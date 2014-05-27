@@ -12,7 +12,7 @@
  * system on multilingual sites without needing any preliminary configuration.
  */
 function locale_install() {
-  require_once DRUPAL_ROOT . '/core/includes/language.inc';
+  require_once BACKDROP_ROOT . '/core/includes/language.inc';
 
   // We cannot rely on language negotiation hooks here, because locale module is
   // not enabled yet. Therefore language_negotiation_set() cannot be used.
@@ -42,7 +42,7 @@ function locale_install() {
  * should run every time the module is enabled.
  */
 function locale_enable() {
-  require_once DRUPAL_ROOT . '/core/includes/locale.inc';
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
   $languages = language_list();
   $prefixes_old = locale_language_negotiation_url_prefixes();
@@ -77,7 +77,7 @@ function locale_uninstall() {
     }
     // Delete the JavaScript translations directory if empty.
     if (!file_scan_directory($locale_js_directory, '/.*/')) {
-      drupal_rmdir($locale_js_directory);
+      backdrop_rmdir($locale_js_directory);
     }
   }
 
@@ -125,7 +125,7 @@ function locale_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'size' => 'big',
-        'description' => 'Drupal path in case of online discovered translations or file path in case of imported strings.',
+        'description' => 'Backdrop path in case of online discovered translations or file path in case of imported strings.',
       ),
       'source' => array(
         'type' => 'text',
@@ -145,7 +145,7 @@ function locale_schema() {
         'length' => 20,
         'not null' => TRUE,
         'default' => 'none',
-        'description' => 'Version of Drupal, where the string was last used (for locales optimization).',
+        'description' => 'Version of Backdrop, where the string was last used (for locales optimization).',
       ),
     ),
     'primary key' => array('lid'),

@@ -10,11 +10,11 @@
  *
  * This returns an array of arrays. Each array represents a single
  * file. The array format is:
- * - file: The fully qualified name of the file to send to drupal_add_css
- * - options: An array of options to pass to drupal_add_css.
+ * - file: The fully qualified name of the file to send to backdrop_add_css
+ * - options: An array of options to pass to backdrop_add_css.
  */
 function views_ui_get_admin_css() {
-  $module_path = drupal_get_path('module', 'views_ui');
+  $module_path = backdrop_get_path('module', 'views_ui');
   $list = array();
   $list[$module_path . '/css/views-admin.css'] = array();
   $list[$module_path . '/css/views-admin.theme.css'] = array();
@@ -24,7 +24,7 @@ function views_ui_get_admin_css() {
   $theme_key = $GLOBALS['theme'];
   while ($theme_key) {
     // Try to find the admin css file for non-core themes.
-    $theme_path = drupal_get_path('theme', $theme_key);
+    $theme_path = backdrop_get_path('theme', $theme_key);
     // First search in the css directory, then in the root folder of the theme.
     if (file_exists($theme_path . "/css/views-admin.$theme_key.css")) {
       $list[$theme_path . "/css/views-admin.$theme_key.css"] = array(
@@ -47,7 +47,7 @@ function views_ui_get_admin_css() {
  */
 function views_ui_add_admin_css() {
   foreach (views_ui_get_admin_css() as $file => $options) {
-    drupal_add_css($file, $options);
+    backdrop_add_css($file, $options);
   }
 }
 
@@ -185,7 +185,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
           $rows['statistics'][] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
 
         }
-        drupal_alter('views_preview_info', $rows, $view);
+        backdrop_alter('views_preview_info', $rows, $view);
       }
       else {
         // No query was run. Display that information in place of either the
@@ -201,7 +201,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
   }
   else {
     foreach ($errors as $error) {
-      drupal_set_message($error, 'error');
+      backdrop_set_message($error, 'error');
     }
     $preview = t('Unable to preview due to validation errors.');
   }
@@ -306,7 +306,7 @@ function _views_ui_get_operations(view $view) {
     $links['enable'] = array(
       'title' => t('Enable'),
       'href' => 'admin/structure/views/view/' . $view->name . '/enable',
-      'query' => array('token' => drupal_get_token($view->name)),
+      'query' => array('token' => backdrop_get_token($view->name)),
     );
   }
   $links['edit'] = array(
@@ -321,7 +321,7 @@ function _views_ui_get_operations(view $view) {
     $links['disable'] = array(
       'title' => t('Disable'),
       'href' => 'admin/structure/views/view/' . $view->name . '/disable',
-      'query' => array('token' => drupal_get_token($view->name)),
+      'query' => array('token' => backdrop_get_token($view->name)),
     );
   }
   if ($view->storage == VIEWS_STORAGE_NORMAL) {
@@ -344,15 +344,15 @@ function _views_ui_get_operations(view $view) {
  */
 function views_ui_add_page() {
   views_ui_add_admin_css();
-  drupal_set_title(t('Add new view'));
-  return drupal_get_form('views_ui_add_form');
+  backdrop_set_title(t('Add new view'));
+  return backdrop_get_form('views_ui_add_form');
 }
 
 /**
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'views_ui') . '/js/views-admin.js';
   $form['#attributes']['class'] = array('views-admin');
 
   $form['human_name'] = array(
@@ -526,7 +526,7 @@ function views_ui_get_selected($form_state, $parents, $default_value, $element) 
   // do for a highly dynamic and extensible form. This method is much simpler.
   if (!empty($form_state['input'])) {
     $key_exists = NULL;
-    $submitted = drupal_array_get_nested_value($form_state['input'], $parents, $key_exists);
+    $submitted = backdrop_array_get_nested_value($form_state['input'], $parents, $key_exists);
     // Check that the user-submitted value is one of the allowed options before
     // returning it. This is not a substitute for actual form validation;
     // rather it is necessary because, for example, the same select element
@@ -577,13 +577,13 @@ function views_ui_get_selected($form_state, $parents, $default_value, $element) 
  *   array('dynamic_content', 'section') for this parameter.
  */
 function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_parents) {
-  $seen_ids = &drupal_static(__FUNCTION__ . ':seen_ids', array());
-  $seen_buttons = &drupal_static(__FUNCTION__ . ':seen_buttons', array());
+  $seen_ids = &backdrop_static(__FUNCTION__ . ':seen_ids', array());
+  $seen_buttons = &backdrop_static(__FUNCTION__ . ':seen_buttons', array());
 
   // Add the AJAX behavior to the triggering element.
   $triggering_element = &$wrapping_element[$trigger_key];
   $triggering_element['#ajax']['callback'] = 'views_ui_ajax_update_form';
-  // We do not use drupal_html_id() to get an ID for the AJAX wrapper, because
+  // We do not use backdrop_html_id() to get an ID for the AJAX wrapper, because
   // it remembers IDs across AJAX requests (and won't reuse them), but in our
   // case we need to use the same ID from request to request so that the
   // wrapper can be recognized by the AJAX system and its content can be
@@ -663,7 +663,7 @@ function views_ui_add_limited_validation($element, &$form_state) {
   $array_parents = $element['#array_parents'];
   array_pop($array_parents);
   $array_parents[] = $element['#views_ui_ajax_data']['trigger_key'];
-  $ajax_triggering_element = drupal_array_get_nested_value($form_state['complete_form'], $array_parents);
+  $ajax_triggering_element = backdrop_array_get_nested_value($form_state['complete_form'], $array_parents);
 
   // Limit this button's validation to the AJAX triggering element, so it can
   // update the form for that change without requiring that the rest of the
@@ -701,7 +701,7 @@ function views_ui_add_ajax_wrapper($element, &$form_state) {
     // This was earlier stored in a property on the element.
     $complete_form = &$form_state['complete_form'];
     $refresh_parents = $element['#views_ui_ajax_data']['refresh_parents'];
-    $refresh_element = drupal_array_get_nested_value($complete_form, $refresh_parents);
+    $refresh_element = backdrop_array_get_nested_value($complete_form, $refresh_parents);
 
     // The HTML ID that AJAX expects was also stored in a property on the
     // element, so use that information to insert the wrapper <div> here.
@@ -715,7 +715,7 @@ function views_ui_add_ajax_wrapper($element, &$form_state) {
 
     // Copy the element that needs to be refreshed back into the form, with our
     // modifications to it.
-    drupal_array_set_nested_value($complete_form, $refresh_parents, $refresh_element);
+    backdrop_array_set_nested_value($complete_form, $refresh_parents, $refresh_element);
   }
 
   return $element;
@@ -731,7 +731,7 @@ function views_ui_ajax_update_form($form, $form_state) {
   // The region that needs to be updated was stored in a property of the
   // triggering element by views_ui_add_ajax_trigger(), so all we have to do is
   // retrieve that here.
-  return drupal_array_get_nested_value($form, $form_state['triggering_element']['#views_ui_ajax_data']['refresh_parents']);
+  return backdrop_array_get_nested_value($form, $form_state['triggering_element']['#views_ui_ajax_data']['refresh_parents']);
 }
 
 /**
@@ -763,7 +763,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
     $view = $form_state['wizard_instance']->create_view($form, $form_state);
   }
   catch (ViewsWizardException $e) {
-    drupal_set_message($e->getMessage(), 'error');
+    backdrop_set_message($e->getMessage(), 'error');
     $form_state['redirect'] = 'admin/structure/views';
   }
   $view->save();
@@ -779,7 +779,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
       }
     }
   }
-  drupal_set_message(t('Your view was saved. You may edit it from the list below.'));
+  backdrop_set_message(t('Your view was saved. You may edit it from the list below.'));
 }
 
 /**
@@ -790,7 +790,7 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
     $view = $form_state['wizard_instance']->create_view($form, $form_state);
   }
   catch (ViewsWizardException $e) {
-    drupal_set_message($e->getMessage(), 'error');
+    backdrop_set_message($e->getMessage(), 'error');
     $form_state['redirect'] = 'admin/structure/views';
   }
   // Just cache it temporarily to edit it.
@@ -800,7 +800,7 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
   // edit view page, and then redirect the user to the destination.
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $form_state['redirect'] = array('admin/structure/views/view/' . $view->name, array('query' => $destination));
@@ -842,7 +842,7 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
       }
     }
     // Store the term ID of each (valid) tag that the user typed.
-    $typed_terms = drupal_explode_tags($tags);
+    $typed_terms = backdrop_explode_tags($tags);
     foreach ($typed_terms as $typed_term) {
       if ($terms = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)))) {
         $term = array_pop($terms);
@@ -926,7 +926,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
 function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
   tempstore_clear('views.view', $form_state['view']->name);
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
-  drupal_set_message(t('The lock has been broken and you may now edit this view.'));
+  backdrop_set_message(t('The lock has been broken and you may now edit this view.'));
 }
 
 /**
@@ -971,7 +971,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
   $display_id = views_ui_edit_page_display($view, $display_id);
   if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
     $build = array();
-    $build['edit_form'] = drupal_get_form('views_ui_edit_form', $view, $display_id);
+    $build['edit_form'] = backdrop_get_form('views_ui_edit_form', $view, $display_id);
     $build['preview'] = views_ui_build_preview($view, $display_id, FALSE);
   }
   else {
@@ -992,7 +992,7 @@ function views_ui_build_preview($view, $display_id, $render = TRUE) {
   );
 
   $form_state = array('build_info' => array('args' => array($view, $display_id)));
-  $build['controls'] = drupal_build_form('views_ui_preview_form', $form_state);
+  $build['controls'] = backdrop_build_form('views_ui_preview_form', $form_state);
 
   $args = array();
   if (!empty($form_state['values']['view_args'])) {
@@ -1040,14 +1040,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   $form['#attached']['library'][] = array('system', 'ui.tabs');
   $form['#attached']['library'][] = array('system', 'ui.dialog');
-  $form['#attached']['library'][] = array('system', 'drupal.ajax');
+  $form['#attached']['library'][] = array('system', 'backdrop.ajax');
   $form['#attached']['library'][] = array('system', 'jquery.form');
   // TODO: This should be getting added to the page when an ajax popup calls
   // for it, instead of having to add it manually here.
   $form['#attached']['js'][] = 'core/misc/tabledrag.js';
 
   $form['#attached']['css'] = views_ui_get_admin_css();
-  $module_path = drupal_get_path('module', 'views_ui');
+  $module_path = backdrop_get_path('module', 'views_ui');
 
   $form['#attached']['js'][] = $module_path . '/js/views-admin.js';
   $form['#attached']['js'][] = array(
@@ -1191,7 +1191,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // so that edits work properly, and to try to get the user to save it
   // so that it's not using weird fixed up relationships.
   if (!empty($view->relationships_changed) && empty($_POST)) {
-    drupal_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    backdrop_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
     views_ui_cache_set($view);
   }
   return $form;
@@ -1284,7 +1284,7 @@ function views_ui_render_display_top($view, $display_id) {
   );
 
   // Let other modules add additional links here.
-  drupal_alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
+  backdrop_alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
 
   if (isset($view->storage) && $view->storage != VIEWS_STORAGE_DEFAULT) {
     if ($view->type == t('Overridden')) {
@@ -1555,7 +1555,7 @@ function views_ui_get_display_tab($view, $display_id) {
   }
   // In AJAX context, views_ui_regenerate_tab() returns this outside of form
   // context, so hook_form_views_ui_edit_form_alter() is insufficient.
-  drupal_alter('views_ui_display_tab', $build, $view, $display_id);
+  backdrop_alter('views_ui_display_tab', $build, $view, $display_id);
   return $build;
 }
 
@@ -1787,7 +1787,7 @@ function views_ui_edit_form_get_build_from_option($id, $option, $view, $display)
       }
     }
   }
-  $option_build['#attributes']['class'][] = drupal_clean_css_identifier($display_id . '-' . $id);
+  $option_build['#attributes']['class'][] = backdrop_clean_css_identifier($display_id . '-' . $id);
   if (!empty($view->changed_sections[$display_id . '-' . $id])) {
     $option_build['#changed'] = TRUE;
   }
@@ -1828,7 +1828,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
     $variables['item_help_icon'] = render($element['#item_help_icon']);
   }
   if (!empty($element['#name'])) {
-    $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
+    $variables['classes_array'][] = backdrop_clean_css_identifier(strtolower($element['#name']));
   }
   if (!empty($element['#overridden'])) {
     $variables['classes_array'][] = 'overridden';
@@ -1837,7 +1837,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['actions'] = !empty($element['actions']) ? drupal_render($element['actions']) : '';
+  $variables['actions'] = !empty($element['actions']) ? backdrop_render($element['actions']) : '';
 }
 
 function template_preprocess_views_ui_display_tab_column(&$variables) {
@@ -1942,13 +1942,13 @@ function views_ui_process_container_radios($element) {
       $element[$key] += array(
         '#type' => 'radio',
         '#title' => $choice,
-        // The key is sanitized in drupal_attributes() during output from the
+        // The key is sanitized in backdrop_attributes() during output from the
         // theme function.
         '#return_value' => $key,
         '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : NULL,
         '#attributes' => $element['#attributes'],
         '#parents' => $element['#parents'],
-        '#id' => drupal_html_id('edit-' . implode('-', $parents_for_id)),
+        '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
       );
       $element[$key . '_options'] = array(
@@ -1964,7 +1964,7 @@ function views_ui_process_container_radios($element) {
  * Form callback; Clone a view.
  */
 function views_ui_clone_form($form, &$form_state, view $view) {
-  drupal_set_title(t('Clone the view @name?', array('@name' => $view->get_human_name())));
+  backdrop_set_title(t('Clone the view @name?', array('@name' => $view->get_human_name())));
   $form_state['view'] = $view;
 
   $form['label'] = array(
@@ -2003,7 +2003,7 @@ function views_ui_clone_form_submit($form, &$form_state) {
   $new_view->name = $form_state['values']['name'];
   $new_view->human_name = $form_state['values']['label'];
   $new_view->save();
-  drupal_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
+  backdrop_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
   $form_state['redirect'] = 'admin/structure/views/view/' . $new_view->name;
 }
 
@@ -2025,7 +2025,7 @@ function views_ui_delete_form_submit($form, &$form_state) {
   $name = $form_state['view']->get_human_name();
   $form_state['view']->delete();
   $form_state['redirect'] = 'admin/structure/views';
-  drupal_set_message(t('The view %name has been deleted.', array('%name' => $name)));
+  backdrop_set_message(t('The view %name has been deleted.', array('%name' => $name)));
 }
 
 /**
@@ -2046,7 +2046,7 @@ function views_ui_revert_form_submit($form, &$form_state) {
   $name = $form_state['view']->get_human_name();
   $form_state['view']->revert();
   $form_state['redirect'] = 'admin/structure/views';
-  drupal_set_message(t('The view %name has been reverted to its defaults.', array('%name' => $name)));
+  backdrop_set_message(t('The view %name has been reverted to its defaults.', array('%name' => $name)));
 }
 
 /**
@@ -2054,7 +2054,7 @@ function views_ui_revert_form_submit($form, &$form_state) {
  */
 function views_ui_toggle_enable_page(view $view, $status) {
   // Validate the token for this page.
-  if (empty($_GET['token']) || $_GET['token'] !== drupal_get_token($view->name)) {
+  if (empty($_GET['token']) || $_GET['token'] !== backdrop_get_token($view->name)) {
     return MENU_ACCESS_DENIED;
   }
   $view->disabled = !$status;
@@ -2065,8 +2065,8 @@ function views_ui_toggle_enable_page(view $view, $status) {
   else {
     $message = t('The view %name has been disabled.', array('%name' => $view->get_human_name()));
   }
-  drupal_set_message($message);
-  drupal_goto('admin/structure/views');
+  backdrop_set_message($message);
+  backdrop_goto('admin/structure/views');
 }
 
 /**
@@ -2165,20 +2165,20 @@ function views_ui_import_validate($form, &$form_state) {
     // Make sure that all plugins and handlers needed by this view actually exist.
     foreach ($view->display as $id => $display) {
       if (empty($display->handler) || !empty($display->handler->broken)) {
-        drupal_set_message(t('Display plugin @plugin is not available.', array('@plugin' => $display->display_plugin)), 'error');
+        backdrop_set_message(t('Display plugin @plugin is not available.', array('@plugin' => $display->display_plugin)), 'error');
         $broken = TRUE;
         continue;
       }
 
       $plugin = views_get_plugin('style', $display->handler->get_option('style_plugin'));
       if (!$plugin) {
-        drupal_set_message(t('Style plugin @plugin is not available.', array('@plugin' => $display->handler->get_option('style_plugin'))), 'error');
+        backdrop_set_message(t('Style plugin @plugin is not available.', array('@plugin' => $display->handler->get_option('style_plugin'))), 'error');
         $broken = TRUE;
       }
       elseif ($plugin->uses_row_plugin()) {
         $plugin = views_get_plugin('row', $display->handler->get_option('row_plugin'));
         if (!$plugin) {
-          drupal_set_message(t('Row plugin @plugin is not available.', array('@plugin' => $display->handler->get_option('row_plugin'))), 'error');
+          backdrop_set_message(t('Row plugin @plugin is not available.', array('@plugin' => $display->handler->get_option('row_plugin'))), 'error');
           $broken = TRUE;
         }
       }
@@ -2188,7 +2188,7 @@ function views_ui_import_validate($form, &$form_state) {
         if ($handlers) {
           foreach ($handlers as $id => $handler) {
             if ($handler->broken()) {
-              drupal_set_message(t('@type handler @table.@field is not available.', array(
+              backdrop_set_message(t('@type handler @table.@field is not available.', array(
                 '@type' => $info['stitle'],
                 '@table' => $handler->table,
                 '@field' => $handler->field,
@@ -2273,7 +2273,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   }
 
   $form_state['view']->save();
-  drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
+  backdrop_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
 
   // Remove this view from cache so we can edit it properly.
   tempstore_clear('views.view', $form_state['view']->name);
@@ -2286,16 +2286,16 @@ function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so edits will be lost.
   tempstore_clear('view', $form_state['view']->name);
   if (empty($form['view']->vid)) {
-    // I seem to have to drupal_goto here because I can't get fapi to
+    // I seem to have to backdrop_goto here because I can't get fapi to
     // honor the redirect target. Not sure what I screwed up here.
-    drupal_goto('admin/structure/views');
+    backdrop_goto('admin/structure/views');
   }
 }
 
 function views_ui_edit_view_form_delete($form, &$form_state) {
   unset($_REQUEST['destination']);
   // Redirect to the delete confirm page
-  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/delete', array('query' => drupal_get_destination() + array('cancel' => 'admin/structure/views/view/' . $form_state['view']->name . '/edit')));
+  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/delete', array('query' => backdrop_get_destination() + array('cancel' => 'admin/structure/views/view/' . $form_state['view']->name . '/edit')));
 }
 
 /**
@@ -2440,7 +2440,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $link_attributes['class'][] = 'views-field-excluded';
     }
     $build['fields'][$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => $link_attributes, 'html' => TRUE));
-    $build['fields'][$id]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
+    $build['fields'][$id]['#class'][] = backdrop_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
       // @TODO: #changed is no longer being used?
       $build['fields'][$id]['#changed'] = TRUE;
@@ -2504,18 +2504,18 @@ function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   // Regenerate the main display area.
   $build = views_ui_get_display_tab($view, $display_id);
   views_ui_add_microweights($build);
-  $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
+  $output[] = ajax_command_html('#views-tab-' . $display_id, backdrop_render($build));
 
   // Regenerate the top area so changes to display names and order will appear.
   $build = views_ui_render_display_top($view, $display_id);
   views_ui_add_microweights($build);
-  $output[] = ajax_command_replace('#views-display-top', drupal_render($build));
+  $output[] = ajax_command_replace('#views-display-top', backdrop_render($build));
 }
 
 /**
  * Recursively adds microweights to a render array, similar to what form_builder() does for forms.
  *
- * @todo Submit a core patch to fix drupal_render() to do this, so that all
+ * @todo Submit a core patch to fix backdrop_render() to do this, so that all
  *   render arrays automatically preserve array insertion order, as forms do.
  */
 function views_ui_add_microweights(&$build) {
@@ -2562,7 +2562,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $name,
-      '#id' => 'edit-submit-' . drupal_html_id($form_id),
+      '#id' => 'edit-submit-' . backdrop_html_id($form_id),
       // The regular submit handler ($form_id . '_submit') does not apply if
       // we're updating the default display. It does apply if we're updating
       // the current display. Since we have no way of knowing at this point
@@ -2640,7 +2640,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
 
   // If this isn't an ajaxy form, then we want to set the title.
   if (!empty($form['#title'])) {
-    drupal_set_title($form['#title']);
+    backdrop_set_title($form['#title']);
   }
 }
 
@@ -2923,7 +2923,7 @@ function views_ui_build_identifier($key, $view, $display_id, $args) {
 }
 
 /**
- * Build up a $form_state object suitable for use with drupal_build_form
+ * Build up a $form_state object suitable for use with backdrop_build_form
  * based on known information about a form.
  */
 function views_ui_build_form_state($js, $key, &$view, $display_id, $args) {
@@ -3009,8 +3009,9 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
  * together.
  */
 function views_ui_ajax_form($js, $key, $view, $display_id = '') {
-  // Reset the cache of IDs. Drupal rather aggressively prevents id duplication
-  // but this causes it to remember IDs that are no longer even being used.
+  // Reset the cache of IDs. Backdrop rather aggressively prevents ID
+  // duplication but this causes it to remember IDs that are no longer even
+  // being used.
   if (isset($_POST['ajax_html_ids'])) {
     unset($_POST['ajax_html_ids']);
   }
@@ -3058,17 +3059,17 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
 
   // With the below logic, we may end up rendering a form twice (or two forms
   // each sharing the same element ids), potentially resulting in
-  // drupal_add_js() being called twice to add the same setting. drupal_get_js()
+  // backdrop_add_js() being called twice to add the same setting. backdrop_get_js()
   // is ok with that, but until ajax_render() is (http://drupal.org/node/208611),
-  // reset the drupal_add_js() static before rendering the second time.
-  $drupal_add_js_original = drupal_add_js();
-  $drupal_add_js = &drupal_static('drupal_add_js');
+  // reset the backdrop_add_js() static before rendering the second time.
+  $backdrop_add_js_original = backdrop_add_js();
+  $backdrop_add_js = &backdrop_static('backdrop_add_js');
   $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
   if ($form_state['submitted'] && empty($form_state['rerender'])) {
     // Sometimes we need to re-generate the form for multi-step type operations.
     $object = NULL;
     if (!empty($view->stack)) {
-      $drupal_add_js = $drupal_add_js_original;
+      $backdrop_add_js = $backdrop_add_js_original;
       $stack = $view->stack;
       $top = array_shift($stack);
       $top[0] = $js;
@@ -3076,13 +3077,13 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
       $form_state['input'] = array();
       $form_state['path'] = views_ui_build_form_path($form_state);
       if (!$js) {
-        return drupal_goto(views_ui_build_form_path($form_state));
+        return backdrop_goto(views_ui_build_form_path($form_state));
       }
       $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
     }
     elseif (!$js) {
       // if nothing on the stack, non-js forms just go back to the main view editor.
-      return drupal_goto("admin/structure/views/view/$view->name/edit");
+      return backdrop_goto("admin/structure/views/view/$view->name/edit");
     }
     else {
       $output = array();
@@ -3276,11 +3277,11 @@ function theme_views_ui_reorder_displays_form($vars) {
       $display = &$form[$key];
 
       $row = array();
-      $row[] = drupal_render($display['title']);
+      $row[] = backdrop_render($display['title']);
       $form[$key]['weight']['#attributes']['class'] = array('weight');
-      $row[] = drupal_render($form[$key]['weight']);
+      $row[] = backdrop_render($form[$key]['weight']);
       if (isset($display['removed'])) {
-        $row[] = drupal_render($form[$key]['removed']) .
+        $row[] = backdrop_render($form[$key]['removed']) .
           l('<span>' . t('Remove') . '</span>',
             'javascript:void()',
             array(
@@ -3308,9 +3309,9 @@ function theme_views_ui_reorder_displays_form($vars) {
 
   $header = array(t('Display'), t('Weight'), t('Remove'));
   $output = '';
-  drupal_add_tabledrag('reorder-displays', 'order', 'sibling', 'weight');
+  backdrop_add_tabledrag('reorder-displays', 'order', 'sibling', 'weight');
 
-  $output = drupal_render($form['override']);
+  $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
   $output .= theme('table',
     array('header' => $header,
@@ -3318,7 +3319,7 @@ function theme_views_ui_reorder_displays_form($vars) {
     'attributes' => array('id' => 'reorder-displays'),
   ));
   $output .= '</div>';
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -3603,10 +3604,10 @@ function theme_views_ui_rearrange_form($variables) {
   foreach (element_children($form['fields']) as $id) {
     if (isset($form['fields'][$id]['name'])) {
       $row = array();
-      $row[] = drupal_render($form['fields'][$id]['name']);
+      $row[] = backdrop_render($form['fields'][$id]['name']);
       $form['fields'][$id]['weight']['#attributes']['class'] = array('weight');
-      $row[] = drupal_render($form['fields'][$id]['weight']);
-      $row[] = drupal_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => TRUE));
+      $row[] = backdrop_render($form['fields'][$id]['weight']);
+      $row[] = backdrop_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => TRUE));
       $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
     }
   }
@@ -3615,12 +3616,12 @@ function theme_views_ui_rearrange_form($variables) {
   }
 
   $header = array('', t('Weight'), t('Remove'));
-  $output = drupal_render($form['override']);
-  $output .= '<div class="scroll" data-drupal-views-scroll>';
+  $output = backdrop_render($form['override']);
+  $output .= '<div class="scroll" data-backdrop-views-scroll>';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
   $output .= '</div>';
-  $output .= drupal_render_children($form);
-  drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
+  $output .= backdrop_render_children($form);
+  backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
 
   return $output;
 }
@@ -3630,34 +3631,34 @@ function theme_views_ui_rearrange_form($variables) {
  */
 function theme_views_ui_expose_filter_form($variables) {
   $form = $variables['form'];
-  $more = drupal_render($form['more']);
+  $more = backdrop_render($form['more']);
 
-  $output = drupal_render($form['form_description']);
-  $output .= drupal_render($form['expose_button']);
-  $output .= drupal_render($form['group_button']);
+  $output = backdrop_render($form['form_description']);
+  $output .= backdrop_render($form['expose_button']);
+  $output .= backdrop_render($form['group_button']);
   if (isset($form['required'])) {
-    $output .= drupal_render($form['required']);
+    $output .= backdrop_render($form['required']);
   }
-  $output .= drupal_render($form['label']);
-  $output .= drupal_render($form['description']);
+  $output .= backdrop_render($form['label']);
+  $output .= backdrop_render($form['description']);
 
-  $output .= drupal_render($form['operator']);
-  $output .= drupal_render($form['value']);
+  $output .= backdrop_render($form['operator']);
+  $output .= backdrop_render($form['value']);
 
   if (isset($form['use_operator'])) {
     $output .= '<div class="views-left-40">';
-    $output .= drupal_render($form['use_operator']);
+    $output .= backdrop_render($form['use_operator']);
     $output .= '</div>';
   }
 
   // Only output the right column markup if there's a left column to begin with
   if (!empty($form['operator']['#type'])) {
     $output .= '<div class="views-right-60">';
-    $output .= drupal_render_children($form);
+    $output .= backdrop_render_children($form);
     $output .= '</div>';
   }
   else {
-    $output .= drupal_render_children($form);
+    $output .= backdrop_render_children($form);
   }
 
   $output .= $more;
@@ -3670,27 +3671,27 @@ function theme_views_ui_expose_filter_form($variables) {
  */
 function theme_views_ui_build_group_filter_form($variables) {
   $form = $variables['form'];
-  $more = drupal_render($form['more']);
+  $more = backdrop_render($form['more']);
 
-  $output = drupal_render($form['form_description']);
-  $output .= drupal_render($form['expose_button']);
-  $output .= drupal_render($form['group_button']);
+  $output = backdrop_render($form['form_description']);
+  $output .= backdrop_render($form['expose_button']);
+  $output .= backdrop_render($form['group_button']);
   if (isset($form['required'])) {
-    $output .= drupal_render($form['required']);
+    $output .= backdrop_render($form['required']);
   }
 
-  $output .= drupal_render($form['operator']);
-  $output .= drupal_render($form['value']);
+  $output .= backdrop_render($form['operator']);
+  $output .= backdrop_render($form['value']);
 
   $output .= '<div class="views-left-40">';
-  $output .= drupal_render($form['optional']);
-  $output .= drupal_render($form['remember']);
+  $output .= backdrop_render($form['optional']);
+  $output .= backdrop_render($form['remember']);
   $output .= '</div>';
 
   $output .= '<div class="views-right-60">';
-  $output .= drupal_render($form['widget']);
-  $output .= drupal_render($form['label']);
-  $output .= drupal_render($form['description']);
+  $output .= backdrop_render($form['widget']);
+  $output .= backdrop_render($form['label']);
+  $output .= backdrop_render($form['description']);
   $output .= '</div>';
 
 
@@ -3707,9 +3708,9 @@ function theme_views_ui_build_group_filter_form($variables) {
   $form['default_group_multiple'] = form_process_checkboxes($form['default_group_multiple']);
   $form['default_group']['All']['#title'] = '';
 
-  drupal_render($form['default_group_multiple']['All']); // Don't render
+  backdrop_render($form['default_group_multiple']['All']); // Don't render
   $rows[] = array(
-    drupal_render($form['default_group']['All']),
+    backdrop_render($form['default_group']['All']),
     '',
     array(
       'data' => config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? t('&lt;Any&gt;') : t('- Any -'),
@@ -3721,18 +3722,18 @@ function theme_views_ui_build_group_filter_form($variables) {
   foreach (element_children($form['group_items']) as $group_id) {
     $form['group_items'][$group_id]['value']['#title'] = '';
     $data = array(
-      'default' => drupal_render($form['default_group'][$group_id]) . drupal_render($form['default_group_multiple'][$group_id]),
-      'weight' => drupal_render($form['group_items'][$group_id]['weight']),
-      'title' => drupal_render($form['group_items'][$group_id]['title']),
-      'operator' => drupal_render($form['group_items'][$group_id]['operator']),
-      'value' => drupal_render($form['group_items'][$group_id]['value']),
-      'remove' => drupal_render($form['group_items'][$group_id]['remove']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $group_id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true)),
+      'default' => backdrop_render($form['default_group'][$group_id]) . backdrop_render($form['default_group_multiple'][$group_id]),
+      'weight' => backdrop_render($form['group_items'][$group_id]['weight']),
+      'title' => backdrop_render($form['group_items'][$group_id]['title']),
+      'operator' => backdrop_render($form['group_items'][$group_id]['operator']),
+      'value' => backdrop_render($form['group_items'][$group_id]['value']),
+      'remove' => backdrop_render($form['group_items'][$group_id]['remove']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $group_id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true)),
     );
     $rows[] = array('data' => $data, 'id' => 'views-row-' . $group_id, 'class' => array('draggable'));
   }
-  $table = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('views-filter-groups'), 'id' => 'views-filter-groups'))) . drupal_render($form['add_group']);
-  drupal_add_tabledrag('views-filter-groups', 'order', 'sibling', 'weight');
-  $render_form = drupal_render_children($form);
+  $table = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('views-filter-groups'), 'id' => 'views-filter-groups'))) . backdrop_render($form['add_group']);
+  backdrop_add_tabledrag('views-filter-groups', 'order', 'sibling', 'weight');
+  $render_form = backdrop_render_children($form);
   return $output . $render_form . $table . $more;
 }
 
@@ -3969,12 +3970,12 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
     if ($group_id !== 'ungroupable') {
       // Set up tabledrag so that it changes the group dropdown when rows are
       // dragged between groups.
-      drupal_add_tabledrag('views-rearrange-filters', 'match', 'sibling', 'views-group-select', 'views-group-select-' . $group_id);
+      backdrop_add_tabledrag('views-rearrange-filters', 'match', 'sibling', 'views-group-select', 'views-group-select-' . $group_id);
 
       // Title row, spanning all columns.
       $row = array();
       // Add a cell to the first row, containing the group operator.
-      $row[] = array('class' => array('group', 'group-operator', 'container-inline'), 'data' => drupal_render($form['filter_groups']['groups'][$group_id]), 'rowspan' => max(array(2, count($contents) + 1)));
+      $row[] = array('class' => array('group', 'group-operator', 'container-inline'), 'data' => backdrop_render($form['filter_groups']['groups'][$group_id]), 'rowspan' => max(array(2, count($contents) + 1)));
       // Title.
       $row[] = array('class' => array('group', 'group-title'), 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4);
       $rows[] = array('class' => array('views-group-title'), 'data' => $row, 'id' => 'views-group-title-' . $group_id);
@@ -3989,20 +3990,20 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
       if (!empty($form['remove_groups'][$group_id]['#type']) && $form['remove_groups'][$group_id]['#type'] == 'submit') {
         $form['remove_groups'][$group_id]['#attributes']['class'][] = 'js-hide';
       }
-      $row[] = array('colspan' => 5, 'data' => $instructions . drupal_render($form['remove_groups'][$group_id]));
+      $row[] = array('colspan' => 5, 'data' => $instructions . backdrop_render($form['remove_groups'][$group_id]));
       $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
     }
 
     foreach ($contents as $id) {
       if (isset($form['filters'][$id]['name'])) {
         $row = array();
-        $row[] = drupal_render($form['filters'][$id]['name']);
+        $row[] = backdrop_render($form['filters'][$id]['name']);
         $form['filters'][$id]['weight']['#attributes']['class'] = array('weight');
-        $row[] = drupal_render($form['filters'][$id]['weight']);
+        $row[] = backdrop_render($form['filters'][$id]['weight']);
         $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-select-' . $group_id);
-        $row[] = drupal_render($form['filters'][$id]['group']);
+        $row[] = backdrop_render($form['filters'][$id]['group']);
         $form['filters'][$id]['removed']['#attributes']['class'][] = 'js-hide';
-        $row[] = drupal_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+        $row[] = backdrop_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
 
         $row = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
         if ($group_id !== 'ungroupable') {
@@ -4018,24 +4019,24 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
     $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
   }
 
-  $output = drupal_render($form['override']);
+  $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
   if ($grouping) {
-    $output .= drupal_render($form['filter_groups']['operator']);
+    $output .= backdrop_render($form['filter_groups']['operator']);
   }
   else {
     $form['filter_groups']['groups'][0]['#title'] = t('Operator');
-    $output .= drupal_render($form['filter_groups']['groups'][0]);
+    $output .= backdrop_render($form['filter_groups']['groups'][0]);
   }
 
   if (!empty($ungroupable_rows)) {
-    drupal_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
+    backdrop_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
     $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
     $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'views-rearrange-filters-ungroupable', 'class' => array('arrange'))));
   }
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
-  drupal_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
+  backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
   $output .= '</div>';
 
@@ -4044,7 +4045,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   $form['actions']['add_group']['#attributes']['class'][] = 'js-hide';
 
   // Render the rest of the form and return.
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -4172,7 +4173,7 @@ function views_ui_add_item_form($form, &$form_state) {
   $form = array(
     'options' => array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('scroll'), 'data-drupal-views-scroll' => TRUE),
+      '#attributes' => array('class' => array('scroll'), 'data-backdrop-views-scroll' => TRUE),
     ),
   );
 
@@ -4283,7 +4284,7 @@ function views_ui_add_item_form($form, &$form_state) {
     '#theme_wrappers' => array('form_element', 'views_container'),
     '#attributes' => array(
       'class' => array('container-inline', 'views-add-form-selected'),
-      'data-drupal-views-offset' => 'bottom',
+      'data-views-offset' => 'bottom',
     ),
   );
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
@@ -4413,7 +4414,7 @@ function views_ui_config_item_form($form, &$form_state) {
     'options' => array(
       '#tree' => TRUE,
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('scroll'), 'data-drupal-views-scroll' => TRUE),
+      '#attributes' => array('class' => array('scroll'), 'data-backdrop-views-scroll' => TRUE),
     ),
   );
   if (!$view->set_display($display_id)) {
@@ -5008,7 +5009,7 @@ function views_ui_admin_settings_basic() {
   $form['live_preview']['show_additional_queries'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),
-    '#description' => t("Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
+    '#description' => t("Backdrop has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
     '#default_value' => config_get('views.settings', 'show_additional_queries'),
     '#states' => array(
       'visible' => array(
@@ -5042,7 +5043,7 @@ function views_ui_admin_settings_basic_submit($form, $form_state) {
   $config = config('views_ui.settings');
   $config->setData($form_state['values']);
   $config->save();
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -5098,10 +5099,6 @@ function views_ui_admin_settings_advanced() {
 
   $regions = array();
   $regions['watchdog'] = t('Watchdog');
-  if (module_exists('devel')) {
-    $regions['message'] = t('Devel message(dpm)');
-    $regions['drupal_debug'] = t('Devel logging (tmp://drupal_debug.txt)');
-  }
 
   $form['debug']['devel_region'] = array(
     '#type' => 'select',
@@ -5152,7 +5149,7 @@ function views_ui_admin_settings_advanced_submit($form, $form_state) {
   $config = config('views.settings');
   $config->setData($form_state['values']);
   $config->save();
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -5160,24 +5157,24 @@ function views_ui_admin_settings_advanced_submit($form, $form_state) {
  */
 function views_ui_tools_clear_cache() {
   views_invalidate_cache();
-  drupal_set_message(t('The cache has been cleared.'));
+  backdrop_set_message(t('The cache has been cleared.'));
 }
 
 /**
- * Submit hook to clear Drupal's theme registry (thereby triggering
+ * Submit hook to clear Backdrop's theme registry (thereby triggering
  * a templates rescan).
  */
 function views_ui_config_item_form_rescan($form, &$form_state) {
-  drupal_theme_rebuild();
+  backdrop_theme_rebuild();
 
   // The 'Theme: Information' page is about to be shown again. That page
   // analyzes the output of theme_get_registry(). However, this latter
   // function uses an internal cache (which was initialized before we
-  // called drupal_theme_rebuild()) so it won't reflect the
+  // called backdrop_theme_rebuild()) so it won't reflect the
   // current state of our theme registry. The only way to clear that cache
   // is to re-initialize the theme system:
   unset($GLOBALS['theme']);
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
 
   $form_state['rerender'] = TRUE;
   $form_state['rebuild'] = TRUE;
@@ -5210,7 +5207,7 @@ function views_ui_autocomplete_tag($string = '') {
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 // ------------------------------------------------------------------
@@ -5256,14 +5253,14 @@ function views_fetch_base_tables() {
 }
 
 function _views_sort_types($a, $b) {
-  $a_group = drupal_strtolower($a['group']);
-  $b_group = drupal_strtolower($b['group']);
+  $a_group = backdrop_strtolower($a['group']);
+  $b_group = backdrop_strtolower($b['group']);
   if ($a_group != $b_group) {
     return $a_group < $b_group ? -1 : 1;
   }
 
-  $a_title = drupal_strtolower($a['title']);
-  $b_title = drupal_strtolower($b['title']);
+  $a_title = backdrop_strtolower($a['title']);
+  $b_title = backdrop_strtolower($b['title']);
   if ($a_title != $b_title) {
     return $a_title < $b_title ? -1 : 1;
   }
@@ -5396,7 +5393,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
 function theme_views_ui_style_plugin_table($variables) {
   $form = $variables['form'];
 
-  $output = drupal_render($form['description_markup']);
+  $output = backdrop_render($form['description_markup']);
 
   $header = array(
     t('Field'),
@@ -5423,21 +5420,21 @@ function theme_views_ui_style_plugin_table($variables) {
   $rows = array();
   foreach (element_children($form['columns']) as $id) {
     $row = array();
-    $row[] = check_plain(drupal_render($form['info'][$id]['name']));
-    $row[] = drupal_render($form['columns'][$id]);
-    $row[] = drupal_render($form['info'][$id]['align']);
-    $row[] = drupal_render($form['info'][$id]['separator']);
+    $row[] = check_plain(backdrop_render($form['info'][$id]['name']));
+    $row[] = backdrop_render($form['columns'][$id]);
+    $row[] = backdrop_render($form['info'][$id]['align']);
+    $row[] = backdrop_render($form['info'][$id]['separator']);
     if (!empty($form['info'][$id]['sortable'])) {
       $row[] = array(
-        'data' => drupal_render($form['info'][$id]['sortable']),
+        'data' => backdrop_render($form['info'][$id]['sortable']),
         'align' => 'center',
       );
       $row[] = array(
-        'data' => drupal_render($form['info'][$id]['default_sort_order']),
+        'data' => backdrop_render($form['info'][$id]['default_sort_order']),
         'align' => 'center',
       );
       $row[] = array(
-        'data' => drupal_render($form['default'][$id]),
+        'data' => backdrop_render($form['default'][$id]),
         'align' => 'center',
       );
     }
@@ -5447,17 +5444,17 @@ function theme_views_ui_style_plugin_table($variables) {
       $row[] = '';
     }
     $row[] = array(
-      'data' => drupal_render($form['info'][$id]['empty_column']),
+      'data' => backdrop_render($form['info'][$id]['empty_column']),
       'align' => 'center',
     );
     $rows[] = $row;
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])), '');
+  $rows[] = array(t('None'), '', '', '', '', '', array('align' => 'center', 'data' => backdrop_render($form['default'][-1])), '');
 
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -5504,7 +5501,7 @@ function views_ui_form_button_was_clicked($element, &$form_state) {
 /**
  * #process callback for a button; makes implicit form submissions trigger as this button.
  *
- * @see Drupal.behaviors.viewsImplicitFormSubmission
+ * @see Backdrop.behaviors.viewsImplicitFormSubmission
  */
 function views_ui_default_button($element, &$form_state, $form) {
   $setting['viewsImplicitFormSubmission'][$form['#id']]['defaultButton'] = $element['#id'];

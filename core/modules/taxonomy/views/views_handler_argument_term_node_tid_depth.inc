@@ -49,8 +49,8 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
 
     $form['use_taxonomy_term_path'] = array(
       '#type' => 'checkbox',
-      '#title' => t("Use Drupal's taxonomy term path to create breadcrumb links"),
-      '#description' => t('If selected, the links in the breadcrumb trail will be created using the standard drupal method instead of the custom views method. This is useful if you are using modules like taxonomy redirect to modify your taxonomy term links.'),
+      '#title' => t("Use Backdrop's taxonomy term path to create breadcrumb links"),
+      '#description' => t('If selected, the links in the breadcrumb trail will be created using the standard Backdrop method instead of the custom views method. This is useful if you are using modules like taxonomy redirect to modify your taxonomy term links.'),
       '#default_value' => !empty($this->options['use_taxonomy_term_path']),
       '#states' => array(
         'visible' => array(

@@ -15,7 +15,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   // If there is a menu link to this term, the link becomes the last part of
   // the active trail, and the link name becomes the page title. Thus, we must
   // explicitly set the page title to be the term title.
-  drupal_set_title($term->name);
+  backdrop_set_title($term->name);
 
   // Build breadcrumb based on the hierarchy of the term.
   $current = (object) array(
@@ -30,14 +30,14 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   }
   $breadcrumb[] = l(t('Home'), NULL);
   $breadcrumb = array_reverse($breadcrumb);
-  drupal_set_breadcrumb($breadcrumb);
-  drupal_add_feed('taxonomy/term/' . $term->tid . '/feed', 'RSS - ' . $term->name);
+  backdrop_set_breadcrumb($breadcrumb);
+  backdrop_add_feed('taxonomy/term/' . $term->tid . '/feed', 'RSS - ' . $term->name);
 
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
-  drupal_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
   // Set the non-aliased path as a default shortlink.
-  drupal_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
 
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
@@ -76,7 +76,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = variable_get('site_name', 'Drupal') . ' - ' . $term->name;
+  $channel['title'] = variable_get('site_name', 'Backdrop') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
@@ -124,8 +124,8 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   }
 
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
-  $tags_typed = drupal_explode_tags($tags_typed);
-  $tag_last = drupal_strtolower(array_pop($tags_typed));
+  $tags_typed = backdrop_explode_tags($tags_typed);
+  $tag_last = backdrop_strtolower(array_pop($tags_typed));
 
   $term_matches = array();
   if ($tag_last != '') {
@@ -154,7 +154,7 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
       ->execute()
       ->fetchAllKeyed();
 
-    $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
+    $prefix = count($tags_typed) ? backdrop_implode_tags($tags_typed) . ', ' : '';
 
     foreach ($tags_return as $tid => $name) {
       $n = $name;
@@ -166,5 +166,5 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
     }
   }
 
-  drupal_json_output($term_matches);
+  backdrop_json_output($term_matches);
 }

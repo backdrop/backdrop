@@ -32,12 +32,12 @@ class views_plugin_display_feed extends views_plugin_display_page {
   /**
    * Feeds do not go through the normal page theming mechanism. Instead, they
    * go through their own little theme function and then return NULL so that
-   * Drupal believes that the page has already rendered itself...which it has.
+   * Backdrop believes that the page has already rendered itself...which it has.
    */
   function execute() {
     $output = $this->view->render();
     if (empty($output)) {
-      return drupal_not_found();
+      return backdrop_not_found();
     }
     print $output;
   }

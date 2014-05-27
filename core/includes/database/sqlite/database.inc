@@ -10,7 +10,7 @@
  * @{
  */
 
-include_once DRUPAL_ROOT . '/core/includes/database/prefetch.inc';
+include_once BACKDROP_ROOT . '/core/includes/database/prefetch.inc';
 
 /**
  * Specific SQLite implementation of DatabaseConnection.
@@ -296,7 +296,7 @@ class DatabaseConnection_sqlite extends DatabaseConnection {
     return $this->query('SELECT value FROM {sequences}')->fetchField();
   }
 
-  public function rollback($savepoint_name = 'drupal_transaction') {
+  public function rollback($savepoint_name = 'backdrop_transaction') {
     if ($this->savepointSupport) {
       return parent::rollBack($savepoint_name);
     }

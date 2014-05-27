@@ -8,7 +8,7 @@
 /**
  * Tests EntityFieldQuery.
  */
-class EntityFieldQueryTestCase extends DrupalWebTestCase {
+class EntityFieldQueryTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
@@ -19,7 +19,7 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
 
     $instances = array();
     $this->fields = array();
-    $this->field_names[0] = $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_names[0] = $field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $field = array('field_name' => $field_name, 'type' => 'test_field', 'cardinality' => 4);
     $field = field_create_field($field);
     $this->fields[0] = $field;
@@ -53,7 +53,7 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
     $instances[0]['bundle'] = $instances[0]['entity_type'] = 'test_entity_bundle';
     field_create_instance($instances[0]);
 
-    $this->field_names[1] = $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_names[1] = $field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $field = array('field_name' => $field_name, 'type' => 'shape', 'cardinality' => 4);
     $field = field_create_field($field);
     $this->fields[1] = $field;
@@ -96,7 +96,7 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
       $entity->fttype = ($i < 5) ? 'bundle1' : 'bundle2';
 
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i;
-      drupal_write_record('test_entity_bundle_key', $entity);
+      backdrop_write_record('test_entity_bundle_key', $entity);
       field_attach_insert('test_entity_bundle_key', $entity);
     }
 
@@ -107,7 +107,7 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
     $entity->{$this->field_names[1]}[LANGUAGE_NONE][0]['color'] = 'red';
     $entity->{$this->field_names[1]}[LANGUAGE_NONE][1]['shape'] = 'circle';
     $entity->{$this->field_names[1]}[LANGUAGE_NONE][1]['color'] = 'blue';
-    drupal_write_record('test_entity_bundle', $entity);
+    backdrop_write_record('test_entity_bundle', $entity);
     field_attach_insert('test_entity_bundle', $entity);
 
     $instances[2] = $instance;
@@ -124,9 +124,9 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
       $entity->fttype = 'test_bundle';
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i;
 
-      drupal_write_record('test_entity', $entity);
+      backdrop_write_record('test_entity', $entity);
       field_attach_insert('test_entity', $entity);
-      drupal_write_record('test_entity_revision', $entity);
+      backdrop_write_record('test_entity_revision', $entity);
     }
 
     // Add two revisions to an entity.
@@ -137,8 +137,8 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
       $entity->fttype = 'test_bundle';
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i;
 
-      drupal_write_record('test_entity', $entity, 'ftid');
-      drupal_write_record('test_entity_revision', $entity);
+      backdrop_write_record('test_entity', $entity, 'ftid');
+      backdrop_write_record('test_entity_revision', $entity);
 
       db_update('test_entity')
        ->fields(array('ftvid' => $entity->ftvid))
@@ -973,7 +973,7 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
       $entity->ftid = $i;
       $entity->fttype = 'test_entity_bundle';
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i - 5;
-      drupal_write_record('test_entity_bundle', $entity);
+      backdrop_write_record('test_entity_bundle', $entity);
       field_attach_insert('test_entity_bundle', $entity);
     }
 
@@ -1516,19 +1516,19 @@ class EntityFieldQueryTestCase extends DrupalWebTestCase {
    */
   function testEntityFieldQueryAccess() {
     // Test as a user with ability to bypass node access.
-    $privileged_user = $this->drupalCreateUser(array('bypass node access', 'access content'));
-    $this->drupalLogin($privileged_user);
-    $this->drupalGet('entity-query-access/test/' . $this->fields[0]['field_name']);
+    $privileged_user = $this->backdropCreateUser(array('bypass node access', 'access content'));
+    $this->backdropLogin($privileged_user);
+    $this->backdropGet('entity-query-access/test/' . $this->fields[0]['field_name']);
     $this->assertText('Found entity', 'Returned access response with entities.');
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Test as a user that does not have ability to bypass node access or view
     // all nodes.
-    $regular_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($regular_user);
-    $this->drupalGet('entity-query-access/test/' . $this->fields[0]['field_name']);
+    $regular_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($regular_user);
+    $this->backdropGet('entity-query-access/test/' . $this->fields[0]['field_name']);
     $this->assertText('Found entity', 'Returned access response with entities.');
-    $this->drupalLogout();
+    $this->backdropLogout();
   }
 
   /**

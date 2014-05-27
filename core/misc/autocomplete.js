@@ -3,24 +3,24 @@
 /**
  * Attaches the autocomplete behavior to all required fields.
  */
-Drupal.behaviors.autocomplete = {
+Backdrop.behaviors.autocomplete = {
   attach: function (context, settings) {
     var acdb = [];
     $('input.autocomplete', context).once('autocomplete', function () {
       var uri = this.value;
       if (!acdb[uri]) {
-        acdb[uri] = new Drupal.ACDB(uri);
+        acdb[uri] = new Backdrop.ACDB(uri);
       }
       var $input = $('#' + this.id.substr(0, this.id.length - 13))
         .attr('autocomplete', 'OFF')
         .attr('aria-autocomplete', 'list');
-      $($input[0].form).submit(Drupal.autocompleteSubmit);
+      $($input[0].form).submit(Backdrop.autocompleteSubmit);
       $input.parent()
         .attr('role', 'application')
         .append($('<span class="element-invisible" aria-live="assertive"></span>')
           .attr('id', $input[0].id + '-autocomplete-aria-live')
         );
-      new Drupal.jsAC($input, acdb[uri]);
+      new Backdrop.jsAC($input, acdb[uri]);
     });
   }
 };
@@ -29,7 +29,7 @@ Drupal.behaviors.autocomplete = {
  * Prevents the form from submitting if the suggestions popup is open
  * and closes the suggestions popup when doing so.
  */
-Drupal.autocompleteSubmit = function () {
+Backdrop.autocompleteSubmit = function () {
   var $autocomplete = $('#autocomplete');
   if ($autocomplete.length !== 0) {
     $autocomplete[0].owner.hidePopup();
@@ -40,7 +40,7 @@ Drupal.autocompleteSubmit = function () {
 /**
  * An AutoComplete object.
  */
-Drupal.jsAC = function ($input, db) {
+Backdrop.jsAC = function ($input, db) {
   var ac = this;
   this.input = $input[0];
   this.ariaLive = $('#' + this.input.id + '-autocomplete-aria-live');
@@ -55,7 +55,7 @@ Drupal.jsAC = function ($input, db) {
 /**
  * Handler for the "keydown" event.
  */
-Drupal.jsAC.prototype.onkeydown = function (input, e) {
+Backdrop.jsAC.prototype.onkeydown = function (input, e) {
   if (!e) {
     e = window.event;
   }
@@ -74,7 +74,7 @@ Drupal.jsAC.prototype.onkeydown = function (input, e) {
 /**
  * Handler for the "keyup" event.
  */
-Drupal.jsAC.prototype.onkeyup = function (input, e) {
+Backdrop.jsAC.prototype.onkeyup = function (input, e) {
   if (!e) {
     e = window.event;
   }
@@ -113,14 +113,14 @@ Drupal.jsAC.prototype.onkeyup = function (input, e) {
 /**
  * Puts the currently highlighted suggestion into the autocomplete field.
  */
-Drupal.jsAC.prototype.select = function (node) {
+Backdrop.jsAC.prototype.select = function (node) {
   this.input.value = $(node).data('autocompleteValue');
 };
 
 /**
  * Highlights the next suggestion.
  */
-Drupal.jsAC.prototype.selectDown = function () {
+Backdrop.jsAC.prototype.selectDown = function () {
   if (this.selected && this.selected.nextSibling) {
     this.highlight(this.selected.nextSibling);
   }
@@ -135,7 +135,7 @@ Drupal.jsAC.prototype.selectDown = function () {
 /**
  * Highlights the previous suggestion.
  */
-Drupal.jsAC.prototype.selectUp = function () {
+Backdrop.jsAC.prototype.selectUp = function () {
   if (this.selected && this.selected.previousSibling) {
     this.highlight(this.selected.previousSibling);
   }
@@ -144,7 +144,7 @@ Drupal.jsAC.prototype.selectUp = function () {
 /**
  * Highlights a suggestion.
  */
-Drupal.jsAC.prototype.highlight = function (node) {
+Backdrop.jsAC.prototype.highlight = function (node) {
   // Unhighlights a suggestion for "keyup" and "keydown" events.
   if (this.selected !== false) {
     $(this.selected).removeClass('selected');
@@ -157,7 +157,7 @@ Drupal.jsAC.prototype.highlight = function (node) {
 /**
  * Unhighlights a suggestion.
  */
-Drupal.jsAC.prototype.unhighlight = function (node) {
+Backdrop.jsAC.prototype.unhighlight = function (node) {
   $(node).removeClass('selected');
   this.selected = false;
   $(this.ariaLive).empty();
@@ -166,7 +166,7 @@ Drupal.jsAC.prototype.unhighlight = function (node) {
 /**
  * Hides the autocomplete suggestions.
  */
-Drupal.jsAC.prototype.hidePopup = function (keycode) {
+Backdrop.jsAC.prototype.hidePopup = function (keycode) {
   // Select item if the right key or mousebutton was pressed.
   if (this.selected && ((keycode && keycode !== 46 && keycode !== 8 && keycode !== 27) || !keycode)) {
     this.input.value = $(this.selected).data('autocompleteValue');
@@ -184,7 +184,7 @@ Drupal.jsAC.prototype.hidePopup = function (keycode) {
 /**
  * Positions the suggestions popup and starts a search.
  */
-Drupal.jsAC.prototype.populatePopup = function () {
+Backdrop.jsAC.prototype.populatePopup = function () {
   var $input = $(this.input);
   var position = $input.position();
   // Show popup.
@@ -210,7 +210,7 @@ Drupal.jsAC.prototype.populatePopup = function () {
 /**
  * Fills the suggestion popup with any matches received.
  */
-Drupal.jsAC.prototype.found = function (matches) {
+Backdrop.jsAC.prototype.found = function (matches) {
   // If no value in the textfield, do not show the popup.
   if (!this.input.value.length) {
     return false;
@@ -235,7 +235,7 @@ Drupal.jsAC.prototype.found = function (matches) {
   if (this.popup) {
     if (ul.children().length) {
       $(this.popup).empty().append(ul).show();
-      $(this.ariaLive).html(Drupal.t('Autocomplete popup'));
+      $(this.ariaLive).html(Backdrop.t('Autocomplete popup'));
     }
     else {
       $(this.popup).css({ visibility: 'hidden' });
@@ -244,11 +244,11 @@ Drupal.jsAC.prototype.found = function (matches) {
   }
 };
 
-Drupal.jsAC.prototype.setStatus = function (status) {
+Backdrop.jsAC.prototype.setStatus = function (status) {
   switch (status) {
     case 'begin':
       $(this.input).addClass('throbbing');
-      $(this.ariaLive).html(Drupal.t('Searching for matches...'));
+      $(this.ariaLive).html(Backdrop.t('Searching for matches...'));
       break;
     case 'cancel':
     case 'error':
@@ -261,7 +261,7 @@ Drupal.jsAC.prototype.setStatus = function (status) {
 /**
  * An AutoComplete DataBase object.
  */
-Drupal.ACDB = function (uri) {
+Backdrop.ACDB = function (uri) {
   this.uri = uri;
   this.delay = 300;
   this.cache = {};
@@ -270,7 +270,7 @@ Drupal.ACDB = function (uri) {
 /**
  * Performs a cached and delayed search.
  */
-Drupal.ACDB.prototype.search = function (searchString) {
+Backdrop.ACDB.prototype.search = function (searchString) {
   var db = this;
   this.searchString = searchString;
 
@@ -309,7 +309,7 @@ Drupal.ACDB.prototype.search = function (searchString) {
         }
       },
       error: function (xmlhttp) {
-        alert(Drupal.ajaxError(xmlhttp, db.uri));
+        alert(Backdrop.ajaxError(xmlhttp, db.uri));
       }
     });
   }, this.delay);
@@ -318,7 +318,7 @@ Drupal.ACDB.prototype.search = function (searchString) {
 /**
  * Cancels the current autocomplete request.
  */
-Drupal.ACDB.prototype.cancel = function () {
+Backdrop.ACDB.prototype.cancel = function () {
   if (this.owner) {
     this.owner.setStatus('cancel');
   }

@@ -279,7 +279,7 @@ class views_handler_field extends views_handler {
     $classes = explode(' ', $this->options['element_class']);
     foreach ($classes as &$class) {
       $class = $this->tokenize_value($class, $row_index);
-      $class = drupal_clean_css_identifier($class);
+      $class = backdrop_clean_css_identifier($class);
     }
     return implode(' ', $classes);
   }
@@ -329,7 +329,7 @@ class views_handler_field extends views_handler {
     $classes = explode(' ', $this->options['element_label_class']);
     foreach ($classes as &$class) {
       $class = $this->tokenize_value($class, $row_index);
-      $class = drupal_clean_css_identifier($class);
+      $class = backdrop_clean_css_identifier($class);
     }
     return implode(' ', $classes);
   }
@@ -341,7 +341,7 @@ class views_handler_field extends views_handler {
     $classes = explode(' ', $this->options['element_wrapper_class']);
     foreach ($classes as &$class) {
       $class = $this->tokenize_value($class, $row_index);
-      $class = drupal_clean_css_identifier($class);
+      $class = backdrop_clean_css_identifier($class);
     }
     return implode(' ', $classes);
   }
@@ -692,7 +692,7 @@ class views_handler_field extends views_handler {
         '#title' => t('Link path'),
         '#type' => 'textfield',
         '#default_value' => $this->options['alter']['path'],
-        '#description' => t('The Drupal path or absolute URL for this link. You may enter data from this view as per the "Replacement patterns" below.'),
+        '#description' => t('The Backdrop path or absolute URL for this link. You may enter data from this view as per the "Replacement patterns" below.'),
         '#states' => array(
           'visible' => array(
             ':input[name="options[alter][make_link]"]' => array('checked' => TRUE),
@@ -1092,7 +1092,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     else {
       $value = $this->render($values);
       if (is_array($value)) {
-        $value = drupal_render($value);
+        $value = backdrop_render($value);
       }
       $this->last_render = $value;
       $this->original_value = $value;
@@ -1105,7 +1105,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
         foreach ($raw_items as $count => $item) {
           $value = $this->render_item($count, $item);
           if (is_array($value)) {
-            $value = drupal_render($value);
+            $value = backdrop_render($value);
           }
           $this->last_render = $value;
           $this->original_value = $this->last_render;
@@ -1123,7 +1123,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
       }
 
       if (is_array($value)) {
-        $value = drupal_render($value);
+        $value = backdrop_render($value);
       }
       // This happens here so that render_as_link can get the unaltered value of
       // this field as a token rather than the altered value.
@@ -1225,7 +1225,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
         $base_path = base_path();
         // Checks whether the path starts with the base_path.
         if (strpos($more_link_path, $base_path) === 0) {
-          $more_link_path = drupal_substr($more_link_path, drupal_strlen($base_path));
+          $more_link_path = backdrop_substr($more_link_path, backdrop_strlen($base_path));
         }
 
         $more_link = l($more_link_text, $more_link_path, array('attributes' => array('class' => array('views-more-link'))));
@@ -1338,7 +1338,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     if (isset($url['query'])) {
       $path = strtr($path, array('?' . $url['query'] => ''));
-      $query = drupal_get_query_array($url['query']);
+      $query = backdrop_get_query_array($url['query']);
       // Remove query parameters that were assigned a query string replacement
       // token for which there is no value available.
       foreach ($query as $param => $val) {
@@ -1392,9 +1392,9 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     if (isset($alter['query'])) {
       // Convert the query to a string, perform token replacement, and then
       // convert back to an array form for l().
-      $options['query'] = drupal_http_build_query($alter['query']);
+      $options['query'] = backdrop_http_build_query($alter['query']);
       $options['query'] = strtr($options['query'], $tokens);
-      $options['query'] = drupal_get_query_array($options['query']);
+      $options['query'] = backdrop_get_query_array($options['query']);
     }
     if (isset($alter['alias'])) {
       // Alias is a boolean field, so no token.

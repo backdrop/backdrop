@@ -5,12 +5,12 @@
 (function ($) {
   "use strict";
 
-  Drupal.ajax.prototype.commands.viewsHilite = function (ajax, response, status) {
+  Backdrop.ajax.prototype.commands.viewsHilite = function (ajax, response, status) {
     $('.hilited').removeClass('hilited');
     $(response.selector).addClass('hilited');
   };
 
-  Drupal.ajax.prototype.commands.viewsAddTab = function (ajax, response, status) {
+  Backdrop.ajax.prototype.commands.viewsAddTab = function (ajax, response, status) {
     var id = '#views-tab-' + response.id;
     $('#views-tabset').viewsAddTab(id, response.title, 0);
     $(id).html(response.body).addClass('views-tab');
@@ -19,23 +19,23 @@
     var display_id = id.replace('#views-tab-', '');
     $("#preview-display-id").append('<option selected="selected" value="' + display_id + '">' + response.title + '</option>');
 
-    Drupal.attachBehaviors(id);
+    Backdrop.attachBehaviors(id);
     var instance = $.viewsUi.tabs.instances[$('#views-tabset').get(0).UI_TABS_UUID];
     $('#views-tabset').viewsClickTab(instance.$tabs.length);
   };
 
-  Drupal.ajax.prototype.commands.viewsShowButtons = function (ajax, response, status) {
+  Backdrop.ajax.prototype.commands.viewsShowButtons = function (ajax, response, status) {
     $('div.views-edit-view div.form-actions').removeClass('js-hide');
     $('div.views-edit-view div.view-changed.messages').removeClass('js-hide');
   };
 
-  Drupal.ajax.prototype.commands.viewsTriggerPreview = function (ajax, response, status) {
+  Backdrop.ajax.prototype.commands.viewsTriggerPreview = function (ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
       $('#preview-submit').trigger('click');
     }
   };
 
-  Drupal.ajax.prototype.commands.viewsReplaceTitle = function (ajax, response, status) {
+  Backdrop.ajax.prototype.commands.viewsReplaceTitle = function (ajax, response, status) {
     // In case we're in the overlay, get a reference to the underlying window.
     var doc = parent.document;
     // For the <title> element, make a best-effort attempt to replace the page
@@ -55,14 +55,14 @@
   /**
    * Get rid of irritating tabledrag messages
    */
-  Drupal.theme.tableDragChangedWarning = function () {
+  Backdrop.theme.tableDragChangedWarning = function () {
     return [];
   }
 
   /**
    * Trigger preview when the "live preview" checkbox is checked.
    */
-  Drupal.behaviors.livePreview = {
+  Backdrop.behaviors.livePreview = {
     attach: function (context) {
       $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
         if ($(this).is(':checked')) {
@@ -75,7 +75,7 @@
   /**
    * Sync preview display.
    */
-  Drupal.behaviors.syncPreviewDisplay = {
+  Backdrop.behaviors.syncPreviewDisplay = {
     attach: function (context) {
       $("#views-tabset a").once('views-ajax-processed').click(function() {
         var href = $(this).attr('href');
@@ -87,7 +87,7 @@
     }
   }
 
-  Drupal.behaviors.viewsAjax = {
+  Backdrop.behaviors.viewsAjax = {
     collapseReplaced: false,
     attach: function (context, settings) {
       var base_element_settings = {
@@ -102,7 +102,7 @@
           element_settings.url = $(this).attr('href');
         }
         var base = $(this).attr('id');
-        Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+        Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
       });
 
       $('div#views-live-preview a')
@@ -115,14 +115,14 @@
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
         element_settings.url = $(this).attr('href');
-        if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
+        if (Backdrop.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
           return true;
         }
 
         element_settings.wrapper = 'views-live-preview';
         element_settings.method = 'html';
         var base = $(this).attr('id');
-        Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+        Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
       });
 
       // Within a live preview, make exposed widget form buttons re-trigger the
@@ -138,7 +138,7 @@
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
         element_settings.url = $(this.form).attr('action');
-        if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
+        if (Backdrop.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
           return true;
         }
 
@@ -147,7 +147,7 @@
         element_settings.event = 'click';
 
         var base = $(this).attr('id');
-        Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+        Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
       });
     }
   };

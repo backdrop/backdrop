@@ -4,12 +4,12 @@
  */
 (function ($) {
 
-Drupal.Views = {};
+Backdrop.Views = {};
 
 /**
  * Helper function to parse a querystring.
  */
-Drupal.Views.parseQueryString = function (query) {
+Backdrop.Views.parseQueryString = function (query) {
   var args = {};
   var pos = query.indexOf('?');
   if (pos != -1) {
@@ -31,9 +31,9 @@ Drupal.Views.parseQueryString = function (query) {
 /**
  * Helper function to return a view's arguments based on a path.
  */
-Drupal.Views.parseViewArgs = function (href, viewPath) {
+Backdrop.Views.parseViewArgs = function (href, viewPath) {
   var returnObj = {};
-  var path = Drupal.Views.getPath(href);
+  var path = Backdrop.Views.getPath(href);
   // Ensure we have a correct path.
   if (viewPath && path.substring(0, viewPath.length + 1) == viewPath + '/') {
     var args = decodeURIComponent(path.substring(viewPath.length + 1, path.length));
@@ -46,7 +46,7 @@ Drupal.Views.parseViewArgs = function (href, viewPath) {
 /**
  * Strip off the protocol plus domain from an href.
  */
-Drupal.Views.pathPortion = function (href) {
+Backdrop.Views.pathPortion = function (href) {
   // Remove e.g. http://example.com if present.
   var protocol = window.location.protocol;
   if (href.substring(0, protocol.length) == protocol) {
@@ -57,11 +57,11 @@ Drupal.Views.pathPortion = function (href) {
 };
 
 /**
- * Return the Drupal path portion of an href.
+ * Return the Backdrop path portion of an href.
  */
-Drupal.Views.getPath = function (href) {
-  href = Drupal.Views.pathPortion(href);
-  href = href.substring(Drupal.settings.basePath.length, href.length);
+Backdrop.Views.getPath = function (href) {
+  href = Backdrop.Views.pathPortion(href);
+  href = href.substring(Backdrop.settings.basePath.length, href.length);
   // 3 is the length of the '?q=' added to the url without clean urls.
   if (href.substring(0, 3) == '?q=') {
     href = href.substring(3, href.length);

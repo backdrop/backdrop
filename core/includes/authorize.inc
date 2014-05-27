@@ -23,7 +23,7 @@ function authorize_filetransfer_form($form, &$form_state) {
 
   // Get all the available ways to transfer files.
   if (empty($_SESSION['authorize_filetransfer_info'])) {
-    drupal_set_message(t('Unable to continue, no available methods of file transfer'), 'error');
+    backdrop_set_message(t('Unable to continue, no available methods of file transfer'), 'error');
     return array();
   }
   $available_backends = $_SESSION['authorize_filetransfer_info'];
@@ -212,7 +212,7 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
       // database connection form in the installer.
       form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">handbook</a>.', array(
         '!message' => '<p class="error">' . $e->getMessage()  . '</p>',
-        '@handbook_url' => 'http://drupal.org/documentation/install/modules-themes',
+        '@handbook_url' => 'http://backdropcms.org/guide/modules',
       )));
     }
   }
@@ -292,10 +292,10 @@ function authorize_run_operation($filetransfer) {
   unset($_SESSION['authorize_operation']);
 
   if (!empty($operation['page_title'])) {
-    drupal_set_title($operation['page_title']);
+    backdrop_set_title($operation['page_title']);
   }
 
-  require_once DRUPAL_ROOT . '/' . $operation['file'];
+  require_once BACKDROP_ROOT . '/' . $operation['file'];
   call_user_func_array($operation['callback'], array_merge(array($filetransfer), $operation['arguments']));
 }
 
@@ -320,7 +320,7 @@ function authorize_get_filetransfer($backend, $settings = array()) {
       require_once $file;
     }
     if (class_exists($backend_info['class'])) {
-      $filetransfer = $backend_info['class']::factory(DRUPAL_ROOT, $settings);
+      $filetransfer = $backend_info['class']::factory(BACKDROP_ROOT, $settings);
     }
   }
   return $filetransfer;

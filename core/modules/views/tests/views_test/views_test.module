@@ -23,7 +23,7 @@ function views_test_permission() {
 function views_test_views_api() {
   return array(
     'api' => 3.0,
-    'template path' => drupal_get_path('module', 'views_test') . '/templates',
+    'template path' => backdrop_get_path('module', 'views_test') . '/templates',
   );
 }
 
@@ -69,8 +69,8 @@ function views_test_test_dynamic_access_callback($access, $argument1, $argument2
  */
 function views_test_views_pre_render(&$view) {
   if ($view->name == 'test_cache_header_storage') {
-    drupal_add_js(drupal_get_path('module', 'views_test') . '/views_cache.test.js');
-    drupal_add_css(drupal_get_path('module', 'views_test') . '/views_cache.test.css');
+    backdrop_add_js(backdrop_get_path('module', 'views_test') . '/views_cache.test.js');
+    backdrop_add_css(backdrop_get_path('module', 'views_test') . '/views_cache.test.css');
     $view->pre_render_called = TRUE;
   }
 }
@@ -128,5 +128,5 @@ function template_preprocess_views_view_mapping_test(&$variables) {
  * Returns HTML for the Mapping Test style.
  */
 function theme_views_view_mapping_test($variables) {
-  return drupal_render($variables['element']);
+  return backdrop_render($variables['element']);
 }

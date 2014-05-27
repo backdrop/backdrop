@@ -4,18 +4,21 @@
  * Lists all the classes used by Backdrop core.
  */
 function backdrop_class_list() {
-  $path = DRUPAL_ROOT . '/core/includes/';
-  return array(
+
+  $path = BACKDROP_ROOT . '/core/includes/';
+
+  // Classes in /core/includes.
+  $classes = array(
     'AnonymousUser' => $path . 'anonymous.inc',
     'ArchiverInterface' => $path . 'archiver.inc',
     'BatchQueue' => $path . 'batch.queue.inc',
     'BatchMemoryQueue' => $path . 'batch.queue.inc',
-    'DrupalCacheArray' => $path . 'bootstrap.inc',
+    'BackdropCacheArray' => $path . 'bootstrap.inc',
     'SchemaCache' => $path . 'boostrap.inc',
-    'DrupalFakeCache' => $path . 'cache-install.inc',
-    'DrupalNullCache' => $path . 'cache.inc',
-    'DrupalDatabaseCache' => $path . 'cache.inc',
-    'DrupalCacheInterface' => $path . 'cache.inc',
+    'BackdropFakeCache' => $path . 'cache-install.inc',
+    'BackdropNullCache' => $path . 'cache.inc',
+    'BackdropDatabaseCache' => $path . 'cache.inc',
+    'BackdropCacheInterface' => $path . 'cache.inc',
     'Color' => $path . 'color.inc',
     'Diff' => $path . 'diff.inc',
     'DiffOp' => $path . 'diff.inc',
@@ -33,16 +36,16 @@ function backdrop_class_list() {
     'DatabaseTaskException' => $path . 'install.inc',
     'MailSystemInterface' => $path . 'mail.inc',
     'PagerDefault' => $path . 'pager.class.inc',
-    'DrupalLocalStreamWrapper' => $path . 'stream_wrappers.inc',
-    'DrupalPublicStreamWrapper' => $path . 'stream_wrappers.inc',
-    'DrupalPrivateStreamWrapper' => $path . 'stream_wrappers.inc',
-    'DrupalTemporaryStreamWrapper' => $path . 'stream_wrappers.inc',
+    'BackdropLocalStreamWrapper' => $path . 'stream_wrappers.inc',
+    'BackdropPublicStreamWrapper' => $path . 'stream_wrappers.inc',
+    'BackdropPrivateStreamWrapper' => $path . 'stream_wrappers.inc',
+    'BackdropTemporaryStreamWrapper' => $path . 'stream_wrappers.inc',
     'StreamWrapperInterface' => $path . 'stream_wrappers.inc',
-    'DrupalStreamWrapperInterface' => $path . 'stream_wrappers.inc',
+    'BackdropStreamWrapperInterface' => $path . 'stream_wrappers.inc',
     'TableSort' => $path . 'tablesort.class.inc',
     'ThemeRegistry' => $path . 'theme.inc',
-    'DrupalUpdateException' => $path . 'update.inc',
-    'DrupalUpdaterInterface' => $path . 'updater.inc',
+    'BackdropUpdateException' => $path . 'update.inc',
+    'BackdropUpdaterInterface' => $path . 'updater.inc',
     'Updater' => $path . 'updater.inc',
     'UpdaterException' => $path . 'updater.inc',
     'UpdaterFileTransferException' => $path . 'updater.inc',
@@ -120,4 +123,29 @@ function backdrop_class_list() {
     'FileTransferLocal' => $path . 'filetransfer/local.inc',
     'FileTransferSSH' => $path . 'filetransfer/ssh.inc',
   );
+
+  // Add in Drupal 7 class name wrappers if compatibility is enabled.
+  if (!empty($GLOBALS['conf']['backdrop_drupal_compatibility'])) {
+    $classes += array(
+      'DrupalQueue' => $path . 'drupal.classes.inc',
+      'DrupalQueueInterface' => $path . 'drupal.classes.inc',
+      'DrupalReliableQueueInterface' => $path . 'drupal.classes.inc',
+      'DrupalCacheArray' => $path . 'drupal.classes.inc',
+      'DrupalUpdateException' => $path . 'drupal.classes.inc',
+      'DrupalFakeCache' => $path . 'drupal.classes.inc',
+      'DrupalDatabaseCache' => $path . 'drupal.classes.inc',
+      'DrupalNullCache' => $path . 'drupal.classes.inc',
+      'DrupalLocalStreamWrapper' => $path . 'drupal.classes.inc',
+      'DrupalPublicStreamWrapper' => $path . 'drupal.classes.inc',
+      'DrupalPrivateStreamWrapper' => $path . 'drupal.classes.inc',
+      'DrupalTemporaryStreamWrapper' => $path . 'drupal.classes.inc',
+      'DrupalStreamWrapperInterface' => $path . 'drupal.classes.inc',
+      'DrupalUpdaterInterface' => $path . 'drupal.classes.inc',
+      'DrupalTestCase' => $path . 'drupal.classes.inc',
+      'DrupalUnitTestCase' => $path . 'drupal.classes.inc',
+      'DrupalWebTestCase' => $path . 'drupal.classes.inc',
+    );
+  }
+
+  return $classes;
 }

@@ -175,7 +175,7 @@ class views_plugin_style_table extends views_plugin_style {
 
     $form['sticky'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enable Drupal style "sticky" table headers (Javascript)'),
+      '#title' => t('Enable Backdrop style "sticky" table headers (Javascript)'),
       '#default_value' => !empty($this->options['sticky']),
       '#description' => t('(Sticky header effects will not be active for preview below, only on live output.)'),
     );
@@ -245,7 +245,7 @@ class views_plugin_style_table extends views_plugin_style {
           ),
         );
         // Provide an ID so we can have such things.
-        $radio_id = drupal_html_id('edit-default-' . $field);
+        $radio_id = backdrop_html_id('edit-default-' . $field);
         $form['default'][$field] = array(
           '#type' => 'radio',
           '#return_value' => $field,

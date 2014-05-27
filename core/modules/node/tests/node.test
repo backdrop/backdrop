@@ -8,7 +8,7 @@
 /**
  * Defines a base class for testing the Node module.
  */
-class NodeWebTestCase extends DrupalWebTestCase {
+class NodeWebTestCase extends BackdropWebTestCase {
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -19,8 +19,8 @@ class NodeWebTestCase extends DrupalWebTestCase {
 
     // Create Basic page and Article node types.
     if ($this->profile != 'standard') {
-      $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-      $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+      $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+      $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
     }
   }
 }
@@ -28,24 +28,24 @@ class NodeWebTestCase extends DrupalWebTestCase {
 /**
  * Tests the node_load_multiple() function.
  */
-class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
+class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
-    $web_user = $this->drupalCreateUser(array('create article content', 'create page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create article content', 'create page content'));
+    $this->backdropLogin($web_user);
   }
 
   /**
    * Creates four nodes and ensures that they are loaded correctly.
    */
   function testNodeMultipleLoad() {
-    $node1 = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1));
-    $node2 = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1));
-    $node3 = $this->drupalCreateNode(array('type' => 'article', 'promote' => 0));
-    $node4 = $this->drupalCreateNode(array('type' => 'page', 'promote' => 0));
+    $node1 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node2 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 0));
+    $node4 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0));
 
     // Confirm that promoted nodes appear in the default node listing.
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->assertText($node1->title, t('Node title appears on the default listing.'));
     $this->assertText($node2->title, t('Node title appears on the default listing.'));
     $this->assertNoText($node3->title, t('Node title does not appear in the default listing.'));
@@ -99,7 +99,7 @@ class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
 /**
  * Tests for the hooks invoked during node_load().
  */
-class NodeLoadHooksTestCase extends DrupalWebTestCase {
+class NodeLoadHooksTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node_test');
   }
@@ -109,10 +109,10 @@ class NodeLoadHooksTestCase extends DrupalWebTestCase {
    */
   function testHookNodeLoad() {
     // Create some sample articles and pages.
-    $node1 = $this->drupalCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
-    $node2 = $this->drupalCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
-    $node3 = $this->drupalCreateNode(array('type' => 'article', 'status' => NODE_NOT_PUBLISHED));
-    $node4 = $this->drupalCreateNode(array('type' => 'page', 'status' => NODE_NOT_PUBLISHED));
+    $node1 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
+    $node2 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
+    $node3 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_NOT_PUBLISHED));
+    $node4 = $this->backdropCreateNode(array('type' => 'page', 'status' => NODE_NOT_PUBLISHED));
 
     // Check that when a set of nodes that only contains articles is loaded,
     // the properties added to the node by node_test_load_node() correctly
@@ -135,7 +135,7 @@ class NodeLoadHooksTestCase extends DrupalWebTestCase {
 /**
  * Tests the node revision functionality.
  */
-class NodeRevisionsTestCase extends DrupalWebTestCase {
+class NodeRevisionsTestCase extends BackdropWebTestCase {
 
   /**
    * Nodes used by the test.
@@ -155,12 +155,12 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     parent::setUp();
 
     // Create and login user.
-    $web_user = $this->drupalCreateUser(array('view revisions', 'revert revisions', 'edit any page content',
+    $web_user = $this->backdropCreateUser(array('view revisions', 'revert revisions', 'edit any page content',
                                                'delete revisions', 'delete any page content'));
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
 
     // Create initial node.
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
     $settings = get_object_vars($node);
     $settings['revision'] = 1;
 
@@ -176,7 +176,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
       $logs[] = $settings['log'] = $this->randomName(32);
 
       // Create revision with random title and body and update variables.
-      $this->drupalCreateNode($settings);
+      $this->backdropCreateNode($settings);
       $node = node_load($node->nid); // Make sure we get revision information.
       $settings = get_object_vars($node);
 
@@ -198,17 +198,17 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     $node = $nodes[3];
 
     // Confirm the correct revision text appears on "view revisions" page.
-    $this->drupalGet("node/$node->nid/revisions/$node->vid/view");
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
     $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('Correct text displays for version.'));
 
     // Confirm the correct log message appears on "revisions overview" page.
-    $this->drupalGet("node/$node->nid/revisions");
+    $this->backdropGet("node/$node->nid/revisions");
     foreach ($logs as $log) {
       $this->assertText($log, t('Log message found.'));
     }
 
     // Confirm that revisions revert properly.
-    $this->drupalPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
+    $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
     $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.',
                         array('@type' => 'Basic page', '%title' => $nodes[1]->title,
                               '%revision-date' => format_date($nodes[1]->revision_timestamp))), t('Revision reverted.'));
@@ -216,7 +216,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), t('Node reverted correctly.'));
 
     // Confirm revisions delete properly.
-    $this->drupalPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
+    $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
     $this->assertRaw(t('Revision from %revision-date of @type %title has been deleted.',
                         array('%revision-date' => format_date($nodes[1]->revision_timestamp),
                               '@type' => 'Basic page', '%title' => $nodes[1]->title)), t('Revision deleted.'));
@@ -231,7 +231,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
         'timestamp' => $old_revision_date,
       ))
       ->execute();
-    $this->drupalPost("node/$node->nid/revisions/{$nodes[2]->vid}/revert", array(), t('Revert'));
+    $this->backdropPost("node/$node->nid/revisions/{$nodes[2]->vid}/revert", array(), t('Revert'));
     $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.', array(
       '@type' => 'Basic page',
       '%title' => $nodes[2]->title,
@@ -245,7 +245,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
   function testNodeRevisionWithoutLogMessage() {
     // Create a node with an initial log message.
     $log = $this->randomName(10);
-    $node = $this->drupalCreateNode(array('log' => $log));
+    $node = $this->backdropCreateNode(array('log' => $log));
 
     // Save over the same revision and explicitly provide an empty log message
     // (for example, to mimic the case of a node form submitted with no text in
@@ -259,13 +259,13 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     $node->revision = FALSE;
 
     $node->save();
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($new_title, t('New node title appears on the page.'));
     $node_revision = node_load($node->nid, NULL, TRUE);
     $this->assertEqual($node_revision->log, $log, t('After an existing node revision is re-saved without a log message, the original log message is preserved.'));
 
     // Create another node with an initial log message.
-    $node = $this->drupalCreateNode(array('log' => $log));
+    $node = $this->backdropCreateNode(array('log' => $log));
 
     // Save a new node revision without providing a log message, and check that
     // this revision has an empty log message.
@@ -277,7 +277,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     $node->log = NULL;
 
     $node->save();
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($new_title, 'New node title appears on the page.');
     $node_revision = node_load($node->nid, NULL, TRUE);
     $this->assertTrue(empty($node_revision->log), 'After a new node revision is saved with an empty log message, the log message for the node is empty.');
@@ -287,7 +287,7 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
 /**
  * Tests the node edit functionality.
  */
-class PageEditTestCase extends DrupalWebTestCase {
+class PageEditTestCase extends BackdropWebTestCase {
 
   /**
    * A user with permission to create and edit own page content.
@@ -306,15 +306,15 @@ class PageEditTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $this->web_user = $this->drupalCreateUser(array('edit own page content', 'create page content'));
-    $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer nodes'));
+    $this->web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
+    $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
   }
 
   /**
    * Checks node edit functionality.
    */
   function testPageEdit() {
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
@@ -323,10 +323,10 @@ class PageEditTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit[$title_key] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the node exists in the database.
-    $node = $this->drupalGetNodeByTitle($edit[$title_key]);
+    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
     $this->assertTrue($node, t('Node found in database.'));
 
     // Check that "edit" link points to correct page.
@@ -347,25 +347,25 @@ class PageEditTestCase extends DrupalWebTestCase {
     $edit[$title_key] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
     // Stay on the current page, without reloading.
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Check that the title and body fields are displayed with the updated values.
     $this->assertText($edit[$title_key], t('Title displayed.'));
     $this->assertText($edit[$body_key], t('Body displayed.'));
 
     // Login as a second administrator user.
-    $second_web_user = $this->drupalCreateUser(array('administer nodes', 'edit any page content'));
-    $this->drupalLogin($second_web_user);
+    $second_web_user = $this->backdropCreateUser(array('administer nodes', 'edit any page content'));
+    $this->backdropLogin($second_web_user);
     // Edit the same node, creating a new revision.
-    $this->drupalGet("node/$node->nid/edit");
+    $this->backdropGet("node/$node->nid/edit");
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
     $edit['revision'] = TRUE;
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Ensure that the node revision has been created.
-    $revised_node = $this->drupalGetNodeByTitle($edit['title']);
+    $revised_node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertNotIdentical($node->vid, $revised_node->vid, 'A new revision has been created.');
     // Ensure that the node author is preserved when it was not changed in the
     // edit form.
@@ -381,7 +381,7 @@ class PageEditTestCase extends DrupalWebTestCase {
    * Tests changing a node's "authored by" field.
    */
   function testPageAuthoredBy() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Create node to edit.
     $langcode = LANGUAGE_NONE;
@@ -389,36 +389,36 @@ class PageEditTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the node was authored by the currently logged in user.
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertIdentical($node->uid, $this->admin_user->uid, 'Node authored by admin user.');
 
     // Try to change the 'authored by' field to an invalid user name.
     $edit = array(
       'name' => 'invalid-name',
     );
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertText('The username invalid-name does not exist.');
 
     // Change the authored by field to an empty string, which should assign
     // authorship to the anonymous user (uid 0).
     $edit['name'] = '';
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertIdentical($node->uid, '0', 'Node authored by anonymous user.');
 
     // Change the authored by field to another user's name (that is not
     // logged in).
     $edit['name'] = $this->web_user->name;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertIdentical($node->uid, $this->web_user->uid, 'Node authored by normal user.');
 
     // Check that normal users cannot change the authored by information.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoFieldByName('name');
   }
 }
@@ -426,12 +426,12 @@ class PageEditTestCase extends DrupalWebTestCase {
 /**
  * Tests the node entity preview functionality.
  */
-class PagePreviewTestCase extends DrupalWebTestCase {
+class PagePreviewTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('edit own page content', 'create page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
+    $this->backdropLogin($web_user);
   }
 
   /**
@@ -446,10 +446,10 @@ class PagePreviewTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit[$title_key] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Preview'));
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
 
     // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview | Drupal'), t('Basic page title is preview.'));
+    $this->assertTitle(t('Preview | Backdrop'), t('Basic page title is preview.'));
     $this->assertText($edit[$title_key], t('Title displayed.'));
     $this->assertText($edit[$body_key], t('Body displayed.'));
 
@@ -473,10 +473,10 @@ class PagePreviewTestCase extends DrupalWebTestCase {
     $edit[$title_key] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
     $edit['log'] = $this->randomName(32);
-    $this->drupalPost('node/add/page', $edit, t('Preview'));
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
 
     // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview | Drupal'), t('Basic page title is preview.'));
+    $this->assertTitle(t('Preview | Backdrop'), t('Basic page title is preview.'));
     $this->assertText($edit[$title_key], t('Title displayed.'));
     $this->assertText($edit[$body_key], t('Body displayed.'));
 
@@ -492,13 +492,13 @@ class PagePreviewTestCase extends DrupalWebTestCase {
 /**
  * Tests creating and saving a node.
  */
-class NodeCreationTestCase extends DrupalWebTestCase {
+class NodeCreationTestCase extends BackdropWebTestCase {
   function setUp() {
     // Enable dummy module that implements hook_node_insert for exceptions.
     parent::setUp('node_test_exception');
 
-    $web_user = $this->drupalCreateUser(array('create page content', 'edit own page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
+    $this->backdropLogin($web_user);
   }
 
   /**
@@ -510,13 +510,13 @@ class NodeCreationTestCase extends DrupalWebTestCase {
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName(8);
     $edit["body[$langcode][0][value]"] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the Basic page has been created.
     $this->assertRaw(t('!post %title has been created.', array('!post' => 'Basic page', '%title' => $edit["title"])), t('Basic page created.'));
 
     // Check that the node exists in the database.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertTrue($node, t('Node found in database.'));
   }
 
@@ -543,12 +543,12 @@ class NodeCreationTestCase extends DrupalWebTestCase {
 
     if (Database::getConnection()->supportsTransactions()) {
       // Check that the node does not exist in the database.
-      $node = $this->drupalGetNodeByTitle($edit['title']);
+      $node = $this->backdropGetNodeByTitle($edit['title']);
       $this->assertFalse($node, t('Transactions supported, and node not found in database.'));
     }
     else {
       // Check that the node exists in the database.
-      $node = $this->drupalGetNodeByTitle($edit['title']);
+      $node = $this->backdropGetNodeByTitle($edit['title']);
       $this->assertTrue($node, t('Transactions not supported, and node found in database.'));
 
       // Check that the failed rollback was logged.
@@ -574,43 +574,43 @@ class NodeCreationTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit["title"] = $this->randomName(8);
     $edit["body[" . LANGUAGE_NONE . "][0][value]"] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the user was redirected to the home page.
-    $this->assertText(t('Welcome to Drupal'), t('The user is redirected to the home page.'));
+    $this->assertText(t('Welcome to Backdrop'), t('The user is redirected to the home page.'));
   }
 }
 
 /**
  * Tests the functionality of node entity edit permissions.
  */
-class PageViewTestCase extends DrupalWebTestCase {
+class PageViewTestCase extends BackdropWebTestCase {
   /**
    * Tests an anonymous and unpermissioned user attempting to edit the node.
    */
   function testPageView() {
     // Create a node to view.
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
     $this->assertTrue(node_load($node->nid), t('Node created.'));
 
     // Try to edit with anonymous user.
-    $html = $this->drupalGet("node/$node->nid/edit");
+    $html = $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
     // Create a user without permission to edit node.
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($web_user);
 
     // Attempt to access edit page.
-    $this->drupalGet("node/$node->nid/edit");
+    $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
     // Create user with permission to edit node.
-    $web_user = $this->drupalCreateUser(array('bypass node access'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('bypass node access'));
+    $this->backdropLogin($web_user);
 
     // Attempt to access edit page.
-    $this->drupalGet("node/$node->nid/edit");
+    $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(200);
   }
 }
@@ -618,27 +618,27 @@ class PageViewTestCase extends DrupalWebTestCase {
 /**
  * Tests the summary length functionality.
  */
-class SummaryLengthTestCase extends DrupalWebTestCase {
+class SummaryLengthTestCase extends BackdropWebTestCase {
   /**
    * Tests the node summary length functionality.
    */
   function testSummaryLength() {
     // Create a node to view.
     $settings = array(
-      'body' => array(LANGUAGE_NONE => array(array('value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a Drupalism? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero. Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci. Curabitur feugiat egestas nisl sed accumsan.'))),
+      'body' => array(LANGUAGE_NONE => array(array('value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a foobar? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero. Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci. Curabitur feugiat egestas nisl sed accumsan.'))),
       'promote' => 1,
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
     $this->assertTrue(node_load($node->nid), t('Node created.'));
 
     // Create user with permission to view the node.
-    $web_user = $this->drupalCreateUser(array('access content', 'administer content types'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content', 'administer content types'));
+    $this->backdropLogin($web_user);
 
     // Attempt to access the front page.
-    $this->drupalGet("node");
+    $this->backdropGet("node");
     // The node teaser when it has 600 characters in length
-    $expected = 'What is a Drupalism?';
+    $expected = 'What is a foobar?';
     $this->assertRaw($expected, t('Check that the summary is 600 characters in length'), 'Node');
 
     // Change the teaser length for "Basic page" content type.
@@ -647,7 +647,7 @@ class SummaryLengthTestCase extends DrupalWebTestCase {
     field_update_instance($instance);
 
     // Attempt to access the front page again and check if the summary is now only 200 characters in length.
-    $this->drupalGet("node");
+    $this->backdropGet("node");
     $this->assertNoRaw($expected, t('Check that the summary is not longer than 200 characters'), 'Node');
   }
 }
@@ -655,31 +655,31 @@ class SummaryLengthTestCase extends DrupalWebTestCase {
 /**
  * Tests XSS functionality with a node entity.
  */
-class NodeTitleXSSTestCase extends DrupalWebTestCase {
+class NodeTitleXSSTestCase extends BackdropWebTestCase {
   /**
    * Tests XSS functionality with a node entity.
    */
   function testNodeTitleXSS() {
     // Prepare a user to do the stuff.
-    $web_user = $this->drupalCreateUser(array('create page content', 'edit any page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create page content', 'edit any page content'));
+    $this->backdropLogin($web_user);
 
     $xss = '<script>alert("xss")</script>';
     $title = $xss . $this->randomName();
     $edit = array("title" => $title);
 
-    $this->drupalPost('node/add/page', $edit, t('Preview'));
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertNoRaw($xss, t('Harmful tags are escaped when previewing a node.'));
 
     $settings = array('title' => $title);
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     // assertTitle() decodes HTML-entities inside the <title> element.
-    $this->assertTitle($edit["title"] . ' | Drupal', t('Title is diplayed when viewing a node.'));
+    $this->assertTitle($edit["title"] . ' | Backdrop', t('Title is diplayed when viewing a node.'));
     $this->assertNoRaw($xss, t('Harmful tags are escaped when viewing a node.'));
 
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoRaw($xss, t('Harmful tags are escaped when editing a node.'));
   }
 }
@@ -687,13 +687,13 @@ class NodeTitleXSSTestCase extends DrupalWebTestCase {
 /**
  * Tests the availability of the syndicate block.
  */
-class NodeBlockTestCase extends DrupalWebTestCase {
+class NodeBlockTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
     // Create and login user
-    $admin_user = $this->drupalCreateUser(array('administer blocks'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer blocks'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -701,13 +701,13 @@ class NodeBlockTestCase extends DrupalWebTestCase {
    */
   function testSyndicateBlock() {
     // Set block title to confirm that the interface is available.
-    $this->drupalPost('admin/structure/block/manage/node/syndicate/configure', array('title' => $this->randomName(8)), t('Save block'));
+    $this->backdropPost('admin/structure/block/manage/node/syndicate/configure', array('title' => $this->randomName(8)), t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block configuration set.'));
 
     // Set the block to a region to confirm block is available.
     $edit = array();
     $edit['blocks[node_syndicate][region]'] = 'footer';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertText(t('The block settings have been updated.'), t('Block successfully move to footer region.'));
   }
 }
@@ -715,12 +715,12 @@ class NodeBlockTestCase extends DrupalWebTestCase {
 /**
  * Checks that the post information displays when enabled for a content type.
  */
-class NodePostSettingsTestCase extends DrupalWebTestCase {
+class NodePostSettingsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('create page content', 'administer content types', 'access user profiles'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create page content', 'administer content types', 'access user profiles'));
+    $this->backdropLogin($web_user);
   }
 
   /**
@@ -731,17 +731,17 @@ class NodePostSettingsTestCase extends DrupalWebTestCase {
     // Set "Basic page" content type to display post information.
     $edit = array();
     $edit['node_submitted'] = TRUE;
-    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
     // Create a node.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName(8);
     $edit["body[$langcode][0][value]"] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $elements = $this->xpath('//div[contains(@class,:class)]', array(':class' => 'submitted'));
     $this->assertEqual(count($elements), 1, t('Post information is displayed.'));
   }
@@ -754,17 +754,17 @@ class NodePostSettingsTestCase extends DrupalWebTestCase {
     // Set "Basic page" content type to display post information.
     $edit = array();
     $edit['node_submitted'] = FALSE;
-    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
     // Create a node.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName(8);
     $edit["body[$langcode][0][value]"] = $this->randomName(16);
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertNoRaw('<span class="submitted">', t('Post information is not displayed.'));
   }
 }
@@ -776,7 +776,7 @@ class NodePostSettingsTestCase extends DrupalWebTestCase {
  * added to the node->content array, then verify that the data appears on the
  * sitewide RSS feed at rss.xml.
  */
-class NodeRSSContentTestCase extends DrupalWebTestCase {
+class NodeRSSContentTestCase extends BackdropWebTestCase {
   function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
@@ -784,8 +784,8 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
     // Use bypass node access permission here, because the test class uses
     // hook_grants_alter() to deny access to everyone on node_access
     // queries.
-    $user = $this->drupalCreateUser(array('bypass node access', 'access content', 'create article content'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('bypass node access', 'access content', 'create article content'));
+    $this->backdropLogin($user);
   }
 
   /**
@@ -793,9 +793,9 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
    */
   function testNodeRSSContent() {
     // Create a node.
-    $node = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
 
-    $this->drupalGet('rss.xml');
+    $this->backdropGet('rss.xml');
 
     // Check that content added in 'rss' view mode appear in RSS feed.
     $rss_only_content = t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid));
@@ -811,18 +811,18 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
       'key' => 'testElement',
       'value' => t('Value of testElement RSS element for node !nid.', array('!nid' => $node->nid)),
     );
-    $test_ns = 'xmlns:drupaltest="http://example.com/test-namespace"';
+    $test_ns = 'xmlns:backdroptest="http://example.com/test-namespace"';
     $this->assertRaw(format_xml_elements(array($test_element)), t('Extra RSS elements appear in RSS feed.'));
     $this->assertRaw($test_ns, t('Extra namespaces appear in RSS feed.'));
 
     // Check that content added in 'rss' view mode doesn't appear when
     // viewing node.
-    $this->drupalGet("node/$node->nid");
+    $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, t('Node content designed for RSS doesn\'t appear when viewing node.'));
     
     // Check that the node feed page does not try to interpret additional path
     // components as arguments for node_feed() and returns default content.
-    $this->drupalGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
+    $this->backdropGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
     $this->assertText($rss_only_content, t('Ignore page arguments when delivering rss.xml.'));
   }
 }
@@ -834,7 +834,7 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
  *
  * @todo Cover hook_node_access in a separate test class.
  */
-class NodeAccessUnitTest extends DrupalWebTestCase {
+class NodeAccessUnitTest extends BackdropWebTestCase {
   /**
    * Asserts node_access() correctly grants or denies access.
    */
@@ -849,7 +849,7 @@ class NodeAccessUnitTest extends DrupalWebTestCase {
     parent::setUp();
     // Clear permissions for authenticated users.
     db_delete('role_permission')
-      ->condition('rid', DRUPAL_AUTHENTICATED_RID)
+      ->condition('rid', BACKDROP_AUTHENTICATED_RID)
       ->execute();
   }
 
@@ -858,34 +858,34 @@ class NodeAccessUnitTest extends DrupalWebTestCase {
    */
   function testNodeAccess() {
     // Ensures user without 'access content' permission can do nothing.
-    $web_user1 = $this->drupalCreateUser(array('create page content', 'edit any page content', 'delete any page content'));
-    $node1 = $this->drupalCreateNode(array('type' => 'page'));
+    $web_user1 = $this->backdropCreateUser(array('create page content', 'edit any page content', 'delete any page content'));
+    $node1 = $this->backdropCreateNode(array('type' => 'page'));
     $this->assertNodeAccess(array('create' => FALSE), 'page', $web_user1);
     $this->assertNodeAccess(array('view' => FALSE, 'update' => FALSE, 'delete' => FALSE), $node1, $web_user1);
 
     // Ensures user with 'bypass node access' permission can do everything.
-    $web_user2 = $this->drupalCreateUser(array('bypass node access'));
-    $node2 = $this->drupalCreateNode(array('type' => 'page'));
+    $web_user2 = $this->backdropCreateUser(array('bypass node access'));
+    $node2 = $this->backdropCreateNode(array('type' => 'page'));
     $this->assertNodeAccess(array('create' => TRUE), 'page', $web_user2);
     $this->assertNodeAccess(array('view' => TRUE, 'update' => TRUE, 'delete' => TRUE), $node2, $web_user2);
 
     // User cannot 'view own unpublished content'.
-    $web_user3 = $this->drupalCreateUser(array('access content'));
-    $node3 = $this->drupalCreateNode(array('status' => 0, 'uid' => $web_user3->uid));
+    $web_user3 = $this->backdropCreateUser(array('access content'));
+    $node3 = $this->backdropCreateNode(array('status' => 0, 'uid' => $web_user3->uid));
     $this->assertNodeAccess(array('view' => FALSE), $node3, $web_user3);
 
     // User cannot create content without permission.
     $this->assertNodeAccess(array('create' => FALSE), 'page', $web_user3);
 
     // User can 'view own unpublished content', but another user cannot.
-    $web_user4 = $this->drupalCreateUser(array('access content', 'view own unpublished content'));
-    $web_user5 = $this->drupalCreateUser(array('access content', 'view own unpublished content'));
-    $node4 = $this->drupalCreateNode(array('status' => 0, 'uid' => $web_user4->uid));
+    $web_user4 = $this->backdropCreateUser(array('access content', 'view own unpublished content'));
+    $web_user5 = $this->backdropCreateUser(array('access content', 'view own unpublished content'));
+    $node4 = $this->backdropCreateNode(array('status' => 0, 'uid' => $web_user4->uid));
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node4, $web_user4);
     $this->assertNodeAccess(array('view' => FALSE), $node4, $web_user5);
 
     // Tests the default access provided for a published node.
-    $node5 = $this->drupalCreateNode();
+    $node5 = $this->backdropCreateNode();
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE, 'delete' => FALSE), $node5, $web_user3);
   }
 }
@@ -893,7 +893,7 @@ class NodeAccessUnitTest extends DrupalWebTestCase {
 /**
  * Tests hook_node_access_records() functionality.
  */
-class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
+class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
   function setUp() {
     // Enable dummy module that implements hook_node_grants(),
     // hook_node_access_records(), hook_node_grants_alter() and
@@ -906,7 +906,7 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
    */
   function testNodeAccessRecords() {
     // Create an article node.
-    $node1 = $this->drupalCreateNode(array('type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('type' => 'article'));
     $this->assertTrue(node_load($node1->nid), t('Article node created.'));
 
     // Check to see if grants added by node_test_node_access_records made it in.
@@ -916,7 +916,7 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
     $this->assertEqual($records[0]->gid, 1, t('Grant with gid = 1 acquired for node without alteration.'));
 
     // Create an unpromoted "Basic page" node.
-    $node2 = $this->drupalCreateNode(array('type' => 'page', 'promote' => 0));
+    $node2 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0));
     $this->assertTrue(node_load($node2->nid), t('Unpromoted basic page node created.'));
 
     // Check to see if grants added by node_test_node_access_records made it in.
@@ -926,7 +926,7 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
     $this->assertEqual($records[0]->gid, 1, t('Grant with gid = 1 acquired for node without alteration.'));
 
     // Create an unpromoted, unpublished "Basic page" node.
-    $node3 = $this->drupalCreateNode(array('type' => 'page', 'promote' => 0, 'status' => 0));
+    $node3 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0, 'status' => 0));
     $this->assertTrue(node_load($node3->nid), t('Unpromoted, unpublished basic page node created.'));
 
     // Check to see if grants added by node_test_node_access_records made it in.
@@ -936,7 +936,7 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
     $this->assertEqual($records[0]->gid, 1, t('Grant with gid = 1 acquired for node without alteration.'));
 
     // Create a promoted "Basic page" node.
-    $node4 = $this->drupalCreateNode(array('type' => 'page', 'promote' => 1));
+    $node4 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 1));
     $this->assertTrue(node_load($node4->nid), t('Promoted basic page node created.'));
 
     // Check to see if grant added by node_test_node_access_records was altered
@@ -949,17 +949,17 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
     // Check to see if we can alter grants with hook_node_grants_alter().
     $operations = array('view', 'update', 'delete');
     // Create a user that is allowed to access content.
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
     foreach ($operations as $op) {
       $grants = node_test_node_grants($op, $web_user);
       $altered_grants = $grants;
-      drupal_alter('node_grants', $altered_grants, $web_user, $op);
+      backdrop_alter('node_grants', $altered_grants, $web_user, $op);
       $this->assertNotEqual($grants, $altered_grants, t('Altered the %op grant for a user.', array('%op' => $op)));
     }
 
     // Check that core does not grant access to an unpublished node when an
     // empty $grants array is returned.
-    $node6 = $this->drupalCreateNode(array('status' => 0, 'disable_node_access' => TRUE));
+    $node6 = $this->backdropCreateNode(array('status' => 0, 'disable_node_access' => TRUE));
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node6->nid))->fetchAll();
     $this->assertEqual(count($records), 0, t('Returned no records for unpublished node.'));
   }
@@ -968,7 +968,7 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
 /**
  * Tests for Node Access with a non-node base table.
  */
-class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
+class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
@@ -997,10 +997,10 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
     $titles = array(); // Titles keyed by nid
     $private_nodes = array(); // Array of nids marked private.
     for ($i = 0; $i < $num_simple_users; $i++) {
-      $simple_users[$i] = $this->drupalCreateUser(array('access content', 'create article content'));
+      $simple_users[$i] = $this->backdropCreateUser(array('access content', 'create article content'));
     }
     foreach ($simple_users as $this->webUser) {
-      $this->drupalLogin($this->webUser);
+      $this->backdropLogin($this->webUser);
       foreach (array(0 => 'Public', 1 => 'Private') as $is_private => $type) {
         $edit = array(
           'title' => t('@private_public Article created by @user', array('@private_public' => $type, '@user' => $this->webUser->name)),
@@ -1015,7 +1015,7 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
           $edit['field_tags[und]'] = 'public';
         }
 
-        $this->drupalPost('node/add/article', $edit, t('Save'));
+        $this->backdropPost('node/add/article', $edit, t('Save'));
         $nid = db_query('SELECT nid FROM {node} WHERE title = :title', array(':title' => $edit['title']))->fetchField();
         $private_status = db_query('SELECT private FROM {node_access_test} where nid = :nid', array(':nid' => $nid))->fetchField();
         $this->assertTrue($is_private == $private_status, t('The private status of the node was properly set in the node_access_test table.'));
@@ -1031,11 +1031,11 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
     $this->assertTrue($this->publicTid, t('Public tid was found'));
     $this->assertTrue($this->privateTid, t('Private tid was found'));
     foreach ($simple_users as $this->webUser) {
-      $this->drupalLogin($this->webUser);
+      $this->backdropLogin($this->webUser);
       // Check own nodes to see that all are readable.
       foreach ($this->nodesByUser as $uid => $data) {
         foreach ($data as $nid => $is_private) {
-          $this->drupalGet('node/' . $nid);
+          $this->backdropGet('node/' . $nid);
           if ($is_private) {
             $should_be_visible = $uid == $this->webUser->uid;
           }
@@ -1057,12 +1057,12 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
     }
 
     // Now test that a user with 'access any private content' can view content.
-    $access_user = $this->drupalCreateUser(array('access content', 'create article content', 'node test view', 'search content'));
-    $this->drupalLogin($access_user);
+    $access_user = $this->backdropCreateUser(array('access content', 'create article content', 'node test view', 'search content'));
+    $this->backdropLogin($access_user);
 
     foreach ($this->nodesByUser as $uid => $private_status) {
       foreach ($private_status as $nid => $is_private) {
-        $this->drupalGet('node/' . $nid);
+        $this->backdropGet('node/' . $nid);
         $this->assertResponse(200);
       }
     }
@@ -1082,7 +1082,7 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
    */
   protected function assertTaxonomyPage($is_admin) {
     foreach (array($this->publicTid, $this->privateTid) as $tid_is_private => $tid) {
-      $this->drupalGet("taxonomy/term/$tid");
+      $this->backdropGet("taxonomy/term/$tid");
       $this->nids_visible = array();
       foreach ($this->xpath("//a[text()='Read more']") as $link) {
         $this->assertTrue(preg_match('|node/(\d+)$|', (string) $link['href'], $matches), 'Read more points to a node');
@@ -1114,12 +1114,12 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
 /**
  * Tests node save related functionality, including import-save.
  */
-class NodeSaveTestCase extends DrupalWebTestCase {
+class NodeSaveTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node_test');
     // Create a user that is allowed to post; we'll use this to test the submission.
-    $web_user = $this->drupalCreateUser(array('create article content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create article content'));
+    $this->backdropLogin($web_user);
     $this->web_user = $web_user;
   }
 
@@ -1154,7 +1154,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     $node_by_nid = node_load($test_nid);
     $this->assertTrue($node_by_nid, t('Node load by node ID.'));
 
-    $node_by_title = $this->drupalGetNodeByTitle($title);
+    $node_by_title = $this->backdropGetNodeByTitle($title);
     $this->assertTrue($node_by_title, t('Node load by node title.'));
   }
 
@@ -1170,7 +1170,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     );
 
     entity_create('node', $edit)->save();
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, REQUEST_TIME, t('Creating a node sets default "created" timestamp.'));
     $this->assertEqual($node->changed, REQUEST_TIME, t('Creating a node sets default "changed" timestamp.'));
 
@@ -1179,14 +1179,14 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     $changed = $node->changed;
 
     $node->save();
-    $node = $this->drupalGetNodeByTitle($edit['title'], TRUE);
+    $node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
     $this->assertEqual($node->created, $created, t('Updating a node preserves "created" timestamp.'));
 
     // Programmatically set the timestamps using hook_node_presave.
     $node->title = 'testing_node_presave';
 
     $node->save();
-    $node = $this->drupalGetNodeByTitle('testing_node_presave', TRUE);
+    $node = $this->backdropGetNodeByTitle('testing_node_presave', TRUE);
     $this->assertEqual($node->created, 280299600, t('Saving a node uses "created" timestamp set in presave hook.'));
     $this->assertEqual($node->changed, 979534800, t('Saving a node uses "changed" timestamp set in presave hook.'));
 
@@ -1200,7 +1200,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     );
 
     entity_create('node', $edit)->save();
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, 280299600, t('Creating a node uses user-set "created" timestamp.'));
     $this->assertNotEqual($node->changed, 979534800, t('Creating a node doesn\'t use user-set "changed" timestamp.'));
 
@@ -1209,7 +1209,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     $node->changed = 280299600;
 
     $node->save();
-    $node = $this->drupalGetNodeByTitle($edit['title'], TRUE);
+    $node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
     $this->assertEqual($node->created, 979534800, t('Updating a node uses user-set "created" timestamp.'));
     $this->assertNotEqual($node->changed, 280299600, t('Updating a node doesn\'t use user-set "changed" timestamp.'));
   }
@@ -1248,7 +1248,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
 /**
  * Tests related to node types.
  */
-class NodeTypeTestCase extends DrupalWebTestCase {
+class NodeTypeTestCase extends BackdropWebTestCase {
   /**
    * Ensures that node type functions (node_type_get_*) work correctly.
    *
@@ -1273,27 +1273,27 @@ class NodeTypeTestCase extends DrupalWebTestCase {
    */
   function testNodeTypeCreation() {
     // Create a content type programmaticaly.
-    $type = $this->drupalCreateContentType();
+    $type = $this->backdropCreateContentType();
 
     $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $type->type))->fetchField();
     $this->assertTrue($type_exists, 'The new content type has been created in the database.');
 
     // Login a test user.
-    $web_user = $this->drupalCreateUser(array('create ' . $type->name . ' content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create ' . $type->name . ' content'));
+    $this->backdropLogin($web_user);
 
-    $this->drupalGet('node/add/' . str_replace('_', '-', $type->name));
+    $this->backdropGet('node/add/' . str_replace('_', '-', $type->name));
     $this->assertResponse(200, 'The new content type can be accessed at node/add.');
 
     // Create a content type via the user interface.
-    $web_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $this->backdropLogin($web_user);
     $edit = array(
       'name' => 'foo',
       'title_label' => 'title for foo',
       'type' => 'foo',
     );
-    $this->drupalPost('admin/structure/types/add', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => 'foo'))->fetchField();
     $this->assertTrue($type_exists, 'The new content type has been created in the database.');
   }
@@ -1302,14 +1302,14 @@ class NodeTypeTestCase extends DrupalWebTestCase {
    * Tests editing a node type using the UI.
    */
   function testNodeTypeEditing() {
-    $web_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $this->backdropLogin($web_user);
 
     $instance = field_info_instance('node', 'body', 'page');
     $this->assertEqual($instance['label'], 'Body', t('Body field was found.'));
 
     // Verify that title and body fields are displayed.
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertRaw('Title', t('Title field was found.'));
     $this->assertRaw('Body', t('Body field was found.'));
 
@@ -1317,11 +1317,11 @@ class NodeTypeTestCase extends DrupalWebTestCase {
     $edit = array(
       'title_label' => 'Foo',
     );
-    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
     // Refresh the field information for the rest of the test.
     field_info_cache_clear();
 
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertRaw('Foo', t('New title label was displayed.'));
     $this->assertNoRaw('Title', t('Old title label was not displayed.'));
 
@@ -1331,10 +1331,10 @@ class NodeTypeTestCase extends DrupalWebTestCase {
       'type' => 'bar',
       'description' => 'Lorem ipsum.',
     );
-    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
     field_info_cache_clear();
 
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertRaw('Bar', t('New name was displayed.'));
     $this->assertRaw('Lorem ipsum', t('New description was displayed.'));
     $this->clickLink('Bar');
@@ -1343,11 +1343,11 @@ class NodeTypeTestCase extends DrupalWebTestCase {
     $this->assertRaw('Body', t('Body field was found.'));
 
     // Remove the body field.
-    $this->drupalPost('admin/structure/types/manage/bar/fields/body/delete', NULL, t('Delete'));
+    $this->backdropPost('admin/structure/types/manage/bar/fields/body/delete', NULL, t('Delete'));
     // Resave the settings for this type.
-    $this->drupalPost('admin/structure/types/manage/bar', array(), t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/bar', array(), t('Save content type'));
     // Check that the body field doesn't exist.
-    $this->drupalGet('node/add/bar');
+    $this->backdropGet('node/add/bar');
     $this->assertNoRaw('Body', t('Body field was not found.'));
   }
 
@@ -1387,13 +1387,13 @@ class NodeTypeTestCase extends DrupalWebTestCase {
 /**
  * Test node type customizations persistence.
  */
-class NodeTypePersistenceTestCase extends DrupalWebTestCase {
+class NodeTypePersistenceTestCase extends BackdropWebTestCase {
   /**
    * Tests that node type customizations persist through disable and uninstall.
    */
   function testNodeTypeCustomizationPersistence() {
-    $web_user = $this->drupalCreateUser(array('bypass node access', 'administer content types', 'administer modules'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer modules'));
+    $this->backdropLogin($web_user);
 
     // Enable the test module and verify that the test node type is in the DB
     // and is not disabled.
@@ -1404,16 +1404,16 @@ class NodeTypePersistenceTestCase extends DrupalWebTestCase {
     $this->assertEqual($disabled, 0, t('Test node type is not disabled'));
 
     // Check that test node type (uncustomized) shows up.
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertText('test', t('Test type is found on node/add'));
 
     // Customize book description.
     $description = $this->randomName();
     $edit = array('description' => $description);
-    $this->drupalPost('admin/structure/types/manage/test', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/test', $edit, t('Save content type'));
 
     // Check that Test node type customization shows up.
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertText($description, t('Customized description found'));
 
     // Disable test node module and check that the node type gets disabled.
@@ -1421,7 +1421,7 @@ class NodeTypePersistenceTestCase extends DrupalWebTestCase {
     node_types_rebuild();
     $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
     $this->assertEqual($disabled, 1, t('Test node type is disabled'));
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertNoText('book', t('Test node type is not found on node/add'));
 
     // Reenable the test node module and check that the customization survived
@@ -1430,23 +1430,23 @@ class NodeTypePersistenceTestCase extends DrupalWebTestCase {
     node_types_rebuild();
     $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
     $this->assertEqual($disabled, 0, t('Test node type is not disabled'));
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertText($description, t('Customized description found'));
 
     // Disable and uninstall book.
     module_disable(array('node_test'), FALSE);
     node_types_rebuild();
-    $result = drupal_uninstall_modules(array('node_test'));
+    $result = backdrop_uninstall_modules(array('node_test'));
     $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
     $this->assertTrue($disabled, t('Test node type is in the database and is disabled'));
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertNoText('test', t('Test type is no longer found on node/add'));
 
     // Reenable the test node module and check that the customization survived
     // the module uninstall.
     module_enable(array('node_test'), FALSE);
     node_types_rebuild();
-    $this->drupalGet('node/add');
+    $this->backdropGet('node/add');
     $this->assertText($description, t('Customized description is found even after uninstall and reenable.'));
   }
 }
@@ -1454,12 +1454,12 @@ class NodeTypePersistenceTestCase extends DrupalWebTestCase {
 /**
  * Verifies the rebuild functionality for the node_access table.
  */
-class NodeAccessRebuildTestCase extends DrupalWebTestCase {
+class NodeAccessRebuildTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'access site reports'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports'));
+    $this->backdropLogin($web_user);
     $this->web_user = $web_user;
   }
 
@@ -1467,9 +1467,9 @@ class NodeAccessRebuildTestCase extends DrupalWebTestCase {
    * Tests rebuilding the node access permissions table.
    */
   function testNodeAccessRebuild() {
-    $this->drupalGet('admin/reports/status');
+    $this->backdropGet('admin/reports/status');
     $this->clickLink(t('Rebuild permissions'));
-    $this->drupalPost(NULL, array(), t('Rebuild permissions'));
+    $this->backdropPost(NULL, array(), t('Rebuild permissions'));
     $this->assertText(t('Content permissions have been rebuilt.'));
   }
 }
@@ -1477,28 +1477,28 @@ class NodeAccessRebuildTestCase extends DrupalWebTestCase {
 /**
  * Tests node administration page functionality.
  */
-class NodeAdminTestCase extends DrupalWebTestCase {
+class NodeAdminTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
     // Remove the "view own unpublished content" permission which is set
     // by default for authenticated users so we can test this permission
     // correctly.
-    user_role_revoke_permissions(DRUPAL_AUTHENTICATED_RID, array('view own unpublished content'));
+    user_role_revoke_permissions(BACKDROP_AUTHENTICATED_RID, array('view own unpublished content'));
 
-    $this->admin_user = $this->drupalCreateUser(array('access administration pages', 'access content overview', 'administer nodes', 'bypass node access'));
-    $this->base_user_1 = $this->drupalCreateUser(array('access content overview'));
-    $this->base_user_2 = $this->drupalCreateUser(array('access content overview', 'view own unpublished content'));
-    $this->base_user_3 = $this->drupalCreateUser(array('access content overview', 'bypass node access'));
+    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'access content overview', 'administer nodes', 'bypass node access'));
+    $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
+    $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
+    $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
   }
 
   /**
    * Tests that the table sorting works on the content admin pages.
    */
   function testContentAdminSort() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
-      $this->drupalCreateNode(array('title' => $prefix . $this->randomName(6)));
+      $this->backdropCreateNode(array('title' => $prefix . $this->randomName(6)));
     }
 
     // Test that the default sort by node.changed DESC actually fires properly.
@@ -1509,7 +1509,7 @@ class NodeAdminTestCase extends DrupalWebTestCase {
       ->fetchCol();
 
     $nodes_form = array();
-    $this->drupalGet('admin/content');
+    $this->backdropGet('admin/content');
     foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
       $nodes_form[] = $input;
     }
@@ -1524,7 +1524,7 @@ class NodeAdminTestCase extends DrupalWebTestCase {
       ->fetchCol();
 
     $nodes_form = array();
-    $this->drupalGet('admin/content', array('query' => array('sort' => 'asc', 'order' => 'Title')));
+    $this->backdropGet('admin/content', array('query' => array('sort' => 'asc', 'order' => 'Title')));
     foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
       $nodes_form[] = $input;
     }
@@ -1539,15 +1539,15 @@ class NodeAdminTestCase extends DrupalWebTestCase {
    * @see TaxonomyNodeFilterTestCase
    */
   function testContentAdminPages() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
-    $nodes['published_page'] = $this->drupalCreateNode(array('type' => 'page'));
-    $nodes['published_article'] = $this->drupalCreateNode(array('type' => 'article'));
-    $nodes['unpublished_page_1'] = $this->drupalCreateNode(array('type' => 'page', 'uid' => $this->base_user_1->uid, 'status' => 0));
-    $nodes['unpublished_page_2'] = $this->drupalCreateNode(array('type' => 'page', 'uid' => $this->base_user_2->uid, 'status' => 0));
+    $nodes['published_page'] = $this->backdropCreateNode(array('type' => 'page'));
+    $nodes['published_article'] = $this->backdropCreateNode(array('type' => 'article'));
+    $nodes['unpublished_page_1'] = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->base_user_1->uid, 'status' => 0));
+    $nodes['unpublished_page_2'] = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->base_user_2->uid, 'status' => 0));
 
     // Verify view, edit, and delete links for any content.
-    $this->drupalGet('admin/content');
+    $this->backdropGet('admin/content');
     $this->assertResponse(200);
     foreach ($nodes as $node) {
       $this->assertLinkByHref('node/' . $node->nid);
@@ -1561,7 +1561,7 @@ class NodeAdminTestCase extends DrupalWebTestCase {
     $edit = array(
       'status' => 'status-1',
     );
-    $this->drupalPost(NULL, $edit, t('Filter'));
+    $this->backdropPost(NULL, $edit, t('Filter'));
 
     $this->assertRaw(t('where %property is %value', array('%property' => t('status'), '%value' => 'published')), t('Content list is filtered by status.'));
 
@@ -1573,7 +1573,7 @@ class NodeAdminTestCase extends DrupalWebTestCase {
     $edit = array(
       'type' => 'page',
     );
-    $this->drupalPost(NULL, $edit, t('Refine'));
+    $this->backdropPost(NULL, $edit, t('Refine'));
 
     $this->assertRaw(t('where %property is %value', array('%property' => t('status'), '%value' => 'published')), t('Content list is filtered by status.'));
     $this->assertRaw(t('and where %property is %value', array('%property' => t('type'), '%value' => 'Basic page')), t('Content list is filtered by content type.'));
@@ -1582,9 +1582,9 @@ class NodeAdminTestCase extends DrupalWebTestCase {
     $this->assertNoLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
 
     // Verify no operation links are displayed for regular users.
-    $this->drupalLogout();
-    $this->drupalLogin($this->base_user_1);
-    $this->drupalGet('admin/content');
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_1);
+    $this->backdropGet('admin/content');
     $this->assertResponse(200);
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid);
     $this->assertLinkByHref('node/' . $nodes['published_article']->nid);
@@ -1602,9 +1602,9 @@ class NodeAdminTestCase extends DrupalWebTestCase {
     $this->assertNoFieldByName('nodes[' . $nodes['published_page']->nid . ']', '', t('No tableselect found.'));
 
     // Verify unpublished content is displayed with permission.
-    $this->drupalLogout();
-    $this->drupalLogin($this->base_user_2);
-    $this->drupalGet('admin/content');
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_2);
+    $this->backdropGet('admin/content');
     $this->assertResponse(200);
     $this->assertLinkByHref('node/' . $nodes['unpublished_page_2']->nid);
     // Verify no operation links are displayed.
@@ -1620,9 +1620,9 @@ class NodeAdminTestCase extends DrupalWebTestCase {
     $this->assertNoFieldByName('nodes[' . $nodes['unpublished_page_2']->nid . ']', '', t('No tableselect found.'));
 
     // Verify node access can be bypassed.
-    $this->drupalLogout();
-    $this->drupalLogin($this->base_user_3);
-    $this->drupalGet('admin/content');
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_3);
+    $this->backdropGet('admin/content');
     $this->assertResponse(200);
     foreach ($nodes as $node) {
       $this->assertLinkByHref('node/' . $node->nid);
@@ -1635,7 +1635,7 @@ class NodeAdminTestCase extends DrupalWebTestCase {
 /**
  * Tests node title functionality.
  */
-class NodeTitleTestCase extends DrupalWebTestCase {
+class NodeTitleTestCase extends BackdropWebTestCase {
 
   /**
    * A user with permission to create and edit content and to administer nodes.
@@ -1646,8 +1646,8 @@ class NodeTitleTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->drupalCreateUser(array('administer nodes', 'create article content', 'create page content'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create article content', 'create page content'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -1660,15 +1660,15 @@ class NodeTitleTestCase extends DrupalWebTestCase {
       'title' => $this->randomName(8),
       'promote' => 1,
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Test <title> tag.
-    $this->drupalGet("node/$node->nid");
+    $this->backdropGet("node/$node->nid");
     $xpath = '//title';
-    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Drupal', 'Page title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Backdrop', 'Page title is equal to node title.', 'Node');
 
     // Test breadcrumb in comment preview.
-    $this->drupalGet("comment/reply/$node->nid");
+    $this->backdropGet("comment/reply/$node->nid");
     $xpath = '//nav[@class="breadcrumb"]/ol/li[last()]/a';
     $this->assertEqual(current($this->xpath($xpath)), $node->title, 'Node breadcrumb is equal to node title.', 'Node');
 
@@ -1676,7 +1676,7 @@ class NodeTitleTestCase extends DrupalWebTestCase {
     $this->assertEqual(current($this->xpath('//article[@id=:id]/header/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
 
     // Test node title is clickable on teaser list (/node).
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->clickLink($node->title);
   }
 }
@@ -1684,39 +1684,39 @@ class NodeTitleTestCase extends DrupalWebTestCase {
 /**
  * Test the node_feed() functionality.
  */
-class NodeFeedTestCase extends DrupalWebTestCase {
+class NodeFeedTestCase extends BackdropWebTestCase {
   /**
    * Ensures that node_feed() accepts and prints extra channel elements.
    */
   function testNodeFeedExtraChannelElements() {
     ob_start();
-    node_feed(array(), array('copyright' => 'Drupal is a registered trademark of Dries Buytaert.'));
+    node_feed(array(), array('copyright' => 'Copyright Backdrop CMS.'));
     $output = ob_get_clean();
 
-    $this->assertTrue(strpos($output, '<copyright>Drupal is a registered trademark of Dries Buytaert.</copyright>') !== FALSE);
+    $this->assertTrue(strpos($output, '<copyright>Copyright Backdrop CMS.</copyright>') !== FALSE);
   }
 }
 
 /**
  * Functional tests for the node module blocks.
  */
-class NodeBlockFunctionalTest extends DrupalWebTestCase {
+class NodeBlockFunctionalTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node', 'block');
 
     // Create users and test node.
-    $this->admin_user = $this->drupalCreateUser(array('administer content types', 'administer nodes', 'administer blocks'));
-    $this->web_user = $this->drupalCreateUser(array('access content', 'create article content'));
+    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks'));
+    $this->web_user = $this->backdropCreateUser(array('access content', 'create article content'));
   }
 
   /**
    * Tests the recent comments block.
    */
   function testRecentNodeBlock() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Disallow anonymous users to view content.
-    user_role_change_permissions(DRUPAL_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
       'access content' => FALSE,
     ));
 
@@ -1724,7 +1724,7 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
     $edit = array(
       'blocks[node_recent][region]' => 'sidebar_first',
     );
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertText(t('The block settings have been updated.'), t('Block saved to first sidebar region.'));
 
     // Set block title and variables.
@@ -1732,18 +1732,18 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
       'title' => $this->randomName(),
       'node_recent_block_count' => 2,
     );
-    $this->drupalPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
+    $this->backdropPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block saved.'));
 
     // Test that block is not visible without nodes
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertText(t('No content available.'), t('Block with "No content available." found.'));
 
     // Add some test nodes.
     $default_settings = array('uid' => $this->web_user->uid, 'type' => 'article');
-    $node1 = $this->drupalCreateNode($default_settings);
-    $node2 = $this->drupalCreateNode($default_settings);
-    $node3 = $this->drupalCreateNode($default_settings);
+    $node1 = $this->backdropCreateNode($default_settings);
+    $node2 = $this->backdropCreateNode($default_settings);
+    $node3 = $this->backdropCreateNode($default_settings);
 
     // Change the changed time for node so that we can test ordering.
     db_update('node')
@@ -1761,12 +1761,12 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
 
     // Test that a user without the 'access content' permission cannot
     // see the block.
-    $this->drupalLogout();
-    $this->drupalGet('');
+    $this->backdropLogout();
+    $this->backdropGet('');
     $this->assertNoText($block['title'], t('Block was not found.'));
 
     // Test that only the 2 latest nodes are shown.
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
     $this->assertNoText($node1->title, t('Node not found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));
@@ -1775,22 +1775,22 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
     $this->assertTrue($this->xpath('//div[@id="block-node-recent"]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
-    $this->drupalLogout();
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogout();
+    $this->backdropLogin($this->admin_user);
     $block = array(
       'node_recent_block_count' => 10,
     );
-    $this->drupalPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
+    $this->backdropPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block saved.'));
 
     // Post an additional node.
-    $node4 = $this->drupalCreateNode($default_settings);
-    // drupalCreateNode() does not automatically flush content caches unlike
+    $node4 = $this->backdropCreateNode($default_settings);
+    // backdropCreateNode() does not automatically flush content caches unlike
     // posting a node from a node form.
     cache_clear_all();
 
     // Test that all four nodes are shown.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertText($node1->title, t('Node found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));
@@ -1806,21 +1806,21 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
     if ($admin_theme = variable_get('admin_theme')) {
       $custom_block['regions[' . $admin_theme . ']'] = 'content';
     }
-    $this->drupalPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
 
     $bid = db_query("SELECT bid FROM {block_custom} WHERE info = :info", array(':info' => $custom_block['info']))->fetchField();
     $this->assertTrue($bid, t('Custom block with visibility rule was created.'));
 
     // Verify visibility rules.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertNoText($custom_block['title'], t('Block was displayed on the front page.'));
-    $this->drupalGet('node/add/article');
+    $this->backdropGet('node/add/article');
     $this->assertText($custom_block['title'], t('Block was displayed on the node/add/article page.'));
-    $this->drupalGet('node/' . $node1->nid);
+    $this->backdropGet('node/' . $node1->nid);
     $this->assertText($custom_block['title'], t('Block was displayed on the node/N.'));
 
     // Delete the created custom block & verify that it's been deleted.
-    $this->drupalPost('admin/structure/block/manage/block/' . $bid . '/delete', array(), t('Delete'));
+    $this->backdropPost('admin/structure/block/manage/block/' . $bid . '/delete', array(), t('Delete'));
     $bid = db_query("SELECT 1 FROM {block_node_type} WHERE module = 'block' AND delta = :delta", array(':delta' => $bid))->fetchField();
     $this->assertFalse($bid, t('Custom block was deleted.'));
   }
@@ -1829,12 +1829,12 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
 /**
  * Test to ensure that a node's content is always rebuilt.
  */
-class NodeBuildContent extends DrupalWebTestCase {
+class NodeBuildContent extends BackdropWebTestCase {
  /**
   * Ensures that content array is rebuilt on every call to node_build_content().
   */
   function testNodeRebuildContent() {
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
 
     // Set a property in the content array so we can test for its existence later on.
     $node->content['test_content_property'] = array('#value' => $this->randomString());
@@ -1848,7 +1848,7 @@ class NodeBuildContent extends DrupalWebTestCase {
 /**
  * Tests node_query_node_access_alter().
  */
-class NodeQueryAlter extends DrupalWebTestCase {
+class NodeQueryAlter extends BackdropWebTestCase {
   /**
    * User with permission to view content.
    *
@@ -1868,16 +1868,16 @@ class NodeQueryAlter extends DrupalWebTestCase {
     node_access_rebuild();
 
     // Create some content.
-    $this->drupalCreateNode();
-    $this->drupalCreateNode();
-    $this->drupalCreateNode();
-    $this->drupalCreateNode();
+    $this->backdropCreateNode();
+    $this->backdropCreateNode();
+    $this->backdropCreateNode();
+    $this->backdropCreateNode();
 
     // Create user with simple node access permission. The 'node test view'
     // permission is implemented and granted by the node_access_test module.
-    $this->accessUser = $this->drupalCreateUser(array('access content overview', 'access content', 'node test view'));
-    $this->noAccessUser = $this->drupalCreateUser(array('access content overview', 'access content'));
-    $this->noAccessUser2 = $this->drupalCreateUser(array('access content overview', 'access content'));
+    $this->accessUser = $this->backdropCreateUser(array('access content overview', 'access content', 'node test view'));
+    $this->noAccessUser = $this->backdropCreateUser(array('access content overview', 'access content'));
+    $this->noAccessUser2 = $this->backdropCreateUser(array('access content overview', 'access content'));
   }
 
   /**
@@ -1885,23 +1885,23 @@ class NodeQueryAlter extends DrupalWebTestCase {
    */
   function testNodeQueryAlterWithUI() {
     // Verify that a user with access permission can see at least one node.
-    $this->drupalLogin($this->accessUser);
-    $this->drupalGet('node_access_test_page');
+    $this->backdropLogin($this->accessUser);
+    $this->backdropGet('node_access_test_page');
     $this->assertText('Yes, 4 nodes', "4 nodes were found for access user");
     $this->assertNoText('Exception', "No database exception");
 
     // Test the content overview page.
-    $this->drupalGet('admin/content');
+    $this->backdropGet('admin/content');
     $table_rows = $this->xpath('//tbody/tr');
     $this->assertEqual(4, count($table_rows), "4 nodes were found for access user");
 
     // Verify that a user with no access permission cannot see nodes.
-    $this->drupalLogin($this->noAccessUser);
-    $this->drupalGet('node_access_test_page');
+    $this->backdropLogin($this->noAccessUser);
+    $this->backdropGet('node_access_test_page');
     $this->assertText('No nodes', "No nodes were found for no access user");
     $this->assertNoText('Exception', "No database exception");
 
-    $this->drupalGet('admin/content');
+    $this->backdropGet('admin/content');
     $this->assertText(t('No content available.'));
   }
 
@@ -1994,11 +1994,11 @@ class NodeQueryAlter extends DrupalWebTestCase {
       'grant_update' => 0,
       'grant_delete' => 0,
     );
-    drupal_write_record('node_access', $record);
+    backdrop_write_record('node_access', $record);
 
     // Test that the noAccessUser still doesn't have the 'view'
     // privilege after adding the node_access record.
-    drupal_static_reset('node_access_view_all_nodes');
+    backdrop_static_reset('node_access_view_all_nodes');
     try {
       $query = db_select('node', 'mytab')
         ->fields('mytab');
@@ -2018,9 +2018,9 @@ class NodeQueryAlter extends DrupalWebTestCase {
     // node_access_view_all_nodes is properly checking the specified
     // $account instead of the global $user, we will log in as
     // noAccessUser2.
-    $this->drupalLogin($this->noAccessUser2);
+    $this->backdropLogin($this->noAccessUser2);
     variable_set('node_test_node_access_all_uid', $this->noAccessUser->uid);
-    drupal_static_reset('node_access_view_all_nodes');
+    backdrop_static_reset('node_access_view_all_nodes');
     try {
       $query = db_select('node', 'mytab')
         ->fields('mytab');
@@ -2042,7 +2042,7 @@ class NodeQueryAlter extends DrupalWebTestCase {
 /**
  * Tests node_query_entity_field_access_alter().
  */
-class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
+class NodeEntityFieldQueryAlter extends BackdropWebTestCase {
   /**
    * User with permission to view content.
    *
@@ -2071,13 +2071,13 @@ class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
         'format' => filter_default_format(),
       );
       $settings['body'][LANGUAGE_NONE][0] = $body;
-      $this->drupalCreateNode($settings);
+      $this->backdropCreateNode($settings);
     }
 
     // Create user with simple node access permission. The 'node test view'
     // permission is implemented and granted by the node_access_test module.
-    $this->accessUser = $this->drupalCreateUser(array('access content', 'node test view'));
-    $this->noAccessUser = $this->drupalCreateUser(array('access content'));
+    $this->accessUser = $this->backdropCreateUser(array('access content', 'node test view'));
+    $this->noAccessUser = $this->backdropCreateUser(array('access content'));
   }
 
   /**
@@ -2085,14 +2085,14 @@ class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
    */
   function testNodeQueryAlterWithUI() {
     // Verify that a user with access permission can see at least one node.
-    $this->drupalLogin($this->accessUser);
-    $this->drupalGet('node_access_entity_test_page');
+    $this->backdropLogin($this->accessUser);
+    $this->backdropGet('node_access_entity_test_page');
     $this->assertText('Yes, 4 nodes', "4 nodes were found for access user");
     $this->assertNoText('Exception', "No database exception");
 
     // Verify that a user with no access permission cannot see nodes.
-    $this->drupalLogin($this->noAccessUser);
-    $this->drupalGet('node_access_entity_test_page');
+    $this->backdropLogin($this->noAccessUser);
+    $this->backdropGet('node_access_entity_test_page');
     $this->assertText('No nodes', "No nodes were found for no access user");
     $this->assertNoText('Exception', "No database exception");
   }
@@ -2101,7 +2101,7 @@ class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
 /**
  * Test node token replacement in strings.
  */
-class NodeTokenReplaceTestCase extends DrupalWebTestCase {
+class NodeTokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Creates a node, then tests the tokens generated from it.
    */
@@ -2113,14 +2113,14 @@ class NodeTokenReplaceTestCase extends DrupalWebTestCase {
     );
 
     // Create a user and a node.
-    $account = $this->drupalCreateUser();
+    $account = $this->backdropCreateUser();
     $settings = array(
       'type' => 'article',
       'uid' => $account->uid,
       'title' => '<blink>Blinking Text</blink>',
       'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(32), 'summary' => $this->randomName(16)))),
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Load node so that the body and summary fields are structured properly.
     $node = node_load($node->nid);
@@ -2170,7 +2170,7 @@ class NodeTokenReplaceTestCase extends DrupalWebTestCase {
 /**
  * Tests user permissions for node revisions.
  */
-class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
+class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
 
   /**
    * Nodes used by the test.
@@ -2201,7 +2201,7 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
     parent::setUp();
 
     // Create a node with several revisions.
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
     $this->node_revisions[] = $node;
 
     for ($i = 0; $i < 3; $i++) {
@@ -2216,7 +2216,7 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
     // Create three users, one with each revision permission.
     foreach ($this->map as $op => $permission) {
       // Create the user.
-      $account = $this->drupalCreateUser(
+      $account = $this->backdropCreateUser(
         array(
           'access content',
           'edit any page content',
@@ -2229,12 +2229,12 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
     }
 
     // Create an admin account (returns TRUE for all revision permissions).
-    $admin_account = $this->drupalCreateUser(array('access content', 'administer nodes'));
+    $admin_account = $this->backdropCreateUser(array('access content', 'administer nodes'));
     $admin_account->is_admin = TRUE;
     $this->accounts['admin'] = $admin_account;
 
     // Create a normal account (returns FALSE for all revision permissions).
-    $normal_account = $this->drupalCreateUser();
+    $normal_account = $this->backdropCreateUser();
     $normal_account->op = FALSE;
     $this->accounts[] = $normal_account;
   }
@@ -2276,11 +2276,11 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
 /**
  * Tests pagination with a node access module enabled.
  */
-class NodeAccessPagerTestCase extends DrupalWebTestCase {
+class NodeAccessPagerTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
-    $this->web_user = $this->drupalCreateUser(array('access content', 'access comments', 'node test view'));
+    $this->web_user = $this->backdropCreateUser(array('access content', 'access comments', 'node test view'));
   }
 
   /**
@@ -2288,7 +2288,7 @@ class NodeAccessPagerTestCase extends DrupalWebTestCase {
    */
   public function testCommentPager() {
     // Create a node.
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
 
     // Create 60 comments.
     for ($i = 0; $i < 60; $i++) {
@@ -2305,11 +2305,11 @@ class NodeAccessPagerTestCase extends DrupalWebTestCase {
       comment_save($comment);
     }
 
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     // View the node page. With the default 50 comments per page there should
     // be two pages (0, 1) but no third (2) page.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($node->title);
     $this->assertText('Comments');
     $this->assertRaw('page=1');
@@ -2326,11 +2326,11 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
     node_access_rebuild();
 
     // Create some users.
-    $this->admin_user = $this->drupalCreateUser(array('access content', 'bypass node access'));
-    $this->content_admin_user = $this->drupalCreateUser(array('access content', 'administer content types'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
+    $this->content_admin_user = $this->backdropCreateUser(array('access content', 'administer content types'));
 
     // Add a custom field to the page content type.
-    $this->field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $this->field = field_create_field(array('field_name' => $this->field_name, 'type' => 'text'));
     $this->instance = field_create_instance(array(
       'field_name' => $this->field_name,
@@ -2347,37 +2347,37 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
     $langcode = LANGUAGE_NONE;
     $field_data = array();
     $value = $field_data[$langcode][0]['value'] = $this->randomName();
-    $node = $this->drupalCreateNode(array($this->field_name => $field_data));
+    $node = $this->backdropCreateNode(array($this->field_name => $field_data));
 
     // Log in as the administrator and confirm that the field value is present.
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet("node/{$node->nid}");
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet("node/{$node->nid}");
     $this->assertText($value, 'The saved field value is visible to an administrator.');
 
     // Log in as the content admin and try to view the node.
-    $this->drupalLogin($this->content_admin_user);
-    $this->drupalGet("node/{$node->nid}");
+    $this->backdropLogin($this->content_admin_user);
+    $this->backdropGet("node/{$node->nid}");
     $this->assertText('Access denied', 'Access is denied for the content admin.');
 
     // Modify the field default as the content admin.
     $edit = array();
     $default = 'Sometimes words have two meanings';
     $edit["{$this->field_name}[$langcode][0][value]"] = $default;
-    $this->drupalPost(
+    $this->backdropPost(
       "admin/structure/types/manage/page/fields/{$this->field_name}",
       $edit,
       t('Save settings')
     );
 
     // Log in as the administrator.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Confirm that the existing node still has the correct field value.
-    $this->drupalGet("node/{$node->nid}");
+    $this->backdropGet("node/{$node->nid}");
     $this->assertText($value, 'The original field value is visible to an administrator.');
 
     // Confirm that the new default value appears when creating a new node.
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertRaw($default, 'The updated default value is displayed when creating a new node.');
   }
 }
@@ -2394,8 +2394,8 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
    * Create a "Basic page" node and verify its consistency in the database.
    */
   function testNodeViewModeChange() {
-    $web_user = $this->drupalCreateUser(array('create page content', 'edit own page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
+    $this->backdropLogin($web_user);
 
     // Create a node.
     $edit = array();
@@ -2403,13 +2403,13 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
     $edit["title"] = $this->randomName(8);
     $edit["body[$langcode][0][value]"] = t('Data that should appear only in the body for the node.');
     $edit["body[$langcode][0][summary]"] = t('Extra data that should appear only in the teaser for the node.');
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
 
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
 
     // Set the flag to alter the view mode and view the node.
     variable_set('node_test_change_view_mode', 'teaser');
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
 
     // Check that teaser mode is viewed.
     $this->assertText('Extra data that should appear only in the teaser for the node.', 'Teaser text present');

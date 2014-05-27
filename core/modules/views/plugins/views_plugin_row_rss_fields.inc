@@ -38,7 +38,7 @@ class views_plugin_row_rss_fields extends views_plugin_row {
     $form['link_field'] = array(
       '#type' => 'select',
       '#title' => t('Link field'),
-      '#description' => t('The field that is going to be used as the RSS item link for each row. This must be a drupal relative path.'),
+      '#description' => t('The field that is going to be used as the RSS item link for each row. This must be a Backdrop relative path.'),
       '#options' => $view_fields_labels,
       '#default_value' => $this->options['link_field'],
       '#required' => TRUE,

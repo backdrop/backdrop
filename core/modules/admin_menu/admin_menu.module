@@ -20,7 +20,7 @@ function admin_menu_menu() {
   $items['admin/config/administration/admin_menu'] = array(
     'title' => 'Administration menu',
     'description' => 'Adjust administration menu settings.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('admin_menu_theme_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'admin_menu.inc',
@@ -112,7 +112,7 @@ function admin_menu_page_build(&$page) {
   }
 
   global $user, $language_interface;
-  $path = drupal_get_path('module', 'admin_menu');
+  $path = backdrop_get_path('module', 'admin_menu');
 
   $page['page_bottom']['admin_menu'] = array(
     '#attached' => array(),
@@ -131,12 +131,12 @@ function admin_menu_page_build(&$page) {
   if ($args[0] == 'admin' && !empty($args[1])) {
     $settings['activeTrail'] = url($args[0] . '/' . $args[1]);
   }
-  elseif (drupal_is_front_page()) {
+  elseif (backdrop_is_front_page()) {
     $settings['activeTrail'] = url('<front>');
   }
 
   // Destination query strings are applied via JS.
-  $settings['destination'] = drupal_http_build_query(drupal_get_destination());
+  $settings['destination'] = backdrop_http_build_query(backdrop_get_destination());
 
   // Determine whether we need to show all components and disable all caches.
   $complete = FALSE;
@@ -151,7 +151,7 @@ function admin_menu_page_build(&$page) {
     $settings['hash'] = $hash;
 
     // The base path to use for cache requests depends on whether clean URLs
-    // are enabled, whether Drupal runs in a sub-directory, and on the language
+    // are enabled, whether Backdrop runs in a sub-directory, and on the locale
     // system configuration. url() already provides us the proper path and also
     // invokes potentially existing custom_url_rewrite() functions, which may
     // add further required components to the URL to provide context. Due to
@@ -180,7 +180,7 @@ function admin_menu_page_build(&$page) {
     // In fixed positioning, supply a callback function for tableheader.js to
     // allow it to determine the top viewport offset.
     $attached['js'][] = array(
-      'data' => array('tableHeaderOffset' => 'Drupal.adminMenu.height'),
+      'data' => array('tableHeaderOffset' => 'Backdrop.adminMenu.height'),
       'type' => 'setting',
     );
   }
@@ -205,10 +205,10 @@ function admin_menu_page_build(&$page) {
  */
 function admin_menu_suppress($set = TRUE) {
   static $suppress = FALSE;
-  // drupal_add_js() must only be invoked once.
+  // backdrop_add_js() must only be invoked once.
   if (!empty($set) && $suppress === FALSE) {
     $suppress = TRUE;
-    drupal_add_js(array('admin_menu' => array('suppress' => 1)), 'setting');
+    backdrop_add_js(array('admin_menu' => array('suppress' => 1)), 'setting');
   }
   return $suppress;
 }
@@ -239,7 +239,7 @@ function admin_menu_js() {
  *   The cache ID of the data to retrieve.
  */
 function admin_menu_cache_get($cid) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (!array_key_exists($cid, $cache)) {
     $cache[$cid] = cache('admin_menu')->get($cid);
@@ -274,33 +274,33 @@ function admin_menu_js_cache() {
 
   // Enforce page caching.
   $conf['cache'] = 1;
-  drupal_page_is_cacheable(TRUE);
+  backdrop_page_is_cacheable(TRUE);
 
   // If we have a cache, serve it.
-  // @see _drupal_bootstrap_page_cache()
-  $cache = drupal_page_get_cache();
+  // @see _backdrop_bootstrap_page_cache()
+  $cache = backdrop_page_get_cache();
   if (is_object($cache)) {
-    header('X-Drupal-Cache: HIT');
+    header('X-Backdrop-Cache: HIT');
     // Restore the metadata cached with the page.
     $_GET['q'] = $cache->data['path'];
-    date_default_timezone_set(drupal_get_user_timezone());
+    date_default_timezone_set(backdrop_get_user_timezone());
 
-    drupal_serve_page_from_cache($cache);
+    backdrop_serve_page_from_cache($cache);
 
     // We are done.
     exit;
   }
 
   // Otherwise, create a new page response (that will be cached).
-  header('X-Drupal-Cache: MISS');
+  header('X-Backdrop-Cache: MISS');
 
   // The Expires HTTP header is the heart of the client-side HTTP caching. The
   // additional server-side page cache only takes effect when the client
   // accesses the callback URL again (e.g., after clearing the browser cache or
-  // when force-reloading a Drupal page).
+  // when force-reloading a Backdrop page).
   $max_age = 3600 * 24 * 365;
-  drupal_add_http_header('Expires', gmdate(DATE_RFC1123, REQUEST_TIME + $max_age));
-  drupal_add_http_header('Cache-Control', 'private, max-age=' . $max_age);
+  backdrop_add_http_header('Expires', gmdate(DATE_RFC1123, REQUEST_TIME + $max_age));
+  backdrop_add_http_header('Cache-Control', 'private, max-age=' . $max_age);
 
   // Retrieve and return the rendered menu.
   module_load_include('inc', 'admin_menu');
@@ -313,11 +313,11 @@ function admin_menu_js_cache() {
  * @see admin_menu_js_cache()
  */
 function admin_menu_deliver($page_callback_result) {
-  drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
 
   // Send appropriate language header for browsers.
   global $language_interface;
-  drupal_add_http_header('Content-Language', $language_interface->langcode);
+  backdrop_add_http_header('Content-Language', $language_interface->langcode);
 
   // The page callback is always admin_menu_js_cache(), which always returns a
   // string, and is only accessed when the user actually has access to it.
@@ -325,7 +325,7 @@ function admin_menu_deliver($page_callback_result) {
   print $page_callback_result;
 
   // Perform end-of-request tasks. The page cache is created here.
-  drupal_page_footer();
+  backdrop_page_footer();
 }
 
 /**
@@ -477,7 +477,7 @@ function admin_menu_translated_menu_link_alter(&$item, $map) {
  */
 function admin_menu_flush_caches() {
   // Flush client-side cache hashes.
-  drupal_static_reset('admin_menu_cache_get');
+  backdrop_static_reset('admin_menu_cache_get');
 
   // Flush cached output of admin_menu.
   return array('cache_admin_menu');
@@ -512,7 +512,7 @@ function admin_menu_form_alter(&$form, &$form_state, $form_id) {
   // auto-enable the 'access administration menu' permission along with
   // 'access administration pages'.
   if ($form_id == 'user_admin_permissions') {
-    $form['#attached']['js'][] = drupal_get_path('module', 'admin_menu') . '/admin_menu.admin.js';
+    $form['#attached']['js'][] = backdrop_get_path('module', 'admin_menu') . '/admin_menu.admin.js';
   }
 }
 

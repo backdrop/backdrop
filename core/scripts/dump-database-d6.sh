@@ -25,9 +25,9 @@ $_SERVER['HTTP_USER_AGENT'] = 'console';
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
-// Include the utility drupal_var_export() function.
+// Include the utility backdrop_var_export() function.
 include_once __DIR__ . '/../includes/utility.inc';
 
 // Output the PHP header.
@@ -50,7 +50,7 @@ foreach (module_list() as $module) {
 $output .= " */\n\n";
 
 // Get the current schema, order it by table name.
-$schema = drupal_get_schema();
+$schema = backdrop_get_schema();
 ksort($schema);
 
 // Export all the tables in the schema.
@@ -62,7 +62,7 @@ foreach ($schema as $table => $data) {
   }
 
   // Dump the table structure.
-  $output .= "db_create_table('" . $table . "', " . drupal_var_export($data) . ");\n";
+  $output .= "db_create_table('" . $table . "', " . backdrop_var_export($data) . ");\n";
 
   // Don't output values for those tables.
   if (substr($table, 0, 5) == 'cache' || $table == 'sessions' || $table == 'watchdog') {
@@ -80,12 +80,12 @@ foreach ($schema as $table => $data) {
     if ($table == 'users') {
       $record['uid']++;
     }
-    $insert .= '->values('. drupal_var_export($record) .")\n";
+    $insert .= '->values('. backdrop_var_export($record) .")\n";
   }
 
   // Dump the values if there are some.
   if ($insert) {
-    $output .= "db_insert('". $table . "')->fields(". drupal_var_export(array_keys($data['fields'])) .")\n";
+    $output .= "db_insert('". $table . "')->fields(". backdrop_var_export(array_keys($data['fields'])) .")\n";
     $output .= $insert;
     $output .= "->execute();\n";
   }

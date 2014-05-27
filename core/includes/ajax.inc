@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Functions for use with Drupal's Ajax framework.
+ * Functions for use with Backdrop's Ajax framework.
  */
 
 /**
  * @defgroup ajax Ajax framework
  * @{
- * Functions for Drupal's Ajax framework.
+ * Functions for Backdrop's Ajax framework.
  *
- * Drupal's Ajax framework is used to dynamically update parts of a page's HTML
+ * Backdrop's Ajax framework is used to dynamically update parts of a page's HTML
  * based on data from the server. Upon a specified event, such as a button
  * click, a callback function is triggered which performs server-side logic and
  * may return updated markup, which is then replaced on-the-fly with no page
@@ -34,10 +34,10 @@
  *     handling.
  *   - On the specified element, Ajax processing is triggered by a change to
  *     that element.
- *   - The browser submits an HTTP POST request to the 'system/ajax' Drupal
+ *   - The browser submits an HTTP POST request to the 'system/ajax' Backdrop
  *     path.
  *   - The menu page callback for 'system/ajax', ajax_form_callback(), calls
- *     drupal_process_form() to process the form submission and rebuild the
+ *     backdrop_process_form() to process the form submission and rebuild the
  *     form if necessary. The form is processed in much the same way as if it
  *     were submitted without Ajax, with the same #process functions and
  *     validation and submission handlers called in either case, making it easy
@@ -61,7 +61,7 @@
  * @link http://drupal.org/project/examples Examples module @endlink follows:
  * @code
  * function main_page() {
- *   return drupal_get_form('ajax_example_simplest');
+ *   return backdrop_get_form('ajax_example_simplest');
  * }
  *
  * function ajax_example_simplest($form, &$form_state) {
@@ -192,7 +192,7 @@
  * Each command item is an associative array which will be converted to a
  * command object on the JavaScript side. $command_item['command'] is the type
  * of command, e.g. 'alert' or 'replace', and will correspond to a method in the
- * Drupal.ajax[command] space. The command array may contain any other data that
+ * Backdrop.ajax[command] space. The command array may contain any other data that
  * the command needs to process, e.g. 'method', 'selector', 'settings', etc.
  *
  * Commands are usually created with a couple of helper functions, so they
@@ -231,10 +231,10 @@
  */
 function ajax_render($commands = array()) {
   // Ajax responses aren't rendered with html.tpl.php, so we have to call
-  // drupal_get_css() and drupal_get_js() here, in order to have new files added
-  // during this request to be loaded by the page. We only want to send back
-  // files that the page hasn't already loaded, so we implement simple diffing
-  // logic using array_diff_key().
+  // backdrop_get_css() and backdrop_get_js() here, in order to have new files
+  // added during this request to be loaded by the page. We only want to send
+  // back files that the page hasn't already loaded, so we implement simple
+  // diffing logic using array_diff_key().
   foreach (array('css', 'js') as $type) {
     // It is highly suspicious if $_POST['ajax_page_state'][$type] is empty,
     // since the base page ought to have at least one JS file and one CSS file
@@ -244,15 +244,15 @@ function ajax_render($commands = array()) {
       $items[$type] = array();
     }
     else {
-      $function = 'drupal_add_' . $type;
+      $function = 'backdrop_add_' . $type;
       $items[$type] = $function();
-      drupal_alter($type, $items[$type]);
+      backdrop_alter($type, $items[$type]);
       // @todo Inline CSS and JS items are indexed numerically. These can't be
       //   reliably diffed with array_diff_key(), since the number can change
       //   due to factors unrelated to the inline content, so for now, we strip
       //   the inline items from Ajax responses, and can add support for them
-      //   when drupal_add_css() and drupal_add_js() are changed to use a hash
-      //   of the inline content as the array key.
+      //   when backdrop_add_css() and backdrop_add_js() are changed to use a
+      //   hash of the inline content as the array key.
       foreach ($items[$type] as $key => $item) {
         if (is_numeric($key)) {
           unset($items[$type][$key]);
@@ -270,9 +270,9 @@ function ajax_render($commands = array()) {
   if (isset($items['js']['settings'])) {
     unset($items['js']['settings']);
   }
-  $styles = drupal_get_css($items['css'], TRUE);
-  $scripts_footer = drupal_get_js('footer', $items['js'], TRUE);
-  $scripts_header = drupal_get_js('header', $items['js'], TRUE);
+  $styles = backdrop_get_css($items['css'], TRUE);
+  $scripts_footer = backdrop_get_js('footer', $items['js'], TRUE);
+  $scripts_header = backdrop_get_js('header', $items['js'], TRUE);
 
   $extra_commands = array();
   if (!empty($styles)) {
@@ -288,17 +288,17 @@ function ajax_render($commands = array()) {
     $commands = array_merge($extra_commands, $commands);
   }
 
-  // Now add a command to merge changes and additions to Drupal.settings.
-  $scripts = drupal_add_js();
+  // Now add a command to merge changes and additions to Backdrop.settings.
+  $scripts = backdrop_add_js();
   if (!empty($scripts['settings'])) {
     $settings = $scripts['settings'];
     array_unshift($commands, ajax_command_settings(call_user_func_array('array_merge_recursive', $settings['data']), TRUE));
   }
 
   // Allow modules to alter any Ajax response.
-  drupal_alter('ajax_render', $commands);
+  backdrop_alter('ajax_render', $commands);
 
-  return drupal_json_encode($commands);
+  return backdrop_json_encode($commands);
 }
 
 /**
@@ -328,7 +328,7 @@ function ajax_get_form() {
     // This is likely a hacking attempt as it never happens under normal
     // circumstances, so we just do nothing.
     watchdog('ajax', 'Invalid form POST data.', array(), WATCHDOG_WARNING);
-    drupal_exit();
+    backdrop_exit();
   }
 
   // Since some of the submit handlers are run, redirects need to be disabled.
@@ -336,7 +336,7 @@ function ajax_get_form() {
 
   // When a form is rebuilt after Ajax processing, its #build_id and #action
   // should not change.
-  // @see drupal_rebuild_form()
+  // @see backdrop_rebuild_form()
   $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
   $form_state['rebuild_info']['copy']['#action'] = TRUE;
 
@@ -367,7 +367,7 @@ function ajax_get_form() {
  */
 function ajax_form_callback() {
   list($form, $form_state) = ajax_get_form();
-  drupal_process_form($form['#form_id'], $form, $form_state);
+  backdrop_process_form($form['#form_id'], $form, $form_state);
 
   // We need to return the part of the form (or some other content) that needs
   // to be re-rendered so the browser can update the page with changed content.
@@ -391,7 +391,7 @@ function ajax_form_callback() {
  * rendered using the same theme as the base page, because most themes are built
  * with the assumption that they control the entire page, so if the CSS for two
  * themes are both loaded for a given page, they may conflict with each other.
- * For example, Bartik is Drupal's default theme, and Seven is Drupal's default
+ * For example, Bartik is Backdrop's default theme, and Seven is the default
  * administration theme. Depending on whether the "Use the administration theme
  * when editing or creating content" checkbox is checked, the node edit form may
  * be displayed in either theme, but the Ajax response to the Field module's
@@ -413,7 +413,7 @@ function ajax_base_page_theme() {
     // to see the default theme, token validation isn't required for that, and
     // bypassing it allows most use-cases to work even when accessed from the
     // page cache.
-    if ($theme === variable_get('theme_default', 'stark') || drupal_valid_token($token, $theme)) {
+    if ($theme === variable_get('theme_default', 'stark') || backdrop_valid_token($token, $theme)) {
       return $theme;
     }
   }
@@ -422,7 +422,7 @@ function ajax_base_page_theme() {
 /**
  * Packages and sends the result of a page callback as an Ajax response.
  *
- * This function is the equivalent of drupal_deliver_html_page(), but for Ajax
+ * This function is the equivalent of backdrop_deliver_html_page(), but for Ajax
  * requests. Like that function, it:
  * - Adds needed HTTP headers.
  * - Prints rendered output.
@@ -435,7 +435,7 @@ function ajax_base_page_theme() {
  *   - A string of HTML content.
  *   - A renderable array of content.
  *
- * @see drupal_deliver_html_page()
+ * @see backdrop_deliver_html_page()
  */
 function ajax_deliver($page_callback_result) {
   // Browsers do not allow JavaScript to read the contents of a user's local
@@ -444,22 +444,22 @@ function ajax_deliver($page_callback_result) {
   // normally expect JSON strings as content within an IFRAME, so the response
   // must be customized accordingly.
   // @see http://malsup.com/jquery/form/#file-upload
-  // @see Drupal.ajax.prototype.beforeSend()
+  // @see Backdrop.ajax.prototype.beforeSend()
   $iframe_upload = !empty($_POST['ajax_iframe_upload']);
 
   // Emit a Content-Type HTTP header if none has been added by the page callback
   // or by a wrapping delivery callback.
-  if (is_null(drupal_get_http_header('Content-Type'))) {
+  if (is_null(backdrop_get_http_header('Content-Type'))) {
     if (!$iframe_upload) {
       // Standard JSON can be returned to a browser's XHR object, and to
       // non-browser user agents.
       // @see http://www.ietf.org/rfc/rfc4627.txt?number=4627
-      drupal_add_http_header('Content-Type', 'application/json; charset=utf-8');
+      backdrop_add_http_header('Content-Type', 'application/json; charset=utf-8');
     }
     else {
       // Browser IFRAMEs expect HTML. With most other content types, Internet
       // Explorer presents the user with a download prompt.
-      drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+      backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
     }
   }
 
@@ -493,9 +493,9 @@ function ajax_deliver_dialog($page_callback_result) {
     $title = $page_callback_result['#title'];
   }
   else {
-    $title = drupal_get_title();
+    $title = backdrop_get_title();
   }
-  $html = drupal_render($page_callback_result);
+  $html = backdrop_render($page_callback_result);
 
   $dialog_options = isset($_POST['dialogOptions']) ? $_POST['dialogOptions'] : array('modal' => TRUE);
   if (isset($dialog_options['target'])) {
@@ -546,7 +546,7 @@ function ajax_prepare_response($page_callback_result) {
 
       case MENU_SITE_OFFLINE:
         $commands[] = ajax_command_alert(filter_xss_admin(variable_get('maintenance_mode_message',
-          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal'))))));
+          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop'))))));
         break;
     }
   }
@@ -572,7 +572,7 @@ function ajax_prepare_response($page_callback_result) {
     // manipulation method is used. The method used is specified by
     // #ajax['method']. The default method is 'replaceWith', which completely
     // replaces the old wrapper element and its content with the new HTML.
-    $html = is_string($page_callback_result) ? $page_callback_result : drupal_render($page_callback_result);
+    $html = is_string($page_callback_result) ? $page_callback_result : backdrop_render($page_callback_result);
     $commands[] = ajax_command_insert(NULL, $html);
     // Add the status messages inside the new content's wrapper element, so that
     // on subsequent Ajax requests, it is treated as old content.
@@ -585,23 +585,23 @@ function ajax_prepare_response($page_callback_result) {
 /**
  * Performs end-of-Ajax-request tasks.
  *
- * This function is the equivalent of drupal_page_footer(), but for Ajax
+ * This function is the equivalent of backdrop_page_footer(), but for Ajax
  * requests.
  *
- * @see drupal_page_footer()
+ * @see backdrop_page_footer()
  */
 function ajax_footer() {
   // Even for Ajax requests, invoke hook_exit() implementations. There may be
   // modules that need very fast Ajax responses, and therefore, run Ajax
   // requests with an early bootstrap.
-  if (drupal_get_bootstrap_phase() == DRUPAL_BOOTSTRAP_FULL && (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update')) {
+  if (backdrop_get_bootstrap_phase() == BACKDROP_BOOTSTRAP_FULL && (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update')) {
     module_invoke_all('exit');
   }
 
   // Commit the user session. See above comment about the possibility of this
   // function running without session.inc loaded.
-  if (function_exists('drupal_session_commit')) {
-    drupal_session_commit();
+  if (function_exists('backdrop_session_commit')) {
+    backdrop_session_commit();
   }
 }
 
@@ -710,14 +710,14 @@ function ajax_pre_render_element($element) {
   // Attach JavaScript settings to the element.
   if (isset($element['#ajax']['event'])) {
     $element['#attached']['library'][] = array('system', 'jquery.form');
-    $element['#attached']['library'][] = array('system', 'drupal.ajax');
+    $element['#attached']['library'][] = array('system', 'backdrop.ajax');
 
     $settings = $element['#ajax'];
 
     // Assign default settings. When 'path' is set to NULL, ajax.js submits the
     // Ajax request to the same URL as the form or link destination is for
     // someone with JavaScript disabled. This is generally preferred as a way to
-    // ensure consistent server processing for js and no-js users, and Drupal's
+    // ensure consistent server processing for js and no-js users, and Backdrop's
     // content negotiation takes care of formatting the response appropriately.
     // However, 'path' and 'options' may be set when wanting server processing
     // to be substantially different for a JavaScript triggered submission.
@@ -729,7 +729,6 @@ function ajax_pre_render_element($element) {
       'options' => array(),
     );
 
-    // @todo Legacy support. Remove in Drupal 8.
     if (isset($settings['method']) && $settings['method'] == 'replace') {
       $settings['method'] = 'replaceWith';
     }
@@ -739,7 +738,7 @@ function ajax_pre_render_element($element) {
     unset($settings['path'], $settings['options']);
 
     // Add special data to $settings['submit'] so that when this element
-    // triggers an Ajax submission, Drupal's form processing can determine which
+    // triggers an Ajax submission, Backdrop's form processing can determine which
     // element triggered it.
     // @see _form_element_triggered_scripted_submission()
     if (isset($settings['trigger_as'])) {
@@ -802,12 +801,12 @@ function ajax_pre_render_element($element) {
  */
 
 /**
- * Creates a Drupal Ajax 'alert' command.
+ * Creates a Backdrop Ajax 'alert' command.
  *
  * The 'alert' command instructs the client to display a JavaScript alert
  * dialog box.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.alert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.alert()
  * defined in misc/ajax.js.
  *
  * @param $text
@@ -824,13 +823,13 @@ function ajax_command_alert($text) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert' command using the method in #ajax['method'].
+ * Creates a Backdrop Ajax 'insert' command using the method in #ajax['method'].
  *
  * This command instructs the client to insert the given HTML using whichever
  * jQuery DOM manipulation method has been specified in the #ajax['method']
  * variable of the element that triggered the request.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -855,13 +854,13 @@ function ajax_command_insert($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/replaceWith' command.
+ * Creates a Backdrop Ajax 'insert/replaceWith' command.
  *
  * The 'insert/replaceWith' command instructs the client to use jQuery's
  * replaceWith() method to replace each element matched matched by the given
  * selector with the given HTML.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -889,13 +888,13 @@ function ajax_command_replace($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/html' command.
+ * Creates a Backdrop Ajax 'insert/html' command.
  *
  * The 'insert/html' command instructs the client to use jQuery's html()
  * method to set the HTML content of each element matched by the given
  * selector while leaving the outer tags intact.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -922,13 +921,13 @@ function ajax_command_html($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/prepend' command.
+ * Creates a Backdrop Ajax 'insert/prepend' command.
  *
  * The 'insert/prepend' command instructs the client to use jQuery's prepend()
  * method to prepend the given HTML content to the inside each element matched
  * by the given selector.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -955,13 +954,13 @@ function ajax_command_prepend($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/append' command.
+ * Creates a Backdrop Ajax 'insert/append' command.
  *
  * The 'insert/append' command instructs the client to use jQuery's append()
  * method to append the given HTML content to the inside of each element matched
  * by the given selector.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -988,13 +987,13 @@ function ajax_command_append($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/after' command.
+ * Creates a Backdrop Ajax 'insert/after' command.
  *
  * The 'insert/after' command instructs the client to use jQuery's after()
  * method to insert the given HTML content after each element matched by
  * the given selector.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1021,13 +1020,13 @@ function ajax_command_after($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'insert/before' command.
+ * Creates a Backdrop Ajax 'insert/before' command.
  *
  * The 'insert/before' command instructs the client to use jQuery's before()
  * method to insert the given HTML content before each of elements matched by
  * the given selector.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.insert()
+ * This command is implemented by Backdrop.ajax.prototype.commands.insert()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1054,13 +1053,13 @@ function ajax_command_before($selector, $html, $settings = NULL) {
 }
 
 /**
- * Creates a Drupal Ajax 'remove' command.
+ * Creates a Backdrop Ajax 'remove' command.
  *
  * The 'remove' command instructs the client to use jQuery's remove() method
  * to remove each of elements matched by the given selector, and everything
  * within them.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.remove()
+ * This command is implemented by Backdrop.ajax.prototype.commands.remove()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1080,12 +1079,12 @@ function ajax_command_remove($selector) {
 }
 
 /**
- * Creates a Drupal Ajax 'changed' command.
+ * Creates a Backdrop Ajax 'changed' command.
  *
  * This command instructs the client to mark each of the elements matched by the
  * given selector as 'ajax-changed'.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.changed()
+ * This command is implemented by Backdrop.ajax.prototype.commands.changed()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1107,12 +1106,12 @@ function ajax_command_changed($selector, $asterisk = '') {
 }
 
 /**
- * Creates a Drupal Ajax 'css' command.
+ * Creates a Backdrop Ajax 'css' command.
  *
  * The 'css' command will instruct the client to use the jQuery css() method
  * to apply the CSS arguments to elements matched by the given selector.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.css()
+ * This command is implemented by Backdrop.ajax.prototype.commands.css()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1135,13 +1134,13 @@ function ajax_command_css($selector, $argument) {
 }
 
 /**
- * Creates a Drupal Ajax 'settings' command.
+ * Creates a Backdrop Ajax 'settings' command.
  *
  * The 'settings' command instructs the client either to use the given array as
- * the settings for ajax-loaded content or to extend Drupal.settings with the
+ * the settings for ajax-loaded content or to extend Backdrop.settings with the
  * given array, depending on the value of the $merge parameter.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.settings()
+ * This command is implemented by Backdrop.ajax.prototype.commands.settings()
  * defined in misc/ajax.js.
  *
  * @param $argument
@@ -1150,9 +1149,9 @@ function ajax_command_css($selector, $argument) {
  *   array.
  * @param $merge
  *   Whether or not the passed settings in $argument should be merged into the
- *   global Drupal.settings on the page. By default (FALSE), the settings that
- *   are passed to Drupal.attachBehaviors will not include the global
- *   Drupal.settings.
+ *   global Backdrop.settings on the page. By default (FALSE), the settings that
+ *   are passed to Backdrop.attachBehaviors will not include the global
+ *   Backdrop.settings.
  *
  * @return
  *   An array suitable for use with the ajax_render() function.
@@ -1166,12 +1165,12 @@ function ajax_command_settings($argument, $merge = FALSE) {
 }
 
 /**
- * Creates a Drupal Ajax 'data' command.
+ * Creates a Backdrop Ajax 'data' command.
  *
  * The 'data' command instructs the client to attach the name=value pair of
  * data to the selector via jQuery's data cache.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.data()
+ * This command is implemented by Backdrop.ajax.prototype.commands.data()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1198,14 +1197,14 @@ function ajax_command_data($selector, $name, $value) {
 }
 
 /**
- * Creates a Drupal Ajax 'invoke' command.
+ * Creates a Backdrop Ajax 'invoke' command.
  *
  * The 'invoke' command will instruct the client to invoke the given jQuery
  * method with the supplied arguments on the elements matched by the given
  * selector. Intended for simple jQuery commands, such as attr(), addClass(),
  * removeClass(), toggleClass(), etc.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.invoke()
+ * This command is implemented by Backdrop.ajax.prototype.commands.invoke()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1229,12 +1228,12 @@ function ajax_command_invoke($selector, $method, array $args = array()) {
 }
 
 /**
- * Creates a Drupal Ajax 'restripe' command.
+ * Creates a Backdrop Ajax 'restripe' command.
  *
  * The 'restripe' command instructs the client to restripe a table. This is
  * usually used after a table has been modified by a replace or append command.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.restripe()
+ * This command is implemented by Backdrop.ajax.prototype.commands.restripe()
  * defined in misc/ajax.js.
  *
  * @param $selector
@@ -1253,7 +1252,7 @@ function ajax_command_restripe($selector) {
 /**
  * Provides an AJAX command to open content in a dialog.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.openDialog()
+ * This command is implemented by Backdrop.ajax.prototype.commands.openDialog()
  * defined in misc/dialog.ajax.js.
  *
  * @param string $selector
@@ -1270,7 +1269,7 @@ function ajax_command_restripe($selector) {
  */
 function ajax_command_open_dialog($selector, $title, $html, array $dialog_options = array()) {
   // Add the library for handling the dialog in the response.
-  drupal_add_library('system', 'backdrop.dialog.ajax');
+  backdrop_add_library('system', 'backdrop.dialog.ajax');
 
   $dialog_options['title'] = $title;
 
@@ -1290,8 +1289,8 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
  *
  * The modal dialog differs from the normal modal provided by
  * ajax_command_open_dialog() in that a modal prevents other interactions on the
- * page until the modal has been completed. Drupal provides a built-in modal for
- * this purpose, so no selector needs to be provided.
+ * page until the modal has been completed. Backdrop provides a built-in modal
+ * for this purpose, so no selector needs to be provided.
  *
  * @see ajax_command_open_dialog()
  */
@@ -1303,7 +1302,7 @@ function ajax_command_open_modal_dialog($title, $html, array $dialog_options = a
 /**
  * Provides an AJAX command to close an open dialog.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.closeDialog()
+ * This command is implemented by Backdrop.ajax.prototype.commands.closeDialog()
  * defined in misc/dialog.ajax.js.
  *
  * @param $selector
@@ -1331,7 +1330,7 @@ function ajax_command_close_modal_dialog() {
 /**
  * Provides an AJAX command that sets jQuery UI dialog properties.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.setDialogOption()
+ * This command is implemented by Backdrop.ajax.prototype.commands.setDialogOption()
  * defined in misc/dialog.ajax.js.
  *
  * @param string $selector
@@ -1374,7 +1373,7 @@ function ajax_command_set_dialog_title($selector, $title) {
 /**
  * Provides an AJAX command to set the window.location, loading that URL.
  *
- * This command is implemented by Drupal.ajax.prototype.commands.redirect()
+ * This command is implemented by Backdrop.ajax.prototype.commands.redirect()
  * defined in misc/ajax.js.
  *
  * @param string $url

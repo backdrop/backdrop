@@ -28,7 +28,7 @@ else {
 }
 
 // Bootstrap to perform initial validation or other operations.
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 if ($args['force']) {
   if (module_exists('simpletest')) {
     echo "Simpletest already installed.\n";
@@ -49,7 +49,7 @@ if ($args['clean']) {
   echo "\nEnvironment cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(drupal_get_messages('status'));
+  $messages = array_pop(backdrop_get_messages('status'));
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
@@ -80,7 +80,7 @@ if ($args['list']) {
 $test_list = simpletest_script_get_test_list();
 
 // Try to allocate unlimited time to run the tests.
-drupal_set_time_limit(0);
+backdrop_set_time_limit(0);
 
 simpletest_script_reporter_init();
 
@@ -320,8 +320,8 @@ function simpletest_script_init($server_software) {
   }
 
   chdir(realpath(__DIR__ . '/../..'));
-  define('DRUPAL_ROOT', getcwd());
-  require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
+  define('BACKDROP_ROOT', getcwd());
+  require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 }
 
 /**
@@ -380,9 +380,9 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 function simpletest_script_run_one_test($test_id, $test_class) {
   try {
     // Bootstrap Backdrop.
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
     $info = simpletest_test_get_by_class($test_class);
-    include_once DRUPAL_ROOT . '/' . $info['file path'] . '/' . $info['file'];
+    include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);
     $test->run();
 
@@ -438,7 +438,7 @@ function simpletest_script_get_test_list() {
     if ($args['file']) {
       $files = array();
       foreach ($args['test_names'] as $file) {
-        $files[drupal_realpath($file)] = 1;
+        $files[backdrop_realpath($file)] = 1;
       }
 
       // Check for valid class names.

@@ -5,7 +5,7 @@
  * Tests for user.module.
  */
 
-class UserRegistrationTestCase extends DrupalWebTestCase {
+class UserRegistrationTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('field_test');
   }
@@ -16,7 +16,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
 
     // Set registration to administrator only.
     variable_set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertResponse(403, 'Registration page is inaccessible when only administrators can create accounts.');
 
     // Allow registration by site visitors without administrator approval.
@@ -24,7 +24,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('A welcome message with further instructions has been sent to your e-mail address.'), 'User registered successfully.');
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
@@ -35,7 +35,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertFalse($new_user->status, 'New account is blocked until approved by an administrator.');
@@ -54,17 +54,17 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     // Try entering a mismatching password.
     $edit['pass[pass1]'] = '99999.0';
     $edit['pass[pass2]'] = '99999';
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');
 
     // Enter a correct password.
     $edit['pass[pass1]'] = $new_pass = $this->randomName();
     $edit['pass[pass2]'] = $new_pass;
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertText(t('Registration successful. You are now logged in.'), 'Users are logged in after registering.');
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Allow registration by site visitors, but require administrator approval.
     variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
@@ -73,7 +73,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
     $edit['pass[pass1]'] = $pass = $this->randomName();
     $edit['pass[pass2]'] = $pass;
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'), 'Users are notified of pending approval');
 
     // Try to login before administrator approval.
@@ -81,22 +81,22 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
       'name' => $name,
       'pass' => $pass,
     );
-    $this->drupalPost('user/login', $auth, t('Log in'));
+    $this->backdropPost('user/login', $auth, t('Log in'));
     $this->assertText(t('The username @name has not been activated or is blocked.', array('@name' => $name)), 'User cannot login yet.');
 
     // Activate the new account.
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
-    $admin_user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin_user);
     $edit = array(
       'status' => 1,
     );
-    $this->drupalPost('user/' . $new_user->uid . '/edit', $edit, t('Save'));
-    $this->drupalLogout();
+    $this->backdropPost('user/' . $new_user->uid . '/edit', $edit, t('Save'));
+    $this->backdropLogout();
 
     // Login after administrator approval.
-    $this->drupalPost('user/login', $auth, t('Log in'));
+    $this->backdropPost('user/login', $auth, t('Log in'));
     $this->assertText(t('Member for'), 'User can log in after administrator approval.');
   }
 
@@ -108,20 +108,20 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     variable_set('user_register', USER_REGISTER_VISITORS);
 
     // Set up a user to check for duplicates.
-    $duplicate_user = $this->drupalCreateUser();
+    $duplicate_user = $this->backdropCreateUser();
 
     $edit = array();
     $edit['name'] = $this->randomName();
     $edit['mail'] = $duplicate_user->mail;
 
     // Attempt to create a new account using an existing e-mail address.
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
 
     // Attempt to bypass duplicate email registration validation by adding spaces.
     $edit['mail'] = '   ' . $duplicate_user->mail . '   ';
 
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
   }
 
@@ -138,7 +138,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
 
     // Check that the account information fieldset's options are not displayed
     // is a fieldset if there is not more than one fieldset in the form.
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertNoRaw('<fieldset id="edit-account"><legend>Account information</legend>', 'Account settings fieldset was hidden.');
 
     $edit = array();
@@ -146,7 +146,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
     $edit['pass[pass1]'] = $new_pass = $this->randomName();
     $edit['pass[pass2]'] = $new_pass;
-    $this->drupalPost(NULL, $edit, t('Create new account'));
+    $this->backdropPost(NULL, $edit, t('Create new account'));
 
     // Check user fields.
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
@@ -185,13 +185,13 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     field_create_instance($instance);
 
     // Check that the field does not appear on the registration form.
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
 
     // Have the field appear on the registration form.
     $instance['settings']['user_register_form'] = TRUE;
     field_update_instance($instance);
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertText($instance['label'], 'The field appears on user registration form');
 
     // Check that validation errors are correctly reported.
@@ -200,17 +200,17 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
     // Missing input in required field.
     $edit['test_user_field[und][0][value]'] = '';
-    $this->drupalPost(NULL, $edit, t('Create new account'));
+    $this->backdropPost(NULL, $edit, t('Create new account'));
     $this->assertRaw(t('@name field is required.', array('@name' => $instance['label'])), 'Field validation error was correctly reported.');
     // Invalid input.
     $edit['test_user_field[und][0][value]'] = '-1';
-    $this->drupalPost(NULL, $edit, t('Create new account'));
+    $this->backdropPost(NULL, $edit, t('Create new account'));
     $this->assertRaw(t('%name does not accept the value -1.', array('%name' => $instance['label'])), 'Field validation error was correctly reported.');
 
     // Submit with valid data.
     $value = rand(1, 255);
     $edit['test_user_field[und][0][value]'] = $value;
-    $this->drupalPost(NULL, $edit, t('Create new account'));
+    $this->backdropPost(NULL, $edit, t('Create new account'));
     // Check user fields.
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
@@ -220,25 +220,25 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $field['cardinality'] = FIELD_CARDINALITY_UNLIMITED;
     field_update_field($field);
     foreach (array('js', 'nojs') as $js) {
-      $this->drupalGet('user/register');
+      $this->backdropGet('user/register');
       // Add two inputs.
       $value = rand(1, 255);
       $edit = array();
       $edit['test_user_field[und][0][value]'] = $value;
       if ($js == 'js') {
-        $this->drupalPostAJAX(NULL, $edit, 'test_user_field_add_more');
-        $this->drupalPostAJAX(NULL, $edit, 'test_user_field_add_more');
+        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
+        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
       }
       else {
-        $this->drupalPost(NULL, $edit, t('Add another item'));
-        $this->drupalPost(NULL, $edit, t('Add another item'));
+        $this->backdropPost(NULL, $edit, t('Add another item'));
+        $this->backdropPost(NULL, $edit, t('Add another item'));
       }
       // Submit with three values.
       $edit['test_user_field[und][1][value]'] = $value + 1;
       $edit['test_user_field[und][2][value]'] = $value + 2;
       $edit['name'] = $name = $this->randomName();
       $edit['mail'] = $mail = $edit['name'] . '@example.com';
-      $this->drupalPost(NULL, $edit, t('Create new account'));
+      $this->backdropPost(NULL, $edit, t('Create new account'));
       // Check user fields.
       $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
       $new_user = reset($accounts);
@@ -249,7 +249,7 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
   }
 }
 
-class UserValidationTestCase extends DrupalWebTestCase {
+class UserValidationTestCase extends BackdropWebTestCase {
   // Username validation.
   function testUsernames() {
     $test_cases = array( // '<username>' => array('<description>', 'assert<testName>'),
@@ -281,7 +281,7 @@ class UserValidationTestCase extends DrupalWebTestCase {
 /**
  * Functional tests for user logins, including rate limiting of login attempts.
  */
-class UserLoginTestCase extends DrupalWebTestCase {
+class UserLoginTestCase extends BackdropWebTestCase {
   /**
    * Test the global login flood control.
    */
@@ -291,7 +291,7 @@ class UserLoginTestCase extends DrupalWebTestCase {
     // Set a high per-user limit out so that it is not relevant in the test.
     variable_set('user_failed_login_user_limit', 4000);
 
-    $user1 = $this->drupalCreateUser(array());
+    $user1 = $this->backdropCreateUser(array());
     $incorrect_user1 = clone $user1;
     $incorrect_user1->pass_raw .= 'incorrect';
 
@@ -301,8 +301,8 @@ class UserLoginTestCase extends DrupalWebTestCase {
     }
 
     // A successful login will not reset the IP-based flood control count.
-    $this->drupalLogin($user1);
-    $this->drupalLogout();
+    $this->backdropLogin($user1);
+    $this->backdropLogout();
 
     // Try 8 more failed logins, they should not trigger the flood control
     // mechanism.
@@ -327,11 +327,11 @@ class UserLoginTestCase extends DrupalWebTestCase {
     // Set the per-user login limit.
     variable_set('user_failed_login_user_limit', 3);
 
-    $user1 = $this->drupalCreateUser(array());
+    $user1 = $this->backdropCreateUser(array());
     $incorrect_user1 = clone $user1;
     $incorrect_user1->pass_raw .= 'incorrect';
 
-    $user2 = $this->drupalCreateUser(array());
+    $user2 = $this->backdropCreateUser(array());
 
     // Try 2 failed logins.
     for ($i = 0; $i < 2; $i++) {
@@ -339,8 +339,8 @@ class UserLoginTestCase extends DrupalWebTestCase {
     }
 
     // A successful login will reset the per-user flood control count.
-    $this->drupalLogin($user1);
-    $this->drupalLogout();
+    $this->backdropLogin($user1);
+    $this->backdropLogout();
 
     // Try 3 failed logins for user 1, they will not trigger flood control.
     for ($i = 0; $i < 3; $i++) {
@@ -349,8 +349,8 @@ class UserLoginTestCase extends DrupalWebTestCase {
 
     // Try one successful attempt for user 2, it should not trigger any
     // flood control.
-    $this->drupalLogin($user2);
-    $this->drupalLogout();
+    $this->backdropLogin($user2);
+    $this->backdropLogout();
 
     // Try one more attempt for user 1, it should be rejected, even if the
     // correct password has been used.
@@ -362,24 +362,24 @@ class UserLoginTestCase extends DrupalWebTestCase {
    */
   function testPasswordRehashOnLogin() {
     // Load password hashing API.
-    require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
-    // Set initial $count_log2 to the default, DRUPAL_HASH_COUNT.
-    variable_set('password_count_log2', DRUPAL_HASH_COUNT);
+    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+    // Set initial $count_log2 to the default, BACKDROP_HASH_COUNT.
+    variable_set('password_count_log2', BACKDROP_HASH_COUNT);
     // Create a new user and authenticate.
-    $account = $this->drupalCreateUser(array());
+    $account = $this->backdropCreateUser(array());
     $password = $account->pass_raw;
-    $this->drupalLogin($account);
-    $this->drupalLogout();
+    $this->backdropLogin($account);
+    $this->backdropLogout();
     // Load the stored user. The password hash should reflect $count_log2.
     $account = user_load($account->uid);
-    $this->assertIdentical(_password_get_count_log2($account->pass), DRUPAL_HASH_COUNT);
+    $this->assertIdentical(_password_get_count_log2($account->pass), BACKDROP_HASH_COUNT);
     // Change $count_log2 and log in again.
-    variable_set('password_count_log2', DRUPAL_HASH_COUNT + 1);
+    variable_set('password_count_log2', BACKDROP_HASH_COUNT + 1);
     $account->pass_raw = $password;
-    $this->drupalLogin($account);
+    $this->backdropLogin($account);
     // Load the stored user, which should have a different password hash now.
     $account = user_load($account->uid, TRUE);
-    $this->assertIdentical(_password_get_count_log2($account->pass), DRUPAL_HASH_COUNT + 1);
+    $this->assertIdentical(_password_get_count_log2($account->pass), BACKDROP_HASH_COUNT + 1);
   }
 
   /**
@@ -396,7 +396,7 @@ class UserLoginTestCase extends DrupalWebTestCase {
       'name' => $account->name,
       'pass' => $account->pass_raw,
     );
-    $this->drupalPost('user', $edit, t('Log in'));
+    $this->backdropPost('user', $edit, t('Log in'));
     $this->assertNoFieldByXPath("//input[@name='pass' and @value!='']", NULL, 'Password value attribute is blank.');
     if (isset($flood_trigger)) {
       if ($flood_trigger == 'user') {
@@ -416,7 +416,7 @@ class UserLoginTestCase extends DrupalWebTestCase {
 /**
  * Test cancelling a user.
  */
-class UserCancelTestCase extends DrupalWebTestCase {
+class UserCancelTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('comment');
   }
@@ -428,21 +428,21 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
-    $account = $this->drupalCreateUser(array());
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array());
+    $this->backdropLogin($account);
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
     // Create a node.
-    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
     // Attempt to cancel account.
-    $this->drupalGet('user/' . $account->uid . '/edit');
+    $this->backdropGet('user/' . $account->uid . '/edit');
     $this->assertNoRaw(t('Cancel account'), 'No cancel account button displayed.');
 
     // Attempt bogus account cancellation request confirmation.
     $timestamp = $account->login;
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $this->assertResponse(403, 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
@@ -461,7 +461,7 @@ class UserCancelTestCase extends DrupalWebTestCase {
   function testUserCancelUid1() {
     // Update uid 1's name and password to we know it.
     $password = user_password();
-    require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
     $account = array(
       'name' => 'user1',
       'pass' => user_hash_password(trim($password)),
@@ -478,13 +478,13 @@ class UserCancelTestCase extends DrupalWebTestCase {
     $user1->pass_raw = $password;
 
     // Try to cancel uid 1's account with a different user.
-    $this->admin_user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($this->admin_user);
     $edit = array(
       'operation' => 'cancel',
       'accounts[1]' => TRUE,
     );
-    $this->drupalPost('admin/people', $edit, t('Update'));
+    $this->backdropPost('admin/people', $edit, t('Update'));
 
     // Verify that uid 1's account was not cancelled.
     $user1 = user_load(1, TRUE);
@@ -498,32 +498,32 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
-    $account = $this->drupalCreateUser(array('cancel account'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('cancel account'));
+    $this->backdropLogin($account);
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
     // Create a node.
-    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
     // Attempt to cancel account.
-    $this->drupalPost('user/' . $account->uid . '/edit', NULL, t('Cancel account'));
+    $this->backdropPost('user/' . $account->uid . '/edit', NULL, t('Cancel account'));
 
     // Confirm account cancellation.
     $timestamp = time();
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
 
     // Attempt bogus account cancellation request confirmation.
     $bogus_timestamp = $timestamp + 60;
-    $this->drupalGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
 
     // Attempt expired account cancellation request confirmation.
     $bogus_timestamp = $timestamp - 86400 - 60;
-    $this->drupalGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Expired cancel account request rejected.');
     $accounts = user_load_multiple(array($account->uid), array('status' => 1));
     $this->assertTrue(reset($accounts), 'User account was not canceled.');
@@ -540,15 +540,15 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_block');
 
     // Create a user.
-    $web_user = $this->drupalCreateUser(array('cancel account'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('cancel account'));
+    $this->backdropLogin($web_user);
 
     // Load real user object.
     $account = user_load($web_user->uid, TRUE);
 
     // Attempt to cancel account.
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'), 'Informs that all content will be remain as is.');
     $this->assertNoText(t('Select the method to cancel the account above.'), 'Does not allow user to select account cancellation method.');
@@ -556,11 +556,11 @@ class UserCancelTestCase extends DrupalWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
 
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -575,30 +575,30 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_block_unpublish');
 
     // Create a user.
-    $account = $this->drupalCreateUser(array('cancel account'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('cancel account'));
+    $this->backdropLogin($account);
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
     // Create a node with two revisions.
-    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
     $settings = get_object_vars($node);
     $settings['revision'] = 1;
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Attempt to cancel account.
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'), 'Informs that all content will be unpublished.');
 
     // Confirm account cancellation.
     $timestamp = time();
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -619,36 +619,36 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
-    $account = $this->drupalCreateUser(array('cancel account'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('cancel account'));
+    $this->backdropLogin($account);
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
     // Create a simple node.
-    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
     // Create a node with two revisions, the initial one belonging to the
     // cancelling user.
-    $revision_node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $revision_node = $this->backdropCreateNode(array('uid' => $account->uid));
     $revision = $revision_node->vid;
     $settings = get_object_vars($revision_node);
     $settings['revision'] = 1;
     $settings['uid'] = 1; // Set new/current revision to someone else.
-    $revision_node = $this->drupalCreateNode($settings);
+    $revision_node = $this->backdropCreateNode($settings);
 
     // Attempt to cancel account.
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')))), 'Informs that all content will be attributed to anonymous account.');
 
     // Confirm account cancellation.
     $timestamp = time();
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been attributed to anonymous user.
@@ -670,13 +670,13 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_delete');
 
     // Create a user.
-    $account = $this->drupalCreateUser(array('cancel account', 'post comments', 'skip comment approval'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('cancel account', 'post comments', 'skip comment approval'));
+    $this->backdropLogin($account);
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
     // Create a simple node.
-    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
     // Create comment.
     $langcode = LANGUAGE_NONE;
@@ -684,8 +684,8 @@ class UserCancelTestCase extends DrupalWebTestCase {
     $edit['subject'] = $this->randomName(8);
     $edit['comment_body[' . $langcode . '][0][value]'] = $this->randomName(16);
 
-    $this->drupalPost('comment/reply/' . $node->nid, $edit, t('Preview'));
-    $this->drupalPost(NULL, array(), t('Save'));
+    $this->backdropPost('comment/reply/' . $node->nid, $edit, t('Preview'));
+    $this->backdropPost(NULL, array(), t('Save'));
     $this->assertText(t('Your comment has been posted.'));
     $comments = comment_load_multiple(FALSE, array('subject' => $edit['subject']));
     $comment = reset($comments);
@@ -693,26 +693,26 @@ class UserCancelTestCase extends DrupalWebTestCase {
 
     // Create a node with two revisions, the initial one belonging to the
     // cancelling user.
-    $revision_node = $this->drupalCreateNode(array('uid' => $account->uid));
+    $revision_node = $this->backdropCreateNode(array('uid' => $account->uid));
     $revision = $revision_node->vid;
     $settings = get_object_vars($revision_node);
     $settings['revision'] = 1;
     $settings['uid'] = 1; // Set new/current revision to someone else.
-    $revision_node = $this->drupalCreateNode($settings);
+    $revision_node = $this->backdropCreateNode($settings);
 
     // Attempt to cancel account.
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be removed and all account information deleted. All of your content will also be deleted.'), 'Informs that all content will be deleted.');
 
     // Confirm account cancellation.
     $timestamp = time();
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been deleted.
@@ -732,20 +732,20 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_cancel_method', 'user_cancel_reassign');
 
     // Create a regular user.
-    $account = $this->drupalCreateUser(array());
+    $account = $this->backdropCreateUser(array());
 
     // Create administrative user.
-    $admin_user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin_user);
 
     // Delete regular user.
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertRaw(t('Are you sure you want to cancel the account %name?', array('%name' => $account->name)), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Select the method to cancel the account above.'), 'Allows to select account cancellation method.');
 
     // Confirm deletion.
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'User deleted.');
     $this->assertFalse(user_load($account->uid), 'User is not found in the database.');
   }
@@ -759,13 +759,13 @@ class UserCancelTestCase extends DrupalWebTestCase {
     variable_set('user_mail_status_canceled_notify', TRUE);
 
     // Create administrative user.
-    $admin_user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin_user);
 
     // Create some users.
     $users = array();
     for ($i = 0; $i < 3; $i++) {
-      $account = $this->drupalCreateUser(array());
+      $account = $this->backdropCreateUser(array());
       $users[$account->uid] = $account;
     }
 
@@ -778,14 +778,14 @@ class UserCancelTestCase extends DrupalWebTestCase {
     $edit['accounts[' . $admin_user->uid . ']'] = TRUE;
     // Also try to cancel uid 1.
     $edit['accounts[1]'] = TRUE;
-    $this->drupalPost('admin/people', $edit, t('Update'));
+    $this->backdropPost('admin/people', $edit, t('Update'));
     $this->assertText(t('Are you sure you want to cancel these user accounts?'), 'Confirmation form to cancel accounts displayed.');
     $this->assertText(t('When cancelling these accounts'), 'Allows to select account cancellation method.');
     $this->assertText(t('Require e-mail confirmation to cancel account.'), 'Allows to send confirmation mail.');
     $this->assertText(t('Notify user when account is canceled.'), 'Allows to send notification mail.');
 
     // Confirm deletion.
-    $this->drupalPost(NULL, NULL, t('Cancel accounts'));
+    $this->backdropPost(NULL, NULL, t('Cancel accounts'));
     $status = TRUE;
     foreach ($users as $account) {
       $status = $status && (strpos($this->content, t('%name has been deleted.', array('%name' => $account->name))) !== FALSE);
@@ -804,7 +804,7 @@ class UserCancelTestCase extends DrupalWebTestCase {
   }
 }
 
-class UserPictureTestCase extends DrupalWebTestCase {
+class UserPictureTestCase extends BackdropWebTestCase {
   protected $user;
   protected $_directory_test;
 
@@ -813,7 +813,7 @@ class UserPictureTestCase extends DrupalWebTestCase {
     // Enable user pictures.
     variable_set('user_pictures', 1);
 
-    $this->user = $this->drupalCreateUser();
+    $this->user = $this->backdropCreateUser();
 
     // Test if directories specified in settings exist in filesystem.
     $file_dir = 'public://';
@@ -829,10 +829,10 @@ class UserPictureTestCase extends DrupalWebTestCase {
   }
 
   function testNoPicture() {
-    $this->drupalLogin($this->user);
+    $this->backdropLogin($this->user);
 
     // Try to upload a file that is not an image for the user picture.
-    $not_an_image = current($this->drupalGetTestFiles('html'));
+    $not_an_image = current($this->backdropGetTestFiles('html'));
     $this->saveUserPicture($not_an_image);
     $this->assertRaw(t('Only JPEG, PNG and GIF images are allowed.'), 'Non-image files are not accepted.');
   }
@@ -846,9 +846,9 @@ class UserPictureTestCase extends DrupalWebTestCase {
    */
   function testWithGDinvalidDimension() {
     if ($this->_directory_test && image_get_toolkit()) {
-      $this->drupalLogin($this->user);
+      $this->backdropLogin($this->user);
 
-      $image = current($this->drupalGetTestFiles('image'));
+      $image = current($this->backdropGetTestFiles('image'));
       $info = image_get_info($image->uri);
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
@@ -879,11 +879,11 @@ class UserPictureTestCase extends DrupalWebTestCase {
    */
   function testWithGDinvalidSize() {
     if ($this->_directory_test && image_get_toolkit()) {
-      $this->drupalLogin($this->user);
+      $this->backdropLogin($this->user);
 
       // Images are sorted first by size then by name. We need an image
       // bigger than 1 KB so we'll grab the last one.
-      $files = $this->drupalGetTestFiles('image');
+      $files = $this->backdropGetTestFiles('image');
       $image = end($files);
       $info = image_get_info($image->uri);
 
@@ -915,9 +915,9 @@ class UserPictureTestCase extends DrupalWebTestCase {
    */
   function testWithoutGDinvalidDimension() {
     if ($this->_directory_test && !image_get_toolkit()) {
-      $this->drupalLogin($this->user);
+      $this->backdropLogin($this->user);
 
-      $image = current($this->drupalGetTestFiles('image'));
+      $image = current($this->backdropGetTestFiles('image'));
       $info = image_get_info($image->uri);
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
@@ -947,9 +947,9 @@ class UserPictureTestCase extends DrupalWebTestCase {
    */
   function testWithoutGDinvalidSize() {
     if ($this->_directory_test && !image_get_toolkit()) {
-      $this->drupalLogin($this->user);
+      $this->backdropLogin($this->user);
 
-      $image = current($this->drupalGetTestFiles('image'));
+      $image = current($this->backdropGetTestFiles('image'));
       $info = image_get_info($image->uri);
 
       // Set new variables: valid dimensions, invalid filesize.
@@ -979,9 +979,9 @@ class UserPictureTestCase extends DrupalWebTestCase {
    */
   function testPictureIsValid() {
     if ($this->_directory_test) {
-      $this->drupalLogin($this->user);
+      $this->backdropLogin($this->user);
 
-      $image = current($this->drupalGetTestFiles('image'));
+      $image = current($this->backdropGetTestFiles('image'));
       $info = image_get_info($image->uri);
 
       // Set new variables: valid dimensions, valid filesize (0 = no limit).
@@ -992,7 +992,7 @@ class UserPictureTestCase extends DrupalWebTestCase {
       $pic_path = $this->saveUserPicture($image);
 
       // Check if image is displayed in user's profile page.
-      $this->drupalGet('user');
+      $this->backdropGet('user');
       $this->assertRaw(file_uri_target($pic_path), "Image is displayed in user's profile page");
 
       // Check if file is located in proper directory.
@@ -1011,15 +1011,15 @@ class UserPictureTestCase extends DrupalWebTestCase {
    * Test HTTP schema working with user pictures.
    */
   function testExternalPicture() {
-    $this->drupalLogin($this->user);
+    $this->backdropLogin($this->user);
     // Set the default picture to an URI with a HTTP schema.
-    $images = $this->drupalGetTestFiles('image');
+    $images = $this->backdropGetTestFiles('image');
     $image = $images[0];
     $pic_path = file_create_url($image->uri);
     variable_set('user_picture_default', $pic_path);
 
     // Check if image is displayed in user's profile page.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
 
     // Get the user picture image via xpath.
     $elements = $this->xpath('//div[@class="user-picture"]/img');
@@ -1031,9 +1031,9 @@ class UserPictureTestCase extends DrupalWebTestCase {
    * Tests deletion of user pictures.
    */
   function testDeletePicture() {
-    $this->drupalLogin($this->user);
+    $this->backdropLogin($this->user);
 
-    $image = current($this->drupalGetTestFiles('image'));
+    $image = current($this->backdropGetTestFiles('image'));
     $info = image_get_info($image->uri);
 
     // Set new variables: valid dimensions, valid filesize (0 = no limit).
@@ -1042,22 +1042,22 @@ class UserPictureTestCase extends DrupalWebTestCase {
     variable_set('user_picture_file_size', 0);
 
     // Save a new picture.
-    $edit = array('files[picture_upload]' => drupal_realpath($image->uri));
-    $this->drupalPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
+    $edit = array('files[picture_upload]' => backdrop_realpath($image->uri));
+    $this->backdropPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
 
     // Load actual user data from database.
     $account = user_load($this->user->uid, TRUE);
     $pic_path = !empty($account->picture) ? $account->picture->uri : NULL;
 
     // Check if image is displayed in user's profile page.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $this->assertRaw(file_uri_target($pic_path), "Image is displayed in user's profile page");
 
     // Check if file is located in proper directory.
     $this->assertTrue(is_file($pic_path), 'File is located in proper directory');
 
     $edit = array('picture_delete' => 1);
-    $this->drupalPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
+    $this->backdropPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
 
     // Load actual user data from database.
     $account1 = user_load($this->user->uid, TRUE);
@@ -1072,8 +1072,8 @@ class UserPictureTestCase extends DrupalWebTestCase {
   }
 
   function saveUserPicture($image) {
-    $edit = array('files[picture_upload]' => drupal_realpath($image->uri));
-    $this->drupalPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
+    $edit = array('files[picture_upload]' => backdrop_realpath($image->uri));
+    $this->backdropPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
 
     // Load actual user data from database.
     $account = user_load($this->user->uid, TRUE);
@@ -1084,30 +1084,30 @@ class UserPictureTestCase extends DrupalWebTestCase {
    * Tests the admin form validates user picture settings.
    */
   function testUserPictureAdminFormValidation() {
-    $this->drupalLogin($this->drupalCreateUser(array('administer account settings')));
+    $this->backdropLogin($this->backdropCreateUser(array('administer account settings')));
 
     // The default values are valid.
-    $this->drupalPost('admin/config/people/accounts', array(), t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', array(), t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'The default values are valid.');
 
     // The form does not save with an invalid file size.
     $edit = array(
       'user_picture_file_size' => $this->randomName(),
     );
-    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
     $this->assertNoText(t('The configuration options have been saved.'), 'The form does not save with an invalid file size.');
   }
 }
 
 
-class UserPermissionsTestCase extends DrupalWebTestCase {
+class UserPermissionsTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $rid;
 
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
 
     // Find the new role ID - it must be the maximum.
     $all_rids = array_keys($this->admin_user->roles);
@@ -1119,7 +1119,7 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
    * Change user permissions and check user_access().
    */
   function testUserPermissionChanges() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $rid = $this->rid;
     $account = $this->admin_user;
 
@@ -1127,20 +1127,20 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(user_access('administer nodes', $account), 'User does not have "administer nodes" permission.');
     $edit = array();
     $edit[$rid . '[administer nodes]'] = TRUE;
-    $this->drupalPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
-    drupal_static_reset('user_access');
-    drupal_static_reset('user_role_permissions');
+    backdrop_static_reset('user_access');
+    backdrop_static_reset('user_role_permissions');
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
 
     // Remove a permission.
     $this->assertTrue(user_access('access user profiles', $account), 'User has "access user profiles" permission.');
     $edit = array();
     $edit[$rid . '[access user profiles]'] = FALSE;
-    $this->drupalPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
-    drupal_static_reset('user_access');
-    drupal_static_reset('user_role_permissions');
+    backdrop_static_reset('user_access');
+    backdrop_static_reset('user_role_permissions');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
   }
 
@@ -1148,19 +1148,19 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
    * Test assigning of permissions for the administrator role.
    */
   function testAdministratorRole() {
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet('admin/config/people/accounts');
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/config/people/accounts');
 
     // Set the user's role to be the administrator role.
     $edit = array();
     $edit['user_admin_role'] = $this->rid;
-    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
 
     // Enable book module and ensure the 'administer book outlines' permission
     // is assigned by default.
     $edit = array();
     $edit['modules[Core][book][enable]'] = TRUE;
-    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertTrue(user_access('administer book outlines', $this->admin_user), 'The permission was automatically assigned to the administrator role');
   }
 
@@ -1193,34 +1193,34 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
    * Tests the admin form validates user picture settings.
    */
   function testUserPictureAdminFormValidation() {
-    $this->drupalLogin($this->drupalCreateUser(array('administer account settings')));
+    $this->backdropLogin($this->backdropCreateUser(array('administer account settings')));
     // The default values are valid.
-    $this->drupalPost('admin/config/people/accounts', array(), 'Save configuration');
+    $this->backdropPost('admin/config/people/accounts', array(), 'Save configuration');
     $this->assertText(t('The configuration options have been saved.'), 'The default values are valid.');
 
     // The form does not save with an invalid file size.
     $edit = array(
       'user_picture_file_size' => $this->randomName(),
     );
-    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
     $this->assertNoText(t('The configuration options have been saved.'), 'The form does not save with an invalid file size.');
   }
 }
 
-class UserAdminTestCase extends DrupalWebTestCase {
+class UserAdminTestCase extends BackdropWebTestCase {
   /**
    * Registers a user and deletes it.
    */
   function testUserAdmin() {
 
-    $user_a = $this->drupalCreateUser(array());
-    $user_b = $this->drupalCreateUser(array('administer taxonomy'));
-    $user_c = $this->drupalCreateUser(array('administer taxonomy'));
+    $user_a = $this->backdropCreateUser(array());
+    $user_b = $this->backdropCreateUser(array('administer taxonomy'));
+    $user_c = $this->backdropCreateUser(array('administer taxonomy'));
 
     // Create admin user to delete registered user.
-    $admin_user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($admin_user);
-    $this->drupalGet('admin/people');
+    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin_user);
+    $this->backdropGet('admin/people');
     $this->assertText($user_a->name, 'Found user A on admin users page');
     $this->assertText($user_b->name, 'Found user B on admin users page');
     $this->assertText($user_c->name, 'Found user C on admin users page');
@@ -1233,7 +1233,7 @@ class UserAdminTestCase extends DrupalWebTestCase {
     // Filter the users by permission 'administer taxonomy'.
     $edit = array();
     $edit['permission'] = 'administer taxonomy';
-    $this->drupalPost('admin/people', $edit, t('Filter'));
+    $this->backdropPost('admin/people', $edit, t('Filter'));
 
     // Check if the correct users show up.
     $this->assertNoText($user_a->name, 'User A not on filtered by perm admin users page');
@@ -1242,7 +1242,7 @@ class UserAdminTestCase extends DrupalWebTestCase {
 
     // Filter the users by role. Grab the system-generated role name for User C.
     $edit['role'] = max(array_flip($user_c->roles));
-    $this->drupalPost('admin/people', $edit, t('Refine'));
+    $this->backdropPost('admin/people', $edit, t('Refine'));
 
     // Check if the correct users show up when filtered by role.
     $this->assertNoText($user_a->name, 'User A not on filtered by role on admin users page');
@@ -1255,7 +1255,7 @@ class UserAdminTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['operation'] = 'block';
     $edit['accounts[' . $account->uid . ']'] = TRUE;
-    $this->drupalPost('admin/people', $edit, t('Update'));
+    $this->backdropPost('admin/people', $edit, t('Update'));
     $account = user_load($user_c->uid, TRUE);
     $this->assertEqual($account->status, 0, 'User C blocked');
 
@@ -1263,18 +1263,18 @@ class UserAdminTestCase extends DrupalWebTestCase {
     $editunblock = array();
     $editunblock['operation'] = 'unblock';
     $editunblock['accounts[' . $account->uid . ']'] = TRUE;
-    $this->drupalPost('admin/people', $editunblock, t('Update'));
+    $this->backdropPost('admin/people', $editunblock, t('Update'));
     $account = user_load($user_c->uid, TRUE);
     $this->assertEqual($account->status, 1, 'User C unblocked');
     $this->assertMail("to", $account->mail, "Activation mail sent to user C");
 
     // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail
-    $user_d = $this->drupalCreateUser(array());
+    $user_d = $this->backdropCreateUser(array());
     $account1 = user_load($user_d->uid, TRUE);
-    $this->drupalPost('user/' . $account1->uid . '/edit', array('status' => 0), t('Save'));
+    $this->backdropPost('user/' . $account1->uid . '/edit', array('status' => 0), t('Save'));
     $account1 = user_load($user_d->uid, TRUE);
     $this->assertEqual($account1->status, 0, 'User D blocked');
-    $this->drupalPost('user/' . $account1->uid . '/edit', array('status' => TRUE), t('Save'));
+    $this->backdropPost('user/' . $account1->uid . '/edit', array('status' => TRUE), t('Save'));
     $account1 = user_load($user_d->uid, TRUE);
     $this->assertEqual($account1->status, 1, 'User D unblocked');
     $this->assertMail("to", $account1->mail, "Activation mail sent to user D");
@@ -1284,7 +1284,7 @@ class UserAdminTestCase extends DrupalWebTestCase {
 /**
  * Tests for user-configurable time zones.
  */
-class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
+class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the display of dates and time when user-configurable time zones are set.
    */
@@ -1295,8 +1295,8 @@ class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
     variable_set('date_format_medium', 'Y-m-d H:i T');
 
     // Create a user account and login.
-    $web_user = $this->drupalCreateUser();
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser();
+    $this->backdropLogin($web_user);
 
     // Create some nodes with different authored-on dates.
     // Two dates in PST (winter time):
@@ -1304,31 +1304,31 @@ class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
     $date2 = '2007-03-11 01:00:00 -0800';
     // One date in PDT (summer time):
     $date3 = '2007-03-20 21:00:00 -0700';
-    $node1 = $this->drupalCreateNode(array('created' => strtotime($date1), 'type' => 'article'));
-    $node2 = $this->drupalCreateNode(array('created' => strtotime($date2), 'type' => 'article'));
-    $node3 = $this->drupalCreateNode(array('created' => strtotime($date3), 'type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'article'));
+    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'article'));
+    $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'article'));
 
     // Confirm date format and time zone.
-    $this->drupalGet("node/$node1->nid");
+    $this->backdropGet("node/$node1->nid");
     $this->assertText('2007-03-09 21:00 PST', 'Date should be PST.');
-    $this->drupalGet("node/$node2->nid");
+    $this->backdropGet("node/$node2->nid");
     $this->assertText('2007-03-11 01:00 PST', 'Date should be PST.');
-    $this->drupalGet("node/$node3->nid");
+    $this->backdropGet("node/$node3->nid");
     $this->assertText('2007-03-20 21:00 PDT', 'Date should be PDT.');
 
     // Change user time zone to Santiago time.
     $edit = array();
     $edit['mail'] = $web_user->mail;
     $edit['timezone'] = 'America/Santiago';
-    $this->drupalPost("user/$web_user->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$web_user->uid/edit", $edit, t('Save'));
     $this->assertText(t('The changes have been saved.'), 'Time zone changed to Santiago time.');
 
     // Confirm date format and time zone.
-    $this->drupalGet("node/$node1->nid");
+    $this->backdropGet("node/$node1->nid");
     $this->assertText('2007-03-10 02:00 CLST', 'Date should be Chile summer time; five hours ahead of PST.');
-    $this->drupalGet("node/$node2->nid");
+    $this->backdropGet("node/$node2->nid");
     $this->assertText('2007-03-11 05:00 CLT', 'Date should be Chile time; four hours ahead of PST');
-    $this->drupalGet("node/$node3->nid");
+    $this->backdropGet("node/$node3->nid");
     $this->assertText('2007-03-21 00:00 CLT', 'Date should be Chile time; three hours ahead of PDT.');
   }
 }
@@ -1336,13 +1336,13 @@ class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
 /**
  * Test user autocompletion.
  */
-class UserAutocompleteTestCase extends DrupalWebTestCase {
+class UserAutocompleteTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
     // Set up two users with different permissions to test access.
-    $this->unprivileged_user = $this->drupalCreateUser();
-    $this->privileged_user = $this->drupalCreateUser(array('access user profiles'));
+    $this->unprivileged_user = $this->backdropCreateUser();
+    $this->privileged_user = $this->backdropCreateUser(array('access user profiles'));
   }
 
   /**
@@ -1350,14 +1350,14 @@ class UserAutocompleteTestCase extends DrupalWebTestCase {
    */
   function testUserAutocomplete() {
     // Check access from unprivileged user, should be denied.
-    $this->drupalLogin($this->unprivileged_user);
-    $this->drupalGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
+    $this->backdropLogin($this->unprivileged_user);
+    $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
     $this->assertResponse(403, 'Autocompletion access denied to user without permission.');
 
     // Check access from privileged user.
-    $this->drupalLogout();
-    $this->drupalLogin($this->privileged_user);
-    $this->drupalGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
+    $this->backdropLogout();
+    $this->backdropLogin($this->privileged_user);
+    $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
     $this->assertResponse(200, 'Autocompletion access allowed.');
 
     // Using first letter of the user's name, make sure the user's full name is in the results.
@@ -1369,17 +1369,17 @@ class UserAutocompleteTestCase extends DrupalWebTestCase {
 /**
  * Tests user links in the secondary menu.
  */
-class UserAccountLinksUnitTests extends DrupalWebTestCase {
+class UserAccountLinksUnitTests extends BackdropWebTestCase {
   /**
    * Test the user login block.
    */
   function testSecondaryMenu() {
     // Create a regular user.
-    $user = $this->drupalCreateUser(array());
+    $user = $this->backdropCreateUser(array());
 
     // Log in and get the homepage.
-    $this->drupalLogin($user);
-    $this->drupalGet('<front>');
+    $this->backdropLogin($user);
+    $this->backdropGet('<front>');
 
     // For a logged-in user, expect the secondary menu to have links for "My
     // account" and "Log out".
@@ -1398,8 +1398,8 @@ class UserAccountLinksUnitTests extends DrupalWebTestCase {
     $this->assertEqual(count($link), 1, 'Log out link is in secondary menu.');
 
     // Log out and get the homepage.
-    $this->drupalLogout();
-    $this->drupalGet('<front>');
+    $this->backdropLogout();
+    $this->backdropGet('<front>');
 
     // For a logged-out user, expect no secondary links.
     $element = $this->xpath('//ul[@id=:menu_id]', array(':menu_id' => 'secondary-menu-links'));
@@ -1410,34 +1410,34 @@ class UserAccountLinksUnitTests extends DrupalWebTestCase {
 /**
  * Test user blocks.
  */
-class UserBlocksUnitTests extends DrupalWebTestCase {
+class UserBlocksUnitTests extends BackdropWebTestCase {
   /**
    * Tests the secondary menu.
    */
   function testUserLoginBlock() {
     // Create a user with some permission that anonymous users lack.
-    $user = $this->drupalCreateUser(array('administer permissions'));
+    $user = $this->backdropCreateUser(array('administer permissions'));
 
     // Log in using the block.
     $edit = array();
     $edit['name'] = $user->name;
     $edit['pass'] = $user->pass_raw;
-    $this->drupalPost('admin/people/permissions', $edit, t('Log in'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Log in'));
     $this->assertNoText(t('User login'), 'Logged in.');
 
     // Check that we are still on the same page.
     $this->assertEqual(url('admin/people/permissions', array('absolute' => TRUE)), $this->getUrl(), 'Still on the same page after login for access denied page');
 
     // Now, log out and repeat with a non-403 page.
-    $this->drupalLogout();
-    $this->drupalPost('filter/tips', $edit, t('Log in'));
+    $this->backdropLogout();
+    $this->backdropPost('filter/tips', $edit, t('Log in'));
     $this->assertNoText(t('User login'), 'Logged in.');
     $this->assertPattern('!<title.*?' . t('Compose tips') . '.*?</title>!', 'Still on the same page after login for allowed page');
 
     // Check that the user login block is not vulnerable to information
     // disclosure to third party sites.
-    $this->drupalLogout();
-    $this->drupalPost('http://example.com/', $edit, t('Log in'), array('external' => FALSE));
+    $this->backdropLogout();
+    $this->backdropPost('http://example.com/', $edit, t('Log in'), array('external' => FALSE));
     // Check that we remain on the site after login.
     $this->assertEqual(url('user/' . $user->uid, array('absolute' => TRUE)), $this->getUrl(), 'Redirected to user profile page after login from the frontpage');
   }
@@ -1451,9 +1451,9 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
    */
   function testWhosOnlineBlock() {
     // Generate users and make sure there are no current user sessions.
-    $user1 = $this->drupalCreateUser(array());
-    $user2 = $this->drupalCreateUser(array());
-    $user3 = $this->drupalCreateUser(array());
+    $user1 = $this->backdropCreateUser(array());
+    $user2 = $this->backdropCreateUser(array());
+    $user3 = $this->backdropCreateUser(array());
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {sessions}")->fetchField(), 0, 'Sessions table is empty.');
 
     // Insert a user with two sessions.
@@ -1473,12 +1473,12 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
 
     // Test block output.
     $block = user_block_view('online');
-    $this->drupalSetContent($block['content']);
+    $this->backdropSetContent($block['content']);
     $this->assertRaw(t('2 users'), 'Correct number of online users (2 users).');
     $this->assertText($user1->name, 'Active user 1 found in online list.');
     $this->assertText($user2->name, 'Active user 2 found in online list.');
     $this->assertNoText($user3->name, "Inactive user not found in online list.");
-    $this->assertTrue(strpos($this->drupalGetContent(), $user1->name) > strpos($this->drupalGetContent(), $user2->name), 'Online users are ordered correctly.');
+    $this->assertTrue(strpos($this->backdropGetContent(), $user1->name) > strpos($this->backdropGetContent(), $user2->name), 'Online users are ordered correctly.');
   }
 
   /**
@@ -1488,7 +1488,7 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
   private function insertSession(array $fields = array()) {
     $fields += array(
       'uid' => 0,
-      'sid' => drupal_hash_base64(uniqid(mt_rand(), TRUE)),
+      'sid' => backdrop_hash_base64(uniqid(mt_rand(), TRUE)),
       'timestamp' => REQUEST_TIME,
     );
     db_insert('sessions')
@@ -1502,10 +1502,10 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
    */
   function testDisabledAccountLink() {
     // Create an admin user and log in.
-    $this->drupalLogin($this->drupalCreateUser(array('access administration pages', 'administer menu')));
+    $this->backdropLogin($this->backdropCreateUser(array('access administration pages', 'administer menu')));
 
     // Verify that the 'My account' link is enabled.
-    $this->drupalGet('admin/structure/menu/manage/user-menu');
+    $this->backdropGet('admin/structure/menu/manage/user-menu');
     $label = $this->xpath('//label[contains(.,:text)]/@for', array(':text' => 'Enable My account menu link'));
     $this->assertFieldChecked((string) $label[0], "The 'My account' link is enabled by default.");
 
@@ -1514,10 +1514,10 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
     $edit = array(
       (string) $input[0] => FALSE,
     );
-    $this->drupalPost('admin/structure/menu/manage/user-menu', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/menu/manage/user-menu', $edit, t('Save configuration'));
 
     // Get the homepage.
-    $this->drupalGet('<front>');
+    $this->backdropGet('<front>');
 
     // Verify that the 'My account' link does not appear when disabled.
     $link = $this->xpath('//ul[@id=:menu_id]/li/a[contains(@href, :href) and text()=:text]', array(
@@ -1533,7 +1533,7 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
 /**
  * Test case to test user_save() behavior.
  */
-class UserSaveTestCase extends DrupalWebTestCase {
+class UserSaveTestCase extends BackdropWebTestCase {
   /**
    * Test creating a user with arbitrary uid.
    */
@@ -1543,7 +1543,7 @@ class UserSaveTestCase extends DrupalWebTestCase {
     $test_uid = $max_uid + mt_rand(1000, 1000000);
     $test_name = $this->randomName();
 
-    // Create the base user, based on drupalCreateUser().
+    // Create the base user, based on backdropCreateUser().
     $user = entity_create('user', array(
       'name' => $test_name,
       'uid' => $test_uid,
@@ -1567,14 +1567,14 @@ class UserSaveTestCase extends DrupalWebTestCase {
 /**
  * Test the create user administration page.
  */
-class UserCreateTestCase extends DrupalWebTestCase {
+class UserCreateTestCase extends BackdropWebTestCase {
   /**
    * Create a user through the administration interface and ensure that it
    * displays in the user list.
    */
   protected function testUserAdd() {
-    $user = $this->drupalCreateUser(array('administer users'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($user);
 
     foreach (array(FALSE, TRUE) as $notify) {
       $edit = array(
@@ -1584,18 +1584,18 @@ class UserCreateTestCase extends DrupalWebTestCase {
         'pass[pass2]' => $pass,
         'notify' => $notify,
       );
-      $this->drupalPost('admin/people/create', $edit, t('Create new account'));
+      $this->backdropPost('admin/people/create', $edit, t('Create new account'));
 
       if ($notify) {
         $this->assertText(t('A welcome message with further instructions has been e-mailed to the new user @name.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->drupalGetMails()), 1, 'Notification e-mail sent');
+        $this->assertEqual(count($this->backdropGetMails()), 1, 'Notification e-mail sent');
       }
       else {
         $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->drupalGetMails()), 0, 'Notification e-mail not sent');
+        $this->assertEqual(count($this->backdropGetMails()), 0, 'Notification e-mail not sent');
       }
 
-      $this->drupalGet('admin/people');
+      $this->backdropGet('admin/people');
       $this->assertText($edit['name'], 'User found in list of users');
     }
   }
@@ -1604,74 +1604,74 @@ class UserCreateTestCase extends DrupalWebTestCase {
 /**
  * Test case to test user_save() behavior.
  */
-class UserEditTestCase extends DrupalWebTestCase {
+class UserEditTestCase extends BackdropWebTestCase {
   /**
    * Test user edit page.
    */
   function testUserEdit() {
     // Test user edit functionality with user pictures disabled.
     variable_set('user_pictures', 0);
-    $user1 = $this->drupalCreateUser(array('change own username'));
-    $user2 = $this->drupalCreateUser(array());
-    $this->drupalLogin($user1);
+    $user1 = $this->backdropCreateUser(array('change own username'));
+    $user2 = $this->backdropCreateUser(array());
+    $this->backdropLogin($user1);
 
     // Test that error message appears when attempting to use a non-unique user name.
     $edit['name'] = $user2->name;
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 
     // Repeat the test with user pictures enabled, which modifies the form.
     variable_set('user_pictures', 1);
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 
     // Check that filling out a single password field does not validate.
     $edit = array();
     $edit['pass[pass1]'] = '';
     $edit['pass[pass2]'] = $this->randomName();
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
 
     $edit['pass[pass1]'] = $this->randomName();
     $edit['pass[pass2]'] = '';
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
 
     // Test that the error message appears when attempting to change the mail or
     // pass without the current password.
     $edit = array();
     $edit['mail'] = $this->randomName() . '@new.example.com';
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('E-mail address'))));
 
     $edit['current_pass'] = $user1->pass_raw;
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("The changes have been saved."));
 
     // Test that the user must enter current password before changing passwords.
     $edit = array();
     $edit['pass[pass1]'] = $new_pass = $this->randomName();
     $edit['pass[pass2]'] = $new_pass;
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Password'))));
 
     // Try again with the current password.
     $edit['current_pass'] = $user1->pass_raw;
-    $this->drupalPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("The changes have been saved."));
 
     // Make sure the user can log in with their new password.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $user1->pass_raw = $new_pass;
-    $this->drupalLogin($user1);
-    $this->drupalLogout();
+    $this->backdropLogin($user1);
+    $this->backdropLogout();
   }
 }
 
 /**
  * Test case for user signatures.
  */
-class UserSignatureTestCase extends DrupalWebTestCase {
+class UserSignatureTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('comment');
 
@@ -1683,14 +1683,14 @@ class UserSignatureTestCase extends DrupalWebTestCase {
     $this->plain_text_format = filter_format_load('plain_text');
 
     // Create regular and administrative users.
-    $this->web_user = $this->drupalCreateUser(array());
+    $this->web_user = $this->backdropCreateUser(array());
     $admin_permissions = array('administer comments');
     foreach (filter_formats() as $format) {
       if ($permission = filter_permission_name($format)) {
         $admin_permissions[] = $permission;
       }
     }
-    $this->admin_user = $this->drupalCreateUser($admin_permissions);
+    $this->admin_user = $this->backdropCreateUser($admin_permissions);
   }
 
   /**
@@ -1699,20 +1699,20 @@ class UserSignatureTestCase extends DrupalWebTestCase {
    */
   function testUserSignature() {
     // Create a new node with comments on.
-    $node = $this->drupalCreateNode(array('comment' => COMMENT_NODE_OPEN));
+    $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
     // Verify that user signature field is not displayed on registration form.
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertNoText(t('Signature'));
 
     // Log in as a regular user and create a signature.
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
     $signature_text = "<h1>" . $this->randomName() . "</h1>";
     $edit = array(
       'signature[value]' => $signature_text,
       'signature[format]' => $this->plain_text_format->format,
     );
-    $this->drupalPost('user/' . $this->web_user->uid . '/edit', $edit, t('Save'));
+    $this->backdropPost('user/' . $this->web_user->uid . '/edit', $edit, t('Save'));
 
     // Verify that values were stored.
     $this->assertFieldByName('signature[value]', $edit['signature[value]'], 'Submitted signature text found.');
@@ -1723,8 +1723,8 @@ class UserSignatureTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['subject'] = $this->randomName(8);
     $edit['comment_body[' . $langcode . '][0][value]'] = $this->randomName(16);
-    $this->drupalPost('comment/reply/' . $node->nid, $edit, t('Preview'));
-    $this->drupalPost(NULL, array(), t('Save'));
+    $this->backdropPost('comment/reply/' . $node->nid, $edit, t('Preview'));
+    $this->backdropPost(NULL, array(), t('Save'));
 
     // Get the comment ID. (This technique is the same one used in the Comment
     // module's CommentHelperCase test case.)
@@ -1733,12 +1733,12 @@ class UserSignatureTestCase extends DrupalWebTestCase {
 
     // Log in as an administrator and edit the comment to use Full HTML, so
     // that the comment text itself is not filtered at all.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit['comment_body[' . $langcode . '][0][format]'] = $this->full_html_format->format;
-    $this->drupalPost('comment/' . $comment_id . '/edit', $edit, t('Save'));
+    $this->backdropPost('comment/' . $comment_id . '/edit', $edit, t('Save'));
 
     // Assert that the signature did not make it through unfiltered.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertNoRaw($signature_text, 'Unfiltered signature text not found.');
     $this->assertRaw(check_markup($signature_text, $this->plain_text_format->format), 'Filtered signature text found.');
   }
@@ -1747,80 +1747,80 @@ class UserSignatureTestCase extends DrupalWebTestCase {
 /*
  * Test that a user, having editing their own account, can still log in.
  */
-class UserEditedOwnAccountTestCase extends DrupalWebTestCase {
+class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
     variable_set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
 
     // Create a new user account and log in.
-    $account = $this->drupalCreateUser(array('change own username'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('change own username'));
+    $this->backdropLogin($account);
 
     // Change own username.
     $edit = array();
     $edit['name'] = $this->randomName();
-    $this->drupalPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
 
     // Log out.
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Set the new name on the user account and attempt to log back in.
     $account->name = $edit['name'];
-    $this->drupalLogin($account);
+    $this->backdropLogin($account);
   }
 }
 
 /**
  * Test case to test adding, editing and deleting roles.
  */
-class UserRoleAdminTestCase extends DrupalWebTestCase {
+class UserRoleAdminTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'administer users'));
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
   }
 
   /**
    * Test adding, renaming and deleting roles.
    */
   function testRoleAdministration() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Test adding a role. (In doing so, we use a role name that happens to
     // correspond to an integer, to test that the role administration pages
     // correctly distinguish between role names and IDs.)
     $role_name = '123';
     $edit = array('name' => $role_name);
-    $this->drupalPost('admin/people/permissions/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/people/permissions/roles', $edit, t('Add role'));
     $this->assertText(t('The role has been added.'), 'The role has been added.');
     $role = user_role_load_by_name($role_name);
     $this->assertTrue(is_object($role), 'The role was successfully retrieved from the database.');
 
     // Try adding a duplicate role.
-    $this->drupalPost(NULL, $edit, t('Add role'));
+    $this->backdropPost(NULL, $edit, t('Add role'));
     $this->assertRaw(t('The role name %name already exists. Choose another role name.', array('%name' => $role_name)), 'Duplicate role warning displayed.');
 
     // Test renaming a role.
     $old_name = $role_name;
     $role_name = '456';
     $edit = array('name' => $role_name);
-    $this->drupalPost("admin/people/permissions/roles/edit/{$role->rid}", $edit, t('Save role'));
+    $this->backdropPost("admin/people/permissions/roles/edit/{$role->rid}", $edit, t('Save role'));
     $this->assertText(t('The role has been renamed.'), 'The role has been renamed.');
     $this->assertFalse(user_role_load_by_name($old_name), 'The role can no longer be retrieved from the database using its old name.');
     $this->assertTrue(is_object(user_role_load_by_name($role_name)), 'The role can be retrieved from the database using its new name.');
 
     // Test deleting a role.
-    $this->drupalPost("admin/people/permissions/roles/edit/{$role->rid}", NULL, t('Delete role'));
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropPost("admin/people/permissions/roles/edit/{$role->rid}", NULL, t('Delete role'));
+    $this->backdropPost(NULL, NULL, t('Delete'));
     $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
     $this->assertNoLinkByHref("admin/people/permissions/roles/edit/{$role->rid}", 'Role edit link removed.');
     $this->assertFalse(user_role_load_by_name($role_name), 'A deleted role can no longer be loaded.');
 
     // Make sure that the system-defined roles cannot be edited via the user
     // interface.
-    $this->drupalGet('admin/people/permissions/roles/edit/' . DRUPAL_ANONYMOUS_RID);
+    $this->backdropGet('admin/people/permissions/roles/edit/' . DRUPAL_ANONYMOUS_RID);
     $this->assertResponse(403, 'Access denied when trying to edit the built-in anonymous role.');
-    $this->drupalGet('admin/people/permissions/roles/edit/' . DRUPAL_AUTHENTICATED_RID);
+    $this->backdropGet('admin/people/permissions/roles/edit/' . DRUPAL_AUTHENTICATED_RID);
     $this->assertResponse(403, 'Access denied when trying to edit the built-in authenticated role.');
   }
 
@@ -1828,7 +1828,7 @@ class UserRoleAdminTestCase extends DrupalWebTestCase {
    * Test user role weight change operation.
    */
   function testRoleWeightChange() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Pick up a random role and get its weight.
     $rid = array_rand(user_roles());
@@ -1837,7 +1837,7 @@ class UserRoleAdminTestCase extends DrupalWebTestCase {
 
     // Change the role weight and submit the form.
     $edit = array('roles['. $rid .'][weight]' => $old_weight + 1);
-    $this->drupalPost('admin/people/permissions/roles', $edit, t('Save order'));
+    $this->backdropPost('admin/people/permissions/roles', $edit, t('Save order'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Retrieve the saved role and compare its weight.
@@ -1850,7 +1850,7 @@ class UserRoleAdminTestCase extends DrupalWebTestCase {
 /**
  * Test user token replacement in strings.
  */
-class UserTokenReplaceTestCase extends DrupalWebTestCase {
+class UserTokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Creates a user, then tests the tokens generated from it.
    */
@@ -1862,11 +1862,11 @@ class UserTokenReplaceTestCase extends DrupalWebTestCase {
     );
 
     // Create two users and log them in one after another.
-    $user1 = $this->drupalCreateUser(array());
-    $user2 = $this->drupalCreateUser(array());
-    $this->drupalLogin($user1);
-    $this->drupalLogout();
-    $this->drupalLogin($user2);
+    $user1 = $this->backdropCreateUser(array());
+    $user2 = $this->backdropCreateUser(array());
+    $this->backdropLogin($user1);
+    $this->backdropLogout();
+    $this->backdropLogin($user2);
 
     $account = user_load($user1->uid);
     $global_account = user_load($GLOBALS['user']->uid);
@@ -1907,55 +1907,55 @@ class UserTokenReplaceTestCase extends DrupalWebTestCase {
 /**
  * Test user search.
  */
-class UserUserSearchTestCase extends DrupalWebTestCase {
+class UserUserSearchTestCase extends BackdropWebTestCase {
   function testUserSearch() {
-    $user1 = $this->drupalCreateUser(array('access user profiles', 'search content', 'use advanced search'));
-    $this->drupalLogin($user1);
+    $user1 = $this->backdropCreateUser(array('access user profiles', 'search content', 'use advanced search'));
+    $this->backdropLogin($user1);
     $keys = $user1->mail;
     $edit = array('keys' => $keys);
-    $this->drupalPost('search/user/', $edit, t('Search'));
+    $this->backdropPost('search/user/', $edit, t('Search'));
     $this->assertNoText($keys);
-    $this->drupalLogout();
+    $this->backdropLogout();
 
-    $user2 = $this->drupalCreateUser(array('administer users', 'access user profiles', 'search content', 'use advanced search'));
-    $this->drupalLogin($user2);
+    $user2 = $this->backdropCreateUser(array('administer users', 'access user profiles', 'search content', 'use advanced search'));
+    $this->backdropLogin($user2);
     $keys = $user2->mail;
     $edit = array('keys' => $keys);
-    $this->drupalPost('search/user/', $edit, t('Search'));
+    $this->backdropPost('search/user/', $edit, t('Search'));
     $this->assertText($keys);
 
     // Create a blocked user.
-    $blocked_user = $this->drupalCreateUser();
+    $blocked_user = $this->backdropCreateUser();
     $blocked_user->status = 0;
     $blocked_user->save();
 
     // Verify that users with "administer users" permissions can see blocked
     // accounts in search results.
     $edit = array('keys' => $blocked_user->name);
-    $this->drupalPost('search/user', $edit, t('Search'));
+    $this->backdropPost('search/user', $edit, t('Search'));
     $this->assertText($blocked_user->name, 'Blocked users are listed on the user search results for users with the "administer users" permission.');
 
     // Verify that users without "administer users" permissions do not see
     // blocked accounts in search results.
-    $this->drupalLogin($user1);
+    $this->backdropLogin($user1);
     $edit = array('keys' => $blocked_user->name);
-    $this->drupalPost('search/user/', $edit, t('Search'));
+    $this->backdropPost('search/user/', $edit, t('Search'));
     $this->assertNoText($blocked_user->name, 'Blocked users are hidden from the user search results.');
 
-    $this->drupalLogout();
+    $this->backdropLogout();
   }
 }
 
 /**
  * Test role assignment.
  */
-class UserRolesAssignmentTestCase extends DrupalWebTestCase {
+class UserRolesAssignmentTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'administer users'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -1963,17 +1963,17 @@ class UserRolesAssignmentTestCase extends DrupalWebTestCase {
    * again.
    */
   function testAssignAndRemoveRole()  {
-    $rid = $this->drupalCreateRole(array('administer content types'));
-    $account = $this->drupalCreateUser();
+    $rid = $this->backdropCreateRole(array('administer content types'));
+    $account = $this->backdropCreateUser();
 
     // Assign the role to the user.
-    $this->drupalPost('user/' . $account->uid . '/edit', array("roles[$rid]" => $rid), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => $rid), t('Save'));
     $this->assertText(t('The changes have been saved.'));
     $this->assertFieldChecked('edit-roles-' . $rid, 'Role is assigned.');
     $this->userLoadAndCheckRoleAssigned($account, $rid);
 
     // Remove the role from the user.
-    $this->drupalPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
     $this->assertNoFieldChecked('edit-roles-' . $rid, 'Role is removed from user.');
     $this->userLoadAndCheckRoleAssigned($account, $rid, FALSE);
@@ -1984,7 +1984,7 @@ class UserRolesAssignmentTestCase extends DrupalWebTestCase {
    * be removed again.
    */
   function testCreateUserWithRole() {
-    $rid = $this->drupalCreateRole(array('administer content types'));
+    $rid = $this->backdropCreateRole(array('administer content types'));
     // Create a new user and add the role at the same time.
     $edit = array(
       'name' => $this->randomName(),
@@ -1993,17 +1993,17 @@ class UserRolesAssignmentTestCase extends DrupalWebTestCase {
       'pass[pass2]' => $pass,
       "roles[$rid]" => $rid,
     );
-    $this->drupalPost('admin/people/create', $edit, t('Create new account'));
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertText(t('Created a new user account for !name.', array('!name' => $edit['name'])));
     // Get the newly added user.
     $account = user_load_by_name($edit['name']);
 
-    $this->drupalGet('user/' . $account->uid . '/edit');
+    $this->backdropGet('user/' . $account->uid . '/edit');
     $this->assertFieldChecked('edit-roles-' . $rid, 'Role is assigned.');
     $this->userLoadAndCheckRoleAssigned($account, $rid);
 
     // Remove the role again.
-    $this->drupalPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
     $this->assertNoFieldChecked('edit-roles-' . $rid, 'Role is removed from user.');
     $this->userLoadAndCheckRoleAssigned($account, $rid, FALSE);
@@ -2030,7 +2030,7 @@ class UserRolesAssignmentTestCase extends DrupalWebTestCase {
 /**
  * Tests user_validate_current_pass on a custom form.
  */
-class UserValidateCurrentPassCustomForm extends DrupalWebTestCase {
+class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
   /**
    * User with permission to view content.
    */
@@ -2044,21 +2044,21 @@ class UserValidateCurrentPassCustomForm extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('user_form_test');
     // Create two users
-    $this->accessUser = $this->drupalCreateUser(array('access content'));
-    $this->adminUser = $this->drupalCreateUser(array('administer users'));
+    $this->accessUser = $this->backdropCreateUser(array('access content'));
+    $this->adminUser = $this->backdropCreateUser(array('administer users'));
   }
 
   /**
    * Tests that user_validate_current_pass can be reused on a custom form.
    */
   function testUserValidateCurrentPassCustomForm() {
-    $this->drupalLogin($this->adminUser);
+    $this->backdropLogin($this->adminUser);
 
     // Submit the custom form with the admin user using the access user's password.
     $edit = array();
     $edit['user_form_test_field'] = $this->accessUser->name;
     $edit['current_pass'] = $this->accessUser->pass_raw;
-    $this->drupalPost('user_form_test_current_password/' . $this->accessUser->uid, $edit, t('Test'));
+    $this->backdropPost('user_form_test_current_password/' . $this->accessUser->uid, $edit, t('Test'));
     $this->assertText(t('The password has been validated and the form submitted successfully.'));
   }
 }
@@ -2066,12 +2066,12 @@ class UserValidateCurrentPassCustomForm extends DrupalWebTestCase {
 /**
  * Test user entity callbacks.
  */
-class UserEntityCallbacksTestCase extends DrupalWebTestCase {
+class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('user');
 
-    $this->account = $this->drupalCreateUser();
-    $this->anonymous = drupal_anonymous_user();
+    $this->account = $this->backdropCreateUser();
+    $this->anonymous = backdrop_anonymous_user();
   }
 
   /**

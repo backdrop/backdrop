@@ -140,7 +140,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['additional_settings'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'node') . '/content_types.js'),
+      'js' => array(backdrop_get_path('module', 'node') . '/content_types.js'),
     ),
   );
 
@@ -166,11 +166,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['submission']['node_preview'] = array(
     '#type' => 'radios',
     '#title' => t('Preview before submitting'),
-    '#default_value' => variable_get('node_preview_' . $type->type, DRUPAL_OPTIONAL),
+    '#default_value' => variable_get('node_preview_' . $type->type, BACKDROP_OPTIONAL),
     '#options' => array(
-      DRUPAL_DISABLED => t('Disabled'),
-      DRUPAL_OPTIONAL => t('Optional'),
-      DRUPAL_REQUIRED => t('Required'),
+      BACKDROP_DISABLED => t('Disabled'),
+      BACKDROP_OPTIONAL => t('Optional'),
+      BACKDROP_REQUIRED => t('Required'),
     ),
   );
   $form['submission']['help']  = array(
@@ -371,11 +371,11 @@ function node_type_form_submit($form, &$form_state) {
   $t_args = array('%name' => $type->name);
 
   if ($status == SAVED_UPDATED) {
-    drupal_set_message(t('The content type %name has been updated.', $t_args));
+    backdrop_set_message(t('The content type %name has been updated.', $t_args));
   }
   elseif ($status == SAVED_NEW) {
     node_add_body_field($type);
-    drupal_set_message(t('The content type %name has been added.', $t_args));
+    backdrop_set_message(t('The content type %name has been added.', $t_args));
     watchdog('node', 'Added content type %name.', $t_args, WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
@@ -391,7 +391,7 @@ function node_node_type_insert($info) {
     $update_count = node_type_update_nodes($info->old_type, $info->type);
 
     if ($update_count) {
-      drupal_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
+      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
     }
   }
 }
@@ -404,7 +404,7 @@ function node_node_type_update($info) {
     $update_count = node_type_update_nodes($info->old_type, $info->type);
 
     if ($update_count) {
-      drupal_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
+      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
     }
   }
 }
@@ -468,7 +468,7 @@ function node_type_delete_confirm_submit($form, &$form_state) {
 
   variable_del('node_preview_' . $form_state['values']['type']);
   $t_args = array('%name' => $form_state['values']['name']);
-  drupal_set_message(t('The content type %name has been deleted.', $t_args));
+  backdrop_set_message(t('The content type %name has been deleted.', $t_args));
   watchdog('node', 'Deleted content type %name.', $t_args, WATCHDOG_NOTICE);
 
   node_types_rebuild();

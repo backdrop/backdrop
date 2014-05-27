@@ -112,7 +112,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
           return FALSE;
         }
 
-        $test = drupal_map_assoc($nids->value);
+        $test = backdrop_map_assoc($nids->value);
         $titles = array();
 
         $result = db_query("SELECT * FROM {node} WHERE nid IN (:nids)", array(':nids' =>  $nids->value));

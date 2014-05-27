@@ -8,31 +8,31 @@
 /**
  * Instantiates and statically caches the correct class for a cache bin.
  *
- * By default, this returns an instance of the DrupalDatabaseCache class.
- * Classes implementing DrupalCacheInterface can register themselves both as a
+ * By default, this returns an instance of the BackdropDatabaseCache class.
+ * Classes implementing BackdropCacheInterface can register themselves both as a
  * default implementation and for specific bins.
  *
  * @param $bin
  *   The cache bin for which the cache object should be returned, defaults to
  *   'cache'.
  *
- * @return DrupalCacheInterface
+ * @return BackdropCacheInterface
  *   The cache object associated with the specified bin.
  *
- * @see DrupalCacheInterface
+ * @see BackdropCacheInterface
  */
 function cache($bin = 'cache') {
   // Temporary backwards compatibiltiy layer, allow old style prefixed cache
   // bin names to be passed as arguments.
   $bin = str_replace('cache_', '', $bin);
 
-  // We do not use drupal_static() here because we do not want to change the
+  // We do not use backdrop_static() here because we do not want to change the
   // storage of a cache bin mid-request.
   static $cache_objects;
   if (!isset($cache_objects[$bin])) {
     $class = variable_get('cache_class_' . $bin);
     if (!isset($class)) {
-      $class = variable_get('cache_default_class', 'DrupalDatabaseCache');
+      $class = variable_get('cache_default_class', 'BackdropDatabaseCache');
     }
     $cache_objects[$bin] = new $class($bin);
   }
@@ -59,21 +59,21 @@ function cache_clear_all() {
  * Defines an interface for cache implementations.
  *
  * All cache implementations have to implement this interface.
- * DrupalDatabaseCache provides the default implementation, which can be
+ * BackdropDatabaseCache provides the default implementation, which can be
  * consulted as an example.
  *
- * To make Drupal use your implementation for a certain cache bin, you have to
+ * To make Backdrop use your implementation for a certain cache bin, you have to
  * set a variable with the name of the cache bin as its key and the name of
  * your class as its value. For example, if your implementation of
- * DrupalCacheInterface was called MyCustomCache, the following line would make
- * Drupal use it for the 'cache_page' bin:
+ * BackdropCacheInterface was called MyCustomCache, the following line would make
+ * Backdrop use it for the 'cache_page' bin:
  * @code
  *  variable_set('cache_class_cache_page', 'MyCustomCache');
  * @endcode
  *
  * Additionally, you can register your cache implementation to be used by
  * default for all cache bins by setting the variable 'cache_default_class' to
- * the name of your implementation of the DrupalCacheInterface, e.g.
+ * the name of your implementation of the BackdropCacheInterface, e.g.
  * @code
  *  variable_set('cache_default_class', 'MyCustomCache');
  * @endcode
@@ -90,9 +90,9 @@ function cache_clear_all() {
  * @endcode
  *
  * @see cache()
- * @see DrupalDatabaseCache
+ * @see BackdropDatabaseCache
  */
-interface DrupalCacheInterface {
+interface BackdropCacheInterface {
   /**
    * Constructs a new cache interface.
    *
@@ -203,71 +203,71 @@ interface DrupalCacheInterface {
  * Defines a stub cache implementation.
  *
  * The stub implementation is needed when database access is not yet available.
- * Because Drupal's caching system never requires that cached data be present,
+ * Because Backdrop's caching system never requires that cached data be present,
  * these stub functions can short-circuit the process and sidestep the need for
  * any persistent storage. Using this cache implementation during normal
  * operations would have a negative impact on performance.
  *
  * This also can be used for testing purposes.
  */
-class DrupalNullCache implements DrupalCacheInterface {
+class BackdropNullCache implements BackdropCacheInterface {
 
   /**
-   * Constructs a DrupalNullCache object.
+   * Constructs a BackdropNullCache object.
    */
   function __construct($bin) {}
 
   /**
-   * Implements DrupalCacheInterface::get().
+   * Implements BackdropCacheInterface::get().
    */
   function get($cid) {
     return FALSE;
   }
 
   /**
-   * Implements DrupalCacheInterface::getMultiple().
+   * Implements BackdropCacheInterface::getMultiple().
    */
   function getMultiple(&$cids) {
     return array();
   }
 
   /**
-   * Implements DrupalCacheInterface::set().
+   * Implements BackdropCacheInterface::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {}
 
   /**
-   * Implements DrupalCacheInterface::delete().
+   * Implements BackdropCacheInterface::delete().
    */
   function delete($cid) {}
 
   /**
-   * Implements DrupalCacheInterface::deleteMultiple().
+   * Implements BackdropCacheInterface::deleteMultiple().
    */
   function deleteMultiple(array $cids) {}
 
   /**
-   * Implements DrupalCacheInterface::deletePrefix().
+   * Implements BackdropCacheInterface::deletePrefix().
    */
   function deletePrefix($prefix) {}
 
   /**
-   * Implements DrupalCacheInterface::flush().
+   * Implements BackdropCacheInterface::flush().
    */
   function flush() {}
 
   /**
-   * Implements DrupalCacheInterface::expire().
+   * Implements BackdropCacheInterface::expire().
    */
   function expire() {}
 
   /**
-   * Implements DrupalCacheInterface::garbageCollection().
+   * Implements BackdropCacheInterface::garbageCollection().
    */
   function garbageCollection() {}
 
   /**
-   * Implements DrupalCacheInterface::isEmpty().
+   * Implements BackdropCacheInterface::isEmpty().
    */
   function isEmpty() {
     return TRUE;
@@ -277,14 +277,14 @@ class DrupalNullCache implements DrupalCacheInterface {
 /**
  * Defines a default cache implementation.
  *
- * This is Drupal's default cache implementation. It uses the database to store
+ * This is Backdrop's default cache implementation. It uses the database to store
  * cached data. Each cache bin corresponds to a database table by the same name.
  */
-class DrupalDatabaseCache implements DrupalCacheInterface {
+class BackdropDatabaseCache implements BackdropCacheInterface {
   protected $bin;
 
   /**
-   * Constructs a new DrupalDatabaseCache object.
+   * Constructs a new BackdropDatabaseCache object.
    */
   function __construct($bin) {
     // All cache tables should be prefixed with 'cache_', except for the
@@ -296,7 +296,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::get().
+   * Implements BackdropCacheInterface::get().
    */
   function get($cid) {
     $cids = array($cid);
@@ -305,7 +305,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::getMultiple().
+   * Implements BackdropCacheInterface::getMultiple().
    */
   function getMultiple(&$cids) {
     try {
@@ -344,7 +344,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
    * data as appropriate.
    *
    * @param $cache
-   *   An item loaded from DrupalCacheInterface::get() or DrupalCacheInterface::getMultiple().
+   *   An item loaded from BackdropCacheInterface::get() or BackdropCacheInterface::getMultiple().
    *
    * @return
    *   The item with data unserialized as appropriate or FALSE if there is no
@@ -374,7 +374,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::set().
+   * Implements BackdropCacheInterface::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {
     $fields = array(
@@ -403,7 +403,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::delete().
+   * Implements BackdropCacheInterface::delete().
    */
   function delete($cid) {
     db_delete($this->bin)
@@ -412,7 +412,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::deleteMultiple().
+   * Implements BackdropCacheInterface::deleteMultiple().
    */
   function deleteMultiple(Array $cids) {
     // Delete in chunks when a large array is passed.
@@ -425,7 +425,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::deletePrefix().
+   * Implements BackdropCacheInterface::deletePrefix().
    */
   function deletePrefix($prefix) {
     db_delete($this->bin)
@@ -434,14 +434,14 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::flush().
+   * Implements BackdropCacheInterface::flush().
    */
   function flush() {
     db_truncate($this->bin)->execute();
   }
 
   /**
-   * Implements DrupalCacheInterface::expire().
+   * Implements BackdropCacheInterface::expire().
    */
   function expire() {
     if (config_get('system.performance', 'cache_lifetime')) {
@@ -475,7 +475,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::garbageCollection().
+   * Implements BackdropCacheInterface::garbageCollection().
    */
   function garbageCollection() {
     $cache_lifetime = config_get('system.performance', 'cache_lifetime');
@@ -515,7 +515,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
   }
 
   /**
-   * Implements DrupalCacheInterface::isEmpty().
+   * Implements BackdropCacheInterface::isEmpty().
    */
   function isEmpty() {
     $this->garbageCollection();

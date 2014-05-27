@@ -26,10 +26,10 @@ function field_views_data() {
     if (empty($result)) {
       $result = field_views_field_default_views_data($field);
     }
-    drupal_alter('field_views_data', $result, $field, $module);
+    backdrop_alter('field_views_data', $result, $field, $module);
 
     if (is_array($result)) {
-      $data = drupal_array_merge_deep($result, $data);
+      $data = backdrop_array_merge_deep($result, $data);
     }
   }
 
@@ -41,7 +41,7 @@ function field_views_data() {
  *
  * Field modules can implement hook_field_views_data_views_data_alter() to
  * alter the views data on a per field basis. This is weirdly named so as
- * not to conflict with the drupal_alter('field_views_data') in
+ * not to conflict with the backdrop_alter('field_views_data') in
  * field_views_data.
  */
 function field_views_data_alter(&$data) {

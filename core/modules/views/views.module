@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Primarily Drupal hooks and global API functions to manipulate views.
+ * Primarily Backdrop hooks and global API functions to manipulate views.
  *
  * This is the main module file for Views. The main entry points into
  * this module are views_page() and views_block(), where it handles
@@ -73,7 +73,7 @@ function views_api_minimum_version() {
  * Implement hook_theme(). Register views theming functions.
  */
 function views_theme($existing, $type, $theme, $path) {
-  $path = drupal_get_path('module', 'views');
+  $path = backdrop_get_path('module', 'views');
   module_load_include('inc', 'views', 'theme/theme');
 
   // Some quasi clever array merging here.
@@ -125,13 +125,13 @@ function views_theme($existing, $type, $theme, $path) {
           'variables' => $variables[$type],
         );
 
-        $include = DRUPAL_ROOT . '/' . $def['theme path'] . '/' . $def['theme file'];
+        $include = BACKDROP_ROOT . '/' . $def['theme path'] . '/' . $def['theme file'];
         if (file_exists($include)) {
           require_once $include;
         }
 
         if (!function_exists('theme_' . $def['theme'])) {
-          $hooks[$def['theme']]['template'] = drupal_clean_css_identifier($def['theme']);
+          $hooks[$def['theme']]['template'] = backdrop_clean_css_identifier($def['theme']);
         }
       }
       if (isset($def['additional themes'])) {
@@ -149,7 +149,7 @@ function views_theme($existing, $type, $theme, $path) {
           );
 
           if (!function_exists('theme_' . $theme)) {
-            $hooks[$theme]['template'] = drupal_clean_css_identifier($theme);
+            $hooks[$theme]['template'] = backdrop_clean_css_identifier($theme);
           }
         }
       }
@@ -193,15 +193,15 @@ function views_theme($existing, $type, $theme, $path) {
  * @param $path
  *   The path to search.
  *
- * @see drupal_find_theme_templates()
+ * @see backdrop_find_theme_templates()
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
   $regex = '/' . '\.tpl\.php' . '$' . '/';
 
-  // Because drupal_system_listing works the way it does, we check for real
+  // Because backdrop_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
-  $files = drupal_system_listing($regex, $path, 'name', 0);
+  $files = backdrop_system_listing($regex, $path, 'name', 0);
   foreach ($files as $template => $file) {
     // Chop off the remaining extensions if there are any. $template already
     // has the rightmost extension removed, but there might still be more,
@@ -312,7 +312,7 @@ function views_plugin_list() {
  * templates if called from a view.
  *
  * The 'modules/node.views.inc' file is a better place for this, but
- * we haven't got a chance to load that file before Drupal builds the
+ * we haven't got a chance to load that file before Backdrop builds the
  * node portion of the theme registry.
  */
 function views_preprocess_node(&$vars) {
@@ -324,7 +324,7 @@ function views_preprocess_node(&$vars) {
       $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
 
       // If a node is being rendered in a view, and the view does not have a path,
-      // prevent drupal from accidentally setting the $page variable:
+      // prevent Backdrop from accidentally setting the $page variable:
       if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
         $vars['page'] = FALSE;
       }
@@ -398,7 +398,7 @@ function views_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
-  // Define another taxonomy autocomplete because the default one of drupal
+  // Define another taxonomy autocomplete because the default one of Backdrop
   // does not support a vid a argument anymore
   $items['admin/views/ajax/autocomplete/taxonomy'] = array(
     'page callback' => 'views_ajax_autocomplete_taxonomy',
@@ -591,7 +591,7 @@ function views_preprocess_html(&$variables) {
       unset($variables['classes_array'][$key]);
       // Add the JavaScript, with a group and weight such that it will run
       // before modules/contextual/contextual.js.
-      drupal_add_js(drupal_get_path('module', 'views') . '/js/views-contextual.js', array('group' => JS_LIBRARY, 'weight' => -1));
+      backdrop_add_js(backdrop_get_path('module', 'views') . '/js/views-contextual.js', array('group' => JS_LIBRARY, 'weight' => -1));
     }
   }
 }
@@ -797,7 +797,7 @@ function views_add_block_contextual_links(&$block, $view, $display_id, $block_ty
  *
  * @param $render_element
  *   The renderable array to which contextual links will be added. This array
- *   should be suitable for passing in to drupal_render() and will normally
+ *   should be suitable for passing in to backdrop_render() and will normally
  *   contain a representation of the view display whose contextual links are
  *   being requested.
  * @param $location
@@ -1023,7 +1023,7 @@ function views_check_roles($rids, $account = NULL) {
   global $user;
   $account = isset($account) ? $account : $user;
   $roles = array_keys($account->roles);
-  $roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
+  $roles[] = $account->uid ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID;
   return user_access('access all views', $account) || array_intersect(array_filter($rids), $roles);
 }
 // ------------------------------------------------------------------
@@ -1056,7 +1056,7 @@ function &views_get_page_view() {
 
 /**
  * Set the current 'current view' that is being built/rendered so that it is
- * easy for other modules or items in drupal_eval to identify
+ * easy for other modules to identify.
  *
  * @return view
  */
@@ -1114,7 +1114,7 @@ function views_module_include($api, $reset = FALSE) {
  * Get a list of modules that support the current views API.
  */
 function views_get_module_apis($reset = FALSE) {
-  $api_cache = &drupal_static(__FUNCTION__, array());
+  $api_cache = &backdrop_static(__FUNCTION__, array());
   if ($reset) {
     $api_cache = array();
   }
@@ -1142,7 +1142,7 @@ function views_add_css($file) {
   // and we don't want to generate duplicate cache files.
   // TODO: at some point investigate adding some files unconditionally and
   // allowing preprocess.
-  drupal_add_css(drupal_get_path('module', 'views') . "/css/$file.css", array('preprocess' => FALSE));
+  backdrop_add_css(backdrop_get_path('module', 'views') . "/css/$file.css", array('preprocess' => FALSE));
 }
 
 /**
@@ -1155,15 +1155,15 @@ function views_add_js($file) {
   }
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
-    drupal_add_js(drupal_get_path('module', 'views') . "/js/base.js");
+    backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
     $base = FALSE;
   }
   if ($ajax && in_array($file, array('ajax', 'ajax_view'))) {
-    drupal_add_library('system', 'drupal.ajax');
-    drupal_add_library('system', 'jquery.form');
+    backdrop_add_library('system', 'backdrop.ajax');
+    backdrop_add_library('system', 'jquery.form');
     $ajax = FALSE;
   }
-  drupal_add_js(drupal_get_path('module', 'views') . "/js/$file.js");
+  backdrop_add_js(backdrop_get_path('module', 'views') . "/js/$file.js");
 }
 
 /**
@@ -1264,7 +1264,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   }
 
   // Identify missing handlers
-  drupal_set_message(t("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key)), 'error');
+  backdrop_set_message(t("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key)), 'error');
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',
@@ -1420,7 +1420,7 @@ function views_get_applicable_views($type) {
  *   If TRUE, reset the static cache forcing views to be reloaded.
  */
 function views_get_all_views($reset = FALSE) {
-  $views = &drupal_static(__FUNCTION__, array());
+  $views = &backdrop_static(__FUNCTION__, array());
   if ($reset || empty($views)) {
     $configs = config_get_names_with_prefix('views.view.');
     foreach ($configs as $config_file) {
@@ -1556,7 +1556,7 @@ function views_view_is_disabled($view) {
  *   a fresh one.
  */
 function views_get_view($name, $reset = FALSE) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if ($reset || !isset($cache[$name])) {
     if ($view_data = config('views.view.' . $name)->get()) {
@@ -1623,7 +1623,7 @@ function views_form($form, &$form_state, $view, $output) {
   $form_state['cache'] = TRUE;
 
   $form = array();
-  $query = drupal_get_query_parameters($_GET, array('q'));
+  $query = backdrop_get_query_parameters($_GET, array('q'));
   $form['#action'] = url($view->get_url(), array('query' => $query));
   // Tell the preprocessor whether it should hide the header, footer, pager...
   $form['show_view_elements'] = array(
@@ -1842,16 +1842,16 @@ function views_exposed_form($form, &$form_state) {
     '#name' => '', // prevent from showing up in $_GET.
     '#type' => 'submit',
     '#value' => t('Apply'),
-    '#id' => drupal_html_id('edit-submit-' . $view->name),
+    '#id' => backdrop_html_id('edit-submit-' . $view->name),
   );
 
   $form['#action'] = url($view->display_handler->get_url());
   $form['#theme'] = views_theme_functions('views_exposed_form', $view, $display);
-  $form['#id'] = drupal_clean_css_identifier('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
+  $form['#id'] = backdrop_clean_css_identifier('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
 
   // If using AJAX, we need the form plugin.
   if ($view->use_ajax) {
-    drupal_add_library('system', 'jquery.form');
+    backdrop_add_library('system', 'jquery.form');
   }
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
@@ -1929,7 +1929,7 @@ function views_exposed_form_submit(&$form, &$form_state) {
 function views_exposed_form_cache($views_name, $display_name, $form_output = NULL) {
   // When running tests for exposed filters, this cache should
   // be cleared between each test.
-  $views_exposed = &drupal_static(__FUNCTION__);
+  $views_exposed = &backdrop_static(__FUNCTION__);
 
   // Save the form output
   if (!empty($form_output)) {
@@ -1948,7 +1948,7 @@ function views_exposed_form_cache($views_name, $display_name, $form_output = NUL
  * Build a list of theme function names for use most everywhere.
  */
 function views_theme_functions($hook, $view, $display = NULL) {
-  require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'views') . "/theme/theme.inc";
+  require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'views') . "/theme/theme.inc";
   return _views_theme_functions($hook, $view, $display);
 }
 
@@ -2192,7 +2192,7 @@ function views_views_api() {
   return array(
     // In your modules do *not* use views_api_version()!!!
     'api' => views_api_version(),
-    'path' => drupal_get_path('module', 'views') . '/includes',
+    'path' => backdrop_get_path('module', 'views') . '/includes',
   );
 }
 

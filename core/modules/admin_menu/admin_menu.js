@@ -1,8 +1,8 @@
 (function($) {
 
-Drupal.adminMenu = Drupal.adminMenu || {};
-Drupal.adminMenu.behaviors = Drupal.adminMenu.behaviors || {};
-Drupal.adminMenu.hashes = Drupal.adminMenu.hashes || {};
+Backdrop.adminMenu = Backdrop.adminMenu || {};
+Backdrop.adminMenu.behaviors = Backdrop.adminMenu.behaviors || {};
+Backdrop.adminMenu.hashes = Backdrop.adminMenu.hashes || {};
 
 /**
  * Core behavior for Administration menu.
@@ -10,7 +10,7 @@ Drupal.adminMenu.hashes = Drupal.adminMenu.hashes || {};
  * Test whether there is an administration menu is in the output and execute all
  * registered behaviors.
  */
-Drupal.behaviors.adminMenu = {
+Backdrop.behaviors.adminMenu = {
   attach: function (context, settings) {
     // Initialize settings.
     settings.admin_menu = $.extend({
@@ -30,13 +30,13 @@ Drupal.behaviors.adminMenu = {
     // Client-side caching; if administration menu is not in the output, it is
     // fetched from the server and cached in the browser.
     if (!$adminMenu.length && settings.admin_menu.hash) {
-      Drupal.adminMenu.getCache(settings.admin_menu.hash, function (response) {
+      Backdrop.adminMenu.getCache(settings.admin_menu.hash, function (response) {
         if (typeof response == 'string' && response.length > 0) {
           $('body', context).append(response);
         }
         var $adminMenu = $('#admin-menu:not(.admin-menu-processed)', context);
         // Apply our behaviors.
-        Drupal.adminMenu.attachBehaviors(context, settings, $adminMenu);
+        Backdrop.adminMenu.attachBehaviors(context, settings, $adminMenu);
         // Allow resize event handlers to recalculate sizes/positions.
         $(window).triggerHandler('resize');
       });
@@ -44,7 +44,7 @@ Drupal.behaviors.adminMenu = {
     // If the menu is in the output already, this means there is a new version.
     else {
       // Apply our behaviors.
-      Drupal.adminMenu.attachBehaviors(context, settings, $adminMenu);
+      Backdrop.adminMenu.attachBehaviors(context, settings, $adminMenu);
     }
   }
 };
@@ -52,7 +52,7 @@ Drupal.behaviors.adminMenu = {
 /**
  * Apply active trail highlighting based on current path.
  */
-Drupal.adminMenu.behaviors.adminMenuActiveTrail = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.adminMenuActiveTrail = function (context, settings, $adminMenu) {
   if (settings.admin_menu.activeTrail) {
     $adminMenu.find('#admin-menu-menu > li > ul > li > a[href="' + settings.admin_menu.activeTrail + '"]').addClass('active-trail');
   }
@@ -63,9 +63,9 @@ Drupal.adminMenu.behaviors.adminMenuActiveTrail = function (context, settings, $
  *
  * Note that directly applying marginTop does not work in IE. To prevent
  * flickering/jumping page content with client-side caching, this is a regular
- * Drupal behavior.
+ * Backdrop behavior.
  */
-Drupal.behaviors.adminMenuMarginTop = {
+Backdrop.behaviors.adminMenuMarginTop = {
   attach: function (context, settings) {
     if (!settings.admin_menu.suppress && settings.admin_menu.margin_top) {
       $('body:not(.admin-menu)', context).addClass('admin-menu');
@@ -81,19 +81,19 @@ Drupal.behaviors.adminMenuMarginTop = {
  * @param onSuccess
  *   A callback function invoked when the cache request was successful.
  */
-Drupal.adminMenu.getCache = function (hash, onSuccess) {
-  if (Drupal.adminMenu.hashes.hash !== undefined) {
-    return Drupal.adminMenu.hashes.hash;
+Backdrop.adminMenu.getCache = function (hash, onSuccess) {
+  if (Backdrop.adminMenu.hashes.hash !== undefined) {
+    return Backdrop.adminMenu.hashes.hash;
   }
   $.ajax({
     cache: true,
     type: 'GET',
     dataType: 'text', // Prevent auto-evaluation of response.
     global: false, // Do not trigger global AJAX events.
-    url: Drupal.settings.admin_menu.basePath.replace(/admin_menu/, 'js/admin_menu/cache/' + hash),
+    url: Backdrop.settings.admin_menu.basePath.replace(/admin_menu/, 'js/admin_menu/cache/' + hash),
     success: onSuccess,
     complete: function (XMLHttpRequest, status) {
-      Drupal.adminMenu.hashes.hash = status;
+      Backdrop.adminMenu.hashes.hash = status;
     }
   });
 };
@@ -101,7 +101,7 @@ Drupal.adminMenu.getCache = function (hash, onSuccess) {
 /**
  * TableHeader callback to determine top viewport offset.
  */
-Drupal.adminMenu.height = function() {
+Backdrop.adminMenu.height = function() {
   var $adminMenu = $('#admin-menu');
   var height = $adminMenu.outerHeight();
   // In IE, Shadow filter adds some extra height, so we need to remove it from
@@ -120,10 +120,10 @@ Drupal.adminMenu.height = function() {
 /**
  * Attach administrative behaviors.
  */
-Drupal.adminMenu.attachBehaviors = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.attachBehaviors = function (context, settings, $adminMenu) {
   if ($adminMenu.length) {
     $adminMenu.addClass('admin-menu-processed');
-    $.each(Drupal.adminMenu.behaviors, function() {
+    $.each(Backdrop.adminMenu.behaviors, function() {
       this(context, settings, $adminMenu);
     });
   }
@@ -132,7 +132,7 @@ Drupal.adminMenu.attachBehaviors = function (context, settings, $adminMenu) {
 /**
  * Apply 'position: fixed'.
  */
-Drupal.adminMenu.behaviors.positionFixed = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.positionFixed = function (context, settings, $adminMenu) {
   if (settings.admin_menu.position_fixed) {
     $adminMenu.addClass('admin-menu-position-fixed');
     $adminMenu.css('position', 'fixed');
@@ -149,7 +149,7 @@ Drupal.adminMenu.behaviors.positionFixed = function (context, settings, $adminMe
 /**
  * Perform dynamic replacements in cached menu.
  */
-Drupal.adminMenu.behaviors.replacements = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.replacements = function (context, settings, $adminMenu) {
   for (var item in settings.admin_menu.replacements) {
     $(item, $adminMenu).html(settings.admin_menu.replacements[item]);
   }
@@ -158,10 +158,10 @@ Drupal.adminMenu.behaviors.replacements = function (context, settings, $adminMen
 /**
  * Inject destination query strings for current page.
  */
-Drupal.adminMenu.behaviors.destination = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.destination = function (context, settings, $adminMenu) {
   if (settings.admin_menu.destination) {
     $('a.admin-menu-destination', $adminMenu).each(function() {
-      this.search += (!this.search.length ? '?' : '&') + Drupal.settings.admin_menu.destination;
+      this.search += (!this.search.length ? '?' : '&') + Backdrop.settings.admin_menu.destination;
     });
   }
 };
@@ -169,7 +169,7 @@ Drupal.adminMenu.behaviors.destination = function (context, settings, $adminMenu
 /**
  * Adjust the top level items based on the available viewport width.
  */
-Drupal.adminMenu.behaviors.collapseWidth = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.collapseWidth = function (context, settings, $adminMenu) {
   var $menu = $adminMenu.find('#admin-menu-menu');
   var $extra = $adminMenu.find('#admin-menu-extra');
   var resizeTimeout;
@@ -207,7 +207,7 @@ Drupal.adminMenu.behaviors.collapseWidth = function (context, settings, $adminMe
  * @todo This has to run last.  If another script registers additional behaviors
  *   it will not run last.
  */
-Drupal.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
   // Bind events for opening and closing menus on hover/click/touch.
   $adminMenu.on('mouseenter', 'li.expandable', expandChild);
   $adminMenu.on('mouseleave', 'li.expandable', closeChild);
@@ -279,7 +279,7 @@ Drupal.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
 /**
  * Apply the search bar functionality.
  */
-Drupal.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
+Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
   var $input = $adminMenu.find('.admin-menu-search input');
   // Initialize the current search needle.
   var needle = $input.val();

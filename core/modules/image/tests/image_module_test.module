@@ -45,6 +45,6 @@ function image_module_test_null_effect(array &$image, array $data) {
  * Used to keep a count of cache misses in image_effect_definitions().
  */
 function image_module_test_image_effect_info_alter(&$effects) {
-  $image_effects_definition_called = &drupal_static(__FUNCTION__, 0);
+  $image_effects_definition_called = &backdrop_static(__FUNCTION__, 0);
   $image_effects_definition_called++;
 }

@@ -48,7 +48,7 @@ function node_test_node_view(Node $node, $view_mode) {
       'key' => 'testElement',
       'value' => t('Value of testElement RSS element for node !nid.', array('!nid' => $node->nid)),
     );
-    $node->rss_namespaces['xmlns:drupaltest'] = 'http://example.com/test-namespace';
+    $node->rss_namespaces['xmlns:backdroptest'] = 'http://example.com/test-namespace';
 
     // Add content that should be displayed only in the RSS feed.
     $node->content['extra_feed_content'] = array(

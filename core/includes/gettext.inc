@@ -20,7 +20,7 @@
  * Parses Gettext Portable Object information and inserts it into the database.
  *
  * @param $file
- *   Drupal file object corresponding to the PO file to import.
+ *   Backdrop file object corresponding to the PO file to import.
  * @param $langcode
  *   Language code.
  * @param $mode
@@ -29,11 +29,11 @@
  */
 function _locale_import_po($file, $langcode, $mode) {
   // Try to allocate enough time to parse and import the data.
-  drupal_set_time_limit(240);
+  backdrop_set_time_limit(240);
 
   // Check if we have the language already in the database.
   if (!language_load($langcode)) {
-    drupal_set_message(t('The language selected for import is not supported.'), 'error');
+    backdrop_set_message(t('The language selected for import is not supported.'), 'error');
     return FALSE;
   }
 
@@ -48,7 +48,7 @@ function _locale_import_po($file, $langcode, $mode) {
   list($header_done, $additions, $updates, $deletes, $skips) = _locale_import_one_string('db-report');
 
   if (!$header_done) {
-    drupal_set_message(t('The translation file %filename appears to have a missing or malformed header.', array('%filename' => $file->filename)), 'error');
+    backdrop_set_message(t('The translation file %filename appears to have a missing or malformed header.', array('%filename' => $file->filename)), 'error');
   }
 
   // Clear cache and force refresh of JavaScript translations.
@@ -58,7 +58,7 @@ function _locale_import_po($file, $langcode, $mode) {
   // Rebuild the menu, strings may have changed.
   menu_rebuild();
 
-  drupal_set_message(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => $additions, '%update' => $updates, '%delete' => $deletes)));
+  backdrop_set_message(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => $additions, '%update' => $updates, '%delete' => $deletes)));
   watchdog('locale', 'Imported %file into %locale: %number new strings added, %update updated and %delete removed.', array('%file' => $file->filename, '%locale' => $langcode, '%number' => $additions, '%update' => $updates, '%delete' => $deletes));
   if ($skips) {
     if (module_exists('dblog')) {
@@ -67,7 +67,7 @@ function _locale_import_po($file, $langcode, $mode) {
     else {
       $skip_message = format_plural($skips, 'A translation string was skipped because of disallowed or malformed HTML. See the log for details.', '@count translation strings were skipped because of disallowed or malformed HTML. See the log for details.');
     }
-    drupal_set_message($skip_message, 'error');
+    backdrop_set_message($skip_message, 'error');
     watchdog('locale', '@count disallowed HTML string(s) in %file', array('@count' => $skips, '%file' => $file->uri), WATCHDOG_WARNING);
   }
   return TRUE;
@@ -79,7 +79,7 @@ function _locale_import_po($file, $langcode, $mode) {
  * @param $op
  *   Storage operation type: db-store or mem-store.
  * @param $file
- *   Drupal file object corresponding to the PO file to import.
+ *   Backdrop file object corresponding to the PO file to import.
  * @param $mode
  *   Should existing translations be replaced LOCALE_IMPORT_KEEP or
  *   LOCALE_IMPORT_OVERWRITE.
@@ -340,7 +340,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
  * @param $message
  *   The message to be translated.
  * @param $file
- *   Drupal file object corresponding to the PO file to import.
+ *   Backdrop file object corresponding to the PO file to import.
  * @param $lineno
  *   An optional line number argument.
  */
@@ -350,7 +350,7 @@ function _locale_import_message($message, $file, $lineno = NULL) {
     $vars['%line'] = $lineno;
   }
   $t = get_t();
-  drupal_set_message($t($message, $vars), 'error');
+  backdrop_set_message($t($message, $vars), 'error');
 }
 
 /**
@@ -370,9 +370,9 @@ function _locale_import_message($message, $file, $lineno = NULL) {
  *   'db-store'.
  */
 function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NULL, $file = NULL) {
-  $report = &drupal_static(__FUNCTION__, array('additions' => 0, 'updates' => 0, 'deletes' => 0, 'skips' => 0));
-  $header_done = &drupal_static(__FUNCTION__ . ':header_done', FALSE);
-  $strings = &drupal_static(__FUNCTION__ . ':strings', array());
+  $report = &backdrop_static(__FUNCTION__, array('additions' => 0, 'updates' => 0, 'deletes' => 0, 'skips' => 0));
+  $header_done = &backdrop_static(__FUNCTION__ . ':header_done', FALSE);
+  $strings = &backdrop_static(__FUNCTION__ . ':strings', array());
 
   switch ($op) {
     // Return stored strings
@@ -617,7 +617,7 @@ function _locale_import_parse_plural_forms($pluralforms, $filepath) {
     return array($nplurals, $plural);
   }
   else {
-    drupal_set_message(t('The translation file %filepath contains an error: the plural formula could not be parsed.', array('%filepath' => $filepath)), 'error');
+    backdrop_set_message(t('The translation file %filepath contains an error: the plural formula could not be parsed.', array('%filepath' => $filepath)), 'error');
     return FALSE;
   }
 }
@@ -918,7 +918,7 @@ function _locale_export_po_generate($language = NULL, $strings = array(), $heade
 
   if (!isset($header)) {
     if (isset($language)) {
-      $header = '# ' . $language->name . ' translation of ' . variable_get('site_name', 'Drupal') . "\n";
+      $header = '# ' . $language->name . ' translation of ' . variable_get('site_name', 'Backdrop') . "\n";
       $header .= '# Generated by ' . $user->name . ' <' . $user->mail . ">\n";
       $header .= "#\n";
       $header .= "msgid \"\"\n";
@@ -1012,14 +1012,14 @@ function _locale_export_po($language = NULL, $output = NULL) {
     watchdog('locale', 'Exported %locale translation file: %filename.', array('%locale' => $language->name, '%filename' => $filename));
   }
   else {
-    $filename = 'drupal.pot';
+    $filename = 'backdrop.pot';
     watchdog('locale', 'Exported translation file: %filename.', array('%filename' => $filename));
   }
   // Download the file for the client.
   header("Content-Disposition: attachment; filename=$filename");
   header("Content-Type: text/plain; charset=utf-8");
   print $output;
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**

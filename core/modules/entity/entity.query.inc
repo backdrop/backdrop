@@ -740,7 +740,7 @@ class EntityFieldQuery {
    */
   public function execute() {
     // Give a chance to other modules to alter the query.
-    drupal_alter('entity_query', $this);
+    backdrop_alter('entity_query', $this);
     $this->altered = TRUE;
 
     // Initialize the pager.
@@ -805,7 +805,7 @@ class EntityFieldQuery {
       throw new EntityFieldQueryException(t('Entity %entity has no base table.', array('%entity' => $entity_type)));
     }
     $base_table = $entity_info['base table'];
-    $base_table_schema = drupal_get_schema($base_table);
+    $base_table_schema = backdrop_get_schema($base_table);
     $select_query = db_select($base_table);
     $select_query->addExpression(':entity_type', 'entity_type', array(':entity_type' => $entity_type));
     // Process the property conditions.

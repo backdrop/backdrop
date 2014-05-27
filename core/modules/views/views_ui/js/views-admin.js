@@ -6,12 +6,12 @@
 
 "use strict";
 
-Drupal.viewsUi = {};
+Backdrop.viewsUi = {};
 
 /**
  * Improve the user experience of the views edit interface.
  */
- Drupal.behaviors.viewsUiEditView = {
+Backdrop.behaviors.viewsUiEditView = {
   attach: function () {
     // Only show the SQL rewrite warning when the user has chosen the
     // corresponding checkbox.
@@ -25,7 +25,7 @@ Drupal.viewsUi = {};
  * In the add view wizard, use the view name to prepopulate form fields such as
  * page title and menu link.
  */
- Drupal.behaviors.viewsUiAddView = {
+Backdrop.behaviors.viewsUiAddView = {
   attach: function (context) {
     var $context = $(context);
     // Set up regular expressions to allow only numbers, letters, and dashes.
@@ -38,7 +38,7 @@ Drupal.viewsUi = {};
     var $fields = $context.find('[id^="edit-page-title"], [id^="edit-block-title"], [id^="edit-page-link-properties-title"]');
     if ($fields.length) {
       if (!this.fieldsFiller) {
-        this.fieldsFiller = new Drupal.viewsUi.FormFieldFiller($fields);
+        this.fieldsFiller = new Backdrop.viewsUi.FormFieldFiller($fields);
       }
       else {
         // After an AJAX response, this.fieldsFiller will still have event
@@ -53,7 +53,7 @@ Drupal.viewsUi = {};
     var $pathField = $context.find('[id^="edit-page-path"]');
     if ($pathField.length) {
       if (!this.pathFiller) {
-        this.pathFiller = new Drupal.viewsUi.FormFieldFiller($pathField, exclude, replace);
+        this.pathFiller = new Backdrop.viewsUi.FormFieldFiller($pathField, exclude, replace);
       }
       else {
         this.pathFiller.rebind($pathField);
@@ -65,7 +65,7 @@ Drupal.viewsUi = {};
     if ($feedField.length) {
       if (!this.feedFiller) {
         suffix = '.xml';
-        this.feedFiller = new Drupal.viewsUi.FormFieldFiller($feedField, exclude, replace, suffix);
+        this.feedFiller = new Backdrop.viewsUi.FormFieldFiller($feedField, exclude, replace, suffix);
       }
       else {
         this.feedFiller.rebind($feedField);
@@ -75,7 +75,7 @@ Drupal.viewsUi = {};
 };
 
 /**
- * Constructor for the Drupal.viewsUi.FormFieldFiller object.
+ * Constructor for the Backdrop.viewsUi.FormFieldFiller object.
  *
  * Prepopulates a form field based on the view name.
  *
@@ -90,7 +90,7 @@ Drupal.viewsUi = {};
  * @param suffix
  *   Optional. A suffix to append at the end of the target field content.
  */
-Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
+Backdrop.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
   this.source = $('#edit-human-name');
   this.target = $target;
   this.exclude = exclude || false;
@@ -110,7 +110,7 @@ Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
   // Object constructor; no return value.
 };
 
-$.extend(Drupal.viewsUi.FormFieldFiller.prototype, {
+$.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
   /**
    * Bind the form-filling behavior.
    */
@@ -158,18 +158,18 @@ $.extend(Drupal.viewsUi.FormFieldFiller.prototype, {
   }
 });
 
-Drupal.behaviors.addItemForm = {
+Backdrop.behaviors.addItemForm = {
   attach: function (context) {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
     $form.once('views-ui-add-item-form', function() {
-      new Drupal.viewsUi.AddItemForm($form);
+      new Backdrop.viewsUi.AddItemForm($form);
     });
   }
 }
 
-Drupal.viewsUi.AddItemForm = function ($form) {
+Backdrop.viewsUi.AddItemForm = function ($form) {
   $form.on('click', '.views-filterable-options :checkbox', $.proxy(this.handleCheck, this));
 
   // Find the wrapper of the displayed text and hide it until items are checked.
@@ -179,7 +179,7 @@ Drupal.viewsUi.AddItemForm = function ($form) {
   this.checkedItems = [];
 }
 
-Drupal.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
+Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   var $target = $(event.target);
   var label = $.trim($target.next().text());
   // Add/remove the checked item to the list.
@@ -208,7 +208,7 @@ Drupal.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
 /**
  * Refresh the display of the checked items.
  */
-Drupal.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
+Backdrop.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
   // Perhaps we should precache the text div, too.
   this.$selected_div.find('.views-selected-options')
     .html(this.checkedItems.join(', '))
@@ -220,14 +220,14 @@ Drupal.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
  * The following behavior detaches the <input> elements from the DOM, wraps them
  * in an unordered list, then appends them to the list of tabs.
  */
- Drupal.behaviors.viewsUiRenderAddViewButton = {
+Backdrop.behaviors.viewsUiRenderAddViewButton = {
   attach: function (context) {
     // Build the add display menu and pull the display input buttons into it.
     var $menu = $(context).find('#views-display-menu-tabs').once('views-ui-render-add-view-button-processed');
     if (!$menu.length) {
       return;
     }
-    var $addDisplayDropdown = $('<li class="add"><a href="#"><span class="icon add"></span>' + Drupal.t('Add') + '</a><ul class="action-list" style="display:none;"></ul></li>');
+    var $addDisplayDropdown = $('<li class="add"><a href="#"><span class="icon add"></span>' + Backdrop.t('Add') + '</a><ul class="action-list" style="display:none;"></ul></li>');
     var $displayButtons = $menu.nextAll('input.add-display').detach();
     $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
       .parent().first().addClass('first').end().last().addClass('last');
@@ -247,7 +247,7 @@ Drupal.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
     $menu.find('li.add > a').on('click', function (event) {
       event.preventDefault();
       var $trigger = $(this);
-      Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+      Backdrop.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
     });
     // Add a mouseleave handler to close the dropdown when the user mouses
     // away from the item. We use mouseleave instead of mouseout because
@@ -260,24 +260,24 @@ Drupal.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
       var $this = $(this);
       var $trigger = $this.children('a[href="#"]');
       if ($this.children('.action-list').is(':visible')) {
-        Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+        Backdrop.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
       }
     });
   }
 };
 
-Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu = function ($trigger) {
+Backdrop.behaviors.viewsUiRenderAddViewButton.toggleMenu = function ($trigger) {
   $trigger.parent().toggleClass('open');
   $trigger.next().slideToggle('fast');
 };
 
-Drupal.behaviors.viewsUiSearchOptions = {
+Backdrop.behaviors.viewsUiSearchOptions = {
   attach: function (context) {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
     $form.once('views-ui-filter-options', function() {
-      new Drupal.viewsUi.OptionsSearch($form);
+      new Backdrop.viewsUi.OptionsSearch($form);
     });
   }
 };
@@ -289,7 +289,7 @@ Drupal.behaviors.viewsUiSearchOptions = {
  * to the user's search term. Typing in "taxonomy" will show only those options
  * containing "taxonomy" in their label.
  */
-Drupal.viewsUi.OptionsSearch = function ($form) {
+Backdrop.viewsUi.OptionsSearch = function ($form) {
   this.$form = $form;
   // Add a keyup handler to the search box.
   this.$searchBox = this.$form.find('#edit-options-search');
@@ -311,7 +311,7 @@ Drupal.viewsUi.OptionsSearch = function ($form) {
   });
 };
 
-$.extend(Drupal.viewsUi.OptionsSearch.prototype, {
+$.extend(Backdrop.viewsUi.OptionsSearch.prototype, {
   /**
    * Assemble a list of all the filterable options on the form.
    *
@@ -397,7 +397,7 @@ $.extend(Drupal.viewsUi.OptionsSearch.prototype, {
   }
 });
 
-Drupal.behaviors.viewsUiPreview = {
+Backdrop.behaviors.viewsUiPreview = {
  attach: function (context) {
    // Only act on the edit view form.
    var $contextualFiltersBucket = $(context).find('.views-display-column .views-ui-display-tab-bucket.contextual-filters');
@@ -423,17 +423,17 @@ Drupal.behaviors.viewsUiPreview = {
   }
 };
 
-Drupal.behaviors.viewsUiRearrangeFilter = {
+Backdrop.behaviors.viewsUiRearrangeFilter = {
   attach: function (context) {
     // Only act on the rearrange filter form.
-    if (typeof Drupal.tableDrag === 'undefined' || typeof Drupal.tableDrag['views-rearrange-filters'] === 'undefined') {
+    if (typeof Backdrop.tableDrag === 'undefined' || typeof Backdrop.tableDrag['views-rearrange-filters'] === 'undefined') {
       return;
     }
     var $context = $(context);
     var $table = $context.find('#views-rearrange-filters').once('views-rearrange-filters');
     var $operator = $context.find('.form-item-filter-groups-operator').once('views-rearrange-filters');
     if ($table.length) {
-      new Drupal.viewsUi.RearrangeFilterHandler($table, $operator);
+      new Backdrop.viewsUi.RearrangeFilterHandler($table, $operator);
     }
   }
 };
@@ -441,7 +441,7 @@ Drupal.behaviors.viewsUiRearrangeFilter = {
 /**
  * Improve the UI of the rearrange filters dialog box.
  */
-Drupal.viewsUi.RearrangeFilterHandler = function ($table, $operator) {
+Backdrop.viewsUi.RearrangeFilterHandler = function ($table, $operator) {
   // Keep a reference to the <table> being altered and to the div containing
   // the filter groups operator dropdown (if it exists).
   this.table = $table;
@@ -496,14 +496,14 @@ Drupal.viewsUi.RearrangeFilterHandler = function ($table, $operator) {
     .on('click.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
 };
 
-$.extend(Drupal.viewsUi.RearrangeFilterHandler.prototype, {
+$.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
   /**
    * Insert links that allow filter groups to be added and removed.
    */
   insertAddRemoveFilterGroupLinks: function () {
     // Insert a link for adding a new group at the top of the page, and make it
     // match the action links styling used in a typical page.tpl.php. Note that
-    // Drupal does not provide a theme function for this markup, so this is the
+    // Backdrop does not provide a theme function for this markup, so this is the
     // best we can do.
     $('<ul class="action-links"><li><a id="views-add-group-link" href="#">' + this.addGroupButton.val() + '</a></li></ul>')
       .prependTo(this.table.parent())
@@ -519,7 +519,7 @@ $.extend(Drupal.viewsUi.RearrangeFilterHandler.prototype, {
     for (i = 0; i < length; i++) {
       var $removeGroupButton = $(this.removeGroupButtons[i]);
       var buttonId = $removeGroupButton.attr('id');
-      $('<a href="#" class="views-remove-group-link">' + Drupal.t('Remove group') + '</a>')
+      $('<a href="#" class="views-remove-group-link">' + Backdrop.t('Remove group') + '</a>')
         .insertBefore($removeGroupButton)
         // When the link is clicked, dynamically click the corresponding form
         // button.
@@ -532,7 +532,7 @@ $.extend(Drupal.viewsUi.RearrangeFilterHandler.prototype, {
    * Dynamically click the button that adds a new filter group.
    */
   clickAddGroupButton: function (event) {
-    // Due to conflicts between Drupal core's AJAX system and the Views AJAX
+    // Due to conflicts between Backdrop core's AJAX system and the Views AJAX
     // system, the only way to get this to work seems to be to trigger both the
     // .mousedown() and .submit() events.
     this.addGroupButton
@@ -615,7 +615,7 @@ $.extend(Drupal.viewsUi.RearrangeFilterHandler.prototype, {
   },
 
   modifyTableDrag: function () {
-    var tableDrag = Drupal.tableDrag['views-rearrange-filters'];
+    var tableDrag = Backdrop.tableDrag['views-rearrange-filters'];
     var filterHandler = this;
 
     /**
@@ -758,7 +758,7 @@ $.extend(Drupal.viewsUi.RearrangeFilterHandler.prototype, {
 /**
  * Add a select all checkbox, which checks each checkbox at once.
  */
-Drupal.behaviors.viewsFilterConfigSelectAll = {
+Backdrop.behaviors.viewsFilterConfigSelectAll = {
   attach: function (context) {
     // Show the select all checkbox.
     $(context).find('#views-ui-config-item-form div.form-item-options-value-all').once('filterConfigSelectAll')
@@ -787,7 +787,7 @@ Drupal.behaviors.viewsFilterConfigSelectAll = {
  *
  * @see http://www.w3.org/TR/html5/association-of-controls-and-forms.html#implicit-submission
  */
-Drupal.behaviors.viewsImplicitFormSubmission = {
+Backdrop.behaviors.viewsImplicitFormSubmission = {
   attach: function (context, settings) {
     $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
       $(this).keypress(function(event) {
@@ -798,8 +798,8 @@ Drupal.behaviors.viewsImplicitFormSubmission = {
             var buttonId = settings.viewsImplicitFormSubmission[formId].defaultButton;
             var $button = $('#' + buttonId, this.form);
             if ($button.length == 1 && $button.is(':enabled')) {
-              if (Drupal.ajax && Drupal.ajax[buttonId]) {
-                $button.trigger(Drupal.ajax[buttonId].element_settings.event);
+              if (Backdrop.ajax && Backdrop.ajax[buttonId]) {
+                $button.trigger(Backdrop.ajax[buttonId].element_settings.event);
               }
               else {
                 $button.click();
@@ -815,7 +815,7 @@ Drupal.behaviors.viewsImplicitFormSubmission = {
 /**
  * Remove icon class from elements that are themed as buttons or dropbuttons.
  */
-Drupal.behaviors.viewsRemoveIconClass = {
+Backdrop.behaviors.viewsRemoveIconClass = {
   attach: function (context) {
     $(context).find('.dropbutton').once('dropbutton-icon', function () {
       $(this).find('.icon').removeClass('icon');
@@ -826,13 +826,13 @@ Drupal.behaviors.viewsRemoveIconClass = {
 /**
  * Change "Expose filter" buttons into checkboxes.
  */
-Drupal.behaviors.viewsUiCheckboxify = {
+Backdrop.behaviors.viewsUiCheckboxify = {
   attach: function (context, settings) {
     var $buttons = $('#edit-options-expose-button-button, #edit-options-group-button-button').once('views-ui-checkboxify');
     var length = $buttons.length;
     var i;
     for (i = 0; i < length; i++) {
-      new Drupal.viewsUi.Checkboxifier($buttons[i]);
+      new Backdrop.viewsUi.Checkboxifier($buttons[i]);
     }
   }
 };
@@ -841,7 +841,7 @@ Drupal.behaviors.viewsUiCheckboxify = {
  * Change the default widget to select the default group according to the
  * selected widget for the exposed group.
  */
-Drupal.behaviors.viewsUiChangeDefaultWidget = {
+Backdrop.behaviors.viewsUiChangeDefaultWidget = {
   attach: function () {
     function changeDefaultWidget (event) {
       if ($(event.target).prop('checked')) {
@@ -869,7 +869,7 @@ Drupal.behaviors.viewsUiChangeDefaultWidget = {
  * @param button
  *   The DOM object representing the button to be checkboxified.
  */
-Drupal.viewsUi.Checkboxifier = function (button) {
+Backdrop.viewsUi.Checkboxifier = function (button) {
   this.$button = $(button);
   this.$parent = this.$button.parent('div.views-expose, div.views-grouped');
   this.$input = this.$parent.find('input:checkbox, input:radio');
@@ -883,7 +883,7 @@ Drupal.viewsUi.Checkboxifier = function (button) {
 /**
  * When the checkbox is checked or unchecked, simulate a button press.
  */
-Drupal.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
+Backdrop.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
   this.$button.mousedown();
   this.$button.submit();
 };
@@ -891,11 +891,11 @@ Drupal.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
 /**
  * Change the Apply button text based upon the override select state.
  */
-Drupal.behaviors.viewsUiOverrideSelect = {
+Backdrop.behaviors.viewsUiOverrideSelect = {
   attach: function (context) {
     $(context).find('#edit-override-dropdown').once('views-ui-override-button-text', function () {
       var $select = $(this);
-      var $submit = $select.closest('form').find('.form-submit[value="' + Drupal.t('Apply') + '"]');
+      var $submit = $select.closest('form').find('.form-submit[value="' + Backdrop.t('Apply') + '"]');
       var old_value = $submit.val();
 
       $submit.once('views-ui-override-button-text')
@@ -906,13 +906,13 @@ Drupal.behaviors.viewsUiOverrideSelect = {
 
       $select.on('change', function () {
         if ($select.val() === 'default') {
-          $submit.val(Drupal.t('Apply (all displays)'));
+          $submit.val(Backdrop.t('Apply (all displays)'));
         }
         else if ($select.val() === 'default_revert') {
-          $submit.val(Drupal.t('Revert to default'));
+          $submit.val(Backdrop.t('Revert to default'));
         }
         else {
-          $submit.val(Drupal.t('Apply (this display)'));
+          $submit.val(Backdrop.t('Apply (this display)'));
         }
 
         // Update dialog copies of buttons if present.
@@ -922,9 +922,9 @@ Drupal.behaviors.viewsUiOverrideSelect = {
   }
 };
 
-Drupal.behaviors.viewsModalContent = {
+Backdrop.behaviors.viewsModalContent = {
   attach: function (context) {
-    $('body').once('viewsDialog').on('dialogContentResize.viewsDialog', '.ui-dialog-content', Drupal.behaviors.viewsModalContent.handleDialogResize);
+    $('body').once('viewsDialog').on('dialogContentResize.viewsDialog', '.ui-dialog-content', Backdrop.behaviors.viewsModalContent.handleDialogResize);
     // When expanding details, make sure the modal is resized.
     $(context).find('.scroll').once('detailsUpdate').on('click', 'summary', function (e) {
       $(e.currentTarget).trigger('dialogContentResize');
@@ -937,8 +937,8 @@ Drupal.behaviors.viewsModalContent = {
   },
   handleDialogResize: function (e) {
     var $modal = $(e.currentTarget);
-    var $viewsOverride = $modal.find('[data-drupal-views-offset]');
-    var $scroll = $modal.find('[data-drupal-views-scroll]');
+    var $viewsOverride = $modal.find('[data-views-offset]');
+    var $scroll = $modal.find('[data-backdrop-views-scroll]');
     var offset = 0;
     var modalHeight;
     if ($viewsOverride.length && $scroll.length) {

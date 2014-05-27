@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API functions for installing Drupal.
+ * API functions for installing Backdrop.
  */
 
 /**
@@ -10,7 +10,7 @@
  *
  * This can be used to skip running an installation task when certain
  * conditions are met, even though the task may still show on the list of
- * installation tasks presented to the user. For example, the Drupal installer
+ * installation tasks presented to the user. For example, the Backdrop installer
  * uses this flag to skip over the database configuration form when valid
  * database connection information is already available from settings.php. It
  * also uses this flag to skip language import tasks when the installation is
@@ -21,7 +21,7 @@ const INSTALL_TASK_SKIP = 1;
 /**
  * Run the task on each installation request until the database is set up.
  *
- * This is primarily used by the Drupal installer for bootstrap-related tasks.
+ * This is primarily used by the Backdrop installer for bootstrap-related tasks.
  */
 const INSTALL_TASK_RUN_IF_REACHED = 2;
 
@@ -33,16 +33,16 @@ const INSTALL_TASK_RUN_IF_REACHED = 2;
  * This is the default method for running tasks and should be used for most
  * tasks that occur after the database is set up; these tasks will then run
  * once and be marked complete once they are successfully finished. For
- * example, the Drupal installer uses this flag for the batch installation of
+ * example, the Backdrop installer uses this flag for the batch installation of
  * modules on the new site, and also for the configuration form that collects
  * basic site information and sets up the site maintenance account.
  */
 const INSTALL_TASK_RUN_IF_NOT_COMPLETED = 3;
 
 /**
- * Installs Drupal either interactively or via an array of passed-in settings.
+ * Installs Backdrop either interactively or via an array of passed-in settings.
  *
- * The Drupal installation happens in a series of steps, which may be spread
+ * The Backdrop installation happens in a series of steps, which may be spread
  * out over multiple page requests. Each request begins by trying to determine
  * the last completed installation step (also known as a "task"), if one is
  * available from a previous request. Control is then passed to the task
@@ -61,7 +61,7 @@ const INSTALL_TASK_RUN_IF_NOT_COMPLETED = 3;
  *
  * @see install_state_defaults()
  */
-function install_drupal($settings = array()) {
+function install_backdrop($settings = array()) {
   global $install_state;
   // Initialize the installation state with the settings that were passed in,
   // as well as a boolean indicating whether or not this is an interactive
@@ -70,7 +70,7 @@ function install_drupal($settings = array()) {
   $install_state = $settings + array('interactive' => $interactive) + install_state_defaults();
   try {
     // Begin the page request. This adds information about the current state of
-    // the Drupal installation to the passed-in array.
+    // the Backdrop installation to the passed-in array.
     install_begin_request($install_state);
     // Based on the installation state, run the remaining tasks for this page
     // request, and collect any output.
@@ -110,16 +110,16 @@ function install_drupal($settings = array()) {
  * of each page request. They may evolve during the page request, but they are
  * initialized again once the next request begins.
  *
- * Non-interactive Drupal installations can override some of these default
+ * Non-interactive Backdrop installations can override some of these default
  * settings by passing in an array to the installation script, most notably
  * 'parameters' (which contains one-time parameters such as 'profile' and
  * 'langcode' that are normally passed in via the URL) and 'forms' (which can
  * be used to programmatically submit forms during the installation; the keys
  * of each element indicate the name of the installation task that the form
  * submission is for, and the values are used as the $form_state['values']
- * array that is passed on to the form submission via drupal_form_submit()).
+ * array that is passed on to the form submission via backdrop_form_submit()).
  *
- * @see drupal_form_submit()
+ * @see backdrop_form_submit()
  */
 function install_state_defaults() {
   $defaults = array(
@@ -128,28 +128,28 @@ function install_state_defaults() {
     // The last task that was completed during the previous installation
     // request.
     'completed_task' => NULL,
-    // This becomes TRUE only when Drupal's system module is installed.
+    // This becomes TRUE only when Backdrop's system module is installed.
     'database_tables_exist' => FALSE,
     // An array of forms to be programmatically submitted during the
     // installation. The keys of each element indicate the name of the
     // installation task that the form submission is for, and the values are
     // used as the $form_state['values'] array that is passed on to the form
-    // submission via drupal_form_submit().
+    // submission via backdrop_form_submit().
     'forms' => array(),
     // This becomes TRUE only at the end of the installation process, after
-    // all available tasks have been completed and Drupal is fully installed.
+    // all available tasks have been completed and Backdrop is fully installed.
     // It is used by the installer to store correct information in the database
     // about the completed installation, as well as to inform theme functions
     // that all tasks are finished (so that the task list can be displayed
     // correctly).
     'installation_finished' => FALSE,
     // Whether or not this installation is interactive. By default this will
-    // be set to FALSE if settings are passed in to install_drupal().
+    // be set to FALSE if settings are passed in to install_backdrop().
     'interactive' => TRUE,
     // An array of available translation files for the installation.
     'translations' => array(),
     // An array of parameters for the installation, pre-populated by the URL
-    // or by the settings passed in to install_drupal(). This is primarily
+    // or by the settings passed in to install_backdrop(). This is primarily
     // used to store 'profile' (the name of the chosen installation profile)
     // and 'langcode' (the code of the chosen installation language), since
     // these settings need to persist from page request to page request before
@@ -165,7 +165,7 @@ function install_state_defaults() {
     // An array of available installation profiles.
     'profiles' => array(),
     // An array of server variables that will be substituted into the global
-    // $_SERVER array via drupal_override_server_variables(). Used by
+    // $_SERVER array via backdrop_override_server_variables(). Used by
     // non-interactive installations only.
     'server' => array(),
     // This becomes TRUE only when a valid database connection can be
@@ -176,7 +176,7 @@ function install_state_defaults() {
     // installation. This is needed only rarely; for example, it would be used
     // by an installation task that prints JSON output rather than returning a
     // themed page. The most common example of this is during batch processing,
-    // but the Drupal installer automatically takes care of setting this
+    // but the Backdrop installer automatically takes care of setting this
     // parameter properly in that case, so that individual installation tasks
     // which implement the batch API do not need to set it themselves.
     'stop_page_request' => FALSE,
@@ -185,7 +185,7 @@ function install_state_defaults() {
     // example, if a single task needs to be spread out over multiple page
     // requests, or if it needs to perform some validation before allowing
     // itself to be marked complete. The most common examples of this are batch
-    // processing and form submissions, but the Drupal installer automatically
+    // processing and form submissions, but the Backdrop installer automatically
     // takes care of setting this parameter properly in those cases, so that
     // individual installation tasks which implement the batch API or form API
     // do not need to set it themselves.
@@ -219,10 +219,10 @@ function install_begin_request(&$install_state) {
     $install_state['parameters']['langcode'] = preg_replace('/[^a-zA-Z_0-9\-]/', '', $install_state['parameters']['langcode']);
   }
 
-  // Allow command line scripts to override server variables used by Drupal.
-  require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
+  // Allow command line scripts to override server variables used by Backdrop.
+  require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
   if (!$install_state['interactive']) {
-    drupal_override_server_variables($install_state['server']);
+    backdrop_override_server_variables($install_state['server']);
   }
 
   // The user agent header is used to pass a database prefix in the request when
@@ -233,32 +233,32 @@ function install_begin_request(&$install_state) {
     exit;
   }
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
 
-  // This must go after drupal_bootstrap(), which unsets globals!
+  // This must go after backdrop_bootstrap(), which unsets globals!
   global $conf;
 
-  require_once DRUPAL_ROOT . '/core/modules/system/system.install';
-  require_once DRUPAL_ROOT . '/core/includes/common.inc';
-  require_once DRUPAL_ROOT . '/core/includes/file.inc';
-  require_once DRUPAL_ROOT . '/core/includes/install.inc';
-  require_once DRUPAL_ROOT . '/' . variable_get('path_inc', 'core/includes/path.inc');
+  require_once BACKDROP_ROOT . '/core/modules/system/system.install';
+  require_once BACKDROP_ROOT . '/core/includes/common.inc';
+  require_once BACKDROP_ROOT . '/core/includes/file.inc';
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
+  require_once BACKDROP_ROOT . '/' . variable_get('path_inc', 'core/includes/path.inc');
 
   // Load module basics (needed for hook invokes).
-  include_once DRUPAL_ROOT . '/core/includes/module.inc';
-  include_once DRUPAL_ROOT . '/core/includes/session.inc';
+  include_once BACKDROP_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/session.inc';
 
   // Set up $language, so t() caller functions will still work.
-  drupal_language_initialize();
+  backdrop_language_initialize();
 
-  require_once DRUPAL_ROOT . '/core/includes/ajax.inc';
+  require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   $module_list['entity']['filename'] = 'core/modules/entity/entity.module';
   $module_list['user']['filename']   = 'core/modules/user/user.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
-  drupal_load('module', 'system');
-  drupal_load('module', 'entity');
-  drupal_load('module', 'user');
+  backdrop_load('module', 'system');
+  backdrop_load('module', 'entity');
+  backdrop_load('module', 'user');
 
   // Load the cache infrastructure using a "fake" cache implementation that
   // does not attempt to write to the database. We need this during the initial
@@ -268,17 +268,17 @@ function install_begin_request(&$install_state) {
   // (the latter complete in one page request and therefore are forced to
   // continue using the cache implementation they started with) and also
   // because any data put in the cache during the installer is inherently
-  // suspect, due to the fact that Drupal is not fully set up yet.
-  require_once DRUPAL_ROOT . '/core/includes/cache.inc';
-  require_once DRUPAL_ROOT . '/core/includes/cache-install.inc';
-  $conf['cache_default_class'] = 'DrupalFakeCache';
+  // suspect, due to the fact that Backdrop is not fully set up yet.
+  require_once BACKDROP_ROOT . '/core/includes/cache.inc';
+  require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
+  $conf['cache_default_class'] = 'BackdropFakeCache';
 
   // Prepare for themed output. We need to run this at the beginning of the
   // page request to avoid a different theme accidentally getting set. (We also
   // need to run it even in the case of command-line installations, to prevent
   // any code in the installer that happens to initialize the theme system from
   // accessing the database before it is set up yet.)
-  drupal_maintenance_theme();
+  backdrop_maintenance_theme();
 
   // Check existing settings.php.
   $install_state['config_verified'] = install_verify_config();
@@ -287,7 +287,7 @@ function install_begin_request(&$install_state) {
   if ($install_state['settings_verified']) {
     // Initialize the database system. Note that the connection
     // won't be initialized until it is actually requested.
-    require_once DRUPAL_ROOT . '/core/includes/database/database.inc';
+    require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
 
     // Verify the last completed task in the database, if there is one.
     $task = install_verify_completed_task();
@@ -376,7 +376,7 @@ function install_run_task($task, &$install_state) {
   $function = $task['function'];
 
   if ($task['type'] == 'form') {
-    require_once DRUPAL_ROOT . '/core/includes/form.inc';
+    require_once BACKDROP_ROOT . '/core/includes/form.inc';
     if ($install_state['interactive']) {
       // For interactive forms, build the form and ensure that it will not
       // redirect, since the installer handles its own redirection only after
@@ -392,12 +392,12 @@ function install_run_task($task, &$install_state) {
         // setting/checking the database with no_cache property.
         'no_cache' => TRUE,
       );
-      $form = drupal_build_form($function, $form_state);
+      $form = backdrop_build_form($function, $form_state);
       // If a successful form submission did not occur, the form needs to be
       // rendered, which means the task is not complete yet.
       if (empty($form_state['executed'])) {
         $install_state['task_not_complete'] = TRUE;
-        return drupal_render($form);
+        return backdrop_render($form);
       }
       // Otherwise, return nothing so the next task will run in the same
       // request.
@@ -414,7 +414,7 @@ function install_run_task($task, &$install_state) {
         // which requires that referenced variables be passed explicitly.
         'build_info' => array('args' => array(&$install_state)),
       );
-      drupal_form_submit($function, $form_state);
+      backdrop_form_submit($function, $form_state);
       $errors = form_get_errors();
       if (!empty($errors)) {
         throw new Exception(implode("\n", $errors));
@@ -451,7 +451,7 @@ function install_run_task($task, &$install_state) {
     // If we are in the middle of processing this batch, keep sending back
     // any output from the batch process, until the task is complete.
     elseif ($current_batch == $function) {
-      include_once DRUPAL_ROOT . '/core/includes/batch.inc';
+      include_once BACKDROP_ROOT . '/core/includes/batch.inc';
       $output = _batch_page();
       // The task is complete when we try to access the batch page and receive
       // FALSE in return, since this means we are at a URL where we are no
@@ -578,7 +578,7 @@ function install_tasks($install_state) {
   if (!empty($install_state['parameters']['profile'])) {
     // Load the profile install file, because it is not always loaded when
     // hook_install_tasks() is invoked (e.g. batch processing).
-    $profile_install_file = DRUPAL_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.install';
+    $profile_install_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.install';
     if (file_exists($profile_install_file)) {
       include_once $profile_install_file;
     }
@@ -606,7 +606,7 @@ function install_tasks($install_state) {
 
   // Allow the installation profile to modify the full list of tasks.
   if (!empty($install_state['parameters']['profile'])) {
-    $profile_file = DRUPAL_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
+    $profile_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
     if (file_exists($profile_file)) {
       include_once $profile_file;
       $function = $install_state['parameters']['profile'] . '_install_tasks_alter';
@@ -668,7 +668,7 @@ function install_tasks_to_display($install_state) {
  * @see install_full_redirect_url()
  */
 function install_redirect_url($install_state) {
-  return 'core/install.php?' . drupal_http_build_query($install_state['parameters']);
+  return 'core/install.php?' . backdrop_http_build_query($install_state['parameters']);
 }
 
 /**
@@ -690,7 +690,7 @@ function install_full_redirect_url($install_state) {
 /**
  * Displays themed installer output and ends the page request.
  *
- * Installation tasks should use drupal_set_title() to set the desired page
+ * Installation tasks should use backdrop_set_title() to set the desired page
  * title, but otherwise this function takes care of theming the overall page
  * output during every step of the installation.
  *
@@ -700,7 +700,7 @@ function install_full_redirect_url($install_state) {
  *   An array of information about the current installation state.
  */
 function install_display_output($output, $install_state) {
-  drupal_page_header();
+  backdrop_page_header();
 
   // Prevent install.php from being indexed when installed in a sub folder.
   // robots.txt rules are not read if the site is within domain.com/subfolder
@@ -714,7 +714,7 @@ function install_display_output($output, $install_state) {
       'content' => 'noindex, nofollow',
     ),
   );
-  drupal_add_html_head($noindex_meta_tag, 'install_meta_robots');
+  backdrop_add_html_head($noindex_meta_tag, 'install_meta_robots');
 
   // Only show the task list if there is an active task; otherwise, the page
   // request has ended before tasks have even been started, so there is nothing
@@ -723,14 +723,14 @@ function install_display_output($output, $install_state) {
     // Let the theming function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
-    drupal_add_region_content('sidebar_first', theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task)));
+    backdrop_add_region_content('sidebar_first', theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task)));
   }
   print theme('install_page', array('content' => $output));
   exit;
 }
 
 /**
- * Verifies the requirements for installing Drupal.
+ * Verifies the requirements for installing Backdrop.
  *
  * @param $install_state
  *   An array of information about the current installation state.
@@ -743,23 +743,23 @@ function install_display_output($output, $install_state) {
  *   run in the same page request.
  */
 function install_verify_requirements(&$install_state) {
-  // Check the installation requirements for Drupal and this profile.
+  // Check the installation requirements for Backdrop and this profile.
   $requirements = install_check_requirements($install_state);
 
   // Verify existence of all required modules.
-  $requirements += drupal_verify_profile($install_state);
+  $requirements += backdrop_verify_profile($install_state);
 
   // Check the severity of the requirements reported.
-  $severity = drupal_requirements_severity($requirements);
+  $severity = backdrop_requirements_severity($requirements);
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway. See drupal_requirements_url().
+  // and indicating a desire to continue anyway. See backdrop_requirements_url().
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
-      drupal_set_title(st('Requirements problem'));
+      backdrop_set_title(st('Requirements problem'));
       $status_report = theme('status_report', array('requirements' => $requirements));
-      $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(drupal_requirements_url($severity))));
+      $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
       return $status_report;
     }
     else {
@@ -781,14 +781,14 @@ function install_verify_requirements(&$install_state) {
 }
 
 /**
- * Installation task; install the Drupal system module.
+ * Installation task; install the Backdrop system module.
  *
  * @param $install_state
  *   An array of information about the current installation state.
  */
 function install_system_module(&$install_state) {
   // Install system.module.
-  drupal_install_system();
+  backdrop_install_system();
 
   // Call file_ensure_htaccess() to ensure that all of Backdrop's standard
   // directories (e.g., the public and private files directories) have
@@ -809,7 +809,7 @@ function install_system_module(&$install_state) {
 
   // The installation profile is also a module, which needs to be installed
   // after all the dependencies have been installed.
-  $modules[] = drupal_get_profile();
+  $modules[] = backdrop_get_profile();
 
   variable_set('install_profile_modules', array_diff($modules, array('system')));
   $install_state['database_tables_exist'] = TRUE;
@@ -819,7 +819,7 @@ function install_system_module(&$install_state) {
  * Verifies and returns the last installation task that was completed.
  *
  * @return
- *   The last completed task, if there is one. An exception is thrown if Drupal
+ *   The last completed task, if there is one. An exception is thrown if Backdrop
  *   is already installed.
  */
 function install_verify_completed_task() {
@@ -867,7 +867,7 @@ function install_verify_settings() {
   // Verify existing settings (if any).
   if (!empty($databases) && install_verify_pdo()) {
     $database = $databases['default']['default'];
-    drupal_static_reset('conf_path');
+    backdrop_static_reset('conf_path');
     $settings_file = conf_path(FALSE) . '/settings.php';
     $errors = install_database_errors($database, $settings_file);
     if (empty($errors)) {
@@ -910,13 +910,13 @@ function install_config_directories(&$install_state) {
 function install_settings_form($form, &$form_state, &$install_state) {
   global $databases;
 
-  drupal_static_reset('conf_path');
+  backdrop_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
   $database = isset($databases['default']['default']) ? $databases['default']['default'] : array();
 
-  drupal_set_title(st('Database configuration'));
+  backdrop_set_title(st('Database configuration'));
 
-  $drivers = drupal_get_database_types();
+  $drivers = backdrop_get_database_types();
   $drivers_keys = array_keys($drivers);
 
   $form['driver'] = array(
@@ -924,7 +924,7 @@ function install_settings_form($form, &$form_state, &$install_state) {
     '#title' => st('Database type'),
     '#required' => TRUE,
     '#default_value' => !empty($database['driver']) ? $database['driver'] : current($drivers_keys),
-    '#description' => st('The type of database your @drupal data will be stored in.', array('@drupal' => drupal_install_profile_distribution_name())),
+    '#description' => st('The type of database your @profile data will be stored in.', array('@profile' => backdrop_install_profile_distribution_name())),
   );
   if (count($drivers) == 1) {
     $form['driver']['#disabled'] = TRUE;
@@ -989,10 +989,10 @@ function install_database_errors($database, $settings_file) {
   $errors = array();
 
   // Check database type.
-  $database_types = drupal_get_database_types();
+  $database_types = backdrop_get_database_types();
   $driver = $database['driver'];
   if (!isset($database_types[$driver])) {
-    $errors['driver'] = st("In your %settings_file file you have configured @drupal to use a %driver server, however your PHP installation currently does not support this database type.", array('%settings_file' => $settings_file, '@drupal' => drupal_install_profile_distribution_name(), '%driver' => $driver));
+    $errors['driver'] = st("In your %settings_file file you have configured @profile to use a %driver server, however your PHP installation currently does not support this database type.", array('%settings_file' => $settings_file, '@profile' => backdrop_install_profile_distribution_name(), '%driver' => $driver));
   }
   else {
     // Run driver specific validation
@@ -1036,14 +1036,14 @@ function install_settings_form_submit($form, &$form_state) {
     'value' => $db_settings['db_prefix'],
   );
   $settings['hash_salt'] = array(
-    'value' => drupal_random_key(),
+    'value' => backdrop_random_key(),
     'required' => TRUE,
   );
-  drupal_rewrite_settings($settings);
+  backdrop_rewrite_settings($settings);
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
   // last step is important since we want to trigger an error if the new
-  // database already has Drupal installed.
+  // database already has Backdrop installed.
   $install_state['settings_verified'] = TRUE;
   $install_state['completed_task'] = install_verify_completed_task();
 }
@@ -1079,10 +1079,10 @@ function install_select_profile(&$install_state) {
       // yet), rather just a convenience method for setting parameters in the
       // URL.
       if ($install_state['interactive']) {
-        include_once DRUPAL_ROOT . '/core/includes/form.inc';
-        drupal_set_title(st('Select an installation profile'));
-        $form = drupal_get_form('install_select_profile_form', $install_state['profiles']);
-        return drupal_render($form);
+        include_once BACKDROP_ROOT . '/core/includes/form.inc';
+        backdrop_set_title(st('Select an installation profile'));
+        $form = backdrop_get_form('install_select_profile_form', $install_state['profiles']);
+        return backdrop_render($form);
       }
       else {
         throw new Exception(install_no_profile_error());
@@ -1105,7 +1105,7 @@ function _install_select_profile($profiles) {
   if (sizeof($profiles) == 1) {
     $profile = array_pop($profiles);
     // TODO: is this right?
-    require_once DRUPAL_ROOT . '/' . $profile->uri;
+    require_once BACKDROP_ROOT . '/' . $profile->uri;
     return $profile->name;
   }
   else {
@@ -1154,7 +1154,7 @@ function install_select_profile_form($form, &$form_state, $profile_files) {
 
   foreach ($profile_files as $profile) {
     // TODO: is this right?
-    include_once DRUPAL_ROOT . '/' . $profile->uri;
+    include_once BACKDROP_ROOT . '/' . $profile->uri;
 
     $details = install_profile_info($profile->name);
     // Don't show hidden profiles. This is used by to hide the testing profile,
@@ -1284,24 +1284,24 @@ function install_select_language(&$install_state) {
       if ($install_state['interactive']) {
         $directory = variable_get('locale_translate_file_directory', 'files/translations');
 
-        drupal_set_title(st('Choose language'));
+        backdrop_set_title(st('Choose language'));
         if (!empty($install_state['parameters']['translate'])) {
-          $output = '<p>Follow these steps to translate Drupal into your language:</p>';
+          $output = '<p>Follow these steps to translate Backdrop into your language:</p>';
           $output .= '<ol>';
           $output .= '<li>Download a translation from the <a href="http://localize.drupal.org/download" target="_blank">translation server</a>.</li>';
           $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
           $output .= '</ol>';
-          $output .= '<p>For more information on installing Drupal in different languages, visit the <a href="http://drupal.org/localize" target="_blank">drupal.org handbook page</a>.</p>';
+          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="http://drupal.org/localize" target="_blank">drupal.org handbook page</a>.</p>';
           $output .= '<p>How should the installation continue?</p>';
           $output .= '<ul>';
-          $output .= '<li><a href="' . check_url(drupal_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
-          $output .= '<li><a href="' . check_url(drupal_current_script_url(array('langcode' => 'en', 'translate' => NULL))) . '">Continue installation in English</a></li>';
+          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
+          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('langcode' => 'en', 'translate' => NULL))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {
-          include_once DRUPAL_ROOT . '/core/includes/form.inc';
-          $elements = drupal_get_form('install_select_language_form', $files);
-          $output = drupal_render($elements);
+          include_once BACKDROP_ROOT . '/core/includes/form.inc';
+          $elements = backdrop_get_form('install_select_language_form', $files);
+          $output = backdrop_render($elements);
         }
         return $output;
       }
@@ -1318,10 +1318,10 @@ function install_select_language(&$install_state) {
       // yet), rather just a convenience method for setting parameters in the
       // URL.
       if ($install_state['interactive']) {
-        drupal_set_title(st('Choose language'));
-        include_once DRUPAL_ROOT . '/core/includes/form.inc';
-        $elements = drupal_get_form('install_select_language_form', $files);
-        return drupal_render($elements);
+        backdrop_set_title(st('Choose language'));
+        include_once BACKDROP_ROOT . '/core/includes/form.inc';
+        $elements = backdrop_get_form('install_select_language_form', $files);
+        return backdrop_render($elements);
       }
       else {
         throw new Exception(st('Sorry, you must select a language to continue the installation.'));
@@ -1336,8 +1336,8 @@ function install_select_language(&$install_state) {
  * @ingroup forms
  */
 function install_select_language_form($form, &$form_state, $files) {
-  include_once DRUPAL_ROOT . '/core/includes/standard.inc';
-  include_once DRUPAL_ROOT . '/core/includes/locale.inc';
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
   $standard_languages = standard_language_list();
   $select_options = array();
@@ -1369,7 +1369,7 @@ function install_select_language_form($form, &$form_state, $files) {
 
   if (count($files) == 1) {
     $form['help'] = array(
-      '#markup' => '<p><a href="' . check_url(drupal_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Drupal in other languages') . '</a></p>',
+      '#markup' => '<p><a href="' . check_url(backdrop_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Backdrop in other languages') . '</a></p>',
     );
   }
   $form['actions'] = array('#type' => 'actions');
@@ -1384,17 +1384,17 @@ function install_select_language_form($form, &$form_state, $files) {
  * Indicates that there are no profiles available.
  */
 function install_no_profile_error() {
-  drupal_set_title(st('No profiles available'));
+  backdrop_set_title(st('No profiles available'));
   return st('We were unable to find any installation profiles. Installation profiles tell us what modules to enable and what schema to install in the database. A profile is necessary to continue with the installation process.');
 }
 
 /**
- * Indicates that Drupal has already been installed.
+ * Indicates that Backdrop has already been installed.
  */
 function install_already_done_error() {
   global $base_url;
 
-  drupal_set_title(st('Drupal already installed'));
+  backdrop_set_title(st('Backdrop already installed'));
   return st('<ul><li>To start over, you must empty your existing database.</li><li>To install to a different database, edit the appropriate <em>settings.php</em> file in the <em>sites</em> folder.</li><li>To upgrade an existing installation, proceed to the <a href="@base-url/core/update.php">update script</a>.</li><li>View your <a href="@base-url">existing site</a>.</li></ul>', array('@base-url' => $base_url));
 }
 
@@ -1407,7 +1407,7 @@ function install_already_done_error() {
  *   the profile cannot be loaded.
  */
 function install_load_profile(&$install_state) {
-  $profile_file = DRUPAL_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
+  $profile_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
   if (file_exists($profile_file)) {
     include_once $profile_file;
     $install_state['profile_info'] = install_profile_info($install_state['parameters']['profile'], $install_state['parameters']['langcode']);
@@ -1418,13 +1418,13 @@ function install_load_profile(&$install_state) {
 }
 
 /**
- * Performs a full bootstrap of Drupal during installation.
+ * Performs a full bootstrap of Backdrop during installation.
  *
  * @param $install_state
  *   An array of information about the current installation state.
  */
 function install_bootstrap_full(&$install_state) {
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 }
 
 /**
@@ -1473,7 +1473,7 @@ function install_profile_modules(&$install_state) {
   }
   $batch = array(
     'operations' => $operations,
-    'title' => st('Installing @drupal', array('@drupal' => drupal_install_profile_distribution_name())),
+    'title' => st('Installing @profile', array('@profile' => backdrop_install_profile_distribution_name())),
     'error_message' => st('The installation has encountered an error.'),
     'finished' => '_install_profile_modules_finished',
   );
@@ -1490,14 +1490,14 @@ function install_profile_modules(&$install_state) {
  *   The batch definition, if there are language files to import.
  */
 function install_import_translations(&$install_state) {
-  include_once DRUPAL_ROOT . '/core/includes/locale.inc';
-  include_once drupal_get_path('module', 'locale') . '/locale.bulk.inc';
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+  include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   $langcode = $install_state['parameters']['langcode'];
 
-  include_once DRUPAL_ROOT . '/core/includes/standard.inc';
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
-    // Drupal does not know about this language, so we prefill its values with
+    // Backdrop does not know about this language, so we prefill its values with
     // our best guess. The user will be able to edit afterwards.
     $language = (object) array(
       'langcode' => $langcode,
@@ -1533,27 +1533,27 @@ function install_import_translations(&$install_state) {
  * @ingroup forms
  */
 function install_configure_form($form, &$form_state, &$install_state) {
-  drupal_set_title(st('Configure site'));
+  backdrop_set_title(st('Configure site'));
 
-  drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
+  backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
   // Add JavaScript time zone detection.
-  drupal_add_js('core/misc/timezone.js');
+  backdrop_add_js('core/misc/timezone.js');
   // We add these strings as settings because JavaScript translation does not
   // work during installation.
-  drupal_add_js(array('copyFieldValue' => array('edit-site-mail' => array('edit-account-mail'))), 'setting');
-  drupal_add_js('jQuery(function () { Drupal.cleanURLsInstallCheck(); });', 'inline');
+  backdrop_add_js(array('copyFieldValue' => array('edit-site-mail' => array('edit-account-mail'))), 'setting');
+  backdrop_add_js('jQuery(function () { Backdrop.cleanURLsInstallCheck(); });', 'inline');
   // Build menu to allow clean URL check.
   menu_rebuild();
 
   // Cache a fully-built schema. This is necessary for any invocation of
   // index.php because: (1) setting cache table entries requires schema
   // information, (2) that occurs during bootstrap before any module are
-  // loaded, so (3) if there is no cached schema, drupal_get_schema() will
+  // loaded, so (3) if there is no cached schema, backdrop_get_schema() will
   // try to generate one but with no loaded modules will return nothing.
   //
   // This logically could be done during the 'install_finished' task, but the
   // clean URL check requires it now.
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 
   // Return the form.
   return _install_configure_form($form, $form_state, $install_state);
@@ -1574,7 +1574,7 @@ function install_configure_form($form, &$form_state, &$install_state) {
  *   http://drupal.org/node/1191488.
  */
 function install_import_translations_remaining(&$install_state) {
-  include_once drupal_get_path('module', 'locale') . '/locale.bulk.inc';
+  include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   return locale_translate_batch_import_files($install_state['parameters']['langcode']);
 }
 
@@ -1591,36 +1591,36 @@ function install_finished(&$install_state) {
   // Flush all caches to ensure that any full bootstraps during the installer
   // do not leave stale cached data, and that any content types or other items
   // registered by the installation profile are registered correctly.
-  drupal_flush_all_caches();
+  backdrop_flush_all_caches();
 
   // Remember the profile which was used.
-  variable_set('install_profile', drupal_get_profile());
+  variable_set('install_profile', backdrop_get_profile());
 
   // Installation profiles are always loaded last
   db_update('system')
     ->fields(array('weight' => 1000))
     ->condition('type', 'module')
-    ->condition('name', drupal_get_profile())
+    ->condition('name', backdrop_get_profile())
     ->execute();
 
   // Cache a fully-built schema.
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 
   // Run cron to populate update status tables (if available) so that users
-  // will be warned if they've installed an out of date Drupal version.
+  // will be warned if they've installed an out of date Backdrop version.
   // Will also trigger indexing of profile-supplied content or feeds.
-  drupal_cron_run();
+  backdrop_cron_run();
 
-  $message = '<strong>' . st('Congratulations, you installed @profile!', array('@profile' => drupal_install_profile_distribution_name())) . '</strong>';
+  $message = '<strong>' . st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name())) . '</strong>';
 
   // Warn about settings.php permissions risk.
   $settings_file = conf_path() . '/settings.php';
-  if (drupal_verify_install_file($settings_file, FILE_WRITABLE)) {
+  if (backdrop_verify_install_file($settings_file, FILE_WRITABLE)) {
     $message .= ' ' . st('Now that installation is complete, you should remove write permissions to the settings.php file. See the site <a href="!status-report">status report</a> for more information.', array('%file' => $settings_file, '!status-report' => url('admin/reports/status')));
   }
 
-  drupal_set_message($message);
-  drupal_goto('<front>');
+  backdrop_set_message($message);
+  backdrop_goto('<front>');
 }
 
 /**
@@ -1628,7 +1628,7 @@ function install_finished(&$install_state) {
  */
 function _install_module_batch($module, $module_name, &$context) {
   // Install and enable the module right away, so that the module will be
-  // loaded by drupal_bootstrap in subsequent batch requests, and other
+  // loaded by backdrop_bootstrap in subsequent batch requests, and other
   // modules possibly depending on it can safely perform their installation
   // steps.
   module_enable(array($module), FALSE);
@@ -1642,7 +1642,7 @@ function _install_module_batch($module, $module_name, &$context) {
 function _install_profile_modules_finished($success, $results, $operations) {
   // Flush all caches to complete the module installation process. Subsequent
   // installation tasks will now have full access to the profile's modules.
-  drupal_flush_all_caches();
+  backdrop_flush_all_caches();
 }
 
 /**
@@ -1652,7 +1652,7 @@ function install_check_requirements($install_state) {
   $profile = $install_state['parameters']['profile'];
 
   // Check the profile requirements.
-  $requirements = drupal_check_profile($profile);
+  $requirements = backdrop_check_profile($profile);
 
   // If Backdrop is not set up already, we need to update the settings file.
   if (!$install_state['settings_verified']) {
@@ -1661,11 +1661,11 @@ function install_check_requirements($install_state) {
     $settings_file = $conf_path . '/settings.php';
     $exists = FALSE;
     // Verify that the directory exists.
-    if (drupal_verify_install_file($conf_path, FILE_EXIST, 'dir')) {
+    if (backdrop_verify_install_file($conf_path, FILE_EXIST, 'dir')) {
       // Check if a settings.php file already exists.
-      if (drupal_verify_install_file($settings_file, FILE_EXIST)) {
+      if (backdrop_verify_install_file($settings_file, FILE_EXIST)) {
         // If it does, make sure it is writable.
-        $writable = drupal_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
+        $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
         $exists = TRUE;
       }
     }
@@ -1676,7 +1676,7 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file does not exist.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array('@profile' => drupal_install_profile_distribution_name(), '@file' => $settings_file)),
+        'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array('@profile' => backdrop_install_profile_distribution_name(), '@file' => $settings_file)),
       );
     }
     else {
@@ -1691,7 +1691,7 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">online handbook</a>.', array('@profile' => drupal_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'http://drupal.org/server-permissions')),
+        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">online handbook</a>.', array('@profile' => backdrop_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'http://backdropcms.org/guide/installation')),
       );
     }
     else {
@@ -1716,7 +1716,7 @@ function install_check_requirements($install_state) {
  * @ingroup forms
  */
 function _install_configure_form($form, &$form_state, &$install_state) {
-  include_once DRUPAL_ROOT . '/core/includes/locale.inc';
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
   $form['site_information'] = array(
     '#type' => 'fieldset',
@@ -1800,7 +1800,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
       2 => st('Receive e-mail notifications'),
     ),
     '#default_value' => array(1, 2),
-    '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="@drupal">Drupal.org</a>.', array('@drupal' => 'http://drupal.org')),
+    '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="http://backdropcms.org">BackdropCMS.org</a>.'),
     '#weight' => 15,
   );
   $form['update_notifications']['update_status_module'][2] = array(

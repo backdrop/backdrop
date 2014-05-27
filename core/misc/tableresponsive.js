@@ -3,9 +3,9 @@
 "use strict";
 
 /**
- * Attach the tableResponsive function to Drupal.behaviors.
+ * Attach the tableResponsive function to Backdrop.behaviors.
  */
-Drupal.behaviors.tableResponsive = {
+Backdrop.behaviors.tableResponsive = {
   attach: function (context, settings) {
     var $tables = $(context).find('table.responsive-enabled').once('tableresponsive');
     if ($tables.length) {
@@ -29,15 +29,15 @@ Drupal.behaviors.tableResponsive = {
 function TableResponsive (table) {
   this.table = table;
   this.$table = $(table);
-  this.showText = Drupal.t('Show all columns');
-  this.hideText = Drupal.t('Hide less important columns');
+  this.showText = Backdrop.t('Show all columns');
+  this.hideText = Backdrop.t('Hide less important columns');
   // Store a reference to the header elements of the table so that the DOM is
   // traversed only once to find them.
   this.$headers = this.$table.find('th');
   // Add a link before the table for users to show or hide weight columns.
   this.$link = $('<a href="#" class="tableresponsive-toggle"></a>')
     .attr({
-      'title': Drupal.t('Show table cells that were hidden to make the table fit within a small screen.')
+      'title': Backdrop.t('Show table cells that were hidden to make the table fit within a small screen.')
     })
     .on('click', $.proxy(this, 'eventhandlerToggleColumns'));
 
@@ -114,7 +114,7 @@ $.extend(TableResponsive.prototype, {
     }
   }
 });
-// Make the TableResponsive object available in the Drupal namespace.
-Drupal.TableResponsive = TableResponsive;
+// Make the TableResponsive object available in the Backdrop namespace.
+Backdrop.TableResponsive = TableResponsive;
 
 })(jQuery);

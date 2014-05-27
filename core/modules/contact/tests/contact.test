@@ -7,7 +7,7 @@
 /**
  * Tests the site-wide contact form.
  */
-class ContactSitewideTestCase extends DrupalWebTestCase {
+class ContactSitewideTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('contact');
   }
@@ -17,8 +17,8 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
    */
   function testSiteWideContact() {
     // Create and login administrative user.
-    $admin_user = $this->drupalCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer account settings'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer account settings'));
+    $this->backdropLogin($admin_user);
 
     $flood_limit = 3;
     $config = config('contact.settings');
@@ -29,19 +29,19 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     // Set settings.
     $edit = array();
     $edit['contact_default_status'] = TRUE;
-    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Setting successfully saved.'));
 
     // Delete old categories to ensure that new categories are used.
     $this->deleteCategories();
 
     // Ensure that the contact form won't be shown without categories.
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
-    $this->drupalLogout();
-    $this->drupalGet('contact');
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    $this->backdropLogout();
+    $this->backdropGet('contact');
     $this->assertResponse(404);
-    $this->drupalLogin($admin_user);
-    $this->drupalGet('contact');
+    $this->backdropLogin($admin_user);
+    $this->backdropGet('contact');
     $this->assertResponse(200);
     $this->assertText(t('The contact form has not been configured.'));
 
@@ -77,13 +77,12 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), t('Category successfully saved.'));
 
     // Ensure that the contact form is shown without a category selection input.
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
-    $this->drupalLogout();
-
-    $this->drupalGet('contact');
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    $this->backdropLogout();
+    $this->backdropGet('contact');
     $this->assertText(t('Your e-mail address'), t('Contact form is shown when there is one category.'));
     $this->assertNoText(t('Category'), t('When there is only one category, the category selection element is hidden.'));
-    $this->drupalLogin($admin_user);
+    $this->backdropLogin($admin_user);
 
     // Add more categories.
     $this->addCategory($category = $this->randomName(16), implode(',', array($recipients[0], $recipients[1])), '', FALSE);
@@ -101,16 +100,16 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     db_delete('flood')->execute();
     $num_records_after = db_query("SELECT COUNT(*) FROM {flood}")->fetchField();
     $this->assertIdentical($num_records_after, '0', t('Flood table emptied.'));
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Check to see that anonymous user cannot see contact page without permission.
-    user_role_revoke_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
-    $this->drupalGet('contact');
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    $this->backdropGet('contact');
     $this->assertResponse(403, t('Access denied to anonymous user without permission.'));
 
     // Give anonymous user permission and see that page is viewable.
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
-    $this->drupalGet('contact');
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    $this->backdropGet('contact');
     $this->assertResponse(200, t('Access granted to anonymous user with permission.'));
 
     // Submit contact form with invalid values.
@@ -132,7 +131,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $config->setData($config_data);
     $config->save();
 
-    $this->drupalGet('contact');
+    $this->backdropGet('contact');
     $this->assertRaw(t('- Please choose -'), t('Without selected categories the visitor is asked to chose a category.'));
 
     // Submit contact form with invalid category id (cid 0).
@@ -145,13 +144,13 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
       $this->assertText(t('Your message has been sent.'), t('Message sent.'));
     }
     // Submit contact form one over limit.
-    $this->drupalGet('contact');
+    $this->backdropGet('contact');
     $this->assertResponse(403, t('Access denied to anonymous user after reaching message treshold.'));
     $config = config('contact.settings');
     $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' =>    $config->get('contact_threshold_limit'), '@interval' => format_interval(600))), t('Message threshold reached.'));
 
     // Delete created categories.
-    $this->drupalLogin($admin_user);
+    $this->backdropLogin($admin_user);
     $this->deleteCategories();
   }
 
@@ -160,8 +159,8 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
   */
   function testAutoReply() {
     // Create and login administrative user.
-    $admin_user = $this->drupalCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer permissions', 'administer users'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer permissions', 'administer users'));
+    $this->backdropLogin($admin_user);
 
     // Set up three categories, 2 with an auto-reply and one without.
     $foo_autoreply = $this->randomName(40);
@@ -176,23 +175,23 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $this->submitContact($this->randomName(16), $email, $subject, 2, $this->randomString(128));
 
     // We are testing the auto-reply, so there should be one e-mail going to the sender.
-    $captured_emails = $this->drupalGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'foo@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'foo@example.com'));
     $this->assertEqual(count($captured_emails), 1, t('Auto-reply e-mail was sent to the sender for category "foo".'), t('Contact'));
-    $this->assertEqual($captured_emails[0]['body'], drupal_html_to_text($foo_autoreply), t('Auto-reply e-mail body is correct for category "foo".'), t('Contact'));
+    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($foo_autoreply), t('Auto-reply e-mail body is correct for category "foo".'), t('Contact'));
 
     // Test the auto-reply for category 'bar'.
     $email = $this->randomName(32) . '@example.com';
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 3, $this->randomString(128));
 
     // Auto-reply for category 'bar' should result in one auto-reply e-mail to the sender.
-    $captured_emails = $this->drupalGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'bar@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'bar@example.com'));
     $this->assertEqual(count($captured_emails), 1, t('Auto-reply e-mail was sent to the sender for category "bar".'), t('Contact'));
-    $this->assertEqual($captured_emails[0]['body'], drupal_html_to_text($bar_autoreply), t('Auto-reply e-mail body is correct for category "bar".'), t('Contact'));
+    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($bar_autoreply), t('Auto-reply e-mail body is correct for category "bar".'), t('Contact'));
 
     // Verify that no auto-reply is sent when the auto-reply field is left blank.
     $email = $this->randomName(32) . '@example.com';
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 4, $this->randomString(128));
-    $captured_emails = $this->drupalGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'no_autoreply@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'no_autoreply@example.com'));
     $this->assertEqual(count($captured_emails), 0, t('No auto-reply e-mail was sent to the sender for category "no-autoreply".'), t('Contact'));
   }
 
@@ -215,7 +214,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $edit['recipients'] = $recipients;
     $edit['reply'] = $reply;
     $edit['selected'] = ($selected ? '1' : '0');
-    $this->drupalPost('admin/structure/contact/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/contact/add', $edit, t('Save'));
   }
 
   /**
@@ -238,7 +237,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $edit['recipients'] = $recipients;
     $edit['reply'] = $reply;
     $edit['selected'] = ($selected ? '1' : '0');
-    $this->drupalPost('admin/structure/contact/edit/' . $category_id, $edit, t('Save'));
+    $this->backdropPost('admin/structure/contact/edit/' . $category_id, $edit, t('Save'));
     return ($category_id);
   }
 
@@ -263,7 +262,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $edit['subject'] = $subject;
     $edit['cid'] = $cid;
     $edit['message'] = $message;
-    $this->drupalPost('contact', $edit, t('Send message'));
+    $this->backdropPost('contact', $edit, t('Send message'));
   }
 
   /**
@@ -274,7 +273,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     foreach ($category_ids as $cid) {
       $category = contact_load($cid);
       $category_name = $category['category'];
-      $this->drupalPost('admin/structure/contact/delete/' . $cid, array(), t('Delete'));
+      $this->backdropPost('admin/structure/contact/delete/' . $cid, array(), t('Delete'));
       $this->assertRaw(t('Category %category has been deleted.', array('%category' => $category_name)), t('Category deleted successfully.'));
     }
   }
@@ -298,7 +297,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
 /**
  * Tests the personal contact form.
  */
-class ContactPersonalTestCase extends DrupalWebTestCase {
+class ContactPersonalTestCase extends BackdropWebTestCase {
   private $admin_user;
   private $web_user;
   private $contact_user;
@@ -307,15 +306,15 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
     parent::setUp('contact');
 
     // Create an admin user.
-    $this->admin_user = $this->drupalCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
+    $this->admin_user = $this->backdropCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
 
     // Create some normal users with their contact forms enabled by default.
     $config = config('contact.settings');
     $config->set('contact_default_status', TRUE);
     $config->save();
 
-    $this->web_user = $this->drupalCreateUser(array('access user contact forms'));
-    $this->contact_user = $this->drupalCreateUser();
+    $this->web_user = $this->backdropCreateUser(array('access user contact forms'));
+    $this->contact_user = $this->backdropCreateUser();
   }
 
   /**
@@ -323,62 +322,62 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
    */
   function testPersonalContactAccess() {
     // Test allowed access to user with contact form enabled.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
     // Test denied access to the user's own contact form.
-    $this->drupalGet('user/' . $this->web_user->uid . '/contact');
+    $this->backdropGet('user/' . $this->web_user->uid . '/contact');
     $this->assertResponse(403);
 
     // Test always denied access to the anonymous user contact form.
-    $this->drupalGet('user/0/contact');
+    $this->backdropGet('user/0/contact');
     $this->assertResponse(403);
 
     // Test that anonymous users can access the contact form.
-    $this->drupalLogout();
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access user contact forms'));
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropLogout();
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access user contact forms'));
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
     // Revoke the personal contact permission for the anonymous user.
-    user_role_revoke_permissions(DRUPAL_ANONYMOUS_RID, array('access user contact forms'));
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_RID, array('access user contact forms'));
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(403);
 
     // Disable the personal contact form.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit = array('contact_default_status' => FALSE);
-    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Setting successfully saved.'));
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Re-create our contacted user with personal contact forms disabled by
     // default.
-    $this->contact_user = $this->drupalCreateUser();
+    $this->contact_user = $this->backdropCreateUser();
 
     // Test denied access to a user with contact form disabled.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(403);
 
     // Test allowed access for admin user to a user with contact form disabled.
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
     // Re-create our contacted user as a blocked user.
-    $this->contact_user = $this->drupalCreateUser();
+    $this->contact_user = $this->backdropCreateUser();
     $this->contact_user->status = 0;
     $this->contact_user->save();
 
     // Test that blocked users can still be contacted by admin.
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
     // Test that blocked users cannot be contacted by non-admins.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(403);
   }
 
@@ -396,7 +395,7 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
     $num_records_flood = db_query("SELECT COUNT(*) FROM {flood}")->fetchField();
     $this->assertIdentical($num_records_flood, '0', 'Flood table emptied.');
 
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     // Submit contact form with correct values and check flood interval.
     for ($i = 0; $i < $flood_limit; $i++) {
@@ -405,12 +404,12 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
     }
 
     // Submit contact form one over limit.
-    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => $flood_limit, '@interval' => format_interval($config->get('contact_threshold_window')))), 'Normal user denied access to flooded contact form.');
 
     // Test that the admin user can still access the contact form even though
     // the flood limit was reached.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $this->assertNoText('Try again later.', 'Admin user not denied access to flooded contact form.');
   }
 
@@ -427,6 +426,6 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
       'subject' => $this->randomName(16),
       'message' => $this->randomName(64),
     );
-    $this->drupalPost('user/' . $account->uid . '/contact', $message, t('Send message'));
+    $this->backdropPost('user/' . $account->uid . '/contact', $message, t('Send message'));
   }
 }

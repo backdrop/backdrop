@@ -17,7 +17,7 @@ function user_autocomplete($string = '') {
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -86,7 +86,7 @@ function user_pass_submit($form, &$form_state) {
   $mail = _user_mail_notify('password_reset', $account, $language_interface);
   if (!empty($mail)) {
     watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
-    drupal_set_message(t('Further instructions have been sent to your e-mail address.'));
+    backdrop_set_message(t('Further instructions have been sent to your e-mail address.'));
   }
 
   $form_state['redirect'] = 'user';
@@ -111,20 +111,20 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
   if ($user->uid) {
     // The existing user is already logged in.
     if ($user->uid == $uid) {
-      drupal_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => $user->name, '!user_edit' => url("user/$user->uid/edit"))));
+      backdrop_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => $user->name, '!user_edit' => url("user/$user->uid/edit"))));
     }
     // A different user is already logged in on the computer.
     else {
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
-        drupal_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
+        backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
           array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))));
       } else {
         // Invalid one-time link specifies an unknown user.
-        drupal_set_message(t('The reset password link you clicked is invalid.'));
+        backdrop_set_message(t('The reset password link you clicked is invalid.'));
       }
     }
-    drupal_goto();
+    backdrop_goto();
   }
   else {
     // Time out, in seconds, until login URL expires. Defaults to 24 hours =
@@ -136,21 +136,21 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
       if ($account->login && $current - $timestamp > $timeout) {
-        drupal_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'));
-        drupal_goto('user/password');
+        backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'));
+        backdrop_goto('user/password');
       }
       elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
-        return drupal_get_form('user_pass_reset_form', $account, $timestamp, $timeout);
+        return backdrop_get_form('user_pass_reset_form', $account, $timestamp, $timeout);
       }
       else {
-        drupal_set_message(t('You have tried to use a reset password link that has either been used or is no longer valid. Please request a new one using the form below.'));
-        drupal_goto('user/password');
+        backdrop_set_message(t('You have tried to use a reset password link that has either been used or is no longer valid. Please request a new one using the form below.'));
+        backdrop_goto('user/password');
       }
     }
     else {
       // Deny access, no more clues.
       // Everything will be in the watchdog's URL for the administrator to check.
-      drupal_access_denied();
+      backdrop_access_denied();
     }
   }
 }
@@ -194,9 +194,9 @@ function user_pass_reset_form_submit($form, &$form_state) {
   // user_login_finalize() also updates the login timestamp of the user, which
   // invalidates further use of the one-time login link.
   user_login_finalize();
-  drupal_set_message(t('You have just used your one-time login link. Your password has been updated.'));
+  backdrop_set_message(t('You have just used your one-time login link. Your password has been updated.'));
   watchdog('user', 'User %name used one-time login link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => REQUEST_TIME));
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
@@ -212,7 +212,7 @@ function user_logout() {
   // Destroy the current session, and reset $user to the anonymous user.
   session_destroy();
 
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
@@ -259,7 +259,7 @@ function user_profile_form($form, &$form_state, $account) {
   }
 
   // @todo Legacy support. Modules are encouraged to access the entity using
-  //   $form_state. Remove in Drupal 8.
+  //   $form_state.
   $form['#user'] = $account;
 
 
@@ -312,7 +312,7 @@ function user_profile_form_submit($form, &$form_state) {
   // Clear the page cache because pages can contain usernames and/or profile information:
   cache_clear_all();
 
-  drupal_set_message(t('The changes have been saved.'));
+  backdrop_set_message(t('The changes have been saved.'));
 }
 
 /**
@@ -321,7 +321,7 @@ function user_profile_form_submit($form, &$form_state) {
 function user_edit_cancel_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   // Note: We redirect from user/uid/edit to user/uid/cancel to make the tabs disappear.
@@ -430,7 +430,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
     $account->user_cancel_notify = $form_state['values']['user_cancel_notify'];
     $account->save();
     _user_mail_notify('cancel_confirm', $account);
-    drupal_set_message(t('A confirmation request to cancel your account has been sent to your e-mail address.'));
+    backdrop_set_message(t('A confirmation request to cancel your account has been sent to your e-mail address.'));
     watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
 
     $form_state['redirect'] = "user/$account->uid";
@@ -469,7 +469,7 @@ function user_cancel_methods() {
     ),
   );
   // Allow modules to customize account cancellation methods.
-  drupal_alter('user_cancel_methods', $methods);
+  backdrop_alter('user_cancel_methods', $methods);
 
   // Turn all methods into real form elements.
   $default_method = variable_get('user_cancel_method', 'user_cancel_block');
@@ -511,11 +511,11 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
       batch_process('');
     }
     else {
-      drupal_set_message(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'));
-      drupal_goto("user/$account->uid/cancel");
+      backdrop_set_message(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'));
+      backdrop_goto("user/$account->uid/cancel");
     }
   }
-  drupal_access_denied();
+  backdrop_access_denied();
 }
 
 /**
@@ -537,6 +537,6 @@ function user_page() {
     return menu_execute_active_handler(NULL, FALSE);
   }
   else {
-    return drupal_get_form('user_login');
+    return backdrop_get_form('user_login');
   }
 }

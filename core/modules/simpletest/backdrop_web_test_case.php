@@ -10,14 +10,14 @@
  *
  * @var array
  */
-global $drupal_test_info;
+global $backdrop_test_info;
 
 /**
- * Base class for Drupal tests.
+ * Base class for Backdrop tests.
  *
  * Do not extend this class, use one of the subclasses in this file.
  */
-abstract class DrupalTestCase {
+abstract class BackdropTestCase {
   /**
    * The test run ID.
    *
@@ -74,7 +74,7 @@ abstract class DrupalTestCase {
    * This class is skipped when looking for the source of an assertion.
    *
    * When displaying which function an assert comes from, it's not too useful
-   * to see "drupalWebTestCase->drupalLogin()', we would like to see the test
+   * to see "backdropWebTestCase->backdropLogin()', we would like to see the test
    * that called it. So we need to skip the classes defining these helper
    * methods.
    */
@@ -83,11 +83,11 @@ abstract class DrupalTestCase {
   /**
    * Flag to indicate whether the test has been set up.
    *
-   * The setUp() method isolates the test from the parent Drupal site by
+   * The setUp() method isolates the test from the parent Backdrop site by
    * creating a random prefix for the database and setting up a clean file
    * storage directory. The tearDown() method then cleans up this test
    * environment. We must ensure that setUp() has been run. Otherwise,
-   * tearDown() will act on the parent Drupal site rather than the test
+   * tearDown() will act on the parent Backdrop site rather than the test
    * environment, destroying live data.
    */
   protected $setup = FALSE;
@@ -97,7 +97,7 @@ abstract class DrupalTestCase {
   protected $setupEnvironment = FALSE;
 
   /**
-   * Constructor for DrupalTestCase.
+   * Constructor for BackdropTestCase.
    *
    * @param $test_id
    *   Tests with the same id are reported together.
@@ -107,7 +107,7 @@ abstract class DrupalTestCase {
   }
 
   /**
-   * Checks the matching requirements for DrupalTestCase.
+   * Checks the matching requirements for BackdropTestCase.
    *
    * @return
    *   Array of errors containing a list of unmet requirements.
@@ -119,16 +119,16 @@ abstract class DrupalTestCase {
   /**
    * Generates a database prefix for running tests.
    *
-   * The generated database table prefix is used for the Drupal installation
+   * The generated database table prefix is used for the Backdrop installation
    * being performed for the test. It is also used as user agent HTTP header
-   * value by the cURL-based browser of DrupalWebTestCase, which is sent
-   * to the Drupal installation of the test. During early Drupal bootstrap, the
-   * user agent HTTP header is parsed, and if it matches, all database queries
-   * use the database table prefix that has been generated here.
+   * value by the cURL-based browser of BackdropWebTestCase, which is sent
+   * to the Backdrop installation of the test. During early Backdrop bootstrap,
+   * the user agent HTTP header is parsed, and if it matches, all database
+   * queries use the database table prefix that has been generated here.
    *
-   * @see DrupalWebTestCase::curlInitialize()
-   * @see drupal_valid_test_ua()
-   * @see DrupalWebTestCase::setUp()
+   * @see BackdropWebTestCase::curlInitialize()
+   * @see backdrop_valid_test_ua()
+   * @see BackdropWebTestCase::setUp()
    */
   protected function prepareDatabasePrefix() {
     // Generate a temporary prefixed database to ensure that tests have a clean
@@ -225,14 +225,14 @@ abstract class DrupalTestCase {
    * the test case has been destroyed, such as PHP fatal errors. The caller
    * information is not automatically gathered since the caller is most likely
    * inserting the assertion on behalf of other code. In all other respects
-   * the method behaves just like DrupalTestCase::assert() in terms of storing
+   * the method behaves just like BackdropTestCase::assert() in terms of storing
    * the assertion.
    *
    * @return
    *   Message ID of the stored assertion.
    *
-   * @see DrupalTestCase::assert()
-   * @see DrupalTestCase::deleteAssert()
+   * @see BackdropTestCase::assert()
+   * @see BackdropTestCase::deleteAssert()
    */
   public static function insertAssert($test_id, $test_class, $status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
@@ -270,7 +270,7 @@ abstract class DrupalTestCase {
    * @return
    *   TRUE if the assertion was deleted, FALSE otherwise.
    *
-   * @see DrupalTestCase::insertAssert()
+   * @see BackdropTestCase::insertAssert()
    */
   public static function deleteAssert($message_id) {
     return (bool) db_delete('simpletest')
@@ -297,7 +297,7 @@ abstract class DrupalTestCase {
       array_shift($backtrace);
     }
 
-    return _drupal_get_last_caller($backtrace);
+    return _backdrop_get_last_caller($backtrace);
   }
 
   /**
@@ -544,7 +544,7 @@ abstract class DrupalTestCase {
         'file' => $missing_requirements_object->getFileName(),
       );
       foreach ($missing_requirements as $missing_requirement) {
-        DrupalTestCase::insertAssert($this->testId, $class, FALSE, $missing_requirement, 'Requirements check.', $caller);
+        BackdropTestCase::insertAssert($this->testId, $class, FALSE, $missing_requirement, 'Requirements check.', $caller);
       }
     }
     else {
@@ -559,7 +559,7 @@ abstract class DrupalTestCase {
             'line' => $method_info->getStartLine(),
             'function' => $class . '->' . $method . '()',
           );
-          $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
+          $completion_check_id = BackdropTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
           $this->setUp();
           if ($this->setup) {
             try {
@@ -575,12 +575,12 @@ abstract class DrupalTestCase {
             $this->fail(t("The test cannot be executed because it has not been set up properly."));
           }
           // Remove the completion check record.
-          DrupalTestCase::deleteAssert($completion_check_id);
+          BackdropTestCase::deleteAssert($completion_check_id);
         }
       }
     }
     // Clear out the error messages and restore error handler.
-    drupal_get_messages();
+    backdrop_get_messages();
     restore_error_handler();
   }
 
@@ -614,7 +614,7 @@ abstract class DrupalTestCase {
       }
 
       $backtrace = debug_backtrace();
-      $this->error($message, $error_map[$severity], _drupal_get_last_caller($backtrace));
+      $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
     }
     return TRUE;
   }
@@ -631,9 +631,9 @@ abstract class DrupalTestCase {
       'line' => $exception->getLine(),
       'file' => $exception->getFile(),
     ));
-    require_once DRUPAL_ROOT . '/core/includes/errors.inc';
-    // The exception message is run through check_plain() by _drupal_decode_exception().
-    $this->error(t('%type: !message in %function (line %line of %file).', _drupal_decode_exception($exception)), 'Uncaught exception', _drupal_get_last_caller($backtrace));
+    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+    // The exception message is run through check_plain() by _backdrop_decode_exception().
+    $this->error(t('%type: !message in %function (line %line of %file).', _backdrop_decode_exception($exception)), 'Uncaught exception', _backdrop_get_last_caller($backtrace));
   }
 
   /**
@@ -645,7 +645,7 @@ abstract class DrupalTestCase {
    *
    * Do not use this method when special characters are not possible (e.g., in
    * machine or file names that have already been validated); instead,
-   * use DrupalWebTestCase::randomName().
+   * use BackdropWebTestCase::randomName().
    *
    * @param $length
    *   Length of random string to generate.
@@ -653,7 +653,7 @@ abstract class DrupalTestCase {
    * @return
    *   Randomly generated string.
    *
-   * @see DrupalWebTestCase::randomName()
+   * @see BackdropWebTestCase::randomName()
    */
   public static function randomString($length = 8) {
     $str = '';
@@ -673,7 +673,7 @@ abstract class DrupalTestCase {
    * characters) this method is best.
    *
    * Do not use this method when testing unvalidated user input. Instead, use
-   * DrupalWebTestCase::randomString().
+   * BackdropWebTestCase::randomString().
    *
    * @param $length
    *   Length of random string to generate.
@@ -681,7 +681,7 @@ abstract class DrupalTestCase {
    * @return
    *   Randomly generated string.
    *
-   * @see DrupalWebTestCase::randomString()
+   * @see BackdropWebTestCase::randomString()
    */
   public static function randomName($length = 8) {
     $values = array_merge(range(65, 90), range(97, 122), range(48, 57));
@@ -705,7 +705,7 @@ abstract class DrupalTestCase {
    *   'one' => array(0, 1),
    *   'two' => array(2, 3),
    * );
-   * $permutations = DrupalTestCase::generatePermutations($parameters);
+   * $permutations = BackdropTestCase::generatePermutations($parameters);
    * // Result:
    * $permutations == array(
    *   array('one' => 0, 'two' => 2),
@@ -744,16 +744,16 @@ abstract class DrupalTestCase {
 }
 
 /**
- * Test case for Drupal unit tests.
+ * Test case for Backdrop unit tests.
  *
- * These tests can not access the database nor files. Calling any Drupal
+ * These tests can not access the database nor files. Calling any Backdrop
  * function that needs the database will throw exceptions. These include
  * watchdog(), module_implements(), module_invoke_all() etc.
  */
-class DrupalUnitTestCase extends DrupalTestCase {
+class BackdropUnitTestCase extends BackdropTestCase {
 
   /**
-   * Constructor for DrupalUnitTestCase.
+   * Constructor for BackdropUnitTestCase.
    */
   function __construct($test_id = NULL) {
     parent::__construct($test_id);
@@ -763,7 +763,7 @@ class DrupalUnitTestCase extends DrupalTestCase {
   /**
    * Sets up unit test environment.
    *
-   * Unlike DrupalWebTestCase::setUp(), DrupalUnitTestCase::setUp() does not
+   * Unlike BackdropWebTestCase::setUp(), BackdropUnitTestCase::setUp() does not
    * install modules because tests are performed without accessing the database.
    * Any required files must be explicitly included by the child class setUp()
    * method.
@@ -777,7 +777,7 @@ class DrupalUnitTestCase extends DrupalTestCase {
     $this->prepareDatabasePrefix();
 
     // Reset all statics so that test is performed with a clean environment.
-    drupal_static_reset();
+    backdrop_static_reset();
 
     // Create test directory.
     $public_files_directory = $this->originalFileDirectory . '/simpletest/' . substr($this->databasePrefix, 10);
@@ -803,7 +803,7 @@ class DrupalUnitTestCase extends DrupalTestCase {
     if (isset($module_list['locale'])) {
       // Transform the list into the format expected as input to module_list().
       foreach ($module_list as &$module) {
-        $module = array('filename' => drupal_get_filename('module', $module));
+        $module = array('filename' => backdrop_get_filename('module', $module));
       }
       $this->originalModuleList = $module_list;
       unset($module_list['locale']);
@@ -834,9 +834,9 @@ class DrupalUnitTestCase extends DrupalTestCase {
 }
 
 /**
- * Test case for typical Drupal tests.
+ * Test case for typical Backdrop tests.
  */
-class DrupalWebTestCase extends DrupalTestCase {
+class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The profile to install as a basis for testing.
    *
@@ -880,11 +880,11 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected $plainTextContent;
 
   /**
-   * The value of the Drupal.settings JavaScript variable for the page currently loaded in the internal browser.
+   * The value of the Backdrop.settings JavaScript variable for the page currently loaded in the internal browser.
    *
    * @var Array
    */
-  protected $drupalSettings;
+  protected $backdropSettings;
 
   /**
    * The parsed version of the page.
@@ -911,7 +911,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   /**
    * Additional cURL options.
    *
-   * DrupalWebTestCase itself never sets this but always obeys what is set.
+   * BackdropWebTestCase itself never sets this but always obeys what is set.
    */
   protected $additionalCurlOptions = array();
 
@@ -960,7 +960,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected $redirect_count;
 
   /**
-   * Constructor for DrupalWebTestCase.
+   * Constructor for BackdropWebTestCase.
    */
   function __construct($test_id = NULL) {
     parent::__construct($test_id);
@@ -978,7 +978,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   A node entity matching $title.
    */
-  function drupalGetNodeByTitle($title, $reset = FALSE) {
+  function backdropGetNodeByTitle($title, $reset = FALSE) {
     $nodes = node_load_multiple(array(), array('title' => $title), $reset);
     // Load the first node returned from the database.
     $returned_node = reset($nodes);
@@ -994,7 +994,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   Created node entity.
    */
-  protected function drupalCreateNode($settings = array()) {
+  protected function backdropCreateNode($settings = array()) {
     // Populate defaults array.
     $settings += array(
       'body'      => array(LANGUAGE_NONE => array(array())),
@@ -1056,7 +1056,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   Created content type.
    */
-  protected function drupalCreateContentType($settings = array()) {
+  protected function backdropCreateContentType($settings = array()) {
     // Find a non-existent random type name.
     do {
       $name = strtolower($this->randomName(8));
@@ -1109,7 +1109,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   List of files that match filter.
    */
-  protected function drupalGetTestFiles($type, $size = NULL) {
+  protected function backdropGetTestFiles($type, $size = NULL) {
     if (empty($this->generatedTestFiles)) {
       // Generate binary test files.
       $lines = array(64, 1024);
@@ -1126,7 +1126,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       }
 
       // Copy other test files from simpletest.
-      $original = drupal_get_path('module', 'simpletest') . '/files';
+      $original = backdrop_get_path('module', 'simpletest') . '/files';
       $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
       foreach ($files as $file) {
         file_unmanaged_copy($file->uri, variable_get('file_public_path', 'files'));
@@ -1150,14 +1150,14 @@ class DrupalWebTestCase extends DrupalTestCase {
         }
       }
     }
-    usort($files, array($this, 'drupalCompareFiles'));
+    usort($files, array($this, 'backdropCompareFiles'));
     return $files;
   }
 
   /**
    * Compare two files based on size and file name.
    */
-  protected function drupalCompareFiles($file1, $file2) {
+  protected function backdropCompareFiles($file1, $file2) {
     $compare_size = filesize($file1->uri) - filesize($file2->uri);
     if ($compare_size) {
       // Sort by file size.
@@ -1180,11 +1180,11 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   A fully loaded user object with pass_raw property, or FALSE if account
    *   creation fails.
    */
-  protected function drupalCreateUser(array $permissions = array()) {
+  protected function backdropCreateUser(array $permissions = array()) {
     // Create a role with the given permission set, if any.
     $rid = FALSE;
     if ($permissions) {
-      $rid = $this->drupalCreateRole($permissions);
+      $rid = $this->backdropCreateRole($permissions);
       if (!$rid) {
         return FALSE;
       }
@@ -1223,7 +1223,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   Role ID of newly created role, or FALSE if role creation failed.
    */
-  protected function drupalCreateRole(array $permissions, $name = NULL) {
+  protected function backdropCreateRole(array $permissions, $name = NULL) {
     // Generate random name if it was not passed.
     if (!$name) {
       $name = $this->randomName();
@@ -1262,7 +1262,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE or FALSE depending on whether the permissions are valid.
    */
   protected function checkPermissions(array $permissions, $reset = FALSE) {
-    $available = &drupal_static(__FUNCTION__);
+    $available = &backdrop_static(__FUNCTION__);
 
     if (!isset($available) || $reset) {
       $available = array_keys(module_invoke_all('permission'));
@@ -1287,13 +1287,13 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Please note that neither the global $user nor the passed-in user object is
    * populated with data of the logged in user. If you need full access to the
    * user object after logging in, it must be updated manually. If you also need
-   * access to the plain-text password of the user (set by drupalCreateUser()),
+   * access to the plain-text password of the user (set by backdropCreateUser()),
    * e.g. to log in the same user again, then it must be re-assigned manually.
    * For example:
    * @code
    *   // Create a user.
-   *   $account = $this->drupalCreateUser(array());
-   *   $this->drupalLogin($account);
+   *   $account = $this->backdropCreateUser(array());
+   *   $this->backdropLogin($account);
    *   // Load real user object.
    *   $pass_raw = $account->pass_raw;
    *   $account = user_load($account->uid);
@@ -1303,18 +1303,18 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @param $account
    *   User object representing the user to log in.
    *
-   * @see drupalCreateUser()
+   * @see backdropCreateUser()
    */
-  protected function drupalLogin($account) {
+  protected function backdropLogin($account) {
     if ($this->loggedInUser) {
-      $this->drupalLogout();
+      $this->backdropLogout();
     }
 
     $edit = array(
       'name' => $account->name,
       'pass' => $account->pass_raw
     );
-    $this->drupalPost('user', $edit, t('Log in'));
+    $this->backdropPost('user', $edit, t('Log in'));
 
     // If a "log out" link appears on the page, it is almost certainly because
     // the login was successful.
@@ -1328,20 +1328,20 @@ class DrupalWebTestCase extends DrupalTestCase {
   /**
    * Generate a token for the currently logged in user.
    */
-  protected function drupalGetToken($value = '') {
-    $private_key = drupal_get_private_key();
-    return drupal_hmac_base64($value, $this->session_id . $private_key);
+  protected function backdropGetToken($value = '') {
+    $private_key = backdrop_get_private_key();
+    return backdrop_hmac_base64($value, $this->session_id . $private_key);
   }
 
   /*
    * Logs a user out of the internal browser, then check the login page to confirm logout.
    */
-  protected function drupalLogout() {
+  protected function backdropLogout() {
     // Make a request to the logout page, and redirect to the user page, the
     // idea being if you were properly logged out you should be seeing a login
     // screen.
-    $this->drupalGet('user/logout');
-    $this->drupalGet('user');
+    $this->backdropGet('user/logout');
+    $this->backdropGet('user');
     $pass = $this->assertField('name', t('Username field found.'), t('Logout'));
     $pass = $pass && $this->assertField('pass', t('Password field found.'), t('Logout'));
 
@@ -1353,7 +1353,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   /**
    * Changes the database connection to the prefixed one.
    *
-   * @see DrupalWebTestCase::setUp()
+   * @see BackdropWebTestCase::setUp()
    */
   protected function changeDatabasePrefix() {
     if (empty($this->databasePrefix)) {
@@ -1385,14 +1385,14 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Prepares the current environment for running the test.
    *
    * Backups various current environment variables and resets them, so they do
-   * not interfere with the Drupal site installation in which tests are executed
+   * not interfere with the Backdrop site installation in which tests are executed
    * and can be restored in tearDown().
    *
    * Also sets up new resources for the testing environment, such as the public
    * filesystem and configuration directories.
    *
-   * @see DrupalWebTestCase::setUp()
-   * @see DrupalWebTestCase::tearDown()
+   * @see BackdropWebTestCase::setUp()
+   * @see BackdropWebTestCase::tearDown()
    */
   protected function prepareEnvironment() {
     global $user, $language_interface, $conf, $config_directories;
@@ -1402,7 +1402,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $this->originalLanguageDefault = variable_get('language_default');
     $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = variable_get('file_public_path', 'files');
-    $this->originalProfile = drupal_get_profile();
+    $this->originalProfile = backdrop_get_profile();
     $this->originalCleanUrl = variable_get('clean_url', 0);
     $this->originalUser = $user;
 
@@ -1421,7 +1421,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // and will be changed by the test run. Otherwise it will contain callbacks
     // from both environments and the testing environment will try to call the
     // handlers defined by the original one.
-    $callbacks = &drupal_register_shutdown_function();
+    $callbacks = &backdrop_register_shutdown_function();
     $this->originalShutdownCallbacks = $callbacks;
     $callbacks = array();
 
@@ -1452,8 +1452,8 @@ class DrupalWebTestCase extends DrupalTestCase {
     ini_set('log_errors', 1);
     ini_set('error_log', $this->public_files_directory . '/error.log');
 
-    // Set the test information for use in other parts of Drupal.
-    $test_info = &$GLOBALS['drupal_test_info'];
+    // Set the test information for use in other parts of Backdrop.
+    $test_info = &$GLOBALS['backdrop_test_info'];
     $test_info['test_run_id'] = $this->databasePrefix;
     $test_info['in_child_site'] = FALSE;
 
@@ -1462,10 +1462,10 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Sets up a Drupal site for running functional and integration tests.
+   * Sets up a Backdrop site for running functional and integration tests.
    *
-   * Generates a random database prefix and installs Drupal with the specified
-   * installation profile in DrupalWebTestCase::$profile into the
+   * Generates a random database prefix and installs Backdrop with the specified
+   * installation profile in BackdropWebTestCase::$profile into the
    * prefixed database. Afterwards, installs any additional modules specified by
    * the test.
    *
@@ -1478,9 +1478,9 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   List of modules to enable for the duration of the test. This can be
    *   either a single array or a variable number of string arguments.
    *
-   * @see DrupalWebTestCase::prepareDatabasePrefix()
-   * @see DrupalWebTestCase::changeDatabasePrefix()
-   * @see DrupalWebTestCase::prepareEnvironment()
+   * @see BackdropWebTestCase::prepareDatabasePrefix()
+   * @see BackdropWebTestCase::changeDatabasePrefix()
+   * @see BackdropWebTestCase::prepareEnvironment()
    */
   protected function setUp() {
     global $user, $language, $conf;
@@ -1496,11 +1496,11 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
-    drupal_static_reset();
+    backdrop_static_reset();
 
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
-    // changed, since DrupalCacheArray implementations attempt to
+    // changed, since BackdropCacheArray implementations attempt to
     // write back to persistent caches when they are destructed.
     $this->changeDatabasePrefix();
     if (!$this->setupDatabasePrefix) {
@@ -1508,15 +1508,15 @@ class DrupalWebTestCase extends DrupalTestCase {
     }
 
     // Preset the 'install_profile' system variable, so the first call into
-    // system_rebuild_module_data() (in drupal_install_system()) will register
+    // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
     // the parent site (executing the test) is registered, and the test
     // profile's hook_install() and other hook implementations are never invoked.
     $conf['install_profile'] = $this->profile;
 
-    // Perform the actual Drupal installation.
-    include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    drupal_install_system();
+    // Perform the actual Backdrop installation.
+    include_once BACKDROP_ROOT . '/core/includes/install.inc';
+    backdrop_install_system();
 
     // Set path variables.
     variable_set('file_public_path', $this->public_files_directory);
@@ -1525,12 +1525,12 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Set the 'simpletest_parent_profile' variable to add the parent profile's
     // search path to the child site's search paths.
-    // @see drupal_system_listing()
+    // @see backdrop_system_listing()
     // @todo This may need to be primed like 'install_profile' above.
     variable_set('simpletest_parent_profile', $this->originalProfile);
 
     // Ensure schema versions are recalculated.
-    drupal_static_reset('drupal_get_schema_versions');
+    backdrop_static_reset('backdrop_get_schema_versions');
 
     // Include the testing profile.
     variable_set('install_profile', $this->profile);
@@ -1541,8 +1541,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Install modules needed for this test. This could have been passed in as
     // either a single array argument or a variable number of string arguments.
-    // @todo Remove this compatibility layer in Drupal 8, and only accept
-    // $modules as a single array argument.
+    // @todo Remove this compatibility layer and only accept a single array.
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -1565,11 +1564,11 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Run cron once in that environment, as install.php does at the end of
     // the installation process.
-    drupal_cron_run();
+    backdrop_cron_run();
 
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
-    drupal_save_session(FALSE);
+    backdrop_save_session(FALSE);
     // Login as uid 1.
     $user = user_load(1);
 
@@ -1586,30 +1585,30 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Use the test mail class instead of the default mail handler class.
     variable_set('mail_system', array('default-system' => 'TestingMailSystem'));
 
-    drupal_set_time_limit($this->timeLimit);
+    backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
   }
 
   /**
    * Reset all data structures after having enabled new modules.
    *
-   * This method is called by DrupalWebTestCase::setUp() after enabling
+   * This method is called by BackdropWebTestCase::setUp() after enabling
    * the requested modules. It must be called again when additional modules
    * are enabled later.
    */
   protected function resetAll() {
     // Reset all static variables.
-    drupal_static_reset();
+    backdrop_static_reset();
     // Reset the list of enabled modules.
     module_list(TRUE);
 
     // Reset cached schema for new database prefix. This must be done before
-    // drupal_flush_all_caches() so rebuilds can make use of the schema of
+    // backdrop_flush_all_caches() so rebuilds can make use of the schema of
     // modules enabled on the cURL side.
-    drupal_get_schema(NULL, TRUE);
+    backdrop_get_schema(NULL, TRUE);
 
     // Perform rebuilds and flush remaining caches.
-    drupal_flush_all_caches();
+    backdrop_flush_all_caches();
 
     // Reload global $conf array and permissions.
     $this->refreshVariables();
@@ -1620,7 +1619,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Refresh the in-memory set of variables and state values. Useful after a
    * page request is made that changes a variable in a different thread.
    *
-   * In other words calling a settings page with $this->drupalPost() with a changed
+   * In other words calling a settings page with $this->backdropPost() with a changed
    * value would update a variable to reflect that change, but in the thread that
    * made the call (thread running the test) the changed variable would not be
    * picked up.
@@ -1632,7 +1631,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     global $conf;
     cache('bootstrap')->delete('variables');
     $conf = variable_initialize();
-    drupal_static_reset('states');
+    backdrop_static_reset('states');
   }
 
   /**
@@ -1687,12 +1686,12 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Restore original shutdown callbacks array to prevent original
     // environment of calling handlers from test run.
-    $callbacks = &drupal_register_shutdown_function();
+    $callbacks = &backdrop_register_shutdown_function();
     $callbacks = $this->originalShutdownCallbacks;
 
     // Return the user to the original one.
     $user = $this->originalUser;
-    drupal_save_session(TRUE);
+    backdrop_save_session(TRUE);
 
     // Ensure that internal logged in variable and cURL options are reset.
     $this->loggedInUser = FALSE;
@@ -1769,7 +1768,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // We set the user agent header on each request so as to use the current
     // time and a new uniqid.
     if (preg_match('/simpletest\d+/', $this->databasePrefix, $matches)) {
-      curl_setopt($this->curlHandle, CURLOPT_USERAGENT, drupal_generate_test_ua($matches[0]));
+      curl_setopt($this->curlHandle, CURLOPT_USERAGENT, backdrop_generate_test_ua($matches[0]));
     }
   }
 
@@ -1796,7 +1795,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // fragment in the request to the server, causing some web servers
     // to reject the request citing "400 - Bad Request". To prevent
     // this, we strip the fragment from the request.
-    // TODO: Remove this for Drupal 8, since fixed in curl 7.20.0.
+    // TODO: Remove this; fixed in curl 7.20.0.
     if (!empty($curl_options[CURLOPT_URL]) && strpos($curl_options[CURLOPT_URL], '#')) {
       $original_url = $curl_options[CURLOPT_URL];
       $curl_options[CURLOPT_URL] = strtok($curl_options[CURLOPT_URL], '#');
@@ -1828,33 +1827,33 @@ class DrupalWebTestCase extends DrupalTestCase {
     // letting cURL handle redirects we take of them ourselves to
     // to prevent fragments being sent to the web server as part
     // of the request.
-    // TODO: Remove this for Drupal 8, since fixed in curl 7.20.0.
+    // TODO: Remove this; fixed in curl 7.20.0.
     if (in_array($status, array(300, 301, 302, 303, 305, 307)) && $this->redirect_count < variable_get('simpletest_maximum_redirects', 5)) {
-      if ($this->drupalGetHeader('location')) {
+      if ($this->backdropGetHeader('location')) {
         $this->redirect_count++;
         $curl_options = array();
-        $curl_options[CURLOPT_URL] = $this->drupalGetHeader('location');
+        $curl_options[CURLOPT_URL] = $this->backdropGetHeader('location');
         $curl_options[CURLOPT_HTTPGET] = TRUE;
         return $this->curlExec($curl_options, TRUE);
       }
     }
 
-    $this->drupalSetContent($content, isset($original_url) ? $original_url : curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL));
+    $this->backdropSetContent($content, isset($original_url) ? $original_url : curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL));
     $message_vars = array(
       '!method' => !empty($curl_options[CURLOPT_NOBODY]) ? 'HEAD' : (empty($curl_options[CURLOPT_POSTFIELDS]) ? 'GET' : 'POST'),
       '@url' => isset($original_url) ? $original_url : $url,
       '@status' => $status,
-      '!length' => format_size(strlen($this->drupalGetContent()))
+      '!length' => format_size(strlen($this->backdropGetContent()))
     );
     $message = t('!method @url returned @status (!length).', $message_vars);
-    $this->assertTrue($this->drupalGetContent() !== FALSE, $message, t('Browser'));
-    return $this->drupalGetContent();
+    $this->assertTrue($this->backdropGetContent() !== FALSE, $message, t('Browser'));
+    return $this->backdropGetContent();
   }
 
   /**
    * Reads headers and registers errors received from the tested site.
    *
-   * @see _drupal_log_error().
+   * @see _backdrop_log_error().
    *
    * @param $curlHandler
    *   The cURL handler.
@@ -1873,11 +1872,11 @@ class DrupalWebTestCase extends DrupalTestCase {
       $this->headers[] = $header;
     }
 
-    // Errors are being sent via X-Drupal-Assertion-* headers,
-    // generated by _drupal_log_error() in the exact form required
-    // by DrupalWebTestCase::error().
-    if (preg_match('/^X-Drupal-Assertion-[0-9]+: (.*)$/', $header, $matches)) {
-      // Call DrupalWebTestCase::error() with the parameters from the header.
+    // Errors are being sent via X-Backdrop-Assertion-* headers,
+    // generated by _backdrop_log_error() in the exact form required
+    // by BackdropWebTestCase::error().
+    if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', $header, $matches)) {
+      // Call BackdropWebTestCase::error() with the parameters from the header.
       call_user_func_array(array(&$this, 'error'), unserialize(urldecode($matches[1])));
     }
 
@@ -1922,7 +1921,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       // DOM can load HTML soup. But, HTML soup can throw warnings, suppress
       // them.
       $htmlDom = new DOMDocument();
-      @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $this->drupalGetContent());
+      @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $this->backdropGetContent());
       if ($htmlDom) {
         $this->pass(t('Valid HTML found on "@path"', array('@path' => $this->getUrl())), t('Browser'));
         // It's much easier to work with simplexml than DOM, luckily enough
@@ -1938,19 +1937,19 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Retrieves a Drupal path or an absolute path.
+   * Retrieves a Backdrop path or an absolute path.
    *
    * @param $path
-   *   Drupal path or URL to load into internal browser
+   *   Backdrop path or URL to load into internal browser
    * @param $options
    *   Options to be forwarded to url().
    * @param $headers
    *   An array containing additional HTTP request headers, each formatted as
    *   "name: value".
    * @return
-   *   The retrieved HTML string, also available as $this->drupalGetContent()
+   *   The retrieved HTML string, also available as $this->backdropGetContent()
    */
-  protected function drupalGet($path, array $options = array(), array $headers = array()) {
+  protected function backdropGet($path, array $options = array(), array $headers = array()) {
     $options['absolute'] = TRUE;
 
     // We re-using a CURL connection here. If that connection still has certain
@@ -1970,30 +1969,30 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Retrieve a Drupal path or an absolute path and JSON decode the result.
+   * Retrieve a Backdrop path or an absolute path and JSON decode the result.
    */
-  protected function drupalGetAJAX($path, array $options = array(), array $headers = array()) {
+  protected function backdropGetAJAX($path, array $options = array(), array $headers = array()) {
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
-    return drupal_json_decode($this->drupalGet($path, $options, $headers));
+    return backdrop_json_decode($this->backdropGet($path, $options, $headers));
   }
 
   /**
-   * Execute a POST request on a Drupal page.
+   * Execute a POST request on a Backdrop page.
    * It will be done as usual POST request with SimpleBrowser.
    *
    * @param $path
-   *   Location of the post form. Either a Drupal path or an absolute path or
+   *   Location of the post form. Either a Backdrop path or an absolute path or
    *   NULL to post to the current page. For multi-stage forms you can set the
    *   path to NULL and have it post to the last received page. Example:
    *
    *   @code
    *   // First step in form.
    *   $edit = array(...);
-   *   $this->drupalPost('some_url', $edit, t('Save'));
+   *   $this->backdropPost('some_url', $edit, t('Save'));
    *
    *   // Second step in form.
    *   $edit = array(...);
-   *   $this->drupalPost(NULL, $edit, t('Save'));
+   *   $this->backdropPost(NULL, $edit, t('Save'));
    *   @endcode
    * @param  $edit
    *   Field data in an associative array. Changes the current input fields
@@ -2042,21 +2041,21 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   (optional) HTML ID of the form to be submitted. On some pages
    *   there are many identical forms, so just using the value of the submit
    *   button is not enough. For example: 'trigger-node-presave-assign-form'.
-   *   Note that this is not the Drupal $form_id, but rather the HTML ID of the
-   *   form, which is typically the same thing but with hyphens replacing the
-   *   underscores.
+   *   Note that this is not the Backdrop $form_id, but rather the HTML ID of
+   *   the form, which is typically the same thing but with hyphens replacing
+   *   the underscores.
    * @param $extra_post
    *   (optional) A string of additional data to append to the POST submission.
    *   This can be used to add POST data for which there are no HTML fields, as
-   *   is done by drupalPostAJAX(). This string is literally appended to the
+   *   is done by backdropPostAJAX(). This string is literally appended to the
    *   POST data, so it must already be urlencoded and contain a leading "&"
    *   (e.g., "&extra_var1=hello+world&extra_var2=you%26me").
    */
-  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+  protected function backdropPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
     $submit_matches = FALSE;
     $ajax = is_array($submit);
     if (isset($path)) {
-      $this->drupalGet($path, $options);
+      $this->backdropGet($path, $options);
     }
     if ($this->parse()) {
       $edit_save = $edit;
@@ -2090,7 +2089,7 @@ class DrupalWebTestCase extends DrupalTestCase {
             // is broken. This is a less than elegant workaround. Alternatives
             // are being explored at #253506.
             foreach ($upload as $key => $file) {
-              $file = drupal_realpath($file);
+              $file = backdrop_realpath($file);
               if ($file && is_file($file)) {
                 // Use the new CurlFile class for file uploads when using PHP
                 // 5.5 or higher.
@@ -2147,7 +2146,8 @@ class DrupalWebTestCase extends DrupalTestCase {
    *
    * @param $path
    *   Location of the form containing the Ajax enabled element to test. Can be
-   *   either a Drupal path or an absolute path or NULL to use the current page.
+   *   either a Backdrop path or an absolute path or NULL to use the current
+   *   page.
    * @param $edit
    *   Field data in an associative array. Changes the current input fields
    *   (where possible) to the values indicated.
@@ -2164,11 +2164,11 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   (optional) Options to be forwarded to url().
    * @param $headers
    *   (optional) An array containing additional HTTP request headers, each
-   *   formatted as "name: value". Forwarded to drupalPost().
+   *   formatted as "name: value". Forwarded to backdropPost().
    * @param $form_html_id
    *   (optional) HTML ID of the form to be submitted, use when there is more
    *   than one identical form on the same page and the value of the triggering
-   *   element is not enough to identify the form. Note this is not the Drupal
+   *   element is not enough to identify the form. Note this is not the Backdrop
    *   ID of the form but rather the HTML ID of the form.
    * @param $ajax_settings
    *   (optional) An array of Ajax settings which if specified will be used in
@@ -2177,17 +2177,17 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   An array of Ajax commands.
    *
-   * @see drupalPost()
+   * @see backdropPost()
    * @see ajax.js
    */
-  protected function drupalPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = array(), array $headers = array(), $form_html_id = NULL, $ajax_settings = NULL) {
-    // Get the content of the initial page prior to calling drupalPost(), since
-    // drupalPost() replaces $this->content.
+  protected function backdropPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = array(), array $headers = array(), $form_html_id = NULL, $ajax_settings = NULL) {
+    // Get the content of the initial page prior to calling backdropPost(), since
+    // backdropPost() replaces $this->content.
     if (isset($path)) {
-      $this->drupalGet($path, $options);
+      $this->backdropGet($path, $options);
     }
     $content = $this->content;
-    $drupal_settings = $this->drupalSettings;
+    $backdrop_settings = $this->backdropSettings;
 
     // Get the Ajax settings bound to the triggering element.
     if (!isset($ajax_settings)) {
@@ -2202,7 +2202,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       }
       $element = $this->xpath($xpath);
       $element_id = (string) $element[0]['id'];
-      $ajax_settings = $drupal_settings['ajax'][$element_id];
+      $ajax_settings = $backdrop_settings['ajax'][$element_id];
     }
 
     // Add extra information to the POST data as ajax.js does.
@@ -2216,13 +2216,13 @@ class DrupalWebTestCase extends DrupalTestCase {
       $id = (string) $element['id'];
       $extra_post .= '&' . urlencode('ajax_html_ids[]') . '=' . urlencode($id);
     }
-    if (isset($drupal_settings['ajaxPageState'])) {
-      $extra_post .= '&' . urlencode('ajax_page_state[theme]') . '=' . urlencode($drupal_settings['ajaxPageState']['theme']);
-      $extra_post .= '&' . urlencode('ajax_page_state[theme_token]') . '=' . urlencode($drupal_settings['ajaxPageState']['theme_token']);
-      foreach ($drupal_settings['ajaxPageState']['css'] as $key => $value) {
+    if (isset($backdrop_settings['ajaxPageState'])) {
+      $extra_post .= '&' . urlencode('ajax_page_state[theme]') . '=' . urlencode($backdrop_settings['ajaxPageState']['theme']);
+      $extra_post .= '&' . urlencode('ajax_page_state[theme_token]') . '=' . urlencode($backdrop_settings['ajaxPageState']['theme_token']);
+      foreach ($backdrop_settings['ajaxPageState']['css'] as $key => $value) {
         $extra_post .= '&' . urlencode("ajax_page_state[css][$key]") . '=1';
       }
-      foreach ($drupal_settings['ajaxPageState']['js'] as $key => $value) {
+      foreach ($backdrop_settings['ajaxPageState']['js'] as $key => $value) {
         $extra_post .= '&' . urlencode("ajax_page_state[js][$key]") . '=1';
       }
     }
@@ -2235,7 +2235,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Submit the POST request.
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
-    $return = drupal_json_decode($this->drupalPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
+    $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
 
     // Change the page content by applying the returned commands.
     if (!empty($ajax_settings) && !empty($return)) {
@@ -2253,7 +2253,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       foreach ($return as $command) {
         switch ($command['command']) {
           case 'settings':
-            $drupal_settings = drupal_array_merge_deep($drupal_settings, $command['settings']);
+            $backdrop_settings = backdrop_array_merge_deep($backdrop_settings, $command['settings']);
             break;
 
           case 'insert':
@@ -2323,20 +2323,20 @@ class DrupalWebTestCase extends DrupalTestCase {
       }
       $content = $dom->saveHTML();
     }
-    $this->drupalSetContent($content);
-    $this->drupalSetSettings($drupal_settings);
+    $this->backdropSetContent($content);
+    $this->backdropSetSettings($backdrop_settings);
     return $return;
   }
 
   /**
-   * Runs cron in the Drupal installed by Simpletest.
+   * Runs cron in the Backdrop installed by SimpleTest.
    */
   protected function cronRun() {
-    $this->drupalGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))));
+    $this->backdropGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))));
   }
 
   /**
-   * Check for meta refresh tag and if found call drupalGet() recursively. This
+   * Check for meta refresh tag and if found call backdropGet() recursively. This
    * function looks for the http-equiv attribute to be set to "Refresh"
    * and is case-sensitive.
    *
@@ -2344,13 +2344,13 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   Either the new page content or FALSE.
    */
   protected function checkForMetaRefresh() {
-    if (strpos($this->drupalGetContent(), '<meta ') && $this->parse()) {
+    if (strpos($this->backdropGetContent(), '<meta ') && $this->parse()) {
       $refresh = $this->xpath('//meta[@http-equiv="Refresh"]');
       if (!empty($refresh)) {
         // Parse the content attribute of the meta tag for the format:
         // "[delay]: URL=[page_to_redirect_to]".
         if (preg_match('/\d+;\s*URL=(?P<url>.*)/i', $refresh[0]['content'], $match)) {
-          return $this->drupalGet($this->getAbsoluteUrl(decode_entities($match['url'])));
+          return $this->backdropGet($this->getAbsoluteUrl(decode_entities($match['url'])));
         }
       }
     }
@@ -2358,19 +2358,19 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Retrieves only the headers for a Drupal path or an absolute path.
+   * Retrieves only the headers for a Backdrop path or an absolute path.
    *
    * @param $path
-   *   Drupal path or URL to load into internal browser
+   *   Backdrop path or URL to load into internal browser
    * @param $options
    *   Options to be forwarded to url().
    * @param $headers
    *   An array containing additional HTTP request headers, each formatted as
    *   "name: value".
    * @return
-   *   The retrieved headers, also available as $this->drupalGetContent()
+   *   The retrieved headers, also available as $this->backdropGetContent()
    */
-  protected function drupalHead($path, array $options = array(), array $headers = array()) {
+  protected function backdropHead($path, array $options = array(), array $headers = array()) {
     $options['absolute'] = TRUE;
     $out = $this->curlExec(array(CURLOPT_NOBODY => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_HTTPHEADER => $headers));
     $this->refreshVariables(); // Ensure that any changes to variables in the other thread are picked up.
@@ -2378,7 +2378,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Handle form input related to drupalPost(). Ensure that the specified fields
+   * Handle form input related to backdropPost(). Ensure that the specified fields
    * exist and attempt to create POST data in the correct manner for the particular
    * field type.
    *
@@ -2729,7 +2729,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $this->assertTrue(isset($urls[$index]), t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before)), t('Browser'));
 
     if (isset($url_target)) {
-      return $this->drupalGet($url_target);
+      return $this->backdropGet($url_target);
     }
     return FALSE;
   }
@@ -2793,7 +2793,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *
    *   Values for duplicate headers are stored as a single comma-separated list.
    */
-  protected function drupalGetHeaders($all_requests = FALSE) {
+  protected function backdropGetHeaders($all_requests = FALSE) {
     $request = 0;
     $headers = array($request => array());
     foreach ($this->headers as $header) {
@@ -2840,11 +2840,11 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   The HTTP header value or FALSE if not found.
    */
-  protected function drupalGetHeader($name, $all_requests = FALSE) {
+  protected function backdropGetHeader($name, $all_requests = FALSE) {
     $name = strtolower($name);
     $header = FALSE;
     if ($all_requests) {
-      foreach (array_reverse($this->drupalGetHeaders(TRUE)) as $headers) {
+      foreach (array_reverse($this->backdropGetHeaders(TRUE)) as $headers) {
         if (isset($headers[$name])) {
           $header = $headers[$name];
           break;
@@ -2852,7 +2852,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       }
     }
     else {
-      $headers = $this->drupalGetHeaders();
+      $headers = $this->backdropGetHeaders();
       if (isset($headers[$name])) {
         $header = $headers[$name];
       }
@@ -2863,15 +2863,15 @@ class DrupalWebTestCase extends DrupalTestCase {
   /**
    * Gets the current raw HTML of requested page.
    */
-  protected function drupalGetContent() {
+  protected function backdropGetContent() {
     return $this->content;
   }
 
   /**
-   * Gets the value of the Drupal.settings JavaScript variable for the currently loaded page.
+   * Gets the value of the Backdrop.settings JavaScript variable for the currently loaded page.
    */
-  protected function drupalGetSettings() {
-    return $this->drupalSettings;
+  protected function backdropGetSettings() {
+    return $this->backdropSettings;
   }
 
   /**
@@ -2882,7 +2882,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @return
    *   An array containing e-mail messages captured during the current test.
    */
-  protected function drupalGetMails($filter = array()) {
+  protected function backdropGetMails($filter = array()) {
     $captured_emails = state_get('test_email_collector', array());
     $filtered_emails = array();
 
@@ -2903,26 +2903,26 @@ class DrupalWebTestCase extends DrupalTestCase {
    * outside of the internal browser and assertions need to be made on the
    * returned page.
    *
-   * A good example would be when testing drupal_http_request(). After fetching
+   * A good example would be when testing backdrop_http_request(). After fetching
    * the page the content can be set and page elements can be checked to ensure
    * that the function worked properly.
    */
-  protected function drupalSetContent($content, $url = 'internal:') {
+  protected function backdropSetContent($content, $url = 'internal:') {
     $this->content = $content;
     $this->url = $url;
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
-    $this->drupalSettings = array();
-    if (preg_match('/jQuery\.extend\(Drupal\.settings, (.*?)\);/', $content, $matches)) {
-      $this->drupalSettings = drupal_json_decode($matches[1]);
+    $this->backdropSettings = array();
+    if (preg_match('/jQuery\.extend\(Backdrop\.settings, (.*?)\);/', $content, $matches)) {
+      $this->backdropSettings = backdrop_json_decode($matches[1]);
     }
   }
 
   /**
-   * Sets the value of the Drupal.settings JavaScript variable for the currently loaded page.
+   * Sets the value of the Backdrop.settings JavaScript variable for the currently loaded page.
    */
-  protected function drupalSetSettings($settings) {
-    $this->drupalSettings = $settings;
+  protected function backdropSetSettings($settings) {
+    $this->backdropSettings = $settings;
   }
 
   /**
@@ -2967,7 +2967,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!$message) {
       $message = t('Raw "@raw" found', array('@raw' => $raw));
     }
-    return $this->assert(strpos($this->drupalGetContent(), $raw) !== FALSE, $message, $group);
+    return $this->assert(strpos($this->backdropGetContent(), $raw) !== FALSE, $message, $group);
   }
 
   /**
@@ -2987,7 +2987,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!$message) {
       $message = t('Raw "@raw" not found', array('@raw' => $raw));
     }
-    return $this->assert(strpos($this->drupalGetContent(), $raw) === FALSE, $message, $group);
+    return $this->assert(strpos($this->backdropGetContent(), $raw) === FALSE, $message, $group);
   }
 
   /**
@@ -3044,7 +3044,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    */
   protected function assertTextHelper($text, $message = '', $group, $not_exists) {
     if ($this->plainTextContent === FALSE) {
-      $this->plainTextContent = filter_xss($this->drupalGetContent(), array());
+      $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
     if (!$message) {
       $message = !$not_exists ? t('"@text" found', array('@text' => $text)) : t('"@text" not found', array('@text' => $text));
@@ -3110,7 +3110,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    */
   protected function assertUniqueTextHelper($text, $message = '', $group, $be_unique) {
     if ($this->plainTextContent === FALSE) {
-      $this->plainTextContent = filter_xss($this->drupalGetContent(), array());
+      $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
     if (!$message) {
       $message = '"' . $text . '"' . ($be_unique ? ' found only once' : ' found more than once');
@@ -3140,7 +3140,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!$message) {
       $message = t('Pattern "@pattern" found', array('@pattern' => $pattern));
     }
-    return $this->assert((bool) preg_match($pattern, $this->drupalGetContent()), $message, $group);
+    return $this->assert((bool) preg_match($pattern, $this->backdropGetContent()), $message, $group);
   }
 
   /**
@@ -3159,7 +3159,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!$message) {
       $message = t('Pattern "@pattern" not found', array('@pattern' => $pattern));
     }
-    return $this->assert(!preg_match($pattern, $this->drupalGetContent()), $message, $group);
+    return $this->assert(!preg_match($pattern, $this->backdropGetContent()), $message, $group);
   }
 
   /**
@@ -3683,7 +3683,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertMailString($field_name, $string, $email_depth) {
-    $mails = $this->drupalGetMails();
+    $mails = $this->backdropGetMails();
     $string_found = FALSE;
     for ($i = sizeof($mails) -1; $i >= sizeof($mails) - $email_depth && $i >= 0; $i--) {
       $mail = $mails[$i];
@@ -3711,7 +3711,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertMailPattern($field_name, $regex, $message) {
-    $mails = $this->drupalGetMails();
+    $mails = $this->backdropGetMails();
     $mail = end($mails);
     $regex_found = preg_match("/$regex/", $mail[$field_name]);
     return $this->assertTrue($regex_found, t('Expected text found in @field of email message: "@expected".', array('@field' => $field_name, '@expected' => $regex)));
@@ -3724,7 +3724,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   Optional number of emails to output.
    */
   protected function verboseEmail($count = 1) {
-    $mails = $this->drupalGetMails();
+    $mails = $this->backdropGetMails();
     for ($i = sizeof($mails) -1; $i >= sizeof($mails) - $count && $i >= 0; $i--) {
       $mail = $mails[$i];
       $this->verbose(t('Email:') . '<pre>' . print_r($mail, TRUE) . '</pre>');
@@ -3749,8 +3749,8 @@ class DrupalWebTestCase extends DrupalTestCase {
  * @return
  *   The ID of the message to be placed in related assertion messages.
  *
- * @see DrupalTestCase->originalFileDirectory
- * @see DrupalWebTestCase->verbose()
+ * @see BackdropTestCase->originalFileDirectory
+ * @see BackdropWebTestCase->verbose()
  */
 function simpletest_verbose($message, $original_file_directory = NULL, $test_class = NULL) {
   static $file_directory = NULL, $class = NULL, $id = 1, $verbose = NULL;

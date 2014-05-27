@@ -170,8 +170,8 @@ class views_plugin_exposed_form extends views_plugin {
     }
 
     $form_state['exposed_form_plugin'] = $this;
-    $form = drupal_build_form('views_exposed_form', $form_state);
-    $output = drupal_render($form);
+    $form = backdrop_build_form('views_exposed_form', $form_state);
+    $output = backdrop_render($form);
 
     if (!$this->view->display_handler->displays_exposed() || (!$block && $this->view->display_handler->get_option('exposed_block'))) {
       return "";
@@ -278,7 +278,7 @@ class views_plugin_exposed_form extends views_plugin {
     if (!empty($this->options['autosubmit'])) {
       $form['#attributes']['class'][] = 'autosubmit-full-form';
       $form['submit']['#attributes']['class'][] = 'autosubmit-click';
-      $form['#attached']['library'][] = array('system', 'drupal.autosubmit');
+      $form['#attached']['library'][] = array('system', 'backdrop.autosubmit');
 
       if (!empty($this->options['autosubmit_hide'])) {
         $form['submit']['#attributes']['class'][] = 'js-hide';

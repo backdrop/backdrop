@@ -7,17 +7,17 @@
  * page. The request returns an array of commands encoded in JSON, which is
  * then executed to make any changes that are necessary to the page.
  *
- * Drupal uses this file to enhance form elements with #ajax['path'] and
+ * Backdrop uses this file to enhance form elements with #ajax['path'] and
  * #ajax['wrapper'] properties. If set, this file will automatically be included
  * to provide Ajax capabilities.
  */
 
-Drupal.ajax = Drupal.ajax || {};
+Backdrop.ajax = Backdrop.ajax || {};
 
 /**
  * Attaches the Ajax behavior to each Ajax form element.
  */
-Drupal.behaviors.AJAX = {
+Backdrop.behaviors.AJAX = {
   attach: function (context, settings) {
     
      function loadAjaxBehaviour(base) {
@@ -29,7 +29,7 @@ Drupal.behaviors.AJAX = {
         }
         $(element_settings.selector).each(function () {
           element_settings.element = this;
-          Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+          Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
         });
 
         $('#' + base).addClass('ajax-processed');
@@ -65,7 +65,7 @@ Drupal.behaviors.AJAX = {
       }
 
       var base = $(this).attr('id');
-      Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+      Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
     });
 
     // This class means to submit the form to the action using Ajax.
@@ -84,7 +84,7 @@ Drupal.behaviors.AJAX = {
       element_settings.progress = { 'type': 'throbber' };
 
       var base = $(this).attr('id');
-      Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
+      Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
     });
   }
 };
@@ -92,17 +92,17 @@ Drupal.behaviors.AJAX = {
 /**
  * Ajax object.
  *
- * All Ajax objects on a page are accessible through the global Drupal.ajax
+ * All Ajax objects on a page are accessible through the global Backdrop.ajax
  * object and are keyed by the submit button's ID. You can access them from
  * your module's JavaScript file to override properties or functions.
  *
  * For example, if your Ajax enabled button has the ID 'edit-submit', you can
  * redefine the function that is called to insert the new content like this
- * (inside a Drupal.behaviors attach block):
+ * (inside a Backdrop.behaviors attach block):
  * @code
- *    Drupal.behaviors.myCustomAJAXStuff = {
+ *    Backdrop.behaviors.myCustomAJAXStuff = {
  *      attach: function (context, settings) {
- *        Drupal.ajax['edit-submit'].commands.insert = function (ajax, response, status) {
+ *        Backdrop.ajax['edit-submit'].commands.insert = function (ajax, response, status) {
  *          new_content = $(response.data);
  *          $('#my-wrapper').append(new_content);
  *          alert('New content was appended to #my-wrapper');
@@ -111,7 +111,7 @@ Drupal.behaviors.AJAX = {
  *    };
  * @endcode
  */
-Drupal.ajax = function (base, element, element_settings) {
+Backdrop.ajax = function (base, element, element_settings) {
   var defaults = {
     event: 'mousedown',
     keypress: true,
@@ -121,7 +121,7 @@ Drupal.ajax = function (base, element, element_settings) {
     method: 'replaceWith',
     progress: {
       type: 'throbber',
-      message: Drupal.t('Please wait...')
+      message: Backdrop.t('Please wait...')
     },
     submit: {
       'js': true
@@ -239,7 +239,7 @@ Drupal.ajax = function (base, element, element_settings) {
  * and 32. RETURN is often used to submit a form when in a textfield, and
  * SPACE is often used to activate an element without submitting.
  */
-Drupal.ajax.prototype.keypressResponse = function (element, event) {
+Backdrop.ajax.prototype.keypressResponse = function (element, event) {
   // Create a synonym for this to reduce code confusion.
   var ajax = this;
 
@@ -261,7 +261,7 @@ Drupal.ajax.prototype.keypressResponse = function (element, event) {
  * bind() in the constructor, and it uses the options specified on the
  * ajax object.
  */
-Drupal.ajax.prototype.eventResponse = function (element, event) {
+Backdrop.ajax.prototype.eventResponse = function (element, event) {
   // Create a synonym for this to reduce code confusion.
   var ajax = this;
 
@@ -313,30 +313,30 @@ Drupal.ajax.prototype.eventResponse = function (element, event) {
  * Runs before the beforeSend() handler (see below), and unlike that one, runs
  * before field data is collected.
  */
-Drupal.ajax.prototype.beforeSerialize = function (element, options) {
+Backdrop.ajax.prototype.beforeSerialize = function (element, options) {
   // Allow detaching behaviors to update field values before collecting them.
   // This is only needed when field values are added to the POST data, so only
   // when there is a form such that this.form.ajaxSubmit() is used instead of
   // $.ajax(). When there is no form and $.ajax() is used, beforeSerialize()
   // isn't called, but don't rely on that: explicitly check this.form.
   if (this.form) {
-    var settings = this.settings || Drupal.settings;
-    Drupal.detachBehaviors(this.form, settings, 'serialize');
+    var settings = this.settings || Backdrop.settings;
+    Backdrop.detachBehaviors(this.form, settings, 'serialize');
   }
 
   // Prevent duplicate HTML ids in the returned markup.
-  // @see drupal_html_id()
+  // @see backdrop_html_id()
   options.data['ajax_html_ids[]'] = [];
   $('[id]').each(function () {
     options.data['ajax_html_ids[]'].push(this.id);
   });
 
-  // Allow Drupal to return new JavaScript and CSS files to load without
+  // Allow Backdrop to return new JavaScript and CSS files to load without
   // returning the ones already loaded.
   // @see ajax_base_page_theme()
-  // @see drupal_get_css()
-  // @see drupal_get_js()
-  var pageState = Drupal.settings.ajaxPageState;
+  // @see backdrop_get_css()
+  // @see backdrop_get_js()
+  var pageState = Backdrop.settings.ajaxPageState;
   options.data['ajax_page_state[theme]'] = pageState.theme;
   options.data['ajax_page_state[theme_token]'] = pageState.theme_token;
   for (var cssFile in pageState.css) {
@@ -352,14 +352,14 @@ Drupal.ajax.prototype.beforeSerialize = function (element, options) {
 
   // Provide an error if the dialog options can't be parsed.
   if (this.options.data.dialogOptions && typeof this.options.data.dialogOptions !== 'object') {
-    $.error(Drupal.t('The data-dialog-options property on this link is not valid JSON.'));
+    $.error(Backdrop.t('The data-dialog-options property on this link is not valid JSON.'));
   }
 };
 
 /**
  * Modify form values prior to form submission.
  */
-Drupal.ajax.prototype.beforeSubmit = function (form_values, element, options) {
+Backdrop.ajax.prototype.beforeSubmit = function (form_values, element, options) {
   // This function is left empty to make it simple to override for modules
   // that wish to add functionality here.
 };
@@ -367,7 +367,7 @@ Drupal.ajax.prototype.beforeSubmit = function (form_values, element, options) {
 /**
  * Prepare the Ajax request before it is sent.
  */
-Drupal.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
+Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
   // For forms without file inputs, the jQuery Form plugin serializes the form
   // values, and then calls jQuery's $.ajax() function, which invokes this
   // handler. In this circumstance, options.extraData is never used. For forms
@@ -404,7 +404,7 @@ Drupal.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
 
   // Insert progressbar or throbber.
   if (this.progress.type == 'bar') {
-    var progressBar = new Drupal.progressBar('ajax-progress-' + this.element.id, $.noop, this.progress.method, $.noop);
+    var progressBar = new Backdrop.progressBar('ajax-progress-' + this.element.id, $.noop, this.progress.method, $.noop);
     if (this.progress.message) {
       progressBar.setProgress(-1, this.progress.message);
     }
@@ -427,7 +427,7 @@ Drupal.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
 /**
  * Handler for the form redirection completion.
  */
-Drupal.ajax.prototype.success = function (response, status) {
+Backdrop.ajax.prototype.success = function (response, status) {
   // Remove the progress element.
   if (this.progress.element) {
     $(this.progress.element).remove();
@@ -437,7 +437,7 @@ Drupal.ajax.prototype.success = function (response, status) {
   }
   $(this.element).removeClass('progress-disabled').prop('disabled', false);
 
-  Drupal.freezeHeight();
+  Backdrop.freezeHeight();
 
   for (var i in response) {
     if (response.hasOwnProperty(i) && response[i].command && this.commands[response[i].command]) {
@@ -450,11 +450,11 @@ Drupal.ajax.prototype.success = function (response, status) {
   // commands is not sufficient, because behaviors from the entire form need
   // to be reattached.
   if (this.form) {
-    var settings = this.settings || Drupal.settings;
-    Drupal.attachBehaviors(this.form, settings);
+    var settings = this.settings || Backdrop.settings;
+    Backdrop.attachBehaviors(this.form, settings);
   }
 
-  Drupal.unfreezeHeight();
+  Backdrop.unfreezeHeight();
 
   // Remove any response-specific settings so they don't get used on the next
   // call by mistake.
@@ -464,7 +464,7 @@ Drupal.ajax.prototype.success = function (response, status) {
 /**
  * Build an effect object which tells us how to apply the effect when adding new HTML.
  */
-Drupal.ajax.prototype.getEffect = function (response) {
+Backdrop.ajax.prototype.getEffect = function (response) {
   var type = response.effect || this.effect;
   var speed = response.speed || this.speed;
 
@@ -491,8 +491,8 @@ Drupal.ajax.prototype.getEffect = function (response) {
 /**
  * Handler for the form redirection error.
  */
-Drupal.ajax.prototype.error = function (response, uri) {
-  window.alert(Drupal.ajaxError(response, uri));
+Backdrop.ajax.prototype.error = function (response, uri) {
+  window.alert(Backdrop.ajaxError(response, uri));
   // Remove the progress element.
   if (this.progress.element) {
     $(this.progress.element).remove();
@@ -506,15 +506,15 @@ Drupal.ajax.prototype.error = function (response, uri) {
   $(this.element).removeClass('progress-disabled').removeAttr('disabled');
   // Reattach behaviors, if they were detached in beforeSerialize().
   if (this.form) {
-    var settings = response.settings || this.settings || Drupal.settings;
-    Drupal.attachBehaviors(this.form, settings);
+    var settings = response.settings || this.settings || Backdrop.settings;
+    Backdrop.attachBehaviors(this.form, settings);
   }
 };
 
 /**
  * Provide a series of commands that the server can request the client perform.
  */
-Drupal.ajax.prototype.commands = {
+Backdrop.ajax.prototype.commands = {
   /**
    * Command to insert new content into the DOM.
    */
@@ -555,8 +555,8 @@ Drupal.ajax.prototype.commands = {
       case 'replaceAll':
       case 'empty':
       case 'remove':
-        settings = response.settings || ajax.settings || Drupal.settings;
-        Drupal.detachBehaviors(wrapper, settings);
+        settings = response.settings || ajax.settings || Backdrop.settings;
+        Backdrop.detachBehaviors(wrapper, settings);
     }
 
     // Add the new content to the page.
@@ -583,8 +583,8 @@ Drupal.ajax.prototype.commands = {
     // optional.
     if (new_content.parents('html').length > 0) {
       // Apply any settings from the returned JSON if available.
-      settings = response.settings || ajax.settings || Drupal.settings;
-      Drupal.attachBehaviors(new_content, settings);
+      settings = response.settings || ajax.settings || Backdrop.settings;
+      Backdrop.attachBehaviors(new_content, settings);
     }
   },
 
@@ -592,8 +592,8 @@ Drupal.ajax.prototype.commands = {
    * Command to remove a chunk from the page.
    */
   remove: function (ajax, response, status) {
-    var settings = response.settings || ajax.settings || Drupal.settings;
-    Drupal.detachBehaviors($(response.selector), settings);
+    var settings = response.settings || ajax.settings || Backdrop.settings;
+    Backdrop.detachBehaviors($(response.selector), settings);
     $(response.selector).remove();
   },
 
@@ -604,7 +604,7 @@ Drupal.ajax.prototype.commands = {
     if (!$(response.selector).hasClass('ajax-changed')) {
       $(response.selector).addClass('ajax-changed');
       if (response.asterisk) {
-        $(response.selector).find(response.asterisk).append(' <abbr class="ajax-changed" title="' + Drupal.t('Changed') + '">*</abbr> ');
+        $(response.selector).find(response.asterisk).append(' <abbr class="ajax-changed" title="' + Backdrop.t('Changed') + '">*</abbr> ');
       }
     }
   },
@@ -635,7 +635,7 @@ Drupal.ajax.prototype.commands = {
    */
   settings: function (ajax, response, status) {
     if (response.merge) {
-      $.extend(true, Drupal.settings, response.settings);
+      $.extend(true, Backdrop.settings, response.settings);
     }
     else {
       ajax.settings = response.settings;

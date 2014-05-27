@@ -92,7 +92,7 @@ function translation_permission() {
 function translation_views_api() {
   return array(
     'api' => '3.0',
-    'path' => drupal_get_path('module', 'translation') . '/views',
+    'path' => backdrop_get_path('module', 'translation') . '/views',
   );
 }
 
@@ -304,7 +304,7 @@ function translation_node_prepare(Node $node) {
     if (!empty($source_node->tnid)) {
       $translations = translation_node_get_translations($source_node->tnid);
       if (isset($translations[$langcode])) {
-        drupal_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
+        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
         return;
       }
     }
@@ -461,7 +461,7 @@ function translation_remove_from_set($node) {
  */
 function translation_node_get_translations($tnid) {
   if (is_numeric($tnid) && $tnid) {
-    $translations = &drupal_static(__FUNCTION__, array());
+    $translations = &backdrop_static(__FUNCTION__, array());
 
     if (!isset($translations[$tnid])) {
       $translations[$tnid] = array();
@@ -490,10 +490,10 @@ function translation_supported_type($type) {
 }
 
 /**
- * Returns the paths of all translations of a node, based on its Drupal path.
+ * Returns the paths of all translations of a node, based on its Backdrop path.
  *
  * @param $path
- *   A Drupal path, for example node/432.
+ *   A Backdrop path, for example node/432.
  * @return
  *   An array of paths of translations of the node accessible to the current
  *   user, keyed with language codes.

@@ -5,12 +5,12 @@
  * User session handling functions.
  *
  * The user-level session storage handlers:
- * - _drupal_session_open()
- * - _drupal_session_close()
- * - _drupal_session_read()
- * - _drupal_session_write()
- * - _drupal_session_destroy()
- * - _drupal_session_garbage_collection()
+ * - _backdrop_session_open()
+ * - _backdrop_session_close()
+ * - _backdrop_session_read()
+ * - _backdrop_session_write()
+ * - _backdrop_session_destroy()
+ * - _backdrop_session_garbage_collection()
  * are assigned by session_set_save_handler() in bootstrap.inc and are called
  * automatically by PHP. These functions should not be called directly. Session
  * data should instead be accessed via the $_SESSION superglobal.
@@ -20,7 +20,7 @@
  * Session handler assigned by session_set_save_handler().
  *
  * This function is used to handle any initialization, such as file paths or
- * database connections, that is needed before accessing session data. Drupal
+ * database connections, that is needed before accessing session data. Backdrop
  * does not need to initialize anything in this function.
  *
  * This function should not be called directly.
@@ -28,14 +28,14 @@
  * @return
  *   This function will always return TRUE.
  */
-function _drupal_session_open() {
+function _backdrop_session_open() {
   return TRUE;
 }
 
 /**
  * Session handler assigned by session_set_save_handler().
  *
- * This function is used to close the current session. Because Drupal stores
+ * This function is used to close the current session. Because Backdrop stores
  * session data in the database immediately on write, this function does
  * not need to do anything.
  *
@@ -44,7 +44,7 @@ function _drupal_session_open() {
  * @return
  *   This function will always return TRUE.
  */
-function _drupal_session_close() {
+function _backdrop_session_close() {
   return TRUE;
 }
 
@@ -67,20 +67,20 @@ function _drupal_session_close() {
  * @return
  *   The user's session, or an empty string if no session exists.
  */
-function _drupal_session_read($sid) {
+function _backdrop_session_read($sid) {
   global $user, $is_https;
 
   // Write and Close handlers are called after destructing objects
   // since PHP 5.0.5.
   // Thus destructors can use sessions but session handler can't use objects.
   // So we are moving session closure before destructing objects.
-  drupal_register_shutdown_function('session_write_close');
+  backdrop_register_shutdown_function('session_write_close');
 
   // Handle the case of first time visitors and clients that don't store
   // cookies (eg. web crawlers).
   $insecure_session_name = substr(session_name(), 1);
   if (!isset($_COOKIE[session_name()]) && !isset($_COOKIE[$insecure_session_name])) {
-    $user = drupal_anonymous_user();
+    $user = backdrop_anonymous_user();
     return '';
   }
 
@@ -110,25 +110,25 @@ function _drupal_session_read($sid) {
 
     // Add roles element to $user.
     $user->roles = array();
-    $user->roles[DRUPAL_AUTHENTICATED_RID] = 'authenticated user';
+    $user->roles[BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
     $user->roles += db_query("SELECT r.rid, r.name FROM {role} r INNER JOIN {users_roles} ur ON ur.rid = r.rid WHERE ur.uid = :uid", array(':uid' => $user->uid))->fetchAllKeyed(0, 1);
   }
   elseif ($user) {
     // The user is anonymous or blocked. Only preserve two fields from the
     // {sessions} table.
-    $account = drupal_anonymous_user();
+    $account = backdrop_anonymous_user();
     $account->session = $user->session;
     $account->timestamp = $user->timestamp;
     $user = $account;
   }
   else {
     // The session has expired.
-    $user = drupal_anonymous_user();
+    $user = backdrop_anonymous_user();
     $user->session = '';
   }
 
-  // Store the session that was read for comparison in _drupal_session_write().
-  $last_read = &drupal_static('drupal_session_last_read');
+  // Store the session that was read for comparison in _backdrop_session_write().
+  $last_read = &backdrop_static('backdrop_session_last_read');
   $last_read = array(
     'sid' => $sid,
     'value' => $user->session,
@@ -155,19 +155,19 @@ function _drupal_session_read($sid) {
  * @return
  *   Always returns TRUE.
  */
-function _drupal_session_write($sid, $value) {
+function _backdrop_session_write($sid, $value) {
   global $user, $is_https;
 
   // The exception handler is not active at this point, so we need to do it
   // manually.
   try {
-    if (!drupal_save_session()) {
+    if (!backdrop_save_session()) {
       // We don't have anything to do if we are not allowed to save the session.
       return;
     }
 
     // Check whether $_SESSION has been changed in this request.
-    $last_read = &drupal_static('drupal_session_last_read');
+    $last_read = &backdrop_static('backdrop_session_last_read');
     $is_changed = !isset($last_read) || $last_read['sid'] != $sid || $last_read['value'] !== $value;
 
     // For performance reasons, do not update the sessions table, unless
@@ -183,7 +183,7 @@ function _drupal_session_write($sid, $value) {
       );
 
       // Use the session ID as 'sid' and an empty string as 'ssid' by default.
-      // _drupal_session_read() does not allow empty strings so that's a safe
+      // _backdrop_session_read() does not allow empty strings so that's a safe
       // default.
       $key = array('sid' => $sid, 'ssid' => '');
       // On HTTPS connections, use the session ID as both 'sid' and 'ssid'.
@@ -222,12 +222,12 @@ function _drupal_session_write($sid, $value) {
     return TRUE;
   }
   catch (Exception $exception) {
-    require_once DRUPAL_ROOT . '/core/includes/errors.inc';
+    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
     // If we are displaying errors, then do so with no possibility of a further
     // uncaught exception being thrown.
     if (error_displayable()) {
       print '<h1>Uncaught exception thrown in session handler.</h1>';
-      print '<p>' . _drupal_render_exception_safe($exception) . '</p><hr />';
+      print '<p>' . _backdrop_render_exception_safe($exception) . '</p><hr />';
     }
     return FALSE;
   }
@@ -236,41 +236,41 @@ function _drupal_session_write($sid, $value) {
 /**
  * Initializes the session handler, starting a session if needed.
  */
-function drupal_session_initialize() {
+function backdrop_session_initialize() {
   global $user, $is_https;
 
-  session_set_save_handler('_drupal_session_open', '_drupal_session_close', '_drupal_session_read', '_drupal_session_write', '_drupal_session_destroy', '_drupal_session_garbage_collection');
+  session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
 
   // We use !empty() in the following check to ensure that blank session IDs
   // are not valid.
   if (!empty($_COOKIE[session_name()]) || ($is_https && variable_get('https', FALSE) && !empty($_COOKIE[substr(session_name(), 1)]))) {
     // If a session cookie exists, initialize the session. Otherwise the
-    // session is only started on demand in drupal_session_commit(), making
+    // session is only started on demand in backdrop_session_commit(), making
     // anonymous users not use a session cookie unless something is stored in
     // $_SESSION. This allows HTTP proxies to cache anonymous pageviews.
-    drupal_session_start();
+    backdrop_session_start();
     if (!empty($user->uid) || !empty($_SESSION)) {
-      drupal_page_is_cacheable(FALSE);
+      backdrop_page_is_cacheable(FALSE);
     }
   }
   else {
     // Set a session identifier for this request. This is necessary because
     // we lazily start sessions at the end of this request, and some
-    // processes (like drupal_get_token()) needs to know the future
+    // processes (like backdrop_get_token()) needs to know the future
     // session ID in advance.
     $GLOBALS['lazy_session'] = TRUE;
-    $user = drupal_anonymous_user();
+    $user = backdrop_anonymous_user();
     // Less random sessions (which are much faster to generate) are used for
-    // anonymous users than are generated in drupal_session_regenerate() when
+    // anonymous users than are generated in backdrop_session_regenerate() when
     // a user becomes authenticated.
-    session_id(drupal_random_key());
+    session_id(backdrop_random_key());
     if ($is_https && variable_get('https', FALSE)) {
       $insecure_session_name = substr(session_name(), 1);
-      $session_id = drupal_random_key();
+      $session_id = backdrop_random_key();
       $_COOKIE[$insecure_session_name] = $session_id;
     }
   }
-  date_default_timezone_set(drupal_get_user_timezone());
+  date_default_timezone_set(backdrop_get_user_timezone());
 }
 
 /**
@@ -278,14 +278,14 @@ function drupal_session_initialize() {
  *
  * @ingroup php_wrappers
  */
-function drupal_session_start() {
+function backdrop_session_start() {
   // Command line clients do not support cookies nor sessions.
-  if (!drupal_session_started() && !drupal_is_cli()) {
+  if (!backdrop_session_started() && !backdrop_is_cli()) {
     // Save current session data before starting it, as PHP will destroy it.
     $session_data = isset($_SESSION) ? $_SESSION : NULL;
 
     session_start();
-    drupal_session_started(TRUE);
+    backdrop_session_started(TRUE);
 
     // Restore session data.
     if (!empty($session_data)) {
@@ -299,10 +299,10 @@ function drupal_session_start() {
  *
  * If an anonymous user already have an empty session, destroy it.
  */
-function drupal_session_commit() {
+function backdrop_session_commit() {
   global $user, $is_https;
 
-  if (!drupal_save_session()) {
+  if (!backdrop_save_session()) {
     // We don't have anything to do if we are not allowed to save the session.
     return;
   }
@@ -310,15 +310,15 @@ function drupal_session_commit() {
   if (empty($user->uid) && empty($_SESSION)) {
     // There is no session data to store, destroy the session if it was
     // previously started.
-    if (drupal_session_started()) {
+    if (backdrop_session_started()) {
       session_destroy();
     }
   }
   else {
     // There is session data to store. Start the session if it is not already
     // started.
-    if (!drupal_session_started()) {
-      drupal_session_start();
+    if (!backdrop_session_started()) {
+      backdrop_session_start();
       if ($is_https && variable_get('https', FALSE)) {
         $insecure_session_name = substr(session_name(), 1);
         $params = session_get_cookie_params();
@@ -334,7 +334,7 @@ function drupal_session_commit() {
 /**
  * Returns whether a session has been started.
  */
-function drupal_session_started($set = NULL) {
+function backdrop_session_started($set = NULL) {
   static $session_started = FALSE;
   if (isset($set)) {
     $session_started = $set;
@@ -347,10 +347,10 @@ function drupal_session_started($set = NULL) {
  *
  * @ingroup php_wrappers
  */
-function drupal_session_regenerate() {
+function backdrop_session_regenerate() {
   global $user, $is_https;
   // Nothing to do if we are not allowed to change the session.
-  if (!drupal_save_session()) {
+  if (!backdrop_save_session()) {
     return;
   }
 
@@ -360,7 +360,7 @@ function drupal_session_regenerate() {
       $old_insecure_session_id = $_COOKIE[$insecure_session_name];
     }
     $params = session_get_cookie_params();
-    $session_id = drupal_random_key();
+    $session_id = backdrop_random_key();
     // If a session cookie lifetime is set, the session will expire
     // $params['lifetime'] seconds from the current request. If it is not set,
     // it will expire when the browser is closed.
@@ -369,10 +369,10 @@ function drupal_session_regenerate() {
     $_COOKIE[$insecure_session_name] = $session_id;
   }
 
-  if (drupal_session_started()) {
+  if (backdrop_session_started()) {
     $old_session_id = session_id();
   }
-  session_id(drupal_random_key());
+  session_id(backdrop_random_key());
 
   if (isset($old_session_id)) {
     $params = session_get_cookie_params();
@@ -404,12 +404,12 @@ function drupal_session_regenerate() {
   else {
     // Start the session when it doesn't exist yet.
     // Preserve the logged in user, as it will be reset to anonymous
-    // by _drupal_session_read.
+    // by _backdrop_session_read.
     $account = $user;
-    drupal_session_start();
+    backdrop_session_start();
     $user = $account;
   }
-  date_default_timezone_set(drupal_get_user_timezone());
+  date_default_timezone_set(backdrop_get_user_timezone());
 }
 
 /**
@@ -420,11 +420,11 @@ function drupal_session_regenerate() {
  * @param $sid
  *   Session ID.
  */
-function _drupal_session_destroy($sid) {
+function _backdrop_session_destroy($sid) {
   global $user, $is_https;
 
   // Nothing to do if we are not allowed to change the session.
-  if (!drupal_save_session()) {
+  if (!backdrop_save_session()) {
     return;
   }
 
@@ -434,17 +434,17 @@ function _drupal_session_destroy($sid) {
     ->execute();
 
   // Reset $_SESSION and $user to prevent a new session from being started
-  // in drupal_session_commit().
+  // in backdrop_session_commit().
   $_SESSION = array();
-  $user = drupal_anonymous_user();
+  $user = backdrop_anonymous_user();
 
   // Unset the session cookies.
-  _drupal_session_delete_cookie(session_name());
+  _backdrop_session_delete_cookie(session_name());
   if ($is_https) {
-    _drupal_session_delete_cookie(substr(session_name(), 1), FALSE);
+    _backdrop_session_delete_cookie(substr(session_name(), 1), FALSE);
   }
   elseif (variable_get('https', FALSE)) {
-    _drupal_session_delete_cookie('S' . session_name(), TRUE);
+    _backdrop_session_delete_cookie('S' . session_name(), TRUE);
   }
 }
 
@@ -456,7 +456,7 @@ function _drupal_session_destroy($sid) {
  * @param boolean $secure
  *   Force the secure value of the cookie.
  */
-function _drupal_session_delete_cookie($name, $secure = NULL) {
+function _backdrop_session_delete_cookie($name, $secure = NULL) {
   global $is_https;
   if (isset($_COOKIE[$name]) || (!$is_https && $secure === TRUE)) {
     $params = session_get_cookie_params();
@@ -474,9 +474,9 @@ function _drupal_session_delete_cookie($name, $secure = NULL) {
  * @param $uid
  *   User ID.
  */
-function drupal_session_destroy_uid($uid) {
+function backdrop_session_destroy_uid($uid) {
   // Nothing to do if we are not allowed to change the session.
-  if (!drupal_save_session()) {
+  if (!backdrop_save_session()) {
     return;
   }
 
@@ -494,7 +494,7 @@ function drupal_session_destroy_uid($uid) {
  *   The value of session.gc_maxlifetime, passed by PHP.
  *   Sessions not updated for more than $lifetime seconds will be removed.
  */
-function _drupal_session_garbage_collection($lifetime) {
+function _backdrop_session_garbage_collection($lifetime) {
   // Be sure to adjust 'php_value session.gc_maxlifetime' to a large enough
   // value. For example, if you want user sessions to stay in your database
   // for three weeks before deleting them, you need to set gc_maxlifetime
@@ -521,9 +521,9 @@ function _drupal_session_garbage_collection($lifetime) {
  * @return
  *   FALSE if writing session data has been disabled. Otherwise, TRUE.
  */
-function drupal_save_session($status = NULL) {
+function backdrop_save_session($status = NULL) {
   // PHP session ID, session, and cookie handling happens in the global scope.
-  // This value has to persist across calls to drupal_static_reset(), since a
+  // This value has to persist across calls to backdrop_static_reset(), since a
   // potentially wrong or disallowed session would be written otherwise.
   static $save_session = TRUE;
   if (isset($status)) {

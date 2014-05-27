@@ -5,7 +5,7 @@
  * Definition of viewsPluginStyleJumpMenuTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests jump menu style functionality.
@@ -22,10 +22,10 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
   public function setUp() {
     parent::setUp();
     $this->nodes = array();
-    $this->nodes['page'][] = $this->drupalCreateNode(array('type' => 'page'));
-    $this->nodes['page'][] = $this->drupalCreateNode(array('type' => 'page'));
-    $this->nodes['story'][] = $this->drupalCreateNode(array('type' => 'story'));
-    $this->nodes['story'][] = $this->drupalCreateNode(array('type' => 'story'));
+    $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));
+    $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));
+    $this->nodes['story'][] = $this->backdropCreateNode(array('type' => 'story'));
+    $this->nodes['story'][] = $this->backdropCreateNode(array('type' => 'story'));
 
     $this->nodeTitles = array($this->nodes['page'][0]->title, $this->nodes['page'][1]->title, $this->nodes['story'][0]->title, $this->nodes['story'][1]->title);
   }

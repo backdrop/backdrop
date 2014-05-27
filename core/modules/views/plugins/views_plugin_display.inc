@@ -8,10 +8,10 @@
 /**
  * @defgroup views_display_plugins Views display plugins
  * @{
- * Display plugins control how Views interact with the rest of Drupal.
+ * Display plugins control how Views interact with the rest of Backdrop.
  *
- * They can handle creating Views from a Drupal page hook; they can
- * handle creating Views from a Drupal block hook. They can also
+ * They can handle creating Views from a Backdrop page hook; they can
+ * handle creating Views from a Backdrop block hook. They can also
  * handle creating Views from an external module source, such as
  * a Panels pane, or an insert view, or a CCK field type.
  *
@@ -1033,7 +1033,7 @@ class views_plugin_display extends views_plugin {
       $title = $text;
     }
 
-    return l($text, 'admin/structure/views/nojs/display/' . $this->view->name . '/' . $this->display->id . '/' . $section, array('attributes' => array('class' => 'views-ajax-link ' . $class, 'title' => $title, 'id' => drupal_html_id('views-' . $this->display->id . '-' . $section)), 'html' => TRUE));
+    return l($text, 'admin/structure/views/nojs/display/' . $this->view->name . '/' . $this->display->id . '/' . $section, array('attributes' => array('class' => 'views-ajax-link ' . $class, 'title' => $title, 'id' => backdrop_html_id('views-' . $this->display->id . '-' . $section)), 'html' => TRUE));
   }
 
   /**
@@ -1122,7 +1122,7 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    $display_comment = check_plain(drupal_substr($this->get_option('display_comment'), 0, 10));
+    $display_comment = check_plain(backdrop_substr($this->get_option('display_comment'), 0, 10));
     $options['display_comment'] = array(
       'category' => 'other',
       'title' => t('Comment'),
@@ -1784,7 +1784,7 @@ class views_plugin_display extends views_plugin {
           '#type' => 'textfield',
           '#title' => t('Custom URL'),
           '#default_value' => $this->get_option('link_url'),
-          '#description' => t('A Drupal path or external URL the more link will point to. Note that this will override the link display setting above.') . $output,
+          '#description' => t('A Backdrop path or external URL the more link will point to. Note that this will override the link display setting above.') . $output,
           '#states' => array(
             'visible' => array(
               ':input[name="link_display"]' => array('value' => 'custom_url'),
@@ -1822,13 +1822,13 @@ class views_plugin_display extends views_plugin {
           // The base themes should be initialized in the right order.
           $base_theme = array_reverse($base_theme);
 
-          // This code is copied directly from _drupal_theme_initialize()
+          // This code is copied directly from _backdrop_theme_initialize()
           $theme_engine = NULL;
 
           // Initialize the theme.
           if (isset($theme->engine)) {
             // Include the engine.
-            include_once DRUPAL_ROOT . '/' . $theme->owner;
+            include_once BACKDROP_ROOT . '/' . $theme->owner;
 
             $theme_engine = $theme->engine;
             if (function_exists($theme_engine . '_init')) {
@@ -1843,12 +1843,12 @@ class views_plugin_display extends views_plugin {
             foreach ($base_theme as $base) {
               // Include the theme file or the engine.
               if (!empty($base->owner)) {
-                include_once DRUPAL_ROOT . '/' . $base->owner;
+                include_once BACKDROP_ROOT . '/' . $base->owner;
               }
             }
             // and our theme gets one too.
             if (!empty($theme->owner)) {
-              include_once DRUPAL_ROOT . '/' . $theme->owner;
+              include_once BACKDROP_ROOT . '/' . $theme->owner;
             }
           }
           $this->theme_registry = _theme_load_registry($theme, $base_theme, $theme_engine);
@@ -1957,7 +1957,7 @@ class views_plugin_display extends views_plugin {
           '#submit' => array('views_ui_config_item_form_rescan'),
         );
         $form['rescan_button']['markup'] = array(
-          '#markup' => '<div class="description">' . t("<strong>Important!</strong> When adding, removing, or renaming template files, it is necessary to make Drupal aware of the changes by making it rescan the files on your system. By clicking this button you clear Drupal's theme registry and thereby trigger this rescanning process. The highlighted templates above will then reflect the new state of your system.") . '</div>',
+          '#markup' => '<div class="description">' . t("<strong>Important!</strong> When adding, removing, or renaming template files, it is necessary to make Backdrop aware of the changes by making it rescan the files on your system. By clicking this button you clear Backdrop's theme registry and thereby trigger this rescanning process. The highlighted templates above will then reflect the new state of your system.") . '</div>',
         );
 
         $form_state['ok_button'] = TRUE;
@@ -2049,7 +2049,7 @@ class views_plugin_display extends views_plugin {
 
         // Field templates aren't registered the normal way...and they're always
         // this one, anyhow.
-        $output .= '<pre>' . check_plain(file_get_contents(drupal_get_path('module', 'views') . '/theme/views-view-field.tpl.php')) . '</pre>';
+        $output .= '<pre>' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/theme/views-view-field.tpl.php')) . '</pre>';
 
         $form['analysis'] = array(
           '#markup' => '<div class="form-item">' . $output . '</div>',
@@ -2060,7 +2060,7 @@ class views_plugin_display extends views_plugin {
       case 'exposed_block':
         $form['#title'] .= t('Put the exposed form in a block');
         $form['description'] = array(
-          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Drupal block administration system, and the exposed form will appear there. Note that this block must be enabled manually, Views will not enable it for you.') . '</div>',
+          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Backdrop block administration system, and the exposed form will appear there. Note that this block must be enabled manually, Views will not enable it for you.') . '</div>',
         );
         $form['exposed_block'] = array(
           '#type' => 'radios',
@@ -2763,7 +2763,7 @@ class views_plugin_display extends views_plugin {
 
       $blocks[$delta] = array(
         'info' => $desc,
-        'cache' => DRUPAL_NO_CACHE,
+        'cache' => BACKDROP_NO_CACHE,
       );
     }
 

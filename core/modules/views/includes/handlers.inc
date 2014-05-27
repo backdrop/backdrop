@@ -239,11 +239,11 @@ class views_handler extends views_object {
       default:
         return $string;
       case 'upper':
-        return drupal_strtoupper($string);
+        return backdrop_strtoupper($string);
       case 'lower':
-        return drupal_strtolower($string);
+        return backdrop_strtolower($string);
       case 'ucfirst':
-        return drupal_strtoupper(drupal_substr($string, 0, 1)) . drupal_substr($string, 1);
+        return backdrop_strtoupper(backdrop_substr($string, 0, 1)) . backdrop_substr($string, 1);
       case 'ucwords':
         if ($multibyte == UNICODE_MULTIBYTE) {
           return mb_convert_case($string, MB_CASE_TITLE);
@@ -287,7 +287,7 @@ class views_handler extends views_object {
       '#weight' => 150,
     );
     // Allow to alter the default values brought into the form.
-    drupal_alter('views_handler_options', $this->options, $view);
+    backdrop_alter('views_handler_options', $this->options, $view);
   }
 
   /**

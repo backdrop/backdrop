@@ -158,10 +158,10 @@ function actions_do($action_ids, $object = NULL, $context = NULL, $a1 = NULL, $a
  * @see hook_action_info()
  */
 function actions_list($reset = FALSE) {
-  $actions = &drupal_static(__FUNCTION__);
+  $actions = &backdrop_static(__FUNCTION__);
   if (!isset($actions) || $reset) {
     $actions = module_invoke_all('action_info');
-    drupal_alter('action_info', $actions);
+    backdrop_alter('action_info', $actions);
   }
 
   // See module_implements() for an explanation of this cast.
@@ -214,7 +214,7 @@ function actions_get_all_actions() {
 function actions_actions_map($actions) {
   $actions_map = array();
   foreach ($actions as $callback => $array) {
-    $key = drupal_hash_base64($callback);
+    $key = backdrop_hash_base64($callback);
     $actions_map[$key]['callback']     = isset($array['callback']) ? $array['callback'] : $callback;
     $actions_map[$key]['label']        = $array['label'];
     $actions_map[$key]['type']         = $array['type'];
@@ -240,7 +240,7 @@ function actions_function_lookup($hash) {
   // Check for a function name match.
   $actions_list = actions_list();
   foreach ($actions_list as $function => $array) {
-    if (drupal_hash_base64($function) == $hash) {
+    if (backdrop_hash_base64($function) == $hash) {
       return $function;
     }
   }
@@ -248,7 +248,7 @@ function actions_function_lookup($hash) {
   // Must be a configurable action; check database.
   $result = db_query("SELECT aid FROM {actions} WHERE parameters <> ''")->fetchAll(PDO::FETCH_ASSOC);
   foreach ($result as $row) {
-    if (drupal_hash_base64($row['aid']) == $hash) {
+    if (backdrop_hash_base64($row['aid']) == $hash) {
       $aid = $row['aid'];
       break;
     }

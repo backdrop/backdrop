@@ -1,18 +1,24 @@
-
-window.Drupal = window.Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {} };
+/**
+ * Main JavaScript file for Backdrop CMS.
+ *
+ * This file provides central functionality to Backdrop, including attaching
+ * behaviors (the main way of interacting with JS in Backdrop), theming
+ * wrappers, and localization functions.
+ */
+window.Backdrop = window.Backdrop || { 'settings': {}, 'behaviors': {}, 'locale': {} };
 
 // JavaScript should be made compatible with libraries other than jQuery by
 // wrapping it in an anonymous closure.
-(function ($, Drupal, window, document, undefined) {
+(function ($, undefined) {
 
 /**
  * Attach all registered behaviors to a page element.
  *
  * Behaviors are event-triggered actions that attach to page elements, enhancing
- * default non-JavaScript UIs. Behaviors are registered in the Drupal.behaviors
+ * default non-JavaScript UIs. Behaviors are registered in the Backdrop.behaviors
  * object using the method 'attach' and optionally also 'detach' as follows:
  * @code
- *    Drupal.behaviors.behaviorName = {
+ *    Backdrop.behaviors.behaviorName = {
  *      attach: function (context, settings) {
  *        ...
  *      },
@@ -22,11 +28,11 @@ window.Drupal = window.Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {}
  *    };
  * @endcode
  *
- * Drupal.attachBehaviors is added below to the jQuery.ready event and therefore
- * runs on initial page load. Developers implementing Ajax in their solutions
- * should also call this function after new page content has been loaded,
- * feeding in an element to be processed, in order to attach all behaviors to
- * the new content.
+ * Backdrop.attachBehaviors is added below to the jQuery.ready event and
+ * therefore runs on initial page load. Developers implementing Ajax in their
+ * solutions should also call this function after new page content has been
+ * loaded, feeding in an element to be processed, in order to attach all
+ * behaviors to the new content.
  *
  * Behaviors should use
  * @code
@@ -41,13 +47,13 @@ window.Drupal = window.Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {}
  *   is used.
  * @param settings
  *   An object containing settings for the current context. If none is given,
- *   the global Drupal.settings object is used.
+ *   the global Backdrop.settings object is used.
  */
-Drupal.attachBehaviors = function (context, settings) {
+Backdrop.attachBehaviors = function (context, settings) {
   context = context || document;
-  settings = settings || Drupal.settings;
+  settings = settings || Backdrop.settings;
   // Execute all of them.
-  $.each(Drupal.behaviors, function () {
+  $.each(Backdrop.behaviors, function () {
     if ($.isFunction(this.attach)) {
       this.attach(context, settings);
     }
@@ -63,7 +69,7 @@ Drupal.attachBehaviors = function (context, settings) {
  * content.
  *
  * Such implementations should look for the class name that was added in their
- * corresponding Drupal.behaviors.behaviorName.attach implementation, i.e.
+ * corresponding Backdrop.behaviors.behaviorName.attach implementation, i.e.
  * behaviorName-processed, to ensure the behavior is detached only from
  * previously processed elements.
  *
@@ -72,14 +78,14 @@ Drupal.attachBehaviors = function (context, settings) {
  *   is used.
  * @param settings
  *   An object containing settings for the current context. If none given, the
- *   global Drupal.settings object is used.
+ *   global Backdrop.settings object is used.
  * @param trigger
  *   A string containing what's causing the behaviors to be detached. The
  *   possible triggers are:
  *   - unload: (default) The context element is being removed from the DOM.
  *   - move: The element is about to be moved within the DOM (for example,
  *     during a tabledrag row swap). After the move is completed,
- *     Drupal.attachBehaviors() is called, so that the behavior can undo
+ *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
  *     do anything simply in response to the element being moved, but because
  *     IFRAME elements reload their "src" when being moved within the DOM,
@@ -92,14 +98,14 @@ Drupal.attachBehaviors = function (context, settings) {
  *     that WYSIWYG editors can update the hidden textarea to which they are
  *     bound.
  *
- * @see Drupal.attachBehaviors
+ * @see Backdrop.attachBehaviors
  */
-Drupal.detachBehaviors = function (context, settings, trigger) {
+Backdrop.detachBehaviors = function (context, settings, trigger) {
   context = context || document;
-  settings = settings || Drupal.settings;
+  settings = settings || Backdrop.settings;
   trigger = trigger || 'unload';
   // Execute all of them.
-  $.each(Drupal.behaviors, function () {
+  $.each(Backdrop.behaviors, function () {
     if ($.isFunction(this.detach)) {
       this.detach(context, settings, trigger);
     }
@@ -115,7 +121,7 @@ Drupal.detachBehaviors = function (context, settings, trigger) {
  *   The encoded string.
  * @ingroup sanitization
  */
-Drupal.checkPlain = function (str) {
+Backdrop.checkPlain = function (str) {
   str = str.toString()
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -134,21 +140,21 @@ Drupal.checkPlain = function (str) {
  *   array are replaced with the corresponding value. Based on the first
  *   character of the key, the value is escaped and/or themed:
  *    - !variable: inserted as is
- *    - @variable: escape plain text to HTML (Drupal.checkPlain)
+ *    - @variable: escape plain text to HTML (Backdrop.checkPlain)
  *    - %variable: escape text and theme as a placeholder for user-submitted
- *      content (checkPlain + Drupal.theme('placeholder'))
+ *      content (checkPlain + Backdrop.theme('placeholder'))
  *
- * @see Drupal.t()
+ * @see Backdrop.t()
  * @ingroup sanitization
  */
-Drupal.formatString = function(str, args) {
+Backdrop.formatString = function(str, args) {
   // Transform arguments before inserting them.
   for (var key in args) {
     if (args.hasOwnProperty(key)) {
        switch (key.charAt(0)) {
          // Escaped only.
          case '@':
-           args[key] = Drupal.checkPlain(args[key]);
+           args[key] = Backdrop.checkPlain(args[key]);
         break;
         // Pass-through.
          case '!':
@@ -156,7 +162,7 @@ Drupal.formatString = function(str, args) {
          // Escaped and placeholder.
          case '%':
          default:
-           args[key] = Drupal.theme('placeholder', args[key]);
+           args[key] = Backdrop.theme('placeholder', args[key]);
            break;
        }
        str = str.replace(key, args[key]);
@@ -175,7 +181,7 @@ Drupal.formatString = function(str, args) {
  * @param args
  *   An object of replacements pairs to make after translation. Incidences
  *   of any key in this array are replaced with the corresponding value.
- *   See Drupal.formatString().
+ *   See Backdrop.formatString().
  *
  * @param options
  *   - 'context' (defaults to the empty context): The context the source string
@@ -184,17 +190,17 @@ Drupal.formatString = function(str, args) {
  * @return
  *   The translated string.
  */
-Drupal.t = function (str, args, options) {
+Backdrop.t = function (str, args, options) {
   options = options || {};
   options.context = options.context || '';
 
   // Fetch the localized version of the string.
-  if (Drupal.locale.strings && Drupal.locale.strings[options.context] && Drupal.locale.strings[options.context][str]) {
-    str = Drupal.locale.strings[options.context][str];
+  if (Backdrop.locale.strings && Backdrop.locale.strings[options.context] && Backdrop.locale.strings[options.context][str]) {
+    str = Backdrop.locale.strings[options.context][str];
   }
 
   if (args) {
-    str = Drupal.formatString(str, args);
+    str = Backdrop.formatString(str, args);
   }
   return str;
 };
@@ -202,7 +208,7 @@ Drupal.t = function (str, args, options) {
 /**
  * Format a string containing a count of items.
  *
- * This function ensures that the string is pluralized correctly. Since Drupal.t() is
+ * This function ensures that the string is pluralized correctly. Since Backdrop.t() is
  * called by this function, make sure not to pass already-localized strings to it.
  *
  * See the documentation of the server-side format_plural() function for further details.
@@ -220,35 +226,35 @@ Drupal.t = function (str, args, options) {
  * @param args
  *   An object of replacements pairs to make after translation. Incidences
  *   of any key in this array are replaced with the corresponding value.
- *   See Drupal.formatString().
+ *   See Backdrop.formatString().
  *   Note that you do not need to include @count in this array.
  *   This replacement is done automatically for the plural case.
  * @param options
- *   The options to pass to the Drupal.t() function.
+ *   The options to pass to the Backdrop.t() function.
  * @return
  *   A translated string.
  */
-Drupal.formatPlural = function (count, singular, plural, args, options) {
+Backdrop.formatPlural = function (count, singular, plural, args, options) {
   args = args || {};
   args['@count'] = count;
   // Determine the index of the plural form.
-  var index = Drupal.locale.pluralFormula ? Drupal.locale.pluralFormula(args['@count']) : ((args['@count'] == 1) ? 0 : 1);
+  var index = Backdrop.locale.pluralFormula ? Backdrop.locale.pluralFormula(args['@count']) : ((args['@count'] == 1) ? 0 : 1);
 
   if (index == 0) {
-    return Drupal.t(singular, args, options);
+    return Backdrop.t(singular, args, options);
   }
   else if (index == 1) {
-    return Drupal.t(plural, args, options);
+    return Backdrop.t(plural, args, options);
   }
   else {
     args['@count[' + index + ']'] = args['@count'];
     delete args['@count'];
-    return Drupal.t(plural.replace('@count', '@count[' + index + ']'), args, options);
+    return Backdrop.t(plural.replace('@count', '@count[' + index + ']'), args, options);
   }
 };
 
 /**
- * Generate the themed representation of a Drupal object.
+ * Generate the themed representation of a Backdrop object.
  *
  * All requests for themed output must go through this function. It examines
  * the request and routes it to the appropriate theme function. If the current
@@ -257,7 +263,7 @@ Drupal.formatPlural = function (count, singular, plural, args, options) {
  *
  * For example, to retrieve the HTML for text that should be emphasized and
  * displayed as a placeholder inside a sentence, call
- * Drupal.theme('placeholder', text).
+ * Backdrop.theme('placeholder', text).
  *
  * @param func
  *   The name of the theme function to call.
@@ -267,18 +273,18 @@ Drupal.formatPlural = function (count, singular, plural, args, options) {
  *   Any data the theme function returns. This could be a plain HTML string,
  *   but also a complex object.
  */
-Drupal.theme = function (func) {
+Backdrop.theme = function (func) {
   var args = Array.prototype.slice.apply(arguments, [1]);
 
-  return (Drupal.theme[func] || Drupal.theme.prototype[func]).apply(this, args);
+  return (Backdrop.theme[func] || Backdrop.theme.prototype[func]).apply(this, args);
 };
 
 /**
  * Freeze the current body height (as minimum height). Used to prevent
  * unnecessary upwards scrolling when doing DOM manipulations.
  */
-Drupal.freezeHeight = function () {
-  Drupal.unfreezeHeight();
+Backdrop.freezeHeight = function () {
+  Backdrop.unfreezeHeight();
   $('<div id="freeze-height"></div>').css({
     position: 'absolute',
     top: '0px',
@@ -291,23 +297,23 @@ Drupal.freezeHeight = function () {
 /**
  * Unfreeze the body height.
  */
-Drupal.unfreezeHeight = function () {
+Backdrop.unfreezeHeight = function () {
   $('#freeze-height').remove();
 };
 
 /**
- * Encodes a Drupal path for use in a URL.
+ * Encodes a Backdrop path for use in a URL.
  *
  * For aesthetic reasons slashes are not escaped.
  */
-Drupal.encodePath = function (item) {
+Backdrop.encodePath = function (item) {
   return window.encodeURIComponent(item).replace(/%2F/g, '/');
 };
 
 /**
  * Get the text selection in a textarea.
  */
-Drupal.getSelection = function (element) {
+Backdrop.getSelection = function (element) {
   var range1, range2, start, end;
   if (typeof element.selectionStart != 'number' && document.selection) {
     // The current selection.
@@ -328,22 +334,22 @@ Drupal.getSelection = function (element) {
 /**
  * Build an error message from an Ajax response.
  */
-Drupal.ajaxError = function (xmlhttp, uri) {
+Backdrop.ajaxError = function (xmlhttp, uri) {
   var statusCode, statusText, pathText, responseText, readyStateText, message;
   if (xmlhttp.status) {
-    statusCode = "\n" + Drupal.t("An AJAX HTTP error occurred.") +  "\n" + Drupal.t("HTTP Result Code: !status", {'!status': xmlhttp.status});
+    statusCode = "\n" + Backdrop.t("An AJAX HTTP error occurred.") +  "\n" + Backdrop.t("HTTP Result Code: !status", {'!status': xmlhttp.status});
   }
   else {
-    statusCode = "\n" + Drupal.t("An AJAX HTTP request terminated abnormally.");
+    statusCode = "\n" + Backdrop.t("An AJAX HTTP request terminated abnormally.");
   }
-  statusCode += "\n" + Drupal.t("Debugging information follows.");
-  pathText = "\n" + Drupal.t("Path: !uri", {'!uri': uri} );
+  statusCode += "\n" + Backdrop.t("Debugging information follows.");
+  pathText = "\n" + Backdrop.t("Path: !uri", {'!uri': uri} );
   statusText = '';
   // In some cases, when statusCode == 0, xmlhttp.statusText may not be defined.
   // Unfortunately, testing for it with typeof, etc, doesn't seem to catch that
   // and the test causes an exception. So we need to catch the exception here.
   try {
-    statusText = "\n" + Drupal.t("StatusText: !statusText", {'!statusText': $.trim(xmlhttp.statusText)});
+    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': $.trim(xmlhttp.statusText)});
   }
   catch (e) {}
 
@@ -351,7 +357,7 @@ Drupal.ajaxError = function (xmlhttp, uri) {
   // Again, we don't have a way to know for sure whether accessing
   // xmlhttp.responseText is going to throw an exception. So we'll catch it.
   try {
-    responseText = "\n" + Drupal.t("ResponseText: !responseText", {'!responseText': $.trim(xmlhttp.responseText) } );
+    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': $.trim(xmlhttp.responseText) } );
   } catch (e) {}
 
   // Make the responseText more readable by stripping HTML tags and newlines.
@@ -359,7 +365,7 @@ Drupal.ajaxError = function (xmlhttp, uri) {
   responseText = responseText.replace(/[\n]+\s+/g,"\n");
 
   // We don't need readyState except for status == 0.
-  readyStateText = xmlhttp.status == 0 ? ("\n" + Drupal.t("ReadyState: !readyState", {'!readyState': xmlhttp.readyState})) : "";
+  readyStateText = xmlhttp.status == 0 ? ("\n" + Backdrop.t("ReadyState: !readyState", {'!readyState': xmlhttp.readyState})) : "";
 
   message = statusCode + pathText + statusText + responseText + readyStateText;
   return message;
@@ -382,15 +388,20 @@ $(function () {
   }
 });
 
-//Attach all behaviors.
+// On page ready, attach behaviors in which all other Backdrop JS is handled.
 $(function () {
-  Drupal.attachBehaviors(document, Drupal.settings);
+  // Alias the Backdrop namespace to Drupal if compatibility is enabled.
+  if (Backdrop.settings.drupalCompatibility) {
+    window.Drupal = Backdrop;
+  }
+
+  Backdrop.attachBehaviors(document, Backdrop.settings);
 });
 
 /**
  * The default themes.
  */
-Drupal.theme.prototype = {
+Backdrop.theme.prototype = {
 
   /**
    * Formats text for emphasized display in a placeholder inside a sentence.
@@ -401,8 +412,8 @@ Drupal.theme.prototype = {
    *   The formatted text (html).
    */
   placeholder: function (str) {
-    return '<em class="placeholder">' + Drupal.checkPlain(str) + '</em>';
+    return '<em class="placeholder">' + Backdrop.checkPlain(str) + '</em>';
   }
 };
 
-})(jQuery, Drupal, this, this.document);
+})(jQuery);

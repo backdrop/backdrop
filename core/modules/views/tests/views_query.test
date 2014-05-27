@@ -8,7 +8,7 @@
 /**
  * Abstract class for views testing.
  */
-abstract class ViewsTestCase extends DrupalWebTestCase {
+abstract class ViewsTestCase extends BackdropWebTestCase {
   /**
    * Helper function: verify a result set returned by view.
    *
@@ -421,7 +421,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
 
     // In order to test exposed filters, we have to disable
     // the exposed forms cache.
-    drupal_static_reset('views_exposed_form_cache');
+    backdrop_static_reset('views_exposed_form_cache');
 
     $display = $view->new_display('page', 'Page', 'page_1');
     return $view;

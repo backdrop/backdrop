@@ -68,7 +68,7 @@ function taxonomy_overview_vocabularies_submit($form, &$form_state) {
       taxonomy_vocabulary_save($form[$vid]['#vocabulary']);
     }
   }
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -91,12 +91,12 @@ function theme_taxonomy_overview_vocabularies($variables) {
       $vocabulary = &$form[$key];
 
       $row = array();
-      $row[] = drupal_render($vocabulary['name']);
+      $row[] = backdrop_render($vocabulary['name']);
       if (isset($vocabulary['weight'])) {
         $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
-        $row[] = drupal_render($vocabulary['weight']);
+        $row[] = backdrop_render($vocabulary['weight']);
       }
-      $row[] = drupal_render($vocabulary['operations']);
+      $row[] = backdrop_render($vocabulary['operations']);
       $rows[] = array('data' => $row, 'class' => array('draggable'));
     }
   }
@@ -104,10 +104,10 @@ function theme_taxonomy_overview_vocabularies($variables) {
   $header = array(t('Vocabulary name'));
   if (isset($form['actions'])) {
     $header[] = t('Weight');
-    drupal_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
+    backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
   }
   $header[] = t('Operations');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy'))) . drupal_render_children($form);
+  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy'))) . backdrop_render_children($form);
 }
 
 /**
@@ -227,13 +227,13 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
 
   switch (taxonomy_vocabulary_save($vocabulary)) {
     case SAVED_NEW:
-      drupal_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
+      backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
       watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
       $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
       break;
 
     case SAVED_UPDATED:
-      drupal_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
+      backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
       watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
       break;
@@ -406,12 +406,12 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     $links['edit'] = array(
       'title' => t('Edit'),
       'href' => 'taxonomy/term/' . $term->tid . '/edit',
-      'query' => drupal_get_destination(),
+      'query' => backdrop_get_destination(),
     );
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => 'taxonomy/term/' . $term->tid . '/delete',
-      'query' => drupal_get_destination(),
+      'query' => backdrop_get_destination(),
     );
     $form[$key]['operations'] = array(
       '#type' => 'operations',
@@ -470,7 +470,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
   }
 
   // Sort term order based on weight.
-  uasort($form_state['values'], 'drupal_sort_weight');
+  uasort($form_state['values'], 'backdrop_sort_weight');
 
   $vocabulary = $form['#vocabulary'];
   // Update the current hierarchy type as we go.
@@ -557,7 +557,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
     $vocabulary->hierarchy = $hierarchy;
     taxonomy_vocabulary_save($vocabulary);
   }
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -580,13 +580,13 @@ function theme_taxonomy_overview_terms($variables) {
 
   // Add drag and drop if parent fields are present in the form.
   if ($form['#parent_fields']) {
-    drupal_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
-    drupal_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
-    drupal_add_js(drupal_get_path('module', 'taxonomy') . '/taxonomy.js');
-    drupal_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
-    drupal_add_css(drupal_get_path('module', 'taxonomy') . '/taxonomy.css');
+    backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
+    backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
+    backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js');
+    backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
+    backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/taxonomy.css');
   }
-  drupal_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
+  backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
 
   $errors = form_get_errors() != FALSE ? form_get_errors() : array();
   $rows = array();
@@ -595,16 +595,16 @@ function theme_taxonomy_overview_terms($variables) {
       $term = &$form[$key];
 
       $row = array();
-      $row[] = (isset($term['#term']['depth']) && $term['#term']['depth'] > 0 ? theme('indentation', array('size' => $term['#term']['depth'])) : ''). drupal_render($term['view']);
+      $row[] = (isset($term['#term']['depth']) && $term['#term']['depth'] > 0 ? theme('indentation', array('size' => $term['#term']['depth'])) : ''). backdrop_render($term['view']);
       if ($form['#parent_fields']) {
         $term['tid']['#attributes']['class'] = array('term-id');
         $term['parent']['#attributes']['class'] = array('term-parent');
         $term['depth']['#attributes']['class'] = array('term-depth');
-        $row[0] .= drupal_render($term['parent']) . drupal_render($term['tid']) . drupal_render($term['depth']);
+        $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
       $term['weight']['#attributes']['class'] = array('term-weight');
-      $row[] = drupal_render($term['weight']);
-      $row[] = drupal_render($term['operations']);
+      $row[] = backdrop_render($term['weight']);
+      $row[] = backdrop_render($term['operations']);
       $row = array('data' => $row);
       $rows[$key] = $row;
     }
@@ -647,7 +647,7 @@ function theme_taxonomy_overview_terms($variables) {
 
   $header = array(t('Name'), t('Weight'), t('Operations'));
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'taxonomy')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   $output .= theme('pager');
 
   return $output;
@@ -829,11 +829,11 @@ function taxonomy_form_term_submit($form, &$form_state) {
   $status = taxonomy_term_save($term);
   switch ($status) {
     case SAVED_NEW:
-      drupal_set_message(t('Created new term %term.', array('%term' => $term->name)));
+      backdrop_set_message(t('Created new term %term.', array('%term' => $term->name)));
       watchdog('taxonomy', 'Created new term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
       break;
     case SAVED_UPDATED:
-      drupal_set_message(t('Updated term %term.', array('%term' => $term->name)));
+      backdrop_set_message(t('Updated term %term.', array('%term' => $term->name)));
       watchdog('taxonomy', 'Updated term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
       // Clear the page and block caches to avoid stale data.
       cache_clear_all();
@@ -890,7 +890,7 @@ function taxonomy_form_term_submit_build_taxonomy_term($form, &$form_state) {
 function taxonomy_form_term_delete_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $term = $form['#term'];
@@ -930,7 +930,7 @@ function taxonomy_term_confirm_delete($form, &$form_state, $term) {
 function taxonomy_term_confirm_delete_submit($form, &$form_state) {
   taxonomy_term_delete($form_state['values']['tid']);
   taxonomy_check_vocabulary_hierarchy($form['#vocabulary'], $form_state['values']);
-  drupal_set_message(t('Deleted term %name.', array('%name' => $form_state['values']['name'])));
+  backdrop_set_message(t('Deleted term %name.', array('%name' => $form_state['values']['name'])));
   watchdog('taxonomy', 'Deleted term %name.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
   if (!isset($_GET['destination'])) {
     $form_state['redirect'] = 'admin/structure/taxonomy';
@@ -972,7 +972,7 @@ function taxonomy_vocabulary_confirm_delete($form, &$form_state, $vid) {
  */
 function taxonomy_vocabulary_confirm_delete_submit($form, &$form_state) {
   $status = taxonomy_vocabulary_delete($form_state['values']['vid']);
-  drupal_set_message(t('Deleted vocabulary %name.', array('%name' => $form_state['values']['name'])));
+  backdrop_set_message(t('Deleted vocabulary %name.', array('%name' => $form_state['values']['name'])));
   watchdog('taxonomy', 'Deleted vocabulary %name.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/taxonomy';
   cache_clear_all();
@@ -1012,7 +1012,7 @@ function taxonomy_vocabulary_confirm_reset_alphabetical_submit($form, &$form_sta
     ->fields(array('weight' => 0))
     ->condition('vid', $form_state['values']['vid'])
     ->execute();
-  drupal_set_message(t('Reset vocabulary %name to alphabetical order.', array('%name' => $form_state['values']['name'])));
+  backdrop_set_message(t('Reset vocabulary %name to alphabetical order.', array('%name' => $form_state['values']['name'])));
   watchdog('taxonomy', 'Reset vocabulary %name to alphabetical order.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/taxonomy/' . $form_state['values']['machine_name'];
 }

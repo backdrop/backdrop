@@ -5,7 +5,7 @@
  * Definition of ViewsHandlerFilterDateTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests the core views_handler_filter_date handler.
@@ -15,10 +15,10 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     parent::setUp();
     // Add some basic test nodes.
     $this->nodes = array();
-    $this->nodes[] = $this->drupalCreateNode(array('created' => 100000));
-    $this->nodes[] = $this->drupalCreateNode(array('created' => 200000));
-    $this->nodes[] = $this->drupalCreateNode(array('created' => 300000));
-    $this->nodes[] = $this->drupalCreateNode(array('created' => time() + 86400));
+    $this->nodes[] = $this->backdropCreateNode(array('created' => 100000));
+    $this->nodes[] = $this->backdropCreateNode(array('created' => 200000));
+    $this->nodes[] = $this->backdropCreateNode(array('created' => 300000));
+    $this->nodes[] = $this->backdropCreateNode(array('created' => time() + 86400));
 
     $this->map = array(
       'nid' => 'nid',
@@ -131,16 +131,16 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $view = $this->views_test_between();
     $view->save();
 
-    $admin_user =   $this->drupalCreateUser(array('administer views', 'administer site configuration'));
-    $this->drupalLogin($admin_user);
+    $admin_user =   $this->backdropCreateUser(array('administer views', 'administer site configuration'));
+    $this->backdropLogin($admin_user);
     menu_rebuild();
-    $this->drupalGet('admin/structure/views/view/test_filter_date_between/edit');
-    $this->drupalGet('admin/structure/views/nojs/config-item/test_filter_date_between/default/filter/created');
+    $this->backdropGet('admin/structure/views/view/test_filter_date_between/edit');
+    $this->backdropGet('admin/structure/views/nojs/config-item/test_filter_date_between/default/filter/created');
 
     $edit = array();
     // Generate a definitive wrong value, which should be checked by validation.
     $edit['options[value][value]'] = $this->randomString() . '-------';
-    $this->drupalPost(NULL, $edit, t('Apply'));
+    $this->backdropPost(NULL, $edit, t('Apply'));
     $this->assertText(t('Invalid date format.'), 'Make sure that validation is runned and the invalidate date format is identified.');
   }
 

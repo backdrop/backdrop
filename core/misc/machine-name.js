@@ -3,7 +3,7 @@
 /**
  * Attach the machine-readable name form element behavior.
  */
-Drupal.behaviors.machineName = {
+Backdrop.behaviors.machineName = {
   /**
    * Attaches the behavior.
    *
@@ -45,7 +45,7 @@ Drupal.behaviors.machineName = {
        if (machine !== '') {
          if (machine !== data.options.replace) {
            data.$target.val(machine);
-           data.$preview.html(data.options.field_prefix + Drupal.checkPlain(machine) + data.options.field_suffix);
+           data.$preview.html(data.options.field_prefix + Backdrop.checkPlain(machine) + data.options.field_suffix);
          }
          data.$suffix.show();
        }
@@ -86,7 +86,7 @@ Drupal.behaviors.machineName = {
            machine = self.transliterate($source.val(), options);
          }
          // Append the machine name preview to the source field.
-         var $preview = $('<span class="machine-name-value">' + options.field_prefix + Drupal.checkPlain(machine) + options.field_suffix + '</span>');
+         var $preview = $('<span class="machine-name-value">' + options.field_prefix + Backdrop.checkPlain(machine) + options.field_suffix + '</span>');
          $suffix.empty();
          if (options.label) {
            $suffix.append(' ').append('<span class="machine-name-label">' + options.label + ':</span>');
@@ -108,7 +108,7 @@ Drupal.behaviors.machineName = {
         };
 
         // If it is editable, append an edit link.
-        var $link = $('<span class="admin-link"><a href="#">' + Drupal.t('Edit') + '</a></span>').bind('click', eventData, clickEditHandler);
+        var $link = $('<span class="admin-link"><a href="#">' + Backdrop.t('Edit') + '</a></span>').bind('click', eventData, clickEditHandler);
         $suffix.append(' ').append($link);
 
         // Preview the machine name in realtime when the human-readable name

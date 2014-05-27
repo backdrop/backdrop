@@ -9,7 +9,7 @@
  * Implements hook_schema().
  */
 function admin_menu_schema() {
-  $schema['cache_admin_menu'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_admin_menu'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_admin_menu']['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
   return $schema;
 }

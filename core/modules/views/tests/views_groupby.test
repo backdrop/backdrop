@@ -5,7 +5,7 @@
  * Tests aggregate functionality of Views.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests aggregate functionality of views, for example count.
@@ -16,23 +16,23 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    */
   public function testAggregateCount() {
     // Create 2 nodes of type1 and 3 nodes of type2
-    $type1 = $this->drupalCreateContentType();
-    $type2 = $this->drupalCreateContentType();
+    $type1 = $this->backdropCreateContentType();
+    $type2 = $this->backdropCreateContentType();
 
     $node_1 = array(
       'type' => $type1->type,
     );
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
 
     $node_2 = array(
       'type' => $type2->type,
     );
-    $this->drupalCreateNode($node_2);
-    $this->drupalCreateNode($node_2);
-    $this->drupalCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
 
     $view = $this->viewsAggregateCountView();
     $output = $view->execute_display();
@@ -106,24 +106,24 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    */
   function GroupByTestHelper($group_by, $values) {
     // Create 2 nodes of type1 and 3 nodes of type2
-    $type1 = $this->drupalCreateContentType();
-    $type2 = $this->drupalCreateContentType();
+    $type1 = $this->backdropCreateContentType();
+    $type2 = $this->backdropCreateContentType();
 
     $node_1 = array(
       'type' => $type1->type,
     );
     // Nids from 1 to 4.
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
-    $this->drupalCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
+    $this->backdropCreateNode($node_1);
     $node_2 = array(
       'type' => $type2->type,
     );
     // Nids from 5 to 7.
-    $this->drupalCreateNode($node_2);
-    $this->drupalCreateNode($node_2);
-    $this->drupalCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
+    $this->backdropCreateNode($node_2);
 
     $view = $this->viewsGroupByViewHelper($group_by);
     $output = $view->execute_display();
@@ -215,13 +215,13 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     // Check if GROUP BY and HAVING are included when a view
     // Doesn't display SUM, COUNT, MAX... functions in SELECT statment
 
-    $type1 = $this->drupalCreateContentType();
+    $type1 = $this->backdropCreateContentType();
 
     $node_1 = array(
       'type' => $type1->type,
     );
     for ($x = 0; $x < 10; $x++) {
-      $this->drupalCreateNode($node_1);
+      $this->backdropCreateNode($node_1);
     }
 
     $view = $this->viewsGroupByCountViewOnlyFilters();
@@ -280,14 +280,14 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
 /**
  * Tests UI of aggregate functionality..
  */
-class viewsUiGroupbyTestCase extends DrupalWebTestCase {
+class viewsUiGroupbyTestCase extends BackdropWebTestCase {
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui', 'views_test');
 
     // Create and log in a user with administer views permission.
-    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
-    $this->drupalLogin($views_admin);
+    $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
+    $this->backdropLogin($views_admin);
   }
 
   /**
@@ -296,16 +296,16 @@ class viewsUiGroupbyTestCase extends DrupalWebTestCase {
    * @todo: this should check the change of the settings as well.
    */
   function testGroupBySave() {
-    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/edit');
 
     $edit = array(
       'group_by' => TRUE,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
+    $this->backdropPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
 
-    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
-    $this->drupalPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
+    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->backdropPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
 
-    $this->drupalGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
+    $this->backdropGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
   }
 }

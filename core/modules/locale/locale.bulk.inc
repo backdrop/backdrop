@@ -5,17 +5,17 @@
  * Mass import-export and batch import functionality for Gettext .po files.
  */
 
-include_once DRUPAL_ROOT . '/core/includes/gettext.inc';
+include_once BACKDROP_ROOT . '/core/includes/gettext.inc';
 
 /**
  * User interface for the translation import screen.
  */
 function locale_translate_import_form($form, &$form_state) {
-  drupal_static_reset('language_list');
+  backdrop_static_reset('language_list');
   $languages = language_list(TRUE);
 
   // Initialize a language list to the ones available, including English if we
-  // are to translate Drupal to English as well.
+  // are to translate Backdrop to English as well.
   $existing_languages = array();
   foreach ($languages as $langcode => $language) {
     if ($langcode != 'en' || locale_translate_english()) {
@@ -75,28 +75,28 @@ function locale_translate_import_form_submit($form, &$form_state) {
   if ($file = file_save_upload('file', $validators)) {
 
     // Add language, if not yet supported
-    drupal_static_reset('language_list');
+    backdrop_static_reset('language_list');
     $languages = language_list();
     $langcode = $form_state['values']['langcode'];
     if (!isset($languages[$langcode])) {
-      include_once DRUPAL_ROOT . '/core/includes/standard.inc';
+      include_once BACKDROP_ROOT . '/core/includes/standard.inc';
       $predefined = standard_language_list();
       $language = (object) array(
         'langcode' => $langcode,
       );
       language_save($language);
-      drupal_set_message(t('The language %language has been created.', array('%language' => t($predefined[$langcode][0]))));
+      backdrop_set_message(t('The language %language has been created.', array('%language' => t($predefined[$langcode][0]))));
     }
 
     // Now import strings into the language
     if ($return = _locale_import_po($file, $langcode, $form_state['values']['mode']) == FALSE) {
       $variables = array('%filename' => $file->filename);
-      drupal_set_message(t('The translation import of %filename failed.', $variables), 'error');
+      backdrop_set_message(t('The translation import of %filename failed.', $variables), 'error');
       watchdog('locale', 'The translation import of %filename failed.', $variables, WATCHDOG_ERROR);
     }
   }
   else {
-    drupal_set_message(t('File to import not found.'), 'error');
+    backdrop_set_message(t('File to import not found.'), 'error');
     $form_state['redirect'] = 'admin/config/regional/translate/import';
     return;
   }
@@ -110,7 +110,7 @@ function locale_translate_import_form_submit($form, &$form_state) {
  */
 function locale_translate_export_screen() {
   // Get all enabled languages, except English, if we should not translate that.
-  drupal_static_reset('language_list');
+  backdrop_static_reset('language_list');
   $languages = language_list(TRUE);
   $language_options = array();
   foreach ($languages as $langcode => $language) {
@@ -122,11 +122,11 @@ function locale_translate_export_screen() {
   $output = '';
   // Offer translation export if any language is set up.
   if (!empty($language_options)) {
-    $elements = drupal_get_form('locale_translate_export_po_form', $language_options);
-    $output = drupal_render($elements);
+    $elements = backdrop_get_form('locale_translate_export_po_form', $language_options);
+    $output = backdrop_render($elements);
   }
-  $elements = drupal_get_form('locale_translate_export_pot_form');
-  $output .= drupal_render($elements);
+  $elements = backdrop_get_form('locale_translate_export_pot_form');
+  $output .= backdrop_render($elements);
   return $output;
 }
 
@@ -157,7 +157,7 @@ function locale_translate_export_pot_form() {
   // Complete template export of the strings
   $form['export_title'] = array('#type' => 'item',
     '#title' => t('Export template'),
-    '#description' => t('Generate a Gettext Portable Object Template (<em>.pot</em>) file with all strings from the Drupal locale database.'),
+    '#description' => t('Generate a Gettext Portable Object Template (<em>.pot</em>) file with all strings from the Backdrop locale database.'),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Export'));
@@ -244,7 +244,7 @@ function locale_translate_batch_build($files, $finish_feedback = FALSE) {
       'title'         => $t('Importing interface translations'),
       'init_message'  => $t('Starting import'),
       'error_message' => $t('Error importing interface translations'),
-      'file'          => drupal_get_path('module', 'locale') . '/locale.bulk.inc',
+      'file'          => backdrop_get_path('module', 'locale') . '/locale.bulk.inc',
     );
     if ($finish_feedback) {
       $batch['finished'] = 'locale_translate_batch_finished';
@@ -267,7 +267,7 @@ function locale_translate_batch_import($filepath, &$context) {
   // we can extract the language code to use for the import from the end.
   if (preg_match('!(/|\.)([^\./]+)\.po$!', $filepath, $langcode)) {
     $file = entity_create('file', array(
-      'filename' => drupal_basename($filepath),
+      'filename' => backdrop_basename($filepath),
       'uri' => $filepath,
     ));
     _locale_import_read_po('db-store', $file, LOCALE_IMPORT_KEEP, $langcode[2]);
@@ -280,6 +280,6 @@ function locale_translate_batch_import($filepath, &$context) {
  */
 function locale_translate_batch_finished($success, $results) {
   if ($success) {
-    drupal_set_message(format_plural(count($results), 'One translation file imported.', '@count translation files imported.'));
+    backdrop_set_message(format_plural(count($results), 'One translation file imported.', '@count translation files imported.'));
   }
 }

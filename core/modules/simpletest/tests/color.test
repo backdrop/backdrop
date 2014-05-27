@@ -1,14 +1,10 @@
 <?php
-
 /**
  * @file
- * Definition of Drupal\system\Tests\Common\ColorTest.
- */
-
-/**
+ *
  * Tests color conversion functions.
  */
-class ColorTest extends DrupalUnitTestCase {
+class ColorTest extends BackdropUnitTestCase {
   
   /**
    * Tests Color::hexToRgb().

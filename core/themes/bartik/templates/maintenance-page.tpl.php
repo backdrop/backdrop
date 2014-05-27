@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Implementation to display a single Drupal page while offline.
+ * Implementation to display a single Backdrop page while offline.
  *
  * All the available variables are mirrored in page.tpl.php.
  *

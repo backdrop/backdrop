@@ -40,7 +40,7 @@ function path_menu() {
   );
   $items['admin/config/search/path/delete/%path'] = array(
     'title' => 'Delete alias',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_admin_delete_confirm', 5),
     'access arguments' => array('administer url aliases'),
     'file' => 'path.admin.inc',
@@ -95,7 +95,7 @@ function path_form_node_form_alter(&$form, $form_state) {
       'class' => array('path-form'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'path') . '/path.js'),
+      'js' => array(backdrop_get_path('module', 'path') . '/path.js'),
     ),
     '#access' => user_access('create url aliases') || user_access('administer url aliases'),
     '#weight' => 30,

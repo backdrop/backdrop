@@ -21,10 +21,10 @@ function views_install() {
  * Implements hook_schema().
  */
 function views_schema() {
-  $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_views']['description'] = 'Cache table for Views to store loaded view configurations.';
 
-  $schema['cache_views_data'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views_data'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
   $schema['cache_views_data']['fields']['serialized']['default'] = 1;
 

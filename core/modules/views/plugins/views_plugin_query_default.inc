@@ -290,7 +290,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', drupal_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
     $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
@@ -1499,7 +1499,7 @@ class views_plugin_query_default extends views_plugin_query {
       catch (Exception $e) {
         $view->result = array();
         if (!empty($view->live_preview)) {
-          drupal_set_message($e->getMessage(), 'error');
+          backdrop_set_message($e->getMessage(), 'error');
         }
         else {
           watchdog('views', 'Exception in @human_name[@view_name]: @message', array('@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()));

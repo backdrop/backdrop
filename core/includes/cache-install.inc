@@ -9,35 +9,35 @@
  * Defines a stub cache implementation to be used during installation.
  *
  * The stub implementation is needed when database access is not yet available.
- * Because Drupal's caching system never requires that cached data be present,
+ * Because Backdrop's caching system never requires that cached data be present,
  * these stub functions can short-circuit the process and sidestep the need for
  * any persistent storage. Obviously, using this cache implementation during
  * normal operations would have a negative impact on performance.
  */
-class DrupalFakeCache extends DrupalDatabaseCache implements DrupalCacheInterface {
+class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheInterface {
 
   /**
-   * Overrides DrupalDatabaseCache::get().
+   * Overrides BackdropDatabaseCache::get().
    */
   function get($cid) {
     return FALSE;
   }
 
   /**
-   * Overrides DrupalDatabaseCache::getMultiple().
+   * Overrides BackdropDatabaseCache::getMultiple().
    */
   function getMultiple(&$cids) {
     return array();
   }
 
   /**
-   * Overrides DrupalDatabaseCache::set().
+   * Overrides BackdropDatabaseCache::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {
   }
 
   /**
-   * Implements DrupalCacheInterface::deletePrefix().
+   * Implements BackdropCacheInterface::deletePrefix().
    */
   function deletePrefix($cid) {
     try {
@@ -50,7 +50,7 @@ class DrupalFakeCache extends DrupalDatabaseCache implements DrupalCacheInterfac
   }
 
   /**
-   * Overrides DrupalDatabaseCache::clear().
+   * Overrides BackdropDatabaseCache::clear().
    */
   function clear($cid = NULL, $wildcard = FALSE) {
     // If there is a database cache, attempt to clear it whenever possible. The
@@ -79,7 +79,7 @@ class DrupalFakeCache extends DrupalDatabaseCache implements DrupalCacheInterfac
   }
 
   /**
-   * Overrides DrupalDatabaseCache::isEmpty().
+   * Overrides BackdropDatabaseCache::isEmpty().
    */
   function isEmpty() {
     return TRUE;

@@ -122,7 +122,7 @@ class views_handler_filter extends views_handler {
         'remember' => array('default' => FALSE, 'bool' => TRUE),
         'multiple' => array('default' => FALSE, 'bool' => TRUE),
         'remember_roles' => array('default' => array(
-          DRUPAL_AUTHENTICATED_RID => DRUPAL_AUTHENTICATED_RID,
+          BACKDROP_AUTHENTICATED_RID => BACKDROP_AUTHENTICATED_RID,
         )),
       ),
     );
@@ -648,7 +648,7 @@ class views_handler_filter extends views_handler {
    */
   function build_group_submit($form, &$form_state) {
     $groups = array();
-    uasort($form_state['values']['options']['group_info']['group_items'], 'drupal_sort_weight');
+    uasort($form_state['values']['options']['group_info']['group_items'], 'backdrop_sort_weight');
     // Filter out removed items.
 
     // Start from 1 to avoid problems with #default_value in the widget.

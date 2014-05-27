@@ -3,7 +3,7 @@
 /**
  * Perform end-to-end tests of the upgrade path.
  */
-abstract class UpgradePathTestCase extends DrupalWebTestCase {
+abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
   /**
    * The file path(s) to the dumped database(s) to load into the child site.
@@ -40,17 +40,17 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Overrides DrupalWebTestCase::setUp() for upgrade testing.
+   * Overrides BackdropWebTestCase::setUp() for upgrade testing.
    *
-   * @see DrupalWebTestCase::prepareDatabasePrefix()
-   * @see DrupalWebTestCase::changeDatabasePrefix()
-   * @see DrupalWebTestCase::prepareEnvironment()
+   * @see BackdropWebTestCase::prepareDatabasePrefix()
+   * @see BackdropWebTestCase::changeDatabasePrefix()
+   * @see BackdropWebTestCase::prepareEnvironment()
    */
   protected function setUp() {
     global $user, $language_interface, $conf;
 
     // Load the Update API.
-    require_once DRUPAL_ROOT . '/core/includes/update.inc';
+    require_once BACKDROP_ROOT . '/core/includes/update.inc';
 
     // Reset flags.
     $this->upgradedSite = FALSE;
@@ -69,11 +69,11 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
 
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
-    drupal_static_reset();
+    backdrop_static_reset();
 
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
-    // changed, since DrupalCacheArray implementations attempt to
+    // changed, since BackdropCacheArray implementations attempt to
     // write back to persistent caches when they are destructed.
     $this->changeDatabasePrefix();
     if (!$this->setupDatabasePrefix) {
@@ -98,26 +98,26 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
 
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
-    drupal_save_session(FALSE);
+    backdrop_save_session(FALSE);
     // Login as uid 1.
     $user = db_query('SELECT * FROM {users} WHERE uid = :uid', array(':uid' => 1))->fetchObject();
 
     // Generate and set a D6-compatible session cookie.
     $this->curlInitialize();
-    $sid = drupal_hash_base64(uniqid(mt_rand(), TRUE) . drupal_random_bytes(55));
+    $sid = backdrop_hash_base64(uniqid(mt_rand(), TRUE) . backdrop_random_bytes(55));
     curl_setopt($this->curlHandle, CURLOPT_COOKIE, rawurlencode(session_name()) . '=' . rawurlencode($sid));
 
     // Force our way into the session of the child site.
-    drupal_save_session(TRUE);
-    _drupal_session_write($sid, '');
+    backdrop_save_session(TRUE);
+    _backdrop_session_write($sid, '');
     // Remove the temporarily added ssid column.
-    drupal_save_session(FALSE);
+    backdrop_save_session(FALSE);
 
     // Restore necessary variables.
     $this->variable_set('clean_url', $this->originalCleanUrl);
     $this->variable_set('site_mail', 'simpletest@example.com');
 
-    drupal_set_time_limit($this->timeLimit);
+    backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
   }
 
@@ -172,19 +172,19 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
 
     // Load the first update screen.
     $update_url = $GLOBALS['base_url'] . '/core/update.php';
-    $this->drupalGet($update_url, array('external' => TRUE));
+    $this->backdropGet($update_url, array('external' => TRUE));
     if (!$this->assertResponse(200)) {
       return FALSE;
     }
 
     // Continue.
-    $this->drupalPost(NULL, array(), t('Continue'));
+    $this->backdropPost(NULL, array(), t('Continue'));
     if (!$this->assertResponse(200)) {
       return FALSE;
     }
 
     // Go!
-    $this->drupalPost(NULL, array(), t('Apply pending updates'));
+    $this->backdropPost(NULL, array(), t('Apply pending updates'));
     if (!$this->assertText('Updates were attempted')) {
       return FALSE;
     }
@@ -205,8 +205,8 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
     }
 
     // Check if there still are pending updates.
-    $this->drupalGet($update_url, array('external' => TRUE));
-    $this->drupalPost(NULL, array(), t('Continue'));
+    $this->backdropGet($update_url, array('external' => TRUE));
+    $this->backdropPost(NULL, array(), t('Continue'));
     if (!$this->assertText(t('No pending updates.'), t('No pending updates at the end of the update process.'))) {
       return FALSE;
     }
@@ -219,23 +219,23 @@ abstract class UpgradePathTestCase extends DrupalWebTestCase {
     // but not on the test client, we need to load the code here.
     $new_modules = array_diff(module_list(TRUE), $this->loadedModules);
     foreach ($new_modules as $module) {
-      drupal_load('module', $module);
+      backdrop_load('module', $module);
     }
 
     // Reload hook implementations
     module_implements_reset();
 
     // Rebuild caches.
-    drupal_static_reset();
-    drupal_flush_all_caches();
+    backdrop_static_reset();
+    backdrop_flush_all_caches();
 
     // Reload global $conf array and permissions.
     $this->refreshVariables();
     $this->checkPermissions(array(), TRUE);
 
     // Check we can load the front page of the new site.
-    $this->drupalGet('');
-    return $this->assertText('Powered by Drupal', t('The front page of the upgraded site loads successfully.'));
+    $this->backdropGet('');
+    return $this->assertText('Powered by Backdrop CMS', t('The front page of the upgraded site loads successfully.'));
   }
 
   /**

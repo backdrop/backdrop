@@ -145,7 +145,7 @@
  *
  * There are 10 types of plugins in Views:
  * - Display: Display plugins are responsible for controlling *where* a view
- *   lives; that is, how they are being exposed to other parts of Drupal. Page
+ *   lives; that is, how they are being exposed to other parts of Backdrop. Page
  *   and block are the most common displays, as well as the ubiquitous 'master'
  *   (or 'default') display.
  * - Style: Style plugins control how a view is displayed. For the most part
@@ -238,7 +238,7 @@
  *       'title' => t('Node'),
  *       'help' => t('Display the node with standard node view.'),
  *       'handler' => 'views_plugin_row_node_view',
- *       'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
+ *       'path' => backdrop_get_path('module', 'views') . '/modules/node', // not necessary for most modules
  *       'theme' => 'views_view_row_node',
  *       'base' => array('node'), // only works with 'node' as base.
  *       'uses options' => TRUE,
@@ -543,8 +543,8 @@ function hook_views_data_alter(&$data) {
  *     - help topic: The name of an entry by advanced help for the plugin.
  *     - theme: The name of a theme suggestion to use for the display.
  *     - js: An array with paths to js files that should be included for the
- *       display. Note that the path should be relative Drupal root, not module
- *       root.
+ *       display. Note that the path should be relative Backdrop root, not
+ *       module root.
  *     - type: Each plugin can specify a type parameter to group certain
  *       plugins together. For example all row plugins related to feeds are
  *       grouped together, because a rss style plugin only accepts feed row
@@ -575,8 +575,8 @@ function hook_views_data_alter(&$data) {
  *       views_block_info().
  *     - theme: The name of a theme suggestion to use for the display.
  *     - js: An array with paths to js files that should be included for the
- *       display. Note that the path should be relative Drupal root, not module
- *       root.
+ *       display. Note that the path should be relative Backdrop root, not
+ *       module root.
  *
  *   - Used by style plugins:
  *     - uses row plugin: Set to TRUE to allow row plugins for this style.
@@ -597,7 +597,7 @@ function hook_views_plugins() {
       'title' => t('Taxonomy term'),
       'handler' => 'views_plugin_argument_validate_taxonomy_term',
       // Declaring path explicitly not necessary for most modules.
-      'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
+      'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
     ),
   );
 
@@ -607,14 +607,14 @@ function hook_views_plugins() {
       'taxonomy_term' => array(
         'title' => t('Taxonomy term'),
         'handler' => 'views_plugin_argument_validate_taxonomy_term',
-        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
       ),
     ),
     'argument default' => array(
       'taxonomy_tid' => array(
         'title' => t('Taxonomy term ID from URL'),
         'handler' => 'views_plugin_argument_default_taxonomy_tid',
-        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
+        'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
         'parent' => 'fixed',
       ),
     ),
@@ -650,8 +650,8 @@ function hook_views_plugins_alter(&$plugins) {
 function hook_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'example') . '/includes/views',
-    'template path' => drupal_get_path('module', 'example') . '/themes',
+    'path' => backdrop_get_path('module', 'example') . '/includes/views',
+    'template path' => backdrop_get_path('module', 'example') . '/themes',
   );
 }
 
@@ -774,7 +774,7 @@ function hook_views_pre_execute(&$view) {
   // (This action could be performed later in the execution process, but not
   // earlier.)
   if (count($view->query->tables) > 2 && user_access('administer views')) {
-    drupal_set_message(t('The view %view may be heavy to execute.', array('%view' => $view->name)), 'warning');
+    backdrop_set_message(t('The view %view may be heavy to execute.', array('%view' => $view->name)), 'warning');
   }
 }
 
@@ -795,7 +795,7 @@ function hook_views_post_execute(&$view) {
   // (This action could be performed later in the execution process, but not
   // earlier.)
   if ($view->total_rows > 100) {
-    drupal_set_message(t('You have more than 100 hits. Use the filter settings to narrow down your list.'));
+    backdrop_set_message(t('You have more than 100 hits. Use the filter settings to narrow down your list.'));
   }
 }
 

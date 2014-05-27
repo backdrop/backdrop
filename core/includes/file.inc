@@ -12,7 +12,7 @@
  * File API is needed before a bootstrap, or in an alternate order (e.g.
  * maintenance theme).
  */
-require_once DRUPAL_ROOT . '/core/includes/stream_wrappers.inc';
+require_once BACKDROP_ROOT . '/core/includes/stream_wrappers.inc';
 
 /**
  * @defgroup file File interface
@@ -29,9 +29,9 @@ require_once DRUPAL_ROOT . '/core/includes/stream_wrappers.inc';
  * - filemime: The file's MIME type.
  * - filesize: The size of the file in bytes.
  * - status: A bitmapped field indicating the status of the file. The first 8
- *   bits are reserved for Drupal core. The least significant bit indicates
+ *   bits are reserved for Backdrop core. The least significant bit indicates
  *   temporary (0) or permanent (1). Temporary files older than
- *   DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed during cron runs.
+ *   BACKDROP_MAXIMUM_TEMP_FILE_AGE will be removed during cron runs.
  * - timestamp: UNIX timestamp for the date the file was added to the database.
  */
 
@@ -63,16 +63,16 @@ const FILE_EXISTS_ERROR = 2;
 /**
  * Indicates that the file is permanent and should not be deleted.
  *
- * Temporary files older than DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed
+ * Temporary files older than BACKDROP_MAXIMUM_TEMP_FILE_AGE will be removed
  * during cron runs, but permanent files will not be removed during the file
  * garbage collection process.
  */
 const FILE_STATUS_PERMANENT = 1;
 
 /**
- * Provides Drupal stream wrapper registry.
+ * Provides Backdrop stream wrapper registry.
  *
- * A stream wrapper is an abstraction of a file system that allows Drupal to
+ * A stream wrapper is an abstraction of a file system that allows Backdrop to
  * use the same set of methods to access both local files and remote resources.
  *
  * Provide a facility for managing and querying user-defined stream wrappers
@@ -113,7 +113,7 @@ const FILE_STATUS_PERMANENT = 1;
  * @return
  *   An array keyed by scheme, with values containing an array of information
  *   about the stream wrapper, as returned by hook_stream_wrappers(). If $filter
- *   is omitted or set to STREAM_WRAPPERS_ALL, the entire Drupal stream wrapper
+ *   is omitted or set to STREAM_WRAPPERS_ALL, the entire Backdrop stream wrapper
  *   registry is returned. Otherwise only the stream wrappers whose 'type'
  *   bitmask has an on bit for each bit specified in $filter are returned.
  *
@@ -121,7 +121,7 @@ const FILE_STATUS_PERMANENT = 1;
  * @see hook_stream_wrappers_alter()
  */
 function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
-  $wrappers_storage = &drupal_static(__FUNCTION__);
+  $wrappers_storage = &backdrop_static(__FUNCTION__);
 
   if (!isset($wrappers_storage)) {
     $wrappers = module_invoke_all('stream_wrappers');
@@ -129,11 +129,11 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
       // Add defaults.
       $wrappers[$scheme] += array('type' => STREAM_WRAPPERS_NORMAL);
     }
-    drupal_alter('stream_wrappers', $wrappers);
+    backdrop_alter('stream_wrappers', $wrappers);
     $existing = stream_get_wrappers();
     foreach ($wrappers as $scheme => $info) {
       // We only register classes that implement our interface.
-      if (in_array('DrupalStreamWrapperInterface', class_implements($info['class']), TRUE)) {
+      if (in_array('BackdropStreamWrapperInterface', class_implements($info['class']), TRUE)) {
         // Record whether we are overriding an existing scheme.
         if (in_array($scheme, $existing, TRUE)) {
           $wrappers[$scheme]['override'] = TRUE;
@@ -299,7 +299,7 @@ function file_stream_wrapper_uri_normalize($uri) {
  *   Returns a new stream wrapper object appropriate for the given URI or FALSE
  *   if no registered handler could be found. For example, a URI of
  *   "private://example.txt" would return a new private stream wrapper object
- *   (DrupalPrivateStreamWrapper).
+ *   (BackdropPrivateStreamWrapper).
  */
 function file_stream_wrapper_get_instance_by_uri($uri) {
   $scheme = file_uri_scheme($uri);
@@ -335,7 +335,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
  * @return
  *   Returns a new stream wrapper object appropriate for the given $scheme.
  *   For example, for the public scheme a stream wrapper object
- *   (DrupalPublicStreamWrapper).
+ *   (BackdropPublicStreamWrapper).
  *   FALSE is returned if no registered handler could be found.
  */
 function file_stream_wrapper_get_instance_by_scheme($scheme) {
@@ -356,11 +356,11 @@ function file_stream_wrapper_get_instance_by_scheme($scheme) {
  * Compatibility: normal paths and stream wrappers.
  *
  * There are two kinds of local files:
- * - "managed files", i.e. those stored by a Drupal-compatible stream wrapper.
+ * - "managed files", i.e. those stored by a Backdrop-compatible stream wrapper.
  *   These are files that have either been uploaded by users or were generated
  *   automatically (for example through CSS aggregation).
  * - "shipped files", i.e. those outside of the files directory, which ship as
- *   part of Drupal core or contributed modules or themes.
+ *   part of Backdrop core or contributed modules or themes.
  *
  * @param $uri
  *   The URI to a file for which we need an external URL, or the path to a
@@ -377,7 +377,7 @@ function file_stream_wrapper_get_instance_by_scheme($scheme) {
 function file_create_url($uri) {
   // Allow the URI to be altered, e.g. to serve a file from a CDN or static
   // file server.
-  drupal_alter('file_url', $uri);
+  backdrop_alter('file_url', $uri);
 
   $scheme = file_uri_scheme($uri);
 
@@ -389,13 +389,13 @@ function file_create_url($uri) {
     //   HTTP and to https://example.com/bar.jpg when viewing a HTTPS page)
     // Both types of relative URIs are characterized by a leading slash, hence
     // we can use a single check.
-    if (drupal_substr($uri, 0, 1) == '/') {
+    if (backdrop_substr($uri, 0, 1) == '/') {
       return $uri;
     }
     else {
       // If this is not a properly formatted stream, then it is a shipped file.
       // Therefore, return the urlencoded URI with the base URL prepended.
-      return $GLOBALS['base_url'] . '/' . drupal_encode_path($uri);
+      return $GLOBALS['base_url'] . '/' . backdrop_encode_path($uri);
     }
   }
   elseif ($scheme == 'http' || $scheme == 'https') {
@@ -443,22 +443,22 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
   if (!is_dir($directory)) {
     // Let mkdir() recursively create directories and use the default directory
     // permissions.
-    if (($options & FILE_CREATE_DIRECTORY) && @drupal_mkdir($directory, NULL, TRUE)) {
-      return drupal_chmod($directory);
+    if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
+      return backdrop_chmod($directory);
     }
     return FALSE;
   }
   // The directory exists, so check to see if it is writable.
   $writable = is_writable($directory);
   if (!$writable && ($options & FILE_MODIFY_PERMISSIONS)) {
-    return drupal_chmod($directory);
+    return backdrop_chmod($directory);
   }
 
   return $writable;
 }
 
 /**
- * Creates a .htaccess file in each Drupal files directory if it is missing.
+ * Creates a .htaccess file in each files directory if it is missing.
  */
 function file_ensure_htaccess() {
   file_save_htaccess('public://', FALSE);
@@ -498,7 +498,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
   // Write the .htaccess file.
   if (file_put_contents($htaccess_path, $htaccess_lines)) {
-    drupal_chmod($htaccess_path, 0444);
+    backdrop_chmod($htaccess_path, 0444);
   }
   else {
     $variables = array('%directory' => $directory, '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines)));
@@ -507,7 +507,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 }
 
 /**
- * Returns the standard .htaccess lines that Drupal writes to file directories.
+ * Returns the standard .htaccess lines that Backdrop adds to file directories.
  *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
@@ -773,13 +773,13 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
  */
 function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
-    if (($realpath = drupal_realpath($source->uri)) !== FALSE) {
+    if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
       watchdog('file', 'File %file (%realpath) could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
     }
     else {
       watchdog('file', 'File %file could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
     }
-    drupal_set_message(t('The specified file %file could not be copied because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
+    backdrop_set_message(t('The specified file %file could not be copied because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
     return FALSE;
   }
 
@@ -787,7 +787,7 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
     $file = clone $source;
     $file->fid = NULL;
     $file->uri = $uri;
-    $file->filename = drupal_basename($uri);
+    $file->filename = backdrop_basename($uri);
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
       $existing_files = file_load_multiple(array(), array('uri' => $uri));
@@ -800,7 +800,7 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
     // If we are renaming around an existing file (rather than a directory),
     // use its basename for the filename.
     elseif ($replace == FILE_EXISTS_RENAME && is_file($destination)) {
-      $file->filename = drupal_basename($destination);
+      $file->filename = backdrop_basename($destination);
     }
 
     $file->save();
@@ -816,7 +816,7 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
 /**
  * Determines whether the URI has a valid scheme for file API operations.
  *
- * There must be a scheme and it must be a Drupal-provided scheme like
+ * There must be a scheme and it must be a Backdrop-provided scheme like
  * 'public', 'private', 'temporary', or an extension provided with
  * hook_stream_wrappers().
  *
@@ -856,7 +856,7 @@ function file_valid_uri($uri) {
  * @param $destination
  *   A URI containing the destination that $source should be copied to. The
  *   URI may be a bare filepath (without a scheme). If this value is omitted,
- *   Drupal's default files scheme will be used, usually "public://".
+ *   Backdrop's default files scheme will be used, usually "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
@@ -875,9 +875,9 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
 
   // Assert that the source file actually exists.
   if (!file_exists($source)) {
-    // @todo Replace drupal_set_message() calls with exceptions instead.
-    drupal_set_message(t('The specified file %file could not be copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
-    if (($realpath = drupal_realpath($original_source)) !== FALSE) {
+    // @todo Replace backdrop_set_message() calls with exceptions instead.
+    backdrop_set_message(t('The specified file %file could not be copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
+    if (($realpath = backdrop_realpath($original_source)) !== FALSE) {
       watchdog('file', 'File %file (%realpath) could not be copied because it does not exist.', array('%file' => $original_source, '%realpath' => $realpath));
     }
     else {
@@ -888,22 +888,22 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
 
   // Build a destination URI if necessary.
   if (!isset($destination)) {
-    $destination = file_build_uri(drupal_basename($source));
+    $destination = file_build_uri(backdrop_basename($source));
   }
 
 
   // Prepare the destination directory.
   if (file_prepare_directory($destination)) {
     // The destination is already a directory, so append the source basename.
-    $destination = file_stream_wrapper_uri_normalize($destination . '/' . drupal_basename($source));
+    $destination = file_stream_wrapper_uri_normalize($destination . '/' . backdrop_basename($source));
   }
   else {
     // Perhaps $destination is a dir/file?
-    $dirname = drupal_dirname($destination);
+    $dirname = backdrop_dirname($destination);
     if (!file_prepare_directory($dirname)) {
       // The destination is not valid.
       watchdog('file', 'File %file could not be copied because the destination directory %destination is not configured correctly.', array('%file' => $original_source, '%destination' => $dirname));
-      drupal_set_message(t('The specified file %file could not be copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
+      backdrop_set_message(t('The specified file %file could not be copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
       return FALSE;
     }
   }
@@ -911,16 +911,16 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   // Determine whether we can perform this operation based on overwrite rules.
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
-    drupal_set_message(t('The file %file could not be copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
+    backdrop_set_message(t('The file %file could not be copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
     watchdog('file', 'File %file could not be copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
     return FALSE;
   }
 
   // Assert that the source and destination filenames are not the same.
-  $real_source = drupal_realpath($source);
-  $real_destination = drupal_realpath($destination);
+  $real_source = backdrop_realpath($source);
+  $real_destination = backdrop_realpath($destination);
   if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-    drupal_set_message(t('The specified file %file was not copied because it would overwrite itself.', array('%file' => $source)), 'error');
+    backdrop_set_message(t('The specified file %file was not copied because it would overwrite itself.', array('%file' => $source)), 'error');
     watchdog('file', 'File %file could not be copied because it would overwrite itself.', array('%file' => $source));
     return FALSE;
   }
@@ -937,13 +937,13 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   }
 
   // Set the permissions on the new file.
-  drupal_chmod($destination);
+  backdrop_chmod($destination);
 
   return $destination;
 }
 
 /**
- * Constructs a URI to Drupal's default files location given a relative path.
+ * Constructs a URI to Backdrop's default files location given a relative path.
  */
 function file_build_uri($path) {
   $uri = file_default_scheme() . '://' . $path;
@@ -974,8 +974,8 @@ function file_destination($destination, $replace) {
         break;
 
       case FILE_EXISTS_RENAME:
-        $basename = drupal_basename($destination);
-        $directory = drupal_dirname($destination);
+        $basename = backdrop_basename($destination);
+        $directory = backdrop_dirname($destination);
         $destination = file_create_filename($basename, $directory);
         break;
 
@@ -1022,13 +1022,13 @@ function file_destination($destination, $replace) {
  */
 function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
-    if (($realpath = drupal_realpath($source->uri)) !== FALSE) {
+    if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
       watchdog('file', 'File %file (%realpath) could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
     }
     else {
       watchdog('file', 'File %file could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
     }
-    drupal_set_message(t('The specified file %file could not be moved because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
+    backdrop_set_message(t('The specified file %file could not be moved because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
     return FALSE;
   }
 
@@ -1049,7 +1049,7 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
     // If we are renaming around an existing file (rather than a directory),
     // use its basename for the filename.
     elseif ($replace == FILE_EXISTS_RENAME && is_file($destination)) {
-      $file->filename = drupal_basename($destination);
+      $file->filename = backdrop_basename($destination);
     }
 
     $file->save();
@@ -1074,7 +1074,7 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *   A string specifying the filepath or URI of the original file.
  * @param $destination
  *   A string containing the destination that $source should be moved to.
- *   This must be a stream wrapper URI. If this value is omitted, Drupal's
+ *   This must be a stream wrapper URI. If this value is omitted, Backdrop's
  *   default files scheme will be used, usually "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
@@ -1113,7 +1113,7 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  * between 2 and 5 characters in length, internal to the file name, and not
  * included in $extensions.
  *
- * Function behavior is also controlled by the Drupal variable
+ * Function behavior is also controlled by the Backdrop variable
  * 'allow_insecure_uploads'. If 'allow_insecure_uploads' evaluates to TRUE, no
  * alterations will be made, if it evaluates to FALSE, the filename is 'munged'.
  *
@@ -1122,7 +1122,7 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  * @param $extensions
  *   A space-separated list of extensions that should not be altered.
  * @param $alerts
- *   If TRUE, drupal_set_message() will be called to display a message if the
+ *   If TRUE, backdrop_set_message() will be called to display a message if the
  *   file name was changed.
  *
  * @return
@@ -1156,7 +1156,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     $filename = $new_filename . '.' . $final_extension;
 
     if ($alerts && $original != $filename) {
-      drupal_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $filename)));
+      backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $filename)));
     }
   }
 
@@ -1287,7 +1287,7 @@ function file_unmanaged_delete($path) {
     return FALSE;
   }
   if (is_file($path)) {
-    return drupal_unlink($path);
+    return backdrop_unlink($path);
   }
   // Return TRUE for non-existent file, but log that nothing was actually
   // deleted, as the current state is the intended result.
@@ -1334,7 +1334,7 @@ function file_unmanaged_delete_recursive($path) {
     }
     $dir->close();
 
-    return drupal_rmdir($path);
+    return backdrop_rmdir($path);
   }
   return file_unmanaged_delete($path);
 }
@@ -1382,7 +1382,7 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   at all).
  * @param $destination
  *   A string containing the URI $source should be copied to.
- *   This must be a stream wrapper URI. If this value is omitted, Drupal's
+ *   This must be a stream wrapper URI. If this value is omitted, Backdrop's
  *   temporary files scheme will be used ("temporary://").
  * @param $replace
  *   Replace behavior when the destination file already exists:
@@ -1422,12 +1422,12 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   switch ($_FILES['files']['error'][$source]) {
     case UPLOAD_ERR_INI_SIZE:
     case UPLOAD_ERR_FORM_SIZE:
-      drupal_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$source], '%maxsize' => format_size(file_upload_max_size()))), 'error');
+      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$source], '%maxsize' => format_size(file_upload_max_size()))), 'error');
       return FALSE;
 
     case UPLOAD_ERR_PARTIAL:
     case UPLOAD_ERR_NO_FILE:
-      drupal_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$source])), 'error');
       return FALSE;
 
     case UPLOAD_ERR_OK:
@@ -1439,14 +1439,14 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
 
     // Unknown error
     default:
-      drupal_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$source])), 'error');
       return FALSE;
   }
   // Begin building file entity.
   $values = array(
     'uid' => $user->uid,
     'status' => 0,
-    'filename' => trim(drupal_basename($_FILES['files']['name'][$source]), '.'),
+    'filename' => trim(backdrop_basename($_FILES['files']['name'][$source]), '.'),
     'uri' => $_FILES['files']['tmp_name'][$source],
     'filesize' => $_FILES['files']['size'][$source],
   );
@@ -1492,7 +1492,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     // to add it here or else the file upload will fail.
     if (!empty($extensions)) {
       $validators['file_validate_extensions'][0] .= ' txt';
-      drupal_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+      backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
     }
   }
 
@@ -1504,7 +1504,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // Assert that the destination contains a valid stream.
   $destination_scheme = file_uri_scheme($destination);
   if (!$destination_scheme || !file_stream_wrapper_valid_scheme($destination_scheme)) {
-    drupal_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+    backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
     return FALSE;
   }
 
@@ -1517,7 +1517,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // If file_destination() returns FALSE then $replace == FILE_EXISTS_ERROR and
   // there's an existing file so we need to bail.
   if ($file->destination === FALSE) {
-    drupal_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $source, '%directory' => $destination)), 'error');
+    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $source, '%directory' => $destination)), 'error');
     return FALSE;
   }
 
@@ -1540,18 +1540,18 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     return FALSE;
   }
 
-  // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
+  // Move uploaded files from PHP's upload_tmp_dir to Backdrop's temporary
   // directory. This overcomes open_basedir restrictions for future file
   // operations.
   $file->uri = $file->destination;
-  if (!drupal_move_uploaded_file($_FILES['files']['tmp_name'][$source], $file->uri)) {
+  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$source], $file->uri)) {
     form_set_error($source, t('File upload error. Could not move uploaded file.'));
     watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
     return FALSE;
   }
 
   // Set the permissions on the new file.
-  drupal_chmod($file->uri);
+  backdrop_chmod($file->uri);
 
   // If we are replacing an existing file re-use its database record.
   if ($replace == FILE_EXISTS_REPLACE) {
@@ -1589,13 +1589,13 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
  * @see http://drupal.org/node/515192
  * @ingroup php_wrappers
  */
-function drupal_move_uploaded_file($filename, $uri) {
+function backdrop_move_uploaded_file($filename, $uri) {
   $result = @move_uploaded_file($filename, $uri);
   // PHP's move_uploaded_file() does not properly support streams if safe_mode
   // or open_basedir are enabled so if the move failed, try finding a real path
   // and retry the move operation.
   if (!$result) {
-    if ($realpath = drupal_realpath($uri)) {
+    if ($realpath = backdrop_realpath($uri)) {
       $result = move_uploaded_file($filename, $realpath);
     }
     else {
@@ -1784,7 +1784,7 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
           image_scale($image, $width, $height);
           image_save($image);
           $file->filesize = $image->info['file_size'];
-          drupal_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+          backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
         }
         else {
           $errors[] = t('The image is too large; the maximum dimensions are %dimensions pixels.', array('%dimensions' => $maximum_dimensions));
@@ -1812,7 +1812,7 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
  * @param $destination
  *   A string containing the destination URI. This must be a stream wrapper URI.
  *   If no value is provided, a randomized name will be generated and the file
- *   will be saved using Drupal's default files scheme, usually "public://".
+ *   will be saved using Backdrop's default files scheme, usually "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
@@ -1835,7 +1835,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
   }
   if (!file_valid_uri($destination)) {
     watchdog('file', 'The data could not be saved because the destination %destination is invalid. This may be caused by improper use of file_save_data() or a missing stream wrapper.', array('%destination' => $destination));
-    drupal_set_message(t('The data could not be saved because the destination is invalid. More information is available in the system log.'), 'error');
+    backdrop_set_message(t('The data could not be saved because the destination is invalid. More information is available in the system log.'), 'error');
     return FALSE;
   }
 
@@ -1858,7 +1858,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
     // If we are renaming around an existing file (rather than a directory),
     // use its basename for the filename.
     elseif ($replace == FILE_EXISTS_RENAME && is_file($destination)) {
-      $file->filename = drupal_basename($destination);
+      $file->filename = backdrop_basename($destination);
     }
 
     $file->save();
@@ -1879,7 +1879,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
  * @param $destination
  *   A string containing the destination location. This must be a stream wrapper
  *   URI. If no value is provided, a randomized name will be generated and the
- *   file will be saved using Drupal's default files scheme, usually
+ *   file will be saved using Backdrop's default files scheme, usually
  *   "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
@@ -1895,9 +1895,9 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
  */
 function file_unmanaged_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   // Write the data to a temporary file.
-  $temp_name = drupal_tempnam('temporary://', 'file');
+  $temp_name = backdrop_tempnam('temporary://', 'file');
   if (file_put_contents($temp_name, $data) === FALSE) {
-    drupal_set_message(t('The file could not be created.'), 'error');
+    backdrop_set_message(t('The file could not be created.'), 'error');
     return FALSE;
   }
 
@@ -1908,7 +1908,7 @@ function file_unmanaged_save_data($data, $destination = NULL, $replace = FILE_EX
 /**
  * Transfers a file to the client using HTTP.
  *
- * Pipes a file through Drupal to the client.
+ * Pipes a file through Backdrop to the client.
  *
  * @param $uri
  *   String specifying the file URI to transfer.
@@ -1921,9 +1921,9 @@ function file_transfer($uri, $headers) {
   }
 
   foreach ($headers as $name => $value) {
-    drupal_add_http_header($name, $value);
+    backdrop_add_http_header($name, $value);
   }
-  drupal_send_headers();
+  backdrop_send_headers();
   $scheme = file_uri_scheme($uri);
   // Transfer file in 1024 byte chunks to save memory usage.
   if ($scheme && file_stream_wrapper_valid_scheme($scheme) && $fd = fopen($uri, 'rb')) {
@@ -1933,9 +1933,9 @@ function file_transfer($uri, $headers) {
     fclose($fd);
   }
   else {
-    drupal_not_found();
+    backdrop_not_found();
   }
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -1944,9 +1944,9 @@ function file_transfer($uri, $headers) {
  * Call modules that implement hook_file_download() to find out if a file is
  * accessible and what headers it should be transferred with. If one or more
  * modules returned headers the download will start with the returned headers.
- * If a module returns -1 drupal_access_denied() will be returned. If the file
- * exists but no modules responded drupal_access_denied() will be returned.
- * If the file does not exist drupal_not_found() will be returned.
+ * If a module returns -1 backdrop_access_denied() will be returned. If the file
+ * exists but no modules responded backdrop_access_denied() will be returned.
+ * If the file does not exist backdrop_not_found() will be returned.
  *
  * @see hook_file_download()
  * @see system_menu()
@@ -1978,12 +1978,12 @@ function file_download() {
     if (count($headers)) {
       file_transfer($uri, $headers);
     }
-    drupal_access_denied();
+    backdrop_access_denied();
   }
   else {
-    drupal_not_found();
+    backdrop_not_found();
   }
-  drupal_exit();
+  backdrop_exit();
 }
 
 
@@ -2112,7 +2112,7 @@ function file_get_mimetype($uri, $mapping = NULL) {
   else {
     // getMimeType() is not implementation specific, so we can directly
     // call it without an instance.
-    return DrupalLocalStreamWrapper::getMimeType($uri, $mapping);
+    return BackdropLocalStreamWrapper::getMimeType($uri, $mapping);
   }
 }
 
@@ -2142,7 +2142,7 @@ function file_get_mimetype($uri, $mapping = NULL) {
  *
  * @ingroup php_wrappers
  */
-function drupal_chmod($uri, $mode = NULL) {
+function backdrop_chmod($uri, $mode = NULL) {
   if (!isset($mode)) {
     if (is_dir($uri)) {
       $mode = variable_get('file_chmod_directory', 0775);
@@ -2153,7 +2153,7 @@ function drupal_chmod($uri, $mode = NULL) {
   }
 
   // If this URI is a stream, pass it off to the appropriate stream wrapper.
-  // Otherwise, attempt PHP's chmod. This allows use of drupal_chmod even
+  // Otherwise, attempt PHP's chmod. This allows use of backdrop_chmod even
   // for unmanaged files outside of the stream wrapper interface.
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
     if ($wrapper->chmod($mode)) {
@@ -2187,7 +2187,7 @@ function drupal_chmod($uri, $mode = NULL) {
  * @see unlink()
  * @ingroup php_wrappers
  */
-function drupal_unlink($uri, $context = NULL) {
+function backdrop_unlink($uri, $context = NULL) {
   $scheme = file_uri_scheme($uri);
   if ((!$scheme || !file_stream_wrapper_valid_scheme($scheme)) && (substr(PHP_OS, 0, 3) == 'WIN')) {
     chmod($uri, 0600);
@@ -2203,7 +2203,7 @@ function drupal_unlink($uri, $context = NULL) {
 /**
  * Resolves the absolute filepath of a local URI or filepath.
  *
- * The use of drupal_realpath() is discouraged, because it does not work for
+ * The use of backdrop_realpath() is discouraged, because it does not work for
  * remote URIs. Except in rare cases, URIs should not be manually resolved.
  *
  * Only use this function if you know that the stream wrapper in the URI uses
@@ -2217,13 +2217,13 @@ function drupal_unlink($uri, $context = NULL) {
  * @return string|false
  *   The absolute local filepath (with no symbolic links), or FALSE on failure.
  *
- * @see DrupalStreamWrapperInterface::realpath()
+ * @see BackdropStreamWrapperInterface::realpath()
  * @see http://php.net/manual/function.realpath.php
  * @ingroup php_wrappers
  */
-function drupal_realpath($uri) {
+function backdrop_realpath($uri) {
   // If this URI is a stream, pass it off to the appropriate stream wrapper.
-  // Otherwise, attempt PHP's realpath. This allows use of drupal_realpath even
+  // Otherwise, attempt PHP's realpath. This allows use of backdrop_realpath even
   // for unmanaged files outside of the stream wrapper interface.
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
     return $wrapper->realpath();
@@ -2251,7 +2251,7 @@ function drupal_realpath($uri) {
  * @see http://drupal.org/node/515192
  * @ingroup php_wrappers
  */
-function drupal_dirname($uri) {
+function backdrop_dirname($uri) {
   $scheme = file_uri_scheme($uri);
 
   if ($scheme && file_stream_wrapper_valid_scheme($scheme)) {
@@ -2273,7 +2273,7 @@ function drupal_dirname($uri) {
  *
  * @ingroup php_wrappers
  */
-function drupal_basename($uri, $suffix = NULL) {
+function backdrop_basename($uri, $suffix = NULL) {
   $separators = '/';
   if (DIRECTORY_SEPARATOR != '/') {
     // For Windows OS add special separator.
@@ -2292,17 +2292,17 @@ function drupal_basename($uri, $suffix = NULL) {
 }
 
 /**
- * Creates a directory using Drupal's default mode.
+ * Creates a directory using Backdrop's default mode.
  *
- * PHP's mkdir() does not respect Drupal's default permissions mode. If a mode
- * is not provided, this function will make sure that Drupal's is used.
+ * PHP's mkdir() does not respect Backdrop's default permissions mode. If a mode
+ * is not provided, this function will make sure that Backdrop's is used.
  *
  * Compatibility: normal paths and stream wrappers.
  *
  * @param $uri
  *   A URI or pathname.
  * @param $mode
- *   By default the Drupal mode is used.
+ *   By default the Backdrop mode is used.
  * @param $recursive
  *   Default to FALSE.
  * @param $context
@@ -2315,7 +2315,7 @@ function drupal_basename($uri, $suffix = NULL) {
  * @see http://drupal.org/node/515192
  * @ingroup php_wrappers
  */
-function drupal_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
+function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
   if (!isset($mode)) {
     $mode = variable_get('file_chmod_directory', 0775);
   }
@@ -2345,7 +2345,7 @@ function drupal_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
  * @see rmdir()
  * @ingroup php_wrappers
  */
-function drupal_rmdir($uri, $context = NULL) {
+function backdrop_rmdir($uri, $context = NULL) {
   $scheme = file_uri_scheme($uri);
   if ((!$scheme || !file_stream_wrapper_valid_scheme($scheme)) && (substr(PHP_OS, 0, 3) == 'WIN')) {
     chmod($uri, 0700);
@@ -2380,14 +2380,14 @@ function drupal_rmdir($uri, $context = NULL) {
  * @see http://drupal.org/node/515192
  * @ingroup php_wrappers
  */
-function drupal_tempnam($directory, $prefix) {
+function backdrop_tempnam($directory, $prefix) {
   $scheme = file_uri_scheme($directory);
 
   if ($scheme && file_stream_wrapper_valid_scheme($scheme)) {
     $wrapper = file_stream_wrapper_get_instance_by_scheme($scheme);
 
     if ($filename = tempnam($wrapper->getDirectoryPath(), $prefix)) {
-      return $scheme . '://' . drupal_basename($filename);
+      return $scheme . '://' . backdrop_basename($filename);
     }
     else {
       return FALSE;

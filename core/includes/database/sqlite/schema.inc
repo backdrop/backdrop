@@ -31,7 +31,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
   }
 
   /**
-   * Generate SQL to create a new table from a Drupal schema definition.
+   * Generate SQL to create a new table from a Backdrop schema definition.
    *
    * @param $name
    *   The name of the table to create.
@@ -119,7 +119,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
     // Set the correct database-engine specific datatype.
     // In case one is already provided, force it to uppercase.
     if (isset($field['sqlite_type'])) {
-      $field['sqlite_type'] = drupal_strtoupper($field['sqlite_type']);
+      $field['sqlite_type'] = backdrop_strtoupper($field['sqlite_type']);
     }
     else {
       $map = $this->getFieldTypeMap();
@@ -193,7 +193,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
     // Put :normal last so it gets preserved by array_flip. This makes
     // it much easier for modules (such as schema.module) to map
     // database types back into schema types.
-    // $map does not use drupal_static as its value never changes.
+    // $map does not use backdrop_static as its value never changes.
     static $map = array(
       'varchar:normal'  => 'VARCHAR',
       'char:normal'     => 'CHAR',
@@ -404,8 +404,8 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
    * @param $table
    *   Name of the table.
    * @return
-   *   An array representing the schema, from drupal_get_schema().
-   * @see drupal_get_schema()
+   *   An array representing the schema, from backdrop_get_schema().
+   * @see backdrop_get_schema()
    */
   protected function introspectSchema($table) {
     $mapped_fields = array_flip($this->getFieldTypeMap());

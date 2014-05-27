@@ -6,10 +6,10 @@
  * This behavior is dependent on the tableDrag behavior, since it uses the
  * objects initialized in that behavior to update the row.
  */
-Drupal.behaviors.termDrag = {
+Backdrop.behaviors.termDrag = {
   attach: function (context, settings) {
     var table = $('#taxonomy', context);
-    var tableDrag = Drupal.tableDrag.taxonomy; // Get the blocks tableDrag object.
+    var tableDrag = Backdrop.tableDrag.taxonomy; // Get the blocks tableDrag object.
     var rows = $('tr', table).length;
 
     // When a row is swapped, keep previous and next page classes set.

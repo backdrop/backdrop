@@ -14,7 +14,7 @@ class views_handler_filter_locale_version extends views_handler_filter_in_operat
   function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('Version');
-      // Enable filtering by the current installed Drupal version.
+      // Enable filtering by the current installed Backdrop version.
       $versions = array('***CURRENT_VERSION***' => t('Current installed version'));
       $result = db_query('SELECT DISTINCT(version) FROM {locales_source} ORDER BY version');
       foreach ($result as $row) {

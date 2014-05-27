@@ -17,7 +17,7 @@
  * @see translation_menu()
  */
 function translation_node_overview(Node $node) {
-  include_once DRUPAL_ROOT . '/core/includes/language.inc';
+  include_once BACKDROP_ROOT . '/core/includes/language.inc';
 
   if ($node->tnid) {
     // Already part of a set, grab that set.
@@ -87,7 +87,7 @@ function translation_node_overview(Node $node) {
     $rows[] = $row;
   }
 
-  drupal_set_title(t('Translations of %title', array('%title' => $node->title)), PASS_THROUGH);
+  backdrop_set_title(t('Translations of %title', array('%title' => $node->title)), PASS_THROUGH);
 
   $build['translation_node_overview'] = array(
     '#theme' => 'table',

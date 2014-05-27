@@ -24,7 +24,7 @@ function _views_theme_functions($hook, $view, $display = NULL) {
     $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower($view->tag));
 
     // Add theme suggestions foreach single tag.
-    foreach (drupal_explode_tags($view->tag) as $tag) {
+    foreach (backdrop_explode_tags($view->tag) as $tag) {
       $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower($tag));
     }
 
@@ -48,7 +48,7 @@ function template_preprocess_views_view(&$vars) {
 
   $vars['rows']       = (!empty($view->result) || $view->style_plugin->even_empty()) ? $view->style_plugin->render($view->result) : '';
 
-  $vars['css_name']   = drupal_clean_css_identifier($view->name);
+  $vars['css_name']   = backdrop_clean_css_identifier($view->name);
   $vars['name']       = $view->name;
   $vars['display_id'] = $view->current_display;
 
@@ -57,7 +57,7 @@ function template_preprocess_views_view(&$vars) {
 
   $vars['classes_array'] = array();
   $vars['classes_array'][] = 'view';
-  $vars['classes_array'][] = 'view-' . drupal_clean_css_identifier($vars['name']);
+  $vars['classes_array'][] = 'view-' . backdrop_clean_css_identifier($vars['name']);
   $vars['classes_array'][] = 'view-id-' . $vars['name'];
   $vars['classes_array'][] = 'view-display-id-' . $vars['display_id'];
 
@@ -111,7 +111,7 @@ function template_preprocess_views_view(&$vars) {
     // and its display ID, but this is not enough to unequivocally match a view
     // with its HTML, because one view may appear several times on the page. So
     // we set up a hash with the current time, $dom_id, to issue a "unique" identifier for
-    // each view. This identifier is written to both Drupal.settings and the DIV
+    // each view. This identifier is written to both Backdrop.settings and the DIV
     // wrapper.
     $vars['dom_id'] = $view->dom_id;
     $vars['classes_array'][] = 'view-dom-id-' . $vars['dom_id'];
@@ -140,14 +140,14 @@ function template_preprocess_views_view(&$vars) {
       ),
     );
 
-    drupal_add_js($settings, 'setting');
+    backdrop_add_js($settings, 'setting');
     views_add_js('ajax_view');
   }
 
   // If form fields were found in the View, reformat the View output as a form.
   if (views_view_has_form_elements($view)) {
     $output = !empty($vars['rows']) ? $vars['rows'] : $vars['empty'];
-    $form = drupal_get_form(views_form_id($view), $view, $output);
+    $form = backdrop_get_form(views_form_id($view), $view, $output);
     // The form is requesting that all non-essential views elements be hidden,
     // usually because the rendered step is not a view result.
     if ($form['show_view_elements']['#value'] == FALSE) {
@@ -167,7 +167,7 @@ function template_preprocess_views_view(&$vars) {
  */
 function template_process_views_view(&$vars) {
   if (is_array($vars['rows'])) {
-    $vars['rows'] = drupal_render($vars['rows']);
+    $vars['rows'] = backdrop_render($vars['rows']);
   }
 
   // Flatten the classes to a string for the template file.
@@ -231,7 +231,7 @@ function template_preprocess_views_view_fields(&$vars) {
         $object->separator = filter_xss_admin($vars['options']['separator']);
       }
 
-      $object->class = drupal_clean_css_identifier($id);
+      $object->class = backdrop_clean_css_identifier($id);
 
       $previous_inline = $object->inline;
       $object->inline_html = $object->handler->element_wrapper_type(TRUE, TRUE);
@@ -368,7 +368,7 @@ function template_preprocess_views_view_summary(&$vars) {
     $url_options['query'] = $view->exposed_raw_input;
   }
 
-  $active_urls = drupal_map_assoc(array(
+  $active_urls = backdrop_map_assoc(array(
     url($_GET['q'], array('alias' => TRUE)), // force system path
     url($_GET['q']), // could be an alias
   ));
@@ -417,7 +417,7 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
   }
 
   $count = 0;
-  $active_urls = drupal_map_assoc(array(
+  $active_urls = backdrop_map_assoc(array(
     url($_GET['q'], array('alias' => TRUE)), // force system path
     url($_GET['q']), // could be an alias
   ));
@@ -491,7 +491,7 @@ function template_preprocess_views_view_table(&$vars) {
   foreach ($columns as $field => $column) {
     // Create a second variable so we can easily find what fields we have and what the
     // CSS classes should be.
-    $vars['fields'][$field] = drupal_clean_css_identifier($field);
+    $vars['fields'][$field] = backdrop_clean_css_identifier($field);
     if ($active == $field) {
       $vars['fields'][$field] .= ' active';
     }
@@ -538,7 +538,7 @@ function template_preprocess_views_view_table(&$vars) {
       }
       // Add a CSS align class to each field if one was set
       if (!empty($options['info'][$field]['align'])) {
-        $vars['header_classes'][$field] .= ' ' . drupal_clean_css_identifier($options['info'][$field]['align']);
+        $vars['header_classes'][$field] .= ' ' . backdrop_clean_css_identifier($options['info'][$field]['align']);
       }
 
       // Add a header label wrapper if one was selected.
@@ -553,7 +553,7 @@ function template_preprocess_views_view_table(&$vars) {
 
     // Add a CSS align class to each field if one was set
     if (!empty($options['info'][$field]['align'])) {
-      $vars['fields'][$field] .= ' ' . drupal_clean_css_identifier($options['info'][$field]['align']);
+      $vars['fields'][$field] .= ' ' . backdrop_clean_css_identifier($options['info'][$field]['align']);
     }
 
     // Render each field into its appropriate column.
@@ -644,7 +644,7 @@ function template_preprocess_views_view_table(&$vars) {
 
 
   if (!empty($options['sticky'])) {
-    drupal_add_js('core/misc/tableheader.js');
+    backdrop_add_js('core/misc/tableheader.js');
     $vars['classes_array'][] = "sticky-enabled";
   }
   $vars['classes_array'][] = 'cols-'. count($vars['header']);
@@ -834,10 +834,10 @@ function template_preprocess_views_view_list(&$vars) {
   $handler  = $vars['view']->style_plugin;
 
   $class = explode(' ', $handler->options['class']);
-  $class = array_map('drupal_clean_css_identifier', $class);
+  $class = array_map('backdrop_clean_css_identifier', $class);
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('drupal_clean_css_identifier', $wrapper_class);
+  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class);
 
   $vars['class'] = implode(' ', $class);
   $vars['wrapper_class'] = implode(' ', $wrapper_class);
@@ -875,7 +875,7 @@ function template_preprocess_views_view_rss(&$vars) {
   $vars['description'] = check_plain(decode_entities(strip_tags($style->get_description())));
 
   if ($view->display_handler->get_option('sitename_title')) {
-    $title = variable_get('site_name', 'Drupal');
+    $title = variable_get('site_name', 'Backdrop');
     if ($slogan = variable_get('site_slogan', '')) {
       $title .= ' - ' . $slogan;
     }
@@ -908,14 +908,14 @@ function template_preprocess_views_view_rss(&$vars) {
   }
 
   $vars['langcode'] = check_plain($language_content->langcode);
-  $vars['namespaces'] = drupal_attributes($style->namespaces);
+  $vars['namespaces'] = backdrop_attributes($style->namespaces);
   $vars['items'] = $items;
   $vars['channel_elements'] = format_xml_elements($style->channel_elements);
 
   // During live preview we don't want to output the header since the contents
   // of the feed are being displayed inside a normal HTML page.
   if (empty($vars['view']->live_preview)) {
-    drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
+    backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
   }
 }
 
@@ -943,14 +943,14 @@ function template_preprocess_views_exposed_form(&$vars) {
   $checkboxes = '';
 
   if (!empty($form['q'])) {
-    $vars['q'] = drupal_render($form['q']);
+    $vars['q'] = backdrop_render($form['q']);
   }
 
   $vars['widgets'] = array();
   foreach ($form['#info'] as $id => $info) {
     // Set aside checkboxes.
     if (isset($form[$info['value']]['#type']) && $form[$info['value']]['#type'] == 'checkbox') {
-      $checkboxes .= drupal_render($form[$info['value']]);
+      $checkboxes .= backdrop_render($form[$info['value']]);
       continue;
     }
     $widget = new stdClass;
@@ -963,10 +963,10 @@ function template_preprocess_views_exposed_form(&$vars) {
       $widget->label = check_plain($info['label']);
     }
     if (!empty($info['operator'])) {
-      $widget->operator = drupal_render($form[$info['operator']]);
+      $widget->operator = backdrop_render($form[$info['operator']]);
     }
 
-    $widget->widget = drupal_render($form[$info['value']]);
+    $widget->widget = backdrop_render($form[$info['value']]);
 
     if (!empty($info['description'])) {
       $widget->description = check_plain($info['description']);
@@ -986,20 +986,20 @@ function template_preprocess_views_exposed_form(&$vars) {
   }
 
   if (isset($form['sort_by'])) {
-    $vars['sort_by'] = drupal_render($form['sort_by']);
-    $vars['sort_order'] = drupal_render($form['sort_order']);
+    $vars['sort_by'] = backdrop_render($form['sort_by']);
+    $vars['sort_order'] = backdrop_render($form['sort_order']);
   }
   if (isset($form['items_per_page'])) {
-    $vars['items_per_page'] = drupal_render($form['items_per_page']);
+    $vars['items_per_page'] = backdrop_render($form['items_per_page']);
   }
   if (isset($form['offset'])) {
-    $vars['offset'] = drupal_render($form['offset']);
+    $vars['offset'] = backdrop_render($form['offset']);
   }
   if (isset($form['reset'])) {
-    $vars['reset_button'] = drupal_render($form['reset']);
+    $vars['reset_button'] = backdrop_render($form['reset']);
   }
   // This includes the submit button.
-  $vars['button'] = drupal_render_children($form);
+  $vars['button'] = backdrop_render_children($form);
 }
 
 /**
@@ -1018,7 +1018,7 @@ function theme_views_form_views_form($variables) {
     $row_id = $substitution['row_id'];
 
     $search[] = $substitution['placeholder'];
-    $replace[] = isset($form[$field_name][$row_id]) ? drupal_render($form[$field_name][$row_id]) : '';
+    $replace[] = isset($form[$field_name][$row_id]) ? backdrop_render($form[$field_name][$row_id]) : '';
   }
   // Add in substitutions from hook_views_form_substitutions().
   $substitutions = module_invoke_all('views_form_substitutions');
@@ -1031,7 +1031,7 @@ function theme_views_form_views_form($variables) {
   $form['output']['#markup'] = str_replace($search, $replace, $form['output']['#markup']);
 
   // Render and add remaining form fields.
-  return drupal_render_children($form);
+  return backdrop_render_children($form);
 }
 
 function theme_views_mini_pager($vars) {
@@ -1104,7 +1104,7 @@ function theme_views_mini_pager($vars) {
  */
 function theme_views_container($variables) {
   $element = $variables['element'];
-  return '<div' . drupal_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
+  return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
 }
 
 /**

@@ -5,7 +5,7 @@
  * Definition of ViewsPluginStyleUnformattedTestCase.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/styles/views_plugin_style_base.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/styles/views_plugin_style_base.test';
 
 /**
  * Tests the default/unformatted row style.

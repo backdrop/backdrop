@@ -3,11 +3,11 @@
  * Attaches preview-related behavior for the Color module.
  */
 
-(function ($, Drupal) {
+(function ($) {
 
 "use strict";
 
-Drupal.color = {
+Backdrop.color = {
   callback: function(context, settings, form, farb, height, width) {
     // Solid background.
     form.find('#preview').css('backgroundColor', form.find('#palette input[name="palette[base]"]').val());
@@ -47,4 +47,4 @@ Drupal.color = {
   }
 };
 
-})(jQuery, Drupal);
+})(jQuery);

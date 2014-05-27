@@ -3,24 +3,24 @@
 /**
  * Toggle the visibility of a fieldset using smooth animations.
  */
-Drupal.toggleFieldset = function (fieldset) {
+Backdrop.toggleFieldset = function (fieldset) {
   var $fieldset = $(fieldset);
   if ($fieldset.is('.collapsed')) {
     var $content = $('> .fieldset-wrapper', fieldset).hide();
     $fieldset
       .removeClass('collapsed')
       .trigger({ type: 'collapsed', value: false })
-      .find('> legend span.fieldset-legend-prefix').html(Drupal.t('Hide'));
+      .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Hide'));
     $content.slideDown({
       duration: 'fast',
       easing: 'linear',
       complete: function () {
-        Drupal.collapseScrollIntoView(fieldset);
+        Backdrop.collapseScrollIntoView(fieldset);
         fieldset.animating = false;
       },
       step: function () {
         // Scroll the fieldset into view.
-        Drupal.collapseScrollIntoView(fieldset);
+        Backdrop.collapseScrollIntoView(fieldset);
       }
     });
   }
@@ -29,7 +29,7 @@ Drupal.toggleFieldset = function (fieldset) {
     $('> .fieldset-wrapper', fieldset).slideUp('fast', function () {
       $fieldset
         .addClass('collapsed')
-        .find('> legend span.fieldset-legend-prefix').html(Drupal.t('Show'));
+        .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Show'));
       fieldset.animating = false;
     });
   }
@@ -38,7 +38,7 @@ Drupal.toggleFieldset = function (fieldset) {
 /**
  * Scroll a given fieldset into view as much as possible.
  */
-Drupal.collapseScrollIntoView = function (node) {
+Backdrop.collapseScrollIntoView = function (node) {
   var h = document.documentElement.clientHeight || document.body.clientHeight || 0;
   var offset = document.documentElement.scrollTop || document.body.scrollTop || 0;
   var posY = $(node).offset().top;
@@ -53,7 +53,7 @@ Drupal.collapseScrollIntoView = function (node) {
   }
 };
 
-Drupal.behaviors.collapse = {
+Backdrop.behaviors.collapse = {
   attach: function (context, settings) {
     $('fieldset.collapsible', context).once('collapse', function () {
       var $fieldset = $(this);
@@ -67,7 +67,7 @@ Drupal.behaviors.collapse = {
       var summary = $('<span class="summary"></span>');
       $fieldset.
         bind('summaryUpdated', function () {
-          var text = $.trim($fieldset.drupalGetSummary());
+          var text = $.trim($fieldset.backdropGetSummary());
           summary.html(text ? ' (' + text + ')' : '');
         })
         .trigger('summaryUpdated');
@@ -77,7 +77,7 @@ Drupal.behaviors.collapse = {
       var $legend = $('> legend .fieldset-legend', this);
 
       $('<span class="fieldset-legend-prefix element-invisible"></span>')
-        .append($fieldset.hasClass('collapsed') ? Drupal.t('Show') : Drupal.t('Hide'))
+        .append($fieldset.hasClass('collapsed') ? Backdrop.t('Show') : Backdrop.t('Hide'))
         .prependTo($legend)
         .after(' ');
 
@@ -90,7 +90,7 @@ Drupal.behaviors.collapse = {
           // Don't animate multiple times.
           if (!fieldset.animating) {
             fieldset.animating = true;
-            Drupal.toggleFieldset(fieldset);
+            Backdrop.toggleFieldset(fieldset);
           }
           return false;
         });

@@ -51,13 +51,13 @@ function views_ajax() {
       $_GET = $_POST + $_GET;
 
       // Overwrite the destination.
-      // @see drupal_get_destination()
+      // @see backdrop_get_destination()
       $origin_destination = $path;
-      $query = drupal_http_build_query($_REQUEST);
+      $query = backdrop_http_build_query($_REQUEST);
       if ($query != '') {
         $origin_destination .= '?' . $query;
       }
-      $destination = &drupal_static('drupal_get_destination');
+      $destination = &backdrop_static('backdrop_get_destination');
       $destination = array('destination' => $origin_destination);
 
       // Override the display's pager_element with the one actually used.
@@ -65,18 +65,18 @@ function views_ajax() {
         $commands[] = views_ajax_command_scroll_top('.view-dom-id-' . $dom_id);
         $view->display[$display_id]->handler->set_option('pager_element', $pager_element);
       }
-      // Reuse the same DOM id so it matches that in Drupal.settings.
+      // Reuse the same DOM id so it matches that in Backdrop.settings.
       $view->dom_id = $dom_id;
 
       $commands[] = ajax_command_replace('.view-dom-id-' . $dom_id, $view->preview($display_id, $args));
     }
-    drupal_alter('views_ajax_data', $commands, $view);
+    backdrop_alter('views_ajax_data', $commands, $view);
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 }
 
 /**
- * Creates a Drupal AJAX 'viewsHilite' command.
+ * Creates a Backdrop AJAX 'viewsHilite' command.
  *
  * @param $selector
  *   The selector to highlight
@@ -92,7 +92,7 @@ function views_ajax_command_hilite($selector) {
 }
 
 /**
- * Creates a Drupal AJAX 'addTab' command.
+ * Creates a Backdrop AJAX 'addTab' command.
  *
  * @param $id
  *   The DOM ID.
@@ -164,7 +164,7 @@ function views_ajax_command_replace_title($title) {
   $command = array(
     'command' => 'viewsReplaceTitle',
     'title' => $title,
-    'siteName' => variable_get('site_name', 'Drupal'),
+    'siteName' => variable_get('site_name', 'Backdrop'),
   );
   return $command;
 }
@@ -179,7 +179,7 @@ function views_ajax_error($message) {
 }
 
 /**
- * Wrapper around drupal_build_form to handle some AJAX stuff automatically.
+ * Wrapper around backdrop_build_form to handle some AJAX stuff automatically.
  * This makes some assumptions about the client.
  */
 function views_ajax_form_wrapper($form_id, &$form_state) {
@@ -193,13 +193,13 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     ),
   );
 
-  $form = drupal_build_form($form_id, $form_state);
-  $output = drupal_render($form);
+  $form = backdrop_build_form($form_id, $form_state);
+  $output = backdrop_render($form);
 
   // These forms have the title built in, so set the title here:
   if (empty($form_state['ajax']) && !empty($form_state['title'])) {
-    drupal_set_title($form_state['title']);
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+    backdrop_set_title($form_state['title']);
+    backdrop_add_css(backdrop_get_path('module', 'views_ui') . '/css/views-admin.css');
   }
 
   if (!empty($form_state['ajax']) && (empty($form_state['executed']) || !empty($form_state['rerender']))) {
@@ -220,7 +220,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     $commands[] = ajax_command_open_modal_dialog($title, $display, $options);
 
     if (!empty($form_state['#section'])) {
-      $commands[] = views_ajax_command_hilite('.' . drupal_clean_css_identifier($form_state['#section']));
+      $commands[] = views_ajax_command_hilite('.' . backdrop_clean_css_identifier($form_state['#section']));
     }
 
     return $commands;
@@ -228,7 +228,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
 
   // These forms have the title built in, so set the title here:
   if (empty($form_state['ajax']) && !empty($form_state['title'])) {
-    drupal_set_title($form_state['title']);
+    backdrop_set_title($form_state['title']);
   }
 
   return $output;
@@ -240,7 +240,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
  */
 function views_ajax_autocomplete_user($string = '') {
   // The user enters a comma-separated list of user name. We only autocomplete the last name.
-  $array = drupal_explode_tags($string);
+  $array = backdrop_explode_tags($string);
 
   // Fetch last name
   $last_string = trim(array_pop($array));
@@ -269,7 +269,7 @@ function views_ajax_autocomplete_user($string = '') {
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -285,8 +285,8 @@ function views_ajax_autocomplete_user($string = '') {
  */
 function views_ajax_autocomplete_taxonomy($vid, $tags_typed = '') {
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
-  $tags_typed = drupal_explode_tags($tags_typed);
-  $tag_last = drupal_strtolower(array_pop($tags_typed));
+  $tags_typed = backdrop_explode_tags($tags_typed);
+  $tag_last = backdrop_strtolower(array_pop($tags_typed));
 
   $matches = array();
   if ($tag_last != '') {
@@ -308,7 +308,7 @@ function views_ajax_autocomplete_taxonomy($vid, $tags_typed = '') {
       ->execute()
       ->fetchAllKeyed();
 
-    $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
+    $prefix = count($tags_typed) ? backdrop_implode_tags($tags_typed) . ', ' : '';
 
     $term_matches = array();
     foreach ($tags_return as $tid => $name) {
@@ -322,7 +322,7 @@ function views_ajax_autocomplete_taxonomy($vid, $tags_typed = '') {
     }
   }
 
-  drupal_json_output($term_matches);
+  backdrop_json_output($term_matches);
 }
 
 /**

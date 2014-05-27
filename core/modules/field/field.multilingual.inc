@@ -101,11 +101,11 @@ function field_language_delete() {
  *   An array of valid language codes.
  */
 function field_available_languages($entity_type, $field) {
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['field_languages'] = &drupal_static(__FUNCTION__);
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['field_languages'] = &backdrop_static(__FUNCTION__);
   }
-  $field_languages = &$drupal_static_fast['field_languages'];
+  $field_languages = &$backdrop_static_fast['field_languages'];
   $field_name = $field['field_name'];
 
   if (!isset($field_languages[$entity_type][$field_name])) {
@@ -115,7 +115,7 @@ function field_available_languages($entity_type, $field) {
       $languages = field_content_languages();
       // Let other modules alter the available languages.
       $context = array('entity_type' => $entity_type, 'field' => $field);
-      drupal_alter('field_available_languages', $languages, $context);
+      backdrop_alter('field_available_languages', $languages, $context);
       $field_languages[$entity_type][$field_name] = $languages;
     }
     else {
@@ -278,7 +278,7 @@ function field_valid_language($langcode, $default = TRUE) {
  *   keyed by field name otherwise.
  */
 function field_language($entity_type, $entity, $field_name = NULL, $langcode = NULL) {
-  $display_languages = &drupal_static(__FUNCTION__, array());
+  $display_languages = &backdrop_static(__FUNCTION__, array());
   list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
   $langcode = field_valid_language($langcode, FALSE);
 
@@ -298,7 +298,7 @@ function field_language($entity_type, $entity, $field_name = NULL, $langcode = N
         'entity' => $entity,
         'language' => $langcode,
       );
-      drupal_alter('field_language', $display_language, $context);
+      backdrop_alter('field_language', $display_language, $context);
     }
 
     $display_languages[$entity_type][$id][$langcode] = $display_language;

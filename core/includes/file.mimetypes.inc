@@ -16,11 +16,11 @@
  * @see file_get_mimetype()
  */
 function file_mimetype_mapping() {
-  $mapping = &drupal_static(__FUNCTION__);
+  $mapping = &backdrop_static(__FUNCTION__);
   if (!isset($mapping)) {
     $mapping = file_default_mimetype_mapping();
     // Allow modules to alter the default mapping.
-    drupal_alter('file_mimetype_mapping', $mapping);
+    backdrop_alter('file_mimetype_mapping', $mapping);
   }
   return $mapping;
 }

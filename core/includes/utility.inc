@@ -6,7 +6,7 @@
  */
 
 /**
- * Drupal-friendly var_export().
+ * Backdrop-friendly var_export().
  *
  * @param $var
  *   The variable to export.
@@ -14,9 +14,9 @@
  *   A prefix that will be added at the beginning of every lines of the output.
  *
  * @return
- *   The variable exported in a way compatible to Drupal's coding standards.
+ *   The variable exported in a way compatible to Backdrop's coding standards.
  */
-function drupal_var_export($var, $prefix = '') {
+function backdrop_var_export($var, $prefix = '') {
   if (is_array($var)) {
     if (empty($var)) {
       $output = 'array()';
@@ -26,7 +26,7 @@ function drupal_var_export($var, $prefix = '') {
       // Don't export keys if the array is non associative.
       $export_keys = array_values($var) != $var;
       foreach ($var as $key => $value) {
-        $output .= '  ' . ($export_keys ? drupal_var_export($key) . ' => ' : '') . drupal_var_export($value, '  ', FALSE) . ",\n";
+        $output .= '  ' . ($export_keys ? backdrop_var_export($key) . ' => ' : '') . backdrop_var_export($value, '  ', FALSE) . ",\n";
       }
       $output .= ')';
     }
@@ -52,7 +52,7 @@ function drupal_var_export($var, $prefix = '') {
     // magic method __set_state() leaving the export broken. This
     // workaround avoids this by casting the object as an array for
     // export and casting it back to an object when evaluated.
-    $output = '(object) ' . drupal_var_export((array) $var, $prefix);
+    $output = '(object) ' . backdrop_var_export((array) $var, $prefix);
   }
   else {
     $output = var_export($var, TRUE);

@@ -8,7 +8,7 @@
 /**
  * Base class for all administration menu web test cases.
  */
-class AdminMenuWebTestCase extends DrupalWebTestCase {
+class AdminMenuWebTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   protected $basePermissions = array(
@@ -25,9 +25,6 @@ class AdminMenuWebTestCase extends DrupalWebTestCase {
     $modules[] = 'admin_menu';
     $modules[] = 'node';
     parent::setUp($modules);
-
-    // Disable Clean URLs to ensure drupal.org testbot compatibility.
-    variable_set('clean_url', 0);
   }
 
   /**
@@ -37,7 +34,7 @@ class AdminMenuWebTestCase extends DrupalWebTestCase {
    *   An XPath expression.
    * @param array $arguments
    *   (optional) An associative array of XPath replacement tokens to pass to
-   *   DrupalWebTestCase::buildXPathQuery().
+   *   BackdropWebTestCase::buildXPathQuery().
    * @param $message
    *   The message to display along with the assertion.
    * @param $group
@@ -58,7 +55,7 @@ class AdminMenuWebTestCase extends DrupalWebTestCase {
    *   An XPath expression.
    * @param array $arguments
    *   (optional) An associative array of XPath replacement tokens to pass to
-   *   DrupalWebTestCase::buildXPathQuery().
+   *   BackdropWebTestCase::buildXPathQuery().
    * @param $message
    *   The message to display along with the assertion.
    * @param $group
@@ -127,7 +124,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $this->resetAll();
 
     // Anonymous users should not see the menu.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertNoElementByXPath('//div[@id="admin-menu"]', array(), t('Administration menu not found.'));
 
     // Create a user who
@@ -136,10 +133,10 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $permissions = $this->basePermissions + array(
       'access content overview',
     );
-    $admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
 
-    // Check that the user can see the admin links, but not the drupal links.
+    // Check that the user can see the admin links, but not the Backdrop links.
     $this->assertElementByXPath('//div[@id="admin-menu"]', array(), 'Administration menu found.');
     $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link found.');
     $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link not found.');
@@ -150,8 +147,8 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $permissions = $this->basePermissions + array(
       'administer contact forms',
     );
-    $admin_user2 = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($admin_user2);
+    $admin_user2 = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user2);
     $this->assertElementByXPath('//div[@id="admin-menu"]', array(), 'Administration menu found.');
     $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link not found.');
     $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link found.');
@@ -162,8 +159,8 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
    */
   function testCategories() {
     // Create a user with minimum permissions.
-    $admin_user = $this->drupalCreateUser($this->basePermissions);
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser($this->basePermissions);
+    $this->backdropLogin($admin_user);
 
     // Verify that no category links appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure')));
@@ -174,8 +171,8 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
       'administer users',
       'administer account settings',
     );
-    $admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
 
     // Verify that only expected category links appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure')));
@@ -195,11 +192,11 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $permissions = $this->basePermissions + array(
       'administer permissions',
     );
-    $admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
 
     // Extract the user role ID that was created for above permissions.
-    $rid = key(array_diff_key($admin_user->roles, array(DRUPAL_AUTHENTICATED_RID => 0)));
+    $rid = key(array_diff_key($admin_user->roles, array(BACKDROP_AUTHENTICATED_RID => 0)));
 
     // Verify that Configuration does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Configuration')));
@@ -207,7 +204,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $edit = array(
       $rid . '[administer site configuration]' => TRUE,
     );
-    $this->drupalPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
     // Verify that Configuration appears.
     $this->assertLinkTrailByTitle(array(t('Configuration')));
 
@@ -217,14 +214,14 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $edit = array(
       'name' => 'test',
     );
-    $this->drupalPost('admin/people/permissions/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/people/permissions/roles', $edit, t('Add role'));
     // It should be safe to assume that the new role gets the next ID.
     $test_rid = $rid + 1;
     // Grant the 'administer content types' permission for the role.
     $edit = array(
       $test_rid . '[administer content types]' => TRUE,
     );
-    $this->drupalPost('admin/people/permissions/' . $test_rid, $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions/' . $test_rid, $edit, t('Save permissions'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
@@ -232,13 +229,13 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $edit = array(
       'roles[' . $test_rid . ']' => TRUE,
     );
-    $this->drupalPost('user/' . $admin_user->uid . '/edit', $edit, t('Save'));
+    $this->backdropPost('user/' . $admin_user->uid . '/edit', $edit, t('Save'));
     // Verify that Structure » Content types appears.
     $this->assertLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
     // Delete the role.
-    $this->drupalPost('admin/people/permissions/roles/edit/' . $test_rid, array(), t('Delete role'));
-    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->backdropPost('admin/people/permissions/roles/edit/' . $test_rid, array(), t('Delete role'));
+    $this->backdropPost(NULL, array(), t('Delete'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
   }
@@ -256,20 +253,20 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
    * Tests node type links.
    */
   function testNode() {
-    $type = $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $type = $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
     // Create a content-type with special characters.
-    $type = $this->drupalCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
+    $type = $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
 
     $permissions = $this->basePermissions + array(
       'administer content types',
       'create article content',
       'create special content',
     );
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
 
     // Verify that dynamic links are displayed.
-    $this->drupalGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_menu');
     $this->assertElementByXPath('//div[@id="admin-menu"]', array(), t('Administration menu found.'));
     $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
 
@@ -306,12 +303,12 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
    * Tests Add content links.
    */
   function testNodeAdd() {
-    $type = $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $type = $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
 
     // Verify that "Add content" does not appear for unprivileged users.
     $permissions = $this->basePermissions + array();
-    $this->web_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->web_user);
     $this->assertNoText(t('Add content'));
 
     // Verify "Add content" appears below "Content" for administrative users.
@@ -319,8 +316,8 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
       'access content overview',
       'create article content',
     );
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
     $this->assertLinkTrailByTitle(array(
       t('Content'),
       t('Add content'),
@@ -330,8 +327,8 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
     $permissions = $this->basePermissions + array(
       'create article content',
     );
-    $this->web_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->web_user);
     $this->assertLinkTrailByTitle(array(
       t('Add content'),
     ));
@@ -347,8 +344,8 @@ class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
 
     $permissions = module_invoke_all('permission');
     $permissions = array_keys($permissions);
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -391,18 +388,18 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
   function setUp() {
     parent::setUp(array('menu'));
 
-    $this->admin_user = $this->drupalCreateUser($this->basePermissions + array(
+    $this->admin_user = $this->backdropCreateUser($this->basePermissions + array(
       'administer menu',
     ));
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
    * Test disabled custom links.
    */
   function testCustomDisabled() {
-    $type = $this->drupalCreateContentType();
-    $node = $this->drupalCreateNode(array('type' => $type->type));
+    $type = $this->backdropCreateContentType();
+    $node = $this->backdropCreateNode(array('type' => $type->type));
     $text = $this->randomName();
     $xpath = $this->buildXPathQuery('//div[@id=:id]//a[contains(text(), :text)]', array(
       ':id' => 'admin-menu',
@@ -410,7 +407,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     ));
 
     // Verify that the link does not appear in the menu.
-    $this->drupalGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Custom link not found.');
 
@@ -420,10 +417,10 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
       'link_title' => $text,
       'parent' => 'management:' . $this->queryMlidByPath('admin'),
     );
-    $this->drupalPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->drupalGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertTrue($elements, 'Custom link found.');
 
@@ -431,10 +428,10 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $edit = array(
       'enabled' => FALSE,
     );
-    $this->drupalPost('admin/structure/menu/item/' . $this->queryMlidByPath('node/' . $node->nid) . '/edit', $edit, t('Save'));
+    $this->backdropPost('admin/structure/menu/item/' . $this->queryMlidByPath('node/' . $node->nid) . '/edit', $edit, t('Save'));
 
     // Verify that the disabled link does not appear in the menu.
-    $this->drupalGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Disabled custom link not found.');
   }
@@ -449,10 +446,10 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
       'link_title' => 'Example',
       'parent' => 'management:' . $this->queryMlidByPath('admin'),
     );
-    $this->drupalPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->drupalGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_menu');
     $elements = $this->xpath('//div[@id=:id]//a[@href=:href and contains(text(), :text)]', array(
       ':id' => 'admin-menu',
       ':href' => $edit['link_path'],

@@ -22,7 +22,7 @@ class views_handler_field_comment_link_delete extends views_handler_field_commen
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = "comment/" . $cid . "/delete";
-    $this->options['alter']['query'] = drupal_get_destination();
+    $this->options['alter']['query'] = backdrop_get_destination();
 
     return $text;
   }

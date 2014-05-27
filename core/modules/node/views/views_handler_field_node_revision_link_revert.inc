@@ -29,7 +29,7 @@ class views_handler_field_node_revision_link_revert extends views_handler_field_
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = 'node/' . $node->nid . "/revisions/$vid/revert";
-    $this->options['alter']['query'] = drupal_get_destination();
+    $this->options['alter']['query'] = backdrop_get_destination();
 
     return !empty($this->options['text']) ? $this->options['text'] : t('revert');
   }

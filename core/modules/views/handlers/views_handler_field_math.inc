@@ -41,7 +41,7 @@ class views_handler_field_math extends views_handler_field_numeric {
   }
 
   function render($values) {
-    include_once DRUPAL_ROOT . '/core/includes/evalmath.inc';
+    include_once BACKDROP_ROOT . '/core/includes/evalmath.inc';
     $tokens = array_map('floatval', $this->get_render_tokens(array()));
     $value = strtr($this->options['expression'], $tokens);
     $expressions = explode(';', $value);
