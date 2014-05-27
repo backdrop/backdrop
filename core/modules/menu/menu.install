@@ -49,7 +49,7 @@ function menu_schema() {
       'tmenu_name' => array(
         'type' => 'varchar',
         'length' => 32,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
         'description' => 'Translation source id. Used to link menus together in a translation set.',
       ),
@@ -78,7 +78,8 @@ function menu_install() {
       'title' => $t($title),
       'description' => $descriptions[$menu_name],
       'multilingual_mode' => MENU_MULTILINGUAL_DISABLED,
-      'langcode' => LANGUAGE_NONE
+      'langcode' => LANGUAGE_NONE,
+      'tmenu_name' => ''
     );
     menu_save($menu);
   }

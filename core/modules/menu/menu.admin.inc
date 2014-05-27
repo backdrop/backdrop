@@ -12,7 +12,10 @@ function menu_overview_page()
 {
   $menus = menu_load_all();
 
-  if (language_multilingual()) {
+  // Enable language column if language module is enabled.
+  $multilanguage = module_exists('language');
+
+  if ($multilanguage) {
     $header = array(t('Title'), t('Language'), t('Operations'));
   } else {
     $header = array(t('Title'), t('Operations'));
@@ -35,11 +38,13 @@ function menu_overview_page()
     $row = array();
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
 
-    $language = language_load($menu['langcode']);
-    if ($language) {
-      $row[] = $language->name;
-    } else {
-      $row[] = '';
+    if ($multilanguage) {
+      $language = language_load($menu['langcode']);
+      if ($language) {
+        $row[] = $language->name;
+      } else {
+        $row[] = '';
+      }
     }
 
     $links = array();
@@ -96,6 +101,9 @@ function menu_overview_form($form, &$form_state, $menu)
   global $menu_admin;
   global $language_interface;
 
+  // Enable language if language module is enabled.
+  $multilanguage = module_exists('language');
+
   $form['#attached']['css'] = array(drupal_get_path('module', 'menu') . '/menu.css');
 
   $select = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC))
@@ -121,7 +129,7 @@ function menu_overview_form($form, &$form_state, $menu)
     $select->orderBy('p' . $i, 'ASC');
   }
 
-  if (language_multilingual() && $menu['multilingual_mode'] != MENU_MULTILINGUAL_DISABLED) {
+  if ($multilanguage && $menu['multilingual_mode'] != MENU_MULTILINGUAL_DISABLED) {
 
     if ($menu['langcode'] != LANGUAGE_NONE) {
       $langcode = $menu['langcode'];
@@ -359,7 +367,10 @@ function theme_menu_overview_form($variables)
   drupal_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
   drupal_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
 
-  if (language_multilingual()) {
+  // Enable language if language module is enabled.
+  $multilanguage = module_exists('language');
+
+  if ($multilanguage) {
     $header = array(
       t('Menu link'),
       t('Language'),
@@ -391,7 +402,7 @@ function theme_menu_overview_form($variables)
 
       $row = array();
       $row[] = theme('indentation', array('size' => $element['#item']['depth'] - 1)) . drupal_render($element['title']);
-      if (language_multilingual()) {
+      if ($multilanguage) {
         $row[] = drupal_render($element['langcode']);
       }
       $row[] = array('data' => drupal_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
@@ -538,7 +549,10 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
   );
 
-  if (language_multilingual()) {
+  // Enable language if language module is enabled.
+  $multilanguage = module_exists('language');
+
+  if ($multilanguage) {
     if (isset($form_state['values']['parent'])) {
       $menu_name = substr($form_state['values']['parent'], 0, strpos($form_state['values']['parent'], ':'));
     }
@@ -724,7 +738,10 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
     '#default_value' => $menu['description'],
   );
 
-  if (language_multilingual()) {
+  // Enable language if language module is enabled.
+  $multilanguage = module_exists('language');
+
+  if ($multilanguage) {
     $form['multilingual_mode'] = array(
       '#type' => 'radios',
       '#title' => t('Multilingual support'),
