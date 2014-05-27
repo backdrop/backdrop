@@ -507,7 +507,7 @@ function system_theme_settings($form, &$form_state, $key = '') {
 
       // Prepare local file path for description.
       if ($original_path && isset($friendly_path)) {
-        $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', conf_path() . '/files')));
+        $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
       }
       elseif ($key) {
         $local_file = drupal_get_path('theme', $key) . '/' . $default;
@@ -1681,7 +1681,7 @@ function system_file_system_settings() {
   $form['file_public_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Public file system path'),
-    '#default_value' => variable_get('file_public_path', conf_path() . '/files'),
+    '#default_value' => variable_get('file_public_path', 'files'),
     '#maxlength' => 255,
     '#description' => t('A local file system path where public files will be stored. This directory must exist and be writable by Drupal. This directory must be relative to the Drupal installation directory and be accessible over the web.'),
     '#after_build' => array('system_check_directory'),

@@ -3,13 +3,5 @@ description = Enables site-wide keyword searching.
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
-files[] = search.extender.inc
 configure = admin/config/search/settings
 stylesheets[all][] = search.theme.css
-
-; Views handlers.
-files[] = views/views_handler_argument_search.inc
-files[] = views/views_handler_field_search_score.inc
-files[] = views/views_handler_filter_search.inc
-files[] = views/views_handler_sort_search_score.inc
-files[] = views/views_plugin_row_search_view.inc

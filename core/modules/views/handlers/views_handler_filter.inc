@@ -394,6 +394,9 @@ class views_handler_filter extends views_handler {
         '#type' => 'submit',
         '#value' => t('Grouped filters'),
         '#submit' => array('views_ui_config_item_form_build_group'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['group_button']['radios']['radios']['#default_value'] = 0;
     }
@@ -403,6 +406,9 @@ class views_handler_filter extends views_handler {
         '#type' => 'submit',
         '#value' => t('Single filter'),
         '#submit' => array('views_ui_config_item_form_build_group'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['group_button']['radios']['radios']['#default_value'] = 1;
     }
@@ -439,6 +445,9 @@ class views_handler_filter extends views_handler {
         '#type' => 'submit',
         '#value' => t('Expose filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }
@@ -451,6 +460,9 @@ class views_handler_filter extends views_handler {
         '#type' => 'submit',
         '#value' => t('Hide filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }

@@ -141,24 +141,27 @@ function simpletest_schema() {
       'reporter' => array('test_class', 'message_id'),
     ),
   );
-  $schema['simpletest_test_id'] = array(
-    'description' => 'Stores simpletest test IDs, used to auto-incrament the test ID so that a fresh test ID is used.',
+  $schema['simpletest_prefix'] = array(
+    'description' => 'Stores simpletest test IDs and active database table prefixes.',
     'fields' => array(
       'test_id'  => array(
-        'type' => 'serial',
+        'type' => 'int',
         'not null' => TRUE,
-        'description' => 'Primary Key: Unique simpletest ID used to group test results together. Each time a set of tests
-                            are run a new test ID is used.',
+        'unsigned' => TRUE,
+        'description' => 'Unique simpletest ID used to group test results together.',
       ),
-      'last_prefix' => array(
+      'prefix' => array(
         'type' => 'varchar',
         'length' => 60,
         'not null' => FALSE,
         'default' => '',
-        'description' => 'The last database prefix used during testing.',
+        'description' => 'The database prefix used during testing. Multiple prefixes may be used at the same time if using the run-scripts.sh script with concurrency.',
       ),
     ),
-    'primary key' => array('test_id'),
+    'indexes' => array(
+      'test_id' => array('test_id'),
+      'prefix' => array('prefix'),
+    ),
   );
   return $schema;
 }
@@ -179,4 +182,38 @@ function simpletest_uninstall() {
 
   // Remove generated files.
   file_unmanaged_delete_recursive('public://simpletest');
+}
+
+/**
+ * Update the simpletest_test_id table to hold a list of active prefixes.
+ */
+function simpletest_update_1000() {
+  if (db_table_exists('simpletest_test_id')) {
+    db_drop_table('simpletest_test_id');
+  }
+  if (!db_table_exists('simpletest_prefix')) {
+    $schema = array(
+      'description' => 'Stores simpletest test IDs and active database table prefixes.',
+      'fields' => array(
+        'test_id'  => array(
+          'type' => 'int',
+          'not null' => TRUE,
+          'unsigned' => TRUE,
+          'description' => 'Unique simpletest ID used to group test results together.',
+        ),
+        'prefix' => array(
+          'type' => 'varchar',
+          'length' => 60,
+          'not null' => FALSE,
+          'default' => '',
+          'description' => 'The database prefix used during testing. Multiple prefixes may be used at the same time if using the run-scripts.sh script with concurrency.',
+        ),
+      ),
+      'indexes' => array(
+        'test_id' => array('test_id'),
+        'prefix' => array('prefix'),
+      ),
+    );
+    db_create_table('simpletest_prefix', $schema);
+  }
 }

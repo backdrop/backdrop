@@ -113,6 +113,15 @@ function _filter_disable_format_access($format) {
 }
 
 /**
+ * Implements hook_autoload_info()
+ */
+function filter_autoload_info() {
+  return array(
+    'views_handler_field_filter_format_name' => 'views/views_handler_field_filter_format_name.inc',
+  );
+}
+
+/**
  * Load a text format object from the database.
  *
  * @param $format_id

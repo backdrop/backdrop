@@ -3579,6 +3579,38 @@ function user_cookie_delete($cookie_name) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function user_autoload_info() {
+  return array(
+    'User' => 'user.entity.inc',
+    'UserStorageController' => 'user.entity.inc',
+
+    // Views handlers.
+    'views_handler_argument_user_uid' => 'views/views_handler_argument_user_uid.inc',
+    'views_handler_argument_users_roles_rid' => 'views/views_handler_argument_users_roles_rid.inc',
+    'views_handler_field_user' => 'views/views_handler_field_user.inc',
+    'views_handler_field_user_language' => 'views/views_handler_field_user_language.inc',
+    'views_handler_field_user_link' => 'views/views_handler_field_user_link.inc',
+    'views_handler_field_user_link_cancel' => 'views/views_handler_field_user_link_cancel.inc',
+    'views_handler_field_user_link_edit' => 'views/views_handler_field_user_link_edit.inc',
+    'views_handler_field_user_mail' => 'views/views_handler_field_user_mail.inc',
+    'views_handler_field_user_name' => 'views/views_handler_field_user_name.inc',
+    'views_handler_field_user_permissions' => 'views/views_handler_field_user_permissions.inc',
+    'views_handler_field_user_picture' => 'views/views_handler_field_user_picture.inc',
+    'views_handler_field_user_roles' => 'views/views_handler_field_user_roles.inc',
+    'views_handler_filter_user_current' => 'views/views_handler_filter_user_current.inc',
+    'views_handler_filter_user_name' => 'views/views_handler_filter_user_name.inc',
+    'views_handler_filter_user_permissions' => 'views/views_handler_filter_user_permissions.inc',
+    'views_handler_filter_user_roles' => 'views/views_handler_filter_user_roles.inc',
+    'views_plugin_argument_default_current_user' => 'views/views_plugin_argument_default_current_user.inc',
+    'views_plugin_argument_default_user' => 'views/views_plugin_argument_default_user.inc',
+    'views_plugin_argument_validate_user' => 'views/views_plugin_argument_validate_user.inc',
+    'views_plugin_row_user_view' => 'views/views_plugin_row_user_view.inc',
+  );
+}
+
+/**
  * Implements hook_file_download_access().
  */
 function user_file_download_access($field, $entity_type, $entity) {

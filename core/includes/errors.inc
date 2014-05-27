@@ -212,14 +212,12 @@ function _drupal_log_error($error, $fatal = FALSE) {
     }
   }
 
-  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
-    if ($fatal) {
-      if (error_displayable($error)) {
-        // When called from JavaScript, simply output the error message.
-        print t('%type: !message in %function (line %line of %file).', $error);
-      }
-      exit;
+  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $fatal) {
+    if (error_displayable($error)) {
+      // When called from JavaScript, simply output the error message.
+      print t('%type: !message in %function (line %line of %file).', $error);
     }
+    exit;
   }
   else {
     // Display the message if the current error reporting level allows this type

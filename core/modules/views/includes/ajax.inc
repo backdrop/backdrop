@@ -76,44 +76,6 @@ function views_ajax() {
 }
 
 /**
- * Creates a Drupal AJAX 'viewsSetForm' command.
- *
- * @param $output
- *   The form to display in the modal.
- * @param $title
- *   The title.
- * @param $url
- *   An optional URL.
- *
- * @return
- *   An array suitable for use with the ajax_render() function.
- */
-function views_ajax_command_set_form($output, $title, $url = NULL) {
-  $command = array(
-    'command' => 'viewsSetForm',
-    'output' => $output,
-    'title' => $title,
-  );
-  if (isset($url)) {
-    $command['url'] = $url;
-  }
-  return $command;
-}
-
-/**
- * Creates a Drupal AJAX 'viewsDismissForm' command.
- *
- * @return
- *   An array suitable for use with the ajax_render() function.
- */
-function views_ajax_command_dismiss_form() {
-  $command = array(
-    'command' => 'viewsDismissForm',
-  );
-  return $command;
-}
-
-/**
  * Creates a Drupal AJAX 'viewsHilite' command.
  *
  * @param $selector
@@ -212,7 +174,7 @@ function views_ajax_command_replace_title($title) {
  */
 function views_ajax_error($message) {
   $commands = array();
-  $commands[] = views_ajax_command_set_form($message, t('Error'));
+  $commands[] = ajax_command_open_modal_dialog(t('Error'), $message);
   return $commands;
 }
 
@@ -252,16 +214,10 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     $display .= $output;
 
     $title = empty($form_state['title']) ? '' : $form_state['title'];
-    if (!empty($form_state['help_topic'])) {
-      $module = !empty($form_state['help_module']) ? $form_state['help_module'] : 'views';
-      if (module_exists('advanced_help')) {
-        $title = theme('advanced_help_topic', array('module' => $module, 'topic' => $form_state['help_topic'])) . $title;
-      }
-    }
-
-    $url = empty($form_state['url']) ? url($_GET['q'], array('absolute' => TRUE)) : $form_state['url'];
-
-    $commands[] = views_ajax_command_set_form($display, $title, $url);
+    $options = array(
+      'dialogClass' => 'views-ui-dialog',
+    );
+    $commands[] = ajax_command_open_modal_dialog($title, $display, $options);
 
     if (!empty($form_state['#section'])) {
       $commands[] = views_ajax_command_hilite('.' . drupal_clean_css_identifier($form_state['#section']));
