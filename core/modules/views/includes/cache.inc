@@ -127,12 +127,8 @@ function _views_data_process_entity_types(&$data) {
 function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
   static $cache = NULL;
   if (!isset($cache) || $reset) {
-    $start = microtime(TRUE);
-    views_include('plugins');
     views_include_handlers();
-
     $cache = views_discover_plugins();
-
   }
 
   if (!$type && !$plugin) {

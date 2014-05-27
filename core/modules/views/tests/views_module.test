@@ -30,6 +30,8 @@ class ViewsModuleTest extends ViewsSqlTest {
   }
 
   public function test_views_trim_text() {
+    views_include('utility');
+
     // Test unicode, @see http://drupal.org/node/513396#comment-2839416
     $text = array(
       'Tuy nhiên, những hi vọng',

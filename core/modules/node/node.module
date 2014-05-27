@@ -1416,7 +1416,7 @@ function node_search_admin() {
   );
   $form['content_ranking']['#theme'] = 'node_search_admin';
   $form['content_ranking']['info'] = array(
-    '#value' => '<em>' . t('The following numbers control which properties the content search should favor when ordering the results. Higher numbers mean more influence, zero means the property is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em>'
+    '#value' => '<em>' . t('Influence is a numeric multiplier used in ordering search results. A higher number means the corresponding factor has more influence on search results; zero means the factor is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em>'
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
@@ -1603,7 +1603,7 @@ function theme_node_search_admin($variables) {
 
   $output = drupal_render($form['info']);
 
-  $header = array(t('Factor'), t('Weight'));
+  $header = array(t('Factor'), t('Influence'));
   foreach (element_children($form['factors']) as $key) {
     $row = array();
     $row[] = $form['factors'][$key]['#title'];
@@ -3058,6 +3058,17 @@ function node_query_entity_field_access_alter(QueryAlterableInterface $query) {
 /**
  * Helper for node access functions.
  *
+ * Queries tagged with 'node_access' that are not against the {node} table
+ * should add the base table as metadata. For example:
+ * @code
+ *   $query
+ *     ->addTag('node_access')
+ *     ->addMetaData('base_table', 'taxonomy_index');
+ * @endcode
+ * If the query is not against the {node} table, an attempt is made to guess
+ * the table, but is not recommended to rely on this as it is deprecated and not
+ * allowed in Drupal 8. It is always safer to provide the table.
+ *
  * @param $query
  *   The query to add conditions to.
  * @param $type
@@ -3915,6 +3926,44 @@ function node_modules_disabled($modules) {
   if (node_access_needs_rebuild() && count(module_implements('node_grants')) == 0) {
     node_access_rebuild();
   }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function node_autoload_info() {
+  return array(
+    'Node' => 'node.entity.inc',
+    'NodeStorageController' => 'node.entity.inc',
+
+    // Views handlers.
+    'views_handler_argument_dates_various' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_language' => 'views/views_handler_argument_node_language.inc',
+    'views_handler_argument_node_nid' => 'views/views_handler_argument_node_nid.inc',
+    'views_handler_argument_node_type' => 'views/views_handler_argument_node_type.inc',
+    'views_handler_argument_node_vid' => 'views/views_handler_argument_node_vid.inc',
+    'views_handler_argument_node_uid_revision' => 'views/views_handler_argument_node_uid_revision.inc',
+    'views_handler_field_history_user_timestamp' => 'views/views_handler_field_history_user_timestamp.inc',
+    'views_handler_field_node' => 'views/views_handler_field_node.inc',
+    'views_handler_field_node_link' => 'views/views_handler_field_node_link.inc',
+    'views_handler_field_node_link_delete' => 'views/views_handler_field_node_link_delete.inc',
+    'views_handler_field_node_link_edit' => 'views/views_handler_field_node_link_edit.inc',
+    'views_handler_field_node_revision' => 'views/views_handler_field_node_revision.inc',
+    'views_handler_field_node_revision_link' => 'views/views_handler_field_node_revision_link.inc',
+    'views_handler_field_node_revision_link_delete' => 'views/views_handler_field_node_revision_link_delete.inc',
+    'views_handler_field_node_revision_link_revert' => 'views/views_handler_field_node_revision_link_revert.inc',
+    'views_handler_field_node_path' => 'views/views_handler_field_node_path.inc',
+    'views_handler_field_node_type' => 'views/views_handler_field_node_type.inc',
+    'views_handler_filter_history_user_timestamp' => 'views/views_handler_filter_history_user_timestamp.inc',
+    'views_handler_filter_node_access' => 'views/views_handler_filter_node_access.inc',
+    'views_handler_filter_node_status' => 'views/views_handler_filter_node_status.inc',
+    'views_handler_filter_node_type' => 'views/views_handler_filter_node_type.inc',
+    'views_handler_filter_node_uid_revision' => 'views/views_handler_filter_node_uid_revision.inc',
+    'views_plugin_argument_default_node' => 'views/views_plugin_argument_default_node.inc',
+    'views_plugin_argument_validate_node' => 'views/views_plugin_argument_validate_node.inc',
+    'views_plugin_row_node_rss' => 'views/views_plugin_row_node_rss.inc',
+    'views_plugin_row_node_view' => 'views/views_plugin_row_node_view.inc',
+  );
 }
 
 /**

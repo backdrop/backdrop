@@ -4,14 +4,6 @@
  * Attach custom data fields to Drupal entities.
  */
 
-/**
- * Base class for all exceptions thrown by Field API functions.
- *
- * This class has no functionality of its own other than allowing all
- * Field API exceptions to be caught by a single catch block.
- */
-class FieldException extends Exception {}
-
 /*
  * Load all public Field API functions. Drupal currently has no
  * mechanism for auto-loading core APIs, so we have to load them on
@@ -274,11 +266,6 @@ const FIELD_LOAD_CURRENT = 'FIELD_LOAD_CURRENT';
 const FIELD_LOAD_REVISION = 'FIELD_LOAD_REVISION';
 
 /**
- * Exception class thrown by hook_field_update_forbid().
- */
-class FieldUpdateForbiddenException extends FieldException {}
-
-/**
  * Implements hook_theme().
  */
 function field_theme() {
@@ -349,6 +336,23 @@ function field_system_info_alter(&$info, $file, $type) {
       $info['explanation'] = $explanation;
     }
   }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function field_autoload_info() {
+  return array(
+    'FieldException' => 'field.exceptions.inc',
+    'FieldUpdateForbiddenException' => 'field.exceptions.inc',
+    'FieldValidationException' => 'field.exceptions.inc',
+    // Views handlers.
+    'views_handler_field_field' => 'views/views_handler_field_field.inc',
+    'views_handler_relationship_entity_reverse' => 'views/views_handler_relationship_entity_reverse.inc',
+    'views_handler_argument_field_list' => 'views/views_handler_argument_field_list.inc',
+    'views_handler_argument_field_list_string' => 'views/views_handler_argument_field_list_string.inc',
+    'views_handler_filter_field_list' => 'views/views_handler_filter_field_list.inc',
+  );
 }
 
 /**

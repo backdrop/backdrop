@@ -674,11 +674,13 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
  */
 function _theme_build_registry($theme, $base_theme, $theme_engine) {
   $cache = array();
+  $modules_loaded = module_load_all(NULL);
+
   // First, process the theme hooks advertised by modules. This will
   // serve as the basic registry. Since the list of enabled modules is the same
   // regardless of the theme used, this is cached in its own entry to save
   // building it for every theme.
-  if ($cached = cache()->get('theme_registry:build:modules')) {
+  if ($modules_loaded && $cached = cache()->get('theme_registry:build:modules')) {
     $cache = $cached->data;
   }
   else {
@@ -686,7 +688,7 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
       _theme_process_registry($cache, $module, 'module', $module, drupal_get_path('module', $module));
     }
     // Only cache this registry if all modules are loaded.
-    if (module_load_all(NULL)) {
+    if ($modules_loaded) {
       cache()->set('theme_registry:build:modules', $cache);
     }
   }
@@ -2629,12 +2631,39 @@ function template_preprocess_page(&$variables) {
   $variables['language']          = $GLOBALS['language_interface'];
   $variables['language']->dir     = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
   $variables['logo']              = theme_get_setting('logo');
-  $variables['main_menu']         = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
-  $variables['secondary_menu']    = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
   $variables['action_links']      = menu_local_actions();
   $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin(variable_get('site_name', 'Drupal')) : '');
   $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? filter_xss_admin(variable_get('site_slogan', '')) : '');
   $variables['tabs']              = menu_local_tabs();
+
+  $variables['main_menu'] = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
+  $variables['secondary_menu'] = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
+  
+  // Pass the main menu and secondary menu to the template as render arrays.
+  if (!empty($variables['main_menu'])) {
+    $variables['main_menu'] = array(
+      '#theme' =>'links__system_main_menu',
+      '#links' => $variables['main_menu'],
+      '#heading' => array(
+        'text' => t('Main menu'),
+        'class' => array('element-invisible'),
+      ),
+      '#set_active_class' => TRUE,
+    );
+  }
+  if (!empty($variables['secondary_menu'])) {
+    $variables['secondary_menu'] = array(
+      '#theme' =>'links__system_secondary_menu',
+      '#links' => $variables['secondary_menu'],
+      '#heading' => array(
+        'text' => t('Secondary menu'),
+        'level' => 'h2',
+        'class' => array('element-invisible'),
+      ),
+      '#set_active_class' => TRUE,
+    );
+  }
+
 
   if ($node = menu_get_object()) {
     $variables['node'] = $node;

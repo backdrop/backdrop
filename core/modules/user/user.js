@@ -16,14 +16,12 @@ Drupal.behaviors.password = {
       innerWrapper.addClass('password-parent');
 
       // Add the password confirmation layer.
-      $('input.password-confirm', outerWrapper).parent().prepend('<div class="password-confirm">' + translate['confirmTitle'] + ' <span></span></div>').addClass('confirm-parent');
-      var confirmInput = $('input.password-confirm', outerWrapper);
+      outerWrapper.find('input.password-confirm').parent().prepend('<div class="password-confirm">' + translate.confirmTitle + ' <span></span></div>').addClass('confirm-parent');      var confirmInput = $('input.password-confirm', outerWrapper);
       var confirmResult = $('div.password-confirm', outerWrapper);
       var confirmChild = $('span', confirmResult);
 
       // Add the description box.
-      var passwordMeter = '<div class="password-strength"><div class="password-strength-text" aria-live="assertive"></div><div class="password-strength-title">' + translate['strengthTitle'] + '</div><div class="password-indicator"><div class="indicator"></div></div></div>';
-      $(confirmInput).parent().after('<div class="password-suggestions description"></div>');
+      var passwordMeter = '<div class="password-strength"><div class="password-strength-text" aria-live="assertive"></div><div class="password-strength-title">' + translate.strengthTitle + '</div><div class="password-indicator"><div class="indicator"></div></div></div>';      $(confirmInput).parent().after('<div class="password-suggestions description"></div>');
       $(innerWrapper).prepend(passwordMeter);
       var passwordDescription = $('div.password-suggestions', outerWrapper).hide();
 

@@ -19,8 +19,6 @@ class ViewsCacheTest extends ViewsSqlTest {
    * @return view
    */
   protected function getBasicView() {
-    views_include('view');
-
     // Create the basic view.
     $view = new view();
     $view->name = 'test_view';

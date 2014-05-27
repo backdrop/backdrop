@@ -377,8 +377,9 @@ function user_password($length = 10) {
  *   An array whose keys are the role IDs of interest, such as $user->roles.
  *
  * @return
- *   An array indexed by role ID. Each value is an array whose keys are the
- *   permission strings for the given role ID.
+ *   If $roles is a non-empty array, an array indexed by role ID is returned.
+ *   Each value is an array whose keys are the permission strings for the given
+ *   role ID. If $roles is empty nothing is returned.
  */
 function user_role_permissions($roles = array()) {
   $cache = &drupal_static(__FUNCTION__, array());
@@ -1494,14 +1495,14 @@ function user_menu() {
 
   // Administration pages.
   $items['admin/config/people'] = array(
-   'title' => 'People',
-   'description' => 'Configure user accounts.',
-   'position' => 'left',
-   'weight' => -20,
-   'page callback' => 'system_admin_menu_block_page',
-   'access arguments' => array('access administration pages'),
-   'file' => 'system.admin.inc',
-   'file path' => drupal_get_path('module', 'system'),
+    'title' => 'People',
+    'description' => 'Configure user accounts.',
+    'position' => 'left',
+    'weight' => -20,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
   );
   $items['admin/config/people/accounts'] = array(
     'title' => 'Account settings',
@@ -1773,7 +1774,7 @@ function user_login_default_validators() {
  * A FAPI validate handler. Sets an error if supplied username has been blocked.
  */
 function user_login_name_validate($form, &$form_state) {
-  if (isset($form_state['values']['name']) && user_is_blocked($form_state['values']['name'])) {
+  if (!empty($form_state['values']['name']) && user_is_blocked($form_state['values']['name'])) {
     // Blocked in user administration.
     form_set_error('name', t('The username %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
   }
@@ -3287,7 +3288,14 @@ function user_action_info() {
 }
 
 /**
- * Blocks the current user.
+ * Blocks a specific user or the current user, if one is not specified.
+ *
+ * @param $entity
+ *   (optional) An entity object; if it is provided and it has a uid property,
+ *   the user with that ID is blocked.
+ * @param $context
+ *   (optional) An associative array; if no user ID is found in $entity, the
+ *   'uid' element of this array determines the user to block.
  *
  * @ingroup actions
  */
@@ -3568,6 +3576,38 @@ function user_cookie_save(array $values) {
  */
 function user_cookie_delete($cookie_name) {
   setrawcookie('Drupal.visitor.' . $cookie_name, '', REQUEST_TIME - 3600, '/');
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function user_autoload_info() {
+  return array(
+    'User' => 'user.entity.inc',
+    'UserStorageController' => 'user.entity.inc',
+
+    // Views handlers.
+    'views_handler_argument_user_uid' => 'views/views_handler_argument_user_uid.inc',
+    'views_handler_argument_users_roles_rid' => 'views/views_handler_argument_users_roles_rid.inc',
+    'views_handler_field_user' => 'views/views_handler_field_user.inc',
+    'views_handler_field_user_language' => 'views/views_handler_field_user_language.inc',
+    'views_handler_field_user_link' => 'views/views_handler_field_user_link.inc',
+    'views_handler_field_user_link_cancel' => 'views/views_handler_field_user_link_cancel.inc',
+    'views_handler_field_user_link_edit' => 'views/views_handler_field_user_link_edit.inc',
+    'views_handler_field_user_mail' => 'views/views_handler_field_user_mail.inc',
+    'views_handler_field_user_name' => 'views/views_handler_field_user_name.inc',
+    'views_handler_field_user_permissions' => 'views/views_handler_field_user_permissions.inc',
+    'views_handler_field_user_picture' => 'views/views_handler_field_user_picture.inc',
+    'views_handler_field_user_roles' => 'views/views_handler_field_user_roles.inc',
+    'views_handler_filter_user_current' => 'views/views_handler_filter_user_current.inc',
+    'views_handler_filter_user_name' => 'views/views_handler_filter_user_name.inc',
+    'views_handler_filter_user_permissions' => 'views/views_handler_filter_user_permissions.inc',
+    'views_handler_filter_user_roles' => 'views/views_handler_filter_user_roles.inc',
+    'views_plugin_argument_default_current_user' => 'views/views_plugin_argument_default_current_user.inc',
+    'views_plugin_argument_default_user' => 'views/views_plugin_argument_default_user.inc',
+    'views_plugin_argument_validate_user' => 'views/views_plugin_argument_validate_user.inc',
+    'views_plugin_row_user_view' => 'views/views_plugin_row_user_view.inc',
+  );
 }
 
 /**

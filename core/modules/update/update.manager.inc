@@ -447,10 +447,10 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
     }
 
     // If the owner of the last directory we extracted is the same as the
-    // owner of our configuration directory (e.g. sites/default) where we're
-    // trying to install the code, there's no need to prompt for FTP/SSH
-    // credentials. Instead, we instantiate a FileTransferLocal and invoke
-    // update_authorize_run_update() directly.
+    // owner of our configuration directory where we're trying to install the
+    // code, there's no need to prompt for FTP/SSH credentials. Instead, we
+    // instantiate a FileTransferLocal and invoke update_authorize_run_update()
+    // directly.
     if (fileowner($project_real_location) == fileowner(conf_path())) {
       module_load_include('inc', 'update', 'update.authorize');
       $filetransfer = new FileTransferLocal(DRUPAL_ROOT);
@@ -510,7 +510,7 @@ function update_manager_install_form($form, &$form_state, $context) {
   );
 
   $form['project_url'] = array(
-    '#type' => 'textfield',
+    '#type' => 'url',
     '#title' => t('Install from a URL'),
     '#description' => t('For example: %url', array('%url' => 'http://ftp.drupal.org/files/projects/name.tar.gz')),
   );
@@ -611,12 +611,6 @@ function _update_manager_check_backends(&$form, $operation) {
 function update_manager_install_form_validate($form, &$form_state) {
   if (!($form_state['values']['project_url'] XOR !empty($_FILES['files']['name']['project_upload']))) {
     form_set_error('project_url', t('You must either provide a URL or upload an archive file to install.'));
-  }
-
-  if ($form_state['values']['project_url']) {
-    if (!valid_url($form_state['values']['project_url'], TRUE)) {
-      form_set_error('project_url', t('The provided URL is invalid.'));
-    }
   }
 }
 
@@ -726,10 +720,10 @@ function update_manager_install_form_submit($form, &$form_state) {
   );
 
   // If the owner of the directory we extracted is the same as the
-  // owner of our configuration directory (e.g. sites/default) where we're
-  // trying to install the code, there's no need to prompt for FTP/SSH
-  // credentials. Instead, we instantiate a FileTransferLocal and invoke
-  // update_authorize_run_install() directly.
+  // owner of our configuration directory where we're trying to install the
+  // code, there's no need to prompt for FTP/SSH credentials. Instead, we
+  // instantiate a FileTransferLocal and invoke update_authorize_run_install()
+  // directly.
   if (fileowner($project_real_location) == fileowner(conf_path())) {
     module_load_include('inc', 'update', 'update.authorize');
     $filetransfer = new FileTransferLocal(DRUPAL_ROOT);
@@ -907,10 +901,10 @@ function update_manager_batch_project_get($project, $url, &$context) {
  * Determines if file transfers will be performed locally.
  *
  * If the server is configured such that webserver-created files have the same
- * owner as the configuration directory (e.g., sites/default) where new code
- * will eventually be installed, the update manager can transfer files entirely
- * locally, without changing their ownership (in other words, without prompting
- * the user for FTP, SSH or other credentials).
+ * owner as the configuration directory where new code will eventually be
+ * installed, the update manager can transfer files entirely locally, without
+ * changing their ownership (in other words, without prompting the user for FTP,
+ * SSH or other credentials).
  *
  * This server configuration is an inherent security weakness because it allows
  * a malicious webserver process to append arbitrary PHP code and then execute

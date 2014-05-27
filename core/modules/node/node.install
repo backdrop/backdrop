@@ -520,7 +520,7 @@ function _update_7000_node_get_types() {
  *
  * @see http://drupal.org/node/375397
  */
-function node_update_8000() {
+function node_update_1000() {
   $front_page = variable_get('site_frontpage');
   if (!isset($front_page)) {
     variable_set('site_frontpage', 'node');
@@ -532,7 +532,7 @@ function node_update_8000() {
  *
  * @see http://drupal.org/node/540294
  */
-function node_update_8001() {
+function node_update_1001() {
   $types = db_query('SELECT type FROM {node_type}')->fetchCol();
   foreach ($types as $type) {
     $language = variable_get('language_content_type_' . $type);
@@ -546,7 +546,7 @@ function node_update_8001() {
 /**
  * Rename node.language field to node.langcode.
  */
-function node_update_8002() {
+function node_update_1002() {
   $spec = array(
     'description' => 'The {language}.langcode of this node.',
     'type' => 'varchar',
@@ -558,6 +558,6 @@ function node_update_8002() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

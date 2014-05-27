@@ -169,6 +169,24 @@ function locale_views_api() {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function locale_autoload_info() {
+  return array(
+    'views_handler_field_node_language' => 'views/views_handler_field_node_language.inc',
+    'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
+    'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
+    'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
+    'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
+    'views_handler_field_locale_language' => 'views/views_handler_field_locale_language.inc',
+    'views_handler_field_locale_link_edit' => 'views/views_handler_field_locale_link_edit.inc',
+    'views_handler_filter_locale_group' => 'views/views_handler_filter_locale_group.inc',
+    'views_handler_filter_locale_language' => 'views/views_handler_filter_locale_language.inc',
+    'views_handler_filter_locale_version' => 'views/views_handler_filter_locale_version.inc',
+  );
+}
+
+/**
  * Form builder callback to display language selection widget.
  *
  * @ingroup forms
@@ -582,7 +600,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         // Refresh database stored cache of translations for given language.
         // We only store short strings used in current version, to improve
         // performance and consume less memory.
-        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => VERSION, ':length' => variable_get('locale_cache_length', 75)));
+        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => BACKDROP_VERSION, ':length' => variable_get('locale_cache_length', 75)));
         foreach ($result as $data) {
           $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
         }
@@ -606,12 +624,12 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
       // Cache translation string or TRUE if no translation exists.
       $locale_t[$langcode][$context][$string] = (empty($translation->translation) ? TRUE : $translation->translation);
 
-      if ($translation->version != VERSION) {
+      if ($translation->version != BACKDROP_VERSION) {
         // This is the first use of this string under current Drupal version. Save version
         // and clear cache, to include the string into caching next time. Saved version is
         // also a string-history information for later pruning of the tables.
         db_update('locales_source')
-          ->fields(array('version' => VERSION))
+          ->fields(array('version' => BACKDROP_VERSION))
           ->condition('lid', $translation->lid)
           ->execute();
         cache()->deletePrefix('locale:');
@@ -622,7 +640,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
       db_merge('locales_source')
         ->insertFields(array(
           'location' => request_uri(),
-          'version' => VERSION,
+          'version' => BACKDROP_VERSION,
         ))
         ->key(array(
           'source' => $string,
@@ -1035,7 +1053,7 @@ function locale_form_system_file_system_settings_alter(&$form, $form_state) {
   $form['locale_translate_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Interface translations directory'),
-    '#default_value' => variable_get('locale_translate_file_directory', conf_path() . '/files/translations'),
+    '#default_value' => variable_get('locale_translate_file_directory', 'files/translations'),
     '#maxlength' => 255,
     '#description' => t('A local file system path where interface translation files are looked for. This directory must exist.'),
     '#after_build' => array('system_check_directory'),

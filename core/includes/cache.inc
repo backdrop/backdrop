@@ -85,8 +85,8 @@ function cache_clear_all() {
  * To access your custom cache bin, specify the name of the bin when storing
  * or retrieving cached data:
  * @code
- *  cache_set($cid, $data, 'custom_bin', $expire);
- *  cache_get($cid, 'custom_bin');
+ *  cache('custom_bin')->set($cid, $data, $expire);
+ *  cache('custom_bin')->get($cid, 'custom_bin');
  * @endcode
  *
  * @see cache()
@@ -104,8 +104,8 @@ interface DrupalCacheInterface {
   /**
    * Returns data from the persistent cache.
    *
-   * Data may be stored as either plain text or as serialized data. cache_get()
-   * will automatically return unserialized objects and arrays.
+   * Data may be stored as either plain text or as serialized data.
+   * cache()->get() will automatically return unserialized objects and arrays.
    *
    * @param $cid
    *   The cache ID of the data to retrieve.
@@ -344,7 +344,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
    * data as appropriate.
    *
    * @param $cache
-   *   An item loaded from cache_get() or cache_get_multiple().
+   *   An item loaded from DrupalCacheInterface::get() or DrupalCacheInterface::getMultiple().
    *
    * @return
    *   The item with data unserialized as appropriate or FALSE if there is no

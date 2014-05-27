@@ -1,6 +1,6 @@
 name = "AJAX form test mock module"
 description = "Test for AJAX form calls."
-core = 8.x
+backdrop = 1.x
 package = Testing
-version = VERSION
+version = BACKDROP_VERSION
 hidden = TRUE

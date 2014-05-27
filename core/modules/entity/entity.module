@@ -428,6 +428,19 @@ function entity_form_submit_build_entity($entity_type, $entity, $form, &$form_st
 }
 
 /**
- * Defines an exception thrown when a malformed entity is passed.
+ * Implements hook_autoload_info().
  */
-class EntityMalformedException extends Exception { }
+function entity_autoload_info() {
+  return array(
+    'EntityInterface' => 'entity.class.inc',
+    'Entity' => 'entity.class.inc',
+    'EntityMalformedException' => 'entity.class.inc',
+    'EntityStorageControllerInterface' => 'entity.controller.inc',
+    'DrupalDefaultEntityController' => 'entity.controller.inc',
+    'DrupalEntityControllerInterface' => 'entity.controller.inc',
+    'EntityStorageException' => 'entity.controller.inc',
+    'EntityDatabaseStorageController' => 'entity.controller.inc',
+    'EntityFieldQueryException' => 'entity.query.inc',
+    'EntityFieldQuery' => 'entity.query.inc',
+  );
+}

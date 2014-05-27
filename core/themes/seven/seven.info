@@ -1,8 +1,8 @@
 name = Seven
 description = A simple one-column, tableless, fluid width administration theme.
 package = Core
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 stylesheets[screen][] = reset.css
 stylesheets[screen][] = style.css
 settings[shortcut_module_link] = 1

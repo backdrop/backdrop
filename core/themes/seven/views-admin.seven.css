@@ -314,15 +314,6 @@ table th {
  * The contents of the popup dialog on the views edit form.
  */
 
-.views-ui-dialog .ui-dialog-titlebar-close {
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border-color: #cccccc;
-  right: -27px;
-  top: -1px;
-}
-
 .views-ui-dialog fieldset.collapsible {
   padding-top: 1.5em;
 }

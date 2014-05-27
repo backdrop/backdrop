@@ -320,13 +320,13 @@ function _drupal_default_html_head() {
   );
   // Show Drupal and the major version number in the META GENERATOR tag.
   // Get the major version.
-  list($version, ) = explode('.', VERSION);
+  list($version, ) = explode('.', BACKDROP_VERSION);
   $elements['system_meta_generator'] = array(
     '#type' => 'html_tag',
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
-      'content' => 'Drupal ' . $version . ' (http://drupal.org)',
+      'content' => 'Backdrop CMS ' . $version . ' (http://backdropcms.org)',
     ),
   );
   // Also send the generator in the HTTP header.
@@ -916,7 +916,7 @@ function drupal_http_request($url, array $options = array()) {
 
   // If the server URL has a user then attempt to use basic authentication.
   if (isset($uri['user'])) {
-    $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ''));
+    $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ':'));
   }
 
   // If the database prefix is being used by SimpleTest to run the tests in a copied
@@ -1504,7 +1504,6 @@ function filter_xss_admin($string) {
  *   valid UTF-8.
  *
  * @see drupal_validate_utf8()
- * @ingroup sanitization
  */
 function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
@@ -2659,7 +2658,7 @@ function drupal_deliver_html_page($page_callback_result) {
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
         // Check for and return a fast 404 page if configured.
-        drupal_fast_404();
+        fast_404();
 
         // Keep old path for reference, and to allow forms to redirect to it.
         if (!isset($_GET['destination'])) {
@@ -2739,8 +2738,6 @@ function drupal_deliver_html_page($page_callback_result) {
  * react to the closing of the page by calling hook_exit().
  */
 function drupal_page_footer() {
-  global $user;
-
   module_invoke_all('exit');
 
   // Commit the user session, if needed.
@@ -2753,7 +2750,6 @@ function drupal_page_footer() {
     ob_flush();
   }
 
-  _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
   drupal_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
@@ -3748,7 +3744,7 @@ function drupal_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE)
  */
 function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
   // Remove multiple charset declarations for standards compliance (and fixing Safari problems).
-  $contents = preg_replace('/^@charset\s+[\'"](\S*)\b[\'"];/i', '', $contents);
+  $contents = preg_replace('/^@charset\s+[\'"](\S*?)\b[\'"];/i', '', $contents);
 
   if ($optimize) {
     // Perform some safe CSS optimizations.
@@ -3885,7 +3881,14 @@ function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_
  *   The cleaned class name.
  */
 function drupal_html_class($class) {
-  return drupal_clean_css_identifier(drupal_strtolower($class));
+  // The output of this function will never change, so this uses a normal
+  // static instead of drupal_static().
+  static $classes = array();
+
+  if (!isset($classes[$class])) {
+    $classes[$class] = drupal_clean_css_identifier(drupal_strtolower($class));
+  }
+  return $classes[$class];
 }
 
 /**
@@ -5303,10 +5306,10 @@ function drupal_json_output($var = NULL) {
  *   A salt based on information in settings.php, not in the database.
  */
 function drupal_get_hash_salt() {
-  global $drupal_hash_salt, $databases;
-  // If the $drupal_hash_salt variable is empty, a hash of the serialized
+  global $hash_salt, $databases;
+  // If the $hash_salt variable is empty, a hash of the serialized
   // database credentials is used as a fallback salt.
-  return empty($drupal_hash_salt) ? hash('sha256', serialize($databases)) : $drupal_hash_salt;
+  return empty($hash_salt) ? hash('sha256', serialize($databases)) : $hash_salt;
 }
 
 /**
@@ -5329,9 +5332,14 @@ function drupal_get_private_key() {
  * @param $value
  *   An additional value to base the token on.
  *
+ * The generated token is based on the session ID of the current user. Normally,
+ * anonymous users do not have a session, so the generated token will be
+ * different on every page request. To generate a token for users without a
+ * session, manually start a session prior to calling this function.
+ *
  * @return string
  *   A 43-character URL-safe token for validation, based on the user session ID,
- *   the global $drupal_hash_salt variable from settings.php, and the
+ *   the global $hash_salt variable from settings.php, and the
  *   'drupal_private_key' configuration variable.
  */
 function drupal_get_token($value = '') {
@@ -5535,6 +5543,10 @@ function drupal_cron_run() {
   }
 
   foreach ($queues as $queue_name => $info) {
+    if (!empty($info['skip on cron'])) {
+      // Do not run if queue wants to skip.
+      continue;
+    }
     $function = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
     $queue = DrupalQueue::get($queue_name);
@@ -5648,7 +5660,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
   }
 
   $searchdir[] = $directory;
-  if (file_exists("$config/$directory")) {
+  if ($config !== '.' && file_exists("$config/$directory")) {
     $searchdir[] = "$config/$directory";
   }
 
@@ -5676,7 +5688,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
         // If the module or theme is incompatible with Drupal core, remove it
         // from the array for the current search directory, so it is not
         // overwritten when merged with the $files array.
-        if (isset($info['core']) && $info['core'] != DRUPAL_CORE_COMPATIBILITY) {
+        if (isset($info['backdrop']) && $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           unset($files_to_add[$file_key]);
         }
       }
@@ -6212,14 +6224,16 @@ function drupal_render(&$elements) {
 /**
  * Renders children of an element and concatenates them.
  *
- * This renders all children of an element using drupal_render() and then
- * joins them together into a single string.
- *
- * @param $element
+ * @param array $element
  *   The structured array whose children shall be rendered.
- * @param $children_keys
- *   If the keys of the element's children are already known, they can be passed
- *   in to save another run of element_children().
+ * @param array $children_keys
+ *   (optional) If the keys of the element's children are already known, they
+ *   can be passed in to save another run of element_children().
+ *
+ * @return string
+ *   The rendered HTML of all children of the element.
+
+ * @see drupal_render()
  */
 function drupal_render_children(&$element, $children_keys = NULL) {
   if ($children_keys === NULL) {
@@ -7269,6 +7283,9 @@ function drupal_common_theme() {
     'email' => array(
       'render element' => 'element',
     ),
+    'url' => array(
+      'render element' => 'element',
+    ),
     'form' => array(
       'render element' => 'element',
     ),
@@ -7869,18 +7886,17 @@ function drupal_flush_all_caches() {
   // Change query-strings on css/js files to enforce reload for all users.
   _drupal_flush_css_js();
 
-  registry_rebuild();
+  system_rebuild_module_data();
   drupal_clear_css_cache();
   drupal_clear_js_cache();
 
-  // Rebuild the theme data. Note that the module data is rebuilt above, as
-  // part of registry_rebuild().
+  // Rebuild the theme data.
   system_rebuild_theme_data();
   drupal_theme_rebuild();
 
   entity_info_cache_clear();
 
-  // @todo D8: Split cache flushing from rebuilding.
+  // @todo Split cache flushing from rebuilding.
   // @see http://drupal.org/node/996236
   if (module_exists('node')) {
     node_types_rebuild();
@@ -7964,7 +7980,7 @@ function drupal_parse_dependency($dependency) {
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
   // Core version is always optional: 8.x-2.x and 2.x is treated the same.
-  $p_core = '(?:' . preg_quote(DRUPAL_CORE_COMPATIBILITY) . '-)?';
+  $p_core = '(?:' . preg_quote(BACKDROP_CORE_COMPATIBILITY) . '-)?';
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
