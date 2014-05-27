@@ -122,24 +122,16 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
       $this->stubTest();
     }
     else {
+      // Run this test from web interface.
+      $this->drupalGet('admin/config/development/testing');
 
-      // Run twice so test_ids can be accumulated.
-      for ($i = 0; $i < 2; $i++) {
-        // Run this test from web interface.
-        $this->drupalGet('admin/config/development/testing');
+      $edit = array();
+      $edit['tests[SimpleTestFunctionalTest]'] = TRUE;
+      $this->drupalPost(NULL, $edit, t('Run tests'));
 
-        $edit = array();
-        $edit['tests[SimpleTestFunctionalTest]'] = TRUE;
-        $this->drupalPost(NULL, $edit, t('Run tests'));
-
-        // Parse results and confirm that they are correct.
-        $this->getTestResults();
-        $this->confirmStubTestResults();
-      }
-
-      // Regression test for #290316.
-      // Check that test_id is incrementing.
-      $this->assertTrue($this->test_ids[0] != $this->test_ids[1], 'Test ID is incrementing.');
+      // Parse results and confirm that they are correct.
+      $this->getTestResults();
+      $this->confirmStubTestResults();
     }
   }
 

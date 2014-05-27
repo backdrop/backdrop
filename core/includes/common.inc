@@ -2658,7 +2658,7 @@ function drupal_deliver_html_page($page_callback_result) {
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
         // Check for and return a fast 404 page if configured.
-        drupal_fast_404();
+        fast_404();
 
         // Keep old path for reference, and to allow forms to redirect to it.
         if (!isset($_GET['destination'])) {
@@ -2738,8 +2738,6 @@ function drupal_deliver_html_page($page_callback_result) {
  * react to the closing of the page by calling hook_exit().
  */
 function drupal_page_footer() {
-  global $user;
-
   module_invoke_all('exit');
 
   // Commit the user session, if needed.
@@ -2752,7 +2750,6 @@ function drupal_page_footer() {
     ob_flush();
   }
 
-  _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
   drupal_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
@@ -5309,10 +5306,10 @@ function drupal_json_output($var = NULL) {
  *   A salt based on information in settings.php, not in the database.
  */
 function drupal_get_hash_salt() {
-  global $drupal_hash_salt, $databases;
-  // If the $drupal_hash_salt variable is empty, a hash of the serialized
+  global $hash_salt, $databases;
+  // If the $hash_salt variable is empty, a hash of the serialized
   // database credentials is used as a fallback salt.
-  return empty($drupal_hash_salt) ? hash('sha256', serialize($databases)) : $drupal_hash_salt;
+  return empty($hash_salt) ? hash('sha256', serialize($databases)) : $hash_salt;
 }
 
 /**
@@ -5342,7 +5339,7 @@ function drupal_get_private_key() {
  *
  * @return string
  *   A 43-character URL-safe token for validation, based on the user session ID,
- *   the global $drupal_hash_salt variable from settings.php, and the
+ *   the global $hash_salt variable from settings.php, and the
  *   'drupal_private_key' configuration variable.
  */
 function drupal_get_token($value = '') {
@@ -5663,7 +5660,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
   }
 
   $searchdir[] = $directory;
-  if (file_exists("$config/$directory")) {
+  if ($config !== '.' && file_exists("$config/$directory")) {
     $searchdir[] = "$config/$directory";
   }
 
@@ -7889,18 +7886,17 @@ function drupal_flush_all_caches() {
   // Change query-strings on css/js files to enforce reload for all users.
   _drupal_flush_css_js();
 
-  registry_rebuild();
+  system_rebuild_module_data();
   drupal_clear_css_cache();
   drupal_clear_js_cache();
 
-  // Rebuild the theme data. Note that the module data is rebuilt above, as
-  // part of registry_rebuild().
+  // Rebuild the theme data.
   system_rebuild_theme_data();
   drupal_theme_rebuild();
 
   entity_info_cache_clear();
 
-  // @todo D8: Split cache flushing from rebuilding.
+  // @todo Split cache flushing from rebuilding.
   // @see http://drupal.org/node/996236
   if (module_exists('node')) {
     node_types_rebuild();

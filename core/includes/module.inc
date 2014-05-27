@@ -23,8 +23,12 @@ function module_load_all($bootstrap = FALSE) {
     foreach (module_list(TRUE, $bootstrap) as $module) {
       drupal_load('module', $module);
     }
-    // $has_run will be TRUE if $bootstrap is FALSE.
-    $has_run = !$bootstrap;
+    // When fully loading all modules, clear the registry to make sure it
+    // includes classes provided by non-bootstrap modules.
+    if (!$bootstrap) {
+      $has_run = TRUE;
+      drupal_static_reset('backdrop_autoload');
+    }
   }
   return $has_run;
 }
@@ -445,7 +449,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       module_implements_reset();
       _system_update_bootstrap_status();
       // Update the registry to include it.
-      registry_update();
+      drupal_static_reset('backdrop_autoload');
       // Refresh the schema to include it.
       drupal_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
@@ -461,7 +465,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         // Set the schema version to the number of the last update provided
         // by the module.
         $versions = drupal_get_schema_versions($module);
-        $version = $versions ? max($versions) : SCHEMA_INSTALLED;
+        $version = $versions ? end($versions) : SCHEMA_INSTALLED;
 
         // Copy any default configuration data to the system config directory/
         config_install_default_config($module);
@@ -469,8 +473,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         // If the module has no current updates, but has some that were
         // previously removed, set the version to the value of
         // hook_update_last_removed().
-        if ($last_removed = module_invoke($module, 'update_last_removed')) {
-          $version = max($version, $last_removed);
+        if (empty($versions) && ($last_removed = module_invoke($module, 'update_last_removed'))) {
+          $version = $last_removed;
         }
         drupal_set_installed_schema_version($module, $version);
         // Allow the module to perform install tasks.
@@ -570,7 +574,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     // so we can still call module hooks to get information.
     module_invoke_all('modules_disabled', $invoke_modules);
     // Update the registry to remove the newly-disabled module.
-    registry_update();
+    drupal_static_reset('backdrop_autoload');
     _system_update_bootstrap_status();
     // Update the theme registry to remove the newly-disabled module.
     drupal_theme_rebuild();
@@ -682,18 +686,14 @@ function module_implements($hook, $sort = FALSE) {
   // Use the advanced drupal_static() pattern, since this is called very often.
   static $drupal_static_fast;
   if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['implementations'] = &drupal_static(__FUNCTION__);
+    $drupal_static_fast['implementations'] = &drupal_static(__FUNCTION__, array());
   }
   $implementations = &$drupal_static_fast['implementations'];
 
   // Fetch implementations from cache.
-  if (empty($implementations)) {
-    $implementations = cache('bootstrap')->get('module_implements');
-    if ($implementations === FALSE) {
-      $implementations = array();
-    }
-    else {
-      $implementations = $implementations->data;
+  if (empty($implementations) && function_exists('cache')) {
+    if ($implementation_cache = cache('bootstrap')->get('module_implements')) {
+      $implementations = $implementation_cache->data;
     }
   }
 

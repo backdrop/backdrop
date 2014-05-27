@@ -248,6 +248,16 @@ function field_test_field_widget_form_alter(&$element, &$form_state, $context) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function field_test_autoload_info() {
+  return array(
+    'TestFieldEntity' => 'field_test.class.inc',
+    'TestEntityBundleController' => 'field_test.controller.inc',
+  );
+}
+
+/**
  * Implements hook_query_TAG_alter() for tag 'efq_table_prefixing_test'.
  *
  * @see EntityFieldQueryTestCase::testTablePrefixing()

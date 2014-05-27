@@ -19,12 +19,12 @@ class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
    */
   function testUpdateOrderingSingleModule() {
     $starting_updates = array(
-      'update_test_1' => 8000,
+      'update_test_1' => 1000,
     );
     $expected_updates = array(
-      'update_test_1_update_8000',
-      'update_test_1_update_8001',
-      'update_test_1_update_8002',
+      'update_test_1_update_1000',
+      'update_test_1_update_1001',
+      'update_test_1_update_1002',
     );
     $actual_updates = array_keys(update_resolve_dependencies($starting_updates));
     $this->assertEqual($expected_updates, $actual_updates, t('Updates within a single module run in the correct order.'));
@@ -35,14 +35,14 @@ class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
    */
   function testUpdateOrderingModuleInterdependency() {
     $starting_updates = array(
-      'update_test_2' => 8000,
-      'update_test_3' => 8000,
+      'update_test_2' => 1000,
+      'update_test_3' => 1000,
     );
     $update_order = array_keys(update_resolve_dependencies($starting_updates));
     // Make sure that each dependency is satisfied.
-    $first_dependency_satisfied = array_search('update_test_2_update_8000', $update_order) < array_search('update_test_3_update_8000', $update_order);
+    $first_dependency_satisfied = array_search('update_test_2_update_1000', $update_order) < array_search('update_test_3_update_1000', $update_order);
     $this->assertTrue($first_dependency_satisfied, t('The dependency of the second module on the first module is respected by the update function order.'));
-    $second_dependency_satisfied = array_search('update_test_3_update_8000', $update_order) < array_search('update_test_2_update_8001', $update_order);
+    $second_dependency_satisfied = array_search('update_test_3_update_1000', $update_order) < array_search('update_test_2_update_1001', $update_order);
     $this->assertTrue($second_dependency_satisfied, t('The dependency of the first module on the second module is respected by the update function order.'));
   }
 }
@@ -60,12 +60,12 @@ class UpdateDependencyMissingTestCase extends DrupalWebTestCase {
 
   function testMissingUpdate() {
     $starting_updates = array(
-      'update_test_2' => 8000,
+      'update_test_2' => 1000,
     );
     $update_graph = update_resolve_dependencies($starting_updates);
-    $this->assertTrue($update_graph['update_test_2_update_8000']['allowed'], t("The module's first update function is allowed to run, since it does not have any missing dependencies."));
-    $this->assertFalse($update_graph['update_test_2_update_8001']['allowed'], t("The module's second update function is not allowed to run, since it has a direct dependency on a missing update."));
-    $this->assertFalse($update_graph['update_test_2_update_8002']['allowed'], t("The module's third update function is not allowed to run, since it has an indirect dependency on a missing update."));
+    $this->assertTrue($update_graph['update_test_2_update_1000']['allowed'], t("The module's first update function is allowed to run, since it does not have any missing dependencies."));
+    $this->assertFalse($update_graph['update_test_2_update_1001']['allowed'], t("The module's second update function is not allowed to run, since it has a direct dependency on a missing update."));
+    $this->assertFalse($update_graph['update_test_2_update_1002']['allowed'], t("The module's third update function is not allowed to run, since it has an indirect dependency on a missing update."));
   }
 }
 
@@ -83,9 +83,85 @@ class UpdateDependencyHookInvocationTestCase extends DrupalWebTestCase {
    */
   function testHookUpdateDependencies() {
     $update_dependencies = update_retrieve_dependencies();
-    $this->assertTrue($update_dependencies['system'][8000]['update_test_1'] == 8000, t('An update function that has a dependency on two separate modules has the first dependency recorded correctly.'));
-    $this->assertTrue($update_dependencies['system'][8000]['update_test_2'] == 8001, t('An update function that has a dependency on two separate modules has the second dependency recorded correctly.'));
-    $this->assertTrue($update_dependencies['system'][8001]['update_test_1'] == 8002, t('An update function that depends on more than one update from the same module only has the dependency on the higher-numbered update function recorded.'));
+    $this->assertTrue($update_dependencies['system'][1000]['update_test_1'] == 1000, t('An update function that has a dependency on two separate modules has the first dependency recorded correctly.'));
+    $this->assertTrue($update_dependencies['system'][1000]['update_test_2'] == 1001, t('An update function that has a dependency on two separate modules has the second dependency recorded correctly.'));
+    $this->assertTrue($update_dependencies['system'][1001]['update_test_1'] == 1002, t('An update function that depends on more than one update from the same module only has the dependency on the higher-numbered update function recorded.'));
   }
 }
 
+
+/**
+ * Tests for ensuring updates from Drupal 7 execute properly.
+ */
+class UpdateDrupal7TestCase extends DrupalWebTestCase {
+  function setUp() {
+    parent::setUp('update_d7_test_1', 'update_d7_test_2');
+    require_once DRUPAL_ROOT . '/core/includes/update.inc';
+  }
+
+  /**
+   * Tests that updates will be executed in the correct order.
+   */
+  function testAvailableUpdates() {
+    // Check that update numbers are ordered correctly.
+    // 7xxx, then 0 - 6999.
+    $schema_versions = drupal_get_schema_versions('update_d7_test_1');
+    $expected_versions = array(
+      '7000', '7001', '7002',
+      '1000', '1001', '1002', '1003',
+    );
+    $this->assertIdentical($schema_versions, $expected_versions, 'Modules with Drupal 7 update numbers properly order updates.');
+
+    // No updates should be needed initially.
+    $list = update_get_update_list();
+    $this->assertIdentical($list, array(), 'No available updates after enabling D7 update modules on a fresh install.');
+
+    // And the current schema should be 1003.
+    $installed_schema = drupal_get_installed_schema_version('update_d7_test_1');
+    $this->assertIdentical($installed_schema, '1003', 'Newly installed module with D7 updates starts at Backdrop 1xxx schema number.');
+
+    // Updates starting in the 7xxx should finish the needed 7xxx updates, then
+    // then run from 1000.
+    drupal_set_installed_schema_version('update_d7_test_1', '7000');
+    $list = update_get_update_list();
+    $expected_list['pending_keys'] = array(
+      7001, 7002,
+      1000, 1001, 1002, 1003,
+    );
+    $expected_list['start'] = '7001';
+    $this->assertEqual(array_keys($list['update_d7_test_1']['pending']), $expected_list['pending_keys'], 'Updates starting from 7000 are in the expected order.');
+    $this->assertEqual($list['update_d7_test_1']['start'], $expected_list['start'], 'Updates will start at the right number.');
+
+    // If the last installed schema is 8xxx, start updates from the matching
+    // 1xxx update. e.g. update 8001 is followed by 1002. This logic exists only
+    // to ease HEAD-to-HEAD Backdrop updates during the Backdrop 1.x cycle, when
+    // updates were renamed from 8xxx to 1xxx. See update_get_update_list().
+    drupal_set_installed_schema_version('update_d7_test_1', '8001');
+    $list = update_get_update_list();
+    $expected_list['pending_keys'] = array(
+      1002, 1003,
+    );
+    $expected_list['start'] = '1002';
+    $this->assertEqual(array_keys($list['update_d7_test_1']['pending']), $expected_list['pending_keys'], 'Updates starting from 8001 are in the expected order.');
+    $this->assertEqual($list['update_d7_test_1']['start'], $expected_list['start'], 'Updates will start at the right number.');
+
+    // Check that update numbers are ordered correctly when the last update is
+    // a 7xxx update in hook_update_last_removed().
+    drupal_set_installed_schema_version('update_d7_test_2', '7002');
+    $list = update_get_update_list();
+    $expected_list['pending_keys'] = array(
+      1000, 1001, 1002,
+    );
+    $expected_list['start'] = '1000';
+    $this->assertEqual(array_keys($list['update_d7_test_2']['pending']), $expected_list['pending_keys'], 'Updates are in the expected order when the last removed schema is 7xxx.');
+    $this->assertEqual($list['update_d7_test_2']['start'], $expected_list['start'], 'Updates will start at the right number.');
+
+    // Check that updates are not allowed when the last installed version of
+    // a Drupal 7 module does not meet the required schema in
+    // hook_update_last_removed().
+    drupal_set_installed_schema_version('update_d7_test_2', '7001');
+    $list = update_get_update_list();
+    $this->assertFalse(isset($list['update_d7_test_2']['pending']), 'Updates are not allowed if a Drupal 7 required schema is not met.');
+    $this->assertTrue(!empty($list['update_d7_test_2']['warning']), 'Update warning provided when a Drupal 7 required schema is not met.');
+  }
+}

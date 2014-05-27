@@ -80,9 +80,14 @@ function contact_install() {
 }
 
 /**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
  * Convert contact module settings to use configuration files.
  */
-function contact_update_8000() {
+function contact_update_1000() {
   // Copy config file to site config folder.
   config_install_default_config('module', 'contact.settings');
   // Migrate variables if any.
@@ -96,3 +101,8 @@ function contact_update_8000() {
   variable_del('contact_threshold_limit');
   variable_del('contact_threshold_window');
 }
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

@@ -204,7 +204,7 @@ function locale_translate_add_language_set_batch($langcode) {
  *   See http://drupal.org/node/1191488.
  */
 function locale_translate_batch_import_files($langcode = NULL, $finish_feedback = FALSE) {
-  $directory = variable_get('locale_translate_file_directory', conf_path() . '/files/translations');
+  $directory = variable_get('locale_translate_file_directory', 'files/translations');
   $files = array();
   if (!empty($langcode)) {
     $langcodes = array($langcode);

@@ -99,12 +99,13 @@ function config_get_config_directory($type = 'active') {
     $path = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/config_' . $type;
   }
   elseif (!empty($config_directories[$type])) {
-    // Allow a configuration directory path to be outside of webroot.
-    if (empty($config_directories[$type]['absolute'])) {
-      $path = conf_path() . '/files/' . $config_directories[$type]['path'];
-    }
-    else {
-      $path = $config_directories[$type]['path'];
+    $path = $config_directories[$type];
+
+    // If the path starts with a slash or dot, assume a normal path. If just
+    // a directory name is provided, make it relative to the settings.php file.
+    $first_character = substr($path, 0);
+    if (!in_array($first_character, array('.', '/', '\\'))) {
+      $path = conf_path() . '/' . $path;
     }
   }
   else {

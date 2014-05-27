@@ -71,14 +71,14 @@ function update_check_incompatibility($name, $type = 'module') {
  * Performs extra steps required to bootstrap when using a Drupal 7 database.
  *
  * Users who still have a Drupal 7 database (and are in the process of
- * updating to Drupal 8) need extra help before a full bootstrap can be
+ * updating to Backdrop) need extra help before a full bootstrap can be
  * achieved. This function does the necessary preliminary work that allows
  * the bootstrap to be successful.
  *
  * No access check has been performed when this function is called, so no
  * irreversible changes to the database are made here.
  */
-function update_prepare_d8_bootstrap() {
+function update_prepare_bootstrap() {
   // Allow the database system to work even if the registry has not been
   // created yet.
   include_once DRUPAL_ROOT . '/core/includes/install.inc';
@@ -116,12 +116,12 @@ function update_prepare_d8_bootstrap() {
   // Bootstrap the database.
   drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
 
-  // If the site has not updated to Drupal 8 yet, check to make sure that it is
+  // If the site has not updated to Backdrop yet, check to make sure that it is
   // running an up-to-date version of Drupal 7 before proceeding. Note this has
   // to happen AFTER the database bootstraps because of
   // drupal_get_installed_schema_version().
   $system_schema = drupal_get_installed_schema_version('system');
-  if ($system_schema < 8000) {
+  if ($system_schema > 7000) {
     $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION;
     $requirements = array(
       'drupal 7 version' => array(
@@ -131,6 +131,8 @@ function update_prepare_d8_bootstrap() {
         'description' => $has_required_schema ? '' : 'Please update your Drupal 7 installation to the most recent version before attempting to upgrade to Drupal 8',
       ),
     );
+    update_extra_requirements($requirements);
+
     if ($has_required_schema) {
       // Bootstrap variables so we can update theme while preparing the update
       // process.
@@ -139,7 +141,7 @@ function update_prepare_d8_bootstrap() {
       // proper update functions.
       update_prepare_stored_includes();
       // Update the environment for the language bootstrap if needed.
-      update_prepare_d8_language();
+      update_prepare_language();
 
       // Change language column to langcode in url_alias.
       if (db_table_exists('url_alias') && db_field_exists('url_alias', 'language')) {
@@ -207,7 +209,7 @@ function update_prepare_stored_includes() {
 /**
  * Prepare Drupal 8 language changes for the bootstrap if needed.
  */
-function update_prepare_d8_language() {
+function update_prepare_language() {
   if (db_table_exists('languages')) {
     $languages = db_select('languages', 'l')
       ->fields('l')
@@ -250,7 +252,7 @@ function update_prepare_d8_language() {
 
     // Rename 'language' column to 'langcode'.
     require_once DRUPAL_ROOT . '/core/modules/language/language.install';
-    language_update_8000();
+    language_update_1000();
   }
 }
 
@@ -290,20 +292,17 @@ function update_module_add_to_system($modules = array()) {
 }
 
 /**
- * Perform Drupal 7.x to 8.x updates that are required for update.php
+ * Perform Drupal 7.x to Backdrop 1.x updates that are required for update.php
  * to function properly.
  *
- * This function runs when update.php is run the first time for 8.x,
+ * This function runs when update.php is run the first time for Backdrop 1.x,
  * even before updates are selected or performed. It is important
  * that if updates are not ultimately performed that no changes are
  * made which make it impossible to continue using the prior version.
  */
-function update_fix_d8_requirements() {
-  global $conf;
-
-  if (drupal_get_installed_schema_version('system') < 8000 && !variable_get('update_d8_requirements', FALSE)) {
-    // @todo: Make critical, first-run changes to the database here.
-    variable_set('update_d8_requirements', TRUE);
+function update_fix_requirements() {
+  if (drupal_get_installed_schema_version('system') > 7000 && !variable_get('update_backdrop_requirements', FALSE)) {
+    variable_set('update_backdrop_requirements', TRUE);
   }
 }
 
@@ -313,8 +312,8 @@ function update_fix_d8_requirements() {
 function update_module_enable(array $modules) {
   foreach ($modules as $module) {
     // Check for initial schema and install it. The schema version of a newly
-    // installed module is always 0. Using 8000 here would be inconsistent
-    // since $module_update_8000() may involve a schema change, and we want
+    // installed module is always 0. Using 1000 here would be inconsistent
+    // since $module_update_1000() may involve a schema change, and we want
     // to install the schema as it was before any updates were added.
     $function = $module . '_schema_0';
     if (function_exists($function)) {
@@ -576,18 +575,35 @@ function update_get_update_list() {
       // module_invoke returns NULL for nonexisting hooks, so if no updates
       // are removed, it will == 0.
       $last_removed = module_invoke($module, 'update_last_removed');
-      if ($schema_version < $last_removed) {
-        $ret[$module]['warning'] = '<em>' . $module . '</em> module can not be updated. Its schema version is ' . $schema_version . '. Updates up to and including ' . $last_removed . ' have been removed in this release. In order to update <em>' . $module . '</em> module, you will first <a href="http://drupal.org/upgrade">need to upgrade</a> to the last version in which these updates were available.';
+      // A last removed schema version of "7xxx" should consider "1xxx" updates
+      // to be after itself. We add 7000 to make an update 1000 be compared
+      // as if it were 8000.
+      $comparison_schema_version = $schema_version;
+      if ($last_removed >= 7000 && $last_removed < 9000 && $schema_version < 7000) {
+        $comparison_schema_version += 7000;
+      }
+      if ($comparison_schema_version < $last_removed) {
+        $ret[$module]['warning'] = '<em>' . $module . '</em> module can not be updated. Its schema version is ' . $schema_version . '. Updates up to and including ' . $last_removed . ' have been removed in this release. In order to update <em>' . $module . '</em> module, you will first <a href="http://backdropcms.org/upgrade">need to upgrade</a> to the last version in which these updates were available.';
         continue;
       }
 
-      $updates = drupal_map_assoc($updates);
-      foreach (array_keys($updates) as $update) {
-        if ($update > $schema_version) {
+      // Reduce schema versions by 7000 for legacy updates.
+      if ($schema_version >= 7000 && $schema_version < 9000) {
+        $schema_version -= 7000;
+      }
+
+      foreach ($updates as $update) {
+        // Reduce update versions by 7000 for legacy update comparisons. Note
+        // that the original update version is still queued for execution.
+        $compare_version = $update;
+        if ($update >= 7000 && $update < 9000) {
+          $compare_version -= 7000;
+        }
+        if ($compare_version > $schema_version) {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
           $description = str_replace(array("\n", '*', '/'), '', $func->getDocComment());
-          $ret[$module]['pending'][$update] = "$update - $description";
+          $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
           if (!isset($ret[$module]['start'])) {
             $ret[$module]['start'] = $update;
           }
@@ -706,13 +722,11 @@ function update_get_update_function_list($starting_updates) {
     $update_functions[$module] = array();
     $updates = drupal_get_schema_versions($module);
     if ($updates !== FALSE) {
-      $max_version = max($updates);
-      if ($version <= $max_version) {
-        foreach ($updates as $update) {
-          if ($update >= $version) {
-            $update_functions[$module][$update] = $module . '_update_' . $update;
-          }
-        }
+      $start_key = array_search($version, $updates);
+      $total_updates = count($updates);
+      for ($n = $start_key; $n < $total_updates; $n++) {
+        $update = $updates[$n];
+        $update_functions[$module][$update] = $module . '_update_' . $update;
       }
     }
   }
@@ -730,10 +744,10 @@ function update_get_update_function_list($starting_updates) {
  * requirement that the first update function needs to run before the second.
  * For example, consider this graph:
  *
- * system_update_8000 ---> system_update_8001 ---> system_update_8002
+ * system_update_1000 ---> system_update_1001 ---> system_update_1002
  *
- * Visually, this indicates that system_update_8000() must run before
- * system_update_8001(), which in turn must run before system_update_8002().
+ * Visually, this indicates that system_update_1000() must run before
+ * system_update_1001(), which in turn must run before system_update_1002().
  *
  * The function takes into account standard dependencies within each module, as
  * shown above (i.e., the fact that each module's updates must run in numerical
@@ -772,7 +786,7 @@ function update_build_dependency_graph($update_functions) {
     foreach ($functions as $number => $function) {
       // Add an edge to the directed graph representing the fact that each
       // update function in a given module must run after the update that
-      // numerically precedes it.
+      // precedes it based on the provided order.
       if ($previous_function) {
         $graph[$previous_function]['edges'][$function] = TRUE;
       }
@@ -880,15 +894,15 @@ function update_retrieve_dependencies() {
               // implementation of hook_update_dependencies() required this
               // ordering:
               //
-              // system_update_8001 ---> user_update_8000
+              // system_update_1001 ---> user_update_1000
               //
               // but another module's implementation of the hook required this
               // one:
               //
-              // system_update_8002 ---> user_update_8000
+              // system_update_1002 ---> user_update_1000
               //
-              // we record the second one, since system_update_8001() is always
-              // guaranteed to run before system_update_8002() anyway (within
+              // we record the second one, since system_update_1001() is always
+              // guaranteed to run before system_update_1002() anyway (within
               // an individual module, updates are always run in numerical
               // order).
               if (!isset($return[$module][$update][$module_dependency]) || $update_dependency > $return[$module][$update][$module_dependency]) {

@@ -402,8 +402,7 @@ abstract class DatabaseConnection extends PDO {
    * Set the list of prefixes used by this database connection.
    *
    * @param $prefix
-   *   The prefixes, in any of the multiple forms documented in
-   *   default.settings.php.
+   *   The prefixes, in any of the multiple forms documented in settings.php.
    */
   protected function setPrefix($prefix) {
     if (is_array($prefix)) {

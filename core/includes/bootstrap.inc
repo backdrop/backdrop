@@ -239,16 +239,6 @@ const CHECK_PLAIN = 0;
 const PASS_THROUGH = -1;
 
 /**
- * Signals that the registry lookup cache should be reset.
- */
-const REGISTRY_RESET_LOOKUP_CACHE = 1;
-
-/**
- * Signals that the registry lookup cache should be written to storage.
- */
-const REGISTRY_WRITE_LOOKUP_CACHE = 2;
-
-/**
  * Regular expression to match PHP function names.
  *
  * @see http://php.net/manual/en/language.functions.php
@@ -528,7 +518,7 @@ function timer_stop($name) {
  *
  * Returns the configuration path based on the site's hostname, port, and
  * pathname. Uses find_conf_path() to find the current configuration directory.
- * See default.settings.php for examples on how the URL is converted to a
+ * See sites/sites.php for examples on how the URL is converted to a
  * directory.
  *
  * @param bool $require_settings
@@ -543,7 +533,7 @@ function timer_stop($name) {
  * @return
  *   The path of the matching directory.
  *
- * @see default.settings.php
+ * @see settings.php
  */
 function conf_path($require_settings = TRUE, $reset = FALSE) {
   $conf = &drupal_static(__FUNCTION__, '');
@@ -564,6 +554,10 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
 /**
  * Finds the appropriate configuration directory for a given host and path.
  *
+ * This function is the heart of Backdrop's multisite functionality, determining
+ * which directory should be used based on the hostname. If not using multisite,
+ * the path returned will be a single period (indicating the current directory).
+ *
  * @param $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
@@ -571,34 +565,36 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  *   The part of the url following the hostname, including the leading slash.
  *
  * @return
- *   The path of the matching configuration directory.
+ *   The relative path of the matching configuration directory.
  *
  * @see conf_path()
  */
 function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
-  $confdir = 'sites';
-
+  $conf = '.';
   $sites = array();
-  if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/sites.php')) {
-    // This will overwrite $sites with the desired mappings.
-    include(DRUPAL_ROOT . '/' . $confdir . '/sites.php');
+
+  // This will overwrite $sites with any multisite mappings.
+  if (file_exists(DRUPAL_ROOT . '/sites/sites.php')) {
+    include DRUPAL_ROOT . '/sites/sites.php';
   }
 
-  $uri = explode('/', $script_name);
-  $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
-  for ($i = count($uri) - 1; $i > 0; $i--) {
-    for ($j = count($server); $j > 0; $j--) {
-      $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
-      if (isset($sites[$dir]) && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $sites[$dir])) {
-        $dir = $sites[$dir];
-      }
-      if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir . '/settings.php') || (!$require_settings && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir))) {
-        $conf = "$confdir/$dir";
-        return $conf;
+  if ($sites) {
+    $uri = explode('/', $script_name);
+    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
+    for ($i = count($uri) - 1; $i > 0; $i--) {
+      for ($j = count($server); $j > 0; $j--) {
+        $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
+        if (isset($sites[$dir]) && file_exists(DRUPAL_ROOT . '/sites/' . $sites[$dir])) {
+          $dir = $sites[$dir];
+        }
+        if (file_exists(DRUPAL_ROOT . '/sites/' . $dir . '/settings.php') || (!$require_settings && file_exists(DRUPAL_ROOT . '/sites/' . $dir))) {
+          $conf = './sites/' . $dir;
+          return $conf;
+        }
       }
     }
   }
-  $conf = "$confdir/default";
+
   return $conf;
 }
 
@@ -615,7 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
  * variable is sufficient, and it can therefore be called without passing in
  * any input. However, command line scripts running on a multisite installation
  * (or on any installation that has settings.php stored somewhere other than
- * the sites/default folder) need to pass in the URL of the site to allow
+ * the root folder) need to pass in the URL of the site to allow
  * Drupal to detect the correct location of the settings.php file. Passing in
  * the 'url' parameter is also required for functions like request_uri() to
  * return the expected values.
@@ -703,7 +699,7 @@ function drupal_environment_initialize() {
   error_reporting(E_STRICT | E_ALL | error_reporting());
 
   // Override PHP settings required for Drupal to work properly.
-  // sites/default/default.settings.php contains more runtime settings.
+  // settings.php contains more runtime settings.
   // The .htaccess file contains settings that cannot be changed at runtime.
 
   // Don't escape quotes when reading files from the database, disk, etc.
@@ -741,14 +737,29 @@ function drupal_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $drupal_hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
   $conf = array();
 
-  if (file_exists(DRUPAL_ROOT . '/' . conf_path() . '/settings.php')) {
-    include_once DRUPAL_ROOT . '/' . conf_path() . '/settings.php';
+  $conf_path = conf_path();
+  if (file_exists($conf_path . '/settings.php')) {
+    require_once $conf_path . '/settings.php';
   }
-  if (isset($conf['backdrop_drupal_compatibility'])) {
-    require_once DRUPAL_ROOT . '/core/includes/drupal.inc';
+  if (!empty($conf['backdrop_drupal_compatibility'])) {
+    require_once './core/includes/drupal.inc';
+  }
+
+  // Convert simplified database settings into the full databases array.
+  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
+    $database_parts = parse_url($database);
+    $databases['default']['default'] = array(
+      'driver' => $database_parts['scheme'],
+      'database' => substr($database_parts['path'], 1), // Remove leading slash.
+      'username' => isset($database_parts['user']) ? $database_parts['user'] : '',
+      'password' => isset($database_parts['pass']) ? $database_parts['pass'] : '',
+      'host' => $database_parts['host'],
+      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+    );
   }
 
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
@@ -2249,12 +2260,11 @@ function drupal_array_merge_deep_array($arrays) {
  *   An anonymous user entity object.
  */
 function drupal_anonymous_user() {
-  $user = new User(array(
-    'uid' => 0,
-    'name' => NULL,
+  // Because this is called early in the bootstrap (starting the session) it
+  // must not use the autoloader, so it's pulled in manually.
+  require_once DRUPAL_ROOT . '/core/includes/anonymous.inc';
+  $user = new AnonymousUser(array(
     'hostname' => ip_address(),
-    'roles' => array(DRUPAL_ANONYMOUS_RID => 'anonymous user'),
-    'cache' => 0,
   ));
   return $user;
 }
@@ -2452,6 +2462,14 @@ function _drupal_bootstrap_configuration() {
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
     install_goto('core/install.php');
   }
+
+  // Check that the config directory is not empty.
+  if (!empty($GLOBALS['config_directories']['active']) && !drupal_installation_attempted()) {
+    $directory = $GLOBALS['config_directories']['active'];
+    if (!is_file($directory . '/system.performance.json')) {
+      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+    }
+  }
 }
 
 /**
@@ -2549,8 +2567,7 @@ function _drupal_bootstrap_database() {
   // The database autoload routine comes first so that we can load the database
   // system without hitting the database. That is especially important during
   // the install or upgrade process.
-  spl_autoload_register('drupal_autoload_class');
-  spl_autoload_register('drupal_autoload_interface');
+  spl_autoload_register('backdrop_autoload');
 }
 
 /**
@@ -2602,7 +2619,7 @@ function drupal_get_bootstrap_phase() {
  *   HMAC and timestamp.
  */
 function drupal_valid_test_ua() {
-  global $drupal_hash_salt;
+  global $hash_salt;
   // No reason to reset this.
   static $test_prefix;
 
@@ -2616,7 +2633,7 @@ function drupal_valid_test_ua() {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Drupal variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $drupal_hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     // Since we are making a local request a 5 second time window is allowed,
     // and the HMAC must match.
@@ -2634,14 +2651,14 @@ function drupal_valid_test_ua() {
  * Generates a user agent string with a HMAC and timestamp for simpletest.
  */
 function drupal_generate_test_ua($prefix) {
-  global $drupal_hash_salt;
+  global $hash_salt;
   static $key;
 
   if (!isset($key)) {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Drupal variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $drupal_hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
   }
   // Generate a moderately secure HMAC based on the database credentials.
   $salt = uniqid('', TRUE);
@@ -2676,7 +2693,7 @@ function drupal_maintenance_theme() {
  * Paths to dynamically-generated content, such as image styles, should also be
  * accounted for in this function.
  */
-function drupal_fast_404() {
+function fast_404() {
   $exclude_paths = variable_get('404_fast_paths_exclude', FALSE);
   if ($exclude_paths && !preg_match($exclude_paths, $_GET['q'])) {
     $fast_paths = variable_get('404_fast_paths', FALSE);
@@ -3171,33 +3188,11 @@ function drupal_get_complete_schema($rebuild = FALSE) {
  * @} End of "addtogroup schemaapi".
  */
 
-
-/**
- * @addtogroup registry
- * @{
- */
-
-/**
- * Confirms that an interface is available.
- *
- * This function is rarely called directly. Instead, it is registered as an
- * spl_autoload()  handler, and PHP calls it for us when necessary.
- *
- * @param $interface
- *   The name of the interface to check or load.
- *
- * @return
- *   TRUE if the interface is currently available, FALSE otherwise.
- */
-function drupal_autoload_interface($interface) {
-  return _registry_check_code('interface', $interface);
-}
-
 /**
  * Confirms that a class is available.
  *
  * This function is rarely called directly. Instead, it is registered as an
- * spl_autoload()  handler, and PHP calls it for us when necessary.
+ * spl_autoload_function() handler, and PHP calls it for us when necessary.
  *
  * @param $class
  *   The name of the class to check or load.
@@ -3205,138 +3200,34 @@ function drupal_autoload_interface($interface) {
  * @return
  *   TRUE if the class is currently available, FALSE otherwise.
  */
-function drupal_autoload_class($class) {
-  return _registry_check_code('class', $class);
-}
+function backdrop_autoload($class) {
+  $class_registry = &drupal_static(__FUNCTION__, NULL);
 
-/**
- * Checks for a resource in the registry.
- *
- * @param $type
- *   The type of resource we are looking up, or one of the constants
- *   REGISTRY_RESET_LOOKUP_CACHE or REGISTRY_WRITE_LOOKUP_CACHE, which
- *   signal that we should reset or write the cache, respectively.
- * @param $name
- *   The name of the resource, or NULL if either of the REGISTRY_* constants
- *   is passed in.
- *
- * @return
- *   TRUE if the resource was found, FALSE if not.
- *   NULL if either of the REGISTRY_* constants is passed in as $type.
- */
-function _registry_check_code($type, $name = NULL) {
-  static $lookup_cache, $cache_update_needed;
-
-  if ($type == 'class' && class_exists($name) || $type == 'interface' && interface_exists($name)) {
-    return TRUE;
-  }
-
-  if (!isset($lookup_cache)) {
-    $lookup_cache = array();
-    if ($cache = cache('bootstrap')->get('lookup_cache')) {
-      $lookup_cache = $cache->data;
+  if (!isset($class_registry)) {
+    include_once DRUPAL_ROOT . '/core/includes/bootstrap.classes.inc';
+    $class_registry = backdrop_class_list();
+    // Loop through all modules to build the list of classes. We avoid
+    // module_invoke_all() because it uses array_merge_recursive(), which is an
+    // expensive O(n^2) operation. Instead we use module_implements() and merge
+    // the array manually, which is O(n).
+    foreach (module_implements('autoload_info') as $module) {
+      $module_classes = module_invoke($module, 'autoload_info');
+      $module_path = drupal_get_path('module', $module);
+      foreach ($module_classes as $module_class => $relative_path) {
+        $class_registry[$module_class] = DRUPAL_ROOT . '/' . $module_path . '/' . $relative_path;
+      }
     }
+    drupal_alter('autoload_info', $class_registry);
   }
 
-  // When we rebuild the registry, we need to reset this cache so
-  // we don't keep lookups for resources that changed during the rebuild.
-  if ($type == REGISTRY_RESET_LOOKUP_CACHE) {
-    $cache_update_needed = TRUE;
-    $lookup_cache = NULL;
-    return;
-  }
-
-  // Called from drupal_page_footer, we write to permanent storage if there
-  // changes to the lookup cache for this request.
-  if ($type == REGISTRY_WRITE_LOOKUP_CACHE) {
-    if ($cache_update_needed) {
-      cache('bootstrap')->set('lookup_cache', $lookup_cache);
-    }
-    return;
-  }
-
-  // $type is either 'interface' or 'class', so we only need the first letter to
-  // keep the cache key unique.
-  $cache_key = $type[0] . $name;
-  if (isset($lookup_cache[$cache_key])) {
-    if ($lookup_cache[$cache_key]) {
-      require_once DRUPAL_ROOT . '/' . $lookup_cache[$cache_key];
-    }
-    return (bool) $lookup_cache[$cache_key];
-  }
-
-  // This function may get called when the default database is not active, but
-  // there is no reason we'd ever want to not use the default database for
-  // this query.
-  $file = Database::getConnection('default', 'default')->query("SELECT filename FROM {registry} WHERE name = :name AND type = :type", array(
-      ':name' => $name,
-      ':type' => $type,
-    ))
-    ->fetchField();
-
-  // Flag that we've run a lookup query and need to update the cache.
-  $cache_update_needed = TRUE;
-
-  // Misses are valuable information worth caching, so cache even if
-  // $file is FALSE.
-  $lookup_cache[$cache_key] = $file;
-
-  if ($file) {
-    require_once DRUPAL_ROOT . '/' . $file;
+  if (isset($class_registry[$class])) {
+    require_once $class_registry[$class];
     return TRUE;
   }
   else {
     return FALSE;
   }
 }
-
-/**
- * Rescans all enabled modules and rebuilds the registry.
- *
- * Rescans all code in modules or includes directories, storing the location of
- * each interface or class in the database.
- */
-function registry_rebuild() {
-  system_rebuild_module_data();
-  registry_update();
-}
-
-/**
- * Updates the registry based on the latest files listed in the database.
- *
- * This function should be used when system_rebuild_module_data() does not need
- * to be called, because it is already known that the list of files in the
- * {system} table matches those in the file system.
- *
- * @return
- *   TRUE if the registry was rebuilt, FALSE if another thread was rebuilding
- *   in parallel and the current thread just waited for completion.
- *
- * @see registry_rebuild()
- */
-function registry_update() {
-  // install_system_module() calls module_enable() which calls into this
-  // function during initial system installation, so the lock system is neither
-  // loaded nor does its storage exist yet.
-  $in_installer = drupal_installation_attempted();
-  if (!$in_installer && !lock_acquire(__FUNCTION__)) {
-    // Another request got the lock, wait for it to finish.
-    lock_wait(__FUNCTION__);
-    return FALSE;
-  }
-
-  require_once DRUPAL_ROOT . '/core/includes/registry.inc';
-  _registry_update();
-
-  if (!$in_installer) {
-    lock_release(__FUNCTION__);
-  }
-  return TRUE;
-}
-
-/**
- * @} End of "addtogroup registry".
- */
 
 /**
  * Provides central static variable storage.

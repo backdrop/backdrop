@@ -32,14 +32,14 @@ function views_schema() {
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
 /**
  * Convert database-based views to configuration files.
  */
-function views_update_8000() {
+function views_update_1000() {
   // Install default views.
   config_install_default_config('views', 'views.view.comments_recent');
   config_install_default_config('views', 'views.view.frontpage');
@@ -49,7 +49,7 @@ function views_update_8000() {
 /**
  * Convert available database image styles to configuration files.
  */
-function views_update_8001() {
+function views_update_1001() {
   if (db_table_exists('views_view')) {
     $views = db_query("SELECT * FROM {views_view}");
     foreach ($views as $view) {
@@ -79,11 +79,11 @@ function views_update_8001() {
 /**
  * Drop Views tables that were converted to configuration files.
  *
- * This update is separate from views_update_8001 so that other modules may read
+ * This update is separate from views_update_1001 so that other modules may read
  * the views_view and views_display tables before they are dropped using
  * hook_update_dependencies() to come between these two updates.
  */
-function views_update_8002() {
+function views_update_1002() {
   if (db_table_exists('views_view')) {
     db_drop_table('views_view');
     db_drop_table('views_display');
@@ -93,7 +93,7 @@ function views_update_8002() {
 /**
  * Update Views variables to use configuration files.
  */
-function views_update_8003() {
+function views_update_1003() {
   $update_variables = array(
     'views_no_javascript' => FALSE,
     'views_exposed_filter_any_label' => 'new_any',
@@ -143,6 +143,6 @@ function views_update_8003() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

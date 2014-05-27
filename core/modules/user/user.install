@@ -298,14 +298,14 @@ function user_install() {
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
 /**
  * The 'Member for' extra field has moved one level up in the array.
  */
-function user_update_8000() {
+function user_update_1000() {
   $settings = field_bundle_settings('user', 'user');
   if (isset($settings['extra_fields']['display']['summary'])) {
     $settings['extra_fields']['display']['member_for'] = $settings['extra_fields']['display']['summary'];
@@ -317,7 +317,7 @@ function user_update_8000() {
 /**
  * Grant "administer account settings" to roles with "administer users."
  */
-function user_update_8001() {
+function user_update_1001() {
   $rids = db_query("SELECT rid FROM {role_permission} WHERE permission = :perm", array(':perm' => 'administer users'))->fetchCol();
   // None found.
   if (empty($rids)) {
@@ -335,5 +335,5 @@ function user_update_8001() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
+ * @} End of "addtogroup updates-7.x-to-1.x"
  */

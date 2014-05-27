@@ -3,5 +3,4 @@ description = Provides a framework for unit and functional testing.
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
-files[] = drupal_web_test_case.php
 configure = admin/config/development/testing/settings

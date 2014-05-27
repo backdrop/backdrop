@@ -225,7 +225,7 @@ interface DrupalStreamWrapperInterface extends StreamWrapperInterface {
  *
  * This class provides a complete stream wrapper implementation. URIs such as
  * "public://example.txt" are expanded to a normal filesystem path such as
- * "sites/default/files/example.txt" and then PHP filesystem functions are
+ * "sites/example.com/files/example.txt" and then PHP filesystem functions are
  * invoked.
  *
  * DrupalLocalStreamWrapper implementations need to implement at least the
@@ -768,7 +768,7 @@ class DrupalPublicStreamWrapper extends DrupalLocalStreamWrapper {
    * Implements abstract public function getDirectoryPath()
    */
   public function getDirectoryPath() {
-    return variable_get('file_public_path', conf_path() . '/files');
+    return variable_get('file_public_path', 'files');
   }
 
   /**

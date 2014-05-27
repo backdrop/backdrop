@@ -278,6 +278,23 @@ function views_ui_custom_theme() {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function views_ui_autoload_info() {
+  return array(
+    'ViewsWizardInterface' => 'wizards/views_ui_base_views_wizard.php',
+    'ViewsWizardException' => 'wizards/views_ui_base_views_wizard.php',
+    'ViewsUiBaseViewsWizard' => 'wizards/views_ui_base_views_wizard.php',
+    'ViewsUiCommentViewsWizard' => 'wizards/views_ui_comment_views_wizard.php',
+    'ViewsUiFileManagedViewsWizard' => 'wizards/views_ui_file_managed_views_wizard.php',
+    'ViewsUiNodeRevisionViewsWizard' => 'wizards/views_ui_node_revision_views_wizard.php',
+    'ViewsUiNodeViewsWizard' => 'wizards/views_ui_node_views_wizard.php',
+    'ViewsUiTaxonomyTermViewsWizard' => 'wizards/views_ui_taxonomy_term_views_wizard.php',
+    'ViewsUiUsersViewsWizard' => 'wizards/views_ui_users_views_wizard.php',
+  );
+}
+
+/**
  * Page title callback for the Edit View page.
  */
 function views_ui_edit_page_title($view) {
@@ -304,7 +321,6 @@ function views_ui_edit_page_title($view) {
 function views_ui_cache_load($name) {
   global $user;
 
-  views_include('view');
   $view = tempstore_get('views.view', $name);
   $original_view = views_get_view($name);
 

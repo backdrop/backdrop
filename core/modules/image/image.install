@@ -108,21 +108,21 @@ function image_requirements($phase) {
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
 /**
  * Provide default image styles for the Image module.
  */
-function image_update_8000() {
+function image_update_1000() {
   config_install_default_config('image');
 }
 
 /**
  * Convert available database image styles to configuration files.
  */
-function image_update_8001() {
+function image_update_1001() {
   if (db_table_exists('image_styles')) {
     $styles = db_query("SELECT * FROM {image_styles}");
     $style = NULL;
@@ -151,11 +151,11 @@ function image_update_8001() {
 /**
  * Drop image tables that were converted to configuration files.
  *
- * This update is separate from image_update_8001 so that other modules may read
+ * This update is separate from image_update_1001 so that other modules may read
  * the image style tables before they are dropped using
  * hook_update_dependencies() to come between these two updates.
  */
-function image_update_8002() {
+function image_update_1002() {
   if (db_table_exists('image_styles')) {
     db_drop_table('image_styles');
     db_drop_table('image_effects');
@@ -165,7 +165,7 @@ function image_update_8002() {
 /**
  * Add labels to all available styles.
  */
-function image_update_8003() {
+function image_update_1003() {
   $names = config_get_names_with_prefix('image.styles.');
   foreach ($names as $config_file) {
     $config = config($config_file);
@@ -179,6 +179,6 @@ function image_update_8003() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

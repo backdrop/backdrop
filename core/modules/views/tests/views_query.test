@@ -362,8 +362,6 @@ abstract class ViewsSqlTest extends ViewsTestCase {
    * @return view
    */
   protected function getBasicView() {
-    views_include('view');
-
     // Create the basic view.
     $view = new view();
     $view->name = 'test_view';
@@ -419,7 +417,6 @@ abstract class ViewsSqlTest extends ViewsTestCase {
    * @return view
    */
   protected function getBasicPageView() {
-    views_include('view');
     $view = $this->getBasicView();
 
     // In order to test exposed filters, we have to disable

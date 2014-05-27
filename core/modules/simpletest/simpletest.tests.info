@@ -1018,18 +1018,6 @@ description = Tests that path_save() exposes the previous alias value.
 group = Path API
 file = tests/path.test
 
-[RegistryParseFilesTestCase]
-name = Registry parse files test
-description = Read two a simple files from disc, and check that their resources are saved to the database.
-group = System
-file = tests/registry.test
-
-[RegistryParseFileTestCase]
-name = Registry parse file test
-description = Parse a simple file and check that its resources are saved to the database.
-group = System
-file = tests/registry.test
-
 [SchemaTestCase]
 name = Schema API
 description = Tests table creation and modification via the schema API.
@@ -1129,6 +1117,12 @@ file = tests/update.test
 [UpdateDependencyHookInvocationTestCase]
 name = Update dependency hook invocation
 description = Test that the hook invocation for determining update dependencies works correctly.
+group = Update API
+file = tests/update.test
+
+[UpdateDrupal7TestCase]
+name = Update from Drupal 7 hook order
+description = Test that the 7xxx updates are run in proper order before 1xxx updates.
 group = Update API
 file = tests/update.test
 

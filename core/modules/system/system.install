@@ -221,8 +221,9 @@ function system_requirements($phase) {
 
   // Test settings.php file writability
   if ($phase == 'runtime') {
-    $conf_dir = drupal_verify_install_file(conf_path(), FILE_NOT_WRITABLE, 'dir');
-    $conf_file = drupal_verify_install_file(conf_path() . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
+    $conf_path = DRUPAL_ROOT . ltrim('.', conf_path());
+    $conf_dir = drupal_verify_install_file($conf_path, FILE_NOT_WRITABLE, 'dir');
+    $conf_file = drupal_verify_install_file($conf_path . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
     if (!$conf_dir || !$conf_file) {
       $requirements['settings.php'] = array(
         'value' => $t('Not protected'),
@@ -230,10 +231,13 @@ function system_requirements($phase) {
         'description' => '',
       );
       if (!$conf_dir) {
-        $requirements['settings.php']['description'] .= $t('The directory %file is not protected from modifications and poses a security risk. You must change the directory\'s permissions to be non-writable. ', array('%file' => conf_path()));
+        $requirements['settings.php']['description'] .= $t('The directory %file is not protected from modifications and poses a security risk. You must change the directory\'s permissions to be non-writable. ', array('%file' => $conf_path));
       }
       if (!$conf_file) {
-        $requirements['settings.php']['description'] .= $t('The file %file is not protected from modifications and poses a security risk. You must change the file\'s permissions to be non-writable.', array('%file' => conf_path() . '/settings.php'));
+        $requirements['settings.php']['description'] .= $t('The file %file is not protected from modifications and poses a security risk. You must change the file\'s permissions to be non-writable.', array('%file' => $conf_path . '/settings.php'));
+      }
+      if ($requirements['settings.php']['description']) {
+        $requirements['settings.php']['description'] .= ' ' . $t('If unsure how to set these permissions, see the <a href="!url">online handbook</a>.', array('!url' => 'http://backdropcms.org/guide/installation'));
       }
     }
     else {
@@ -251,7 +255,7 @@ function system_requirements($phase) {
     file_ensure_htaccess();
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => variable_get('file_public_path', conf_path() . '/files'),
+      'directory' => variable_get('file_public_path', 'files'),
     );
     if ($private_files_directory = variable_get('file_private_path')) {
       $htaccess_files['private://.htaccess'] = array(
@@ -320,13 +324,8 @@ function system_requirements($phase) {
   }
 
   // Test files directories.
-  // If we are installing Drupal, the settings.php file might not exist yet in
-  // the intended conf_path() directory, so don't require it. The conf_path()
-  // cache must also be reset in this case.
-  $require_settings = ($phase != 'install');
-  $reset_cache = !$require_settings;
   $directories = array(
-    variable_get('file_public_path', conf_path($require_settings, $reset_cache) . '/files'),
+    variable_get('file_public_path', 'files'),
     // By default no private files directory is configured. For private files
     // to be secure the admin needs to provide a path outside the webroot.
     variable_get('file_private_path', FALSE),
@@ -373,7 +372,12 @@ function system_requirements($phase) {
       elseif ($phase == 'install') {
         // For the installer UI, we need different wording. 'value' will
         // be treated as version, so provide none there.
-        $description = $error . $t('An automated attempt to create this directory failed, possibly due to a permissions problem. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see INSTALL.txt or the <a href="@handbook_url">online handbook</a>.', array('@handbook_url' => 'http://drupal.org/server-permissions'));
+        if ($is_directory && !$is_writable) {
+          $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server. If you are unsure how to do this, please see the <a href="@handbook_url">online handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/installation'));
+        }
+        else {
+          $description = $error . ' ' . $t('An automated attempt to create this directory failed. To proceed with the installation, either create the directory and modify its permissions to make it writable or adjust the permissions on the parent directory to allow the installer to create it automatically. If you are unsure how to do this, see the <a href="@handbook_url">online handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/installation'));
+        }
         $requirements['file system']['value'] = '';
       }
       if (!empty($description)) {
@@ -403,8 +407,9 @@ function system_requirements($phase) {
     foreach (module_list() as $module) {
       $updates = drupal_get_schema_versions($module);
       if ($updates !== FALSE) {
-        $default = drupal_get_installed_schema_version($module);
-        if (max($updates) > $default) {
+        $current_schema = drupal_get_installed_schema_version($module);
+        $latest_schema = end($updates);
+        if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
           $requirements['update']['value'] = $t('Out of date');
           $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
@@ -1338,68 +1343,6 @@ function system_schema() {
     ),
   );
 
-  $schema['registry'] = array(
-    'description' => "Each record is a function, class, or interface name and the file it is in.",
-    'fields' => array(
-      'name'   => array(
-        'description' => 'The name of the function, class, or interface.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'type'   => array(
-        'description' => 'Either function or class or interface.',
-        'type' => 'varchar',
-        'length' => 9,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'filename'   => array(
-        'description' => 'Name of the file.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'module' => array(
-        'description' => 'Name of the module the file belongs to.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => ''
-      ),
-      'weight' => array(
-        'description' => "The order in which this module's hooks should be invoked relative to other modules. Equal-weighted modules are ordered by name.",
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('name', 'type'),
-    'indexes' => array(
-      'hook' => array('type', 'weight', 'module'),
-    ),
-  );
-
-  $schema['registry_file'] = array(
-    'description' => "Files parsed to build the registry.",
-    'fields' => array(
-      'filename'   => array(
-        'description' => 'Path to the file.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'hash'  => array(
-        'description' => "sha-256 hash of the file's contents when last parsed.",
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('filename'),
-  );
-
   $schema['semaphore'] = array(
     'description' => 'Table for holding semaphores, locks, flags, etc. that cannot be stored as Drupal variables since they must not be cached.',
     'fields' => array(
@@ -1684,22 +1627,22 @@ function system_update_last_removed() {
 }
 
 /**
- * @defgroup updates-7.x-to-8.x Updates from 7.x to 8.x
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
  * @{
- * Update functions from 7.x to 8.x.
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
  */
 
 /**
  * Enable entity module.
  */
-function system_update_8000() {
+function system_update_1000() {
   update_module_enable(array('entity'));
 }
 
 /**
  * Move from the Garland theme.
  */
-function system_update_8001() {
+function system_update_1001() {
   $themes = array('theme_default', 'maintenance_theme', 'admin_theme');
   foreach ($themes as $theme) {
     if (variable_get($theme) == 'garland') {
@@ -1720,7 +1663,7 @@ function system_update_8001() {
  *
  * @see http://drupal.org/node/1181776
  */
-function system_update_8002() {
+function system_update_1002() {
   $theme = variable_get('theme_default');
   if (!isset($theme)) {
     variable_set('theme_default', 'bartik');
@@ -1730,7 +1673,7 @@ function system_update_8002() {
 /**
  * Convert performance module settings to use configuration files.
  */
-function system_update_8003() {
+function system_update_1003() {
   config_install_default_config('system', 'system.performance');
   $config = config('system.performance');
   $config->set('cache', variable_get('cache', 0));
@@ -1745,7 +1688,7 @@ function system_update_8003() {
 /**
  * Create the "state" table for the state storage system.
  */
-function system_update_8004() {
+function system_update_1004() {
   if (!db_table_exists('state')) {
     $schema = array(
       'description' => 'Stores environment-specific state values.',
@@ -1773,7 +1716,7 @@ function system_update_8004() {
 /**
  * Convert basic system variables to the state system.
  */
-function system_update_8005() {
+function system_update_1005() {
   $variables = array(
     'install_time' => REQUEST_TIME,
     'install_task' => 'done',
@@ -1791,7 +1734,7 @@ function system_update_8005() {
 /**
  * Delete unneeded actions for manually saving comments and nodes.
  */
-function system_update_8006() {
+function system_update_1006() {
   db_delete('actions')
     ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
     ->execute();
@@ -1800,7 +1743,7 @@ function system_update_8006() {
 /**
  * Create the tempstore table and remove the cache_form table.
  */
-function system_update_8007() {
+function system_update_1007() {
   $schema = array(
     'description' => 'Generic temporary key/value storage table with an expiration.',
     'fields' => array(
@@ -1849,7 +1792,7 @@ function system_update_8007() {
 /**
  * Convert the 'filesize' column in {file_managed} to a bigint.
  */
-function system_update_8008() {
+function system_update_1008() {
   $spec = array(
     'description' => 'The size of the file in bytes.',
     'type' => 'int',
@@ -1864,7 +1807,7 @@ function system_update_8008() {
 /**
  * Enable Admin Menu module.
  */
-function system_update_8009() {
+function system_update_1009() {
   update_module_enable(array('admin_menu'));
 
   // Install default config.
@@ -1879,6 +1822,35 @@ function system_update_8009() {
 }
 
 /**
- * @} End of "defgroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * Remove the registry and registry_file tables.
+ */
+function system_update_1010() {
+  if (db_table_exists('registry')) {
+    db_drop_table('registry');
+  }
+  if (db_table_exists('registry_file')) {
+    db_drop_table('registry_file');
+  }
+}
+
+/**
+ * Specify the files directory manually if needed.
+ */
+function system_update_1011() {
+  $file_path = variable_get('file_public_path', NULL);
+  if (is_null($file_path)) {
+    $conf_path = conf_path();
+    if ($conf_path != '.') {
+      $conf_path = str_replace('./', '', $conf_path);
+      variable_set('file_public_path', $conf_path . '/files');
+    }
+    else {
+      variable_set('file_public_path', 'sites/default/files');
+    }
+  }
+}
+
+/**
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

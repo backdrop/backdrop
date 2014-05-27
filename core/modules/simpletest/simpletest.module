@@ -70,6 +70,17 @@ function simpletest_theme() {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function simpletest_autoload_info() {
+  return array(
+    'DrupalTestCase' => 'drupal_web_test_case.php',
+    'DrupalUnitTestCase' => 'drupal_web_test_case.php',
+    'DrupalWebTestCase' => 'drupal_web_test_case.php',
+  );
+}
+
+/**
  * Implements hook_js_alter().
  */
 function simpletest_js_alter(&$javascript) {
@@ -104,9 +115,7 @@ function _simpletest_format_summary_line($summary) {
  *   drupal being the default.
  */
 function simpletest_run_tests($test_list, $reporter = 'drupal') {
-  $test_id = db_insert('simpletest_test_id')
-    ->useDefaults(array('test_id'))
-    ->execute();
+  $test_id = db_query("SELECT MAX(test_id) FROM {simpletest_prefix}")->fetchField() + 1;
 
   // Clear out the previous verbose files.
   file_unmanaged_delete_recursive('public://simpletest/verbose');
@@ -219,7 +228,7 @@ function _simpletest_batch_finished($success, $results, $operations, $elapsed) {
  *   that ran.
  */
 function simpletest_last_test_get($test_id) {
-  $last_prefix = db_query_range('SELECT last_prefix FROM {simpletest_test_id} WHERE test_id = :test_id', 0, 1, array(':test_id' => $test_id))->fetchField();
+  $last_prefix = db_query_range('SELECT prefix FROM {simpletest_prefix} WHERE test_id = :test_id', 0, 1, array(':test_id' => $test_id))->fetchField();
   $last_test_class = db_query_range('SELECT test_class FROM {simpletest} WHERE test_id = :test_id ORDER BY message_id DESC', 0, 1, array(':test_id' => $test_id))->fetchField();
   return array($last_prefix, $last_test_class);
 }
@@ -415,7 +424,6 @@ function simpletest_clean_environment() {
   }
 
   // Detect test classes that have been added, renamed or deleted.
-  registry_rebuild();
   cache()->delete('simpletest');
 }
 
@@ -428,7 +436,7 @@ function simpletest_clean_database() {
   $count = 0;
   foreach (array_diff_key($tables, $schema) as $table) {
     // Strip the prefix and skip tables without digits following "simpletest",
-    // e.g. {simpletest_test_id}.
+    // e.g. {simpletest_prefix}.
     if (preg_match('/simpletest\d+.*/', $table, $matches)) {
       db_drop_table($matches[0]);
       $count++;
@@ -478,21 +486,21 @@ function simpletest_clean_temporary_directories() {
 function simpletest_clean_results_table($test_id = NULL) {
   if (variable_get('simpletest_clear_results', TRUE)) {
     if ($test_id) {
-      $count = db_query('SELECT COUNT(test_id) FROM {simpletest_test_id} WHERE test_id = :test_id', array(':test_id' => $test_id))->fetchField();
+      $count = db_query('SELECT COUNT(test_id) FROM {simpletest_prefix} WHERE test_id = :test_id', array(':test_id' => $test_id))->fetchField();
 
       db_delete('simpletest')
         ->condition('test_id', $test_id)
         ->execute();
-      db_delete('simpletest_test_id')
+      db_delete('simpletest_prefix')
         ->condition('test_id', $test_id)
         ->execute();
     }
     else {
-      $count = db_query('SELECT COUNT(test_id) FROM {simpletest_test_id}')->fetchField();
+      $count = db_query('SELECT COUNT(test_id) FROM {simpletest_prefix}')->fetchField();
 
       // Clear test results.
       db_delete('simpletest')->execute();
-      db_delete('simpletest_test_id')->execute();
+      db_delete('simpletest_prefix')->execute();
     }
 
     return $count;
