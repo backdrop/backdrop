@@ -46,7 +46,11 @@ function template_preprocess_views_view(&$vars) {
 
   $view = $vars['view'];
 
-  $vars['rows']       = (!empty($view->result) || $view->style_plugin->even_empty()) ? $view->style_plugin->render($view->result) : '';
+  $vars['rows'] = (!empty($view->result) || $view->style_plugin->even_empty()) ? $view->style_plugin->render($view->result) : '';
+  // Force a render array so CSS/JS can be added.
+  if (!is_array($vars['rows'])) {
+    $vars['rows'] = array('#markup' => $vars['rows']);
+  }
 
   $vars['css_name']   = drupal_clean_css_identifier($view->name);
   $vars['name']       = $view->name;
@@ -67,13 +71,14 @@ function template_preprocess_views_view(&$vars) {
     $vars['classes_array'][] = $vars['css_class'];
   }
 
-  $empty = empty($vars['rows']);
+  // Render the rows render array to check for contents.
+  $rows = $vars['rows'];
+  $rows = drupal_render($rows);
+  $empty = empty($rows);
 
   $vars['header'] = $view->display_handler->render_area('header', $empty);
   $vars['footer'] = $view->display_handler->render_area('footer', $empty);
-  if ($empty) {
-    $vars['empty'] = $view->display_handler->render_area('empty', $empty);
-  }
+  $vars['empty'] = $empty ? $view->display_handler->renderArea('empty', $empty) : FALSE;
 
   $vars['exposed']    = !empty($view->exposed_widgets) ? $view->exposed_widgets : '';
   $vars['more']       = $view->display_handler->render_more_link();
@@ -139,14 +144,13 @@ function template_preprocess_views_view(&$vars) {
         ),
       ),
     );
-
-    drupal_add_js($settings, 'setting');
-    views_add_js('ajax_view');
+    $view->element['#attached']['js'][] = array('type' => 'setting', 'data' => $settings);
+    $view->element['#attached']['library'][] = array('views', 'views.ajax');
   }
 
   // If form fields were found in the View, reformat the View output as a form.
   if (views_view_has_form_elements($view)) {
-    $output = !empty($vars['rows']) ? $vars['rows'] : $vars['empty'];
+    $output = !empty($rows) ? $rows : $vars['empty'];
     $form = drupal_get_form(views_form_id($view), $view, $output);
     // The form is requesting that all non-essential views elements be hidden,
     // usually because the rendered step is not a view result.
@@ -160,18 +164,6 @@ function template_preprocess_views_view(&$vars) {
     }
     $vars['rows'] = $form;
   }
-}
-
-/**
- * Process function to render certain elements into the view.
- */
-function template_process_views_view(&$vars) {
-  if (is_array($vars['rows'])) {
-    $vars['rows'] = drupal_render($vars['rows']);
-  }
-
-  // Flatten the classes to a string for the template file.
-  $vars['classes'] = implode(' ', $vars['classes_array']);
 }
 
 /**
@@ -644,7 +636,7 @@ function template_preprocess_views_view_table(&$vars) {
 
 
   if (!empty($options['sticky'])) {
-    drupal_add_js('core/misc/tableheader.js');
+    $vars['view']->element['#attached']['library'][] = array('system', 'drupal.tableheader');
     $vars['classes_array'][] = "sticky-enabled";
   }
   $vars['classes_array'][] = 'cols-'. count($vars['header']);
