@@ -2,10 +2,10 @@
  * @file
  * Admin styles for the Database Logging module.
  */
-
-.form-item-type,
-.form-item-severity {
+.dblog-filter-form .form-item-type,
+.dblog-filter-form .form-item-severity {
   float: left; /* LTR */
+  margin: .1em .9em .1em .1em; /* LTR */
   padding-right: .8em; /* LTR */
   margin: 0.1em;
   /**
@@ -15,50 +15,60 @@
    */
   width: 15em;
 }
-#dblog-filter-form .form-type-select select {
+[dir="rtl"] .dblog-filter-form .form-item-type,
+[dir="rtl"] .dblog-filter-form .form-item-severity {
+  margin: .1em .1em .1em .9em;
+  float: right;
+  padding-right: 0;
+  padding-left: .8em;
+}
+.dblog-filter-form .form-type-select select {
   width: 100%;
 }
-#dblog-filter-form .form-actions {
-  float: left;
-  padding: 3ex 0 0 1em;
+.dblog-filter-form .form-actions {
+  float: left; /* LTR */
+  padding: 3ex 0 0 1em; /* LTR */
 }
-
-tr.dblog-user {
+[dir="rtl"] .dblog-filter-form .form-actions {
+  float: right;
+  padding: 3ex 1em 0 0;
+}
+.dblog-user {
   background: #ffd;
 }
-tr.dblog-user .active {
+.dblog-user .active {
   background: #eed;
 }
-tr.dblog-content {
+.dblog-content {
   background: #ddf;
 }
-tr.dblog-content .active {
+.dblog-content .active {
   background: #cce;
 }
-tr.dblog-page-not-found,
-tr.dblog-access-denied {
+.dblog-page-not-found,
+.dblog-access-denied {
   background: #dfd;
 }
-tr.dblog-page-not-found .active,
-tr.dblog-access-denied .active {
+.dblog-page-not-found .active,
+.dblog-access-denied .active {
   background: #cec;
 }
-tr.dblog-error {
+.dblog-error {
   background: #ffc9c9;
 }
-tr.dblog-error .active {
+.dblog-error .active {
   background: #eeb9b9;
 }
-table#admin-dblog td.icon {
+.admin-dblog .icon {
   background: no-repeat center;
   width: 16px;
 }
-table#admin-dblog tr.dblog-warning td.icon {
+.admin-dblog .dblog-warning .icon {
   background-image: url(../../misc/message-16-warning.png);
 }
-table#admin-dblog tr.dblog-error td.icon,
-table#admin-dblog tr.dblog-critical td.icon,
-table#admin-dblog tr.dblog-alert td.icon,
-table#admin-dblog tr.dblog-emerg td.icon {
+.admin-dblog .dblog-error .icon,
+.admin-dblog .dblog-critical .icon,
+.admin-dblog .dblog-alert .icon,
+.admin-dblog .dblog-emerg .icon {
   background-image: url(../../misc/message-16-error.png);
 }
