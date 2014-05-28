@@ -5,4 +5,3 @@ version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = node
 configure = admin/content/book/settings
-stylesheets[all][] = book.theme.css
