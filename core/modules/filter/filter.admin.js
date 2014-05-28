@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Attaches administration-specific behavior for the Filter module.
+ */
+
 (function ($) {
 
 Drupal.behaviors.filterStatus = {

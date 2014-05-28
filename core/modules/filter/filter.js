@@ -1,7 +1,12 @@
+/**
+ * @file
+ * Attaches behavior for the Filter module.
+ */
+
 (function ($) {
 
 /**
- * Automatically display the guidelines of the selected text format.
+ * Displays the guidelines of the selected text format automatically.
  */
 Drupal.behaviors.filterGuidelines = {
   attach: function (context) {
