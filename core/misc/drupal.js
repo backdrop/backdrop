@@ -266,8 +266,9 @@ Drupal.formatPlural = function (count, singular, plural, args, options) {
  */
 Drupal.theme = function (func) {
   var args = Array.prototype.slice.apply(arguments, [1]);
-
-  return (Drupal.theme[func] || Drupal.theme.prototype[func]).apply(this, args);
+  if (func in Drupal.theme) {
+    return Drupal.theme[func].apply(this, args);
+  }
 };
 
 /**
@@ -390,7 +391,7 @@ $(function () {
 /**
  * The default themes.
  */
-Drupal.theme.prototype = {
+$.extend(Drupal.theme, {
 
   /**
    * Formats text for emphasized display in a placeholder inside a sentence.
@@ -403,6 +404,6 @@ Drupal.theme.prototype = {
   placeholder: function (str) {
     return '<em class="placeholder">' + Drupal.checkPlain(str) + '</em>';
   }
-};
+});
 
 })(jQuery);
