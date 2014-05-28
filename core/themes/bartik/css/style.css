@@ -890,25 +890,40 @@ ul.links {
 #footer .block {
   clear: both;
 }
-#footer ul,
-#footer li {
+#footer .menu,
+#footer .menu li {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-#footer li a {
+#footer .menu li a {
   float: left; /* LTR */
   padding: 0 12px;
   display: block;
   border-right: 1px solid #555; /* LTR */
   border-color: rgba(255, 255, 255, 0.15);
 }
-#footer li.first a {
+[dir="rtl"] #footer .menu li a {
+  float: right;
+  border-left: 1px solid #555;
+  border-color: rgba(255, 255, 255, 0.15);
+  border-right: none;
+}
+#footer .menu li.first a {
   padding-left: 0; /* LTR */
 }
-#footer li.last a {
+[dir="rtl"] #footer .menu li.first a {
+    padding-right: 0;
+    padding-left: 12px;
+}
+#footer .menu li.last a {
   padding-right: 0; /* LTR */
   border-right: none; /* LTR */
+}
+[dir="rtl"] #footer .menu li.last a {
+    padding-left: 0;
+    padding-right: 12px;
+    border-left: none;
 }
 #footer-wrapper tr.odd {
   background-color: transparent;
@@ -917,6 +932,7 @@ ul.links {
   background-color: #2c2c2c;
   background-color: rgba(0, 0, 0, 0.15);
 }
+
 
 /* --------------- System Tabs  --------------- */
 
