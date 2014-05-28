@@ -872,6 +872,11 @@ function book_node_view(Node $node, $view_mode) {
       $node->content['book_navigation'] = array(
         '#markup' => theme('book_navigation', array('book_link' => $node->book)),
         '#weight' => 100,
+        '#attached' => array(
+          'css' => array(
+            drupal_get_path('module', 'book') . '/css/book.theme.css',
+          ),
+        ),
       );
     }
   }
