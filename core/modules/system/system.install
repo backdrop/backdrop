@@ -748,6 +748,7 @@ function system_schema() {
         'type' => 'varchar',
         'length' => 100,
         'not null' => TRUE,
+        'binary' => TRUE,
       ),
       'type' => array(
         'description' => 'The date format type, e.g. medium.',
@@ -1620,10 +1621,14 @@ function system_schema() {
   return $schema;
 }
 
-// Updates for core.
-
+/**
+ * Implements hook_update_last_removed().
+ *
+ * Returns latest required Drupal 7 schema version for upgrade to Backdrop CMS.
+ */
 function system_update_last_removed() {
-  return 7069;
+  // Drupal 7.28
+  return 7078;
 }
 
 /**
