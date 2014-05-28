@@ -67,8 +67,6 @@ function search_theme() {
   return array(
     'search_result' => array(
       'variables' => array('result' => NULL, 'module' => NULL),
-      'file' => 'search.pages.inc',
-      'template' => 'search-result',
     ),
     'search_results' => array(
       'variables' => array('results' => NULL, 'module' => NULL),

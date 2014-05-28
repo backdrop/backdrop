@@ -54,16 +54,12 @@ function search_extra_type_search_execute($keys = NULL, $conditions = NULL) {
  * Adds some text to the search page so we can verify that it runs.
  */
 function search_extra_type_search_page($results) {
-  $output['prefix']['#markup'] = '<h2>Test page text is here</h2> <ol class="search-results">';
-
-  foreach ($results as $entry) {
-    $output[] = array(
-      '#theme' => 'search_result',
-      '#result' => $entry,
-      '#module' => 'search_extra_type',
-    );
-  }
-  $output['suffix']['#markup'] = '</ol>' . theme('pager');
-
-  return $output;
+  return array(
+    '#prefix' => '<h2>Test page text is here</h2>',
+    '#theme' => 'search_results',
+    '#results' => $results,
+    '#module' => 'search_extra_type',
+  );
 }
+
+
