@@ -5104,7 +5104,7 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
 function backdrop_build_js_cache($files) {
   $contents = '';
   $uri = '';
-  $map = variable_get('js_cache_files', array());
+  $map = state_get('js_cache_files', array());
   // Create a new array so that only the file names are used to create the hash.
   // This prevents new aggregates from being created unnecessarily.
   $js_data = array();
@@ -5145,7 +5145,7 @@ function backdrop_build_js_cache($files) {
       }
     }
     $map[$key] = $uri;
-    variable_set('js_cache_files', $map);
+    state_set('js_cache_files', $map);
   }
   return $uri;
 }
@@ -5155,7 +5155,7 @@ function backdrop_build_js_cache($files) {
  */
 function backdrop_clear_js_cache() {
   variable_del('javascript_parsed');
-  variable_del('js_cache_files');
+  state_set('js_cache_files', FALSE);
   file_scan_directory('public://js', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }
 
