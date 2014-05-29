@@ -2798,18 +2798,6 @@ function system_date_time_formats() {
  * Allow users to add additional date formats.
  */
 function system_configure_date_formats_form($form, &$form_state, $dfid = 0) {
-  $js_settings = array(
-    'type' => 'setting',
-    'data' => array(
-      'dateTime' => array(
-        'date-format' => array(
-          'text' => t('Displayed as'),
-          'lookup' => url('admin/config/regional/date-time/formats/lookup'),
-        ),
-      ),
-    ),
-  );
-
   if ($dfid) {
     $form['dfid'] = array(
       '#type' => 'value',
