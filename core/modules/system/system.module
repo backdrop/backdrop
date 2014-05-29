@@ -1138,6 +1138,7 @@ function system_library_info() {
     ),
     'dependencies' => array(
       array('system', 'jquery'),
+      array('system', 'drupal.settings'),
       array('system', 'drupal.ajax'),
       array('system', 'backdrop.dialog'),
     ),
