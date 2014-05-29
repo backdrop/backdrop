@@ -202,6 +202,12 @@ description = Check if a cache bin is empty after performing clear operations.
 group = Cache
 file = tests/cache.test
 
+[ColorTest]
+name = Color conversion
+description = Tests Color utility class conversions.
+group = Common
+file = tests/color.test
+
 [CommonDrupalAlterTestCase]
 name = Alter hook functionality
 description = Tests alteration of arguments passed to drupal_alter().
