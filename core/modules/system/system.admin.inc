@@ -1599,13 +1599,15 @@ function system_performance_settings($form, &$form_state) {
     '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.') . $disabled_message,
   );
 
-  $js_hide = $config->get('cache') ? '' : ' class="js-hide"';
   $form['bandwidth_optimization']['page_compression'] = array(
     '#type' => 'checkbox',
     '#title' => t('Compress cached pages.'),
     '#default_value' => $config->get('page_compression'),
-    '#prefix' => '<div id="page-compression-wrapper"' . $js_hide . '>',
-    '#suffix' => '</div>',
+    '#states' => array(
+      'visible' => array(
+        'input[name="cache"]' => array('checked' => TRUE),
+      ),
+    ),
   );
   $form['bandwidth_optimization']['preprocess_css'] = array(
     '#type' => 'checkbox',
@@ -2079,14 +2081,6 @@ function system_add_date_format_type_form_submit($form, &$form_state) {
 
   drupal_set_message(t('New date type added successfully.'));
   $form_state['redirect'] = 'admin/config/regional/date-time';
-}
-
-/**
- * Return the date for a given format string via Ajax.
- */
-function system_date_time_lookup() {
-  $result = format_date(REQUEST_TIME, 'custom', $_GET['format']);
-  drupal_json_output($result);
 }
 
 /**
@@ -2798,18 +2792,6 @@ function system_date_time_formats() {
  * Allow users to add additional date formats.
  */
 function system_configure_date_formats_form($form, &$form_state, $dfid = 0) {
-  $js_settings = array(
-    'type' => 'setting',
-    'data' => array(
-      'dateTime' => array(
-        'date-format' => array(
-          'text' => t('Displayed as'),
-          'lookup' => url('admin/config/regional/date-time/formats/lookup'),
-        ),
-      ),
-    ),
-  );
-
   if ($dfid) {
     $form['dfid'] = array(
       '#type' => 'value',
@@ -2827,8 +2809,10 @@ function system_configure_date_formats_form($form, &$form_state, $dfid = 0) {
     '#description' => t('A user-defined date format. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
     '#default_value' => ($dfid ? $format->format : ''),
     '#field_suffix' => ' <small id="edit-date-format-suffix">' . $now . '</small>',
-    '#attached' => array(
-      'js' => array(drupal_get_path('module', 'system') . '/system.js', $js_settings),
+    '#ajax' => array(
+      'callback' => 'system_date_time_lookup',
+      'event' => 'keyup',
+      'progress' => array('type' => 'none', 'message' => NULL),
     ),
     '#required' => TRUE,
   );
@@ -2875,6 +2859,21 @@ function system_add_date_formats_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'admin/config/regional/date-time/formats';
+}
+
+/**
+ * Ajax callback; Returns the date for a given format string.
+ */
+function system_date_time_lookup($form, &$form_state) {
+  $format = '';
+  if (!empty($form_state['values']['date_format'])) {
+    $format = t('Displayed as %date_format', array('%date_format' => format_date(REQUEST_TIME, 'custom', $form_state['values']['date_format'])));
+  }
+  // Return a command instead of a string, since the Ajax framework
+  // automatically prepends an additional empty DIV element for a string, which
+  // breaks the layout.
+  $commands[] = ajax_command_replace('#edit-date-format-suffix', '<small id="edit-date-format-suffix">' . $format . '</small>');
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
