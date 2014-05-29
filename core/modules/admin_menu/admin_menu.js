@@ -136,6 +136,13 @@ Drupal.adminMenu.behaviors.positionFixed = function (context, settings, $adminMe
   if (settings.admin_menu.position_fixed) {
     $adminMenu.addClass('admin-menu-position-fixed');
     $adminMenu.css('position', 'fixed');
+
+    // Set a data attribute to inform other parts of the page that we're
+    // offsetting the top margin, then trigger an offset change. See
+    // tableheader.js for an example of how this is utilized.
+    var height = $adminMenu.height();
+    $adminMenu.attr('data-offset-top', height);
+    $(document).triggerHandler('offsettopchange');
   }
 };
 

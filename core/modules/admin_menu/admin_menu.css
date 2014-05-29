@@ -18,6 +18,7 @@
   line-height: 1;
   padding: 0;
   margin: 0;
+  z-index: 999;
   background: #2D2D2D; /* Old browsers */
   background: -moz-linear-gradient(#2D2D2D 0%, #171717 100%); /* FF3.6+ */
   background: -webkit-gradient(color-stop(0%, #2D2D2D), color-stop(100%, #171717)); /* Chrome,Safari4+ */
