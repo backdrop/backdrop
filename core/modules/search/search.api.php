@@ -227,10 +227,6 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * implement this hook in order to override the default theming of its search
  * results, which is otherwise themed using theme('search_results').
  *
- * Note that by default, theme('search_results') and theme('search_result')
- * work together to create an ordered list (OL). So your hook_search_page()
- * implementation should probably do this as well.
- *
  * @param $results
  *   An array of search results.
  *
@@ -242,18 +238,12 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * @see search-results.tpl.php
  */
 function hook_search_page($results) {
-  $output['prefix']['#markup'] = '<ol class="search-results">';
-
-  foreach ($results as $entry) {
-    $output[] = array(
-      '#theme' => 'search_result',
-      '#result' => $entry,
-      '#module' => 'my_module_name',
-    );
-  }
-  $output['suffix']['#markup'] = '</ol>' . theme('pager');
-
-  return $output;
+  return array(
+    '#prefix' => '<h2>Test page text is here</h2>',
+    '#theme' => 'search_results',
+    '#results' => $results,
+    '#module' => 'search_extra_type',
+  );
 }
 
 /**
