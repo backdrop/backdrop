@@ -144,10 +144,10 @@ function admin_menu_page_build(&$page) {
     $complete = TRUE;
   }
 
-  // If the client supports JavaScript and we have a cached menu for the current
-  // user, only output the hash for the client-side HTTP cache callback URL.
+  // If we have a cached menu for the current user, only output the hash for the
+  // client-side HTTP cache callback URL.
   $cid = 'admin_menu:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
-  if (!$complete && !empty($_COOKIE['has_js']) && ($hash = admin_menu_cache_get($cid))) {
+  if (!$complete && ($hash = admin_menu_cache_get($cid))) {
     $settings['hash'] = $hash;
 
     // The base path to use for cache requests depends on whether clean URLs

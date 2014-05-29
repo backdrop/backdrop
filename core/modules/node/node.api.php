@@ -667,9 +667,6 @@ function hook_node_prepare(Node $node) {
  *   the post information (last updated, author) in the default search result
  *   theming.
  *
- * @see template_preprocess_search_result()
- * @see search-result.tpl.php
- *
  * @ingroup node_api_hooks
  */
 function hook_node_search_result(Node $node) {

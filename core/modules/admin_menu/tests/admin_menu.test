@@ -13,6 +13,7 @@ class AdminMenuWebTestCase extends DrupalWebTestCase {
 
   protected $basePermissions = array(
     'system' => 'access administration pages',
+    'config' => 'administer site configuration',
     'admin_menu' => 'access administration menu',
     'node' => 'access content',
   );
@@ -268,7 +269,7 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
     $this->drupalLogin($this->admin_user);
 
     // Verify that dynamic links are displayed.
-    $this->drupalGet('');
+    $this->drupalGet('admin/config/administration/admin_menu');
     $this->assertElementByXPath('//div[@id="admin-menu"]', array(), t('Administration menu found.'));
     $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
 
@@ -409,7 +410,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     ));
 
     // Verify that the link does not appear in the menu.
-    $this->drupalGet('node');
+    $this->drupalGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Custom link not found.');
 
@@ -422,7 +423,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->drupalPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->drupalGet('node');
+    $this->drupalGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertTrue($elements, 'Custom link found.');
 
@@ -433,7 +434,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->drupalPost('admin/structure/menu/item/' . $this->queryMlidByPath('node/' . $node->nid) . '/edit', $edit, t('Save'));
 
     // Verify that the disabled link does not appear in the menu.
-    $this->drupalGet('node');
+    $this->drupalGet('admin/config/administration/admin_menu');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Disabled custom link not found.');
   }
@@ -451,7 +452,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->drupalPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->drupalGet('');
+    $this->drupalGet('admin/config/administration/admin_menu');
     $elements = $this->xpath('//div[@id=:id]//a[@href=:href and contains(text(), :text)]', array(
       ':id' => 'admin-menu',
       ':href' => $edit['link_path'],
