@@ -31,6 +31,22 @@ const MARK_NEW = 1;
 const MARK_UPDATED = 2;
 
 /**
+ * A responsive table class; hide table cell on narrow devices.
+ *
+ * Indicates that a column has medium priority and thus can be hidden on narrow
+ * width devices and shown on medium+ width devices (i.e. tablets and desktops).
+ */
+const RESPONSIVE_PRIORITY_MEDIUM = 'priority-medium';
+
+/**
+ * A responsive table class; only show table cell on wide devices.
+ *
+ * Indicates that a column has low priority and thus can be hidden on narrow
+ * and medium viewports and shown on wide devices (i.e. desktops).
+ */
+const RESPONSIVE_PRIORITY_LOW = 'priority-low';
+
+/**
  * @} End of "Content markers".
  */
 
@@ -1910,7 +1926,15 @@ function theme_breadcrumb($variables) {
  *     - "data": The localized title of the table column.
  *     - "field": The database field represented in the table column (required
  *       if user is to be able to sort on this column).
- *     - "sort": A default sort order for this column ("asc" or "desc"). Only
+ *     - "sort": A default sort order for this column ("asc" or "desc"). 
+ *     - "class": An array of values for the 'class' attribute. In particular,
+ *       the least important columns that can be hidden on narrow and medium
+ *       width screens should have a 'priority-low' class, referenced with the
+ *       RESPONSIVE_PRIORITY_LOW constant. Columns that should be shown on
+ *       medium+ wide screens should be marked up with a class of
+ *       'priority-medium', referenced by with the RESPONSIVE_PRIORITY_MEDIUM
+ *       constant. Themes may hide columns with one of these two classes on
+ *       narrow viewports to save horizontal space. Only
  *       one column should be given a default sort order because table sorting
  *       only applies to one column at a time.
  *     - Any HTML attributes, such as "colspan", to apply to the column header
@@ -1983,6 +2007,7 @@ function theme_table($variables) {
   $caption = $variables['caption'];
   $colgroups = $variables['colgroups'];
   $sticky = $variables['sticky'];
+  $responsive = $variables['responsive'];
   $empty = $variables['empty'];
 
   // Add sticky headers, if applicable.
@@ -1991,6 +2016,15 @@ function theme_table($variables) {
     // Add 'sticky-enabled' class to the table to identify it for JS.
     // This is needed to target tables constructed by this function.
     $attributes['class'][] = 'sticky-enabled';
+  }
+  // If the table has headers and it should react responsively to columns hidden
+  // with the classes represented by the constants RESPONSIVE_PRIORITY_MEDIUM
+  // and RESPONSIVE_PRIORITY_LOW, add the tableresponsive behaviors.
+  if (count($header) && $responsive) {
+    drupal_add_library('system', 'drupal.tableresponsive');
+    // Add 'responsive-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $attributes['class'][] = 'responsive-enabled';
   }
 
   $output = '<table' . drupal_attributes($attributes) . ">\n";
@@ -2048,13 +2082,28 @@ function theme_table($variables) {
     $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
   }
 
+  $responsive = array();
   // Format the table header:
   if (count($header)) {
     $ts = tablesort_init($header);
     // HTML requires that the thead tag has tr tags in it followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
     $output .= (count($rows) ? ' <thead><tr>' : ' <tr>');
+    $i = 0;
     foreach ($header as $cell) {
+      $i++;
+      // Track responsive classes for each column as needed. Only the header
+      // cells for a column are marked up with the responsive classes by a
+      // module developer or themer. The responsive classes on the header cells
+      // must be transferred to the content cells.
+      if (!empty($cell['class']) && is_array($cell['class'])) {
+        if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $cell['class'])) {
+          $responsive[$i] =  RESPONSIVE_PRIORITY_MEDIUM;
+        }
+        elseif (in_array(RESPONSIVE_PRIORITY_LOW, $cell['class'])) {
+          $responsive[$i] =  RESPONSIVE_PRIORITY_LOW;
+        }
+      }
       $cell = tablesort_header($cell, $header, $ts);
       $output .= _theme_table_cell($cell, TRUE);
     }
@@ -2097,7 +2146,19 @@ function theme_table($variables) {
         $output .= ' <tr' . drupal_attributes($attributes) . '>';
         $i = 0;
         foreach ($cells as $cell) {
-          $cell = tablesort_cell($cell, $header, $ts, $i++);
+          $i++;
+          // Add active class if needed for sortable tables.
+          $cell = tablesort_cell($cell, $header, $ts, $i);
+          // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
+          // class from header to cell as needed.
+          if (isset($responsive[$i])) {
+            if (is_array($cell)) {
+              $cell['class'][] = $responsive[$i];
+            }
+            else {
+              $cell = array('data' => $cell, 'class' => $responsive[$i]);
+            }
+          }
           $output .= _theme_table_cell($cell);
         }
         $output .= " </tr>\n";
