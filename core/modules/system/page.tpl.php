@@ -73,7 +73,6 @@
  */
 ?>
   <div class="l-container">
-
     <header role="banner">
       <?php if ($logo): ?>
         <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home">

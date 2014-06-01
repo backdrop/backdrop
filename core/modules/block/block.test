@@ -336,6 +336,43 @@ class BlockTestCase extends DrupalWebTestCase {
   }
 
   function moveBlockToRegion($block, $region) {
+    // Confirm that the custom block was found at the proper region.
+    switch ($region) {
+      case 'header':
+        $xpath = $this->buildXPathQuery('//div[@class=:class]//div[@id=:block-id]/*', array(
+          ':class' => 'section clearfix',
+          ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
+        ));
+        break;
+
+      case 'footer':
+        $xpath = $this->buildXPathQuery('//div[@class=:class]//div[@id=:block-id]/*', array(
+          ':class' => 'clearfix',
+          ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
+        ));
+        break;
+
+      case 'content':
+        $xpath = $this->buildXPathQuery('//div//div[@id=:block-id]/*', array(
+          ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
+        ));
+        break;
+
+      case 'sidebar_first':
+        $xpath = $this->buildXPathQuery('//div[@class=:class]//div[@id=:block-id]/*', array(
+          ':class' => 'column sidebar',
+          ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
+        ));
+        break;
+
+      case 'sidebar_second':
+        $xpath = $this->buildXPathQuery('//div[@class=:class]//div[@id=:block-id]/*', array(
+          ':class' => 'column sidebar',
+          ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
+        ));
+        break;
+    }
+
     // Set the created block to a specific region.
     $edit = array();
     $edit['blocks[' . $block['module'] . '_' . $block['delta'] . '][region]'] = $region;
@@ -348,11 +385,6 @@ class BlockTestCase extends DrupalWebTestCase {
     $this->drupalGet('node');
     $this->assertText(t($block['title']), 'Block successfully being displayed on the page.');
 
-    // Confirm that the custom block was found at the proper region.
-    $xpath = $this->buildXPathQuery('//div[@class=:region-class]//div[@id=:block-id]/*', array(
-      ':region-class' => 'region region-' . str_replace('_', '-', $region),
-      ':block-id' => 'block-' . $block['module'] . '-' . $block['delta'],
-    ));
     $this->assertFieldByXPath($xpath, NULL, format_string('Custom block found in %region_name region.', array('%region_name' => $region)));
   }
 
