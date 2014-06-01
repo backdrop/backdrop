@@ -342,21 +342,21 @@ ul.secondary li.active a.active {
 #page {
   background: #fff;
   color: #333;
-  margin-left: 0.8125em;
-  margin-right: 0.8125em;
+  margin-left: 13px;
+  margin-right: 13px;
   padding: 20px 0 40px 0;
   position: relative;
 }
 @media screen and (min-width:450px) {
   #page {
-    margin-left: 1.25em;
-    margin-right: 1.25em;
+    margin-left: 20px;
+    margin-right: 20px;
   }
 }
 @media screen and (min-width:720px) {
   #page {
-    margin-left: 2.5em;
-    margin-right: 2.5em;
+    margin-left: 40px;
+    margin-right: 40px;
   }
 }
 #secondary-links ul.links li {

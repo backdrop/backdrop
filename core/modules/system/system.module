@@ -1155,13 +1155,11 @@ function system_library_info() {
   // Drupal's responsive table API.
   $libraries['drupal.tableresponsive'] = array(
     'title' => 'Drupal responsive table API',
-    'version' => VERSION,
+    'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/tableresponsive.js' => array('group' => JS_LIBRARY),
     ),
     'dependencies' => array(
-      array('system', 'jquery'),
-      array('system', 'drupal'),
       array('system', 'jquery.once'),
     ),
   );

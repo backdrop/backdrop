@@ -1,4 +1,4 @@
-(function ($, Drupal, window) {
+(function ($) {
 
 "use strict";
 
@@ -30,7 +30,7 @@ function TableResponsive (table) {
   this.table = table;
   this.$table = $(table);
   this.showText = Drupal.t('Show all columns');
-  this.hideText = Drupal.t('Hide unimportant columns');
+  this.hideText = Drupal.t('Hide less important columns');
   // Store a reference to the header elements of the table so that the DOM is
   // traversed only once to find them.
   this.$headers = this.$table.find('th');
@@ -107,28 +107,7 @@ $.extend(TableResponsive.prototype, {
       this.$revealedCells.hide();
       // Strip the 'display:none' declaration from the style attributes of
       // the table cells that .hide() added.
-      this.$revealedCells.each(function (index, element) {
-        var $cell = $(this);
-        var properties = $cell.attr('style').split(';');
-        var newProps = [];
-        // The hide method adds display none to the element. The element should
-        // be returned to the same state it was in before the columns were
-        // revealed, so it is necessary to remove the display none
-        // value from the style attribute.
-        var match =  /^display\s*\:\s*none$/;
-        for (var i = 0; i < properties.length; i++) {
-          var prop = properties[i];
-          prop.trim();
-          // Find the display:none property and remove it.
-          var isDisplayNone = match.exec(prop);
-          if (isDisplayNone) {
-            continue;
-          }
-          newProps.push(prop);
-        }
-        // Return the rest of the style attribute values to the element.
-        $cell.attr('style', newProps.join(';'));
-      });
+      this.$revealedCells.css('display', '');
       this.$link.text(this.showText).data('pegged', 0);
       // Refresh the toggle link.
       $(window).trigger('resize.tableresponsive');
@@ -138,4 +117,4 @@ $.extend(TableResponsive.prototype, {
 // Make the TableResponsive object available in the Drupal namespace.
 Drupal.TableResponsive = TableResponsive;
 
-})(jQuery, Drupal, window);
+})(jQuery);

@@ -2007,45 +2007,28 @@ function theme_table($variables) {
   $caption = $variables['caption'];
   $colgroups = $variables['colgroups'];
   $sticky = $variables['sticky'];
-  $responsive = $variables['responsive'];
   $empty = $variables['empty'];
 
-  // Add sticky headers, if applicable.
-  if (count($header) && $sticky) {
-    drupal_add_js('core/misc/tableheader.js');
-    // Add 'sticky-enabled' class to the table to identify it for JS.
-    // This is needed to target tables constructed by this function.
-    $attributes['class'][] = 'sticky-enabled';
-  }
-  // If the table has headers and it should react responsively to columns hidden
-  // with the classes represented by the constants RESPONSIVE_PRIORITY_MEDIUM
-  // and RESPONSIVE_PRIORITY_LOW, add the tableresponsive behaviors.
-  if (count($header) && $responsive) {
-    drupal_add_library('system', 'drupal.tableresponsive');
-    // Add 'responsive-enabled' class to the table to identify it for JS.
-    // This is needed to target tables constructed by this function.
-    $attributes['class'][] = 'responsive-enabled';
-  }
-
-  $output = '<table' . drupal_attributes($attributes) . ">\n";
-
+  // The output string contains the inner content of the table. The table tag
+  // itself is added at the end.
+  $output = '';
   if (isset($caption)) {
     $output .= '<caption>' . $caption . "</caption>\n";
   }
 
   // Format the table columns:
   if (count($colgroups)) {
-    foreach ($colgroups as $number => $colgroup) {
-      $attributes = array();
+    foreach ($colgroups as $colgroup) {
+      $colgroup_attributes = array();
 
-      // Check if we're dealing with a simple or complex column
+      // Check if we're dealing with a simple or complex column.
       if (isset($colgroup['data'])) {
         foreach ($colgroup as $key => $value) {
           if ($key == 'data') {
             $cols = $value;
           }
           else {
-            $attributes[$key] = $value;
+            $colgroup_attributes[$key] = $value;
           }
         }
       }
@@ -2053,17 +2036,16 @@ function theme_table($variables) {
         $cols = $colgroup;
       }
 
-      // Build colgroup
+      // Build colgroup.
       if (is_array($cols) && count($cols)) {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . '>';
-        $i = 0;
+        $output .= ' <colgroup' . drupal_attributes($colgroup_attributes) . '>';
         foreach ($cols as $col) {
           $output .= ' <col' . drupal_attributes($col) . ' />';
         }
         $output .= " </colgroup>\n";
       }
       else {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . " />\n";
+        $output .= ' <colgroup' . drupal_attributes($colgroup_attributes) . " />\n";
       }
     }
   }
@@ -2082,7 +2064,7 @@ function theme_table($variables) {
     $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
   }
 
-  $responsive = array();
+  $responsive_columns = array();
   // Format the table header:
   if (count($header)) {
     $ts = tablesort_init($header);
@@ -2098,16 +2080,16 @@ function theme_table($variables) {
       // must be transferred to the content cells.
       if (!empty($cell['class']) && is_array($cell['class'])) {
         if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $cell['class'])) {
-          $responsive[$i] =  RESPONSIVE_PRIORITY_MEDIUM;
+          $responsive_columns[$i] =  RESPONSIVE_PRIORITY_MEDIUM;
         }
         elseif (in_array(RESPONSIVE_PRIORITY_LOW, $cell['class'])) {
-          $responsive[$i] =  RESPONSIVE_PRIORITY_LOW;
+          $responsive_columns[$i] =  RESPONSIVE_PRIORITY_LOW;
         }
       }
       $cell = tablesort_header($cell, $header, $ts);
       $output .= _theme_table_cell($cell, TRUE);
     }
-    // Using ternary operator to close the tags based on whether or not there are rows
+    // Close the tags based on whether or not there are rows.
     $output .= (count($rows) ? " </tr></thead>\n" : "</tr>\n");
   }
   else {
@@ -2120,30 +2102,30 @@ function theme_table($variables) {
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
     foreach ($rows as $number => $row) {
-      // Check if we're dealing with a simple or complex row
+      // Check if we're dealing with a simple or complex row.
       if (isset($row['data'])) {
         $cells = $row['data'];
         $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
 
         // Set the attributes array and exclude 'data' and 'no_striping'.
-        $attributes = $row;
-        unset($attributes['data']);
-        unset($attributes['no_striping']);
+        $tr_attributes = $row;
+        unset($tr_attributes['data']);
+        unset($tr_attributes['no_striping']);
       }
       else {
         $cells = $row;
-        $attributes = array();
+        $tr_attributes = array();
         $no_striping = FALSE;
       }
       if (count($cells)) {
-        // Add odd/even class
+        // Add odd/even class.
         if (!$no_striping) {
           $class = $flip[$class];
-          $attributes['class'][] = $class;
+          $tr_attributes['class'][] = $class;
         }
 
-        // Build row
-        $output .= ' <tr' . drupal_attributes($attributes) . '>';
+        // Build row.
+        $output .= ' <tr' . drupal_attributes($tr_attributes) . '>';
         $i = 0;
         foreach ($cells as $cell) {
           $i++;
@@ -2151,12 +2133,12 @@ function theme_table($variables) {
           $cell = tablesort_cell($cell, $header, $ts, $i);
           // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
           // class from header to cell as needed.
-          if (isset($responsive[$i])) {
+          if (isset($responsive_columns[$i])) {
             if (is_array($cell)) {
-              $cell['class'][] = $responsive[$i];
+              $cell['class'][] = $responsive_columns[$i];
             }
             else {
-              $cell = array('data' => $cell, 'class' => $responsive[$i]);
+              $cell = array('data' => $cell, 'class' => array($responsive_columns[$i]));
             }
           }
           $output .= _theme_table_cell($cell);
@@ -2167,7 +2149,25 @@ function theme_table($variables) {
     $output .= "</tbody>\n";
   }
 
-  $output .= "</table>\n";
+  // Add sticky headers if enabled.
+  if (count($header) && $sticky) {
+    drupal_add_js('core/misc/tableheader.js');
+    // Add 'sticky-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $attributes['class'][] = 'sticky-enabled';
+  }
+  // If the responsive classes were used, add the matching library.
+  if (count($responsive_columns)) {
+    drupal_add_library('system', 'drupal.tableresponsive');
+    // Add 'responsive-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $attributes['class'][] = 'responsive-enabled';
+  }
+
+  // Wrap the result in the table tag. This is done last so that the
+  // responsive-enabled class is added only when needed.
+  $output = '<table' . drupal_attributes($attributes) . ">\n$output</table>\n";
+
   return $output;
 }
 
