@@ -134,27 +134,40 @@ caption {
   text-align: left; /* LTR */
   font-weight: normal;
 }
+[dir="rtl"] caption {
+  text-align: right;
+}
 blockquote {
   background: #f7f7f7;
-  border-left: 1px solid #bbb;
+  border-left: 4px solid #bbb; /* RTL */
   font-style: italic;
   margin: 1.5em 10px;
   padding: 0.5em 10px;
 }
+[dir="rtl"] blockquote {
+  border-left: none;
+  border-right: 4px solid #bbb;
+}
 blockquote:before {
   color: #bbb;
-  content: "\201C";
+  content: "\201C"; /* RTL */
   font-size: 3em;
   line-height: 0.1em;
   margin-right: 0.2em;
   vertical-align: -.4em;
 }
+[dir="rtl"] blockquote:before {
+  content: "\201D";
+}
 blockquote:after {
   color: #bbb;
-  content: "\201D";
+  content: "\201D"; /* RTL */
   font-size: 3em;
   line-height: 0.1em;
   vertical-align: -.45em;
+}
+[dir="rtl"] blockquote:after {
+  content: "\201C";
 }
 blockquote > p:first-child {
   display: inline;
@@ -199,6 +212,10 @@ tr th {
   border: 1px solid #fff;
   text-align: left; /* LTR */
 }
+[dir="rtl"] tr td,
+[dir="rtl"] tr th {
+  text-align: right;
+}
 #footer-wrapper tr td,
 #footer-wrapper tr th {
   border-color: #555;
@@ -229,6 +246,11 @@ table ul.links li {
   margin: 0;
   padding: 0 0 0.25em 1em; /* LTR */
 }
+[dir="rtl"] .block ol,
+[dir="rtl"] .block ul {
+  padding: 0 1em 0.25em 0;
+}
+
 .contextual-links-wrapper {
   font-size: small !important;
 }
@@ -249,12 +271,22 @@ ul.menu li {
   margin: 1em 0;
   padding: 0 0 0.25em 2.5em; /* LTR */
 }
+[dir="rtl"] .region-content ul,
+[dir="rtl"] .region-content ol {
+  padding: 2.5em 0 0.25em 0;
+}
 .item-list ul li {
   margin: 0;
   padding: 0.2em 0.5em 0 0; /* LTR */
 }
+[dir="rtl"] .item-list ul li {
+  padding: 0.2em 0 0 0.5em;
+}
 ul.tips {
   padding: 0 0 0 1.25em; /* LTR */
+}
+[dir="rtl"] ul.tips {
+  padding: 0 1.25em 0 0;
 }
 
 /* ------------------ Header ------------------ */
@@ -289,10 +321,18 @@ ul.tips {
   float: left; /* LTR */
   padding: 15px 15px 15px 10px; /* LTR */
 }
+[dir="rtl"] #logo {
+  float: right;
+  padding: 15px 10px 15px 15px;
+}
 #name-and-slogan {
   float: left; /* LTR */
   padding-top: 34px;
   margin: 0 0 30px 15px; /* LTR */
+}
+[dir="rtl"] #name-and-slogan {
+  float: right;
+  margin: 0 15px 30px 0;
 }
 #site-name {
   font-size: 1.821em;
@@ -318,6 +358,9 @@ h1#site-name {
   margin: 0 10px;
   padding: 0;
 }
+[dir="rtl"] .region-header .block {
+  float: right;
+}
 .region-header .block .content {
   margin: 0;
   padding: 0;
@@ -338,6 +381,10 @@ h1#site-name {
   border-color: rgba(255, 255, 255, 0.3);
   margin-right: 2px; /* LTR */
   width: 120px;
+}
+[dir="rtl"] .region-header .form-text {
+  margin-left: 2px;
+  margin-right: 0;
 }
 .region-header .form-text:hover,
 .region-header .form-text:focus,
@@ -385,6 +432,9 @@ h1#site-name {
   margin: 0;
   padding: 0;
 }
+[dir="rtl"] .region-header #block-user-login .form-item {
+  float: right;
+}
 .region-header #block-user-login div.item-list,
 .region-header #block-user-login div.description {
   font-size: 0.916em;
@@ -405,8 +455,15 @@ h1#site-name {
   float: left; /* LTR */
   padding: 3px 0 1px;
 }
+[dir="rtl"] .region-header #block-user-login .item-list li {
+  float: right;
+}
 .region-header #block-user-login .item-list li.last {
   padding-left: 0.5em; /* LTR */
+}
+[dir="rtl"] .region-header #block-user-login .item-list li.last {
+  padding-left: 0;
+  padding-right: 0.5em;
 }
 .region-header #block-user-login .form-actions {
   margin: 4px 0 0;
@@ -456,6 +513,9 @@ h1#site-name {
   padding: 0 1px;
   margin: 0 1px;
 }
+[dir="rtl"] #main-menu-links li {
+  float: right;
+}
 #main-menu-links a {
   color: #333;
   background: #ccc;
@@ -470,6 +530,9 @@ h1#site-name {
   -moz-border-radius-topright: 8px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+}
+[dir="rtl"] #main-menu-links a {
+  float: right;
 }
 #main-menu-links a:hover,
 #main-menu-links a:focus {
@@ -495,6 +558,9 @@ h1#site-name {
   float: right; /* LTR */
   font-size: 0.929em;
   margin: 10px 10px 0;
+}
+[dir="rtl"] #secondary-menu-links {
+  float: left;
 }
 #secondary-menu-links a:hover,
 #secondary-menu-links a:focus {
@@ -590,6 +656,11 @@ h1#page-title {
   height: 20px;
   margin: 1px 5px 0 0; /* LTR */
 }
+[dir="rtl"] .submitted .user-picture img {
+  float: right;
+  margin-left: 5px;
+  margin-right: 0;
+}
 .field-type-taxonomy-term-reference {
   margin: 0 0 1.2em;
 }
@@ -597,6 +668,10 @@ h1#page-title {
   font-weight: normal;
   margin: 0;
   padding-right: 5px; /* LTR */
+}
+[dir="rtl"] .field-type-taxonomy-term-reference .field-label {
+  padding-left: 5px;
+  padding-right: 0;
 }
 .field-type-taxonomy-term-reference .field-label,
 .field-type-taxonomy-term-reference ul.links {
@@ -616,8 +691,15 @@ h1#page-title {
   padding: 0 1em 0 0; /* LTR */
   white-space: nowrap;
 }
+[dir="rtl"] .field-type-taxonomy-term-reference ul.links li {
+  padding: 0 0 0 1em;
+  float: right;
+}
 .link-wrapper {
   text-align: right;
+}
+[dir="rtl"] .link-wrapper {
+  text-align: left;
 }
 .field-type-image img,
 .user-picture img {
@@ -644,6 +726,9 @@ ul.links {
 .comment div.user-picture img {
   margin-left: 0; /* LTR */
 }
+[dir="rtl"] .comment div.user-picture img {
+  margin-right: 0;
+}
 .comment {
   margin-bottom: 20px;
   display: table;
@@ -654,6 +739,10 @@ ul.links {
   padding: 0 30px 0 0; /* LTR */
   vertical-align: top;
   overflow: hidden;
+}
+[dir="rtl"] .comment .attribution {
+  float: right;
+  padding: 0 0 0 30px;
 }
 .comment .attribution img {
   margin: 0;
@@ -689,6 +778,11 @@ ul.links {
   position: absolute;
   width: 20px;
 }
+[dir="rtl"] .comment .comment-arrow {
+  background-image: url(../images/comment-arrow-rtl.gif);
+  margin-left: 0;
+  margin-right: -47px;
+}
 .comment .comment-text {
   padding: 10px 25px;
   border: 1px solid #d3d7d9;
@@ -700,15 +794,27 @@ ul.links {
 .comment .indented {
   margin-left: 40px; /* LTR */
 }
+[dir="rtl"] .comment .indented {
+  margin-right: 40px;
+  margin-left: 0;
+}
 .comment ul.links {
   padding: 0 0 0.25em 0;
 }
 .comment ul.links li {
   padding: 0 0.5em 0 0; /* LTR */
 }
+[dir="rtl"] .comment ul.links li {
+  padding: 0 0 0.5em;
+}
 .comment-unpublished {
   margin-right: 5px; /* LTR */
   padding: 5px 2px 5px 5px; /* LTR */
+}
+[dir="rtl"] .comment-unpublished {
+  margin-left: 5px;
+  margin-right: 0;
+  padding: 5px 5px 5px 2px;
 }
 .comment-unpublished .comment-text .comment-arrow {
   border-left: 1px solid #fff4f4;
@@ -777,6 +883,7 @@ ul.links {
 #triptych .block ol {
   padding-left: 0;
 }
+
 #triptych #block-user-login .form-text {
   width: 185px;
 }
@@ -856,8 +963,8 @@ ul.links {
 }
 #footer-columns .content ul {
   list-style: none;
-  padding-left: 0; /* LTR */
-  margin-left: 0;
+  padding: 0;
+  margin: 0;
 }
 #footer-columns .content li {
   list-style: none;
@@ -871,6 +978,9 @@ ul.links {
   line-height: 1.2;
   padding: 0.8em 2px 0.8em 20px; /* LTR */
   text-indent: -15px;
+}
+[dir="rtl"] #footer-columns .content li a {
+  padding: 0.8em 20px 0.8em 2px;
 }
 #footer-columns .content li a:hover,
 #footer-columns .content li a:focus {
@@ -906,24 +1016,23 @@ ul.links {
 [dir="rtl"] #footer .menu li a {
   float: right;
   border-left: 1px solid #555;
-  border-color: rgba(255, 255, 255, 0.15);
   border-right: none;
 }
 #footer .menu li.first a {
   padding-left: 0; /* LTR */
 }
 [dir="rtl"] #footer .menu li.first a {
-    padding-right: 0;
-    padding-left: 12px;
+  padding-right: 0;
+  padding-left: 12px;
 }
 #footer .menu li.last a {
   padding-right: 0; /* LTR */
   border-right: none; /* LTR */
 }
 [dir="rtl"] #footer .menu li.last a {
-    padding-left: 0;
-    padding-right: 12px;
-    border-left: none;
+  padding-left: 0;
+  padding-right: 12px;
+  border-left: none;
 }
 #footer-wrapper tr.odd {
   background-color: transparent;
@@ -932,7 +1041,6 @@ ul.links {
   background-color: #2c2c2c;
   background-color: rgba(0, 0, 0, 0.15);
 }
-
 
 /* --------------- System Tabs  --------------- */
 
@@ -952,6 +1060,10 @@ ul.links {
   float: left; /* LTR */
   vertical-align: bottom;
   margin: 0 5px 0 0; /* LTR */
+}
+[dir="rtl"] .tabs ul.primary li {
+  margin: 0 0 0 5px;
+  float: right;
 }
 .tabs ul.primary li.active a {
   border-bottom: 1px solid #ffffff;
@@ -983,11 +1095,20 @@ ul.links {
   display: block;
   float: left; /* LTR */
 }
+[dir="rtl"] .tabs ul.secondary li {
+  float: right;
+}
 .tabs ul.secondary li:last-child {
   border-right: none; /* LTR */
 }
+[dir="rtl"] .tabs ul.secondary li:last-child {
+  border-left: none;
+}
 .tabs ul.secondary li:first-child {
   padding-left: 0; /* LTR */
+}
+[dir="rtl"] .tabs ul.secondary li:first-child {
+  padding-right: 0;
 }
 .tabs ul.secondary li a {
   padding: 0.25em 0.5em;
@@ -1011,6 +1132,11 @@ ul.action-links li a {
   padding-left: 15px;
   background: url(../images/add.png) no-repeat left center;
   margin: 0 10px 0 0;
+}
+[dir="rtl"] ul.action-links li a {
+  background-position: right center;
+  padding-left: 0;
+  padding-right: 15px;
 }
 
 /* ---------------- Messages  ----------------- */
@@ -1081,6 +1207,11 @@ a.button {
   padding: 4px 17px;
   -moz-border-radius: 20px;
   border-radius: 15px;
+}
+[dir="rtl"] input.form-submit,
+[dir="rtl"] a.button {
+  margin-right: 0;
+  margin-left: 0.6em;
 }
 a.button:link,
 a.button:visited,
@@ -1282,15 +1413,23 @@ input.form-button-disabled:active,
 .js input.form-autocomplete {
   background-position: 100% 4px; /* LTR */
 }
+[dir="rtl"] .js input.form-autocomplete {
+  background-position: 1% 4px;
+}
 .js input.throbbing {
   background-position: 100% -16px; /* LTR */
 }
-
+[dir="rtl"] .js input.throbbing {
+  background-position: 1% -16px;
+}
 /* Comment form */
 .comment-form label {
   float: left; /* LTR */
   font-size: 0.929em;
   width: 120px;
+}
+[dir="rtl"] .comment-form label {
+  float: right;
 }
 .comment-form input,
 .comment-form .form-select {
@@ -1311,6 +1450,12 @@ input.form-button-disabled:active,
 .comment-form .form-type-checkbox,
 .comment-form .form-radios {
   margin-left: 120px; /* LTR */
+}
+
+[dir="rtl"] .comment-form .form-type-checkbox,
+[dir="rtl"] .comment-form .form-radios {
+  margin-left: 0;
+  margin-right: 120px;
 }
 .comment-form .form-type-checkbox label,
 .comment-form .form-radios label {
@@ -1333,6 +1478,10 @@ input.form-button-disabled:active,
   font-size: 0.786em;
   line-height: 1.2;
   margin-left: 120px; /* LTR */
+}
+[dir="rtl"] .comment-form .form-item .description {
+  margin-left: 0;
+  margin-right: 120px;
 }
 #content h2.comment-form {
   margin-bottom: 0.5em;
@@ -1364,6 +1513,10 @@ input.form-button-disabled:active,
 #edit-actions input {
   margin-right: 0.6em; /* LTR */
 }
+[dir="rtl"] #edit-actions input {
+  margin-left: 0.6em;
+  margin-right: 0;
+}
 
 /* -------------- Other Overrides ------------- */
 
@@ -1387,8 +1540,14 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   float: left; /* LTR */
   font-size: 1em;
   height: 1.143em;
-  margin-right: 5px;
+  margin-right: 5px; /* LTR */
   width: 9em;
+}
+[dir="rtl"] #search-form input#edit-keys,
+[dir="rtl"] #block-search-form .form-item-search-block-form input {
+  float: right;
+  margin-left: 5px;
+  margin-right: 0;
 }
 #search-block-form input.form-submit,
 #search-form input.form-submit {
