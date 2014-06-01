@@ -10,7 +10,7 @@ Drupal.Views = {};
  * jQuery UI tabs, Views integration component
  */
 Drupal.behaviors.viewsTabs = {
-  attach: function (context) {
+  attach: function () {
     if ($.viewsUi && $.viewsUi.tabs) {
       $('#views-tabset').once('views-processed').viewsTabs({
         selectedClass: 'active'

@@ -42,8 +42,8 @@ a.tabledrag-handle .handle {
 }
 div.indentation {
   float: right;
-  margin: -0.4em -0.4em -0.4em 0.2em;
-  padding: 0.42em 0.6em 0.42em 0;
+  margin: -1em -0.4em -1em 0.2em;
+  padding: 1em 0.6em 1em 0;
 }
 div.tree-child,
 div.tree-child-last {

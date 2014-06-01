@@ -114,8 +114,8 @@ a.tabledrag-handle-hover .handle {
 div.indentation {
   float: left; /* LTR */
   height: 1.7em;
-  margin: -0.4em 0.2em -0.4em -0.4em; /* LTR */
-  padding: 0.42em 0 0.42em 0.6em; /* LTR */
+  margin: -1em 0.2em -1em -0.4em; /* LTR */
+  padding: 1em 0 1em 0.6em; /* LTR */
   width: 20px;
 }
 div.tree-child {
