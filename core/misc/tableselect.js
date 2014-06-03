@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, Drupal) {
 
 Drupal.behaviors.tableSelect = {
   attach: function (context, settings) {
@@ -87,4 +87,4 @@ Drupal.tableSelectRange = function (from, to, state) {
   }
 };
 
-})(jQuery);
+})(jQuery, Drupal);
