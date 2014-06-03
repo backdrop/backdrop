@@ -428,8 +428,6 @@ function user_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Picture upload file size'),
     '#default_value' => variable_get('user_picture_file_size', '30'),
-    '#size' => 10,
-    '#maxlength' => 10,
     '#field_suffix' => ' ' . t('KB'),
     '#description' => t('Maximum allowed file size for uploaded pictures. Upload size is normally limited only by the PHP maximum post and file upload settings, and images are automatically scaled down to the dimensions specified above.'),
     '#element_validate' => array('element_validate_integer_positive'),
