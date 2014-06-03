@@ -7,60 +7,6 @@
 Drupal.Views = {};
 
 /**
- * jQuery UI tabs, Views integration component
- */
-Drupal.behaviors.viewsTabs = {
-  attach: function () {
-    if ($.viewsUi && $.viewsUi.tabs) {
-      $('#views-tabset').once('views-processed').viewsTabs({
-        selectedClass: 'active'
-      });
-    }
-
-    $('a.views-remove-link').once('views-processed').click(function(event) {
-      var id = $(this).attr('id').replace('views-remove-link-', '');
-      $('#views-row-' + id).hide();
-      $('#views-removed-' + id).prop('checked', true);
-      event.preventDefault();
-   });
-  /**
-    * Here is to handle display deletion
-    * (checking in the hidden checkbox and hiding out the row)
-    */
-  $('a.display-remove-link')
-    .addClass('display-processed')
-    .click(function() {
-      var id = $(this).attr('id').replace('display-remove-link-', '');
-      $('#display-row-' + id).hide();
-      $('#display-removed-' + id).prop('checked', true);
-      return false;
-  });
-  }
-};
-
-/**
- * Helper function to parse a querystring.
- */
-Drupal.Views.parseQueryString = function (query) {
-  var args = {};
-  var pos = query.indexOf('?');
-  if (pos != -1) {
-    query = query.substring(pos + 1);
-  }
-  var pairs = query.split('&');
-  for(var i in pairs) {
-    if (typeof(pairs[i]) == 'string') {
-      var pair = pairs[i].split('=');
-      // Ignore the 'q' path argument, if present.
-      if (pair[0] != 'q' && pair[1]) {
-        args[decodeURIComponent(pair[0].replace(/\+/g, ' '))] = decodeURIComponent(pair[1].replace(/\+/g, ' '));
-      }
-    }
-  }
-  return args;
-};
-
-/**
  * Helper function to return a view's arguments based on a path.
  */
 Drupal.Views.parseViewArgs = function (href, viewPath) {
