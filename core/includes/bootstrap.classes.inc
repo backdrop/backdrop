@@ -16,6 +16,7 @@ function backdrop_class_list() {
     'DrupalNullCache' => $path . 'cache.inc',
     'DrupalDatabaseCache' => $path . 'cache.inc',
     'DrupalCacheInterface' => $path . 'cache.inc',
+    'Color' => $path . 'color.inc',
     'Diff' => $path . 'diff.inc',
     'DiffOp' => $path . 'diff.inc',
     'DiffOpCopy' => $path . 'diff.inc',
