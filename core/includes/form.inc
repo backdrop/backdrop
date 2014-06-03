@@ -2825,33 +2825,6 @@ function theme_radio($variables) {
 }
 
 /**
- * Returns HTML for a set of radio button form elements.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #value, #options, #description, #required,
- *     #attributes, #children.
- *
- * @ingroup themeable
- */
-function theme_radios($variables) {
-  $element = $variables['element'];
-  $attributes = array();
-  if (isset($element['#id'])) {
-    $attributes['id'] = $element['#id'];
-  }
-  $attributes['class'] = 'form-radios';
-  if (!empty($element['#attributes']['class'])) {
-    $attributes['class'] .= ' ' . implode(' ', $element['#attributes']['class']);
-  }
-  if (isset($element['#attributes']['title'])) {
-    $attributes['title'] = $element['#attributes']['title'];
-  }
-  return '<div' . drupal_attributes($attributes) . '>' . (!empty($element['#children']) ? $element['#children'] : '') . '</div>';
-}
-
-/**
  * Expand a password_confirm field into two text boxes.
  */
 function form_process_password_confirm($element) {
@@ -3259,6 +3232,9 @@ function form_process_container($element, &$form_state) {
 function theme_container($variables) {
   $element = $variables['element'];
 
+  // Disabled attribute is handled on children
+  unset($element['#attributes']['disabled']);
+
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
     // Assign an html ID.
@@ -3267,6 +3243,9 @@ function theme_container($variables) {
     }
     // Add the 'form-wrapper' class.
     $element['#attributes']['class'][] = 'form-wrapper';
+    if(isset($variables['element']['#type'])) {
+      $element['#attributes']['class'][] = 'form-' . $variables['element']['#type'];
+    }
   }
 
   return '<div' . drupal_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
