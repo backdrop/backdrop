@@ -1,4 +1,3 @@
-
 /* ---------- Overall Specifications ---------- */
 
 body {
@@ -1665,4 +1664,22 @@ div.admin-panel .description {
 }
 .js .dropbutton-multiple.open .dropbutton-widget:hover {
   background-color: white;
+}
+
+/**
+ * Responsive tables.
+ */
+@media screen and (max-width:450px) {
+  th.helpful,
+  td.helpful,
+  th.priority-medium,
+  td.priority-medium {
+    display: none;
+  }
+}
+@media screen and (max-width:720px) {
+  th.helpful,
+  td.helpful {
+    display: none;
+  }
 }

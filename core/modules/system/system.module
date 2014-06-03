@@ -1152,6 +1152,18 @@ function system_library_info() {
     ),
   );
 
+  // Drupal's responsive table API.
+  $libraries['drupal.tableresponsive'] = array(
+    'title' => 'Drupal responsive table API',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/tableresponsive.js' => array('group' => JS_LIBRARY),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
   // Drupal's collapsible fieldset.
   $libraries['drupal.collapse'] = array(
     'title' => 'Drupal collapsible fieldset',
