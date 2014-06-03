@@ -3962,6 +3962,9 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   $rows = $ungroupable_rows = array();
   // Enable grouping only if > 1 group.
   $grouping = count(array_keys($form['#group_options'])) > 1;
+  // Sort groups to ensure they're rendered in the right order, regardless of
+  // how they're saved in configuration.
+  ksort($form['#group_renders']);
 
   foreach ($form['#group_renders'] as $group_id => $contents) {
     // Header row for the group.
@@ -4062,7 +4065,12 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
   else {
     $old_fields = $display->handler->get_option($types[$form_state['type']]['plural']);
   }
-  $count = 0;
+
+  // Ensure defaults.
+  $form_state['values'] += array(
+    'filter_groups' => array(),
+    'filters' => array(),
+  );
 
   $groups = $form_state['values']['filter_groups'];
   // Whatever button was clicked, re-calculate field information.
