@@ -3,6 +3,11 @@
   margin: 1em 0 1em 15em; /* LTR */
   border: 1px solid #ccc;
 }
+
+[dir=rtl] .vertical-tabs {
+   margin-left: 0;
+   margin-right: 15em;
+}
 .vertical-tabs .vertical-tabs-list {
   width: 15em;
   list-style: none;
@@ -11,10 +16,20 @@
   margin: -1px 0 -1px -15em; /* LTR */
   float: left; /* LTR */
 }
+[dir=rtl] .vertical-tabs .vertical-tabs-list {
+  margin-left: 0;
+  margin-right: -15em;
+  float: right;
+}
 .vertical-tabs fieldset.vertical-tabs-pane {
   margin: 0 !important;
   padding: 0 1em;
   border: 0;
+}
+[dir=rtl] .vertical-tabs-list {
+  float: right;
+  margin-left: 0;
+  margin-right: -15em;
 }
 fieldset.vertical-tabs-pane > legend {
   display: none;
@@ -29,7 +44,7 @@ fieldset.vertical-tabs-pane > legend {
   margin: 0;
 }
 .vertical-tabs .vertical-tabs-list a {
-  display: block;
+  display: block;gi
   text-decoration: none;
   padding: 0.5em 0.6em;
 }
@@ -45,9 +60,16 @@ fieldset.vertical-tabs-pane > legend {
   background-color: #fff;
   border-right-width: 0; /* LTR */
 }
+
+[dir=rtl] .vertical-tabs .vertical-tabs-list .selected {
+  border-left-width: 0;
+  border-right-width: 1px;
+}
+
 .vertical-tabs .vertical-tabs-list .selected strong {
   color: #000;
 }
+
 .vertical-tabs .vertical-tabs-list .summary {
   display: block;
 }
