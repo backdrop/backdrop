@@ -1589,8 +1589,10 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
       $groups = $cached->data;
     }
     else {
-      drupal_static_reset('ctools_export_load_object');
-      drupal_static_reset('ctools_export_load_object_all');
+      $ctools_export_load_object = &drupal_static('ctools_export_load_object');
+      $ctools_export_load_object_all = &drupal_static('ctools_export_load_object_all');
+      unset($ctools_export_load_object['field_group']);
+      unset($ctools_export_load_object_all['field_group']);
       $groups = field_group_read_groups();
       cache_set('field_groups', $groups, 'cache_field');
     }
