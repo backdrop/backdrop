@@ -1915,6 +1915,11 @@ function field_group_build_entity_groups(&$vars, $type) {
     return $element;
   }
 
+  // No groups on the entity. Prerender removed empty field groups.
+  if (empty($element['#fieldgroups'])) {
+    return $element;
+  }
+
   // Put groups inside content if we are rendering an entity_view.
   foreach ($element['#fieldgroups'] as $group) {
     if (!empty($element[$group->group_name]) && $type != 'user_profile') {
