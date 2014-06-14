@@ -165,3 +165,9 @@ name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
 group = System
 file = system.test
+
+[TokenScanTest]
+name = Token scanning
+description = Scan token-like patterns in a dummy text to check token scanning.
+group = System
+file = system.test
