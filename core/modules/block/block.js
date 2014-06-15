@@ -1,4 +1,4 @@
-(function ($, window) {
+(function ($) {
 
 /**
  * Provide the summary information for the block settings vertical tabs.
@@ -12,7 +12,7 @@ Drupal.behaviors.blockSettingsSummary = {
       return;
     }
 
-    $('fieldset#edit-path', context).drupalSetSummary(function (context) {
+    $('#edit-path').drupalSetSummary(function (context) {
       if (!$('textarea[name="pages"]', context).val()) {
         return Drupal.t('Not restricted');
       }
@@ -21,7 +21,7 @@ Drupal.behaviors.blockSettingsSummary = {
       }
     });
 
-    $('fieldset#edit-node-type', context).drupalSetSummary(function (context) {
+    $('#edit-node-type').drupalSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
@@ -32,7 +32,7 @@ Drupal.behaviors.blockSettingsSummary = {
       return vals.join(', ');
     });
 
-    $('fieldset#edit-role', context).drupalSetSummary(function (context) {
+    $('#edit-role').drupalSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
@@ -43,7 +43,7 @@ Drupal.behaviors.blockSettingsSummary = {
       return vals.join(', ');
     });
 
-    $('fieldset#edit-user', context).drupalSetSummary(function (context) {
+    $('#edit-user').drupalSetSummary(function (context) {
       var $radio = $('input[name="custom"]:checked', context);
       if ($radio.val() == 0) {
         return Drupal.t('Not customizable');
@@ -68,7 +68,7 @@ Drupal.behaviors.blockDrag = {
       return;
     }
 
-    var table = $('table#blocks');
+    var table = $('#blocks');
     var tableDrag = Drupal.tableDrag.blocks; // Get the blocks tableDrag object.
 
     // Add a handler for when a row is swapped, update empty regions.
@@ -165,4 +165,4 @@ Drupal.behaviors.blockDrag = {
   }
 };
 
-})(jQuery, window);
+})(jQuery);
