@@ -59,6 +59,11 @@ dl dl {
   margin-left: 20px; /* LTR */
   margin-bottom: 10px;
 }
+[dir="rtl"] dl dd,
+[dir="rtl"] dl dl {
+  margin-left: 0;
+  margin-right: 20px;
+}
 blockquote {
   margin: 1em 40px;
 }
@@ -104,6 +109,11 @@ ul,
   list-style-image: none;
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
 }
+[dir="rtl"] ul,
+[dir="rtl"] .block ul,
+[dir="rtl"] .item-list ul {
+  margin: 0.25em 1.5em 0.25em 0;
+}
 .item-list .pager li {
   padding: 0.5em;
 }
@@ -119,6 +129,9 @@ ul.menu li {
 ol {
   list-style-type: decimal;
   margin: 0.25em 0 0.25em 2em; /* LTR */
+}
+[dir="rtl"] ol {
+  margin: 0.25em 2em 0.25em 0;
 }
 .item-list ul li.collapsed,
 ul.menu li.collapsed {
@@ -155,6 +168,11 @@ pre {
   width: auto;
   z-index: 50;
 }
+[dir="rtl"] #skip-link {
+  right: 50%;
+  margin-left: 0;
+  margin-right: -5.25em;
+}
 #skip-link a,
 #skip-link a:link,
 #skip-link a:visited {
@@ -166,6 +184,11 @@ pre {
   text-decoration: none;
   -moz-border-radius: 0 0 10px 10px;
   border-radius: 0 0 10px 10px;
+}
+[dir="rtl"] #skip-link a,
+[dir="rtl"] #skip-link a:link,
+[dir="rtl"] #skip-link a:visited {
+  padding: 1px 10px 2px 10px;
 }
 #skip-link a:hover,
 #skip-link a:focus,
@@ -182,6 +205,9 @@ pre {
   position: relative;
   background-color: #e0e0d8;
 }
+[dir="rtl"] #branding {
+  padding: 20px 20px 0 20px;
+}
 #branding div.breadcrumb {
   font-size: 0.846em;
   padding-bottom: 5px;
@@ -193,6 +219,11 @@ pre {
   padding-left: 10px; /* LTR */
   background: #333;
 }
+[dir="rtl"] #branding div.block {
+  float: left;
+  padding-left: 0;
+  padding-right: 10px;
+}
 #branding div.block form label {
   display: none;
 }
@@ -202,9 +233,16 @@ pre {
   margin: 0;
   padding: 0;
 }
+[dir="rtl"] #branding div.block form div.form-item {
+  float: right;
+}
 #branding div.block form input.form-text {
   width: 140px;
   margin-right: 10px; /* LTR */
+}
+[dir="rtl"] #branding div.block form input.form-text {
+  margin-left: 10px;
+  margin-right: 0;
 }
 #branding div.block form input.form-submit {
   text-align: center;
@@ -224,6 +262,9 @@ pre {
 #help div.more-help-link {
   text-align: right; /* LTR */
 }
+[dir="rtl"] #help div.more-help-link {
+  text-align: left;
+}
 
 /**
  * Page title.
@@ -239,6 +280,9 @@ pre {
   font-size: 1.385em;
   font-weight: normal;
   float: left; /* LTR */
+}
+[dir="rtl"] #branding h1.page-title {
+  float: right;
 }
 
 /**
@@ -259,6 +303,9 @@ ul.primary {
   height: 2.60em;
   margin: 0;
   padding-top: 0;
+}
+[dir="rtl"] ul.primary {
+  float: left;
 }
 ul.primary li {
   float: left; /* LTR */
@@ -285,6 +332,11 @@ ul.primary li.active a {
   -moz-border-radius: 8px 8px 0 0;
   border-radius: 8px 8px 0 0;
 }
+[dir="rtl"] ul.primary li,
+[dir="rtl"] ul.primary li a:link,
+[dir="rtl"] ul.primary li a.active {
+  float: right;
+}
 ul.primary li.active a,
 ul.primary li.active a.active,
 ul.primary li.active a:active,
@@ -309,9 +361,12 @@ ul.secondary {
   overflow: hidden;
   background-color: #fff;
 }
+[dir="rtl"] ul.secondary {
+  float: left;
+}
 ul.secondary li {
   margin: 0 5px;
-  float: none; /* LTR */
+  float: none;
 }
 ul.secondary li a {
   background-color: #ddd;
@@ -362,6 +417,9 @@ ul.secondary li.active a.active {
 #secondary-links ul.links li {
   padding: 0 10px 10px 0; /* LTR */
 }
+[dir="rtl"] #secondary-links ul.links li {
+  padding: 0 0 10px 10px; /* LTR */
+}
 #secondary-links ul.links li a {
   font-size: 0.923em;
   background: #777;
@@ -381,6 +439,11 @@ ul.links li,
 ul.inline li {
   padding-right: 1em; /* LTR */
 }
+[dir="rtl"] ul.links li,
+[dir="rtl"] ul.inline li {
+  padding-left: 1em;
+  padding-right: 0;
+}
 ul.inline li {
   display: inline;
 }
@@ -398,6 +461,11 @@ ul.admin-list li {
   background: url(images/list-item.png) no-repeat 0 11px; /* LTR */
   list-style-type: none;
   list-style-image: none;
+}
+[dir="rtl"] ul.admin-list li {
+  padding: 9px 30px 0 0;
+  margin-right: 0;
+  background: url(images/list-item-rtl.png) no-repeat right 11px;
 }
 .admin-panel .item-list ul,
 ul.admin-list {
@@ -424,14 +492,25 @@ ul.admin-list li a {
   padding: 0 0 4px 30px; /* LTR */
   min-height: 0;
 }
+[dir="rtl"] ul.admin-list li a {
+  margin-right: -30px;
+  margin-left: 0;
+  padding: 0 30px 4px 0;
+}
 ul.admin-list.compact li a {
   margin-left: 0; /* LTR */
   padding: 0;
+}
+[dir="rtl"] ul.admin-list.compact li a {
+  margin-right: 0;
 }
 ul.admin-list li div.description a {
   margin-left: 0; /* LTR */
   padding: 0;
   min-height: inherit;
+}
+[dir="rtl"] ul.admin-list li div.description a {
+  margin-right: 0;
 }
 div.submitted {
   color: #898989;
@@ -494,10 +573,17 @@ table th a {
 table th.active a {
   padding: 0 25px 0 0; /* LTR */
 }
+[dir="rtl"] table th.active a {
+  padding: 0 0 0 25px;
+}
 table th.active img {
   position: absolute;
   top: 3px;
   right: 3px; /* LTR */
+}
+[dir="rtl"] table th.active img {
+  left: 3px;
+  right: auto;
 }
 table td.active {
   background: #e9e9dd;
@@ -536,7 +622,10 @@ table.system-status-report tr.error {
 tr td:last-child {
   border-right: 1px solid #bebfb9; /* LTR */
 }
-
+[dir="rtl"] tr td:last-child {
+  border-left: 1px solid #bebfb9;
+  border-right: none;
+}
 
 /**
  * Responsive tables.
@@ -579,14 +668,24 @@ fieldset {
   position: relative;
   margin: 1em 0;
 }
+[dir="rtl"] fieldset {
+  padding: 2.5em 0 0 0;
+}
 fieldset .fieldset-legend {
   margin-top: 0.5em;
   padding-left: 15px; /* LTR */
   position: absolute;
   text-transform: uppercase;
 }
+[dir="rtl"] fieldset .fieldset-legend {
+  padding-right: 15px;
+  right: 0;
+}
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
+}
+[dir="rtl"] fieldset .fieldset-wrapper {
+  padding: 0 15px 13px 13px;
 }
 fieldset.collapsed {
   background-color: transparent;
@@ -661,6 +760,11 @@ div.teaser-checkbox .form-item,
   font-size: 0.923em;
   padding: 2px 0 0 0; /* LTR */
 }
+[dir="rtl"] .filter-wrapper .form-item,
+[dir="rtl"] .filter-wrapper .filter-guidelines,
+[dir="rtl"] .filter-wrapper .filter-help {
+  padding: 2px 0 0 0;
+}
 ul.tips,
 div.description,
 .form-item div.description {
@@ -672,9 +776,17 @@ div.description,
 ul.tips li {
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
 }
+[dir="rtl"] ul.tips li {
+  margin: 0.25em 1.5em 0.25em 0;
+}
 body div.form-type-radio div.description,
 body div.form-type-checkbox div.description {
   margin-left: 1.5em; /* LTR */
+}
+[dir="rtl"] body div.form-type-radio div.description,
+[dir="rtl"] body div.form-type-checkbox div.description {
+  margin-left: 0;
+  margin-right: 1.5em;
 }
 input.form-submit,
 a.button {
@@ -694,6 +806,11 @@ a.button {
   background: url(images/buttons.png) 0 0 repeat-x;
   -moz-border-radius: 20px;
   border-radius: 20px;
+}
+[dir="rtl"] input.form-submit,
+[dir="rtl"] a.button {
+  margin-left: 1em;
+  margin-right: 0;
 }
 a.button:link,
 a.button:visited,
@@ -775,10 +892,19 @@ ul.action-links li {
   float: left; /* LTR */
   margin: 0 1em 0 0; /* LTR */
 }
+[dir="rtl"] ul.action-links li {
+  float: right;
+  margin: 0 0 0 1em;
+}
 ul.action-links a {
   padding-left: 15px; /* LTR */
   background: transparent url(images/add.png) no-repeat 0 center;
   line-height: 30px;
+}
+[dir="rtl"] ul.action-links a {
+  padding-left: 0;
+  padding-right: 15px;
+  background-position: right center;
 }
 
 /* Exceptions */
@@ -846,6 +972,12 @@ div.admin-options div.form-item {
   margin-right: 10px; /* LTR */
   float: left; /* LTR */
 }
+[dir="rtl"] div.admin-options label,
+[dir="rtl"] div.admin-options div.form-item {
+  margin-left: 10px;
+  margin-right: 0;
+  float: right;
+}
 div.admin-options div.form-item {
   padding: 0;
   border: 0;
@@ -861,11 +993,19 @@ body.in-maintenance #sidebar-first {
   float: left; /* LTR */
   width: 200px;
 }
+[dir="rtl"] body.in-maintenance #sidebar-first {
+  float: right;
+}
 body.in-maintenance #content {
   float: right; /* LTR */
   width: 550px;
   padding-right: 20px; /* LTR */
   clear: none;
+}
+[dir="rtl"] body.in-maintenance #content {
+  float: left;
+  padding-left: 20px;
+  padding-right: 0;
 }
 body.in-maintenance #page {
   overflow: auto;
@@ -898,14 +1038,24 @@ ol.task-list {
   list-style-type: none;
   list-style-image: none;
 }
+[dir="rtl"] ol.task-list {
+  margin-right: 0;
+}
 ol.task-list li {
   padding: 0.5em 1em 0.5em 20px; /* LTR */
   color: #adadad;
+}
+[dir="rtl"] ol.task-list li {
+  padding: 0.5em 20px 0.5em 1em;
 }
 ol.task-list li.active {
   background: transparent url(images/task-item.png) no-repeat 3px 50%; /* LTR */
   padding: 0.5em 1em 0.5em 20px; /* LTR */
   color: #000;
+}
+[dir="rtl"] ol.task-list li.active {
+  background: transparent url(images/task-item-rtl.png) no-repeat right 50%;
+  padding: 0.5em 20px 0.5em 1em;
 }
 ol.task-list li.done {
   background: transparent url(images/task-check.png) no-repeat 0 50%;
@@ -917,6 +1067,11 @@ div.add-or-remove-shortcuts {
   float: left; /* LTR */
   padding-top: 6px;
   padding-left: 6px; /* LTR */
+}
+[dir="rtl"] div.add-or-remove-shortcuts {
+  float: right;
+  padding-left: 0;
+  padding-right: 6px;
 }
 
 /* Field UI */
@@ -951,6 +1106,9 @@ div.add-or-remove-shortcuts {
 }
 #block-node-recent .more-link {
   padding: 0 5px 5px 0; /* LTR */
+}
+[dir="rtl"] #block-node-recent .more-link {
+  padding: 0 0 5px 5px;
 }
 
 /* Dropbutton */
