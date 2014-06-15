@@ -370,7 +370,7 @@ function system_element_info() {
   $types['radios'] = array(
     '#input' => TRUE,
     '#process' => array('form_process_radios'),
-    '#theme_wrappers' => array('radios'),
+    '#theme_wrappers' => array('container__radios'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
   );
   $types['radio'] = array(
@@ -384,7 +384,7 @@ function system_element_info() {
   $types['checkboxes'] = array(
     '#input' => TRUE,
     '#process' => array('form_process_checkboxes'),
-    '#theme_wrappers' => array('checkboxes'),
+    '#theme_wrappers' => array('container__checkboxes'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
   );
   $types['checkbox'] = array(
