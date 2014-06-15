@@ -17,10 +17,10 @@
 }
 [dir="rtl"] .dblog-filter-form .form-item-type,
 [dir="rtl"] .dblog-filter-form .form-item-severity {
-  margin: .1em .1em .1em .9em;
   float: right;
-  padding-right: 0;
+  margin: .1em .1em .1em .9em;
   padding-left: .8em;
+  padding-right: 0;
 }
 .dblog-filter-form .form-type-select select {
   width: 100%;

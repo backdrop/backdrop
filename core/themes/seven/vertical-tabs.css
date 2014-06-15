@@ -8,6 +8,9 @@
   margin: 10px 0;
   position: relative;
 }
+[dir="rtl"] .vertical-tabs {
+  background: #fff url(images/fc-rtl.png) repeat-y right 0;
+}
 fieldset.vertical-tabs-pane {
   border: 0;
   padding: 0;
@@ -21,6 +24,10 @@ fieldset.vertical-tabs-pane {
   margin: 0 -100% -1px 0; /* LTR */
   padding: 0;
   width: 240px;
+}
+[dir="rtl"] .vertical-tabs .vertical-tabs-list {
+  float: right;
+  margin: 0 0 -1px -100%;
 }
 .vertical-tabs .vertical-tab-button {
   list-style: none;
@@ -58,6 +65,12 @@ fieldset.vertical-tabs-pane {
   border-right-color: #fff; /* LTR */
   border-top: 1px solid #ccc;
 }
+[dir="rtl"] .vertical-tabs .selected a,
+[dir="rtl"] .vertical-tabs .selected a:hover,
+[dir="rtl"] .vertical-tabs .selected a:focus,
+[dir="rtl"] .vertical-tabs .selected a:active {
+  border-left-color: #fff;
+}
 .vertical-tabs .first.selected a,
 .vertical-tabs .first.selected a:hover {
   border-top: 0;
@@ -68,6 +81,10 @@ fieldset.vertical-tabs-pane {
 .vertical-tabs .vertical-tabs-panes {
   margin: 0 0 0 265px; /* LTR */
   padding: 10px 15px 10px 0; /* LTR */
+}
+[dir="rtl"] .vertical-tabs .vertical-tabs-panes {
+  margin: 0 265px 0 0;
+  padding: 10px 0 10px 15px;
 }
 fieldset.vertical-tabs-pane > legend {
   display: none;
