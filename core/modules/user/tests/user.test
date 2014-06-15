@@ -153,7 +153,6 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
     $new_user = reset($accounts);
     $this->assertEqual($new_user->name, $name, 'Username matches.');
     $this->assertEqual($new_user->mail, $mail, 'E-mail address matches.');
-    $this->assertEqual($new_user->theme, '', 'Correct theme field.');
     $this->assertEqual($new_user->signature, '', 'Correct signature field.');
     $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
     $this->assertEqual($new_user->status, variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');

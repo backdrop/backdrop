@@ -94,9 +94,8 @@ function drupal_theme_initialize() {
   drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
   $themes = list_themes();
 
-  // Only select the user selected theme if it is available in the
-  // list of themes that can be accessed.
-  $theme = !empty($user->theme) && drupal_theme_access($user->theme) ? $user->theme : variable_get('theme_default', 'stark');
+  // Load the default theme, Stark.
+  $theme = variable_get('theme_default', 'stark');
 
   // Allow modules to override the theme. Validation has already been performed
   // inside menu_get_custom_theme(), so we do not need to check it again here.
