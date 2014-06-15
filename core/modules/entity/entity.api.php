@@ -63,7 +63,10 @@
  *       object.
  *   - bundles: An array describing all bundles for this object type. Keys are
  *     bundles machine names, as found in the objects' 'bundle' property
- *     (defined in the 'entity keys' entry above). Elements:
+ *     (defined in the 'entity keys' entry above). This entry can be omitted if
+ *     this entity type exposes a single bundle (all entities have the same
+ *     collection of fields). The name of this single bundle will be the same as
+ *     the entity type. Elements:
  *     - label: The human-readable name of the bundle.
  *     - admin: An array of information that allows Field UI pages to attach
  *       themselves to the existing administration pages for the bundle.

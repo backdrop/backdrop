@@ -38,7 +38,7 @@ function update_fix_compatibility() {
 }
 
 /**
- * Helper function to test compatibility of a module or theme.
+ * Tests the compatibility of a module or theme.
  */
 function update_check_incompatibility($name, $type = 'module') {
   static $themes, $modules;
@@ -339,7 +339,7 @@ function update_module_enable(array $modules) {
 }
 
 /**
- * Perform one update and store the results for display on finished page.
+ * Performs one update and stores the results for display on the results page.
  *
  * If an update function completes successfully, it should return a message
  * as a string indicating success, for example:
@@ -439,7 +439,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 class DrupalUpdateException extends Exception { }
 
 /**
- * Start the database update batch process.
+ * Starts the database update batch process.
  *
  * @param $start
  *   An array whose keys contain the names of modules to be updated during the
@@ -509,7 +509,7 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
 }
 
 /**
- * Finish the update process and store results for eventual display.
+ * Finishes the update process and stores the results for eventual display.
  *
  * After the updates run, all caches are flushed. The update results are
  * stored into the session (for example, to be displayed on the update results
@@ -542,7 +542,7 @@ function update_finished($success, $results, $operations) {
 }
 
 /**
- * Return a list of all the pending database updates.
+ * Returns a list of all the pending database updates.
  *
  * @return
  *   An associative array keyed by module name which contains all information
@@ -851,7 +851,7 @@ function update_already_performed($module, $number) {
 }
 
 /**
- * Invoke hook_update_dependencies() in all installed modules.
+ * Invokes hook_update_dependencies() in all installed modules.
  *
  * This function is similar to module_invoke_all(), with the main difference
  * that it does not require that a module be enabled to invoke its hook, only
