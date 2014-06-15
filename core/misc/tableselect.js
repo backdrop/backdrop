@@ -9,7 +9,7 @@ Drupal.behaviors.tableSelect = {
 
 Drupal.tableSelect = function () {
   // Do not add a "Select all" checkbox if there are no rows with checkboxes in the table
-  if ($('td input:checkbox', this).length == 0) {
+  if ($(this).find('td input[type="checkbox"]').length === 0) {
     return;
   }
 
@@ -18,7 +18,7 @@ Drupal.tableSelect = function () {
   var strings = { 'selectAll': Drupal.t('Select all rows in this table'), 'selectNone': Drupal.t('Deselect all rows in this table') };
   var updateSelectAll = function (state) {
     // Update table's select-all checkbox (and sticky header's if available).
-    $(table).prev('table.sticky-header').addBack().find('th.select-all input:checkbox').each(function() {
+    $table.prev('table.sticky-header').andSelf().find('th.select-all input[type="checkbox"]').each(function() {
       $(this).attr('title', state ? strings.selectNone : strings.selectAll);
       this.checked = state;
     });
@@ -26,7 +26,7 @@ Drupal.tableSelect = function () {
 
   // Find all <th> with class select-all, and insert the check all checkbox.
   $('th.select-all', table).prepend($('<input type="checkbox" class="form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
-    if ($(event.target).is('input:checkbox')) {
+    if ($(event.target).is('input[type="checkbox"]')) {
       // Loop through all checkboxes and set their state to the select all checkbox' state.
       checkboxes.each(function () {
         this.checked = event.target.checked;
@@ -39,7 +39,7 @@ Drupal.tableSelect = function () {
   });
 
   // For each of the checkboxes within the table that are not disabled.
-  checkboxes = $('td input:checkbox:enabled', table).click(function (e) {
+  checkboxes = $table.find('td input[type="checkbox"]:enabled').click(function (e) {
     // Either add or remove the selected class based on the state of the check all checkbox.
     $(this).closest('tr').toggleClass('selected', this.checked);
 
@@ -72,7 +72,7 @@ Drupal.tableSelectRange = function (from, to, state) {
 
     // Either add or remove the selected class based on the state of the target checkbox.
     $(i).toggleClass('selected', state);
-    $('input:checkbox', i).prop('checked', state);
+    $i.find('input[type="checkbox"]').attr('checked', state);
 
     if (to.nodeType) {
       // If we are at the end of the range, stop.
