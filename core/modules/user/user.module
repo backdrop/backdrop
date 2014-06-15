@@ -110,7 +110,7 @@ function user_entity_info() {
         'user' => array(
           'label' => t('User'),
           'admin' => array(
-            'path' => 'admin/config/people/accounts',
+            'path' => 'admin/config/people/manage',
             'access arguments' => array('administer users'),
           ),
         ),
@@ -509,7 +509,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')), '@user-settings-url' => url('admin/config/people/accounts'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
@@ -1436,8 +1436,8 @@ function user_menu() {
     'weight' => -4,
     'file' => 'user.admin.inc',
   );
-  $items['admin/people/people'] = array(
-    'title' => 'List',
+  $items['admin/people/list'] = array(
+    'title' => 'User account list',
     'description' => 'Find and manage people interacting with your site.',
     'access arguments' => array('administer users'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -1445,39 +1445,51 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
-  // Permissions and role forms.
-  $items['admin/people/permissions'] = array(
+  $items['admin/people/create'] = array(
+    'title' => 'Add user account',
+    'page arguments' => array('create'),
+    'access arguments' => array('administer users'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  // Administration pages.
+  $items['admin/config/people'] = array(
+    'title' => 'People',
+    'description' => 'Configure user accounts.',
+    'position' => 'left',
+    'weight' => -20,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  // Permissions forms.
+  $items['admin/config/people/permissions'] = array(
     'title' => 'Permissions',
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_permissions'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/people/permissions/list'] = array(
-    'title' => 'Permissions',
-    'description' => 'Determine access to features by selecting permissions for roles.',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -8,
-  );
-  $items['admin/people/permissions/roles'] = array(
+
+  // Role forms.
+  $items['admin/config/people/roles'] = array(
     'title' => 'Roles',
-    'description' => 'List, edit, or add user roles.',
+    'description' => 'List, edit, or add levels of access, or <em>user roles</em>.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_roles'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => -5,
   );
-  $items['admin/people/permissions/roles/edit/%user_role'] = array(
+  $items['admin/config/people/roles/edit/%user_role'] = array(
     'title' => 'Edit role',
     'page arguments' => array('user_admin_role', 5),
     'access callback' => 'user_role_edit_access',
     'access arguments' => array(5),
   );
-  $items['admin/people/permissions/roles/delete/%user_role'] = array(
+  $items['admin/config/people/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_role_delete_confirm', 5),
@@ -1504,19 +1516,16 @@ function user_menu() {
     'file' => 'system.admin.inc',
     'file path' => backdrop_get_path('module', 'system'),
   );
-  $items['admin/config/people/accounts'] = array(
+
+  // Settings.
+  $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
-    'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
+    'description' => 'Configure settings for user accounts including registration requirements and customization of automated e-mails.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'weight' => -10,
-  );
-  $items['admin/config/people/accounts/settings'] = array(
-    'title' => 'Settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+    'weight' => 10,
   );
 
   $items['user/%user'] = array(
