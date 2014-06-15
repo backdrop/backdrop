@@ -1542,8 +1542,6 @@ function install_configure_form($form, &$form_state, &$install_state) {
   // work during installation.
   drupal_add_js(array('copyFieldValue' => array('edit-site-mail' => array('edit-account-mail'))), 'setting');
   drupal_add_js('jQuery(function () { Drupal.cleanURLsInstallCheck(); });', 'inline');
-  // Add JS to show / hide the 'Email administrator about site updates' elements
-  drupal_add_js('jQuery(function () { Drupal.hideEmailAdministratorCheckbox() });', 'inline');
   // Build menu to allow clean URL check.
   menu_rebuild();
 
@@ -1804,6 +1802,13 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#default_value' => array(1, 2),
     '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="@drupal">Drupal.org</a>.', array('@drupal' => 'http://drupal.org')),
     '#weight' => 15,
+  );
+  $form['update_notifications']['update_status_module'][2] = array(
+    '#states' => array(
+      'visible' => array(
+        'input[name="update_status_module[1]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['actions'] = array('#type' => 'actions');
