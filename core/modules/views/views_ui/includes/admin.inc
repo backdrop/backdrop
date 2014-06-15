@@ -458,8 +458,6 @@ function views_ui_add_form($form, &$form_state) {
  * The problem with this is that the function is private so it's not guaranteed
  * that it might not be renamed/changed. In the future field.module or something else
  * should provide a public validate function.
- *
- * @see _element_validate_integer_positive()
  */
 function views_element_validate_integer($element, &$form_state) {
   $value = $element['#value'];

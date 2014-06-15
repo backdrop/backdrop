@@ -292,6 +292,12 @@ description = Tests URL validation by valid_url()
 group = Common
 file = tests/common.test
 
+[CommonValidNumberStepUnitTestCase]
+name = Number step validation
+description = Tests number step validation by valid_number_step().
+group = Common
+file = tests/common.test
+
 [CommonDrupalWriteRecordTestCase]
 name = Data record write functionality
 description = Tests writing of data records with drupal_write_record().

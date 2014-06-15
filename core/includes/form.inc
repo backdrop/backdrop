@@ -3901,7 +3901,7 @@ function theme_tel($variables) {
 }
 
 /**
- * Returns HTML for a url form element.
+ * Returns HTML for a URL form element.
  *
  * @param $variables
  *   An associative array containing:
@@ -3989,6 +3989,89 @@ function theme_color($variables) {
   _form_set_class($element, array('form-color'));
 
   return '<input' . drupal_attributes($element['#attributes']) . ' />' . drupal_render_children($element);
+}
+
+/**
+ * Returns HTML for a number form element.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title, #value, #description, #size, #min, #max,
+ *     #placeholder, #required, #attributes, #step.
+ *
+ * @ingroup themeable
+ */
+function theme_number($variables) {
+  $element = $variables['element'];
+  $element['#attributes']['type'] = 'number';
+  element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder'));
+  _form_set_class($element, array('form-number'));
+
+  return '<input' . drupal_attributes($element['#attributes']) . ' />' . drupal_render_children($element);
+}
+
+/**
+ * Form element validation handler for #type 'number'.
+ *
+ * Note that #required is validated by _form_validate() already.
+ */
+function form_validate_number(&$element, &$form_state) {
+  $value = $element['#value'];
+  if ($value === '') {
+    return;
+  }
+
+  $name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
+
+  // Ensure the input is numeric.
+  if (!is_numeric($value)) {
+    form_error($element, t('%name must be a number.', array('%name' => $name)));
+    return;
+  }
+
+  // Ensure that the input is greater than the #min property, if set.
+  if (isset($element['#min']) && $value < $element['#min']) {
+    form_error($element, t('%name must be higher or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+  }
+
+  // Ensure that the input is less than the #max property, if set.
+  if (isset($element['#max']) && $value > $element['#max']) {
+    form_error($element, t('%name must be below or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+  }
+
+  if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
+    // Check that the input is an allowed multiple of #step (offset by #min if
+    // #min is set).
+    $offset = isset($element['#min']) ? $element['#min'] : 0.0;
+
+    if (!valid_number_step($value, $element['#step'], $offset)) {
+      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+    }
+  }
+}
+
+/**
+ * Returns HTML for a range form element.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title, #value, #description, #min, #max, #placeholder,
+ *     #required, #attributes, #step.
+ *
+ * @ingroup themeable
+ */
+function theme_range($variables) {
+  $element = $variables['element'];
+
+  $element['#attributes']['type'] = 'range';
+  element_set_attributes($element, array('id', 'name', 'value', 'step', 'min', 'max', 'placeholder'));
+  _form_set_class($element, array('form-range'));
+
+  $output = '<input' . drupal_attributes($element['#attributes']) . ' />';
+
+  return $output;
 }
 
 /**
@@ -4084,11 +4167,10 @@ function form_process_weight($element) {
   }
   // Otherwise, use a text field.
   else {
-    $element['#type'] = 'textfield';
+    $element['#type'] = 'number';
     // Use a field big enough to fit most weights.
-    $element['#size'] = 10;
-    $element['#element_validate'] = array('element_validate_integer');
-    $element += element_info('textfield');
+    $element['#max'] = 1000000;
+    $element += element_info('number');
   }
 
   return $element;
@@ -4327,36 +4409,6 @@ function _form_set_class(&$element, $class = array()) {
   }
   if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
     $element['#attributes']['class'][] = 'error';
-  }
-}
-
-/**
- * Form element validation handler for integer elements.
- */
-function element_validate_integer($element, &$form_state) {
-  $value = $element['#value'];
-  if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
-    form_error($element, t('%name must be an integer.', array('%name' => $element['#title'])));
-  }
-}
-
-/**
- * Form element validation handler for integer elements that must be positive.
- */
-function element_validate_integer_positive($element, &$form_state) {
-  $value = $element['#value'];
-  if ($value !== '' && (!is_numeric($value) || intval($value) != $value || $value <= 0)) {
-    form_error($element, t('%name must be a positive integer.', array('%name' => $element['#title'])));
-  }
-}
-
-/**
- * Form element validation handler for number elements.
- */
-function element_validate_number($element, &$form_state) {
-  $value = $element['#value'];
-  if ($value != '' && !is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $element['#title'])));
   }
 }
 

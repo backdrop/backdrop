@@ -1188,6 +1188,23 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(user_access('access user profiles', $account), t('User no longer has "access user profiles" permission.'));
     $this->assertTrue(user_access('administer site configuration', $account), t('User still has "administer site configuration" permission.'));
   }
+
+  /**
+   * Tests the admin form validates user picture settings.
+   */
+  function testUserPictureAdminFormValidation() {
+    $this->drupalLogin($this->drupalCreateUser(array('administer account settings')));
+    // The default values are valid.
+    $this->drupalPost('admin/config/people/accounts', array(), 'Save configuration');
+    $this->assertText(t('The configuration options have been saved.'), 'The default values are valid.');
+
+    // The form does not save with an invalid file size.
+    $edit = array(
+      'user_picture_file_size' => $this->randomName(),
+    );
+    $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->assertNoText(t('The configuration options have been saved.'), 'The form does not save with an invalid file size.');
+  }
 }
 
 class UserAdminTestCase extends DrupalWebTestCase {
