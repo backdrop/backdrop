@@ -110,7 +110,7 @@ function user_entity_info() {
         'user' => array(
           'label' => t('User'),
           'admin' => array(
-            'path' => 'admin/config/people/accounts',
+            'path' => 'admin/config/people/manage',
             'access arguments' => array('administer users'),
           ),
         ),
@@ -1436,8 +1436,8 @@ function user_menu() {
     'weight' => -4,
     'file' => 'user.admin.inc',
   );
-  $items['admin/people/people'] = array(
-    'title' => 'List',
+  $items['admin/people/list'] = array(
+    'title' => 'User account list',
     'description' => 'Find and manage people interacting with your site.',
     'access arguments' => array('administer users'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -1445,49 +1445,8 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
-  // Permissions and role forms.
-  $items['admin/people/permissions'] = array(
-    'title' => 'Permissions',
-    'description' => 'Determine access to features by selecting permissions for roles.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('user_admin_permissions'),
-    'access arguments' => array('administer permissions'),
-    'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['admin/people/permissions/list'] = array(
-    'title' => 'Permissions',
-    'description' => 'Determine access to features by selecting permissions for roles.',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -8,
-  );
-  $items['admin/people/permissions/roles'] = array(
-    'title' => 'Roles',
-    'description' => 'List, edit, or add user roles.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('user_admin_roles'),
-    'access arguments' => array('administer permissions'),
-    'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => -5,
-  );
-  $items['admin/people/permissions/roles/edit/%user_role'] = array(
-    'title' => 'Edit role',
-    'page arguments' => array('user_admin_role', 5),
-    'access callback' => 'user_role_edit_access',
-    'access arguments' => array(5),
-  );
-  $items['admin/people/permissions/roles/delete/%user_role'] = array(
-    'title' => 'Delete role',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('user_admin_role_delete_confirm', 5),
-    'access callback' => 'user_role_edit_access',
-    'access arguments' => array(5),
-    'file' => 'user.admin.inc',
-  );
-
   $items['admin/people/create'] = array(
-    'title' => 'Add user',
+    'title' => 'Add user account',
     'page arguments' => array('create'),
     'access arguments' => array('administer users'),
     'type' => MENU_LOCAL_ACTION,
@@ -1504,19 +1463,50 @@ function user_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  $items['admin/config/people/accounts'] = array(
+
+  // Permissions forms.
+  $items['admin/config/people/permissions'] = array(
+    'title' => 'Permissions',
+    'description' => 'Determine access to features by selecting <em>permissions</em> for roles.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_admin_permissions'),
+    'access arguments' => array('administer permissions'),
+    'file' => 'user.admin.inc',
+  );
+
+  // Role forms.
+  $items['admin/config/people/roles'] = array(
+    'title' => 'Roles',
+    'description' => 'List, edit, or add levels of access, or <em>user roles</em>.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_admin_roles'),
+    'access arguments' => array('administer permissions'),
+    'file' => 'user.admin.inc',
+  );
+  $items['admin/config/people/roles/edit/%user_role'] = array(
+    'title' => 'Edit role',
+    'page arguments' => array('user_admin_role', 5),
+    'access callback' => 'user_role_edit_access',
+    'access arguments' => array(5),
+  );
+  $items['admin/config/people/roles/delete/%user_role'] = array(
+    'title' => 'Delete role',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_admin_role_delete_confirm', 5),
+    'access callback' => 'user_role_edit_access',
+    'access arguments' => array(5),
+    'file' => 'user.admin.inc',
+  );
+
+  // Settings.
+  $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
-    'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
+    'description' => 'Configure settings for user accounts including registration requirements and customization of automated e-mails.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'weight' => -10,
-  );
-  $items['admin/config/people/accounts/settings'] = array(
-    'title' => 'Settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+    'weight' => 10,
   );
 
   $items['user/%user'] = array(
@@ -1569,6 +1559,19 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
   return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function user_menu_alter(&$items) {
+  if (module_exists('field_ui')) {
+    // Accounts (field UI).
+    $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];
+    $items['admin/config/people/manage']['type'] = MENU_NORMAL_ITEM;
+    $items['admin/config/people/manage']['weight'] = -20;
+    $items['admin/config/people/manage']['description'] = 'Configure display and behavior of user accounts including configuration of <em>fields</em> like user pictures.';
+  }
 }
 
 /**
