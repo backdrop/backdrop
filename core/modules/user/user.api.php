@@ -88,9 +88,11 @@ function hook_user_delete($account) {
  * by using batch_set().
  *
  * @param $edit
- *   The array of form values submitted by the user.
+ *   The array of form values submitted by the user. Assign values to this
+ *   array to save changes in the database.
  * @param $account
- *   The user object on which the operation is being performed.
+ *   The user object on which the operation is performed. Values assigned in
+ *   this object will not be saved in the database.
  * @param $method
  *   The account cancellation method.
  *

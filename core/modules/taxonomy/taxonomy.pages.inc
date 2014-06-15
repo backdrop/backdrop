@@ -114,7 +114,7 @@ function taxonomy_term_feed(TaxonomyTerm $term) {
  * @see taxonomy_menu()
  * @see taxonomy_field_widget_info()
  */
-function taxonomy_autocomplete($field_name, $tags_typed = '') {
+function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   // Make sure the field exists and is a taxonomy field.
   if (!($field = field_info_field($field_name)) || $field['type'] !== 'taxonomy_term_reference') {
     // Error string. The JavaScript handler will realize this is not JSON and
@@ -127,7 +127,7 @@ function taxonomy_autocomplete($field_name, $tags_typed = '') {
   $tags_typed = drupal_explode_tags($tags_typed);
   $tag_last = drupal_strtolower(array_pop($tags_typed));
 
-  $matches = array();
+  $term_matches = array();
   if ($tag_last != '') {
 
     // Part of the criteria for the query come from the field's own settings.
@@ -156,7 +156,6 @@ function taxonomy_autocomplete($field_name, $tags_typed = '') {
 
     $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
 
-    $term_matches = array();
     foreach ($tags_return as $tid => $name) {
       $n = $name;
       // Term names containing commas or quotes must be wrapped in quotes.

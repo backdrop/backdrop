@@ -128,7 +128,8 @@ function update_script_selection_form($form, &$form_state) {
     drupal_set_message(t('No pending updates.'));
     unset($form);
     $form['links'] = array(
-      '#markup' => theme('item_list', array('items' => update_helpful_links())),
+      '#theme' => 'links',
+      '#links' => update_helpful_links(),
     );
 
     // No updates to run, so caches won't get flushed later.  Clear them now.
@@ -163,11 +164,15 @@ function update_script_selection_form($form, &$form_state) {
  * Provides links to the homepage and administration pages.
  */
 function update_helpful_links() {
-  // NOTE: we can't use l() here because the URL would point to
-  // 'core/update.php?q=admin'.
-  $links[] = '<a href="' . base_path() . '">Front page</a>';
+  $links['front'] = array(
+    'title' => t('Front page'),
+    'href' => '<front>',
+  );
   if (user_access('access administration pages')) {
-    $links[] = '<a href="' . base_path() . '?q=admin">Administration pages</a>';
+    $links['admin-pages'] = array(
+      'title' => t('Administration pages'),
+      'href' => 'admin',
+    );
   }
   return $links;
 }
@@ -177,7 +182,6 @@ function update_helpful_links() {
  */
 function update_results_page() {
   drupal_set_title('Drupal database update');
-  $links = update_helpful_links();
 
   update_task_list();
   // Report end result.
@@ -205,7 +209,7 @@ function update_results_page() {
     $output .= "<p><strong>Reminder: don't forget to set the <code>\$update_free_access</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
   }
 
-  $output .= theme('item_list', array('items' => $links));
+  $output .= theme('links', array('links' => update_helpful_links()));
 
   // Output a list of queries executed.
   if (!empty($_SESSION['update_results'])) {
