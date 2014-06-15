@@ -7250,9 +7250,6 @@ function drupal_common_theme() {
     'radio' => array(
       'render element' => 'element',
     ),
-    'radios' => array(
-      'render element' => 'element',
-    ),
     'date' => array(
       'render element' => 'element',
     ),
@@ -7260,9 +7257,6 @@ function drupal_common_theme() {
       'render element' => 'form',
     ),
     'checkbox' => array(
-      'render element' => 'element',
-    ),
-    'checkboxes' => array(
       'render element' => 'element',
     ),
     'button' => array(
