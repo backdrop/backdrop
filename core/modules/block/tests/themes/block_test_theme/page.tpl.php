@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Custom theme implementation to display a single Drupal page without
+ * Custom theme implementation to display a single Backdrop page without
  * sidebars. The sidebars are hidden by regions_hidden for this theme, so
  * the default page.tpl.php will not work without throwing exceptions.
  */

@@ -13,8 +13,8 @@
 /**
  * Define all blocks provided by the module.
  *
- * This hook declares to Drupal what blocks are provided by your module and can
- * optionally specify initial block configuration settings.
+ * This hook declares to Backdrop what blocks are provided by your module and
+ * can optionally specify initial block configuration settings.
  *
  * In hook_block_info(), each block your module provides is given a unique
  * identifier referred to as "delta" (the array key in the return value). Delta
@@ -43,20 +43,20 @@
  *     This is used to identify the block on administration screens, and
  *     is not displayed to non-administrative users.
  *   - cache: (optional) A bitmask describing what kind of caching is
- *     appropriate for the block. Drupal provides the following bitmask
+ *     appropriate for the block. Backdrop provides the following bitmask
  *     constants for defining cache granularity:
- *     - DRUPAL_CACHE_PER_ROLE (default): The block can change depending on the
+ *     - BACKDROP_CACHE_PER_ROLE (default): The block can change depending on the
  *       roles the user viewing the page belongs to.
- *     - DRUPAL_CACHE_PER_USER: The block can change depending on the user
+ *     - BACKDROP_CACHE_PER_USER: The block can change depending on the user
  *       viewing the page. This setting can be resource-consuming for sites
  *       with large number of users, and should only be used when
- *       DRUPAL_CACHE_PER_ROLE is not sufficient.
- *     - DRUPAL_CACHE_PER_PAGE: The block can change depending on the page
+ *       BACKDROP_CACHE_PER_ROLE is not sufficient.
+ *     - BACKDROP_CACHE_PER_PAGE: The block can change depending on the page
  *       being viewed.
- *     - DRUPAL_CACHE_GLOBAL: The block is the same for every user on every
+ *     - BACKDROP_CACHE_GLOBAL: The block is the same for every user on every
  *       page where it is visible.
- *     - DRUPAL_CACHE_CUSTOM: The module implements its own caching system.
- *     - DRUPAL_NO_CACHE: The block should not get cached.
+ *     - BACKDROP_CACHE_CUSTOM: The module implements its own caching system.
+ *     - BACKDROP_NO_CACHE: The block should not get cached.
  *   - properties: (optional) Array of additional metadata to add to the block.
  *     Common properties include:
  *     - administrative: Boolean that categorizes this block as usable in an
@@ -108,12 +108,12 @@ function hook_block_info() {
   // This example comes from node.module.
   $blocks['syndicate'] = array(
     'info' => t('Syndicate'),
-    'cache' => DRUPAL_NO_CACHE
+    'cache' => BACKDROP_NO_CACHE
   );
 
   $blocks['recent'] = array(
     'info' => t('Recent content'),
-    // DRUPAL_CACHE_PER_ROLE will be assumed.
+    // BACKDROP_CACHE_PER_ROLE will be assumed.
   );
 
   return $blocks;
@@ -164,7 +164,7 @@ function hook_block_configure($delta = '') {
       '#type' => 'select',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => variable_get('node_recent_block_count', 10),
-      '#options' => drupal_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
+      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
     );
   }
   return $form;

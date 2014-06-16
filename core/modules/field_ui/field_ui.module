@@ -53,7 +53,7 @@ function field_ui_menu() {
           $field_position = count(explode('/', $path)) + 1;
 
           // Extract access information, providing defaults.
-          $access = array_intersect_key($bundle_info['admin'], drupal_map_assoc(array('access callback', 'access arguments')));
+          $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
           $access += array(
             'access callback' => 'user_access',
             'access arguments' => array('administer site configuration'),
@@ -61,7 +61,7 @@ function field_ui_menu() {
 
           $items["$path/fields"] = array(
             'title' => 'Manage fields',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_overview_form', $entity_type, $bundle_arg),
             'type' => MENU_LOCAL_TASK,
             'weight' => 1,
@@ -71,14 +71,14 @@ function field_ui_menu() {
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title callback' => 'field_ui_menu_title',
             'title arguments' => array($field_position),
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_edit_form', $field_position),
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu/edit"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Edit',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_edit_form', $field_position),
             'type' => MENU_DEFAULT_LOCAL_TASK,
             'file' => 'field_ui.admin.inc',
@@ -86,7 +86,7 @@ function field_ui_menu() {
           $items["$path/fields/%field_ui_menu/field-settings"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Field settings',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_settings_form', $field_position),
             'type' => MENU_LOCAL_TASK,
             'file' => 'field_ui.admin.inc',
@@ -94,7 +94,7 @@ function field_ui_menu() {
           $items["$path/fields/%field_ui_menu/widget-type"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Widget type',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_widget_type_form', $field_position),
             'type' => MENU_LOCAL_TASK,
             'file' => 'field_ui.admin.inc',
@@ -102,7 +102,7 @@ function field_ui_menu() {
           $items["$path/fields/%field_ui_menu/delete"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Delete',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_delete_form', $field_position),
             'type' => MENU_VISIBLE_IN_BREADCRUMB,
             'weight' => 10,
@@ -112,7 +112,7 @@ function field_ui_menu() {
           // 'Manage display' tab.
           $items["$path/display"] = array(
             'title' => 'Manage display',
-            'page callback' => 'drupal_get_form',
+            'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_overview_form', $entity_type, $bundle_arg, 'default'),
             'type' => MENU_LOCAL_TASK,
             'weight' => 2,

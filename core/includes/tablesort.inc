@@ -96,7 +96,7 @@ function tablesort_cell($cell, $header, $ts, $i) {
  *   page request except for those pertaining to table sorting.
  */
 function tablesort_get_query_parameters() {
-  return drupal_get_query_parameters($_GET, array('q', 'sort', 'order'));
+  return backdrop_get_query_parameters($_GET, array('q', 'sort', 'order'));
 }
 
 /**

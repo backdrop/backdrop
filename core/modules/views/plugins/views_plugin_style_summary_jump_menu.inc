@@ -139,7 +139,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       'default_value' => $default_value,
     );
 
-    $form = drupal_get_form('system_jump_menu', $options, $settings);
-    return drupal_render($form);
+    $form = backdrop_get_form('system_jump_menu', $options, $settings);
+    return backdrop_render($form);
   }
 }

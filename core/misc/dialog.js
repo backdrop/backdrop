@@ -8,7 +8,7 @@
 
 "use strict";
 
-Drupal.settings.dialog = {
+Backdrop.settings.dialog = {
   // This option will turn off resizable and draggable.
   autoResize: true,
   // jQuery UI does not support percentage heights, but we convert this property
@@ -19,14 +19,14 @@ Drupal.settings.dialog = {
   width: '100%',
   position: 'center',
   close: function (e) {
-    Drupal.detachBehaviors(e.target, null, 'unload');
+    Backdrop.detachBehaviors(e.target, null, 'unload');
   }
 };
 
-Drupal.dialog = function (element, options) {
+Backdrop.dialog = function (element, options) {
 
   function openDialog (settings) {
-    settings = $.extend({}, Drupal.settings.dialog, options, settings);
+    settings = $.extend({}, Backdrop.settings.dialog, options, settings);
     // Trigger a global event to allow scripts to bind events to the dialog.
     $(window).trigger('dialog:beforecreate', [dialog, $element, settings]);
     $element.dialog(settings);
@@ -58,7 +58,7 @@ Drupal.dialog = function (element, options) {
    * This is used as a window resize and scroll callback to reposition the
    * jQuery UI dialog. Although not a built-in jQuery UI option, this can
    * be disabled by setting autoResize: false in the options array when creating
-   * a new Drupal.dialog().
+   * a new Backdrop.dialog().
    */
   function resetPosition (event) {
     var positionOptions = ['width', 'height', 'minWidth', 'minHeight', 'maxHeight', 'maxWidth', 'position'];

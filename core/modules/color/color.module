@@ -56,7 +56,7 @@ function _color_html_alter(&$vars) {
       foreach ($color_paths as $color_path) {
         // Color module currently requires unique file names to be used,
         // which allows us to compare different file paths.
-        if (drupal_basename($old_path) == drupal_basename($color_path)) {
+        if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
           // Replace the path to the new css file.
           // This keeps the order of the stylesheets intact.
           $vars['css'][$old_path]['data'] = $color_path;
@@ -64,7 +64,7 @@ function _color_html_alter(&$vars) {
       }
     }
 
-    $vars['styles'] = drupal_get_css($vars['css']);
+    $vars['styles'] = backdrop_get_css($vars['css']);
   }
 }
 
@@ -97,8 +97,8 @@ function color_get_info($theme) {
     return $theme_info[$theme];
   }
 
-  $path = drupal_get_path('theme', $theme);
-  $file = DRUPAL_ROOT . '/' . $path . '/color/color.inc';
+  $path = backdrop_get_path('theme', $theme);
+  $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
   if ($path && file_exists($file)) {
     include $file;
     $theme_info[$theme] = $info;
@@ -129,7 +129,7 @@ function color_get_palette($theme, $default = FALSE) {
  * @ingroup forms
  */
 function color_scheme_form($complete_form, &$form_state, $theme) {
-  $base = drupal_get_path('module', 'color');
+  $base = backdrop_get_path('module', 'color');
   $info = color_get_info($theme);
 
   $info['schemes'][''] = array('title' => t('Custom'), 'colors' => array());
@@ -226,28 +226,28 @@ function theme_color_scheme_form($variables) {
 
   $theme = $form['theme']['#value'];
   $info = $form['info']['#value'];
-  $path = drupal_get_path('theme', $theme) . '/';
-  drupal_add_css($path . $info['preview_css']);
+  $path = backdrop_get_path('theme', $theme) . '/';
+  backdrop_add_css($path . $info['preview_css']);
 
-  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : drupal_get_path('module', 'color') . '/' . 'preview.js';
+  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : backdrop_get_path('module', 'color') . '/' . 'preview.js';
   // Add the JS at a weight below color.js.
-  drupal_add_js($preview_js_path, array('weight' => -1));
+  backdrop_add_js($preview_js_path, array('weight' => -1));
 
   $output  = '';
   $output .= '<div class="color-form clearfix">';
   // Color schemes
-  $output .= drupal_render($form['scheme']);
+  $output .= backdrop_render($form['scheme']);
   // Palette
   $output .= '<div id="palette" class="clearfix">';
   foreach (element_children($form['palette']) as $name) {
-    $output .= drupal_render($form['palette'][$name]);
+    $output .= backdrop_render($form['palette'][$name]);
   }
   $output .= '</div>';
   // Preview
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   $output .= '<h2>' . t('Preview') . '</h2>';
   // Attempt to load preview HTML if the theme provides it.
-  $preview_html_path = DRUPAL_ROOT . '/' . (isset($info['preview_html']) ? drupal_get_path('theme', $theme) . '/' . $info['preview_html'] : drupal_get_path('module', 'color') . '/preview.html');
+  $preview_html_path = BACKDROP_ROOT . '/' . (isset($info['preview_html']) ? backdrop_get_path('theme', $theme) . '/' . $info['preview_html'] : backdrop_get_path('module', 'color') . '/preview.html');
   $output .= file_get_contents($preview_html_path);
   // Close the wrapper div.
   $output .= '</div>';
@@ -278,7 +278,7 @@ function color_palette_color_value($element, $input = FALSE, $form_state = array
     // Start with the provided value for this textfield, and validate that if
     // necessary, falling back on the default value.
     $value = form_type_textfield_value($element, $input, $form_state);
-    if (!$value || !isset($form_state['complete form']['#token']) || color_valid_hexadecimal_string($value) || drupal_valid_token($form_state['values']['form_token'], $form_state['complete form']['#token'])) {
+    if (!$value || !isset($form_state['complete form']['#token']) || color_valid_hexadecimal_string($value) || backdrop_valid_token($form_state['values']['form_token'], $form_state['complete form']['#token'])) {
       return $value;
     }
     else {
@@ -342,7 +342,7 @@ function color_scheme_form_submit($form, &$form_state) {
   // Make sure enough memory is available, if PHP's memory limit is compiled in.
   if (function_exists('memory_get_usage')) {
     // Fetch source image dimensions.
-    $source = drupal_get_path('theme', $theme) . '/' . $info['base_image'];
+    $source = backdrop_get_path('theme', $theme) . '/' . $info['base_image'];
     list($width, $height) = getimagesize($source);
 
     // We need at least a copy of the source and a target buffer of the same
@@ -355,18 +355,18 @@ function color_scheme_form_submit($form, &$form_state) {
     $usage = memory_get_usage(TRUE);
     $memory_limit = ini_get('memory_limit');
     $size = parse_size($memory_limit);
-    if (!drupal_check_memory_limit($usage + $required, $memory_limit)) {
-      drupal_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. You need at least %size more. Check the <a href="@url">PHP documentation</a> for more information.', array('%size' => format_size($usage + $required - $size), '@url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
+    if (!backdrop_check_memory_limit($usage + $required, $memory_limit)) {
+      backdrop_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. You need at least %size more. Check the <a href="@url">PHP documentation</a> for more information.', array('%size' => format_size($usage + $required - $size), '@url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
       return;
     }
   }
 
   // Delete old files.
   foreach (variable_get('color_' . $theme . '_files', array()) as $file) {
-    @drupal_unlink($file);
+    @backdrop_unlink($file);
   }
   if (isset($file) && $file = dirname($file)) {
-    @drupal_rmdir($file);
+    @backdrop_rmdir($file);
   }
 
   // Don't render the default colorscheme, use the standard theme instead.
@@ -388,7 +388,7 @@ function color_scheme_form_submit($form, &$form_state) {
   }
   $paths['target'] = $paths['target'] . '/';
   $paths['id'] = $id;
-  $paths['source'] = drupal_get_path('theme', $theme) . '/';
+  $paths['source'] = backdrop_get_path('theme', $theme) . '/';
   $paths['files'] = $paths['map'] = array();
 
   // Save palette and logo location.
@@ -397,7 +397,7 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Copy over neutral images.
   foreach ($info['copy'] as $file) {
-    $base = drupal_basename($file);
+    $base = backdrop_basename($file);
     $source = $paths['source'] . $file;
     $filepath = file_unmanaged_copy($source, $paths['target'] . $base);
     $paths['map'][$file] = $base;
@@ -421,20 +421,20 @@ function color_scheme_form_submit($form, &$form_state) {
     foreach ($files as $file) {
       // Aggregate @imports recursively for each configured top level CSS file
       // without optimization. Aggregation and optimization will be
-      // handled by drupal_build_css_cache() only.
-      $style = drupal_load_stylesheet($paths['source'] . $file, FALSE);
+      // handled by backdrop_build_css_cache() only.
+      $style = backdrop_load_stylesheet($paths['source'] . $file, FALSE);
 
       // Return the path to where this CSS file originated from, stripping
       // off the name of the file at the end of the path.
       $base = base_path() . dirname($paths['source'] . $file) . '/';
-      _drupal_build_css_path(NULL, $base);
+      _backdrop_build_css_path(NULL, $base);
 
       // Prefix all paths within this CSS file, ignoring absolute paths.
-      $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_drupal_build_css_path', $style);
+      $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $style);
 
       // Rewrite stylesheet with new colors.
       $style = _color_rewrite_stylesheet($theme, $info, $paths, $palette, $style);
-      $base_file = drupal_basename($file);
+      $base_file = backdrop_basename($file);
       $css[] = $paths['target'] . $base_file;
       _color_save_stylesheet($paths['target'] . $base_file, $style, $paths);
     }
@@ -453,7 +453,7 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   // Prepare color conversion table.
   $conversion = $palette;
   foreach ($conversion as $k => $v) {
-    $conversion[$k] = drupal_strtolower($v);
+    $conversion[$k] = backdrop_strtolower($v);
   }
   $default = color_get_palette($theme, TRUE);
 
@@ -472,7 +472,7 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   // Iterate over all the parts.
   foreach ($style as $chunk) {
     if ($is_color) {
-      $chunk = drupal_strtolower($chunk);
+      $chunk = backdrop_strtolower($chunk);
       // Check if this is one of the colors in the default palette.
       if ($key = array_search($chunk, $default)) {
         $chunk = $conversion[$key];
@@ -524,7 +524,7 @@ function _color_save_stylesheet($file, $style, &$paths) {
   $paths['files'][] = $filepath;
 
   // Set standard file permissions for webserver-generated files.
-  drupal_chmod($file);
+  backdrop_chmod($file);
 }
 
 /**
@@ -574,8 +574,8 @@ function _color_render_images($theme, &$info, &$paths, $palette) {
   // Cut out slices.
   foreach ($info['slices'] as $file => $coord) {
     list($x, $y, $width, $height) = $coord;
-    $base = drupal_basename($file);
-    $image = drupal_realpath($paths['target'] . $base);
+    $base = backdrop_basename($file);
+    $image = backdrop_realpath($paths['target'] . $base);
 
     // Cut out slice.
     if ($file == 'screenshot.png') {
@@ -594,7 +594,7 @@ function _color_render_images($theme, &$info, &$paths, $palette) {
     $paths['files'][] = $image;
 
     // Set standard file permissions for webserver-generated files
-    drupal_chmod($image);
+    backdrop_chmod($image);
 
     // Build before/after map of image paths.
     $paths['map'][$file] = $base;

@@ -46,7 +46,7 @@ function ajax_test_menu() {
  * Implements hook_system_theme_info().
  */
 function ajax_test_system_theme_info() {
-  $themes['test_theme'] = drupal_get_path('module', 'ajax_test') . '/themes/test_theme/test_theme.info';
+  $themes['test_theme'] = backdrop_get_path('module', 'ajax_test') . '/themes/test_theme/test_theme.info';
   return $themes;
 }
 
@@ -54,11 +54,11 @@ function ajax_test_system_theme_info() {
  * Menu callback; Return an element suitable for use by ajax_deliver().
  *
  * Additionally ensures that ajax_render() incorporates JavaScript settings
- * generated during the page request by invoking drupal_add_js() with a dummy
+ * generated during the page request by invoking backdrop_add_js() with a dummy
  * setting.
  */
 function ajax_test_render() {
-  drupal_add_js(array('ajax' => 'test'), 'setting');
+  backdrop_add_js(array('ajax' => 'test'), 'setting');
   return array('#type' => 'ajax', '#commands' => array());
 }
 
@@ -77,14 +77,14 @@ function ajax_test_error() {
  * Menu callback: Renders a form elements and links with #ajax['dialog'].
  */
 function ajax_test_dialog() {
-  drupal_add_library('system', 'drupal.dialog.ajax');
+  backdrop_add_library('system', 'backdrop.ajax');
 
   // Add two wrapper elements for testing non-modal dialogs. Modal dialogs use
   // the global backdrop-modal wrapper by default.
   $build['dialog_wrappers'] = array('#markup' => '<div id="ajax-test-dialog-wrapper-1"></div><div id="ajax-test-dialog-wrapper-2"></div>');
 
   // Dialog behavior applied to a button.
-  $build['form'] = drupal_get_form('ajax_test_dialog_form');
+  $build['form'] = backdrop_get_form('ajax_test_dialog_form');
 
   // Dialog behavior applied to a #type => 'link'.
   $build['client_side_title']['#markup'] = '<h2>Client-side dialog links</h2><p>These links have no special server-side handling. They request a normal page as a dialog. They use the "use-ajax" class combined with the "data-dialog" and "data-dialog-options" properties.</p>';
@@ -206,7 +206,7 @@ function ajax_test_dialog_contents($page_mode = 'nojs', $is_modal = 0) {
       '#commands' => array(),
     );
     $title = t('AJAX Dialog');
-    $html = drupal_render($content);
+    $html = backdrop_render($content);
     if ($is_modal) {
       $commands['#commands'][] = ajax_command_open_modal_dialog($title, $html);
     }

@@ -190,10 +190,10 @@ class UserStorageController extends EntityDatabaseStorageController {
       $queried_users[$key]->data = unserialize($record->data);
       $queried_users[$key]->roles = array();
       if ($record->uid) {
-        $queried_users[$record->uid]->roles[DRUPAL_AUTHENTICATED_RID] = 'authenticated user';
+        $queried_users[$record->uid]->roles[BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
       }
       else {
-        $queried_users[$record->uid]->roles[DRUPAL_ANONYMOUS_RID] = 'anonymous user';
+        $queried_users[$record->uid]->roles[BACKDROP_ANONYMOUS_RID] = 'anonymous user';
       }
     }
 
@@ -225,7 +225,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       $values['created'] = REQUEST_TIME;
     }
     // Users always have the authenticated user role.
-    $values['roles'][DRUPAL_AUTHENTICATED_RID] = 'authenticated user';
+    $values['roles'][BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
 
     return parent::create($values);
   }
@@ -248,7 +248,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Update the user password if it has changed.
     if ($entity->isNew() || (!empty($entity->pass) && $entity->pass != $entity->original->pass)) {
       // Allow alternate password hashing schemes.
-      require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+      require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
       $entity->pass = user_hash_password(trim($entity->pass));
       // Abort if the hashing failed and returned FALSE.
       if (!$entity->pass) {
@@ -324,9 +324,9 @@ class UserStorageController extends EntityDatabaseStorageController {
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
       if ($entity->pass != $entity->original->pass) {
-        drupal_session_destroy_uid($entity->uid);
+        backdrop_session_destroy_uid($entity->uid);
         if ($entity->uid == $GLOBALS['user']->uid) {
-          drupal_session_regenerate();
+          backdrop_session_regenerate();
         }
       }
 
@@ -341,7 +341,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
         $query = db_insert('users_roles')->fields(array('uid', 'rid'));
         foreach (array_keys($entity->roles) as $rid) {
-          if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+          if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
             $query->values(array(
               'uid' => $entity->uid,
               'rid' => $rid,
@@ -353,7 +353,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
       // If the user was blocked, delete the user's sessions to force a logout.
       if ($entity->original->status != $entity->status && $entity->status == 0) {
-        drupal_session_destroy_uid($entity->uid);
+        backdrop_session_destroy_uid($entity->uid);
       }
 
       // Send emails after we have the new user object.
@@ -368,7 +368,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       if (count($entity->roles) > 1) {
         $query = db_insert('users_roles')->fields(array('uid', 'rid'));
         foreach (array_keys($entity->roles) as $rid) {
-          if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+          if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
             $query->values(array(
               'uid' => $entity->uid,
               'rid' => $rid,

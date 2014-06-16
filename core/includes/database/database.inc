@@ -14,7 +14,7 @@
  * @{
  * Allow the use of different database servers using the same code base.
  *
- * Drupal provides a database abstraction layer to provide developers with
+ * Backdrop provides a database abstraction layer to provide developers with
  * the ability to support multiple database servers easily. The intent of
  * this layer is to preserve the syntax and power of SQL as much as possible,
  * but also allow developers a way to leverage more complex functionality in
@@ -25,7 +25,7 @@
  * The system is built atop PHP's PDO (PHP Data Objects) database API and
  * inherits much of its syntax and semantics.
  *
- * Most Drupal database SELECT queries are performed by a call to db_query() or
+ * Most Backdrop database SELECT queries are performed by a call to db_query() or
  * db_query_range(). Module authors should also consider using the PagerDefault
  * Extender for queries that return results that need to be presented on
  * multiple pages (see https://drupal.org/node/508796), and the TableSort
@@ -38,7 +38,7 @@
  * SELECT n.nid, n.title, n.created FROM node n WHERE n.uid = $uid
  *   ORDER BY n.created DESC LIMIT 0, 10;
  * @endcode
- * one would instead call the Drupal functions:
+ * one would instead call the Backdrop functions:
  * @code
  * $result = db_query_range('SELECT n.nid, n.title, n.created
  *   FROM {node} n WHERE n.uid = :uid
@@ -120,12 +120,12 @@
  * while also allowing optimizations such as multi-insert queries. UPDATE and
  * DELETE queries have a similar pattern.
  *
- * Drupal also supports transactions, including a transparent fallback for
+ * Backdrop also supports transactions, including a transparent fallback for
  * databases that do not support transactions. To start a new transaction,
  * simply call $txn = db_transaction(); in your own code. The transaction will
  * remain open for as long as the variable $txn remains in scope.  When $txn is
  * destroyed, the transaction will be committed.  If your transaction is nested
- * inside of another then Drupal will track each transaction and only commit
+ * inside of another then Backdrop will track each transaction and only commit
  * the outer-most transaction when the last transaction object goes out out of
  * scope, that is, all relevant queries completed successfully.
  *
@@ -177,7 +177,7 @@
 /**
  * Base Database API class.
  *
- * This class provides a Drupal-specific extension of the PDO database
+ * This class provides a Backdrop-specific extension of the PDO database
  * abstraction class in PHP. Every database driver implementation must provide a
  * concrete implementation of it to support special handling required by that
  * database.
@@ -432,9 +432,9 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Appends a database prefix to all tables in a query.
    *
-   * Queries sent to Drupal should wrap all table names in curly brackets. This
-   * function searches for this syntax and adds Drupal's table prefix to all
-   * tables, allowing Drupal to coexist with other systems in the same database
+   * Queries sent to Backdrop should wrap all table names in curly brackets. This
+   * function searches for this syntax and adds Backdrop's table prefix to all
+   * tables, allowing Backdrop to coexist with other systems in the same database
    * and/or schema if necessary.
    *
    * @param $sql
@@ -632,7 +632,7 @@ abstract class DatabaseConnection extends PDO {
    * Executes a query string against the database.
    *
    * This method provides a central handler for the actual execution of every
-   * query. All queries executed by Drupal are executed as PDO prepared
+   * query. All queries executed by Backdrop are executed as PDO prepared
    * statements.
    *
    * @param $query
@@ -717,7 +717,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Expands out shorthand placeholders.
    *
-   * Drupal supports an alternate syntax for doing arrays of values. We
+   * Backdrop supports an alternate syntax for doing arrays of values. We
    * therefore need to expand them out into a full, executable query string.
    *
    * @param $query
@@ -1022,14 +1022,14 @@ abstract class DatabaseConnection extends PDO {
    * This method throws an exception if no transaction is active.
    *
    * @param $savepoint_name
-   *   The name of the savepoint. The default, 'drupal_transaction', will roll
+   *   The name of the savepoint. The default, 'backdrop_transaction', will roll
    *   the entire transaction back.
    *
    * @throws DatabaseTransactionNoActiveException
    *
    * @see DatabaseTransaction::rollback()
    */
-  public function rollback($savepoint_name = 'drupal_transaction') {
+  public function rollback($savepoint_name = 'backdrop_transaction') {
     if (!$this->supportsTransactions()) {
       return;
     }
@@ -1684,7 +1684,7 @@ abstract class Database {
     // We cannot rely on the registry yet, because the registry requires an
     // open database connection.
     $driver_class = 'DatabaseConnection_' . $driver;
-    require_once DRUPAL_ROOT . '/core/includes/database/' . $driver . '/database.inc';
+    require_once BACKDROP_ROOT . '/core/includes/database/' . $driver . '/database.inc';
     $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
     $new_connection->setTarget($target);
     $new_connection->setKey($key);
@@ -1879,16 +1879,16 @@ class DatabaseTransaction {
    * The name of the transaction.
    *
    * This is used to label the transaction savepoint. It will be overridden to
-   * 'drupal_transaction' if there is no transaction depth.
+   * 'backdrop_transaction' if there is no transaction depth.
    */
   protected $name;
 
   public function __construct(DatabaseConnection $connection, $name = NULL) {
     $this->connection = $connection;
     // If there is no transaction depth, then no transaction has started. Name
-    // the transaction 'drupal_transaction'.
+    // the transaction 'backdrop_transaction'.
     if (!$depth = $connection->transactionDepth()) {
-      $this->name = 'drupal_transaction';
+      $this->name = 'backdrop_transaction';
     }
     // Within transactions, savepoints are used. Each savepoint requires a
     // name. So if no name is present we need to create one.
@@ -2713,7 +2713,7 @@ function db_condition($conjunction) {
  */
 
 /**
- * Creates a new table from a Drupal table definition.
+ * Creates a new table from a Backdrop table definition.
  *
  * @param $name
  *   The name of the table to create.
@@ -2744,9 +2744,9 @@ function db_field_names($fields) {
  * Checks if an index exists in the given table.
  *
  * @param $table
- *   The name of the table in drupal (no prefixing).
+ *   The name of the table in Backdrop (no prefixing).
  * @param $name
- *   The name of the index in drupal (no prefixing).
+ *   The name of the index in Backdrop (no prefixing).
  *
  * @return
  *   TRUE if the given index exists, otherwise FALSE.
@@ -2759,7 +2759,7 @@ function db_index_exists($table, $name) {
  * Checks if a table exists.
  *
  * @param $table
- *   The name of the table in drupal (no prefixing).
+ *   The name of the table in Backdrop (no prefixing).
  *
  * @return
  *   TRUE if the given table exists, otherwise FALSE.
@@ -2772,7 +2772,7 @@ function db_table_exists($table) {
  * Checks if a column exists in the given table.
  *
  * @param $table
- *   The name of the table in drupal (no prefixing).
+ *   The name of the table in Backdrop (no prefixing).
  * @param $field
  *   The name of the field.
  *
@@ -3037,8 +3037,8 @@ function db_ignore_slave() {
   // is assumed if there are more than one.
   if (count($connection_info) > 1) {
     // Five minutes is long enough to allow the slave to break and resume
-    // interrupted replication without causing problems on the Drupal site from
-    // the old data.
+    // interrupted replication without causing problems on the Backdrop site
+    // from the old data.
     $duration = variable_get('maximum_replication_lag', 300);
     // Set session variable with amount of time to delay before using slave.
     $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;

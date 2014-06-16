@@ -29,7 +29,7 @@ function module_test_schema() {
  */
 function module_test_install() {
   $record = array('data' => 'Data inserted in hook_install()');
-  drupal_write_record('module_test', $record);
+  backdrop_write_record('module_test', $record);
 }
 
 /**
@@ -37,6 +37,6 @@ function module_test_install() {
  */
 function module_test_enable() {
   $record = array('data' => 'Data inserted in hook_enable()');
-  drupal_write_record('module_test', $record);
+  backdrop_write_record('module_test', $record);
 }
 

@@ -24,10 +24,10 @@ function seven_preprocess_html(&$vars) {
       'content' => 'width=device-width, initial-scale=1',
     ),
   );
-  drupal_add_html_head($viewport, 'viewport');
+  backdrop_add_html_head($viewport, 'viewport');
 
   // Add conditional CSS for IE8 and below.
-  drupal_add_css(path_to_theme() . '/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'weight' => 999, 'preprocess' => FALSE));
+  backdrop_add_css(path_to_theme() . '/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'weight' => 999, 'preprocess' => FALSE));
 }
 
 /**
@@ -94,7 +94,7 @@ function seven_admin_block_content($variables) {
  */
 function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
-  $theme_path = drupal_get_path('theme', 'seven');
+  $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
     return theme('image', array('uri' => $theme_path . '/images/arrow-asc.png', 'alt' => t('sort ascending'), 'width' => 13, 'height' => 13, 'title' => t('sort ascending')));
   }
@@ -109,12 +109,12 @@ function seven_tablesort_indicator($variables) {
 function seven_css_alter(&$css) {
   // Use Seven's vertical tabs style instead of the default one.
   if (isset($css['core/misc/vertical-tabs.css'])) {
-    $css['core/misc/vertical-tabs.css']['data'] = drupal_get_path('theme', 'seven') . '/vertical-tabs.css';
+    $css['core/misc/vertical-tabs.css']['data'] = backdrop_get_path('theme', 'seven') . '/vertical-tabs.css';
     $css['core/misc/vertical-tabs.css']['type'] = 'file';
   }
   // Use Seven's jQuery UI theme style instead of the default one.
   if (isset($css['core/misc/ui/jquery.ui.theme.css'])) {
-    $css['core/misc/ui/jquery.ui.theme.css']['data'] = drupal_get_path('theme', 'seven') . '/jquery.ui.theme.css';
+    $css['core/misc/ui/jquery.ui.theme.css']['data'] = backdrop_get_path('theme', 'seven') . '/jquery.ui.theme.css';
     $css['core/misc/ui/jquery.ui.theme.css']['type'] = 'file';
   }
 }

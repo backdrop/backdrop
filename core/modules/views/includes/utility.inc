@@ -251,8 +251,8 @@ function views_break_phrase($str, &$handler = NULL) {
  *   The string which should be trimmed.
  */
 function views_trim_text($alter, $value) {
-  if (drupal_strlen($value) > $alter['max_length']) {
-    $value = drupal_substr($value, 0, $alter['max_length']);
+  if (backdrop_strlen($value) > $alter['max_length']) {
+    $value = backdrop_substr($value, 0, $alter['max_length']);
     if (!empty($alter['word_boundary'])) {
       $regex = "(.*)\b.+";
       if (function_exists('mb_ereg')) {
@@ -340,7 +340,7 @@ function views_get_timezone() {
  *  The type of date field, 'int' or 'datetime'.
  * @param $set_offset
  *   The name of a field that holds the timezone offset or a fixed timezone
- *   offset value. If not provided, the normal Drupal timezone handling
+ *   offset value. If not provided, the normal Backdrop timezone handling
  *   will be used, i.e. $set_offset = 0 will make no timezone adjustment.
  * @return
  *   An appropriate SQL string for the db type and field type.
@@ -398,7 +398,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
  *   The type of date field, 'int' or 'datetime'.
  * @param $set_offset
  *   The name of a field that holds the timezone offset or a fixed timezone
- *   offset value. If not provided, the normal Drupal timezone handling
+ *   offset value. If not provided, the normal Backdrop timezone handling
  *   will be used, i.e. $set_offset = 0 will make no timezone adjustment.
  * @return
  *   An appropriate SQL string for the db type and field type.
@@ -484,7 +484,7 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
  *   The type of date field, 'int' or 'datetime'.
  * @param $set_offset
  *   The name of a field that holds the timezone offset or a fixed timezone
- *   offset value. If not provided, the normal Drupal timezone handling
+ *   offset value. If not provided, the normal Backdrop timezone handling
  *   will be used, i.e. $set_offset = 0 will make no timezone adjustment.
  * @return
  *   An appropriate SQL string for the db type and field type.
@@ -555,12 +555,12 @@ function views_discover_plugins() {
     $module_dir = isset($result['module']) ? $result['module'] : $module;
     // Setup automatic path/file finding for theme registration
     if ($module_dir == 'views') {
-      $theme_path = drupal_get_path('module', $module_dir) . '/theme';
+      $theme_path = backdrop_get_path('module', $module_dir) . '/theme';
       $theme_file = 'theme.inc';
-      $path = drupal_get_path('module', $module_dir) . '/plugins';
+      $path = backdrop_get_path('module', $module_dir) . '/plugins';
     }
     else {
-      $theme_path = $path = drupal_get_path('module', $module_dir);
+      $theme_path = $path = backdrop_get_path('module', $module_dir);
       $theme_file = "$module.views.inc";
     }
 
@@ -595,7 +595,7 @@ function views_discover_plugins() {
   }
 
   // Let other modules modify the plugins.
-  drupal_alter('views_plugins', $cache);
+  backdrop_alter('views_plugins', $cache);
   return $cache;
 }
 

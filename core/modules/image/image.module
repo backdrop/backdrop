@@ -26,7 +26,7 @@ const IMAGE_STORAGE_DEFAULT = 4;
 define('IMAGE_STORAGE_MODULE', IMAGE_STORAGE_OVERRIDE | IMAGE_STORAGE_DEFAULT);
 
 // Load all Field module hooks for Image.
-require_once DRUPAL_ROOT . '/core/modules/image/image.field.inc';
+require_once BACKDROP_ROOT . '/core/modules/image/image.field.inc';
 
 /**
  * Implements hook_menu().
@@ -75,7 +75,7 @@ function image_menu() {
   $items['admin/config/media/image-styles/add'] = array(
     'title' => 'Add style',
     'description' => 'Add a new image style.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_style_add_form'),
     'access arguments' => array('administer image styles'),
     'type' => MENU_LOCAL_ACTION,
@@ -85,7 +85,7 @@ function image_menu() {
   $items['admin/config/media/image-styles/edit/%image_style'] = array(
     'title' => 'Edit style',
     'description' => 'Configure an image style.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_style_form', 5),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -94,7 +94,7 @@ function image_menu() {
     'title' => 'Delete style',
     'description' => 'Delete an image style.',
     'load arguments' => array((string) IMAGE_STORAGE_NORMAL),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_style_delete_form', 5),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -103,7 +103,7 @@ function image_menu() {
     'title' => 'Revert style',
     'description' => 'Revert an image style.',
     'load arguments' => array((string) IMAGE_STORAGE_MODULE),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_style_revert_form', 5),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -112,7 +112,7 @@ function image_menu() {
     'title' => 'Edit image effect',
     'description' => 'Edit an existing effect within a style.',
     'load arguments' => array(5),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_effect_form', 5, 7),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -121,7 +121,7 @@ function image_menu() {
     'title' => 'Delete image effect',
     'description' => 'Delete an existing effect from a style.',
     'load arguments' => array(5),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_effect_delete_form', 5, 7),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -130,7 +130,7 @@ function image_menu() {
     'title' => 'Add image effect',
     'description' => 'Add a new effect to a style.',
     'load arguments' => array(5),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_effect_form', 5, 7),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
@@ -211,7 +211,7 @@ function image_permission() {
 function image_views_api() {
   return array(
     'api' => '3.0',
-    'path' => drupal_get_path('module', 'image') . '/views',
+    'path' => backdrop_get_path('module', 'image') . '/views',
   );
 }
 
@@ -277,7 +277,7 @@ function image_file_download($uri) {
           // Send headers describing the image's size, and MIME-type...
           'Content-Type' => $info['mime_type'],
           'Content-Length' => $info['file_size'],
-          // By not explicitly setting them here, this uses normal Drupal
+          // By not explicitly setting them here, this uses normal Backdrop
           // Expires, Cache-Control and ETag headers to prevent proxy or
           // browser caching of private images.
         );
@@ -475,7 +475,7 @@ function image_field_update_instance($instance, $prior_instance) {
  * Clear cached versions of a specific file in all styles.
  *
  * @param $path
- *   The Drupal file path to the original image.
+ *   The Backdrop file path to the original image.
  */
 function image_path_flush($path) {
   $styles = image_styles();
@@ -495,7 +495,7 @@ function image_path_flush($path) {
  * @see image_style_load()
  */
 function image_styles() {
-  $styles = &drupal_static(__FUNCTION__);
+  $styles = &backdrop_static(__FUNCTION__);
 
   // Grab from cache or build the array.
   if (!isset($styles)) {
@@ -536,7 +536,7 @@ function image_styles() {
         });
         $styles[$style['name']] = $style;
       }
-      drupal_alter('image_styles', $styles);
+      backdrop_alter('image_styles', $styles);
       cache()->set('image_styles', $styles);
     }
   }
@@ -681,7 +681,7 @@ function image_style_options($include_empty = TRUE, $output = CHECK_PLAIN) {
   // Use the array concatenation operator '+' here instead of array_merge(),
   // because the latter loses the datatype of the array keys, turning
   // associative string keys into numeric ones without warning.
-  $options = $options + drupal_map_assoc(array_keys($styles));
+  $options = $options + backdrop_map_assoc(array_keys($styles));
   if (empty($options)) {
     $options[''] = t('No defined styles');
   }
@@ -699,7 +699,7 @@ function image_style_options($include_empty = TRUE, $output = CHECK_PLAIN) {
 function image_style_deliver($style, $scheme) {
   // Check that the style is defined and the scheme is valid.
   if (!$style || !file_stream_wrapper_valid_scheme($scheme)) {
-    drupal_exit();
+    backdrop_exit();
   }
 
   $args = func_get_args();
@@ -719,11 +719,11 @@ function image_style_deliver($style, $scheme) {
     else {
       $headers = module_invoke_all('file_download', $image_uri);
       if (in_array(-1, $headers) || empty($headers)) {
-        return drupal_access_denied();
+        return backdrop_access_denied();
       }
       if (count($headers)) {
         foreach ($headers as $name => $value) {
-          drupal_add_http_header($name, $value);
+          backdrop_add_http_header($name, $value);
         }
       }
     }
@@ -731,16 +731,16 @@ function image_style_deliver($style, $scheme) {
 
   // Don't start generating the image if the derivative already exists or if
   // generation is in progress in another thread.
-  $lock_name = 'image_style_deliver:' . $style['name'] . ':' . drupal_hash_base64($image_uri);
+  $lock_name = 'image_style_deliver:' . $style['name'] . ':' . backdrop_hash_base64($image_uri);
   if (!file_exists($derivative_uri)) {
     $lock_acquired = lock_acquire($lock_name);
     if (!$lock_acquired) {
       // Tell client to retry again in 3 seconds. Currently no browsers are known
       // to support Retry-After.
-      drupal_add_http_header('Status', '503 Service Unavailable');
-      drupal_add_http_header('Retry-After', 3);
+      backdrop_add_http_header('Status', '503 Service Unavailable');
+      backdrop_add_http_header('Retry-After', 3);
       print t('Image generation in progress. Try again shortly.');
-      drupal_exit();
+      backdrop_exit();
     }
   }
 
@@ -758,9 +758,9 @@ function image_style_deliver($style, $scheme) {
   }
   else {
     watchdog('image', 'Unable to generate the derived image located at %path.', array('%path' => $derivative_uri));
-    drupal_add_http_header('Status', '500 Internal Server Error');
+    backdrop_add_http_header('Status', '500 Internal Server Error');
     print t('Error generating image.');
-    drupal_exit();
+    backdrop_exit();
   }
 }
 
@@ -786,7 +786,7 @@ function image_style_deliver($style, $scheme) {
  */
 function image_style_create_derivative($style, $source, $destination) {
   // Get the folder for the final location of this style.
-  $directory = drupal_dirname($destination);
+  $directory = backdrop_dirname($destination);
 
   // Build the destination folder tree if it doesn't already exist.
   if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
@@ -866,12 +866,12 @@ function image_style_flush($style) {
   // Clear image style and effect caches.
   cache()->delete('image_styles');
   cache()->deletePrefix('image_effects:');
-  drupal_static_reset('image_styles');
-  drupal_static_reset('image_effects');
+  backdrop_static_reset('image_styles');
+  backdrop_static_reset('image_effects');
 
   // Clear field caches so that formatters may be added for this style.
   field_info_cache_clear();
-  drupal_theme_rebuild();
+  backdrop_theme_rebuild();
 
   // Clear page caches when flushing.
   if (module_exists('block')) {
@@ -962,7 +962,7 @@ function image_effect_definitions() {
   // cached separately.
   $langcode = $language_interface->langcode;
 
-  $effects = &drupal_static(__FUNCTION__);
+  $effects = &backdrop_static(__FUNCTION__);
 
   if (!isset($effects)) {
     if ($cache = cache()->get("image_effect_definitions:$langcode")) {
@@ -970,7 +970,7 @@ function image_effect_definitions() {
     }
     else {
       $effects = array();
-      include_once DRUPAL_ROOT . '/core/modules/image/image.effects.inc';
+      include_once BACKDROP_ROOT . '/core/modules/image/image.effects.inc';
       foreach (module_implements('image_effect_info') as $module) {
         foreach (module_invoke($module, 'image_effect_info') as $name => $effect) {
           // Ensure the current toolkit supports the effect.
@@ -981,7 +981,7 @@ function image_effect_definitions() {
         }
       }
       uasort($effects, '_image_effect_definitions_sort');
-      drupal_alter('image_effect_info', $effects);
+      backdrop_alter('image_effect_info', $effects);
       cache()->set("image_effect_definitions:$langcode", $effects);
     }
   }
@@ -1123,7 +1123,7 @@ function image_effect_apply($image, $effect) {
  * @param $variables
  *   An associative array containing:
  *   - style_name: The name of the style to be used to alter the original image.
- *   - uri: The path of the image file relative to the Drupal files directory.
+ *   - uri: The path of the image file relative to the Backdrop files directory.
  *     This function does not work with images outside the files directory nor
  *     with remotely hosted images. This should be in a format such as
  *     'images/image.jpg', or using a stream wrapper such as

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Default theme implementation to display a single Drupal page while offline.
+ * Default theme implementation to display a single Backdrop page while offline.
  *
  * All the available variables are mirrored in html.tpl.php and page.tpl.php.
  * Some may be blank but they are provided for consistency.

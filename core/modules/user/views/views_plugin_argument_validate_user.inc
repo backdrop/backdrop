@@ -111,7 +111,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     if (!empty($this->options['restrict_roles']) && !empty($this->options['roles'])) {
       $roles = $this->options['roles'];
       $account->roles = array();
-      $account->roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
+      $account->roles[] = $account->uid ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID;
       $result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
       foreach ($result as $role) {
         $account->roles[] = $role->rid;

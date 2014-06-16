@@ -195,7 +195,7 @@ function user_field_extra_fields() {
  * @see user_load_by_name()
  * @see EntityFieldQuery
  *
- * @todo Remove $conditions in Drupal 8.
+ * @todo Remove $conditions for consistency with other loaders.
  */
 function user_load_multiple($uids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('user', $uids, $conditions, $reset);
@@ -204,11 +204,11 @@ function user_load_multiple($uids = array(), $conditions = array(), $reset = FAL
 /**
  * Loads a user object.
  *
- * Drupal has a global $user object, which represents the currently-logged-in
+ * Backdrop has a global $user object, which represents the currently-logged-in
  * user. So to avoid confusion and to avoid clobbering the global $user object,
  * it is a good idea to assign the result of this function to a different local
  * variable, generally $account. If you actually do want to act as the user you
- * are loading, it is essential to call drupal_save_session(FALSE); first.
+ * are loading, it is essential to call backdrop_save_session(FALSE); first.
  * See
  * @link http://drupal.org/node/218104 Safely impersonating another user @endlink
  * for more information.
@@ -311,7 +311,7 @@ function user_validate_name($name) {
                   $name)) {
     return t('The username contains an illegal character.');
   }
-  if (drupal_strlen($name) > USERNAME_MAX_LENGTH) {
+  if (backdrop_strlen($name) > USERNAME_MAX_LENGTH) {
     return t('The username %name is too long: it must be %max characters or less.', array('%name' => $name, '%max' => USERNAME_MAX_LENGTH));
   }
 }
@@ -359,7 +359,7 @@ function user_password($length = 10) {
   for ($i = 0; $i < $length; $i++) {
     do {
       // Find a secure random number within the range needed.
-      $index = ord(drupal_random_bytes(1));
+      $index = ord(backdrop_random_bytes(1));
     } while ($index > $len);
 
     // Each iteration, pick a random character from the
@@ -382,7 +382,7 @@ function user_password($length = 10) {
  *   role ID. If $roles is empty nothing is returned.
  */
 function user_role_permissions($roles = array()) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   $role_permissions = $fetch = array();
 
@@ -428,7 +428,7 @@ function user_role_permissions($roles = array()) {
  * @return
  *   Boolean TRUE if the current user has the requested permission.
  *
- * All permission checks in Drupal should go through this function. This
+ * All permission checks in Backdrop should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
@@ -446,12 +446,12 @@ function user_access($string, $account = NULL) {
 
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable.
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['perm'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['perm'] = &backdrop_static(__FUNCTION__);
   }
-  $perm = &$drupal_static_fast['perm'];
+  $perm = &$backdrop_static_fast['perm'];
   if (!isset($perm[$account->uid])) {
     $role_permissions = user_role_permissions($account->roles);
 
@@ -524,7 +524,7 @@ function user_permission() {
 function user_views_api() {
   return array(
     'api' => '3.0',
-    'path' => drupal_get_path('module', 'user') . '/views',
+    'path' => backdrop_get_path('module', 'user') . '/views',
   );
 }
 
@@ -760,18 +760,18 @@ function user_account_form(&$form, &$form_state) {
   // @todo This should be solved more elegantly. See issue #119038.
   $checkbox_authenticated = array(
     '#type' => 'checkbox',
-    '#title' => $roles[DRUPAL_AUTHENTICATED_RID],
+    '#title' => $roles[BACKDROP_AUTHENTICATED_RID],
     '#default_value' => TRUE,
     '#disabled' => TRUE,
   );
-  unset($roles[DRUPAL_AUTHENTICATED_RID]);
+  unset($roles[BACKDROP_AUTHENTICATED_RID]);
   $form['account']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
     '#default_value' => (!$register && isset($account->roles) ? array_keys($account->roles) : array()),
     '#options' => $roles,
     '#access' => $roles && user_access('administer permissions'),
-    DRUPAL_AUTHENTICATED_RID => $checkbox_authenticated,
+    BACKDROP_AUTHENTICATED_RID => $checkbox_authenticated,
   );
 
   $form['account']['notify'] = array(
@@ -837,7 +837,7 @@ function user_validate_current_pass(&$form, &$form_state) {
     // form values like password_confirm that have their own validation
     // that prevent them from being empty if they are changed.
     if ((strlen(trim($form_state['values'][$key])) > 0) && ($form_state['values'][$key] != $account->$key)) {
-      require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+      require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
       $current_pass_failed = empty($form_state['values']['current_pass']) || !user_check_password($form_state['values']['current_pass'], $account);
       if ($current_pass_failed) {
         form_set_error('current_pass', t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => $name)));
@@ -908,15 +908,15 @@ function user_account_form_validate($form, &$form_state) {
     // Move text value for user signature into 'signature'.
     $form_state['values']['signature'] = $form_state['values']['signature']['value'];
 
-    $user_schema = drupal_get_schema('users');
-    if (drupal_strlen($form_state['values']['signature']) > $user_schema['fields']['signature']['length']) {
+    $user_schema = backdrop_get_schema('users');
+    if (backdrop_strlen($form_state['values']['signature']) > $user_schema['fields']['signature']['length']) {
       form_set_error('signature', t('The signature is too long: it must be %max characters or less.', array('%max' => $user_schema['fields']['signature']['length'])));
     }
   }
 }
 
 function user_login_block($form) {
-  $form['#action'] = url(current_path(), array('query' => drupal_get_destination(), 'external' => FALSE));
+  $form['#action'] = url(current_path(), array('query' => backdrop_get_destination(), 'external' => FALSE));
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
@@ -952,14 +952,14 @@ function user_block_info() {
 
   $blocks['login']['info'] = t('User login');
   // Not worth caching.
-  $blocks['login']['cache'] = DRUPAL_NO_CACHE;
+  $blocks['login']['cache'] = BACKDROP_NO_CACHE;
 
   $blocks['new']['info'] = t('Who\'s new');
   $blocks['new']['properties']['administrative'] = TRUE;
 
   // Too dynamic to cache.
   $blocks['online']['info'] = t('Who\'s online');
-  $blocks['online']['cache'] = DRUPAL_NO_CACHE;
+  $blocks['online']['cache'] = BACKDROP_NO_CACHE;
   $blocks['online']['properties']['administrative'] = TRUE;
 
   return $blocks;
@@ -977,14 +977,14 @@ function user_block_configure($delta = '') {
         '#type' => 'select',
         '#title' => t('Number of users to display'),
         '#default_value' => variable_get('user_block_whois_new_count', 5),
-        '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
+        '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
       );
       return $form;
 
     case 'online':
-      $period = drupal_map_assoc(array(30, 60, 120, 180, 300, 600, 900, 1800, 2700, 3600, 5400, 7200, 10800, 21600, 43200, 86400), 'format_interval');
+      $period = backdrop_map_assoc(array(30, 60, 120, 180, 300, 600, 900, 1800, 2700, 3600, 5400, 7200, 10800, 21600, 43200, 86400), 'format_interval');
       $form['user_block_seconds_online'] = array('#type' => 'select', '#title' => t('User activity'), '#default_value' => variable_get('user_block_seconds_online', 900), '#options' => $period, '#description' => t('A user is considered online for this long after they have last viewed a page.'));
-      $form['user_block_max_list_count'] = array('#type' => 'select', '#title' => t('User list length'), '#default_value' => variable_get('user_block_max_list_count', 10), '#options' => drupal_map_assoc(array(0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100)), '#description' => t('Maximum number of currently online users to display.'));
+      $form['user_block_max_list_count'] = array('#type' => 'select', '#title' => t('User list length'), '#default_value' => variable_get('user_block_max_list_count', 10), '#options' => backdrop_map_assoc(array(0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100)), '#description' => t('Maximum number of currently online users to display.'));
       return $form;
   }
 }
@@ -1021,7 +1021,7 @@ function user_block_view($delta = '') {
       if (!$user->uid && !(arg(0) == 'user' && !is_numeric(arg(1)))) {
 
         $block['subject'] = t('User login');
-        $block['content'] = drupal_get_form('user_login_block');
+        $block['content'] = backdrop_get_form('user_login_block');
       }
       return $block;
 
@@ -1100,7 +1100,7 @@ function user_preprocess_block(&$variables) {
  */
 function user_format_name($account) {
   $name = !empty($account->name) ? $account->name : variable_get('anonymous', t('Anonymous'));
-  drupal_alter('user_format_name', $name, $account);
+  backdrop_alter('user_format_name', $name, $account);
   return $name;
 }
 
@@ -1137,7 +1137,7 @@ function template_preprocess_user_picture(&$variables) {
     }
     if (isset($filepath)) {
       $alt = t("@user's picture", array('@user' => user_format_name($account)));
-      // If the image does not have a valid Drupal scheme (for eg. HTTP),
+      // If the image does not have a valid Backdrop scheme (for eg. HTTP),
       // don't load image styles.
       if (module_exists('image') && file_valid_uri($filepath) && $style = variable_get('user_picture_style', '')) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
@@ -1182,8 +1182,8 @@ function template_preprocess_username(&$variables) {
   // their own shortening logic or add markup. If they do so, they must ensure
   // that $variables['name'] is safe for printing.
   $name = $variables['name_raw'] = user_format_name($account);
-  if (drupal_strlen($name) > 20) {
-    $name = drupal_substr($name, 0, 15) . '...';
+  if (backdrop_strlen($name) > 20) {
+    $name = backdrop_substr($name, 0, 15) . '...';
   }
   $variables['name'] = check_plain($name);
   $variables['profile_access'] = user_access('access user profiles');
@@ -1242,7 +1242,7 @@ function template_process_username(&$variables) {
  *   - link_options: An array of options to pass to the l() function's $options
  *     parameter if linking the user's name to the user's page.
  *   - attributes_array: An array of attributes to pass to the
- *     drupal_attributes() function if not linking to the user's page.
+ *     backdrop_attributes() function if not linking to the user's page.
  *
  * @see template_preprocess_username()
  * @see template_process_username()
@@ -1258,7 +1258,7 @@ function theme_username($variables) {
     // Modules may have added important attributes so they must be included
     // in the output. Additional classes may be added as array elements like
     // $variables['attributes_array']['class'][] = 'myclass';
-    $output = '<span' . drupal_attributes($variables['attributes_array']) . '>' . $variables['name'] . $variables['extra'] . '</span>';
+    $output = '<span' . backdrop_attributes($variables['attributes_array']) . '>' . $variables['name'] . $variables['extra'] . '</span>';
   }
   return $output;
 }
@@ -1393,7 +1393,7 @@ function user_menu() {
 
   $items['user/register'] = array(
     'title' => 'Create new account',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_register_form'),
     'access callback' => 'user_register_access',
     'type' => MENU_LOCAL_TASK,
@@ -1401,7 +1401,7 @@ function user_menu() {
 
   $items['user/password'] = array(
     'title' => 'Reset password',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_pass'),
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
@@ -1449,7 +1449,7 @@ function user_menu() {
   $items['admin/people/permissions'] = array(
     'title' => 'Permissions',
     'description' => 'Determine access to features by selecting permissions for roles.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_permissions'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
@@ -1464,7 +1464,7 @@ function user_menu() {
   $items['admin/people/permissions/roles'] = array(
     'title' => 'Roles',
     'description' => 'List, edit, or add user roles.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_roles'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
@@ -1479,7 +1479,7 @@ function user_menu() {
   );
   $items['admin/people/permissions/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_role_delete_confirm', 5),
     'access callback' => 'user_role_edit_access',
     'access arguments' => array(5),
@@ -1502,12 +1502,12 @@ function user_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
+    'file path' => backdrop_get_path('module', 'system'),
   );
   $items['admin/config/people/accounts'] = array(
     'title' => 'Account settings',
     'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
@@ -1543,7 +1543,7 @@ function user_menu() {
 
   $items['user/%user/cancel'] = array(
     'title' => 'Cancel account',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_cancel_confirm_form', 1),
     'access callback' => 'user_cancel_access',
     'access arguments' => array(1),
@@ -1561,7 +1561,7 @@ function user_menu() {
 
   $items['user/%user/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_profile_form', 1),
     'access callback' => 'user_edit_access',
     'access arguments' => array(1),
@@ -1586,7 +1586,7 @@ function user_menu_site_status_alter(&$menu_site_status, $path) {
       switch ($path) {
         case 'user':
           // Forward anonymous user to login page.
-          drupal_goto('user/login');
+          backdrop_goto('user/login');
         case 'user/login':
         case 'user/password':
           // Disable offline mode.
@@ -1604,11 +1604,11 @@ function user_menu_site_status_alter(&$menu_site_status, $path) {
   if (user_is_logged_in()) {
     if ($path == 'user/login') {
       // If user is logged in, redirect to 'user' instead of giving 403.
-      drupal_goto('user');
+      backdrop_goto('user');
     }
     if ($path == 'user/register') {
       // Authenticated user should be redirected to user edit page.
-      drupal_goto('user/' . $GLOBALS['user']->uid . '/edit');
+      backdrop_goto('user/' . $GLOBALS['user']->uid . '/edit');
     }
   }
 }
@@ -1676,7 +1676,7 @@ function user_uid_only_optional_to_arg($arg) {
  *   cannot be loaded.
  *
  * @see user_load()
- * @todo rethink the naming of this in Drupal 8.
+ * @todo rethink the naming of this.
  */
 function user_uid_optional_load($uid = NULL) {
   if (!isset($uid)) {
@@ -1688,7 +1688,7 @@ function user_uid_optional_load($uid = NULL) {
 /**
  * Returns $arg or the user ID of the current user if $arg is '%' or empty.
  *
- * @todo rethink the naming of this in Drupal 8.
+ * @todo rethink the naming of this.
  */
 function user_uid_optional_to_arg($arg) {
   // Give back the current user uid when called from eg. tracker, aka.
@@ -1724,7 +1724,7 @@ function user_login($form, &$form_state) {
 
   // If we are already logged on, go to the user page instead.
   if ($user->uid) {
-    drupal_goto('user/' . $user->uid);
+    backdrop_goto('user/' . $user->uid);
   }
 
   // Display login form:
@@ -1735,7 +1735,7 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']['#description'] = t('Enter your @s username.', array('@s' => variable_get('site_name', 'Drupal')));
+  $form['name']['#description'] = t('Enter your @s username.', array('@s' => variable_get('site_name', 'Backdrop')));
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
     '#description' => t('Enter the password that accompanies your username.'),
@@ -1878,7 +1878,7 @@ function user_authenticate($name, $password) {
     $account = user_load_by_name($name);
     if ($account) {
       // Allow alternate password hashing schemes.
-      require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+      require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
       if (user_check_password($password, $account)) {
         // Successful authentication.
         $uid = $account->uid;
@@ -1919,7 +1919,7 @@ function user_login_finalize(&$edit = array()) {
   // Regenerate the session ID to prevent against session fixation attacks.
   // This is called before hook_user in case one of those functions fails
   // or incorrectly does a redirect which would leave the old session in place.
-  drupal_session_regenerate();
+  backdrop_session_regenerate();
 
   user_module_invoke('login', $edit, $user);
 }
@@ -1999,7 +1999,7 @@ function user_cancel_url($account) {
  *   A string that is safe for use in URLs and SQL statements.
  */
 function user_pass_rehash($password, $timestamp, $login) {
-  return drupal_hmac_base64($timestamp . $login, drupal_get_hash_salt() . $password);
+  return backdrop_hmac_base64($timestamp . $login, backdrop_get_hash_salt() . $password);
 }
 
 /**
@@ -2024,7 +2024,7 @@ function user_cancel($edit, $uid, $method) {
   $account = user_load($uid);
 
   if (!$account) {
-    drupal_set_message(t('The user account %id does not exist.', array('%id' => $uid)), 'error');
+    backdrop_set_message(t('The user account %id does not exist.', array('%id' => $uid)), 'error');
     watchdog('user', 'Attempted to cancel non-existing user account: %id.', array('%id' => $uid), WATCHDOG_ERROR);
     return;
   }
@@ -2078,7 +2078,7 @@ function _user_cancel($edit, $account, $method) {
       }
       $account->status = 0;
       $account->save();
-      drupal_set_message(t('%name has been disabled.', array('%name' => $account->name)));
+      backdrop_set_message(t('%name has been disabled.', array('%name' => $account->name)));
       watchdog('user', 'Blocked user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
       break;
 
@@ -2089,7 +2089,7 @@ function _user_cancel($edit, $account, $method) {
         _user_mail_notify('status_canceled', $account);
       }
       user_delete($account->uid);
-      drupal_set_message(t('%name has been deleted.', array('%name' => $account->name)));
+      backdrop_set_message(t('%name has been deleted.', array('%name' => $account->name)));
       watchdog('user', 'Deleted user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
       break;
   }
@@ -2135,7 +2135,7 @@ function user_delete_multiple(array $uids) {
         module_invoke_all('entity_predelete', $account, 'user');
 
         field_attach_delete('user', $account);
-        drupal_session_destroy_uid($account->uid);
+        backdrop_session_destroy_uid($account->uid);
       }
 
       db_delete('users')
@@ -2191,7 +2191,7 @@ function user_view_page($account) {
  *   content language of the current request.
  *
  * @return
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function user_view($account, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
@@ -2214,7 +2214,7 @@ function user_view($account, $view_mode = 'full', $langcode = NULL) {
 
   // Allow modules to modify the structured user.
   $type = 'user';
-  drupal_alter(array('user_view', 'entity_view'), $build, $type);
+  backdrop_alter(array('user_view', 'entity_view'), $build, $type);
 
   return $build;
 }
@@ -2244,7 +2244,7 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
     'entity' => $account,
     'langcode' => $langcode,
   );
-  drupal_alter('entity_view_mode', $view_mode, $context);
+  backdrop_alter('entity_view_mode', $view_mode, $context);
 
   // Build fields content.
   field_attach_prepare_view('user', array($account->uid => $account), $view_mode, $langcode);
@@ -2476,12 +2476,12 @@ function user_mail_tokens(&$replacements, $data, $options) {
  *   value.
  */
 function user_roles($membersonly = FALSE, $permission = NULL) {
-  $user_roles = &drupal_static(__FUNCTION__);
+  $user_roles = &backdrop_static(__FUNCTION__);
 
   // Do not cache roles for specific permissions. This data is not requested
   // frequently enough to justify the additional memory use.
   if (empty($permission)) {
-    $cid = $membersonly ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
+    $cid = $membersonly ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID;
     if (isset($user_roles[$cid])) {
       return $user_roles[$cid];
     }
@@ -2502,12 +2502,12 @@ function user_roles($membersonly = FALSE, $permission = NULL) {
   foreach ($result as $role) {
     switch ($role->rid) {
       // We only translate the built in role names
-      case DRUPAL_ANONYMOUS_RID:
+      case BACKDROP_ANONYMOUS_RID:
         if (!$membersonly) {
           $roles[$role->rid] = t($role->name);
         }
         break;
-      case DRUPAL_AUTHENTICATED_RID:
+      case BACKDROP_AUTHENTICATED_RID:
         $roles[$role->rid] = t($role->name);
         break;
       default:
@@ -2591,17 +2591,17 @@ function user_role_save($role) {
   module_invoke_all('user_role_presave', $role);
 
   if (!empty($role->rid) && $role->name) {
-    $status = drupal_write_record('role', $role, 'rid');
+    $status = backdrop_write_record('role', $role, 'rid');
     module_invoke_all('user_role_update', $role);
   }
   else {
-    $status = drupal_write_record('role', $role);
+    $status = backdrop_write_record('role', $role);
     module_invoke_all('user_role_insert', $role);
   }
 
   // Clear the user access cache.
-  drupal_static_reset('user_access');
-  drupal_static_reset('user_role_permissions');
+  backdrop_static_reset('user_access');
+  backdrop_static_reset('user_role_permissions');
 
   return $status;
 }
@@ -2634,8 +2634,8 @@ function user_role_delete($role) {
   module_invoke_all('user_role_delete', $role);
 
   // Clear the user access cache.
-  drupal_static_reset('user_access');
-  drupal_static_reset('user_role_permissions');
+  backdrop_static_reset('user_access');
+  backdrop_static_reset('user_role_permissions');
 }
 
 /**
@@ -2643,7 +2643,7 @@ function user_role_delete($role) {
  */
 function user_role_edit_access($role) {
   // Prevent the system-defined roles from being altered or removed.
-  if ($role->rid == DRUPAL_ANONYMOUS_RID || $role->rid == DRUPAL_AUTHENTICATED_RID) {
+  if ($role->rid == BACKDROP_ANONYMOUS_RID || $role->rid == BACKDROP_AUTHENTICATED_RID) {
     return FALSE;
   }
 
@@ -2736,8 +2736,8 @@ function user_role_grant_permissions($rid, array $permissions = array()) {
   }
 
   // Clear the user access cache.
-  drupal_static_reset('user_access');
-  drupal_static_reset('user_role_permissions');
+  backdrop_static_reset('user_access');
+  backdrop_static_reset('user_role_permissions');
 }
 
 /**
@@ -2759,8 +2759,8 @@ function user_role_revoke_permissions($rid, array $permissions = array()) {
     ->execute();
 
   // Clear the user access cache.
-  drupal_static_reset('user_access');
-  drupal_static_reset('user_role_permissions');
+  backdrop_static_reset('user_access');
+  backdrop_static_reset('user_role_permissions');
 }
 
 /**
@@ -2783,7 +2783,7 @@ function user_user_operations($form = array(), $form_state = array()) {
 
   if (user_access('administer permissions')) {
     $roles = user_roles(TRUE);
-    unset($roles[DRUPAL_AUTHENTICATED_RID]);  // Can't edit authenticated role.
+    unset($roles[BACKDROP_AUTHENTICATED_RID]);  // Can't edit authenticated role.
 
     $add_roles = array();
     foreach ($roles as $key => $value) {
@@ -2923,10 +2923,10 @@ function user_multiple_cancel_confirm($form, &$form_state) {
   if (isset($accounts[1])) {
     $redirect = (count($accounts) == 1);
     $message = t('The user account %name cannot be cancelled.', array('%name' => $accounts[1]->name));
-    drupal_set_message($message, $redirect ? 'error' : 'warning');
+    backdrop_set_message($message, $redirect ? 'error' : 'warning');
     // If only user 1 was selected, redirect to the overview.
     if ($redirect) {
-      drupal_goto('admin/people');
+      backdrop_goto('admin/people');
     }
   }
 
@@ -3004,7 +3004,7 @@ function user_filters() {
   // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[DRUPAL_AUTHENTICATED_RID]); // Don't list authorized role.
+  unset($roles[BACKDROP_AUTHENTICATED_RID]); // Don't list authorized role.
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
@@ -3062,7 +3062,7 @@ function user_build_filter_query(SelectQuery $query) {
     if ($key == 'permission') {
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
-      $account->roles = array(DRUPAL_AUTHENTICATED_RID => 1);
+      $account->roles = array(BACKDROP_AUTHENTICATED_RID => 1);
       if (user_access($value, $account)) {
         continue;
       }
@@ -3088,7 +3088,7 @@ function user_comment_view($comment) {
     // @todo This alters and replaces the original object value, so a
     //   hypothetical process of loading, viewing, and saving will hijack the
     //   stored data. Consider renaming to $comment->signature_safe or similar
-    //   here and elsewhere in Drupal 8.
+    //   here and elsewhere in Backdrop.
     $comment->signature = check_markup($comment->signature, $comment->signature_format, '', TRUE);
   }
   else {
@@ -3147,7 +3147,7 @@ function user_preferred_language($account, $default = NULL) {
  * operation happens on the given user account.
  *
  * @see user_mail_tokens()
- * @see drupal_mail()
+ * @see backdrop_mail()
  *
  * @param $op
  *   The operation being performed on the account. Possible values:
@@ -3169,7 +3169,7 @@ function user_preferred_language($account, $default = NULL) {
  *   Optional language to use for the notification, overriding account language.
  *
  * @return
- *   The return value from drupal_mail_system()->mail(), if ends up being
+ *   The return value from backdrop_mail_system()->mail(), if ends up being
  *   called.
  */
 function _user_mail_notify($op, $account, $language = NULL) {
@@ -3179,11 +3179,11 @@ function _user_mail_notify($op, $account, $language = NULL) {
   if ($notify) {
     $params['account'] = $account;
     $language = $language ? $language : user_preferred_language($account);
-    $mail = drupal_mail('user', $op, $account->mail, $language, $params);
+    $mail = backdrop_mail('user', $op, $account->mail, $language, $params);
     if ($op == 'register_pending_approval') {
       // If a user registered requiring admin approval, notify the admin, too.
       // We use the site default language for this.
-      drupal_mail('user', 'register_pending_approval_admin', variable_get('site_mail', ini_get('sendmail_from')), language_default(), $params);
+      backdrop_mail('user', 'register_pending_approval_admin', variable_get('site_mail', ini_get('sendmail_from')), language_default(), $params);
     }
   }
   return empty($mail) ? NULL : $mail['result'];
@@ -3222,7 +3222,7 @@ function user_form_process_password_confirm($element) {
     ),
   );
 
-  $element['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.js';
+  $element['#attached']['js'][] = backdrop_get_path('module', 'user') . '/user.js';
   // Ensure settings are only added once per page.
   static $already_added = FALSE;
   if (!$already_added) {
@@ -3346,7 +3346,7 @@ function user_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id
       // a custom behavior, since the #states system would also synchronize on
       // uncheck.
       '#attached' => array(
-        'js' => array(drupal_get_path('module', 'user') . '/user.js'),
+        'js' => array(backdrop_get_path('module', 'user') . '/user.js'),
       ),
     );
 
@@ -3390,7 +3390,7 @@ function user_register_form($form, &$form_state) {
 
   // If we aren't admin but already logged on, go to the user page instead.
   if (!$admin && $user->uid) {
-    drupal_goto('user/' . $user->uid);
+    backdrop_goto('user/' . $user->uid);
   }
 
   $form['#user'] = entity_create('user', array());
@@ -3468,7 +3468,7 @@ function user_register_submit($form, &$form_state) {
 
   // Terminate if an error occurred while saving the account.
   if ($status =! SAVED_NEW) {
-    drupal_set_message(t("Error saving user account."), 'error');
+    backdrop_set_message(t("Error saving user account."), 'error');
     $form_state['redirect'] = '';
     return;
   }
@@ -3483,14 +3483,14 @@ function user_register_submit($form, &$form_state) {
   // New administrative account without notification.
   $uri = entity_uri('user', $account);
   if ($admin && !$notify) {
-    drupal_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No e-mail verification required; log in user immediately.
   elseif (!$admin && !variable_get('user_email_verification', TRUE) && $account->status) {
     _user_mail_notify('register_no_approval_required', $account);
     $form_state['uid'] = $account->uid;
     user_login_submit(array(), $form_state);
-    drupal_set_message(t('Registration successful. You are now logged in.'));
+    backdrop_set_message(t('Registration successful. You are now logged in.'));
     $form_state['redirect'] = '';
   }
   // No administrator approval required.
@@ -3498,17 +3498,17 @@ function user_register_submit($form, &$form_state) {
     $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
     _user_mail_notify($op, $account);
     if ($notify) {
-      drupal_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+      backdrop_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
     }
     else {
-      drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      backdrop_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
       $form_state['redirect'] = '';
     }
   }
   // Administrator approval required.
   else {
     _user_mail_notify('register_pending_approval', $account);
-    drupal_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
+    backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
     $form_state['redirect'] = '';
   }
 }
@@ -3548,7 +3548,7 @@ function user_modules_uninstalled($modules) {
  * proper destination after a user has been properly logged in.
  */
 function user_login_destination() {
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   if ($destination['destination'] == 'user/login') {
     $destination['destination'] = 'user';
   }
@@ -3564,7 +3564,7 @@ function user_login_destination() {
 function user_cookie_save(array $values) {
   foreach ($values as $field => $value) {
     // Set cookie for 365 days.
-    setrawcookie('Drupal.visitor.' . $field, rawurlencode($value), REQUEST_TIME + 31536000, '/');
+    setrawcookie('Backdrop.visitor.' . $field, rawurlencode($value), REQUEST_TIME + 31536000, '/');
   }
 }
 
@@ -3575,7 +3575,7 @@ function user_cookie_save(array $values) {
  *   A cookie name such as 'homepage'.
  */
 function user_cookie_delete($cookie_name) {
-  setrawcookie('Drupal.visitor.' . $cookie_name, '', REQUEST_TIME - 3600, '/');
+  setrawcookie('Backdrop.visitor.' . $cookie_name, '', REQUEST_TIME - 3600, '/');
 }
 
 /**

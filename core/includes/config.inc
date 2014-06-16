@@ -17,7 +17,7 @@
  *   an JSON configuration file. For @code config(book.admin) @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $type
- *   (optional) The type of config directory to return. Drupal core provides
+ *   (optional) The type of config directory to return. Backdrop core provides
  *   'active' and 'staging'. Defaults to 'active'.
  *
  * @return Config
@@ -85,7 +85,7 @@ function config_set($config_file, $option, $value) {
  * Returns the path of a configuration directory.
  *
  * @param string $type
- *   (optional) The type of config directory to return. Drupal core provides
+ *   (optional) The type of config directory to return. Backdrop core provides
  *   'active' and 'staging'. Defaults to 'active'.
  *
  * @return string
@@ -94,8 +94,8 @@ function config_set($config_file, $option, $value) {
 function config_get_config_directory($type = 'active') {
   global $config_directories;
 
-  if ($test_prefix = drupal_valid_test_ua()) {
-    // See Drupal\simpletest\WebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
     $path = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/config_' . $type;
   }
   elseif (!empty($config_directories[$type])) {
@@ -141,13 +141,13 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  *   module, specify the configuration file name without the extension.
  */
 function config_install_default_config($module, $config_name = NULL) {
-  $module_config_dir = drupal_get_path('module', $module) . '/config';
+  $module_config_dir = backdrop_get_path('module', $module) . '/config';
   $storage = new ConfigFileStorage($module_config_dir);
-  if (is_dir(drupal_get_path('module', $module) . '/config')) {
+  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
     $files = glob($module_config_dir . '/' . '*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
-      // file system in the drupal config directory. Note the config name
+      // file system in the Backdrop config directory. Note the config name
       // needs to be the same as the file name WITHOUT the extension.
       $parts = explode('/', $file);
       $file = array_pop($parts);
@@ -868,7 +868,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
       return FALSE;
     }
-    return drupal_unlink($this->getFilePath($name));
+    return backdrop_unlink($this->getFilePath($name));
   }
 
   /**
@@ -893,7 +893,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function encode($data) {
-    $contents = drupal_json_encode($data, TRUE);
+    $contents = backdrop_json_encode($data, TRUE);
     if ($contents === FALSE) {
       throw new ConfigStorageException(t('The configuration string could not be parsed.'));
     }

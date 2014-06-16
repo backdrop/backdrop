@@ -27,7 +27,7 @@ function entity_query_access_test_sample_query($field_name) {
   global $user;
 
   // Simulate user does not have access to view all nodes.
-  $access = &drupal_static('node_access_view_all_nodes');
+  $access = &backdrop_static('node_access_view_all_nodes');
   $access[$user->uid] = FALSE;
 
   $query = new EntityFieldQuery();

@@ -2,9 +2,9 @@
 
 /**
  * @file
- * Handles updates of Drupal core and contributed projects.
+ * Handles updates of Backdrop core and contributed projects.
  *
- * The module checks for available updates of Drupal core and any installed
+ * The module checks for available updates of Backdrop core and any installed
  * contributed modules and themes. It warns site administrators if newer
  * releases are available via the system status report (admin/reports/status),
  * the module and theme pages, and optionally via e-mail. It also provides the
@@ -107,10 +107,10 @@ function update_init() {
       if (!empty($verbose)) {
         if (isset($status[$type]['severity'])) {
           if ($status[$type]['severity'] == REQUIREMENT_ERROR) {
-            drupal_set_message($status[$type]['description'], 'error', FALSE);
+            backdrop_set_message($status[$type]['description'], 'error', FALSE);
           }
           elseif ($status[$type]['severity'] == REQUIREMENT_WARNING) {
-            drupal_set_message($status[$type]['description'], 'warning', FALSE);
+            backdrop_set_message($status[$type]['description'], 'warning', FALSE);
           }
         }
       }
@@ -120,7 +120,7 @@ function update_init() {
         if (isset($status[$type])
             && isset($status[$type]['reason'])
             && $status[$type]['reason'] === UPDATE_NOT_SECURE) {
-          drupal_set_message($status[$type]['description'], 'error', FALSE);
+          backdrop_set_message($status[$type]['description'], 'error', FALSE);
         }
       }
     }
@@ -148,7 +148,7 @@ function update_menu() {
   );
   $items['admin/reports/updates/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('update_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'update.settings.inc',
@@ -176,7 +176,7 @@ function update_menu() {
   );
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('update_manager_install_form', $context),
       'access callback' => 'update_manager_access',
       'access arguments' => array(),
@@ -185,7 +185,7 @@ function update_menu() {
       'file' => 'update.manager.inc',
     );
     $items[$path . '/update'] = array(
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('update_manager_update_form', $context),
       'access callback' => 'update_manager_access',
       'access arguments' => array(),
@@ -205,7 +205,7 @@ function update_menu() {
   // have been downloaded, asking you to backup before installing updates.
   $items['admin/update/ready'] = array(
     'title' => 'Ready to update',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('update_manager_update_ready_form'),
     'access callback' => 'update_manager_access',
     'access arguments' => array(),
@@ -331,7 +331,7 @@ function update_cache_clear_submit($form, &$form_state) {
  * Returns a warning message when there is no data about available updates.
  */
 function _update_no_data() {
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   return t('No update information available. <a href="@run_cron">Run cron</a> or <a href="@check_manually">check manually</a>.', array(
     '@run_cron' => url('admin/reports/status/run-cron', array('query' => $destination)),
     '@check_manually' => url('admin/reports/updates/check', array('query' => $destination)),
@@ -482,14 +482,14 @@ function _update_get_cached_available_releases() {
  *   keys, and the status reason constant (UPDATE_NOT_SECURE, etc) for the
  *   values.
  *
- * @see drupal_mail()
+ * @see backdrop_mail()
  * @see _update_cron_notify()
  * @see _update_message_text()
  */
 function update_mail($key, &$message, $params) {
   $language = $message['language'];
   $langcode = $language->langcode;
-  $message['subject'] .= t('New release(s) available for !site_name', array('!site_name' => variable_get('site_name', 'Drupal')), array('langcode' => $langcode));
+  $message['subject'] .= t('New release(s) available for !site_name', array('!site_name' => variable_get('site_name', 'Backdrop')), array('langcode' => $langcode));
   foreach ($params as $msg_type => $msg_reason) {
     $message['body'][] = _update_message_text($msg_type, $msg_reason, FALSE, $language);
   }
@@ -533,7 +533,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
   switch ($msg_reason) {
     case UPDATE_NOT_SECURE:
       if ($msg_type == 'core') {
-        $text = t('There is a security update available for your version of Drupal. To ensure the security of your server, you should update immediately!', array(), array('langcode' => $langcode));
+        $text = t('There is a security update available for your version of Backdrop. To ensure the security of your server, you should update immediately!', array(), array('langcode' => $langcode));
       }
       else {
         $text = t('There are security updates available for one or more of your modules or themes. To ensure the security of your server, you should update immediately!', array(), array('langcode' => $langcode));
@@ -542,7 +542,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_REVOKED:
       if ($msg_type == 'core') {
-        $text = t('Your version of Drupal has been revoked and is no longer available for download. Upgrading is strongly recommended!', array(), array('langcode' => $langcode));
+        $text = t('Your version of Backdrop has been revoked and is no longer available for download. Upgrading is strongly recommended!', array(), array('langcode' => $langcode));
       }
       else {
         $text = t('The installed version of at least one of your modules or themes has been revoked and is no longer available for download. Upgrading or disabling is strongly recommended!', array(), array('langcode' => $langcode));
@@ -551,7 +551,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_NOT_SUPPORTED:
       if ($msg_type == 'core') {
-        $text = t('Your version of Drupal is no longer supported. Upgrading is strongly recommended!', array(), array('langcode' => $langcode));
+        $text = t('Your version of Backdrop CMS is no longer supported. Upgrading is strongly recommended!', array(), array('langcode' => $langcode));
       }
       else {
         $text = t('The installed version of at least one of your modules or themes is no longer supported. Upgrading or disabling is strongly recommended. See the project homepage for more details.', array(), array('langcode' => $langcode));
@@ -560,7 +560,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_NOT_CURRENT:
       if ($msg_type == 'core') {
-        $text = t('There are updates available for your version of Drupal. To ensure the proper functioning of your site, you should update as soon as possible.', array(), array('langcode' => $langcode));
+        $text = t('There are updates available for your version of Backdrop. To ensure the proper functioning of your site, you should update as soon as possible.', array(), array('langcode' => $langcode));
       }
       else {
         $text = t('There are updates available for one or more of your modules or themes. To ensure the proper functioning of your site, you should update as soon as possible.', array(), array('langcode' => $langcode));
@@ -572,7 +572,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
     case UPDATE_NOT_FETCHED:
     case UPDATE_FETCH_PENDING:
       if ($msg_type == 'core') {
-        $text = t('There was a problem checking <a href="@update-report">available updates</a> for Drupal.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
+        $text = t('There was a problem checking <a href="@update-report">available updates</a> for Backdrop.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
       }
       else {
         $text = t('There was a problem checking <a href="@update-report">available updates</a> for your modules or themes.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
@@ -626,7 +626,7 @@ function theme_update_last_check($variables) {
   $last = $variables['last'];
   $output = '<div class="update checked">';
   $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never');
-  $output .= ' <span class="check-manually">(' . l(t('Check manually'), 'admin/reports/updates/check', array('query' => drupal_get_destination())) . ')</span>';
+  $output .= ' <span class="check-manually">(' . l(t('Check manually'), 'admin/reports/updates/check', array('query' => backdrop_get_destination())) . ')</span>';
   $output .= "</div>\n";
   return $output;
 }
@@ -634,20 +634,20 @@ function theme_update_last_check($variables) {
 /**
  * Implements hook_verify_update_archive().
  *
- * First, we ensure that the archive isn't a copy of Drupal core, which the
+ * First, we ensure that the archive isn't a copy of Backdrop core, which the
  * update manager does not yet support. See http://drupal.org/node/606592
  *
  * Then, we make sure that at least one module included in the archive file has
  * an .info file which claims that the code is compatible with the current
- * version of Drupal core.
+ * version of Backdrop core.
  *
- * @see drupal_system_listing()
+ * @see backdrop_system_listing()
  * @see _system_rebuild_module_data()
  */
 function update_verify_update_archive($project, $archive_file, $directory) {
   $errors = array();
 
-  // Make sure this isn't a tarball of Drupal core.
+  // Make sure this isn't a tarball of Backdrop core.
   if (
     file_exists("$directory/$project/index.php")
     && file_exists("$directory/$project/core/update.php")
@@ -656,23 +656,23 @@ function update_verify_update_archive($project, $archive_file, $directory) {
     && file_exists("$directory/$project/core/modules/system/system.module")
   ) {
     return array(
-      'no-core' => t('Automatic updating of Drupal core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Drupal core manually.', array('@upgrade-guide' => 'http://drupal.org/upgrade')),
+      'no-core' => t('Automatic updating of Backdrop CMS core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Backdrop CMS core manually.', array('@upgrade-guide' => 'http://backdropcms.org/guide/upgrade')),
     );
   }
 
   // Parse all the .info files and make sure at least one is compatible with
-  // this version of Drupal core. If one is compatible, then the project as a
+  // this version of Backdrop core. If one is compatible, then the project as a
   // whole is considered compatible (since, for example, the project may ship
   // with some out-of-date modules that are not necessary for its overall
   // functionality).
   $compatible_project = FALSE;
   $incompatible = array();
-  $files = file_scan_directory("$directory/$project", '/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.info$/', array('key' => 'name', 'min_depth' => 0));
+  $files = file_scan_directory("$directory/$project", '/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', array('key' => 'name', 'min_depth' => 0));
   foreach ($files as $key => $file) {
     // Get the .info file for the module or theme this file belongs to.
-    $info = drupal_parse_info_file($file->uri);
+    $info = backdrop_parse_info_file($file->uri);
 
-    // If the module or theme is incompatible with Drupal core, set an error.
+    // If the module or theme is incompatible with Backdrop core, set an error.
     if (empty($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
       $incompatible[] = !empty($info['name']) ? $info['name'] : t('Unknown');
     }
@@ -683,14 +683,14 @@ function update_verify_update_archive($project, $archive_file, $directory) {
   }
 
   if (empty($files)) {
-    $errors[] = t('%archive_file does not contain any .info files.', array('%archive_file' => drupal_basename($archive_file)));
+    $errors[] = t('%archive_file does not contain any .info files.', array('%archive_file' => backdrop_basename($archive_file)));
   }
   elseif (!$compatible_project) {
     $errors[] = format_plural(
       count($incompatible),
-      '%archive_file contains a version of %names that is not compatible with Drupal !version.',
-      '%archive_file contains versions of modules or themes that are not compatible with Drupal !version: %names',
-      array('!version' => BACKDROP_CORE_COMPATIBILITY, '%archive_file' => drupal_basename($archive_file), '%names' => implode(', ', $incompatible))
+      '%archive_file contains a version of %names that is not compatible with Backdrop !version.',
+      '%archive_file contains versions of modules or themes that are not compatible with Backdrop !version: %names',
+      array('!version' => BACKDROP_CORE_COMPATIBILITY, '%archive_file' => backdrop_basename($archive_file), '%names' => implode(', ', $incompatible))
     );
   }
 
@@ -859,15 +859,15 @@ function update_flush_caches() {
  */
 
 /**
- * Returns a short unique identifier for this Drupal installation.
+ * Returns a short unique identifier for this Backdrop installation.
  *
  * @return
- *   An eight character string uniquely identifying this Drupal installation.
+ *   An eight character string uniquely identifying this Backdrop installation.
  */
 function _update_manager_unique_identifier() {
-  $id = &drupal_static(__FUNCTION__, '');
+  $id = &backdrop_static(__FUNCTION__, '');
   if (empty($id)) {
-    $id = substr(hash('sha256', drupal_get_hash_salt()), 0, 8);
+    $id = substr(hash('sha256', backdrop_get_hash_salt()), 0, 8);
   }
   return $id;
 }
@@ -884,7 +884,7 @@ function _update_manager_unique_identifier() {
  *   be extracted.
  */
 function _update_manager_extract_directory($create = TRUE) {
-  $directory = &drupal_static(__FUNCTION__, '');
+  $directory = &backdrop_static(__FUNCTION__, '');
   if (empty($directory)) {
     $directory = 'temporary://update-extraction-' . _update_manager_unique_identifier();
     if ($create && !file_exists($directory)) {
@@ -906,7 +906,7 @@ function _update_manager_extract_directory($create = TRUE) {
  *   be cached.
  */
 function _update_manager_cache_directory($create = TRUE) {
-  $directory = &drupal_static(__FUNCTION__, '');
+  $directory = &backdrop_static(__FUNCTION__, '');
   if (empty($directory)) {
     $directory = 'temporary://update-cache-' . _update_manager_unique_identifier();
     if ($create && !file_exists($directory)) {
@@ -954,7 +954,7 @@ function update_clear_update_disk_cache() {
 function update_delete_file_if_stale($path) {
   if (file_exists($path)) {
     $filectime = filectime($path);
-    if (REQUEST_TIME - $filectime > DRUPAL_MAXIMUM_TEMP_FILE_AGE || (preg_match('/.*-dev\.(tar\.gz|zip)/i', $path) && REQUEST_TIME - $filectime > 300)) {
+    if (REQUEST_TIME - $filectime > BACKDROP_MAXIMUM_TEMP_FILE_AGE || (preg_match('/.*-dev\.(tar\.gz|zip)/i', $path) && REQUEST_TIME - $filectime > 300)) {
       file_unmanaged_delete_recursive($path);
     }
   }

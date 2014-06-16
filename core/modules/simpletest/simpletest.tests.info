@@ -17,7 +17,7 @@ file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
 name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the drupalGetMails function.
+description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -150,7 +150,7 @@ file = tests/bootstrap.test
 
 [BootstrapGetFilenameTestCase]
 name = Get filename test
-description = Test that drupal_get_filename() works correctly when the file is not found in the database.
+description = Test that backdrop_get_filename() works correctly when the file is not found in the database.
 group = Bootstrap
 file = tests/bootstrap.test
 
@@ -162,7 +162,7 @@ file = tests/bootstrap.test
 
 [BootstrapResettableStaticTestCase]
 name = Resettable static variables test
-description = Test that drupal_static() and drupal_static_reset() work.
+description = Test that backdrop_static() and backdrop_static_reset() work.
 group = Bootstrap
 file = tests/bootstrap.test
 
@@ -174,7 +174,7 @@ file = tests/bootstrap.test
 
 [BootstrapOverrideServerVariablesTestCase]
 name = Overriding server variables
-description = Test that drupal_override_server_variables() works correctly.
+description = Test that backdrop_override_server_variables() works correctly.
 group = Bootstrap
 file = tests/bootstrap.test
 
@@ -208,15 +208,15 @@ description = Tests Color utility class conversions.
 group = Common
 file = tests/color.test
 
-[CommonDrupalAlterTestCase]
+[CommonBackdropAlterTestCase]
 name = Alter hook functionality
-description = Tests alteration of arguments passed to drupal_alter().
+description = Tests alteration of arguments passed to backdrop_alter().
 group = Common
 file = tests/common.test
 
 [CommonURLUnitTestCase]
 name = URL generation tests
-description = Confirm that url(), drupal_get_query_parameters(), drupal_http_build_query(), and l() work correctly with various input.
+description = Confirm that url(), backdrop_get_query_parameters(), backdrop_http_build_query(), and l() work correctly with various input.
 group = Common
 file = tests/common.test
 
@@ -246,7 +246,7 @@ file = tests/common.test
 
 [CommonHTMLIdentifierTestCase]
 name = HTML identifiers
-description = Test the functions drupal_html_class(), drupal_html_id() and drupal_clean_css_identifier() for expected behavior
+description = Test the functions backdrop_html_class(), backdrop_html_id() and backdrop_clean_css_identifier() for expected behavior
 group = Common
 file = tests/common.test
 
@@ -256,9 +256,9 @@ description = Unit tests on CSS functions like aggregation.
 group = Common
 file = tests/common.test
 
-[CommonDrupalHTTPRequestTestCase]
-name = Drupal HTTP request
-description = Performs tests on Drupal's HTTP request mechanism.
+[CommonBackdropHTTPRequestTestCase]
+name = Backdrop HTTP request
+description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = tests/common.test
 
@@ -268,9 +268,9 @@ description = Tests setting and retrieving content from theme regions.
 group = Common
 file = tests/common.test
 
-[CommonDrupalGotoTestCase]
+[CommonBackdropGotoTestCase]
 name = Redirect functionality
-description = Tests the drupal_goto() and hook_drupal_goto_alter() functionality.
+description = Tests the backdrop_goto() and hook_backdrop_goto_alter() functionality.
 group = Common
 file = tests/common.test
 
@@ -280,9 +280,9 @@ description = Tests the JavaScript system.
 group = Common
 file = tests/common.test
 
-[CommonDrupalRenderTestCase]
-name = drupal_render()
-description = Performs functional tests on drupal_render().
+[CommonBackdropRenderTestCase]
+name = backdrop_render()
+description = Performs functional tests on backdrop_render().
 group = Common
 file = tests/common.test
 
@@ -298,9 +298,9 @@ description = Tests number step validation by valid_number_step().
 group = Common
 file = tests/common.test
 
-[CommonDrupalWriteRecordTestCase]
+[CommonBackdropWriteRecordTestCase]
 name = Data record write functionality
-description = Tests writing of data records with drupal_write_record().
+description = Tests writing of data records with backdrop_write_record().
 group = Common
 file = tests/common.test
 
@@ -310,15 +310,15 @@ description = Performs tests on the Simpletest error and exception collector.
 group = Common
 file = tests/common.test
 
-[CommonDrupalParseInfoFileTestCase]
+[CommonBackdropParseInfoFileTestCase]
 name = Parsing .info files
-description = Tests the drupal_parse_info_file() API function.
+description = Tests the backdrop_parse_info_file() API function.
 group = Common
 file = tests/common.test
 
-[CommonDrupalSystemListingTestCase]
-name = Drupal system listing
-description = Tests scanning system directories in drupal_system_listing().
+[CommonBackdropSystemListingTestCase]
+name = Backdrop system listing
+description = Tests scanning system directories in backdrop_system_listing().
 group = Common
 file = tests/common.test
 
@@ -328,33 +328,33 @@ description = Test the format_date() function.
 group = Common
 file = tests/common.test
 
-[CommonDrupalAttributesUnitTestCase]
+[CommonBackdropAttributesUnitTestCase]
 name = HTML Attributes
-description = Tests the drupal_attributes() functionality.
+description = Tests the backdrop_attributes() functionality.
 group = Common
 file = tests/common.test
 
-[CommonDrupalArrayUnitTest]
-name = drupal_array_*() tests
-description = Tests the various drupal_array_* helper functions.
+[CommonBackdropArrayUnitTest]
+name = backdrop_array_*() tests
+description = Tests the various backdrop_array_* helper functions.
 group = System
 file = tests/common.test
 
 [CommonJSONUnitTestCase]
 name = JSON
-description = Tests the drupal_json_encode() and drupal_json_decode() functions to convert PHP variables to JSON strings and back.
+description = Tests the backdrop_json_encode() and backdrop_json_decode() functions to convert PHP variables to JSON strings and back.
 group = Common
 file = tests/common.test
 
-[CommonDrupalAddFeedTestCase]
-name = drupal_add_feed() tests
-description = Make sure that drupal_add_feed() works correctly with various constructs.
+[CommonBackdropAddFeedTestCase]
+name = backdrop_add_feed() tests
+description = Make sure that backdrop_add_feed() works correctly with various constructs.
 group = Common
 file = tests/common.test
 
 [ArrayDiffUnitTest]
 name = Array differences
-description = Performs tests on drupal_array_diff_assoc_recursive().
+description = Performs tests on backdrop_array_diff_assoc_recursive().
 group = Common
 file = tests/common.test
 
@@ -540,7 +540,7 @@ file = tests/database_test.test
 
 [DatabaseQueryTestCase]
 name = Custom query syntax tests
-description = Test Drupal\s extended prepared statement syntax..',
+description = Test Backdrop's extended prepared statement syntax.
 group = Database
 file = tests/database_test.test
 
@@ -568,9 +568,9 @@ description = Tests management of database connections.
 group = Database
 file = tests/database_test.test
 
-[DrupalErrorHandlerUnitTest]
-name = Drupal error handlers
-description = Performs tests on the Drupal error and exception handler.
+[BackdropErrorHandlerUnitTest]
+name = Backdrop error handlers
+description = Performs tests on the Backdrop error and exception handler.
 group = System
 file = tests/error.test
 
@@ -774,7 +774,7 @@ file = tests/form.test
 
 [FormsRedirectTestCase]
 name = Form redirecting
-description = Tests functionality of drupal_redirect_form().
+description = Tests functionality of backdrop_redirect_form().
 group = Form API
 file = tests/form.test
 
@@ -840,7 +840,7 @@ file = tests/form.test
 
 [FormsRebuildTestCase]
 name = Form rebuilding
-description = Tests functionality of drupal_rebuild_form().
+description = Tests functionality of backdrop_rebuild_form().
 group = Form API
 file = tests/form.test
 
@@ -882,7 +882,7 @@ file = tests/form.test
 
 [HTMLIdTestCase]
 name = Unique HTML IDs
-description = Tests functionality of drupal_html_id().
+description = Tests functionality of backdrop_html_id().
 group = Form API
 file = tests/form.test
 
@@ -934,9 +934,9 @@ description = Performs tests on the pluggable mailing framework.
 group = System
 file = tests/mail.test
 
-[DrupalHtmlToTextTestCase]
+[BackdropHtmlToTextTestCase]
 name = HTML to text conversion
-description = Tests drupal_html_to_text().
+description = Tests backdrop_html_to_text().
 group = Mail
 file = tests/mail.test
 
@@ -1006,9 +1006,9 @@ description = Password hashing unit tests.
 group = System
 file = tests/password.test
 
-[DrupalMatchPathTestCase]
-name = Drupal match path
-description = Tests the drupal_match_path() function to make sure it works properly.
+[BackdropMatchPathTestCase]
+name = Backdrop match path
+description = Tests the backdrop_match_path() function to make sure it works properly.
 group = Path API
 file = tests/path.test
 
@@ -1020,7 +1020,7 @@ file = tests/path.test
 
 [PathLookupTest]
 name = Path lookup
-description = Tests that drupal_lookup_path() returns correct paths.
+description = Tests that backdrop_lookup_path() returns correct paths.
 group = Path API
 file = tests/path.test
 
@@ -1038,7 +1038,7 @@ file = tests/schema.test
 
 [SessionTestCase]
 name = Session tests
-description = Drupal session handling tests.
+description = Backdrop session handling tests.
 group = Session
 file = tests/session.test
 
@@ -1110,7 +1110,7 @@ file = tests/theme.test
 
 [UnicodeUnitTest]
 name = Unicode handling
-description = Tests Drupal Unicode handling.
+description = Tests Backdrop Unicode handling.
 group = System
 file = tests/unicode.test
 

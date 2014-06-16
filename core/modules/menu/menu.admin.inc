@@ -65,7 +65,7 @@ function theme_menu_admin_overview($variables) {
  */
 function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
-  $form['#attached']['css'] = array(drupal_get_path('module', 'menu') . '/menu.css');
+  $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/menu.css');
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
@@ -107,7 +107,7 @@ function menu_overview_form($form, &$form_state, $menu) {
  *   The menu_tree retrieved by menu_tree_data.
  */
 function _menu_overview_tree_form($tree) {
-  $form = &drupal_static(__FUNCTION__, array('#tree' => TRUE));
+  $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
   foreach ($tree as $data) {
     $title = '';
     $item = $data['link'];
@@ -222,7 +222,7 @@ function menu_overview_form_submit($form, &$form_state) {
     $item['customized'] = 1;
     menu_link_save($item);
   }
-  drupal_set_message(t('Your configuration has been saved.'));
+  backdrop_set_message(t('Your configuration has been saved.'));
 }
 
 /**
@@ -237,8 +237,8 @@ function menu_overview_form_submit($form, &$form_state) {
 function theme_menu_overview_form($variables) {
   $form = $variables['form'];
 
-  drupal_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
-  drupal_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
+  backdrop_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
+  backdrop_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
 
   $header = array(
     t('Menu link'),
@@ -261,10 +261,10 @@ function theme_menu_overview_form($variables) {
       $element['plid']['#type'] = 'hidden';
 
       $row = array();
-      $row[] = theme('indentation', array('size' => $element['#item']['depth'] - 1)) . drupal_render($element['title']);
-      $row[] = array('data' => drupal_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
-      $row[] = drupal_render($element['weight']) . drupal_render($element['plid']) . drupal_render($element['mlid']);
-      $row[] = drupal_render($element['operations']);
+      $row[] = theme('indentation', array('size' => $element['#item']['depth'] - 1)) . backdrop_render($element['title']);
+      $row[] = array('data' => backdrop_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
+      $row[] = backdrop_render($element['weight']) . backdrop_render($element['plid']) . backdrop_render($element['mlid']);
+      $row[] = backdrop_render($element['operations']);
 
       $row = array_merge(array('data' => $row), $element['#attributes']);
       $row['class'][] = 'draggable';
@@ -276,7 +276,7 @@ function theme_menu_overview_form($variables) {
     $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '7'));
   }
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -296,7 +296,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
     $breadcrumb[] = l($current_title, 'admin/structure/menu/manage/' . $item['menu_name']);
-    drupal_set_breadcrumb($breadcrumb);
+    backdrop_set_breadcrumb($breadcrumb);
   }
   $form['actions'] = array('#type' => 'actions');
   $form['link_title'] = array(
@@ -315,7 +315,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
 
   $path = $item['link_path'];
   if (isset($item['options']['query'])) {
-    $path .= '?' . drupal_http_build_query($item['options']['query']);
+    $path .= '?' . backdrop_http_build_query($item['options']['query']);
   }
   if (isset($item['options']['fragment'])) {
     $path .= '#' . $item['options']['fragment'];
@@ -326,7 +326,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#title' => t('Path'),
       '#maxlength' => 255,
       '#default_value' => $path,
-      '#description' => t('The path for this menu link. This can be an internal Drupal path such as %add-node or an external URL such as %drupal. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%drupal' => 'http://drupal.org')),
+      '#description' => t('The path for this menu link. This can be an internal Backdrop path such as %add-node or an external URL such as %external. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://backdropcms.org')),
       '#required' => TRUE,
     );
     $form['actions']['delete'] = array(
@@ -395,15 +395,15 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
  */
 function menu_edit_item_validate($form, &$form_state) {
   $item = &$form_state['values'];
-  $normal_path = drupal_get_normal_path($item['link_path']);
+  $normal_path = backdrop_get_normal_path($item['link_path']);
   if ($item['link_path'] != $normal_path) {
-    drupal_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array('%link_path' => $item['link_path'], '%normal_path' => $normal_path)));
+    backdrop_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array('%link_path' => $item['link_path'], '%normal_path' => $normal_path)));
     $item['link_path'] = $normal_path;
   }
   if (!url_is_external($item['link_path'])) {
     $parsed_link = parse_url($item['link_path']);
     if (isset($parsed_link['query'])) {
-      $item['options']['query'] = drupal_get_query_array($parsed_link['query']);
+      $item['options']['query'] = backdrop_get_query_array($parsed_link['query']);
     }
     else {
       // Use unset() rather than setting to empty string
@@ -420,7 +420,7 @@ function menu_edit_item_validate($form, &$form_state) {
       $item['link_path'] = $parsed_link['path'];
     }
   }
-  if (!trim($item['link_path']) || !drupal_valid_path($item['link_path'], TRUE)) {
+  if (!trim($item['link_path']) || !backdrop_valid_path($item['link_path'], TRUE)) {
     form_set_error('link_path', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $item['link_path'])));
   }
 }
@@ -446,10 +446,10 @@ function menu_edit_item_submit($form, &$form_state) {
   $item['options']['attributes']['title'] = $item['description'];
   list($item['menu_name'], $item['plid']) = explode(':', $item['parent']);
   if (!menu_link_save($item)) {
-    drupal_set_message(t('There was an error saving the menu link.'), 'error');
+    backdrop_set_message(t('There was an error saving the menu link.'), 'error');
   }
   else {
-    drupal_set_message(t('Your configuration has been saved.'));
+    backdrop_set_message(t('Your configuration has been saved.'));
   }
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
 }
@@ -533,10 +533,10 @@ function menu_delete_menu_page($menu) {
   // System-defined menus may not be deleted.
   $system_menus = menu_list_system_menus();
   if (isset($system_menus[$menu['menu_name']])) {
-    drupal_access_denied();
+    backdrop_access_denied();
     return;
   }
-  return drupal_get_form('menu_delete_menu_confirm', $menu);
+  return backdrop_get_form('menu_delete_menu_confirm', $menu);
 }
 
 /**
@@ -582,7 +582,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
   menu_delete($menu);
 
   $t_args = array('%title' => $menu['title']);
-  drupal_set_message(t('The custom menu %title has been deleted.', $t_args));
+  backdrop_set_message(t('The custom menu %title has been deleted.', $t_args));
   watchdog('menu', 'Deleted custom menu %title and all its menu links.', $t_args, WATCHDOG_NOTICE);
 }
 
@@ -632,7 +632,7 @@ function menu_edit_menu_submit($form, &$form_state) {
       menu_link_save($link);
     }
   }
-  drupal_set_message(t('Your configuration has been saved.'));
+  backdrop_set_message(t('Your configuration has been saved.'));
   $form_state['redirect'] = $path . $menu['menu_name'];
 }
 
@@ -643,10 +643,10 @@ function menu_item_delete_page($item) {
   // Links defined via hook_menu may not be deleted. Updated items are an
   // exception, as they can be broken.
   if ($item['module'] == 'system' && !$item['updated']) {
-    drupal_access_denied();
+    backdrop_access_denied();
     return;
   }
-  return drupal_get_form('menu_item_delete_form', $item);
+  return backdrop_get_form('menu_item_delete_form', $item);
 }
 
 /**
@@ -664,7 +664,7 @@ function menu_item_delete_form_submit($form, &$form_state) {
   $item = $form['#item'];
   menu_link_delete($item['mlid']);
   $t_args = array('%title' => $item['link_title']);
-  drupal_set_message(t('The menu link %title has been deleted.', $t_args));
+  backdrop_set_message(t('The menu link %title has been deleted.', $t_args));
   watchdog('menu', 'Deleted menu link %title.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
 }
@@ -683,7 +683,7 @@ function menu_reset_item_confirm($form, &$form_state, $item) {
 function menu_reset_item_confirm_submit($form, &$form_state) {
   $item = $form_state['values']['item'];
   $new_item = menu_reset_item($item);
-  drupal_set_message(t('The menu link was reset to its default settings.'));
+  backdrop_set_message(t('The menu link was reset to its default settings.'));
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $new_item['menu_name'];
 }
 

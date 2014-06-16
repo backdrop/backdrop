@@ -5,7 +5,7 @@
  * Attach the autosubmit library to the form.
  *
  * @code
- *   $form['#attached']['library'][] = array('system', 'drupal.autosubmit');
+ *   $form['#attached']['library'][] = array('system', 'backdrop.autosubmit');
  * @endcode
  *
  * On elements you want to auto-submit when changed, add the autosubmit
@@ -34,7 +34,7 @@
  * Currently only 'select', 'radio', 'checkbox' and 'textfield' types are
  * supported.
  */
-Drupal.behaviors.autosubmit = {
+Backdrop.behaviors.autosubmit = {
   attach: function(context) {
     // 'this' references the form element
     function triggerSubmit (e) {

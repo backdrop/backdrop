@@ -3,7 +3,7 @@
 /**
  * Live preview of Administration menu components.
  */
-Drupal.behaviors.adminMenuLivePreview = {
+Backdrop.behaviors.adminMenuLivePreview = {
   attach: function (context, settings) {
     $('input[name^="components"]', context).once('admin-menu-live-preview')
       .change(function () {
@@ -18,11 +18,11 @@ Drupal.behaviors.adminMenuLivePreview = {
  * Automatically enables required permissions on demand.
  *
  * Many users do not understand that two permissions are required for the
- * administration menu to appear. Since Drupal core provides no facility for
+ * administration menu to appear. Since Backdrop core provides no facility for
  * this, we implement a simple manual confirmation for automatically enabling
  * the "other" permission.
  */
-Drupal.behaviors.adminMenuPermissionsSetupHelp = {
+Backdrop.behaviors.adminMenuPermissionsSetupHelp = {
   attach: function (context, settings) {
     $('#permissions', context).once('admin-menu-permissions-setup', function () {
       // Retrieve matrix/mapping - these need to use the same indexes for the
@@ -45,7 +45,7 @@ Drupal.behaviors.adminMenuPermissionsSetupHelp = {
               // Figure out which is the other, check whether it still disabled,
               // and if so, ask whether to auto-enable it.
               var other = (this == $admin[index] ? $menu[index] : $admin[index]);
-              if (!other.checked && confirm(Drupal.t('Also allow !name role the "!permission" permission? This is usually required to display any pages within the administration menu.', {
+              if (!other.checked && confirm(Backdrop.t('Also allow !name role the "!permission" permission? This is usually required to display any pages within the administration menu.', {
                 '!name': $roles[index].textContent,
                 '!permission': (this == $admin[index] ? menuPermission : adminPermission)
               }))) {

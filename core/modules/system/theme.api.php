@@ -5,11 +5,11 @@
  * @{
  * Functions and templates for the user interface to be implemented by themes.
  *
- * Drupal's presentation layer is a pluggable system known as the theme
- * layer. Each theme can take control over most of Drupal's output, and
+ * Backdrop's presentation layer is a pluggable system known as the theme
+ * layer. Each theme can take control over most of Backdrop's output, and
  * has complete control over the CSS.
  *
- * Inside Drupal, the theme layer is utilized by the use of the theme()
+ * Inside Backdrop, the theme layer is utilized by the use of the theme()
  * function, which is passed the name of a component (the theme hook)
  * and an array of variables. For example,
  * theme('table', array('header' => $header, 'rows' => $rows));
@@ -22,10 +22,9 @@
  * theme functions to named objects, allowing the themer more control over
  * specific types of output.
  *
- * As of Drupal 6, every theme hook is required to be registered by the
- * module that owns it, so that Drupal can tell what to do with it and
- * to make it simple for themes to identify and override the behavior
- * for these calls.
+ * Every theme hook is required to be registered by the module that owns it, so
+ * that Backdrop can tell what to do with it and to make it simple for themes to
+ * identify and override the behavior for these calls.
  *
  * The theme hooks are registered via hook_theme(), which returns an
  * array of arrays with information about the hook. It describes the
@@ -39,22 +38,22 @@
  * default implementations of theme hooks are named theme_HOOK. Default
  * template implementations are stored in the module directory.
  *
- * Drupal's default template renderer is a simple PHP parsing engine that
- * includes the template and stores the output. Drupal's theme engines
+ * Backdrop's default template renderer is a simple PHP parsing engine that
+ * includes the template and stores the output. Backdrop's theme engines
  * can provide alternate template engines, such as XTemplate, Smarty and
  * PHPTal. The most common template engine is PHPTemplate (included with
- * Drupal and implemented in phptemplate.engine, which uses Drupal's default
+ * Backdrop and implemented in phptemplate.engine, which uses Backdrop's default
  * template renderer.
  *
  * In order to create theme-specific implementations of these hooks, themes can
  * implement their own version of theme hooks, either as functions or templates.
  * These implementations will be used instead of the default implementation. If
  * using a pure .theme without an engine, the .theme is required to implement
- * its own version of hook_theme() to tell Drupal what it is implementing;
+ * its own version of hook_theme() to tell Backdrop what it is implementing;
  * themes utilizing an engine will have their well-named theming functions
  * automatically registered for them. While this can vary based upon the theme
  * engine, the standard set by phptemplate is that theme functions should be
- * named THEMENAME_HOOK. For example, for Drupal's default theme (Bartik) to
+ * named THEMENAME_HOOK. For example, for Backdrop's default theme (Bartik) to
  * implement the 'table' hook, the phptemplate.engine would find
  * bartik_table().
  *
@@ -72,7 +71,7 @@
  * Allow themes to alter the theme-specific settings form.
  *
  * With this hook, themes can alter the theme-specific settings form in any way
- * allowable by Drupal's Form API, such as adding form elements, changing
+ * allowable by Backdrop's Form API, such as adding form elements, changing
  * default values and removing form elements. See the Form API documentation on
  * api.drupal.org for detailed information.
  *
@@ -195,7 +194,7 @@ function hook_process(&$variables, $hook) {
  *   The variables array (modify in place).
  */
 function hook_process_HOOK(&$variables) {
-  // @todo There are no use-cases in Drupal core for this hook. Find one from a
+  // @todo There are no use-cases in Backdrop core for this hook. Find one from a
   //   contributed module, or come up with a good example. Coming up with a good
   //   example might be tough, since the intent is for nearly everything to be
   //   achievable via preprocess functions, and for process functions to only be

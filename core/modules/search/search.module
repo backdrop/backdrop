@@ -99,7 +99,7 @@ function search_permission() {
 function search_views_api() {
   return array(
     'api' => '3.0',
-    'path' => drupal_get_path('module', 'search') . '/views',
+    'path' => backdrop_get_path('module', 'search') . '/views',
   );
 }
 
@@ -109,7 +109,7 @@ function search_views_api() {
 function search_block_info() {
   $blocks['form']['info'] = t('Search form');
   // Not worth caching.
-  $blocks['form']['cache'] = DRUPAL_NO_CACHE;
+  $blocks['form']['cache'] = BACKDROP_NO_CACHE;
   $blocks['form']['properties']['administrative'] = TRUE;
   return $blocks;
 }
@@ -120,7 +120,7 @@ function search_block_info() {
 function search_block_view($delta = '') {
   if (user_access('search content')) {
     $block['subject'] = t('Search');
-    $block['content'] = drupal_get_form('search_block_form');
+    $block['content'] = backdrop_get_form('search_block_form');
     return $block;
   }
 }
@@ -149,7 +149,7 @@ function search_menu() {
   $items['admin/config/search/settings'] = array(
     'title' => 'Search settings',
     'description' => 'Configure relevance settings for search and other indexing options.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_admin_settings'),
     'access arguments' => array('administer search'),
     'weight' => -10,
@@ -157,7 +157,7 @@ function search_menu() {
   );
   $items['admin/config/search/settings/reindex'] = array(
     'title' => 'Clear index',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_reindex_confirm'),
     'access arguments' => array('administer search'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
@@ -167,11 +167,11 @@ function search_menu() {
   // Add paths for searching. We add each module search path twice: once without
   // and once with %menu_tail appended. The reason for this is that we want to
   // preserve keywords when switching tabs, and also to have search tabs
-  // highlighted properly. The only way to do that within the Drupal menu
+  // highlighted properly. The only way to do that within the Backdrop menu
   // system appears to be having two sets of tabs. See discussion on issue
   // http://drupal.org/node/245103 for details.
 
-  drupal_static_reset('search_get_info');
+  backdrop_static_reset('search_get_info');
   $default_info = search_get_default_module_info();
   if ($default_info) {
     foreach (search_get_info() as $module => $search_info) {
@@ -231,7 +231,7 @@ function search_is_active() {
  *   'module' will be added (set to the module name).
  */
 function search_get_info($all = FALSE) {
-  $search_hooks = &drupal_static(__FUNCTION__);
+  $search_hooks = &backdrop_static(__FUNCTION__);
 
   if (!isset($search_hooks)) {
     foreach (module_implements('search_info') as $module) {
@@ -316,7 +316,7 @@ function search_reindex($sid = NULL, $module = NULL, $reindex = FALSE) {
  * total counts in the search_total table, and need to be recounted.
  */
 function search_dirty($word = NULL) {
-  $dirty = &drupal_static(__FUNCTION__, array());
+  $dirty = &backdrop_static(__FUNCTION__, array());
   if ($word !== NULL) {
     $dirty[$word] = TRUE;
   }
@@ -335,7 +335,7 @@ function search_dirty($word = NULL) {
 function search_cron() {
   // We register a shutdown function to ensure that search_total is always up
   // to date.
-  drupal_register_shutdown_function('search_update_totals');
+  backdrop_register_shutdown_function('search_update_totals');
 
   foreach (variable_get('search_active_modules', array('node', 'user')) as $module) {
     // Update word index
@@ -392,7 +392,7 @@ function search_simplify($text) {
   $text = decode_entities($text);
 
   // Lowercase
-  $text = drupal_strtolower($text);
+  $text = backdrop_strtolower($text);
 
   // Call an external processor for word handling.
   search_invoke_preprocess($text);
@@ -454,7 +454,7 @@ function search_simplify($text) {
 function search_expand_cjk($matches) {
   $min = variable_get('minimum_word_size', 3);
   $str = $matches[0];
-  $length = drupal_strlen($str);
+  $length = backdrop_strlen($str);
   // If the text is shorter than the minimum word size, don't tokenize it.
   if ($length <= $min) {
     return ' ' . $str . ' ';
@@ -464,7 +464,7 @@ function search_expand_cjk($matches) {
   $chars = array();
   for ($i = 0; $i < $length; $i++) {
     // Add the next character off the beginning of the string to the queue.
-    $current = drupal_substr($str, 0, 1);
+    $current = backdrop_substr($str, 0, 1);
     $str = substr($str, strlen($current));
     $chars[] = $current;
     if ($i >= $min - 1) {
@@ -481,8 +481,8 @@ function search_expand_cjk($matches) {
  * Simplifies and splits a string into tokens for indexing.
  */
 function search_index_split($text) {
-  $last = &drupal_static(__FUNCTION__);
-  $lastsplit = &drupal_static(__FUNCTION__ . ':lastsplit');
+  $last = &backdrop_static(__FUNCTION__);
+  $lastsplit = &backdrop_static(__FUNCTION__ . ':lastsplit');
 
   if ($last == $text) {
     return $lastsplit;
@@ -578,7 +578,7 @@ function search_index($sid, $module, $text) {
     if ($tag) {
       // Increase or decrease score per word based on tag
       list($tagname) = explode(' ', $value, 2);
-      $tagname = drupal_strtolower($tagname);
+      $tagname = backdrop_strtolower($tagname);
       // Closing or opening tag?
       if ($tagname[0] == '/') {
         $tagname = substr($tagname, 1);
@@ -610,7 +610,7 @@ function search_index($sid, $module, $text) {
         if ($tagname == 'a') {
           // Check if link points to a node on this site
           if (preg_match($node_regexp, $value, $match)) {
-            $path = drupal_get_normal_path($match[1]);
+            $path = backdrop_get_normal_path($match[1]);
             if (preg_match('!(?:node|book)/(?:view/)?([0-9]+)!i', $path, $match)) {
               $linknid = $match[1];
               if ($linknid > 0) {
@@ -639,7 +639,7 @@ function search_index($sid, $module, $text) {
           // Add word to accumulator
           $accum .= $word . ' ';
           // Check wordlength
-          if (is_numeric($word) || drupal_strlen($word) >= $minimum_word_size) {
+          if (is_numeric($word) || backdrop_strlen($word) >= $minimum_word_size) {
             // Links score mainly for the target.
             if ($link) {
               if (!isset($results[$linknid])) {
@@ -890,7 +890,7 @@ function search_expression_insert($expression, $option, $value = NULL) {
 /**
  * @defgroup search Search interface
  * @{
- * The Drupal search interface manages a global search mechanism.
+ * The Backdrop search interface manages a global search mechanism.
  *
  * Modules may plug into this system to provide searches of different types of
  * data. Most of the system is handled by search.module, so this must be enabled
@@ -906,7 +906,7 @@ function search_expression_insert($expression, $option, $value = NULL) {
  * - Implement hook_search_info(). This will create a search tab for your module
  *   on the /search page with a simple keyword search form. You will also need
  *   to implement hook_search_execute() to perform the search.
- * - Implement hook_update_index(). This allows your module to use Drupal's
+ * - Implement hook_update_index(). This allows your module to use Backdrop's
  *   HTML indexing mechanism for searching full text efficiently.
  *
  * If your module needs to provide a more complicated search form, then you need
@@ -1005,7 +1005,7 @@ function search_box($form, &$form_state, $form_id) {
 function search_box_form_submit($form, &$form_state) {
   // The search form relies on control of the redirect destination for its
   // functionality, so we override any static destination set in the request,
-  // for example by drupal_access_denied() or drupal_not_found()
+  // for example by backdrop_access_denied() or backdrop_not_found()
   // (see http://drupal.org/node/292565).
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);

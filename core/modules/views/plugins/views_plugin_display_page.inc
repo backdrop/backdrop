@@ -48,7 +48,7 @@ class views_plugin_display_page extends views_plugin_display {
   }
 
   /**
-   * Add this display's path information to Drupal's menu system.
+   * Add this display's path information to Backdrop's menu system.
    */
   function execute_hook_menu($callbacks) {
     $items = array();
@@ -205,7 +205,7 @@ class views_plugin_display_page extends views_plugin_display {
 
   /**
    * The display page handler returns a normal view, but it also does
-   * a drupal_set_title for the page, and does a views_set_page_view
+   * a backdrop_set_title for the page, and does a views_set_page_view
    * on the view.
    */
   function execute() {
@@ -216,11 +216,11 @@ class views_plugin_display_page extends views_plugin_display {
     // display, and arguments should be set on the view.
     $this->view->build();
     if (!empty($this->view->build_info['fail'])) {
-      return drupal_not_found();
+      return backdrop_not_found();
     }
 
     if (!empty($this->view->build_info['denied'])) {
-      return drupal_access_denied();
+      return backdrop_access_denied();
     }
 
     $this->view->get_breadcrumb(TRUE);
@@ -231,7 +231,7 @@ class views_plugin_display_page extends views_plugin_display {
 
     // First execute the view so it's possible to get tokens for the title.
     // And the title, which is much easier.
-    drupal_set_title(filter_xss_admin($this->view->get_title()), PASS_THROUGH);
+    backdrop_set_title(filter_xss_admin($this->view->get_title()), PASS_THROUGH);
     return $render;
   }
 
@@ -464,7 +464,7 @@ class views_plugin_display_page extends views_plugin_display {
         }
 
         $form['tab_markup'] = array(
-          '#markup' => '<div class="form-item description">' . t('When providing a menu item as a tab, Drupal needs to know what the parent menu item of that tab will be. Sometimes the parent will already exist, but other times you will need to have one created. The path of a parent item will always be the same path with the last part left off. i.e, if the path to this view is <em>foo/bar/baz</em>, the parent path would be <em>foo/bar</em>.') . '</div>',
+          '#markup' => '<div class="form-item description">' . t('When providing a menu item as a tab, Backdrop needs to know what the parent menu item of that tab will be. Sometimes the parent will already exist, but other times you will need to have one created. The path of a parent item will always be the same path with the last part left off. i.e, if the path to this view is <em>foo/bar/baz</em>, the parent path would be <em>foo/bar</em>.') . '</div>',
         );
 
         $form['tab_options'] = array(

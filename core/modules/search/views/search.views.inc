@@ -143,7 +143,7 @@ function search_views_plugins() {
         'help' => t('Display the results with standard search view.'),
         'handler' => 'views_plugin_row_search_view',
         'theme' => 'views_view_row_search',
-        'path' => drupal_get_path('module', 'views') . '/modules/search', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/search', // not necessary for most modules
         'base' => array('node'), // only works with 'node' as base.
         'type' => 'normal',
       ),
@@ -173,7 +173,7 @@ function template_preprocess_views_view_row_search(&$vars) {
 
   // Build the node body.
   $node = node_build_content($node, FALSE, FALSE);
-  $node->body = drupal_render($node->content);
+  $node->body = backdrop_render($node->content);
 
   // Fetch comments for snippet
   $node->body .= module_invoke('comment', 'nodeapi', $node, 'update index');

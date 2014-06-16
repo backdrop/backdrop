@@ -26,15 +26,15 @@ function user_admin($callback_arg = '') {
   switch ($op) {
     case t('Create new account'):
     case 'create':
-      $build['user_register'] = drupal_get_form('user_register_form');
+      $build['user_register'] = backdrop_get_form('user_register_form');
       break;
     default:
       if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'cancel')) {
-        $build['user_multiple_cancel_confirm'] = drupal_get_form('user_multiple_cancel_confirm');
+        $build['user_multiple_cancel_confirm'] = backdrop_get_form('user_multiple_cancel_confirm');
       }
       else {
-        $build['user_filter_form'] = drupal_get_form('user_filter_form');
-        $build['user_admin_account'] = drupal_get_form('user_admin_account');
+        $build['user_filter_form'] = backdrop_get_form('user_filter_form');
+        $build['user_admin_account'] = backdrop_get_form('user_admin_account');
       }
   }
   return $build;
@@ -113,7 +113,7 @@ function user_filter_form() {
     );
   }
 
-  drupal_add_library('system', 'drupal.form');
+  backdrop_add_library('system', 'backdrop.form');
 
   return $form;
 }
@@ -203,7 +203,7 @@ function user_admin_account() {
     '#value' => t('Update'),
   );
 
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
 
   $status = array(t('blocked'), t('active'));
   $roles = array_map('check_plain', user_roles(TRUE));
@@ -264,7 +264,7 @@ function user_admin_account_submit($form, &$form_state) {
     }
     call_user_func_array($function, $args);
 
-    drupal_set_message(t('The update has been performed.'));
+    backdrop_set_message(t('The update has been performed.'));
   }
 }
 
@@ -304,8 +304,8 @@ function user_admin_settings() {
   // Do not allow users to set the anonymous or authenticated user roles as the
   // administrator role.
   $roles = user_roles();
-  unset($roles[DRUPAL_ANONYMOUS_RID]);
-  unset($roles[DRUPAL_AUTHENTICATED_RID]);
+  unset($roles[BACKDROP_ANONYMOUS_RID]);
+  unset($roles[BACKDROP_AUTHENTICATED_RID]);
   $roles[0] = t('disabled');
 
   $form['admin_role']['user_admin_role'] = array(
@@ -380,7 +380,7 @@ function user_admin_settings() {
     '#title' => t('Enable user pictures.'),
     '#default_value' => $picture_support,
   );
-  drupal_add_js(drupal_get_path('module', 'user') . '/user.js');
+  backdrop_add_js(backdrop_get_path('module', 'user') . '/user.js');
   $form['personalization']['pictures'] = array(
     '#type' => 'container',
     '#states' => array(
@@ -743,7 +743,7 @@ function user_admin_permissions($form, $form_state, $rid = NULL) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/user.permissions.js';
 
   return $form;
 }
@@ -758,7 +758,7 @@ function user_admin_permissions_submit($form, &$form_state) {
     user_role_change_permissions($rid, $form_state['values'][$rid]);
   }
 
-  drupal_set_message(t('The changes have been saved.'));
+  backdrop_set_message(t('The changes have been saved.'));
 
   // Clear the cached pages and blocks.
   cache_clear_all();
@@ -781,29 +781,29 @@ function theme_user_admin_permissions($variables) {
     $row = array();
     // Module name
     if (is_numeric($key)) {
-      $row[] = array('data' => drupal_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['role_names']['#value']) + 1);
+      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['role_names']['#value']) + 1);
     }
     else {
       // Permission row.
       $row[] = array(
-        'data' => drupal_render($form['permission'][$key]),
+        'data' => backdrop_render($form['permission'][$key]),
         'class' => array('permission'),
       );
       foreach (element_children($form['checkboxes']) as $rid) {
         $form['checkboxes'][$rid][$key]['#title'] = $roles[$rid] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$rid][$key]['#title_display'] = 'invisible';
-        $row[] = array('data' => drupal_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'));
+        $row[] = array('data' => backdrop_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'));
       }
     }
     $rows[] = $row;
   }
   $header[] = (t('Permission'));
   foreach (element_children($form['role_names']) as $rid) {
-    $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
+    $header[] = array('data' => backdrop_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
   $output = theme('system_compact_link');
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -867,7 +867,7 @@ function user_admin_roles($form, $form_state) {
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
-    if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+    if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
       $links['edit'] = array(
         'title' => t('Edit role'),
         'href' => 'admin/people/permissions/roles/edit/' . $rid,
@@ -918,7 +918,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
     $role->weight = $role_values['weight'];
     user_role_save($role);
   }
-  drupal_set_message(t('The role settings have been updated.'));
+  backdrop_set_message(t('The role settings have been updated.'));
 }
 
 /**
@@ -937,22 +937,22 @@ function theme_user_admin_roles($variables) {
   foreach (element_children($form['roles']) as $rid) {
     $name = $form['roles'][$rid]['#role']->name;
     $row = array();
-    if (in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+    if (in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
       $row[] = t('@name <em>(locked)</em>', array('@name' => $name));
     }
     else {
       $row[] = check_plain($name);
     }
-    $row[] = drupal_render($form['roles'][$rid]['weight']);
-    $row[] = drupal_render($form['roles'][$rid]['operations']);
+    $row[] = backdrop_render($form['roles'][$rid]['weight']);
+    $row[] = backdrop_render($form['roles'][$rid]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
-  $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));
+  $rows[] = array(array('data' => backdrop_render($form['name']) . backdrop_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));
 
-  drupal_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
+  backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -965,8 +965,8 @@ function theme_user_admin_roles($variables) {
  * @see user_admin_role_submit()
  */
 function user_admin_role($form, $form_state, $role) {
-  if ($role->rid == DRUPAL_ANONYMOUS_RID || $role->rid == DRUPAL_AUTHENTICATED_RID) {
-    drupal_goto('admin/people/permissions/roles');
+  if ($role->rid == BACKDROP_ANONYMOUS_RID || $role->rid == BACKDROP_AUTHENTICATED_RID) {
+    backdrop_goto('admin/people/permissions/roles');
   }
 
   // Display the edit role form.
@@ -1030,11 +1030,11 @@ function user_admin_role_submit($form, &$form_state) {
   $role = (object) $form_state['values'];
   if ($form_state['values']['op'] == t('Save role')) {
     user_role_save($role);
-    drupal_set_message(t('The role has been renamed.'));
+    backdrop_set_message(t('The role has been renamed.'));
   }
   elseif ($form_state['values']['op'] == t('Add role')) {
     user_role_save($role);
-    drupal_set_message(t('The role has been added.'));
+    backdrop_set_message(t('The role has been added.'));
   }
   $form_state['redirect'] = 'admin/people/permissions/roles';
   return;
@@ -1063,7 +1063,7 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
  */
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
   user_role_delete((int) $form_state['values']['rid']);
-  drupal_set_message(t('The role has been deleted.'));
+  backdrop_set_message(t('The role has been deleted.'));
   $form_state['redirect'] = 'admin/people/permissions/roles';
 }
 

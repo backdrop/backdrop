@@ -5,7 +5,7 @@
  * Definition of CommentViewsHandlerArgumentUserUidTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests the argument_comment_user_uid handler.
@@ -35,11 +35,11 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
 
     // Add two users, create a node with the user1 as author and another node with user2 as author.
     // For the second node add a comment from user1.
-    $this->account = $this->drupalCreateUser();
-    $this->account2 = $this->drupalCreateUser();
-    $this->drupalLogin($this->account);
-    $this->node_user_posted = $this->drupalCreateNode();
-    $this->node_user_commented = $this->drupalCreateNode(array('uid' => $this->account2->uid));
+    $this->account = $this->backdropCreateUser();
+    $this->account2 = $this->backdropCreateUser();
+    $this->backdropLogin($this->account);
+    $this->node_user_posted = $this->backdropCreateNode();
+    $this->node_user_commented = $this->backdropCreateNode(array('uid' => $this->account2->uid));
     $this->postComment($this->node_user_commented);
   }
 

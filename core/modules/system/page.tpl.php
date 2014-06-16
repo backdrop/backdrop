@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Default theme implementation to display a single Drupal page.
+ * Default theme implementation to display a single Backdrop page.
  *
  * The doctype, html, head and body tags are not in this template. Instead they
  * can be found in the html.tpl.php template in this directory.
@@ -10,7 +10,7 @@
  * Available variables:
  *
  * General utility variables:
- * - $base_path: The base URL path of the Drupal installation. At the very
+ * - $base_path: The base URL path of the Backdrop installation. At the very
  *   least, this will always default to /.
  * - $directory: The directory the template is located in, e.g. modules/system
  *   or themes/bartik.

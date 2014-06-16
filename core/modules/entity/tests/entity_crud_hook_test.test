@@ -17,7 +17,7 @@
  * As well as all type-specific hooks, like hook_node_insert(),
  * hook_comment_update(), etc.
  */
-class EntityCrudHookTestCase extends DrupalWebTestCase {
+class EntityCrudHookTestCase extends BackdropWebTestCase {
 
   protected $ids = array();
 

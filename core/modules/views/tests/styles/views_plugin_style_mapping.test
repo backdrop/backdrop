@@ -5,7 +5,7 @@
  * Definition of ViewsPluginStyleMappingTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/styles/views_plugin_style_base.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/styles/views_plugin_style_base.test';
 
 /**
  * Tests the default/mapping row style.
@@ -25,9 +25,9 @@ class ViewsPluginStyleMappingTest extends ViewsPluginStyleTestBase {
           'title' => t('Field mapping'),
           'help' => t('Maps specific fields to specific purposes.'),
           'handler' => 'views_test_plugin_style_test_mapping',
-          'path' => drupal_get_path('module', 'views_test') . '/test_plugins',
+          'path' => backdrop_get_path('module', 'views_test') . '/test_plugins',
           'theme' => 'views_view_mapping_test',
-          'theme path' => drupal_get_path('module', 'views_test'),
+          'theme path' => backdrop_get_path('module', 'views_test'),
           'theme file' => 'views_test.module',
           'uses row plugin' => FALSE,
           'uses fields' => TRUE,

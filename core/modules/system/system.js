@@ -10,10 +10,10 @@ var ids = [];
  * This function is not used to verify whether or not clean URLs
  * are currently enabled.
  */
-Drupal.behaviors.cleanURLsSettingsCheck = {
+Backdrop.behaviors.cleanURLsSettingsCheck = {
   attach: function (context, settings) {
     // This behavior attaches by ID, so is only valid once on a page.
-    // Also skip if we are on an install page, as Drupal.cleanURLsInstallCheck will handle
+    // Also skip if we are on an install page, as Backdrop.cleanURLsInstallCheck will handle
     // the processing.
     if (!($('#edit-clean-url').length) || $('#edit-clean-url.install').once('clean-url').length) {
       return;
@@ -37,8 +37,8 @@ Drupal.behaviors.cleanURLsSettingsCheck = {
  * This function is not used to verify whether or not clean URLs
  * are currently enabled.
  */
-Drupal.cleanURLsInstallCheck = function () {
-  var url = location.protocol + '//' + location.host + Drupal.settings.basePath + 'admin/config/search/clean-urls/check';
+Backdrop.cleanURLsInstallCheck = function () {
+  var url = location.protocol + '//' + location.host + Backdrop.settings.basePath + 'admin/config/search/clean-urls/check';
   // Submit a synchronous request to avoid database errors associated with
   // concurrent requests during install.
   $.ajax({
@@ -57,12 +57,12 @@ Drupal.cleanURLsInstallCheck = function () {
  * use the same value. In the installer this is used to populate the
  * administrator e-mail address with the same value as the site e-mail address.
  */
-Drupal.behaviors.copyFieldValue = {
+Backdrop.behaviors.copyFieldValue = {
   attach: function (context) {
     // List of fields IDs on which to bind the event listener.
     // Create an array of IDs to use with jQuery.
-    for (var sourceId in Drupal.settings.copyFieldValue) {
-      if (Drupal.settings.copyFieldValue.hasOwnProperty(sourceId)) {
+    for (var sourceId in Backdrop.settings.copyFieldValue) {
+      if (Backdrop.settings.copyFieldValue.hasOwnProperty(sourceId)) {
         ids.push(sourceId);
       }
     }
@@ -102,8 +102,9 @@ Drupal.behaviors.copyFieldValue = {
    */
   valueSourceBlurHandler: function (e) {
     var value = $(e.target).val();
-    var targetIds = Drupal.settings.copyFieldValue[e.target.id];
+    var targetIds = Backdrop.settings.copyFieldValue[e.target.id];
     $('#' + targetIds.join(', #')).trigger('value:copy', value);
+
   }
 };
 

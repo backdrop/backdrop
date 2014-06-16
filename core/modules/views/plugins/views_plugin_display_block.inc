@@ -15,7 +15,7 @@ class views_plugin_display_block extends views_plugin_display {
     $options = parent::option_definition();
 
     $options['block_description'] = array('default' => '', 'translatable' => TRUE);
-    $options['block_caching'] = array('default' => DRUPAL_NO_CACHE);
+    $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
 
     return $options;
   }
@@ -99,13 +99,13 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function block_caching_modes() {
     return array(
-      DRUPAL_NO_CACHE => t('Do not cache'),
-      DRUPAL_CACHE_GLOBAL => t('Cache once for everything (global)'),
-      DRUPAL_CACHE_PER_PAGE => t('Per page'),
-      DRUPAL_CACHE_PER_ROLE => t('Per role'),
-      DRUPAL_CACHE_PER_ROLE | DRUPAL_CACHE_PER_PAGE => t('Per role per page'),
-      DRUPAL_CACHE_PER_USER => t('Per user'),
-      DRUPAL_CACHE_PER_USER | DRUPAL_CACHE_PER_PAGE => t('Per user per page'),
+      BACKDROP_NO_CACHE => t('Do not cache'),
+      BACKDROP_CACHE_GLOBAL => t('Cache once for everything (global)'),
+      BACKDROP_CACHE_PER_PAGE => t('Per page'),
+      BACKDROP_CACHE_PER_ROLE => t('Per role'),
+      BACKDROP_CACHE_PER_ROLE | BACKDROP_CACHE_PER_PAGE => t('Per role per page'),
+      BACKDROP_CACHE_PER_USER => t('Per user'),
+      BACKDROP_CACHE_PER_USER | BACKDROP_CACHE_PER_PAGE => t('Per user per page'),
     );
   }
 
@@ -116,7 +116,7 @@ class views_plugin_display_block extends views_plugin_display {
   function get_cache_type() {
     $cache_type = $this->get_option('block_caching');
     if (empty($cache_type)) {
-      $cache_type = DRUPAL_NO_CACHE;
+      $cache_type = BACKDROP_NO_CACHE;
     }
     return $cache_type;
   }
@@ -142,7 +142,7 @@ class views_plugin_display_block extends views_plugin_display {
 
         $form['block_caching'] = array(
           '#type' => 'radios',
-          '#description' => t("This sets the default status for Drupal's built-in block caching method; this requires that caching be turned on in block administration, and be careful because you have little control over when this cache is flushed."),
+          '#description' => t("This sets the default status for Backdrop's built-in block caching method; this requires that caching be turned on in block administration, and be careful because you have little control over when this cache is flushed."),
           '#options' => $this->block_caching_modes(),
           '#default_value' => $this->get_cache_type(),
         );

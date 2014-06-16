@@ -13,19 +13,19 @@
 /**
  * Attach behaviors to managed file element upload fields.
  */
-Drupal.behaviors.fileValidateAutoAttach = {
+Backdrop.behaviors.fileValidateAutoAttach = {
   attach: function (context, settings) {
     if (settings.file && settings.file.elements) {
       $.each(settings.file.elements, function(selector) {
         var extensions = settings.file.elements[selector];
-        $(selector, context).bind('change', {extensions: extensions}, Drupal.file.validateExtension);
+        $(selector, context).bind('change', {extensions: extensions}, Backdrop.file.validateExtension);
       });
     }
   },
   detach: function (context, settings) {
     if (settings.file && settings.file.elements) {
       $.each(settings.file.elements, function(selector) {
-        $(selector, context).unbind('change', Drupal.file.validateExtension);
+        $(selector, context).unbind('change', Backdrop.file.validateExtension);
       });
     }
   }
@@ -34,33 +34,33 @@ Drupal.behaviors.fileValidateAutoAttach = {
 /**
  * Attach behaviors to the file upload and remove buttons.
  */
-Drupal.behaviors.fileButtons = {
+Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).bind('mousedown', Drupal.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).bind('mousedown', Drupal.file.progressBar);
+    $('input.form-submit', context).bind('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).bind('mousedown', Backdrop.file.progressBar);
   },
   detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Drupal.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Drupal.file.progressBar);
+    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
   }
 };
 
 /**
  * Attach behaviors to links within managed file elements.
  */
-Drupal.behaviors.filePreviewLinks = {
+Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).bind('click',Drupal.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).bind('click',Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Drupal.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
   }
 };
 
 /**
  * File upload utility functions.
  */
-Drupal.file = Drupal.file || {
+Backdrop.file = Backdrop.file || {
   /**
    * Client-side file input validation of file extensions.
    */
@@ -73,12 +73,12 @@ Drupal.file = Drupal.file || {
     if (extensionPattern.length > 1 && this.value.length > 0) {
       var acceptableMatch = new RegExp('\\.(' + extensionPattern + ')$', 'gi');
       if (!acceptableMatch.test(this.value)) {
-        var error = Drupal.t("The selected file %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions.", {
+        var error = Backdrop.t("The selected file %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions.", {
           // According to the specifications of HTML5, a file upload control
           // should not reveal the real local path to the file that a user
           // has selected. Some web browsers implement this restriction by
           // replacing the local path with "C:\fakepath\", which can cause
-          // confusion by leaving the user thinking perhaps Drupal could not
+          // confusion by leaving the user thinking perhaps Backdrop could not
           // find the file because it messed up the file path. To avoid this
           // confusion, therefore, we strip out the bogus fakepath string.
           '%filename': this.value.replace('C:\\fakepath\\', ''),
@@ -111,9 +111,9 @@ Drupal.file = Drupal.file || {
     // working with. Filter out fields that are already disabled so that they
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
-    // of time (1 second). All the other mousedown handlers (like Drupal's Ajax
-    // behaviors) are excuted before any timeout functions are called, so we
-    // don't have to worry about the fields being re-enabled too soon.
+    // of time (1 second). All the other mousedown handlers (like Backdrop's
+    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');
     $fieldsToTemporarilyDisable.prop('disabled', true);

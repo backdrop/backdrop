@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Drupal hash script - to generate a hash from a plaintext password
+ * Backdrop hash script - to generate a hash from a plaintext password
  *
  * Check for your PHP interpreter - on Windows you'll probably have to
  * replace line 1 with
@@ -28,7 +28,7 @@ $script = basename(array_shift($_SERVER['argv']));
 if (in_array('--help', $_SERVER['argv']) || empty($_SERVER['argv'])) {
   echo <<<EOF
 
-Generate Drupal password hashes from the shell.
+Generate Backdrop password hashes from the shell.
 
 Usage:        {$script} [OPTIONS] "<plan-text password>"
 Example:      {$script} "mynewpassword"
@@ -41,8 +41,9 @@ All arguments are long options.
 
               Set the working directory for the script to the specified path.
               To execute this script this has to be the root directory of your
-              Drupal installation, e.g. /home/www/foo/drupal (assuming Drupal
-              running on Unix). Use surrounding quotation marks on Windows.
+              Backdrop installation, e.g. /home/www/foo/backdrop (assuming
+              Backdrop is running on Unix). Use surrounding quotation marks on
+              Windows.
 
   "<password1>" ["<password2>" ["<password3>" ...]]
 
@@ -51,7 +52,7 @@ All arguments are long options.
               change a password via SQL to a known value.
 
 To run this script without the --root argument invoke it from the root directory
-of your Drupal installation as
+of your Backdrop installation as
 
   ./scripts/{$script}
 \n
@@ -79,10 +80,10 @@ while ($param = array_shift($_SERVER['argv'])) {
 }
 
 chdir('..');
-define('DRUPAL_ROOT', getcwd());
+define('BACKDROP_ROOT', getcwd());
 
-include_once DRUPAL_ROOT . '/core/includes/password.inc';
-include_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
+include_once BACKDROP_ROOT . '/core/includes/password.inc';
+include_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 
 foreach ($passwords as $password) {
   print("\npassword: $password \t\thash: ". user_hash_password($password) ."\n");

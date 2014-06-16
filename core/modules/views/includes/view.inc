@@ -311,7 +311,7 @@ class view {
   /**
    * Perform automatic updates when loading or importing a view.
    *
-   * Over time, some things about Views or Drupal data has changed.
+   * Over time, some things about Views or Backdrop data has changed.
    * this attempts to do some automatic updates that must happen
    * to ensure older views will at least try to work.
    */
@@ -1233,7 +1233,7 @@ class view {
       return;
     }
 
-    drupal_theme_initialize();
+    backdrop_theme_initialize();
 
     $start = microtime(TRUE);
     if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
@@ -1693,7 +1693,7 @@ class view {
    * Get the breadcrumb used for this view.
    *
    * @param $set
-   *   If true, use drupal_set_breadcrumb() to install the breadcrumb.
+   *   If true, use backdrop_set_breadcrumb() to install the breadcrumb.
    */
   function get_breadcrumb($set = FALSE) {
     // Now that we've built the view, extract the breadcrumb.
@@ -1715,9 +1715,9 @@ class view {
 
       if ($set) {
         if ($base) {
-          $breadcrumb = array_merge(drupal_get_breadcrumb(), $breadcrumb);
+          $breadcrumb = array_merge(backdrop_get_breadcrumb(), $breadcrumb);
         }
-        drupal_set_breadcrumb($breadcrumb);
+        backdrop_set_breadcrumb($breadcrumb);
       }
     }
     return $breadcrumb;

@@ -3,7 +3,7 @@
  * JavaScript companion to the system_jump_menu form.
  */
 (function($) {
-  Drupal.behaviors.jumpMenu = {
+  Backdrop.behaviors.jumpMenu = {
     attach: function(context) {
       $('.jump-menu-hide')
           .once('jump-menu')

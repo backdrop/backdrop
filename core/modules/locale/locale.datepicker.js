@@ -3,76 +3,76 @@
 /**
  * Attaches language support to the jQuery UI datepicker component.
  */
-Drupal.behaviors.localeDatepicker = {
+Backdrop.behaviors.localeDatepicker = {
   attach: function(context, settings) {
-    // This code accesses Drupal.settings and localized strings via Drupal.t().
+    // This code accesses Backdrop.settings and localized strings via Backdrop.t().
     // So this code should run after these are initialized. By placing it in an
     // attach behavior this is assured.
-    $.datepicker.regional['drupal-locale'] = $.extend({
-      closeText: Drupal.t('Done'),
-      prevText: Drupal.t('Prev'),
-      nextText: Drupal.t('Next'),
-      currentText: Drupal.t('Today'),
+    $.datepicker.regional['backdrop-locale'] = $.extend({
+      closeText: Backdrop.t('Done'),
+      prevText: Backdrop.t('Prev'),
+      nextText: Backdrop.t('Next'),
+      currentText: Backdrop.t('Today'),
       monthNames: [
-        Drupal.t('January', {}, {context: "Long month name"}),
-        Drupal.t('February', {}, {context: "Long month name"}),
-        Drupal.t('March', {}, {context: "Long month name"}),
-        Drupal.t('April', {}, {context: "Long month name"}),
-        Drupal.t('May', {}, {context: "Long month name"}),
-        Drupal.t('June', {}, {context: "Long month name"}),
-        Drupal.t('July', {}, {context: "Long month name"}),
-        Drupal.t('August', {}, {context: "Long month name"}),
-        Drupal.t('September', {}, {context: "Long month name"}),
-        Drupal.t('October', {}, {context: "Long month name"}),
-        Drupal.t('November', {}, {context: "Long month name"}),
-        Drupal.t('December', {}, {context: "Long month name"})
+        Backdrop.t('January', {}, {context: "Long month name"}),
+        Backdrop.t('February', {}, {context: "Long month name"}),
+        Backdrop.t('March', {}, {context: "Long month name"}),
+        Backdrop.t('April', {}, {context: "Long month name"}),
+        Backdrop.t('May', {}, {context: "Long month name"}),
+        Backdrop.t('June', {}, {context: "Long month name"}),
+        Backdrop.t('July', {}, {context: "Long month name"}),
+        Backdrop.t('August', {}, {context: "Long month name"}),
+        Backdrop.t('September', {}, {context: "Long month name"}),
+        Backdrop.t('October', {}, {context: "Long month name"}),
+        Backdrop.t('November', {}, {context: "Long month name"}),
+        Backdrop.t('December', {}, {context: "Long month name"})
       ],
       monthNamesShort: [
-        Drupal.t('Jan'),
-        Drupal.t('Feb'),
-        Drupal.t('Mar'),
-        Drupal.t('Apr'),
-        Drupal.t('May'),
-        Drupal.t('Jun'),
-        Drupal.t('Jul'),
-        Drupal.t('Aug'),
-        Drupal.t('Sep'),
-        Drupal.t('Oct'),
-        Drupal.t('Nov'),
-        Drupal.t('Dec')
+        Backdrop.t('Jan'),
+        Backdrop.t('Feb'),
+        Backdrop.t('Mar'),
+        Backdrop.t('Apr'),
+        Backdrop.t('May'),
+        Backdrop.t('Jun'),
+        Backdrop.t('Jul'),
+        Backdrop.t('Aug'),
+        Backdrop.t('Sep'),
+        Backdrop.t('Oct'),
+        Backdrop.t('Nov'),
+        Backdrop.t('Dec')
       ],
       dayNames: [
-        Drupal.t('Sunday'),
-        Drupal.t('Monday'),
-        Drupal.t('Tuesday'),
-        Drupal.t('Wednesday'),
-        Drupal.t('Thursday'),
-        Drupal.t('Friday'),
-        Drupal.t('Saturday')
+        Backdrop.t('Sunday'),
+        Backdrop.t('Monday'),
+        Backdrop.t('Tuesday'),
+        Backdrop.t('Wednesday'),
+        Backdrop.t('Thursday'),
+        Backdrop.t('Friday'),
+        Backdrop.t('Saturday')
       ],
       dayNamesShort: [
-        Drupal.t('Sun'),
-        Drupal.t('Mon'),
-        Drupal.t('Tue'),
-        Drupal.t('Wed'),
-        Drupal.t('Thu'),
-        Drupal.t('Fri'),
-        Drupal.t('Sat')
+        Backdrop.t('Sun'),
+        Backdrop.t('Mon'),
+        Backdrop.t('Tue'),
+        Backdrop.t('Wed'),
+        Backdrop.t('Thu'),
+        Backdrop.t('Fri'),
+        Backdrop.t('Sat')
       ],
       dayNamesMin: [
-        Drupal.t('Su'),
-        Drupal.t('Mo'),
-        Drupal.t('Tu'),
-        Drupal.t('We'),
-        Drupal.t('Th'),
-        Drupal.t('Fr'),
-        Drupal.t('Sa')
+        Backdrop.t('Su'),
+        Backdrop.t('Mo'),
+        Backdrop.t('Tu'),
+        Backdrop.t('We'),
+        Backdrop.t('Th'),
+        Backdrop.t('Fr'),
+        Backdrop.t('Sa')
       ],
-      dateFormat: Drupal.t('mm/dd/yy'),
+      dateFormat: Backdrop.t('mm/dd/yy'),
       firstDay: 0,
       isRTL: 0
-    }, Drupal.settings.jquery.ui.datepicker);
-    $.datepicker.setDefaults($.datepicker.regional['drupal-locale']);
+    }, Backdrop.settings.jquery.ui.datepicker);
+    $.datepicker.setDefaults($.datepicker.regional['backdrop-locale']);
   }
 };
 

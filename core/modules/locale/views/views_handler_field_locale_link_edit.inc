@@ -53,7 +53,7 @@ class views_handler_field_locale_link_edit extends views_handler_field {
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = 'admin/build/translate/edit/' . $data;
-    $this->options['alter']['query'] = drupal_get_destination();
+    $this->options['alter']['query'] = backdrop_get_destination();
 
     return $text;
   }

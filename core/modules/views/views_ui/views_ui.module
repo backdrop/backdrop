@@ -39,7 +39,7 @@ function views_ui_menu() {
 
   $items['admin/structure/views/import'] = array(
     'title' => 'Import',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_import_page'),
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
@@ -47,7 +47,7 @@ function views_ui_menu() {
 
   $items['admin/structure/views/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_admin_settings_basic'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
@@ -102,14 +102,14 @@ function views_ui_menu() {
   // Additional pages for acting on a View.
   $items['admin/structure/views/view/%views_ui_cache/clone'] = array(
     'title' => 'Clone view',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_clone_form', 4),
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/delete'] = array(
     'title' => 'Delete view',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_delete_form', 4),
     'access callback' => 'views_ui_menu_action_access',
     'access arguments' => array(4, 'delete'),
@@ -130,7 +130,7 @@ function views_ui_menu() {
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/revert'] = array(
     'title' => 'Revert view',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_revert_form', 4),
     'access callback' => 'views_ui_menu_action_access',
     'access arguments' => array(4, 'revert'),
@@ -139,7 +139,7 @@ function views_ui_menu() {
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
@@ -374,7 +374,7 @@ function views_ui_cache_set(&$view) {
   global $user;
 
   if (!empty($view->locked)) {
-    drupal_set_message(t('Changes cannot be made to a locked view.'), 'error');
+    backdrop_set_message(t('Changes cannot be made to a locked view.'), 'error');
     return;
   }
   $view->changed = TRUE; // let any future object know that this view has changed.
@@ -430,11 +430,11 @@ function views_ui_preprocess_views_view(&$vars) {
           '#theme' => 'views_ui_view_preview_section',
           '#view' => $view,
           '#section' => $section,
-          '#content' => is_array($vars[$section]) ? drupal_render($vars[$section]) : $vars[$section],
+          '#content' => is_array($vars[$section]) ? backdrop_render($vars[$section]) : $vars[$section],
           '#theme_wrappers' => array('views_container'),
           '#attributes' => array('class' => 'contextual-links-region'),
         );
-        $vars[$section] = drupal_render($vars[$section]);
+        $vars[$section] = backdrop_render($vars[$section]);
       }
     }
   }
@@ -503,7 +503,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
         'library' => array(array('contextual', 'contextual-links')),
       ),
     );
-    $vars['links'] = drupal_render($build);
+    $vars['links'] = backdrop_render($build);
   }
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
 }
@@ -896,7 +896,7 @@ function views_ui_contextual_links_view_alter(&$element, $items) {
  * @see views_ui_contextual_links_view_alter()
  */
 function views_ui_contextual_links_suppress($set = NULL) {
-  $suppress = &drupal_static(__FUNCTION__);
+  $suppress = &backdrop_static(__FUNCTION__);
   if (isset($set)) {
     $suppress = $set;
   }
@@ -933,19 +933,19 @@ function views_ui_contextual_links_suppress_pop() {
  *
  * ajax_form_callback(), the menu callback for the system/ajax path, requires
  * the form to be retrievable from the form cache, because it lacks a trusted
- * $form_id argument with which to call drupal_retrieve_form(). When AJAX is
+ * $form_id argument with which to call backdrop_retrieve_form(). When AJAX is
  * wanted on a non-cacheable form, #ajax['path'] can be set to a path whose
  * menu router item's 'page callback' is this function, and whose
  * 'page arguments' is the form id, optionally followed by additional build
- * arguments, as expected by drupal_get_form().
+ * arguments, as expected by backdrop_get_form().
  *
  * The same caution must be used when defining a hook_menu() entry with this
  * page callback as is used when defining a hook_menu() entry with the
- * 'drupal_get_form' page callback: a 'page arguments' must be specified with a
+ * 'backdrop_get_form' page callback: a 'page arguments' must be specified with a
  * literal value as the first argument, because $form_id determines which form
  * builder function gets called, so must be safe from user tampering.
  *
- * @see drupal_get_form()
+ * @see backdrop_get_form()
  * @see ajax_form_callback()
  * @see http://drupal.org/node/774876
  */
@@ -957,11 +957,11 @@ function views_ui_ajax_get_form($form_id) {
   $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
   $form_state['rebuild_info']['copy']['#action'] = TRUE;
 
-  // @see drupal_get_form()
+  // @see backdrop_get_form()
   $args = func_get_args();
   array_shift($args);
   $form_state['build_info']['args'] = $args;
-  $form = drupal_build_form($form_id, $form_state);
+  $form = backdrop_build_form($form_id, $form_state);
 
   // @see ajax_form_callback()
   if (!empty($form_state['triggering_element'])) {
@@ -1039,8 +1039,8 @@ function _views_ui_get_displays_list($view) {
  * This is often used in the UI to ensure long strings fit.
  */
 function views_ui_truncate($string, $length) {
-  if (drupal_strlen($string) > $length) {
-    $string = drupal_substr($string, 0, $length);
+  if (backdrop_strlen($string) > $length) {
+    $string = backdrop_substr($string, 0, $length);
     $string .= '...';
   }
 

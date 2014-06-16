@@ -4,7 +4,7 @@
  * Definition of ViewsHandlerArgumentNullTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests the core views_handler_argument_string handler.
@@ -21,7 +21,7 @@ class ViewsHandlerArgumentStringTest extends ViewsSqlTest {
         $edit = array(
           'title' => $char . $this->randomName(),
         );
-        $this->drupalCreateNode($edit);
+        $this->backdropCreateNode($edit);
       }
     }
 

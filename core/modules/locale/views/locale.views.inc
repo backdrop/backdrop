@@ -98,7 +98,7 @@ function locale_views_data() {
   $data['locales_source']['version'] = array(
     'group' => t('Locale source'),
     'title' => t('Version'),
-    'help' => t('The version of Drupal core that this string is for.'),
+    'help' => t('The version of Backdrop core that this string is for.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,

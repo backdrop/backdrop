@@ -1,6 +1,6 @@
 <?php
 
-require_once DRUPAL_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.test';
+require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.test';
 
 /**
  * Upgrade test for the bare database..
@@ -11,7 +11,7 @@ class BareUpgradePathTestCase extends UpgradePathTestCase {
   public function setUp() {
     // Path to the database dump.
     $this->databaseDumpFiles = array(
-      drupal_get_path('module', 'simpletest') . '/tests/upgrade/drupal-7.bare.database.php.gz',
+      backdrop_get_path('module', 'simpletest') . '/tests/upgrade/drupal-7.bare.database.php.gz',
     );
     parent::setUp();
   }

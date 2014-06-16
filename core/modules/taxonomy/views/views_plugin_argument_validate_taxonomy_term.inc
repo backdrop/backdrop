@@ -119,7 +119,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
           return FALSE;
         }
 
-        $test = drupal_map_assoc($tids->value);
+        $test = backdrop_map_assoc($tids->value);
         $titles = array();
 
         // check, if some tids already verified

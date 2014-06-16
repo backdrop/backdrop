@@ -47,9 +47,9 @@ function hook_test_group_finished() {
  * This hook is called when an individual test has finished.
  *
  * @param
- *   $results The results of the test as gathered by DrupalWebTestCase.
+ *   $results The results of the test as gathered by BackdropWebTestCase.
  *
- * @see DrupalWebTestCase->results
+ * @see BackdropWebTestCase->results
  */
 function hook_test_finished($results) {
 }

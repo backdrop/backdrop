@@ -548,19 +548,19 @@ function user_views_plugins() {
       'user' => array(
         'title' => t('User ID from URL'),
         'handler' => 'views_plugin_argument_default_user',
-        'path' => drupal_get_path('module', 'views') . '/modules/user', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
       'current_user' => array(
         'title' => t('User ID from logged in user'),
         'handler' => 'views_plugin_argument_default_current_user',
-        'path' => drupal_get_path('module', 'views') . '/modules/user', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
     ),
     'argument validator' => array(
       'user' => array(
         'title' => t('User'),
         'handler' => 'views_plugin_argument_validate_user',
-        'path' => drupal_get_path('module', 'views') . '/modules/user', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
     ),
   );

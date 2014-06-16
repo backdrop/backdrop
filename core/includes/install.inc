@@ -78,8 +78,8 @@ const FILE_NOT_EXECUTABLE = 128;
 /**
  * Loads .install files for installed modules to initialize the update system.
  */
-function drupal_load_updates() {
-  foreach (drupal_get_installed_schema_version(NULL, FALSE, TRUE) as $module => $schema_version) {
+function backdrop_load_updates() {
+  foreach (backdrop_get_installed_schema_version(NULL, FALSE, TRUE) as $module => $schema_version) {
     if ($schema_version > -1) {
       module_load_install($module);
     }
@@ -100,8 +100,8 @@ function drupal_load_updates() {
  *   If the module has updates, an unindexed array of available updates sorted
  *   by the order they should be executed. Otherwise, FALSE.
  */
-function drupal_get_schema_versions($module) {
-  $updates = &drupal_static(__FUNCTION__, NULL);
+function backdrop_get_schema_versions($module) {
+  $updates = &backdrop_static(__FUNCTION__, NULL);
   if (!isset($updates[$module])) {
     $updates = array();
 
@@ -158,7 +158,7 @@ function drupal_get_schema_versions($module) {
  *   The currently installed schema version, or SCHEMA_UNINSTALLED if the
  *   module is not installed.
  */
-function drupal_get_installed_schema_version($module, $reset = FALSE, $array = FALSE) {
+function backdrop_get_installed_schema_version($module, $reset = FALSE, $array = FALSE) {
   static $versions = array();
 
   if ($reset) {
@@ -189,14 +189,14 @@ function drupal_get_installed_schema_version($module, $reset = FALSE, $array = F
  * @param $version
  *   The new schema version.
  */
-function drupal_set_installed_schema_version($module, $version) {
+function backdrop_set_installed_schema_version($module, $version) {
   db_update('system')
     ->fields(array('schema_version' => $version))
     ->condition('name', $module)
     ->execute();
 
   // Reset the static cache of module schema versions.
-  drupal_get_installed_schema_version(NULL, TRUE);
+  backdrop_get_installed_schema_version(NULL, TRUE);
 }
 
 /**
@@ -204,20 +204,20 @@ function drupal_set_installed_schema_version($module, $version) {
  *
  * @return
  *   The distribution name defined in the profile's .info file. Defaults to
- *   "Drupal" if none is explicitly provided by the installation profile.
+ *   "Backdrop CMS" if none is explicitly provided by the installation profile.
  *
  * @see install_profile_info()
  */
-function drupal_install_profile_distribution_name() {
+function backdrop_install_profile_distribution_name() {
   // During installation, the profile information is stored in the global
   // installation state (it might not be saved anywhere yet).
-  if (drupal_installation_attempted()) {
+  if (backdrop_installation_attempted()) {
     global $install_state;
     return $install_state['profile_info']['distribution_name'];
   }
   // At all other times, we load the profile via standard methods.
   else {
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     $info = system_get_info('module', $profile);
     return $info['distribution_name'];
   }
@@ -233,7 +233,7 @@ function drupal_install_profile_distribution_name() {
  * @return
  *   The auto-detected $base_url that should be configured in settings.php
  */
-function drupal_detect_baseurl($file = 'core/install.php') {
+function backdrop_detect_baseurl($file = 'core/install.php') {
   $proto = $_SERVER['HTTPS'] ? 'https://' : 'http://';
   $host = $_SERVER['SERVER_NAME'];
   $port = ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT']);
@@ -249,8 +249,8 @@ function drupal_detect_baseurl($file = 'core/install.php') {
  * @return
  *  An array of database types compiled into PHP.
  */
-function drupal_detect_database_types() {
-  $databases = drupal_get_database_types();
+function backdrop_detect_database_types() {
+  $databases = backdrop_get_database_types();
 
   foreach ($databases as $driver => $installer) {
     $databases[$driver] = $installer->name();
@@ -265,7 +265,7 @@ function drupal_detect_database_types() {
  * @return
  *  An array of database installer objects compiled into PHP.
  */
-function drupal_get_database_types() {
+function backdrop_get_database_types() {
   $databases = array();
 
   // We define a driver as a directory in /core/includes/database that in turn
@@ -273,8 +273,8 @@ function drupal_get_database_types() {
   // without modifying the installer.
   // Because we have no registry yet, we need to also include the install.inc
   // file for the driver explicitly.
-  require_once DRUPAL_ROOT . '/core/includes/database/database.inc';
-  foreach (file_scan_directory(DRUPAL_ROOT . '/core/includes/database', '/^[a-z]*$/i', array('recurse' => FALSE)) as $file) {
+  require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
+  foreach (file_scan_directory(BACKDROP_ROOT . '/core/includes/database', '/^[a-z]*$/i', array('recurse' => FALSE)) as $file) {
     if (file_exists($file->uri . '/database.inc') && file_exists($file->uri . '/install.inc')) {
       $drivers[$file->filename] = $file->uri;
     }
@@ -300,7 +300,7 @@ function drupal_get_database_types() {
 /**
  * Database installer structure.
  *
- * Defines basic Drupal requirements for databases.
+ * Defines basic Backdrop requirements for databases.
  */
 abstract class DatabaseTasks {
 
@@ -319,37 +319,37 @@ abstract class DatabaseTasks {
     ),
     array(
       'arguments'   => array(
-        'CREATE TABLE {drupal_install_test} (id int NULL)',
-        'Drupal can use CREATE TABLE database commands.',
+        'CREATE TABLE {backdrop_install_test} (id int NULL)',
+        'Backdrop can use CREATE TABLE database commands.',
         'Failed to <strong>CREATE</strong> a test table on your database server with the command %query. The server reports the following message: %error.<p>Are you sure the configured username has the necessary permissions to create tables in the database?</p>',
         TRUE,
       ),
     ),
     array(
       'arguments'   => array(
-        'INSERT INTO {drupal_install_test} (id) VALUES (1)',
-        'Drupal can use INSERT database commands.',
+        'INSERT INTO {backdrop_install_test} (id) VALUES (1)',
+        'Backdrop can use INSERT database commands.',
         'Failed to <strong>INSERT</strong> a value into a test table on your database server. We tried inserting a value with the command %query and the server reported the following error: %error.',
       ),
     ),
     array(
       'arguments'   => array(
-        'UPDATE {drupal_install_test} SET id = 2',
-        'Drupal can use UPDATE database commands.',
+        'UPDATE {backdrop_install_test} SET id = 2',
+        'Backdrop can use UPDATE database commands.',
         'Failed to <strong>UPDATE</strong> a value in a test table on your database server. We tried updating a value with the command %query and the server reported the following error: %error.',
       ),
     ),
     array(
       'arguments'   => array(
-        'DELETE FROM {drupal_install_test}',
-        'Drupal can use DELETE database commands.',
+        'DELETE FROM {backdrop_install_test}',
+        'Backdrop can use DELETE database commands.',
         'Failed to <strong>DELETE</strong> a value from a test table on your database server. We tried deleting a value with the command %query and the server reported the following error: %error.',
       ),
     ),
     array(
       'arguments'   => array(
-        'DROP TABLE {drupal_install_test}',
-        'Drupal can use DROP TABLE database commands.',
+        'DROP TABLE {backdrop_install_test}',
+        'Backdrop can use DROP TABLE database commands.',
         'Failed to <strong>DROP</strong> a test table from your database server. We tried dropping a table with the command %query and the server reported the following error %error.',
       ),
     ),
@@ -384,7 +384,7 @@ abstract class DatabaseTasks {
   }
 
   /**
-   * Check whether Drupal is installable on the database.
+   * Check whether Backdrop is installable on the database.
    */
   public function installable() {
     return $this->hasPdoDriver() && empty($this->error);
@@ -407,7 +407,7 @@ abstract class DatabaseTasks {
   }
 
   /**
-   * Run database tasks and tests to see if Drupal can run on the database.
+   * Run database tasks and tests to see if Backdrop can run on the database.
    */
   public function runTasks() {
     // We need to establish a connection before we can run tests.
@@ -435,7 +435,7 @@ abstract class DatabaseTasks {
       }
     }
     if (!empty($message)) {
-      $message = '<p>In order for Drupal to work, and to continue with the installation process, you must resolve all issues reported below. For more help with configuring your database server, see the <a href="http://drupal.org/getting-started/install">installation handbook</a>. If you are unsure what any of this means you should probably contact your hosting provider.</p>' . $message;
+      $message = '<p>In order for Backdrop CMS to continue installation process, you must resolve all issues reported below. For more help with configuring your database server, see the <a href="http://backdropcms.org/guide/installation">installation handbook</a>. If you are unsure what any of this means you should probably contact your hosting provider.</p>' . $message;
       throw new DatabaseTaskException($message);
     }
   }
@@ -449,7 +449,7 @@ abstract class DatabaseTasks {
       db_set_active();
       // Now actually do a check.
       Database::getConnection();
-      $this->pass('Drupal can CONNECT to the database ok.');
+      $this->pass('Backdrop can CONNECT to the database ok.');
     }
     catch (Exception $e) {
       $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.<ul><li>Is the database server running?</li><li>Does the database exist, and have you entered the correct database name?</li><li>Have you entered the correct username and password?</li><li>Have you entered the correct database hostname?</li></ul>', array('%error' => $e->getMessage())));
@@ -497,7 +497,7 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['database']) ? '' : $database['database'],
       '#size' => 45,
       '#required' => TRUE,
-      '#description' => st('The name of the database your @drupal data will be stored in. It must exist on your server before @drupal can be installed.', array('@drupal' => drupal_install_profile_distribution_name())),
+      '#description' => st('The name of the database your @profile data will be stored in. It must exist on your server before @profile can be installed.', array('@profile' => backdrop_install_profile_distribution_name())),
     );
 
     $form['username'] = array(
@@ -525,14 +525,14 @@ abstract class DatabaseTasks {
       '#weight' => 10,
     );
 
-    $profile = drupal_get_profile();
-    $db_prefix = ($profile == 'standard') ? 'drupal_' : $profile . '_';
+    $profile = backdrop_get_profile();
+    $db_prefix = ($profile == 'standard') ? 'backdrop_' : $profile . '_';
     $form['advanced_options']['db_prefix'] = array(
       '#type' => 'textfield',
       '#title' => st('Table prefix'),
       '#default_value' => '',
       '#size' => 45,
-      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @drupal site here.', array('@drupal' => drupal_install_profile_distribution_name(), '%prefix' => $db_prefix)),
+      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $db_prefix)),
       '#weight' => 10,
     );
 
@@ -604,8 +604,8 @@ class DatabaseTaskException extends Exception {
  * @return bool
  *   TRUE if the settings file was rewritten successfully. FALSE otherwise.
  */
-function drupal_rewrite_settings($settings = array()) {
-  drupal_static_reset('conf_path');
+function backdrop_rewrite_settings($settings = array()) {
+  backdrop_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additions = '';
 
@@ -657,7 +657,7 @@ function drupal_rewrite_settings($settings = array()) {
       }
     }
 
-    $fp = @fopen(DRUPAL_ROOT . '/' . $settings_file, 'w');
+    $fp = @fopen(BACKDROP_ROOT . '/' . $settings_file, 'w');
     if (!$fp || fwrite($fp, $buffer) === FALSE) {
       throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
     }
@@ -679,7 +679,7 @@ function backdrop_install_config_directories() {
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.
   if (empty($config_directories)) {
-    $config_directories_hash = md5(drupal_random_bytes(55));
+    $config_directories_hash = md5(backdrop_random_bytes(55));
     $settings["config_directories['active']"] = array(
       'value' => 'files/config_' . $config_directories_hash . '/active',
       'required' => TRUE,
@@ -690,7 +690,7 @@ function backdrop_install_config_directories() {
     );
 
     // Rewrite settings.php.
-    drupal_rewrite_settings($settings);
+    backdrop_rewrite_settings($settings);
   }
 
   // Reload the settings.php file from scratch to update the config directories
@@ -710,7 +710,7 @@ function backdrop_install_config_directories() {
     if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
         '%directory' => config_get_config_directory($config_type),
-        '@handbook_url' => 'http://drupal.org/server-permissions',
+        '@handbook_url' => 'http://backdropcms.org/guide/installation',
       )));
     }
 
@@ -722,7 +722,7 @@ function backdrop_install_config_directories() {
     switch ($config_type) {
       case 'active':
         $text = ltrim('
-This directory contains the active configuration for your Drupal site. To move
+This directory contains the active configuration for your Backdrop site. To move
 this configuration between environments, contents from this directory should be
 placed in the staging directory on the target server. To make this configuration
 active, see admin/config/development/configuration/sync on the target server.
@@ -731,7 +731,7 @@ active, see admin/config/development/configuration/sync on the target server.
         break;
       case 'staging':
         $text = ltrim('
-This directory contains configuration to be imported into your Drupal site. To
+This directory contains configuration to be imported into your Backdrop site. To
 make this configuration active, see admin/config/development/configuration/sync.
 
 ');
@@ -755,28 +755,28 @@ http://drupal.org/documentation/administer/config
  * @return
  *   The list of modules to install.
  */
-function drupal_verify_profile($install_state) {
+function backdrop_verify_profile($install_state) {
   $profile = $install_state['parameters']['profile'];
 
-  include_once DRUPAL_ROOT . '/core/includes/file.inc';
-  include_once DRUPAL_ROOT . '/core/includes/common.inc';
+  include_once BACKDROP_ROOT . '/core/includes/file.inc';
+  include_once BACKDROP_ROOT . '/core/includes/common.inc';
 
-  $profile_file = DRUPAL_ROOT . "/profiles/$profile/$profile.profile";
+  $profile_file = BACKDROP_ROOT . "/profiles/$profile/$profile.profile";
 
   if (!isset($profile) || !file_exists($profile_file)) {
     throw new Exception(install_no_profile_error());
   }
   $info = $install_state['profile_info'];
 
-  // Get a list of modules that exist in Drupal's assorted subdirectories.
+  // Get a list of modules that exist in Backdrop's assorted subdirectories.
   $present_modules = array();
-  foreach (drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0) as $present_module) {
+  foreach (backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0) as $present_module) {
     $present_modules[] = $present_module->name;
   }
 
   // The installation profile is also a module, which needs to be installed
   // after all the other dependencies have been installed.
-  $present_modules[] = drupal_get_profile();
+  $present_modules[] = backdrop_get_profile();
 
   // Verify that all of the profile's required modules are present.
   $missing_modules = array_diff($info['dependencies'], $present_modules);
@@ -786,7 +786,7 @@ function drupal_verify_profile($install_state) {
   if (count($missing_modules)) {
     $modules = array();
     foreach ($missing_modules as $module) {
-      $modules[] = '<span class="admin-missing">' . drupal_ucfirst($module) . '</span>';
+      $modules[] = '<span class="admin-missing">' . backdrop_ucfirst($module) . '</span>';
     }
     $requirements['required_modules'] = array(
       'title'       => st('Required modules'),
@@ -803,12 +803,12 @@ function drupal_verify_profile($install_state) {
  * Separated from the installation of other modules so core system
  * functions can be made available while other modules are installed.
  */
-function drupal_install_system() {
-  $system_path = drupal_get_path('module', 'system');
-  require_once DRUPAL_ROOT . '/' . $system_path . '/system.install';
+function backdrop_install_system() {
+  $system_path = backdrop_get_path('module', 'system');
+  require_once BACKDROP_ROOT . '/' . $system_path . '/system.install';
   module_invoke('system', 'install');
 
-  $system_versions = drupal_get_schema_versions('system');
+  $system_versions = backdrop_get_schema_versions('system');
   $system_version = $system_versions ? end($system_versions) : SCHEMA_INSTALLED;
   db_insert('system')
     ->fields(array('filename', 'name', 'type', 'owner', 'status', 'schema_version', 'bootstrap'))
@@ -849,16 +849,16 @@ function drupal_install_system() {
  *
  * @see module_disable()
  */
-function drupal_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
+function backdrop_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
   if ($uninstall_dependents) {
     // Get all module data so we can find dependents and sort.
     $module_data = system_rebuild_module_data();
     // Create an associative array with weights as values.
     $module_list = array_flip(array_values($module_list));
 
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     while (list($module) = each($module_list)) {
-      if (!isset($module_data[$module]) || drupal_get_installed_schema_version($module) == SCHEMA_UNINSTALLED) {
+      if (!isset($module_data[$module]) || backdrop_get_installed_schema_version($module) == SCHEMA_UNINSTALLED) {
         // This module doesn't exist or is already uninstalled. Skip it.
         unset($module_list[$module]);
         continue;
@@ -870,7 +870,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
       // them automatically because uninstalling a module is a destructive
       // operation.
       foreach (array_keys($module_data[$module]->required_by) as $dependent) {
-        if (!isset($module_list[$dependent]) && drupal_get_installed_schema_version($dependent) != SCHEMA_UNINSTALLED && $dependent != $profile) {
+        if (!isset($module_list[$dependent]) && backdrop_get_installed_schema_version($dependent) != SCHEMA_UNINSTALLED && $dependent != $profile) {
           return FALSE;
         }
       }
@@ -885,10 +885,10 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
     // Uninstall the module.
     module_load_install($module);
     module_invoke($module, 'uninstall');
-    drupal_uninstall_schema($module);
+    backdrop_uninstall_schema($module);
 
     watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
-    drupal_set_installed_schema_version($module, SCHEMA_UNINSTALLED);
+    backdrop_set_installed_schema_version($module, SCHEMA_UNINSTALLED);
   }
 
   if (!empty($module_list)) {
@@ -912,7 +912,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
  * @return
  *   TRUE on success or FALSE on failure. A message is set for the latter.
  */
-function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
+function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
   $return = TRUE;
   // Check for files that shouldn't be there.
   if (isset($mask) && ($mask & FILE_NOT_EXIST) && file_exists($file)) {
@@ -935,7 +935,7 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
           case FILE_EXIST:
             if (!file_exists($file)) {
               if ($type == 'dir') {
-                drupal_install_mkdir($file, $mask);
+                backdrop_install_mkdir($file, $mask);
               }
               if (!file_exists($file)) {
                 $return = FALSE;
@@ -992,7 +992,7 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
  * @return
  *  TRUE/FALSE whether or not the directory was successfully created.
  */
-function drupal_install_mkdir($file, $mask, $message = TRUE) {
+function backdrop_install_mkdir($file, $mask, $message = TRUE) {
   $mod = 0;
   $masks = array(FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE, FILE_NOT_READABLE, FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE);
   foreach ($masks as $m) {
@@ -1011,7 +1011,7 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
     }
   }
 
-  if (@drupal_mkdir($file, $mod)) {
+  if (@backdrop_mkdir($file, $mod)) {
     return TRUE;
   }
   else {
@@ -1029,10 +1029,10 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
  */
 function install_goto($path) {
   global $base_url;
-  include_once DRUPAL_ROOT . '/core/includes/common.inc';
+  include_once BACKDROP_ROOT . '/core/includes/common.inc';
   header('Location: ' . $base_url . '/' . $path);
   header('Cache-Control: no-cache'); // Not a permanent redirect.
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -1058,13 +1058,13 @@ function install_goto($path) {
  *   passed-in $query. The URL is not sanitized, so it still needs to be run
  *   through check_url() if it will be used as an HTML attribute value.
  *
- * @see drupal_requirements_url()
+ * @see backdrop_requirements_url()
  */
-function drupal_current_script_url($query = array()) {
+function backdrop_current_script_url($query = array()) {
   $uri = $_SERVER['SCRIPT_NAME'];
-  $query = array_merge(drupal_get_query_parameters(), $query);
+  $query = array_merge(backdrop_get_query_parameters(), $query);
   if (!empty($query)) {
-    $uri .= '?' . drupal_http_build_query($query);
+    $uri .= '?' . backdrop_http_build_query($query);
   }
   return $uri;
 }
@@ -1078,23 +1078,23 @@ function drupal_current_script_url($query = array()) {
  *
  * @param $severity
  *   The severity of the requirements problem, as returned by
- *   drupal_requirements_severity().
+ *   backdrop_requirements_severity().
  *
  * @return
  *   A URL for attempting to proceed to the next step of the script. The URL is
  *   not sanitized, so it still needs to be run through check_url() if it will
  *   be used as an HTML attribute value.
  *
- * @see drupal_current_script_url()
+ * @see backdrop_current_script_url()
  */
-function drupal_requirements_url($severity) {
+function backdrop_requirements_url($severity) {
   $query = array();
   // If there are no errors, only warnings, append 'continue=1' to the URL so
   // the user can bypass this screen on the next page load.
   if ($severity == REQUIREMENT_WARNING) {
     $query['continue'] = 1;
   }
-  return drupal_current_script_url($query);
+  return backdrop_current_script_url($query);
 }
 
 /**
@@ -1103,7 +1103,7 @@ function drupal_requirements_url($severity) {
  * Used during the install process, when database, theme, and localization
  * system is possibly not yet available.
  *
- * Use t() if your code will never run during the Drupal installation phase.
+ * Use t() if your code will never run during the Backdrop installation phase.
  * Use st() if your code will only run during installation and never any other
  * time. Use get_t() if your code could run in either circumstance.
  *
@@ -1128,7 +1128,7 @@ function st($string, array $args = array(), array $options = array()) {
       // that multiple files end with the same extension, even if unlikely.
       $files = install_find_translation_files($install_state['parameters']['langcode']);
       if (!empty($files)) {
-        require_once DRUPAL_ROOT . '/core/includes/gettext.inc';
+        require_once BACKDROP_ROOT . '/core/includes/gettext.inc';
         foreach ($files as $file) {
           _locale_import_read_po('mem-store', $file);
         }
@@ -1137,7 +1137,7 @@ function st($string, array $args = array(), array $options = array()) {
     }
   }
 
-  require_once DRUPAL_ROOT . '/core/includes/theme.inc';
+  require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
     switch ($key[0]) {
@@ -1165,10 +1165,10 @@ function st($string, array $args = array(), array $options = array()) {
  * @return
  *   Array of the installation profile's requirements.
  */
-function drupal_check_profile($profile) {
-  include_once DRUPAL_ROOT . '/core/includes/file.inc';
+function backdrop_check_profile($profile) {
+  include_once BACKDROP_ROOT . '/core/includes/file.inc';
 
-  $profile_file = DRUPAL_ROOT . "/profiles/$profile/$profile.profile";
+  $profile_file = BACKDROP_ROOT . "/profiles/$profile/$profile.profile";
 
   if (!isset($profile) || !file_exists($profile_file)) {
     throw new Exception(install_no_profile_error());
@@ -1198,7 +1198,7 @@ function drupal_check_profile($profile) {
  * @return
  *   The highest severity in the array.
  */
-function drupal_requirements_severity(&$requirements) {
+function backdrop_requirements_severity(&$requirements) {
   $severity = REQUIREMENT_OK;
   foreach ($requirements as $requirement) {
     if (isset($requirement['severity'])) {
@@ -1217,12 +1217,12 @@ function drupal_requirements_severity(&$requirements) {
  * @return
  *   TRUE or FALSE, depending on whether the requirements are met.
  */
-function drupal_check_module($module) {
+function backdrop_check_module($module) {
   module_load_install($module);
   if (module_hook($module, 'requirements')) {
     // Check requirements
     $requirements = module_invoke($module, 'requirements', 'install');
-    if (is_array($requirements) && drupal_requirements_severity($requirements) == REQUIREMENT_ERROR) {
+    if (is_array($requirements) && backdrop_requirements_severity($requirements) == REQUIREMENT_ERROR) {
       // Print any error messages
       foreach ($requirements as $requirement) {
         if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
@@ -1230,7 +1230,7 @@ function drupal_check_module($module) {
           if (isset($requirement['value']) && $requirement['value']) {
             $message .= ' (' . t('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) . ')';
           }
-          drupal_set_message($message, 'error');
+          backdrop_set_message($message, 'error');
         }
       }
       return FALSE;
@@ -1243,17 +1243,17 @@ function drupal_check_module($module) {
  * Retrieves information about an installation profile from its .info file.
  *
  * The information stored in a profile .info file is similar to that stored in
- * a normal Drupal module .info file. For example:
+ * a normal Backdrop module .info file. For example:
  * - name: The real name of the installation profile for display purposes.
  * - description: A brief description of the profile.
  * - dependencies: An array of shortnames of other modules that this install
  *   profile requires.
  *
  * Additional, less commonly-used information that can appear in a profile.info
- * file but not in a normal Drupal module .info file includes:
- * - distribution_name: The name of the Drupal distribution that is being
+ * file but not in a normal Backdrop module .info file includes:
+ * - distribution_name: The name of the Backdrop distribution that is being
  *   installed, to be shown throughout the installation process. Defaults to
- *   'Drupal'.
+ *   'Backdrop CMS'.
  * - exclusive: If the install profile is intended to be the only eligible
  *   choice in a distribution, setting exclusive = TRUE will auto-select it
  *   during installation, and the install profile selection screen will be
@@ -1282,7 +1282,7 @@ function drupal_check_module($module) {
  *   The info array.
  */
 function install_profile_info($profile, $langcode = 'en') {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($cache[$profile])) {
     // Set defaults for module info.
@@ -1292,16 +1292,16 @@ function install_profile_info($profile, $langcode = 'en') {
       'distribution_name' => 'Backdrop CMS',
       'version' => NULL,
       'hidden' => FALSE,
-      'php' => DRUPAL_MINIMUM_PHP,
+      'php' => BACKDROP_MINIMUM_PHP,
     );
-    $info = drupal_parse_info_file("profiles/$profile/$profile.info") + $defaults;
+    $info = backdrop_parse_info_file("profiles/$profile/$profile.info") + $defaults;
     $info['dependencies'] = array_unique(array_merge(
-      drupal_required_modules(),
+      backdrop_required_modules(),
       $info['dependencies'],
       ($langcode != 'en' && !empty($langcode) ? array('locale') : array()))
     );
 
-    // drupal_required_modules() includes the current profile as a dependency.
+    // backdrop_required_modules() includes the current profile as a dependency.
     // Since a module can't depend on itself we remove that element of the array.
     array_shift($info['dependencies']);
 
@@ -1311,10 +1311,10 @@ function install_profile_info($profile, $langcode = 'en') {
 }
 
 /**
- * Ensures the environment for a Drupal database on a predefined connection.
+ * Ensures the environment for a Backdrop database on a predefined connection.
  *
- * This will run tasks that check that Drupal can perform all of the functions
- * on a database, that Drupal needs. Tasks include simple checks like CREATE
+ * This will run tasks that check that Backdrop can perform all of the functions
+ * on a database, that Backdrop needs. Tasks include simple checks like CREATE
  * TABLE to database specific functions like stored procedures and client
  * encoding.
  */

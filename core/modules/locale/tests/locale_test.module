@@ -23,7 +23,7 @@ function locale_test_boot() {
 function locale_test_init() {
   locale_test_store_language_negotiation();
   if (isset($GLOBALS['language_interface']) && isset($GLOBALS['language_interface']->provider)) {
-    drupal_set_message(t('Language negotiation provider: @name', array('@name' => $GLOBALS['language_interface']->provider)));
+    backdrop_set_message(t('Language negotiation provider: @name', array('@name' => $GLOBALS['language_interface']->provider)));
   }
 }
 
@@ -62,7 +62,7 @@ function locale_test_language_negotiation_info() {
       'callbacks' => array(
         'language' => 'locale_test_language_provider',
       ),
-      'file' => drupal_get_path('module', 'locale_test') .'/locale_test.module',
+      'file' => backdrop_get_path('module', 'locale_test') .'/locale_test.module',
       'weight' => -10,
       'description' => t('This is a test language provider.'),
     );

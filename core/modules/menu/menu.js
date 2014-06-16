@@ -1,13 +1,13 @@
 (function ($) {
 
-Drupal.behaviors.menuFieldsetSummaries = {
+Backdrop.behaviors.menuFieldsetSummaries = {
   attach: function (context) {
-    $('fieldset.menu-link-form', context).drupalSetSummary(function (context) {
+    $('fieldset.menu-link-form', context).backdropSetSummary(function (context) {
       if ($('.form-item-menu-enabled input', context).is(':checked')) {
-        return Drupal.checkPlain($('.form-item-menu-link-title input', context).val());
+        return Backdrop.checkPlain($('.form-item-menu-link-title input', context).val());
       }
       else {
-        return Drupal.t('Not in menu');
+        return Backdrop.t('Not in menu');
       }
     });
   }
@@ -16,7 +16,7 @@ Drupal.behaviors.menuFieldsetSummaries = {
 /**
  * Automatically fill in a menu link title, if possible.
  */
-Drupal.behaviors.menuLinkAutomaticTitle = {
+Backdrop.behaviors.menuLinkAutomaticTitle = {
   attach: function (context) {
     $('fieldset.menu-link-form', context).each(function () {
       // Try to find menu settings widget elements as well as a 'title' field in

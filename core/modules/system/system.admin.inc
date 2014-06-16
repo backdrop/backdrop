@@ -11,7 +11,7 @@
 function system_admin_config_page() {
   // Check for status report errors.
   if (system_status(TRUE) && user_access('administer site configuration')) {
-    drupal_set_message(t('One or more problems were detected with your Drupal installation. Check the <a href="@status">status report</a> for more information.', array('@status' => url('admin/reports/status'))), 'error');
+    backdrop_set_message(t('One or more problems were detected with your Backdrop installation. Check the <a href="@status">status report</a> for more information.', array('@status' => url('admin/reports/status'))), 'error');
   }
   $blocks = array();
   if ($admin = db_query("SELECT menu_name, mlid FROM {menu_links} WHERE link_path = 'admin/config' AND module = 'system'")->fetchAssoc()) {
@@ -57,7 +57,7 @@ function system_admin_config_page() {
  *
  * This function is often a destination for these blocks.
  * For example, 'admin/structure/types' needs to have a destination to be valid
- * in the Drupal menu system, but too much information there might be
+ * in the Backdrop menu system, but too much information there might be
  * hidden, so we supply the contents of the block.
  *
  * @return
@@ -90,7 +90,7 @@ function system_admin_index() {
     // Only display a section if there are any available tasks.
     if ($admin_tasks = system_get_module_admin_tasks($module, $info->info)) {
       // Sort links by title.
-      uasort($admin_tasks, 'drupal_sort_title');
+      uasort($admin_tasks, 'backdrop_sort_title');
       // Move 'Configure permissions' links to the bottom of each section.
       $permission_key = "admin/people/permissions#module-$module";
       if (isset($admin_tasks[$permission_key])) {
@@ -153,12 +153,12 @@ function system_themes_page() {
       $theme->incompatible_core = !isset($theme->info['backdrop']) || ($theme->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) || (!isset($theme->info['regions']['content']));
       $theme->incompatible_php = version_compare(phpversion(), $theme->info['php']) < 0;
     }
-    $query['token'] = drupal_get_token('system-theme-operation-link');
+    $query['token'] = backdrop_get_token('system-theme-operation-link');
     $theme->operations = array();
     if (!empty($theme->status) || !$theme->incompatible_core && !$theme->incompatible_php) {
       // Create the operations links.
       $query['theme'] = $theme->name;
-      if (drupal_theme_access($theme)) {
+      if (backdrop_theme_access($theme)) {
         $theme->operations[] = array(
           'title' => t('Settings'),
           'href' => 'admin/appearance/settings/' . $theme->name,
@@ -218,10 +218,10 @@ function system_themes_page() {
   }
 
   uasort($theme_groups['enabled'], 'system_sort_themes');
-  drupal_alter('system_themes_page', $theme_groups);
+  backdrop_alter('system_themes_page', $theme_groups);
 
-  $admin_form = drupal_get_form('system_themes_admin_form', $admin_theme_options);
-  return theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles)) . drupal_render($admin_form);
+  $admin_form = backdrop_get_form('system_themes_admin_form', $admin_theme_options);
+  return theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles)) . backdrop_render($admin_form);
 }
 
 /**
@@ -255,7 +255,7 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
  * Process system_themes_admin_form form submissions.
  */
 function system_themes_admin_form_submit($form, &$form_state) {
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
   variable_set('admin_theme', $form_state['values']['admin_theme']);
 }
 
@@ -263,7 +263,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
  * Menu callback; Enables a theme.
  */
 function system_theme_enable() {
-  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && drupal_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
+  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
     $theme = $_REQUEST['theme'];
     // Get current list of themes.
     $themes = list_themes();
@@ -271,21 +271,21 @@ function system_theme_enable() {
     // Check if the specified theme is one recognized by the system.
     if (!empty($themes[$theme])) {
       theme_enable(array($theme));
-      drupal_set_message(t('The %theme theme has been enabled.', array('%theme' => $themes[$theme]->info['name'])));
+      backdrop_set_message(t('The %theme theme has been enabled.', array('%theme' => $themes[$theme]->info['name'])));
     }
     else {
-      drupal_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+      backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
     }
-    drupal_goto('admin/appearance');
+    backdrop_goto('admin/appearance');
   }
-  return drupal_access_denied();
+  return backdrop_access_denied();
 }
 
 /**
  * Menu callback; Disables a theme.
  */
 function system_theme_disable() {
-  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && drupal_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
+  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
     $theme = $_REQUEST['theme'];
     // Get current list of themes.
     $themes = list_themes();
@@ -294,26 +294,26 @@ function system_theme_disable() {
     if (!empty($themes[$theme])) {
       if ($theme == variable_get('theme_default', 'stark')) {
         // Don't disable the default theme.
-        drupal_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
+        backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
       }
       else {
         theme_disable(array($theme));
-        drupal_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
+        backdrop_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
       }
     }
     else {
-      drupal_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+      backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
     }
-    drupal_goto('admin/appearance');
+    backdrop_goto('admin/appearance');
   }
-  return drupal_access_denied();
+  return backdrop_access_denied();
 }
 
 /**
  * Menu callback; Set the default theme.
  */
 function system_theme_default() {
-  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && drupal_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
+  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
     $theme = $_REQUEST['theme'];
     // Get current list of themes.
     $themes = list_themes();
@@ -338,21 +338,21 @@ function system_theme_default() {
       // a value of 0 means the admin theme is set to be the default theme.
       $admin_theme = variable_get('admin_theme', 0);
       if ($admin_theme != 0 && $admin_theme != $theme) {
-        drupal_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
+        backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
           '%selected_theme' => $themes[$theme]->info['name'],
         )));
       }
       else {
-        drupal_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
+        backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
       }
     }
     else {
-      drupal_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+      backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
     }
-    drupal_goto('admin/appearance');
+    backdrop_goto('admin/appearance');
   }
-  return drupal_access_denied();
+  return backdrop_access_denied();
 }
 
 /**
@@ -510,7 +510,7 @@ function system_theme_settings($form, &$form_state, $key = '') {
         $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
       }
       elseif ($key) {
-        $local_file = drupal_get_path('theme', $key) . '/' . $default;
+        $local_file = backdrop_get_path('theme', $key) . '/' . $default;
       }
       else {
         $local_file = path_to_theme() . '/' . $default;
@@ -554,7 +554,7 @@ function system_theme_settings($form, &$form_state, $key = '') {
     // Process the theme and all its base themes.
     foreach ($theme_keys as $theme) {
       // Include the theme-settings.php file.
-      $filename = DRUPAL_ROOT . '/' . str_replace("/$theme.info", '', $themes[$theme]->filename) . '/theme-settings.php';
+      $filename = BACKDROP_ROOT . '/' . str_replace("/$theme.info", '', $themes[$theme]->filename) . '/theme-settings.php';
       if (file_exists($filename)) {
         require_once $filename;
       }
@@ -644,7 +644,7 @@ function system_theme_settings_validate($form, &$form_state) {
  * returns a valid path or URI that the theme system can display.
  *
  * @param $path
- *   A path relative to the Drupal root or to the public files directory, or
+ *   A path relative to the Backdrop root or to the public files directory, or
  *   a stream wrapper URI.
  * @return mixed
  *   A valid path that can be displayed through the theme system, or FALSE if
@@ -652,10 +652,10 @@ function system_theme_settings_validate($form, &$form_state) {
  */
 function _system_theme_settings_validate_path($path) {
   // Absolute local file paths are invalid.
-  if (drupal_realpath($path) == $path) {
+  if (backdrop_realpath($path) == $path) {
     return FALSE;
   }
-  // A path relative to the Drupal root or a fully qualified URI is valid.
+  // A path relative to the Backdrop root or a fully qualified URI is valid.
   if (is_file($path)) {
     return $path;
   }
@@ -711,7 +711,7 @@ function system_theme_settings_submit($form, &$form_state) {
   }
 
   variable_set($key, $values);
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 
   cache_clear_all();
 }
@@ -748,7 +748,7 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
  *
  * The list of modules gets populated by module.info files, which contain each
  * module's name, description, and information about which modules it requires.
- * See drupal_parse_info_file() for information on module.info descriptors.
+ * See backdrop_parse_info_file() for information on module.info descriptors.
  *
  * Dependency checking is performed to ensure that a module:
  * - can not be enabled if there are disabled modules it requires.
@@ -790,8 +790,8 @@ function system_modules($form, $form_state = array()) {
   $form['modules'] = array('#tree' => TRUE);
 
   // Used when displaying modules that are required by the installation profile.
-  require_once DRUPAL_ROOT . '/core/includes/install.inc';
-  $distribution_name = check_plain(drupal_install_profile_distribution_name());
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
+  $distribution_name = check_plain(backdrop_install_profile_distribution_name());
 
   // Iterate through each of the modules.
   foreach ($visible_files as $filename => $module) {
@@ -810,14 +810,14 @@ function system_modules($form, $form_state = array()) {
     // If this module requires other modules, add them to the array.
     foreach ($module->requires as $requires => $v) {
       if (!isset($files[$requires])) {
-        $extra['requires'][$requires] = t('@module (<span class="admin-missing">missing</span>)', array('@module' => drupal_ucfirst($requires)));
+        $extra['requires'][$requires] = t('@module (<span class="admin-missing">missing</span>)', array('@module' => backdrop_ucfirst($requires)));
         $extra['disabled'] = TRUE;
       }
       // Only display visible modules.
       elseif (isset($visible_files[$requires])) {
         $requires_name = $files[$requires]->info['name'];
         // Disable this module if it is incompatible with the dependency's version.
-        if ($incompatible_version = drupal_check_incompatibility($v, str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $files[$requires]->info['version']))) {
+        if ($incompatible_version = backdrop_check_incompatibility($v, str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $files[$requires]->info['version']))) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
             '@module' => $requires_name . $incompatible_version,
             '@version' => $files[$requires]->info['version'],
@@ -825,9 +825,9 @@ function system_modules($form, $form_state = array()) {
           $extra['disabled'] = TRUE;
         }
         // Disable this module if the dependency is incompatible with this
-        // version of Drupal core.
+        // version of Backdrop core.
         elseif ($files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
-          $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Drupal core)', array(
+          $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Backdrop core)', array(
             '@module' => $requires_name,
           ));
           $extra['disabled'] = TRUE;
@@ -1063,7 +1063,7 @@ function system_modules_confirm_form($modules, $storage) {
  * Submit callback; handles modules form submission.
  */
 function system_modules_submit($form, &$form_state) {
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   // Builds list of modules.
   $modules = array();
@@ -1139,8 +1139,8 @@ function system_modules_submit($form, &$form_state) {
   // the dependent modules aren't installed either.
   foreach ($modules as $name => $module) {
     // Only invoke hook_requirements() on modules that are going to be installed.
-    if ($module['enabled'] && drupal_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
-      if (!drupal_check_module($name)) {
+    if ($module['enabled'] && backdrop_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
+      if (!backdrop_check_module($name)) {
         $modules[$name]['enabled'] = FALSE;
         foreach (array_keys($files[$name]->required_by) as $required_by) {
           $modules[$required_by]['enabled'] = FALSE;
@@ -1159,7 +1159,7 @@ function system_modules_submit($form, &$form_state) {
   // Builds arrays of modules that need to be enabled, disabled, and installed.
   foreach ($modules as $name => $module) {
     if ($module['enabled']) {
-      if (drupal_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
+      if (backdrop_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
         $actions['install'][] = $name;
         $actions['enable'][] = $name;
       }
@@ -1188,8 +1188,8 @@ function system_modules_submit($form, &$form_state) {
   // message if there are changes.
   $post_install_list = module_list(TRUE);
   if ($pre_install_list != $post_install_list) {
-    drupal_flush_all_caches();
-    drupal_set_message(t('The configuration options have been saved.'));
+    backdrop_flush_all_caches();
+    backdrop_set_message(t('The configuration options have been saved.'));
   }
 
   $form_state['redirect'] = 'admin/modules';
@@ -1212,7 +1212,7 @@ function system_modules_submit($form, &$form_state) {
  */
 function system_modules_uninstall($form, $form_state = NULL) {
   // Make sure the install API is available.
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   // Display the confirm form if any modules have been submitted.
   if (!empty($form_state['storage']) && $confirm_form = system_modules_uninstall_confirm_form($form_state['storage'])) {
@@ -1231,7 +1231,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
   // Only build the rest of the form if there are any modules available to
   // uninstall.
   if (!empty($disabled_modules)) {
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     uasort($disabled_modules, 'system_sort_modules_by_info_name');
     $form['uninstall'] = array('#tree' => TRUE);
     foreach ($disabled_modules as $module) {
@@ -1248,7 +1248,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
       // we can allow this module to be uninstalled. (The installation profile
       // is excluded from this list.)
       foreach (array_keys($module->required_by) as $dependent) {
-        if ($dependent != $profile && drupal_get_installed_schema_version($dependent) != SCHEMA_UNINSTALLED) {
+        if ($dependent != $profile && backdrop_get_installed_schema_version($dependent) != SCHEMA_UNINSTALLED) {
           $dependent_name = isset($all_modules[$dependent]->info['name']) ? $all_modules[$dependent]->info['name'] : $dependent;
           $form['modules'][$module->name]['#required_by'][] = $dependent_name;
           $form['uninstall'][$module->name]['#disabled'] = TRUE;
@@ -1286,7 +1286,7 @@ function system_modules_uninstall_confirm_form($storage) {
 
   // Construct the hidden form elements and list items.
   foreach (array_filter($storage['uninstall']) as $module => $value) {
-    $info = drupal_parse_info_file(drupal_get_path('module', $module) . '/' . $module . '.info');
+    $info = backdrop_parse_info_file(backdrop_get_path('module', $module) . '/' . $module . '.info');
     $uninstall[] = $info['name'];
     $form['uninstall'][$module] = array('#type' => 'hidden',
       '#value' => 1,
@@ -1315,8 +1315,8 @@ function system_modules_uninstall_confirm_form($storage) {
 function system_modules_uninstall_validate($form, &$form_state) {
   // Form submitted, but no modules selected.
   if (!count(array_filter($form_state['values']['uninstall']))) {
-    drupal_set_message(t('No modules selected.'), 'error');
-    drupal_goto('admin/modules/uninstall');
+    backdrop_set_message(t('No modules selected.'), 'error');
+    backdrop_goto('admin/modules/uninstall');
   }
 }
 
@@ -1325,13 +1325,13 @@ function system_modules_uninstall_validate($form, &$form_state) {
  */
 function system_modules_uninstall_submit($form, &$form_state) {
   // Make sure the install API is available.
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   if (!empty($form['#confirmed'])) {
     // Call the uninstall routine for each selected module.
     $modules = array_keys($form_state['values']['uninstall']);
-    drupal_uninstall_modules($modules);
-    drupal_set_message(t('The selected modules have been uninstalled.'));
+    backdrop_uninstall_modules($modules);
+    backdrop_set_message(t('The selected modules have been uninstalled.'));
 
     $form_state['redirect'] = 'admin/modules/uninstall';
   }
@@ -1355,7 +1355,7 @@ function system_site_information_settings() {
   $form['site_information']['site_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Site name'),
-    '#default_value' => variable_get('site_name', 'Drupal'),
+    '#default_value' => variable_get('site_name', 'Backdrop'),
     '#required' => TRUE
   );
   $form['site_information']['site_slogan'] = array(
@@ -1378,7 +1378,7 @@ function system_site_information_settings() {
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
     '#title' => t('Default front page'),
-    '#default_value' => (variable_get('site_frontpage') != 'user' ? drupal_get_path_alias(variable_get('site_frontpage', 'user')) : ''),
+    '#default_value' => (variable_get('site_frontpage') != 'user' ? backdrop_get_path_alias(variable_get('site_frontpage', 'user')) : ''),
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
@@ -1386,7 +1386,7 @@ function system_site_information_settings() {
   $form['front_page']['default_nodes_main'] = array(
     '#type' => 'select', '#title' => t('Number of posts on front page'),
     '#default_value' => variable_get('default_nodes_main', 10),
-    '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
     '#access' => (variable_get('site_frontpage') == 'node'),
   );
@@ -1427,25 +1427,25 @@ function system_site_information_settings_validate($form, &$form_state) {
   }
   else {
     // Get the normal path of the front page.
-    form_set_value($form['front_page']['site_frontpage'], drupal_get_normal_path($form_state['values']['site_frontpage']), $form_state);
+    form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
   }
   // Validate front page path.
-  if (!drupal_valid_path($form_state['values']['site_frontpage'])) {
+  if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
   // Get the normal paths of both error pages.
   if (!empty($form_state['values']['site_403'])) {
-    form_set_value($form['error_page']['site_403'], drupal_get_normal_path($form_state['values']['site_403']), $form_state);
+    form_set_value($form['error_page']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
   }
   if (!empty($form_state['values']['site_404'])) {
-    form_set_value($form['error_page']['site_404'], drupal_get_normal_path($form_state['values']['site_404']), $form_state);
+    form_set_value($form['error_page']['site_404'], backdrop_get_normal_path($form_state['values']['site_404']), $form_state);
   }
   // Validate 403 error path.
-  if (!empty($form_state['values']['site_403']) && !drupal_valid_path($form_state['values']['site_403'])) {
+  if (!empty($form_state['values']['site_403']) && !backdrop_valid_path($form_state['values']['site_403'])) {
     form_set_error('site_403', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403'])));
   }
   // Validate 404 error path.
-  if (!empty($form_state['values']['site_404']) && !drupal_valid_path($form_state['values']['site_404'])) {
+  if (!empty($form_state['values']['site_404']) && !backdrop_valid_path($form_state['values']['site_404'])) {
     form_set_error('site_404', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404'])));
   }
 }
@@ -1472,7 +1472,7 @@ function system_cron_settings() {
   );
 
   $form['cron_url'] = array(
-    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'drupal')))))) . '</p>',
+    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'backdrop')))))) . '</p>',
   );
 
   $form['cron'] = array(
@@ -1482,8 +1482,8 @@ function system_cron_settings() {
     '#type' => 'select',
     '#title' => t('Run cron every'),
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
-    '#default_value' => variable_get('cron_safe_threshold', DRUPAL_CRON_DEFAULT_THRESHOLD),
-    '#options' => array(0 => t('Never')) + drupal_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#default_value' => variable_get('cron_safe_threshold', BACKDROP_CRON_DEFAULT_THRESHOLD),
+    '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
   return system_settings_form($form);
@@ -1496,14 +1496,14 @@ function system_cron_settings() {
  */
 function system_run_cron_submit($form, &$form_state) {
   // Run cron manually from Cron form.
-  if (drupal_cron_run()) {
-    drupal_set_message(t('Cron run successfully.'));
+  if (backdrop_cron_run()) {
+    backdrop_set_message(t('Cron run successfully.'));
   }
   else {
-    drupal_set_message(t('Cron run failed.'), 'error');
+    backdrop_set_message(t('Cron run failed.'), 'error');
   }
 
-  drupal_goto('admin/config/system/cron');
+  backdrop_goto('admin/config/system/cron');
 }
 
 /**
@@ -1535,7 +1535,7 @@ function system_logging_settings() {
  * @see system_performance_settings_submit().
  */
 function system_performance_settings($form, &$form_state) {
-  drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
+  backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
   $form_state['config'] = array(
     'cache' => 'system.performance',
     'page_compression' => 'system.performance',
@@ -1568,7 +1568,7 @@ function system_performance_settings($form, &$form_state) {
     '#default_value' => $config->get('cache'),
     '#weight' => -2,
   );
-  $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
+  $period = backdrop_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
   $period[0] = '<' . t('none') . '>';
   $form['caching']['cache_lifetime'] = array(
     '#type' => 'select',
@@ -1628,8 +1628,8 @@ function system_performance_settings($form, &$form_state) {
     '#value' => t('Save configuration'),
   );
 
-  $form['#submit'][] = 'drupal_clear_css_cache';
-  $form['#submit'][] = 'drupal_clear_js_cache';
+  $form['#submit'][] = 'backdrop_clear_css_cache';
+  $form['#submit'][] = 'backdrop_clear_js_cache';
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
@@ -1660,8 +1660,8 @@ function system_performance_settings_submit($form, &$form_state) {
  * @ingroup forms
  */
 function system_clear_cache_submit($form, &$form_state) {
-  drupal_flush_all_caches();
-  drupal_set_message(t('Caches cleared.'));
+  backdrop_flush_all_caches();
+  backdrop_set_message(t('Caches cleared.'));
 }
 
 /**
@@ -1685,7 +1685,7 @@ function system_file_system_settings() {
     '#title' => t('Public file system path'),
     '#default_value' => variable_get('file_public_path', 'files'),
     '#maxlength' => 255,
-    '#description' => t('A local file system path where public files will be stored. This directory must exist and be writable by Drupal. This directory must be relative to the Drupal installation directory and be accessible over the web.'),
+    '#description' => t('A local file system path where public files will be stored. This directory must exist and be writable by Backdrop. This directory must be relative to the Backdrop installation directory and be accessible over the web.'),
     '#after_build' => array('system_check_directory'),
   );
 
@@ -1694,7 +1694,7 @@ function system_file_system_settings() {
     '#title' => t('Private file system path'),
     '#default_value' => variable_get('file_private_path', ''),
     '#maxlength' => 255,
-    '#description' => t('An existing local file system path for storing private files. It should be writable by Drupal and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'http://drupal.org/handbook/modules/file')),
+    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'http://drupal.org/handbook/modules/file')),
     '#after_build' => array('system_check_directory'),
   );
 
@@ -1738,7 +1738,7 @@ function system_image_toolkit_settings() {
   if (count($toolkits_available) == 0) {
     variable_del('image_toolkit');
     $form['image_toolkit_help'] = array(
-      '#markup' => t("No image toolkits were detected. Drupal includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should consult your system administrator to have them enabled, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
+      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should consult your system administrator to have them enabled, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
     );
     return $form;
   }
@@ -1781,7 +1781,7 @@ function system_rss_feeds_settings() {
     '#type' => 'select',
     '#title' => t('Number of items in each feed'),
     '#default_value' => variable_get('feed_default_items', 10),
-    '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('Default number of items to include in each feed.')
   );
   $form['feed_item_length'] = array(
@@ -1803,7 +1803,7 @@ function system_rss_feeds_settings() {
  * @see system_regional_settings_submit()
  */
 function system_regional_settings() {
-  include_once DRUPAL_ROOT . '/core/includes/locale.inc';
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
   $countries = country_get_list();
 
   // Date settings:
@@ -1869,11 +1869,11 @@ function system_regional_settings() {
   $form['timezone']['configurable_timezones_wrapper']['user_default_timezone'] = array(
     '#type' => 'radios',
     '#title' => t('Time zone for new users'),
-    '#default_value' => variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT),
+    '#default_value' => variable_get('user_default_timezone', BACKDROP_USER_TIMEZONE_DEFAULT),
     '#options' => array(
-      DRUPAL_USER_TIMEZONE_DEFAULT => t('Default time zone.'),
-      DRUPAL_USER_TIMEZONE_EMPTY   => t('Empty time zone.'),
-      DRUPAL_USER_TIMEZONE_SELECT  => t('Users may set their own time zone at registration.'),
+      BACKDROP_USER_TIMEZONE_DEFAULT => t('Default time zone.'),
+      BACKDROP_USER_TIMEZONE_EMPTY   => t('Empty time zone.'),
+      BACKDROP_USER_TIMEZONE_SELECT  => t('Users may set their own time zone at registration.'),
     ),
     '#description' => t('Only applied if users may set their own time zone.')
   );
@@ -1889,12 +1889,12 @@ function system_regional_settings() {
  */
 function system_date_time_settings() {
   // Get list of all available date types.
-  drupal_static_reset('system_get_date_types');
+  backdrop_static_reset('system_get_date_types');
   $format_types = system_get_date_types();
 
   // Get list of all available date formats.
   $all_formats = array();
-  drupal_static_reset('system_get_date_formats');
+  backdrop_static_reset('system_get_date_formats');
   $date_formats = system_get_date_formats(); // Call this to rebuild the list, and to have default list.
   foreach ($date_formats as $type => $format_info) {
     $all_formats = array_merge($all_formats, $format_info);
@@ -1981,13 +1981,13 @@ function theme_system_date_time_settings($variables) {
     $row = array();
     $row[] = $form['format'][$key]['#title'];
     $form['format'][$key]['#title_display'] = 'invisible';
-    $row[] = array('data' => drupal_render($form['format'][$key]));
-    $row[] = drupal_render($form['operations'][$key]);
+    $row[] = array('data' => backdrop_render($form['format'][$key]));
+    $row[] = backdrop_render($form['operations'][$key]);
     $rows[] = $row;
   }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'system-date-types')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -2016,7 +2016,7 @@ function system_add_date_format_type_form($form, &$form_state) {
 
   // Get list of all available date formats.
   $formats = array();
-  drupal_static_reset('system_get_date_formats');
+  backdrop_static_reset('system_get_date_formats');
   $date_formats = system_get_date_formats(); // Call this to rebuild the list, and to have default list.
   foreach ($date_formats as $type => $format_info) {
     $formats = array_merge($formats, $format_info);
@@ -2079,7 +2079,7 @@ function system_add_date_format_type_form_submit($form, &$form_state) {
   system_date_format_type_save($format_type);
   variable_set('date_format_' . $machine_name, $form_state['values']['date_format']);
 
-  drupal_set_message(t('New date type added successfully.'));
+  backdrop_set_message(t('New date type added successfully.'));
   $form_state['redirect'] = 'admin/config/regional/date-time';
 }
 
@@ -2099,7 +2099,7 @@ function system_site_maintenance_mode() {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')))),
+    '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')))),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -2119,13 +2119,13 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
 
   // Give specific messages on the primary action for this form.
   if ($form_state['values']['maintenance_mode']) {
-    drupal_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
+    backdrop_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
   }
   elseif ($form['maintenance_mode']['#default_value'] != $form_state['values']['maintenance_mode']) {
-    drupal_set_message(t('The site is no longer in maintenance mode.'));
+    backdrop_set_message(t('The site is no longer in maintenance mode.'));
   }
   else {
-    drupal_set_message(t('The configuration options have been saved.'));
+    backdrop_set_message(t('The configuration options have been saved.'));
   }
 }
 
@@ -2145,13 +2145,13 @@ function system_clean_url_settings($form, &$form_state) {
     $available = TRUE;
   }
   else {
-    $request = drupal_http_request($GLOBALS['base_url'] . '/admin/config/search/clean-urls/check');
+    $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/search/clean-urls/check');
     // If the request returns HTTP 200, clean URLs are available.
     if (isset($request->code) && $request->code == 200) {
       $available = TRUE;
       // If the user started the clean URL test, provide explicit feedback.
       if (isset($form_state['input']['clean_url_test_execute'])) {
-        drupal_set_message(t('The clean URL test passed.'));
+        backdrop_set_message(t('The clean URL test passed.'));
       }
     }
     else {
@@ -2162,12 +2162,12 @@ function system_clean_url_settings($form, &$form_state) {
         // Warn the user of a conflicting situation, unless after processing
         // a submitted form.
         if (!isset($form_state['input']['op'])) {
-          drupal_set_message(t('Clean URLs are enabled, but the clean URL test failed. Uncheck the box below to disable clean URLs.'), 'warning');
+          backdrop_set_message(t('Clean URLs are enabled, but the clean URL test failed. Uncheck the box below to disable clean URLs.'), 'warning');
         }
       }
       // If the user started the clean URL test, provide explicit feedback.
       elseif (isset($form_state['input']['clean_url_test_execute'])) {
-        drupal_set_message(t('The clean URL test failed.'), 'warning');
+        backdrop_set_message(t('The clean URL test failed.'), 'warning');
       }
     }
   }
@@ -2190,7 +2190,7 @@ function system_clean_url_settings($form, &$form_state) {
   }
   // Show the clean URLs test form.
   else {
-    drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
+    backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
 
     $form_state['redirect'] = url('admin/config/search/clean-urls');
     $form['clean_url_description'] = array(
@@ -2227,15 +2227,15 @@ function system_clean_url_settings($form, &$form_state) {
  */
 function system_status($check = FALSE) {
   // Load .install files
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
-  drupal_load_updates();
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  backdrop_load_updates();
 
   // Check run-time requirements and status information.
   $requirements = module_invoke_all('requirements', 'runtime');
   usort($requirements, '_system_sort_requirements');
 
   if ($check) {
-    return drupal_requirements_severity($requirements) == REQUIREMENT_ERROR;
+    return backdrop_requirements_severity($requirements) == REQUIREMENT_ERROR;
   }
   // MySQL import might have set the uid of the anonymous user to autoincrement
   // value. Let's try fixing it. See http://drupal.org/node/204411
@@ -2253,14 +2253,14 @@ function system_status($check = FALSE) {
  */
 function system_run_cron() {
   // Run cron manually
-  if (drupal_cron_run()) {
-    drupal_set_message(t('Cron ran successfully.'));
+  if (backdrop_cron_run()) {
+    backdrop_set_message(t('Cron ran successfully.'));
   }
   else {
-    drupal_set_message(t('Cron run failed.'), 'error');
+    backdrop_set_message(t('Cron run failed.'), 'error');
   }
 
-  drupal_goto('admin/reports/status');
+  backdrop_goto('admin/reports/status');
 }
 
 /**
@@ -2268,23 +2268,23 @@ function system_run_cron() {
  */
 function system_php() {
   phpinfo();
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
  * Default page callback for batches.
  */
 function system_batch_page() {
-  require_once DRUPAL_ROOT . '/core/includes/batch.inc';
+  require_once BACKDROP_ROOT . '/core/includes/batch.inc';
   $output = _batch_page();
 
   if ($output === FALSE) {
-    drupal_access_denied();
+    backdrop_access_denied();
   }
   elseif (isset($output)) {
     // Force a page without blocks or messages to
     // display a list of collected messages later.
-    drupal_set_page_content($output);
+    backdrop_set_page_content($output);
     $page = element_info('page');
     $page['#show_messages'] = FALSE;
     return $page;
@@ -2529,15 +2529,15 @@ function theme_system_modules_fieldset($variables) {
     $module = $form[$key];
     $row = array();
     unset($module['enable']['#title']);
-    $row[] = array('class' => array('checkbox'), 'data' => drupal_render($module['enable']));
+    $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
     $label = '<label';
     if (isset($module['enable']['#id'])) {
       $label .= ' for="' . $module['enable']['#id'] . '"';
     }
-    $row[] = $label . '><strong>' . drupal_render($module['name']) . '</strong></label>';
-    $row[] = drupal_render($module['version']);
+    $row[] = $label . '><strong>' . backdrop_render($module['name']) . '</strong></label>';
+    $row[] = backdrop_render($module['version']);
     // Add the description, along with any modules it requires.
-    $description = drupal_render($module['description']);
+    $description = backdrop_render($module['description']);
     if ($module['#requires']) {
       $description .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
     }
@@ -2547,7 +2547,7 @@ function theme_system_modules_fieldset($variables) {
     $row[] = array('data' => $description, 'class' => array('description'));
     // Display links (such as help or permissions) in their own columns.
     foreach (array('help', 'permissions', 'configure') as $key) {
-      $row[] = array('data' => drupal_render($module['links'][$key]), 'class' => array($key));
+      $row[] = array('data' => backdrop_render($module['links'][$key]), 'class' => array($key));
     }
 
     // Hide modules that can't be disabled at all.
@@ -2586,7 +2586,7 @@ function theme_system_modules_uninstall($variables) {
 
   // No theming for the confirm form.
   if (isset($form['confirm'])) {
-    return drupal_render($form);
+    return backdrop_render($form);
   }
 
   // Table headers.
@@ -2609,14 +2609,14 @@ function theme_system_modules_uninstall($variables) {
       $disabled_message = '';
     }
     $rows[] = array(
-      array('data' => drupal_render($form['uninstall'][$module]), 'align' => 'center'),
-      '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . drupal_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => drupal_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+      '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
+      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
     );
   }
 
   $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -2707,7 +2707,7 @@ function system_date_delete_format_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     $format = system_get_date_format($form_state['values']['dfid']);
     system_date_format_delete($form_state['values']['dfid']);
-    drupal_set_message(t('Removed date format %format.', array('%format' => format_date(REQUEST_TIME, 'custom', $format->format))));
+    backdrop_set_message(t('Removed date format %format.', array('%format' => format_date(REQUEST_TIME, 'custom', $format->format))));
     $form_state['redirect'] = 'admin/config/regional/date-time/formats';
   }
 }
@@ -2740,7 +2740,7 @@ function system_delete_date_format_type_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     $type_info = system_get_date_types($form_state['values']['format_type']);
     system_date_format_type_delete($form_state['values']['format_type']);
-    drupal_set_message(t('Removed date type %type.', array('%type' => $type_info['title'])));
+    backdrop_set_message(t('Removed date type %type.', array('%type' => $type_info['title'])));
     $form_state['redirect'] = 'admin/config/regional/date-time';
   }
 }
@@ -2753,7 +2753,7 @@ function system_date_time_formats() {
   $header = array(t('Format'), t('Operations'));
   $rows = array();
 
-  drupal_static_reset('system_get_date_formats');
+  backdrop_static_reset('system_get_date_formats');
   $formats = system_get_date_formats('custom');
   if (!empty($formats)) {
     foreach ($formats as $format) {
@@ -2850,12 +2850,12 @@ function system_add_date_formats_form_submit($form, &$form_state) {
   $format['locked'] = 0;
   if (!empty($form_state['values']['dfid'])) {
     system_date_format_save($format, $form_state['values']['dfid']);
-    drupal_set_message(t('Custom date format updated.'));
+    backdrop_set_message(t('Custom date format updated.'));
   }
   else {
     $format['is_new'] = 1;
     system_date_format_save($format);
-    drupal_set_message(t('Custom date format added.'));
+    backdrop_set_message(t('Custom date format added.'));
   }
 
   $form_state['redirect'] = 'admin/config/regional/date-time/formats';
@@ -2945,7 +2945,7 @@ function system_actions_manage() {
   }
 
   if ($actions_map) {
-    $build['system_actions_manage_form'] = drupal_get_form('system_actions_manage_form', $options);
+    $build['system_actions_manage_form'] = backdrop_get_form('system_actions_manage_form', $options);
   }
 
   return $build;
@@ -3016,7 +3016,7 @@ function system_actions_manage_form_submit($form, &$form_state) {
  */
 function system_actions_configure($form, &$form_state, $action = NULL) {
   if ($action === NULL) {
-    drupal_goto('admin/config/system/actions');
+    backdrop_goto('admin/config/system/actions');
   }
 
   $actions_map = actions_actions_map(actions_list());
@@ -3030,7 +3030,7 @@ function system_actions_configure($form, &$form_state, $action = NULL) {
     $edit['actions_label'] = $data->label;
     $edit['actions_type'] = $data->type;
     $function = $data->callback;
-    $action = drupal_hash_base64($data->callback);
+    $action = backdrop_hash_base64($data->callback);
     $params = unserialize($data->parameters);
     if ($params) {
       foreach ($params as $name => $val) {
@@ -3107,7 +3107,7 @@ function system_actions_configure_submit($form, &$form_state) {
   $aid = isset($form_state['values']['actions_aid']) ? $form_state['values']['actions_aid'] : NULL;
 
   actions_save($function, $form_state['values']['actions_type'], $params, $form_state['values']['actions_label'], $aid);
-  drupal_set_message(t('The action has been successfully saved.'));
+  backdrop_set_message(t('The action has been successfully saved.'));
 
   $form_state['redirect'] = 'admin/config/system/actions/manage';
 }
@@ -3142,7 +3142,7 @@ function system_actions_delete_form_submit($form, &$form_state) {
   $action = actions_load($aid);
   actions_delete($aid);
   watchdog('user', 'Deleted action %aid (%action)', array('%aid' => $aid, '%action' => $action->label));
-  drupal_set_message(t('Action %action was deleted', array('%action' => $action->label)));
+  backdrop_set_message(t('Action %action was deleted', array('%action' => $action->label)));
   $form_state['redirect'] = 'admin/config/system/actions/manage';
 }
 
@@ -3154,7 +3154,7 @@ function system_actions_delete_form_submit($form, &$form_state) {
  */
 function system_action_delete_orphans_post($orphaned) {
   foreach ($orphaned as $callback) {
-    drupal_set_message(t("Deleted orphaned action (%action).", array('%action' => $callback)));
+    backdrop_set_message(t("Deleted orphaned action (%action).", array('%action' => $callback)));
   }
 }
 
@@ -3163,5 +3163,5 @@ function system_action_delete_orphans_post($orphaned) {
  */
 function system_actions_remove_orphans() {
   actions_synchronize(TRUE);
-  drupal_goto('admin/config/system/actions/manage');
+  backdrop_goto('admin/config/system/actions/manage');
 }

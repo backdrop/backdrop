@@ -16,8 +16,8 @@
  */
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
-  drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title)), PASS_THROUGH);
-  return drupal_get_form($node->type . '_node_form', $node);
+  backdrop_set_title(t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title)), PASS_THROUGH);
+  return backdrop_get_form($node->type . '_node_form', $node);
 }
 
 /**
@@ -33,7 +33,7 @@ function node_add_page() {
   // Bypass the node/add listing if only one content type is available.
   if (count($content) == 1) {
     $item = array_shift($content);
-    drupal_goto($item['href']);
+    backdrop_goto($item['href']);
   }
   return theme('node_add_list', array('content' => $content));
 }
@@ -87,8 +87,8 @@ function node_add($type) {
     'type' => $type,
     'langcode' => LANGUAGE_NONE,
   ));
-  drupal_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
-  $output = drupal_get_form($type . '_node_form', $node);
+  backdrop_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
+  $output = backdrop_get_form($type . '_node_form', $node);
 
   return $output;
 }
@@ -149,7 +149,7 @@ function node_form($form, &$form_state, Node $node) {
 
   // Override the default CSS class name, since the user-defined node type name
   // in 'TYPE-node-form' potentially clashes with third-party class names.
-  $form['#attributes']['class'][0] = drupal_html_class('node-' . $node->type . '-form');
+  $form['#attributes']['class'][0] = backdrop_html_class('node-' . $node->type . '-form');
 
   // Basic node information.
   // These elements are just values so they are not even sent to the client.
@@ -222,7 +222,7 @@ function node_form($form, &$form_state, Node $node) {
       'class' => array('node-form-revision-information'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'node') . '/node.js'),
+      'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
     ),
     '#weight' => 20,
     '#access' => $node->revision || user_access('administer nodes'),
@@ -264,7 +264,7 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#attached' => array(
       'js' => array(
-        drupal_get_path('module', 'node') . '/node.js',
+        backdrop_get_path('module', 'node') . '/node.js',
         array(
           'type' => 'setting',
           'data' => array('anonymous' => variable_get('anonymous', t('Anonymous'))),
@@ -311,7 +311,7 @@ function node_form($form, &$form_state, Node $node) {
       'class' => array('node-form-options'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'node') . '/node.js'),
+      'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
     ),
     '#weight' => 95,
   );
@@ -335,13 +335,13 @@ function node_form($form, &$form_state, Node $node) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#access' => variable_get('node_preview_' . $node->type, DRUPAL_OPTIONAL) != DRUPAL_REQUIRED || (!form_get_errors() && isset($form_state['node_preview'])),
+    '#access' => variable_get('node_preview_' . $node->type, BACKDROP_OPTIONAL) != BACKDROP_REQUIRED || (!form_get_errors() && isset($form_state['node_preview'])),
     '#value' => t('Save'),
     '#weight' => 5,
     '#submit' => array('node_form_submit'),
   );
   $form['actions']['preview'] = array(
-    '#access' => variable_get('node_preview_' . $node->type, DRUPAL_OPTIONAL) != DRUPAL_DISABLED,
+    '#access' => variable_get('node_preview_' . $node->type, BACKDROP_OPTIONAL) != BACKDROP_DISABLED,
     '#type' => 'submit',
     '#value' => t('Preview'),
     '#weight' => 10,
@@ -382,7 +382,7 @@ function node_form($form, &$form_state, Node $node) {
 function node_form_delete_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $node = $form['#node'];
@@ -448,7 +448,7 @@ function node_preview(Node $node) {
       $output = theme('node_preview', array('node' => $cloned_node));
       unset($cloned_node->in_preview);
     }
-    drupal_set_title(t('Preview'), PASS_THROUGH);
+    backdrop_set_title(t('Preview'), PASS_THROUGH);
 
     return $output;
   }
@@ -473,13 +473,13 @@ function theme_node_preview($variables) {
   $preview_trimmed_version = FALSE;
 
   $elements = node_view(clone $node, 'teaser');
-  $trimmed = drupal_render($elements);
+  $trimmed = backdrop_render($elements);
   $elements = node_view($node, 'full');
-  $full = drupal_render($elements);
+  $full = backdrop_render($elements);
 
   // Do we need to preview trimmed version of post as well as full version?
   if ($trimmed != $full) {
-    drupal_set_message(t('The trimmed version of your post shows what your post looks like when promoted to the main page or when exported for syndication.<span class="no-js"> You can insert the delimiter "&lt;!--break--&gt;" (without the quotes) to fine-tune where your post gets split.</span>'));
+    backdrop_set_message(t('The trimmed version of your post shows what your post looks like when promoted to the main page or when exported for syndication.<span class="no-js"> You can insert the delimiter "&lt;!--break--&gt;" (without the quotes) to fine-tune where your post gets split.</span>'));
     $output .= '<h3>' . t('Preview trimmed version') . '</h3>';
     $output .= $trimmed;
     $output .= '<h3>' . t('Preview full version') . '</h3>';
@@ -510,11 +510,11 @@ function node_form_submit($form, &$form_state) {
 
   if ($insert) {
     watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
-    drupal_set_message(t('@type %title has been created.', $t_args));
+    backdrop_set_message(t('@type %title has been created.', $t_args));
   }
   else {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
-    drupal_set_message(t('@type %title has been updated.', $t_args));
+    backdrop_set_message(t('@type %title has been updated.', $t_args));
   }
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
@@ -524,7 +524,7 @@ function node_form_submit($form, &$form_state) {
   else {
     // In the unlikely case something went wrong on save, the node will be
     // rebuilt and node form redisplayed the same way as in preview.
-    drupal_set_message(t('The post could not be saved.'), 'error');
+    backdrop_set_message(t('The post could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
   // Clear the page and block caches.
@@ -551,8 +551,8 @@ function node_form_submit_build_node($form, &$form_state) {
   //   submit handlers that adjust $form_state['values'] prior to those values
   //   being used to update the entity. Module authors are encouraged to instead
   //   adjust the node directly within a hook_node_submit() implementation. For
-  //   Drupal 8, evaluate whether the pattern of triggering form-level submit
-  //   handlers during button-level submit processing is worth supporting
+  //   Backdrop 2.x, evaluate whether the pattern of triggering form-level
+  //   submit handlers during button-level submit processing is worth supporting
   //   properly, and if so, add a Form API function for doing so.
   unset($form_state['submit_handlers']);
   form_execute_handlers('submit', $form, $form_state);
@@ -597,7 +597,7 @@ function node_delete_confirm_submit($form, &$form_state) {
     $node = node_load($form_state['values']['nid']);
     node_delete($form_state['values']['nid']);
     watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
-    drupal_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
+    backdrop_set_message(t('@type %title has been deleted.', array('@type' => node_type_get_name($node), '%title' => $node->title)));
   }
 
   $form_state['redirect'] = '<front>';
@@ -610,12 +610,12 @@ function node_delete_confirm_submit($form, &$form_state) {
  *   A node object.
  *
  * @return array
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  *
  * @see node_menu()
  */
 function node_revision_overview($node) {
-  drupal_set_title(t('Revisions for %title', array('%title' => $node->title)), PASS_THROUGH);
+  backdrop_set_title(t('Revisions for %title', array('%title' => $node->title)), PASS_THROUGH);
 
   $header = array(t('Revision'), t('Operations'));
 
@@ -636,7 +636,7 @@ function node_revision_overview($node) {
       $row[] = array('data' => t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid"), '!username' => theme('username', array('account' => $revision))))
                                . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : ''),
                      'class' => array('revision-current'));
-      $row[] = array('data' => drupal_placeholder(t('current revision')), 'class' => array('revision-current'));
+      $row[] = array('data' => backdrop_placeholder(t('current revision')), 'class' => array('revision-current'));
     }
     else {
       $row[] = t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view"), '!username' => theme('username', array('account' => $revision))))
@@ -668,7 +668,7 @@ function node_revision_overview($node) {
     '#rows' => $rows,
     '#header' => $header,
     '#attached' => array (
-      'css' => array(drupal_get_path('module', 'node') . '/node.admin.css'),
+      'css' => array(backdrop_get_path('module', 'node') . '/node.admin.css'),
     ),
   );
 
@@ -682,7 +682,7 @@ function node_revision_overview($node) {
  *   The node revision ID.
  *
  * @return array
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  *
  * @see node_menu()
  * @see node_revision_revert_confirm_submit()
@@ -709,7 +709,7 @@ function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision->save();
 
   watchdog('content', '@type: reverted %title revision %revision.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
-  drupal_set_message(t('@type %title has been reverted back to the revision from %revision-date.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
+  backdrop_set_message(t('@type %title has been reverted back to the revision from %revision-date.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
   $form_state['redirect'] = 'node/' . $node_revision->nid . '/revisions';
 }
 
@@ -722,7 +722,7 @@ function node_revision_revert_confirm_submit($form, &$form_state) {
  *   The node revision ID.
  *
  * @return
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  *
  * @see node_menu()
  * @see node_revision_delete_confirm_submit()
@@ -742,7 +742,7 @@ function node_revision_delete_confirm_submit($form, &$form_state) {
   node_revision_delete($node_revision->vid);
 
   watchdog('content', '@type: deleted %title revision %revision.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
-  drupal_set_message(t('Revision from %revision-date of @type %title has been deleted.', array('%revision-date' => format_date($node_revision->revision_timestamp), '@type' => node_type_get_name($node_revision), '%title' => $node_revision->title)));
+  backdrop_set_message(t('Revision from %revision-date of @type %title has been deleted.', array('%revision-date' => format_date($node_revision->revision_timestamp), '@type' => node_type_get_name($node_revision), '%title' => $node_revision->title)));
   $form_state['redirect'] = 'node/' . $node_revision->nid;
   if (db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid', array(':nid' => $node_revision->nid))->fetchField() > 1) {
     $form_state['redirect'] .= '/revisions';

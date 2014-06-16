@@ -48,13 +48,13 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
           '%driver' => $this->name(),
           '!link' => '<a href="INSTALL.pgsql.txt">INSTALL.pgsql.txt</a>'
         );
-        $text  = 'The %driver database must use %encoding encoding to work with Drupal.';
+        $text  = 'The %driver database must use %encoding encoding to work with Backdrop.';
         $text .= 'Recreate the database with %encoding encoding. See !link for more details.';
         $this->fail(st($text, $replacements));
       }
     }
     catch (Exception $e) {
-      $this->fail(st('Drupal could not determine the encoding of the database was set to UTF-8'));
+      $this->fail(st('Backdrop could not determine the encoding of the database was set to UTF-8'));
     }
   }
 
@@ -113,12 +113,12 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
   }
 
   /**
-   * Make PostgreSQL Drupal friendly.
+   * Make PostgreSQL Backdrop friendly.
    */
   function initializeDatabase() {
     // We create some functions using global names instead of prefixing them
     // like we do with table names. This is so that we don't double up if more
-    // than one instance of Drupal is running on a single database. We therefore
+    // than one instance of Backdrop is running on a single database. We therefore
     // avoid trying to create them again in that case.
 
     try {
@@ -144,8 +144,8 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
         LANGUAGE \'sql\''
       );
 
-      // Using || to concatenate in Drupal is not recommeneded because there are
-      // database drivers for Drupal that do not support the syntax, however
+      // Using || to concatenate in Backdrop is not recommeneded because there are
+      // database drivers for Backdrop that do not support the syntax, however
       // they do support CONCAT(item1, item2) which we can replicate in
       // PostgreSQL. PostgreSQL requires the function to be defined for each
       // different argument variation the function can handle.
@@ -169,7 +169,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
       $this->pass(st('PostgreSQL has initialized itself.'));
     }
     catch (Exception $e) {
-      $this->fail(st('Drupal could not be correctly setup with the existing database. Revise any errors.'));
+      $this->fail(st('Backdrop could not be correctly setup with the existing database. Revise any errors.'));
     }
   }
 }

@@ -90,7 +90,7 @@ function block_schema() {
         'not null' => TRUE,
         'default' => 1,
         'size' => 'tiny',
-        'description' => 'Binary flag to indicate block cache mode. (-2: Custom cache, -1: Do not cache, 1: Cache per role, 2: Cache per user, 4: Cache per page, 8: Block cache global) See DRUPAL_CACHE_* constants in ../includes/common.inc for more detailed information.',
+        'description' => 'Binary flag to indicate block cache mode. (-2: Custom cache, -1: Do not cache, 1: Cache per role, 2: Cache per user, 4: Cache per page, 8: Block cache global) See BACKDROP_CACHE_* constants in ../includes/common.inc for more detailed information.',
       ),
     ),
     'primary key' => array('bid'),
@@ -166,7 +166,7 @@ function block_schema() {
     'primary key' => array('bid'),
   );
 
-  $schema['cache_block'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_block'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_block']['description'] = 'Cache table for the Block module to store already built blocks, identified by module, delta, and various contexts which may change the block, such as theme, locale, and caching mode defined for the block.';
 
   return $schema;

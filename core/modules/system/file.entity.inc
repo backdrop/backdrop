@@ -66,7 +66,7 @@ class File extends Entity {
    * A field indicating the status of the file.
    *
    * Two status are defined in core: temporary (0) and permanent (1).
-   * Temporary files older than DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed
+   * Temporary files older than BACKDROP_MAXIMUM_TEMP_FILE_AGE will be removed
    * during a cron run.
    *
    * @var integer
@@ -117,12 +117,12 @@ class File extends Entity {
 class FileStorageController extends EntityDatabaseStorageController {
 
   /**
-   * Overrides Drupal\entity\EntityDatabaseStorageController::create().
+   * Overrides EntityDatabaseStorageController::create().
    */
   public function create(array $values) {
     // Automatically detect filename if not set.
     if (!isset($values['filename']) && isset($values['uri'])) {
-      $values['filename'] = drupal_basename($values['uri']);
+      $values['filename'] = backdrop_basename($values['uri']);
     }
 
     // Automatically detect filemime if not set.
@@ -133,7 +133,7 @@ class FileStorageController extends EntityDatabaseStorageController {
   }
 
   /**
-   * Overrides Drupal\entity\EntityDatabaseStorageController::presave().
+   * Overrides EntityDatabaseStorageController::presave().
    */
   protected function preSave(EntityInterface $entity) {
     $entity->timestamp = REQUEST_TIME;
@@ -146,7 +146,7 @@ class FileStorageController extends EntityDatabaseStorageController {
   }
 
   /**
-   * Overrides Drupal\entity\EntityDatabaseStorageController::preDelete().
+   * Overrides EntityDatabaseStorageController::preDelete().
    */
   public function preDelete($entities) {
     foreach ($entities as $entity) {

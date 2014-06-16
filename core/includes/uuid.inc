@@ -114,7 +114,7 @@ class UuidPecl implements UuidInterface {
 class UuidCom implements UuidInterface {
   public function generate() {
     // Remove {} wrapper and make lower case to keep result consistent.
-    return drupal_strtolower(trim(com_create_guid(), '{}'));
+    return backdrop_strtolower(trim(com_create_guid(), '{}'));
   }
 }
 
@@ -127,7 +127,7 @@ class UuidCom implements UuidInterface {
  */
 class UuidPhp implements UuidInterface {
   public function generate() {
-    $hex = substr(hash('sha256', drupal_random_bytes(16)), 0, 32);
+    $hex = substr(hash('sha256', backdrop_random_bytes(16)), 0, 32);
 
     // The field names refer to RFC 4122 section 4.1.2.
     $time_low = substr($hex, 0, 8);

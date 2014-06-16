@@ -623,7 +623,7 @@ function comment_views_plugins() {
         'help' => t('Display the comment with standard comment view.'),
         'handler' => 'views_plugin_row_comment_view',
         'theme' => 'views_view_row_comment',
-        'path' => drupal_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
         'base' => array('comment'), // only works with 'comment' as base.
         'uses options' => TRUE,
         'type' => 'normal',
@@ -634,7 +634,7 @@ function comment_views_plugins() {
         'help' => t('Display the comment as RSS.'),
         'handler' => 'views_plugin_row_comment_rss',
         'theme' => 'views_view_row_rss',
-        'path' => drupal_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
         'base' => array('comment'), // only works with 'comment' as base.
         'uses options' => TRUE,
         'type' => 'feed',
@@ -667,5 +667,5 @@ function template_preprocess_views_view_row_comment(&$vars) {
       }
     }
   }
-  $vars['comment'] = drupal_render($build);
+  $vars['comment'] = backdrop_render($build);
 }

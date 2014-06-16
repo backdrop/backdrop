@@ -75,7 +75,7 @@ class views_handler_field_links extends views_handler_field {
           'title' => $title,
         );
         if (!empty($this->options['destination'])) {
-          $links[$field]['query'] = drupal_get_destination();
+          $links[$field]['query'] = backdrop_get_destination();
         }
       }
     }
@@ -92,7 +92,7 @@ class views_handler_field_links extends views_handler_field {
         '#theme' => 'links',
         '#links' => $links,
       );
-      return drupal_render($build);
+      return backdrop_render($build);
     }
     else {
       return '';

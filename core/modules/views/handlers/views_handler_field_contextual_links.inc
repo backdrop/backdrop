@@ -49,7 +49,7 @@ class views_handler_field_contextual_links extends views_handler_field_links {
         ),
         '#access' => user_access('access contextual links'),
       );
-      return drupal_render($build);
+      return backdrop_render($build);
     }
     else {
       return '';

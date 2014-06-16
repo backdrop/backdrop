@@ -45,7 +45,7 @@ function hook_admin_menu_map() {
  * hook_admin_menu_output_alter() to *alter* existing data.
  *
  * @param array $content
- *   A structured array suitable for drupal_render(), potentially containing:
+ *   A structured array suitable for backdrop_render(), potentially containing:
  *   - menu: The administrative menu of links below the path 'admin/*'.
  *   - icon: The icon menu.
  *   - account: The user account name and log out link.
@@ -80,7 +80,7 @@ function hook_admin_menu_output_build(&$content) {
       '#href' => 'mymodule/path',
       // #options are passed to l().
       '#options' => array(
-        'query' => drupal_get_destination(),
+        'query' => backdrop_get_destination(),
         // Apply a class on the link (anchor).
         'attributes' => array('class' => array('myitem-link-anchor')),
       ),
@@ -105,7 +105,7 @@ function hook_admin_menu_output_build(&$content) {
  * hook_admin_menu_output_build() to *add* new data.
  *
  * @param array $content
- *   A structured array suitable for drupal_render(). Passed by reference.
+ *   A structured array suitable for backdrop_render(). Passed by reference.
  *
  * @see hook_admin_menu_output_build()
  */

@@ -67,7 +67,7 @@ class views_handler_area_view extends views_handler_area {
       // Check if the view is part of the parent views of this view
       $search = "$view_name:$display_id";
       if (in_array($search, $this->view->parent_views)) {
-        drupal_set_message(t("Recursion detected in view @view display @display.", array('@view' => $view_name, '@display' => $display_id)), 'error');
+        backdrop_set_message(t("Recursion detected in view @view display @display.", array('@view' => $view_name, '@display' => $display_id)), 'error');
       }
       else {
         if (!empty($this->options['inherit_arguments']) && !empty($this->view->args)) {

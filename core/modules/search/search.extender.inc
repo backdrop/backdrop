@@ -304,7 +304,7 @@ class SearchQuery extends SelectQueryExtender {
     }
 
     if ($warning == 'or') {
-      drupal_set_message(t('Search for either of the two terms with uppercase <strong>OR</strong>. For example, <strong>cats OR dogs</strong>.'));
+      backdrop_set_message(t('Search for either of the two terms with uppercase <strong>OR</strong>. For example, <strong>cats OR dogs</strong>.'));
     }
   }
 
@@ -318,7 +318,7 @@ class SearchQuery extends SelectQueryExtender {
     $split = explode(' ', $word);
     foreach ($split as $s) {
       $num = is_numeric($s);
-      if ($num || drupal_strlen($s) >= variable_get('minimum_word_size', 3)) {
+      if ($num || backdrop_strlen($s) >= variable_get('minimum_word_size', 3)) {
         if (!isset($this->words[$s])) {
           $this->words[$s] = $s;
           $num_new_scores++;
@@ -348,7 +348,7 @@ class SearchQuery extends SelectQueryExtender {
       return FALSE;
     }
     if ($this->expressionsIgnored) {
-      drupal_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => variable_get('search_and_or_limit', 7))), 'warning');
+      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => variable_get('search_and_or_limit', 7))), 'warning');
     }
     $this->executedFirstPass = TRUE;
 

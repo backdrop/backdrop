@@ -25,7 +25,7 @@ function system_requirements($phase) {
 
     // Display the currently active installation profile, if the site
     // is not running the default installation profile.
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
       $requirements['install_profile'] = array(
@@ -65,8 +65,8 @@ function system_requirements($phase) {
     );
   }
 
-  if (version_compare($phpversion, DRUPAL_MINIMUM_PHP) < 0) {
-    $requirements['php']['description'] = $t('Your PHP installation is too old. Drupal requires at least PHP %version.', array('%version' => DRUPAL_MINIMUM_PHP));
+  if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
+    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
     // If PHP is old, it's not safe to continue with the requirements check.
     return $requirements;
@@ -83,7 +83,7 @@ function system_requirements($phase) {
   // (register_globals off), when it is in fact on. We can only guarantee
   // register_globals is off if the value returned is 'off', '', or 0.
   if (!empty($register_globals) && strtolower($register_globals) != 'off') {
-    $requirements['php_register_globals']['description'] = $t('<em>register_globals</em> is enabled. Drupal requires this configuration directive to be disabled. Your site may not be secure when <em>register_globals</em> is enabled. The PHP manual has instructions for <a href="http://php.net/configuration.changes">how to change configuration settings</a>.');
+    $requirements['php_register_globals']['description'] = $t('<em>register_globals</em> is enabled. Backdrop requires this configuration directive to be disabled. Your site may not be secure when <em>register_globals</em> is enabled. The PHP manual has instructions for <a href="http://php.net/configuration.changes">how to change configuration settings</a>.');
     $requirements['php_register_globals']['severity'] = REQUIREMENT_ERROR;
     $requirements['php_register_globals']['value'] = $t("Enabled ('@value')", array('@value' => $register_globals));
   }
@@ -118,7 +118,7 @@ function system_requirements($phase) {
   }
 
   if (!empty($missing_extensions)) {
-    $description = $t('Drupal requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
+    $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
       '@system_requirements' => 'http://drupal.org/requirements',
     ));
 
@@ -147,19 +147,19 @@ function system_requirements($phase) {
     }
     else {
       // Make sure at least one supported database driver exists.
-      $drivers = drupal_detect_database_types();
+      $drivers = backdrop_detect_database_types();
       if (empty($drivers)) {
         $database_ok = FALSE;
-        $pdo_message = $t('Your web server does not appear to support any common PDO database extensions. Check with your hosting provider to see if they support PDO (PHP Data Objects) and offer any databases that <a href="@drupal-databases">Drupal supports</a>.', array(
-          '@drupal-databases' => 'http://drupal.org/node/270#database',
+        $pdo_message = $t('Your web server does not appear to support any common PDO database extensions. Check with your hosting provider to see if they support PDO (PHP Data Objects) and offer any databases that <a href="@support-url">Backdrop CMS supports</a>.', array(
+          '@support-url' => 'http://backdropcms.org/guide/requirements',
         ));
       }
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
         $database_ok = FALSE;
-        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Drupal 7 requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">system requirements</a> page for more information.', array(
-          '@link' => 'http://drupal.org/requirements/pdo#pecl',
+        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">system requirements</a> page for more information.', array(
+          '@link' => 'http://backdropcms.org/guide/requirements',
         ));
       }
     }
@@ -194,16 +194,16 @@ function system_requirements($phase) {
     'value' => $memory_limit == -1 ? t('-1 (Unlimited)') : $memory_limit,
   );
 
-  if (!drupal_check_memory_limit(DRUPAL_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
+  if (!backdrop_check_memory_limit(BACKDROP_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
     $description = '';
     if ($phase == 'install') {
-      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the installation process.', array('%memory_minimum_limit' => DRUPAL_MINIMUM_PHP_MEMORY_LIMIT));
+      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the installation process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
     }
     elseif ($phase == 'update') {
-      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the update process.', array('%memory_minimum_limit' => DRUPAL_MINIMUM_PHP_MEMORY_LIMIT));
+      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the update process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
     }
     elseif ($phase == 'runtime') {
-      $description = $t('Depending on your configuration, Drupal can run with a %memory_limit PHP memory limit. However, a %memory_minimum_limit PHP memory limit or above is recommended, especially if your site uses additional custom or contributed modules.', array('%memory_limit' => $memory_limit, '%memory_minimum_limit' => DRUPAL_MINIMUM_PHP_MEMORY_LIMIT));
+      $description = $t('Depending on your configuration, Backdrop can run with a %memory_limit PHP memory limit. However, a %memory_minimum_limit PHP memory limit or above is recommended, especially if your site uses additional custom or contributed modules.', array('%memory_limit' => $memory_limit, '%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
     }
 
     if (!empty($description)) {
@@ -214,16 +214,16 @@ function system_requirements($phase) {
         $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
       }
 
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Drupal requirements</a> for more information.', array('@url' => 'http://drupal.org/requirements'));
+      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'http://drupal.org/requirements'));
       $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
     }
   }
 
   // Test settings.php file writability
   if ($phase == 'runtime') {
-    $conf_path = DRUPAL_ROOT . ltrim('.', conf_path());
-    $conf_dir = drupal_verify_install_file($conf_path, FILE_NOT_WRITABLE, 'dir');
-    $conf_file = drupal_verify_install_file($conf_path . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
+    $conf_path = BACKDROP_ROOT . ltrim('.', conf_path());
+    $conf_dir = backdrop_verify_install_file($conf_path, FILE_NOT_WRITABLE, 'dir');
+    $conf_file = backdrop_verify_install_file($conf_path . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
     if (!$conf_dir || !$conf_file) {
       $requirements['settings.php'] = array(
         'value' => $t('Not protected'),
@@ -405,9 +405,9 @@ function system_requirements($phase) {
 
     // Check installed modules.
     foreach (module_list() as $module) {
-      $updates = drupal_get_schema_versions($module);
+      $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
-        $current_schema = drupal_get_installed_schema_version($module);
+        $current_schema = backdrop_get_installed_schema_version($module);
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
@@ -438,7 +438,7 @@ function system_requirements($phase) {
 
   // Display an error if a newly introduced dependency in a module is not resolved.
   if ($phase == 'update') {
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     $files = system_rebuild_module_data();
     foreach ($files as $module => $file) {
       // Ignore disabled modules and installation profiles.
@@ -469,7 +469,7 @@ function system_requirements($phase) {
         $required_file = $files[$required_module];
         $required_name = $required_file->info['name'];
         $version = str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $required_file->info['version']);
-        $compatibility = drupal_check_incompatibility($requirement, $version);
+        $compatibility = backdrop_check_incompatibility($requirement, $version);
         if ($compatibility) {
           $compatibility = rtrim(substr($compatibility, 2), ')');
           $requirements["$module-$required_module"] = array(
@@ -485,7 +485,7 @@ function system_requirements($phase) {
   }
 
   // Test Unicode library
-  include_once DRUPAL_ROOT . '/core/includes/unicode.inc';
+  include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   $requirements = array_merge($requirements, unicode_requirements());
 
   if ($phase == 'runtime') {
@@ -504,13 +504,13 @@ function system_requirements($phase) {
     }
     $requirements['update status']['title'] = $t('Update notifications');
 
-    // Check that Drupal can issue HTTP requests.
-    if (variable_get('drupal_http_request_fails', TRUE) && !system_check_http_request()) {
+    // Check that Backdrop can issue HTTP requests.
+    if (variable_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
       $requirements['http requests'] = array(
         'title' => $t('HTTP request status'),
         'value' => $t('Fails'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('Your system or network configuration does not allow Drupal to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Drupal can access web pages but you are still seeing this message, you may add <code>$conf[\'drupal_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$conf[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
       );
     }
   }
@@ -523,10 +523,10 @@ function system_requirements($phase) {
  */
 function system_install() {
   // Create tables.
-  drupal_install_schema('system');
-  $versions = drupal_get_schema_versions('system');
+  backdrop_install_schema('system');
+  $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
-  drupal_set_installed_schema_version('system', $version);
+  backdrop_set_installed_schema_version('system', $version);
 
   // Clear out module list and hook implementation statics before calling
   // system_rebuild_theme_data().
@@ -545,7 +545,7 @@ function system_install() {
     ->execute();
 
   // Populate the cron key variable.
-  $cron_key = drupal_random_key();
+  $cron_key = backdrop_random_key();
   state_set('cron_key', $cron_key);
 }
 
@@ -557,7 +557,7 @@ function system_schema() {
   // some database drivers, e.g. Oracle and DB2, will require variable_get()
   // and variable_set() for overcoming some database specific limitations.
   $schema['variable'] = array(
-    'description' => 'Named variable/value pairs created by Drupal core or any other module or theme. All variables are cached in memory at the start of every Drupal request so developers should not be careless about what is stored here.',
+    'description' => 'Named variable/value pairs created by Backdrop core or any other module or theme. All variables are cached in memory at the start of every Backdrop request so developers should not be careless about what is stored here.',
     'fields' => array(
       'name' => array(
         'description' => 'The name of the variable.',
@@ -695,7 +695,7 @@ function system_schema() {
     'primary key' => array('cid'),
   );
   $schema['cache_bootstrap'] = $schema['cache'];
-  $schema['cache_bootstrap']['description'] = 'Cache table for data required to bootstrap Drupal, may be routed to a shared memory cache.';
+  $schema['cache_bootstrap']['description'] = 'Cache table for data required to bootstrap Backdrop, may be routed to a shared memory cache.';
   $schema['cache_page'] = $schema['cache'];
   $schema['cache_page']['description'] = 'Cache table used to store compressed pages for anonymous users, if page caching is enabled.';
   $schema['cache_menu'] = $schema['cache'];
@@ -839,7 +839,7 @@ function system_schema() {
         'default' => 0,
       ),
       'status' => array(
-        'description' => 'A field indicating the status of the file. Two status are defined in core: temporary (0) and permanent (1). Temporary files older than DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed during a cron run.',
+        'description' => 'A field indicating the status of the file. Two status are defined in core: temporary (0) and permanent (1). Temporary files older than BACKDROP_MAXIMUM_TEMP_FILE_AGE will be removed during a cron run.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -962,7 +962,7 @@ function system_schema() {
     'description' => 'Maps paths to various callbacks (access, page and title)',
     'fields' => array(
       'path' => array(
-        'description' => 'Primary Key: the Drupal path this entry describes',
+        'description' => 'Primary Key: the Backdrop path this entry describes',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1139,14 +1139,14 @@ function system_schema() {
         'default' => 0,
       ),
       'link_path' => array(
-        'description' => 'The Drupal path or external path this link points to.',
+        'description' => 'The Backdrop path or external path this link points to.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
       'router_path' => array(
-        'description' => 'For links corresponding to a Drupal path (external = 0), this connects the link to a {menu_router}.path for joins.',
+        'description' => 'For links corresponding to a Backdrop path (external = 0), this connects the link to a {menu_router}.path for joins.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1345,7 +1345,7 @@ function system_schema() {
   );
 
   $schema['semaphore'] = array(
-    'description' => 'Table for holding semaphores, locks, flags, etc. that cannot be stored as Drupal variables since they must not be cached.',
+    'description' => 'Table for holding semaphores, locks, flags, etc. that cannot be stored as Backdrop variables since they must not be cached.',
     'fields' => array(
       'name' => array(
         'description' => 'Primary Key: Unique name.',
@@ -1389,7 +1389,7 @@ function system_schema() {
   );
 
   $schema['sessions'] = array(
-    'description' => "Drupal's session handlers read and write into the sessions table. Each record represents a user session, either anonymous or authenticated.",
+    'description' => "Backdrop's session handlers read and write into the sessions table. Each record represents a user session, either anonymous or authenticated.",
     'fields' => array(
       'uid' => array(
         'description' => 'The {users}.uid corresponding to a session, or 0 for anonymous user.',
@@ -1398,13 +1398,13 @@ function system_schema() {
         'not null' => TRUE,
       ),
       'sid' => array(
-        'description' => "A session ID. The value is generated by Drupal's session handlers.",
+        'description' => "A session ID. The value is generated by Backdrop's session handlers.",
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
       ),
       'ssid' => array(
-        'description' => "Secure session ID. The value is generated by Drupal's session handlers.",
+        'description' => "Secure session ID. The value is generated by Backdrop's session handlers.",
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
@@ -1424,13 +1424,13 @@ function system_schema() {
         'default' => 0,
       ),
       'cache' => array(
-        'description' => "The time of this user's last post. This is used when the site has specified a minimum_cache_lifetime. See DrupalCacheInterface::get().",
+        'description' => "The time of this user's last post. This is used when the site has specified a minimum_cache_lifetime. See BackdropCacheInterface::get().",
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
       'session' => array(
-        'description' => 'The serialized contents of $_SESSION, an array of name/value pairs that persists across page requests by this session ID. Drupal loads $_SESSION from here at the start of each request and saves it at the end.',
+        'description' => 'The serialized contents of $_SESSION, an array of name/value pairs that persists across page requests by this session ID. Backdrop loads $_SESSION from here at the start of each request and saves it at the end.',
         'type' => 'blob',
         'not null' => FALSE,
         'size' => 'big',
@@ -1474,10 +1474,10 @@ function system_schema() {
   );
 
   $schema['system'] = array(
-    'description' => "A list of all modules, themes, and theme engines that are or have been installed in Drupal's file system.",
+    'description' => "A list of all modules, themes, and theme engines that are or have been installed in Backdrop's file system.",
     'fields' => array(
       'filename' => array(
-        'description' => 'The path of the primary file for this item, relative to the Drupal root; e.g. modules/node/node.module.',
+        'description' => 'The path of the primary file for this item, relative to the Backdrop root; e.g. modules/node/node.module.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1511,7 +1511,7 @@ function system_schema() {
         'default' => 0,
       ),
       'bootstrap' => array(
-        'description' => "Boolean indicating whether this module is loaded during Drupal's early bootstrapping phase (e.g. even before the page cache is consulted).",
+        'description' => "Boolean indicating whether this module is loaded during Backdrop's early bootstrapping phase (e.g. even before the page cache is consulted).",
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -1581,7 +1581,7 @@ function system_schema() {
   );
 
   $schema['url_alias'] = array(
-    'description' => 'A list of URL aliases for Drupal paths; a user may visit either the source or destination path.',
+    'description' => 'A list of URL aliases for Backdrop paths; a user may visit either the source or destination path.',
     'fields' => array(
       'pid' => array(
         'description' => 'A unique path alias identifier.',
@@ -1590,7 +1590,7 @@ function system_schema() {
         'not null' => TRUE,
       ),
       'source' => array(
-        'description' => 'The Drupal path this alias is for; e.g. node/12.',
+        'description' => 'The Backdrop path this alias is for; e.g. node/12.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1604,7 +1604,7 @@ function system_schema() {
         'default' => '',
       ),
       'langcode' => array(
-        'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Drupal path can have an alias for each supported language.",
+        'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Backdrop path can have an alias for each supported language.",
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
@@ -1659,7 +1659,7 @@ function system_update_1001() {
 /**
  * Set Bartik as default theme if it implicitly was the default before.
  *
- * The default theme for Drupal core was changed from Bartik to Stark.
+ * The default theme for Backdrop core was changed from Bartik to Stark.
  * Installation profiles (including Standard and Minimal) were changed to
  * explicitly configure Bartik as default theme. Since Bartik was the default
  * theme by default and may not have been explicitly configured as such
@@ -1820,7 +1820,7 @@ function system_update_1009() {
 
   // Manually install schema, as update_module_enable() does not do this for us.
   if (!db_table_exists('cache_admin_menu')) {
-    $cache_admin_menu = drupal_get_schema_unprocessed('system', 'cache');
+    $cache_admin_menu = backdrop_get_schema_unprocessed('system', 'cache');
     $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
     db_create_table('cache_admin_menu', $cache_admin_menu);
   }

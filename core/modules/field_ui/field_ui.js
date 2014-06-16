@@ -5,15 +5,15 @@
  
 (function($) {
 
-Drupal.behaviors.fieldUIFieldOverview = {
+Backdrop.behaviors.fieldUIFieldOverview = {
   attach: function (context, settings) {
     $('table#field-overview', context).once('field-overview', function () {
-      Drupal.fieldUIFieldOverview.attachUpdateSelects(this, settings);
+      Backdrop.fieldUIFieldOverview.attachUpdateSelects(this, settings);
     });
   }
 };
 
-Drupal.fieldUIFieldOverview = {
+Backdrop.fieldUIFieldOverview = {
   /**
    * Implements dependent select dropdowns on the 'Manage fields' screen.
    */
@@ -101,20 +101,20 @@ jQuery.fn.fieldUIPopulateOptions = function (options, selected) {
   });
 };
 
-Drupal.behaviors.fieldUIDisplayOverview = {
+Backdrop.behaviors.fieldUIDisplayOverview = {
   attach: function (context, settings) {
     $('table#field-display-overview', context).once('field-display-overview', function() {
-      Drupal.fieldUIOverview.attach(this, settings.fieldUIRowsData, Drupal.fieldUIDisplayOverview);
+      Backdrop.fieldUIOverview.attach(this, settings.fieldUIRowsData, Backdrop.fieldUIDisplayOverview);
     });
   }
 };
 
-Drupal.fieldUIOverview = {
+Backdrop.fieldUIOverview = {
   /**
    * Attaches the fieldUIOverview behavior.
    */
   attach: function (table, rowsData, rowHandlers) {
-    var tableDrag = Drupal.tableDrag[table.id];
+    var tableDrag = Backdrop.tableDrag[table.id];
 
     // Add custom tabledrag callbacks.
     tableDrag.onDrop = this.onDrop;
@@ -158,7 +158,7 @@ Drupal.fieldUIOverview = {
     }
 
     // Ajax-update the rows.
-    Drupal.fieldUIOverview.AJAXRefreshRows(refreshRows);
+    Backdrop.fieldUIOverview.AJAXRefreshRows(refreshRows);
   },
 
   /**
@@ -178,7 +178,7 @@ Drupal.fieldUIOverview = {
         // Update the row region.
         rowHandler.region = region;
         // Ajax-update the rows.
-        Drupal.fieldUIOverview.AJAXRefreshRows(refreshRows);
+        Backdrop.fieldUIOverview.AJAXRefreshRows(refreshRows);
       }
     }
   },
@@ -259,7 +259,7 @@ Drupal.fieldUIOverview = {
 /**
  * Row handlers for the 'Manage display' screen.
  */
-Drupal.fieldUIDisplayOverview = {};
+Backdrop.fieldUIDisplayOverview = {};
 
 /**
  * Constructor for a 'field' row handler.
@@ -271,7 +271,7 @@ Drupal.fieldUIDisplayOverview = {};
  * @param data
  *   Additional data to be populated in the constructed object.
  */
-Drupal.fieldUIDisplayOverview.field = function (row, data) {
+Backdrop.fieldUIDisplayOverview.field = function (row, data) {
   this.row = row;
   this.name = data.name;
   this.region = data.region;
@@ -279,12 +279,12 @@ Drupal.fieldUIDisplayOverview.field = function (row, data) {
 
   // Attach change listener to the 'formatter type' select.
   this.$formatSelect = $('select.field-formatter-type', row);
-  this.$formatSelect.change(Drupal.fieldUIOverview.onChange);
+  this.$formatSelect.change(Backdrop.fieldUIOverview.onChange);
 
   return this;
 };
 
-Drupal.fieldUIDisplayOverview.field.prototype = {
+Backdrop.fieldUIDisplayOverview.field.prototype = {
   /**
    * Returns the region corresponding to the current form values of the row.
    */
@@ -300,14 +300,14 @@ Drupal.fieldUIDisplayOverview.field.prototype = {
    * - a drag-and-drop action (the row's form elements then probably need to be
    *   updated accordingly)
    * - user input in one of the form elements watched by the
-   *   Drupal.fieldUIOverview.onChange change listener.
+   *   Backdrop.fieldUIOverview.onChange change listener.
    *
    * @param region
    *   The name of the new region for the row.
    * @return
    *   A hash object indicating which rows should be Ajax-updated as a result
    *   of the change, in the format expected by
-   *   Drupal.displayOverview.AJAXRefreshRows().
+   *   Backdrop.displayOverview.AJAXRefreshRows().
    */
   regionChange: function (region) {
 

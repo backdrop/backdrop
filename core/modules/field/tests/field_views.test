@@ -16,7 +16,7 @@
  *   - Use relationships between different entity types, for example node and the node author(user).
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Provides some helper methods for testing fieldapi integration into views.
@@ -37,7 +37,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
   protected function CreateUser($extra_edit = array()) {
     $permissions = array('access comments', 'access content', 'post comments', 'skip comment approval');
     // Create a role with the given permission set.
-    if (!($rid = $this->drupalCreateRole($permissions))) {
+    if (!($rid = $this->backdropCreateRole($permissions))) {
       return FALSE;
     }
 
@@ -90,9 +90,9 @@ class FieldViewsTestHelper extends ViewsSqlTest {
    */
   function clearViewsCaches() {
     // Reset views data cache.
-    drupal_static_reset('_views_fetch_data_cache');
-    drupal_static_reset('_views_fetch_data_recursion_protected');
-    drupal_static_reset('_views_fetch_data_fully_loaded');
+    backdrop_static_reset('_views_fetch_data_cache');
+    backdrop_static_reset('_views_fetch_data_recursion_protected');
+    backdrop_static_reset('_views_fetch_data_fully_loaded');
   }
 }
 
@@ -150,7 +150,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
         'field_name_0' => array($langcode => array((array('value' => $this->randomName())))),
         'field_name_2' => array($langcode => array((array('value' => $this->randomName())))),
       );
-      $this->nodes[] = $this->drupalCreateNode($edit);
+      $this->nodes[] = $this->backdropCreateNode($edit);
     }
 
     for ($i = 0; $i < 5; $i++) {
@@ -302,7 +302,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       // Set this field to be empty.
       $edit[$this->fields[4]['field_name']] = array();
 
-      $this->nodes[$i] = $this->drupalCreateNode($edit);
+      $this->nodes[$i] = $this->backdropCreateNode($edit);
     }
   }
 

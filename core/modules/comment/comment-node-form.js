@@ -5,14 +5,14 @@
 
 (function ($) {
 
-Drupal.behaviors.commentFieldsetSummaries = {
+Backdrop.behaviors.commentFieldsetSummaries = {
   attach: function (context) {
-    $('fieldset.comment-node-settings-form', context).drupalSetSummary(function (context) {
-      return Drupal.checkPlain($('.form-item-comment input:checked', context).next('label').text());
+    $('fieldset.comment-node-settings-form', context).backdropSetSummary(function (context) {
+      return Backdrop.checkPlain($('.form-item-comment input:checked', context).next('label').text());
     });
 
     // Provide the summary for the node type form.
-    $('fieldset.comment-node-type-settings-form', context).drupalSetSummary(function(context) {
+    $('fieldset.comment-node-type-settings-form', context).backdropSetSummary(function(context) {
       var vals = [];
 
       // Default comment setting.
@@ -26,9 +26,9 @@ Drupal.behaviors.commentFieldsetSummaries = {
 
       // Comments per page.
       var number = $(".form-item-comment-default-per-page select option:selected", context).val();
-      vals.push(Drupal.t('@number comments per page', {'@number': number}));
+      vals.push(Backdrop.t('@number comments per page', {'@number': number}));
 
-      return Drupal.checkPlain(vals.join(', '));
+      return Backdrop.checkPlain(vals.join(', '));
     });
   }
 };

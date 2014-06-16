@@ -23,7 +23,7 @@ class views_plugin_style_rss extends views_plugin_style {
     $url = url($this->view->get_url(NULL, $path), $url_options);
     if ($display->has_path()) {
       if (empty($this->preview)) {
-        drupal_add_feed($url, $title);
+        backdrop_add_feed($url, $title);
       }
     }
     else {
@@ -32,7 +32,7 @@ class views_plugin_style_rss extends views_plugin_style {
       }
 
       $this->view->feed_icon .= theme('feed_icon', array('url' => $url, 'title' => $title));
-      drupal_add_html_head_link(array(
+      backdrop_add_html_head_link(array(
         'rel' => 'alternate',
         'type' => 'application/rss+xml',
         'title' => $title,

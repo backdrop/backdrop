@@ -7,27 +7,27 @@
 /**
  * Attaches the AJAX behavior to Views exposed filter forms and key View links.
  */
-Drupal.behaviors.ViewsAjaxView = {};
-Drupal.behaviors.ViewsAjaxView.attach = function() {
-  if (Drupal.settings && Drupal.settings.views && Drupal.settings.views.ajaxViews) {
-    $.each(Drupal.settings.views.ajaxViews, function(i, settings) {
-      Drupal.views.instances[i] = new Drupal.views.ajaxView(settings);
+Backdrop.behaviors.ViewsAjaxView = {};
+Backdrop.behaviors.ViewsAjaxView.attach = function() {
+  if (Backdrop.settings && Backdrop.settings.views && Backdrop.settings.views.ajaxViews) {
+    $.each(Backdrop.settings.views.ajaxViews, function(i, settings) {
+      Backdrop.views.instances[i] = new Backdrop.views.ajaxView(settings);
     });
   }
 };
 
-Drupal.views = {};
-Drupal.views.instances = {};
+Backdrop.views = {};
+Backdrop.views.instances = {};
 
 /**
  * Javascript object for a certain view.
  */
-Drupal.views.ajaxView = function(settings) {
+Backdrop.views.ajaxView = function(settings) {
   var selector = '.view-dom-id-' + settings.view_dom_id;
   this.$view = $(selector);
 
   // Retrieve the path to use for views' ajax.
-  var ajax_path = Drupal.settings.views.ajax_path;
+  var ajax_path = Backdrop.settings.views.ajax_path;
 
   // If there are multiple views this might've ended up showing up multiple times.
   if (ajax_path.constructor.toString().indexOf("Array") != -1) {
@@ -37,7 +37,7 @@ Drupal.views.ajaxView = function(settings) {
   // Check if there are any GET parameters to send to views.
   var queryString = window.location.search || '';
   if (queryString !== '') {
-    // Remove the question mark and Drupal path component if any.
+    // Remove the question mark and Backdrop path component if any.
     queryString = queryString.slice(1).replace(/q=[^&]+&?|&?render=[^&]+/, '');
     if (queryString !== '') {
       // If there is a '?' in ajax_path, clean url are on and & should be used to add parameters.
@@ -70,17 +70,17 @@ Drupal.views.ajaxView = function(settings) {
   // Add a trigger to update this view specifically.
   var self_settings = this.element_settings;
   self_settings.event = 'RefreshView';
-  this.refreshViewAjax = new Drupal.ajax(this.selector, this.$view, self_settings);
+  this.refreshViewAjax = new Backdrop.ajax(this.selector, this.$view, self_settings);
 };
 
-Drupal.views.ajaxView.prototype.attachExposedFormAjax = function() {
+Backdrop.views.ajaxView.prototype.attachExposedFormAjax = function() {
   var button = $('input[type=submit], button[type=submit], input[type=image]', this.$exposed_form);
   button = button[0];
 
-  this.exposedFormAjax = new Drupal.ajax($(button).attr('id'), button, this.element_settings);
+  this.exposedFormAjax = new Backdrop.ajax($(button).attr('id'), button, this.element_settings);
 };
 
-Drupal.views.ajaxView.prototype.filterNestedViews= function() {
+Backdrop.views.ajaxView.prototype.filterNestedViews= function() {
   // If there is at least one parent with a view class, this view
   // is nested (e.g., an attachment). Bail.
   return !this.$view.parents('.view').length;
@@ -89,7 +89,7 @@ Drupal.views.ajaxView.prototype.filterNestedViews= function() {
 /**
  * Attach the ajax behavior to each link.
  */
-Drupal.views.ajaxView.prototype.attachPagerAjax = function() {
+Backdrop.views.ajaxView.prototype.attachPagerAjax = function() {
   this.$view.find('ul.pager > li > a, th.views-field a, .attachment .views-summary a')
   .each(jQuery.proxy(this.attachPagerLinkAjax, this));
 };
@@ -97,7 +97,7 @@ Drupal.views.ajaxView.prototype.attachPagerAjax = function() {
 /**
  * Attach the ajax behavior to a singe link.
  */
-Drupal.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
+Backdrop.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
   var $link = $(link);
   var viewData = {};
   var href = $link.attr('href');
@@ -106,20 +106,20 @@ Drupal.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
   $.extend(
     viewData,
     this.settings,
-    Drupal.Views.parseQueryString(href),
+    Backdrop.Views.parseQueryString(href),
     // Extract argument data from the URL.
-    Drupal.Views.parseViewArgs(href, this.settings.view_base_path)
+    Backdrop.Views.parseViewArgs(href, this.settings.view_base_path)
   );
 
   // For anchor tags, these will go to the target of the anchor rather
   // than the usual location.
-  $.extend(viewData, Drupal.Views.parseViewArgs(href, this.settings.view_base_path));
+  $.extend(viewData, Backdrop.Views.parseViewArgs(href, this.settings.view_base_path));
 
   this.element_settings.submit = viewData;
-  this.pagerAjax = new Drupal.ajax(false, $link, this.element_settings);
+  this.pagerAjax = new Backdrop.ajax(false, $link, this.element_settings);
 };
 
-Drupal.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
+Backdrop.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
   // Scroll to the top of the view. This will allow users
   // to browse newly loaded content after e.g. clicking a pager
   // link.

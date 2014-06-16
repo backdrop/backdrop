@@ -5,7 +5,7 @@
 /**
  * Attaches sticky table headers.
  */
-Drupal.behaviors.tableHeader = {
+Backdrop.behaviors.tableHeader = {
   attach: function (context) {
     if (!$.support.positionFixed) {
       return;
@@ -64,7 +64,7 @@ $(window).on({
   'scroll.TableHeader': tableHeaderOnScrollHandler
 });
 
-// Bind to custom Drupal events.
+// Bind to custom Backdrop events.
 $(document).on({
   /**
    * Recalculate columns width when window is resized and when show/hide
@@ -117,8 +117,7 @@ function TableHeader(table) {
 /**
  * Store the state of TableHeader.
  */
-
- $.extend(TableHeader, {
+$.extend(TableHeader, {
    /**
     * This will store the state of all processed tables.
     *
@@ -145,7 +144,6 @@ function TableHeader(table) {
      }
      this.offsetTop = sum;
      return sum;
-
   }
 });
 
@@ -280,6 +278,6 @@ window.setTimeout(function() {
 }, 100);
 
 // Expose constructor in the public space.
-Drupal.TableHeader = TableHeader;
+Backdrop.TableHeader = TableHeader;
 
 }(jQuery));

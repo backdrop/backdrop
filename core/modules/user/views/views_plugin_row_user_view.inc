@@ -76,6 +76,6 @@ class views_plugin_row_user_view extends views_plugin_row {
     $account->view = $this->view;
     $build = user_view($account, $this->options['view_mode']);
 
-    return drupal_render($build);
+    return backdrop_render($build);
   }
 }

@@ -1,5 +1,5 @@
 #
-# Apache/PHP/Drupal settings:
+# Apache/PHP/Backdrop settings:
 #
 
 # Protect files and directories from prying eyes.
@@ -13,15 +13,15 @@ Options -Indexes
 # Follow symbolic links in this directory.
 Options +FollowSymLinks
 
-# Make Drupal handle any 404 errors.
+# Make Backdrop handle any 404 errors.
 ErrorDocument 404 /index.php
 
 # Set the default handler.
 DirectoryIndex index.php index.html index.htm
 
 # Override PHP settings that cannot be changed at runtime. See
-# settings.php and drupal_environment_initialize() in includes/bootstrap.inc for
-# settings that can be changed at runtime.
+# settings.php and backdrop_environment_initialize() in includes/bootstrap.inc
+# for settings that can be changed at runtime.
 
 # PHP 5, Apache 1 and 2.
 <IfModule mod_php5.c>
@@ -47,7 +47,7 @@ DirectoryIndex index.php index.html index.htm
     # headers themselves. Otherwise all scripts would have to overwrite the
     # headers set by mod_expires if they want another caching behavior. This may
     # fail if an error occurs early in the bootstrap process, and it may cause
-    # problems if a non-Drupal PHP file is installed in a subdirectory.
+    # problems if a non-Backdrop PHP file is installed in a subdirectory.
     ExpiresActive Off
   </FilesMatch>
 </IfModule>
@@ -95,11 +95,11 @@ DirectoryIndex index.php index.html index.htm
   # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   # RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]
 
-  # Modify the RewriteBase if you are using Drupal in a subdirectory or in a
+  # Modify the RewriteBase if you are using Backdrop in a subdirectory or in a
   # VirtualDocumentRoot and the rewrite rules are not working properly.
-  # For example if your site is at http://example.com/drupal uncomment and
+  # For example if your site is at http://example.com/backdrop uncomment and
   # modify the following line:
-  # RewriteBase /drupal
+  # RewriteBase /backdrop
   #
   # If your site is running in a VirtualDocumentRoot at http://example.com/,
   # uncomment the following line:
@@ -113,7 +113,7 @@ DirectoryIndex index.php index.html index.htm
   RewriteRule ^ %1/core/%2 [L,QSA,R=301]
 
   # Pass all requests not referring directly to files in the filesystem to
-  # index.php. Clean URLs are handled in drupal_environment_initialize().
+  # index.php. Clean URLs are handled in backdrop_environment_initialize().
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico

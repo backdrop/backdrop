@@ -104,7 +104,7 @@ class views_plugin_row_node_view extends views_plugin_row {
       $node->view = $this->view;
       $build = node_view($node, $this->options['view_mode']);
 
-      return drupal_render($build);
+      return backdrop_render($build);
     }
   }
 }

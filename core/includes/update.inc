@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Drupal database update API.
+ * Backdrop database update API.
  *
- * This file contains functions to perform database updates for a Drupal
+ * This file contains functions to perform database updates for a Backdrop
  * installation. It is included and used extensively by update.php.
  */
 
 /**
- * Minimum schema version of Drupal 7 required for upgrade to Drupal 8.
+ * Minimum schema version of Drupal 7 required for upgrade to Backdrop.
  *
- * Upgrades from Drupal 7 to Drupal 8 require that Drupal 7 be running
+ * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running
  * the most recent version, or the upgrade could fail. We can't easily
  * check the Drupal 7 version once the update process has begun, so instead
  * we check the schema version of system.module in the system table.
@@ -81,9 +81,9 @@ function update_check_incompatibility($name, $type = 'module') {
 function update_prepare_bootstrap() {
   // Allow the database system to work even if the registry has not been
   // created yet.
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
-  include_once DRUPAL_ROOT . '/core/modules/entity/entity.controller.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/modules/entity/entity.controller.inc';
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
 
   // Check whether settings.php needs to be rewritten.
   $settings_exist = !empty($GLOBALS['config_directories']);
@@ -96,7 +96,7 @@ function update_prepare_bootstrap() {
   // needs to be writable.
   if (!$settings_exist) {
     $settings_file = conf_path() . '/settings.php';
-    $writable = drupal_verify_install_file($settings_file, FILE_EXIST | FILE_READABLE | FILE_WRITABLE);
+    $writable = backdrop_verify_install_file($settings_file, FILE_EXIST | FILE_READABLE | FILE_WRITABLE);
     $requirements['settings file']['title'] = 'Settings file';
     if ($writable) {
       $requirements['settings file'] += array(
@@ -107,20 +107,20 @@ function update_prepare_bootstrap() {
       $requirements['settings file'] += array(
         'value' => 'settings.php is not writable.',
         'severity' => REQUIREMENT_ERROR,
-        'description' => 'Drupal requires write permissions to <em>' . $settings_file . '</em> during the update process. If you are unsure how to grant file permissions, consult the <a href="http://drupal.org/server-permissions">online handbook</a>.',
+        'description' => 'Backdrop CMS requires write permissions to <em>' . $settings_file . '</em> during the update process. If you are unsure how to grant file permissions, consult the <a href="http://backdropcms.org/guide/installation">online handbook</a>.',
       );
     }
     update_extra_requirements($requirements);
   }
 
   // Bootstrap the database.
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE);
 
   // If the site has not updated to Backdrop yet, check to make sure that it is
   // running an up-to-date version of Drupal 7 before proceeding. Note this has
   // to happen AFTER the database bootstraps because of
-  // drupal_get_installed_schema_version().
-  $system_schema = drupal_get_installed_schema_version('system');
+  // backdrop_get_installed_schema_version().
+  $system_schema = backdrop_get_installed_schema_version('system');
   if ($system_schema > 7000) {
     $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION;
     $requirements = array(
@@ -128,7 +128,7 @@ function update_prepare_bootstrap() {
         'title' => 'Drupal 7 version',
         'value' => $has_required_schema ? 'You are running a current version of Drupal 7.' : 'You are not running a current version of Drupal 7',
         'severity' => $has_required_schema ? REQUIREMENT_OK : REQUIREMENT_ERROR,
-        'description' => $has_required_schema ? '' : 'Please update your Drupal 7 installation to the most recent version before attempting to upgrade to Drupal 8',
+        'description' => $has_required_schema ? '' : 'Please update your Drupal 7 installation to the most recent version before attempting to upgrade to Backdrop',
       ),
     );
     update_extra_requirements($requirements);
@@ -136,7 +136,7 @@ function update_prepare_bootstrap() {
     if ($has_required_schema) {
       // Bootstrap variables so we can update theme while preparing the update
       // process.
-      drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
+      backdrop_bootstrap(BACKDROP_BOOTSTRAP_VARIABLES);
       // Update the dynamic include paths that might be used before running the
       // proper update functions.
       update_prepare_stored_includes();
@@ -148,7 +148,7 @@ function update_prepare_bootstrap() {
         db_drop_index('url_alias', 'alias_language_pid');
         db_drop_index('url_alias', 'source_language_pid');
         $langcode_spec = array(
-          'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Drupal path can have an alias for each supported language.",
+          'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Backdrop path can have an alias for each supported language.",
           'type' => 'varchar',
           'length' => 12,
           'not null' => TRUE,
@@ -207,7 +207,7 @@ function update_prepare_stored_includes() {
 }
 
 /**
- * Prepare Drupal 8 language changes for the bootstrap if needed.
+ * Prepare Backdrop language changes for the bootstrap if needed.
  */
 function update_prepare_language() {
   if (db_table_exists('languages')) {
@@ -251,13 +251,13 @@ function update_prepare_language() {
     update_module_enable($modules);
 
     // Rename 'language' column to 'langcode'.
-    require_once DRUPAL_ROOT . '/core/modules/language/language.install';
+    require_once BACKDROP_ROOT . '/core/modules/language/language.install';
     language_update_1000();
   }
 }
 
 /**
- * Adds modules to the system table in a Drupal core update.
+ * Adds modules to the system table in a Backdrop core update.
  *
  * @param $modules
  *   Array of module names.
@@ -270,12 +270,12 @@ function update_module_add_to_system($modules = array()) {
     'description' => '',
     'package' => 'Other',
     'version' => NULL,
-    'php' => DRUPAL_MINIMUM_PHP,
+    'php' => BACKDROP_MINIMUM_PHP,
     'files' => array(),
     'bootstrap' => 0,
   );
   foreach ($modules as $module) {
-    $module_info = drupal_parse_info_file('core/modules/' . $module . '/' . $module . '.info');
+    $module_info = backdrop_parse_info_file('core/modules/' . $module . '/' . $module . '.info');
     db_insert('system')
       ->fields(array(
         'filename' => 'core/modules/' . $module . '/' . $module . '.module',
@@ -301,13 +301,13 @@ function update_module_add_to_system($modules = array()) {
  * made which make it impossible to continue using the prior version.
  */
 function update_fix_requirements() {
-  if (drupal_get_installed_schema_version('system') > 7000 && !variable_get('update_backdrop_requirements', FALSE)) {
+  if (backdrop_get_installed_schema_version('system') > 7000 && !variable_get('update_backdrop_requirements', FALSE)) {
     variable_set('update_backdrop_requirements', TRUE);
   }
 }
 
 /**
- * Helper function to install a new module in Drupal 8 via hook_update_N().
+ * Helper function to install a new module in Backdrop 1.x via hook_update_N().
  */
 function update_module_enable(array $modules) {
   foreach ($modules as $module) {
@@ -332,7 +332,7 @@ function update_module_enable(array $modules) {
 
     // system_list_reset() is in module.inc but that would only be available
     // once the variable bootstrap is done.
-    require_once DRUPAL_ROOT . '/core/includes/module.inc';
+    require_once BACKDROP_ROOT . '/core/includes/module.inc';
     system_list_reset();
     //  @todo: figure out what to do about hook_install() and hook_enable().
   }
@@ -351,9 +351,9 @@ function update_module_enable(array $modules) {
  * will be displayed at all.
  *
  * If it fails for whatever reason, it should throw an instance of
- * DrupalUpdateException with an appropriate error message, for example:
+ * BackdropUpdateException with an appropriate error message, for example:
  * @code
- * throw new DrupalUpdateException(t('Description of what went wrong'));
+ * throw new BackdropUpdateException(t('Description of what went wrong'));
  * @endcode
  *
  * If an exception is thrown, the current update and all updates that depend on
@@ -400,9 +400,9 @@ function update_do_one($module, $number, $dependency_map, &$context) {
     catch (Exception $e) {
       watchdog_exception('update', $e);
 
-      require_once DRUPAL_ROOT . '/core/includes/errors.inc';
-      $variables = _drupal_decode_exception($e);
-      // The exception message is run through check_plain() by _drupal_decode_exception().
+      require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+      $variables = _backdrop_decode_exception($e);
+      // The exception message is run through check_plain() by _backdrop_decode_exception().
       $ret['#abort'] = array('success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables));
     }
   }
@@ -427,7 +427,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 
   // Record the schema update if it was completed successfully.
   if ($context['finished'] == 1 && empty($ret['#abort'])) {
-    drupal_set_installed_schema_version($module, $number);
+    backdrop_set_installed_schema_version($module, $number);
   }
 
   $context['message'] = 'Updating ' . check_plain($module) . ' module';
@@ -436,7 +436,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 /**
  * @class Exception class used to throw error if a module update fails.
  */
-class DrupalUpdateException extends Exception { }
+class BackdropUpdateException extends Exception { }
 
 /**
  * Starts the database update batch process.
@@ -460,7 +460,7 @@ class DrupalUpdateException extends Exception { }
  *
  * @see update_resolve_dependencies()
  */
-function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'drupal_goto') {
+function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
   // During the update, bring the site offline so that schema changes do not
   // affect visiting users.
   $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
@@ -488,7 +488,7 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
       // correct place. (The updates are already sorted, so we can simply base
       // this on the first one we come across in the above foreach loop.)
       if (isset($start[$update['module']])) {
-        drupal_set_installed_schema_version($update['module'], $update['number'] - 1);
+        backdrop_set_installed_schema_version($update['module'], $update['number'] - 1);
         unset($start[$update['module']]);
       }
       // Add this update function to the batch.
@@ -527,7 +527,7 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
  */
 function update_finished($success, $results, $operations) {
   // Clear the caches in case the data has been updated.
-  drupal_flush_all_caches();
+  backdrop_flush_all_caches();
 
   $_SESSION['update_results'] = $results;
   $_SESSION['update_success'] = $success;
@@ -563,14 +563,14 @@ function update_get_update_list() {
   // Make sure that the system module is first in the list of updates.
   $ret = array('system' => array());
 
-  $modules = drupal_get_installed_schema_version(NULL, FALSE, TRUE);
+  $modules = backdrop_get_installed_schema_version(NULL, FALSE, TRUE);
   foreach ($modules as $module => $schema_version) {
     // Skip uninstalled and incompatible modules.
     if ($schema_version == SCHEMA_UNINSTALLED || update_check_incompatibility($module)) {
       continue;
     }
     // Otherwise, get the list of updates defined by this module.
-    $updates = drupal_get_schema_versions($module);
+    $updates = backdrop_get_schema_versions($module);
     if ($updates !== FALSE) {
       // module_invoke returns NULL for nonexisting hooks, so if no updates
       // are removed, it will == 0.
@@ -633,7 +633,7 @@ function update_get_update_list() {
  *
  * In addition, the returned array also includes detailed information about the
  * dependency chain for each update, as provided by the depth-first search
- * algorithm in drupal_depth_first_search().
+ * algorithm in backdrop_depth_first_search().
  *
  * @param $starting_updates
  *   An array whose keys contain the names of modules with updates to be run
@@ -646,7 +646,7 @@ function update_get_update_list() {
  *   request, arranged in the order in which the update functions should be
  *   run. (This includes the provided starting update for each module and all
  *   subsequent updates that are available.) The values are themselves arrays
- *   containing all the keys provided by the drupal_depth_first_search()
+ *   containing all the keys provided by the backdrop_depth_first_search()
  *   algorithm, which encode detailed information about the dependency chain
  *   for this update function (for example: 'paths', 'reverse_paths', 'weight',
  *   and 'component'), as well as the following additional keys:
@@ -659,7 +659,7 @@ function update_get_update_list() {
  *   - 'module': The name of the module that this update function belongs to.
  *   - 'number': The number of this update function within that module.
  *
- * @see drupal_depth_first_search()
+ * @see backdrop_depth_first_search()
  */
 function update_resolve_dependencies($starting_updates) {
   // Obtain a dependency graph for the requested update functions.
@@ -667,9 +667,9 @@ function update_resolve_dependencies($starting_updates) {
   $graph = update_build_dependency_graph($update_functions);
 
   // Perform the depth-first search and sort the results.
-  require_once DRUPAL_ROOT . '/core/includes/graph.inc';
-  drupal_depth_first_search($graph);
-  uasort($graph, 'drupal_sort_weight');
+  require_once BACKDROP_ROOT . '/core/includes/graph.inc';
+  backdrop_depth_first_search($graph);
+  uasort($graph, 'backdrop_sort_weight');
 
   foreach ($graph as $function => &$data) {
     $module = $data['module'];
@@ -720,7 +720,7 @@ function update_get_update_function_list($starting_updates) {
   $update_functions = array();
   foreach ($starting_updates as $module => $version) {
     $update_functions[$module] = array();
-    $updates = drupal_get_schema_versions($module);
+    $updates = backdrop_get_schema_versions($module);
     if ($updates !== FALSE) {
       $start_key = array_search($version, $updates);
       $total_updates = count($updates);
@@ -761,18 +761,18 @@ function update_get_update_function_list($starting_updates) {
  *
  * @return
  *   A multidimensional array representing the dependency graph, suitable for
- *   passing in to drupal_depth_first_search(), but with extra information
+ *   passing in to backdrop_depth_first_search(), but with extra information
  *   about each update function also included. Each array key contains the name
  *   of an update function, including all update functions from the provided
  *   list as well as any outside update functions which they directly depend
  *   on. Each value is an associative array containing the following keys:
  *   - 'edges': A representation of any other update functions that immediately
- *     depend on this one. See drupal_depth_first_search() for more details on
+ *     depend on this one. See backdrop_depth_first_search() for more details on
  *     the format.
  *   - 'module': The name of the module that this update function belongs to.
  *   - 'number': The number of this update function within that module.
  *
- * @see drupal_depth_first_search()
+ * @see backdrop_depth_first_search()
  * @see update_resolve_dependencies()
  */
 function update_build_dependency_graph($update_functions) {
@@ -847,7 +847,7 @@ function update_is_missing($module, $number, $update_functions) {
  *   performed; FALSE otherwise.
  */
 function update_already_performed($module, $number) {
-  return $number <= drupal_get_installed_schema_version($module);
+  return $number <= backdrop_get_installed_schema_version($module);
 }
 
 /**

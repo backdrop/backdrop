@@ -26,7 +26,7 @@ $modules_to_enable          = array('path');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
 // Enable requested modules
 include_once './modules/system/system.admin.inc';
@@ -39,7 +39,7 @@ system_modules_submit(NULL, $form_state);
 unset($form_state);
 
 // Run cron after installing
-drupal_cron_run();
+backdrop_cron_run();
 
 // Create six users
 for ($i = 0; $i < 6; $i++) {

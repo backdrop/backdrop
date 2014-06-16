@@ -11,7 +11,7 @@
  * Borrowed from field_ui.
  */
 function _field_view_formatter_options($field_type = NULL) {
-  $options = &drupal_static(__FUNCTION__);
+  $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
     $field_types = field_info_field_types();
@@ -259,7 +259,7 @@ class views_handler_field_field extends views_handler_field {
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
         if (variable_get('locale_field_language_fallback', TRUE)) {
-          require_once DRUPAL_ROOT . '/includes/language.inc';
+          require_once BACKDROP_ROOT . '/includes/language.inc';
           $language_fallback_candidates = array_merge($language_fallback_candidates, language_fallback_get_candidates());
         }
         else {
@@ -422,7 +422,7 @@ class views_handler_field_field extends views_handler_field {
       $form['click_sort_column'] = array(
         '#type' => 'select',
         '#title' => t('Column used for click sorting'),
-        '#options' => drupal_map_assoc($column_names),
+        '#options' => backdrop_map_assoc($column_names),
         '#default_value' => $this->options['click_sort_column'],
         '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
         '#fieldset' => 'more',
@@ -540,7 +540,7 @@ class views_handler_field_field extends views_handler_field {
     }
     else {
       $type = 'select';
-      $options = drupal_map_assoc(range(1, $field['cardinality']));
+      $options = backdrop_map_assoc(range(1, $field['cardinality']));
       $size = 1;
     }
     $form['multi_type'] = array(
@@ -640,7 +640,7 @@ class views_handler_field_field extends views_handler_field {
     // and any additional grouping columns must be specified.
     $group_columns = array(
       'entity_id' => t('Entity ID'),
-    ) + drupal_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
+    ) + backdrop_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
 
     $form['group_column'] = array(
       '#type' => 'select',
@@ -650,7 +650,7 @@ class views_handler_field_field extends views_handler_field {
       '#options' => $group_columns,
     );
 
-    $options = drupal_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+    $options = backdrop_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
 
     // Add on defined fields, noting that they're prefixed with the field name.
     $form['group_columns'] = array(
@@ -900,7 +900,7 @@ class views_handler_field_field extends views_handler_field {
     if ($this->options['field_api_classes']) {
       // Make a copy.
       $array = $render_array;
-      return array(array('rendered' => drupal_render($render_array)));
+      return array(array('rendered' => backdrop_render($render_array)));
     }
 
     foreach (element_children($render_array) as $count) {

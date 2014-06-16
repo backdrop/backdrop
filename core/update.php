@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Administrative page for handling updates from one Drupal version to another.
+ * Administrative page for handling updates from one Backdrop version to another.
  *
  * Point your browser to "http://www.example.com/core/update.php" and follow the
  * instructions.
@@ -14,20 +14,20 @@
  * back to its original state!
  */
 
-// Change the directory to the Drupal root.
+// Change the directory to the Backdrop root.
 chdir('..');
 
 /**
- * Defines the root directory of the Drupal installation.
+ * Defines the root directory of the Backdrop installation.
  */
-define('DRUPAL_ROOT', getcwd());
+define('BACKDROP_ROOT', getcwd());
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
-// The minimum version is specified explicitly, as DRUPAL_MINIMUM_PHP is not
+// The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
 if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Drupal requires at least PHP 5.3.2. See the <a href="http://drupal.org/requirements">system requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="http://backdropcms.org/guide/requirements">system requirements</a> page for more information.';
   exit;
 }
 
@@ -47,9 +47,9 @@ define('MAINTENANCE_MODE', 'update');
  * Renders form with a list of available database updates.
  */
 function update_selection_page() {
-  drupal_set_title('Drupal database update');
-  $elements = drupal_get_form('update_script_selection_form');
-  $output = drupal_render($elements);
+  backdrop_set_title('Backdrop database update');
+  $elements = backdrop_get_form('update_script_selection_form');
+  $output = backdrop_render($elements);
 
   update_task_list('select');
 
@@ -121,11 +121,11 @@ function update_script_selection_form($form, &$form_state) {
 
   // Warn the user if any updates were incompatible.
   if ($incompatible_updates_exist) {
-    drupal_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
+    backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
   }
 
   if (empty($count)) {
-    drupal_set_message(t('No pending updates.'));
+    backdrop_set_message(t('No pending updates.'));
     unset($form);
     $form['links'] = array(
       '#theme' => 'links',
@@ -133,7 +133,7 @@ function update_script_selection_form($form, &$form_state) {
     );
 
     // No updates to run, so caches won't get flushed later.  Clear them now.
-    drupal_flush_all_caches();
+    backdrop_flush_all_caches();
   }
   else {
     $form['help'] = array(
@@ -181,7 +181,7 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  drupal_set_title('Drupal database update');
+  backdrop_set_title('Backdrop database update');
 
   update_task_list();
   // Report end result.
@@ -261,7 +261,7 @@ function update_results_page() {
 }
 
 /**
- * Provides an overview of the Drupal database update.
+ * Provides an overview of the Backdrop database update.
  *
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
@@ -271,24 +271,24 @@ function update_results_page() {
  */
 function update_info_page() {
   // Change query-strings on css/js files to enforce reload for all users.
-  _drupal_flush_css_js();
+  _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
   if (db_table_exists('cache_update')) {
     cache('update')->flush();
   }
 
   update_task_list('info');
-  drupal_set_title('Drupal database update');
-  $token = drupal_get_token('update');
-  $output = '<p>Use this utility to update your database whenever a new release of Drupal or a module is installed.</p><p>For more detailed information, see the <a href="http://drupal.org/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.</p>';
+  backdrop_set_title('Backdrop database update');
+  $token = backdrop_get_token('update');
+  $output = '<p>Use this utility to update your database whenever a new release of Backdrop or a module is installed.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.</p>';
   $output .= "<ol>\n";
   $output .= "<li><strong>Back up your database</strong>. This process will change your database values and in case of emergency you may need to revert to a backup.</li>\n";
-  $output .= "<li><strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Drupal's auto-discovery mechanism.</li>\n";
+  $output .= "<li><strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Backdrop's auto-discovery mechanism.</li>\n";
   $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
   $output .= "<li>Install your new files in the appropriate location, as described in the handbook.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>When you have performed the steps above, you may proceed.</p>\n";
-  $form_action = check_url(drupal_current_script_url(array('op' => 'selection', 'token' => $token)));
+  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
   $output .= "\n";
   return $output;
@@ -301,9 +301,9 @@ function update_info_page() {
  *   Rendered HTML warning with 403 status.
  */
 function update_access_denied_page() {
-  drupal_add_http_header('Status', '403 Forbidden');
+  backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'update.php', NULL, WATCHDOG_WARNING);
-  drupal_set_title('Access denied');
+  backdrop_set_title('Access denied');
   return '<p>Access denied. You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:</p>
 <ol>
  <li>With a text editor find the settings.php file on your system and open it.</li>
@@ -326,10 +326,10 @@ function update_access_allowed() {
   if (!empty($update_free_access)) {
     return TRUE;
   }
-  // Calls to user_access() might fail during the Drupal 6 to 7 update process,
+  // Calls to user_access() might fail during the update process,
   // so we fall back on requiring that the user be logged in as user #1.
   try {
-    require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'user') . '/user.module';
+    require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'user') . '/user.module';
     return user_access('administer software updates');
   }
   catch (Exception $e) {
@@ -350,7 +350,7 @@ function update_task_list($active = NULL) {
     'finished' => 'Review log',
   );
 
-  drupal_add_region_content('sidebar_first', theme('task_list', array('items' => $tasks, 'active' => $active)));
+  backdrop_add_region_content('sidebar_first', theme('task_list', array('items' => $tasks, 'active' => $active)));
 }
 
 /**
@@ -376,15 +376,15 @@ function update_check_requirements($skip_warnings = FALSE) {
   // Check requirements of all loaded modules.
   $requirements = module_invoke_all('requirements', 'update');
   $requirements += update_extra_requirements();
-  $severity = drupal_requirements_severity($requirements);
+  $severity = backdrop_requirements_severity($requirements);
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the caller has indicated they should be skipped.
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
     update_task_list('requirements');
-    drupal_set_title('Requirements problem');
+    backdrop_set_title('Requirements problem');
     $status_report = theme('status_report', array('requirements' => $requirements));
-    $status_report .= 'Check the messages and <a href="' . check_url(drupal_requirements_url($severity)) . '">try again</a>.';
+    $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
     print theme('update_page', array('content' => $status_report));
     exit();
   }
@@ -396,15 +396,15 @@ ini_set('display_errors', FALSE);
 
 // We prepare a minimal bootstrap for the update requirements check to avoid
 // reaching the PHP memory limit.
-require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
-require_once DRUPAL_ROOT . '/core/includes/update.inc';
-require_once DRUPAL_ROOT . '/core/includes/common.inc';
-require_once DRUPAL_ROOT . '/core/includes/file.inc';
-require_once DRUPAL_ROOT . '/core/includes/unicode.inc';
+require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
+require_once BACKDROP_ROOT . '/core/includes/update.inc';
+require_once BACKDROP_ROOT . '/core/includes/common.inc';
+require_once BACKDROP_ROOT . '/core/includes/file.inc';
+require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
 update_prepare_bootstrap();
 
 // Determine if the current user has access to run update.php.
-drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
 
 // The interface language global has been renamed in D8, we must ensure that it
 // contains a valid value while language settings are upgraded.
@@ -415,26 +415,26 @@ $GLOBALS[LANGUAGE_TYPE_INTERFACE] = language_default();
 // configuration).
 $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
 if (empty($op) && update_access_allowed()) {
-  require_once DRUPAL_ROOT . '/core/includes/install.inc';
-  require_once DRUPAL_ROOT . '/core/modules/system/system.install';
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
+  require_once BACKDROP_ROOT . '/core/modules/system/system.install';
 
   // Load module basics.
-  include_once DRUPAL_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/module.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
-  drupal_load('module', 'system');
+  backdrop_load('module', 'system');
 
   // Reset the module_implements() cache so that any new hook implementations
   // in updated code are picked up.
   module_implements_reset();
 
   // Set up $language, since the installer components require it.
-  drupal_language_initialize();
+  backdrop_language_initialize();
 
   // Set up theme system for the maintenance page.
-  drupal_maintenance_theme();
+  backdrop_maintenance_theme();
 
-  // Check the update requirements for Drupal. Only report on errors at this
+  // Check the update requirements for Backdrop. Only report on errors at this
   // stage, since the real requirements check happens further down.
   update_check_requirements(TRUE);
 
@@ -443,17 +443,17 @@ if (empty($op) && update_access_allowed()) {
 }
 
 // update_fix_requirements() needs to run before bootstrapping beyond path.
-// So bootstrap to DRUPAL_BOOTSTRAP_LANGUAGE then include unicode.inc.
+// So bootstrap to BACKDROP_BOOTSTRAP_LANGUAGE then include unicode.inc.
 
-drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE);
-include_once DRUPAL_ROOT . '/core/includes/unicode.inc';
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_LANGUAGE);
+include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
 
 update_fix_requirements();
 
 // Now proceed with a full bootstrap.
 
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-drupal_maintenance_theme();
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+backdrop_maintenance_theme();
 
 // Turn error reporting back on. From now on, only fatal errors (which are
 // not passed through the error handler) will cause a message to be printed.
@@ -462,16 +462,16 @@ ini_set('display_errors', TRUE);
 // Only proceed with updates if the user is allowed to run them.
 if (update_access_allowed()) {
 
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
-  include_once DRUPAL_ROOT . '/core/includes/batch.inc';
-  drupal_load_updates();
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/batch.inc';
+  backdrop_load_updates();
 
   update_fix_compatibility();
 
   // Check the update requirements for all modules. If there are warnings, but
   // no errors, skip reporting them if the user has provided a URL parameter
   // acknowledging the warnings and indicating a desire to continue anyway. See
-  // drupal_requirements_url().
+  // backdrop_requirements_url().
   $skip_warnings = !empty($_GET['continue']);
   update_check_requirements($skip_warnings);
 
@@ -480,18 +480,18 @@ if (update_access_allowed()) {
     // update.php ops.
 
     case 'selection':
-      if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'update')) {
+      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         $output = update_selection_page();
         break;
       }
 
     case 'Apply pending updates':
-      if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'update')) {
+      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
-        $batch_url = $base_root . drupal_current_script_url();
-        $redirect_url = $base_root . drupal_current_script_url(array('op' => 'results'));
+        $batch_url = $base_root . backdrop_current_script_url();
+        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
         update_batch($_POST['start'], $redirect_url, $batch_url);
         break;
       }
@@ -516,7 +516,7 @@ else {
 }
 if (isset($output) && $output) {
   // Explicitly start a session so that the update.php token will be accepted.
-  drupal_session_start();
+  backdrop_session_start();
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);
   print theme('update_page', array('content' => $output, 'show_messages' => !$progress_page));
