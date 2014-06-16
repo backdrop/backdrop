@@ -26,10 +26,6 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   position: relative;
 }
-#preview-logo {
-  float: left;
-  padding: 15px 15px 15px 10px;
-}
 #preview-site-name {
   color: #686868;
   font-weight: normal;
