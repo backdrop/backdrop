@@ -215,6 +215,10 @@ body.admin-menu {
 #admin-menu-icon .admin-menu-icon img {
   vertical-align: bottom;
 }
+/* Add a border when using the default Backdrop logo. */
+#admin-menu-icon .admin-menu-icon img[src$="core/misc/favicon.ico"] {
+  outline: 1px solid #45454A;
+}
 
 /* Extras menu */
 #admin-menu-extra {
