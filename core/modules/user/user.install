@@ -111,13 +111,6 @@ function user_schema() {
         'default' => '',
         'description' => "User's e-mail address.",
       ),
-      'theme' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "User's default theme.",
-      ),
       'signature' => array(
         'type' => 'varchar',
         'length' => 255,
@@ -332,6 +325,13 @@ function user_update_1001() {
     ));
   }
   $insert->execute();
+}
+
+/**
+ * Remove the ability for users to select a theme.
+ */
+function user_update_1002() {
+  db_drop_field('users', 'theme');
 }
 
 /**

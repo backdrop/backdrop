@@ -39,13 +39,6 @@ class User extends Entity {
   public $mail = '';
 
   /**
-   * The user's default theme.
-   *
-   * @var string
-   */
-  public $theme;
-
-  /**
    * The user's signature.
    *
    * @var string
