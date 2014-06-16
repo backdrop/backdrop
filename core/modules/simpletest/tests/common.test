@@ -499,8 +499,8 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
   var $validTags = array(
     'Backdrop' => 'Backdrop',
     'Backdrop with some spaces' => 'Backdrop with some spaces',
-    '"Legendary Backdrop mascot of doom: ""Druplicon"""' => 'Legendary Backdrop mascot of doom: "Druplicon"',
-    '"Backdrop, although it rhymes with sloopal, is as awesome as a troopal!"' => 'Backdrop, although it rhymes with sloopal, is as awesome as a troopal!',
+    '"Inside of quotes: ""Backdrop"""' => 'Inside of quotes: "Backdrop"',
+    '"Remove quotes"' => 'Remove quotes',
   );
 
   /**

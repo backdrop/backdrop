@@ -1030,8 +1030,8 @@ body.in-maintenance .form-submit {
   display: block;
 }
 body.in-maintenance #logo {
-  margin-bottom: 1.5em;
-  max-width: 180px;
+  max-width: 120px;
+  margin: 0 20px;
 }
 ol.task-list {
   margin-left: 0; /* LTR */

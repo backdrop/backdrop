@@ -358,7 +358,7 @@ class FileValidatorTest extends BackdropWebTestCase {
     parent::setUp();
 
     $this->image = entity_create('file', array());
-    $this->image->uri = 'core/misc/druplicon.png';
+    $this->image->uri = 'core/misc/feed.png';
     $this->image->filename = backdrop_basename($this->image->uri);
 
     $this->non_image = entity_create('file', array());
@@ -416,8 +416,8 @@ class FileValidatorTest extends BackdropWebTestCase {
     // Maximum size.
     if (image_get_toolkit()) {
       // Copy the image so that the original doesn't get resized.
-      copy('core/misc/druplicon.png', 'temporary://druplicon.png');
-      $this->image->uri = 'temporary://druplicon.png';
+      copy('core/misc/feed.png', 'temporary://feed.png');
+      $this->image->uri = 'temporary://feed.png';
 
       $errors = file_validate_image_resolution($this->image, '10x5');
       $this->assertEqual(count($errors), 0, t('No errors should be reported when an oversized image can be scaled down.'), 'File');
@@ -426,7 +426,7 @@ class FileValidatorTest extends BackdropWebTestCase {
       $this->assertTrue($info['width'] <= 10, t('Image scaled to correct width.'), 'File');
       $this->assertTrue($info['height'] <= 5, t('Image scaled to correct height.'), 'File');
 
-      backdrop_unlink('temporary://druplicon.png');
+      backdrop_unlink('temporary://feed.png');
     }
     else {
       // TODO: should check that the error is returned if no toolkit is available.
@@ -915,9 +915,9 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertEqual($path, $original, t('New filepath %new equals %original.', array('%new' => $path, '%original' => $original)), 'File');
 
     // Then we test against a file that already exists within that directory.
-    $basename = 'druplicon.png';
+    $basename = 'feed.png';
     $original = $directory . '/' . $basename;
-    $expected = $directory . '/druplicon_0.png';
+    $expected = $directory . '/feed_0.png';
     $path = file_create_filename($basename, $directory);
     $this->assertEqual($path, $expected, t('Creating a new filepath from %original equals %new (expected %expected).', array('%new' => $path, '%original' => $original, '%expected' => $expected)), 'File');
 
@@ -946,7 +946,7 @@ class FileDirectoryTest extends FileTestCase {
     $path = file_destination($destination, FILE_EXISTS_ERROR);
     $this->assertEqual($path, $destination, t('Non-existing filepath destination is correct with FILE_EXISTS_ERROR.'), 'File');
 
-    $destination = 'core/misc/druplicon.png';
+    $destination = 'core/misc/feed.png';
     $path = file_destination($destination, FILE_EXISTS_REPLACE);
     $this->assertEqual($path, $destination, t('Existing filepath destination remains the same with FILE_EXISTS_REPLACE.'), 'File');
     $path = file_destination($destination, FILE_EXISTS_RENAME);
@@ -1768,7 +1768,7 @@ class FileLoadTest extends FileHookTestCase {
    * Try to load a non-existent file by URI.
    */
   function testLoadMissingFilepath() {
-    $files = file_load_multiple(array(), array('uri' => 'foobar://misc/druplicon.png'));
+    $files = file_load_multiple(array(), array('uri' => 'foobar://misc/feed.png'));
     $this->assertFalse(reset($files), t("Try to load a file that doesn't exist in the database fails."));
     $this->assertFileHooksCalled(array());
   }
@@ -1787,7 +1787,7 @@ class FileLoadTest extends FileHookTestCase {
    */
   function testSingleValues() {
     // Create a new file entity from scratch so we know the values.
-    $file = $this->createFile('druplicon.txt', NULL, 'public');
+    $file = $this->createFile('backdrop.txt', NULL, 'public');
 
     $by_fid_file = file_load($file->fid);
     $this->assertFileHookCalled('load');
@@ -1805,7 +1805,7 @@ class FileLoadTest extends FileHookTestCase {
    */
   function testMultiple() {
     // Create a new file entity.
-    $file = $this->createFile('druplicon.txt', NULL, 'public');
+    $file = $this->createFile('backdrop.txt', NULL, 'public');
 
     // Load by path.
     file_test_reset();
@@ -1835,8 +1835,8 @@ class FileSaveTest extends FileHookTestCase {
     // Create a new file object.
     $file = entity_create('file', array(
       'uid' => 1,
-      'filename' => 'druplicon.txt',
-      'uri' => 'public://druplicon.txt',
+      'filename' => 'backdrop.txt',
+      'uri' => 'public://backdrop.txt',
       'filemime' => 'text/plain',
       'timestamp' => 1,
       'status' => FILE_STATUS_PERMANENT,
