@@ -469,8 +469,8 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language', $edit, t('Save configuration'));
 
     // Verify that French is the only language.
-    $this->assertFalse(language_multilingual(), t('Site is mono-lingual'));
-    $this->assertEqual(language_default()->langcode, 'fr', t('French is the default language'));
+    $this->assertFalse(language_multilingual(), 'Site is mono-lingual');
+    $this->assertEqual(language_default()->langcode, 'fr', 'French is the default language');
 
     // Set language detection to URL.
     $edit = array('language_interface[enabled][locale-url]' => TRUE);
