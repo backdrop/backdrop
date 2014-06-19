@@ -21,37 +21,37 @@ function contact_site_form($form, &$form_state) {
   $limit = $config->get('contact_threshold_limit');
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms')) {
-    drupal_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    drupal_access_denied();
-    drupal_exit();
+    backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
+    backdrop_access_denied();
+    backdrop_exit();
   }
 
-  // Get an array of the categories and the current default category.
-  $categories = db_select('contact', 'c')
-    ->addTag('translatable')
-    ->fields('c', array('cid', 'category'))
-    ->orderBy('weight')
-    ->orderBy('category')
-    ->execute()
-    ->fetchAllKeyed();
-  $default_category = db_query("SELECT cid FROM {contact} WHERE selected = 1")->fetchField();
+  // Get an array of the categories.
+  $config_data = contact_config_data();
+  $categories = $config_data['categories'];
+  $default_category = $config_data['contact_default_category'];
 
   // If there are no categories, do not display the form.
   if (!$categories) {
     if (user_access('administer contact forms')) {
-      drupal_set_message(t('The contact form has not been configured. <a href="@add">Add one or more categories</a> to the form.', array('@add' => url('admin/structure/contact/add'))), 'error');
+      backdrop_set_message(t('The contact form has not been configured. <a href="@add">Add one or more categories</a> to the form.', array('@add' => url('admin/structure/contact/add'))), 'error');
     }
     else {
-      drupal_not_found();
-      drupal_exit();
+      backdrop_not_found();
+      backdrop_exit();
     }
+  }
+
+  $options = array();
+  foreach ($categories as $cat) {
+    $options[$cat['cid']] = $cat['category'];
   }
 
   // If there is more than one category available and no default category has
   // been selected, prepend a default placeholder value.
-  if (!$default_category) {
-    if (count($categories) > 1) {
-      $categories = array(0 => t('- Please choose -')) + $categories;
+  if ($default_category == 0) {
+    if (count($options) > 1) {
+      $options = array(0 => t('- Please choose -')) + $options;
     }
     else {
       $default_category = key($categories);
@@ -83,13 +83,14 @@ function contact_site_form($form, &$form_state) {
     '#maxlength' => 255,
     '#required' => TRUE,
   );
+
   $form['cid'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#default_value' => $default_category,
-    '#options' => $categories,
+    '#options' => $options,
     '#required' => TRUE,
-    '#access' => count($categories) > 1,
+    '#access' => count($options) > 1,
   );
   $form['message'] = array(
     '#type' => 'textarea',
@@ -147,25 +148,30 @@ function contact_site_form_submit($form, &$form_state) {
   $from = $values['sender']->mail;
 
   // Send the e-mail to the recipients using the site default language.
-  drupal_mail('contact', 'page_mail', $to, language_default(), $values, $from);
+  backdrop_mail('contact', 'page_mail', $to, language_default(), $values, $from);
 
   // If the user requests it, send a copy using the current language.
   if ($values['copy']) {
-    drupal_mail('contact', 'page_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'page_copy', $from, $language_interface, $values, $from);
   }
 
   // Send an auto-reply if necessary using the current language.
   if ($values['category']['reply']) {
-    drupal_mail('contact', 'page_autoreply', $from, $language_interface, $values, $to);
+    backdrop_mail('contact', 'page_autoreply', $from, $language_interface, $values, $to);
   }
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%category' => $values['category']['category']));
+  watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.',
+    array(
+      '%sender-name' => $values['name'],
+      '@sender-from' => $from,
+      '%category' => $values['category']['category'],
+    ));
 
   // Jump to home page rather than back to contact page to avoid
   // contradictory messages if flood control has been activated.
-  drupal_set_message(t('Your message has been sent.'));
+  backdrop_set_message(t('Your message has been sent.'));
   $form_state['redirect'] = '';
 }
 
@@ -185,12 +191,12 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $limit = $config->get('contact_threshold_limit');
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('administer users')) {
-    drupal_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    drupal_access_denied();
-    drupal_exit();
+    backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
+    backdrop_access_denied();
+    backdrop_exit();
   }
 
-  drupal_set_title(t('Contact @username', array('@username' => user_format_name($recipient))), PASS_THROUGH);
+  backdrop_set_title(t('Contact @username', array('@username' => user_format_name($recipient))), PASS_THROUGH);
 
   if (!$user->uid) {
     $form['#attached']['library'][] = array('system', 'jquery.cookie');
@@ -270,18 +276,23 @@ function contact_personal_form_submit($form, &$form_state) {
   $from = $values['sender']->mail;
 
   // Send the e-mail in the requested user language.
-  drupal_mail('contact', 'user_mail', $to, user_preferred_language($values['recipient']), $values, $from);
+  backdrop_mail('contact', 'user_mail', $to, user_preferred_language($values['recipient']), $values, $from);
 
   // Send a copy if requested, using current page language.
   if ($values['copy']) {
-    drupal_mail('contact', 'user_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'user_copy', $from, $language_interface, $values, $from);
   }
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%recipient-name' => $values['recipient']->name));
+  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.',
+    array(
+      '%sender-name' => $values['name'],
+      '@sender-from' => $from,
+      '%recipient-name' => $values['recipient']->name,
+    ));
 
   // Jump to the contacted user's profile page.
-  drupal_set_message(t('Your message has been sent.'));
+  backdrop_set_message(t('Your message has been sent.'));
   $form_state['redirect'] = user_access('access user profiles') ? 'user/' . $values['recipient']->uid : '';
 }

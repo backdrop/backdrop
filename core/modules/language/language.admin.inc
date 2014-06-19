@@ -9,7 +9,7 @@
  * User interface for the language overview screen.
  */
 function language_admin_overview_form($form, &$form_state) {
-  drupal_static_reset('language_list');
+  backdrop_static_reset('language_list');
   $languages = language_list();
   $default = language_default();
 
@@ -104,7 +104,7 @@ function theme_language_admin_overview_form_table($variables) {
     );
     foreach (element_children($element, TRUE) as $column) {
       $cell = &$element[$column];
-      $row['data'][] = drupal_render($cell);
+      $row['data'][] = backdrop_render($cell);
     }
     $rows[] = $row;
   }
@@ -114,9 +114,9 @@ function theme_language_admin_overview_form_table($variables) {
     'rows' => $rows,
     'attributes' => array('id' => 'language-order'),
   ));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
-  drupal_add_tabledrag('language-order', 'order', 'sibling', 'language-order-weight');
+  backdrop_add_tabledrag('language-order', 'order', 'sibling', 'language-order-weight');
 
   return $output;
 }
@@ -143,7 +143,7 @@ function language_admin_overview_form_submit($form, &$form_state) {
     language_save($language);
   }
 
-  drupal_set_message(t('Configuration saved.'));
+  backdrop_set_message(t('Configuration saved.'));
 }
 
 /**
@@ -307,7 +307,7 @@ function language_admin_add_custom_form_submit($form, &$form_state) {
     'direction' => $form_state['values']['direction'],
   );
   language_save($language);
-  drupal_set_message(t('The language %language has been created and can now be used.', array('%language' => $form_state['values']['name'])));
+  backdrop_set_message(t('The language %language has been created and can now be used.', array('%language' => $form_state['values']['name'])));
   $form_state['redirect'] = 'admin/config/regional/language';
 }
 
@@ -317,13 +317,13 @@ function language_admin_add_custom_form_submit($form, &$form_state) {
 function language_admin_add_predefined_form_submit($form, &$form_state) {
   // Predefined language selection.
   $langcode = $form_state['values']['predefined_langcode'];
-  include_once DRUPAL_ROOT . '/core/includes/standard.inc';
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   $predefined = standard_language_list();
   $language = (object) array(
     'langcode' => $langcode,
   );
   language_save($language);
-  drupal_set_message(t('The language %language has been created and can now be used.', array('%language' => t($predefined[$langcode][0]))));
+  backdrop_set_message(t('The language %language has been created and can now be used.', array('%language' => t($predefined[$langcode][0]))));
   $form_state['redirect'] = 'admin/config/regional/language';
 }
 
@@ -361,16 +361,16 @@ function language_admin_delete_form($form, &$form_state, $language) {
   $langcode = $language->langcode;
 
   if (language_default()->langcode == $langcode) {
-    drupal_set_message(t('The default language cannot be deleted.'));
-    drupal_goto('admin/config/regional/language');
+    backdrop_set_message(t('The default language cannot be deleted.'));
+    backdrop_goto('admin/config/regional/language');
   }
 
   // For other languages, warn user that data loss is ahead.
   $languages = language_list();
 
   if (!isset($languages[$langcode])) {
-    drupal_not_found();
-    drupal_exit();
+    backdrop_not_found();
+    backdrop_exit();
   }
   else {
     $form['langcode'] = array('#type' => 'value', '#value' => $langcode);
@@ -390,7 +390,7 @@ function language_admin_delete_form_submit($form, &$form_state) {
 
   if ($success) {
     $t_args = array('%language' => $language->name, '%langcode' => $language->langcode);
-    drupal_set_message(t('The %language (%langcode) language has been removed.', $t_args));
+    backdrop_set_message(t('The %language (%langcode) language has been removed.', $t_args));
   }
 
   $form_state['redirect'] = 'admin/config/regional/language';
@@ -400,7 +400,7 @@ function language_admin_delete_form_submit($form, &$form_state) {
  * Prepare a language code list for unused predefined languages.
  */
 function language_admin_predefined_list() {
-  include_once DRUPAL_ROOT . '/core/includes/standard.inc';
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   $languages = language_list();
   $predefined = standard_language_list();
   foreach ($predefined as $key => $value) {

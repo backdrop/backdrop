@@ -1,11 +1,11 @@
-(function ($, Drupal) {
+(function ($) {
 
 "use strict";
 
 /**
  * Process elements with the .dropbutton class on page load.
  */
-Drupal.behaviors.dropButton = {
+Backdrop.behaviors.dropButton = {
   attach: function (context, settings) {
     var $dropbuttons = $(context).find('.dropbutton-wrapper').once('dropbutton');
     if ($dropbuttons.length) {
@@ -46,7 +46,7 @@ function dropbuttonClickHandler (e) {
  */
 function DropButton (dropbutton, settings) {
   // Merge defaults with settings.
-  var options = $.extend({'title': Drupal.t('List additional actions')}, settings);
+  var options = $.extend({'title': Backdrop.t('List additional actions')}, settings);
   var $dropbutton = $(dropbutton);
   this.$dropbutton = $dropbutton;
   this.$list = $dropbutton.find('.dropbutton');
@@ -61,7 +61,7 @@ function DropButton (dropbutton, settings) {
     var $secondary = this.$actions.slice(1);
     $secondary.addClass('secondary-action');
     // Add toggle link.
-    $primary.after(Drupal.theme('dropbuttonToggle', options));
+    $primary.after(Backdrop.theme('dropbuttonToggle', options));
     // Bind mouse events.
     this.$dropbutton
       .addClass('dropbutton-multiple')
@@ -151,11 +151,11 @@ $.extend(DropButton.prototype, {
  * @return {String}
  *   A string representing a DOM fragment.
  */
-Drupal.theme.prototype.dropbuttonToggle = function (options) {
+Backdrop.theme.prototype.dropbuttonToggle = function (options) {
   return '<li class="dropbutton-toggle"><button type="button" role="button"><span class="dropbutton-arrow"><span class="visually-hidden">' + options.title + '</span></span></button></li>';
 }
 
 // Expose constructor in the public space.
-Drupal.DropButton = DropButton;
+Backdrop.DropButton = DropButton;
 
-})(jQuery, Drupal);
+})(jQuery);

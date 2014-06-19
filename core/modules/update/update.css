@@ -9,6 +9,10 @@
   padding-left: .25em; /* LTR */
   height: 22px;
 }
+[dir="rtl"] .update .project {
+  padding-left: 0;
+  padding-right: .25em;
+}
 
 .update .version-status {
   float: right; /* LTR */
@@ -16,9 +20,18 @@
   font-size: 110%;
   height: 20px;
 }
+[dir="rtl"] .update .version-status {
+  float: left;
+  padding-left: 10px;
+  padding-right: 0;
+}
 
 .update .version-status .icon {
   padding-left: .5em; /* LTR */
+}
+[dir="rtl"] .update .version-status .icon {
+  padding-left: 0;
+  padding-right: .5em;
 }
 
 .update .version-date {
@@ -93,14 +106,28 @@ table.update,
   padding-left: 1em; /* LTR */
   width: 14em;
 }
+[dir="rtl"] .update table.version .version-title {
+  padding-left: 0;
+  padding-right: 1em;
+}
 
 .update table.version .version-details {
   padding-right: .5em; /* LTR */
+}
+[dir="rtl"] .update table.version .version-details {
+  padding-left: .5em;
+  padding-right: 0;
+  direction: ltr;
 }
 
 .update table.version .version-links {
   text-align: right; /* LTR */
   padding-right: 1em; /* LTR */
+}
+[dir="rtl"] .update table.version .version-links {
+  text-align: left;
+  padding-left: 1em;
+  padding-right: 0;
 }
 
 .update table.version-security .version-title {
@@ -119,6 +146,11 @@ table.update,
 .update .check-manually {
   padding-left: 1em; /* LTR */
 }
+[dir="rtl"] .update .check-manually {
+  padding-left: 0;
+  padding-right: 1em;
+}
+
 
 .update-major-version-warning {
   color: #ff0000;

@@ -41,7 +41,7 @@ function admin_menu_output($complete = FALSE) {
     // Add site name as CSS class for development/staging theming purposes. We
     // leverage the cookie domain instead of HTTP_HOST to account for many (but
     // not all) multi-domain setups (e.g. language-based sub-domains).
-    $classes = 'admin-menu-site' . drupal_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
+    $classes = 'admin-menu-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
     $content['#prefix'] = '<div id="admin-menu" class="' . $classes . '"><div id="admin-menu-wrapper">';
@@ -98,9 +98,9 @@ function admin_menu_output($complete = FALSE) {
     // Allow modules to alter the output.
     // The '_output' suffix is required to prevent hook implementation function
     // name clashes with the contributed Admin module.
-    drupal_alter('admin_menu_output', $content);
+    backdrop_alter('admin_menu_output', $content);
 
-    $content = drupal_render($content);
+    $content = backdrop_render($content);
 
     // Cache the menu for this user.
     if ($cache_server_enabled) {
@@ -128,7 +128,7 @@ function admin_menu_tree($menu_name) {
   module_load_include('inc', 'admin_menu', 'admin_menu.map');
   $expand_map = module_invoke_all('admin_menu_map');
   // Allow modules to alter the expansion map.
-  drupal_alter('admin_menu_map', $expand_map);
+  backdrop_alter('admin_menu_map', $expand_map);
 
   $new_map = array();
   foreach ($expand_map as $path => $data) {
@@ -197,7 +197,7 @@ function admin_menu_tree_dynamic(array $expand_map) {
   $query->join('menu_router', 'm', 'ml.router_path = m.path');
   $query
     ->fields('ml')
-    ->fields('m', array_diff(drupal_schema_fields_sql('menu_router'), drupal_schema_fields_sql('menu_links')));
+    ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), backdrop_schema_fields_sql('menu_links')));
 
   // The retrieved menu link trees have to be ordered by depth, so parents
   // always come before their children for the storage logic below.
@@ -531,7 +531,7 @@ function admin_menu_links_menu($tree) {
  * @see theme_admin_menu_links()
  */
 function admin_menu_links_icon() {
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
 
   $links = array(
     '#theme' => 'admin_menu_links',
@@ -573,7 +573,7 @@ function admin_menu_links_icon() {
     '#access' => user_access('flush caches'),
     '#href' => 'admin_menu/flush-cache',
     '#options' => array(
-      'query' => $destination + array('token' => drupal_get_token('admin_menu/flush-cache')),
+      'query' => $destination + array('token' => backdrop_get_token('admin_menu/flush-cache')),
     ),
   );
   $caches = module_invoke_all('admin_menu_cache_info');
@@ -582,7 +582,7 @@ function admin_menu_links_icon() {
       '#title' => $cache['title'],
       '#href' => 'admin_menu/flush-cache/' . $name,
       '#options' => array(
-        'query' => $destination + array('token' => drupal_get_token('admin_menu/flush-cache/' . $name)),
+        'query' => $destination + array('token' => backdrop_get_token('admin_menu/flush-cache/' . $name)),
       ),
     );
   }
@@ -687,7 +687,7 @@ function admin_menu_theme_settings() {
 
   $process = element_info_property('checkboxes', '#process', array());
   $form['components']['#process'] = array_merge(array('admin_menu_settings_process_components'), $process);
-  $form['#attached']['js'][] = drupal_get_path('module', 'admin_menu') . '/admin_menu.admin.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'admin_menu') . '/admin_menu.admin.js';
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -734,7 +734,7 @@ function admin_menu_theme_settings_submit($form, $form_state) {
  *   (optional) Name of cache to flush.
  */
 function admin_menu_flush_cache($name = NULL) {
-  if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], current_path())) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], current_path())) {
     return MENU_ACCESS_DENIED;
   }
   if (isset($name)) {
@@ -746,19 +746,19 @@ function admin_menu_flush_cache($name = NULL) {
   else {
     $caches[$name] = array(
       'title' => t('Every'),
-      'callback' => 'drupal_flush_all_caches',
+      'callback' => 'backdrop_flush_all_caches',
     );
   }
   // Pass the cache to flush forward to the callback.
   $function = $caches[$name]['callback'];
   $function($name);
 
-  drupal_set_message(t('!title cache cleared.', array('!title' => $caches[$name]['title'])));
+  backdrop_set_message(t('!title cache cleared.', array('!title' => $caches[$name]['title'])));
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
   // destination parameter, the redirect ends on the front page.
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
@@ -823,7 +823,7 @@ function _admin_menu_flush_cache($name = NULL) {
     case 'cache':
       // Don't clear cache_form - in-progress form submissions may break.
       // Ordered so clearing the page cache will always be the last action.
-      // @see drupal_flush_all_caches()
+      // @see backdrop_flush_all_caches()
       $core = array('cache', 'cache_bootstrap', 'cache_filter', 'cache_page');
       $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
       foreach ($cache_tables as $table) {
@@ -833,10 +833,10 @@ function _admin_menu_flush_cache($name = NULL) {
 
     case 'assets':
       // Change query-strings on css/js files to enforce reload for all users.
-      _drupal_flush_css_js();
+      _backdrop_flush_css_js();
 
-      drupal_clear_css_cache();
-      drupal_clear_js_cache();
+      backdrop_clear_css_cache();
+      backdrop_clear_js_cache();
 
       // Clear the page cache, since cached HTML pages might link to old CSS and
       // JS aggregates.
@@ -845,7 +845,7 @@ function _admin_menu_flush_cache($name = NULL) {
 
     case 'theme':
       system_rebuild_theme_data();
-      drupal_theme_rebuild();
+      backdrop_theme_rebuild();
       break;
   }
 }
@@ -889,7 +889,7 @@ function theme_admin_menu_icon($variables) {
  * @param $variables
  *   - elements: A renderable array of links using the following keys:
  *     - #attributes: Optional array of attributes for the list item, processed
- *       via drupal_attributes().
+ *       via backdrop_attributes().
  *     - #title: Title of the link, passed to l().
  *     - #href: Optional path of the link, passed to l(). When omitted, the
  *       element's '#title' is rendered without link.
@@ -898,11 +898,11 @@ function theme_admin_menu_icon($variables) {
  *     The array key of each child element itself is passed as path for l().
  */
 function theme_admin_menu_links($variables) {
-  $destination = &drupal_static('admin_menu_destination');
+  $destination = &backdrop_static('admin_menu_destination');
   $elements = $variables['elements'];
 
   if (!isset($destination)) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     $destination = $destination['destination'];
   }
 
@@ -926,7 +926,7 @@ function theme_admin_menu_links($variables) {
     );
     // Render children to determine whether this link is expandable.
     if (isset($elements[$path]['#type']) || isset($elements[$path]['#theme']) || isset($elements[$path]['#pre_render'])) {
-      $elements[$path]['#children'] = drupal_render($elements[$path]);
+      $elements[$path]['#children'] = backdrop_render($elements[$path]);
     }
     else {
       $elements[$path]['#children'] = theme('admin_menu_links', array('elements' => $elements[$path]));
@@ -960,18 +960,18 @@ function theme_admin_menu_links($variables) {
       }
       $attributes = '';
       if (isset($elements[$path]['#options']['attributes'])) {
-        $attributes = drupal_attributes($elements[$path]['#options']['attributes']);
+        $attributes = backdrop_attributes($elements[$path]['#options']['attributes']);
       }
       $link = '<span' . $attributes . '>' . $title . '</span>';
     }
 
-    $output .= '<li' . drupal_attributes($elements[$path]['#attributes']) . '>';
+    $output .= '<li' . backdrop_attributes($elements[$path]['#attributes']) . '>';
     $output .= $link . $elements[$path]['#children'];
     $output .= '</li>';
   }
   if ($output) {
     $elements['#wrapper_attributes']['class'][] = 'dropdown';
-    $attributes = drupal_attributes($elements['#wrapper_attributes']);
+    $attributes = backdrop_attributes($elements['#wrapper_attributes']);
     $output = '<ul' . $attributes . '>' . $output . '</ul>';
   }
   return $output;

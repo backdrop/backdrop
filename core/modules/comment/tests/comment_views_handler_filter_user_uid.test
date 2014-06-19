@@ -5,7 +5,7 @@
  * Definition of viewsHandlerFilterCommentUserUidTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/comment/tests/comment_views_handler_argument_user_uid.test';
+require_once BACKDROP_ROOT . '/core/modules/comment/tests/comment_views_handler_argument_user_uid.test';
 
 /**
  * Tests the filter_comment_user_uid handler.

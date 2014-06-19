@@ -26,8 +26,8 @@
  * are affected.
  */
 function field_info_cache_clear() {
-  drupal_static_reset('field_view_mode_settings');
-  drupal_static_reset('field_available_languages');
+  backdrop_static_reset('field_view_mode_settings');
+  backdrop_static_reset('field_available_languages');
 
   // @todo: Remove this when field_attach_*_bundle() bundle management
   // functions are moved to the entity API.
@@ -69,13 +69,13 @@ function field_info_cache_clear() {
 function _field_info_collate_types() {
   global $language_interface;
 
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
 
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['field_info_collate_types'] = &drupal_static(__FUNCTION__);
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['field_info_collate_types'] = &backdrop_static(__FUNCTION__);
   }
-  $info = &$drupal_static_fast['field_info_collate_types'];
+  $info = &$backdrop_static_fast['field_info_collate_types'];
 
   // The _info() hooks invoked below include translated strings, so each
   // language is cached separately.
@@ -106,7 +106,7 @@ function _field_info_collate_types() {
           $info['field types'][$name]['module'] = $module;
         }
       }
-      drupal_alter('field_info', $info['field types']);
+      backdrop_alter('field_info', $info['field types']);
 
       // Populate widget types.
       foreach (module_implements('field_widget_info') as $module) {
@@ -120,8 +120,8 @@ function _field_info_collate_types() {
           $info['widget types'][$name]['module'] = $module;
         }
       }
-      drupal_alter('field_widget_info', $info['widget types']);
-      uasort($info['widget types'], 'drupal_sort_weight');
+      backdrop_alter('field_widget_info', $info['widget types']);
+      uasort($info['widget types'], 'backdrop_sort_weight');
 
       // Populate formatter types.
       foreach (module_implements('field_formatter_info') as $module) {
@@ -135,7 +135,7 @@ function _field_info_collate_types() {
           $info['formatter types'][$name]['module'] = $module;
         }
       }
-      drupal_alter('field_formatter_info', $info['formatter types']);
+      backdrop_alter('field_formatter_info', $info['formatter types']);
 
       // Populate storage types.
       foreach (module_implements('field_storage_info') as $module) {
@@ -149,7 +149,7 @@ function _field_info_collate_types() {
           $info['storage types'][$name]['module'] = $module;
         }
       }
-      drupal_alter('field_storage_info', $info['storage types']);
+      backdrop_alter('field_storage_info', $info['storage types']);
 
       cache('field')->set("field_info_types:$langcode", $info);
     }
@@ -162,7 +162,7 @@ function _field_info_collate_types() {
  * Clear collated information on field and widget types and related structures.
  */
 function _field_info_collate_types_reset() {
-  drupal_static_reset('_field_info_collate_types');
+  backdrop_static_reset('_field_info_collate_types');
   // Clear all languages.
   cache('field')->deletePrefix('field_info_types:');
 }
@@ -185,13 +185,13 @@ function _field_info_collate_types_reset() {
  * @see _field_info_collate_fields_reset()
  */
 function _field_info_collate_fields() {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
 
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['field_info_collate_fields'] = &drupal_static(__FUNCTION__);
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['field_info_collate_fields'] = &backdrop_static(__FUNCTION__);
   }
-  $info = &$drupal_static_fast['field_info_collate_fields'];
+  $info = &$backdrop_static_fast['field_info_collate_fields'];
 
   if (!isset($info)) {
     if ($cached = cache('field')->get('field_info_fields')) {
@@ -237,7 +237,7 @@ function _field_info_collate_fields() {
 
       // Populate 'extra_fields'.
       $extra = module_invoke_all('field_extra_fields');
-      drupal_alter('field_extra_fields', $extra);
+      backdrop_alter('field_extra_fields', $extra);
       // Merge in saved settings.
       foreach ($extra as $entity_type => $bundles) {
         foreach ($bundles as $bundle => $extra_fields) {
@@ -257,7 +257,7 @@ function _field_info_collate_fields() {
  * Clear collated information on existing fields and instances.
  */
 function _field_info_collate_fields_reset() {
-  drupal_static_reset('_field_info_collate_fields');
+  backdrop_static_reset('_field_info_collate_fields');
   cache('field')->delete('field_info_fields');
 }
 
@@ -277,7 +277,7 @@ function _field_info_prepare_field($field) {
 
   // Add storage details.
   $details = (array) module_invoke($field['storage']['module'], 'field_storage_details', $field);
-  drupal_alter('field_storage_details', $details, $field, $instance);
+  backdrop_alter('field_storage_details', $details, $field, $instance);
   $field['storage']['details'] = $details;
 
   // Initialize the 'bundles' list.

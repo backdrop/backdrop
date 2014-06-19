@@ -32,12 +32,12 @@ function entity_modules_disabled() {
 function entity_get_info($entity_type = NULL) {
   global $language_interface;
 
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['entity_info'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['entity_info'] = &backdrop_static(__FUNCTION__);
   }
-  $entity_info = &$drupal_static_fast['entity_info'];
+  $entity_info = &$backdrop_static_fast['entity_info'];
 
   // hook_entity_info() includes translated strings, so each language is cached
   // separately.
@@ -53,7 +53,7 @@ function entity_get_info($entity_type = NULL) {
       foreach ($entity_info as $name => $data) {
         $entity_info[$name] += array(
           'fieldable' => FALSE,
-          'controller class' => 'DrupalDefaultEntityController',
+          'controller class' => 'DefaultEntityController',
           'static cache' => TRUE,
           'field cache' => TRUE,
           'load hook' => $name . '_load',
@@ -77,16 +77,16 @@ function entity_get_info($entity_type = NULL) {
           $entity_info[$name]['bundles'] = array($name => array('label' => $entity_info[$name]['label']));
         }
         // Prepare entity schema fields SQL info for
-        // DrupalEntityControllerInterface::buildQuery().
+        // EntityControllerInterface::buildQuery().
         if (isset($entity_info[$name]['base table'])) {
-          $entity_info[$name]['schema_fields_sql']['base table'] = drupal_schema_fields_sql($entity_info[$name]['base table']);
+          $entity_info[$name]['schema_fields_sql']['base table'] = backdrop_schema_fields_sql($entity_info[$name]['base table']);
           if (isset($entity_info[$name]['revision table'])) {
-            $entity_info[$name]['schema_fields_sql']['revision table'] = drupal_schema_fields_sql($entity_info[$name]['revision table']);
+            $entity_info[$name]['schema_fields_sql']['revision table'] = backdrop_schema_fields_sql($entity_info[$name]['revision table']);
           }
         }
       }
       // Let other modules alter the entity info.
-      drupal_alter('entity_info', $entity_info);
+      backdrop_alter('entity_info', $entity_info);
       cache()->set("entity_info:$langcode", $entity_info);
     }
   }
@@ -103,7 +103,7 @@ function entity_get_info($entity_type = NULL) {
  * Resets the cached information about entity types.
  */
 function entity_info_cache_clear() {
-  drupal_static_reset('entity_get_info');
+  backdrop_static_reset('entity_get_info');
   // Clear all languages.
   cache()->deletePrefix('entity_info:');
 }
@@ -184,12 +184,12 @@ function entity_create_stub_entity($entity_type, $ids) {
  * database access if loaded again during the same page request.
  *
  * The actual loading is done through a class that has to implement the
- * DrupalEntityControllerInterface interface. By default,
- * DrupalDefaultEntityController is used. Entity types can specify that a
+ * EntityControllerInterface interface. By default,
+ * DefaultEntityController is used. Entity types can specify that a
  * different class should be used by setting the 'controller class' key in
  * hook_entity_info(). These classes can either implement the
- * DrupalEntityControllerInterface interface, or, most commonly, extend the
- * DrupalDefaultEntityController class. See node_entity_info() and the
+ * EntityControllerInterface interface, or, most commonly, extend the
+ * DefaultEntityController class. See node_entity_info() and the
  * NodeController in node.module as an example.
  *
  * @param $entity_type
@@ -210,8 +210,8 @@ function entity_create_stub_entity($entity_type, $ids) {
  * @todo Remove $conditions in Drupal 8.
  *
  * @see hook_entity_info()
- * @see DrupalEntityControllerInterface
- * @see DrupalDefaultEntityController
+ * @see EntityControllerInterface
+ * @see DefaultEntityController
  * @see EntityFieldQuery
  */
 function entity_load($entity_type, $ids = FALSE, $conditions = array(), $reset = FALSE) {
@@ -277,7 +277,7 @@ function entity_create($entity_type, array $values) {
  * @return EntityStorageControllerInterface
  */
 function entity_get_controller($entity_type) {
-  $controllers = &drupal_static(__FUNCTION__, array());
+  $controllers = &backdrop_static(__FUNCTION__, array());
   if (!isset($controllers[$entity_type])) {
     $type_info = entity_get_info($entity_type);
     $class = $type_info['controller class'];
@@ -436,8 +436,8 @@ function entity_autoload_info() {
     'Entity' => 'entity.class.inc',
     'EntityMalformedException' => 'entity.class.inc',
     'EntityStorageControllerInterface' => 'entity.controller.inc',
-    'DrupalDefaultEntityController' => 'entity.controller.inc',
-    'DrupalEntityControllerInterface' => 'entity.controller.inc',
+    'DefaultEntityController' => 'entity.controller.inc',
+    'EntityControllerInterface' => 'entity.controller.inc',
     'EntityStorageException' => 'entity.controller.inc',
     'EntityDatabaseStorageController' => 'entity.controller.inc',
     'EntityFieldQueryException' => 'entity.query.inc',

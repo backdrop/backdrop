@@ -166,7 +166,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       }
 
       if ($count) {
-        drupal_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', array(
+        backdrop_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', array(
           '%action' => $action->label,
         )));
       }

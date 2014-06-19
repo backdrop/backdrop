@@ -3,9 +3,9 @@
  * Attaches the behaviors for the Color module.
  */
 
-(function ($, Drupal) {
+(function ($) {
 
-Drupal.behaviors.color = {
+Backdrop.behaviors.color = {
   attach: function (context, settings) {
     var i, j, colors;
     // This behavior attaches by ID, so is only valid once on a page.
@@ -71,7 +71,7 @@ Drupal.behaviors.color = {
      * Renders the preview.
      */
     function preview() {
-      Drupal.color.callback(context, settings, form, farb, height, width);
+      Backdrop.color.callback(context, settings, form, farb, height, width);
     }
 
     /**
@@ -252,4 +252,4 @@ Drupal.behaviors.color = {
   }
 };
 
-})(jQuery, Drupal);
+})(jQuery);

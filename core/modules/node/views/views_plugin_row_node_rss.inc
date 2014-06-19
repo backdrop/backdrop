@@ -155,7 +155,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     if ($display_mode != 'title') {
       // We render node contents and force links to be last.
       $build['links']['#weight'] = 1000;
-      $item_text .= drupal_render($build);
+      $item_text .= backdrop_render($build);
     }
 
     $item = new stdClass();

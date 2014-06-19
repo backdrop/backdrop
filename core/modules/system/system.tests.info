@@ -60,7 +60,7 @@ file = system.test
 
 [PageTitleFiltering]
 name = HTML in page titles
-description = Tests correct handling or conversion by drupal_set_title() and drupal_get_title() and checks the correct escaping of site name and slogan.
+description = Tests correct handling or conversion by backdrop_set_title() and backdrop_get_title() and checks the correct escaping of site name and slogan.
 group = System
 file = system.test
 
@@ -163,5 +163,11 @@ file = system.test
 [UuidUnitTestCase]
 name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
+group = System
+file = system.test
+
+[TokenScanTest]
+name = Token scanning
+description = Scan token-like patterns in a dummy text to check token scanning.
 group = System
 file = system.test

@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Classes used for updating various files in the Drupal webroot. These
+ * Classes used for updating various files in the Backdrop webroot. These
  * classes use a FileTransfer object to actually perform the operations.
  * Normally, the FileTransfer is provided when the site owner is redirected to
  * authorize.php as part of a multistep process.
  */
 
 /**
- * Interface for a class which can update a Drupal project.
+ * Interface for a class which can update a Backdrop project.
  *
  * An Updater currently serves the following purposes:
  *   - It can take a given directory, and determine if it can operate on it.
@@ -18,7 +18,7 @@
  *   - It can return a list of "next steps" after an update or install.
  *   - In the future, it will most likely perform some of those steps as well.
  */
-interface DrupalUpdaterInterface {
+interface BackdropUpdaterInterface {
 
   /**
    * Checks if the project is installed.
@@ -65,7 +65,7 @@ interface DrupalUpdaterInterface {
 }
 
 /**
- * Base class for Updaters used in Drupal.
+ * Base class for Updaters used in Backdrop.
  */
 class Updater {
 
@@ -87,7 +87,7 @@ class Updater {
    * ModuleUpdater.
    *
    * @param string $source
-   *   Directory of a Drupal project.
+   *   Directory of a Backdrop project.
    *
    * @return Updater
    */
@@ -105,14 +105,14 @@ class Updater {
    * Determine which Updater class can operate on the given directory.
    *
    * @param string $directory
-   *   Extracted Drupal project.
+   *   Extracted Backdrop project.
    *
    * @return string
    *   The class name which can work with this project type.
    */
   public static function getUpdaterFromDirectory($directory) {
     // Gets a list of possible implementing classes.
-    $updaters = drupal_get_updaters();
+    $updaters = backdrop_get_updaters();
     foreach ($updaters as $updater) {
       $class = $updater['class'];
       if (call_user_func(array($class, 'canUpdateDirectory'), $directory)) {
@@ -141,7 +141,7 @@ class Updater {
       return FALSE;
     }
     foreach ($info_files as $info_file) {
-      if (drupal_substr($info_file->filename, 0, -5) == drupal_basename($directory)) {
+      if (backdrop_substr($info_file->filename, 0, -5) == backdrop_basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;
       }
@@ -163,11 +163,11 @@ class Updater {
    *   The name of the project.
    */
   public static function getProjectName($directory) {
-    return drupal_basename($directory);
+    return backdrop_basename($directory);
   }
 
   /**
-   * Return the project name from a Drupal info file.
+   * Return the project name from a Backdrop info file.
    *
    * @param string $directory
    *   Directory to search for the info file.
@@ -177,7 +177,7 @@ class Updater {
    */
   public static function getProjectTitle($directory) {
     $info_file = self::findInfoFile($directory);
-    $info = drupal_parse_info_file($info_file);
+    $info = backdrop_parse_info_file($info_file);
     if (empty($info)) {
       throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
     }
@@ -206,7 +206,7 @@ class Updater {
   }
 
   /**
-   * Updates a Drupal project, returns a list of next actions.
+   * Updates a Backdrop project, returns a list of next actions.
    *
    * @param FileTransfer $filetransfer
    *   Object that is a child of FileTransfer. Used for moving files
@@ -262,7 +262,7 @@ class Updater {
   }
 
   /**
-   * Installs a Drupal project, returns a list of next actions.
+   * Installs a Backdrop project, returns a list of next actions.
    *
    * @param FileTransfer $filetransfer
    *   Object that is a child of FileTransfer.
@@ -420,7 +420,7 @@ class UpdaterException extends Exception {
  * Child class of UpdaterException that indicates a FileTransfer exception.
  *
  * We have to catch FileTransfer exceptions and wrap those in t(), since
- * FileTransfer is so low-level that it doesn't use any Drupal APIs and none
+ * FileTransfer is so low-level that it doesn't use any Backdrop APIs and none
  * of the strings are translated.
  */
 class UpdaterFileTransferException extends UpdaterException {

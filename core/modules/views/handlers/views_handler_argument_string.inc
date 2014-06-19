@@ -268,7 +268,7 @@ class views_handler_argument_string extends views_handler_argument {
    * Override for specific title lookups.
    */
   function title_query() {
-    return drupal_map_assoc($this->value, 'check_plain');
+    return backdrop_map_assoc($this->value, 'check_plain');
   }
 
   function summary_name($data) {

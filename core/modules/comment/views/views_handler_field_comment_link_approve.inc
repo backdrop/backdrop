@@ -29,7 +29,7 @@ class views_handler_field_comment_link_approve extends views_handler_field_comme
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = "comment/" . $cid . "/approve";
-    $this->options['alter']['query'] = drupal_get_destination() + array('token' => drupal_get_token("comment/$cid/approve"));
+    $this->options['alter']['query'] = backdrop_get_destination() + array('token' => backdrop_get_token("comment/$cid/approve"));
 
     return $text;
   }

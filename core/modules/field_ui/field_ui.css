@@ -7,6 +7,9 @@
 table.field-ui-overview tr.add-new .label-input {
   float: left; /* LTR */
 }
+[dir="rtl"] table.field-ui-overview tr.add-new .label-input {
+  float: right;
+}
 table.field-ui-overview tr.add-new .tabledrag-changed {
   display: none;
 }

@@ -14,8 +14,8 @@ function config_sync_form(array $form, array &$form_state) {
   $config_file_errors = array();
 
   // Add the AJAX library to the form for dialog support.
-  $form['#attached']['library'][] = array('system', 'drupal.ajax');
-  $form['#attached']['css'][] = drupal_get_path('module', 'config') . '/config.admin.css';
+  $form['#attached']['library'][] = array('system', 'backdrop.ajax');
+  $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/config.admin.css';
 
   $form['description'] = array(
     '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p>',
@@ -91,7 +91,7 @@ function config_sync_form(array $form, array &$form_state) {
   }
 
   if ($config_file_errors) {
-    drupal_set_message(t('The following configuration files could not be parsed, synchronization cannot proceed.') . theme('item_list', array('items' => $config_file_errors)), 'error');
+    backdrop_set_message(t('The following configuration files could not be parsed, synchronization cannot proceed.') . theme('item_list', array('items' => $config_file_errors)), 'error');
   }
 
   $form['actions'] = array(
@@ -117,7 +117,7 @@ function config_sync_form_submit(array &$form, array &$form_state) {
     batch_set($config_sync_batch);
   }
   else {
-    drupal_set_message(t('Another request may be synchronizing configuration already or a sync failed unexpectedly. Please wait a minute and try again.'), 'error');
+    backdrop_set_message(t('Another request may be synchronizing configuration already or a sync failed unexpectedly. Please wait a minute and try again.'), 'error');
   }
 
   return $form;
@@ -139,7 +139,7 @@ function config_diff_page($config_file) {
 
   $build['#title'] = t('View changes of @config_file', array('@config_file' => $config_file));
   // Add the CSS for the inline diff.
-  $build['#attached']['css'][] = drupal_get_path('module', 'system') . '/css/system.diff.css';
+  $build['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/system.diff.css';
 
   $build['diff'] = array(
     '#theme' => 'table',
@@ -264,10 +264,10 @@ function config_import_full_form_submit(array &$form, array &$form_state) {
     $config_statuses = array_filter(config_get_statuses());
     if (empty($config_statuses)) {
       $config_storage->deleteAll();
-      drupal_set_message(t('The uploaded configuration matches the current site configuration exactly. No changes were made.'), 'warning');
+      backdrop_set_message(t('The uploaded configuration matches the current site configuration exactly. No changes were made.'), 'warning');
     }
     else {
-      drupal_set_message(t('Your configuration files were successfully uploaded. You may view the differences below and import using the "Import all" button.'));
+      backdrop_set_message(t('Your configuration files were successfully uploaded. You may view the differences below and import using the "Import all" button.'));
       $form_state['redirect'] = 'admin/config/development/configuration';
     }
   }
@@ -286,7 +286,7 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   $form['config_group'] = array(
     '#title' => t('Configuration group'),
     '#type' => 'select',
-    '#options' => drupal_map_assoc(array_keys($form_state['config_groups'])),
+    '#options' => backdrop_map_assoc(array_keys($form_state['config_groups'])),
     '#default_value' => $config_group,
     '#required' => TRUE,
     '#ajax' => array(
@@ -331,8 +331,8 @@ function config_export_single_form_update_type($form, &$form_state) {
   // Because we need to replace both the configation name select and the
   // textarea, this requires using AJAX commands instead of a simple return.
   $commands = array();
-  $commands[] = ajax_command_replace('#edit-config-type-wrapper', drupal_render($form['config_name']));
-  $commands[] = ajax_command_replace('#edit-export-wrapper', drupal_render($form['export']));
+  $commands[] = ajax_command_replace('#edit-config-type-wrapper', backdrop_render($form['config_name']));
+  $commands[] = ajax_command_replace('#edit-export-wrapper', backdrop_render($form['export']));
   $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
   return array(
     '#type' => 'ajax',
@@ -449,7 +449,7 @@ function config_import_single_form_validate(array &$form, array &$form_state) {
 function config_import_single_form_submit(array &$form, array &$form_state) {
   $data = $form_state['config_data'];
   config_sync_file($data['_config_name'], $form_state['config_change_type'], $data);
-  drupal_set_message(t('The %name configuration was imported successfully.', array('%name' => $data['_config_name'])));
+  backdrop_set_message(t('The %name configuration was imported successfully.', array('%name' => $data['_config_name'])));
 }
 
 /**
@@ -528,8 +528,8 @@ function config_diff($name) {
   $active_storage = new ConfigFileStorage($active_directory);
   $staging_storage = new ConfigFileStorage($staging_directory);
 
-  $source_data = explode("\n", drupal_json_encode($active_storage->read($name), TRUE));
-  $target_data = explode("\n", drupal_json_encode($staging_storage->read($name), TRUE));
+  $source_data = explode("\n", backdrop_json_encode($active_storage->read($name), TRUE));
+  $target_data = explode("\n", backdrop_json_encode($staging_storage->read($name), TRUE));
 
   // Check for new or removed files.
   if ($source_data === array('false')) {

@@ -21,7 +21,7 @@ class views_handler_field_dropbutton extends views_handler_field_links {
         '#type' => 'dropbutton',
         '#links' => $links,
       );
-      return drupal_render($build);
+      return backdrop_render($build);
     }
     else {
       return '';

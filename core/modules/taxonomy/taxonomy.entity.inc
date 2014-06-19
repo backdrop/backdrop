@@ -166,9 +166,9 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   protected function cacheGet($ids, $conditions = array()) {
     $terms = parent::cacheGet($ids, $conditions);
     // Name matching is case insensitive, note that with some collations
-    // LOWER() and drupal_strtolower() may return different results.
+    // LOWER() and backdrop_strtolower() may return different results.
     foreach ($terms as $term) {
-      if (isset($conditions['name']) && drupal_strtolower($conditions['name'] != drupal_strtolower($term->name))) {
+      if (isset($conditions['name']) && backdrop_strtolower($conditions['name'] != backdrop_strtolower($term->name))) {
         unset($terms[$term->tid]);
       }
     }
@@ -229,16 +229,16 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   }
 
   /**
-   * Implements DrupalEntityControllerInterface::resetCache().
+   * Implements EntityControllerInterface::resetCache().
    */
   public function resetCache(array $ids = NULL) {
-    drupal_static_reset('taxonomy_term_count_nodes');
-    drupal_static_reset('taxonomy_get_tree');
-    drupal_static_reset('taxonomy_get_tree:parents');
-    drupal_static_reset('taxonomy_get_tree:terms');
-    drupal_static_reset('taxonomy_term_load_parents');
-    drupal_static_reset('taxonomy_term_load_parents_all');
-    drupal_static_reset('taxonomy_term_load_children');
+    backdrop_static_reset('taxonomy_term_count_nodes');
+    backdrop_static_reset('taxonomy_get_tree');
+    backdrop_static_reset('taxonomy_get_tree:parents');
+    backdrop_static_reset('taxonomy_get_tree:terms');
+    backdrop_static_reset('taxonomy_term_load_parents');
+    backdrop_static_reset('taxonomy_term_load_parents_all');
+    backdrop_static_reset('taxonomy_term_load_children');
     parent::resetCache($ids);
   }
 }
@@ -393,10 +393,10 @@ class TaxonomyVocabularyController extends EntityDatabaseStorageController {
   }
 
   /**
-   * Implements DrupalEntityControllerInterface::resetCache().
+   * Implements EntityControllerInterface::resetCache().
    */
   public function resetCache(array $ids = NULL) {
-    drupal_static_reset('taxonomy_vocabulary_get_names');
+    backdrop_static_reset('taxonomy_vocabulary_get_names');
     parent::resetCache($ids);
     cache_clear_all();
   }

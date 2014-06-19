@@ -6,7 +6,7 @@
  *
  * Run this script at the root of an existing Drupal 6 installation.
  * Steps to use this generation script:
- * - Install drupal 7.
+ * - Install Drupal 7.
  * - Run this script from your Drupal ROOT directory.
  * - Use the dump-database-d7.sh to generate the D7 file
  *   modules/simpletest/tests/upgrade/database.filled.php
@@ -14,7 +14,7 @@
 
 // Define settings.
 $cmd = 'index.php';
-define('DRUPAL_ROOT', getcwd());
+define('BACKDROP_ROOT', getcwd());
 $_SERVER['HTTP_HOST']       = 'default';
 $_SERVER['PHP_SELF']        = '/index.php';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
@@ -27,10 +27,10 @@ $modules_to_enable          = array('path', 'taxonomy');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
 // Enable requested modules
-require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
 include_once './modules/system/system.admin.inc';
 $form = system_modules();
 foreach ($modules_to_enable as $module) {
@@ -41,7 +41,7 @@ system_modules_submit(NULL, $form_state);
 unset($form_state);
 
 // Run cron after installing
-drupal_cron_run();
+backdrop_cron_run();
 
 // Create six users
 $query = db_insert('users')->fields(array('uid', 'name', 'pass', 'mail', 'status', 'created', 'access'));

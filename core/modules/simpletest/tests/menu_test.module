@@ -384,8 +384,8 @@ function menu_test_menu_trail_callback() {
  */
 function menu_test_init() {
   // When requested by one of the MenuTrailTestCase tests, record the initial
-  // active trail during Drupal's bootstrap (before the user is redirected to a
-  // custom 403 or 404 page). See menu_test_custom_403_404_callback().
+  // active trail during Backdrop's bootstrap (before the user is redirected to
+  // a custom 403 or 404 page). See menu_test_custom_403_404_callback().
   if (variable_get('menu_test_record_active_trail', FALSE)) {
     variable_set('menu_test_active_trail_initial', menu_get_active_trail());
   }
@@ -418,7 +418,7 @@ function menu_test_custom_403_404_callback() {
 function menu_test_theme_page_callback($inherited = FALSE) {
   global $theme_key;
   // Initialize the theme system so that $theme_key will be populated.
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   // Now check both the requested custom theme and the actual theme being used.
   $custom_theme = menu_get_custom_theme();
   $requested_theme = empty($custom_theme) ? 'NONE' : $custom_theme;

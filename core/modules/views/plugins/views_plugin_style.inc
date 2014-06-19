@@ -129,7 +129,7 @@ class views_plugin_style extends views_plugin {
 
       $classes = explode(' ', $class);
       foreach ($classes as &$class) {
-        $class = drupal_clean_css_identifier($class);
+        $class = backdrop_clean_css_identifier($class);
       }
       return implode(' ', $classes);
     }

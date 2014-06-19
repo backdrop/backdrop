@@ -10,10 +10,10 @@
  */
 function locale_translate_seek_screen() {
   // Add CSS.
-  drupal_add_css(drupal_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
 
-  $elements = drupal_get_form('locale_translation_filter_form');
-  $output = drupal_render($elements);
+  $elements = backdrop_get_form('locale_translation_filter_form');
+  $output = backdrop_render($elements);
   $output .= _locale_translate_seek();
   return $output;
 }
@@ -98,13 +98,13 @@ function _locale_translate_seek() {
     $links['edit'] = array(
       'title' => t('Edit'),
       'href' => "admin/config/regional/translate/edit/$lid",
-      'query' => drupal_get_destination(),
+      'query' => backdrop_get_destination(),
       'class' => array('nowrap'),
     );
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => "admin/config/regional/translate/delete/$lid",
-      'query' => drupal_get_destination(),
+      'query' => backdrop_get_destination(),
       'class' => array('nowrap'),
     );
     $rows[] = array(
@@ -126,7 +126,7 @@ function _locale_translate_seek() {
  */
 function _locale_translate_language_list($translation, $limit_language) {
   // Add CSS.
-  drupal_add_css(drupal_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
 
   $languages = language_list();
   if (!locale_translate_english()) {
@@ -146,7 +146,7 @@ function _locale_translate_language_list($translation, $limit_language) {
  * Build array out of search criteria specified in request variables
  */
 function _locale_translate_seek_query() {
-  $query = &drupal_static(__FUNCTION__);
+  $query = &backdrop_static(__FUNCTION__);
   if (!isset($query)) {
     $query = array();
     $fields = array('string', 'language', 'translation');
@@ -166,7 +166,7 @@ function locale_translation_filters() {
   $filters = array();
 
   // Get all languages, except English
-  drupal_static_reset('language_list');
+  backdrop_static_reset('language_list');
   $languages = language_list(TRUE);
   $language_options = array();
   foreach ($languages as $langcode => $language) {
@@ -290,8 +290,8 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
   // Fetch source string, if possible.
   $source = db_query('SELECT source, context, location FROM {locales_source} WHERE lid = :lid', array(':lid' => $lid))->fetchObject();
   if (!$source) {
-    drupal_set_message(t('String not found.'), 'error');
-    drupal_goto('admin/config/regional/translate/translate');
+    backdrop_set_message(t('String not found.'), 'error');
+    backdrop_goto('admin/config/regional/translate/translate');
   }
 
   // Add original text to the top and some values for form altering.
@@ -399,7 +399,7 @@ function locale_translate_edit_form_submit($form, &$form_state) {
     _locale_invalidate_js($key);
   }
 
-  drupal_set_message(t('The string has been saved.'));
+  backdrop_set_message(t('The string has been saved.'));
 
   // Clear locale cache.
   _locale_invalidate_js();
@@ -414,10 +414,10 @@ function locale_translate_edit_form_submit($form, &$form_state) {
  */
 function locale_translate_delete_page($lid) {
   if ($source = db_query('SELECT lid, source FROM {locales_source} WHERE lid = :lid', array(':lid' => $lid))->fetchObject()) {
-    return drupal_get_form('locale_translate_delete_form', $source);
+    return backdrop_get_form('locale_translate_delete_form', $source);
   }
   else {
-    return drupal_not_found();
+    return backdrop_not_found();
   }
 }
 
@@ -444,6 +444,6 @@ function locale_translate_delete_form_submit($form, &$form_state) {
   // Force JavaScript translation file recreation for all languages.
   _locale_invalidate_js();
   cache()->deletePrefix('locale:');
-  drupal_set_message(t('The string has been removed.'));
+  backdrop_set_message(t('The string has been removed.'));
   $form_state['redirect'] = 'admin/config/regional/translate/translate';
 }

@@ -2,7 +2,7 @@
 <project xmlns:dc="http://purl.org/dc/elements/1.1/">
 <title>Update test subtheme</title>
 <short_name>update_test_subtheme</short_name>
-<dc:creator>Drupal</dc:creator>
+<dc:creator>Backdrop CMS</dc:creator>
 <api_version>8.x</api_version>
 <recommended_major>1</recommended_major>
 <supported_majors>1</supported_majors>
@@ -16,7 +16,7 @@
  <release>
   <name>update_test_subtheme 8.x-1.0</name>
   <version>8.x-1.0</version>
-  <tag>DRUPAL-7--1-0</tag>
+  <tag>BACKDROP-7--1-0</tag>
   <version_major>1</version_major>
   <version_patch>0</version_patch>
   <status>published</status>

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API for loading and interacting with Drupal modules.
+ * API for loading and interacting with Backdrop modules.
  */
 
 /**
@@ -21,13 +21,13 @@ function module_load_all($bootstrap = FALSE) {
 
   if (isset($bootstrap)) {
     foreach (module_list(TRUE, $bootstrap) as $module) {
-      drupal_load('module', $module);
+      backdrop_load('module', $module);
     }
     // When fully loading all modules, clear the registry to make sure it
     // includes classes provided by non-bootstrap modules.
     if (!$bootstrap) {
       $has_run = TRUE;
-      drupal_static_reset('backdrop_autoload');
+      backdrop_static_reset('backdrop_autoload');
     }
   }
   return $has_run;
@@ -75,7 +75,7 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
     $sorted_list = NULL;
     if ($fixed_list) {
       foreach ($fixed_list as $name => $module) {
-        drupal_get_filename('module', $name, $module['filename']);
+        backdrop_get_filename('module', $name, $module['filename']);
         $list[$name] = $name;
       }
     }
@@ -83,13 +83,13 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
       if ($refresh) {
         // For the $refresh case, make sure that system_list() returns fresh
         // data.
-        drupal_static_reset('system_list');
+        backdrop_static_reset('system_list');
       }
       if ($bootstrap_refresh) {
         $list = system_list('bootstrap');
       }
       else {
-        // Not using drupal_map_assoc() here as that requires common.inc.
+        // Not using backdrop_map_assoc() here as that requires common.inc.
         $list = array_keys(system_list('module_enabled'));
         $list = (!empty($list) ? array_combine($list, $list) : array());
       }
@@ -124,7 +124,7 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
  * @see list_themes()
  */
 function system_list($type) {
-  $lists = &drupal_static(__FUNCTION__);
+  $lists = &backdrop_static(__FUNCTION__);
 
   // For bootstrap modules, attempt to fetch the list from cache if possible.
   // if not fetch only the required information to fire bootstrap hooks
@@ -141,10 +141,10 @@ function system_list($type) {
       cache('bootstrap')->set('bootstrap_modules', $bootstrap_list);
     }
     // To avoid a separate database lookup for the filepath, prime the
-    // drupal_get_filename() static cache for bootstrap modules only.
+    // backdrop_get_filename() static cache for bootstrap modules only.
     // The rest is stored separately to keep the bootstrap module cache small.
     foreach ($bootstrap_list as $module) {
-      drupal_get_filename('module', $module->name, $module->filename);
+      backdrop_get_filename('module', $module->name, $module->filename);
     }
     // We only return the module names here since module_list() doesn't need
     // the filename itself.
@@ -163,7 +163,7 @@ function system_list($type) {
       );
       // The module name (rather than the filename) is used as the fallback
       // weighting in order to guarantee consistent behavior across different
-      // Drupal installations, which might have modules installed in different
+      // Backdrop installations, which might have modules installed in different
       // locations in the file system. The ordering here must also be
       // consistent with the one used in module_implements().
       $result = db_query("SELECT * FROM {system} WHERE type = 'theme' OR (type = 'module' AND status = 1) ORDER BY weight ASC, name ASC");
@@ -177,7 +177,7 @@ function system_list($type) {
         if ($record->type == 'theme') {
           $lists['theme'][$record->name] = $record;
         }
-        // Build a list of filenames so drupal_get_filename can use it.
+        // Build a list of filenames so backdrop_get_filename can use it.
         if ($record->status) {
           $lists['filepaths'][] = array('type' => $record->type, 'name' => $record->name, 'filepath' => $record->filename);
         }
@@ -185,8 +185,8 @@ function system_list($type) {
       foreach ($lists['theme'] as $key => $theme) {
         if (!empty($theme->info['base theme'])) {
           // Make a list of the theme's base themes.
-          require_once DRUPAL_ROOT . '/core/includes/theme.inc';
-          $lists['theme'][$key]->base_themes = drupal_find_base_themes($lists['theme'], $key);
+          require_once BACKDROP_ROOT . '/core/includes/theme.inc';
+          $lists['theme'][$key]->base_themes = backdrop_find_base_themes($lists['theme'], $key);
           // Don't proceed if there was a problem with the root base theme.
           if (!current($lists['theme'][$key]->base_themes)) {
             continue;
@@ -210,9 +210,9 @@ function system_list($type) {
       cache('bootstrap')->set('system_list', $lists);
     }
     // To avoid a separate database lookup for the filepath, prime the
-    // drupal_get_filename() static cache with all enabled modules and themes.
+    // backdrop_get_filename() static cache with all enabled modules and themes.
     foreach ($lists['filepaths'] as $item) {
-      drupal_get_filename($item['type'], $item['name'], $item['filepath']);
+      backdrop_get_filename($item['type'], $item['name'], $item['filepath']);
     }
   }
 
@@ -223,9 +223,9 @@ function system_list($type) {
  * Resets all system_list() caches.
  */
 function system_list_reset() {
-  drupal_static_reset('system_list');
-  drupal_static_reset('system_rebuild_module_data');
-  drupal_static_reset('list_themes');
+  backdrop_static_reset('system_list');
+  backdrop_static_reset('system_rebuild_module_data');
+  backdrop_static_reset('list_themes');
   cache('bootstrap')->deleteMultiple(array('bootstrap_modules', 'system_list'));
 }
 
@@ -243,17 +243,17 @@ function system_list_reset() {
  *     without this module.
  */
 function _module_build_dependencies($files) {
-  require_once DRUPAL_ROOT . '/core/includes/graph.inc';
+  require_once BACKDROP_ROOT . '/core/includes/graph.inc';
   foreach ($files as $filename => $file) {
     $graph[$file->name]['edges'] = array();
     if (isset($file->info['dependencies']) && is_array($file->info['dependencies'])) {
       foreach ($file->info['dependencies'] as $dependency) {
-        $dependency_data = drupal_parse_dependency($dependency);
+        $dependency_data = backdrop_parse_dependency($dependency);
         $graph[$file->name]['edges'][$dependency_data['name']] = $dependency_data;
       }
     }
   }
-  drupal_depth_first_search($graph);
+  backdrop_depth_first_search($graph);
   foreach ($graph as $module => $data) {
     $files[$module]->required_by = isset($data['reverse_paths']) ? $data['reverse_paths'] : array();
     $files[$module]->requires = isset($data['paths']) ? $data['paths'] : array();
@@ -287,7 +287,7 @@ function module_exists($module) {
  */
 function module_load_install($module) {
   // Make sure the installation API is available
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   return module_load_include('install', $module);
 }
@@ -305,7 +305,7 @@ function module_load_install($module) {
  *
  * Do not use this function to load an install file, use module_load_install()
  * instead. Do not use this function in a global context since it requires
- * Drupal to be fully bootstrapped, use require_once DRUPAL_ROOT . '/path/file'
+ * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT . '/path/file'
  * instead.
  *
  * @param $type
@@ -324,8 +324,8 @@ function module_load_include($type, $module, $name = NULL) {
     $name = $module;
   }
 
-  if (function_exists('drupal_get_path')) {
-    $file = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . "/$name.$type";
+  if (function_exists('backdrop_get_path')) {
+    $file = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module) . "/$name.$type";
     if (is_file($file)) {
       require_once $file;
       return $file;
@@ -348,7 +348,7 @@ function module_load_all_includes($type, $name = NULL) {
  * Enables or installs a given list of modules.
  *
  * Definitions:
- * - "Enabling" is the process of activating a module for use by Drupal.
+ * - "Enabling" is the process of activating a module for use by Backdrop.
  * - "Disabling" is the process of deactivating a module.
  * - "Installing" is the process of enabling it for the first time or after it
  *   has been uninstalled.
@@ -419,7 +419,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
   }
 
   // Required for module installation checks.
-  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   $modules_installed = array();
   $modules_enabled = array();
@@ -431,7 +431,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       ->fetchObject();
     if ($existing->status == 0) {
       // Load the module's code.
-      drupal_load('module', $module);
+      backdrop_load('module', $module);
       module_load_install($module);
 
       // Update the database and module list to reflect the new module. This
@@ -449,22 +449,22 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       module_implements_reset();
       _system_update_bootstrap_status();
       // Update the registry to include it.
-      drupal_static_reset('backdrop_autoload');
+      backdrop_static_reset('backdrop_autoload');
       // Refresh the schema to include it.
-      drupal_get_schema(NULL, TRUE);
+      backdrop_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
-      drupal_theme_rebuild();
+      backdrop_theme_rebuild();
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
 
       // Now install the module if necessary.
-      if (drupal_get_installed_schema_version($module, TRUE) == SCHEMA_UNINSTALLED) {
-        drupal_install_schema($module);
+      if (backdrop_get_installed_schema_version($module, TRUE) == SCHEMA_UNINSTALLED) {
+        backdrop_install_schema($module);
 
         // Set the schema version to the number of the last update provided
         // by the module.
-        $versions = drupal_get_schema_versions($module);
+        $versions = backdrop_get_schema_versions($module);
         $version = $versions ? end($versions) : SCHEMA_INSTALLED;
 
         // Copy any default configuration data to the system config directory/
@@ -476,7 +476,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         if (empty($versions) && ($last_removed = module_invoke($module, 'update_last_removed'))) {
           $version = $last_removed;
         }
-        drupal_set_installed_schema_version($module, $version);
+        backdrop_set_installed_schema_version($module, $version);
         // Allow the module to perform install tasks.
         module_invoke($module, 'install');
         // Record the fact that it was installed.
@@ -526,7 +526,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     // Create an associative array with weights as values.
     $module_list = array_flip(array_values($module_list));
 
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     while (list($module) = each($module_list)) {
       if (!isset($module_data[$module]) || !$module_data[$module]->status) {
         // This module doesn't exist or is already disabled, skip it.
@@ -574,24 +574,24 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     // so we can still call module hooks to get information.
     module_invoke_all('modules_disabled', $invoke_modules);
     // Update the registry to remove the newly-disabled module.
-    drupal_static_reset('backdrop_autoload');
+    backdrop_static_reset('backdrop_autoload');
     _system_update_bootstrap_status();
     // Update the theme registry to remove the newly-disabled module.
-    drupal_theme_rebuild();
+    backdrop_theme_rebuild();
   }
 }
 
 /**
  * @defgroup hooks Hooks
  * @{
- * Allow modules to interact with the Drupal core.
+ * Allow modules to interact with the Backdrop core.
  *
- * Drupal's module system is based on the concept of "hooks". A hook is a PHP
+ * Backdrop's module system is based on the concept of "hooks". A hook is a PHP
  * function that is named foo_bar(), where "foo" is the name of the module
  * (whose filename is thus foo.module) and "bar" is the name of the hook. Each
  * hook has a defined set of parameters and a specified result type.
  *
- * To extend Drupal, a module need simply implement a hook. When Drupal wishes
+ * To extend Backdrop, a module need simply implement a hook. When Backdrop wishes
  * to allow intervention from modules, it determines which modules implement a
  * hook and calls that hook in all enabled modules that implement it.
  *
@@ -601,9 +601,9 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * called example.module, then hook_help() as implemented by that module would
  * be defined as example_help().
  *
- * The example functions included are not part of the Drupal core, they are
+ * The example functions included are not part of the Backdrop core, they are
  * just models that you can modify. Only the hooks implemented within modules
- * are executed when running Drupal.
+ * are executed when running Backdrop.
  *
  * @see themeable
  * @see callbacks
@@ -614,10 +614,10 @@ function module_disable($module_list, $disable_dependents = TRUE) {
   * @{
   * Callback function signatures.
   *
-  * Drupal's API sometimes uses callback functions to allow you to define how
+  * Backdrop's API sometimes uses callback functions to allow you to define how
   * some type of processing happens. A callback is a function with a defined
   * signature, which you define in a module. Then you pass the function name as
-  * a parameter to a Drupal API function or return it as part of a hook
+  * a parameter to a Backdrop API function or return it as part of a hook
   * implementation return value, and your function is called at an appropriate
   * time. For instance, when setting up batch processing you might need to
   * provide a callback function for each processing step and/or a callback for
@@ -683,12 +683,12 @@ function module_hook($module, $hook) {
  * @see module_implements_write_cache()
  */
 function module_implements($hook, $sort = FALSE) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['implementations'] = &drupal_static(__FUNCTION__, array());
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['implementations'] = &backdrop_static(__FUNCTION__, array());
   }
-  $implementations = &$drupal_static_fast['implementations'];
+  $implementations = &$backdrop_static_fast['implementations'];
 
   // Fetch implementations from cache.
   if (empty($implementations) && function_exists('cache')) {
@@ -715,7 +715,7 @@ function module_implements($hook, $sort = FALSE) {
     // Allow modules to change the weight of specific implementations but avoid
     // an infinite loop.
     if ($hook != 'module_implements_alter') {
-      drupal_alter('module_implements', $implementations[$hook], $hook);
+      backdrop_alter('module_implements', $implementations[$hook], $hook);
     }
   }
   else {
@@ -756,10 +756,10 @@ function module_implements_reset() {
   // gains when a large number of modules are installed or hooks invoked, since
   // this can quickly lead to module_hook() being called several thousand times
   // per request.
-  drupal_static_reset('module_implements');
+  backdrop_static_reset('module_implements');
   cache('bootstrap')->set('module_implements', array());
-  drupal_static_reset('module_hook_info');
-  drupal_static_reset('drupal_alter');
+  backdrop_static_reset('module_hook_info');
+  backdrop_static_reset('backdrop_alter');
   cache('bootstrap')->delete('hook_info');
 }
 
@@ -778,10 +778,10 @@ function module_hook_info() {
   // case common.inc, subsystems, and modules are not loaded yet, so it does not
   // make sense to support hook groups resp. lazy-loaded include files prior to
   // full bootstrap.
-  if (drupal_bootstrap(NULL, FALSE) != DRUPAL_BOOTSTRAP_FULL) {
+  if (backdrop_bootstrap(NULL, FALSE) != BACKDROP_BOOTSTRAP_FULL) {
     return array();
   }
-  $hook_info = &drupal_static(__FUNCTION__);
+  $hook_info = &backdrop_static(__FUNCTION__);
 
   if (!isset($hook_info)) {
     $hook_info = array();
@@ -799,7 +799,7 @@ function module_hook_info() {
           }
         }
       }
-      // We can't use drupal_alter() for the same reason as above.
+      // We can't use backdrop_alter() for the same reason as above.
       foreach (module_list() as $module) {
         $function = $module . '_hook_info_alter';
         if (function_exists($function)) {
@@ -822,7 +822,7 @@ function module_hook_info() {
  * @see module_implements()
  */
 function module_implements_write_cache() {
-  $implementations = &drupal_static('module_implements');
+  $implementations = &backdrop_static('module_implements');
   if (isset($implementations['#write_cache'])) {
     unset($implementations['#write_cache']);
     cache('bootstrap')->set('module_implements', $implementations);
@@ -832,7 +832,7 @@ function module_implements_write_cache() {
 /**
  * Invokes a hook in a particular module.
  *
- * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * All arguments are passed by value. Use backdrop_alter() if you need to pass
  * arguments by reference.
  *
  * @param $module
@@ -845,7 +845,7 @@ function module_implements_write_cache() {
  * @return
  *   The return value of the hook implementation.
  *
- * @see drupal_alter()
+ * @see backdrop_alter()
  */
 function module_invoke($module, $hook) {
   $args = func_get_args();
@@ -859,7 +859,7 @@ function module_invoke($module, $hook) {
 /**
  * Invokes a hook in all enabled modules that implement it.
  *
- * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * All arguments are passed by value. Use backdrop_alter() if you need to pass
  * arguments by reference.
  *
  * @param $hook
@@ -871,7 +871,7 @@ function module_invoke($module, $hook) {
  *   An array of return values of the hook implementations. If modules return
  *   arrays from their implementations, those are merged into one array.
  *
- * @see drupal_alter()
+ * @see backdrop_alter()
  */
 function module_invoke_all($hook) {
   $args = func_get_args();
@@ -901,15 +901,15 @@ function module_invoke_all($hook) {
 /**
  * Returns an array of modules required by core.
  */
-function drupal_required_modules() {
-  $files = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.info$/', 'modules', 'name', 0);
+function backdrop_required_modules() {
+  $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'modules', 'name', 0);
   $required = array();
 
   // An installation profile is required and one must always be loaded.
-  $required[] = drupal_get_profile();
+  $required[] = backdrop_get_profile();
 
   foreach ($files as $name => $file) {
-    $info = drupal_parse_info_file($file->uri);
+    $info = backdrop_parse_info_file($file->uri);
     if (!empty($info) && !empty($info['required']) && $info['required']) {
       $required[] = $name;
     }
@@ -935,7 +935,7 @@ function drupal_required_modules() {
  *     'unalterable' => $unalterable,
  *     'foo' => 'bar',
  *   );
- *   drupal_alter('mymodule_data', $alterable1, $alterable2, $context);
+ *   backdrop_alter('mymodule_data', $alterable1, $alterable2, $context);
  * @endcode
  *
  * Note that objects are always passed by reference in PHP5. If it is absolutely
@@ -945,7 +945,7 @@ function drupal_required_modules() {
  *   $context = array(
  *     'unalterable_object' => clone $object,
  *   );
- *   drupal_alter('mymodule_data', $data, $context);
+ *   backdrop_alter('mymodule_data', $data, $context);
  * @endcode
  *
  * @param $type
@@ -953,7 +953,7 @@ function drupal_required_modules() {
  *   'node_content', and so on are several examples. Alternatively can be an
  *   array, in which case hook_TYPE_alter() is invoked for each value in the
  *   array, ordered first by module, and then for each module, in the order of
- *   values in $type. For example, when Form API is using drupal_alter() to
+ *   values in $type. For example, when Form API is using backdrop_alter() to
  *   execute both hook_form_alter() and hook_form_FORM_ID_alter()
  *   implementations, it passes array('form', 'form_' . $form_id) for $type.
  * @param $data
@@ -968,19 +968,15 @@ function drupal_required_modules() {
  *   context needs to be provided to implementations, then this should be an
  *   associative array as described above.
  * @param $context3
- *   (optional) An additional variable that is passed by reference. This
- *   parameter is deprecated and will not exist in Drupal 8; consequently, it
- *   should not be used for new Drupal 7 code either. It is here only for
- *   backwards compatibility with older code that passed additional arguments
- *   to drupal_alter().
+ *   (optional) An additional variable that is passed by reference.
  */
-function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['functions'] = &drupal_static(__FUNCTION__);
+function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['functions'] = &backdrop_static(__FUNCTION__);
   }
-  $functions = &$drupal_static_fast['functions'];
+  $functions = &$backdrop_static_fast['functions'];
 
   // Most of the time, $type is passed as a string, so for performance,
   // normalize it to that. When passed as an array, usually the first item in
@@ -1029,7 +1025,7 @@ function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$con
       // implementations of a single hook. To get the ordered implementations
       // of multiple hooks, we mimic the module_implements() logic of first
       // ordering by module_list(), and then calling
-      // drupal_alter('module_implements').
+      // backdrop_alter('module_implements').
       if (array_diff($extra_modules, $modules)) {
         // Merge the arrays and order by module_list().
         $modules = array_intersect(module_list(), array_merge($modules, $extra_modules));
@@ -1038,10 +1034,10 @@ function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$con
         $implementations = array_fill_keys($modules, FALSE);
         // Let modules adjust the order solely based on the primary hook. This
         // ensures the same module order regardless of whether this if block
-        // runs. Calling drupal_alter() recursively in this way does not result
+        // runs. Calling backdrop_alter() recursively in this way does not result
         // in an infinite loop, because this call is for a single $type, so we
         // won't end up in this code block again.
-        drupal_alter('module_implements', $implementations, $hook);
+        backdrop_alter('module_implements', $implementations, $hook);
         $modules = array_keys($implementations);
       }
       foreach ($modules as $module) {

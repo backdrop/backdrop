@@ -7,7 +7,7 @@
 
 "use strict";
 
-Drupal.behaviors.dialog = {
+Backdrop.behaviors.dialog = {
   attach: function (context) {
     // Provide a known 'backdrop-modal' DOM element for Backdrop-based modal
     // dialogs. Non-modal dialogs are responsible for creating their own
@@ -21,7 +21,7 @@ Drupal.behaviors.dialog = {
     var $dialog = $(context).closest('.ui-dialog-content');
     if ($dialog.length) {
       // Remove and replace the dialog buttons with those from the new form.
-      if ($dialog.dialog('option', 'drupalAutoButtons')) {
+      if ($dialog.dialog('option', 'backdropAutoButtons')) {
         // Trigger an event to detect/sync changes to buttons.
         $dialog.trigger('dialogButtonsChange');
       }
@@ -70,7 +70,7 @@ Drupal.behaviors.dialog = {
 /**
  * Command to open a dialog.
  */
-Drupal.ajax.prototype.commands.openDialog = function (ajax, response, status) {
+Backdrop.ajax.prototype.commands.openDialog = function (ajax, response, status) {
   if (!response.selector) {
     return false;
   }
@@ -91,19 +91,19 @@ Drupal.ajax.prototype.commands.openDialog = function (ajax, response, status) {
 
   // Move the buttons to the jQuery UI dialog buttons area.
   if (!response.dialogOptions.buttons) {
-    response.dialogOptions.drupalAutoButtons = true;
-    response.dialogOptions.buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
+    response.dialogOptions.backdropAutoButtons = true;
+    response.dialogOptions.buttons = Backdrop.behaviors.dialog.prepareDialogButtons($dialog);
   }
 
   // Bind dialogButtonsChange
   $dialog.on('dialogButtonsChange', function () {
-    var buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
+    var buttons = Backdrop.behaviors.dialog.prepareDialogButtons($dialog);
     $dialog.dialog('option', 'buttons', buttons);
   });
 
   // Open the dialog itself.
   response.dialogOptions = response.dialogOptions || {};
-  var dialog = Drupal.dialog($dialog, response.dialogOptions);
+  var dialog = Backdrop.dialog($dialog, response.dialogOptions);
   if (response.dialogOptions.modal) {
     dialog.showModal();
   }
@@ -120,10 +120,10 @@ Drupal.ajax.prototype.commands.openDialog = function (ajax, response, status) {
  *
  * If no selector is given, it defaults to trying to close the modal.
  */
-Drupal.ajax.prototype.commands.closeDialog = function (ajax, response, status) {
+Backdrop.ajax.prototype.commands.closeDialog = function (ajax, response, status) {
   var $dialog = $(response.selector);
   if ($dialog.length) {
-    Drupal.dialog($dialog).close();
+    Backdrop.dialog($dialog).close();
   }
 
   // Unbind dialogButtonsChange
@@ -135,7 +135,7 @@ Drupal.ajax.prototype.commands.closeDialog = function (ajax, response, status) {
  *
  * jQuery UI specific way of setting dialog options.
  */
-Drupal.ajax.prototype.commands.setDialogOption = function (ajax, response, status) {
+Backdrop.ajax.prototype.commands.setDialogOption = function (ajax, response, status) {
   var $dialog = $(response.selector);
   if ($dialog.length) {
     $dialog.dialog('option', response.optionName, response.optionValue);

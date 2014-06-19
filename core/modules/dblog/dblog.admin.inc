@@ -30,16 +30,16 @@ function dblog_overview() {
     WATCHDOG_EMERGENCY     => 'dblog-emerg',
   );
 
-  $build['dblog_filter_form'] = drupal_get_form('dblog_filter_form');
-  $build['dblog_clear_log_form'] = drupal_get_form('dblog_clear_log_form');
+  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   $header = array(
     '', // Icon column.
-    array('data' => t('Type'), 'field' => 'w.type'),
-    array('data' => t('Date'), 'field' => 'w.wid', 'sort' => 'desc'),
+    array('data' => t('Type'), 'field' => 'w.type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Date'), 'field' => 'w.wid', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     t('Message'),
-    array('data' => t('User'), 'field' => 'u.name'),
-    array('data' => t('Operations')),
+    array('data' => t('User'), 'field' => 'u.name', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Operations'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
   );
 
   $query = db_select('watchdog', 'w')->extend('PagerDefault')->extend('TableSort');
@@ -73,7 +73,7 @@ function dblog_overview() {
         filter_xss($dblog->link),
       ),
       // Attributes for tr
-      'class' => array(drupal_html_class('dblog-' . $dblog->type), $classes[$dblog->severity]),
+      'class' => array(backdrop_html_class('dblog-' . $dblog->type), $classes[$dblog->severity]),
     );
   }
 
@@ -81,7 +81,7 @@ function dblog_overview() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#attributes' => array('id' => 'admin-dblog'),
+    '#attributes' => array('id' => 'admin-dblog', 'class' => array('admin-dblog')),
     '#empty' => t('No log messages available.'),
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
@@ -99,7 +99,7 @@ function dblog_overview() {
  *   Type of database log events to display (e.g., 'search').
  *
  * @return array
- *   A build array in the format expected by drupal_render().
+ *   A build array in the format expected by backdrop_render().
  *
  * @see dblog_menu()
  */
@@ -149,7 +149,7 @@ function dblog_top($type) {
  *
  * @return array|string
  *   If the ID is located in the Database Logging table, a build array in the
- *   format expected by drupal_render(); otherwise, an empty string.
+ *   format expected by backdrop_render(); otherwise, an empty string.
  *
  * @see dblog_menu()
  */
@@ -426,5 +426,5 @@ function dblog_clear_log_form($form) {
 function dblog_clear_log_submit() {
   $_SESSION['dblog_overview_filter'] = array();
   db_delete('watchdog')->execute();
-  drupal_set_message(t('Database log cleared.'));
+  backdrop_set_message(t('Database log cleared.'));
 }

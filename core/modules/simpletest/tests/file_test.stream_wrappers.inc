@@ -9,7 +9,7 @@
  *
  * Dummy stream wrapper implementation (dummy://).
  */
-class DrupalDummyStreamWrapper extends DrupalLocalStreamWrapper {
+class BackdropDummyStreamWrapper extends BackdropLocalStreamWrapper {
   function getDirectoryPath() {
     return variable_get('stream_public_path', 'sites/default/files');
   }
@@ -40,7 +40,7 @@ class DrupalDummyStreamWrapper extends DrupalLocalStreamWrapper {
  *
  * Basically just the public scheme but not returning a local file for realpath.
  */
-class DrupalDummyRemoteStreamWrapper extends DrupalPublicStreamWrapper {
+class BackdropDummyRemoteStreamWrapper extends BackdropPublicStreamWrapper {
   function realpath() {
     return FALSE;
   }

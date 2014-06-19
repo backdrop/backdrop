@@ -13,9 +13,9 @@
  *   One example is views_get_handler.
  */
 function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
-  $cache = &drupal_static(__FUNCTION__ . '_cache');
-  $recursion_protection = &drupal_static(__FUNCTION__ . '_recursion_protected');
-  $fully_loaded = &drupal_static(__FUNCTION__ . '_fully_loaded');
+  $cache = &backdrop_static(__FUNCTION__ . '_cache');
+  $recursion_protection = &backdrop_static(__FUNCTION__ . '_recursion_protected');
+  $fully_loaded = &backdrop_static(__FUNCTION__ . '_fully_loaded');
   if ($reset) {
     $cache = NULL;
     $fully_loaded = FALSE;

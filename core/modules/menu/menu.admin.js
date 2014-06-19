@@ -1,11 +1,11 @@
 (function ($) {
 
-Drupal.behaviors.menuChangeParentItems = {
+Backdrop.behaviors.menuChangeParentItems = {
   attach: function (context, settings) {
     $('fieldset#edit-menu input').each(function () {
       $(this).change(function () {
         // Update list of available parent menu items.
-        Drupal.menu_update_parent_list();
+        Backdrop.menu_update_parent_list();
       });
     });
   }
@@ -14,15 +14,15 @@ Drupal.behaviors.menuChangeParentItems = {
 /**
  * Function to set the options of the menu parent item dropdown.
  */
-Drupal.menu_update_parent_list = function () {
+Backdrop.menu_update_parent_list = function () {
   var values = [];
 
   $('input:checked', $('fieldset#edit-menu')).each(function () {
     // Get the names of all checked menus.
-    values.push(Drupal.checkPlain($.trim($(this).val())));
+    values.push(Backdrop.checkPlain($.trim($(this).val())));
   });
 
-  var url = Drupal.settings.basePath + 'admin/structure/menu/parents';
+  var url = Backdrop.settings.basePath + 'admin/structure/menu/parents';
   $.ajax({
     url: location.protocol + '//' + location.host + url,
     type: 'POST',

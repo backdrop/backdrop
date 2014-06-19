@@ -13,13 +13,13 @@
  * this interface.
  *
  * Most simple, SQL-based entity controllers will do better by extending
- * DrupalDefaultEntityController instead of implementing this interface
+ * DefaultEntityController instead of implementing this interface
  * directly.
  */
-interface DrupalEntityControllerInterface {
+interface EntityControllerInterface {
 
   /**
-   * Constructs a new DrupalEntityControllerInterface object.
+   * Constructs a new EntityControllerInterface object.
    *
    * @param $entityType
    *   The entity type for which the instance is created.
@@ -52,12 +52,12 @@ interface DrupalEntityControllerInterface {
 /**
  * Defines a base entity controller class.
  *
- * Default implementation of DrupalEntityControllerInterface.
+ * Default implementation of EntityControllerInterface.
  *
  * This class can be used as-is by most simple entity types. Entity types
  * requiring special handling can extend the class.
  */
-class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
+class DefaultEntityController implements EntityControllerInterface {
 
   /**
    * Static cache of entities.
@@ -85,7 +85,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
   /**
    * Additional arguments to pass to hook_TYPE_load().
    *
-   * Set before calling DrupalDefaultEntityController::attachLoad().
+   * Set before calling DefaultEntityController::attachLoad().
    *
    * @var array
    */
@@ -124,7 +124,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
   protected $cache;
 
   /**
-   * Implements DrupalEntityControllerInterface::__construct().
+   * Implements EntityControllerInterface::__construct().
    *
    * Sets basic variables.
    */
@@ -149,7 +149,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
   }
 
   /**
-   * Implements DrupalEntityControllerInterface::resetCache().
+   * Implements EntityControllerInterface::resetCache().
    */
   public function resetCache(array $ids = NULL) {
     if (isset($ids)) {
@@ -163,7 +163,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
   }
 
   /**
-   * Implements DrupalEntityControllerInterface::load().
+   * Implements EntityControllerInterface::load().
    */
   public function load($ids = array(), $conditions = array()) {
     $entities = array();
@@ -279,7 +279,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
 
     if ($this->revisionKey) {
       // Add all fields from the {entity_revision} table.
-      $entity_revision_fields = drupal_map_assoc($this->entityInfo['schema_fields_sql']['revision table']);
+      $entity_revision_fields = backdrop_map_assoc($this->entityInfo['schema_fields_sql']['revision table']);
       // The id field is provided by entity, so remove it.
       unset($entity_revision_fields[$this->idKey]);
 
@@ -401,7 +401,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
 /**
  * Defines a common interface for entity storage controllers.
  */
-interface EntityStorageControllerInterface extends DrupalEntityControllerInterface {
+interface EntityStorageControllerInterface extends EntityControllerInterface {
 
   /**
    * Constructs a new entity object, without permanently saving it.
@@ -451,7 +451,7 @@ class EntityStorageException extends Exception { }
 /**
  * Implements the entity storage controller interface for the database.
  */
-class EntityDatabaseStorageController extends DrupalDefaultEntityController implements EntityStorageControllerInterface {
+class EntityDatabaseStorageController extends DefaultEntityController implements EntityStorageControllerInterface {
 
   /**
    * Implements EntityStorageControllerInterface::create().
@@ -514,13 +514,13 @@ class EntityDatabaseStorageController extends DrupalDefaultEntityController impl
       $this->invokeHook('presave', $entity);
 
       if (!$entity->isNew()) {
-        $return = drupal_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         $this->resetCache(array($entity->{$this->idKey}));
         $this->postSave($entity, TRUE);
         $this->invokeHook('update', $entity);
       }
       else {
-        $return = drupal_write_record($this->entityInfo['base table'], $entity);
+        $return = backdrop_write_record($this->entityInfo['base table'], $entity);
         // Reset general caches, but keep caches specific to certain entities.
         $this->resetCache(array());
         $this->postSave($entity, FALSE);

@@ -5,7 +5,7 @@
  * Definition of ViewsGlossaryTestCase.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests glossary view ( summary of arguments ).
@@ -20,7 +20,7 @@ class ViewsGlossaryTestCase extends ViewsSqlTest {
    */
   public function testGlossaryView() {
     // create a contentype and add some nodes, with a non random title.
-    $type = $this->drupalCreateContentType();
+    $type = $this->backdropCreateContentType();
     $nodes_per_char = array(
       'd' => 1,
       'r' => 4,
@@ -36,7 +36,7 @@ class ViewsGlossaryTestCase extends ViewsSqlTest {
       for ($i = 0; $i < $count; $i++) {
         $node = $setting;
         $node['title'] = $char . $this->randomString(3);
-        $this->drupalCreateNode($node);
+        $this->backdropCreateNode($node);
       }
     }
 

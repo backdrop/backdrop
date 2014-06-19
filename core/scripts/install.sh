@@ -167,13 +167,13 @@ foreach ($additional_form_options as $key => $value) {
   $current = $value;
 }
 
-define('DRUPAL_ROOT', getcwd());
+define('BACKDROP_ROOT', getcwd());
 define('MAINTENANCE_MODE', 'install');
 
 require_once './core/includes/install.core.inc';
 try {
   print "Installing Backdrop. This may take a moment...\n";
-  install_drupal($settings);
+  install_backdrop($settings);
   print "Backdrop installed successfully.\n";
 }
 catch (Exception $e) {

@@ -60,8 +60,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       $this->exec('SET NAMES utf8');
     }
 
-    // Set MySQL init_commands if not already defined.  Default Drupal's MySQL
-    // behavior to conform more closely to SQL standards.  This allows Drupal
+    // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL
+    // behavior to conform more closely to SQL standards.  This allows Backdrop
     // to run almost seamlessly on many different kinds of database systems.
     // These settings force MySQL to behave the same as postgresql, or sqlite
     // in regards to syntax interpretation and invalid data handling.  See

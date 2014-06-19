@@ -113,7 +113,7 @@ function hook_search_admin() {
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
-  $options = drupal_map_assoc(range(0, 10));
+  $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
     $form['content_ranking']['factors']['node_rank_' . $var] = array(
       '#title' => $values['title'],
@@ -196,7 +196,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
     // Build the node body.
     $node = node_load($item->sid);
     node_build_content($node, 'search_result');
-    $node->body = drupal_render($node->content);
+    $node->body = backdrop_render($node->content);
 
     // Fetch comments for snippet.
     $node->rendered .= ' ' . module_invoke('comment', 'node_update_index', $node);
@@ -227,10 +227,6 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * implement this hook in order to override the default theming of its search
  * results, which is otherwise themed using theme('search_results').
  *
- * Note that by default, theme('search_results') and theme('search_result')
- * work together to create an ordered list (OL). So your hook_search_page()
- * implementation should probably do this as well.
- *
  * @param $results
  *   An array of search results.
  *
@@ -242,18 +238,12 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * @see search-results.tpl.php
  */
 function hook_search_page($results) {
-  $output['prefix']['#markup'] = '<ol class="search-results">';
-
-  foreach ($results as $entry) {
-    $output[] = array(
-      '#theme' => 'search_result',
-      '#result' => $entry,
-      '#module' => 'my_module_name',
-    );
-  }
-  $output['suffix']['#markup'] = '</ol>' . theme('pager');
-
-  return $output;
+  return array(
+    '#prefix' => '<h2>Test page text is here</h2>',
+    '#theme' => 'search_results',
+    '#results' => $results,
+    '#module' => 'search_extra_type',
+  );
 }
 
 /**
@@ -319,7 +309,7 @@ function hook_update_index() {
 
     // Render the node.
     node_build_content($node, 'search_index');
-    $node->rendered = drupal_render($node->content);
+    $node->rendered = backdrop_render($node->content);
 
     $text = '<h1>' . check_plain($node->title) . '</h1>' . $node->rendered;
 

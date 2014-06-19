@@ -182,10 +182,10 @@ class views_plugin_cache extends views_plugin {
    * will be removed so that we don't hold onto it.
    */
   function cache_start() {
-    $this->storage['head'] = drupal_add_html_head();
-    $this->storage['css'] = drupal_add_css();
-    $this->storage['js'] = drupal_add_js();
-    $this->storage['headers'] = drupal_get_http_header();
+    $this->storage['head'] = backdrop_add_html_head();
+    $this->storage['css'] = backdrop_add_css();
+    $this->storage['js'] = backdrop_add_js();
+    $this->storage['headers'] = backdrop_get_http_header();
   }
 
   /**
@@ -194,22 +194,22 @@ class views_plugin_cache extends views_plugin {
   function gather_headers() {
     // Simple replacement for head
     if (isset($this->storage['head'])) {
-      $this->storage['head'] = str_replace($this->storage['head'], '', drupal_add_html_head());
+      $this->storage['head'] = str_replace($this->storage['head'], '', backdrop_add_html_head());
     }
     else {
       $this->storage['head'] = '';
     }
 
     // Check if the advanced mapping function of D 7.23 is available.
-    $array_mapping_func = function_exists('drupal_array_diff_assoc_recursive') ? 'drupal_array_diff_assoc_recursive' : 'array_diff_assoc';
+    $array_mapping_func = function_exists('backdrop_array_diff_assoc_recursive') ? 'backdrop_array_diff_assoc_recursive' : 'array_diff_assoc';
 
     // Slightly less simple for CSS:
-    $css = drupal_add_css();
+    $css = backdrop_add_css();
     $css_start = isset($this->storage['css']) ? $this->storage['css'] : array();
     $this->storage['css'] = $array_mapping_func($css, $css_start);
 
     // Get javascript after/before views renders.
-    $js = drupal_add_js();
+    $js = backdrop_add_js();
     $js_start = isset($this->storage['js']) ? $this->storage['js'] : array();
     // If there are any differences between the old and the new javascript then
     // store them to be added later.
@@ -221,7 +221,7 @@ class views_plugin_cache extends views_plugin {
     $this->storage['js']['settings'] = $array_mapping_func($settings, $settings_start);
 
     // Get difference of HTTP headers.
-    $this->storage['headers'] = $array_mapping_func(drupal_get_http_header(), $this->storage['headers']);
+    $this->storage['headers'] = $array_mapping_func(backdrop_get_http_header(), $this->storage['headers']);
   }
 
   /**
@@ -229,28 +229,28 @@ class views_plugin_cache extends views_plugin {
    */
   function restore_headers() {
     if (!empty($this->storage['head'])) {
-      drupal_add_html_head($this->storage['head']);
+      backdrop_add_html_head($this->storage['head']);
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
-        drupal_add_css($args['data'], $args);
+        backdrop_add_css($args['data'], $args);
       }
     }
     if (!empty($this->storage['js'])) {
       foreach ($this->storage['js'] as $key => $args) {
         if ($key !== 'settings') {
-          drupal_add_js($args['data'], $args);
+          backdrop_add_js($args['data'], $args);
         }
         else {
           foreach ($args as $setting) {
-            drupal_add_js($setting, 'setting');
+            backdrop_add_js($setting, 'setting');
           }
         }
       }
     }
     if (!empty($this->storage['headers'])) {
       foreach ($this->storage['headers'] as $name => $value) {
-        drupal_add_http_header($name, $value);
+        backdrop_add_http_header($name, $value);
       }
     }
   }

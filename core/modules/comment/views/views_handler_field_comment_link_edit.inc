@@ -42,7 +42,7 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     unset($this->options['alter']['fragment']);
 
     if (!empty($this->options['destination'])) {
-      $this->options['alter']['query'] = drupal_get_destination();
+      $this->options['alter']['query'] = backdrop_get_destination();
     }
 
     $this->options['alter']['path'] = "comment/" . $comment->cid . "/edit";

@@ -11,7 +11,7 @@ function config_menu() {
   $items['admin/config/development/configuration'] = array(
     'title' => 'Configuration management',
     'description' => 'Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_sync_form'),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
@@ -30,7 +30,7 @@ function config_menu() {
   );
   $items['admin/config/development/configuration/single'] = array(
     'title' => 'Single Import/Export',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_import_single_form'),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
@@ -43,7 +43,7 @@ function config_menu() {
   );
   $items['admin/config/development/configuration/single/export'] = array(
     'title' => 'Export',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_export_single_form'),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
@@ -52,7 +52,7 @@ function config_menu() {
   );
   $items['admin/config/development/configuration/full'] = array(
     'title' => 'Full Import/Export',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_import_full_form'),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
@@ -65,7 +65,7 @@ function config_menu() {
   );
   $items['admin/config/development/configuration/full/export'] = array(
     'title' => 'Export',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_export_full_form'),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
@@ -121,10 +121,10 @@ function config_file_download($uri) {
  * @see hook_config_info_alter()
  */
 function config_get_info($config_name = NULL) {
-  $config_info = &drupal_static(__FUNCTION__, array());
+  $config_info = &backdrop_static(__FUNCTION__, array());
   if (empty($config_info)) {
     $config_info = module_invoke_all('config_info');
-    drupal_alter('config_info', $config_info);
+    backdrop_alter('config_info', $config_info);
   }
 
   if ($config_name) {

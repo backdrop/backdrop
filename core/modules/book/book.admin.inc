@@ -94,7 +94,7 @@ function book_admin_settings_validate($form, &$form_state) {
  * @ingroup forms
  */
 function book_admin_edit($form, $form_state, Node $node) {
-  drupal_set_title($node->title);
+  backdrop_set_title($node->title);
   $form['#node'] = $node;
   _book_admin_table($node, $form);
   $form['save'] = array(
@@ -160,7 +160,7 @@ function book_admin_edit_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Updated book %title.', array('%title' => $form['#node']->title)));
+  backdrop_set_message(t('Updated book %title.', array('%title' => $form['#node']->title)));
 }
 
 /**
@@ -182,7 +182,7 @@ function _book_admin_table(Node $node, &$form) {
   $tree = book_menu_subtree_data($node->book);
   $tree = array_shift($tree); // Do not include the book item itself.
   if ($tree['below']) {
-    $hash = drupal_hash_base64(serialize($tree['below']));
+    $hash = backdrop_hash_base64(serialize($tree['below']));
     // Store the hash value as a hidden form element so that we can detect
     // if another user changed the book hierarchy.
     $form['tree_hash'] = array(
@@ -265,13 +265,13 @@ function _book_admin_table_tree($tree, &$form) {
 function theme_book_admin_table($variables) {
   $form = $variables['form'];
 
-  drupal_add_tabledrag('book-outline', 'match', 'parent', 'book-plid', 'book-plid', 'book-mlid', TRUE, MENU_MAX_DEPTH - 2);
-  drupal_add_tabledrag('book-outline', 'order', 'sibling', 'book-weight');
+  backdrop_add_tabledrag('book-outline', 'match', 'parent', 'book-plid', 'book-plid', 'book-mlid', TRUE, MENU_MAX_DEPTH - 2);
+  backdrop_add_tabledrag('book-outline', 'order', 'sibling', 'book-weight');
 
   $header = array(t('Title'), t('Weight'), t('Parent'), t('Operations'));
 
   $rows = array();
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   $access = user_access('administer nodes');
   foreach (element_children($form) as $key) {
     $nid = $form[$key]['nid']['#value'];
@@ -283,9 +283,9 @@ function theme_book_admin_table($variables) {
     $form[$key]['weight']['#attributes']['class'] = array('book-weight');
 
     $data = array(
-      theme('indentation', array('size' => $form[$key]['depth']['#value'] - 2)) . drupal_render($form[$key]['title']),
-      drupal_render($form[$key]['weight']),
-      drupal_render($form[$key]['plid']) . drupal_render($form[$key]['mlid']),
+      theme('indentation', array('size' => $form[$key]['depth']['#value'] - 2)) . backdrop_render($form[$key]['title']),
+      backdrop_render($form[$key]['weight']),
+      backdrop_render($form[$key]['plid']) . backdrop_render($form[$key]['mlid']),
     );
     $links = array();
     $links['view'] = array(

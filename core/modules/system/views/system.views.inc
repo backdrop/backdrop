@@ -23,7 +23,7 @@ function system_views_data() {
   $data['file_managed']['table']['base'] = array(
     'field' => 'fid',
     'title' => t('File'),
-    'help' => t("Files maintained by Drupal and various modules."),
+    'help' => t("Files maintained by Backdrop and various modules."),
     'defaults' => array(
       'field' => 'filename'
     ),
@@ -468,7 +468,7 @@ function system_views_data() {
   // - filename
   $data['system']['filename'] = array(
     'title' => t('Module/Theme/Theme engine filename'),
-    'help' => t('The path of the primary file for this item, relative to the Drupal root; e.g. modules/node/node.module.'),
+    'help' => t('The path of the primary file for this item, relative to the Backdrop root; e.g. modules/node/node.module.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,

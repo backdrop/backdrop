@@ -5,7 +5,7 @@
  * Tests dropbutton functionality of Views.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests dropbutton functionality of views.
@@ -16,8 +16,8 @@ class ViewsHandlerFieldDropbuttonTest extends ViewsSqlTest {
    */
   public function testDropbutton() {
     // Create a node to test the listing.
-    $node = $this->drupalCreateNode();
-    $this->drupalGet('views_test/dropbutton');
+    $node = $this->backdropCreateNode();
+    $this->backdropGet('views_test/dropbutton');
     $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => 'node/' . $node->nid, ':title' => 'view'));
     $this->assertEqual(count($result), 1, 'Node node view link found in dropbutton.');
     $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => 'node/' . $node->nid, ':title' => 'custom'));

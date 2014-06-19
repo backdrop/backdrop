@@ -1,15 +1,15 @@
 <?php
 
 
-class FileTranferTest extends DrupalWebTestCase {
+class FileTranferTest extends BackdropWebTestCase {
   protected $hostname = 'localhost';
-  protected $username = 'drupal';
+  protected $username = 'backdrop';
   protected $password = 'password';
   protected $port = '42';
 
   function setUp() {
     parent::setUp();
-    $this->testConnection = TestFileTransfer::factory(DRUPAL_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
+    $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
   }
 
   function _getFakeModuleFiles() {
@@ -71,7 +71,7 @@ class FileTranferTest extends DrupalWebTestCase {
 
     $gotit = TRUE;
     try {
-      $this->testConnection->copyDirectory($source, DRUPAL_ROOT . '/'. variable_get('file_public_path', 'files'));
+      $this->testConnection->copyDirectory($source, BACKDROP_ROOT . '/'. variable_get('file_public_path', 'files'));
     }
     catch (FileTransferException $e) {
       $gotit = FALSE;

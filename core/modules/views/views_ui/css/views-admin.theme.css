@@ -297,12 +297,12 @@ th.views-ui-operations {
 /* @group Add view */
 
 /**
- * Drupal core forces AJAX triggering elements to float left when they are
+ * Backdrop core forces AJAX triggering elements to float left when they are
  * disabled due to AJAX processing. On the add view page, we have inline
  * containers where we don't want that behavior; it causes the select dropdown
  * which is triggered to jump to the left while the AJAX throbber is active.
  *
- * See also http://drupal.org/node/769936 (Drupal core issue); when that is
+ * See also http://drupal.org/node/769936 (core issue); when that is
  * fixed it may no longer be necessary to do this.
  */
 .views-admin .container-inline .progress-disabled {
@@ -1029,7 +1029,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 /* @group AJAX */
 
-/* Hide the drupal system throbber image */
+/* Hide the Backdrop system throbber image */
 .views-admin .ajax-progress .throbber {
   display: none;
 }
@@ -1053,9 +1053,9 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 /* @end */
 
-/* @group Drupal
+/* @group Backdrop
  *
- * Overrides to Drupal system CSS
+ * Overrides to Backdrop system CSS
  */
 div.messages {
   margin-bottom: 18px;

@@ -4,7 +4,7 @@
 /**
  * Auto-hide summary textarea if empty and show hide and unhide links.
  */
-Drupal.behaviors.textSummary = {
+Backdrop.behaviors.textSummary = {
   attach: function (context, settings) {
     $('.text-summary', context).once('text-summary', function () {
       var $widget = $(this).closest('div.field-type-text-with-summary');
@@ -23,14 +23,14 @@ Drupal.behaviors.textSummary = {
         }
 
         // Setup the edit/hide summary link.
-        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Drupal.t('Hide summary') + '</a>)</span>').bind('click', function(e) {
+        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Backdrop.t('Hide summary') + '</a>)</span>').bind('click', function(e) {
           if ($summary.css('display') !== 'none') {
             $summary.hide();
-            $(this).find('a').html(Drupal.t('Edit summary')).end().appendTo($fullLabel);
+            $(this).find('a').html(Backdrop.t('Edit summary')).end().appendTo($fullLabel);
           }
           else {
             $summary.show();
-            $(this).find('a').html(Drupal.t('Hide summary')).end().appendTo($summaryLabel);
+            $(this).find('a').html(Backdrop.t('Hide summary')).end().appendTo($summaryLabel);
           }
           e.preventDefault();
         }).appendTo($summaryLabel);

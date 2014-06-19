@@ -41,7 +41,7 @@ class views_plugin_argument_default_raw extends views_plugin_argument_default {
   function get_argument() {
     $path = NULL;
     if ($this->options['use_alias']) {
-      $path = drupal_get_path_alias();
+      $path = backdrop_get_path_alias();
     }
     if ($arg = arg($this->options['index'], $path)) {
       return $arg;

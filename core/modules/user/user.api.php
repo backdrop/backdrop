@@ -68,7 +68,7 @@ function hook_user_predelete($account) {
  * @see user_delete_multiple()
  */
 function hook_user_delete($account) {
-  drupal_set_message(t('User: @name has been deleted.', array('@name' => $account->name)));
+  backdrop_set_message(t('User: @name has been deleted.', array('@name' => $account->name)));
 }
 
 /**
@@ -88,9 +88,11 @@ function hook_user_delete($account) {
  * by using batch_set().
  *
  * @param $edit
- *   The array of form values submitted by the user.
+ *   The array of form values submitted by the user. Assign values to this
+ *   array to save changes in the database.
  * @param $account
- *   The user object on which the operation is being performed.
+ *   The user object on which the operation is performed. Values assigned in
+ *   this object will not be saved in the database.
  * @param $method
  *   The account cancellation method.
  *
@@ -297,7 +299,7 @@ function hook_user_update(&$edit, $account) {
 function hook_user_login(&$edit, $account) {
   // If the user has a NULL time zone, notify them to set a time zone.
   if (!$account->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
-    drupal_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => drupal_get_destination(), 'fragment' => 'edit-timezone')))));
+    backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
 
@@ -370,7 +372,7 @@ function hook_user_view($account, $view_mode, $langcode) {
  * If the module wishes to act on the rendered HTML of the user rather than the
  * structured content array, it may use this hook to add a #post_render callback.
  * Alternatively, it could also implement hook_preprocess_user_profile(). See
- * drupal_render() and theme() documentation respectively for details.
+ * backdrop_render() and theme() documentation respectively for details.
  *
  * @param $build
  *   A renderable array representing the user.

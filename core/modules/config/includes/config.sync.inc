@@ -15,7 +15,7 @@ function config_sync_batch($config_statuses = NULL) {
     'title' => t('Importing configuration'),
     'init_message' => t('Starting import'),
     'error_message' => t('An error occurred while importing the configuration.'),
-    'file' => drupal_get_path('module', 'config') . '/includes/config.sync.inc',
+    'file' => backdrop_get_path('module', 'config') . '/includes/config.sync.inc',
     'finished' => '_config_sync_finished',
   );
   return $batch;
@@ -94,13 +94,13 @@ function _config_sync_import(&$context) {
  */
 function _config_sync_finished($status, $results, &$context) {
   if ($status === FALSE) {
-    drupal_set_message(t('Configuration sync failed. Check that the configuration files are properly formatted.'), 'error');
+    backdrop_set_message(t('Configuration sync failed. Check that the configuration files are properly formatted.'), 'error');
   }
   if (!empty($results['errors'])) {
-    drupal_set_message(t('Configuration sync failed. The following errors were reported:') . ' ' . theme('item_list', array('items' => $results['errors'])), 'error');
+    backdrop_set_message(t('Configuration sync failed. The following errors were reported:') . ' ' . theme('item_list', array('items' => $results['errors'])), 'error');
   }
   if (!empty($results['completed_changes'])) {
-    drupal_set_message(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($results['completed_changes']))));
+    backdrop_set_message(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($results['completed_changes']))));
 
     // Clean up the staging directory.
     $config_dir = config_get_config_directory('staging');
@@ -216,5 +216,5 @@ function config_sync_file($config_file, $config_change_type, $config_contents = 
       $active_config->delete();
       break;
   }
-  drupal_flush_all_caches();
+  backdrop_flush_all_caches();
 }

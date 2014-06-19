@@ -111,7 +111,7 @@ function taxonomy_entity_info() {
 function taxonomy_views_api() {
   return array(
     'api' => '3.0',
-    'path' => drupal_get_path('module', 'taxonomy') . '/views',
+    'path' => backdrop_get_path('module', 'taxonomy') . '/views',
   );
 }
 
@@ -227,7 +227,7 @@ function taxonomy_menu() {
   $items['admin/structure/taxonomy'] = array(
     'title' => 'Taxonomy',
     'description' => 'Manage tagging, categorization, and classification of your content.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_vocabularies'),
     'access arguments' => array('administer taxonomy'),
     'file' => 'taxonomy.admin.inc',
@@ -239,7 +239,7 @@ function taxonomy_menu() {
   );
   $items['admin/structure/taxonomy/add'] = array(
     'title' => 'Add vocabulary',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary'),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
@@ -261,7 +261,7 @@ function taxonomy_menu() {
   );
   $items['taxonomy/term/%taxonomy_term/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     // Pass a NULL argument to ensure that additional path components are not
     // passed to taxonomy_form_term() as the vocabulary machine name argument.
     'page arguments' => array('taxonomy_form_term', 2, NULL),
@@ -273,7 +273,7 @@ function taxonomy_menu() {
   );
   $items['taxonomy/term/%taxonomy_term/delete'] = array(
     'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_term_confirm_delete', 2),
     'access callback' => 'taxonomy_term_access',
     'access arguments' => array('delete', 2),
@@ -302,7 +302,7 @@ function taxonomy_menu() {
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
     'title callback' => 'entity_label',
     'title arguments' => array('taxonomy_vocabulary', 3),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_terms', 3),
     'access arguments' => array('administer taxonomy'),
     'file' => 'taxonomy.admin.inc',
@@ -314,7 +314,7 @@ function taxonomy_menu() {
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary', 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_TASK,
@@ -324,7 +324,7 @@ function taxonomy_menu() {
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/add'] = array(
     'title' => 'Add term',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_term', NULL, 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
@@ -525,14 +525,14 @@ function taxonomy_term_delete_multiple(array $tids) {
  * @param term
  *   A taxonomy term object.
  * @return
- *   A $page element suitable for use by drupal_render().
+ *   A $page element suitable for use by backdrop_render().
  */
 function taxonomy_term_show($term) {
   return taxonomy_term_view_multiple(array($term->tid => $term), 'full');
 }
 
 /**
- * Constructs a drupal_render() style array from an array of loaded terms.
+ * Constructs a backdrop_render() style array from an array of loaded terms.
  *
  * @param $terms
  *   An array of taxonomy terms as returned by taxonomy_term_load_multiple().
@@ -545,7 +545,7 @@ function taxonomy_term_show($term) {
  *   content language of the current request.
  *
  * @return
- *   An array in the format expected by drupal_render().
+ *   An array in the format expected by backdrop_render().
  */
 function taxonomy_term_view_multiple($terms, $view_mode = 'teaser', $weight = 0, $langcode = NULL) {
   field_attach_prepare_view('taxonomy_term', $terms, $view_mode, $langcode);
@@ -566,7 +566,7 @@ function taxonomy_term_view_multiple($terms, $view_mode = 'teaser', $weight = 0,
  * The content built for the taxonomy term (field values, file attachments or
  * other term components) will vary depending on the $view_mode parameter.
  *
- * Drupal core defines the following view modes for terms, with the following
+ * Backdrop core defines the following view modes for terms, with the following
  * default use cases:
  *   - full (default): term is displayed on its own page (taxonomy/term/123)
  * Contributed modules might define additional view modes, or use existing
@@ -594,7 +594,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
     'entity' => $term,
     'langcode' => $langcode,
   );
-  drupal_alter('entity_view_mode', $view_mode, $context);
+  backdrop_alter('entity_view_mode', $view_mode, $context);
 
   // Add the term description if the term has one and it is visible.
   $type = 'taxonomy_term';
@@ -639,7 +639,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
  *   content language of the current request.
  *
  * @return
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
@@ -660,11 +660,11 @@ function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode =
     '#language' => $langcode,
   );
 
-  $build['#attached']['css'][] = drupal_get_path('module', 'taxonomy') . '/taxonomy.css';
+  $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/taxonomy.css';
 
   // Allow modules to modify the structured taxonomy term.
   $type = 'taxonomy_term';
-  drupal_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
+  backdrop_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
 
   return $build;
 }
@@ -744,7 +744,7 @@ function taxonomy_vocabulary_static_reset(array $ids = NULL) {
  *   - vid: The vocabulary ID.
  */
 function taxonomy_vocabulary_get_names() {
-  $names = &drupal_static(__FUNCTION__);
+  $names = &backdrop_static(__FUNCTION__);
 
   if (!isset($names)) {
     $names = db_query('SELECT name, machine_name, vid FROM {taxonomy_vocabulary}')->fetchAllAssoc('machine_name');
@@ -764,7 +764,7 @@ function taxonomy_vocabulary_get_names() {
  *   empty array if parents are not found.
  */
 function taxonomy_term_load_parents($tid) {
-  $parents = &drupal_static(__FUNCTION__, array());
+  $parents = &backdrop_static(__FUNCTION__, array());
 
   if ($tid && !isset($parents[$tid])) {
     $query = db_select('taxonomy_term_data', 't');
@@ -785,7 +785,7 @@ function taxonomy_term_load_parents($tid) {
  * Find all ancestors of a given term ID.
  */
 function taxonomy_term_load_parents_all($tid) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (isset($cache[$tid])) {
     return $cache[$tid];
@@ -819,7 +819,7 @@ function taxonomy_term_load_parents_all($tid) {
  *   empty array when no children exist.
  */
 function taxonomy_term_load_children($tid, $vid = 0) {
-  $children = &drupal_static(__FUNCTION__, array());
+  $children = &backdrop_static(__FUNCTION__, array());
 
   if ($tid && !isset($children[$tid])) {
     $query = db_select('taxonomy_term_data', 't');
@@ -862,9 +862,9 @@ function taxonomy_term_load_children($tid, $vid = 0) {
  *   depending on the $load_entities parameter.
  */
 function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities = FALSE) {
-  $children = &drupal_static(__FUNCTION__, array());
-  $parents = &drupal_static(__FUNCTION__ . ':parents', array());
-  $terms = &drupal_static(__FUNCTION__ . ':terms', array());
+  $children = &backdrop_static(__FUNCTION__, array());
+  $parents = &backdrop_static(__FUNCTION__ . ':parents', array());
+  $terms = &backdrop_static(__FUNCTION__ . ':terms', array());
 
   // We cache trees, so it's not CPU-intensive to call taxonomy_get_tree() on a
   // term and its children, too.
@@ -1127,7 +1127,7 @@ function _taxonomy_get_tid_from_term(TaxonomyTerm $term) {
 /**
  * Implodes a list of tags of a certain vocabulary into a string.
  *
- * @see drupal_explode_tags()
+ * @see backdrop_explode_tags()
  */
 function taxonomy_implode_tags($tags, $vid = NULL) {
   $typed_tags = array();
@@ -1483,7 +1483,7 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
     }
 
     // Translate term names into actual terms.
-    $typed_terms = drupal_explode_tags($tags);
+    $typed_terms = backdrop_explode_tags($tags);
     foreach ($typed_terms as $typed_term) {
       // See if the term exists in the chosen vocabulary and return the tid;
       // otherwise, create a new 'autocreate' term for insert/update.

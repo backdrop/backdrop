@@ -273,12 +273,12 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
       if ($entity->isNew()) {
         $op = 'insert';
-        $return = drupal_write_record($this->entityInfo['base table'], $entity);
+        $return = backdrop_write_record($this->entityInfo['base table'], $entity);
         unset($entity->is_new);
       }
       else {
         $op = 'update';
-        $return = drupal_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
       }
 
       if ($this->revisionKey) {
@@ -316,21 +316,21 @@ class NodeStorageController extends EntityDatabaseStorageController {
     $record->timestamp = $entity->revision_timestamp;
 
     if (empty($entity->{$this->revisionKey}) || !empty($entity->revision)) {
-      drupal_write_record($this->revisionTable, $record);
+      backdrop_write_record($this->revisionTable, $record);
       db_update($this->entityInfo['base table'])
         ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
         ->condition($this->idKey, $entity->{$this->idKey})
         ->execute();
     }
     else {
-      drupal_write_record($this->revisionTable, $record, $this->revisionKey);
+      backdrop_write_record($this->revisionTable, $record, $this->revisionKey);
     }
     // Make sure to update the new revision key for the entity.
     $entity->{$this->revisionKey} = $record->{$this->revisionKey};
   }
 
   /**
-   * Overrides DrupalDefaultEntityController::attachLoad().
+   * Overrides DefaultEntityController::attachLoad().
    */
   protected function attachLoad(&$nodes, $revision_id = FALSE) {
     // Create an array of nodes for each content type and pass this to the
@@ -355,7 +355,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
   }
 
   /**
-   * Overrides DrupalDefaultEntityController::buildQuery().
+   * Overrides DefaultEntityController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     // Ensure that uid is taken from the {node} table,
@@ -401,7 +401,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       elseif (!isset($node->log) || $node->log === '') {
         // If we are updating an existing node without adding a new revision, we
         // need to make sure $node->log is unset whenever it is empty. As long as
-        // $node->log is unset, drupal_write_record() will not attempt to update
+        // $node->log is unset, backdrop_write_record() will not attempt to update
         // the existing database column when re-saving the revision; therefore,
         // this code allows us to avoid clobbering an existing log entry with an
         // empty one.

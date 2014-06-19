@@ -133,7 +133,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     if ($item_length != 'title') {
       // We render comment contents and force links to be last.
       $build['links']['#weight'] = 1000;
-      $item_text .= drupal_render($build);
+      $item_text .= backdrop_render($build);
     }
 
     $item = new stdClass();

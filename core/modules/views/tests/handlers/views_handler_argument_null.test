@@ -5,7 +5,7 @@
  * Definition of ViewsHandlerArgumentNullTest.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests the core views_handler_argument_null handler.

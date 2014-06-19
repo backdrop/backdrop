@@ -5,7 +5,7 @@
  * Definition of ViewsNodeRevisionRelationsTestCase.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests basic node_revision table integration into views.
@@ -15,7 +15,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
    * Create a node with revision and rest result count for both views.
    */
   public function testNodeRevisionRelationship() {
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
     // Create revision of the node.
     $node_revision = clone $node;
     $node_revision->revision = 1;

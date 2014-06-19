@@ -215,7 +215,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return;
     }
 
-    $values = drupal_explode_tags($form_state['values']['options']['value']);
+    $values = backdrop_explode_tags($form_state['values']['options']['value']);
     $tids = $this->validate_term_strings($form['value'], $values);
 
     if ($tids) {
@@ -269,7 +269,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return;
     }
 
-    $values = drupal_explode_tags($form_state['values'][$identifier]);
+    $values = backdrop_explode_tags($form_state['values'][$identifier]);
 
     $tids = $this->validate_term_strings($form[$identifier], $values);
     if ($tids) {

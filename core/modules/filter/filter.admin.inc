@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Admin page callbacks for the filter module.
+ * Administrative page callbacks for the Filter module.
  */
 
 /**
- * Menu callback; Displays a list of all text formats and allows them to be rearranged.
+ * Page callback: Form constructor for a form to list and reorder text formats.
  *
  * @ingroup forms
+ * @see filter_menu()
  * @see filter_admin_overview_submit()
  */
 function filter_admin_overview($form) {
@@ -27,8 +28,8 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => drupal_placeholder($format->name));
-      $roles_markup = drupal_placeholder(t('All roles may use this format'));
+      $form['formats'][$id]['name'] = array('#markup' => backdrop_placeholder($format->name));
+      $roles_markup = backdrop_placeholder(t('All roles may use this format'));
     }
     else {
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
@@ -56,6 +57,9 @@ function filter_admin_overview($form) {
   return $form;
 }
 
+/**
+ * Form submission handler for filter_admin_overview().
+ */
 function filter_admin_overview_submit($form, &$form_state) {
   foreach ($form_state['values']['formats'] as $id => $data) {
     if (is_array($data) && isset($data['weight'])) {
@@ -67,7 +71,7 @@ function filter_admin_overview_submit($form, &$form_state) {
     }
   }
   filter_formats_reset();
-  drupal_set_message(t('The text format ordering has been saved.'));
+  backdrop_set_message(t('The text format ordering has been saved.'));
 }
 
 /**
@@ -87,10 +91,10 @@ function theme_filter_admin_overview($variables) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $row = array(
       'data' => array(
-        drupal_render($form['formats'][$id]['name']),
-        drupal_render($form['formats'][$id]['roles']),
-        drupal_render($form['formats'][$id]['weight']),
-        drupal_render($form['formats'][$id]['operations']),
+        backdrop_render($form['formats'][$id]['name']),
+        backdrop_render($form['formats'][$id]['roles']),
+        backdrop_render($form['formats'][$id]['weight']),
+        backdrop_render($form['formats'][$id]['operations']),
       ),
       'class' => array('draggable'),
     );
@@ -98,41 +102,73 @@ function theme_filter_admin_overview($variables) {
   }
   $header = array(t('Name'), t('Roles'), t('Weight'), t('Operations'));
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
-  drupal_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
+  backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
 
   return $output;
 }
 
 /**
- * Menu callback; Display a text format form.
+ * Page callback: Displays the text format add/edit form.
+ *
+ * @param object|null $format
+ *   (optional) An object representing a format, with the following properties:
+ *   - format: A machine-readable name representing the ID of the text format
+ *     to save. If this corresponds to an existing text format, that format
+ *     will be updated; otherwise, a new format will be created.
+ *   - name: The title of the text format.
+ *   - cache: (optional) An integer indicating whether the text format is
+ *     cacheable (1) or not (0). Defaults to 1.
+ *   - status: (optional) An integer indicating whether the text format is
+ *     enabled (1) or not (0). Defaults to 1.
+ *   - weight: (optional) The weight of the text format, which controls its
+ *     placement in text format lists. If omitted, the weight is set to 0.
+ *     Defaults to NULL.
+ *
+ * @return
+ *   A form array.
+ *
+ * @see filter_menu()
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    drupal_set_title(t('Add text format'));
+    backdrop_set_title(t('Add text format'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
     );
   }
-  return drupal_get_form('filter_admin_format_form', $format);
+  return backdrop_get_form('filter_admin_format_form', $format);
 }
 
 /**
- * Generate a text format form.
+ * Form constructor for the text format add/edit form.
  *
- * @ingroup forms
+ * @param $format
+ *   A format object having the properties:
+ *   - format: A machine-readable name representing the ID of the text format to
+ *     save. If this corresponds to an existing text format, that format will be
+ *     updated; otherwise, a new format will be created.
+ *   - name: The title of the text format.
+ *   - cache: An integer indicating whether the text format is cacheable (1) or
+ *     not (0). Defaults to 1.
+ *   - status: (optional) An integer indicating whether the text format is
+ *     enabled (1) or not (0). Defaults to 1.
+ *   - weight: (optional) The weight of the text format, which controls its
+ *     placement in text format lists. If omitted, the weight is set to 0.
+ *
  * @see filter_admin_format_form_validate()
  * @see filter_admin_format_form_submit()
+ * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
   $is_fallback = ($format->format == filter_fallback_format());
 
   $form['#format'] = $format;
   $form['#tree'] = TRUE;
-  $form['#attached']['js'][] = drupal_get_path('module', 'filter') . '/filter.admin.js';
-  $form['#attached']['css'][] = drupal_get_path('module', 'filter') . '/filter.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/filter.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/filter.css';
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -284,21 +320,23 @@ function theme_filter_admin_format_filter_order($variables) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
     $rows[] = array(
       'data' => array(
-        drupal_render($element[$name]['filter']),
-        drupal_render($element[$name]['weight']),
+        backdrop_render($element[$name]['filter']),
+        backdrop_render($element[$name]['weight']),
       ),
       'class' => array('draggable'),
     );
   }
-  $output = drupal_render_children($element);
+  $output = backdrop_render_children($element);
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  drupal_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;
 }
 
 /**
- * Validate text format form submissions.
+ * Form validation handler for filter_admin_format_form().
+ *
+ * @see filter_admin_format_form_submit()
  */
 function filter_admin_format_form_validate($form, &$form_state) {
   $format_format = trim($form_state['values']['format']);
@@ -315,7 +353,9 @@ function filter_admin_format_form_validate($form, &$form_state) {
 }
 
 /**
- * Process text format form submissions.
+ * Form submission handler for filter_admin_format_form().
+ *
+ * @see filter_admin_format_form_validate()
  */
 function filter_admin_format_form_submit($form, &$form_state) {
   // Remove unnecessary values.
@@ -337,20 +377,24 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   switch ($status) {
     case SAVED_NEW:
-      drupal_set_message(t('Added text format %format.', array('%format' => $format->name)));
+      backdrop_set_message(t('Added text format %format.', array('%format' => $format->name)));
       break;
 
     case SAVED_UPDATED:
-      drupal_set_message(t('The text format %format has been updated.', array('%format' => $format->name)));
+      backdrop_set_message(t('The text format %format has been updated.', array('%format' => $format->name)));
       break;
   }
 }
 
 /**
- * Menu callback; confirm deletion of a format.
+ * Form constructor for the text format deletion confirmation form.
  *
- * @ingroup forms
+ * @param $format
+ *   An object representing a text format.
+ *
+ * @see filter_menu()
  * @see filter_admin_disable_submit()
+ * @ingroup forms
  */
 function filter_admin_disable($form, &$form_state, $format) {
   $form['#format'] = $format;
@@ -364,13 +408,12 @@ function filter_admin_disable($form, &$form_state, $format) {
 }
 
 /**
- * Process filter disable form submission.
+ * Form submission handler for filter_admin_disable().
  */
 function filter_admin_disable_submit($form, &$form_state) {
   $format = $form['#format'];
   filter_format_disable($format);
-  drupal_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
+  backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
 
   $form_state['redirect'] = 'admin/config/content/formats';
 }
-

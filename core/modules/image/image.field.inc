@@ -87,21 +87,21 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The maximum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_resolution']['x'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
     '#default_value' => $max_resolution[0],
-    '#size' => 5,
-    '#maxlength' => 5,
+    '#min' => 1,
+    '#max' => 100000,
     '#field_suffix' => ' x ',
   );
   $form['max_resolution']['y'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
     '#default_value' => $max_resolution[1],
-    '#size' => 5,
-    '#maxlength' => 5,
+    '#min' => 1,
+    '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
 
@@ -116,21 +116,21 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The minimum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_resolution']['x'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
     '#default_value' => $min_resolution[0],
-    '#size' => 5,
-    '#maxlength' => 5,
+    '#min' => 1,
+    '#max' => 100000,
     '#field_suffix' => ' x ',
   );
   $form['min_resolution']['y'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Minimum height'),
     '#title_display' => 'invisible',
     '#default_value' => $min_resolution[1],
-    '#size' => 5,
-    '#maxlength' => 5,
+    '#min' => 1,
+    '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
 
@@ -171,17 +171,12 @@ function image_field_instance_settings_form($field, $instance) {
 function _image_field_resolution_validate($element, &$form_state) {
   if (!empty($element['x']['#value']) || !empty($element['y']['#value'])) {
     foreach (array('x', 'y') as $dimension) {
-      $value = $element[$dimension]['#value'];
-      if (!is_numeric($value)) {
-        form_error($element[$dimension], t('Height and width values must be numeric.'));
-        return;
-      }
-      if (intval($value) == 0) {
+      if (!$element[$dimension]['#value']) {
         form_error($element[$dimension], t('Both a height and width value must be specified in the !name field.', array('!name' => $element['#title'])));
         return;
       }
     }
-    form_set_value($element, intval($element['x']['#value']) . 'x' . intval($element['y']['#value']), $form_state);
+    form_set_value($element, $element['x']['#value'] . 'x' . $element['y']['#value'], $form_state);
   }
   else {
     form_set_value($element, '', $form_state);
@@ -374,7 +369,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   $widget_settings = $instance['widget']['settings'];
 
   $element['#theme'] = 'image_widget';
-  $element['#attached']['css'][] = drupal_get_path('module', 'image') . '/image.css';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/image.css';
 
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
@@ -457,7 +452,7 @@ function theme_image_widget($variables) {
 
   if (isset($element['preview'])) {
     $output .= '<div class="image-preview">';
-    $output .= drupal_render($element['preview']);
+    $output .= backdrop_render($element['preview']);
     $output .= '</div>';
   }
 
@@ -465,7 +460,7 @@ function theme_image_widget($variables) {
   if ($element['fid']['#value'] != 0) {
     $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
   }
-  $output .= drupal_render_children($element);
+  $output .= backdrop_render_children($element);
   $output .= '</div>';
   $output .= '</div>';
 
@@ -598,7 +593,7 @@ function theme_image_formatter($variables) {
   $item = $variables['item'];
 
   // Do not output an empty 'title' attribute.
-  if (isset($item['title']) && drupal_strlen($item['title']) == 0) {
+  if (isset($item['title']) && backdrop_strlen($item['title']) == 0) {
     unset($item['title']);
   }
 

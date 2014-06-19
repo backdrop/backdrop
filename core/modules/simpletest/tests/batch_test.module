@@ -13,7 +13,7 @@ function batch_test_menu() {
 
   $items['batch-test'] = array(
     'title' => 'Batch test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('batch_test_simple_form'),
     'access callback' => TRUE,
   );
@@ -26,7 +26,7 @@ function batch_test_menu() {
   // Multistep form: two steps, each setting a batch.
   $items['batch-test/multistep'] = array(
     'title' => 'Multistep',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('batch_test_multistep_form'),
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
@@ -35,14 +35,14 @@ function batch_test_menu() {
   // Chained form: four submit handlers, several of which set a batch.
   $items['batch-test/chained'] = array(
     'title' => 'Chained',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('batch_test_chained_form'),
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
   // Programmatic form: the page submits the 'Chained' form through
-  // drupal_form_submit().
+  // backdrop_form_submit().
   $items['batch-test/programmatic'] = array(
     'title' => 'Programmatic',
     'page callback' => 'batch_test_programmatic',
@@ -69,7 +69,7 @@ function batch_test_menu() {
   // Tests programmatic form submission within a batch operation.
   $items['batch-test/nested-programmatic'] = array(
     'title' => 'Nested programmatic',
-    'page callback' => 'batch_test_nested_drupal_form_submit',
+    'page callback' => 'batch_test_nested_backdrop_form_submit',
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'weight' => 6,
@@ -260,28 +260,28 @@ function batch_test_programmatic($value = 1) {
   $form_state = array(
     'values' => array('value' => $value)
   );
-  drupal_form_submit('batch_test_chained_form', $form_state);
+  backdrop_form_submit('batch_test_chained_form', $form_state);
   return 'Got out of a programmatic batched form.';
 }
 
 /**
  * Menu callback: programmatically submits a form within a batch.
  */
-function batch_test_nested_drupal_form_submit($value = 1) {
+function batch_test_nested_backdrop_form_submit($value = 1) {
   // Set the batch and process it.
   $batch['operations'] = array(
-    array('_batch_test_nested_drupal_form_submit_callback', array($value)),
+    array('_batch_test_nested_backdrop_form_submit_callback', array($value)),
   );
   batch_set($batch);
   batch_process('batch-test/redirect');
 }
 
 /**
- * Batch operation: submits form_test_mock_form using drupal_form_submit().
+ * Batch operation: submits form_test_mock_form using backdrop_form_submit().
  */
-function _batch_test_nested_drupal_form_submit_callback($value) {
+function _batch_test_nested_backdrop_form_submit_callback($value) {
   $state['values']['test_value'] = $value;
-  drupal_form_submit('batch_test_mock_form', $state);
+  backdrop_form_submit('batch_test_mock_form', $state);
 }
 
 /**
@@ -340,7 +340,7 @@ function _batch_test_batch_0() {
   $batch = array(
     'operations' => array(),
     'finished' => '_batch_test_finished_0',
-    'file' => drupal_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -362,7 +362,7 @@ function _batch_test_batch_1() {
   $batch = array(
     'operations' => $operations,
     'finished' => '_batch_test_finished_1',
-    'file' => drupal_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -383,7 +383,7 @@ function _batch_test_batch_2() {
   $batch = array(
     'operations' => $operations,
     'finished' => '_batch_test_finished_2',
-    'file' => drupal_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -414,7 +414,7 @@ function _batch_test_batch_3() {
   $batch = array(
     'operations' => $operations,
     'finished' => '_batch_test_finished_3',
-    'file' => drupal_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -443,7 +443,7 @@ function _batch_test_batch_4() {
   $batch = array(
     'operations' => $operations,
     'finished' => '_batch_test_finished_4',
-    'file' => drupal_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test') . '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -465,7 +465,7 @@ function _batch_test_batch_5() {
   $batch = array(
     'operations' => $operations,
     'finished' => '_batch_test_finished_5',
-    'file' => drupal_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
+    'file' => backdrop_get_path('module', 'batch_test'). '/batch_test.callbacks.inc',
   );
   return $batch;
 }
@@ -488,7 +488,7 @@ function batch_test_theme_batch() {
  * Batch callback function for testing the theme used on the progress page.
  */
 function _batch_test_theme_callback() {
-  // Because drupalGet() steps through the full progressive batch before
+  // Because backdropGet() steps through the full progressive batch before
   // returning control to the test function, we cannot test that the correct
   // theme is being used on the batch processing page by viewing that page
   // directly. Instead, we save the theme being used in a variable here, so

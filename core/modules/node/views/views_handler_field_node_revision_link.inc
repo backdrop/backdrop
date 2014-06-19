@@ -35,7 +35,7 @@ class views_handler_field_node_revision_link extends views_handler_field_node_li
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = $path;
-    $this->options['alter']['query'] = drupal_get_destination();
+    $this->options['alter']['query'] = backdrop_get_destination();
 
     return !empty($this->options['text']) ? $this->options['text'] : t('view');
   }

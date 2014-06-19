@@ -67,7 +67,7 @@ function dblog_menu() {
 function dblog_init() {
   if (arg(0) == 'admin' && arg(1) == 'reports') {
     // Add the CSS for this module
-    drupal_add_css(drupal_get_path('module', 'dblog') . '/dblog.css');
+    backdrop_add_css(backdrop_get_path('module', 'dblog') . '/dblog.css');
   }
 }
 
@@ -146,7 +146,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
     '#default_value' => variable_get('dblog_row_limit', 1000),
-    '#options' => array(0 => t('All')) + drupal_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
+    '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
   $form['actions']['#weight'] = 1;

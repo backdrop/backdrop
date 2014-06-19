@@ -1,24 +1,24 @@
 (function ($) {
 
-Drupal.behaviors.tableSelect = {
+Backdrop.behaviors.tableSelect = {
   attach: function (context, settings) {
     // Select the inner-most table in case of nested tables.
-    $('th.select-all', context).closest('table').once('table-select', Drupal.tableSelect);
+    $('th.select-all', context).closest('table').once('table-select', Backdrop.tableSelect);
   }
 };
 
-Drupal.tableSelect = function () {
+Backdrop.tableSelect = function () {
   // Do not add a "Select all" checkbox if there are no rows with checkboxes in the table
-  if ($('td input:checkbox', this).length == 0) {
+  if ($(this).find('td input[type="checkbox"]').length == 0) {
     return;
   }
 
   // Keep track of the table, which checkbox is checked and alias the settings.
   var table = this, checkboxes, lastChecked;
-  var strings = { 'selectAll': Drupal.t('Select all rows in this table'), 'selectNone': Drupal.t('Deselect all rows in this table') };
+  var strings = { 'selectAll': Backdrop.t('Select all rows in this table'), 'selectNone': Backdrop.t('Deselect all rows in this table') };
   var updateSelectAll = function (state) {
     // Update table's select-all checkbox (and sticky header's if available).
-    $(table).prev('table.sticky-header').addBack().find('th.select-all input:checkbox').each(function() {
+    $(table).prev('table.sticky-header').addBack().find('th.select-all input[type="checkbox"]').each(function() {
       $(this).attr('title', state ? strings.selectNone : strings.selectAll);
       this.checked = state;
     });
@@ -26,7 +26,7 @@ Drupal.tableSelect = function () {
 
   // Find all <th> with class select-all, and insert the check all checkbox.
   $('th.select-all', table).prepend($('<input type="checkbox" class="form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
-    if ($(event.target).is('input:checkbox')) {
+    if ($(event.target).is('input[type="checkbox"]')) {
       // Loop through all checkboxes and set their state to the select all checkbox' state.
       checkboxes.each(function () {
         this.checked = event.target.checked;
@@ -39,7 +39,7 @@ Drupal.tableSelect = function () {
   });
 
   // For each of the checkboxes within the table that are not disabled.
-  checkboxes = $('td input:checkbox:enabled', table).click(function (e) {
+  checkboxes = $('td input[type="checkbox"]:enabled', table).click(function (e) {
     // Either add or remove the selected class based on the state of the check all checkbox.
     $(this).closest('tr').toggleClass('selected', this.checked);
 
@@ -48,7 +48,7 @@ Drupal.tableSelect = function () {
     // that a checkbox has been checked or unchecked before.
     if (e.shiftKey && lastChecked && lastChecked != e.target) {
       // We use the checkbox's parent TR to do our range searching.
-      Drupal.tableSelectRange($(e.target).closest('tr')[0], $(lastChecked).closest('tr')[0], e.target.checked);
+      Backdrop.tableSelectRange($(e.target).closest('tr')[0], $(lastChecked).closest('tr')[0], e.target.checked);
     }
 
     // If all checkboxes are checked, make sure the select-all one is checked too, otherwise keep unchecked.
@@ -59,20 +59,21 @@ Drupal.tableSelect = function () {
   });
 };
 
-Drupal.tableSelectRange = function (from, to, state) {
+Backdrop.tableSelectRange = function (from, to, state) {
   // We determine the looping mode based on the the order of from and to.
   var mode = from.rowIndex > to.rowIndex ? 'previousSibling' : 'nextSibling';
 
   // Traverse through the sibling nodes.
-  for (var i = from[mode]; i; i = i[mode]) {
+  for (var i = from[mode], $i; i; i = i[mode]) {
     // Make sure that we're only dealing with elements.
     if (i.nodeType != 1) {
       continue;
     }
 
     // Either add or remove the selected class based on the state of the target checkbox.
-    $(i).toggleClass('selected', state);
-    $('input:checkbox', i).prop('checked', state);
+    $i = $(i);
+    $i.toggleClass('selected', state);
+    $i.find('input[type="checkbox"]').prop('checked', state);
 
     if (to.nodeType) {
       // If we are at the end of the range, stop.

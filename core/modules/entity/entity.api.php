@@ -22,18 +22,18 @@
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
  *   - controller class: The name of the class that is used to load the objects.
- *     The class has to implement the DrupalEntityControllerInterface interface.
- *     Leave blank to use the DrupalDefaultEntityController implementation.
- *   - base table: (used by DrupalDefaultEntityController) The name of the
+ *     The class has to implement the EntityControllerInterface interface.
+ *     Leave blank to use the DefaultEntityController implementation.
+ *   - base table: (used by DefaultEntityController) The name of the
  *     entity type's base table.
- *   - static cache: (used by DrupalDefaultEntityController) FALSE to disable
+ *   - static cache: (used by DefaultEntityController) FALSE to disable
  *     static caching of entities during a page request. Defaults to TRUE.
  *   - field cache: (used by Field API loading and saving of field data) FALSE
  *     to disable Field API's persistent cache of field data. Only recommended
  *     if a higher level persistent cache is available for the entity type.
  *     Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
- *     DrupalDefaultEntityController:attachLoad(), for example 'node_load'.
+ *     DefaultEntityController:attachLoad(), for example 'node_load'.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.
  *   - translation: An associative array of modules registered as field
  *     translation handlers. Array keys are the module names, array values
@@ -63,7 +63,10 @@
  *       object.
  *   - bundles: An array describing all bundles for this object type. Keys are
  *     bundles machine names, as found in the objects' 'bundle' property
- *     (defined in the 'entity keys' entry above). Elements:
+ *     (defined in the 'entity keys' entry above). This entry can be omitted if
+ *     this entity type exposes a single bundle (all entities have the same
+ *     collection of fields). The name of this single bundle will be the same as
+ *     the entity type. Elements:
  *     - label: The human-readable name of the bundle.
  *     - admin: An array of information that allows Field UI pages to attach
  *       themselves to the existing administration pages for the bundle.
@@ -186,7 +189,7 @@ function hook_entity_info() {
  */
 function hook_entity_info_alter(&$entity_info) {
   // Set the controller class for nodes to an alternate implementation of the
-  // DrupalEntityController interface.
+  // EntityControllerInterface.
   $entity_info['node']['controller class'] = 'MyCustomNodeController';
 }
 
@@ -289,7 +292,7 @@ function hook_entity_predelete($entity, $type) {
     'type' => $type,
     'id' => $id,
   );
-  drupal_write_record('example_deleted_entity_statistics', $ref_count_record);
+  backdrop_write_record('example_deleted_entity_statistics', $ref_count_record);
 }
 
 /**
@@ -352,7 +355,7 @@ function hook_entity_query_alter($query) {
  *
  * The module may add elements to $entity->content prior to rendering. The
  * structure of $entity->content is a renderable array as expected by
- * drupal_render().
+ * backdrop_render().
  *
  * @see hook_entity_view_alter()
  * @see hook_comment_view()
@@ -377,7 +380,7 @@ function hook_entity_view($entity, $type, $view_mode, $langcode) {
  * If a module wishes to act on the rendered HTML of the entity rather than the
  * structured content array, it may use this hook to add a #post_render
  * callback. Alternatively, it could also implement hook_preprocess_ENTITY().
- * See drupal_render() and theme() for details.
+ * See backdrop_render() and theme() for details.
  *
  * @param $build
  *   A renderable array representing the entity content.

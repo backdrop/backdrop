@@ -25,9 +25,6 @@
     <?php print $head; ?>
     <base href="<?php print $base_url; ?>" />
     <link type="text/css" rel="stylesheet" href="misc/print.css" />
-    <?php if ($language_rtl): ?>
-      <link type="text/css" rel="stylesheet" href="misc/print-rtl.css" />
-    <?php endif; ?>
   </head>
   <body>
     <?php

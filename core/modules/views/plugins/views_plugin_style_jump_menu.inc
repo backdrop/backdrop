@@ -119,12 +119,12 @@ class views_plugin_style_jump_menu extends views_plugin_style {
         // so users don't shoot themselves in the foot.
         $base_path = base_path();
         if (strpos($path, $base_path) === 0) {
-          $path = drupal_substr($path, drupal_strlen($base_path));
+          $path = backdrop_substr($path, backdrop_strlen($base_path));
         }
 
-        // use drupal_parse_url() to preserve query and fragment in case the user
+        // use backdrop_parse_url() to preserve query and fragment in case the user
         // wants to do fun tricks.
-        $url_options = drupal_parse_url($path);
+        $url_options = backdrop_parse_url($path);
 
         $path = url($url_options['path'], $url_options);
         $field = strip_tags(decode_entities($this->row_plugin->render($row)));
@@ -164,7 +164,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       'default_value' => $default_value,
     );
 
-    $form = drupal_get_form('system_jump_menu', $options, $settings);
+    $form = backdrop_get_form('system_jump_menu', $options, $settings);
     return $form;
   }
 

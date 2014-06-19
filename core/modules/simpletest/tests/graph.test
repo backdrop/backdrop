@@ -8,9 +8,9 @@
 /**
  * Unit tests for the graph handling features.
  */
-class GraphUnitTest extends DrupalUnitTestCase {
+class GraphUnitTest extends BackdropUnitTestCase {
   function setUp() {
-    require_once DRUPAL_ROOT . '/core/includes/graph.inc';
+    require_once BACKDROP_ROOT . '/core/includes/graph.inc';
     parent::setUp();
   }
 
@@ -34,7 +34,7 @@ class GraphUnitTest extends DrupalUnitTestCase {
       8 => array(9),
       9 => array(),
     ));
-    drupal_depth_first_search($graph);
+    backdrop_depth_first_search($graph);
 
     $expected_paths = array(
       1 => array(2, 3, 4),
@@ -98,7 +98,7 @@ class GraphUnitTest extends DrupalUnitTestCase {
    * Verify expected paths in a graph.
    *
    * @param $graph
-   *   A graph array processed by drupal_depth_first_search().
+   *   A graph array processed by backdrop_depth_first_search().
    * @param $expected_paths
    *   An associative array containing vertices with their expected paths.
    */
@@ -115,7 +115,7 @@ class GraphUnitTest extends DrupalUnitTestCase {
    * Verify expected reverse paths in a graph.
    *
    * @param $graph
-   *   A graph array processed by drupal_depth_first_search().
+   *   A graph array processed by backdrop_depth_first_search().
    * @param $expected_reverse_paths
    *   An associative array containing vertices with their expected reverse
    *   paths.
@@ -133,7 +133,7 @@ class GraphUnitTest extends DrupalUnitTestCase {
    * Verify expected components in a graph.
    *
    * @param $graph
-   *   A graph array processed by drupal_depth_first_search().
+   *   A graph array processed by backdrop_depth_first_search().
    * @param $expected_components
    *   An array containing of components defined as a list of their vertices.
    */
@@ -154,7 +154,7 @@ class GraphUnitTest extends DrupalUnitTestCase {
    * Verify expected order in a graph.
    *
    * @param $graph
-   *   A graph array processed by drupal_depth_first_search().
+   *   A graph array processed by backdrop_depth_first_search().
    * @param $expected_orders
    *   An array containing lists of vertices in their expected order.
    */

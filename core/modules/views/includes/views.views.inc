@@ -385,7 +385,7 @@ function views_views_plugins() {
       ),
       'views_query' => array(
         'title' => t('SQL Query'),
-        'help' => t('Query will be generated and run using the Drupal database API.'),
+        'help' => t('Query will be generated and run using the Backdrop database API.'),
         'handler' => 'views_plugin_query_default'
       ),
     ),
@@ -455,7 +455,7 @@ function views_views_plugins() {
       'full' => array(
         'title' => t('Paged output, full pager'),
         'short title' => t('Full'),
-        'help' => t('Paged output, full Drupal style'),
+        'help' => t('Paged output, full Backdrop style'),
         'handler' => 'views_plugin_pager_full',
         'help topic' => 'pager-full',
         'uses options' => TRUE,

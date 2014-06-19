@@ -5,7 +5,7 @@
  * Definition of ViewsUpgradeTestCase.
  */
 
-require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Try to test the upgrade path of all conversions.

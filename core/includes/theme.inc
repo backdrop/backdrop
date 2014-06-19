@@ -2,9 +2,9 @@
 
 /**
  * @file
- * The theme system, which controls the output of Drupal.
+ * The theme system, which controls the output of Backdrop.
  *
- * The theme system allows for nearly all output of the Drupal system to be
+ * The theme system allows for nearly all output of the Backdrop system to be
  * customized by user themes.
  */
 
@@ -31,6 +31,22 @@ const MARK_NEW = 1;
 const MARK_UPDATED = 2;
 
 /**
+ * A responsive table class; hide table cell on narrow devices.
+ *
+ * Indicates that a column has medium priority and thus can be hidden on narrow
+ * width devices and shown on medium+ width devices (i.e. tablets and desktops).
+ */
+const RESPONSIVE_PRIORITY_MEDIUM = 'priority-medium';
+
+/**
+ * A responsive table class; only show table cell on wide devices.
+ *
+ * Indicates that a column has low priority and thus can be hidden on narrow
+ * and medium viewports and shown on wide devices (i.e. desktops).
+ */
+const RESPONSIVE_PRIORITY_LOW = 'priority-low';
+
+/**
  * @} End of "Content markers".
  */
 
@@ -44,30 +60,30 @@ const MARK_UPDATED = 2;
  *   Boolean TRUE if the theme is enabled or is the site administration theme;
  *   FALSE otherwise.
  */
-function drupal_theme_access($theme) {
+function backdrop_theme_access($theme) {
   if (is_object($theme)) {
-    return _drupal_theme_access($theme);
+    return _backdrop_theme_access($theme);
   }
   else {
     $themes = list_themes();
-    return isset($themes[$theme]) && _drupal_theme_access($themes[$theme]);
+    return isset($themes[$theme]) && _backdrop_theme_access($themes[$theme]);
   }
 }
 
 /**
  * Helper function for determining access to a theme.
  *
- * @see drupal_theme_access()
+ * @see backdrop_theme_access()
  */
-function _drupal_theme_access($theme) {
+function _backdrop_theme_access($theme) {
   $admin_theme = variable_get('admin_theme');
   return !empty($theme->status) || ($admin_theme && $theme->name == $admin_theme);
 }
 
 /**
- * Initialize the theme system by loading the theme.
+ * Initializes the theme system by loading the theme.
  */
-function drupal_theme_initialize() {
+function backdrop_theme_initialize() {
   global $theme, $user, $theme_key;
 
   // If $theme is already set, assume the others are set, too, and do nothing
@@ -75,12 +91,12 @@ function drupal_theme_initialize() {
     return;
   }
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE);
   $themes = list_themes();
 
   // Only select the user selected theme if it is available in the
   // list of themes that can be accessed.
-  $theme = !empty($user->theme) && drupal_theme_access($user->theme) ? $user->theme : variable_get('theme_default', 'stark');
+  $theme = !empty($user->theme) && backdrop_theme_access($user->theme) ? $user->theme : variable_get('theme_default', 'stark');
 
   // Allow modules to override the theme. Validation has already been performed
   // inside menu_get_custom_theme(), so we do not need to check it again here.
@@ -97,24 +113,25 @@ function drupal_theme_initialize() {
     $ancestor = $themes[$ancestor]->base_theme;
     $base_theme[] = $themes[$ancestor];
   }
-  _drupal_theme_initialize($themes[$theme], array_reverse($base_theme));
+  _backdrop_theme_initialize($themes[$theme], array_reverse($base_theme));
 
-  // Themes can have alter functions, so reset the drupal_alter() cache.
-  drupal_static_reset('drupal_alter');
+  // Themes can have alter functions, so reset the backdrop_alter() cache.
+  backdrop_static_reset('backdrop_alter');
 
   // Provide the page with information about the theme that's used, so that a
   // later Ajax request can be rendered using the same theme.
   // @see ajax_base_page_theme()
   $setting['ajaxPageState'] = array(
     'theme' => $theme_key,
-    'theme_token' => drupal_get_token($theme_key),
+    'theme_token' => backdrop_get_token($theme_key),
   );
-  drupal_add_js($setting, 'setting');
+  backdrop_add_js($setting, 'setting');
 }
 
 /**
- * Initialize the theme system given already loaded information. This
- * function is useful to initialize a theme when no database is present.
+ * Initializes the theme system given already loaded information.
+ *
+ * This function is useful to initialize a theme when no database is present.
  *
  * @param $theme
  *   An object with the following information:
@@ -137,7 +154,7 @@ function drupal_theme_initialize() {
  * @param $registry_callback
  *   The callback to invoke to set the theme registry.
  */
-function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callback = '_theme_load_registry') {
+function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_callback = '_theme_load_registry') {
   global $theme_info, $base_theme_info, $theme_engine, $theme_path;
   $theme_info = $theme;
   $base_theme_info = $base_theme;
@@ -172,7 +189,7 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
   // And now add the stylesheets properly
   foreach ($final_stylesheets as $media => $stylesheets) {
     foreach ($stylesheets as $stylesheet) {
-      drupal_add_css($stylesheet, array('group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media));
+      backdrop_add_css($stylesheet, array('group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media));
     }
   }
 
@@ -197,7 +214,7 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
 
   // Add scripts used by this theme.
   foreach ($final_scripts as $script) {
-    drupal_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE));
+    backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE));
   }
 
   $theme_engine = NULL;
@@ -205,7 +222,7 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
   // Initialize the theme.
   if (isset($theme->engine)) {
     // Include the engine.
-    include_once DRUPAL_ROOT . '/' . $theme->owner;
+    include_once BACKDROP_ROOT . '/' . $theme->owner;
 
     $theme_engine = $theme->engine;
     if (function_exists($theme_engine . '_init')) {
@@ -220,12 +237,12 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
     foreach ($base_theme as $base) {
       // Include the theme file or the engine.
       if (!empty($base->owner)) {
-        include_once DRUPAL_ROOT . '/' . $base->owner;
+        include_once BACKDROP_ROOT . '/' . $base->owner;
       }
     }
     // and our theme gets one too.
     if (!empty($theme->owner)) {
-      include_once DRUPAL_ROOT . '/' . $theme->owner;
+      include_once BACKDROP_ROOT . '/' . $theme->owner;
     }
   }
 
@@ -235,7 +252,7 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
 }
 
 /**
- * Get the theme registry.
+ * Gets the theme registry.
  *
  * @param $complete
  *   Optional boolean to indicate whether to return the complete theme registry
@@ -252,17 +269,17 @@ function _drupal_theme_initialize($theme, $base_theme = array(), $registry_callb
  *   class.
  */
 function theme_get_registry($complete = TRUE) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['registry'] = &drupal_static('theme_get_registry');
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['registry'] = &backdrop_static('theme_get_registry');
   }
-  $theme_registry = &$drupal_static_fast['registry'];
+  $theme_registry = &$backdrop_static_fast['registry'];
 
   // Initialize the theme, if this is called early in the bootstrap, or after
   // static variables have been reset.
   if (!is_array($theme_registry)) {
-    drupal_theme_initialize();
+    backdrop_theme_initialize();
     $theme_registry = array();
   }
 
@@ -280,7 +297,7 @@ function theme_get_registry($complete = TRUE) {
 }
 
 /**
- * Set the callback that will be used by theme_get_registry() to fetch the registry.
+ * Sets the callback that will be used by theme_get_registry().
  *
  * @param $callback
  *   The name of the callback function.
@@ -296,7 +313,7 @@ function _theme_registry_callback($callback = NULL, array $arguments = array()) 
 }
 
 /**
- * Get the theme_registry cache; if it doesn't exist, build it.
+ * Gets the theme_registry cache; if it doesn't exist, builds it.
  *
  * @param $theme
  *   The loaded $theme object as returned by list_themes().
@@ -336,31 +353,32 @@ function _theme_load_registry($theme, $base_theme = NULL, $theme_engine = NULL, 
 }
 
 /**
- * Write the theme_registry cache into the database.
+ * Writes the theme_registry cache into the database.
  */
 function _theme_save_registry($theme, $registry) {
   cache()->set("theme_registry:$theme->name", $registry);
 }
 
 /**
- * Force the system to rebuild the theme registry; this should be called
- * when modules are added to the system, or when a dynamic system needs
- * to add more theme hooks.
+ * Forces the system to rebuild the theme registry.
+ *
+ * This function should be called when modules are added to the system, or when
+ * a dynamic system needs to add more theme hooks.
  */
-function drupal_theme_rebuild() {
-  drupal_static_reset('theme_get_registry');
+function backdrop_theme_rebuild() {
+  backdrop_static_reset('theme_get_registry');
   cache()->deletePrefix('theme_registry');
 }
 
 /**
  * Builds the run-time theme registry.
  *
- * Extends DrupalCacheArray to allow the theme registry to be accessed as a
+ * Extends BackdropCacheArray to allow the theme registry to be accessed as a
  * complete registry, while internally caching only the parts of the registry
  * that are actually in use on the site. On cache misses the complete
  * theme registry is loaded and used to update the run-time cache.
  */
-class ThemeRegistry Extends DrupalCacheArray {
+class ThemeRegistry Extends BackdropCacheArray {
 
   /**
    * Whether the partial registry can be persisted to the cache.
@@ -560,7 +578,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       if (isset($info['file'])) {
         $include_file = isset($info['path']) ? $info['path'] : $path;
         $include_file .= '/' . $info['file'];
-        include_once DRUPAL_ROOT . '/' . $include_file;
+        include_once BACKDROP_ROOT . '/' . $include_file;
         $result[$hook]['includes'][] = $include_file;
       }
 
@@ -635,7 +653,8 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
     $cache = $result + $cache;
   }
 
-  // Let themes have variable processors even if they didn't register a template.
+  // Let themes have variable processors even if they didn't register a
+  // template.
   if ($type == 'theme' || $type == 'base_theme') {
     foreach ($cache as $hook => $info) {
       // Check only if not registered by the theme or engine.
@@ -662,7 +681,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
 }
 
 /**
- * Build the theme registry cache.
+ * Builds the theme registry cache.
  *
  * @param $theme
  *   The loaded $theme object as returned by list_themes().
@@ -685,7 +704,7 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
   }
   else {
     foreach (module_implements('theme') as $module) {
-      _theme_process_registry($cache, $module, 'module', $module, drupal_get_path('module', $module));
+      _theme_process_registry($cache, $module, 'module', $module, backdrop_get_path('module', $module));
     }
     // Only cache this registry if all modules are loaded.
     if ($modules_loaded) {
@@ -712,7 +731,7 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
   _theme_process_registry($cache, $theme->name, 'theme', $theme->name, dirname($theme->filename));
 
   // Let modules alter the registry.
-  drupal_alter('theme_registry', $cache);
+  backdrop_alter('theme_registry', $cache);
 
   // Optimize the registry to not have empty arrays for functions.
   foreach ($cache as $hook => $info) {
@@ -726,7 +745,7 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
 }
 
 /**
- * Return a list of all currently available themes.
+ * Returns a list of all currently available themes.
  *
  * Retrieved from the database, if available and the site is not in maintenance
  * mode; otherwise compiled freshly from the filesystem.
@@ -768,10 +787,10 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
  *     their base theme), direct sub-themes of sub-themes, etc. The keys are
  *     the themes' machine names, and the values are the themes' human-readable
  *     names. This element is not set if there are no themes on the system that
- *     declare this theme as their base theme. 
+ *     declare this theme as their base theme.
 */
 function list_themes($refresh = FALSE) {
-  $list = &drupal_static(__FUNCTION__, array());
+  $list = &backdrop_static(__FUNCTION__, array());
 
   if ($refresh) {
     $list = array();
@@ -839,7 +858,7 @@ function list_themes($refresh = FALSE) {
  *   Returns an array of all of the theme's ancestors; the first element's value
  *   will be NULL if an error occurred.
  */
-function drupal_find_base_themes($themes, $key, $used_keys = array()) {
+function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
   $base_key = $themes[$key]->info['base theme'];
   // Does the base theme exist?
   if (!isset($themes[$base_key])) {
@@ -859,7 +878,7 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
       return array($base_key => NULL);
     }
     $used_keys[$base_key] = TRUE;
-    return drupal_find_base_themes($themes, $base_key, $used_keys) + $current_base_theme;
+    return backdrop_find_base_themes($themes, $base_key, $used_keys) + $current_base_theme;
   }
   // If we get here, then this is our parent theme.
   return $current_base_theme;
@@ -875,8 +894,8 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
  * registry.
  *
  * Avoid calling this function directly. It is preferable to replace direct
- * calls to the theme() function with calls to drupal_render() by passing a
- * render array with a #theme key to drupal_render(), which in turn calls
+ * calls to the theme() function with calls to backdrop_render() by passing a
+ * render array with a #theme key to backdrop_render(), which in turn calls
  * theme().
  *
  * @section sec_theme_hooks Theme Hooks
@@ -911,15 +930,15 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
  * executed (if they exist), in the following order (note that in the following
  * list, HOOK indicates the theme hook name, MODULE indicates a module name,
  * THEME indicates a theme name, and ENGINE indicates a theme engine name):
- * - template_preprocess(&$variables, $hook): Creates a default set of variables
- *   for all theme hooks with template implementations.
+ * - template_preprocess(&$variables, $hook): Creates a default set of
+ *   variables for all theme hooks with template implementations.
  * - template_preprocess_HOOK(&$variables): Should be implemented by the module
  *   that registers the theme hook, to set up default variables.
  * - MODULE_preprocess(&$variables, $hook): hook_preprocess() is invoked on all
  *   implementing modules.
  * - MODULE_preprocess_HOOK(&$variables): hook_preprocess_HOOK() is invoked on
- *   all implementing modules, so that modules that didn't define the theme hook
- *   can alter the variables.
+ *   all implementing modules, so that modules that didn't define the theme
+ *   hook can alter the variables.
  * - ENGINE_engine_preprocess(&$variables, $hook): Allows the theme engine to
  *   set necessary variables for all theme hooks with template implementations.
  * - ENGINE_engine_preprocess_HOOK(&$variables): Allows the theme engine to set
@@ -976,10 +995,10 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
  * @param $hook
  *   The name of the theme hook to call. If the name contains a
  *   double-underscore ('__') and there isn't an implementation for the full
- *   name, the part before the '__' is checked. This allows a fallback to a more
- *   generic implementation. For example, if theme('links__node', ...) is
- *   called, but there is no implementation of that theme hook, then the 'links'
- *   implementation is used. This process is iterative, so if
+ *   name, the part before the '__' is checked. This allows a fallback to a
+ *   more generic implementation. For example, if theme('links__node', ...) is
+ *   called, but there is no implementation of that theme hook, then the
+ *   'links' implementation is used. This process is iterative, so if
  *   theme('links__contextual__node', ...) is called, theme() checks for the
  *   following implementations, and uses the first one that exists:
  *   - links__contextual__node
@@ -1002,7 +1021,7 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
  * @return
  *   An HTML string representing the themed output.
  *
- * @see drupal_render()
+ * @see backdrop_render()
  * @see themeable
  * @see hook_theme()
  * @see template_preprocess()
@@ -1044,7 +1063,7 @@ function theme($hook, $variables = array()) {
       // Only log a message when not trying theme suggestions ($hook being an
       // array).
       if (!isset($candidate)) {
-        watchdog('theme', 'Theme key "@key" not found.', array('@key' => $hook), WATCHDOG_WARNING);
+        watchdog('theme', 'Theme hook "@hook" not found.', array('@hook' => $hook), WATCHDOG_WARNING);
       }
       return '';
     }
@@ -1056,10 +1075,11 @@ function theme($hook, $variables = array()) {
   // point path_to_theme() to the currently used theme path:
   $theme_path = $info['theme path'];
 
-  // Include a file if the theme function or variable processor is held elsewhere.
+  // Include a file if the theme function or variable processor is held
+  // elsewhere.
   if (!empty($info['includes'])) {
     foreach ($info['includes'] as $include_file) {
-      include_once DRUPAL_ROOT . '/' . $include_file;
+      include_once BACKDROP_ROOT . '/' . $include_file;
     }
   }
 
@@ -1100,7 +1120,7 @@ function theme($hook, $variables = array()) {
     // might reside there.
     if (!empty($base_hook_info['includes'])) {
       foreach ($base_hook_info['includes'] as $include_file) {
-        include_once DRUPAL_ROOT . '/' . $include_file;
+        include_once BACKDROP_ROOT . '/' . $include_file;
       }
     }
     if (isset($base_hook_info['preprocess functions']) || isset($base_hook_info['process functions'])) {
@@ -1205,27 +1225,27 @@ function theme($hook, $variables = array()) {
 }
 
 /**
- * Return the path to the current themed element.
+ * Returns the path to the current themed element.
  *
- * It can point to the active theme or the module handling a themed implementation.
- * For example, when invoked within the scope of a theming call it will depend
- * on where the theming function is handled. If implemented from a module, it
- * will point to the module. If implemented from the active theme, it will point
- * to the active theme. When called outside the scope of a theming call, it will
- * always point to the active theme.
+ * It can point to the active theme or the module handling a themed
+ * implementation. For example, when invoked within the scope of a theming call
+ * it will depend on where the theming function is handled. If implemented from
+ * a module, it will point to the module. If implemented from the active theme,
+ * it will point to the active theme. When called outside the scope of a
+ * theming call, it will always point to the active theme.
  */
 function path_to_theme() {
   global $theme_path;
 
   if (!isset($theme_path)) {
-    drupal_theme_initialize();
+    backdrop_theme_initialize();
   }
 
   return $theme_path;
 }
 
 /**
- * Allow themes and/or theme engines to easily discover overridden theme functions.
+ * Allows themes and/or theme engines to discover overridden theme functions.
  *
  * @param $cache
  *   The existing cache of theme hooks to test against.
@@ -1235,7 +1255,7 @@ function path_to_theme() {
  * @return $implementations
  *   The functions found, suitable for returning from hook_theme;
  */
-function drupal_find_theme_functions($cache, $prefixes) {
+function backdrop_find_theme_functions($cache, $prefixes) {
   $implementations = array();
   $functions = get_defined_functions();
 
@@ -1282,7 +1302,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allow themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to easily discover overridden templates.
  *
  * @param $cache
  *   The existing cache of theme hooks to test against.
@@ -1291,7 +1311,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
  * @param $path
  *   The path to search.
  */
-function drupal_find_theme_templates($cache, $extension, $path) {
+function backdrop_find_theme_templates($cache, $extension, $path) {
   $implementations = array();
 
   // Collect paths to all sub-themes grouped by base themes. These will be
@@ -1358,7 +1378,7 @@ function drupal_find_theme_templates($cache, $extension, $path) {
 
   // Find templates that implement possible "suggestion" variants of registered
   // theme hooks and add those as new registered theme hooks. See
-  // drupal_find_theme_functions() for more information about suggestions and
+  // backdrop_find_theme_functions() for more information about suggestions and
   // the use of 'pattern' and 'base hook'.
   $patterns = array_keys($files);
   foreach ($cache as $hook => $info) {
@@ -1372,7 +1392,8 @@ function drupal_find_theme_templates($cache, $extension, $path) {
       if ($matches) {
         foreach ($matches as $match) {
           $file = substr($match, 0, strpos($match, '.'));
-          // Put the underscores back in for the hook name and register this pattern.
+          // Put the underscores back in for the hook name and register this
+          // pattern.
           $arg_name = isset($info['variables']) ? 'variables' : 'render element';
           $implementations[strtr($file, '-', '_')] = array(
             'template' => $file,
@@ -1388,7 +1409,7 @@ function drupal_find_theme_templates($cache, $extension, $path) {
 }
 
 /**
- * Retrieve a setting for the current theme or for a given theme.
+ * Retrieves a setting for the current theme or for a given theme.
  *
  * The final setting is obtained from the last value found in the following
  * sources:
@@ -1409,7 +1430,7 @@ function drupal_find_theme_templates($cache, $extension, $path) {
  *   The value of the requested setting, NULL if the setting does not exist.
  */
 function theme_get_setting($setting_name, $theme = NULL) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   // If no key is given, use the current theme if we can determine it.
   if (!isset($theme)) {
@@ -1475,7 +1496,13 @@ function theme_get_setting($setting_name, $theme = NULL) {
       // Generate the path to the logo image.
       if ($cache[$theme]['toggle_logo']) {
         if ($cache[$theme]['default_logo']) {
-          $cache[$theme]['logo'] = file_create_url(dirname($theme_object->filename) . '/logo.png');
+          if (file_exists($logo = dirname($theme_object->filename) . '/logo.png')) {
+            $cache[$theme]['logo'] = file_create_url($logo);
+          }
+          else {
+            $cache[$theme]['logo'] = '';
+            $cache[$theme]['toggle_logo'] = FALSE;
+          }
         }
         elseif ($cache[$theme]['logo_path']) {
           $cache[$theme]['logo'] = file_create_url($cache[$theme]['logo_path']);
@@ -1506,7 +1533,7 @@ function theme_get_setting($setting_name, $theme = NULL) {
 }
 
 /**
- * Render a system default template, which is essentially a PHP template.
+ * Renders a system default template, which is essentially a PHP template.
  *
  * @param $template_file
  *   The filename of the template to render.
@@ -1517,20 +1544,27 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *   The output generated by the template.
  */
 function theme_render_template($template_file, $variables) {
-  extract($variables, EXTR_SKIP);               // Extract the variables to a local namespace
-  ob_start();                                   // Start output buffering
-  include DRUPAL_ROOT . '/' . $template_file;   // Include the template file
-  return ob_get_clean();                        // End buffering and return its contents
+  // Extract the variables to a local namespace
+  extract($variables, EXTR_SKIP);
+
+  // Start output buffering
+  ob_start();
+
+  // Include the template file
+  include BACKDROP_ROOT . '/' . $template_file;
+
+  // End buffering and return its contents
+  return ob_get_clean();
 }
 
 /**
- * Enable a given list of themes.
+ * Enables a given list of themes.
  *
  * @param $theme_list
  *   An array of theme names.
  */
 function theme_enable($theme_list) {
-  drupal_clear_css_cache();
+  backdrop_clear_css_cache();
 
   foreach ($theme_list as $key) {
     db_update('system')
@@ -1542,14 +1576,14 @@ function theme_enable($theme_list) {
 
   list_themes(TRUE);
   menu_rebuild();
-  drupal_theme_rebuild();
+  backdrop_theme_rebuild();
 
   // Invoke hook_themes_enabled() after the themes have been enabled.
   module_invoke_all('themes_enabled', $theme_list);
 }
 
 /**
- * Disable a given list of themes.
+ * Disables a given list of themes.
  *
  * @param $theme_list
  *   An array of theme names.
@@ -1563,7 +1597,7 @@ function theme_disable($theme_list) {
     }
   }
 
-  drupal_clear_css_cache();
+  backdrop_clear_css_cache();
 
   foreach ($theme_list as $key) {
     db_update('system')
@@ -1575,7 +1609,7 @@ function theme_disable($theme_list) {
 
   list_themes(TRUE);
   menu_rebuild();
-  drupal_theme_rebuild();
+  backdrop_theme_rebuild();
 
   // Invoke hook_themes_disabled after the themes have been disabled.
   module_invoke_all('themes_disabled', $theme_list);
@@ -1640,7 +1674,7 @@ function template_preprocess_datetime(&$variables) {
  * @see http://www.w3.org/TR/html5-author/the-time-element.html#attr-time-datetime
  */
 function theme_datetime($variables) {
-  $output = '<time' . drupal_attributes($variables['attributes']) . '>';
+  $output = '<time' . backdrop_attributes($variables['attributes']) . '>';
   $output .= !empty($variables['html']) ? $variables['text'] : check_plain($variables['text']);
   $output .= '</time>';
   return $output;
@@ -1667,7 +1701,7 @@ function theme_status_messages($variables) {
     'error' => t('Error message'),
     'warning' => t('Warning message'),
   );
-  foreach (drupal_get_messages($display) as $type => $messages) {
+  foreach (backdrop_get_messages($display) as $type => $messages) {
     $output .= "<div class=\"messages $type\">\n";
     if (!empty($status_heading[$type])) {
       $output .= '<h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
@@ -1692,19 +1726,19 @@ function theme_status_messages($variables) {
  *
  * This is a wrapper around l() to allow for more flexible link themeing.
  *
- * Where performance is more important than theme flexibility, Drupal code that
+ * Where performance is more important than theme flexibility, Backdrop code that
  * outputs a link should call the l() function directly, as #theme 'link'
  * implementations have a measurable performance impact.
  *
  * @param $variables
- *   An associative array containing the keys 'text', 'path', and 'options'. See
- *   See the l() function for information about these variables. However, unlike
- *   'text' in l(), both render arrays and strings are supported here.
+ *   An associative array containing the keys 'text', 'path', and 'options'.
+ *   See the l() function for information about these variables. Both render
+ *   arrays and strings are supported as 'text', unlike in the l() function.
  *
  * @see l()
  */
 function theme_link($variables) {
-  $rendered_text = is_array($variables['text']) ? drupal_render($variables['text']) : $variables['text'];
+  $rendered_text = is_array($variables['text']) ? backdrop_render($variables['text']) : $variables['text'];
   return l($rendered_text, $variables['path'], $variables['options']);
 }
 
@@ -1721,15 +1755,16 @@ function theme_link($variables) {
  *       item in the links list.
  *     - html: (optional) Whether or not 'title' is HTML. If set, the title
  *       will not be passed through check_plain().
- *     - attributes: (optional) Attributes for the anchor, or for the <span> tag
- *       used in its place if no 'href' is supplied. If element 'class' is
+ *     - attributes: (optional) Attributes for the anchor, or for the <span>
+ *       tag used in its place if no 'href' is supplied. If element 'class' is
  *       included, it must be an array of one or more class names.
- *     If the 'href' element is supplied, the entire link array is passed to l()
- *     as its $options parameter.
+ *     If the 'href' element is supplied, the entire link array is passed to
+ *     l() as its $options parameter.
  *   - attributes: A keyed array of attributes for the UL containing the
  *     list of links.
- *   - heading: (optional) A heading to precede the links. May be an associative
- *     array or a string. If it's an array, it can have the following elements:
+ *   - heading: (optional) A heading to precede the links. May be an
+ *     associative array or a string. If it's an array, it can have the
+ *     following elements:
  *     - text: The heading text.
  *     - level: The heading level (e.g. 'h2', 'h3').
  *     - class: (optional) An array of the CSS classes for the heading.
@@ -1768,12 +1803,12 @@ function theme_links($variables) {
         $heading['attributes']['class'] = $heading['class'];
       }
 
-      $output .= '<' . $heading['level'] . drupal_attributes($heading['attributes']) . '>';
+      $output .= '<' . $heading['level'] . backdrop_attributes($heading['attributes']) . '>';
       $output .= check_plain($heading['text']);
       $output .= '</' . $heading['level'] . '>';
     }
 
-    $output .= '<ul' . drupal_attributes($attributes) . '>';
+    $output .= '<ul' . backdrop_attributes($attributes) . '>';
 
     $num_links = count($links);
     $i = 0;
@@ -1782,7 +1817,7 @@ function theme_links($variables) {
 
       $class = array();
       // Use the array key as class name.
-      $class[] = drupal_html_class($key);
+      $class[] = backdrop_html_class($key);
       // Add odd/even, first, and last classes.
       $class[] = ($i % 2 ? 'odd' : 'even');
       if ($i == 1) {
@@ -1794,7 +1829,7 @@ function theme_links($variables) {
 
       // Handle links.
       if (isset($link['href'])) {
-        $is_current_path = ($link['href'] == $_GET['q'] || ($link['href'] == '<front>' && drupal_is_front_page()));
+        $is_current_path = ($link['href'] == $_GET['q'] || ($link['href'] == '<front>' && backdrop_is_front_page()));
         $is_current_language = (empty($link['language']) || $link['language']->langcode == $language_url->langcode);
         if ($is_current_path && $is_current_language) {
           $class[] = 'active';
@@ -1809,12 +1844,12 @@ function theme_links($variables) {
           'html' => FALSE,
           'attributes' => array(),
         );
-        $item = '<span' . drupal_attributes($link['attributes']) . '>';
+        $item = '<span' . backdrop_attributes($link['attributes']) . '>';
         $item .= ($link['html'] ? $link['title'] : check_plain($link['title']));
         $item .= '</span>';
       }
 
-      $output .= '<li' . drupal_attributes(array('class' => $class)) . '>';
+      $output .= '<li' . backdrop_attributes(array('class' => $class)) . '>';
       $output .= $item;
       $output .= '</li>';
     }
@@ -1856,8 +1891,8 @@ function theme_dropbutton_wrapper($variables) {
  *     attribute to be omitted in some cases. Therefore, this variable defaults
  *     to an empty string, but can be set to NULL for the attribute to be
  *     omitted. Usually, neither omission nor an empty string satisfies
- *     accessibility requirements, so it is strongly encouraged for code calling
- *     theme('image') to pass a meaningful value for this variable.
+ *     accessibility requirements, so it is strongly encouraged for code
+ *     calling theme('image') to pass a meaningful value for this variable.
  *     - http://www.w3.org/TR/REC-html40/struct/objects.html#h-13.8
  *     - http://www.w3.org/TR/xhtml1/dtds.html
  *     - http://dev.w3.org/html5/spec/Overview.html#alt
@@ -1875,7 +1910,7 @@ function theme_image($variables) {
     }
   }
 
-  return '<img' . drupal_attributes($attributes) . ' />';
+  return '<img' . backdrop_attributes($attributes) . ' />';
 }
 
 /**
@@ -1910,7 +1945,15 @@ function theme_breadcrumb($variables) {
  *     - "data": The localized title of the table column.
  *     - "field": The database field represented in the table column (required
  *       if user is to be able to sort on this column).
- *     - "sort": A default sort order for this column ("asc" or "desc"). Only
+ *     - "sort": A default sort order for this column ("asc" or "desc"). 
+ *     - "class": An array of values for the 'class' attribute. In particular,
+ *       the least important columns that can be hidden on narrow and medium
+ *       width screens should have a 'priority-low' class, referenced with the
+ *       RESPONSIVE_PRIORITY_LOW constant. Columns that should be shown on
+ *       medium+ wide screens should be marked up with a class of
+ *       'priority-medium', referenced by with the RESPONSIVE_PRIORITY_MEDIUM
+ *       constant. Themes may hide columns with one of these two classes on
+ *       narrow viewports to save horizontal space. Only
  *       one column should be given a default sort order because table sorting
  *       only applies to one column at a time.
  *     - Any HTML attributes, such as "colspan", to apply to the column header
@@ -1985,33 +2028,26 @@ function theme_table($variables) {
   $sticky = $variables['sticky'];
   $empty = $variables['empty'];
 
-  // Add sticky headers, if applicable.
-  if (count($header) && $sticky) {
-    drupal_add_js('core/misc/tableheader.js');
-    // Add 'sticky-enabled' class to the table to identify it for JS.
-    // This is needed to target tables constructed by this function.
-    $attributes['class'][] = 'sticky-enabled';
-  }
-
-  $output = '<table' . drupal_attributes($attributes) . ">\n";
-
+  // The output string contains the inner content of the table. The table tag
+  // itself is added at the end.
+  $output = '';
   if (isset($caption)) {
     $output .= '<caption>' . $caption . "</caption>\n";
   }
 
   // Format the table columns:
   if (count($colgroups)) {
-    foreach ($colgroups as $number => $colgroup) {
-      $attributes = array();
+    foreach ($colgroups as $colgroup) {
+      $colgroup_attributes = array();
 
-      // Check if we're dealing with a simple or complex column
+      // Check if we're dealing with a simple or complex column.
       if (isset($colgroup['data'])) {
         foreach ($colgroup as $key => $value) {
           if ($key == 'data') {
             $cols = $value;
           }
           else {
-            $attributes[$key] = $value;
+            $colgroup_attributes[$key] = $value;
           }
         }
       }
@@ -2019,17 +2055,16 @@ function theme_table($variables) {
         $cols = $colgroup;
       }
 
-      // Build colgroup
+      // Build colgroup.
       if (is_array($cols) && count($cols)) {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . '>';
-        $i = 0;
+        $output .= ' <colgroup' . backdrop_attributes($colgroup_attributes) . '>';
         foreach ($cols as $col) {
-          $output .= ' <col' . drupal_attributes($col) . ' />';
+          $output .= ' <col' . backdrop_attributes($col) . ' />';
         }
         $output .= " </colgroup>\n";
       }
       else {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . " />\n";
+        $output .= ' <colgroup' . backdrop_attributes($colgroup_attributes) . " />\n";
       }
     }
   }
@@ -2048,17 +2083,32 @@ function theme_table($variables) {
     $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
   }
 
+  $responsive_columns = array();
   // Format the table header:
   if (count($header)) {
     $ts = tablesort_init($header);
     // HTML requires that the thead tag has tr tags in it followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
     $output .= (count($rows) ? ' <thead><tr>' : ' <tr>');
+    $i = 0;
     foreach ($header as $cell) {
+      $i++;
+      // Track responsive classes for each column as needed. Only the header
+      // cells for a column are marked up with the responsive classes by a
+      // module developer or themer. The responsive classes on the header cells
+      // must be transferred to the content cells.
+      if (!empty($cell['class']) && is_array($cell['class'])) {
+        if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $cell['class'])) {
+          $responsive_columns[$i] =  RESPONSIVE_PRIORITY_MEDIUM;
+        }
+        elseif (in_array(RESPONSIVE_PRIORITY_LOW, $cell['class'])) {
+          $responsive_columns[$i] =  RESPONSIVE_PRIORITY_LOW;
+        }
+      }
       $cell = tablesort_header($cell, $header, $ts);
       $output .= _theme_table_cell($cell, TRUE);
     }
-    // Using ternary operator to close the tags based on whether or not there are rows
+    // Close the tags based on whether or not there are rows.
     $output .= (count($rows) ? " </tr></thead>\n" : "</tr>\n");
   }
   else {
@@ -2071,33 +2121,45 @@ function theme_table($variables) {
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
     foreach ($rows as $number => $row) {
-      // Check if we're dealing with a simple or complex row
+      // Check if we're dealing with a simple or complex row.
       if (isset($row['data'])) {
         $cells = $row['data'];
         $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
 
         // Set the attributes array and exclude 'data' and 'no_striping'.
-        $attributes = $row;
-        unset($attributes['data']);
-        unset($attributes['no_striping']);
+        $tr_attributes = $row;
+        unset($tr_attributes['data']);
+        unset($tr_attributes['no_striping']);
       }
       else {
         $cells = $row;
-        $attributes = array();
+        $tr_attributes = array();
         $no_striping = FALSE;
       }
       if (count($cells)) {
-        // Add odd/even class
+        // Add odd/even class.
         if (!$no_striping) {
           $class = $flip[$class];
-          $attributes['class'][] = $class;
+          $tr_attributes['class'][] = $class;
         }
 
-        // Build row
-        $output .= ' <tr' . drupal_attributes($attributes) . '>';
+        // Build row.
+        $output .= ' <tr' . backdrop_attributes($tr_attributes) . '>';
         $i = 0;
         foreach ($cells as $cell) {
-          $cell = tablesort_cell($cell, $header, $ts, $i++);
+          $i++;
+          // Add active class if needed for sortable tables.
+          $cell = tablesort_cell($cell, $header, $ts, $i);
+          // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
+          // class from header to cell as needed.
+          if (isset($responsive_columns[$i])) {
+            if (is_array($cell)) {
+              $cell['class'][] = $responsive_columns[$i];
+            }
+            else {
+              $cell = array('data' => $cell, 'class' => array($responsive_columns[$i]));
+            }
+          }
           $output .= _theme_table_cell($cell);
         }
         $output .= " </tr>\n";
@@ -2106,7 +2168,25 @@ function theme_table($variables) {
     $output .= "</tbody>\n";
   }
 
-  $output .= "</table>\n";
+  // Add sticky headers if enabled.
+  if (count($header) && $sticky) {
+    backdrop_add_js('core/misc/tableheader.js');
+    // Add 'sticky-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $attributes['class'][] = 'sticky-enabled';
+  }
+  // If the responsive classes were used, add the matching library.
+  if (count($responsive_columns)) {
+    backdrop_add_library('system', 'backdrop.tableresponsive');
+    // Add 'responsive-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $attributes['class'][] = 'responsive-enabled';
+  }
+
+  // Wrap the result in the table tag. This is done last so that the
+  // responsive-enabled class is added only when needed.
+  $output = '<table' . backdrop_attributes($attributes) . ">\n$output</table>\n";
+
   return $output;
 }
 
@@ -2115,7 +2195,8 @@ function theme_table($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - style: Set to either 'asc' or 'desc', this determines which icon to show.
+ *   - style: Set to either 'asc' or 'desc', this determines which icon to
+ *     show.
  */
 function theme_tablesort_indicator($variables) {
   if ($variables['style'] == "asc") {
@@ -2172,7 +2253,7 @@ function theme_item_list($variables) {
 
   $output = '';
   if ($items) {
-    $output .= '<' . $type . drupal_attributes($list_attributes) . '>';
+    $output .= '<' . $type . backdrop_attributes($list_attributes) . '>';
 
     $num_items = count($items);
     $i = 0;
@@ -2218,7 +2299,7 @@ function theme_item_list($variables) {
         $attributes['class'][] = 'last';
       }
 
-      $output .= '<li' . drupal_attributes($attributes) . '>' . $value . '</li>';
+      $output .= '<li' . backdrop_attributes($attributes) . '>' . $value . '</li>';
     }
     $output .= "</$type>";
   }
@@ -2275,7 +2356,8 @@ function theme_feed_icon($variables) {
  *       - script: To load JavaScript.
  *     - #attributes: (optional) An array of HTML attributes to apply to the
  *       tag.
- *     - #value: (optional) A string containing tag content, such as inline CSS.
+ *     - #value: (optional) A string containing tag content, such as inline
+ *       CSS.
  *     - #value_prefix: (optional) A string to prepend to #value, e.g. a CDATA
  *       wrapper prefix.
  *     - #value_suffix: (optional) A string to append to #value, e.g. a CDATA
@@ -2283,7 +2365,7 @@ function theme_feed_icon($variables) {
  */
 function theme_html_tag($variables) {
   $element = $variables['element'];
-  $attributes = isset($element['#attributes']) ? drupal_attributes($element['#attributes']) : '';
+  $attributes = isset($element['#attributes']) ? backdrop_attributes($element['#attributes']) : '';
   if (!isset($element['#value'])) {
     return '<' . $element['#tag'] . $attributes . " />\n";
   }
@@ -2372,12 +2454,12 @@ function _theme_table_cell($cell, $header = FALSE) {
     $data = isset($cell['data']) ? $cell['data'] : '';
     // Cell's data property can be a string or a renderable array.
     if (is_array($data)) {
-      $data = drupal_render($data);
+      $data = backdrop_render($data);
     }
     $header |= isset($cell['header']);
     unset($cell['data']);
     unset($cell['header']);
-    $attributes = drupal_attributes($cell);
+    $attributes = backdrop_attributes($cell);
   }
   else {
     $data = $cell;
@@ -2409,8 +2491,9 @@ function template_preprocess(&$variables, $hook) {
   global $user;
   static $count = array();
 
-  // Track run count for each hook to provide zebra striping.
-  // See "template_preprocess_block()" which provides the same feature specific to blocks.
+  // Track run count for each hook to provide zebra striping. See
+  // "template_preprocess_block()" which provides the same feature specific to
+  // blocks.
   $count[$hook] = isset($count[$hook]) && is_int($count[$hook]) ? $count[$hook] : 1;
   $variables['zebra'] = ($count[$hook] % 2) ? 'odd' : 'even';
   $variables['id'] = $count[$hook]++;
@@ -2419,16 +2502,16 @@ function template_preprocess(&$variables, $hook) {
   $variables['directory'] = path_to_theme();
 
   // Initialize html class attribute for the current hook.
-  $variables['classes_array'] = array(drupal_html_class($hook));
+  $variables['classes_array'] = array(backdrop_html_class($hook));
 
   // Merge in variables that don't depend on hook and don't change during a
   // single page request.
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['default_variables'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['default_variables'] = &backdrop_static(__FUNCTION__);
   }
-  $default_variables = &$drupal_static_fast['default_variables'];
+  $default_variables = &$backdrop_static_fast['default_variables'];
   // Global $user object shouldn't change during a page request once rendering
   // has started, but if there's an edge case where it does, re-fetch the
   // variables appropriate for the new user.
@@ -2465,9 +2548,9 @@ function _template_preprocess_default_variables() {
     $variables['logged_in'] = ($user->uid > 0);
   }
 
-  // drupal_is_front_page() might throw an exception.
+  // backdrop_is_front_page() might throw an exception.
   try {
-    $variables['is_front'] = drupal_is_front_page();
+    $variables['is_front'] = backdrop_is_front_page();
   }
   catch (Exception $e) {
     // If the database is not yet available, set default values for these
@@ -2500,11 +2583,11 @@ function template_process(&$variables, $hook) {
 
   // Flatten out attributes, title_attributes, and content_attributes.
   // Because this function can be called very often, and often with empty
-  // attributes, optimize performance by only calling drupal_attributes() if
+  // attributes, optimize performance by only calling backdrop_attributes() if
   // necessary.
-  $variables['attributes'] = $variables['attributes_array'] ? drupal_attributes($variables['attributes_array']) : '';
-  $variables['title_attributes'] = $variables['title_attributes_array'] ? drupal_attributes($variables['title_attributes_array']) : '';
-  $variables['content_attributes'] = $variables['content_attributes_array'] ? drupal_attributes($variables['content_attributes_array']) : '';
+  $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
+  $variables['title_attributes'] = $variables['title_attributes_array'] ? backdrop_attributes($variables['title_attributes_array']) : '';
+  $variables['content_attributes'] = $variables['content_attributes_array'] ? backdrop_attributes($variables['content_attributes_array']) : '';
 }
 
 /**
@@ -2542,14 +2625,14 @@ function template_preprocess_html(&$variables) {
         // Add current suggestion to page classes to make it possible to theme
         // the page depending on the current page type (e.g. node, admin, user,
         // etc.) as well as more specific data like node-12 or node-edit.
-        $variables['classes_array'][] = drupal_html_class($suggestion);
+        $variables['classes_array'][] = backdrop_html_class($suggestion);
       }
     }
   }
 
   // If on an individual node page, add the node type to body classes.
   if ($node = menu_get_object()) {
-    $variables['classes_array'][] = drupal_html_class('node-type-' . $node->type);
+    $variables['classes_array'][] = backdrop_html_class('node-type-' . $node->type);
   }
 
   // Initializes attributes which are specific to the html and body elements.
@@ -2564,18 +2647,18 @@ function template_preprocess_html(&$variables) {
   if (theme_get_setting('toggle_favicon')) {
     $favicon = theme_get_setting('favicon');
     $type = theme_get_setting('favicon_mimetype');
-    drupal_add_html_head_link(array('rel' => 'shortcut icon', 'href' => drupal_strip_dangerous_protocols($favicon), 'type' => $type));
+    backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon), 'type' => $type));
   }
 
   // Construct page title.
-  if (drupal_get_title()) {
+  if (backdrop_get_title()) {
     $head_title = array(
-      'title' => strip_tags(drupal_get_title()),
-      'name' => check_plain(variable_get('site_name', 'Drupal')),
+      'title' => strip_tags(backdrop_get_title()),
+      'name' => check_plain(variable_get('site_name', 'Backdrop')),
     );
   }
   else {
-    $head_title = array('name' => check_plain(variable_get('site_name', 'Drupal')));
+    $head_title = array('name' => check_plain(variable_get('site_name', 'Backdrop')));
     if (variable_get('site_slogan', '')) {
       $head_title['slogan'] = filter_xss_admin(variable_get('site_slogan', ''));
     }
@@ -2602,7 +2685,7 @@ function template_preprocess_html(&$variables) {
  * Any changes to variables in this preprocessor should also be changed inside
  * template_preprocess_maintenance_page() to keep all of them consistent.
  *
- * @see drupal_render_page()
+ * @see backdrop_render_page()
  * @see template_process_page()
  * @see page.tpl.php
  */
@@ -2627,12 +2710,12 @@ function template_preprocess_page(&$variables) {
 
   $variables['base_path']         = base_path();
   $variables['front_page']        = url();
-  $variables['feed_icons']        = drupal_get_feeds();
+  $variables['feed_icons']        = backdrop_get_feeds();
   $variables['language']          = $GLOBALS['language_interface'];
   $variables['language']->dir     = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
   $variables['logo']              = theme_get_setting('logo');
   $variables['action_links']      = menu_local_actions();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin(variable_get('site_name', 'Drupal')) : '');
+  $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin(variable_get('site_name', 'Backdrop')) : '');
   $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? filter_xss_admin(variable_get('site_slogan', '')) : '');
   $variables['tabs']              = menu_local_tabs();
 
@@ -2690,10 +2773,10 @@ function template_process_page(&$variables) {
     // re-use the cache of an already rendered menu containing the active link
     // for the current page.
     // @see menu_tree_page_data()
-    $variables['breadcrumb'] = theme('breadcrumb', array('breadcrumb' => drupal_get_breadcrumb()));
+    $variables['breadcrumb'] = theme('breadcrumb', array('breadcrumb' => backdrop_get_breadcrumb()));
   }
   if (!isset($variables['title'])) {
-    $variables['title'] = drupal_get_title();
+    $variables['title'] = backdrop_get_title();
   }
 
   // Generate messages last in order to capture as many as possible for the
@@ -2707,7 +2790,7 @@ function template_process_page(&$variables) {
  * Process variables for html.tpl.php
  *
  * Perform final addition and modification of variables before passing into
- * the template. To customize these variables, call drupal_render() on elements
+ * the template. To customize these variables, call backdrop_render() on elements
  * in $variables['page'] during THEME_preprocess_page().
  *
  * @see template_preprocess_html()
@@ -2715,20 +2798,20 @@ function template_process_page(&$variables) {
  */
 function template_process_html(&$variables) {
   // Flatten out html_attributes and body_attributes.
-  $variables['html_attributes'] = drupal_attributes($variables['html_attributes_array']);
-  $variables['body_attributes'] = drupal_attributes($variables['body_attributes_array']);
+  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
+  $variables['body_attributes'] = backdrop_attributes($variables['body_attributes_array']);
 
   // Render page_top and page_bottom into top level variables.
-  $variables['page_top'] = drupal_render($variables['page']['page_top']);
-  $variables['page_bottom'] = drupal_render($variables['page']['page_bottom']);
+  $variables['page_top'] = backdrop_render($variables['page']['page_top']);
+  $variables['page_bottom'] = backdrop_render($variables['page']['page_bottom']);
   // Place the rendered HTML for the page body into a top level variable.
   $variables['page']              = $variables['page']['#children'];
-  $variables['page_bottom'] .= drupal_get_js('footer');
+  $variables['page_bottom'] .= backdrop_get_js('footer');
 
-  $variables['head']    = drupal_get_html_head();
-  $variables['css']     = drupal_add_css();
-  $variables['styles']  = drupal_get_css();
-  $variables['scripts'] = drupal_get_js();
+  $variables['head']    = backdrop_get_html_head();
+  $variables['css']     = backdrop_add_css();
+  $variables['styles']  = backdrop_get_css();
+  $variables['scripts'] = backdrop_get_js();
 }
 
 /**
@@ -2772,7 +2855,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
     // Remove slashes or null per SA-CORE-2009-003 and change - (hyphen) to _
     // (underscore).
     //
-    // When we discover templates in @see drupal_find_theme_templates,
+    // When we discover templates in @see backdrop_find_theme_templates,
     // hyphens (-) are converted to underscores (_) before the theme hook
     // is registered. We do this because the hyphens used for delimiters
     // in hook suggestions cannot be used in the function names of the
@@ -2792,7 +2875,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
       $prefix .= $delimiter . $arg;
     }
   }
-  if (drupal_is_front_page()) {
+  if (backdrop_is_front_page()) {
     // Front templates should be based on root only, not prefixed arguments.
     $suggestions[] = $base . $delimiter . 'front';
   }
@@ -2801,13 +2884,13 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
 }
 
 /**
- * The variables array generated here is a mirror of template_preprocess_page().
- * This preprocessor will run its course when theme_maintenance_page() is
- * invoked.
+ * Process variables for maintenance-page.tpl.php.
  *
- * An alternate template file of "maintenance-page--offline.tpl.php" can be
- * used when the database is offline to hide errors and completely replace the
- * content.
+ * The variables array generated here is a mirror of
+ * template_preprocess_page(). This preprocessor will run its course when
+ * theme_maintenance_page() is invoked. An alternate template file of
+ * maintenance-page--offline.tpl.php can be used when the database is offline to
+ * hide errors and completely replace the content.
  *
  * The $variables array contains the following arguments:
  * - $content
@@ -2819,7 +2902,7 @@ function template_preprocess_maintenance_page(&$variables) {
   if (theme_get_setting('toggle_favicon')) {
     $favicon = theme_get_setting('favicon');
     $type = theme_get_setting('favicon_mimetype');
-    drupal_add_html_head_link(array('rel' => 'shortcut icon', 'href' => drupal_strip_dangerous_protocols($favicon), 'type' => $type));
+    backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon), 'type' => $type));
   }
 
   global $theme;
@@ -2827,10 +2910,10 @@ function template_preprocess_maintenance_page(&$variables) {
   $theme_data = list_themes();
   $regions = $theme_data[$theme]->info['regions'];
 
-  // Get all region content set with drupal_add_region_content().
+  // Get all region content set with backdrop_add_region_content().
   foreach (array_keys($regions) as $region) {
     // Assign region to a region variable.
-    $region_content = drupal_get_region_content($region);
+    $region_content = backdrop_get_region_content($region);
     isset($variables[$region]) ? $variables[$region] .= $region_content : $variables[$region] = $region_content;
   }
 
@@ -2844,14 +2927,14 @@ function template_preprocess_maintenance_page(&$variables) {
   }
 
   // Construct page title
-  if (drupal_get_title()) {
+  if (backdrop_get_title()) {
     $head_title = array(
-      'title' => strip_tags(drupal_get_title()),
-      'name' => variable_get('site_name', 'Drupal'),
+      'title' => strip_tags(backdrop_get_title()),
+      'name' => variable_get('site_name', 'Backdrop'),
     );
   }
   else {
-    $head_title = array('name' => variable_get('site_name', 'Drupal'));
+    $head_title = array('name' => variable_get('site_name', 'Backdrop'));
     if (variable_get('site_slogan', '')) {
       $head_title['slogan'] = variable_get('site_slogan', '');
     }
@@ -2873,10 +2956,10 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
   $variables['main_menu']         = array();
   $variables['secondary_menu']    = array();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? variable_get('site_name', 'Drupal') : '');
+  $variables['site_name']         = (theme_get_setting('toggle_name') ? variable_get('site_name', 'Backdrop') : '');
   $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? variable_get('site_slogan', '') : '');
   $variables['tabs']              = '';
-  $variables['title']             = drupal_get_title();
+  $variables['title']             = backdrop_get_title();
 
   // Compile a list of classes that are going to be applied to the body element.
   $variables['classes_array'][] = 'in-maintenance';
@@ -2901,33 +2984,17 @@ function template_preprocess_maintenance_page(&$variables) {
 }
 
 /**
+ * Theme process function for theme_maintenance_field().
+ *
  * The variables array generated here is a mirror of template_process_html().
  * This processor will run its course when theme_maintenance_page() is invoked.
  *
  * @see maintenance-page.tpl.php
+ * @see template_process_html()
  */
 function template_process_maintenance_page(&$variables) {
-  $variables['head']    = drupal_get_html_head();
-  $variables['css']     = drupal_add_css();
-  $variables['styles']  = drupal_get_css();
-  $variables['scripts'] = drupal_get_js();
-}
-
-/**
- * Preprocess variables for region.tpl.php
- *
- * Prepare the values passed to the theme_region function to be passed into a
- * pluggable template engine. Uses the region name to generate a template file
- * suggestions. If none are found, the default region.tpl.php is used.
- *
- * @see drupal_region_class()
- * @see region.tpl.php
- */
-function template_preprocess_region(&$variables) {
-  // Create the $content variable that templates expect.
-  $variables['content'] = $variables['elements']['#children'];
-  $variables['region'] = $variables['elements']['#region'];
-
-  $variables['classes_array'][] = drupal_region_class($variables['region']);
-  $variables['theme_hook_suggestions'][] = 'region__' . $variables['region'];
+  $variables['head']    = backdrop_get_html_head();
+  $variables['css']     = backdrop_add_css();
+  $variables['styles']  = backdrop_get_css();
+  $variables['scripts'] = backdrop_get_js();
 }

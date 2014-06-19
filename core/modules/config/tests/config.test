@@ -7,7 +7,7 @@
 /**
  * Tests reading and writing file contents.
  */
-class ConfigurationTest extends DrupalWebTestCase {
+class ConfigurationTest extends BackdropWebTestCase {
   protected function setUp() {
     parent::setUp(array('config_test'));
   }
@@ -89,7 +89,7 @@ class ConfigurationTest extends DrupalWebTestCase {
 /**
  * Tests hooks for validation, creating, updating, and deleting configurations.
  */
-class ConfigurationHooksTest extends DrupalWebTestCase {
+class ConfigurationHooksTest extends BackdropWebTestCase {
   protected function setUp() {
     parent::setUp(array('config_test', 'config_test_hooks'));
   }
@@ -154,12 +154,12 @@ class ConfigurationHooksTest extends DrupalWebTestCase {
 /**
  * Tests the UI for syncing, importing, and exporting.
  */
-class ConfigurationUITest extends DrupalWebTestCase {
+class ConfigurationUITest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('config_test'));
 
-    $this->webUser = $this->drupalCreateUser(array('synchronize configuration'));
-    $this->drupalLogin($this->webUser);
+    $this->webUser = $this->backdropCreateUser(array('synchronize configuration'));
+    $this->backdropLogin($this->webUser);
   }
 
   /**
@@ -170,7 +170,7 @@ class ConfigurationUITest extends DrupalWebTestCase {
     $dynamic_name = 'config_test.dynamic.new';
     $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
 
-    $this->drupalGet('admin/config/development/configuration');
+    $this->backdropGet('admin/config/development/configuration');
     $this->assertText('There are no configuration changes currently staged.');
     $this->assertNoFieldById('edit-submit', t('Import all'));
 
@@ -196,19 +196,19 @@ class ConfigurationUITest extends DrupalWebTestCase {
     $this->assertIdentical($staging_storage->exists($dynamic_name), TRUE, $dynamic_name . ' found in staging.');
 
     // Verify that both appear as ready to import.
-    $this->drupalGet('admin/config/development/configuration');
+    $this->backdropGet('admin/config/development/configuration');
     $this->assertText($name);
     $this->assertText($dynamic_name);
     $this->assertFieldById('edit-submit', t('Import all'));
 
     // Check that the locking message works when an import is in-progress.
     variable_set('config_sync', REQUEST_TIME);
-    $this->drupalPost(NULL, array(), t('Import all'));
+    $this->backdropPost(NULL, array(), t('Import all'));
     $this->assertText('Another request may be synchronizing configuration already or a sync failed unexpectedly.');
     variable_del('config_sync');
 
     // Import and verify that both do not appear anymore.
-    $this->drupalPost(NULL, array(), t('Import all'));
+    $this->backdropPost(NULL, array(), t('Import all'));
     $this->assertNoText($name);
     $this->assertNoText($dynamic_name);
     $this->assertNoFieldById('edit-submit', t('Import all'));
@@ -251,7 +251,7 @@ class ConfigurationUITest extends DrupalWebTestCase {
     $staging_storage->write($config_name, $staging_data);
 
     // Load the diff UI and verify that the diff reflects the changes.
-    $this->drupalGet('admin/config/development/configuration/sync/diff/' . $config_name);
+    $this->backdropGet('admin/config/development/configuration/sync/diff/' . $config_name);
     $deleted_words = $this->xpath('//td[contains(@class, :class)]//del', array(':class' => 'diff-deletedline'));
     $this->assertEqual($original_data[$change_key], (string) $deleted_words[0]);
     $this->assertEqual($remove_key, (string) $deleted_words[1]);
@@ -268,15 +268,15 @@ class ConfigurationUITest extends DrupalWebTestCase {
    */
   function testExport() {
     // Verify the export page with export submit button is available.
-    $this->drupalGet('admin/config/development/configuration/full/export');
+    $this->backdropGet('admin/config/development/configuration/full/export');
     $this->assertFieldById('edit-submit', t('Export'));
 
     // Submit the export form and verify response.
-    $this->drupalPost('admin/config/development/configuration/full/export', array(), t('Export'));
+    $this->backdropPost('admin/config/development/configuration/full/export', array(), t('Export'));
     $this->assertResponse(200, 'User can access the download callback.');
 
     // Get the archived binary file provided to user for download.
-    $archive_data = $this->drupalGetContent();
+    $archive_data = $this->backdropGetContent();
 
     // Temporarily save the archive file.
     $uri = file_unmanaged_save_data($archive_data, 'temporary://config.tar.gz');

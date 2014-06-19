@@ -498,14 +498,14 @@ function taxonomy_views_plugins() {
       'taxonomy_term' => array(
         'title' => t('Taxonomy term'),
         'handler' => 'views_plugin_argument_validate_taxonomy_term',
-        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
+        'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
       ),
     ),
     'argument default' => array(
       'taxonomy_tid' => array(
         'title' => t('Taxonomy term ID from URL'),
         'handler' => 'views_plugin_argument_default_taxonomy_tid',
-        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
+        'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
         'parent' => 'fixed',
       ),
     ),

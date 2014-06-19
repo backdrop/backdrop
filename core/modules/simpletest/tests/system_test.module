@@ -154,7 +154,7 @@ function system_test_multiple_redirects($count) {
 }
 
 function system_test_set_header() {
-  drupal_add_http_header($_GET['name'], $_GET['value']);
+  backdrop_add_http_header($_GET['name'], $_GET['value']);
   return t('The following header was set: %name: %value', array('%name' => $_GET['name'], '%value' => $_GET['value']));
 }
 
@@ -179,7 +179,7 @@ function system_test_redirect_invalid_scheme() {
 function system_test_modules_installed($modules) {
   if (variable_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
-      drupal_set_message(t('hook_modules_installed fired for @module', array('@module' => $module)));
+      backdrop_set_message(t('hook_modules_installed fired for @module', array('@module' => $module)));
     }
   }
 }
@@ -190,7 +190,7 @@ function system_test_modules_installed($modules) {
 function system_test_modules_enabled($modules) {
   if (variable_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
-      drupal_set_message(t('hook_modules_enabled fired for @module', array('@module' => $module)));
+      backdrop_set_message(t('hook_modules_enabled fired for @module', array('@module' => $module)));
     }
   }
 }
@@ -201,7 +201,7 @@ function system_test_modules_enabled($modules) {
 function system_test_modules_disabled($modules) {
   if (variable_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
-      drupal_set_message(t('hook_modules_disabled fired for @module', array('@module' => $module)));
+      backdrop_set_message(t('hook_modules_disabled fired for @module', array('@module' => $module)));
     }
   }
 }
@@ -212,7 +212,7 @@ function system_test_modules_disabled($modules) {
 function system_test_modules_uninstalled($modules) {
   if (variable_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
-      drupal_set_message(t('hook_modules_uninstalled fired for @module', array('@module' => $module)));
+      backdrop_set_message(t('hook_modules_uninstalled fired for @module', array('@module' => $module)));
     }
   }
 }
@@ -228,9 +228,9 @@ function system_test_boot() {
  * Implements hook_init().
  */
 function system_test_init() {
-  // Used by FrontPageTestCase to get the results of drupal_is_front_page().
-  if (variable_get('front_page_output', 0) && drupal_is_front_page()) {
-    drupal_set_message(t('On front page.'));
+  // Used by FrontPageTestCase to get the results of backdrop_is_front_page().
+  if (variable_get('front_page_output', 0) && backdrop_is_front_page()) {
+    backdrop_set_message(t('On front page.'));
   }
 }
 
@@ -309,18 +309,18 @@ function system_test_lock_exit() {
  */
 function system_test_page_build(&$page) {
   $menu_item = menu_get_item();
-  $main_content_display = &drupal_static('system_main_content_added', FALSE);
+  $main_content_display = &backdrop_static('system_main_content_added', FALSE);
 
   if ($menu_item['path'] == 'system-test/main-content-handling') {
-    $page['footer'] = drupal_set_page_content();
+    $page['footer'] = backdrop_set_page_content();
     $page['footer']['main']['#markup'] = '<div id="system-test-content">' . $page['footer']['main']['#markup'] . '</div>';
   }
   elseif ($menu_item['path'] == 'system-test/main-content-fallback') {
-    drupal_set_page_content();
+    backdrop_set_page_content();
     $main_content_display = FALSE;
   }
   elseif ($menu_item['path'] == 'system-test/main-content-duplication') {
-    drupal_set_page_content();
+    backdrop_set_page_content();
   }
 }
 
@@ -335,7 +335,7 @@ function system_test_main_content_fallback() {
  * A simple page callback which adds a register shutdown function.
  */
 function system_test_page_shutdown_functions($arg1, $arg2) {
-  drupal_register_shutdown_function('_system_test_first_shutdown_function', $arg1, $arg2);
+  backdrop_register_shutdown_function('_system_test_first_shutdown_function', $arg1, $arg2);
 }
 
 /**
@@ -343,9 +343,9 @@ function system_test_page_shutdown_functions($arg1, $arg2) {
  */
 function _system_test_first_shutdown_function($arg1, $arg2) {
   // Output something, page has already been printed and the session stored
-  // so we can't use drupal_set_message.
+  // so we can't use backdrop_set_message.
   print t('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
-  drupal_register_shutdown_function('_system_test_second_shutdown_function', $arg1, $arg2);
+  backdrop_register_shutdown_function('_system_test_second_shutdown_function', $arg1, $arg2);
 }
 
 /**
@@ -353,14 +353,14 @@ function _system_test_first_shutdown_function($arg1, $arg2) {
  */
 function _system_test_second_shutdown_function($arg1, $arg2) {
   // Output something, page has already been printed and the session stored
-  // so we can't use drupal_set_message.
+  // so we can't use backdrop_set_message.
   print t('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
 
   // Throw an exception with an HTML tag. Since this is called in a shutdown
   // function, it will not bubble up to the default exception handler but will
-  // be caught in _drupal_shutdown_function() and be displayed through
-  // _drupal_render_exception_safe().
-  throw new Exception('Drupal is <blink>awesome</blink>.');
+  // be caught in _backdrop_shutdown_function() and be displayed through
+  // _backdrop_render_exception_safe().
+  throw new Exception('Backdrop is <blink>awesome</blink>.');
 }
 
 /**
@@ -402,6 +402,6 @@ class SystemTestFileTransfer {
  */
 function system_test_authorize_init_page($page_title) {
   $authorize_url = $GLOBALS['base_url'] . '/core/authorize.php';
-  system_authorized_init('system_test_authorize_run', drupal_get_path('module', 'system_test') . '/system_test.module', array(), $page_title);
-  drupal_goto($authorize_url);
+  system_authorized_init('system_test_authorize_run', backdrop_get_path('module', 'system_test') . '/system_test.module', array(), $page_title);
+  backdrop_goto($authorize_url);
 }
