@@ -3,3 +3,4 @@ description = Logs and records system events to syslog.
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
+configure = admin/config/development/logging
