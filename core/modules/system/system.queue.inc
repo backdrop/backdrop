@@ -96,13 +96,6 @@ class BackdropQueue {
 }
 
 interface BackdropQueueInterface {
-  /**
-   * Start working with a queue.
-   *
-   * @param $name
-   *   Arbitrary string. The name of the queue to work with.
-   */
-  public function __construct($name);
 
   /**
    * Add a queue item and store it directly to the queue.
@@ -314,6 +307,12 @@ class MemoryQueue implements BackdropQueueInterface {
    */
   protected $id_sequence;
 
+  /**
+   * Start working with a queue.
+   *
+   * @param $name
+   *   Arbitrary string. The name of the queue to work with.
+   */
   public function __construct($name) {
     $this->queue = array();
     $this->id_sequence = 0;
