@@ -1022,7 +1022,7 @@ function system_schema() {
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
      'menu_name' => array(
-        'description' => "The menu name. All links with the same menu name (such as 'navigation') are part of the same menu.",
+        'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,

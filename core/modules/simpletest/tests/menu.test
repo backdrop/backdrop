@@ -974,9 +974,9 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->admin_user = $this->backdropCreateUser($perms);
     $this->backdropLogin($this->admin_user);
 
-    // This test puts menu links in the Navigation menu and then tests for
-    // their presence on the page, so we need to ensure that the Navigation
-    // block will be displayed in all active themes.
+    // This test puts menu links in the Main menu and then tests for their
+    // presence on the page, so we need to ensure that the Main block
+    // will be displayed in all active themes.
     db_update('block')
       ->fields(array(
         // Use a region that is valid for all themes.
@@ -984,7 +984,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
         'status' => 1,
       ))
       ->condition('module', 'system')
-      ->condition('delta', 'navigation')
+      ->condition('delta', 'main-menu')
       ->execute();
   }
 
@@ -1048,13 +1048,13 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $trail += array(
       'admin/structure/menu' => t('Menus'),
     );
-    $this->assertBreadcrumb('admin/structure/menu/manage/navigation', $trail);
+    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu', $trail);
     $trail += array(
-      'admin/structure/menu/manage/navigation' => t('Navigation'),
+      'admin/structure/menu/manage/main-menu' => t('Main menu'),
     );
     $this->assertBreadcrumb("admin/structure/menu/item/6/edit", $trail);
-    $this->assertBreadcrumb('admin/structure/menu/manage/navigation/edit', $trail);
-    $this->assertBreadcrumb('admin/structure/menu/manage/navigation/add', $trail);
+    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu/edit', $trail);
+    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu/add', $trail);
 
     // Verify Node administration breadcrumbs.
     $trail = $admin + array(
@@ -1125,14 +1125,14 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('node', $trail);
 
     // Verify node breadcrumbs (in menu).
-    // Do this separately for Main menu and Navigation menu, since only the
+    // Do this separately for Main menu and Main menu, since only the
     // latter is a preferred menu by default.
     // @todo Also test all themes? Manually testing led to the suspicion that
     //   breadcrumbs may differ, possibly due to template.php overrides.
-    $menus = array('main-menu', 'navigation');
+    $menus = array('main-menu', 'main-menu');
     // Alter node type menu settings.
     variable_set("menu_options_$type", $menus);
-    variable_set("menu_parent_$type", 'navigation:0');
+    variable_set("menu_parent_$type", 'main-menu:0');
 
     foreach ($menus as $menu) {
       // Create a parent node in the current menu.
@@ -1194,15 +1194,15 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       $trail = array();
       $this->assertBreadcrumb('node', $trail);
 
-      if ($menu == 'navigation') {
+      if ($menu == 'main-menu') {
         $parent = $node2;
         $child = $node3;
       }
     }
 
-    // Create a Navigation menu link for 'node', move the last parent node menu
+    // Create a Main menu link for 'node', move the last parent node menu
     // link below it, and verify a full breadcrumb for the last child node.
-    $menu = 'navigation';
+    $menu = 'main-menu';
     $edit = array(
       'link_title' => 'Root',
       'link_path' => 'node',
@@ -1231,7 +1231,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb("node/{$child->nid}", $trail, $child->title, $tree);
 
     // Add a taxonomy term/tag to last node, and add a link for that term to the
-    // Navigation menu.
+    // Main menu.
     $tags = array(
       'Backdrop' => array(),
       'Breadcrumbs' => array(),
@@ -1292,7 +1292,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       // ('taxonomy/term/%') should never be translated and appear in any menu
       // other than the breadcrumb trail.
       $elements = $this->xpath('//div[@id=:menu]/descendant::a[@href=:href]', array(
-        ':menu' => 'block-system-navigation',
+        ':menu' => 'block-system-main-menu',
         ':href' => url($link['link_path']),
       ));
       $this->assertTrue(count($elements) == 1, "Link to {$link['link_path']} appears only once.");
@@ -1355,7 +1355,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->web_user->uid . '/edit', $trail, $this->web_user->name);
 
-    // Add a Navigation menu links for 'user' and $this->admin_user.
+    // Add a Main menu links for 'user' and $this->admin_user.
     // Although it may be faster to manage these links via low-level API
     // functions, there's a lot that can go wrong in doing so.
     $this->backdropLogin($this->admin_user);
@@ -1460,9 +1460,9 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages'));
     $this->backdropLogin($this->admin_user);
 
-    // This test puts menu links in the Navigation menu and then tests for
-    // their presence on the page, so we need to ensure that the Navigation
-    // block will be displayed in all active themes.
+    // This test puts menu links in the Main menu and then tests for their
+    // presence on the page, so we need to ensure that the Main menu block
+    // will be displayed in all active themes.
     db_update('block')
       ->fields(array(
         // Use a region that is valid for all themes.
@@ -1470,7 +1470,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
         'status' => 1,
       ))
       ->condition('module', 'system')
-      ->condition('delta', 'navigation')
+      ->condition('delta', 'main-menu')
       ->execute();
 
     // This test puts menu links in the Management menu and then tests for
@@ -1514,12 +1514,12 @@ class MenuTrailTestCase extends MenuWebTestCase {
       'menu-test/menu-trail' => t('Menu trail - Case 1'),
     );
 
-    // Test the tree generation for the Navigation menu.
+    // Test the tree generation for the Main menu.
     variable_del('menu_test_menu_tree_set_path');
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 
     // Override the active trail for the Management tree; it should not affect
-    // the Navigation tree.
+    // the Main tree.
     variable_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 

@@ -26,6 +26,13 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->big_user);
     $this->items = array();
 
+    // Find the Main menu on the block settings page.
+    $this->backdropGet('admin/structure/block');
+    $this->assertRaw(t('Main menu'), 'Main menu block found.');
+    // Add Main menu block into sidebar.
+    $this->backdropPost('admin/structure/block', array('blocks[system_main-menu][region]' => 'sidebar_first'), t('Save blocks'));
+    $this->assertFieldByName('blocks[system_main-menu][region]', 'sidebar_first', 'Main menu block is enabled in first sidebar.');
+
     // Do standard menu tests.
     $this->doStandardMenuTests();
 
@@ -67,7 +74,7 @@ class MenuTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test standard menu functionality using navigation menu.
+   * Test standard menu functionality using main-menu menu.
    *
    */
   function doStandardMenuTests() {
@@ -76,7 +83,7 @@ class MenuTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test custom menu functionality using navigation menu.
+   * Test custom menu functionality using main-menu menu.
    *
    */
   function doCustomMenuTests() {
@@ -184,10 +191,9 @@ class MenuTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test menu functionality using navigation menu.
-   *
+   * Test menu functionality using main-menu menu.
    */
-  function doMenuTests($menu_name = 'navigation') {
+  function doMenuTests($menu_name = 'main-menu') {
     // Add nodes to use as links for menu links.
     $node1 = $this->backdropCreateNode(array('type' => 'article'));
     $node2 = $this->backdropCreateNode(array('type' => 'article'));
@@ -275,7 +281,7 @@ class MenuTestCase extends BackdropWebTestCase {
    * @param string $menu_name Menu name.
    * @return array Menu link created.
    */
-  function addMenuLink($plid = 0, $link = '<front>', $menu_name = 'navigation', $expanded = TRUE) {
+  function addMenuLink($plid = 0, $link = '<front>', $menu_name = 'main-menu', $expanded = TRUE) {
     // View add menu link page.
     $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
     $this->assertResponse(200);
@@ -309,7 +315,7 @@ class MenuTestCase extends BackdropWebTestCase {
    *
    * @param string $menu_name Menu name.
    */
-  function addInvalidMenuLink($menu_name = 'navigation') {
+  function addInvalidMenuLink($menu_name = 'main-menu') {
     foreach (array('-&-', 'admin/people/permissions', '#') as $link_path) {
       $edit = array(
         'link_path' => $link_path,
@@ -439,12 +445,11 @@ class MenuTestCase extends BackdropWebTestCase {
    */
   function toggleMenuLink($item) {
     $this->disableMenuLink($item);
-
     // Verify menu link is absent.
     $this->backdropGet('');
     $this->assertNoText($item['link_title'], 'Menu link was not displayed');
-    $this->enableMenuLink($item);
 
+    $this->enableMenuLink($item);
     // Verify menu link is displayed.
     $this->backdropGet('');
     $this->assertText($item['link_title'], 'Menu link was displayed');
@@ -539,11 +544,11 @@ class MenuTestCase extends BackdropWebTestCase {
       $this->assertText(t('Menus'), 'Menu build overview node was displayed');
     }
 
-    // View navigation menu customization node.
-    $this->backdropGet('admin/structure/menu/manage/navigation');
+    // View main-menu menu customization node.
+    $this->backdropGet('admin/structure/menu/manage/main-menu');
         $this->assertResponse($response);
     if ($response == 200) {
-      $this->assertText(t('Navigation'), 'Navigation menu node was displayed');
+      $this->assertText(t('Main menu'), 'Main menu menu node was displayed');
     }
 
     // View menu edit node.
@@ -592,15 +597,15 @@ class MenuNodeTestCase extends BackdropWebTestCase {
    * Test creating, editing, deleting menu links via node form widget.
    */
   function testMenuNodeFormWidget() {
-    // Enable Navigation menu as available menu.
+    // Enable Main menu as available menu.
     $edit = array(
-      'menu_options[navigation]' => 1,
+      'menu_options[main-menu]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    // Change default parent item to Navigation menu, so we can assert more
+    // Change default parent item to Main menu, so we can assert more
     // easily.
     $edit = array(
-      'menu_parent' => 'navigation:0',
+      'menu_parent' => 'main-menu:0',
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
@@ -665,8 +670,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $link = menu_link_load($item['mlid']);
     $this->assertTrue($link, 'Link in not allowed menu still exists after saving node');
 
-    // Move the menu link back to the Navigation menu.
-    $item['menu_name'] = 'navigation';
+    // Move the menu link back to the Main menu.
+    $item['menu_name'] = 'main-menu';
     menu_link_save($item);
     // Create a second node.
     $child_node = $this->backdropCreateNode(array('type' => 'article'));
@@ -680,8 +685,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     // Edit the first node.
     $this->backdropGet('node/'. $node->nid .'/edit');
     // Assert that it is not possible to set the parent of the first node to itself or the second node.
-    $this->assertNoOption('edit-menu-parent', 'navigation:'. $item['mlid']);
-    $this->assertNoOption('edit-menu-parent', 'navigation:'. $child_item['mlid']);
+    $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
+    $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
     // Assert that unallowed Management menu is not available in options.
     $this->assertNoOption('edit-menu-parent', 'management:0');
   }

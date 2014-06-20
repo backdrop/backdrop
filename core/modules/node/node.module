@@ -1805,7 +1805,7 @@ function node_menu() {
   $items['node'] = array(
     'page callback' => 'node_page_default',
     'access arguments' => array('access content'),
-    'menu_name' => 'navigation',
+    'menu_name' => 'main-menu',
     'type' => MENU_CALLBACK,
   );
   $items['node/add'] = array(
