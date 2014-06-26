@@ -2307,6 +2307,13 @@ class BackdropWebTestCase extends BackdropTestCase {
             }
             break;
 
+          case 'updateBuildId':
+            $buildId = $xpath->query('//input[@name="form_build_id" and @value="' . $command['old'] . '"]')->item(0);
+            if ($buildId) {
+              $buildId->setAttribute('value', $command['new']);
+            }
+            break;
+
           // @todo Add suitable implementations for these commands in order to
           //   have full test coverage of what ajax.js can do.
           case 'remove':

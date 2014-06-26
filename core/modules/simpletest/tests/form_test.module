@@ -13,14 +13,14 @@ function form_test_menu() {
     'title' => 'Form altering test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_alter_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['form-test/validate'] = array(
     'title' => 'Form validation handlers test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_validate_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['form-test/validate-required'] = array(
@@ -41,7 +41,7 @@ function form_test_menu() {
     'title' => 'Form validation with some error suppression',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_limit_validation_errors_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -49,28 +49,28 @@ function form_test_menu() {
     'title' => 'Tableselect checkboxes test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_form_test_tableselect_multiple_true_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['form_test/tableselect/multiple-false'] = array(
     'title' => 'Tableselect radio button test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_form_test_tableselect_multiple_false_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['form_test/tableselect/empty-text'] = array(
     'title' => 'Tableselect empty text test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_form_test_tableselect_empty_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['form_test/tableselect/advanced-select'] = array(
     'title' => 'Tableselect js_select tests',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_form_test_tableselect_js_select_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -78,7 +78,7 @@ function form_test_menu() {
     'title' => 'Vertical tabs tests',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_form_test_vertical_tabs_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -86,7 +86,22 @@ function form_test_menu() {
     'title' => 'Form storage test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_storage_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['form_test/form-storage-legacy'] = array(
+    'title' => 'Emulate legacy AHAH-style ajax callback',
+    'page callback' => 'form_test_storage_legacy_handler',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['form_test/form-storage-page-cache'] = array(
+    'title' => 'Form storage with page cache test',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_storage_page_cache_form'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -94,7 +109,7 @@ function form_test_menu() {
     'title' => 'Form wrapper callback test',
     'page callback' => 'form_test_wrapper_callback',
     'page arguments' => array('form_test_wrapper_callback_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -102,7 +117,7 @@ function form_test_menu() {
     'title' => 'Form state values clearance test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_form_state_values_clean_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -110,7 +125,7 @@ function form_test_menu() {
     'title' => 'Form state values clearance advanced test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_form_state_values_clean_advanced_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -190,7 +205,7 @@ function form_test_menu() {
     'title' => 'Form values preservation during rebuild test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_form_rebuild_preserve_values_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -206,7 +221,7 @@ function form_test_menu() {
     'title' => 'Form label test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_label_test_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -782,7 +797,38 @@ function form_test_storage_form($form, &$form_state) {
     $form_state['cache'] = TRUE;
   }
 
+  if (isset($_REQUEST['immutable'])) {
+    $form_state['build_info']['immutable'] = TRUE;
+  }
+
   return $form;
+}
+
+/**
+ * Emulate legacy AHAH-style ajax callback.
+ *
+ * Drupal 6 AHAH callbacks used to operate directly on forms retrieved using
+ * form_get_cache and stored using form_set_cache after manipulation. This
+ * callback helps testing whether form_set_cache prevents resaving of immutable
+ * forms.
+ */
+function form_test_storage_legacy_handler($form_build_id) {
+  $form_state = array();
+  $form = form_get_cache($form_build_id, $form_state);
+
+  backdrop_json_output(array(
+    'form' => $form,
+    'form_state' => $form_state,
+  ));
+
+  $form['#poisoned'] = TRUE;
+  $form_state['poisoned'] = TRUE;
+
+  form_set_cache($form_build_id, $form, $form_state);
+
+  // This exit call is necessary for a "legacy" handler, otherwise Backdrop will
+  // append AJAX commands for settings to the already-printed JSON string.
+  backdrop_exit();
 }
 
 /**
@@ -819,6 +865,56 @@ function form_test_storage_form_submit($form, &$form_state) {
     backdrop_set_message("The thing has been changed.");
   }
   $form_state['redirect'] = 'node';
+}
+
+/**
+ * A simple form for testing form storage when page caching is enabled.
+ */
+function form_test_storage_page_cache_form($form, &$form_state) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Title',
+    '#required' => TRUE,
+  );
+
+  $form['test_build_id_old'] = array(
+    '#type' => 'item',
+    '#title' => 'Old build id',
+    '#markup' => 'No old build id',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  $form['rebuild'] = array(
+    '#type' => 'submit',
+    '#value' => 'Rebuild',
+    '#submit' => array('form_test_storage_page_cache_rebuild'),
+  );
+
+  $form['#after_build'] = array('form_test_storage_page_cache_old_build_id');
+  $form_state['cache'] = TRUE;
+
+  return $form;
+}
+
+/**
+ * Form element #after_build callback: output the old form build-id.
+ */
+function form_test_storage_page_cache_old_build_id($form) {
+  if (isset($form['#build_id_old'])) {
+    $form['test_build_id_old']['#markup'] = check_plain($form['#build_id_old']);
+  }
+  return $form;
+}
+
+/**
+ * Form submit callback: Rebuild the form and continue.
+ */
+function form_test_storage_page_cache_rebuild($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
