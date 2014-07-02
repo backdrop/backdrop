@@ -684,7 +684,7 @@ class CronRunTestCase extends BackdropWebTestCase {
 /**
  * Test execution of the cron queue.
  */
-class CronQueueTestCase extends DrupalWebTestCase {
+class CronQueueTestCase extends BackdropWebTestCase {
   /**
    * Implement getInfo().
    */
