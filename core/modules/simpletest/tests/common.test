@@ -912,8 +912,8 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request($auth);
 
     $this->backdropSetContent($result->data);
-    $this->assertRaw($username, '$_SERVER["PHP_AUTH_USER"] is passed correctly.');
-    $this->assertRaw($password, '$_SERVER["PHP_AUTH_PW"] is passed correctly.');
+    $this->assertRaw($username, 'Username is passed correctly.');
+    $this->assertRaw($password, 'Password is passed correctly.');
   }
 
   function testBackdropHTTPRequestRedirect() {
