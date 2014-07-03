@@ -11,6 +11,9 @@ const SEARCH_TYPE = '_test_';
 const SEARCH_TYPE_2 = '_test2_';
 const SEARCH_TYPE_JPN = '_test3_';
 
+/**
+ * Indexes content and queries it.
+ */
 class SearchMatchTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
@@ -291,6 +294,9 @@ class SearchPageText extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Indexes content and tests the advanced search form.
+ */
 class SearchAdvancedSearchForm extends BackdropWebTestCase {
   protected $node;
 
@@ -346,6 +352,9 @@ class SearchAdvancedSearchForm extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Indexes content and tests ranking factors.
+ */
 class SearchRankingTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
@@ -540,6 +549,9 @@ class SearchRankingTestCase extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Tests the rendering of the search block.
+ */
 class SearchBlockTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('search');

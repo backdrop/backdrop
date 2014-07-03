@@ -36,7 +36,7 @@ file = search.test
 
 [SearchCommentTestCase]
 name = Comment Search tests
-description = Verify text formats and filters used elsewhere.
+description = Test integration searching comments.
 group = Search
 file = search.test
 
