@@ -283,10 +283,11 @@ function system_requirements($phase) {
 
   // Report cron status.
   if ($phase == 'runtime') {
+    $config = config('system.cron');
     // Cron warning threshold defaults to two days.
-    $threshold_warning = variable_get('cron_threshold_warning', 172800);
+    $threshold_warning = $config->get('cron_threshold_warning');
     // Cron error threshold defaults to two weeks.
-    $threshold_error = variable_get('cron_threshold_error', 1209600);
+    $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
     $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
 
@@ -1853,6 +1854,26 @@ function system_update_1011() {
       variable_set('file_public_path', 'sites/default/files');
     }
   }
+}
+
+/**
+ * Convert cron settings to use configuration files.
+ */
+function system_update_1012() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.cron');
+  // Migrate variables if any.
+  $config = config('system.cron');
+  $config->set('cron_threshold_warning', variable_get('cron_threshold_warning', 172800));
+  $config->set('cron_safe_threshold', variable_get('cron_safe_threshold', 10800));
+  $config->set('cron_max_threshold', variable_get('cron_max_threshold', 10800));
+  $config->set('cron_threshold_error', variable_get('cron_threshold_error', 1209600));
+  $config->save();
+  // Delete variables.
+  variable_del('cron_threshold_warning');
+  variable_del('cron_safe_threshold');
+  variable_del('cron_max_threshold');
+  variable_del('cron_threshold_error');
 }
 
 /**

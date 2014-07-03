@@ -594,7 +594,9 @@ class CronRunTestCase extends BackdropWebTestCase {
     $cron_last = time();
     $cron_safe_threshold = 100;
     state_set('cron_last', $cron_last);
-    variable_set('cron_safe_threshold', $cron_safe_threshold);
+    config('system.cron')
+      ->set('cron_safe_threshold', $cron_safe_threshold)
+      ->save();
     $this->backdropGet('');
     $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is not passed.'));
 

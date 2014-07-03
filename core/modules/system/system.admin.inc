@@ -1456,7 +1456,7 @@ function system_site_information_settings_validate($form, &$form_state) {
  * @see system_settings_form()
  * @ingroup forms
  */
-function system_cron_settings() {
+function system_cron_settings($form, &$form_state) {
   global $base_url;
   $form['description'] = array(
     '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
@@ -1466,6 +1466,7 @@ function system_cron_settings() {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
+  
   $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
@@ -1482,11 +1483,29 @@ function system_cron_settings() {
     '#type' => 'select',
     '#title' => t('Run cron every'),
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
-    '#default_value' => variable_get('cron_safe_threshold', BACKDROP_CRON_DEFAULT_THRESHOLD),
+    '#default_value' => config('system.cron')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submit handler; Handle submission for cron settings.
+ *
+ * @ingroup forms
+ * @see system_settings_form()
+ */
+function system_cron_settings_submit($form, &$form_state) {
+  config('system.cron')
+    ->set('cron_safe_threshold', $form_state['values']['cron_safe_threshold'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
