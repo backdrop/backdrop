@@ -875,8 +875,9 @@ function template_preprocess_views_view_rss(&$vars) {
   $vars['description'] = check_plain(decode_entities(strip_tags($style->get_description())));
 
   if ($view->display_handler->get_option('sitename_title')) {
-    $title = variable_get('site_name', 'Backdrop');
-    if ($slogan = variable_get('site_slogan', '')) {
+    $site_config = config('system.site');
+    $title = $site_config->get('site_name');
+    if ($slogan = $site_config->get('site_slogan')) {
       $title .= ' - ' . $slogan;
     }
   }
@@ -900,7 +901,7 @@ function template_preprocess_views_view_rss(&$vars) {
     }
 
     // Compare the link to the default home page; if it's the default home page, just use $base_url.
-    if ($path == variable_get('site_frontpage', 'node')) {
+    if ($path == config_get('system.site', 'site_frontpage')) {
       $path = '';
     }
 

@@ -164,7 +164,7 @@ function views_ajax_command_replace_title($title) {
   $command = array(
     'command' => 'viewsReplaceTitle',
     'title' => $title,
-    'siteName' => variable_get('site_name', 'Backdrop'),
+    'siteName' => config_get('system.site', 'site_name'),
   );
   return $command;
 }

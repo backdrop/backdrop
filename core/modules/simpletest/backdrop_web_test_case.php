@@ -1575,7 +1575,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Restore necessary variables.
     state_set('install_task', 'done');
     variable_set('clean_url', $this->originalCleanUrl);
-    variable_set('site_mail', 'simpletest@example.com');
+    config_set('system.site', 'site_mail', 'simpletest@example.com');
     variable_set('date_default_timezone', date_default_timezone_get());
 
     // Set up English language.

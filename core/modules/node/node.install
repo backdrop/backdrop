@@ -521,9 +521,9 @@ function _update_7000_node_get_types() {
  * @see http://drupal.org/node/375397
  */
 function node_update_1000() {
-  $front_page = variable_get('site_frontpage');
+  $front_page = config_get('system.site', 'site_frontpage');
   if (!isset($front_page)) {
-    variable_set('site_frontpage', 'node');
+    config_set('system.site', 'site_frontpage', 'node');
   }
 }
 
