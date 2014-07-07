@@ -1813,31 +1813,41 @@ function system_image_toolkit_settings() {
  * Form builder; Configure how the site handles RSS feeds.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_rss_feeds_settings() {
+  $rss_config = config('system.rss');
   $form['feed_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Feed description'),
-    '#default_value' => variable_get('feed_description', ''),
+    '#default_value' => $rss_config->get('rss_description'),
     '#description' => t('Description of your site, included in each feed.')
   );
   $form['feed_default_items'] = array(
     '#type' => 'select',
     '#title' => t('Number of items in each feed'),
-    '#default_value' => variable_get('feed_default_items', 10),
+    '#default_value' => $rss_config->get('rss_limit'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('Default number of items to include in each feed.')
   );
   $form['feed_item_length'] = array(
     '#type' => 'select',
     '#title' => t('Feed content'),
-    '#default_value' => variable_get('feed_item_length', 'fulltext'),
-    '#options' => array('title' => t('Titles only'), 'teaser' => t('Titles plus teaser'), 'fulltext' => t('Full text')),
+    '#default_value' => $rss_config->get('rss_viewmode'),
+    '#options' => array(
+      'title' => t('Titles only'),
+      'teaser' => t('Titles plus teaser'),
+      'fulltext' => t('Full text'),
+    ),
     '#description' => t('Global setting for the default display of content items in each feed.')
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+
+  return $form;
 }
 
 /**

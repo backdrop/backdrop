@@ -1917,6 +1917,24 @@ function system_update_1014() {
 }
 
 /**
+ *  Convert RSS publishing settings to use configuration files.
+ */
+function system_update_1015() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.rss');
+  // Migrate variables if any.
+  $config = config('system.rss');
+  $config->set('rss_description', variable_get('feed_description', ''));
+  $config->set('rss_limit', variable_get('feed_default_items', 10));
+  $config->set('rss_viewmode', variable_get('feed_item_length', 'fulltext'));
+  $config->save();
+  // Delete variables.
+  variable_del('feed_description');
+  variable_del('feed_default_items');
+  variable_del('feed_item_length');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

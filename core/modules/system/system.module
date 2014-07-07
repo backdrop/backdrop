@@ -4206,6 +4206,10 @@ function system_config_info() {
     'label' => t('System maintenance'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.rss'] = array(
+    'label' => t('System RSS'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
