@@ -30,7 +30,7 @@ function search_embedded_form_menu() {
  * @see search_embedded_form_form_submit().
  */
 function search_embedded_form_form($form, &$form_state) {
-  $count = variable_get('search_embedded_form_submitted', 0);
+  $count = config_get('search.settings', 'search_embedded_form_submitted');
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -56,8 +56,9 @@ function search_embedded_form_form($form, &$form_state) {
  * Submit handler for search_embedded_form_form().
  */
 function search_embedded_form_form_submit($form, &$form_state) {
-  $count = variable_get('search_embedded_form_submitted', 0) + 1;
-  variable_set('search_embedded_form_submitted', $count);
+  $config = config('search.settings');
+  $submit_count = (int) $config->get('search_embedded_form_submitted');
+  $config->set('search_embedded_form_submitted', $submit_count + 1)->save();
   backdrop_set_message(t('Test form was submitted'));
 }
 
