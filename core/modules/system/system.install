@@ -1876,7 +1876,7 @@ function system_update_1012() {
   variable_del('cron_threshold_error');
 }
 
- /**
+/**
  * Moves site system settings from variable to config.
  */
 function system_update_1013() {
@@ -1898,6 +1898,22 @@ function system_update_1013() {
   variable_del('site_frontpage');
   variable_del('site_403');
   variable_del('site_404');
+}
+
+/**
+ * Move the system maintenance settings from variable to config.
+ */
+function system_update_1014() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.maintenance');
+  // Migrate variables if any.
+  $config = config('system.maintenance');
+  $config->set('maintenance_enabled', variable_get('maintenance_mode', 'enabled'));
+  $config->set('maintenance_message', variable_get('maintenance_mode_message', 'message'));
+  $config->save();
+  // Delete variables.
+  variable_del('maintenance_mode');
+  variable_del('maintenance_mode_message');
 }
 
 /**
