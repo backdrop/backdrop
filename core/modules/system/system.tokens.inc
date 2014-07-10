@@ -145,17 +145,17 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $site_name = variable_get('site_name', 'Backdrop');
+          $site_name = config_get('system.site', 'site_name');
           $replacements[$original] = $sanitize ? check_plain($site_name) : $site_name;
           break;
 
         case 'slogan':
-          $slogan = variable_get('site_slogan', '');
+          $slogan = config_get('system.site', 'site_slogan');
           $replacements[$original] = $sanitize ? check_plain($slogan) : $slogan;
           break;
 
         case 'mail':
-          $replacements[$original] = variable_get('site_mail', '');
+          $replacements[$original] = config_get('system.site', 'site_mail');
           break;
 
         case 'url':

@@ -4198,6 +4198,10 @@ function system_config_info() {
     'label' => t('System cron'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.site'] = array(
+    'label' => t('System site'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 

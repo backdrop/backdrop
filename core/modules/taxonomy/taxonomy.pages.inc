@@ -76,7 +76,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = variable_get('site_name', 'Backdrop') . ' - ' . $term->name;
+  $channel['title'] = config_get('system.site', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);

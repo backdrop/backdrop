@@ -218,7 +218,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testMaintenanceModeLoginPaths() {
     state_set('maintenance_mode', TRUE);
 
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')));
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.site', 'site_name')));
     $this->backdropLogout();
     $this->backdropGet('node');
     $this->assertText($offline_message);
@@ -1569,8 +1569,10 @@ class MenuTrailTestCase extends MenuWebTestCase {
    */
   function testCustom403And404Pages() {
     // Set the custom 403 and 404 pages we will use.
-    variable_set('site_403', 'menu-test/custom-403-page');
-    variable_set('site_404', 'menu-test/custom-404-page');
+    config('system.site')
+      ->set('site_403', 'menu-test/custom-403-page')
+      ->set('site_404', 'menu-test/custom-404-page')
+      ->save();
 
     // Define the paths we'll visit to trigger 403 and 404 responses during
     // this test, and the expected active trail for each case.

@@ -568,7 +568,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     // Set "Basic page" content type to be unpublished by default.
     variable_set('node_options_page', array());
     // Set the front page to the default "node" page.
-    variable_set('site_frontpage', 'node');
+    config_set('system.site', 'site_frontpage', 'node');
 
     // Create a node.
     $edit = array();

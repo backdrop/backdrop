@@ -28,11 +28,11 @@ function hook_language_init() {
 
   switch ($language->language) {
     case 'it':
-      $conf['site_name'] = 'Il mio sito Backdrop';
+      $conf['system.site']['site_name'] = 'Il mio sito Backdrop';
       break;
 
     case 'fr':
-      $conf['site_name'] = 'Mon site Backdrop';
+      $conf['system.site']['site_name'] = 'Mon site Backdrop';
       break;
   }
 }

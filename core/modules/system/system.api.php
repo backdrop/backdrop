@@ -1531,7 +1531,7 @@ function hook_mail_alter(&$message) {
       $message['send'] = FALSE;
       return;
     }
-    $message['body'][] = "--\nMail sent out from " . variable_get('site_name', 'Backdrop');
+    $message['body'][] = "--\nMail sent out from " . config_get('system.site', 'site_name');
   }
 }
 
@@ -1912,7 +1912,7 @@ function hook_watchdog(array $log_entry) {
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
-    '@site_name' => variable_get('site_name', 'Backdrop'),
+    '@site_name' => config_get('system.site', 'site_name'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
   ));
 
@@ -1978,7 +1978,7 @@ function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
   $variables = array(
-    '%site_name' => variable_get('site_name', 'Backdrop'),
+    '%site_name' => config_get('system.site', 'site_name'),
     '%username' => user_format_name($account),
   );
   if ($context['hook'] == 'taxonomy') {
