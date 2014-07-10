@@ -77,20 +77,10 @@ function update_install() {
  * Implements hook_uninstall().
  */
 function update_uninstall() {
-  // Clear any variables that might be in use
-  $variables = array(
-    'update_check_frequency',
-    'update_fetch_url',
-    'update_last_check',
-    'update_last_email_notification',
-    'update_notification_threshold',
-    'update_notify_emails',
-    'update_max_fetch_attempts',
-    'update_max_fetch_time',
-  );
-  foreach ($variables as $variable) {
-    variable_del($variable);
-  }
+  // @todo: Convert to new state storage.
+  variable_del('update_last_check');
+  variable_del('update_last_email_notification');
+
   $queue = BackdropQueue::get('update_fetch_tasks');
   $queue->deleteQueue();
 }
@@ -157,3 +147,49 @@ function _update_requirement_check($project, $type) {
   $requirement['value'] = l($requirement_label, update_manager_access() ? 'admin/reports/updates/update' : 'admin/reports/updates');
   return $requirement;
 }
+
+/**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
+ * Moves update settings from variables to config.
+ */
+function update_update_1000() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'update.settings');
+  // Migrate variables if any.
+  $config = config('update.settings');
+  $config->set('update_disabled_extensions', variable_get('update_check_disabled', 0));
+  $config->set('update_interval_days', variable_get('update_check_frequency', 1));
+  $config->set('update_url', variable_get('update_fetch_url', ''));
+  $config->set('update_max_attempts', variable_get('update_max_fetch_attempts', 2));
+  $config->set('update_timeout', variable_get('update_max_fetch_time', 5));
+  $config->set('update_emails', variable_get('update_notify_emails', array()));
+  $config->set('update_threshold', variable_get('update_notification_threshold', 0));
+  $config->set('update_requirement_type', variable_get('update_script_test_requirement_type', 0));
+  $config->set('update_system_info', variable_get('update_test_system_info', array()));
+  $config->set('update_status', variable_get('update_test_update_status', array()));
+  $config->set('update_xml_map', variable_get('update_test_xml_map', FALSE));
+  $config->set('update_projects', variable_get('update_advanced_project_settings', array()));
+  $config->save();
+  // Delete variables.
+  variable_del('update_check_disabled');
+  variable_del('update_check_frequency');
+  variable_del('update_fetch_url');
+  variable_del('update_max_fetch_attempts');
+  variable_del('update_max_fetch_time');
+  variable_del('update_notify_emails');
+  variable_del('update_notification_threshold');
+  variable_del('update_script_test_requirement_type');
+  variable_del('update_test_system_info');
+  variable_del('update_test_update_status');
+  variable_del('update_test_xml_map');
+  variable_del('update_advanced_project_settings');
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */
