@@ -777,3 +777,14 @@ function menu_preprocess_block(&$variables) {
     $variables['attributes_array']['role'] = 'navigation';
   }
 }
+
+/**
+ * Implements hook_config_info().
+ */
+function menu_config_info() {
+  $prefixes['menu.settings'] = array(
+    'label' => t('Menu settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
