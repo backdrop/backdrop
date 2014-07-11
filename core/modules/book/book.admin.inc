@@ -44,15 +44,17 @@ function book_admin_overview() {
  * Form constructor for the book settings form.
  *
  * @see book_menu()
+ * @see book_admin_settings_submit()
  * @see book_admin_settings_validate()
  * @ingroup forms
  */
-function book_admin_settings() {
+function book_admin_settings($form, &$form_state) {
   $types = node_type_get_names();
+  $config = config('book.settings');
   $form['book_allowed_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Content types allowed in book outlines'),
-    '#default_value' => variable_get('book_allowed_types', array('book')),
+    '#default_value' => $config->get('book_allowed_types'),
     '#options' => $types,
     '#description' => t('Users with the %outline-perm permission can add all content types.', array('%outline-perm' => t('Administer book outlines'))),
     '#required' => TRUE,
@@ -60,14 +62,19 @@ function book_admin_settings() {
   $form['book_child_type'] = array(
     '#type' => 'radios',
     '#title' => t('Content type for child pages'),
-    '#default_value' => variable_get('book_child_type', 'book'),
+    '#default_value' => $config->get('book_child_type'),
     '#options' => $types,
     '#required' => TRUE,
   );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
 }
 
 /**
@@ -80,6 +87,19 @@ function book_admin_settings_validate($form, &$form_state) {
   if (empty($form_state['values']['book_allowed_types'][$child_type])) {
     form_set_error('book_child_type', t('The content type for the %add-child link must be one of those selected as an allowed book outline type.', array('%add-child' => t('Add child page'))));
   }
+}
+
+ /**
+ * Form submission handler for book_admin_settings().
+ *
+ * @see book_admin_settings_validate()
+ */
+function book_admin_settings_submit($form, &$form_state) {
+  config('book.settings')
+    ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
+    ->set('book_child_type', $form_state['values']['book_child_type'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
