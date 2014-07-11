@@ -858,7 +858,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/development/maintenance');
     $this->assertNoRaw($admin_message, 'Site maintenance mode message not displayed.');
 
-    $offline_message = 'Sorry, not online.';
+    $offline_message = 'Backdrop is currently under maintenance. We should be back shortly. Thank you for your patience.';
     $edit = array(
       'maintenance_mode_message' => $offline_message,
     );

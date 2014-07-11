@@ -2132,9 +2132,10 @@ function system_add_date_format_type_form_submit($form, &$form_state) {
  * Form builder; Configure the site's maintenance status.
  *
  * @ingroup forms
- * @see system_settings_form()
+ * @see system_site_maintenance_mode_submit()
  */
-function system_site_maintenance_mode() {
+function system_site_maintenance_mode($form, &$form_state) {
+  $config = config('system.maintenance');
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
@@ -2144,7 +2145,7 @@ function system_site_maintenance_mode() {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.site', 'site_name')))),
+    '#default_value' => t($config->get('maintenance_message'), array('@site' => config_get('system.site', 'site_name'))),
   );
 
   $form['actions']['#type'] = 'actions';

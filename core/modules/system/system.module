@@ -4202,6 +4202,10 @@ function system_config_info() {
     'label' => t('System site'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.maintenance'] = array(
+    'label' => t('System maintenance'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
