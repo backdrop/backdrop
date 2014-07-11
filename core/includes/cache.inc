@@ -93,13 +93,6 @@ function cache_clear_all() {
  * @see BackdropDatabaseCache
  */
 interface BackdropCacheInterface {
-  /**
-   * Constructs a new cache interface.
-   *
-   * @param $bin
-   *   The cache bin for which the object is created.
-   */
-  function __construct($bin);
 
   /**
    * Returns data from the persistent cache.
@@ -214,6 +207,9 @@ class BackdropNullCache implements BackdropCacheInterface {
 
   /**
    * Constructs a BackdropNullCache object.
+   *
+   * @param $bin
+   *   The cache bin for which the object is created.
    */
   function __construct($bin) {}
 
