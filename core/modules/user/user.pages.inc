@@ -127,9 +127,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
     backdrop_goto();
   }
   else {
-    // Time out, in seconds, until login URL expires. Defaults to 24 hours =
-    // 86400 seconds.
-    $timeout = variable_get('user_password_reset_timeout', 86400);
+    // Time out, in seconds, until login URL expires.
+    $timeout = config_get('user.settings', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
     // Some redundant checks for extra security ?
     $users = user_load_multiple(array($uid), array('status' => '1'));
@@ -363,7 +362,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
   );
   // Also allow to send account canceled notification mail, if enabled.
-  $default_notify = variable_get('user_mail_status_canceled_notify', FALSE);
+  $default_notify = config_get('user.settings', 'account_status_cancelled');
   $form['user_cancel_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
@@ -449,6 +448,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  * @see user_multiple_cancel_confirm()
  */
 function user_cancel_methods() {
+  $anonymous_name = config_get('user.settings', 'anonymous');
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content.'),
@@ -459,8 +459,8 @@ function user_cancel_methods() {
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
     ),
     'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')))),
-      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')))),
+      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
     ),
     'user_cancel_delete' => array(
       'title' => t('Delete the account and its content.'),
@@ -502,7 +502,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
     // Validate expiration and hashed password/login.
     if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
       $edit = array(
-        'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : variable_get('user_mail_status_canceled_notify', FALSE),
+        'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('user.settings', 'user_mail_status_canceled_notify'),
       );
       user_cancel($edit, $account->uid, $account->data['user_cancel_method']);
       // Since user_cancel() is not invoked via Form API, batch processing needs

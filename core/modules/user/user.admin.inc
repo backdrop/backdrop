@@ -268,7 +268,8 @@ function user_admin_account_validate($form, &$form_state) {
  * @ingroup forms
  * @see system_settings_form()
  */
-function user_admin_settings() {
+function user_admin_settings($form, &$form_state) {
+  $config = config('user.settings');
   // Settings for anonymous users.
   $form['anonymous_settings'] = array(
     '#type' => 'fieldset',
@@ -277,7 +278,7 @@ function user_admin_settings() {
   $form['anonymous_settings']['anonymous'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
-    '#default_value' => variable_get('anonymous', t('Anonymous')),
+    '#default_value' => $config->get('anonymous'),
     '#description' => t('The name used to indicate anonymous users.'),
     '#required' => TRUE,
   );
@@ -298,7 +299,7 @@ function user_admin_settings() {
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('Administrator role'),
-    '#default_value' => variable_get('user_admin_role', 0),
+    '#default_value' => $config->get('user_admin_role'),
     '#options' => $roles,
     '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
   );
@@ -308,10 +309,11 @@ function user_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Registration and cancellation'),
   );
+
   $form['registration_cancellation']['user_register'] = array(
     '#type' => 'radios',
     '#title' => t('Who can register accounts?'),
-    '#default_value' => variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL),
+    '#default_value' => $config->get('user_register'),
     '#options' => array(
       USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
       USER_REGISTER_VISITORS => t('Visitors'),
@@ -321,7 +323,7 @@ function user_admin_settings() {
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
     '#title' => t('Require e-mail verification when a visitor creates an account.'),
-    '#default_value' => variable_get('user_email_verification', TRUE),
+    '#default_value' => $config->get('user_email_verification'),
     '#description' => t('New users will be required to validate their e-mail address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
   );
   module_load_include('inc', 'user', 'user.pages');
@@ -351,7 +353,7 @@ function user_admin_settings() {
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable signatures.'),
-    '#default_value' => variable_get('user_signatures', 0),
+    '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
   if (variable_get('user_pictures', 0)) {
@@ -442,7 +444,7 @@ function user_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Welcome (new user created by administrator)'),
     '#collapsible' => TRUE,
-    '#collapsed' => (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_ADMINISTRATORS_ONLY),
+    '#collapsed' => ($config->get('user_register') != USER_REGISTER_ADMINISTRATORS_ONLY),
     '#description' => t('Edit the welcome e-mail messages sent to new member accounts created by an administrator.') . ' ' . $email_token_help,
     '#group' => 'email',
   );
@@ -463,7 +465,7 @@ function user_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Welcome (awaiting approval)'),
     '#collapsible' => TRUE,
-    '#collapsed' => (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL),
+    '#collapsed' => ($config->get('user_register') != USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL),
     '#description' => t('Edit the welcome e-mail messages sent to new members upon registering, when administrative approval is required.') . ' ' . $email_token_help,
     '#group' => 'email',
   );
@@ -484,7 +486,7 @@ function user_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Welcome (no approval required)'),
     '#collapsible' => TRUE,
-    '#collapsed' => (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_VISITORS),
+    '#collapsed' => ($config->get('user_register') != USER_REGISTER_VISITORS),
     '#description' => t('Edit the welcome e-mail messages sent to new members upon registering, when no administrator approval is required.') . ' ' . $email_token_help,
     '#group' => 'email',
   );
@@ -534,7 +536,7 @@ function user_admin_settings() {
   $form['email_activated']['user_mail_status_activated_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is activated.'),
-    '#default_value' => variable_get('user_mail_status_activated_notify', TRUE),
+    '#default_value' => $config->get('user_mail_status_activated_notify'),
   );
   $form['email_activated']['settings'] = array(
     '#type' => 'container',
@@ -569,7 +571,7 @@ function user_admin_settings() {
   $form['email_blocked']['user_mail_status_blocked_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is blocked.'),
-    '#default_value' => variable_get('user_mail_status_blocked_notify', FALSE),
+    '#default_value' => $config->get('user_mail_status_blocked_notify'),
   );
   $form['email_blocked']['settings'] = array(
     '#type' => 'container',
@@ -625,7 +627,7 @@ function user_admin_settings() {
   $form['email_canceled']['user_mail_status_canceled_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
-    '#default_value' => variable_get('user_mail_status_canceled_notify', FALSE),
+    '#default_value' => $config->get('account_status_cancelled'),
   );
   $form['email_canceled']['settings'] = array(
     '#type' => 'container',
@@ -649,7 +651,29 @@ function user_admin_settings() {
     '#rows' => 3,
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for user_admin_settings().
+ */
+function user_admin_settings_submit($form, &$form_state) {
+  config('user.settings')
+    ->set('anonymous', $form_state['values']['anonymous'])
+    ->set('user_admin_role', $form_state['values']['user_admin_role'])
+    ->set('user_register', $form_state['values']['user_register'])
+    ->set('user_email_verification', $form_state['values']['user_email_verification'])
+    ->set('user_signatures', $form_state['values']['user_signatures'])
+    ->set('user_mail_status_activated_notify', $form_state['values']['user_mail_status_activated_notify'])
+    ->set('user_mail_status_blocked_notify', $form_state['values']['user_mail_status_blocked_notify'])
+    ->set('user_mail_status_canceled_notify', $form_state['values']['user_mail_status_canceled_notify'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
