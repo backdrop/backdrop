@@ -335,6 +335,52 @@ function user_update_1001() {
 }
 
 /**
+ * Moves account settings from variable to config.
+ */
+function user_update_1002() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'user.settings');
+  // Migrate variables if any.
+  $config = config('user.settings');
+  $config->set('account_admin_role', variable_get('user_admin_role', ''));
+  $config->set('account_anonymous', variable_get('anonymous', 'Anonymous'));
+  $config->set('account_verify_mail', variable_get('user_email_verification', 1));
+  $config->set('account_cancel_confirm', 1);
+  $config->set('account_password_reset', 1);
+  $config->set('account_status_activated', variable_get('user_mail_status_activated_notify', 1));
+  $config->set('account_status_blocked', variable_get('user_mail_status_blocked_notify', 0));
+  $config->set('account_status_cancelled', variable_get('user_mail_status_cancelled_notify', 0));
+  $config->set('account_register_admin_created', 1);
+  $config->set('account_register_no_approval_required', 1);
+  $config->set('account_register_pending_approval', 1);
+  $config->set('account_register', variable_get('user_register', 'visitors'));
+  $config->set('account_signatures', variable_get('user_signatures', 0));
+  $config->set('account_password_reset_timeout', variable_get('user_password_reset_timeout', 86400));
+  $config->save();
+  // Convert the user.settings:register numeric value to text value.
+  $map = array(
+    '0' => 'admin_only',
+    '1' => 'visitors',
+    '2' => 'visitors_admin_approval',
+  );
+  $user_register = $config->get('account_register');
+
+  if (is_numeric($user_register) && isset($map[$user_register])) {
+    $config->set('register', $map[$user_register])->save();
+  }
+  // Delete variables.
+  variable_del('anonymous');
+  variable_del('user_admin_role');
+  variable_del('user_register');
+  variable_del('user_signatures');
+  variable_del('user_mail_status_activated_notify');
+  variable_del('user_mail_status_blocked_notify');
+  variable_del('user_mail_status_cancelled_notify');
+  variable_del('user_email_verification');
+  variable_del('user_password_reset_timeout');
+}
+
+/**
  * Moves login flood settings from variable to config.
  */
 function user_update_1004() {
