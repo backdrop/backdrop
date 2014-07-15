@@ -63,7 +63,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
         'name' => $user->name,
         'pass' => $user->pass_raw
       );
-      variable_set('simpletest_maximum_redirects', 1);
+      $this->maximumRedirects = 1;
       $this->backdropPost('user?destination=user/logout', $edit, t('Log in'));
       $headers = $this->backdropGetHeaders(TRUE);
       $this->assertEqual(count($headers), 2, 'Simpletest stopped following redirects after the first one.');
