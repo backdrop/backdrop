@@ -40,6 +40,12 @@ description = Test user administration page functionality.
 group = User
 file = tests/user.test
 
+[UserAdminSettingsFormTest]
+name = User admin settings
+description = Configuration object user.mail and user.settings save test.
+group = User
+file = tests/user.test
+
 [UserTimeZoneFunctionalTest]
 name = User time zones
 description = Set a user time zone and verify that dates are displayed in local time.
