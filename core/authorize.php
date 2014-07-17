@@ -58,7 +58,7 @@ function authorize_access_denied_page() {
  *   TRUE if the current user can run authorize.php, and FALSE if not.
  */
 function authorize_access_allowed() {
-  return variable_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
+  return config_get('system.authorize', 'allow_authorize_operations') && user_access('administer software updates');
 }
 
 // *** Real work of the script begins here. ***
