@@ -1949,6 +1949,20 @@ function system_update_1016() {
 }
 
 /**
+ * Converts active_menus_default variable to config.
+ */
+function system_update_1019() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.menu');
+  // Migrate variables if any.
+  $config = config('system.menu');
+  $config->set('active_menus_default', variable_get('menu_default_active_menus', array()));
+  $config->save();
+  // Delete variables.
+  variable_del('menu_default_active_menus');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
