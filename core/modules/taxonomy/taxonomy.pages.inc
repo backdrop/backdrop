@@ -80,7 +80,7 @@ function taxonomy_term_feed(TaxonomyTerm $term) {
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
-  $nids = taxonomy_select_nodes($term->tid, FALSE, variable_get('feed_default_items', 10));
+  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.rss', 'rss_limit'));
 
   node_feed($nids, $channel);
 }

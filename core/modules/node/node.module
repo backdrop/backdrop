@@ -2341,6 +2341,7 @@ function node_block_list_alter(&$blocks) {
  */
 function node_feed($nids = FALSE, $channel = array()) {
   global $base_url, $language_content;
+  $rss_config = config('system.rss');
 
   if ($nids === FALSE) {
     $nids = db_select('node', 'n')
@@ -2348,13 +2349,13 @@ function node_feed($nids = FALSE, $channel = array()) {
       ->condition('n.promote', 1)
       ->condition('n.status', 1)
       ->orderBy('n.created', 'DESC')
-      ->range(0, variable_get('feed_default_items', 10))
+      ->range(0, $rss_config->get('rss_limit'))
       ->addTag('node_access')
       ->execute()
       ->fetchCol();
   }
 
-  $item_length = variable_get('feed_item_length', 'fulltext');
+  $item_length = $rss_config->get('rss_viewmode');
   $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
 
   // Load all nodes to be rendered.
@@ -2393,7 +2394,7 @@ function node_feed($nids = FALSE, $channel = array()) {
     'version'     => '2.0',
     'title'       => config_get('system.site', 'site_name'),
     'link'        => $base_url,
-    'description' => variable_get('feed_description', ''),
+    'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
   );
   $channel_extras = array_diff_key($channel, $channel_defaults);
