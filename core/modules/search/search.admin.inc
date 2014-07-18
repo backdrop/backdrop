@@ -49,11 +49,13 @@ function _search_get_module_names() {
  * @see search_admin_settings_submit()
  * @see search_admin_reindex_submit()
  */
-function search_admin_settings($form) {
+function search_admin_settings($form, &$form_state) {
+  $config = config('search.settings');
+
   // Collect some stats
   $remaining = 0;
   $total = 0;
-  foreach (variable_get('search_active_modules', array('node', 'user')) as $module) {
+  foreach ($config->get('search_active_modules') as $module) {
     if ($status = module_invoke($module, 'search_status')) {
       $remaining += $status['remaining'];
       $total += $status['total'];
@@ -77,7 +79,7 @@ function search_admin_settings($form) {
   $form['indexing_throttle']['search_cron_limit'] = array(
     '#type' => 'select',
     '#title' => t('Number of items to index per cron run'),
-    '#default_value' => variable_get('search_cron_limit', 100),
+    '#default_value' => $config->get('search_cron_limit'),
     '#options' => $items,
     '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce the number of items to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
   );
@@ -92,7 +94,7 @@ function search_admin_settings($form) {
   $form['indexing_settings']['minimum_word_size'] = array(
     '#type' => 'number',
     '#title' => t('Minimum word length to index'),
-    '#default_value' => variable_get('minimum_word_size', 3),
+    '#default_value' => $config->get('search_minimum_word_size'),
     '#min' => 1,
     '#max' => 10000,
     '#description' => t('The number of characters a word has to be to be indexed. A lower setting means better search result ranking, but also a larger database. Each search query must contain at least one keyword that is this size (or longer).'),
@@ -100,7 +102,7 @@ function search_admin_settings($form) {
   $form['indexing_settings']['overlap_cjk'] = array(
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
-    '#default_value' => variable_get('overlap_cjk', TRUE),
+    '#default_value' => $config->get('search_overlap_cjk'),
     '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages.')
   );
 
@@ -113,14 +115,14 @@ function search_admin_settings($form) {
     '#type' => 'checkboxes',
     '#title' => t('Active modules'),
     '#title_display' => 'invisible',
-    '#default_value' => variable_get('search_active_modules', array('node', 'user')),
+    '#default_value' => $config->get('search_active_modules'),
     '#options' => $module_options,
     '#description' => t('Choose which search modules are active from the available modules.')
   );
   $form['active']['search_default_module'] = array(
     '#title' => t('Default search module'),
     '#type' => 'radios',
-    '#default_value' => variable_get('search_default_module', 'node'),
+    '#default_value' => $config->get('search_default_module'),
     '#options' => $module_options,
     '#description' => t('Choose which search module is the default.')
   );
@@ -128,14 +130,18 @@ function search_admin_settings($form) {
   $form['#submit'][] = 'search_admin_settings_submit';
 
   // Per module settings
-  foreach (variable_get('search_active_modules', array('node', 'user')) as $module) {
+  foreach ($config->get('search_active_modules') as $module) {
     $added_form = module_invoke($module, 'search_admin');
     if (is_array($added_form)) {
       $form = array_merge($form, $added_form);
     }
   }
-
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
 }
 
 /**
@@ -156,13 +162,16 @@ function search_admin_settings_validate($form, &$form_state) {
  * Form submission handler for search_admin_settings().
  */
 function search_admin_settings_submit($form, &$form_state) {
+  $config = config('search.settings');
   // If these settings change, the index needs to be rebuilt.
-  if ((variable_get('minimum_word_size', 3) != $form_state['values']['minimum_word_size']) ||
-      (variable_get('overlap_cjk', TRUE) != $form_state['values']['overlap_cjk'])) {
+  if (($config->get('search_minimum_word_size') != $form_state['values']['minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['overlap_cjk'])) {
+    $config->set('search_minimum_word_size', $form_state['values']['minimum_word_size']);
+    $config->set('search_overlap_cjk', $form_state['values']['overlap_cjk']);
     backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();
   }
-  $current_modules = variable_get('search_active_modules', array('node', 'user'));
+  $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
+  $config->set('search_default_module', $form_state['values']['search_default_module']);
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
     $new_modules = array('node', 'user');
@@ -170,10 +179,12 @@ function search_admin_settings_submit($form, &$form_state) {
   else {
     $new_modules = array_filter($form_state['values']['search_active_modules']);
   }
-  if (array_diff($current_modules, $new_modules)) {
+  if ($config->get('search_active_modules') != $new_modules) {
+    $config->set('search_active_modules', $new_modules);
     backdrop_set_message(t('The active search modules have been changed.'));
     variable_set('menu_rebuild_needed', TRUE);
   }
+  $config->save();
 }
 
 /**

@@ -91,7 +91,7 @@ class views_handler_filter_search extends views_handler_filter {
     if (!empty($form_state['values'][$key])) {
       $this->query_parse_search_expression($form_state['values'][$key]);
       if (count($this->search_query->words()) == 0) {
-        form_set_error($key, format_plural(variable_get('minimum_word_size', 3), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
+        form_set_error($key, format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
       }
     }
   }
