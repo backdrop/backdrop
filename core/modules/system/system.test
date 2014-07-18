@@ -1973,6 +1973,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
    * Tests that requirements warnings and errors are correctly displayed.
    */
   function testRequirements() {
+    $config = config('update.settings');
     $this->backdropLogin($this->update_user);
 
     // If there are no requirements warnings or errors, we expect to be able to
@@ -1989,7 +1990,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
 
     // First, run this test with pending updates to make sure they can be run
     // successfully.
-    variable_set('update_script_test_requirement_type', REQUIREMENT_WARNING);
+    $config->set('update_requirement_type', REQUIREMENT_WARNING)->save();
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertText('This is a requirements warning provided by the update_script_test module.');
@@ -2014,7 +2015,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     // If there is a requirements error, it should be displayed even after
     // clicking the link to proceed (since the problem that triggered the error
     // has not been fixed).
-    variable_set('update_script_test_requirement_type', REQUIREMENT_ERROR);
+    $config->set('update_requirement_type', REQUIREMENT_ERROR)->save();
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertText('This is a requirements error provided by the update_script_test module.');
     $this->clickLink('try again');
