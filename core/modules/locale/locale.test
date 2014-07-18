@@ -1271,8 +1271,10 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     variable_set('language_negotiation_' . LANGUAGE_TYPE_URL, locale_language_negotiation_info());
 
     // Change language providers settings.
-    variable_set('locale_language_negotiation_url_part', LANGUAGE_NEGOTIATION_URL_PREFIX);
-    variable_set('locale_language_negotiation_session_param', TRUE);
+    config('language.negotiation')
+      ->set('url_part', FALSE)
+      ->set('session_parameter', FALSE)
+      ->save();
 
     // Uninstall Locale.
     module_disable($locale_module);
@@ -1303,8 +1305,8 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $this->assertTrue($language_negotiation, t('URL language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
 
     // Check language providers settings.
-    $this->assertFalse(variable_get('locale_language_negotiation_url_part', FALSE), 'URL language provider indicator settings cleared.');
-    $this->assertFalse(variable_get('locale_language_negotiation_session_param', FALSE), 'Visit language provider settings cleared.');
+    $this->assertFalse(config_get('language.negotiation', 'url_part'), t('URL language negotiation method indicator settings cleared.'));
+    $this->assertFalse(config_get('language.negotiation', 'session_parameter'), t('Visit language negotiation method settings cleared.'));
 
     // Check JavaScript parsed.
     $javascript_parsed_count = count(variable_get('javascript_parsed', array()));
@@ -2221,7 +2223,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       language_negotiation_set(LANGUAGE_TYPE_INTERFACE, $negotiation);
     }
     if (!empty($test['locale_language_negotiation_url_part'])) {
-      variable_set('locale_language_negotiation_url_part', $test['locale_language_negotiation_url_part']);
+      config_set('language.negotiation', 'url_part', $test['locale_language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
       variable_set('locale_test_domain', $test['locale_test_domain']);
@@ -2300,7 +2302,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Change the domain for the Italian language.
     $edit = array(
-      'locale_language_negotiation_url_part' => 1,
+      'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
       'domain[it]' => 'it.example.com',
     );
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));

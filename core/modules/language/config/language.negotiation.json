@@ -1,0 +1,11 @@
+{
+    "_config_name": "language.negotiation",
+    "session_parameter": "language",
+    "url_part": "path_prefix",
+    "url_prefixes": {
+    	"en": ""
+    },
+    "url_domains": {
+    	"en": ""
+    }
+}

@@ -317,6 +317,26 @@ function locale_update_1002() {
 }
 
 /**
+ * Move language negotation settings from variables to config.
+ */
+function locale_update_1003() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'language.negotiation');
+  // Migrate variables if any.
+  $config = config('language.negotiation');
+  $config->set('session_parameter', variable_get('locale_language_negotiation_session_param', 'language'));
+  $config->set('url_part', variable_get('locale_language_negotiation_url_part', 'path_prefix'));
+  $config->set('url_prefixes', variable_get('locale_language_negotiation_url_prefixes', array('en' => '')));
+  $config->set('url_domains', variable_get('locale_language_negotiation_url_domains', array('en' => '')));
+  $config->save();
+  // Delete variables.
+  variable_del('locale_language_negotiation_session_param');
+  variable_del('locale_language_negotiation_url_part');
+  variable_del('locale_language_negotiation_url_prefixes');
+  variable_del('locale_language_negotiation_url_domains');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
