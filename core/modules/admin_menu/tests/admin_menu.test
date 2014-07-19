@@ -204,7 +204,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $edit = array(
       $rid . '[administer site configuration]' => TRUE,
     );
-    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
     // Verify that Configuration appears.
     $this->assertLinkTrailByTitle(array(t('Configuration')));
 
@@ -214,14 +214,14 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $edit = array(
       'name' => 'test',
     );
-    $this->backdropPost('admin/people/permissions/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
     // It should be safe to assume that the new role gets the next ID.
     $test_rid = $rid + 1;
     // Grant the 'administer content types' permission for the role.
     $edit = array(
       $test_rid . '[administer content types]' => TRUE,
     );
-    $this->backdropPost('admin/people/permissions/' . $test_rid, $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/people/permissions/' . $test_rid, $edit, t('Save permissions'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
@@ -234,7 +234,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $this->assertLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
     // Delete the role.
-    $this->backdropPost('admin/people/permissions/roles/edit/' . $test_rid, array(), t('Delete role'));
+    $this->backdropPost('admin/config/people/roles/edit/' . $test_rid, array(), t('Delete role'));
     $this->backdropPost(NULL, array(), t('Delete'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
@@ -360,7 +360,6 @@ class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
     ));
 
     // Verify that MENU_LOCAL_TASKs appear.
-    $this->assertLinkTrailByTitle(array(t('People'), t('Permissions')));
     $this->assertLinkTrailByTitle(array(t('Appearance'), t('Settings')));
     $this->assertLinkTrailByTitle(array(t('Modules'), t('Uninstall')));
 
@@ -371,10 +370,8 @@ class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
     ));
 
     // Verify that MENU_DEFAULT_LOCAL_TASKs do NOT appear.
-    $this->assertNoLinkTrailByTitle(array(t('Modules'), t('List')));
-    $this->assertNoLinkTrailByTitle(array(t('People'), t('List')));
-    $this->assertNoLinkTrailByTitle(array(t('People'), t('Permissions'), t('Permissions')));
     $this->assertNoLinkTrailByTitle(array(t('Appearance'), t('List')));
+    $this->assertNoLinkTrailByTitle(array(t('Modules'), t('List')));
 
     // Verify that MENU_VISIBLE_IN_BREADCRUMB items (exact type) do NOT appear.
     $this->assertNoLinkTrailByTitle(array(t('Modules'), t('Uninstall'), t('Uninstall')));

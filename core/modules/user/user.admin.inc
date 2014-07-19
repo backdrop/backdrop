@@ -341,7 +341,7 @@ function user_admin_settings() {
   $form['registration_cancellation']['user_cancel_method'] = array(
     '#type' => 'item',
     '#title' => t('When cancelling a user account'),
-    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer users'), '@permissions-url' => url('admin/people/permissions'))),
+    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer users'), '@permissions-url' => url('admin/config/people/permissions'))),
   );
   $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
   foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
@@ -870,13 +870,13 @@ function user_admin_roles($form, $form_state) {
     if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
       $links['edit'] = array(
         'title' => t('Edit role'),
-        'href' => 'admin/people/permissions/roles/edit/' . $rid,
+        'href' => 'admin/config/people/roles/edit/' . $rid,
         'weight' => 0,
       );
     }
     $links['permissions'] = array(
       'title' => t('Edit permissions'),
-      'href' => 'admin/people/permissions/' . $rid,
+      'href' => 'admin/config/people/permissions/' . $rid,
       'weight' => 5,
     );
     $form['roles'][$rid]['operations'] = array(
@@ -1036,7 +1036,7 @@ function user_admin_role_submit($form, &$form_state) {
     user_role_save($role);
     backdrop_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'admin/people/permissions/roles';
+  $form_state['redirect'] = 'admin/config/people/roles';
   return;
 }
 
@@ -1044,7 +1044,7 @@ function user_admin_role_submit($form, &$form_state) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/people/permissions/roles/delete/' . $form_state['values']['rid'];
+  $form_state['redirect'] = 'admin/config/people/roles/delete/' . $form_state['values']['rid'];
 }
 
 /**
@@ -1055,7 +1055,7 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
     '#type' => 'value',
     '#value' => $role->rid,
   );
-  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->name)), 'admin/people/permissions/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->name)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
 }
 
 /**
@@ -1064,6 +1064,6 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
   user_role_delete((int) $form_state['values']['rid']);
   backdrop_set_message(t('The role has been deleted.'));
-  $form_state['redirect'] = 'admin/people/permissions/roles';
+  $form_state['redirect'] = 'admin/config/people/roles';
 }
 
