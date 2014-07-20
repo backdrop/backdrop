@@ -1430,7 +1430,6 @@ function user_menu() {
     'title' => 'People',
     'description' => 'Manage user accounts, roles, and permissions.',
     'page callback' => 'user_admin',
-    'page arguments' => array('list'),
     'access arguments' => array('administer users'),
     'position' => 'left',
     'weight' => -4,
@@ -1444,10 +1443,10 @@ function user_menu() {
     'weight' => -10,
     'file' => 'user.admin.inc',
   );
-
   $items['admin/people/create'] = array(
     'title' => 'Add user account',
-    'page arguments' => array('create'),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_register_form'),
     'access arguments' => array('administer users'),
     'type' => MENU_LOCAL_ACTION,
   );
@@ -1496,13 +1495,6 @@ function user_menu() {
     'access callback' => 'user_role_edit_access',
     'access arguments' => array(5),
     'file' => 'user.admin.inc',
-  );
-
-  $items['admin/people/create'] = array(
-    'title' => 'Add user',
-    'page arguments' => array('create'),
-    'access arguments' => array('administer users'),
-    'type' => MENU_LOCAL_ACTION,
   );
 
   // Administration pages.
