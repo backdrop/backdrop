@@ -4210,6 +4210,10 @@ function system_config_info() {
     'label' => t('System RSS'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.action'] = array(
+    'label' => t('System action'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
