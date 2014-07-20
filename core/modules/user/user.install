@@ -335,5 +335,27 @@ function user_update_1001() {
 }
 
 /**
+ * Moves login flood settings from variable to config.
+ */
+function user_update_1004() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'user.flood');
+  // Migrate variables if any.
+  $config = config('user.flood');
+  $config->set('flood_uid_only', variable_get('user_failed_login_identifier_uid_only', 'false'));
+  $config->set('flood_ip_limit', variable_get('user_failed_login_ip_limit', 50));
+  $config->set('flood_ip_window', variable_get('user_failed_login_ip_window', 3600));
+  $config->set('flood_user_limit', variable_get('user_failed_login_user_limit', 5));
+  $config->set('flood_user_window', variable_get('user_failed_login_user_window', 21600));
+  $config->save();
+  // Delete variables.
+  variable_del('user_failed_login_identifier_uid_only');
+  variable_del('user_failed_login_ip_limit');
+  variable_del('user_failed_login_ip_window');
+  variable_del('user_failed_login_user_limit');
+  variable_del('user_failed_login_user_window');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
