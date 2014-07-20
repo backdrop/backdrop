@@ -366,7 +366,7 @@ class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
     // Verify that MENU_LOCAL_ACTIONs appear.
     $this->assertLinkTrailByTitle(array(
       t('People'),
-      t('Add user'),
+      t('Add user account'),
     ));
 
     // Verify that MENU_DEFAULT_LOCAL_TASKs do NOT appear.
