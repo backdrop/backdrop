@@ -537,7 +537,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     $edit = array(
       '1[access comments]' => FALSE,
     );
-    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
 
     // Create a new field.
     $edit = array(

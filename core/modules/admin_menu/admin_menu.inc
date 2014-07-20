@@ -623,7 +623,7 @@ function admin_menu_links_users() {
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-menu-action', 'admin-menu-users')),
-    '#href' => (user_access('administer users') ? 'admin/people/people' : 'user'),
+    '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
   );
   return $links;
 }

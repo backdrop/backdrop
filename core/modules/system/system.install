@@ -1935,6 +1935,20 @@ function system_update_1015() {
 }
 
 /**
+ * Moves action_max_stack from variable to config.
+ */
+function system_update_1016() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.action');
+  // Migrate variables if any.
+  $config = config('system.action');
+  $config->set('action_recursion_limit', variable_get('actions_max_stack', 35));
+  $config->save();
+  // Delete variables.
+  variable_del('actions_max_stack');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

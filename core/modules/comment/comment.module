@@ -2470,7 +2470,7 @@ function comment_autoload_info() {
     'views_handler_field_comment_link_reply' => 'views/views_handler_field_comment_link_reply.inc',
     'views_handler_field_comment_node_link' => 'views/views_handler_field_comment_node_link.inc',
     'views_handler_field_comment_username' => 'views/views_handler_field_comment_username.inc',
-    'views_handler_field_comment_username' => 'views/views_handler_field_ncs_last_comment_name.inc',
+    'views_handler_field_ncs_last_comment_name' => 'views/views_handler_field_ncs_last_comment_name.inc',
     'views_handler_field_ncs_last_updated' => 'views/views_handler_field_ncs_last_updated.inc',
     'views_handler_field_node_comment' => 'views/views_handler_field_node_comment.inc',
     'views_handler_field_node_new_comments' => 'views/views_handler_field_node_new_comments.inc',
