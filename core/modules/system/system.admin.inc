@@ -765,6 +765,8 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
  * @see system_modules_submit()
  */
 function system_modules($form, $form_state = array()) {
+  backdrop_set_title('Modules');
+
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
@@ -1211,6 +1213,8 @@ function system_modules_submit($form, &$form_state) {
  *   A form array representing the currently disabled modules.
  */
 function system_modules_uninstall($form, $form_state = NULL) {
+  backdrop_set_title('Uninstall modules');
+
   // Make sure the install API is available.
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
