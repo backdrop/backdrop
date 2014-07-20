@@ -92,7 +92,7 @@ function system_admin_index() {
       // Sort links by title.
       uasort($admin_tasks, 'backdrop_sort_title');
       // Move 'Configure permissions' links to the bottom of each section.
-      $permission_key = "admin/people/permissions#module-$module";
+      $permission_key = "admin/config/people/permissions#module-$module";
       if (isset($admin_tasks[$permission_key])) {
         $permission_task = $admin_tasks[$permission_key];
         unset($admin_tasks[$permission_key]);

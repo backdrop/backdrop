@@ -29,7 +29,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     // Set settings.
     $edit = array();
     $edit['contact_default_status'] = TRUE;
-    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Setting successfully saved.');
 
     // Delete old categories to ensure that new categories are used.
@@ -348,7 +348,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     // Disable the personal contact form.
     $this->backdropLogin($this->admin_user);
     $edit = array('contact_default_status' => FALSE);
-    $this->backdropPost('admin/config/people/accounts', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Setting successfully saved.');
     $this->backdropLogout();
 

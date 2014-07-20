@@ -705,7 +705,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
       BACKDROP_ANONYMOUS_RID . '[access comments]' => 1,
       BACKDROP_ANONYMOUS_RID . '[post comments]' => 1,
     );
-    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'article'));
@@ -783,7 +783,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $this->checkCommentAccess('Anon user has search permission and access comments permission, comments should be indexed', TRUE);
 
     $this->backdropLogin($this->admin_user);
-    $this->backdropGet('admin/people/permissions');
+    $this->backdropGet('admin/config/people/permissions');
 
     // Disable search access for authenticated user to test admin user.
     $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID, FALSE, FALSE);

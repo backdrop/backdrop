@@ -3207,13 +3207,13 @@ function system_get_module_admin_tasks($module, $info) {
 
   // Append link for permissions.
   if (module_hook($module, 'permission')) {
-    $item = menu_get_item('admin/people/permissions');
+    $item = menu_get_item('admin/config/people/permissions');
     if (!empty($item['access'])) {
       $item['link_path'] = $item['href'];
       $item['title'] = t('Configure @module permissions', array('@module' => $info['name']));
       unset($item['description']);
       $item['localized_options']['fragment'] = 'module-' . $module;
-      $admin_tasks["admin/people/permissions#module-$module"] = $item;
+      $admin_tasks["admin/config/people/permissions#module-$module"] = $item;
     }
   }
 
