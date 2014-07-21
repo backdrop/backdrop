@@ -12,31 +12,18 @@
  * or filtered user list admin form, depending on the argument and the POST
  * form values.
  *
- * @param string $callback_arg
- *   (optional) Indicates which form to build. Defaults to '', which will
- *   trigger the user filter form. If the POST value 'op' is present, this
- *   function uses that value as the callback argument.
- *
  * @return string
  *   A renderable form array for the respective request.
  */
-function user_admin($callback_arg = '') {
-  $op = isset($_POST['op']) ? $_POST['op'] : $callback_arg;
-
-  switch ($op) {
-    case t('Create new account'):
-    case 'create':
-      $build['user_register'] = backdrop_get_form('user_register_form');
-      break;
-    default:
-      if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'cancel')) {
-        $build['user_multiple_cancel_confirm'] = backdrop_get_form('user_multiple_cancel_confirm');
-      }
-      else {
-        $build['user_filter_form'] = backdrop_get_form('user_filter_form');
-        $build['user_admin_account'] = backdrop_get_form('user_admin_account');
-      }
+function user_admin() {
+  if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'cancel')) {
+    $build['user_multiple_cancel_confirm'] = backdrop_get_form('user_multiple_cancel_confirm');
   }
+  else {
+    $build['user_filter_form'] = backdrop_get_form('user_filter_form');
+    $build['user_admin_account'] = backdrop_get_form('user_admin_account');
+  }
+
   return $build;
 }
 
