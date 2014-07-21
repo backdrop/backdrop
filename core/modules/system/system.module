@@ -4214,6 +4214,10 @@ function system_config_info() {
     'label' => t('System action'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.logging'] = array(
+    'label' => t('System logging'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
