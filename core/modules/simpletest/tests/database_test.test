@@ -1297,9 +1297,10 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * Test query COMMENT system against vulnerabilities.
    */
   function testVulnerableComment() {
-    $query = db_select('test')->comment('Testing query comments */ SELECT nid FROM {node}; --');
-    $name_field = $query->addField('test', 'name');
-    $age_field = $query->addField('test', 'age', 'age');
+    $query = db_select('test');
+    $query->comment('Testing query comments */ SELECT nid FROM {node}; --');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
     $result = $query->execute();
 
     $num_records = 0;
