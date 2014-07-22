@@ -3,7 +3,7 @@
  */
 body {
   color: #000;
-  background: #fff;
+  background: #E8E6E5;
   font: normal 81.3%/1.538em "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
 a {
@@ -205,7 +205,9 @@ pre {
   overflow: hidden;
   padding: 20px 20px 0 20px; /* LTR */
   position: relative;
-  background-color: #e0e0d8;
+  background-color: #E8E6E5;
+  width:770px;
+  margin:0 auto;
 }
 [dir="rtl"] #branding {
   padding: 20px 20px 0 20px;
@@ -403,6 +405,9 @@ ul.secondary li.active a.active {
   margin-right: 13px;
   padding: 20px 0 40px 0;
   position: relative;
+  background-image:url(images/corner.png);
+  background-position:right bottom;
+  background-repeat: no-repeat;
 }
 @media screen and (min-width:450px) {
   #page {
@@ -1000,7 +1005,7 @@ body.in-maintenance #sidebar-first {
 }
 body.in-maintenance #content {
   float: right; /* LTR */
-  width: 550px;
+  width: 490px;
   padding-right: 20px; /* LTR */
   clear: none;
 }
@@ -1014,6 +1019,7 @@ body.in-maintenance #page {
   width: 770px;
   margin: 0 auto;
   padding-top: 2em;
+}
 }
 body.in-maintenance #branding h1 {
   width: 770px;
@@ -1054,7 +1060,8 @@ ol.task-list li {
 }
 ol.task-list li.active {
   font-family:"open sans", "sans";
-  background: transparent url(images/task-item.png) no-repeat 3px 50%; /* LTR */
+  /*background: transparent url(images/task-item.png) no-repeat 3px 50%; /* LTR */
+  background: none repeat scroll 0 0 #E8E6E5;
   padding: 0.5em 1em 0.5em 20px; /* LTR */
   color: #000;
 }
