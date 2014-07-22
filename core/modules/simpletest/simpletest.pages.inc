@@ -421,8 +421,10 @@ function simpletest_result_status_image($status) {
  *
  * @ingroup forms
  * @see simpletest_settings_form_validate()
+ * @see simpletest_settings_form_submit()
  */
 function simpletest_settings_form($form, &$form_state) {
+  $config = config('simpletest.settings');
   $form['general'] = array(
     '#type' => 'fieldset',
     '#title' => t('General'),
@@ -431,13 +433,13 @@ function simpletest_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Clear results after each complete test suite run'),
     '#description' => t('By default SimpleTest will clear the results after they have been viewed on the results page, but in some cases it may be useful to leave the results in the database. The results can then be viewed at <em>admin/config/development/testing/[test_id]</em>. The test ID can be found in the database, simpletest table, or kept track of when viewing the results the first time. Additionally, some modules may provide more analysis or features that require this setting to be disabled.'),
-    '#default_value' => variable_get('simpletest_clear_results', TRUE),
+    '#default_value' => $config->get('simpletest_clear_results'),
   );
   $form['general']['simpletest_verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide verbose information when running tests'),
     '#description' => t('The verbose data will be printed along with the standard assertions and is useful for debugging. The verbose data will be erased between each test suite run. The verbose data output is very detailed and should only be used when debugging.'),
-    '#default_value' => variable_get('simpletest_verbose', TRUE),
+    '#default_value' => $config->get('simpletest_verbose'),
   );
 
   $form['httpauth'] = array(
@@ -458,16 +460,16 @@ function simpletest_settings_form($form, &$form_state) {
       CURLAUTH_ANY => t('Any'),
       CURLAUTH_ANYSAFE => t('Any safe'),
     ),
-    '#default_value' => variable_get('simpletest_httpauth_method', CURLAUTH_BASIC),
+    '#default_value' => $config->get('simpletest_method'),
   );
-  $username = variable_get('simpletest_httpauth_username');
-  $password = variable_get('simpletest_httpauth_password');
+  $username = $config->get('simpletest_username');
+  $password = $config->get('simpletest_password');
   $form['httpauth']['simpletest_httpauth_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username'),
     '#default_value' => $username,
   );
-  if ($username && $password) {
+  if (!empty($username) && !empty($password)) {
     $form['httpauth']['simpletest_httpauth_username']['#description'] = t('Leave this blank to delete both the existing username and password.');
   }
   $form['httpauth']['simpletest_httpauth_password'] = array(
@@ -478,7 +480,25 @@ function simpletest_settings_form($form, &$form_state) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');
   }
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for simpletest_settings_form().
+ */
+function simpletest_settings_form_submit($form, &$form_state) {
+  config('simpletest.settings')
+    ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
+    ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
+    ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
+    ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
+    ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
+    ->save();
 }
 
 /**
@@ -488,7 +508,7 @@ function simpletest_settings_form_validate($form, &$form_state) {
   // If a username was provided but a password wasn't, preserve the existing
   // password.
   if (!empty($form_state['values']['simpletest_httpauth_username']) && empty($form_state['values']['simpletest_httpauth_password'])) {
-    $form_state['values']['simpletest_httpauth_password'] = variable_get('simpletest_httpauth_password', '');
+    $form_state['values']['simpletest_httpauth_password'] = config_get('simpletest.settings', 'simpletest_password');
   }
 
   // If a password was provided but a username wasn't, the credentials are

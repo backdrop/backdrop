@@ -5687,7 +5687,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   // distribution we need to include the profile of the parent site (in which
   // test runs are triggered).
   if (backdrop_valid_test_ua()) {
-    $testing_profile = variable_get('simpletest_parent_profile', FALSE);
+    $testing_profile = config_get('simpletest.settings', 'simpletest_parent_profile');
     if ($testing_profile && $testing_profile != $profile) {
       $profiles[] = $testing_profile;
     }
