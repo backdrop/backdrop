@@ -1061,7 +1061,7 @@ ol.task-list li {
 ol.task-list li.active {
   font-family:"open sans", "sans";
   /*background: transparent url(images/task-item.png) no-repeat 3px 50%; /* LTR */
-  background: none repeat scroll 0 0 #E8E6E5;
+  background: url(images/installer_btn.png) no-repeat scroll 0 0 #fff;
   padding: 0.5em 1em 0.5em 20px; /* LTR */
   color: #000;
 }
