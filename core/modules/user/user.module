@@ -1436,7 +1436,7 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
   $items['admin/people/list'] = array(
-    'title' => 'User account list',
+    'title' => 'Find user accounts',
     'description' => 'Find and manage people interacting with your site.',
     'access arguments' => array('administer users'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
