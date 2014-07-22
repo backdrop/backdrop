@@ -1147,10 +1147,10 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * Executes the UPDATE query.
    *
    * @return
-   *   The number of rows affected by the update.
+   *   The number of rows matched by the update. This count includes rows that
+   *   may have matched but not necessarily changed by the update.
    */
   public function execute() {
-
     // Expressions take priority over literal fields, so we process those first
     // and remove any literal fields that conflict.
     $fields = $this->fields;
