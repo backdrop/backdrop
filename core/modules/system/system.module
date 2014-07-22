@@ -592,7 +592,7 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
   $items['admin/appearance/list'] = array(
-    'title' => 'List',
+    'title' => 'Themes',
     'description' => 'Select and configure your theme',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
@@ -649,7 +649,7 @@ function system_menu() {
 
   // Modules.
   $items['admin/modules'] = array(
-    'title' => 'Modules',
+    'title' => 'Functionality',
     'description' => 'Extend site functionality.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
@@ -658,11 +658,11 @@ function system_menu() {
     'weight' => -2,
   );
   $items['admin/modules/list'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/modules/list/confirm'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
@@ -675,7 +675,7 @@ function system_menu() {
     'weight' => 20,
   );
   $items['admin/modules/uninstall/confirm'] = array(
-    'title' => 'Uninstall',
+    'title' => 'Uninstall modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'system.admin.inc',
