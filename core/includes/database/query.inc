@@ -1609,10 +1609,32 @@ class MergeQuery extends Query implements QueryConditionInterface {
     if (!count($this->condition)) {
       throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
     }
-    $select = $this->connection->select($this->conditionTable)
-      ->condition($this->condition);
-    $select->addExpression('1');
-    if (!$select->execute()->fetchField()) {
+
+    // If doing an update, try that first and see if it matches any rows.
+    if ($this->needsUpdate) {
+      $update = $this->connection->update($this->table)
+        ->fields($this->updateFields)
+        ->condition($this->condition);
+      if ($this->expressionFields) {
+        foreach ($this->expressionFields as $field => $data) {
+          $update->expression($field, $data['expression'], $data['arguments']);
+        }
+      }
+      $row_exists = (bool) $update->execute();
+      // If updated, we have no more work to be done.
+      if ($row_exists) {
+        return self::STATUS_UPDATE;
+      }
+    }
+    // If only doing inserts, select first to see if the row exists.
+    else {
+      $select = $this->connection->select($this->conditionTable)
+        ->condition($this->condition);
+      $select->addExpression('1');
+      $row_exists = (bool) $select->execute()->fetchField();
+    }
+
+    if (!$row_exists) {
       try {
         $insert = $this->connection->insert($this->table)->fields($this->insertFields);
         if ($this->defaultFields) {
@@ -1626,23 +1648,16 @@ class MergeQuery extends Query implements QueryConditionInterface {
         // beat us in inserting the same row. Retry the select query, if it
         // returns a row, ignore the error and continue with the update
         // query below.
+        if (!isset($select)) {
+          $select = $this->connection->select($this->conditionTable)
+            ->condition($this->condition);
+          $select->addExpression('1');
+        }
         if (!$select->execute()->fetchField()) {
           throw $e;
         }
       }
     }
-    if ($this->needsUpdate) {
-      $update = $this->connection->update($this->table)
-        ->fields($this->updateFields)
-        ->condition($this->condition);
-      if ($this->expressionFields) {
-        foreach ($this->expressionFields as $field => $data) {
-          $update->expression($field, $data['expression'], $data['arguments']);
-        }
-      }
-      $update->execute();
-      return self::STATUS_UPDATE;
-     }
   }
 }
 
