@@ -4,3 +4,4 @@ package = Views
 version = BACKDROP_VERSION
 backdrop = 1.x
 stylesheets[all][] = css/views.css
+required = TRUE
