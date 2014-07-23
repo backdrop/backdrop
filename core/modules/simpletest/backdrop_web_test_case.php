@@ -517,15 +517,16 @@ abstract class BackdropTestCase {
    *   methods during debugging.
    */
   public function run(array $methods = array()) {
+    $config = config('simpletest.settings');
     // Initialize verbose debugging.
     simpletest_verbose(NULL, variable_get('file_public_path', 'files'), get_class($this));
 
     // HTTP auth settings (<username>:<password>) for the simpletest browser
     // when sending requests to the test site.
-    $this->httpauth_method = variable_get('simpletest_httpauth_method', CURLAUTH_BASIC);
-    $username = variable_get('simpletest_httpauth_username', NULL);
-    $password = variable_get('simpletest_httpauth_password', NULL);
-    if ($username && $password) {
+    $this->httpauth_method = $config->get('simpletest_method');
+    $username = $config->get('simpletest_username', NULL);
+    $password = $config->get('simpletest_password', NULL);
+    if (!empty($username) && !empty($password)) {
       $this->httpauth_credentials = $username . ':' . $password;
     }
 
@@ -953,6 +954,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Whether the files were copied to the test files directory.
    */
   protected $generatedTestFiles = FALSE;
+
+  /**
+   * The maximum number of redirects to follow when handling responses.
+   */
+  protected $maximumRedirects = 5;
 
   /**
    * The number of redirects followed during the handling of a request.
@@ -1523,11 +1529,11 @@ class BackdropWebTestCase extends BackdropTestCase {
     variable_set('file_private_path', $this->private_files_directory);
     variable_set('file_temporary_path', $this->temp_files_directory);
 
-    // Set the 'simpletest_parent_profile' variable to add the parent profile's
+    // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
     // @see backdrop_system_listing()
     // @todo This may need to be primed like 'install_profile' above.
-    variable_set('simpletest_parent_profile', $this->originalProfile);
+    config_set('simpletest.settings', 'parent_profile', $this->originalProfile);
 
     // Ensure schema versions are recalculated.
     backdrop_static_reset('backdrop_get_schema_versions');
@@ -1828,7 +1834,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // to prevent fragments being sent to the web server as part
     // of the request.
     // TODO: Remove this; fixed in curl 7.20.0.
-    if (in_array($status, array(300, 301, 302, 303, 305, 307)) && $this->redirect_count < variable_get('simpletest_maximum_redirects', 5)) {
+    if (in_array($status, array(300, 301, 302, 303, 305, 307)) && $this->redirect_count < $this->maximumRedirects) {
       if ($this->backdropGetHeader('location')) {
         $this->redirect_count++;
         $curl_options = array();

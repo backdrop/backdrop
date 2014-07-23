@@ -173,16 +173,15 @@ function simpletest_uninstall() {
   backdrop_load('module', 'simpletest');
   simpletest_clean_database();
 
-  // Remove settings variables.
-  variable_del('simpletest_httpauth_method');
-  variable_del('simpletest_httpauth_username');
-  variable_del('simpletest_httpauth_password');
-  variable_del('simpletest_clear_results');
-  variable_del('simpletest_verbose');
-
   // Remove generated files.
   file_unmanaged_delete_recursive('public://simpletest');
 }
+
+/**
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
+ * @{
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
+ */
 
 /**
  * Update the simpletest_test_id table to hold a list of active prefixes.
@@ -217,3 +216,30 @@ function simpletest_update_1000() {
     db_create_table('simpletest_prefix', $schema);
   }
 }
+
+/**
+ * Move simpletest settings from variables to config.
+ */
+function simpletest_update_1001() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'simpletest.settings');
+  // Migrate variables if any.
+  $config = config('simpletest.settings');
+  $config->set('simpletest_clear_results', variable_get('simpletest_clear_results', 1));
+  $config->set('simpletest_method', variable_get('simpletest_httpauth_method', 1));
+  $config->set('simpletest_password', variable_get('simpletest_httpauth_password', ''));
+  $config->set('simpletest_username', variable_get('simpletest_httpauth_username', ''));
+  $config->set('simpletest_verbose', variable_get('simpletest_verbose', 1));
+  $config->save();
+  // Delete variables.
+  variable_del('simpletest_clear_results');
+  variable_del('simpletest_httpauth_method');
+  variable_del('simpletest_httpauth_password');
+  variable_del('simpletest_httpauth_username');
+  variable_del('simpletest_verbose');
+}
+
+/**
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

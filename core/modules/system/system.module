@@ -4214,6 +4214,10 @@ function system_config_info() {
     'label' => t('System action'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.menu'] = array(
+    'label' => t('System menu'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
