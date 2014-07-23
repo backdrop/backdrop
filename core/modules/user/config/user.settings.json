@@ -1,0 +1,17 @@
+{
+    "_config_name": "user.settings",
+    "account_admin_role": "",
+    "account_anonymous": "Anonymous",
+    "account_verify_mail": 1,
+    "account_cancel_confirm": 1,
+    "account_password_reset": 1,
+    "account_status_activated": 1,
+    "account_status_blocked": 0,
+    "account_status_cancelled": 0,
+    "account_register_admin_created": 1,
+    "account_register_no_approval_required": 1,
+    "account_register_pending_approval": 1,
+    "account_register": "visitors",
+    "account_signatures": 0,
+    "account_password_reset_timeout": 86400
+}
