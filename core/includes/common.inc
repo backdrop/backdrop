@@ -1121,7 +1121,7 @@ function _fix_gpc_magic(&$item) {
  * @param $key
  *   The key for the item within $_FILES.
  *
- * @see http://php.net/manual/en/features.file-upload.php#42280
+ * @see http://php.net/manual/features.file-upload.php#42280
  */
 function _fix_gpc_magic_files(&$item, $key) {
   if ($key != 'tmp_name') {
@@ -2074,7 +2074,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *   get interpreted as date format characters.
  * @param $timezone
  *   (optional) Time zone identifier, as described at
- *   http://php.net/manual/en/timezones.php Defaults to the time zone used to
+ *   http://php.net/manual/timezones.php Defaults to the time zone used to
  *   display the page.
  * @param $langcode
  *   (optional) Language code to translate to. Defaults to the language used to
@@ -2694,6 +2694,7 @@ function backdrop_deliver_html_page($page_callback_result) {
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
+    $site_config = config('system.site');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -2710,7 +2711,7 @@ function backdrop_deliver_html_page($page_callback_result) {
           $_GET['destination'] = $_GET['q'];
         }
 
-        $path = backdrop_get_normal_path(variable_get('site_404', ''));
+        $path = backdrop_get_normal_path($site_config->get('site_404'));
         if ($path && $path != $_GET['q']) {
           // Custom 404 handler. Set the active item in case there are tabs to
           // display, or other dependencies on the path.
@@ -2739,7 +2740,7 @@ function backdrop_deliver_html_page($page_callback_result) {
           $_GET['destination'] = $_GET['q'];
         }
 
-        $path = backdrop_get_normal_path(variable_get('site_403', ''));
+        $path = backdrop_get_normal_path($site_config->get('site_403'));
         if ($path && $path != $_GET['q']) {
           // Custom 403 handler. Set the active item in case there are tabs to
           // display or other dependencies on the path.
@@ -2761,8 +2762,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         backdrop_maintenance_theme();
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(variable_get('maintenance_mode_message',
-          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.maintenance', 'maintenance_message'), array('@site' => config_get('system.site', 'site_name'))))));
         break;
     }
   }
@@ -3797,7 +3797,7 @@ function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
     // Remove certain whitespace.
     // There are different conditions for removing leading and trailing
     // whitespace.
-    // @see http://php.net/manual/en/regexp.reference.subpatterns.php
+    // @see http://php.net/manual/regexp.reference.subpatterns.php
     $contents = preg_replace('<
       # Strip leading and trailing whitespace.
         \s*([@{};,])\s*
@@ -5478,7 +5478,7 @@ function _backdrop_bootstrap_full() {
  * client without gzip support.
  *
  * Page compression requires the PHP zlib extension
- * (http://php.net/manual/en/ref.zlib.php).
+ * (http://php.net/manual/ref.zlib.php).
  *
  * @see backdrop_page_header()
  */

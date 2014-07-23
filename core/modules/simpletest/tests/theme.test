@@ -22,7 +22,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   function testThemeSuggestions() {
     // Set the front page as something random otherwise the CLI
     // test runner fails.
-    variable_set('site_frontpage', 'nobody-home');
+    config_set('system.site', 'site_frontpage', 'nobody-home');
     $args = array('node', '1', 'edit');
     $suggestions = theme_get_suggestions($args, 'page');
     $this->assertEqual($suggestions, array('page__node', 'page__node__%', 'page__node__1', 'page__node__edit'), t('Found expected node edit page suggestions'));
@@ -66,7 +66,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
     $q = $_GET['q'];
     // Set $_GET['q'] to node because theme_get_suggestions() will query it to
     // see if we are on the front page.
-    variable_set('site_frontpage', 'node');
+    config_set('system.site', 'site_frontpage', 'node');
     $_GET['q'] = 'node';
     $suggestions = theme_get_suggestions(explode('/', $_GET['q']), 'page');
     // Set it back to not annoy the batch runner.
@@ -307,7 +307,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     // Required to verify the "active" class in expected links below, and
     // because the current path is different when running tests manually via
     // simpletest.module ('batch') and via the testing framework ('').
-    $_GET['q'] = variable_get('site_frontpage', 'user');
+    $_GET['q'] = config_get('system.site', 'site_frontpage');
 
     // Verify that a list of links is properly rendered.
     $variables = array();

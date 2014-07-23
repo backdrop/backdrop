@@ -37,11 +37,12 @@ class UpdateTestHelper extends BackdropWebTestCase {
    * @see update_test_mock_page()
    */
   protected function refreshUpdateStatus($xml_map, $url = 'update-test') {
+    $config = config('update.settings');
     // Tell the Update Manager module to fetch from the URL provided by
     // update_test module.
-    variable_set('update_fetch_url', url($url, array('absolute' => TRUE)));
+    $config->set('update_url', url($url, array('absolute' => TRUE)))->save();
     // Save the map for update_test_mock_page() to use.
-    variable_set('update_test_xml_map', $xml_map);
+    $config->set('update_xml_map', $xml_map)->save();
     // Manually check the update status.
     $this->backdropGet('admin/reports/updates/check');
   }
@@ -121,7 +122,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
         'datestamp' => '1000000000',
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => 'dev'));
     $this->assertNoText(t('2001-Sep-'));
     $this->assertText(t('Up to date'));
@@ -133,9 +134,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    * Checks that running cron updates the list of available updates.
    */
   function testModulePageRunCron() {
+    $config = config('update.settings');
     $this->setSystemInfo7_0();
-    variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('backdrop' => '0'));
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '0'))->save();
 
     $this->cronRun();
     $this->backdropGet('admin/modules');
@@ -147,9 +149,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testModulePageUpToDate() {
     $this->setSystemInfo7_0();
+    $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
-    variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('backdrop' => '0'));
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '0'))->save();
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -164,9 +167,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testModulePageRegularUpdate() {
     $this->setSystemInfo7_0();
+    $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
-    variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('backdrop' => '1'));
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '1'))->save();
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -181,9 +185,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testModulePageSecurityUpdate() {
     $this->setSystemInfo7_0();
+    $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
-    variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('backdrop' => '2-sec'));
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '2-sec'))->save();
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -257,7 +262,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
         'version' => '7.0',
       ),
     );
-    variable_set('update_test_system_info', $setting);
+    config_set('update.settings', 'update_system_info', $setting);
   }
 
 }
@@ -283,7 +288,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => '0', 'aaa_update_test' => 'no-releases'));
     $this->backdropGet('admin/reports/updates');
     // Cannot use $this->standardTests() because we need to check for the
@@ -311,7 +316,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
     $this->refreshUpdateStatus(
       array(
         'backdrop' => '0',
@@ -370,7 +375,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => '0', '#all' => '1_0'));
     $this->standardTests();
     // We're expecting the report to say all projects are up to date.
@@ -427,7 +432,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
     $xml_mapping = array(
       'backdrop' => '0',
       'update_test_subtheme' => '1_0',
@@ -442,6 +447,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
    * Tests that disabled themes are only shown when desired.
    */
   function testUpdateShowDisabledThemes() {
+    $config = config('update.settings');
     // Make sure all the update_test_* themes are disabled.
     db_update('system')
       ->fields(array('status' => 0))
@@ -472,8 +478,8 @@ class UpdateTestContribCase extends UpdateTestHelper {
     // total number of attempts made in the test may exceed the default value
     // of update_max_fetch_attempts. Therefore this variable is set very high
     // to avoid test failures in those cases.
-    variable_set('update_max_fetch_attempts', 99999);
-    variable_set('update_test_system_info', $system_info);
+    $config->set('update_max_attempts', 99999)->save();
+    $config->set('update_system_info', $system_info)->save();
     $xml_mapping = array(
       'backdrop' => '0',
       'update_test_subtheme' => '1_0',
@@ -482,7 +488,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $base_theme_project_link = l(t('Update test base theme'), 'http://example.com/project/update_test_basetheme');
     $sub_theme_project_link = l(t('Update test subtheme'), 'http://example.com/project/update_test_subtheme');
     foreach (array(TRUE, FALSE) as $check_disabled) {
-      variable_set('update_check_disabled', $check_disabled);
+      $config->set('update_disabled_extensions', $check_disabled)->save();
       $this->refreshUpdateStatus($xml_mapping);
       // In neither case should we see the "Themes" heading for enabled themes.
       $this->assertNoText(t('Themes'));
@@ -523,7 +529,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_system_info', $system_info);
 
     $xml_mapping = array(
       'backdrop' => '0',
@@ -565,6 +571,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
    */
   function testHookUpdateStatusAlter() {
     variable_set('allow_authorize_operations', TRUE);
+    $config = config('update.settings');
     $update_admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer software updates'));
     $this->backdropLogin($update_admin_user);
 
@@ -578,13 +585,13 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    variable_set('update_test_system_info', $system_info);
+    $config->set('update_system_info', $system_info)->save();
     $update_status = array(
       'aaa_update_test' => array(
         'status' => UPDATE_NOT_SECURE,
       ),
     );
-    variable_set('update_test_update_status', $update_status);
+    $config->set('update_status', $update_status)->save();
     $this->refreshUpdateStatus(
       array(
         'backdrop' => '0',
@@ -598,19 +605,19 @@ class UpdateTestContribCase extends UpdateTestHelper {
 
     // Visit the reports page again without the altering and make sure the
     // status is back to normal.
-    variable_set('update_test_update_status', array());
+    $config->set('update_status', array())->save();
     $this->backdropGet('admin/reports/updates');
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Security update required!'));
     $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
 
     // Turn the altering back on and visit the Update manager UI.
-    variable_set('update_test_update_status', $update_status);
+    $config->set('update_status', $update_status)->save();
     $this->backdropGet('admin/modules/update');
     $this->assertText(t('Security update'));
 
     // Turn the altering back off and visit the Update manager UI.
-    variable_set('update_test_update_status', array());
+    $config->set('update_status', array())->save();
     $this->backdropGet('admin/modules/update');
     $this->assertNoText(t('Security update'));
   }
@@ -668,14 +675,15 @@ class UpdateTestUploadCase extends UpdateTestHelper {
    * Checks the messages on update manager pages when missing a security update.
    */
   function testUpdateManagerCoreSecurityUpdateMessages() {
+    $config = config('update.settings');
     $setting = array(
       '#all' => array(
         'version' => '7.0',
       ),
     );
-    variable_set('update_test_system_info', $setting);
-    variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('backdrop' => '2-sec'));
+    $config->set('update_system_info', $setting)->save();
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '2-sec'))->save();
     // Initialize the update status.
     $this->backdropGet('admin/reports/updates');
 

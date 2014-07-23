@@ -1840,8 +1840,10 @@ function install_configure_form_validate($form, &$form_state) {
 function install_configure_form_submit($form, &$form_state) {
   global $user;
 
-  variable_set('site_name', $form_state['values']['site_name']);
-  variable_set('site_mail', $form_state['values']['site_mail']);
+  config('system.site')
+    ->set('site_name', $form_state['values']['site_name'])
+    ->set('site_mail', $form_state['values']['site_mail'])
+    ->save();
   variable_set('date_default_timezone', $form_state['values']['date_default_timezone']);
 
   // Enable update.module if this option was selected.
@@ -1851,7 +1853,7 @@ function install_configure_form_submit($form, &$form_state) {
     // Add the site maintenance account's email address to the list of
     // addresses to be notified when updates are available, if selected.
     if ($form_state['values']['update_status_module'][2]) {
-      variable_set('update_notify_emails', array($form_state['values']['account']['mail']));
+      config_set('update.settings', 'update_emails', array($form_state['values']['account']['mail']));
     }
   }
 

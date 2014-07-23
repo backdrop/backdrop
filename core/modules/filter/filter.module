@@ -1242,10 +1242,9 @@ function filter_filter_info() {
 }
 
 /**
- * Filter settings callback for the HTML content filter.
+ * Implements callback_filter_settings().
  *
- * See hook_filter_FILTER_settings() for documentation of parameters and return
- * value.
+ * Filter settings callback for the HTML content filter.
  */
 function _filter_html_settings($form, &$form_state, $filter, $format, $defaults) {
   $filter->settings += $defaults;
@@ -1271,6 +1270,8 @@ function _filter_html_settings($form, &$form_state, $filter, $format, $defaults)
 }
 
 /**
+ * Implements callback_filter_process().
+ *
  * Provides filtering of input into accepted HTML.
  */
 function _filter_html($text, $filter) {
@@ -1290,7 +1291,9 @@ function _filter_html($text, $filter) {
 }
 
 /**
- * Filter tips callback: Provides help for the HTML filter.
+ * Implements callback_filter_tips().
+ *
+ * Provides help for the HTML filter.
  *
  * @see filter_filter_info()
  */
@@ -1313,7 +1316,7 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
   $output .= '<p>' . t('This site allows HTML content. While learning all of HTML may feel intimidating, learning how to use a very small number of the most basic HTML "tags" is very easy. This table provides examples for each tag that is enabled on this site.') . '</p>';
   $output .= '<p>' . t('For more information see W3C\'s <a href="@html-specifications">HTML Specifications</a> or use your favorite search engine to find other sites that explain HTML.', array('@html-specifications' => 'http://www.w3.org/TR/html/')) . '</p>';
   $tips = array(
-    'a' => array(t('Anchors are used to make links to other pages.'), '<a href="' . $base_url . '">' . check_plain(variable_get('site_name', 'Backdrop')) . '</a>'),
+    'a' => array(t('Anchors are used to make links to other pages.'), '<a href="' . $base_url . '">' . check_plain(config_get('system.site', 'site_name')) . '</a>'),
     'br' => array(t('By default line break tags are automatically added, so use this tag to add additional ones. Use of this tag is different because it is not used with an open/close pair like all the others. Use the extra " /" inside the tag to maintain XHTML 1.0 compatibility'), t('Text with <br />line break')),
     'p' => array(t('By default paragraph tags are automatically added, so use this tag to add additional ones.'), '<p>' . t('Paragraph one.') . '</p> <p>' . t('Paragraph two.') . '</p>'),
     'strong' => array(t('Strong', array(), array('context' => 'Font weight')), '<strong>' . t('Strong', array(), array('context' => 'Font weight')) . '</strong>'),
@@ -1390,7 +1393,9 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
 }
 
 /**
- * Filter URL settings callback: Provides settings for the URL filter.
+ * Implements callback_filter_settings().
+ *
+ * Provides settings for the URL filter.
  *
  * @see filter_filter_info()
  */
@@ -1410,6 +1415,8 @@ function _filter_url_settings($form, &$form_state, $filter, $format, $defaults) 
 }
 
 /**
+ * Implements callback_filter_process().
+ *
  * Converts text into hyperlinks automatically.
  *
  * This filter identifies and makes clickable three types of "links".
@@ -1635,7 +1642,9 @@ function _filter_url_trim($text, $length = NULL) {
 }
 
 /**
- * Filter tips callback: Provides help for the URL filter.
+ * Implements callback_filter_tips().
+ *
+ * Provides help for the URL filter.
  *
  * @see filter_filter_info()
  */
@@ -1644,6 +1653,8 @@ function _filter_url_tips($filter, $format, $long = FALSE) {
 }
 
 /**
+ * Implements callback_filter_process().
+ *
  * Scans the input and makes sure that HTML tags are properly closed.
  */
 function _filter_htmlcorrector($text) {
@@ -1651,6 +1662,8 @@ function _filter_htmlcorrector($text) {
 }
 
 /**
+ * Implements callback_filter_process().
+ *
  * Converts line breaks into <p> and <br> in an intelligent fashion.
  *
  * Based on: http://photomatt.net/scripts/autop
@@ -1718,7 +1731,9 @@ function _filter_autop($text) {
 }
 
 /**
- * Filter tips callback: Provides help for the auto-paragraph filter.
+ * Implements callback_filter_tips().
+ *
+ * Provides help for the auto-paragraph filter.
  *
  * @see filter_filter_info()
  */
@@ -1732,6 +1747,8 @@ function _filter_autop_tips($filter, $format, $long = FALSE) {
 }
 
 /**
+ * Implements callback_filter_process().
+ *
  * Escapes all HTML tags, so they will be visible instead of being effective.
  */
 function _filter_html_escape($text) {
@@ -1739,7 +1756,9 @@ function _filter_html_escape($text) {
 }
 
 /**
- * Filter tips callback: Provides help for the HTML escaping filter.
+ * Implements callback_filter_tips().
+ *
+ * Provides help for the HTML escaping filter.
  *
  * @see filter_filter_info()
  */

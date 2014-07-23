@@ -199,7 +199,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', t('Page was cached.'));
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), t('A Content-Encoding header was not sent.'));
-    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => variable_get('site_name', 'Backdrop'))), t('Site title matches.'));
+    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.site', 'site_name'))), t('Site title matches.'));
     $this->assertRaw('</html>', t('Page was not compressed.'));
   }
 }

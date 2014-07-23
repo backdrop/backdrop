@@ -86,7 +86,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
 
     $item_length = $this->options['item_length'];
     if ($item_length == 'default') {
-      $item_length = variable_get('feed_item_length', 'teaser');
+      $item_length = config_get('system.rss', 'rss_viewmode');
     }
 
     // Load the specified comment and its associated node:

@@ -28,11 +28,11 @@ function hook_language_init() {
 
   switch ($language->language) {
     case 'it':
-      $conf['site_name'] = 'Il mio sito Backdrop';
+      $conf['system.site']['site_name'] = 'Il mio sito Backdrop';
       break;
 
     case 'fr':
-      $conf['site_name'] = 'Mon site Backdrop';
+      $conf['system.site']['site_name'] = 'Mon site Backdrop';
       break;
   }
 }
@@ -118,11 +118,11 @@ function hook_language_types_info_alter(array &$language_types) {
  *     will be available for all the configurable language types.
  *   - callbacks: An associative array of functions that will be called to
  *     perform various tasks. Possible elements are:
- *     - negotiation: (required) Name of the callback function that determines
- *       the language value.
- *     - language_switch: (optional) Name of the callback function that
- *       determines links for a language switcher block associated with this
- *       provider. See language_switcher_url() for an example.
+ *     - language: (required) Name of the callback function that determines the
+ *       language value.
+ *     - switcher: (optional) Name of the callback function that determines
+ *       links for a language switcher block associated with this provider. See
+ *       language_switcher_url() for an example.
  *     - url_rewrite: (optional) Name of the callback function that provides URL
  *       rewriting, if needed by this provider.
  *   - file: The file where callback functions are defined (this file will be

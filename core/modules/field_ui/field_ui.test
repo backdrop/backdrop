@@ -747,7 +747,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     // Test that field_test_field_widget_properties_user_alter() replaces
     // the widget and that field_test_field_widget_form_alter() reports the
     // correct widget name when the form is displayed.
-    $this->backdropGet('admin/config/people/accounts/fields/alter_test_options');
+    $this->backdropGet('admin/config/people/manage/fields/alter_test_options');
     $this->assertText('Widget type: options_buttons', 'Widget type is altered for users in hook_field_widget_form_alter().');
 
     // Test that the widget is not altered on page nodes.

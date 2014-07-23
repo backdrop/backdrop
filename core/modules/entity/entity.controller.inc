@@ -19,14 +19,6 @@
 interface EntityControllerInterface {
 
   /**
-   * Constructs a new EntityControllerInterface object.
-   *
-   * @param $entityType
-   *   The entity type for which the instance is created.
-   */
-  public function __construct($entityType);
-
-  /**
    * Resets the internal, static entity cache.
    *
    * @param $ids
@@ -127,6 +119,9 @@ class DefaultEntityController implements EntityControllerInterface {
    * Implements EntityControllerInterface::__construct().
    *
    * Sets basic variables.
+   *
+   * @param $entityType
+   *   The entity type for which the instance is created.
    */
   public function __construct($entityType) {
     $this->entityType = $entityType;

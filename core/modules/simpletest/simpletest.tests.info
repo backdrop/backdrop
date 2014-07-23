@@ -94,6 +94,12 @@ description = Tests that AJAX-enabled forms work when multiple instances of the 
 group = AJAX
 file = tests/ajax.test
 
+[AJAXFormPageCacheTestCase]
+name = AJAX forms on cached pages
+description = Tests that AJAX forms work properly for anonymous users on cached pages.
+group = AJAX
+file = tests/ajax.test
+
 [AJAXElementValidation]
 name = Miscellaneous AJAX tests
 description = Various tests of AJAX behavior
@@ -817,6 +823,12 @@ file = tests/form.test
 [FormsFormStorageTestCase]
 name = Multistep form using form storage
 description = Tests a multistep form using form storage and makes sure validation and caching works right.
+group = Form API
+file = tests/form.test
+
+[FormsFormStoragePageCacheTestCase]
+name  = Forms using form storage on cached pages
+description  = Tests a form using form storage and makes sure validation and caching works when page caching for anonymous users is turned on.
 group = Form API
 file = tests/form.test
 

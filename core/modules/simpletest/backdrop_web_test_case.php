@@ -1575,7 +1575,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Restore necessary variables.
     state_set('install_task', 'done');
     variable_set('clean_url', $this->originalCleanUrl);
-    variable_set('site_mail', 'simpletest@example.com');
+    config_set('system.site', 'site_mail', 'simpletest@example.com');
     variable_set('date_default_timezone', date_default_timezone_get());
 
     // Set up English language.
@@ -2304,6 +2304,13 @@ class BackdropWebTestCase extends BackdropTestCase {
                   $wrapperNode->appendChild($newNode);
                   break;
               }
+            }
+            break;
+
+          case 'updateBuildId':
+            $buildId = $xpath->query('//input[@name="form_build_id" and @value="' . $command['old'] . '"]')->item(0);
+            if ($buildId) {
+              $buildId->setAttribute('value', $command['new']);
             }
             break;
 

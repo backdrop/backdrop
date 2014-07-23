@@ -11,11 +11,6 @@
 const BACKDROP_MAXIMUM_TEMP_FILE_AGE = 21600;
 
 /**
- * Default interval for automatic cron executions in seconds.
- */
-const BACKDROP_CRON_DEFAULT_THRESHOLD = 10800;
-
-/**
  * New users will be set to the default time zone at registration.
  */
 const BACKDROP_USER_TIMEZONE_DEFAULT = 0;
@@ -3212,13 +3207,13 @@ function system_get_module_admin_tasks($module, $info) {
 
   // Append link for permissions.
   if (module_hook($module, 'permission')) {
-    $item = menu_get_item('admin/people/permissions');
+    $item = menu_get_item('admin/config/people/permissions');
     if (!empty($item['access'])) {
       $item['link_path'] = $item['href'];
       $item['title'] = t('Configure @module permissions', array('@module' => $info['name']));
       unset($item['description']);
       $item['localized_options']['fragment'] = 'module-' . $module;
-      $admin_tasks["admin/people/permissions#module-$module"] = $item;
+      $admin_tasks["admin/config/people/permissions#module-$module"] = $item;
     }
   }
 
@@ -3711,7 +3706,7 @@ function system_run_automated_cron() {
   // If the site is not fully installed, suppress the automated cron run.
   // Otherwise it could be triggered prematurely by Ajax requests during
   // installation.
-  if (($threshold = variable_get('cron_safe_threshold', BACKDROP_CRON_DEFAULT_THRESHOLD)) > 0 && state_get('install_task') == 'done') {
+  if (($threshold = config('system.cron')->get('cron_safe_threshold')) > 0 && state_get('install_task') == 'done') {
     $cron_last = state_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
       backdrop_cron_run();
@@ -4197,6 +4192,26 @@ function system_autoload_info() {
 function system_config_info() {
   $prefixes['system.performance'] = array(
     'label' => t('System performance'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.cron'] = array(
+    'label' => t('System cron'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.site'] = array(
+    'label' => t('System site'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.maintenance'] = array(
+    'label' => t('System maintenance'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.rss'] = array(
+    'label' => t('System RSS'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.action'] = array(
+    'label' => t('System action'),
     'group' => t('Configuration'),
   );
   return $prefixes;

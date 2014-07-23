@@ -197,7 +197,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     }
 
     // Add the full file objects for user pictures if enabled.
-    if (!empty($picture_fids) && variable_get('user_pictures', 1) == 1) {
+    if (!empty($picture_fids) && variable_get('user_pictures', 0)) {
       $pictures = file_load_multiple($picture_fids);
       foreach ($queried_users as $entity) {
         if (!empty($entity->picture) && isset($pictures[$entity->picture])) {

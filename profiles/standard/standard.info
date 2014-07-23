@@ -20,3 +20,5 @@ dependencies[] = dblog
 dependencies[] = search
 dependencies[] = field_ui
 dependencies[] = file
+dependencies[] = views
+dependencies[] = views_ui

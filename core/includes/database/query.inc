@@ -1147,10 +1147,10 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * Executes the UPDATE query.
    *
    * @return
-   *   The number of rows affected by the update.
+   *   The number of rows matched by the update. This count includes rows that
+   *   may have matched but not necessarily changed by the update.
    */
   public function execute() {
-
     // Expressions take priority over literal fields, so we process those first
     // and remove any literal fields that conflict.
     $fields = $this->fields;
@@ -1227,13 +1227,9 @@ class UpdateQuery extends Query implements QueryConditionInterface {
  *   INSERT (column1 [, column2 ...]) VALUES (value1 [, value2 ...
  * @endcode
  *
- * Other databases (most notably MySQL, PostgreSQL and SQLite) will emulate
- * this statement by running a SELECT and then INSERT or UPDATE.
- *
- * By default, the two table names are identical and they are passed into the
- * the constructor. table_name_2 can be specified by the
- * MergeQuery::conditionTable() method. It can be either a string or a
- * subquery.
+ * Thus far, many databases (most notably MySQL, PostgreSQL or SQLite) do not
+ * directly implement MERGE queries and will emulate this statement by running
+ * an UPDATE, and if that does not match any rows, then an INSERT.
  *
  * The condition is built exactly like SelectQuery or UpdateQuery conditions,
  * the UPDATE query part is built similarly like an UpdateQuery and finally the
@@ -1242,7 +1238,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
  * MergeQuery::updateFields() and MergeQuery::insertFields() needs to be called
  * instead. MergeQuery::fields() can also be called which calls both of these
  * methods as the common case is to use the same column-value pairs for both
- * INSERT and UPDATE. However, this is not mandatory. Another convinient
+ * INSERT and UPDATE. However, this is not mandatory. Another convenient
  * wrapper is MergeQuery::key() which adds the same column-value pairs to the
  * condition and the INSERT query part.
  *
@@ -1268,11 +1264,6 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @var string
    */
   protected $table;
-
-  /**
-   * The table or subquery to be used for the condition.
-   */
-  protected $conditionTable;
 
   /**
    * An array of fields on which to insert.
@@ -1340,23 +1331,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
-    $this->conditionTable = $table;
     $this->condition = new DatabaseCondition('AND');
-  }
-
-  /**
-   * Sets the table or subquery to be used for the condition.
-   *
-   * @param $table
-   *   The table name or the subquery to be used. Use a SelectQuery object to
-   *   pass in a subquery.
-   *
-   * @return MergeQuery
-   *   The called object.
-   */
-  protected function conditionTable($table) {
-    $this->conditionTable = $table;
-    return $this;
   }
 
   /**
@@ -1609,10 +1584,32 @@ class MergeQuery extends Query implements QueryConditionInterface {
     if (!count($this->condition)) {
       throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
     }
-    $select = $this->connection->select($this->conditionTable)
-      ->condition($this->condition);
-    $select->addExpression('1');
-    if (!$select->execute()->fetchField()) {
+
+    // If doing an update, try that first and see if it matches any rows.
+    if ($this->needsUpdate) {
+      $update = $this->connection->update($this->table)
+        ->fields($this->updateFields)
+        ->condition($this->condition);
+      if ($this->expressionFields) {
+        foreach ($this->expressionFields as $field => $data) {
+          $update->expression($field, $data['expression'], $data['arguments']);
+        }
+      }
+      $row_exists = (bool) $update->execute();
+      // If updated, we have no more work to be done.
+      if ($row_exists) {
+        return self::STATUS_UPDATE;
+      }
+    }
+    // If only doing inserts, select first to see if the row exists.
+    else {
+      $select = $this->connection->select($this->table)
+        ->condition($this->condition);
+      $select->addExpression('1');
+      $row_exists = (bool) $select->execute()->fetchField();
+    }
+
+    if (!$row_exists) {
       try {
         $insert = $this->connection->insert($this->table)->fields($this->insertFields);
         if ($this->defaultFields) {
@@ -1626,23 +1623,16 @@ class MergeQuery extends Query implements QueryConditionInterface {
         // beat us in inserting the same row. Retry the select query, if it
         // returns a row, ignore the error and continue with the update
         // query below.
+        if (!isset($select)) {
+          $select = $this->connection->select($this->table)
+            ->condition($this->condition);
+          $select->addExpression('1');
+        }
         if (!$select->execute()->fetchField()) {
           throw $e;
         }
       }
     }
-    if ($this->needsUpdate) {
-      $update = $this->connection->update($this->table)
-        ->fields($this->updateFields)
-        ->condition($this->condition);
-      if ($this->expressionFields) {
-        foreach ($this->expressionFields as $field => $data) {
-          $update->expression($field, $data['expression'], $data['arguments']);
-        }
-      }
-      $update->execute();
-      return self::STATUS_UPDATE;
-     }
   }
 }
 

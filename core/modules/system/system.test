@@ -594,7 +594,9 @@ class CronRunTestCase extends BackdropWebTestCase {
     $cron_last = time();
     $cron_safe_threshold = 100;
     state_set('cron_last', $cron_last);
-    variable_set('cron_safe_threshold', $cron_safe_threshold);
+    config('system.cron')
+      ->set('cron_safe_threshold', $cron_safe_threshold)
+      ->save();
     $this->backdropGet('');
     $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is not passed.'));
 
@@ -744,7 +746,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
-    variable_set('site_403', 'user');
+    config_set('system.site', 'site_403', 'user');
     $this->backdropPost('admin/structure/block', array('blocks[user_login][region]' => '-1'), t('Save blocks'));
 
     // Check that we can log in from the 403 page.
@@ -821,7 +823,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     $admin_message = format_string('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
     $user_message = 'Operating in maintenance mode.';
-    $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')));
+    $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.site', 'site_name')));
 
     $this->backdropGet('');
     $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
@@ -856,7 +858,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/development/maintenance');
     $this->assertNoRaw($admin_message, 'Site maintenance mode message not displayed.');
 
-    $offline_message = 'Sorry, not online.';
+    $offline_message = 'Backdrop is currently under maintenance. We should be back shortly. Thank you for your patience.';
     $edit = array(
       'maintenance_mode_message' => $offline_message,
     );
@@ -1189,7 +1191,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->node_path = "node/" . $this->backdropCreateNode(array('promote' => 1))->nid;
 
     // Enable front page logging in system_test.module.
-    variable_set('front_page_output', 1);
+    config_set('system.site', 'front_page_output', 1);
   }
 
   /**
@@ -1741,13 +1743,15 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     );
 
     // Set a few site variables.
-    variable_set('site_name', '<strong>Backdrop<strong>');
-    variable_set('site_slogan', '<blink>Slogan</blink>');
+    config('system.site')
+      ->set('site_name', '<strong>Backdrop<strong>')
+      ->set('site_slogan', '<blink>Slogan</blink>')
+      ->save();
 
     // Generate and test sanitized tokens.
     $tests = array();
-    $tests['[site:name]'] = check_plain(variable_get('site_name', 'Backdrop'));
-    $tests['[site:slogan]'] = check_plain(variable_get('site_slogan', ''));
+    $tests['[site:name]'] = check_plain(config_get('system.site', 'site_name'));
+    $tests['[site:slogan]'] = check_plain(config_get('system.site', 'site_slogan'));
     $tests['[site:mail]'] = 'simpletest@example.com';
     $tests['[site:url]'] = url('<front>', $url_options);
     $tests['[site:url-brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
@@ -1762,8 +1766,8 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     }
 
     // Generate and test unsanitized tokens.
-    $tests['[site:name]'] = variable_get('site_name', 'Backdrop');
-    $tests['[site:slogan]'] = variable_get('site_slogan', '');
+    $tests['[site:name]'] = config_get('system.site', 'site_name');
+    $tests['[site:slogan]'] = config_get('system.site', 'site_slogan');
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array(), array('language' => $language_interface, 'sanitize' => FALSE));
@@ -1969,6 +1973,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
    * Tests that requirements warnings and errors are correctly displayed.
    */
   function testRequirements() {
+    $config = config('update.settings');
     $this->backdropLogin($this->update_user);
 
     // If there are no requirements warnings or errors, we expect to be able to
@@ -1985,7 +1990,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
 
     // First, run this test with pending updates to make sure they can be run
     // successfully.
-    variable_set('update_script_test_requirement_type', REQUIREMENT_WARNING);
+    $config->set('update_requirement_type', REQUIREMENT_WARNING)->save();
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertText('This is a requirements warning provided by the update_script_test module.');
@@ -2010,7 +2015,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     // If there is a requirements error, it should be displayed even after
     // clicking the link to proceed (since the problem that triggered the error
     // has not been fixed).
-    variable_set('update_script_test_requirement_type', REQUIREMENT_ERROR);
+    $config->set('update_requirement_type', REQUIREMENT_ERROR)->save();
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertText('This is a requirements error provided by the update_script_test module.');
     $this->clickLink('try again');
@@ -2240,7 +2245,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
       // On admin/index only, the administrator should also see a "Configure
       // permissions" link for the Locale module.
       if ($page == 'admin/index') {
-        $this->assertLinkByHref("admin/people/permissions#module-locale");
+        $this->assertLinkByHref("admin/config/people/permissions#module-locale");
       }
 
       // For a less privileged user, verify that there are no links to Locale's
@@ -2257,7 +2262,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
       // This user cannot configure permissions, so even on admin/index should
       // not see a "Configure permissions" link for the Locale module.
       if ($page == 'admin/index') {
-        $this->assertNoLinkByHref("admin/people/permissions#module-locale");
+        $this->assertNoLinkByHref("admin/config/people/permissions#module-locale");
       }
     }
   }

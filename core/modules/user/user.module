@@ -110,7 +110,7 @@ function user_entity_info() {
         'user' => array(
           'label' => t('User'),
           'admin' => array(
-            'path' => 'admin/config/people/accounts',
+            'path' => 'admin/config/people/manage',
             'access arguments' => array('administer users'),
           ),
         ),
@@ -509,7 +509,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')), '@user-settings-url' => url('admin/config/people/accounts'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
@@ -1430,65 +1430,23 @@ function user_menu() {
     'title' => 'People',
     'description' => 'Manage user accounts, roles, and permissions.',
     'page callback' => 'user_admin',
-    'page arguments' => array('list'),
     'access arguments' => array('administer users'),
     'position' => 'left',
     'weight' => -4,
     'file' => 'user.admin.inc',
   );
-  $items['admin/people/people'] = array(
-    'title' => 'List',
+  $items['admin/people/list'] = array(
+    'title' => 'User account list',
     'description' => 'Find and manage people interacting with your site.',
     'access arguments' => array('administer users'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
     'file' => 'user.admin.inc',
   );
-
-  // Permissions and role forms.
-  $items['admin/people/permissions'] = array(
-    'title' => 'Permissions',
-    'description' => 'Determine access to features by selecting permissions for roles.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_admin_permissions'),
-    'access arguments' => array('administer permissions'),
-    'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['admin/people/permissions/list'] = array(
-    'title' => 'Permissions',
-    'description' => 'Determine access to features by selecting permissions for roles.',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -8,
-  );
-  $items['admin/people/permissions/roles'] = array(
-    'title' => 'Roles',
-    'description' => 'List, edit, or add user roles.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_admin_roles'),
-    'access arguments' => array('administer permissions'),
-    'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => -5,
-  );
-  $items['admin/people/permissions/roles/edit/%user_role'] = array(
-    'title' => 'Edit role',
-    'page arguments' => array('user_admin_role', 5),
-    'access callback' => 'user_role_edit_access',
-    'access arguments' => array(5),
-  );
-  $items['admin/people/permissions/roles/delete/%user_role'] = array(
-    'title' => 'Delete role',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_admin_role_delete_confirm', 5),
-    'access callback' => 'user_role_edit_access',
-    'access arguments' => array(5),
-    'file' => 'user.admin.inc',
-  );
-
   $items['admin/people/create'] = array(
-    'title' => 'Add user',
-    'page arguments' => array('create'),
+    'title' => 'Add user account',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_register_form'),
     'access arguments' => array('administer users'),
     'type' => MENU_LOCAL_ACTION,
   );
@@ -1502,21 +1460,64 @@ function user_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  // Permissions forms.
+  $items['admin/config/people/permissions'] = array(
+    'title' => 'Permissions',
+    'description' => 'Determine access to features by selecting permissions for roles.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_admin_permissions'),
+    'access arguments' => array('administer permissions'),
+    'file' => 'user.admin.inc',
+  );
+
+  // Role forms.
+  $items['admin/config/people/roles'] = array(
+    'title' => 'Roles',
+    'description' => 'List, edit, or add levels of access, or <em>user roles</em>.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_admin_roles'),
+    'access arguments' => array('administer permissions'),
+    'file' => 'user.admin.inc',
+  );
+  $items['admin/config/people/roles/edit/%user_role'] = array(
+    'title' => 'Edit role',
+    'page arguments' => array('user_admin_role', 5),
+    'access callback' => 'user_role_edit_access',
+    'access arguments' => array(5),
+  );
+  $items['admin/config/people/roles/delete/%user_role'] = array(
+    'title' => 'Delete role',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_admin_role_delete_confirm', 5),
+    'access callback' => 'user_role_edit_access',
+    'access arguments' => array(5),
+    'file' => 'user.admin.inc',
+  );
+
+  // Administration pages.
+  $items['admin/config/people'] = array(
+    'title' => 'People',
+    'description' => 'Configure user accounts.',
+    'position' => 'left',
+    'weight' => -20,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
     'file path' => backdrop_get_path('module', 'system'),
   );
-  $items['admin/config/people/accounts'] = array(
+
+  // Settings.
+  $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
-    'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
+    'description' => 'Configure settings for user accounts including registration requirements and customization of automated e-mails.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'weight' => -10,
-  );
-  $items['admin/config/people/accounts/settings'] = array(
-    'title' => 'Settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+    'weight' => 10,
   );
 
   $items['user/%user'] = array(
@@ -1569,6 +1570,32 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
   return $items;
+}
+/**
+ * Implements hook_menu_alter().
+ */
+function user_menu_alter(&$items) {
+  if (module_exists('field_ui')) {
+    // Provide a parent menu item for managing fields.
+    $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];
+    $items['admin/config/people/manage']['type'] = MENU_NORMAL_ITEM;
+    $items['admin/config/people/manage']['weight'] = 1;
+    $items['admin/config/people/manage']['description'] = 'Configure fields and display of fields on user accounts.';
+
+    // Set "Manage fields" tab as the default tab.
+    $items['admin/config/people/manage/fields']['type'] = MENU_DEFAULT_LOCAL_TASK;
+  }
+}
+
+/**
+ * Implements hook_admin_menu_output_alter().
+ */
+function user_admin_menu_output_alter(&$content) {
+  // Admin menu shows both the parent menu item and its children, remove the
+  // duplicate child element show "Manage fields" doesn't show up twice.
+  if (isset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields'])) {
+    unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields']);
+  }
 }
 
 /**
@@ -1735,7 +1762,7 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']['#description'] = t('Enter your @s username.', array('@s' => variable_get('site_name', 'Backdrop')));
+  $form['name']['#description'] = t('Enter your @s username.', array('@s' => config_get('system.site', 'site_name')));
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
     '#description' => t('Enter the password that accompanies your username.'),
@@ -1787,19 +1814,20 @@ function user_login_name_validate($form, &$form_state) {
  */
 function user_login_authenticate_validate($form, &$form_state) {
   $password = trim($form_state['values']['pass']);
+  $flood_config = config('user.flood');
   if (!empty($form_state['values']['name']) && !empty($password)) {
     // Do not allow any login from the current user's IP if the limit has been
     // reached. Default is 50 failed attempts allowed in one hour. This is
     // independent of the per-user limit to catch attempts from one IP to log
     // in to many different user accounts.  We have a reasonably high limit
     // since there may be only one apparent IP for all users at an institution.
-    if (!flood_is_allowed('failed_login_attempt_ip', variable_get('user_failed_login_ip_limit', 50), variable_get('user_failed_login_ip_window', 3600))) {
+    if (!flood_is_allowed('failed_login_attempt_ip', $flood_config->get('flood_ip_limit'), $flood_config->get('flood_ip_window'))) {
       $form_state['flood_control_triggered'] = 'ip';
       return;
     }
     $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
     if ($account) {
-      if (variable_get('user_failed_login_identifier_uid_only', FALSE)) {
+      if ($flood_config->get('flood_uid_only')) {
         // Register flood events based on the uid only, so they apply for any
         // IP address. This is the most secure option.
         $identifier = $account->uid;
@@ -1814,7 +1842,7 @@ function user_login_authenticate_validate($form, &$form_state) {
 
       // Don't allow login if the limit for this user has been reached.
       // Default is to allow 5 failed attempts every 6 hours.
-      if (!flood_is_allowed('failed_login_attempt_user', variable_get('user_failed_login_user_limit', 5), variable_get('user_failed_login_user_window', 21600), $identifier)) {
+      if (!flood_is_allowed('failed_login_attempt_user', $flood_config->get('flood_user_limit'), $flood_config->get('flood_user_window'), $identifier)) {
         $form_state['flood_control_triggered'] = 'user';
         return;
       }
@@ -1833,17 +1861,18 @@ function user_login_authenticate_validate($form, &$form_state) {
  * be the last one.
  */
 function user_login_final_validate($form, &$form_state) {
+  $flood_config = config('user.flood');
   if (empty($form_state['uid'])) {
     // Always register an IP-based failed login event.
-    flood_register_event('failed_login_attempt_ip', variable_get('user_failed_login_ip_window', 3600));
+    flood_register_event('failed_login_attempt_ip', $flood_config->get('flood_ip_window'));
     // Register a per-user failed login event.
     if (isset($form_state['flood_control_user_identifier'])) {
-      flood_register_event('failed_login_attempt_user', variable_get('user_failed_login_user_window', 21600), $form_state['flood_control_user_identifier']);
+      flood_register_event('failed_login_attempt_user', $flood_config->get('flood_user_window'), $form_state['flood_control_user_identifier']);
     }
 
     if (isset($form_state['flood_control_triggered'])) {
       if ($form_state['flood_control_triggered'] == 'user') {
-        form_set_error('name', format_plural(variable_get('user_failed_login_user_limit', 5), 'Sorry, there has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', 'Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
+        form_set_error('name', format_plural($flood_config->get('flood_user_limit'), 'Sorry, there has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', 'Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
       }
       else {
         // We did not find a uid, so the limit is IP-based.
@@ -3183,7 +3212,12 @@ function _user_mail_notify($op, $account, $language = NULL) {
     if ($op == 'register_pending_approval') {
       // If a user registered requiring admin approval, notify the admin, too.
       // We use the site default language for this.
-      backdrop_mail('user', 'register_pending_approval_admin', variable_get('site_mail', ini_get('sendmail_from')), language_default(), $params);
+      $site_mail = config_get('system.site', 'site_mail');
+      if (empty($site_mail)) {
+        $site_mail = ini_get('sendmail_from');
+      }
+      backdrop_mail('user', 'register_pending_approval_admin', $site_mail, language_default(), $params);
+
     }
   }
   return empty($mail) ? NULL : $mail['result'];
@@ -3617,4 +3651,14 @@ function user_file_download_access($field, $entity_type, $entity) {
   if ($entity_type == 'user') {
     return user_view_access($entity);
   }
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function user_config_info() {
+  $prefixes['user.flood'] = array(
+    'label' => t('User flood'),
+    'group' => t('Configuration'),
+  );
 }

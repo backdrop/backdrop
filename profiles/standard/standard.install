@@ -156,7 +156,7 @@ function standard_install() {
   $query->execute();
 
   // Set front page to "node".
-  variable_set('site_frontpage', 'node');
+  config_set('system.site', 'site_frontpage', 'node');
 
   // Insert default pre-defined node types into the database. For a complete
   // list of available node type attributes, refer to the node type API

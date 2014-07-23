@@ -195,7 +195,7 @@ class SearchQuery extends SelectQueryExtender {
     // Classify tokens.
     $or = FALSE;
     $warning = '';
-    $limit_combinations = variable_get('search_and_or_limit', 7);
+    $limit_combinations = config_get('search.settings', 'search_and_or_limit');
     // The first search expression does not count as AND.
     $and_count = -1;
     $or_count = 0;
@@ -318,7 +318,7 @@ class SearchQuery extends SelectQueryExtender {
     $split = explode(' ', $word);
     foreach ($split as $s) {
       $num = is_numeric($s);
-      if ($num || backdrop_strlen($s) >= variable_get('minimum_word_size', 3)) {
+      if ($num || backdrop_strlen($s) >= config_get('search.settings', 'search_minimum_word_size')) {
         if (!isset($this->words[$s])) {
           $this->words[$s] = $s;
           $num_new_scores++;
@@ -344,11 +344,11 @@ class SearchQuery extends SelectQueryExtender {
     $this->parseSearchExpression();
 
     if (count($this->words) == 0) {
-      form_set_error('keys', format_plural(variable_get('minimum_word_size', 3), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
+      form_set_error('keys', format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
       return FALSE;
     }
     if ($this->expressionsIgnored) {
-      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => variable_get('search_and_or_limit', 7))), 'warning');
+      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => config_get('search.settings', 'search_and_or_limit'))), 'warning');
     }
     $this->executedFirstPass = TRUE;
 

@@ -1531,7 +1531,7 @@ function hook_mail_alter(&$message) {
       $message['send'] = FALSE;
       return;
     }
-    $message['body'][] = "--\nMail sent out from " . variable_get('site_name', 'Backdrop');
+    $message['body'][] = "--\nMail sent out from " . config_get('system.site', 'site_name');
   }
 }
 
@@ -1912,7 +1912,7 @@ function hook_watchdog(array $log_entry) {
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
-    '@site_name' => variable_get('site_name', 'Backdrop'),
+    '@site_name' => config_get('system.site', 'site_name'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
   ));
 
@@ -1978,7 +1978,7 @@ function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
   $variables = array(
-    '%site_name' => variable_get('site_name', 'Backdrop'),
+    '%site_name' => config_get('system.site', 'site_name'),
     '%username' => user_format_name($account),
   );
   if ($context['hook'] == 'taxonomy') {
@@ -2599,37 +2599,39 @@ function hook_requirements($phase) {
 /**
  * Define the current version of the database schema.
  *
- * A Backdrop schema definition is an array structure representing one or
- * more tables and their related keys and indexes. A schema is defined by
+ * A Backdrop schema definition is an array structure representing one or more
+ * tables and their related keys and indexes. A schema is defined by
  * hook_schema() which must live in your module's .install file.
  *
- * This hook is called at install and uninstall time, and in the latter
- * case, it cannot rely on the .module file being loaded or hooks being known.
- * If the .module file is needed, it may be loaded with backdrop_load().
+ * This hook is called at install and uninstall time, and in the latter case, it
+ * cannot rely on the .module file being loaded or hooks being known. If the
+ * .module file is needed, it may be loaded with backdrop_load().
  *
- * The tables declared by this hook will be automatically created when
- * the module is first enabled, and removed when the module is uninstalled.
- * This happens before hook_install() is invoked, and after hook_uninstall()
- * is invoked, respectively.
+ * The tables declared by this hook will be automatically created when the
+ * module is first enabled, and removed when the module is uninstalled. This
+ * happens before hook_install() is invoked, and after hook_uninstall() is
+ * invoked, respectively.
  *
  * By declaring the tables used by your module via an implementation of
  * hook_schema(), these tables will be available on all supported database
  * engines. You don't have to deal with the different SQL dialects for table
  * creation and alteration of the supported database engines.
  *
- * See the Schema API Handbook at http://drupal.org/node/146843 for
- * details on schema definition structures.
+ * See the Schema API Handbook at http://drupal.org/node/146843 for details on
+ * schema definition structures.
  *
- * @return
+ * @return array
  *   A schema definition structure array. For each element of the
  *   array, the key is a table name and the value is a table structure
  *   definition.
+ *
+ * @see hook_schema_alter()
  *
  * @ingroup schemaapi
  */
 function hook_schema() {
   $schema['node'] = array(
-    // example (partial) specification for table "node"
+    // Example (partial) specification for table "node".
     'description' => 'The base table for nodes.',
     'fields' => array(
       'nid' => array(
@@ -3561,7 +3563,7 @@ function hook_date_format_types_alter(&$types) {
  *     declared in an implementation of hook_date_format_types().
  *   - 'format': A PHP date format string to use when formatting dates. It
  *     can contain any of the formatting options described at
- *     http://php.net/manual/en/function.date.php
+ *     http://php.net/manual/function.date.php
  *   - 'locales': (optional) An array of 2 and 5 character locale codes,
  *     defining which locales this format applies to (for example, 'en',
  *     'en-us', etc.). If your date format is not language-specific, leave this

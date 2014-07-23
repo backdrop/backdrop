@@ -69,3 +69,30 @@ function menu_uninstall() {
   menu_rebuild();
 }
 
+/**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
+ * Moves menu settings from variables to config.
+ *
+ * @ingroup config_upgrade
+ */
+function menu_update_1000() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'menu.settings');
+  // Migrate variables if any.
+  $config = config('menu.settings');
+  $config->set('menu_main_links', variable_get('menu_main_links_source', 'main-menu'));
+  $config->set('menu_secondary_links_source', variable_get('menu_main_links_source', 'user-menu'));
+  $config->save();
+  // Delete variables.
+  variable_del('menu_main_links_source');
+  variable_del('menu_secondary_links_source');
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

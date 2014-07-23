@@ -2341,6 +2341,7 @@ function node_block_list_alter(&$blocks) {
  */
 function node_feed($nids = FALSE, $channel = array()) {
   global $base_url, $language_content;
+  $rss_config = config('system.rss');
 
   if ($nids === FALSE) {
     $nids = db_select('node', 'n')
@@ -2348,13 +2349,13 @@ function node_feed($nids = FALSE, $channel = array()) {
       ->condition('n.promote', 1)
       ->condition('n.status', 1)
       ->orderBy('n.created', 'DESC')
-      ->range(0, variable_get('feed_default_items', 10))
+      ->range(0, $rss_config->get('rss_limit'))
       ->addTag('node_access')
       ->execute()
       ->fetchCol();
   }
 
-  $item_length = variable_get('feed_item_length', 'fulltext');
+  $item_length = $rss_config->get('rss_viewmode');
   $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
 
   // Load all nodes to be rendered.
@@ -2391,9 +2392,9 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => variable_get('site_name', 'Backdrop'),
+    'title'       => config_get('system.site', 'site_name'),
     'link'        => $base_url,
-    'description' => variable_get('feed_description', ''),
+    'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
   );
   $channel_extras = array_diff_key($channel, $channel_defaults);
@@ -2446,6 +2447,7 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
  * @see node_menu()
  */
 function node_page_default() {
+  $site_config = config('system.site');
   $select = db_select('node', 'n')
     ->fields('n', array('nid', 'sticky', 'created'))
     ->condition('n.promote', 1)
@@ -2463,7 +2465,7 @@ function node_page_default() {
     $build = node_view_multiple($nodes);
 
     // 'rss.xml' is a path, not a file, registered in node_menu().
-    backdrop_add_feed('rss.xml', variable_get('site_name', 'Backdrop') . ' ' . t('RSS'));
+    backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
     $build['pager'] = array(
       '#theme' => 'pager',
       '#weight' => 5,
@@ -2471,7 +2473,7 @@ function node_page_default() {
     backdrop_set_title('');
   }
   else {
-    backdrop_set_title(t('Welcome to @site-name', array('@site-name' => variable_get('site_name', 'Backdrop'))), PASS_THROUGH);
+    backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
 
     $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
 
@@ -2520,7 +2522,7 @@ function node_page_view(Node $node) {
  * Implements hook_update_index().
  */
 function node_update_index() {
-  $limit = (int)variable_get('search_cron_limit', 100);
+  $limit = (int)config_get('search.settings', 'search_cron_limit');
 
   $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0 ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(), array('target' => 'slave'));
   $nids = $result->fetchCol();

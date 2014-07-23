@@ -92,7 +92,7 @@ function system_admin_index() {
       // Sort links by title.
       uasort($admin_tasks, 'backdrop_sort_title');
       // Move 'Configure permissions' links to the bottom of each section.
-      $permission_key = "admin/people/permissions#module-$module";
+      $permission_key = "admin/config/people/permissions#module-$module";
       if (isset($admin_tasks[$permission_key])) {
         $permission_task = $admin_tasks[$permission_key];
         unset($admin_tasks[$permission_key]);
@@ -1347,7 +1347,13 @@ function system_modules_uninstall_submit($form, &$form_state) {
  * @ingroup forms
  * @see system_settings_form()
  */
-function system_site_information_settings() {
+function system_site_information_settings($form, &$form_state) {
+  $site_config = config('system.site');
+  $site_mail = $site_config->get('site_mail');
+  if (empty($site_mail)) {
+    $site_mail = ini_get('sendmail_from');
+  }
+
   $form['site_information'] = array(
     '#type' => 'fieldset',
     '#title' => t('Site details'),
@@ -1355,19 +1361,19 @@ function system_site_information_settings() {
   $form['site_information']['site_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Site name'),
-    '#default_value' => variable_get('site_name', 'Backdrop'),
+    '#default_value' => $site_config->get('site_name'),
     '#required' => TRUE
   );
   $form['site_information']['site_slogan'] = array(
     '#type' => 'textfield',
     '#title' => t('Slogan'),
-    '#default_value' => variable_get('site_slogan', ''),
+    '#default_value' => $site_config->get('site_slogan'),
     '#description' => t("How this is used depends on your site's theme."),
   );
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
     '#title' => t('E-mail address'),
-    '#default_value' => variable_get('site_mail', ini_get('sendmail_from')),
+    '#default_value' => $site_mail,
     '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
     '#required' => TRUE,
   );
@@ -1378,7 +1384,7 @@ function system_site_information_settings() {
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
     '#title' => t('Default front page'),
-    '#default_value' => (variable_get('site_frontpage') != 'user' ? backdrop_get_path_alias(variable_get('site_frontpage', 'user')) : ''),
+    '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
@@ -1388,7 +1394,7 @@ function system_site_information_settings() {
     '#default_value' => variable_get('default_nodes_main', 10),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
-    '#access' => (variable_get('site_frontpage') == 'node'),
+    '#access' => (config_get('system.site', 'site_frontpage') == 'node'),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
@@ -1397,7 +1403,7 @@ function system_site_information_settings() {
   $form['error_page']['site_403'] = array(
     '#type' => 'textfield',
     '#title' => t('Default 403 (access denied) page'),
-    '#default_value' => variable_get('site_403', ''),
+    '#default_value' => $site_config->get('site_403'),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
@@ -1405,7 +1411,7 @@ function system_site_information_settings() {
   $form['error_page']['site_404'] = array(
     '#type' => 'textfield',
     '#title' => t('Default 404 (not found) page'),
-    '#default_value' => variable_get('site_404', ''),
+    '#default_value' => $site_config->get('site_404'),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
@@ -1413,7 +1419,12 @@ function system_site_information_settings() {
 
   $form['#validate'][] = 'system_site_information_settings_validate';
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
 }
 
 /**
@@ -1451,12 +1462,27 @@ function system_site_information_settings_validate($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for system_site_information_settings().
+ */
+function system_site_information_settings_submit($form, &$form_state) {
+  config('system.site')
+    ->set('site_name', $form_state['values']['site_name'])
+    ->set('site_mail', $form_state['values']['site_mail'])
+    ->set('site_slogan', $form_state['values']['site_slogan'])
+    ->set('site_frontpage', $form_state['values']['site_frontpage'])
+    ->set('site_403', $form_state['values']['site_403'])
+    ->set('site_404', $form_state['values']['site_404'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
  * Form builder; Cron form.
  *
  * @see system_settings_form()
  * @ingroup forms
  */
-function system_cron_settings() {
+function system_cron_settings($form, &$form_state) {
   global $base_url;
   $form['description'] = array(
     '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
@@ -1466,6 +1492,7 @@ function system_cron_settings() {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
+  
   $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
@@ -1482,11 +1509,29 @@ function system_cron_settings() {
     '#type' => 'select',
     '#title' => t('Run cron every'),
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
-    '#default_value' => variable_get('cron_safe_threshold', BACKDROP_CRON_DEFAULT_THRESHOLD),
+    '#default_value' => config('system.cron')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submit handler; Handle submission for cron settings.
+ *
+ * @ingroup forms
+ * @see system_settings_form()
+ */
+function system_cron_settings_submit($form, &$form_state) {
+  config('system.cron')
+    ->set('cron_safe_threshold', $form_state['values']['cron_safe_threshold'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1768,31 +1813,41 @@ function system_image_toolkit_settings() {
  * Form builder; Configure how the site handles RSS feeds.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_rss_feeds_settings() {
+  $rss_config = config('system.rss');
   $form['feed_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Feed description'),
-    '#default_value' => variable_get('feed_description', ''),
+    '#default_value' => $rss_config->get('rss_description'),
     '#description' => t('Description of your site, included in each feed.')
   );
   $form['feed_default_items'] = array(
     '#type' => 'select',
     '#title' => t('Number of items in each feed'),
-    '#default_value' => variable_get('feed_default_items', 10),
+    '#default_value' => $rss_config->get('rss_limit'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('Default number of items to include in each feed.')
   );
   $form['feed_item_length'] = array(
     '#type' => 'select',
     '#title' => t('Feed content'),
-    '#default_value' => variable_get('feed_item_length', 'fulltext'),
-    '#options' => array('title' => t('Titles only'), 'teaser' => t('Titles plus teaser'), 'fulltext' => t('Full text')),
+    '#default_value' => $rss_config->get('rss_viewmode'),
+    '#options' => array(
+      'title' => t('Titles only'),
+      'teaser' => t('Titles plus teaser'),
+      'fulltext' => t('Full text'),
+    ),
     '#description' => t('Global setting for the default display of content items in each feed.')
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+
+  return $form;
 }
 
 /**
@@ -2087,9 +2142,10 @@ function system_add_date_format_type_form_submit($form, &$form_state) {
  * Form builder; Configure the site's maintenance status.
  *
  * @ingroup forms
- * @see system_settings_form()
+ * @see system_site_maintenance_mode_submit()
  */
-function system_site_maintenance_mode() {
+function system_site_maintenance_mode($form, &$form_state) {
+  $config = config('system.maintenance');
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
@@ -2099,7 +2155,7 @@ function system_site_maintenance_mode() {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')))),
+    '#default_value' => t($config->get('maintenance_message'), array('@site' => config_get('system.site', 'site_name'))),
   );
 
   $form['actions']['#type'] = 'actions';

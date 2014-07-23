@@ -168,6 +168,12 @@ function backdrop_get_form($form_id) {
  *       processed.
  *     - base_form_id: Identification for a base form, as declared in a
  *       hook_forms() implementation.
+ *     - immutable: If this flag is set to TRUE, a new form build id is
+ *       generated when the form is loaded from the cache. If it is subsequently
+ *       saved to the cache again, it will have another cache id and therefore
+ *       the original form and form-state will remain unaltered. This is
+ *       important when page caching is enabled in order to prevent form state
+ *       from leaking between anonymous users.
  *   - rebuild_info: Internal. Similar to 'build_info', but pertaining to
  *     backdrop_rebuild_form().
  *   - rebuild: Normally, after the entire form processing is completed and
@@ -458,16 +464,24 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
   $form = backdrop_retrieve_form($form_id, $form_state);
 
   // If only parts of the form will be returned to the browser (e.g., Ajax or
-  // RIA clients), re-use the old #build_id to not require client-side code to
-  // manually update the hidden 'build_id' input element.
+  // RIA clients), or if the form already had a new build ID regenerated when it
+  // was retrieved from the form cache, reuse the existing #build_id.
   // Otherwise, a new #build_id is generated, to not clobber the previous
   // build's data in the form cache; also allowing the user to go back to an
   // earlier build, make changes, and re-submit.
   // @see backdrop_prepare_form()
-  if (isset($old_form['#build_id']) && !empty($form_state['rebuild_info']['copy']['#build_id'])) {
+  $enforce_old_build_id = isset($old_form['#build_id']) && !empty($form_state['rebuild_info']['copy']['#build_id']);
+  $old_form_is_mutable_copy = isset($old_form['#build_id_old']);
+  if ($enforce_old_build_id || $old_form_is_mutable_copy) {
     $form['#build_id'] = $old_form['#build_id'];
+    if ($old_form_is_mutable_copy) {
+      $form['#build_id_old'] = $old_form['#build_id_old'];
+    }
   }
   else {
+    if (isset($old_form['#build_id'])) {
+      $form['#build_id_old'] = $old_form['#build_id'];
+    }
     $form['#build_id'] = 'form-' . backdrop_random_key();
   }
 
@@ -521,6 +535,15 @@ function form_get_cache($form_build_id, &$form_state) {
           }
         }
       }
+      // Generate a new #build_id if the cached form was rendered on a cacheable
+      // page.
+      if (!empty($form_state['build_info']['immutable'])) {
+        $form['#build_id_old'] = $form['#build_id'];
+        $form['#build_id'] = 'form-' . backdrop_random_key();
+        $form['form_build_id']['#value'] = $form['#build_id'];
+        $form['form_build_id']['#id'] = $form['#build_id'];
+        unset($form_state['build_info']['immutable']);
+      }
       return $form;
     }
   }
@@ -533,16 +556,29 @@ function form_set_cache($form_build_id, $form, $form_state) {
   // 6 hours cache life time for forms should be plenty.
   $expire = 21600;
 
+  // Ensure that the form build_id embedded in the form structure is the same as
+  // the one passed in as a parameter. This is an additional safety measure to
+  // prevent legacy code operating directly with form_get_cache and
+  // form_set_cache from accidentally overwriting immutable form state.
+  if ($form['#build_id'] != $form_build_id) {
+    watchdog('form', 'Form build-id mismatch detected while attempting to store a form in the cache.', array(), WATCHDOG_ERROR);
+    return;
+  }
+
   // Note that form caches must not be affected by cache clears, so we use the
   // tempstore to ensure persistent values between clears.
   if (isset($form)) {
     if ($GLOBALS['user']->uid) {
       $form['#cache_token'] = backdrop_get_token();
     }
+    unset($form['#build_id_old']);
     tempstore_set('form', $form_build_id, $form, REQUEST_TIME + $expire);
   }
 
   // Cache form state.
+  if (config_get('system.performance', 'cache') && backdrop_page_is_cacheable()) {
+    $form_state['build_info']['immutable'] = TRUE;
+  }
   if ($data = array_diff_key($form_state, array_flip(form_state_keys_no_cache()))) {
     tempstore_set('form_state', $form_build_id, $data, REQUEST_TIME + $expire);
   }
@@ -733,8 +769,9 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   // Record the filepath of the include file containing the original form, so
   // the form builder callbacks can be loaded when the form is being rebuilt
   // from cache on a different path (such as 'system/ajax'). See
-  // form_get_cache().
-  // $menu_get_item() is not available during installation.
+  // form_get_cache(). Don't do this in maintenance mode as Backdrop may not be
+  // fully bootstrapped (i.e. during installation) in which case
+  // menu_get_item() is not available.
   if (!isset($form_state['build_info']['files']['menu']) && !defined('MAINTENANCE_MODE')) {
     $item = menu_get_item();
     if (!empty($item['include_file'])) {
