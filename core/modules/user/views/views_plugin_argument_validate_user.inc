@@ -85,7 +85,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     }
     else {
       if ($type == 'name' || $type == 'either') {
-        $name = !empty($GLOBALS['user']->name) ? $GLOBALS['user']->name : variable_get('anonymous', t('Anonymous'));
+        $name = !empty($GLOBALS['user']->name) ? $GLOBALS['user']->name : config_get('user.settings', 'anonymous');
         if ($argument == $name) {
           $account = clone $GLOBALS['user'];
         }

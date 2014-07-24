@@ -308,7 +308,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
 class SimpleTestBrowserTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
-    variable_set('user_register', USER_REGISTER_VISITORS);
+    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**

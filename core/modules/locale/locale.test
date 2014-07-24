@@ -1598,7 +1598,7 @@ class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
 class LocaleUserCreationTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('locale');
-    variable_set('user_register', USER_REGISTER_VISITORS);
+    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**

@@ -18,18 +18,18 @@ const EMAIL_MAX_LENGTH = 254;
 /**
  * Only administrators can create user accounts.
  */
-const USER_REGISTER_ADMINISTRATORS_ONLY = 0;
+const USER_REGISTER_ADMINISTRATORS_ONLY = 'admin_only';
 
 /**
  * Visitors can create their own accounts.
  */
-const USER_REGISTER_VISITORS = 1;
+const USER_REGISTER_VISITORS = 'visitors';
 
 /**
  * Visitors can create accounts, but they don't become active without
  * administrative approval.
  */
-const USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL = 2;
+const USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL = 'visitors_admin_approval';
 
 /**
  * Invokes a user hook in every module.
@@ -509,7 +509,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')), '@user-settings-url' => url('admin/config/people/settings'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get('user.settings', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
@@ -729,7 +729,7 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!variable_get('user_email_verification', TRUE) || $admin) {
+  elseif (!config_get('user.settings', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
       '#type' => 'password_confirm',
       '#size' => 25,
@@ -742,7 +742,7 @@ function user_account_form(&$form, &$form_state) {
     $status = isset($account->status) ? $account->status : 1;
   }
   else {
-    $status = $register ? variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS : $account->status;
+    $status = $register ? config_get('user.settings', 'user_register') == USER_REGISTER_VISITORS : $account->status;
   }
   $form['account']['status'] = array(
     '#type' => 'radios',
@@ -785,7 +785,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Signature settings'),
     '#weight' => 1,
-    '#access' => (!$register && variable_get('user_signatures', 0)),
+    '#access' => (!$register && config_get('user.settings', 'user_signatures')),
   );
 
   $form['signature_settings']['signature'] = array(
@@ -936,7 +936,7 @@ function user_login_block($form) {
     '#value' => t('Log in'),
   );
   $items = array();
-  if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
+  if (config_get('user.settings', 'user_register')) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
   $items[] = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
@@ -1099,7 +1099,7 @@ function user_preprocess_block(&$variables) {
  *   printed to the page.
  */
 function user_format_name($account) {
-  $name = !empty($account->name) ? $account->name : variable_get('anonymous', t('Anonymous'));
+  $name = !empty($account->name) ? $account->name : config_get('user.settings', 'anonymous');
   backdrop_alter('user_format_name', $name, $account);
   return $name;
 }
@@ -1315,7 +1315,7 @@ function user_is_logged_in() {
  *   TRUE if the user is not already logged in and can register for an account.
  */
 function user_register_access() {
-  return user_is_anonymous() && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+  return user_is_anonymous() && config_get('user.settings', 'user_register') !== USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL;
 }
 
 /**
@@ -2984,7 +2984,7 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
     '#default_value' => FALSE,
-    '#access' => variable_get('user_mail_status_canceled_notify', FALSE),
+    '#access' => config_get('user.settings', 'account_status_cancelled'),
     '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
   );
 
@@ -3113,7 +3113,7 @@ function user_build_filter_query(SelectQuery $query) {
  * Implements hook_comment_view().
  */
 function user_comment_view($comment) {
-  if (variable_get('user_signatures', 0) && !empty($comment->signature)) {
+  if (config_get('user.settings', 'user_signatures') && !empty($comment->signature)) {
     // @todo This alters and replaces the original object value, so a
     //   hypothetical process of loading, viewing, and saving will hijack the
     //   stored data. Consider renaming to $comment->signature_safe or similar
@@ -3481,7 +3481,7 @@ function user_register_validate($form, &$form_state) {
 function user_register_submit($form, &$form_state) {
   $admin = $form_state['values']['administer_users'];
 
-  if (!variable_get('user_email_verification', TRUE) || $admin) {
+  if (!config_get('user.settings', 'user_email_verification') || $admin) {
     $pass = $form_state['values']['pass'];
   }
   else {
@@ -3501,7 +3501,7 @@ function user_register_submit($form, &$form_state) {
   $status = $account->save();
 
   // Terminate if an error occurred while saving the account.
-  if ($status =! SAVED_NEW) {
+  if ($status != SAVED_NEW) {
     backdrop_set_message(t("Error saving user account."), 'error');
     $form_state['redirect'] = '';
     return;
@@ -3515,12 +3515,12 @@ function user_register_submit($form, &$form_state) {
   $account->password = $pass;
 
   // New administrative account without notification.
-  $uri = entity_uri('user', $account);
+  $uri = $account->uri();
   if ($admin && !$notify) {
     backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No e-mail verification required; log in user immediately.
-  elseif (!$admin && !variable_get('user_email_verification', TRUE) && $account->status) {
+  elseif (!$admin && !config_get('user.settings', 'user_email_verification') && $account->status) {
     _user_mail_notify('register_no_approval_required', $account);
     $form_state['uid'] = $account->uid;
     user_login_submit(array(), $form_state);
@@ -3552,7 +3552,7 @@ function user_register_submit($form, &$form_state) {
  */
 function user_modules_installed($modules) {
   // Assign all available permissions to the administrator role.
-  $rid = variable_get('user_admin_role', 0);
+  $rid = config_get('user.settings', 'user_admin_role');
   if ($rid) {
     $permissions = array();
     foreach ($modules as $module) {
@@ -3659,6 +3659,10 @@ function user_file_download_access($field, $entity_type, $entity) {
 function user_config_info() {
   $prefixes['user.flood'] = array(
     'label' => t('User flood'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['user.settings'] = array(
+    'label' => t('User settings'),
     'group' => t('Configuration'),
   );
 }

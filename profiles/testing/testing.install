@@ -13,5 +13,5 @@
  */
 function testing_install() {
   // Allow visitor account creation, but with administrative approval.
-  variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+  config_set('user.settings', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 }
