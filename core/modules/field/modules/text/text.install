@@ -65,3 +65,21 @@ function text_field_schema($field) {
     ),
   );
 }
+
+/**
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
+ * @{
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
+ */
+
+/**
+ * Delete teaser_length variable.
+ */
+function text_update_1000() {
+  variable_del('teaser_length');
+}
+
+/**
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */
