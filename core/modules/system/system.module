@@ -576,7 +576,7 @@ function system_menu() {
     'title' => 'Structure',
     'description' => 'Administer blocks, content types, menus, etc.',
     'position' => 'right',
-    'weight' => -8,
+    'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -584,16 +584,16 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
-    'description' => 'Select and configure your themes.',
+    'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
     'position' => 'left',
-    'weight' => -6,
+    'weight' => -3,
     'file' => 'system.admin.inc',
   );
   $items['admin/appearance/list'] = array(
-    'title' => 'List',
-    'description' => 'Select and configure your theme',
+    'title' => 'Themes',
+    'description' => 'Select and configure themes.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
     'file' => 'system.admin.inc',
@@ -649,20 +649,20 @@ function system_menu() {
 
   // Modules.
   $items['admin/modules'] = array(
-    'title' => 'Modules',
-    'description' => 'Extend site functionality.',
+    'title' => 'Functionality',
+    'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
     'access arguments' => array('administer modules'),
     'file' => 'system.admin.inc',
-    'weight' => -2,
+    'weight' => -4,
   );
   $items['admin/modules/list'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/modules/list/confirm'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
@@ -675,7 +675,7 @@ function system_menu() {
     'weight' => 20,
   );
   $items['admin/modules/uninstall/confirm'] = array(
-    'title' => 'Uninstall',
+    'title' => 'Uninstall modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'system.admin.inc',
