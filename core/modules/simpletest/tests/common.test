@@ -1818,7 +1818,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
     );
     $message = t('%type: !message in %function (line ', $error);
 
-    variable_set('error_level', ERROR_REPORTING_DISPLAY_ALL);
+    config_set('system.logging', 'error_level', ERROR_REPORTING_DISPLAY_ALL);
     $this->backdropGet('common-test/backdrop-render-invalid-keys');
     $this->assertResponse(200, t('Received expected HTTP status code.'));
     $this->assertRaw($message, t('Found error message: !message.', array('!message' => $message)));
