@@ -14,7 +14,7 @@ class views_handler_field_date extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['date_format'] = array('default' => 'small');
+    $options['date_format'] = array('default' => 'short');
     $options['custom_date_format'] = array('default' => '');
     $options['timezone'] = array('default' => '');
 
@@ -24,9 +24,9 @@ class views_handler_field_date extends views_handler_field {
   function options_form(&$form, &$form_state) {
 
     $date_formats = array();
-    $date_types = system_get_date_types();
-    foreach ($date_types as $key => $value) {
-      $date_formats[$value['type']] = t('@date_format format', array('@date_format' => $value['title'])) . ': ' . format_date(REQUEST_TIME, $value['type']);
+    $date_types = system_get_date_formats();
+    foreach ($date_types as $machine_name => $value) {
+      $date_formats[$machine_name] = check_plain(t('@name format', array('@name' => $value['name'])) . ': ' . format_date(REQUEST_TIME, $machine_name));
     }
 
     $form['date_format'] = array(
@@ -42,7 +42,7 @@ class views_handler_field_date extends views_handler_field {
         'inverse time span' => t('Time span (past dates have "-" prepended)'),
         'time span' => t('Time span (with "ago/hence" appended)'),
       ),
-      '#default_value' => isset($this->options['date_format']) ? $this->options['date_format'] : 'small',
+      '#default_value' => isset($this->options['date_format']) ? $this->options['date_format'] : 'short',
     );
     $form['custom_date_format'] = array(
       '#type' => 'textfield',
