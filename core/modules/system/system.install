@@ -1949,6 +1949,28 @@ function system_update_1016() {
 }
 
 /**
+ * Moves system logging settings from variables to config.
+ */
+function system_update_1017() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.logging');
+  // Migrate variables if any.
+  $config = config('system.logging');
+  $config->set('log_row_limit', variable_get('dblog_row_limit', 1000));
+  $config->set('log_identity', variable_get('syslog_identity', 'backdrop'));
+  $config->set('log_facility', variable_get('syslog_facility', LOG_LOCAL0));
+  $config->set('log_format', variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
+  $config->set('error_level', variable_get('error_level', 'all'));
+  $config->save();
+  // Delete variables.
+  variable_del('error_level');
+  variable_del('dblog_row_limit');
+  variable_del('syslog_identity');
+  variable_del('syslog_facility');
+  variable_del('syslog_format');
+}
+
+/**
  * Converts active_menus_default variable to config.
  */
 function system_update_1019() {

@@ -4218,6 +4218,10 @@ function system_config_info() {
     'label' => t('System menu'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.logging'] = array(
+    'label' => t('System logging'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
