@@ -303,13 +303,7 @@ function views_array_key_plus($array) {
  * Figure out what timezone we're in; needed for some date manipulations.
  */
 function views_get_timezone() {
-  global $user;
-  if (variable_get('configurable_timezones', 1) && $user->uid && strlen($user->timezone)) {
-    $timezone = $user->timezone;
-  }
-  else {
-    $timezone = variable_get('date_default_timezone', 0);
-  }
+  $timezone = backdrop_get_user_timezone();
 
   // set up the database timezone
   $db_type = Database::getConnection()->databaseType();

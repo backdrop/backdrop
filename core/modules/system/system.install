@@ -2006,6 +2006,30 @@ function system_update_1019() {
 }
 
 /**
+ *
+ */
+function system_update_1020() {
+    // Copy config file to site config folder.
+  config_install_default_config('module', 'system.date');
+  // Migrate variables if any.
+  $config = config('system.date');
+  $config->set('country.default', variable_get('site_default_country', ''));
+  $config->set('first_day', variable_get('date_first_day', 0));
+  $config->set('timezone.default', variable_get('date_default_timezone', ''));
+  $config->set('timezone.user.configurable', variable_get('configurable_timezones', 1));
+  $config->set('timezone.user.warn', variable_get('empty_timezone_message', 0));
+  $config->set('timezone.user.default', variable_get('user_default_timezone', 0));
+  $config->save();
+  // Delete variables.
+  variable_del('site_default_country');
+  variable_del('date_first_day');
+  variable_del('date_default_timezone');
+  variable_del('configurable_timezones');
+  variable_del('empty_timezone_message');
+  variable_del('user_default_timezone');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
