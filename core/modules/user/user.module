@@ -1315,7 +1315,7 @@ function user_is_logged_in() {
  *   TRUE if the user is not already logged in and can register for an account.
  */
 function user_register_access() {
-  return user_is_anonymous() && config_get('user.settings', 'user_register') !== USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL;
+  return user_is_anonymous() && config_get('user.settings', 'user_register') !== USER_REGISTER_ADMINISTRATORS_ONLY;
 }
 
 /**
