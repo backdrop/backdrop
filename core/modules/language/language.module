@@ -156,3 +156,13 @@ function language_delete($langcode) {
   }
   return FALSE;
 }
+
+/**
+ * Implements hook_config_info().
+ */
+function language_config_info() {
+  $prefixes['language.negotiation'] = array(
+    'label' => t('Language negotiation'),
+    'group' => t('Configuration'),
+  );
+}

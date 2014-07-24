@@ -229,8 +229,8 @@ function update_prepare_language() {
     }
     variable_set('locale_translation_plurals', $plurals);
     variable_set('locale_translation_javascript', $javascript);
-    variable_set('locale_language_negotiation_url_prefixes', $prefixes);
-    variable_set('locale_language_negotiation_url_domains', $domains);
+    config_set('language.negotiation', 'url_prefixes', $prefixes);
+    config_set('language.negotiation', 'url_domains', $domains);
 
     // Drop now unneeded columns.
     db_drop_field('languages', 'plurals');
