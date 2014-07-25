@@ -389,6 +389,15 @@ function menu_test_init() {
   if (variable_get('menu_test_record_active_trail', FALSE)) {
     variable_set('menu_test_active_trail_initial', menu_get_active_trail());
   }
+
+  // Set string overrides to be used in MenuRouterTestCase.
+  $string_overrides = array(
+    'Example title - Case 1' => 'Alternative example title - Case 1',
+    'Example @sub1 - Case @op2' => 'Alternative example @sub1 - Case @op2',
+    'Example title' => 'Alternative example title',
+    'Example title' => 'Alternative example title',
+  );
+  $GLOBALS['settings']['locale_custom_strings_en'] = array('' => $string_overrides);
 }
 
 /**

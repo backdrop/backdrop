@@ -63,6 +63,13 @@ function session_test_menu() {
  */
 function session_test_boot() {
   header('X-Session-Empty: ' . intval(empty($_SESSION)));
+
+  // Enable HTTPS for this request if set in state.
+  // See SessionHttpsTestCase::testHttpsSession().
+  if (state_get('session_test_https')) {
+    $GLOBALS['settings']['https'] = TRUE;
+    backdrop_session_initialize();
+  }
 }
 
 /**

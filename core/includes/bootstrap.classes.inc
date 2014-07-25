@@ -125,7 +125,7 @@ function backdrop_class_list() {
   );
 
   // Add in Drupal 7 class name wrappers if compatibility is enabled.
-  if (!empty($GLOBALS['conf']['backdrop_drupal_compatibility'])) {
+  if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
     $classes += array(
       'DrupalQueue' => $path . 'drupal.classes.inc',
       'DrupalQueueInterface' => $path . 'drupal.classes.inc',

@@ -192,14 +192,14 @@ function _backdrop_session_write($sid, $value) {
         // The "secure pages" setting allows a site to simultaneously use both
         // secure and insecure session cookies. If enabled and both cookies are
         // presented then use both keys.
-        if (variable_get('https', FALSE)) {
+        if (settings_get('https', FALSE)) {
           $insecure_session_name = substr(session_name(), 1);
           if (isset($_COOKIE[$insecure_session_name])) {
             $key['sid'] = $_COOKIE[$insecure_session_name];
           }
         }
       }
-      elseif (variable_get('https', FALSE)) {
+      elseif (settings_get('https', FALSE)) {
         unset($key['ssid']);
       }
 
@@ -243,7 +243,7 @@ function backdrop_session_initialize() {
 
   // We use !empty() in the following check to ensure that blank session IDs
   // are not valid.
-  if (!empty($_COOKIE[session_name()]) || ($is_https && variable_get('https', FALSE) && !empty($_COOKIE[substr(session_name(), 1)]))) {
+  if (!empty($_COOKIE[session_name()]) || ($is_https && settings_get('https', FALSE) && !empty($_COOKIE[substr(session_name(), 1)]))) {
     // If a session cookie exists, initialize the session. Otherwise the
     // session is only started on demand in backdrop_session_commit(), making
     // anonymous users not use a session cookie unless something is stored in
@@ -264,7 +264,7 @@ function backdrop_session_initialize() {
     // anonymous users than are generated in backdrop_session_regenerate() when
     // a user becomes authenticated.
     session_id(backdrop_random_key());
-    if ($is_https && variable_get('https', FALSE)) {
+    if ($is_https && settings_get('https', FALSE)) {
       $insecure_session_name = substr(session_name(), 1);
       $session_id = backdrop_random_key();
       $_COOKIE[$insecure_session_name] = $session_id;
@@ -319,7 +319,7 @@ function backdrop_session_commit() {
     // started.
     if (!backdrop_session_started()) {
       backdrop_session_start();
-      if ($is_https && variable_get('https', FALSE)) {
+      if ($is_https && settings_get('https', FALSE)) {
         $insecure_session_name = substr(session_name(), 1);
         $params = session_get_cookie_params();
         $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
@@ -354,7 +354,7 @@ function backdrop_session_regenerate() {
     return;
   }
 
-  if ($is_https && variable_get('https', FALSE)) {
+  if ($is_https && settings_get('https', FALSE)) {
     $insecure_session_name = substr(session_name(), 1);
     if (!isset($GLOBALS['lazy_session']) && isset($_COOKIE[$insecure_session_name])) {
       $old_insecure_session_id = $_COOKIE[$insecure_session_name];
@@ -383,7 +383,7 @@ function backdrop_session_regenerate() {
       $fields['ssid'] = session_id();
       // If the "secure pages" setting is enabled, use the newly-created
       // insecure session identifier as the regenerated sid.
-      if (variable_get('https', FALSE)) {
+      if (settings_get('https', FALSE)) {
         $fields['sid'] = $session_id;
       }
     }
@@ -443,7 +443,7 @@ function _backdrop_session_destroy($sid) {
   if ($is_https) {
     _backdrop_session_delete_cookie(substr(session_name(), 1), FALSE);
   }
-  elseif (variable_get('https', FALSE)) {
+  elseif (settings_get('https', FALSE)) {
     _backdrop_session_delete_cookie('S' . session_name(), TRUE);
   }
 }

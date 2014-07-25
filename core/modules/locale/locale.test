@@ -2320,11 +2320,11 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->assertTrue($italian_url == $correct_link, format_string('The url() function returns the right url (@url) in accordance with the chosen language', array('@url' => $italian_url . " == " . $correct_link)));
 
     // Test HTTPS via options.
-    variable_set('https', TRUE);
+    $GLOBALS['settings']['https'] = TRUE;
     $italian_url = url('admin', array('https' => TRUE, 'language' => $languages['it']));
     $correct_link = 'https://' . $link;
     $this->assertTrue($italian_url == $correct_link, format_string('The url() function returns the right https url (via options) (@url) in accordance with the chosen language', array('@url' => $italian_url . " == " . $correct_link)));
-    variable_set('https', FALSE);
+    unset($GLOBALS['settings']['https']);
 
     // Test HTTPS via current URL scheme.
     $temp_https = $is_https;

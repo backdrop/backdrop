@@ -570,7 +570,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
    * update, then assert if we see the appropriate warnings on the right pages.
    */
   function testHookUpdateStatusAlter() {
-    variable_set('allow_authorize_operations', TRUE);
+    $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
     $config = config('update.settings');
     $update_admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer software updates'));
     $this->backdropLogin($update_admin_user);
@@ -627,7 +627,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
 class UpdateTestUploadCase extends UpdateTestHelper {
   public function setUp() {
     parent::setUp('update', 'update_test');
-    variable_set('allow_authorize_operations', TRUE);
+    $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
     $admin_user = $this->backdropCreateUser(array('administer software updates', 'administer site configuration'));
     $this->backdropLogin($admin_user);
   }

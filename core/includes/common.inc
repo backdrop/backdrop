@@ -772,7 +772,7 @@ function backdrop_http_request($url, array $options = array()) {
   // implementation.
   $alternate_http_system = &backdrop_static('__FUNCTION__');
   if (!isset($alternate_http_system)) {
-    $class = variable_get('http_system');
+    $class = settings_get('http_system');
     $alternate_http_system = $class ? new $class() : FALSE;
   }
   if ($alternate_http_system) {
@@ -817,7 +817,7 @@ function backdrop_http_request($url, array $options = array()) {
   $options['timeout'] = (float) $options['timeout'];
 
   // Use a proxy if one is defined and the host is not on the excluded list.
-  $proxy_server = variable_get('proxy_server', '');
+  $proxy_server = settings_get('proxy_server', '');
   if ($proxy_server && _backdrop_http_use_proxy($uri['host'])) {
     // Set the scheme so we open a socket to the proxy server.
     $uri['scheme'] = 'proxy';
@@ -827,13 +827,13 @@ function backdrop_http_request($url, array $options = array()) {
     unset($uri['query']);
 
     // Add in username and password to Proxy-Authorization header if needed.
-    if ($proxy_username = variable_get('proxy_username', '')) {
-      $proxy_password = variable_get('proxy_password', '');
+    if ($proxy_username = settings_get('proxy_username', '')) {
+      $proxy_password = settings_get('proxy_password', '');
       $options['headers']['Proxy-Authorization'] = 'Basic ' . base64_encode($proxy_username . (!empty($proxy_password) ? ":" . $proxy_password : ''));
     }
     // Some proxies reject requests with any User-Agent headers, while others
     // require a specific one.
-    $proxy_user_agent = variable_get('proxy_user_agent', '');
+    $proxy_user_agent = settings_get('proxy_user_agent', '');
     // The default value matches neither condition.
     if ($proxy_user_agent === NULL) {
       unset($options['headers']['User-Agent']);
@@ -846,7 +846,7 @@ function backdrop_http_request($url, array $options = array()) {
   switch ($uri['scheme']) {
     case 'proxy':
       // Make the socket connection to a proxy server.
-      $socket = 'tcp://' . $proxy_server . ':' . variable_get('proxy_port', 8080);
+      $socket = 'tcp://' . $proxy_server . ':' . settings_get('proxy_port', 8080);
       // The Host header still needs to match the real request.
       $options['headers']['Host'] = $uri['host'];
       $options['headers']['Host'] .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
@@ -1083,7 +1083,7 @@ function backdrop_http_request($url, array $options = array()) {
  *   TRUE if a proxy should be used for this host.
  */
 function _backdrop_http_use_proxy($host) {
-  $proxy_exceptions = variable_get('proxy_exceptions', array('localhost', '127.0.0.1'));
+  $proxy_exceptions = settings_get('proxy_exceptions', array('localhost', '127.0.0.1'));
   return !in_array(strtolower($host), $proxy_exceptions, TRUE);
 }
 
@@ -2330,7 +2330,7 @@ function url($path = NULL, array $options = array()) {
     if ($options['query']) {
       $path .= (strpos($path, '?') !== FALSE ? '&' : '?') . backdrop_http_build_query($options['query']);
     }
-    if (isset($options['https']) && variable_get('https', FALSE)) {
+    if (isset($options['https']) && settings_get('https', FALSE)) {
       if ($options['https'] === TRUE) {
         $path = str_replace('http://', 'https://', $path);
       }
@@ -2346,7 +2346,7 @@ function url($path = NULL, array $options = array()) {
 
   // The base_url might be rewritten from the language rewrite in domain mode.
   if (!isset($options['base_url'])) {
-    if (isset($options['https']) && variable_get('https', FALSE)) {
+    if (isset($options['https']) && settings_get('https', FALSE)) {
       if ($options['https'] === TRUE) {
         $options['base_url'] = $base_secure_url;
         $options['absolute'] = TRUE;
@@ -4263,7 +4263,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
         ),
       );
       // Backwards-compatibility for JavaScript.
-      if (!empty($GLOBALS['conf']['backdrop_drupal_compatibility'])) {
+      if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
         $javascript['settings']['data'][] = array('drupalCompatibility' => TRUE);
       }
 
@@ -5348,8 +5348,10 @@ function backdrop_json_output($var = NULL) {
  *   A salt based on information in settings.php, not in the database.
  */
 function backdrop_get_hash_salt() {
-  global $hash_salt, $databases;
-  // If the $hash_salt variable is empty, a hash of the serialized
+  global $databases;
+  $hash_salt = settings_get('hash_salt');
+
+  // If the hash_salt setting is empty, a hash of the serialized
   // database credentials is used as a fallback salt.
   return empty($hash_salt) ? hash('sha256', serialize($databases)) : $hash_salt;
 }
@@ -5380,7 +5382,7 @@ function backdrop_get_private_key() {
  * session, manually start a session prior to calling this function.
  *
  * @return string
- *   A 43-character URL-safe token for validation, based on the user session ID,
+ *   A 43-character URL-safe token for validation,based on the user session ID,
  *   the global $hash_salt variable from settings.php, and the
  *   'private_key' configuration variable.
  */
@@ -5414,10 +5416,10 @@ function _backdrop_bootstrap_full() {
     return;
   }
   $called = TRUE;
-  require_once BACKDROP_ROOT . '/' . variable_get('path_inc', 'core/includes/path.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('path_inc', 'core/includes/path.inc');
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/pager.inc';
-  require_once BACKDROP_ROOT . '/' . variable_get('menu_inc', 'core/includes/menu.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('menu_inc', 'core/includes/menu.inc');
   require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
