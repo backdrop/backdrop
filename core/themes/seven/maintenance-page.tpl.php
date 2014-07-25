@@ -7,14 +7,8 @@
     <?php print $scripts; ?>
   </head>
   <body class="<?php print $classes; ?>">
-
-  <?php print $page_top; ?>
-
-  <header id="branding">
-    <?php if ($title): ?><h1 class="page-title"><?php print $title; ?></h1><?php endif; ?>
-  </header>
-
-  <div id="page">
+    <?php print $page_top; ?>
+    <div id="page">
 
     <?php if ($sidebar_first): ?>
       <div id="sidebar-first" class="sidebar">
@@ -26,12 +20,12 @@
     <?php endif; ?>
 
     <main id="content" class="clearfix">
+      <?php if ($title): ?><h1 class="page-title"><?php print $title; ?></h1><?php endif; ?>
       <?php if ($messages): ?>
         <div id="console"><?php print $messages; ?></div>
       <?php endif; ?>
       <?php print $content; ?>
     </main>
-
   </div>
 
   <footer role="contentinfo">

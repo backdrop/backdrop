@@ -497,7 +497,6 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['database']) ? '' : $database['database'],
       '#size' => 45,
       '#required' => TRUE,
-      '#description' => st('The name of the database your @profile data will be stored in. It must exist on your server before @profile can be installed.', array('@profile' => backdrop_install_profile_distribution_name())),
     );
 
     $form['username'] = array(
