@@ -396,8 +396,8 @@ function language_negotiation_configure_session_form_submit($form, &$form_state)
 function theme_locale_date_format_form($variables) {
   $form = $variables['form'];
   $header = array(
-    t('Date type'),
-    t('Format'),
+    'machine_name' => t('Machine Name'),
+    'pattern' => t('Format'),
   );
 
   foreach (element_children($form['date_formats']) as $key) {
@@ -467,36 +467,36 @@ function locale_date_format_form($form, &$form_state, $langcode) {
     '#value' => $langcode,
   );
 
-  // Get list of date format types.
-  $types = system_get_date_types();
-
   // Get list of available formats.
   $formats = system_get_date_formats();
   $choices = array();
-  foreach ($formats as $type => $list) {
-    foreach ($list as $f => $format) {
-      $choices[$f] = format_date(REQUEST_TIME, 'custom', $f);
+  foreach ($formats as $date_format_id => $format_info) {
+    // Ignore values that are localized.
+    if (empty($format_info['locales'])) {
+      $choices[$date_format_id] = format_date(REQUEST_TIME, $date_format_id);
+    }
+    else {
+      unset($formats[$date_format_id]);
     }
   }
-  reset($formats);
 
   // Get configured formats for each language.
   $locale_formats = system_date_format_locale($langcode);
-  // Display a form field for each format type.
-  foreach ($types as $type => $type_info) {
-    if (!empty($locale_formats) && in_array($type, array_keys($locale_formats))) {
-      $default = $locale_formats[$type];
+  if (!empty($locale_formats)) {
+    $formats += $locale_formats;
+    foreach ($locale_formats as $date_format_id => $format_info) {
+      $choices[$date_format_id] = format_date(REQUEST_TIME, $date_format_id);
     }
-    else {
-      $default = variable_get('date_format_' . $type, key($formats));
-    }
+  }
 
+  // Display a form field for each format type.
+  foreach ($formats as $date_format_id => $format_info) {
     // Show date format select list.
-    $form['date_formats']['date_format_' . $type] = array(
+    $form['date_formats']['date_format_' . $date_format_id] = array(
       '#type' => 'select',
-      '#title' => check_plain($type_info['title']),
+      '#title' => check_plain($format_info['name']),
       '#attributes' => array('class' => array('date-format')),
-      '#default_value' => (isset($choices[$default]) ? $default : 'custom'),
+      '#default_value' => (isset($choices[$date_format_id]) ? $date_format_id : 'custom'),
       '#options' => $choices,
     );
   }
@@ -517,14 +517,12 @@ function locale_date_format_form_submit($form, &$form_state) {
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
   $langcode = $form_state['values']['langcode'];
 
-  // Get list of date format types.
-  $types = system_get_date_types();
-  foreach ($types as $type => $type_info) {
-    $format = $form_state['values']['date_format_' . $type];
-    if ($format == 'custom') {
-      $format = $form_state['values']['date_format_' . $type . '_custom'];
+  $formats = system_get_date_formats();
+  foreach ($formats as $date_format_id => $format_info) {
+    if (isset($form_state['values']['date_format_' . $date_format_id])) {
+      $format = $form_state['values']['date_format_' . $date_format_id];
+      system_date_format_localize_form_save($langcode, $date_format_id, $formats[$format]['pattern']);
     }
-    locale_date_format_save($langcode, $type, $format);
   }
   backdrop_set_message(t('Configuration saved.'));
   $form_state['redirect'] = 'admin/config/regional/date-time/locale';
@@ -549,8 +547,6 @@ function locale_date_format_reset_form($form, &$form_state, $langcode) {
  * Reset date formats for a specific language to global defaults.
  */
 function locale_date_format_reset_form_submit($form, &$form_state) {
-  db_delete('date_format_locale')
-    ->condition('language', $form_state['values']['langcode'])
-    ->execute();
+  config('locale.config.' . $form['langcode']['#value'] . '.system.date')->delete();
   $form_state['redirect'] = 'admin/config/regional/date-time/locale';
 }

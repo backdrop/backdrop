@@ -2060,11 +2060,11 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *   A UNIX timestamp to format.
  * @param $type
  *   (optional) The format to use, one of:
- *   - One of the built-in formats: 'short', 'medium', 'long', 'html_datetime',
- *     'html_date', 'html_time', 'html_yearless_date', 'html_week',
- *     'html_month', 'html_year'.
- *   - The name of a date type defined by a module in hook_date_format_types(),
- *     if it's been assigned a format.
+ *   - One of the built-in formats: 'short', 'medium',
+ *     'long', 'html_datetime', 'html_date', 'html_time',
+ *     'html_yearless_date', 'html_week', 'html_month', 'html_year'.
+ *   - The name of a date type defined by a module in
+ *     hook_date_format_types(), if it's been assigned a format.
  *   - The machine name of an administrator-defined date format.
  *   - 'custom', to use $format.
  *   Defaults to 'medium'.
@@ -2106,64 +2106,23 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
     $langcode = isset($language_interface->langcode) ? $language_interface->langcode : LANGUAGE_SYSTEM;
   }
 
-  switch ($type) {
-    case 'short':
-      $format = variable_get('date_format_short', 'm/d/Y - H:i');
-      break;
-
-    case 'long':
-      $format = variable_get('date_format_long', 'l, F j, Y - H:i');
-      break;
-
-    case 'html_datetime':
-      $format = variable_get('date_format_html_datetime', 'Y-m-d\TH:i:sO');
-      break;
-
-    case 'html_date':
-      $format = variable_get('date_format_html_date', 'Y-m-d');
-      break;
-
-    case 'html_time':
-      $format = variable_get('date_format_html_time', 'H:i:s');
-      break;
-
-    case 'html_yearless_date':
-      $format = variable_get('date_format_html_yearless_date', 'm-d');
-      break;
-
-    case 'html_week':
-      $format = variable_get('date_format_html_week', 'Y-\WW');
-      break;
-
-    case 'html_month':
-      $format = variable_get('date_format_html_month', 'Y-m');
-      break;
-
-    case 'html_year':
-      $format = variable_get('date_format_html_year', 'Y');
-      break;
-
-    case 'custom':
-      // No change to format.
-      break;
-
-    case 'medium':
-    default:
-      // Retrieve the format of the custom $type passed.
-      if ($type != 'medium') {
-        $format = variable_get('date_format_' . $type, '');
-      }
-      // Fall back to 'medium'.
-      if ($format === '') {
-        $format = variable_get('date_format_medium', 'D, m/d/Y - H:i');
-      }
-      break;
-  }
+  // Find the appropriate format type.
+  $key = (class_exists('IntlDateFormatter') && !empty($langcode) && $langcode != 'en') ? 'intl' : 'php';
 
   // Create a DateTime object from the timestamp.
   $date_time = date_create('@' . $timestamp);
   // Set the time zone for the DateTime object.
   date_timezone_set($date_time, $timezones[$timezone]);
+
+  // If we have a non-custom date format use the provided date format pattern.
+  if ($type != 'custom') {
+    $format = config_get('system.date', 'formats.' . $type . '.pattern.' . $key);
+  }
+
+  // Fall back to medium if a format was not found.
+  if (empty($format)) {
+    $format = config_get('system.date', 'formats.medium.pattern.' . $key);
+  }
 
   // Encode markers that should be translated. 'A' becomes '\xEF\AA\xFF'.
   // xEF and xFF are invalid UTF-8 sequences, and we assume they are not in the
