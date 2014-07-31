@@ -325,14 +325,14 @@ function user_validate_picture(&$form, &$form_state) {
   // If required, validate the uploaded picture.
   $validators = array(
     'file_validate_is_image' => array(),
-    'file_validate_image_resolution' => array(variable_get('user_picture_dimensions', '85x85')),
-    'file_validate_size' => array(variable_get('user_picture_file_size', '30') * 1024),
+    'file_validate_image_resolution' => array(config_get('user.settings', 'user_picture_dimensions')),
+    'file_validate_size' => array(config_get('user.settings', 'user_picture_file_size') * 1024),
   );
 
   // Save the file as a temporary file.
   $file = file_save_upload('picture_upload', $validators);
   if ($file === FALSE) {
-    form_set_error('picture_upload', t("Failed to upload the picture image; the %directory directory doesn't exist or is not writable.", array('%directory' => variable_get('user_picture_path', 'pictures'))));
+    form_set_error('picture_upload', t("Failed to upload the picture image; the %directory directory doesn't exist or is not writable.", array('%directory' => config_get('user.settings', 'user_picture_path'))));
   }
   elseif ($file !== NULL) {
     $form_state['values']['picture_upload'] = $file;
@@ -534,7 +534,7 @@ function user_views_api() {
  * Ensure that user pictures (avatars) are always downloadable.
  */
 function user_file_download($uri) {
-  if (strpos(file_uri_target($uri), variable_get('user_picture_path', 'pictures') . '/picture-') === 0) {
+  if (strpos(file_uri_target($uri), config_get('user.settings', 'user_picture_path') . '/picture-') === 0) {
     $info = image_get_info($uri);
     return array('Content-Type' => $info['mime_type']);
   }
@@ -801,7 +801,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Picture'),
     '#weight' => 1,
-    '#access' => (!$register && variable_get('user_pictures', 0)),
+    '#access' => (!$register && config_get('user.settings', 'user_pictures')),
   );
   $form['picture']['picture'] = array(
     '#type' => 'value',
@@ -820,7 +820,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'file',
     '#title' => t('Upload picture'),
     '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => variable_get('user_picture_dimensions', '85x85'))) . ' ' . filter_xss_admin(variable_get('user_picture_guidelines', '')),
+    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => config_get('user.settings', 'user_picture_dimensions'))) . ' ' . filter_xss_admin(config_get('user.settings', 'user_picture_guidelines')),
   );
   $form['#validate'][] = 'user_validate_picture';
 }
@@ -1115,7 +1115,7 @@ function user_format_name($account) {
  */
 function template_preprocess_user_picture(&$variables) {
   $variables['user_picture'] = '';
-  if (variable_get('user_pictures', 0)) {
+  if (config_get('user.settings', 'user_pictures')) {
     $account = $variables['account'];
     if (!empty($account->picture)) {
       // @TODO: Ideally this function would only be passed file entities, but
@@ -1132,14 +1132,14 @@ function template_preprocess_user_picture(&$variables) {
         $filepath = $account->picture->uri;
       }
     }
-    elseif (variable_get('user_picture_default', '')) {
-      $filepath = variable_get('user_picture_default', '');
+    elseif (config_get('user.settings', 'user_picture_default')) {
+      $filepath = config_get('user.settings', 'user_picture_default');
     }
     if (isset($filepath)) {
       $alt = t("@user's picture", array('@user' => user_format_name($account)));
       // If the image does not have a valid Backdrop scheme (for eg. HTTP),
       // don't load image styles.
-      if (module_exists('image') && file_valid_uri($filepath) && $style = variable_get('user_picture_style', '')) {
+      if (module_exists('image') && file_valid_uri($filepath) && $style = config_get('user.settings', 'user_picture_style')) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
       else {
@@ -3180,8 +3180,8 @@ function user_image_style_delete($style) {
  */
 function user_image_style_save($style) {
   // If a style is renamed, update the variables that use it.
-  if (isset($style['old_name']) && $style['old_name'] == variable_get('user_picture_style', '')) {
-    variable_set('user_picture_style', $style['name']);
+  if (isset($style['old_name']) && $style['old_name'] == config_get('user.settings', 'user_picture_style')) {
+    config_set('user.settings', 'user_picture_style', $style['name']);
   }
 }
 

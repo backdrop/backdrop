@@ -962,8 +962,10 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Login as web user and add a signature and a user picture.
     $this->backdropLogin($this->web_user);
-    config_set('user.settings', 'user_signatures', 1);
-    variable_set('user_pictures', 1);
+    config('user.settings')
+      ->set('user_signatures', 1)
+      ->set('user_pictures', 1)
+      ->save();
     $test_signature = $this->randomName();
     $edit['signature[value]'] = '<a href="http://example.com/">' . $test_signature. '</a>';
     $edit['signature[format]'] = 'filtered_html';

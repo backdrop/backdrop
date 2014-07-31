@@ -442,5 +442,29 @@ function user_update_1005() {
 }
 
 /**
+ * Moves user picture settings from variable to config.
+ */
+function user_update_1006() {
+  // Migrate variables if any.
+  $config = config('user.settings');
+  $config->set('user_pictures', variable_get('user_pictures', 0));
+  $config->set('user_picture_path', variable_get('user_picture_path', 'pictures'));
+  $config->set('user_picture_default', variable_get('user_picture_default', ''));
+  $config->set('user_picture_style', variable_get('user_picture_style', ''));
+  $config->set('user_picture_dimensions', variable_get('user_picture_dimensions', '85x85'));
+  $config->set('user_picture_file_size', variable_get('user_picture_file_size', 30));
+  $config->set('user_picture_guidelines', variable_get('user_picture_guidelines', ''));
+  $config->save();
+  // Delete variables.
+  variable_del('user_pictures');
+  variable_del('user_picture_path');
+  variable_del('user_picture_default');
+  variable_del('user_picture_style');
+  variable_del('user_picture_dimensions');
+  variable_del('user_picture_file_size');
+  variable_del('user_picture_guidelines');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
