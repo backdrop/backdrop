@@ -1226,6 +1226,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
       // spinners will be added manually by the client-side script.
       'progress' => 'none',
     ),
+    '#attributes' => array('class' => array('element-invisible'))
   );
 
   $form['actions'] = array('#type' => 'actions');
