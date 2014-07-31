@@ -12,8 +12,8 @@
  * the HTTP_HOST here
  */
 function locale_test_boot() {
-  if (variable_get('locale_test_domain')) {
-    $_SERVER['HTTP_HOST'] = variable_get('locale_test_domain');
+  if (state_get('locale_test_domain')) {
+    $_SERVER['HTTP_HOST'] = state_get('locale_test_domain');
   }
 }
 
@@ -31,7 +31,7 @@ function locale_test_init() {
  * Implements hook_language_types_info().
  */
 function locale_test_language_types_info() {
-  if (variable_get('locale_test_language_types', FALSE)) {
+  if (state_get('locale_test_language_types', FALSE)) {
     return array(
       'test_language_type' => array(
         'name' => t('Test'),
@@ -48,7 +48,7 @@ function locale_test_language_types_info() {
  * Implements hook_language_types_info_alter().
  */
 function locale_test_language_types_info_alter(array &$language_types) {
-  if (variable_get('locale_test_content_language_type', FALSE)) {
+  if (state_get('locale_test_content_language_type', FALSE)) {
     unset($language_types[LANGUAGE_TYPE_CONTENT]['fixed']);
   }
 }
@@ -57,7 +57,7 @@ function locale_test_language_types_info_alter(array &$language_types) {
  * Implements hook_language_negotiation_info().
  */
 function locale_test_language_negotiation_info() {
-  if (variable_get('locale_test_language_negotiation_info', FALSE)) {
+  if (state_get('locale_test_language_negotiation_info', FALSE)) {
     $info = array(
       'callbacks' => array(
         'language' => 'locale_test_language_provider',
@@ -84,7 +84,7 @@ function locale_test_language_negotiation_info() {
  * Implements hook_language_negotiation_info_alter().
  */
 function locale_test_language_negotiation_info_alter(array &$language_providers) {
-  if (variable_get('locale_test_language_negotiation_info_alter', FALSE)) {
+  if (state_get('locale_test_language_negotiation_info_alter', FALSE)) {
     unset($language_providers[LANGUAGE_NEGOTIATION_INTERFACE]);
   }
 }

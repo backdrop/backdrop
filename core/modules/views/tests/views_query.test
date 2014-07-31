@@ -129,9 +129,9 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     parent::setUp('views', 'views_ui');
 
     // Define the schema and views data variable before enabling the test module.
-    variable_set('views_test_schema', $this->schemaDefinition());
-    variable_set('views_test_views_data', $this->viewsData());
-    variable_set('views_test_views_plugins', $this->viewsPlugins());
+    state_set('views_test_schema', $this->schemaDefinition());
+    state_set('views_test_views_data', $this->viewsData());
+    state_set('views_test_views_plugins', $this->viewsPlugins());
 
     module_enable(array('views_test'));
     $this->resetAll();

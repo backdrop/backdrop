@@ -15,7 +15,7 @@ function module_test_permission() {
  * Manipulate module dependencies to test dependency chains.
  */
 function module_test_system_info_alter(&$info, $file, $type) {
-  if (variable_get('dependency_test', FALSE) == 'missing dependency') {
+  if (state_get('dependency_test', FALSE) == 'missing dependency') {
     if ($file->name == 'dependency_test3') {
       // Make dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';
@@ -25,7 +25,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
       $info['dependencies'][] = 'foo';
     }
   }
-  elseif (variable_get('dependency_test', FALSE) == 'dependency') {
+  elseif (state_get('dependency_test', FALSE) == 'dependency') {
     if ($file->name == 'dependency_test3') {
       // Make the dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';
@@ -40,7 +40,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
       $info['hidden'] = FALSE;
     }
   }
-  elseif (variable_get('dependency_test', FALSE) == 'version dependency') {
+  elseif (state_get('dependency_test', FALSE) == 'version dependency') {
     if ($file->name == 'dependency_test3') {
       // Make the dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';

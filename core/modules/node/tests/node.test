@@ -972,7 +972,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
-    variable_set('node_access_test_private', TRUE);
+    state_set('node_access_test_private', TRUE);
   }
 
   /**
@@ -2019,7 +2019,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
     // $account instead of the global $user, we will log in as
     // noAccessUser2.
     $this->backdropLogin($this->noAccessUser2);
-    variable_set('node_test_node_access_all_uid', $this->noAccessUser->uid);
+    state_set('node_test_node_access_all_uid', $this->noAccessUser->uid);
     backdrop_static_reset('node_access_view_all_nodes');
     try {
       $query = db_select('node', 'mytab')
@@ -2034,7 +2034,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
     catch (Exception $e) {
       $this->fail(t('Altered query is malformed'));
     }
-    variable_del('node_test_node_access_all_uid');
+    state_del('node_test_node_access_all_uid');
   }
 }
 

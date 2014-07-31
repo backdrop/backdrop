@@ -125,8 +125,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view = $this->view_access_dynamic();
     $argument1 = $this->randomName();
     $argument2 = $this->randomName();
-    variable_set('test_dynamic_access_argument1', $argument1);
-    variable_set('test_dynamic_access_argument2', $argument2);
+    state_set('test_dynamic_access_argument1', $argument1);
+    state_set('test_dynamic_access_argument2', $argument2);
 
     $view->set_display('default');
     $access_plugin = $view->display_handler->get_plugin('access');

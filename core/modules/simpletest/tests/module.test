@@ -139,7 +139,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     // First, create a fake missing dependency. Test3 depends on the test2
     // module, which depends on a made-up module, foo. Nothing should be
     // installed.
-    variable_set('dependency_test', 'missing dependency');
+    state_set('dependency_test', 'missing dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
     $this->assertFalse($result, t('module_enable() returns FALSE if dependencies are missing.'));
@@ -147,7 +147,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
 
     // Now, fix the missing dependency. Test3 module depends on test2, but test2
     // depends on test1 module. module_enable() should work.
-    variable_set('dependency_test', 'dependency');
+    state_set('dependency_test', 'dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
@@ -210,7 +210,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     // and test1 module. But, this time do it with test2 module declaring a
     // dependency on a specific version of test1 module in its info file. Make
     // sure that module_enable() still works.
-    variable_set('dependency_test', 'version dependency');
+    state_set('dependency_test', 'version dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
