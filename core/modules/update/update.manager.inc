@@ -6,7 +6,7 @@
  *
  * This allows site administrators with the 'administer software updates'
  * permission to either upgrade existing projects, or download and install new
- * ones, so long as the killswitch setting ('allow_authorize_operations') is
+ * ones, so long as the killswitch $settings['allow_authorize_operations'] is
  * still TRUE.
  *
  * To install new code, the administrator is prompted for either the URL of an
