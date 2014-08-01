@@ -1746,7 +1746,7 @@ function node_menu() {
     'file' => 'node.admin.inc',
   );
   $items['admin/content/node'] = array(
-    'title' => 'Content',
+    'title' => 'Find content',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );

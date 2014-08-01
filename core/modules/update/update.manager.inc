@@ -60,6 +60,8 @@
  * @ingroup forms
  */
 function update_manager_update_form($form, $form_state = array(), $context) {
+  backdrop_set_title('Update modules');
+
   if (!_update_manager_check_backends($form, 'update')) {
     return $form;
   }
@@ -497,6 +499,8 @@ function update_manager_install_form($form, &$form_state, $context) {
   if (!_update_manager_check_backends($form, 'install')) {
     return $form;
   }
+
+  backdrop_set_title('Install a module');
 
   $form['help_text'] = array(
     '#prefix' => '<p>',

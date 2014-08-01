@@ -17,10 +17,6 @@ function book_install() {
  * Implements hook_uninstall().
  */
 function book_uninstall() {
-  variable_del('book_allowed_types');
-  variable_del('book_child_type');
-  variable_del('book_block_mode');
-
   // Delete menu links.
   db_delete('menu_links')
     ->condition('module', 'book')
@@ -48,9 +44,6 @@ function _book_install_type_create() {
   node_add_body_field($book_node_type);
   // Default to not promoted.
   variable_set('node_options_book', array('status'));
-  // Use this default type for adding content to books.
-  variable_set('book_allowed_types', array('book'));
-  variable_set('book_child_type', 'book');
 }
 
 /**
@@ -93,3 +86,32 @@ function book_schema() {
 
   return $schema;
 }
+
+/**
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
+ * @{
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
+ */
+
+/**
+ * Move book settings from variables to config.
+ */
+function book_update_1000() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'book.settings');
+  // Migrate variables if any.
+  $config = config('book.settings');
+  $config->set('book_allowed_types', variable_get('book_allowed_types', array('book')));
+  $config->set('book_child_type', variable_get('book_child_type', 'book'));
+  $config->set('book_block_mode', variable_get('book_block_mode', 'all pages'));
+  $config->save();
+  // Delete variables.
+  variable_del('book_allowed_types');
+  variable_del('book_child_type');
+  variable_del('book_block_mode');
+}
+
+/**
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

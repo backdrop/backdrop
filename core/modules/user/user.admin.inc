@@ -270,6 +270,8 @@ function user_admin_account_validate($form, &$form_state) {
  */
 function user_admin_settings($form, &$form_state) {
   $config = config('user.settings');
+  $mail_config = config('user.mail');
+
   // Settings for anonymous users.
   $form['anonymous_settings'] = array(
     '#type' => 'fieldset',
@@ -451,13 +453,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_admin_created']['user_mail_register_admin_created_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('register_admin_created_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_admin_created_subject'),
     '#maxlength' => 180,
   );
   $form['email_admin_created']['user_mail_register_admin_created_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('register_admin_created_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_admin_created_body'),
     '#rows' => 15,
   );
 
@@ -472,13 +474,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_pending_approval']['user_mail_register_pending_approval_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('register_pending_approval_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_pending_approval_subject'),
     '#maxlength' => 180,
   );
   $form['email_pending_approval']['user_mail_register_pending_approval_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('register_pending_approval_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_pending_approval_body'),
     '#rows' => 8,
   );
 
@@ -493,13 +495,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_no_approval_required']['user_mail_register_no_approval_required_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('register_no_approval_required_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_no_approval_required_subject'),
     '#maxlength' => 180,
   );
   $form['email_no_approval_required']['user_mail_register_no_approval_required_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('register_no_approval_required_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('register_no_approval_required_body'),
     '#rows' => 15,
   );
 
@@ -515,13 +517,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_password_reset']['user_mail_password_reset_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('password_reset_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('password_reset_subject'),
     '#maxlength' => 180,
   );
   $form['email_password_reset']['user_mail_password_reset_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('password_reset_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('password_reset_body'),
     '#rows' => 12,
   );
 
@@ -550,13 +552,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_activated']['settings']['user_mail_status_activated_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('status_activated_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_activated_subject'),
     '#maxlength' => 180,
   );
   $form['email_activated']['settings']['user_mail_status_activated_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('status_activated_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_activated_body'),
     '#rows' => 15,
   );
 
@@ -585,13 +587,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_blocked']['settings']['user_mail_status_blocked_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('status_blocked_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_blocked_subject'),
     '#maxlength' => 180,
   );
   $form['email_blocked']['settings']['user_mail_status_blocked_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('status_blocked_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_blocked_body'),
     '#rows' => 3,
   );
 
@@ -606,13 +608,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_cancel_confirm']['user_mail_cancel_confirm_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('cancel_confirm_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('cancel_confirm_subject'),
     '#maxlength' => 180,
   );
   $form['email_cancel_confirm']['user_mail_cancel_confirm_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('cancel_confirm_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('cancel_confirm_body'),
     '#rows' => 3,
   );
 
@@ -641,13 +643,13 @@ function user_admin_settings($form, &$form_state) {
   $form['email_canceled']['settings']['user_mail_status_canceled_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => _user_mail_text('status_canceled_subject', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_canceled_subject'),
     '#maxlength' => 180,
   );
   $form['email_canceled']['settings']['user_mail_status_canceled_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => _user_mail_text('status_canceled_body', NULL, array(), FALSE),
+    '#default_value' => $mail_config->get('status_canceled_body'),
     '#rows' => 3,
   );
 
@@ -673,7 +675,27 @@ function user_admin_settings_submit($form, &$form_state) {
     ->set('user_mail_status_blocked_notify', $form_state['values']['user_mail_status_blocked_notify'])
     ->set('user_mail_status_canceled_notify', $form_state['values']['user_mail_status_canceled_notify'])
     ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+
+  config('user.mail')
+    ->set('cancel_confirm_body', $form_state['values']['user_mail_cancel_confirm_body'])
+    ->set('cancel_confirm_subject', $form_state['values']['user_mail_cancel_confirm_subject'])
+    ->set('password_reset_body', $form_state['values']['user_mail_password_reset_body'])
+    ->set('password_reset_subject', $form_state['values']['user_mail_password_reset_subject'])
+    ->set('register_admin_body', $form_state['values']['user_mail_register_admin_created_body'])
+    ->set('register_admin_subject', $form_state['values']['user_mail_register_admin_created_subject'])
+    ->set('register_no_approval_body', $form_state['values']['user_mail_register_no_approval_required_body'])
+    ->set('register_no_approval_subject', $form_state['values']['user_mail_register_no_approval_required_subject'])
+    ->set('register_pending_body', $form_state['values']['user_mail_register_pending_approval_body'])
+    ->set('register_pending_subject', $form_state['values']['user_mail_register_pending_approval_subject'])
+    ->set('status_activated_body', $form_state['values']['user_mail_status_activated_body'])
+    ->set('status_activated_subject', $form_state['values']['user_mail_status_activated_subject'])
+    ->set('status_blocked_body', $form_state['values']['user_mail_status_blocked_body'])
+    ->set('status_blocked_subject', $form_state['values']['user_mail_status_blocked_subject'])
+    ->set('status_canceled_body', $form_state['values']['user_mail_status_canceled_body'])
+    ->set('status_canceled_subject', $form_state['values']['user_mail_status_canceled_subject'])
+    ->save();
+
+    backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

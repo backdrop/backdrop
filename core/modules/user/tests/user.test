@@ -574,8 +574,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
-    // Confirm user is logged out.
-    $this->assertNoText($account->name, 'Logged out.');
+    // Confirm that the confirmation message made it through to the end user.
+    $this->assertRaw(t('%name has been disabled.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -618,8 +618,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $test_node = node_load($node->nid, $node->vid, TRUE);
     $this->assertTrue($test_node->status == 0, 'Node revision of the user has been unpublished.');
 
-    // Confirm user is logged out.
-    $this->assertNoText($account->name, 'Logged out.');
+    // Confirm that the confirmation message made it through to the end user.
+    $this->assertRaw(t('%name has been disabled.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -669,8 +669,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $test_node = node_load($revision_node->nid, NULL, TRUE);
     $this->assertTrue(($test_node->uid != 0 && $test_node->status == 1), "Current revision of the user's node was not attributed to anonymous user.");
 
-    // Confirm that user is logged out.
-    $this->assertNoText($account->name, 'Logged out.');
+    // Confirm that the confirmation message made it through to the end user.
+    $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -731,8 +731,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue(node_load($revision_node->nid, NULL, TRUE), "Current revision of the user's node was not deleted.");
     $this->assertFalse(comment_load($comment->cid), 'Comment of the user has been deleted.');
 
-    // Confirm that user is logged out.
-    $this->assertNoText($account->name, 'Logged out.');
+    // Confirm that the confirmation message made it through to the end user.
+    $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -1288,6 +1288,88 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $account1 = user_load($user_d->uid, TRUE);
     $this->assertEqual($account1->status, 1, 'User D unblocked');
     $this->assertMail("to", $account1->mail, "Activation mail sent to user D");
+  }
+}
+
+/**
+ * Test forms that save data using the configuration system.
+ */
+class SystemConfigFormCase extends BackdropWebTestCase {
+  /**
+   * Form ID to use for testing.
+   *
+   * @var string
+   */
+  protected $form_id;
+
+  /**
+   * Values to use for testing.
+   *
+   * Conatins details for form key, configuration object name, and config key.
+   * Example:
+   * @code
+   *   array(
+   *     'user_mail_cancel_confirm_body' => array(
+   *       '#value' => $this->randomString(),
+   *       '#config_name' => 'user.mail',
+   *       '#config_key' => 'cancel_confirm_body',
+   *     ),
+   *   );
+   * @endcode
+   *
+   * @var array
+   */
+  protected $values;
+
+  /**
+   * Submit the system_config_form and then test the configuration has the
+   * expected values.
+   */
+  function testConfigForm() {
+    // Programmatically submit the given values.
+    foreach ($this->values as $form_key => $data) {
+      $values[$form_key] = $data['#value'];
+    }
+    $form_state = array('values' => $values);
+    backdrop_form_submit($this->form_id, $form_state);
+
+    // Check that the form returns an error when expected, and vice versa.
+    $errors = form_get_errors();
+    $valid_form = empty($errors);
+    $args = array(
+      '%values' => print_r($values, TRUE),
+      '%errors' => $valid_form ? t('None') : implode(' ', $errors),
+    );
+    $this->assertTrue($valid_form, t('Input values: %values<br/>Validation handler errors: %errors', $args));
+
+    foreach ($this->values as $form_key => $data) {
+      $this->assertEqual($data['#value'], config($data['#config_name'])->get($data['#config_key']));
+    }
+  }
+}
+
+class UserAdminSettingsFormTest extends SystemConfigFormCase {
+  public function setUp() {
+    parent::setUp();
+    module_load_include('admin.inc', 'user');
+    $this->form_id = 'user_admin_settings';
+    $this->values = array(
+      'anonymous' => array(
+        '#value' => $this->randomString(10),
+        '#config_name' => 'user.settings',
+        '#config_key' => 'anonymous',
+      ),
+      'user_mail_cancel_confirm_body' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'user.mail',
+        '#config_key' => 'cancel_confirm_body',
+      ),
+      'user_mail_cancel_confirm_subject' => array(
+        '#value' => $this->randomString(20),
+        '#config_name' => 'user.mail',
+        '#config_key' => 'cancel_confirm_subject',
+      ),
+    );
   }
 }
 

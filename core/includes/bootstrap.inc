@@ -28,17 +28,17 @@ const BACKDROP_MINIMUM_PHP_MEMORY_LIMIT = '32M';
 /**
  * Error reporting level: display no errors.
  */
-define('ERROR_REPORTING_HIDE', 0);
+define('ERROR_REPORTING_HIDE', 'hide');
 
 /**
  * Error reporting level: display errors and warnings.
  */
-define('ERROR_REPORTING_DISPLAY_SOME', 1);
+define('ERROR_REPORTING_DISPLAY_SOME', 'some');
 
 /**
  * Error reporting level: display all messages.
  */
-define('ERROR_REPORTING_DISPLAY_ALL', 2);
+define('ERROR_REPORTING_DISPLAY_ALL', 'all');
 
 /**
  * Indicates that the item should never be removed unless explicitly selected.

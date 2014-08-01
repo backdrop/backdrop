@@ -1,0 +1,5 @@
+{
+    "_config_name": "system.authorize",
+    "allow_authorize_operations": 1,
+    "filetransfer_default": ""
+}

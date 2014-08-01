@@ -1,0 +1,8 @@
+{
+    "_config_name": "system.logging",
+    "error_level": "all",
+    "log_row_limit": 1000,
+    "log_identity": "backdrop",
+    "log_facility": "",
+    "log_format": "!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message"
+}

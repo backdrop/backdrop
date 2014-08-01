@@ -330,14 +330,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  * @return
  *   The generated summary.
  */
-function text_summary($text, $format = NULL, $size = NULL) {
-
-  if (!isset($size)) {
-    // What used to be called 'teaser' is now called 'summary', but
-    // the variable 'teaser_length' is preserved for backwards compatibility.
-    $size = variable_get('teaser_length', 600);
-  }
-
+function text_summary($text, $format = NULL, $size = 600) {
   // Find where the delimiter is in the body
   $delimiter = strpos($text, '<!--break-->');
 

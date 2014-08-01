@@ -173,13 +173,13 @@ class LocaleJavascriptTranslationTest extends BackdropWebTestCase {
       $args = array('%source' => $str, '%context' => $context);
 
       // Make sure that the string was found in the file.
-      $this->assertTrue(isset($source_strings[$str]), format_string("Found source string: %source", $args));
+      $this->assertTrue(isset($source_strings[$str]), format_string('Found source string: %source', $args));
 
       // Make sure that the proper context was matched.
-      $this->assertTrue(isset($source_strings[$str]) && $source_strings[$str] === $context, strlen($context) > 0 ? format_string("Context for %source is %context", $args) : format_string("Context for %source is blank", $args));
+      $this->assertTrue(isset($source_strings[$str]) && $source_strings[$str] === $context, strlen($context) > 0 ? format_string('Context for %source is %context', $args) : format_string('Context for %source is blank', $args));
     }
 
-    $this->assertEqual(count($source_strings), count($test_strings), "Found correct number of source strings.");
+    $this->assertEqual(count($source_strings), count($test_strings), 'Found correct number of source strings.');
   }
 }
 
