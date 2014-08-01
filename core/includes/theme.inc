@@ -2906,10 +2906,17 @@ function template_preprocess_maintenance_page(&$variables) {
     backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon), 'type' => $type));
   }
 
-  global $theme;
+  global $theme, $language_interface;
   // Retrieve the theme data to list all available regions.
   $theme_data = list_themes();
   $regions = $theme_data[$theme]->info['regions'];
+
+  // Initializes attributes which are specific to the html element.
+  $variables['html_attributes'] = new Attribute;
+
+  // HTML element attributes.
+  $variables['html_attributes']['lang'] = $language_interface->id;
+  $variables['html_attributes']['dir'] = $language_interface->direction ? 'rtl' : 'ltr';
 
   // Get all region content set with backdrop_add_region_content().
   foreach (array_keys($regions) as $region) {
