@@ -148,13 +148,13 @@ class EnableDisableTestCase extends ModuleTestCase {
 
     // Enable the dblog module first, since we will be asserting the presence
     // of log messages throughout the test.
-   if (isset($modules['dblog'])) {
-     $modules = array('dblog' => $modules['dblog']) + $modules;
-   }
-
-   // Set a variable so that the hook implementations in system_test.module
-   // will display messages via backdrop_set_message().
-   variable_set('test_verbose_module_hooks', TRUE);
+    if (isset($modules['dblog'])) {
+      $modules = array('dblog' => $modules['dblog']) + $modules;
+    }
+ 
+    // Set a variable so that the hook implementations in system_test.module
+    // will display messages via backdrop_set_message().
+    state_set('test_verbose_module_hooks', TRUE);
 
     // Throughout this test, some modules may be automatically enabled (due to
     // dependencies). We'll keep track of them in an array, so we can handle
@@ -445,7 +445,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->assertModules(array('module_test'), TRUE);
-    variable_set('dependency_test', 'dependency');
+    state_set('dependency_test', 'dependency');
     // module_test creates a dependency chain: test3 depends on test2, which
     // depends on test1. The correct enable order is, test1, test2, test3.
     $expected_order = array('dependency_test1', 'dependency_test2', 'dependency_test3');
@@ -546,7 +546,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Testing extra version. Incompatible.
       'common_test (>2.4-rc0)',
     );
-    variable_set('dependencies', $dependencies);
+    state_set('system_test_dependencies', $dependencies);
     $n = count($dependencies);
     for ($i = 0; $i < $n; $i++) {
       $this->backdropGet('admin/modules');

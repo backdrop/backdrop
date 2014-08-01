@@ -19,7 +19,7 @@ function node_access_test_node_grants($account, $op) {
   if ($op == 'view' && user_access('node test view', $account)) {
     $grants['node_access_test'] = array(8888, 8889);
   }
-  if ($op == 'view' && $account->uid == variable_get('node_test_node_access_all_uid', 0)) {
+  if ($op == 'view' && $account->uid == state_get('node_test_node_access_all_uid', 0)) {
     $grants['node_access_all'] = array(0);
   }
   return $grants;
@@ -31,7 +31,7 @@ function node_access_test_node_grants($account, $op) {
 function node_access_test_node_access_records(Node $node) {
   $grants = array();
   // For NodeAccessBaseTableTestCase, only set records for private nodes.
-  if (!variable_get('node_access_test_private') || $node->private) {
+  if (!state_get('node_access_test_private') || $node->private) {
     $grants[] = array(
       'realm' => 'node_access_test',
       'gid' => 8888,
@@ -177,7 +177,7 @@ function node_access_entity_test_page() {
  */
 function node_access_test_form_node_form_alter(&$form, $form_state) {
   // Only show this checkbox for NodeAccessBaseTableTestCase.
-  if (variable_get('node_access_test_private')) {
+  if (state_get('node_access_test_private')) {
     $form['private'] = array(
       '#type' => 'checkbox',
       '#title' => t('Private'),

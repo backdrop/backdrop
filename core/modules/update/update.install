@@ -168,10 +168,6 @@ function update_update_1000() {
   $config->set('update_timeout', variable_get('update_max_fetch_time', 5));
   $config->set('update_emails', variable_get('update_notify_emails', array()));
   $config->set('update_threshold', variable_get('update_notification_threshold', 0));
-  $config->set('update_requirement_type', variable_get('update_script_test_requirement_type', 0));
-  $config->set('update_system_info', variable_get('update_test_system_info', array()));
-  $config->set('update_status', variable_get('update_test_update_status', array()));
-  $config->set('update_xml_map', variable_get('update_test_xml_map', FALSE));
   $config->set('update_projects', variable_get('update_advanced_project_settings', array()));
   $config->save();
   // Delete variables.
@@ -182,10 +178,6 @@ function update_update_1000() {
   variable_del('update_max_fetch_time');
   variable_del('update_notify_emails');
   variable_del('update_notification_threshold');
-  variable_del('update_script_test_requirement_type');
-  variable_del('update_test_system_info');
-  variable_del('update_test_update_status');
-  variable_del('update_test_xml_map');
   variable_del('update_advanced_project_settings');
 }
 

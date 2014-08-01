@@ -2226,7 +2226,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       config_set('language.negotiation', 'url_part', $test['locale_language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
-      variable_set('locale_test_domain', $test['locale_test_domain']);
+      state_set('locale_test_domain', $test['locale_test_domain']);
     }
     $this->backdropGet($test['path'], array(), $test['http_header']);
     $this->assertText($test['expect'], $test['message']);
@@ -2553,7 +2553,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
 
     // Enable content language negotiation UI.
-    variable_set('locale_test_content_language_type', TRUE);
+    state_set('locale_test_content_language_type', TRUE);
 
     // Set interface language detection to user and content language detection
     // to URL. Disable inheritance from interface language to ensure content
@@ -2695,8 +2695,8 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
    */
   function testInfoAlterations() {
     // Enable language type/negotiation info alterations.
-    variable_set('locale_test_language_types', TRUE);
-    variable_set('locale_test_language_negotiation_info', TRUE);
+    state_set('locale_test_language_types', TRUE);
+    state_set('locale_test_language_negotiation_info', TRUE);
     $this->languageNegotiationUpdate();
 
     // Check that fixed language types are properly configured without the need
@@ -2705,7 +2705,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Make the content language type configurable by updating the language
     // negotiation settings with the proper flag enabled.
-    variable_set('locale_test_content_language_type', TRUE);
+    state_set('locale_test_content_language_type', TRUE);
     $this->languageNegotiationUpdate();
     $type = LANGUAGE_TYPE_CONTENT;
     $language_types = variable_get('language_types', language_types_get_default());
@@ -2726,7 +2726,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Remove the interface language provider by updating the language
     // negotiation settings with the proper flag enabled.
-    variable_set('locale_test_language_negotiation_info_alter', TRUE);
+    state_set('locale_test_language_negotiation_info_alter', TRUE);
     $this->languageNegotiationUpdate();
     $negotiation = variable_get("language_negotiation_$type", array());
     $this->assertFalse(isset($negotiation[$provider]), 'Interface language provider removed from the stored settings.');
