@@ -34,12 +34,12 @@ class PathTestCase extends BackdropWebTestCase {
     // created.
     cache('path')->flush();
     $this->backdropGet($edit['source']);
-    $this->assertTrue(cache('path')->get($edit['source']), t('Cache entry was created.'));
+    $this->assertTrue(cache('path')->get($edit['source']), 'Cache entry was created.');
 
     // Visit the alias for the node and confirm a cache entry is created.
     cache('path')->flush();
     $this->backdropGet($edit['alias']);
-    $this->assertTrue(cache('path')->get($edit['source']), t('Cache entry was created.'));
+    $this->assertTrue(cache('path')->get($edit['source']), 'Cache entry was created.');
   }
 
   /**
@@ -312,7 +312,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     backdrop_static_reset('locale_language_url_rewrite_url');
     $languages = language_list();
     $url = url('node/' . $french_node->nid, array('language' => $languages[$french_node->langcode]));
-    $this->assertTrue(strpos($url, $edit['path[alias]']), t('URL contains the path alias.'));
+    $this->assertTrue(strpos($url, $edit['path[alias]']), 'URL contains the path alias.');
 
     // Confirm that the alias works even when changing language negotiation
     // options. Enable User language detection and selection over URL one.
@@ -356,23 +356,23 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // situation only aliases in the default language and language neutral ones
     // should keep working.
     $this->backdropGet($french_alias);
-    $this->assertResponse(404, t('Alias for French translation is unavailable when URL language negotiation is disabled.'));
+    $this->assertResponse(404, 'Alias for French translation is unavailable when URL language negotiation is disabled.');
 
     // backdrop_lookup_path() has an internal static cache. Check to see that
     // it has the appropriate contents at this point.
     backdrop_lookup_path('wipe');
     $french_node_path = backdrop_lookup_path('source', $french_alias, $french_node->langcode);
-    $this->assertEqual($french_node_path, 'node/' . $french_node->nid, t('Normal path works.'));
+    $this->assertEqual($french_node_path, 'node/' . $french_node->nid, 'Normal path works.');
     // Second call should return the same path.
     $french_node_path = backdrop_lookup_path('source', $french_alias, $french_node->langcode);
-    $this->assertEqual($french_node_path, 'node/' . $french_node->nid, t('Normal path is the same.'));
+    $this->assertEqual($french_node_path, 'node/' . $french_node->nid, 'Normal path is the same.');
 
     // Confirm that the alias works.
     $french_node_alias = backdrop_lookup_path('alias', 'node/' . $french_node->nid, $french_node->langcode);
-    $this->assertEqual($french_node_alias, $french_alias, t('Alias works.'));
+    $this->assertEqual($french_node_alias, $french_alias, 'Alias works.');
     // Second call should return the same alias.
     $french_node_alias = backdrop_lookup_path('alias', 'node/' . $french_node->nid, $french_node->langcode);
-    $this->assertEqual($french_node_alias, $french_alias, t('Alias is the same.'));
+    $this->assertEqual($french_node_alias, $french_alias, 'Alias is the same.');
   }
 }
 
