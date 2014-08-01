@@ -721,6 +721,26 @@ class AdminMetaTagTestCase extends BackdropWebTestCase {
   }
 }
 
+class DefaultMobileMetaTagsTestCase extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp();
+    $this->default_metatags = array(
+      'viewport' => '<meta name="viewport" content="width=device-width" />',
+      'cleartype' => '<meta http-equiv="cleartype" content="on" />',
+    );
+  }
+
+  /**
+   * Verifies that the default mobile meta tags are added.
+   */
+  public function testDefaultMetaTagsExist() {
+    $this->backdropGet('');
+    foreach ($this->default_metatags as $name => $metatag) {
+      $this->assertRaw($metatag, 'Default Mobile meta tag "' . $name . '" displayed properly.', t('System'));
+    }
+  }
+}
+
 /**
  * Tests custom access denied functionality.
  */

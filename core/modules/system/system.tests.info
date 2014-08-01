@@ -46,6 +46,12 @@ description = Confirm that the fingerprinting meta tag appears as expected.
 group = System
 file = system.test
 
+[DefaultMobileMetaTagsTestCase]
+name = Default mobile meta tags
+description = Confirm that the default mobile meta tags appear as expected.
+group = System
+file = system.test
+
 [AccessDeniedTestCase]
 name = 403 functionality
 description = Tests page access denied functionality, including custom 403 pages.
