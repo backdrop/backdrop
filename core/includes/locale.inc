@@ -448,7 +448,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
           $url_scheme = ($is_https) ? 'https://' : 'http://';
           $options['absolute'] = TRUE;
           $options['base_url'] = $url_scheme . $domains[$options['language']->langcode];
-          if (isset($options['https']) && variable_get('https', FALSE)) {
+          if (isset($options['https']) && settings_get('https', FALSE)) {
             if ($options['https'] === TRUE) {
               $options['base_url'] = str_replace('http://', 'https://', $options['base_url']);
             }

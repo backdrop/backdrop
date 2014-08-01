@@ -2294,7 +2294,7 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('system_test'));
 
-    variable_set('allow_authorize_operations', TRUE);
+    $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
 
     // Create an administrator user.
     $this->admin_user = $this->backdropCreateUser(array('administer software updates'));

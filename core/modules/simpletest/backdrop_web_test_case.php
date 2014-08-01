@@ -924,6 +924,13 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalUser = NULL;
 
   /**
+   * The original settings as provided in settings.php.
+   *
+   * @var object
+   */
+  protected $originalSettings = NULL;
+
+  /**
    * The original shutdown handlers array, before it was cleaned for testing purposes.
    *
    * @var array
@@ -1401,7 +1408,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see BackdropWebTestCase::tearDown()
    */
   protected function prepareEnvironment() {
-    global $user, $language_interface, $conf, $config_directories;
+    global $user, $language_interface, $settings, $config_directories;
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language_interface;
@@ -1411,6 +1418,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->originalProfile = backdrop_get_profile();
     $this->originalCleanUrl = variable_get('clean_url', 0);
     $this->originalUser = $user;
+    $this->originalSettings = $settings;
 
     // Set to English to prevent exceptions from utf8_truncate() from t()
     // during install if the current language is not 'en'.
@@ -1462,6 +1470,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     $test_info = &$GLOBALS['backdrop_test_info'];
     $test_info['test_run_id'] = $this->databasePrefix;
     $test_info['in_child_site'] = FALSE;
+
+    // Disable Drupal compatibility for test runs.
+    $settings['backdrop_drupal_compatibility'] = FALSE;
 
     // Indicate the environment was set up correctly.
     $this->setupEnvironment = TRUE;
@@ -1645,7 +1656,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * and reset the database prefix.
    */
   protected function tearDown() {
-    global $user, $language_interface, $config_directories;
+    global $user, $language_interface, $settings, $config_directories;
 
     // In case a fatal error occurred that was not in the test process read the
     // log to pick up any fatal errors.
@@ -1661,7 +1672,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . substr($this->databasePrefix, 10));
 
     // Remove all prefixed tables.
-    $tables = db_find_tables($this->databasePrefix . '%');
     $connection_info = Database::getConnectionInfo('default');
     $tables = db_find_tables($connection_info['default']['prefix']['default'] . '%');
     if (empty($tables)) {
@@ -1689,6 +1699,9 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Set the configuration direcotires back to the originals.
     $config_directories = $this->originalConfigDirectories;
+
+    // Restore the original settings.
+    $settings = $this->originalSettings;
 
     // Restore original shutdown callbacks array to prevent original
     // environment of calling handlers from test run.

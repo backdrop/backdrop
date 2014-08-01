@@ -560,7 +560,7 @@ function admin_menu_links_icon() {
     '#title' => t('Run updates'),
     '#weight' => 50,
     // @see update_access_allowed()
-    '#access' => $GLOBALS['user']->uid == 1 || !empty($GLOBALS['update_free_access']) || user_access('administer software updates'),
+    '#access' => $GLOBALS['user']->uid == 1 || settings_get('update_free_access') || user_access('administer software updates'),
     '#href' => base_path() . 'update.php',
     '#options' => array(
       'external' => TRUE,

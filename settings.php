@@ -205,7 +205,7 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
  * After finishing the upgrade, be sure to open this file again and change the
  * TRUE back to a FALSE!
  */
-$update_free_access = FALSE;
+$settings['update_free_access'] = FALSE;
 
 /**
  * Salt for one-time login links and cancel links, form tokens, etc.
@@ -221,10 +221,10 @@ $update_free_access = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $hash_salt = file_get_contents('/home/example/salt.txt');
+ *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  *
  */
-$hash_salt = '';
+$settings['hash_salt'] = '';
 
 /**
  * Base URL (optional).
@@ -333,7 +333,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-// $conf['maintenance_theme'] = 'bartik';
+// $settings['maintenance_theme'] = 'bartik';
 
 /**
  * Reverse Proxy Configuration:
@@ -350,35 +350,35 @@ ini_set('session.cookie_lifetime', 2000000);
  * malicious client could bypass restrictions by setting the
  * X-Forwarded-For header directly. Therefore, Backdrop's proxy
  * configuration requires the IP addresses of all remote proxies to be
- * specified in $conf['reverse_proxy_addresses'] to work correctly.
+ * specified in $settings['reverse_proxy_addresses'] to work correctly.
  *
  * Enable this setting to get Backdrop to determine the client IP from
- * the X-Forwarded-For header (or $conf['reverse_proxy_header'] if set).
+ * the X-Forwarded-For header (or $settings['reverse_proxy_header'] if set).
  * If you are unsure about this setting, do not have a reverse proxy,
  * or Backdrop operates in a shared hosting environment, this setting
  * should remain commented out.
  *
  * In order for this setting to be used you must specify every possible
- * reverse proxy IP address in $conf['reverse_proxy_addresses'].
+ * reverse proxy IP address in $settings['reverse_proxy_addresses'].
  * If a complete list of reverse proxies is not available in your
  * environment (for example, if you use a CDN) you may set the
  * $_SERVER['REMOTE_ADDR'] variable directly in settings.php.
  * Be aware, however, that it is likely that this would allow IP
  * address spoofing unless more advanced precautions are taken.
  */
-// $conf['reverse_proxy'] = TRUE;
+// $settings['reverse_proxy'] = TRUE;
 
 /**
  * Specify every reverse proxy IP address in your environment.
- * This setting is required if $conf['reverse_proxy'] is TRUE.
+ * This setting is required if $settings['reverse_proxy'] is TRUE.
  */
-// $conf['reverse_proxy_addresses'] = array('a.b.c.d', ...);
+// $settings['reverse_proxy_addresses'] = array('a.b.c.d', ...);
 
 /**
  * Set this value if your proxy server sends the client IP in a header
  * other than X-Forwarded-For.
  */
-// $conf['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
+// $settings['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
 
 /**
  * Page caching:
@@ -396,7 +396,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * HTTP proxy, and bypass the reverse proxy if one is used) in order to avoid
  * getting cached pages from the proxy.
  */
-// $conf['omit_vary_cookie'] = TRUE;
+// $settings['omit_vary_cookie'] = TRUE;
 
 /**
  * CSS/JS aggregated file gzip compression:
@@ -424,7 +424,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * Uncomment the lines below to enable.
  */
 /*
-$conf['locale_custom_strings_en'][''] = array(
+$settings['locale_custom_strings_en'][''] = array(
   'forum'      => 'Discussion board',
   '@count min' => '@count minutes',
 );
@@ -477,12 +477,12 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $conf['proxy_server'] = '';
-# $conf['proxy_port'] = 8080;
-# $conf['proxy_username'] = '';
-# $conf['proxy_password'] = '';
-# $conf['proxy_user_agent'] = '';
-# $conf['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+# $settings['proxy_server'] = '';
+# $settings['proxy_port'] = 8080;
+# $settings['proxy_username'] = '';
+# $settings['proxy_password'] = '';
+# $settings['proxy_user_agent'] = '';
+# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
@@ -504,7 +504,15 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  *
  * Uncomment the line below to disable authorize operations.
  */
-// $conf['allow_authorize_operations'] = FALSE;
+// $settings['allow_authorize_operations'] = FALSE;
+
+/**
+ * Mixed-mode sessions:
+ *
+ * Set to TRUE to create both secure and insecure sessions when using HTTPS.
+ * Defaults to FALSE.
+ */
+// $settings['https'] = TRUE;
 
 /**
  * Drupal backwards compatibility.
@@ -514,4 +522,4 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * layer however. You may disable it if all the modules you're running were
  * built for Backdrop.
  */
-$conf['backdrop_drupal_compatibility'] = TRUE;
+$settings['backdrop_drupal_compatibility'] = TRUE;

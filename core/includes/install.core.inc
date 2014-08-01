@@ -235,14 +235,11 @@ function install_begin_request(&$install_state) {
 
   backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
 
-  // This must go after backdrop_bootstrap(), which unsets globals!
-  global $conf;
-
   require_once BACKDROP_ROOT . '/core/modules/system/system.install';
   require_once BACKDROP_ROOT . '/core/includes/common.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/install.inc';
-  require_once BACKDROP_ROOT . '/' . variable_get('path_inc', 'core/includes/path.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('path_inc', 'core/includes/path.inc');
 
   // Load module basics (needed for hook invokes).
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
@@ -271,7 +268,7 @@ function install_begin_request(&$install_state) {
   // suspect, due to the fact that Backdrop is not fully set up yet.
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
   require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
-  $conf['cache_default_class'] = 'BackdropFakeCache';
+  $GLOBALS['settings']['cache_default_class'] = 'BackdropFakeCache';
 
   // Prepare for themed output. We need to run this at the beginning of the
   // page request to avoid a different theme accidentally getting set. (We also
@@ -1035,7 +1032,7 @@ function install_settings_form_submit($form, &$form_state) {
   $settings['database_prefix'] = array(
     'value' => $db_settings['db_prefix'],
   );
-  $settings['hash_salt'] = array(
+  $settings["settings['hash_salt']"] = array(
     'value' => backdrop_random_key(),
     'required' => TRUE,
   );

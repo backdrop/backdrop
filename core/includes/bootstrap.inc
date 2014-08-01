@@ -737,14 +737,15 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $db_url, $db_prefix, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
   $conf = array();
+  $settings = array();
 
   $conf_path = conf_path();
   if (file_exists($conf_path . '/settings.php')) {
     require_once $conf_path . '/settings.php';
   }
-  if (!empty($conf['backdrop_drupal_compatibility'])) {
+  if (!empty($settings['backdrop_drupal_compatibility'])) {
     require_once './core/includes/drupal.inc';
   }
 
@@ -981,6 +982,29 @@ function variable_initialize($conf = array()) {
   }
 
   return $variables;
+}
+
+/**
+ * Returns a site-wide setting, usually specified via the settings.php file.
+ *
+ * This returns values from the global $settings variable, with an optional
+ * default if the setting has not be specified. Settings are used for low-level,
+ * global configuration. Unlike config_get(), this function is used to retrieve
+ * values that cannot be changed via the user-interface, hence why there is no
+ * matching settings_set() function.
+ *
+ * @param string $name
+ *   The name of the setting to return.
+ * @param mixed $default
+ *   (optional) The default value to use if this setting is not set.
+ *
+ * @return mixed
+ *   The value of the setting, the provided default if not set.
+ */
+function settings_get($name, $default = NULL) {
+  global $settings;
+
+  return isset($settings[$name]) ? $settings[$name] : $default;
 }
 
 /**
@@ -1505,7 +1529,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   // response to reply to a subsequent request for a given URL without
   // revalidation. If a Vary header has been set in hook_boot(), it is assumed
   // that the module knows how to cache the page.
-  if (!isset($hook_boot_headers['vary']) && !variable_get('omit_vary_cookie')) {
+  if (!isset($hook_boot_headers['vary']) && !settings_get('omit_vary_cookie')) {
     header('Vary: Cookie');
   }
 
@@ -1618,7 +1642,7 @@ function backdrop_unpack($obj, $field = 'data') {
  */
 function t($string, array $args = array(), array $options = array()) {
   global $language_interface;
-  static $custom_strings;
+  //static $custom_strings;
 
   // Merge in default.
   if (empty($options['langcode'])) {
@@ -1633,7 +1657,7 @@ function t($string, array $args = array(), array $options = array()) {
   // handful of string replacements. See settings.php for examples.
   // Cache the $custom_strings variable to improve performance.
   if (!isset($custom_strings[$options['langcode']])) {
-    $custom_strings[$options['langcode']] = variable_get('locale_custom_strings_' . $options['langcode'], array());
+    $custom_strings[$options['langcode']] = settings_get('locale_custom_strings_' . $options['langcode'], array());
   }
   // Custom strings work for English too, even if locale module is disabled.
   if (isset($custom_strings[$options['langcode']][$options['context']][$string])) {
@@ -2619,7 +2643,6 @@ function backdrop_get_bootstrap_phase() {
  *   HMAC and timestamp.
  */
 function backdrop_valid_test_ua() {
-  global $hash_salt;
   // No reason to reset this.
   static $test_prefix;
 
@@ -2633,7 +2656,7 @@ function backdrop_valid_test_ua() {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Backdrop variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     // Since we are making a local request a 5 second time window is allowed,
     // and the HMAC must match.
@@ -2651,14 +2674,13 @@ function backdrop_valid_test_ua() {
  * Generates a user agent string with a HMAC and timestamp for simpletest.
  */
 function backdrop_generate_test_ua($prefix) {
-  global $hash_salt;
   static $key;
 
   if (!isset($key)) {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Backdrop variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
   }
   // Generate a moderately secure HMAC based on the database credentials.
   $salt = uniqid('', TRUE);
@@ -3034,12 +3056,12 @@ function ip_address() {
   if (!isset($ip_address)) {
     $ip_address = $_SERVER['REMOTE_ADDR'];
 
-    if (variable_get('reverse_proxy', 0)) {
-      $reverse_proxy_header = variable_get('reverse_proxy_header', 'HTTP_X_FORWARDED_FOR');
+    if (settings_get('reverse_proxy', 0)) {
+      $reverse_proxy_header = settings_get('reverse_proxy_header', 'HTTP_X_FORWARDED_FOR');
       if (!empty($_SERVER[$reverse_proxy_header])) {
         // If an array of known reverse proxy IPs is provided, then trust
         // the XFF header if request really comes from one of them.
-        $reverse_proxy_addresses = variable_get('reverse_proxy_addresses', array());
+        $reverse_proxy_addresses = settings_get('reverse_proxy_addresses', array());
 
         // Turn XFF header into an array.
         $forwarded = explode(',', $_SERVER[$reverse_proxy_header]);

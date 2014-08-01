@@ -370,8 +370,8 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
       return;
     }
 
-    // Enable secure pages.
-    variable_set('https', TRUE);
+    // Enable secure pages. See session_test_init().
+    state_set('session_test_https', TRUE);
 
     $this->curlClose();
     // Start an anonymous session on the insecure site.

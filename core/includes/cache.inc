@@ -30,9 +30,9 @@ function cache($bin = 'cache') {
   // storage of a cache bin mid-request.
   static $cache_objects;
   if (!isset($cache_objects[$bin])) {
-    $class = variable_get('cache_class_' . $bin);
+    $class = settings_get('cache_class_' . $bin);
     if (!isset($class)) {
-      $class = variable_get('cache_default_class', 'BackdropDatabaseCache');
+      $class = settings_get('cache_default_class', 'BackdropDatabaseCache');
     }
     $cache_objects[$bin] = new $class($bin);
   }
@@ -63,24 +63,24 @@ function cache_clear_all() {
  * consulted as an example.
  *
  * To make Backdrop use your implementation for a certain cache bin, you have to
- * set a variable with the name of the cache bin as its key and the name of
- * your class as its value. For example, if your implementation of
- * BackdropCacheInterface was called MyCustomCache, the following line would make
- * Backdrop use it for the 'cache_page' bin:
+ * set a value in settings.php with the name of the cache bin as its key and the
+ * name of your class as its value. For example, if your implementation of
+ * BackdropCacheInterface was called MyCustomCache, the following line in
+ * settings.php would make Backdrop use it for the 'cache_page' bin:
  * @code
- *  variable_set('cache_class_cache_page', 'MyCustomCache');
+ *  $settings['cache_class_cache_page'] = 'MyCustomCache';
  * @endcode
  *
  * Additionally, you can register your cache implementation to be used by
- * default for all cache bins by setting the variable 'cache_default_class' to
+ * default for all cache bins by setting the $settings['cache_default_class'] to
  * the name of your implementation of the BackdropCacheInterface, e.g.
  * @code
- *  variable_set('cache_default_class', 'MyCustomCache');
+ *  $settings['cache_default_class'] = 'MyCustomCache';
  * @endcode
  *
- * To implement a completely custom cache bin, use the same variable format:
+ * To implement a completely custom cache bin, use the same format:
  * @code
- *  variable_set('cache_class_custom_bin', 'MyCustomCache');
+ *  $settings['cache_class_custom_bin'] = 'MyCustomCache';
  * @endcode
  * To access your custom cache bin, specify the name of the bin when storing
  * or retrieving cached data:
