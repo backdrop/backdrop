@@ -4222,6 +4222,10 @@ function system_config_info() {
     'label' => t('System logging'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.authorize'] = array(
+    'label' => t('System authorize'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 

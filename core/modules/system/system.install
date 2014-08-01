@@ -1971,6 +1971,28 @@ function system_update_1017() {
 }
 
 /**
+ * Moves authorize system settings from variable to config.
+ */
+function system_update_1018() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'system.authorize');
+  // Migrate variables if any.
+  $config = config('system.authorize');
+  $config->set('allow_authorize_operations', variable_get('allow_authorize_operations', 1));
+  $config->set('filetransfer_default', variable_get('authorize_filetransfer_default', ''));
+  $settings = db_query("SELECT name, value FROM variable WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
+  foreach ($settings as $row)  {
+    $row = unserialize($row);
+    $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
+  }
+  $config->save();
+  // Delete variables.
+  variable_del('allow_authorize_operations');
+  variable_del('authorize_filetransfer_default');
+
+}
+
+/**
  * Converts active_menus_default variable to config.
  */
 function system_update_1019() {
