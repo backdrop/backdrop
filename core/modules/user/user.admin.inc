@@ -358,14 +358,15 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
-  if (variable_get('user_pictures', 0)) {
-    $picture_path =  file_default_scheme() . '://' . variable_get('user_picture_path', 'pictures');
+  $config = config('user.settings');
+  if ($config->get('user_pictures')) {
+    $picture_path =  file_default_scheme() . '://' . config_get('user.settings', 'user_picture_path');
     if (!file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY)) {
       form_set_error('user_picture_path', t('The directory %directory does not exist or is not writable.', array('%directory' => $picture_path)));
       watchdog('file system', 'The directory %directory does not exist or is not writable.', array('%directory' => $picture_path), WATCHDOG_ERROR);
     }
   }
-  $picture_support = variable_get('user_pictures', 0);
+  $picture_support = $config->get('user_pictures');
   $form['personalization']['user_pictures'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable user pictures.'),
@@ -384,7 +385,7 @@ function user_admin_settings($form, &$form_state) {
   $form['personalization']['pictures']['user_picture_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Picture directory'),
-    '#default_value' => variable_get('user_picture_path', 'pictures'),
+    '#default_value' => $config->get('user_picture_path'),
     '#size' => 30,
     '#maxlength' => 255,
     '#description' => t('Subdirectory in the file upload directory where pictures will be stored.'),
@@ -392,7 +393,7 @@ function user_admin_settings($form, &$form_state) {
   $form['personalization']['pictures']['user_picture_default'] = array(
     '#type' => 'textfield',
     '#title' => t('Default picture'),
-    '#default_value' => variable_get('user_picture_default', ''),
+    '#default_value' => $config->get('user_picture_default'),
     '#size' => 30,
     '#maxlength' => 255,
     '#description' => t('URL of picture to display for users with no custom picture selected. Leave blank for none.'),
@@ -402,14 +403,14 @@ function user_admin_settings($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Picture display style'),
       '#options' => image_style_options(TRUE, PASS_THROUGH),
-      '#default_value' => variable_get('user_picture_style', ''),
+      '#default_value' => $config->get('user_picture_style'),
       '#description' => t('The style selected will be used on display, while the original image is retained. Styles may be configured in the <a href="!url">Image styles</a> administration area.', array('!url' => url('admin/config/media/image-styles'))),
     );
   }
   $form['personalization']['pictures']['user_picture_dimensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Picture upload dimensions'),
-    '#default_value' => variable_get('user_picture_dimensions', '85x85'),
+    '#default_value' => $config->get('user_picture_dimensions'),
     '#size' => 10,
     '#maxlength' => 10,
     '#field_suffix' => ' ' . t('pixels'),
@@ -418,7 +419,7 @@ function user_admin_settings($form, &$form_state) {
   $form['personalization']['pictures']['user_picture_file_size'] = array(
     '#type' => 'number',
     '#title' => t('Picture upload file size'),
-    '#default_value' => variable_get('user_picture_file_size', '30'),
+    '#default_value' => $config->get('user_picture_file_size'),
     '#min' => 0,
     '#max' => 1000000000,
     '#field_suffix' => ' ' . t('KB'),
@@ -427,7 +428,7 @@ function user_admin_settings($form, &$form_state) {
   $form['personalization']['pictures']['user_picture_guidelines'] = array(
     '#type' => 'textarea',
     '#title' => t('Picture guidelines'),
-    '#default_value' => variable_get('user_picture_guidelines', ''),
+    '#default_value' => $config->get('user_picture_guidelines'),
     '#description' => t("This text is displayed at the picture upload form in addition to the default guidelines. It's useful for helping or instructing your users."),
   );
 

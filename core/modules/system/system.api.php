@@ -2421,7 +2421,7 @@ function hook_file_download($uri) {
   if (!file_prepare_directory($uri)) {
     $uri = FALSE;
   }
-  if (strpos(file_uri_target($uri), variable_get('user_picture_path', 'pictures') . '/picture-') === 0) {
+  if (strpos(file_uri_target($uri), config_get('user.settings', 'user_picture_path') . '/picture-') === 0) {
     if (!user_access('access user profiles')) {
       // Access to the file is denied.
       return -1;

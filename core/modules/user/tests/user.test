@@ -821,7 +821,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
     // Enable user pictures.
-    variable_set('user_pictures', 1);
+    config_set('user.settings', 'user_pictures', 1);
 
     $this->user = $this->backdropCreateUser();
 
@@ -830,7 +830,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $file_check = file_prepare_directory($file_dir, FILE_CREATE_DIRECTORY);
     // TODO: Test public and private methods?
 
-    $picture_dir = variable_get('user_picture_path', 'pictures');
+    $picture_dir = config_get('user.settings', 'user_picture_path');
     $picture_path = $file_dir . $picture_dir;
 
     $pic_check = file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY);
@@ -863,8 +863,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] - 10) . 'x' . ($info['height'] - 10);
-      variable_set('user_picture_dimensions', $test_dim);
-      variable_set('user_picture_file_size', 0);
+      config('user.settings')
+        ->set('user_picture_dimensions', $test_dim)
+        ->set('user_picture_file_size', 0)
+        ->save();
 
       $pic_path = $this->saveUserPicture($image);
       // Check that the image was resized and is being displayed on the
@@ -872,7 +874,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
       $text = t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $test_dim));
       $this->assertRaw($text, 'Image was resized.');
       $alt = t("@user's picture", array('@user' => user_format_name($this->user)));
-      $style = variable_get('user_picture_style', '');
+      $style = config_get('user.settings', 'user_picture_style');
       $this->assertRaw(image_style_url($style, $pic_path), "Image is displayed in user's edit page");
 
       // Check if file is located in proper directory.
@@ -900,8 +902,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
       // Set new variables: valid dimensions, invalid filesize.
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
       $test_size = 1;
-      variable_set('user_picture_dimensions', $test_dim);
-      variable_set('user_picture_file_size', $test_size);
+      config('user.settings')
+        ->set('user_picture_dimensions', $test_dim)
+        ->set('user_picture_file_size', $test_size)
+        ->save();
 
       $pic_path = $this->saveUserPicture($image);
 
@@ -932,8 +936,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] - 10) . 'x' . ($info['height'] - 10);
-      variable_set('user_picture_dimensions', $test_dim);
-      variable_set('user_picture_file_size', 0);
+      config('user.settings')
+        ->set('user_picture_dimensions', $test_dim)
+        ->set('user_picture_file_size', 0)
+        ->save();
 
       $pic_path = $this->saveUserPicture($image);
 
@@ -965,8 +971,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
       // Set new variables: valid dimensions, invalid filesize.
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
       $test_size = 1;
-      variable_set('user_picture_dimensions', $test_dim);
-      variable_set('user_picture_file_size', $test_size);
+      config('user.settings')
+        ->set('user_picture_dimensions', $test_dim)
+        ->set('user_picture_file_size', $test_size)
+        ->save();
 
       $pic_path = $this->saveUserPicture($image);
 
@@ -996,8 +1004,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: valid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
-      variable_set('user_picture_dimensions', $test_dim);
-      variable_set('user_picture_file_size', 0);
+      config('user.settings')
+        ->set('user_picture_dimensions', $test_dim)
+        ->set('user_picture_file_size', 0)
+        ->save();
 
       $pic_path = $this->saveUserPicture($image);
 
@@ -1010,7 +1020,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new picture dimensions.
       $test_dim = ($info['width'] + 5) . 'x' . ($info['height'] + 5);
-      variable_set('user_picture_dimensions', $test_dim);
+      config_set('user.settings', 'user_picture_dimensions', $test_dim);
 
       $pic_path2 = $this->saveUserPicture($image);
       $this->assertNotEqual($pic_path, $pic_path2, 'Filename of second picture is different.');
@@ -1026,7 +1036,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $images = $this->backdropGetTestFiles('image');
     $image = $images[0];
     $pic_path = file_create_url($image->uri);
-    variable_set('user_picture_default', $pic_path);
+    config_set('user.settings', 'user_picture_default', $pic_path);
 
     // Check if image is displayed in user's profile page.
     $this->backdropGet('user');
@@ -1048,8 +1058,10 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
     // Set new variables: valid dimensions, valid filesize (0 = no limit).
     $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
-    variable_set('user_picture_dimensions', $test_dim);
-    variable_set('user_picture_file_size', 0);
+    config('user.settings')
+      ->set('user_picture_dimensions', $test_dim)
+      ->set('user_picture_file_size', 0)
+      ->save();
 
     // Save a new picture.
     $edit = array('files[picture_upload]' => backdrop_realpath($image->uri));
@@ -1702,7 +1714,8 @@ class UserEditTestCase extends BackdropWebTestCase {
    */
   function testUserEdit() {
     // Test user edit functionality with user pictures disabled.
-    variable_set('user_pictures', 0);
+    $config = config('user.settings');
+    $config->set('user_pictures', 0)->save();
     $user1 = $this->backdropCreateUser(array('change own username'));
     $user2 = $this->backdropCreateUser(array());
     $this->backdropLogin($user1);
@@ -1713,7 +1726,8 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 
     // Repeat the test with user pictures enabled, which modifies the form.
-    variable_set('user_pictures', 1);
+    $config->set('user_pictures', 1)->save();
+
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 

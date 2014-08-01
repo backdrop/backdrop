@@ -82,7 +82,7 @@ class views_handler_field_user_picture extends views_handler_field {
         $picture_filepath = $picture->uri;
       }
       else {
-        $picture_filepath = variable_get('user_picture_default', '');
+        $picture_filepath = config_get('user.settings', 'user_picture_default');
       }
       if (file_valid_uri($picture_filepath)) {
         $output = theme('image_style', array('style_name' => $this->options['image_style'], 'path' => $picture_filepath));

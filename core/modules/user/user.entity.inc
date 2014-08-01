@@ -197,7 +197,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     }
 
     // Add the full file objects for user pictures if enabled.
-    if (!empty($picture_fids) && variable_get('user_pictures', 0)) {
+    if (!empty($picture_fids) && config_get('user.settings', 'user_pictures')) {
       $pictures = file_load_multiple($picture_fids);
       foreach ($queried_users as $entity) {
         if (!empty($entity->picture) && isset($pictures[$entity->picture])) {
@@ -268,7 +268,7 @@ class UserStorageController extends EntityDatabaseStorageController {
         // and make it permanent.
         if (!$picture->status) {
           $info = image_get_info($picture->uri);
-          $picture_directory =  file_default_scheme() . '://' . variable_get('user_picture_path', 'pictures');
+          $picture_directory =  file_default_scheme() . '://' . config_get('user.settings', 'user_picture_path');
 
           // Prepare the pictures directory.
           file_prepare_directory($picture_directory, FILE_CREATE_DIRECTORY);
