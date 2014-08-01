@@ -912,8 +912,8 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request($auth);
 
     $this->backdropSetContent($result->data);
-    $this->assertRaw($username, '$_SERVER["PHP_AUTH_USER"] is passed correctly.');
-    $this->assertRaw($password, '$_SERVER["PHP_AUTH_PW"] is passed correctly.');
+    $this->assertRaw($username, 'Username is passed correctly.');
+    $this->assertRaw($password, 'Password is passed correctly.');
   }
 
   function testBackdropHTTPRequestRedirect() {
@@ -2774,6 +2774,21 @@ class ArrayDiffUnitTest extends BackdropUnitTestCase {
   }
 }
 
+/**
+ * Tests the functionality of backdrop_get_query_array().
+ */
+class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
+  /**
+   * Tests that backdrop_get_query_array() correctly explodes query parameters.
+   */
+  public function testBackdropGetQueryArray() {
+    $url = "http://my.site.com/somepath?foo=/content/folder[@name='foo']/folder[@name='bar']";
+    $parsed = parse_url($url);
+    $result = backdrop_get_query_array($parsed['query']);
+    $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
+  }
+
+}
 /**
  * Test for theme_feed_icon().
  */

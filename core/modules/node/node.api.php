@@ -1034,9 +1034,17 @@ function hook_node_type_delete($info) {
  * This hook is invoked only on the module that defines the node's content type
  * (use hook_node_delete() to respond to all node deletions).
  *
- * This hook is invoked from node_delete_multiple() after the node has been
- * removed from the node table in the database, before hook_node_delete() is
- * invoked, and before field_attach_delete() is called.
+ * This hook is invoked from node_delete_multiple() before hook_node_delete()
+ * is invoked and before field_attach_delete() is called.
+ *
+ * Note that when this hook is invoked, the changes have not yet been written
+ * to the database, because a database transaction is still in progress. The
+ * transaction is not finalized until the delete operation is entirely
+ * completed and node_delete_multiple() goes out of scope. You should not rely
+ * on data in the database at this time as it is not updated yet. You should
+ * also note that any write/update database queries executed from this hook are
+ * also not committed immediately. Check node_delete_multiple() and
+ * db_transaction() for more info.
  *
  * @param Node $node
  *   The node that is being deleted.
@@ -1064,21 +1072,19 @@ function hook_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_prepare(Node $node) {
-  if ($file = file_check_upload($field_name)) {
-    $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
-    if ($file) {
-      if (!image_get_info($file->uri)) {
-        form_set_error($field_name, t('Uploaded file is not a valid image'));
-        return;
-      }
-    }
-    else {
+  $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
+  if ($file) {
+    if (!image_get_info($file->uri)) {
+      form_set_error($field_name, t('Uploaded file is not a valid image'));
       return;
     }
-    $node->images['_original'] = $file->uri;
-    _image_build_derivatives($node, TRUE);
-    $node->new_file = TRUE;
   }
+  else {
+    return;
+  }
+  $node->images['_original'] = $file->uri;
+  _image_build_derivatives($node, TRUE);
+  $node->new_file = TRUE;
 }
 
 /**

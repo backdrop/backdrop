@@ -28,6 +28,18 @@ description = Test cron run.
 group = System
 file = system.test
 
+[CronRunTestCase]
+name = Cron run
+description = Test cron run.
+group = System
+file = system.test
+
+[CronQueueTestCase]
+name = Cron queue functionality
+description = Tests the cron queue runner.
+group = System
+file = system.test
+      
 [AdminMetaTagTestCase]
 name = Fingerprinting meta tag
 description = Confirm that the fingerprinting meta tag appears as expected.
