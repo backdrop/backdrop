@@ -637,7 +637,7 @@ class CronRunTestCase extends BackdropWebTestCase {
       ))
       ->condition('fid', $temp_old->fid)
       ->execute();
-    $this->assertTrue(file_exists($temp_old->uri), t('Old temp file was created correctly.'));
+    $this->assertTrue(file_exists($temp_old->uri), 'Old temp file was created correctly.');
 
     // Temporary file that is less than BACKDROP_MAXIMUM_TEMP_FILE_AGE.
     $temp_new = file_save_data('');
@@ -645,7 +645,7 @@ class CronRunTestCase extends BackdropWebTestCase {
       ->fields(array('status' => 0))
       ->condition('fid', $temp_new->fid)
       ->execute();
-    $this->assertTrue(file_exists($temp_new->uri), t('New temp file was created correctly.'));
+    $this->assertTrue(file_exists($temp_new->uri), 'New temp file was created correctly.');
 
     // Permanent file that is older than BACKDROP_MAXIMUM_TEMP_FILE_AGE.
     $perm_old = file_save_data('');
@@ -653,18 +653,18 @@ class CronRunTestCase extends BackdropWebTestCase {
       ->fields(array('timestamp' => 1))
       ->condition('fid', $temp_old->fid)
       ->execute();
-    $this->assertTrue(file_exists($perm_old->uri), t('Old permanent file was created correctly.'));
+    $this->assertTrue(file_exists($perm_old->uri), 'Old permanent file was created correctly.');
 
     // Permanent file that is newer than BACKDROP_MAXIMUM_TEMP_FILE_AGE.
     $perm_new = file_save_data('');
-    $this->assertTrue(file_exists($perm_new->uri), t('New permanent file was created correctly.'));
+    $this->assertTrue(file_exists($perm_new->uri), 'New permanent file was created correctly.');
 
     // Run cron and then ensure that only the old, temp file was deleted.
     $this->cronRun();
-    $this->assertFalse(file_exists($temp_old->uri), t('Old temp file was correctly removed.'));
-    $this->assertTrue(file_exists($temp_new->uri), t('New temp file was correctly ignored.'));
-    $this->assertTrue(file_exists($perm_old->uri), t('Old permanent file was correctly ignored.'));
-    $this->assertTrue(file_exists($perm_new->uri), t('New permanent file was correctly ignored.'));
+    $this->assertFalse(file_exists($temp_old->uri), 'Old temp file was correctly removed.');
+    $this->assertTrue(file_exists($temp_new->uri), 'New temp file was correctly ignored.');
+    $this->assertTrue(file_exists($perm_old->uri), 'Old permanent file was correctly ignored.');
+    $this->assertTrue(file_exists($perm_new->uri), 'New permanent file was correctly ignored.');
   }
 
   /**
@@ -677,7 +677,7 @@ class CronRunTestCase extends BackdropWebTestCase {
     // The common_test_cron_helper module sets the 'common_test_cron' variable.
     $this->cronRun();
     $result = variable_get('common_test_cron');
-    $this->assertEqual($result, 'success', t('Cron correctly handles exceptions thrown during hook_cron() invocations.'));
+    $this->assertEqual($result, 'success', 'Cron correctly handles exceptions thrown during hook_cron() invocations.');
   }
 }
 
@@ -689,7 +689,7 @@ class AdminMetaTagTestCase extends BackdropWebTestCase {
     list($version, ) = explode('.', BACKDROP_VERSION);
     $string = '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />';
     $this->backdropGet('node');
-    $this->assertRaw($string, t('Fingerprinting meta tag generated correctly.'), t('System'));
+    $this->assertRaw($string, 'Fingerprinting meta tag generated correctly.', 'System');
   }
 }
 
@@ -1602,14 +1602,14 @@ class QueueTestCase extends BackdropWebTestCase {
     $new_items[] = $item->data;
 
     // First two dequeued items should match the first two items we queued.
-    $this->assertEqual($this->queueScore($data, $new_items), 2, t('Two items matched'));
+    $this->assertEqual($this->queueScore($data, $new_items), 2, 'Two items matched');
 
     // Add two more items.
     $queue1->createItem($data[2]);
     $queue1->createItem($data[3]);
 
-    $this->assertTrue($queue1->numberOfItems(), t('Queue 1 is not empty after adding items.'));
-    $this->assertFalse($queue2->numberOfItems(), t('Queue 2 is empty while Queue 1 has items'));
+    $this->assertTrue($queue1->numberOfItems(), 'Queue 1 is not empty after adding items.');
+    $this->assertFalse($queue2->numberOfItems(), 'Queue 2 is empty while Queue 1 has items');
 
     $items[] = $item = $queue1->claimItem();
     $new_items[] = $item->data;
@@ -1619,10 +1619,10 @@ class QueueTestCase extends BackdropWebTestCase {
 
     // All dequeued items should match the items we queued exactly once,
     // therefore the score must be exactly 4.
-    $this->assertEqual($this->queueScore($data, $new_items), 4, t('Four items matched'));
+    $this->assertEqual($this->queueScore($data, $new_items), 4, 'Four items matched');
 
     // There should be no duplicate items.
-    $this->assertEqual($this->queueScore($new_items, $new_items), 4, t('Four items matched'));
+    $this->assertEqual($this->queueScore($new_items, $new_items), 4, 'Four items matched');
 
     // Delete all items from queue1.
     foreach ($items as $item) {
@@ -1630,8 +1630,8 @@ class QueueTestCase extends BackdropWebTestCase {
     }
 
     // Check that both queues are empty.
-    $this->assertFalse($queue1->numberOfItems(), t('Queue 1 is empty'));
-    $this->assertFalse($queue2->numberOfItems(), t('Queue 2 is empty'));
+    $this->assertFalse($queue1->numberOfItems(), 'Queue 1 is empty');
+    $this->assertFalse($queue2->numberOfItems(), 'Queue 2 is empty');
   }
 
   /**
