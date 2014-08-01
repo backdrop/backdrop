@@ -4,11 +4,11 @@
   text-decoration: line-through;
 }
 
-#locale-translation-filter-form .form-item-language,
-#locale-translation-filter-form .form-item-translation,
-#locale-translation-filter-form .form-item-group {
+.locale-translation-filter-form .form-item-language,
+.locale-translation-filter-form .form-item-translation,
+.locale-translation-filter-form .form-item-group {
   float: left; /* LTR */
-  padding-right: .8em; /* LTR */
+  margin-right: .8em; /* LTR */
   margin: 0.1em;
   /**
    * In Opera 9, DOM elements with the property of "overflow: auto"
@@ -17,21 +17,21 @@
    */
   width: 15em;
 }
-[dir="rtl"] #locale-translation-filter-form .form-item-language,
-[dir="rtl"] #locale-translation-filter-form .form-item-translation,
-[dir="rtl"] #locale-translation-filter-form .form-item-group {
+[dir="rtl"] .locale-translation-filter-form .form-item-language,
+[dir="rtl"] .locale-translation-filter-form .form-item-translation,
+[dir="rtl"] .locale-translation-filter-form .form-item-group {
   float: right;
-  padding-left: .8em;
-  padding-right: 0;
+  margin-left: .8em;
+  margin-right: 0;
 }
-#locale-translation-filter-form .form-type-select select {
+.locale-translation-filter-form .form-type-select select {
   width: 100%;
 }
-#locale-translation-filter-form .form-actions {
+.locale-translation-filter-form .form-actions {
   float: left; /* LTR */
   padding: 3ex 0 0 1em; /* LTR */
 }
-[dir="rtl"] #locale-translation-filter-form .form-actions {
+[dir="rtl"] .locale-translation-filter-form .form-actions {
   float: right;
   padding: 3ex 1em 0 0;
 }
