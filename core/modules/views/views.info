@@ -3,5 +3,4 @@ description = Create customized lists and queries from your database.
 package = Views
 version = BACKDROP_VERSION
 backdrop = 1.x
-stylesheets[all][] = css/views.css
 required = TRUE

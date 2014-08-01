@@ -6276,7 +6276,6 @@ function backdrop_render(&$elements) {
  *
  * @return string
  *   The rendered HTML of all children of the element.
-
  * @see backdrop_render()
  */
 function backdrop_render_children(&$element, $children_keys = NULL) {

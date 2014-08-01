@@ -137,13 +137,13 @@ class views_plugin_row extends views_plugin {
    *   The rendered output of a single row, used by the style plugin.
    */
   function render($row) {
-    return theme($this->theme_functions(),
-      array(
-        'view' => $this->view,
-        'options' => $this->options,
-        'row' => $row,
-        'field_alias' => isset($this->field_alias) ? $this->field_alias : '',
-      ));
+    return array(
+      '#theme' => $this->theme_functions(),
+      '#view' => $this->view,
+      '#options' => $this->options,
+      '#row' => $row,
+      '#field_alias' => isset($this->field_alias) ? $this->field_alias : '',
+    );
   }
 }
 

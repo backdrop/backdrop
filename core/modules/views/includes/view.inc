@@ -1277,6 +1277,13 @@ class view {
 
       $this->style_plugin->pre_render($this->result);
 
+      // Let each area handler have access to the result set.
+      foreach (array('header', 'footer', 'empty') as $area) {
+        foreach ($this->{$area} as $handler) {
+          $handler->pre_render($this->result);
+        }
+      }
+
       // Let modules modify the view just prior to rendering it.
       foreach (module_implements('views_pre_render') as $module) {
         $function = $module . '_views_pre_render';

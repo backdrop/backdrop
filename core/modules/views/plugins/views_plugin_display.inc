@@ -1020,7 +1020,6 @@ class views_plugin_display extends views_plugin {
    * an easy URL to exactly the right section. Don't override this.
    */
   function option_link($text, $section, $class = '', $title = '') {
-    views_add_js('ajax');
     if (!empty($class)) {
       $text = '<span>' . $text . '</span>';
     }
@@ -2581,7 +2580,13 @@ class views_plugin_display extends views_plugin {
    * Render this display.
    */
   function render() {
-    return theme($this->theme_functions(), array('view' => $this->view));
+    $element = array(
+      '#theme' => $this->theme_functions(),
+      '#view' => $this->view,
+    );
+    $element['#attached'] = &$this->view->element['#attached'];
+
+    return $element;
   }
 
   function render_area($area, $empty = FALSE) {
@@ -2653,7 +2658,10 @@ class views_plugin_display extends views_plugin {
    * Fully render the display for the purposes of a live preview or
    * some other AJAXy reason.
    */
-  function preview() { return $this->view->render(); }
+  function preview() {
+    $element = $this->view->render();
+    return backdrop_render($element);
+  }
 
   /**
    * Displays can require a certain type of style plugin. By default, they will

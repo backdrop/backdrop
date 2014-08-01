@@ -97,8 +97,8 @@ class views_plugin_cache extends views_plugin {
         cache($this->bin)->set($this->get_results_key(), $data, $this->cache_set_expire($type));
         break;
       case 'output':
-        $this->gather_headers();
         $this->storage['output'] = $this->view->display_handler->output;
+        $this->gather_headers();
         cache($this->bin)->set($this->get_output_key(), $this->storage, $this->cache_set_expire($type));
         break;
     }
@@ -175,21 +175,21 @@ class views_plugin_cache extends views_plugin {
   function post_render(&$output) { }
 
   /**
-   * Start caching javascript, css and other out of band info.
+   * Start caching the html head.
    *
    * This takes a snapshot of the current system state so that we don't
    * duplicate it. Later on, when gather_headers() is run, this information
    * will be removed so that we don't hold onto it.
+   *
+   * @see backdrop_add_html_head()
    */
   function cache_start() {
     $this->storage['head'] = backdrop_add_html_head();
-    $this->storage['css'] = backdrop_add_css();
-    $this->storage['js'] = backdrop_add_js();
     $this->storage['headers'] = backdrop_get_http_header();
   }
 
   /**
-   * Gather out of band data, compare it to what we started with and store the difference.
+   * Gather the JS/CSS from the render array, the html head from the band data.
    */
   function gather_headers() {
     // Simple replacement for head
@@ -203,22 +203,9 @@ class views_plugin_cache extends views_plugin {
     // Check if the advanced mapping function of D 7.23 is available.
     $array_mapping_func = function_exists('backdrop_array_diff_assoc_recursive') ? 'backdrop_array_diff_assoc_recursive' : 'array_diff_assoc';
 
-    // Slightly less simple for CSS:
-    $css = backdrop_add_css();
-    $css_start = isset($this->storage['css']) ? $this->storage['css'] : array();
-    $this->storage['css'] = $array_mapping_func($css, $css_start);
-
-    // Get javascript after/before views renders.
-    $js = backdrop_add_js();
-    $js_start = isset($this->storage['js']) ? $this->storage['js'] : array();
-    // If there are any differences between the old and the new javascript then
-    // store them to be added later.
-    $this->storage['js'] = $array_mapping_func($js, $js_start);
-
-    // Special case the settings key and get the difference of the data.
-    $settings = isset($js['settings']['data']) ? $js['settings']['data'] : array();
-    $settings_start = isset($js_start['settings']['data']) ? $js_start['settings']['data'] : array();
-    $this->storage['js']['settings'] = $array_mapping_func($settings, $settings_start);
+    $attached = backdrop_render_collect_attached($this->storage['output']);
+    $this->storage['css'] = $attached['css'];
+    $this->storage['js'] = $attached['js'];
 
     // Get difference of HTTP headers.
     $this->storage['headers'] = $array_mapping_func(backdrop_get_http_header(), $this->storage['headers']);
@@ -233,17 +220,17 @@ class views_plugin_cache extends views_plugin {
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
-        backdrop_add_css($args['data'], $args);
+        $this->view->element['#attached']['css'][] = $args;
       }
     }
     if (!empty($this->storage['js'])) {
       foreach ($this->storage['js'] as $key => $args) {
         if ($key !== 'settings') {
-          backdrop_add_js($args['data'], $args);
+          $this->view->element['#attached']['js'][] = $args;
         }
         else {
           foreach ($args as $setting) {
-            backdrop_add_js($setting, 'setting');
+            $this->view->element['#attached']['js']['setting'][] = $setting;
           }
         }
       }

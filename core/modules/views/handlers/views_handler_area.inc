@@ -88,6 +88,14 @@ class views_handler_area extends views_handler {
   function query() { }
 
   /**
+   * Performs any operations needed before full rendering.
+   *
+   * @param array $results
+   *  The results of the view.
+   */
+  public function pre_render(array $results) {  }
+
+  /**
    * Render the area
    */
   function render($empty = FALSE) {
