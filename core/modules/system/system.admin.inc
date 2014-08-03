@@ -1894,7 +1894,7 @@ function system_regional_settings($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Default country'),
     '#empty_value' => '',
-    '#default_value' => $system_date->get('country.default'),
+    '#default_value' => $system_date->get('default_country'),
     '#options' => $countries,
     '#attributes' => array('class' => array('country-detect')),
   );
@@ -1911,7 +1911,7 @@ function system_regional_settings($form, &$form_state) {
     '#title' => t('Time zones'),
   );
 
-  $date_default_timezone = $system_date->get('timezone.default');
+  $date_default_timezone = $system_date->get('default_timezone');
   $form['timezone']['date_default_timezone'] = array(
     '#type' => 'select',
     '#title' => t('Default time zone'),
@@ -1919,7 +1919,7 @@ function system_regional_settings($form, &$form_state) {
     '#options' => $zones,
   );
 
-  $configurable_timezones = $system_date->get('timezone.user.configurable');
+  $configurable_timezones = $system_date->get('user_configurable_timezones');
   $form['timezone']['configurable_timezones'] = array(
     '#type' => 'checkbox',
     '#title' => t('Users may set their own time zone.'),
@@ -1939,14 +1939,14 @@ function system_regional_settings($form, &$form_state) {
   $form['timezone']['configurable_timezones_wrapper']['empty_timezone_message'] = array(
     '#type' => 'checkbox',
     '#title' => t('Remind users at login if their time zone is not set.'),
-    '#default_value' => $system_date->get('timezone.user.warn'),
+    '#default_value' => $system_date->get('user_empty_timezone_message'),
     '#description' => t('Only applied if users may set their own time zone.')
   );
 
   $form['timezone']['configurable_timezones_wrapper']['user_default_timezone'] = array(
     '#type' => 'radios',
     '#title' => t('Time zone for new users'),
-    '#default_value' => $system_date->get('timezone.user.default'),
+    '#default_value' => $system_date->get('user_default_timezone'),
     '#options' => array(
       BACKDROP_USER_TIMEZONE_DEFAULT => t('Default time zone.'),
       BACKDROP_USER_TIMEZONE_EMPTY   => t('Empty time zone.'),
@@ -1971,12 +1971,12 @@ function system_regional_settings($form, &$form_state) {
  */
 function system_regional_settings_submit($form, &$form_state) {
   config('system.date')
-    ->set('country.default', $form_state['values']['site_default_country'])
+    ->set('default_country', $form_state['values']['site_default_country'])
     ->set('first_day', $form_state['values']['date_first_day'])
-    ->set('timezone.default', $form_state['values']['date_default_timezone'])
-    ->set('timezone.user.configurable', $form_state['values']['configurable_timezones'])
-    ->set('timezone.user.warn', $form_state['values']['empty_timezone_message'])
-    ->set('timezone.user.default', $form_state['values']['user_default_timezone'])
+    ->set('default_timezone', $form_state['values']['date_default_timezone'])
+    ->set('user_configurable_timezones', $form_state['values']['configurable_timezones'])
+    ->set('user_empty_timezone_message', $form_state['values']['empty_timezone_message'])
+    ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
     ->save();
 }
 
@@ -2580,18 +2580,20 @@ function theme_system_themes_page($variables) {
 /**
  * Menu callback; present a form for deleting a date format.
  *
- * @param string $date_format_id
- *   The machine name for the date format that may be deleted.
+ * @param array $format
+ *   The date format being deleted.
  */
-function system_date_delete_format_form($form, &$form_state, $date_format_id) {
-  $form['date_format_id'] = array(
-    '#type' => 'value',
-    '#value' => $date_format_id,
-  );
-  $format = system_get_date_formats($date_format_id);
+function system_date_delete_format_form($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
+  // Do not allow deletion of module-provided formats.
+  if (!empty($format['module'])) {
+    backdrop_access_denied();
+    backdrop_exit();
+  }
 
   $output = confirm_form($form,
-    t('Are you sure you want to remove the format %name : %format?', array('%name' => $format['name'], '%format' => format_date(REQUEST_TIME, $date_format_id))),
+    t('Are you sure you want to remove the format %label: %format?', array('%label' => $format['label'], '%format' => format_date(REQUEST_TIME, 'custom', $format['pattern']))),
     'admin/config/regional/date-time/formats',
     t('This action cannot be undone.'),
     t('Remove'), t('Cancel'),
@@ -2605,12 +2607,10 @@ function system_date_delete_format_form($form, &$form_state, $date_format_id) {
  * Delete a configured date format.
  */
 function system_date_delete_format_form_submit($form, &$form_state) {
-  if ($form_state['values']['confirm']) {
-    $format = system_get_date_formats($form_state['values']['date_format_id']);
-    system_date_format_delete($form_state['values']['date_format_id']);
-    backdrop_set_message(t('Removed date format %format.', array('%format' => $format['name'])));
-    $form_state['redirect'] = 'admin/config/regional/date-time/formats';
-  }
+  $format = $form_state['format'];
+  system_date_format_delete($format['name']);
+  backdrop_set_message(t('Removed date format %format.', array('%format' => $format['label'])));
+  $form_state['redirect'] = 'admin/config/regional/date-time/formats';
 }
 
 /**
@@ -2618,33 +2618,42 @@ function system_date_delete_format_form_submit($form, &$form_state) {
  */
 function system_date_time_formats() {
   $header = array(
-    array('data' => t('Machine name'), 'field' => 'machine_name'),
-    array('data' => t('Name'), 'field' => 'name'),
-    array('data' => t('Pattern'), 'field' => 'pattern'),
+    array('data' => t('Machine name')),
+    array('data' => t('Label')),
+    array('data' => t('Pattern')),
     array('data' => t('Operations'))
   );
   $rows = array();
 
   $formats = system_get_date_formats();
   if (!empty($formats)) {
-    foreach ($formats as $date_format_id => $format_info) {
-      // Do not display date formats that are locked.
-      if (empty($format_info['locked'])) {
+    foreach ($formats as $date_format_name => $format_info) {
+      // Do not display date formats that are hidden.
+      if (empty($format_info['hidden'])) {
         $row = array();
-        $row[] = array('data' => $date_format_id);
-        $row[] = array('data' => $format_info['name']);
-        $row[] = array('data' => format_date(REQUEST_TIME, $date_format_id));
+        $row[] = array('data' => $date_format_name);
+        $row[] = array('data' => check_plain($format_info['label']));
+        $row[] = array('data' => format_date(REQUEST_TIME, 'custom', $format_info['pattern']));
 
         // Prepare Operational links.
         $links = array();
         $links['edit'] = array(
           'title' => t('Edit'),
-          'href' => 'admin/config/regional/date-time/formats/' . $date_format_id . '/edit',
+          'href' => 'admin/config/regional/date-time/formats/' . $date_format_name . '/edit',
         );
-        $links['delete'] = array(
-          'title' => t('Delete'),
-          'href' => 'admin/config/regional/date-time/formats/' . $date_format_id . '/delete',
-        );
+        if (module_exists('locale')) {
+          $links['localize'] = array(
+            'title' => t('Localize'),
+            'href' => 'admin/config/regional/date-time/formats/' . $date_format_name . '/localize',
+          );
+        }
+        // Do not allow deletion of module-provided formats.
+        if (empty($format_info['module'])) {
+          $links['delete'] = array(
+            'title' => t('Delete'),
+            'href' => 'admin/config/regional/date-time/formats/' . $date_format_name . '/delete',
+          );
+        }
         $row['operations'] = array('data' => array(
           '#type' => 'operations',
           '#links' => $links,
@@ -2668,127 +2677,75 @@ function system_date_time_formats() {
 /**
  * Allow users to add additional date formats.
  *
- * @param string $date_format_id
- *   (optional) When present, provides the machine name of the date format that
- *   is being modified. Defaults to an empty string.
+ * @param string $format
+ *   (optional) When present, provides the format being edited, otherwise a new
+ *   format is being created.
  */
-function system_configure_date_formats_form($form, &$form_state, $date_format_id = '') {
-  $formats = system_get_date_formats();
-  $format_info = config_get('system.date', 'formats.' . $date_format_id);
-  $patterns = $format_info['pattern'];
-  $date = new DateTime;
+function system_configure_date_formats_form($form, &$form_state, $format = NULL) {
+  if ($format) {
+    backdrop_set_title(t('Edit %format', array('%format' => $format['label'])), PASS_THROUGH);
+  }
+  $form_state['format'] = $format;
 
-  $form['date_format_name'] = array(
+  $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => 'Name',
+    '#title' => 'Label',
     '#maxlength' => 100,
-    '#description' => t('Name of the date format'),
-    '#default_value' => empty($format_info['name']) ? '' : $format_info['name']
+    '#default_value' => empty($format['label']) ? '' : $format['label']
   );
 
-  $now = !empty($date_format_id) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, $date_format_id))) : '';
-
-  $form['date_format_id'] = array(
+  $form['name'] = array(
     '#type' => 'machine_name',
     '#title' => t('Machine-readable name'),
     '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
-    '#disabled' => !empty($date_format_id),
-    '#default_value' => $date_format_id,
+    '#disabled' => !empty($format),
+    '#default_value' => $format['name'],
     '#machine_name' => array(
-      'exists' => 'system_date_format_exists',
-      'source' => array('date_format_name'),
+      'exists' => 'system_date_format_load',
+      'source' => array('label'),
     ),
   );
 
-  if (class_exists('intlDateFormatter')) {
-    $description = t('A user-defined date format. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://userguide.icu-project.org/formatparse/datetime'));
-  }
-  else {
-    $description = t('A user-defined date format. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php'));
-  }
-  $form['date_format_pattern'] = array(
+  $pattern = isset($form_state['values']['pattern']) ? $form_state['values']['pattern'] : (isset($format['pattern']) ? $format['pattern'] : '');
+  $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
+
+  $form['pattern'] = array(
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => $description,
-    '#default_value' => empty($format_info['pattern']) ? '' : $format_info['pattern'],
-    '#field_suffix' => ' <small id="edit-date-format-suffix">' . $now . '</small>',
+    '#description' => t('A user-defined date format. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#default_value' => $pattern,
+    '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
     '#ajax' => array(
       'callback' => 'system_date_time_lookup',
       'event' => 'keyup',
       'progress' => array('type' => 'none', 'message' => NULL),
+      'disable' => FALSE,
     ),
     '#required' => TRUE,
+    '#wrapper_attributes' => array(
+      'id' => 'date-format-pattern',
+    ),
   );
-
-  $languages = language_list();
-
-  $options = array();
-  foreach ($languages as $langcode => $data) {
-    $options[$langcode] = $data->name;
-  }
-
-  if (!empty($options)) {
-    $form['date_langcode'] = array(
-      '#title' => t('Select localizations'),
-      '#type' => 'select',
-      '#options' => $options,
-      '#multiple' => TRUE,
-      '#default_value' => empty($format_info['locales']) ? '' : $format_info['locales']
-    );
-  }
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['update'] = array(
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => (!empty($date_format_id) ? t('Save format') : t('Add format')),
+    '#value' => (!empty($format['name']) ? t('Save format') : t('Add format')),
   );
-
-  $form['#validate'][] = 'system_date_formats_form_validate';
-  $form['#submit'][] = 'system_date_formats_form_submit';
 
   return $form;
 }
 
 /**
- * Checks if the chosen machine_name exists or not.
- */
-function system_date_format_exists($candidate_machine_name) {
-  if ($formats = system_get_date_formats()) {
-    return array_key_exists($candidate_machine_name, $formats);
-  }
-  return FALSE;
-}
-
-/**
- * Validate date format string submission.
- */
-function system_date_formats_form_validate($form, &$form_state) {
-  $formats = system_get_date_formats();
-  $format = trim($form_state['values']['date_format_pattern']);
-
-  // The machine name field should already check to see if the requested
-  // machine name is available. Regardless of machine_name or human readable
-  // name, check to see if the provided pattern exists.
-  if (!empty($formats) && in_array($format, array_values($formats)) && (!isset($form_state['values']['date_format_id']) || $form_state['values']['date_format_id'] != $formats[$format]['date_format_id'])) {
-    form_set_error('date_format', t('This format already exists. Enter a unique format string.'));
-  }
-}
-
-/**
  * Process date format string submission.
  */
-function system_date_formats_form_submit($form, &$form_state) {
-  $date = new DateTime;
-  $format = array();
-  $format['name'] = check_plain($form_state['values']['date_format_name']);
-  $format['pattern']['php'] = trim($form_state['values']['date_format_pattern']);
-  $format['locales'] = !empty($form_state['values']['date_langcode']) ? $form_state['values']['date_langcode'] : array();
-  // Formats created in the UI are not locked.
-  $format['locked'] = 0;
-  system_date_format_save($form_state['values']['date_format_id'], $format);
-  if (!empty($form_state['values']['date_format_id'])) {
-    backdrop_set_message(t('Custom date format updated.'));
+function system_configure_date_formats_form_submit($form, &$form_state) {
+  $format = (array) $form_state['format'];
+  $format = array_merge($format, $form_state['values']);
+  system_date_format_save($format);
+  if (!empty($form_state['values']['name'])) {
+    backdrop_set_message(t('Date format updated.'));
   }
   else {
     backdrop_set_message(t('Custom date format added.'));
@@ -2801,14 +2758,10 @@ function system_date_formats_form_submit($form, &$form_state) {
  * Ajax callback; Returns the date for a given format string.
  */
 function system_date_time_lookup($form, &$form_state) {
-  $format = '';
-  if (!empty($form_state['values']['date_format_pattern'])) {
-    $format = t('Displayed as %date_format', array('%date_format' => format_date(REQUEST_TIME, 'custom', $form_state['values']['date_format_pattern'])));
-  }
-  // Return a command instead of a string, since the Ajax framework
-  // automatically prepends an additional empty DIV element for a string, which
-  // breaks the layout.
-  $commands[] = ajax_command_replace('#edit-date-format-suffix', '<small id="edit-date-format-suffix">' . $format . '</small>');
+  // Replace the preview based on the textfield's wrapper ID.
+  $element = $form_state['triggering_element'];
+  $parent_id = $element['#wrapper_attributes']['id'];
+  $commands[] = ajax_command_html("#$parent_id .field-suffix", '<span>' . $element['#field_suffix'] . '</span>');
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 

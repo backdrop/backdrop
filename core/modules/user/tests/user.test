@@ -143,8 +143,8 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
 
     // Set the default timezone to Brussels.
     $config_system_date = config('system.date')
-      ->set('timezone.user.configurable', 1)
-      ->set('timezone.default', 'Europe/Brussels')
+      ->set('user_configurable_timezones', 1)
+      ->set('default_timezone', 'Europe/Brussels')
       ->save();
 
     // Check that the account information fieldset's options are not displayed
@@ -167,7 +167,7 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
     $this->assertEqual($new_user->signature, '', 'Correct signature field.');
     $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
     $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
-    $this->assertEqual($new_user->timezone, $config_system_date->get('timezone.default'), 'Correct time zone field.');
+    $this->assertEqual($new_user->timezone, $config_system_date->get('default_timezone'), 'Correct time zone field.');
     $this->assertEqual($new_user->language, '', 'Correct language field.');
     $this->assertEqual($new_user->picture, 0, 'Correct picture field.');
     $this->assertEqual($new_user->init, $mail, 'Correct init field.');
@@ -1397,10 +1397,14 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
   function testUserTimeZone() {
     // Setup date/time settings for Los Angeles time.
     config('system.date')
-      ->set('timezone.user.configurable', 1)
-      ->set('timezone.default', 'America/Los_Angeles')
-      ->set('formats.medium.pattern.php', 'Y-m-d H:i T')
+      ->set('user_configurable_timezones', 1)
+      ->set('default_timezone', 'America/Los_Angeles')
       ->save();
+
+    // Include the timezone in the medium date format.
+    $format = system_date_format_load('medium');
+    $format['pattern'] = 'Y-m-d H:i T';
+    system_date_format_save($format);
 
     // Create a user account and login.
     $web_user = $this->backdropCreateUser();

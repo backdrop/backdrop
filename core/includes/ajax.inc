@@ -659,6 +659,7 @@ function ajax_process_form($element, &$form_state) {
  *   Properties used:
  *   - #ajax['event']
  *   - #ajax['prevent']
+ *   - #ajax['disable']
  *   - #ajax['path']
  *   - #ajax['options']
  *   - #ajax['wrapper']
@@ -787,6 +788,11 @@ function ajax_pre_render_element($element) {
       if (isset($element['#button_type']) && empty($element['#has_garbage_value'])) {
         $settings['submit']['_triggering_element_value'] = $element['#value'];
       }
+    }
+
+    // Set the disable flag if FALSE.
+    if (isset($settings['disable']) && empty($settings['disable'])) {
+      $settings['disable'] = FALSE;
     }
 
     // Convert a simple #ajax['progress'] string into an array.

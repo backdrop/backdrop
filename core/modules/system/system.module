@@ -801,15 +801,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time'] = array(
-    'title' => 'Formats',
-    'description' => 'Configure display format strings for date and time.',
+    'title' => 'Date and time formats',
+    'description' => 'Configure the display of date and time strings.',
     'page callback' => 'system_date_time_formats',
     'access arguments' => array('administer site configuration'),
     'weight' => -9,
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time/formats/add'] = array(
-    'title' => 'Add format',
+    'title' => 'Add date format',
     'description' => 'Allow users to add additional date formats.',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'backdrop_get_form',
@@ -818,13 +818,18 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/regional/date-time/formats/%system_date_format/edit'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format'] = array(
     'title' => 'Edit date format',
-    'description' => 'Allow users to edit a configured date format.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_configure_date_formats_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
+  );
+  $items['admin/config/regional/date-time/formats/%system_date_format/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'Allow users to edit a configured date format.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
   );
   $items['admin/config/regional/date-time/formats/%system_date_format/delete'] = array(
     'title' => 'Delete date format',
@@ -2012,7 +2017,7 @@ function system_custom_theme() {
  * Implements hook_form_FORM_ID_alter().
  */
 function system_form_user_profile_form_alter(&$form, &$form_state) {
-  if (config_get('system.date', 'timezone.user.configurable')) {
+  if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
   return $form;
@@ -2023,7 +2028,7 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
  */
 function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
-  if ($config->get('timezone.user.configurable') && $config->get('timezone.user.default') == BACKDROP_USER_TIMEZONE_SELECT) {
+  if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
     return $form;
   }
@@ -2034,8 +2039,8 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
  */
 function system_user_presave($account) {
   $config = config('system.date');
-  if ($config->get('timezone.user.configurable') && empty($account->timezone) && !$config->get('timezone.user.default')) {
-    $account->timezone = $config->get('timezone.default');
+  if ($config->get('user_configurable_timezones') && empty($account->timezone) && !$config->get('user_default_timezone')) {
+    $account->timezone = $config->get('default_timezone');
   }
 }
 
@@ -2045,7 +2050,7 @@ function system_user_presave($account) {
 function system_user_login(&$edit, $account) {
   $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
-  if (!$account->timezone && $config->get('timezone.user.configurable') && $config->get('timezone.user.warn')) {
+  if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
     backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
@@ -2066,7 +2071,7 @@ function system_user_timezone(&$form, &$form_state) {
   $form['timezone']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
-    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'timezone.default') : ''),
+    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
     '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
   );
@@ -3676,7 +3681,7 @@ function system_run_automated_cron() {
 /**
  * Gets the list of defined date formats and attributes.
  *
- * @param $date_format_id
+ * @param $date_format_name
  *   (optional) The date type name.
  *
  * @return
@@ -3684,125 +3689,101 @@ function system_run_automated_cron() {
  *   machine-readable names of the date formats. The values are associative
  *   arrays with the following keys:
  *   - name: The string human readable name of the date format.
- *   - pattern: An associative array of patterns that will modify the format
- *     of the date, keyed with 'php' for normal PHP date pattern and 'intl'
- *     for the alternate pattern used by the IntlDateFormatter.
+ *   - pattern: The pattern string as usable by the PHP date() function.
  *
- *   If $date_format_id was defined, only the date formats associated with the
+ *   If $date_format_name was defined, only the date formats associated with the
  *   given machine name are returned, in an associative array keyed by format
  *   string.
  */
-function system_get_date_formats($date_format_id = NULL) {
-  $date_formats = config_get('system.date', 'formats');
+function system_get_date_formats($date_format_name = NULL) {
+  $date_formats = backdrop_static(__FUNCTION__, array());
+  if (empty($date_formats)) {
+    $date_formats = config_get('system.date', 'formats');
+    foreach ($date_formats as $name => $format) {
+      $date_formats[$name]['name'] = $name;
+    }
+  }
 
   // Return either the specific format or all formats.
-  return empty($date_format_id) ? $date_formats : $date_formats[$date_format_id];
+  if (empty($date_format_name)) {
+    return $date_formats;
+  }
+  else {
+    return isset($date_formats[$date_format_name]) ? $date_formats[$date_format_name] : FALSE;
+  }
 }
 
 /**
  * Menu loader function for a date format.
  *
- * @param $date_format_id
+ * @param string $date_format_name
  *   The date type name.
+ * @param bool $include_hidden
+ *   Include hidden, non-configurable date formats, such as those used by HTML5
+ *   date/time elements.
  *
  * @return
- *   The date format id if it exists and is not locked, FALSE otherwise.
+ *   The date format id if it exists and is not hidden, FALSE otherwise.
  */
-function system_date_format_load($date_format_id) {
-  if (($format = system_get_date_formats($date_format_id)) && empty($format['locked'])) {
-    return $date_format_id;
+function system_date_format_load($date_format_name, $include_hidden = TRUE) {
+  if (($format = system_get_date_formats($date_format_name)) && ($include_hidden || empty($format['hidden']))) {
+    return $format;
   }
-  return FALSE;
-}
-
-/**
- * Gets the appropriate date format string for a date type and locale.
- *
- * @param $langcode
- *   (optional) String language code for the current locale. This can be a 2 character
- *   language code like 'en' and 'fr' or a 5 character language code like
- *   'en-gb' and 'en-us'.
- * @param $date_format_id
- *   (optional) String machine name for the date format.
- *
- * @return
- *   If $date_format_id and $langcode are specified, returns the corresponding
- *   date format string. If only $langcode is specified, returns an array of
- *   all date format strings for that locale, keyed by the date type. If
- *   neither is specified returns FALSE.
- */
-function system_date_format_locale($langcode = NULL, $date_format_id = NULL) {
-  $formats = &backdrop_static(__FUNCTION__);
-
-  if (!isset($formats[$langcode])) {
-    $formats[$langcode] = config_get('locale.config.' . $langcode . '.system.date', 'formats');
-  }
-
-  if ($date_format_id && $langcode && !empty($formats[$langcode][$date_format_id])) {
-    return $formats[$langcode][$date_format_id];
-  }
-  elseif ($langcode && !empty($formats[$langcode])) {
-    return $formats[$langcode];
-  }
-
   return FALSE;
 }
 
 /**
  * Saves a date format to the database.
  *
- * @param string $date_format_id
- *   If set, replace the existing date format having this ID with the
- *   information specified in $format_info.
- * @param array $format_info
+ * @param array $date_format
  *   A date format array containing the following keys:
- *   - name: The string name of the date type this format is associated with.
- *   - pattern: An associative array keyed by 'php' and 'intl' with the PHP
- *     and/or IntlDateFormatter date format strings for each.
- *   - locked: A boolean indicating whether or not this format should be
- *     configurable from the user interface.
+ *   - name: The machine name of this date format.
+ *   - label: The human-readable label for this date format.
+ *   - pattern: The pattern string as usable by the PHP date() function.
+ *   - langcode: Optional. If multiple languages are available, this specifies
+ *     which language the default format is in.
+ *   - module: If provided by a module, the name of the providing module. This
+ *     will prevent the format from being deleted in the UI.
+ *   - hidden: Optional. A boolean indicating whether or not this format should
+ *     be configurable from the user interface.
  *
  * @see http://php.net/date
  */
-function system_date_format_save($date_format_id, $format_info) {
-  config_set('system.date', 'formats.' . $date_format_id, $format_info);
-
-  // Retrieve an array of language objects for enabled languages.
-  $languages = language_list(TRUE);
-
-  $locale_format = array(
-    'name' => $format_info['name'],
-    'pattern' => $format_info['pattern'],
+function system_date_format_save($date_format) {
+  $format = array(
+    'label' => $date_format['label'],
+    'pattern' => $date_format['pattern'],
   );
-
-  // Check if the suggested language codes are configured and enabled.
-  if (!empty($format_info['locales'])) {
-    foreach ($format_info['locales'] as $langcode) {
-      // Only proceed if language is enabled.
-      if (isset($languages[$langcode])) {
-        config_set('locale.config.' . $langcode . '.system.date', 'formats.' . $date_format_id, $locale_format);
-      }
+  // Trim empty strings from locale settings.
+  if (isset($date_format['locales'])) {
+    $date_format['locales'] = array_filter(array_filter($date_format['locales'], 'trim'));
+  }
+  // Don't save empty defaults.
+  foreach (array('module', 'hidden', 'locales') as $key) {
+    if (!empty($date_format[$key])) {
+      $format[$key] = $date_format[$key];
     }
   }
+  config_set('system.date', 'formats.' . $date_format['name'], $format);
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**
  * Deletes a date format from the database.
  *
- * @param $date_format_id
+ * @param $date_format_name
  *   The date format ID.
  */
-function system_date_format_delete($date_format_id) {
-  $format_id = 'formats.' . $date_format_id;
-  config('system.date')->clear($format_id)->save();
-
-  // Clean up the localized entry if required.
-  foreach (language_list() as $langcode => $data) {
-    $config = config('locale.config.' . $langcode . '.system.date');
-    if ($config->get($format_id)) {
-      $config->clear($format_id)->save();
-    }
+function system_date_format_delete($date_format_name) {
+  // Do not allow deletion of module-provided formats.
+  $format = system_get_date_formats($date_format_name);
+  if (isset($format['module'])) {
+    return FALSE;
   }
+
+  $format_id = 'formats.' . $date_format_name;
+  config('system.date')->clear($format_id)->save();
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**

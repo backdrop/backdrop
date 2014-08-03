@@ -2323,11 +2323,12 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     parent::setUp('locale');
 
     config('system.date')
-      ->set('timezone.user.configurable', 1)
-      ->set('formats.long.pattern.php', 'l, j. F Y - G:i')
-      ->set('formats.medium.pattern.php', 'j. F Y - G:i')
-      ->set('formats.short.pattern.php', 'Y M j - g:ia')
+      ->set('user_configurable_timezones', 1)
+      ->set('formats.long.pattern', 'l, j. F Y - G:i')
+      ->set('formats.medium.pattern', 'j. F Y - G:i')
+      ->set('formats.short.pattern', 'Y M j - g:ia')
       ->save();
+    backdrop_static_reset('system_get_date_formats');
 
     $GLOBALS['settings']['locale_custom_strings_' . self::LANGCODE] = array(
       '' => array('Sunday' => 'domingo'),
@@ -2347,20 +2348,20 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
 
     // Add new date format.
     $edit = array(
-      'date_format_id' => 'example_style',
-      'date_format_name' => 'Example Style',
-      'date_format_pattern' => 'j M y',
+      'label' => 'Example Style',
+      'name' => 'example_style',
+      'pattern' => 'j M y',
     );
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
 
    // Add a second date format with a different case than the first.
     $edit = array(
-      'date_format_id' => 'example_style_uppercase',
-      'date_format_name' => 'Example Style Uppercase',
-      'date_format_pattern' => 'j M Y',
+      'label' => 'Example Style Uppercase',
+      'name' => 'example_style_uppercase',
+      'pattern' => 'j M Y',
     );
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
-    $this->assertText(t('Custom date format updated.'));
+    $this->assertText(t('Date format updated.'));
 
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');

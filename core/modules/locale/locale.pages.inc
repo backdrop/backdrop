@@ -363,6 +363,8 @@ function locale_translate_edit_form_validate($form, &$form_state) {
  * Saves all translations of one string submitted from a form.
  */
 function locale_translate_edit_form_submit($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   $lid = $form_state['values']['lid'];
   foreach ($form_state['values']['translations'] as $key => $value) {
     $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $key))->fetchField();
@@ -435,6 +437,8 @@ function locale_translate_delete_form($form, &$form_state, $source) {
  * Process string deletion submissions.
  */
 function locale_translate_delete_form_submit($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   db_delete('locales_source')
     ->condition('lid', $form_state['values']['lid'])
     ->execute();

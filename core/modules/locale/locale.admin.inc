@@ -5,11 +5,13 @@
  * Administration functions for locale.module.
  */
 
+include_once BACKDROP_ROOT . '/core/includes/language.inc';
+include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
 /**
  * Builds the configuration form for language negotiation.
  */
 function language_negotiation_configure_form() {
-  include_once BACKDROP_ROOT . '/core/includes/language.inc';
 
   $form = array(
     '#submit' => array('language_negotiation_configure_form_submit'),
@@ -263,13 +265,19 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   $languages = language_list(TRUE);
   $prefixes = locale_language_negotiation_url_prefixes();
   $domains = locale_language_negotiation_url_domains();
+
+  // Use a mock language for the URL field prefix to prevent use of any language
+  // codes in the field prefix.
+  $mock_language = (object)(array(
+    'langcode' => '',
+  ));
   foreach ($languages as $langcode => $language) {
     $form['prefix'][$langcode] = array(
       '#type' => 'textfield',
       '#title' => t('%language (%langcode) path prefix', array('%language' => $language->name, '%langcode' => $language->langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
-      '#field_prefix' => url('', array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
+      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (variable_get('clean_url', 0) ? '' : '?q=')
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',
@@ -385,119 +393,54 @@ function language_negotiation_configure_session_form_submit($form, &$form_state)
  */
 
 /**
- * Returns HTML for a locale date format form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
+ * Form callback; Display fields for setting the date format for each language.
  */
-function theme_locale_date_format_form($variables) {
-  $form = $variables['form'];
-  $header = array(
-    'machine_name' => t('Machine Name'),
-    'pattern' => t('Format'),
+function locale_date_format_form($form, &$form_state, $format) {
+  backdrop_set_title(t('Localize %format', array('%format' => $format['name'])), PASS_THROUGH);
+
+  // We use the system_date_time_lookup() function from system.admin.inc.
+  form_load_include($form_state, 'inc', 'system', 'system.admin');
+  $form_state['format'] = $format;
+
+  $form['#tree'] = TRUE;
+  $form['help'] = array(
+    '#markup' => '<p>' . t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')) . '</p>',
   );
 
-  foreach (element_children($form['date_formats']) as $key) {
-    $row = array();
-    $row[] = $form['date_formats'][$key]['#title'];
-    unset($form['date_formats'][$key]['#title']);
-    $row[] = array('data' => backdrop_render($form['date_formats'][$key]));
-    $rows[] = $row;
-  }
-
-  $output = backdrop_render($form['language']);
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
-  $output .= backdrop_render_children($form);
-
-  return $output;
-}
-
-/**
- * Display edit date format links for each language.
- */
-function locale_date_format_language_overview_page() {
-  $header = array(
-    t('Language'),
-    t('Operations'),
+  $form['locales']['default'] = array(
+    '#type' => 'item',
+    '#title' => t('Default'),
+    '#markup' => '<strong>' . check_plain($format['pattern']) . '</strong>',
+    '#field_suffix' => '<small>' . t('Displayed as %date_format' , array('%date_format' => format_date(REQUEST_TIME, 'custom', $format['pattern']))) . '</small>',
   );
 
   // Get the enabled languages only.
   $languages = language_list(TRUE);
-
   foreach ($languages as $langcode => $language) {
-    $row = array();
-    $row[] = $language->name;
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/edit',
-    );
-    $links['reset'] = array(
-      'title' => t('Reset'),
-      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/reset',
-    );
-    $row[] = array(
-      'data' => array(
-        '#type' => 'operations',
-        '#links' => $links,
+    $pattern = isset($format['locales'][$langcode]) ? $format['locales'][$langcode] : '';
+    if (!empty($form_state['values']['locales'][$langcode])) {
+      $pattern = $form_state['values']['locales'][$langcode];
+    }
+    $placeholder_pattern = $pattern ? $pattern : $format['pattern'];
+    $preview = t('Displayed as %date_format', array('%date_format' => format_date(REQUEST_TIME, 'custom', $placeholder_pattern)));
+
+    $form['locales'][$langcode] = array(
+      '#title' => check_plain($language->name),
+      '#type' => 'textfield',
+      '#maxlength' => 100,
+      '#default_value' => $pattern,
+      '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
+      '#ajax' => array(
+        'callback' => 'system_date_time_lookup',
+        'event' => 'keyup',
+        'progress' => array('type' => 'none', 'message' => NULL),
+        'disable' => FALSE,
       ),
-    );
-    $rows[] = $row;
-  }
-
-  return theme('table', array('header' => $header, 'rows' => $rows));
-}
-
-/**
- * Provide date localization configuration options to users.
- */
-function locale_date_format_form($form, &$form_state, $langcode) {
-  // Display the current language name.
-  $form['language'] = array(
-    '#type' => 'item',
-    '#title' => t('Language'),
-    '#markup' => language_load($langcode)->name,
-    '#weight' => -10,
-  );
-  $form['langcode'] = array(
-    '#type' => 'value',
-    '#value' => $langcode,
-  );
-
-  // Get list of available formats.
-  $formats = system_get_date_formats();
-  $choices = array();
-  foreach ($formats as $date_format_id => $format_info) {
-    // Ignore values that are localized.
-    if (empty($format_info['locales'])) {
-      $choices[$date_format_id] = format_date(REQUEST_TIME, $date_format_id);
-    }
-    else {
-      unset($formats[$date_format_id]);
-    }
-  }
-
-  // Get configured formats for each language.
-  $locale_formats = system_date_format_locale($langcode);
-  if (!empty($locale_formats)) {
-    $formats += $locale_formats;
-    foreach ($locale_formats as $date_format_id => $format_info) {
-      $choices[$date_format_id] = format_date(REQUEST_TIME, $date_format_id);
-    }
-  }
-
-  // Display a form field for each format type.
-  foreach ($formats as $date_format_id => $format_info) {
-    // Show date format select list.
-    $form['date_formats']['date_format_' . $date_format_id] = array(
-      '#type' => 'select',
-      '#title' => check_plain($format_info['name']),
-      '#attributes' => array('class' => array('date-format')),
-      '#default_value' => (isset($choices[$date_format_id]) ? $date_format_id : 'custom'),
-      '#options' => $choices,
+      '#placeholder' => $placeholder_pattern,
+      '#size' => 30,
+      '#wrapper_attributes' => array(
+        'id' => 'locale-pattern-' . $langcode,
+      ),
     );
   }
 
@@ -514,39 +457,44 @@ function locale_date_format_form($form, &$form_state, $langcode) {
  * Submit handler for configuring localized date formats on the locale_date_format_form.
  */
 function locale_date_format_form_submit($form, &$form_state) {
-  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
-  $langcode = $form_state['values']['langcode'];
-
-  $formats = system_get_date_formats();
-  foreach ($formats as $date_format_id => $format_info) {
-    if (isset($form_state['values']['date_format_' . $date_format_id])) {
-      $format = $form_state['values']['date_format_' . $date_format_id];
-      system_date_format_localize_form_save($langcode, $date_format_id, $formats[$format]['pattern']);
+  $format = $form_state['format'];
+  foreach ($form_state['values']['locales'] as $langcode => $pattern) {
+    if (!empty($pattern)) {
+      $format['locales'][$langcode] = $pattern;
     }
   }
-  backdrop_set_message(t('Configuration saved.'));
-  $form_state['redirect'] = 'admin/config/regional/date-time/locale';
+  system_date_format_save($format);
+  backdrop_set_message(t('Date localizations saved.'));
+  $form_state['redirect'] = 'admin/config/regional/date-time';
 }
 
 /**
- * Reset locale specific date formats to the global defaults.
+ * Returns themed HTML for the locale_date_format_form() form.
  *
- * @param $langcode
- *   Language code, e.g. 'en'.
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @ingroup themeable
  */
-function locale_date_format_reset_form($form, &$form_state, $langcode) {
-  $form['langcode'] = array('#type' => 'value', '#value' => $langcode);
-  return confirm_form($form,
-    t('Are you sure you want to reset the date formats for %language to the global defaults?', array('%language' => language_load($langcode)->name)),
-    'admin/config/regional/date-time/locale',
-    t('Resetting will remove all localized date formats for this language. This action cannot be undone.'),
-    t('Reset'), t('Cancel'));
-}
+function theme_locale_date_format_form($variables) {
+  $form = $variables['form'];
+  $header = array(
+    'machine_name' => t('Language'),
+    'pattern' => t('Format'),
+  );
 
-/**
- * Reset date formats for a specific language to global defaults.
- */
-function locale_date_format_reset_form_submit($form, &$form_state) {
-  config('locale.config.' . $form['langcode']['#value'] . '.system.date')->delete();
-  $form_state['redirect'] = 'admin/config/regional/date-time/locale';
+  foreach (element_children($form['locales']) as $key) {
+    $row = array();
+    $row[] = $form['locales'][$key]['#title'];
+    unset($form['locales'][$key]['#title']);
+    $row[] = array('data' => backdrop_render($form['locales'][$key]));
+    $rows[] = $row;
+  }
+
+  $output = backdrop_render($form['help']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output .= backdrop_render_children($form);
+
+  return $output;
 }

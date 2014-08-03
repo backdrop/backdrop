@@ -2406,13 +2406,18 @@ function backdrop_get_user_timezone() {
   global $user;
   $config = config('system.date');
 
-  if ($config->get('timezone.user.configurable') && $user->uid && $user->timezone) {
+  // If the date config has not yet been set (e.g. upgrading from D7), then use
+  // the server default time.
+  if ($config->isNew()) {
+    return @date_default_timezone_get();
+  }
+  elseif ($config->get('user_configurable_timezones') && $user->uid && $user->timezone) {
     return $user->timezone;
   }
   else {
     // Ignore PHP strict notice if time zone has not yet been set in the php.ini
     // configuration.
-    $config_data_default_timezone = $config->get('timezone.default');
+    $config_data_default_timezone = $config->get('default_timezone');
     return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();  }
 }
 

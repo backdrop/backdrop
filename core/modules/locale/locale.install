@@ -320,15 +320,30 @@ function locale_update_1002() {
  * Move language negotation settings from variables to config.
  */
 function locale_update_1003() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'language.negotiation');
-  // Migrate variables if any.
+  // Set up new config file for language negotiation.
   $config = config('language.negotiation');
   $config->set('session_parameter', variable_get('locale_language_negotiation_session_param', 'language'));
   $config->set('url_part', variable_get('locale_language_negotiation_url_part', 'path_prefix'));
-  $config->set('url_prefixes', variable_get('locale_language_negotiation_url_prefixes', array('en' => '')));
-  $config->set('url_domains', variable_get('locale_language_negotiation_url_domains', array('en' => '')));
+
+  // Ensure defaults are set for all enabled languages.
+  $languages = language_list();
+  $prefixes_old = variable_get('locale_language_negotiation_url_prefixes', array('en' => ''));
+  $domains_old = variable_get('locale_language_negotiation_url_domains', array('en' => ''));
+
+  $prefixes = array();
+  $domains = array();
+
+  foreach ($languages as $langcode => $language) {
+    // Keep the old prefix or fill in based on whether the language is default.
+    $prefixes[$langcode] = empty($prefixes_old[$langcode]) ? (empty($language->default) ? $langcode : '') : $prefixes_old[$langcode];
+    // Keep the old domain or fill in empty value.
+    $domains[$langcode] = empty($domains_old[$langcode]) ? '' : $domains_old[$langcode];
+  }
+
+  $config->set('url_prefixes', $prefixes);
+  $config->set('url_domains', $domains);
   $config->save();
+
   // Delete variables.
   variable_del('locale_language_negotiation_session_param');
   variable_del('locale_language_negotiation_url_part');

@@ -299,7 +299,7 @@ function hook_user_update(&$edit, $account) {
 function hook_user_login(&$edit, $account) {
   $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
-  if (!$account->timezone && $config->get('timezone.user.configurable') && $config->get('timezone.user.warn')) {
+  if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
     backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }

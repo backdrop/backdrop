@@ -854,3 +854,32 @@ db_insert('field_revision_comment_body')->fields(array(
   'comment_body_format' => 'filtered_html',
 ))
 ->execute();
+
+// Add date localizations.
+db_insert('date_format_locale')
+->fields(array(
+  'format',
+  'type',
+  'language',
+))
+->values(array(
+  'Y/m/d - H:i',
+  'short',
+  'ca',
+))
+->values(array(
+  'Y/m/d - g:ia',
+  'short',
+  'cv',
+))
+->values(array(
+  'D, Y/m/d - H:i',
+  'medium',
+  'ca',
+))
+->values(array(
+  'D, Y/m/d - g:ia',
+  'medium',
+  'cv',
+))
+->execute();

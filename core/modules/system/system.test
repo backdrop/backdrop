@@ -916,9 +916,9 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
   function testTimeZoneHandling() {
     // Setup date/time settings for Honolulu time.
     $config = config('system.date')
-      ->set('timezone.default', 'Pacific/Honolulu')
-      ->set('timezone.user.configurable', 0)
-      ->set('formats.medium.pattern.php', 'Y-m-d H:i:s O')
+      ->set('default_timezone', 'Pacific/Honolulu')
+      ->set('user_configurable_timezones', 0)
+      ->set('formats.medium.pattern', 'Y-m-d H:i:s O')
       ->save();
 
     // Create some nodes with different authored-on dates.
@@ -934,7 +934,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
     $this->assertText('2007-07-31 21:00:00 -1000', t('Date should be identical, with GMT offset of -10 hours.'));
 
     // Set time zone to Los Angeles time.
-    $config->set('timezone.default', 'America/Los_Angeles')->save();
+    $config->set('default_timezone', 'America/Los_Angeles')->save();
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");
@@ -951,41 +951,40 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('admin/config/regional/date-time/formats');
 
     // Add custom date format.
-    $this->clickLink(t('Add format'));
-    $date_format_id = strtolower($this->randomName(8));
-    $name = ucwords($date_format_id);
+    $this->clickLink(t('Add date format'));
+    $date_format_name = strtolower($this->randomName(8));
+    $label = ucwords($date_format_name);
     $date_format = 'd.m.Y - H:i';
     $edit = array(
-      'date_format_id' => $date_format_id,
-      'date_format_name' => $name,
-      'date_format_pattern' => $date_format,    
+      'label' => $label,
+      'name' => $date_format_name,
+      'pattern' => $date_format,
     );
-    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
+    $this->backdropPost(NULL, $edit, t('Add format'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/date-time/formats', array('absolute' => TRUE)), t('Correct page redirection.'));
 
-    $this->assertText(t('Custom date format updated.'), 'Date format added confirmation message appears.');
-    $this->assertText($date_format_id, 'Custom date format appears in the date format list.');
+    $this->assertText(t('Date format updated.'), 'Date format added confirmation message appears.');
+    $this->assertText($date_format_name, 'Custom date format appears in the date format list.');
     $this->assertText(t('Delete'), 'Delete link for custom date format appears.');
 
     // Edit custom date format.
     $this->backdropGet('admin/config/regional/date-time/formats');
     $this->clickLink(t('Edit'));
     $edit = array(
-      'date_format_pattern' => 'Y m',
+      'pattern' => 'Y m',
     );
     $this->backdropPost($this->getUrl(), $edit, t('Save format'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/date-time/formats', array('absolute' => TRUE)), t('Correct page redirection.'));
-    $this->assertText(t('Custom date format updated.'), 'Custom date format successfully updated.');
+    $this->assertText(t('Date format updated.'), 'Custom date format successfully updated.');
 
     // Delete custom date format.
-    $this->clickLink(t('Delete'));
-    $this->backdropPost('admin/config/regional/date-time/formats/' . $date_format_id . '/delete', array(), t('Remove'));
+    $this->backdropPost('admin/config/regional/date-time/formats/' . $date_format_name . '/delete', array(), t('Remove'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/date-time/formats', array('absolute' => TRUE)), t('Correct page redirection.'));
-    $this->assertText(t('Removed date format ' . $name), 'Custom date format removed.');
+    $this->assertRaw(t('Removed date format %format.', array('%format' => $label)), 'Custom date format removed.');
 
     // Make sure the date does not exist in config.
-    $date_format = config_get('system.date', 'formats.' . $date_format_id);
-    $this->assertIdentical($date_format, NULL);
+    $formats = config_get('system.date', 'formats');
+    $this->assertFalse(array_key_exists($date_format, $formats), 'Date format has been removed from config.');
   }
 
   /**
@@ -993,24 +992,15 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
    */
   function testDateFormatStorage() {
     $date_format_info = array(
-      'name' => 'testDateFormatStorage Short Format',
-      'pattern' => array('php' => 'dmYHis'),
+      'label' => 'testDateFormatStorage Short Format',
+      'name' => 'test_short',
+      'pattern' => 'dmYHis',
     );
 
-    system_date_format_save('test_short', $date_format_info);
+    system_date_format_save($date_format_info);
 
-    $format = config_get('system.date', 'formats.test_short.pattern.php');
-    $this->assertEqual('dmYHis', $format, 'Unlocalized date format resides in general config.');
-
-    $date_format_info['locales'] = array('en');
-
-    system_date_format_save('test_short_en', $date_format_info);
-
-    $format = config_get('system.date', 'formats.test_short_en.pattern.php');
-    $this->assertEqual('dmYHis', $format, 'Localized date format resides in general config too.');
-
-    $format = config_get('locale.config.en.system.date', 'formats.test_short_en.pattern.php');
-    $this->assertEqual('dmYHis', $format, 'Localized date format resides in localized config.');
+    $format = config_get('system.date', 'formats.test_short.pattern');
+    $this->assertEqual('dmYHis', $format, 'Date format resides in general config.');
   }
 }
 
