@@ -4593,7 +4593,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * @code
  * $build['#attached'] = array(
  *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js'),
- *   'css' => array(backdrop_get_path('module', 'taxonomy') . '/taxonomy.css'),
+ *   'css' => array(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css'),
  * );
  * @endcode
  *

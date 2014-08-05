@@ -100,13 +100,13 @@ a.module-link {
   white-space: nowrap;
 }
 a.module-link-help {
-  background: url(../../misc/help.png) 0 50% no-repeat; /* LTR */
+  background: url(../../../misc/help.png) 0 50% no-repeat; /* LTR */
 }
 a.module-link-permissions {
-  background: url(../../misc/permissions.png) 0 50% no-repeat; /* LTR */
+  background: url(../../../misc/permissions.png) 0 50% no-repeat; /* LTR */
 }
 a.module-link-configure {
-  background: url(../../misc/configure.png) 0 50% no-repeat; /* LTR */
+  background: url(../../../misc/configure.png) 0 50% no-repeat; /* LTR */
 }
 .module-help {
   margin-left: 1em; /* LTR */
@@ -140,10 +140,10 @@ table.system-status-report td.status-icon div {
   width: 16px;
 }
 table.system-status-report tr.error td.status-icon div {
-  background-image: url(../../misc/message-16-error.png);
+  background-image: url(../../../misc/message-16-error.png);
 }
 table.system-status-report tr.warning td.status-icon div {
-  background-image: url(../../misc/message-16-warning.png);
+  background-image: url(../../../misc/message-16-warning.png);
 }
 tr.merge-down,
 tr.merge-down td {

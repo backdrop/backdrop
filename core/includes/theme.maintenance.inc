@@ -82,10 +82,10 @@ function _backdrop_maintenance_theme() {
   // These are usually added from system_init() -except maintenance.css.
   // When the database is inactive it's not called so we add it here.
   $path = backdrop_get_path('module', 'system');
-  backdrop_add_css($path . '/system.base.css');
-  backdrop_add_css($path . '/system.admin.css');
-  backdrop_add_css($path . '/system.theme.css');
-  backdrop_add_css($path . '/system.maintenance.css');
+  backdrop_add_css($path . '/css/system.css');
+  backdrop_add_css($path . '/css/system.admin.css');
+  backdrop_add_css($path . '/css/system.theme.css');
+  backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
 /**

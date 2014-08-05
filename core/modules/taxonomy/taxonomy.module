@@ -660,7 +660,7 @@ function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode =
     '#language' => $langcode,
   );
 
-  $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/taxonomy.css';
+  $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css';
 
   // Allow modules to modify the structured taxonomy term.
   $type = 'taxonomy_term';

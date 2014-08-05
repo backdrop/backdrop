@@ -5,4 +5,4 @@ version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE
 configure = admin/config/people
-stylesheets[all][] = user.css
+stylesheets[all][] = css/user.css

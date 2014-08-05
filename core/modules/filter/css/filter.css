@@ -22,7 +22,7 @@
   margin: 0;
 }
 .filter-help a {
-  background: transparent url(../../misc/help.png) right center no-repeat;
+  background: transparent url(../../../misc/help.png) right center no-repeat;
   padding: 0 20px;
 }
 .filter-guidelines {

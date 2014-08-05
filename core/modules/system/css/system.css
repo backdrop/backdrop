@@ -31,7 +31,7 @@
 }
 /* Animated throbber */
 .js input.form-autocomplete {
-  background-image: url(../../misc/throbber.gif);
+  background-image: url(../../../misc/throbber.gif);
   background-position: 100% 2px; /* LTR */
   background-repeat: no-repeat;
 }
@@ -113,7 +113,7 @@ a.tabledrag-handle:hover {
   text-decoration: none;
 }
 a.tabledrag-handle .handle {
-  background: url(../../misc/draggable.png) no-repeat 6px 9px;
+  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
   height: 13px;
   margin: -0.4em 0.5em; /* LTR */
   padding: 0.42em 0.5em; /* LTR */
@@ -139,19 +139,19 @@ div.indentation {
   padding: 1em 0.6em 1em 0;
 }
 div.tree-child {
-  background: url(../../misc/tree.png) no-repeat 11px center; /* LTR */
+  background: url(../../../misc/tree.png) no-repeat 11px center; /* LTR */
 }
 [dir="rtl"] div.tree-child {
   background-position: -65px center;
 }
 div.tree-child-last {
-  background: url(../../misc/tree-bottom.png) no-repeat 11px center; /* LTR */
+  background: url(../../../misc/tree-bottom.png) no-repeat 11px center; /* LTR */
 }
 [dir="rtl"] div.tree-child-last {
   background-position: -65px center;
 }
 div.tree-child-horizontal {
-  background: url(../../misc/tree.png) no-repeat -11px center;
+  background: url(../../../misc/tree.png) no-repeat -11px center;
 }
 .tabledrag-toggle-weight-wrapper {
   text-align: right; /* LTR */
@@ -198,7 +198,7 @@ table.sticky-header {
   padding: 1px 5px 2px 5px;
 }
 .ajax-progress-throbber .throbber {
-  background: transparent url(../../misc/throbber.gif) no-repeat 0px -18px;
+  background: transparent url(../../../misc/throbber.gif) no-repeat 0px -18px;
   display: inline;
   padding: 1px 5px 2px;
 }

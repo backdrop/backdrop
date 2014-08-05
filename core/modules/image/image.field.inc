@@ -369,7 +369,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   $widget_settings = $instance['widget']['settings'];
 
   $element['#theme'] = 'image_widget';
-  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/image.css';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {

@@ -69,7 +69,7 @@ function simpletest_test_form($form) {
 function theme_simpletest_test_table($variables) {
   $table = $variables['table'];
 
-  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
+  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
   backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/simpletest.js');
   backdrop_add_js('core/misc/tableselect.js');
 
@@ -202,7 +202,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
   }
 
   // Load all classes and include CSS.
-  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
+  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
 
   // Keep track of which test cases passed or failed.
   $filter = array(

@@ -64,7 +64,7 @@
   width: 16px;
 }
 .admin-dblog .dblog-warning .icon {
-  background-image: url(../../misc/message-16-warning.png);
+  background-image: url(../../../misc/message-16-warning.png);
 }
 .admin-dblog .dblog-error .icon,
 .admin-dblog .dblog-critical .icon,

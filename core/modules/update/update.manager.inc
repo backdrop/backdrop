@@ -76,7 +76,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
     return $form;
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/update.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/css/update.css';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
