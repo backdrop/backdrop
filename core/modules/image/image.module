@@ -895,13 +895,21 @@ function image_style_flush($style) {
 function image_style_url($style_name, $uri) {
   $uri = image_style_path($style_name, $uri);
 
+  // The passed-in $path variable can be either a relative path or a full URI.
+  $original_uri = file_uri_scheme($path) ? file_stream_wrapper_uri_normalize($path) : file_build_uri($path);
+
+  // The token query is added even if the 'image_allow_insecure_derivatives'
+  // variable is TRUE, so that the emitted links remain valid if it is changed
+  // back to the default FALSE.
+  $token_query = array(IMAGE_DERIVATIVE_TOKEN => image_style_path_token($style_name, $original_uri));
+
   // If not using clean URLs, the image derivative callback is only available
   // with the query string. If the file does not exist, use url() to ensure
   // that it is included. Once the file exists it's fine to fall back to the
   // actual file path, this avoids bootstrapping PHP once the files are built.
   if (!variable_get('clean_url') && file_uri_scheme($uri) == 'public' && !file_exists($uri)) {
     $directory_path = file_stream_wrapper_get_instance_by_uri($uri)->getDirectoryPath();
-    return url($directory_path . '/' . file_uri_target($uri), array('absolute' => TRUE));
+    return url($directory_path . '/' . file_uri_target($uri), array('absolute' => TRUE, 'query' => $token_query));
   }
 
   return file_create_url($uri);
