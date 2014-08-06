@@ -116,7 +116,6 @@ class SchemaTestCase extends BackdropWebTestCase {
         'timestamp'  => array(
           'mysql_type' => 'timestamp',
           'pgsql_type' => 'timestamp',
-          'sqlite_type' => 'datetime',
           'not null' => FALSE,
           'default' => NULL,
         ),

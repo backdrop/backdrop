@@ -67,8 +67,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL
     // behavior to conform more closely to SQL standards.  This allows Backdrop
     // to run almost seamlessly on many different kinds of database systems.
-    // These settings force MySQL to behave the same as postgresql, or sqlite
-    // in regards to syntax interpretation and invalid data handling.  See
+    // These settings force MySQL to behave the same as postgresql in regards
+    // to syntax interpretation and invalid data handling.  See
     // http://drupal.org/node/344575 for further discussion. Also, as MySQL 5.5
     // changed the meaning of TRADITIONAL we need to spell out the modes one by
     // one.
