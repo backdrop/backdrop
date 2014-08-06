@@ -195,15 +195,8 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       $field['size'] = 'normal';
     }
 
-    // Set the correct database-engine specific datatype.
-    // In case one is already provided, force it to uppercase.
-    if (isset($field['mysql_type'])) {
-      $field['mysql_type'] = backdrop_strtoupper($field['mysql_type']);
-    }
-    else {
-      $map = $this->getFieldTypeMap();
-      $field['mysql_type'] = $map[$field['type'] . ':' . $field['size']];
-    }
+    $map = $this->getFieldTypeMap();
+    $field['mysql_type'] = $map[$field['type'] . ':' . $field['size']];
 
     if (isset($field['type']) && $field['type'] == 'serial') {
       $field['auto_increment'] = TRUE;

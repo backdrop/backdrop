@@ -608,10 +608,12 @@ function drupal_detect_baseurl($file = 'core/install.php') {
   return backdrop_detect_baseurl($file);
 }
 function drupal_detect_database_types() {
-  return backdrop_detect_database_types();
+  $installer = backdrop_load_database_driver();
+  return array('mysql' => $installer->name());
 }
 function drupal_get_database_types() {
-  return backdrop_get_database_types();
+  $mysql = backdrop_load_database_driver();
+  return array('mysql' => $mysql);
 }
 function drupal_rewrite_settings($settings = array()) {
   return backdrop_rewrite_settings($settings);
