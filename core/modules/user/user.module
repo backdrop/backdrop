@@ -16,6 +16,21 @@ const USERNAME_MAX_LENGTH = 60;
 const EMAIL_MAX_LENGTH = 254;
 
 /**
+ * Users can login with username only.
+ */
+const USER_LOGIN_USERNAME_ONLY = 'username_only';
+
+/**
+ * Users can login with e-mail address only.
+ */
+const USER_LOGIN_EMAIL_ONLY = 'email_only';
+
+/**
+ * Users can login using either username or e-mail address.
+ */
+const USER_LOGIN_USERNAME_OR_EMAIL = 'username_or_email';
+
+/**
  * Only administrators can create user accounts.
  */
 const USER_REGISTER_ADMINISTRATORS_ONLY = 'admin_only';
@@ -920,19 +935,23 @@ function user_login_block($form) {
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
-  $form['name'] = array('#type' => 'textfield',
-    '#title' => t('Username'),
-    '#maxlength' => USERNAME_MAX_LENGTH,
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => $credentials == USER_LOGIN_USERNAME_ONLY ? t('Username') : ($credentials == USER_LOGIN_EMAIL_ONLY ? t('E-mail address') : t('Username or e-mail address')),
+    '#maxlength' => $credentials == USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
   );
-  $form['pass'] = array('#type' => 'password',
+  $form['pass'] = array(
+    '#type' => 'password',
     '#title' => t('Password'),
     '#size' => 15,
     '#required' => TRUE,
   );
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit',
+  $form['actions'] = array(
+    '#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
     '#value' => t('Log in'),
   );
   $items = array();
@@ -1798,12 +1817,26 @@ function user_login_default_validators() {
 }
 
 /**
- * A FAPI validate handler. Sets an error if supplied username has been blocked.
+ * A FAPI validate handler. Depending on user_login_method, delegates
+ * validation to user_login_username_validate() and valid_email_address().
  */
 function user_login_name_validate($form, &$form_state) {
-  if (!empty($form_state['values']['name']) && user_is_blocked($form_state['values']['name'])) {
-    // Blocked in user administration.
-    form_set_error('name', t('The username %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+  if (isset($form_state['values']['name'])) {
+    $name = $form_state['values']['name'];
+    $credentials = config('user.settings')->get('user_login_method');
+    if ($credentials != USER_LOGIN_USERNAME_ONLY) {
+      if ($account = db_query("SELECT * FROM {users} WHERE mail = :mail", array(':mail' => $name))->fetchObject()) {
+        $name = $account->name;
+      }
+      // If can't find account, check if valid email address.
+      elseif ($credentials == USER_LOGIN_EMAIL_ONLY && !valid_email_address($name)) {
+        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $form_state['values']['name'])));
+      }
+    }
+    // If can find account, check if user is blocked.
+    if ($name && user_is_blocked($name)) {
+      form_set_error('name', t('The username %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+    }
   }
 }
 
@@ -1825,7 +1858,15 @@ function user_login_authenticate_validate($form, &$form_state) {
       $form_state['flood_control_triggered'] = 'ip';
       return;
     }
-    $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
+    $account = FALSE;
+    $credentials = config('user.settings')->get('user_login_method');
+    if ($credentials != USER_LOGIN_USERNAME_ONLY && valid_email_address($form_state['values']['name'])) {
+      $account = db_query("SELECT * FROM {users} WHERE mail = :mail AND status = 1", array(':mail' => $form_state['values']['name']))->fetchObject();
+    }
+    if (!$account && $credentials != USER_LOGIN_EMAIL_ONLY) {
+      $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
+    }
+
     if ($account) {
       if ($flood_config->get('flood_uid_only')) {
         // Register flood events based on the uid only, so they apply for any
@@ -1846,10 +1887,10 @@ function user_login_authenticate_validate($form, &$form_state) {
         $form_state['flood_control_triggered'] = 'user';
         return;
       }
+      // We are not limited by flood control, so try to authenticate.
+      // Set $form_state['uid'] as a flag for user_login_final_validate().
+      $form_state['uid'] = user_authenticate($account->name, $password);
     }
-    // We are not limited by flood control, so try to authenticate.
-    // Set $form_state['uid'] as a flag for user_login_final_validate().
-    $form_state['uid'] = user_authenticate($form_state['values']['name'], $password);
   }
 }
 
@@ -1880,6 +1921,17 @@ function user_login_final_validate($form, &$form_state) {
       }
     }
     else {
+      switch (config('user.settings')->get('user_login_method')) {
+        case USER_LOGIN_USERNAME_ONLY:
+          form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password'))));
+          break;
+        case USER_LOGIN_EMAIL_ONLY:
+          form_set_error('name', t('Sorry, unrecognized e-mail address or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password'))));
+          break;
+        case USER_LOGIN_USERNAME_OR_EMAIL:
+          form_set_error('name', t('Sorry, unrecognized username, e-mail address or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password'))));
+        break;
+      }
       form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
