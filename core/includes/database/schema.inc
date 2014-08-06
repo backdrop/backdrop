@@ -140,6 +140,7 @@ require_once __DIR__ . '/query.inc';
  *     'uid'                 => array('uid'),
  *     'tnid'                => array('tnid'),
  *     'translate'           => array('translate'),
+ *     'language'            => array('language'),
  *   ),
  *   'unique keys' => array(
  *     'vid' => array('vid'),
