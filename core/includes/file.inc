@@ -1982,7 +1982,7 @@ function file_download() {
   }
   else {
     backdrop_not_found();
-  }
+  }  
   backdrop_exit();
 }
 

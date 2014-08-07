@@ -150,6 +150,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
       // Deny access, no more clues.
       // Everything will be in the watchdog's URL for the administrator to check.
       backdrop_access_denied();
+      backdrop_exit();
     }
   }
 }
@@ -515,7 +516,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
       backdrop_goto("user/$account->uid/cancel");
     }
   }
-  backdrop_access_denied();
+  return MENU_ACCESS_DENIED;
 }
 
 /**
