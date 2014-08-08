@@ -946,14 +946,6 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   variables for all theme hooks with template implementations.
  * - THEME_preprocess_HOOK(&$variables): Allows the theme to set necessary
  *   variables specific to the particular theme hook.
- * - template_process(&$variables, $hook): Creates an additional set of default
- *   variables for all theme hooks with template implementations. The variables
- *   created in this function are derived from ones created by
- *   template_preprocess(), but potentially altered by the other preprocess
- *   functions listed above. For example, any preprocess function can add to or
- *   modify the $variables['attributes_array'] variable, and after all of them
- *   have finished executing, template_process() flattens it into a
- *   $variables['attributes'] string for convenient use by templates.
  * - template_process_HOOK(&$variables): Should be implemented by the module
  *   that registers the theme hook, if it needs to perform additional variable
  *   processing after all preprocess functions have finished.
@@ -2500,7 +2492,7 @@ function template_preprocess(&$variables, $hook) {
   // Tell all templates where they are located.
   $variables['directory'] = path_to_theme();
 
-  // Initialize html class attribute for the current hook.
+  // Initialize html classes for the current hook.
   $variables['classes'] = array(backdrop_html_class($hook));
 
   // Merge in variables that don't depend on hook and don't change during a
@@ -2528,7 +2520,7 @@ function _template_preprocess_default_variables() {
 
   // Variables that don't depend on a database connection.
   $variables = array(
-    'attributes_array' => array(),
+    'attributes' => array(),
     'content_attributes' => array(),
     'title_prefix' => array(),
     'title_suffix' => array(),
@@ -2558,28 +2550,6 @@ function _template_preprocess_default_variables() {
   }
 
   return $variables;
-}
-
-/**
- * Adds helper variables derived from variables defined during preprocessing.
- *
- * When preparing variables for a theme hook implementation, all 'preprocess'
- * functions run first, then all 'process' functions (see theme() for details
- * about the full sequence).
- *
- * This function serializes array variables manipulated during the preprocessing
- * phase into strings for convenient use by templates. As with
- * template_preprocess(), this function does not get called for theme hooks
- * implemented as functions.
- *
- * @see theme()
- * @see template_preprocess()
- */
-function template_process(&$variables, $hook) {
-  // Because this function can be called very often, and often with empty
-  // attributes, optimize performance by only calling backdrop_attributes() if
-  // necessary.
-  $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
 }
 
 /**
@@ -2628,12 +2598,12 @@ function template_preprocess_html(&$variables) {
   }
 
   // Initializes attributes which are specific to the html and body elements.
-  $variables['html_attributes_array'] = array();
-  $variables['body_attributes_array'] = array();
+  $variables['html_attributes'] = array();
+  $variables['body_attributes'] = array();
 
   // HTML element attributes.
-  $variables['html_attributes_array']['lang'] = $GLOBALS['language_interface']->langcode;
-  $variables['html_attributes_array']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
 
   // Add favicon.
   if (theme_get_setting('toggle_favicon')) {
@@ -2791,10 +2761,6 @@ function template_process_page(&$variables) {
  * @see html.tpl.php
  */
 function template_process_html(&$variables) {
-  // Flatten out html_attributes and body_attributes.
-  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
-  $variables['body_attributes'] = backdrop_attributes($variables['body_attributes_array']);
-
   // Render page_top and page_bottom into top level variables.
   $variables['page_top'] = backdrop_render($variables['page']['page_top']);
   $variables['page_bottom'] = backdrop_render($variables['page']['page_bottom']);

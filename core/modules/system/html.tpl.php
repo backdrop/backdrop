@@ -41,14 +41,14 @@
  * @ingroup themeable
  */
 ?><!DOCTYPE html>
-<html<?php print $html_attributes; ?>>
+<html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
     <?php print $head; ?>
     <title><?php print $head_title; ?></title>
     <?php print $styles; ?>
     <?php print $scripts; ?>
   </head>
-  <body class="<?php print implode(' ', $classes); ?>" <?php print $body_attributes;?>>
+  <body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($body_attributes);?>>
     <div id="skip-link">
       <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
     </div>

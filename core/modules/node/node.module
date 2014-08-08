@@ -1219,10 +1219,10 @@ function node_preprocess_block(&$variables) {
   if ($variables['block']->module == 'node') {
     switch ($variables['block']->delta) {
       case 'syndicate':
-        $variables['attributes_array']['role'] = 'complementary';
+        $variables['attributes']['role'] = 'complementary';
         break;
       case 'recent':
-        $variables['attributes_array']['role'] = 'navigation';
+        $variables['attributes']['role'] = 'navigation';
         break;
     }
   }
@@ -1286,7 +1286,7 @@ function template_preprocess_node(&$variables) {
   }
 
   // Add article ARIA role.
-  $variables['attributes_array']['role'] = 'article';
+  $variables['attributes']['role'] = 'article';
 
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);

@@ -646,7 +646,7 @@ function template_preprocess_views_view_table(&$vars) {
 
   // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
-    $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+    $vars['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
   }
 
   // Add the caption to the list if set.
@@ -769,7 +769,7 @@ function template_preprocess_views_view_grid(&$vars) {
 
   // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
-    $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+    $vars['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
   }
 
   // Add the caption to the list if set.

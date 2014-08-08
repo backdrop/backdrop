@@ -31,7 +31,7 @@
  * @ingroup themeable
  */
 ?>
-<section id="comments" class="<?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
+<section id="comments" class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php if ($content['comments']): ?>
     <?php print render($title_prefix); ?>
     <h2 class="title"><?php print t('Comments'); ?></h2>

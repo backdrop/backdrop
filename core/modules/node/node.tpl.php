@@ -76,7 +76,7 @@
  * @ingroup themeable
  */
 ?>
-<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print $attributes; ?>>
+<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix" <?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
   <?php if (!$page): ?>

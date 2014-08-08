@@ -40,12 +40,12 @@
  * @ingroup themeable
  */
 ?>
-<div id="<?php print $block_html_id; ?>" class="<?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
+<div id="<?php print $block_html_id; ?>" class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
-<?php if ($block->subject): ?>
-  <h2><?php print $block->subject ?></h2>
-<?php endif;?>
+  <?php if ($block->subject): ?>
+    <h2><?php print $block->subject ?></h2>
+  <?php endif;?>
   <?php print render($title_suffix); ?>
 
   <div<?php print backdrop_attributes($content_attributes); ?>>

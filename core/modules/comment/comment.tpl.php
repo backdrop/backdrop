@@ -59,7 +59,7 @@
  * @ingroup themeable
  */
 ?>
-<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print $attributes; ?>>
+<article class="<?php print implode(' ', $classes); ?> clearfix" <?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
   <?php if ($new): ?>
