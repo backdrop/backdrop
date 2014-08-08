@@ -25,10 +25,8 @@
  * - $status: Comment status. Possible values are:
  *   comment-unpublished, comment-published or comment-preview.
  * - $title: Linked title.
- * - $classes: String of classes that can be used to style contextually through
- *   CSS. It can be manipulated through the variable $classes_array from
- *   preprocess functions. The default values can be one or more of the
- *   following:
+ * - $classes: Array of classes that can be used to style through CSS. The
+ *   default classes can be one or more of the following:
  *   - comment: The current template type, i.e., "theming hook".
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
@@ -50,7 +48,7 @@
  * - $node: Node entity the comments are attached to.
  *
  * Other variables:
- * - $classes_array: Array of html class attribute values. It is flattened
+ * - $classes: Array of html class attribute values. It is flattened
  *   into a string within the variable $classes.
  *
  * @see template_preprocess()
@@ -61,13 +59,13 @@
  * @ingroup themeable
  */
 ?>
-<article class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article class="<?php print implode(' ', $classes); ?> clearfix" <?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
-  <h3<?php print $title_attributes; ?>><?php print $title; ?></h3>
+  <h3><?php print $title; ?></h3>
   <?php print render($title_suffix); ?>
 
   <footer>
@@ -76,7 +74,7 @@
     <?php print $permalink; ?>
   </footer>
 
-  <div class="content"<?php print $content_attributes; ?>>
+  <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
       // We hide the links now so that we can render them later.
       hide($content['links']);

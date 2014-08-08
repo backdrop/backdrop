@@ -10,10 +10,8 @@
  * - $block->module: Module that generated the block.
  * - $block->delta: An ID for the block, unique within each module.
  * - $block->region: The block region embedding the current block.
- * - $classes: String of classes that can be used to style contextually through
- *   CSS. It can be manipulated through the variable $classes_array from
- *   preprocess functions. The default values can be one or more of the
- *   following:
+ * - $classes: Array of classes that can be used to style through CSS. The
+ *   default classes can be one or more of the following:
  *   - block: The current template type, i.e., "theming hook".
  *   - block-[module]: The module generating the block. For example, the user
  *     module is responsible for handling the default user navigation block. In
@@ -26,8 +24,6 @@
  *   the template.
  *
  * Helper variables:
- * - $classes_array: Array of html class attribute values. It is flattened
- *   into a string within the variable $classes.
  * - $block_zebra: Outputs 'odd' and 'even' dependent on each block region.
  * - $zebra: Same output as $block_zebra but independent of any block region.
  * - $block_id: Counter dependent on each block region.
@@ -44,15 +40,15 @@
  * @ingroup themeable
  */
 ?>
-<div id="<?php print $block_html_id; ?>" class="<?php print $classes; ?>"<?php print $attributes; ?>>
+<div id="<?php print $block_html_id; ?>" class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
-<?php if ($block->subject): ?>
-  <h2<?php print $title_attributes; ?>><?php print $block->subject ?></h2>
-<?php endif;?>
+  <?php if ($block->subject): ?>
+    <h2><?php print $block->subject ?></h2>
+  <?php endif;?>
   <?php print render($title_suffix); ?>
 
-  <div<?php print $content_attributes; ?>>
+  <div<?php print backdrop_attributes($content_attributes); ?>>
     <?php print $content ?>
   </div>
 </div>

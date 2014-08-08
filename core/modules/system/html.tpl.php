@@ -32,8 +32,7 @@
  * - $page_bottom: Final closing markup from any modules that have altered the
  *   page. This variable should always be output last, after all other dynamic
  *   content.
- * - $classes String of classes that can be used to style contextually through
- *   CSS.
+ * - $classes: Array of classes that can be used to style through CSS.
  *
  * @see template_preprocess()
  * @see template_preprocess_html()
@@ -42,14 +41,14 @@
  * @ingroup themeable
  */
 ?><!DOCTYPE html>
-<html<?php print $html_attributes; ?>>
+<html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
     <?php print $head; ?>
     <title><?php print $head_title; ?></title>
     <?php print $styles; ?>
     <?php print $scripts; ?>
   </head>
-  <body class="<?php print $classes; ?>" <?php print $body_attributes;?>>
+  <body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($body_attributes);?>>
     <div id="skip-link">
       <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
     </div>

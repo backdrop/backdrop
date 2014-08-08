@@ -91,7 +91,7 @@ function contextual_preprocess(&$variables, $hook) {
       '#element' => $element,
     );
     // Mark this element as potentially having contextual links attached to it.
-    $variables['classes_array'][] = 'contextual-links-region';
+    $variables['classes'][] = 'contextual-links-region';
   }
 }
 

@@ -19,7 +19,7 @@
  */
 ?>
 <!DOCTYPE html >
-<html<?php print $html_attributes; ?>>
+<html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
     <title><?php print $title; ?></title>
     <?php print $head; ?>
