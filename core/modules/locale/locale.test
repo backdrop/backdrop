@@ -2647,33 +2647,48 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
-    // Configure date formats.
-    $this->backdropGet('admin/config/regional/date-time/locale');
-    $this->assertText('French', 'Configured languages appear.');
+    // Ensure generated URLs stick with English.
+    $GLOBALS['language_url'] = language_default();
+
+    // Add new date format.
     $edit = array(
-      'date_format_long' => 'd.m.Y - H:i',
-      'date_format_medium' => 'd.m.Y - H:i',
-      'date_format_short' => 'd.m.Y - H:i',
+      'label' => 'Example Style',
+      'name' => 'example_style',
+      'pattern' => 'd.m.Y - H:i',
     );
-    $this->backdropPost('admin/config/regional/date-time/locale/fr/edit', $edit, t('Save configuration'));
-    $this->assertText(t('Configuration saved.'), 'French date formats updated.');
+    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
+
+    // Configure the example format.
     $edit = array(
-      'date_format_long' => 'j M Y - g:ia',
-      'date_format_medium' => 'j M Y - g:ia',
-      'date_format_short' => 'j M Y - g:ia',
+      'locales[en]' => 'm.d.Y - H:i',
+      'locales[fr]' => 'Y.m.d - H:i',
     );
-    $this->backdropPost('admin/config/regional/date-time/locale/en/edit', $edit, t('Save configuration'));
-    $this->assertText(t('Configuration saved.'), 'English date formats updated.');
+    $this->backdropPost('admin/config/regional/date-time/formats/example_style/localize', $edit, t('Save configuration'));
+    $this->assertText(t('Date localizations saved.'), 'Localized date formats saved.');
+
+    // Ensure that the original date format is still used on this page's
+    // display, not the localized English version. Hour and minute are omitted
+    // to avoid race conditions between the GET and the assert.
+    $this->backdropGet('admin/config/regional/date-time/formats');
+    $this->assertText(format_date(REQUEST_TIME, 'custom', 'd.m.Y'));
+
+    // Configure the medium format.
+    $edit = array(
+      'locales[en]' => 'D, m/d/Y - g:ia',
+      'locales[fr]' => 'D, Y/m/Y - H:i',
+    );
+    $this->backdropPost('admin/config/regional/date-time/formats/medium/localize', $edit, t('Save configuration'));
+    $this->assertText(t('Date localizations saved.'), 'Medium date formats updated.');
 
     // Create node content.
     $node = $this->backdropCreateNode(array('type' => 'article'));
 
     // Configure format for the node posted date changes with the language.
     $this->backdropGet('node/' . $node->nid);
-    $english_date = format_date($node->created, 'custom', 'j M Y');
+    $english_date = format_date($node->created, 'custom', 'D, m/d/Y - g:ia');
     $this->assertText($english_date, 'English date format appears');
     $this->backdropGet('fr/node/' . $node->nid);
-    $french_date = format_date($node->created, 'custom', 'd.m.Y');
+    $french_date = format_date($node->created, 'custom', 'D, Y/m/Y - H:i');
     $this->assertText($french_date, 'French date format appears');
   }
 }

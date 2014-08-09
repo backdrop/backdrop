@@ -2955,11 +2955,11 @@ function form_process_date($element) {
   $element['#tree'] = TRUE;
 
   // Determine the order of day, month, year in the site's chosen date format.
-  $format = variable_get('date_format_short', 'm/d/Y - H:i');
+  $format = system_date_format_load('short');
   $sort = array();
-  $sort['day'] = max(strpos($format, 'd'), strpos($format, 'j'));
-  $sort['month'] = max(strpos($format, 'm'), strpos($format, 'M'));
-  $sort['year'] = strpos($format, 'Y');
+  $sort['day'] = max(strpos($format['pattern'], 'd'), strpos($format['pattern'], 'j'));
+  $sort['month'] = max(strpos($format['pattern'], 'm'), strpos($format['pattern'], 'M'));
+  $sort['year'] = strpos($format['pattern'], 'Y');
   asort($sort);
   $order = array_keys($sort);
 

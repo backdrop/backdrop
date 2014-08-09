@@ -16,8 +16,8 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
 
     // This test requires we be using UTC, otherwise the returned results may
     // change based on timezones when sorting by granularity.
-    variable_set('configurable_timezones', 0);
-    variable_set('date_default_timezone', 'UTC');
+    config_set('system.date', 'default_timezone', 'UTC');
+    config_set('system.date', 'user_configurable_timezones', 0);
   }
   protected function expectedResultSet($granularity, $reverse = TRUE) {
     $expected = array();

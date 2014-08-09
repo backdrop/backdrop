@@ -2404,14 +2404,21 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  */
 function backdrop_get_user_timezone() {
   global $user;
-  if (variable_get('configurable_timezones', 1) && $user->uid && $user->timezone) {
+  $config = config('system.date');
+
+  // If the date config has not yet been set (e.g. upgrading from D7), then use
+  // the server default time.
+  if ($config->isNew()) {
+    return @date_default_timezone_get();
+  }
+  elseif ($config->get('user_configurable_timezones') && $user->uid && $user->timezone) {
     return $user->timezone;
   }
   else {
     // Ignore PHP strict notice if time zone has not yet been set in the php.ini
     // configuration.
-    return variable_get('date_default_timezone', @date_default_timezone_get());
-  }
+    $config_data_default_timezone = $config->get('default_timezone');
+    return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();  }
 }
 
 /**

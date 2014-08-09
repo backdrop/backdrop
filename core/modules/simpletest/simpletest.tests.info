@@ -1170,6 +1170,6 @@ file = tests/upgrade/upgrade_filled.test
 
 [LanguageUpgradePathTestCase]
 name = Language upgrade test
-description => Upgrade tests with language data.
+description = Upgrade tests with language data.
 group = Upgrade path
 file = tests/upgrade/upgrade.language.test

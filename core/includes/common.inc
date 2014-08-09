@@ -2058,20 +2058,18 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *
  * @param $timestamp
  *   A UNIX timestamp to format.
- * @param $type
+ * @param $date_format_name
  *   (optional) The format to use, one of:
  *   - One of the built-in formats: 'short', 'medium', 'long', 'html_datetime',
  *     'html_date', 'html_time', 'html_yearless_date', 'html_week',
  *     'html_month', 'html_year'.
- *   - The name of a date type defined by a module in hook_date_format_types(),
- *     if it's been assigned a format.
  *   - The machine name of an administrator-defined date format.
  *   - 'custom', to use $format.
  *   Defaults to 'medium'.
- * @param $format
- *   (optional) If $type is 'custom', a PHP date format string suitable for
- *   input to date(). Use a backslash to escape ordinary text, so it does not
- *   get interpreted as date format characters.
+ * @param $pattern
+ *   (optional) If $date_format_name is 'custom', a PHP date format string
+ *   suitable for input to date(). Use a backslash to escape ordinary text, so
+ *   it does not get interpreted as date format characters.
  * @param $timezone
  *   (optional) Time zone identifier, as described at
  *   http://php.net/manual/timezones.php Defaults to the time zone used to
@@ -2083,7 +2081,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  * @return
  *   A translated date string in the requested format.
  */
-function format_date($timestamp, $type = 'medium', $format = '', $timezone = NULL, $langcode = NULL) {
+function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $timezone = NULL, $langcode = NULL) {
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
@@ -2100,64 +2098,10 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
     $timezones[$timezone] = timezone_open($timezone);
   }
 
-  // Use the default langcode if none is set.
+  // Use the interface langcode if none is set.
   global $language_interface;
   if (empty($langcode)) {
     $langcode = isset($language_interface->langcode) ? $language_interface->langcode : LANGUAGE_SYSTEM;
-  }
-
-  switch ($type) {
-    case 'short':
-      $format = variable_get('date_format_short', 'm/d/Y - H:i');
-      break;
-
-    case 'long':
-      $format = variable_get('date_format_long', 'l, F j, Y - H:i');
-      break;
-
-    case 'html_datetime':
-      $format = variable_get('date_format_html_datetime', 'Y-m-d\TH:i:sO');
-      break;
-
-    case 'html_date':
-      $format = variable_get('date_format_html_date', 'Y-m-d');
-      break;
-
-    case 'html_time':
-      $format = variable_get('date_format_html_time', 'H:i:s');
-      break;
-
-    case 'html_yearless_date':
-      $format = variable_get('date_format_html_yearless_date', 'm-d');
-      break;
-
-    case 'html_week':
-      $format = variable_get('date_format_html_week', 'Y-\WW');
-      break;
-
-    case 'html_month':
-      $format = variable_get('date_format_html_month', 'Y-m');
-      break;
-
-    case 'html_year':
-      $format = variable_get('date_format_html_year', 'Y');
-      break;
-
-    case 'custom':
-      // No change to format.
-      break;
-
-    case 'medium':
-    default:
-      // Retrieve the format of the custom $type passed.
-      if ($type != 'medium') {
-        $format = variable_get('date_format_' . $type, '');
-      }
-      // Fall back to 'medium'.
-      if ($format === '') {
-        $format = variable_get('date_format_medium', 'D, m/d/Y - H:i');
-      }
-      break;
   }
 
   // Create a DateTime object from the timestamp.
@@ -2165,21 +2109,33 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
   // Set the time zone for the DateTime object.
   date_timezone_set($date_time, $timezones[$timezone]);
 
+  // If we have a non-custom date format use the provided date format pattern.
+  if ($date_format_name != 'custom') {
+    $date_format = system_date_format_load($date_format_name);
+    $pattern = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
+  }
+
+  // Fall back to medium if a format was not found.
+  if (empty($pattern)) {
+    $date_format = system_date_format_load('medium');
+    $pattern = $date_format['pattern'];
+  }
+
   // Encode markers that should be translated. 'A' becomes '\xEF\AA\xFF'.
   // xEF and xFF are invalid UTF-8 sequences, and we assume they are not in the
   // input string.
   // Paired backslashes are isolated to prevent errors in read-ahead evaluation.
   // The read-ahead expression ensures that A matches, but not \A.
-  $format = preg_replace(array('/\\\\\\\\/', '/(?<!\\\\)([AaeDlMTF])/'), array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"), $format);
+  $pattern = preg_replace(array('/\\\\\\\\/', '/(?<!\\\\)([AaeDlMTF])/'), array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"), $pattern);
 
   // Call date_format().
-  $format = date_format($date_time, $format);
+  $formatted_date_time = date_format($date_time, $pattern);
 
   // Pass the langcode to _format_date_callback().
   _format_date_callback(NULL, $langcode);
 
   // Translate the marked sequences.
-  return preg_replace_callback('/\xEF([AaeDlMTF]?)(.*?)\xFF/', '_format_date_callback', $format);
+  return preg_replace_callback('/\xEF([AaeDlMTF]?)(.*?)\xFF/', '_format_date_callback', $formatted_date_time);
 }
 
 /**

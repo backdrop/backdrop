@@ -1841,7 +1841,7 @@ function install_configure_form_submit($form, &$form_state) {
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_mail', $form_state['values']['site_mail'])
     ->save();
-  variable_set('date_default_timezone', $form_state['values']['date_default_timezone']);
+  config_set('system.date', 'default_timezone', $form_state['values']['date_default_timezone']);
 
   // Enable update.module if this option was selected.
   if ($form_state['values']['update_status_module'][1]) {

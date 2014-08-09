@@ -92,58 +92,19 @@ function locale_menu() {
   );
 
   // Localize date formats.
-  $items['admin/config/regional/date-time/locale'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format/localize'] = array(
     'title' => 'Localize',
-    'description' => 'Configure date formats for each locale',
-    'page callback' => 'locale_date_format_language_overview_page',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => -8,
-    'file' => 'locale.admin.inc',
-  );
-  $items['admin/config/regional/date-time/locale/%/edit'] = array(
-    'title' => 'Localize date formats',
     'description' => 'Configure date formats for each locale',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('locale_date_format_form', 5),
     'access arguments' => array('administer site configuration'),
-    'file' => 'locale.admin.inc',
-  );
-  $items['admin/config/regional/date-time/locale/%/reset'] = array(
-    'title' => 'Reset date formats',
-    'description' => 'Reset localized date formats to global defaults',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('locale_date_format_reset_form', 5),
-    'access arguments' => array('administer site configuration'),
+    'load arguments' => array(FALSE),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -8,
     'file' => 'locale.admin.inc',
   );
 
   return $items;
-}
-
-/**
- * Implements hook_init().
- *
- * Initialize date formats according to the user's current locale.
- */
-function locale_init() {
-  global $conf, $language_interface;
-  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
-
-  // For each date type (e.g. long, short), get the localized date format
-  // for the user's current language and override the default setting for it
-  // in $conf. This should happen on all pages except the date and time formats
-  // settings page, where we want to display the site default and not the
-  // localized version.
-  if (strpos($_GET['q'], 'admin/config/regional/date-time/formats') !== 0) {
-    $languages = array($language_interface->langcode);
-
-    // Setup appropriate date formats for this locale.
-    $formats = locale_get_localized_date_format($languages);
-    foreach ($formats as $format_type => $format) {
-      $conf[$format_type] = $format;
-    }
-  }
 }
 
 /**
@@ -478,6 +439,8 @@ function locale_modules_disabled($modules) {
  * Implements hook_language_insert().
  */
 function locale_language_insert($language) {
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   // Add new language to the list of language prefixes.
   $prefixes = locale_language_negotiation_url_prefixes();
   $prefixes[$language->langcode] = (empty($language->default) ? $language->langcode : '');
@@ -499,6 +462,7 @@ function locale_language_insert($language) {
  * Implements hook_language_update().
  */
 function locale_language_update($language) {
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
   // If the language is the default, then ensure that no other languages have
   // blank prefix codes.
@@ -523,6 +487,8 @@ function locale_language_update($language) {
  * Implements hook_language_delete().
  */
 function locale_language_delete($language) {
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   // Remove language from language prefix list.
   $prefixes = locale_language_negotiation_url_prefixes();
   unset($prefixes[$language->langcode]);
@@ -840,7 +806,7 @@ function locale_library_info_alter(&$libraries, $module) {
           'ui' => array(
             'datepicker' => array(
               'isRTL' => $language_interface->direction == LANGUAGE_RTL,
-              'firstDay' => variable_get('date_first_day', 0),
+              'firstDay' => config_get('system.date', 'first_day'),
             ),
           ),
         ),
