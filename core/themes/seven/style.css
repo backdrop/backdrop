@@ -387,9 +387,6 @@ ul.secondary li.active a.active {
   color: #fff;
   background: #666;
 }
-#content {
-  clear: left;
-}
 
 /**
  * Page layout.
@@ -705,7 +702,7 @@ fieldset fieldset fieldset {
  * Form elements.
  */
 .form-item {
-  padding: 9px 0;
+  padding: 0;
   margin: 0 0 10px;
 }
 .filter-wrapper .form-item,
@@ -989,77 +986,148 @@ div.admin-options div.form-item {
 }
 
 /* Maintenance theming */
-body.in-maintenance #sidebar-first {
-  float: left; /* LTR */
-  width: 200px;
+body.maintenance-page {
+  background: #E8E6E5;
+  padding: 1em;
 }
-[dir="rtl"] body.in-maintenance #sidebar-first {
+body.maintenance-page #page {
+  padding: 2em;
+  max-width: 770px;
+  min-width: 255px;
+  margin: 0 auto;
+}
+body.maintenance-page #page:after {
+  left: 100%; /* LTR */
+  border: solid transparent;
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #E8E6E5; /* LTR */
+  border-top-color: #E8E6E5; /* LTR */
+  border-width: 17px;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  bottom: 0;
+  margin-top: -16px;
+  margin-left: -34px;
+}
+body.maintenance-page #page-title {
+  background: transparent;
+  padding-top: 0;
+}
+body.maintenance-page .sidebar {
+  float: left; /* LTR */
+  width: 180px;
+  text-align: center;
+}
+[dir="rtl"] body.maintenance-page .sidebar {
   float: right;
 }
-body.in-maintenance #content {
-  float: right; /* LTR */
-  width: 550px;
+body.maintenance-page main {
+  max-width: 590px;
   padding-right: 20px; /* LTR */
-  clear: none;
+  margin-left: 200px; /* LTR */
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
-[dir="rtl"] body.in-maintenance #content {
-  float: left;
-  padding-left: 20px;
+[dir="rtl"] body.maintenance-page main {
   padding-right: 0;
+  padding-left: 20px;
+  margin-left: 0;
+  margin-right: 200px;
 }
-body.in-maintenance #page {
-  overflow: auto;
-  width: 770px;
-  margin: 0 auto;
-  padding-top: 2em;
-}
-body.in-maintenance #branding h1 {
-  width: 770px;
+body.maintenance-page h1 {
   margin: 0 auto;
   float: none;
 }
-body.in-maintenance .form-radios .form-type-radio {
+body.maintenance-page li.front a.active {
+  color: #0074bd;
+}
+body.maintenance-page .form-radios .form-type-radio {
   padding: 2px 0;
 }
-body.in-maintenance div.form-item:after {
+body.maintenance-page div.form-item:after {
   content: "";
   display: none;
   clear: none;
 }
-body.in-maintenance .form-submit {
+body.maintenance-page .password-parent {
+  width: auto;
+}
+body.maintenance-page div.form-item div.password-suggestions {
+  float: none;
+  width: auto;
+}
+body.maintenance-page .form-submit {
   display: block;
 }
-body.in-maintenance #logo {
+body.maintenance-page #logo {
   max-width: 120px;
-  margin: 0 20px;
+  margin: 0 auto;
 }
 ol.task-list {
+  margin-top: 20px;
+  text-align: left; /* LTR */
   margin-left: 0; /* LTR */
   list-style-type: none;
   list-style-image: none;
+  padding-right: 17px;
+  padding-bottom: 1em;
+  padding-left: 0; /* LTR */
 }
 [dir="rtl"] ol.task-list {
+  text-align: right;
   margin-right: 0;
+  padding-right: 0;
 }
 ol.task-list li {
   padding: 0.5em 1em 0.5em 20px; /* LTR */
-  color: #adadad;
+  color: #1a1a1a;
 }
 [dir="rtl"] ol.task-list li {
   padding: 0.5em 20px 0.5em 1em;
 }
 ol.task-list li.active {
-  background: transparent url(images/task-item.png) no-repeat 3px 50%; /* LTR */
   padding: 0.5em 1em 0.5em 20px; /* LTR */
+  font-weight: normal;
   color: #000;
+  background: #E8E6E5;
+  position: relative;
 }
 [dir="rtl"] ol.task-list li.active {
-  background: transparent url(images/task-item-rtl.png) no-repeat right 50%;
   padding: 0.5em 20px 0.5em 1em;
+}
+ol.task-list li.active:after {
+  left: 100%; /* LTR */
+  border: solid transparent;
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #E8E6E5; /* LTR */
+  border-width: 17px;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  top: 50%;
+  margin-top: -17px;
+}
+[dir="rtl"] ol.task-list li.active:after {
+  right: 100%;
+  border-left-color: transparent;
+  border-right-color: #E8E6E5;
 }
 ol.task-list li.done {
   background: transparent url(images/task-check.png) no-repeat 0 50%;
   color: green;
+}
+[dir="rtl"] ol.task-list li.done {
+  background: transparent url(images/task-check.png) no-repeat right 50%;
+}
+
+.step-indicator {
+  display: none;
 }
 
 /* Shortcut theming */
@@ -1075,7 +1143,6 @@ div.add-or-remove-shortcuts {
 }
 
 /* Field UI */
-
 #field-display-overview input.field-formatter-settings-edit {
   margin: 0;
   padding: 1px 8px;
@@ -1150,4 +1217,85 @@ div.add-or-remove-shortcuts {
 }
 .js .form-actions .dropbutton-multiple.open .dropbutton-action:hover {
   background-color: #73b3dd;
+}
+
+@media all and (min-width: 768px) {
+  html, body {
+    height: 100%;
+    margin: 0;
+    width: 100%;
+    display: table;
+  }
+  body.maintenance-page {
+    height: 100%;
+    width: 100%;
+    display: table-cell;
+    vertical-align: middle;
+  }
+  body.maintenance-page #page {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 770px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+}
+
+@media all and (max-width: 768px) {
+  body.maintenance-page #page {
+    width: auto;
+  }
+  body.maintenance-page .sidebar {
+    float: none;
+    width: 100%;
+    height: 35px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 1em;
+  }
+  body.maintenance-page .sidebar #logo {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  [dir="rtl"] body.maintenance-page .sidebar #logo {
+    left: auto;
+    right: 0;
+  }
+  body.maintenance-page #content {
+    max-width: 690px;
+    clear: both;
+    float: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  [dir="rtl"] body.maintenance-page #content {
+    margin: 0;
+    padding: 0;
+  }
+  body.maintenance-page ol.task-list {
+    display: none;
+  }
+  body.maintenance-page .step-indicator {
+    display: block;
+    font-size: 1.385em;
+    position: absolute;
+    top: .5em;
+    right: 0;
+  }
+  [dir="rtl"] body.maintenance-page .step-indicator {
+    left: 0;
+    right: auto;
+  }
+}
+
+@media all and (max-width: 975px) and (min-width: 768px) {
+  body.maintenance-page .password-strength,
+  body.maintenance-page .confirm-parent,
+  body.maintenance-page div.password-confirm {
+    float: none;
+    width: auto;
+  }
 }

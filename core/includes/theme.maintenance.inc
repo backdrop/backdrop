@@ -110,26 +110,34 @@ function theme_task_list($variables) {
   $active = $variables['active'];
 
   $done = isset($items[$active]) || $active == NULL;
-  $output = '<h2 class="element-invisible">Installation tasks</h2>';
-  $output .= '<ol class="task-list">';
+  $total = count($items);
+  $count = 0;
+  $current = 0;
+  $list = '';
 
   foreach ($items as $k => $item) {
+    $count++;
     if ($active == $k) {
       $class = 'active';
       $status = '(' . t('active') . ')';
       $done = FALSE;
+      $current = $count;
     }
     else {
       $class = $done ? 'done' : '';
       $status = $done ? '(' . t('done') . ')' : '';
     }
-    $output .= '<li';
-    $output .= ($class ? ' class="' . $class . '"' : '') . '>';
-    $output .= $item;
-    $output .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
-    $output .= '</li>';
+    $list .= '<li';
+    $list .= ($class ? ' class="' . $class . '"' : '') . '>';
+    $list .= $item;
+    $list .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
+    $list .= '</li>';
   }
-  $output .= '</ol>';
+
+  $output = '<h2 class="element-invisible">Installation tasks</h2>';
+  $output .= '<div class="step-indicator">' . t('Step !current of !total', array('!current' => $current, '!total' => $total)) . '</div>';
+  $output .= '<ol class="task-list">' . $list . '</ol>';
+
   return $output;
 }
 

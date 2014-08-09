@@ -2971,6 +2971,7 @@ function template_preprocess_maintenance_page(&$variables) {
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
     $variables['classes_array'][] = 'db-offline';
   }
+
   if ($variables['layout'] == 'both') {
     $variables['classes_array'][] = 'two-sidebars';
   }

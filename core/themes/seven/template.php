@@ -3,19 +3,19 @@
 /**
  * Override or insert variables into the maintenance page template.
  */
-function seven_preprocess_maintenance_page(&$vars) {
+function seven_preprocess_maintenance_page(&$variables) {
   // While markup for normal pages is split into page.tpl.php and html.tpl.php,
   // the markup for the maintenance page is all in the single
   // maintenance-page.tpl.php template. So, to have what's done in
   // seven_preprocess_html() also happen on the maintenance page, it has to be
   // called here.
-  seven_preprocess_html($vars);
+  seven_preprocess_html($variables);
 }
 
 /**
  * Override or insert variables into the html template.
  */
-function seven_preprocess_html(&$vars) {
+function seven_preprocess_html(&$variables) {
   // Add viewport setting for mobile.
   $viewport = array(
     '#tag' => 'meta',
@@ -33,12 +33,12 @@ function seven_preprocess_html(&$vars) {
 /**
  * Override or insert variables into the page template.
  */
-function seven_preprocess_page(&$vars) {
-  $vars['primary_local_tasks'] = $vars['tabs'];
-  unset($vars['primary_local_tasks']['#secondary']);
-  $vars['secondary_local_tasks'] = array(
+function seven_preprocess_page(&$variables) {
+  $variables['primary_local_tasks'] = $variables['tabs'];
+  unset($variables['primary_local_tasks']['#secondary']);
+  $variables['secondary_local_tasks'] = array(
     '#theme' => 'menu_local_tasks',
-    '#secondary' => $vars['tabs']['#secondary'],
+    '#secondary' => $variables['tabs']['#secondary'],
   );
 }
 
