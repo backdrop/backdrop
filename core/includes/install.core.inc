@@ -596,6 +596,8 @@ function install_tasks($install_state) {
       'type' => 'batch',
       'run' => $needs_translations ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
     ),
+    'install_finished' => array(
+    ),
   );
 
   // Allow the installation profile to modify the full list of tasks.
