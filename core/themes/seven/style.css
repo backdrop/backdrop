@@ -1039,7 +1039,7 @@ body.maintenance-page main {
   margin-right: 200px;
 }
 body.maintenance-page h1 {
-  margin: 0 auto;
+  margin: 0 auto 1em;
   float: none;
 }
 body.maintenance-page li.front a.active {
@@ -1048,10 +1048,18 @@ body.maintenance-page li.front a.active {
 body.maintenance-page .form-radios .form-type-radio {
   padding: 2px 0;
 }
+body.maintenance-page div.form-item {
+  width: 100%;
+}
 body.maintenance-page div.form-item:after {
   content: "";
   display: none;
   clear: none;
+}
+body.maintenance-page input[type="text"],
+body.maintenance-page input[type="email"] {
+  width: 100%;
+  box-sizing: border-box;
 }
 body.maintenance-page .password-parent {
   width: auto;
@@ -1239,6 +1247,10 @@ div.add-or-remove-shortcuts {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
+  body.maintenance-page input[type="text"],
+  body.maintenance-page input[type="email"] {
+    width: auto;
+  }
 }
 
 @media all and (max-width: 768px) {
@@ -1251,7 +1263,7 @@ div.add-or-remove-shortcuts {
     height: 35px;
     overflow: hidden;
     position: relative;
-    margin-top: 1em;
+    margin: 0 0 1em;
   }
   body.maintenance-page .sidebar #logo {
     width: 100%;
