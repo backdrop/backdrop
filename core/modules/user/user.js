@@ -8,47 +8,34 @@ Backdrop.behaviors.password = {
   attach: function (context, settings) {
     var translate = settings.password;
     $('input.password-field', context).once('password', function () {
-      var passwordInput = $(this);
-      var innerWrapper = $(this).parent();
-      var outerWrapper = $(this).parent().parent();
+      var $passwordInput = $(this);
+      var $innerWrapper = $(this).parent();
+      var $outerWrapper = $(this).parent().parent();
 
       // Add identifying class to password element parent.
-      innerWrapper.addClass('password-parent');
+      $innerWrapper.addClass('password-parent');
 
       // Add the password confirmation layer.
-      outerWrapper.find('input.password-confirm').parent().prepend('<div class="password-confirm">' + translate.confirmTitle + ' <span></span></div>').addClass('confirm-parent');      var confirmInput = $('input.password-confirm', outerWrapper);
-      var confirmResult = $('div.password-confirm', outerWrapper);
-      var confirmChild = $('span', confirmResult);
-
-      // Add the description box.
-      var passwordMeter = '<div class="password-strength"><div class="password-strength-text" aria-live="assertive"></div><div class="password-strength-title">' + translate.strengthTitle + '</div><div class="password-indicator"><div class="indicator"></div></div></div>';      $(confirmInput).parent().after('<div class="password-suggestions description"></div>');
-      $(innerWrapper).prepend(passwordMeter);
-      var passwordDescription = $('div.password-suggestions', outerWrapper).hide();
+      $outerWrapper.find('input.password-confirm').wrap('<span class="password-confirm-wrapper"></span>').after('<span class="password-match"><span class="password-match-title">' + translate.confirmTitle + '</span><span class="password-match-text"></span></span>').addClass('confirm-parent');
+      var $confirmInput = $outerWrapper.find('input.password-confirm');
+      var $matchResult = $outerWrapper.find('span.password-match');
+      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + translate.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
+      $passwordInput.wrap('<span class="password-confirm-wrapper"></span>').after(passwordMeter);
 
       // Check the password strength.
       var passwordCheck = function () {
 
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength(passwordInput.val(), settings.password);
-
-        // Update the suggestions for how to improve the password.
-        if (passwordDescription.html() != result.message) {
-          passwordDescription.html(result.message);
-        }
-
-        // Only show the description box if there is a weakness in the password.
-        if (result.strength == 100) {
-          passwordDescription.hide();
-        }
-        else {
-          passwordDescription.show();
-        }
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val());
 
         // Adjust the length of the strength indicator.
-        $(innerWrapper).find('.indicator').css('width', result.strength + '%');
+        $innerWrapper.find('.indicator').css('width', result.strength + '%');
 
         // Update the strength indication text.
-        $(innerWrapper).find('.password-strength-text').html(result.indicatorText);
+        $innerWrapper.find('.password-strength-text').html(translate[result.level]);
+
+        // Give a class to the strength.
+        $innerWrapper.find('.password-strength').attr('class', 'password-strength ' + result.level);
 
         passwordCheckMatch();
       };
@@ -56,31 +43,28 @@ Backdrop.behaviors.password = {
       // Check that password and confirmation inputs match.
       var passwordCheckMatch = function () {
 
-        if (confirmInput.val()) {
-          var success = passwordInput.val() === confirmInput.val();
-
-          // Show the confirm result.
-          confirmResult.css({ visibility: 'visible' });
+        if ($confirmInput.val()) {
+          var success = $passwordInput.val() === $confirmInput.val();
 
           // Remove the previous styling if any exists.
           if (this.confirmClass) {
-            confirmChild.removeClass(this.confirmClass);
+            $matchResult.removeClass(this.confirmClass);
           }
 
           // Fill in the success message and set the class accordingly.
-          var confirmClass = success ? 'ok' : 'error';
-          confirmChild.html(translate['confirm' + (success ? 'Success' : 'Failure')]).addClass(confirmClass);
-          this.confirmClass = confirmClass;
+          this.confirmClass = success ? 'match' : 'mismatch';
+          $matchResult.addClass(this.confirmClass).find('.password-match-text').html(translate['confirm' + (success ? 'Success' : 'Failure')]);
         }
         else {
-          confirmResult.css({ visibility: 'hidden' });
+          this.confirmClass = 'empty';
+          $matchResult.addClass(this.confirmClass);
         }
       };
 
       // Monitor keyup and blur events.
       // Blur must be used because a mouse paste does not trigger keyup.
-      passwordInput.keyup(passwordCheck).focus(passwordCheck).blur(passwordCheck);
-      confirmInput.keyup(passwordCheckMatch).blur(passwordCheckMatch);
+      $passwordInput.bind('keyup focus blur', passwordCheck).triggerHandler('keyup');
+      $confirmInput.bind('keyup blur', passwordCheckMatch);
     });
   }
 };
@@ -90,9 +74,9 @@ Backdrop.behaviors.password = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password, translate) {
-  var weaknesses = 0, strength = 100, msg = [];
-
+Backdrop.evaluatePasswordStrength = function (password) {
+  var strength = 0;
+  var level = 'empty';
   var hasLowercase = /[a-z]+/.test(password);
   var hasUppercase = /[A-Z]+/.test(password);
   var hasNumbers = /[0-9]+/.test(password);
@@ -103,71 +87,38 @@ Backdrop.evaluatePasswordStrength = function (password, translate) {
   var usernameBox = $('input.username');
   var username = (usernameBox.length > 0) ? usernameBox.val() : translate.username;
 
-  // Lose 5 points for every character less than 6, plus a 30 point penalty.
-  if (password.length < 6) {
-    msg.push(translate.tooShort);
-    strength -= ((6 - password.length) * 5) + 30;
-  }
+  // Calculate the number of unique character sets within a string.
+  // Adapted from https://github.com/dropbox/zxcvbn.
+  var cardinality = (hasLowercase * 26) + (hasUppercase * 26) + (hasNumbers * 10) + (hasPunctuation * 33);
 
-  // Count weaknesses.
-  if (!hasLowercase) {
-    msg.push(translate.addLowerCase);
-    weaknesses++;
-  }
-  if (!hasUppercase) {
-    msg.push(translate.addUpperCase);
-    weaknesses++;
-  }
-  if (!hasNumbers) {
-    msg.push(translate.addNumbers);
-    weaknesses++;
-  }
-  if (!hasPunctuation) {
-    msg.push(translate.addPunctuation);
-    weaknesses++;
-  }
-
-  // Apply penalty for each weakness (balanced against length penalty).
-  switch (weaknesses) {
-    case 1:
-      strength -= 12.5;
-      break;
-
-    case 2:
-      strength -= 25;
-      break;
-
-    case 3:
-      strength -= 40;
-      break;
-
-    case 4:
-      strength -= 40;
-      break;
-  }
+  // Assign strength based on the level of entropy within the password, times
+  // its length. Again, adapted from zxcvbn.
+  strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
 
   // Check if password is the same as the username.
   if (password !== '' && password.toLowerCase() === username.toLowerCase()) {
-    msg.push(translate.sameAsUsername);
-    // Passwords the same as username are always very weak.
     strength = 5;
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.
-  if (strength < 60) {
-    indicatorText = translate.weak;
-  } else if (strength < 70) {
-    indicatorText = translate.fair;
-  } else if (strength < 80) {
-    indicatorText = translate.good;
-  } else if (strength <= 100) {
-    indicatorText = translate.strong;
+  if (strength >= 90) {
+    level = 'strong';
+  }
+  else if (strength > 70) {
+    level = 'good';
+  }
+  else if (strength > 50) {
+    level = 'fair';
+  }
+  else if (strength > 0) {
+    level = 'weak';
   }
 
-  // Assemble the final message.
-  msg = translate.hasWeaknesses + '<ul><li>' + msg.join('</li><li>') + '</li></ul>';
-  return { strength: strength, message: msg, indicatorText: indicatorText };
+  // Cap at 100 and round to the nearest integer.
+  strength = parseInt(Math.min(strength, 100));
 
+  // Assemble the final message.
+  return { strength: strength, level: level };
 };
 
 /**

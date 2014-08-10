@@ -764,12 +764,27 @@ div.teaser-checkbox .form-item,
 }
 ul.tips,
 div.description,
-.form-item div.description {
+.form-item div.description,
+.password-strength,
+.password-match {
   margin: 5px 0;
   line-height: 1.231em;
   font-size: 0.923em;
   color: #666;
 }
+.password-strength {
+  padding-top: 6px;
+}
+.password-strength .indicator {
+  color: #008000;
+}
+.password-match.match .password-match-text {
+  color: #008000;
+}
+.password-match.mismatch .password-match-text {
+  color: #8c2e0b
+}
+
 ul.tips li {
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
 }
@@ -1057,16 +1072,13 @@ body.maintenance-page div.form-item:after {
   clear: none;
 }
 body.maintenance-page input[type="text"],
-body.maintenance-page input[type="email"] {
+body.maintenance-page input[type="email"],
+body.maintenance-page input[type="password"],
+body.maintenance-page select,
+body.maintenance-page .password-parent {
   width: 100%;
   box-sizing: border-box;
-}
-body.maintenance-page .password-parent {
-  width: auto;
-}
-body.maintenance-page div.form-item div.password-suggestions {
-  float: none;
-  width: auto;
+  max-width: 300px;
 }
 body.maintenance-page .form-submit {
   display: block;
@@ -1247,10 +1259,6 @@ div.add-or-remove-shortcuts {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
-  body.maintenance-page input[type="text"],
-  body.maintenance-page input[type="email"] {
-    width: auto;
-  }
 }
 
 @media all and (max-width: 768px) {
@@ -1300,14 +1308,5 @@ div.add-or-remove-shortcuts {
   [dir="rtl"] body.maintenance-page .step-indicator {
     left: 0;
     right: auto;
-  }
-}
-
-@media all and (max-width: 975px) and (min-width: 768px) {
-  body.maintenance-page .password-strength,
-  body.maintenance-page .confirm-parent,
-  body.maintenance-page div.password-confirm {
-    float: none;
-    width: auto;
   }
 }

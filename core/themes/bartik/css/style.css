@@ -1164,29 +1164,6 @@ div.messages {
   float: none;
 }
 
-/* -------------- Password Meter  ------------- */
-
-.confirm-parent,
-.password-parent {
-  width: 34em;
-}
-.password-parent,
-div.form-item div.password-suggestions {
-  position: relative;
-}
-.password-strength-text,
-.password-strength-title,
-div.password-confirm {
-  font-size: 0.82em;
-}
-.password-strength-text {
-  margin-top: 0.2em;
-}
-div.password-confirm {
-  margin-top: 2.2em;
-  width: 20.73em;
-}
-
 /* ---------------- Buttons    ---------------- */
 
 input.form-submit,
@@ -1337,9 +1314,6 @@ select.form-select {
 input.form-submit:hover,
 input.form-submit:focus {
   background: #dedede;
-}
-.password-suggestions ul li {
-  margin-left: 1.2em; /* LTR */
 }
 .form-item {
   margin-bottom: 1em;
@@ -1521,9 +1495,6 @@ input.form-button-disabled:active,
 
 /* -------------- Other Overrides ------------- */
 
-div.password-suggestions {
-  border: 0;
-}
 div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   padding: 1em;
 }
