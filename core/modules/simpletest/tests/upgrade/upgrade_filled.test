@@ -20,6 +20,6 @@ class FilledUpgradePathTestCase extends UpgradePathTestCase {
    * Test a successful upgrade.
    */
   public function testFilledUpgrade() {
-    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
+    $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
   }
 }
