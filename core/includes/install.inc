@@ -608,11 +608,18 @@ function backdrop_rewrite_settings($settings = array()) {
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additions = '';
 
-  // Build list of setting names and insert the values into the global namespace.
-  $keys = array();
+  // Assign each variable into the global namespace.
   foreach ($settings as $setting => $data) {
-    $GLOBALS[$setting] = $data['value'];
-    $keys[] = $setting;
+    $matches = array();
+    preg_match('!([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
+    $variable = $matches[1];
+    $nesting = isset($matches[3]) ? explode('\'][\'', $matches[3]) : array();
+
+    $global_array = &$GLOBALS[$variable];
+    foreach ($nesting as $nested_key) {
+      $global_array = &$global_array[$nested_key];
+    }
+    $global_array = $data['value'];
   }
 
   $buffer = NULL;
@@ -628,7 +635,7 @@ function backdrop_rewrite_settings($settings = array()) {
       // Check for variables.
       if (substr($line, 0, 1) == '$') {
         preg_match('/\$([^ =]*) /', $line, $variable);
-        if (in_array($variable[1], $keys)) {
+        if (array_key_exists($variable[1], $settings)) {
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable[1]];
