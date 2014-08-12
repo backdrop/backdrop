@@ -173,6 +173,33 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
     $this->assertEqual($new_user->init, $mail, 'Correct init field.');
   }
 
+
+  /**
+   * Test that login credentials work.
+   */
+  function testLoginByEmail() {
+    $account = $this->backdropCreateUser(array());
+
+    // Login via name.
+    $this->backdropLogin($account);
+    $this->assertFailedLogin($account, NULL, TRUE);
+
+    // Login via email only.
+    config('user.settings')
+      ->set('user_login_method', USER_LOGIN_EMAIL_ONLY)
+      ->save();
+    $this->backdropLogin($account, TRUE);
+    $this->assertFailedLogin($account);
+
+    // Login via name or email.
+    config('user.settings')
+      ->set('user_login_method', USER_LOGIN_USERNAME_OR_EMAIL)
+      ->save();;
+    $this->backdropLogin($account, TRUE);
+    $this->backdropLogin($account);
+
+  }
+
   /**
    * Tests Field API fields on user registration forms.
    */
@@ -293,6 +320,31 @@ class UserValidationTestCase extends BackdropWebTestCase {
  */
 class UserLoginTestCase extends BackdropWebTestCase {
   /**
+   * Test that login credentials work.
+   */
+  function testLoginByEmail() {
+    $account = $this->backdropCreateUser(array());
+
+    // Login via name.
+    $this->backdropLogin($account);
+    $this->assertFailedLogin($account, NULL, TRUE);
+
+    // Login via email only.
+    config('user.settings')
+      ->set('user_login_method', USER_LOGIN_EMAIL_ONLY)
+      ->save();
+    $this->backdropLogin($account, TRUE);
+    $this->assertFailedLogin($account);
+
+    // Login via name or email.
+    config('user.settings')
+      ->set('user_login_method', USER_LOGIN_USERNAME_OR_EMAIL)
+      ->save();;
+    $this->backdropLogin($account, TRUE);
+    $this->backdropLogin($account);
+  }
+
+  /**
    * Test the global login flood control.
    */
   function testGlobalLoginFloodControl() {
@@ -402,10 +454,15 @@ class UserLoginTestCase extends BackdropWebTestCase {
    * @param $flood_trigger
    *   Whether or not to expect that the flood control mechanism will be
    *   triggered.
+   * @param $by_email
+   *   Authenticate with email instead of username.
    */
-  function assertFailedLogin($account, $flood_trigger = NULL) {
+  function assertFailedLogin($account, $flood_trigger = NULL, $by_email = FALSE) {
+    if ($this->loggedInUser) {
+      $this->backdropLogout();
+    }
     $edit = array(
-      'name' => $account->name,
+      'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw,
     );
     $this->backdropPost('user', $edit, t('Log in'));
@@ -420,7 +477,22 @@ class UserLoginTestCase extends BackdropWebTestCase {
       }
     }
     else {
-      $this->assertText(t('Sorry, unrecognized username or password. Have you forgotten your password?'));
+      switch (config('user.settings')->get('user_login_method')) {
+        case USER_LOGIN_USERNAME_ONLY:
+          $this->assertText(t('Sorry, unrecognized username or password. Have you forgotten your password?'));
+          break;
+        case USER_LOGIN_EMAIL_ONLY:
+          if (!$by_email) {
+            $this->assertText(t('The e-mail address @email is not valid.', array('@email' => $account->name)));
+          }
+          else {
+            $this->assertText(t('Sorry, unrecognized e-mail address or password. Have you forgotten your password?'));
+          }
+          break;
+        case USER_LOGIN_USERNAME_OR_EMAIL:
+          $this->assertText(t('Sorry, unrecognized username, e-mail address or password. Have you forgotten your password?'));
+        break;
+      }
     }
   }
 }
