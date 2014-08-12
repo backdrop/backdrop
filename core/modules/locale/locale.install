@@ -128,8 +128,7 @@ function locale_schema() {
         'description' => 'Backdrop path in case of online discovered translations or file path in case of imported strings.',
       ),
       'source' => array(
-        'type' => 'text',
-        'mysql_type' => 'blob',
+        'type' => 'blob',
         'not null' => TRUE,
         'description' => 'The original string in English.',
       ),
@@ -164,8 +163,7 @@ function locale_schema() {
         'description' => 'Source string ID. References {locales_source}.lid.',
       ),
       'translation' => array(
-        'type' => 'text',
-        'mysql_type' => 'blob',
+        'type' => 'blob',
         'not null' => TRUE,
         'description' => 'Translation string value in this language.',
       ),

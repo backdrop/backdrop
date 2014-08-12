@@ -244,57 +244,27 @@ function backdrop_detect_baseurl($file = 'core/install.php') {
 }
 
 /**
- * Detects all supported databases that are compiled into PHP.
- *
- * @return
- *  An array of database types compiled into PHP.
- */
-function backdrop_detect_database_types() {
-  $databases = backdrop_get_database_types();
-
-  foreach ($databases as $driver => $installer) {
-    $databases[$driver] = $installer->name();
-  }
-
-  return $databases;
-}
-
-/**
  * Returns all supported database installer objects that are compiled into PHP.
  *
  * @return
  *  An array of database installer objects compiled into PHP.
  */
-function backdrop_get_database_types() {
-  $databases = array();
-
-  // We define a driver as a directory in /core/includes/database that in turn
-  // contains a database.inc file. That allows us to drop in additional drivers
-  // without modifying the installer.
-  // Because we have no registry yet, we need to also include the install.inc
-  // file for the driver explicitly.
+function backdrop_load_database_driver() {
+  // Because we have no registry yet, we need to include the install.inc file
+  // for the driver explicitly.
   require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
-  foreach (file_scan_directory(BACKDROP_ROOT . '/core/includes/database', '/^[a-z]*$/i', array('recurse' => FALSE)) as $file) {
-    if (file_exists($file->uri . '/database.inc') && file_exists($file->uri . '/install.inc')) {
-      $drivers[$file->filename] = $file->uri;
-    }
+
+  $driver = array(
+    'name' => 'mysql',
+    'mysql' => BACKDROP_ROOT . '/core/includes/database/mysql',
+  );
+
+  $installer = db_installer_object('mysql');
+  if ($installer->installable()) {
+    return $installer;
   }
 
-  foreach ($drivers as $driver => $file) {
-    $installer = db_installer_object($driver);
-    if ($installer->installable()) {
-      $databases[$driver] = $installer;
-    }
-  }
-
-  // Usability: unconditionally put the MySQL driver on top.
-  if (isset($databases['mysql'])) {
-    $mysql_database = $databases['mysql'];
-    unset($databases['mysql']);
-    $databases = array('mysql' => $mysql_database) + $databases;
-  }
-
-  return $databases;
+  return FALSE;
 }
 
 /**
@@ -493,7 +463,7 @@ abstract class DatabaseTasks {
   public function getFormOptions($database) {
     $form['database'] = array(
       '#type' => 'textfield',
-      '#title' => st('Database name'),
+      '#title' => st('MySQL Database name'),
       '#default_value' => empty($database['database']) ? '' : $database['database'],
       '#size' => 45,
       '#required' => TRUE,

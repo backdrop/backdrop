@@ -205,8 +205,7 @@ db_create_table('locales_source', array(
       'default' => 'default',
     ),
     'source' => array(
-      'type' => 'text',
-      'mysql_type' => 'blob',
+      'type' => 'blob',
       'not null' => TRUE,
     ),
     'context' => array(
@@ -400,8 +399,7 @@ db_create_table('locales_target', array(
       'default' => 0,
     ),
     'translation' => array(
-      'type' => 'text',
-      'mysql_type' => 'blob',
+      'type' => 'blob',
       'not null' => TRUE,
     ),
     'language' => array(

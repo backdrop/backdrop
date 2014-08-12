@@ -9,11 +9,6 @@
  * Implements hook_install().
  */
 function views_install() {
-  if (Database::getConnection()->databaseType() == 'pgsql') {
-    db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
-    db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
-    db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
-  }
   db_query("UPDATE {system} SET weight = 10 WHERE name = 'views'");
 }
 

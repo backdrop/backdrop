@@ -912,36 +912,27 @@ function install_settings_form($form, &$form_state, &$install_state) {
 
   backdrop_set_title(st('Database configuration'));
 
-  $drivers = backdrop_get_database_types();
-  $drivers_keys = array_keys($drivers);
-
   $form['driver'] = array(
-    '#type' => 'radios',
-    '#title' => st('Database type'),
+    '#type' => 'hidden',
     '#required' => TRUE,
-    '#default_value' => !empty($database['driver']) ? $database['driver'] : current($drivers_keys),
-    '#description' => st('The type of database your @profile data will be stored in.', array('@profile' => backdrop_install_profile_distribution_name())),
+    '#value' => !empty($database['driver']) ? $database['driver'] : 'mysql',
   );
-  if (count($drivers) == 1) {
-    $form['driver']['#disabled'] = TRUE;
-    $form['driver']['#description'] .= ' ' . st('Your PHP configuration only supports a single database type, so it has been automatically selected.');
-  }
+
+  $driver = backdrop_load_database_driver();
 
   // Add driver specific configuration options.
-  foreach ($drivers as $key => $driver) {
-    $form['driver']['#options'][$key] = $driver->name();
+  $form['driver']['#options']['mysql'] = $driver->name();
 
-    $form['settings'][$key] = $driver->getFormOptions($database);
-    $form['settings'][$key]['#prefix'] = '<h2 class="js-hide">' . st('@driver_name settings', array('@driver_name' => $driver->name())) . '</h2>';
-    $form['settings'][$key]['#type'] = 'container';
-    $form['settings'][$key]['#tree'] = TRUE;
-    $form['settings'][$key]['advanced_options']['#parents'] = array($key);
-    $form['settings'][$key]['#states'] = array(
-      'visible' => array(
-        ':input[name=driver]' => array('value' => $key),
-      )
-    );
-  }
+  $form['settings']['mysql'] = $driver->getFormOptions($database);
+  $form['settings']['mysql']['#prefix'] = '<h2 class="js-hide">' . st('@driver_name settings', array('@driver_name' => $driver->name())) . '</h2>';
+  $form['settings']['mysql']['#type'] = 'container';
+  $form['settings']['mysql']['#tree'] = TRUE;
+  $form['settings']['mysql']['advanced_options']['#parents'] = array('mysql');
+  $form['settings']['mysql']['#states'] = array(
+    'visible' => array(
+      ':input[name=driver]' => array('value' => 'mysql'),
+    )
+  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(
@@ -949,7 +940,7 @@ function install_settings_form($form, &$form_state, &$install_state) {
     '#value' => st('Save and continue'),
     '#limit_validation_errors' => array(
       array('driver'),
-      array(isset($form_state['input']['driver']) ? $form_state['input']['driver'] : current($drivers_keys)),
+      array(isset($form_state['input']['driver']) ? $form_state['input']['driver'] : 'mysql'),
     ),
     '#submit' => array('install_settings_form_submit'),
   );
@@ -985,14 +976,13 @@ function install_database_errors($database, $settings_file) {
   $errors = array();
 
   // Check database type.
-  $database_types = backdrop_get_database_types();
   $driver = $database['driver'];
-  if (!isset($database_types[$driver])) {
+  if (!$mysql_driver = backdrop_load_database_driver()) {
     $errors['driver'] = st("In your %settings_file file you have configured @profile to use a %driver server, however your PHP installation currently does not support this database type.", array('%settings_file' => $settings_file, '@profile' => backdrop_install_profile_distribution_name(), '%driver' => $driver));
   }
   else {
     // Run driver specific validation
-    $errors += $database_types[$driver]->validateDatabaseSettings($database);
+    $errors += $mysql_driver->validateDatabaseSettings($database);
 
     // Run tasks associated with the database type. Any errors are caught in the
     // calling function.
