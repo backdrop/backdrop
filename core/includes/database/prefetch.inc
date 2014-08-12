@@ -3,9 +3,7 @@
 /**
  * @file
  * Database interface code for engines that need complete control over their
- * result sets. For example, SQLite will prefix some column names by the name
- * of the table. We post-process the data, by renaming the column names
- * using the same convention as MySQL and PostgreSQL.
+ * result sets.
  */
 
 /**
@@ -174,8 +172,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     // as soon as possible.
     $this->rowCount = $statement->rowCount();
     $this->data = $statement->fetchAll(PDO::FETCH_ASSOC);
-    // Destroy the statement as soon as possible. See
-    // DatabaseConnection_sqlite::PDOPrepare() for explanation.
+    // Destroy the statement as soon as possible.
     unset($statement);
 
     $this->resultRowCount = count($this->data);
@@ -212,8 +209,8 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Grab a PDOStatement object from a given query and its arguments.
    *
-   * Some drivers (including SQLite) will need to perform some preparation
-   * themselves to get the statement right.
+   * Some drivers will need to perform some preparation themselves to get the
+   * statement right.
    *
    * @param $query
    *   The query.
