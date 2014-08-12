@@ -231,6 +231,8 @@ function locale_translation_filter_form() {
     }
   }
 
+  $form['#attributes']['class'] = array('locale-translation-filter-form');
+  
   $form['filters']['actions'] = array(
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
