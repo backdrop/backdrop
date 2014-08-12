@@ -611,7 +611,7 @@ function backdrop_rewrite_settings($settings = array()) {
   // Assign each variable into the global namespace.
   foreach ($settings as $setting => $data) {
     $matches = array();
-    preg_match('!([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
+    preg_match('!^([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
     $variable = $matches[1];
     $nesting = isset($matches[3]) ? explode('\'][\'', $matches[3]) : array();
 
