@@ -174,6 +174,12 @@ function update_helpful_links() {
       'href' => 'admin',
     );
   }
+  if (user_access('administer site configuration')) {
+    $links['status-report'] = array(
+      'title' => t('Status report'),
+      'href' => 'admin/reports/status',
+    );
+  }
   return $links;
 }
 
