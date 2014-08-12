@@ -1758,7 +1758,6 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['admin_account']['account']['pass'] = array(
     '#type' => 'password_confirm',
     '#required' => TRUE,
-    '#size' => 25,
     '#weight' => 0,
   );
 
