@@ -28,6 +28,12 @@ description = Test block caching.
 group = Block
 file = block.test
 
+[BlockHashTestCase]
+name = Block rehash
+description = Checks _block_rehash() functionality.
+group = Block
+file = block.test
+
 [BlockHTMLIdTestCase]
 name = Block HTML id
 description = Test block HTML id validity.

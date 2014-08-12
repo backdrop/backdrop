@@ -34,3 +34,12 @@ function block_test_block_info() {
 function block_test_block_view($delta = 0) {
   return array('content' => state_get('block_test_content', ''));
 }
+
+/**
+ * Implements hook_block_info_alter().
+ */
+function block_test_block_info_alter(&$blocks) {
+  if (state_get('block_test_info_alter')) {
+    $blocks['block_test']['test_html_id']['weight'] = 10000;
+  }
+}
