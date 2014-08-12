@@ -130,6 +130,11 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
 .form-item select.error {
   border: 2px solid red;
 }
+.form-item input[type="checkbox"].error,
+.form-item input[type="radio"].error {
+    outline: 2px solid red;
+    border: none;
+}
 
 /**
  * Inline items.
