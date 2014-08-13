@@ -1369,8 +1369,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  * Temporary files are periodically cleaned. Use file_usage_add() to register
  * the usage of the file which will automatically mark it as permanent.
  *
- * @param $source
- *   A string specifying the filepath or URI of the uploaded file to save.
+ * @param $form_field_name
+ *   A string that is the associative array key of the upload form element in
+ *   the form array.
  * @param $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. See file_validate() for a full discussion of the array format.
@@ -1381,9 +1382,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   (Beware: this is not safe and should only be allowed for trusted users, if
  *   at all).
  * @param $destination
- *   A string containing the URI $source should be copied to.
- *   This must be a stream wrapper URI. If this value is omitted, Backdrop's
- *   temporary files scheme will be used ("temporary://").
+ *   A string containing the URI that the file should be copied to. This must
+ *   be a stream wrapper URI. If this value is omitted, Drupal's temporary
+ *   files scheme will be used ("temporary://").
  * @param $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE: Replace the existing file.
@@ -1401,54 +1402,54 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   - source: Path to the file before it is moved.
  *   - destination: Path to the file after it is moved (same as 'uri').
  */
-function file_save_upload($source, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
+function file_save_upload($form_field_name, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
   global $user;
   static $upload_cache;
 
   // Return cached objects without processing since the file will have
   // already been processed and the paths in _FILES will be invalid.
-  if (isset($upload_cache[$source])) {
-    return $upload_cache[$source];
+  if (isset($upload_cache[$form_field_name])) {
+    return $upload_cache[$form_field_name];
   }
 
   // Make sure there's an upload to process.
-  if (empty($_FILES['files']['name'][$source])) {
+  if (empty($_FILES['files']['name'][$form_field_name])) {
     return NULL;
   }
 
   // Check for file upload errors and return FALSE if a lower level system
   // error occurred. For a complete list of errors:
   // See http://php.net/manual/features.file-upload.errors.php.
-  switch ($_FILES['files']['error'][$source]) {
+  switch ($_FILES['files']['error'][$form_field_name]) {
     case UPLOAD_ERR_INI_SIZE:
     case UPLOAD_ERR_FORM_SIZE:
-      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$source], '%maxsize' => format_size(file_upload_max_size()))), 'error');
+      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$form_field_name], '%maxsize' => format_size(file_upload_max_size()))), 'error');
       return FALSE;
 
     case UPLOAD_ERR_PARTIAL:
     case UPLOAD_ERR_NO_FILE:
-      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
       return FALSE;
 
     case UPLOAD_ERR_OK:
       // Final check that this is a valid upload, if it isn't, use the
       // default error handler.
-      if (is_uploaded_file($_FILES['files']['tmp_name'][$source])) {
+      if (is_uploaded_file($_FILES['files']['tmp_name'][$form_field_name])) {
         break;
       }
 
     // Unknown error
     default:
-      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
       return FALSE;
   }
   // Begin building file entity.
   $values = array(
     'uid' => $user->uid,
     'status' => 0,
-    'filename' => trim(backdrop_basename($_FILES['files']['name'][$source]), '.'),
-    'uri' => $_FILES['files']['tmp_name'][$source],
-    'filesize' => $_FILES['files']['size'][$source],
+    'filename' => trim(backdrop_basename($_FILES['files']['name'][$form_field_name]), '.'),
+    'uri' => $_FILES['files']['tmp_name'][$form_field_name],
+    'filesize' => $_FILES['files']['size'][$form_field_name],
   );
   $values['filemime'] = file_get_mimetype($values['filename']);
   $file = entity_create('file', $values);
@@ -1508,7 +1509,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     return FALSE;
   }
 
-  $file->source = $source;
+  $file->source = $form_field_name;
   // A URI may already have a trailing slash or look like "public://".
   if (substr($destination, -1) != '/') {
     $destination .= '/';
@@ -1517,7 +1518,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // If file_destination() returns FALSE then $replace == FILE_EXISTS_ERROR and
   // there's an existing file so we need to bail.
   if ($file->destination === FALSE) {
-    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $source, '%directory' => $destination)), 'error');
+    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
     return FALSE;
   }
 
@@ -1536,7 +1537,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     else {
       $message .= ' ' . array_pop($errors);
     }
-    form_set_error($source, $message);
+    form_set_error($form_field_name, $message);
     return FALSE;
   }
 
@@ -1544,8 +1545,8 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // directory. This overcomes open_basedir restrictions for future file
   // operations.
   $file->uri = $file->destination;
-  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$source], $file->uri)) {
-    form_set_error($source, t('File upload error. Could not move uploaded file.'));
+  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$form_field_name], $file->uri)) {
+    form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
     watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
     return FALSE;
   }
@@ -1565,7 +1566,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // If we made it this far it's safe to record this file in the database.
   $file->save();
   // Add file to the cache.
-  $upload_cache[$source] = $file;
+  $upload_cache[$form_field_name] = $file;
   return $file;
 }
 
