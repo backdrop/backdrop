@@ -5444,6 +5444,10 @@ function backdrop_page_set_cache() {
   global $base_root;
 
   if (backdrop_page_is_cacheable()) {
+
+    // Check whether the current page might be compressed.
+    $page_compressed = config_get('system.performance', 'page_compression') && extension_loaded('zlib');
+
     $cache = (object) array(
       'cid' => $base_root . request_uri(),
       'data' => array(
@@ -5451,6 +5455,9 @@ function backdrop_page_set_cache() {
         'body' => ob_get_clean(),
         'title' => backdrop_get_title(),
         'headers' => array(),
+        // We need to store whether page was compressed or not,
+        // because by the time it is read, the configuration might change.
+        'page_compressed' => $page_compressed,
       ),
       'expire' => CACHE_TEMPORARY,
       'created' => REQUEST_TIME,
@@ -5468,7 +5475,7 @@ function backdrop_page_set_cache() {
     }
 
     if ($cache->data['body']) {
-      if (config_get('system.performance', 'page_compression') && extension_loaded('zlib')) {
+      if ($page_compressed) {
         $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
       }
       cache('page')->set($cache->cid, $cache->data, $cache->expire);
