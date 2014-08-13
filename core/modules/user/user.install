@@ -480,10 +480,17 @@ function user_update_1008() {
   }
 }
 
+/*
+ * Set default option for login method to use accounts only.
+ */
+function user_update_1009() {
+  config_set('user.settings', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
+}
+
 /**
  * Create the default view for user administration.
  */
-function user_update_1009() {
+function user_update_1010() {
   $view_config = array(
     'name' => 'user_admin',
     'description' => 'Manage user accounts, roles, and permissions.',
