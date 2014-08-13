@@ -114,6 +114,7 @@ function node_schema() {
       'uid'                 => array('uid'),
       'tnid'                => array('tnid'),
       'translate'           => array('translate'),
+      'langcode'            => array('langcode'),
     ),
     'unique keys' => array(
       'vid' => array('vid'),
@@ -555,6 +556,13 @@ function node_update_1002() {
     'default' => '',
   );
   db_change_field('node', 'language', 'langcode', $spec);
+}
+
+/**
+ * Add an index on {node}.langcode.
+ */
+function node_update_1003() {
+  db_add_index('node', 'langcode', array('langcode'));
 }
 
 /**
