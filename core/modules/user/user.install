@@ -466,5 +466,12 @@ function user_update_1006() {
 }
 
 /**
+ * Set default option for login method to use accounts only.
+ */
+function user_update_1007() {
+  config_set('user.settings', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

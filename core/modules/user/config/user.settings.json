@@ -1,6 +1,7 @@
 {
     "_config_name": "user.settings",
     "user_admin_role": "",
+    "user_login_method": "username_or_email",
     "anonymous": "Anonymous",
     "user_email_verification": 1,
     "user_mail_status_activated_notify": 1,

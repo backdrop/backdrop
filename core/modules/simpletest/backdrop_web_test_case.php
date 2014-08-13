@@ -1315,16 +1315,18 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @param $account
    *   User object representing the user to log in.
+   * @param $by_email
+   *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account) {
+  protected function backdropLogin($account, $by_email = FALSE) {
     if ($this->loggedInUser) {
       $this->backdropLogout();
     }
 
     $edit = array(
-      'name' => $account->name,
+      'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw
     );
     $this->backdropPost('user', $edit, t('Log in'));
