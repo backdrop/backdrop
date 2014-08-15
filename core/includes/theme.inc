@@ -1864,7 +1864,7 @@ function theme_links($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *     - children: Contains the rendered childen of the dropbutton menu.
+ *     - children: Contains the rendered children of the dropbutton menu.
  */
 function theme_dropbutton_wrapper($variables) {
   $output = '';
