@@ -19,7 +19,7 @@ function system_admin_config_page() {
       SELECT m.*, ml.*
       FROM {menu_links} ml
       INNER JOIN {menu_router} m ON ml.router_path = m.path
-      WHERE ml.link_path <> 'admin/help' AND menu_name = :menu_name AND ml.plid = :mlid AND hidden = 0", $admin, array('fetch' => PDO::FETCH_ASSOC));
+      WHERE menu_name = :menu_name AND ml.plid = :mlid AND hidden = 0", $admin, array('fetch' => PDO::FETCH_ASSOC));
     foreach ($result as $item) {
       _menu_link_translate($item);
       if (!$item['access']) {
@@ -767,6 +767,28 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 function system_modules($form, $form_state = array()) {
   backdrop_set_title('Modules');
 
+  // JS-only table filters.
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+    '#attached' => array(
+      'library' => array(array('system', 'backdrop.modules')),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Search'),
+    '#size' => 30,
+    '#placeholder' => t('Enter module name…'),
+    '#attributes' => array(
+      'class' => array('table-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the module name or description to filter.'),
+    ),
+  );
+
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
@@ -842,25 +864,25 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
+
     // Generate link for module's permission, if the user has access to it.
     if ($module->status && user_access('administer permissions') && in_array($filename, module_implements('permission'))) {
       $extra['links']['permissions'] = array(
-        '#type' => 'link',
-        '#title' => t('Permissions'),
-        '#href' => 'admin/people/permissions',
-        '#options' => array('fragment' => 'module-' . $filename, 'attributes' => array('class' => array('module-link', 'module-link-permissions'), 'title' => t('Configure permissions'))),
+        'title' => t('Permissions'),
+        'href' => 'admin/people/permissions',
+        'attributes' => array('class' => array('module-link', 'module-link-permissions'), 'title' => t('Configure permissions')),
+        'options' => array('fragment' => 'module-' . $filename),
       );
     }
-    // Generate link for module's configuration page, if the module provides
-    // one.
+
+    // Generate link for module's configuration page, if provided.
     if ($module->status && isset($module->info['configure'])) {
       $configure_link = menu_get_item($module->info['configure']);
       if ($configure_link['access']) {
         $extra['links']['configure'] = array(
-          '#type' => 'link',
-          '#title' => t('Configure'),
-          '#href' => $configure_link['href'],
-          '#options' => array('attributes' => array('class' => array('module-link', 'module-link-configure'), 'title' => $configure_link['description'])),
+          'title' => t('Configure'),
+          'href' => $configure_link['href'],
+          'attributes' => array('class' => array('module-link', 'module-link-configure'), 'title' => $configure_link['description']),
         );
       }
     }
@@ -894,7 +916,7 @@ function system_modules($form, $form_state = array()) {
         t('Name'),
         array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-        array('data' => t('Operations'), 'colspan' => 3),
+        array('data' => t('Operations')),
       ),
       // Ensure that the "Core" package fieldset comes first.
       '#weight' => $package == 'Core' ? -10 : NULL,
@@ -968,32 +990,26 @@ function _system_modules_build_row($info, $extra) {
   $status_short = '';
   $status_long = '';
 
-  // Initialize empty arrays of long and short reasons explaining why the
-  // module is incompatible.
-  // Add each reason as a separate element in both the arrays.
-  $reasons_short = array();
-  $reasons_long = array();
-
   // Check the core compatibility.
   if (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
-    $compatible = FALSE;   
-    $reasons_short[] = t('Incompatible with this version of Backdrop CMS.');
-    $reasons_long[] = t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
+    $compatible = FALSE;
+    $status_short .= t('Incompatible with this version of Backdrop CMS.');
+    $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
   }
 
   // Ensure this module is compatible with the currently installed version of PHP.
   if (version_compare(phpversion(), $info['php']) < 0) {
     $compatible = FALSE;
-    $reasons_short[] = t('Incompatible with this version of PHP');
+    $status_short .= t('Incompatible with this version of PHP');
     $php_required = $info['php'];
     if (substr_count($info['php'], '.') < 2) {
       $php_required .= '.*';
     }
-    $reasons_long[] = t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $php_required, '!php_version' => phpversion()));
+    $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $php_required, '!php_version' => phpversion()));
   }
 
-  // If this module is compatible, present a checkbox indicating
-  // this module may be installed. Otherwise, show a big red X.
+  // If this module is compatible, present a checkbox indicating this module
+  // may be installed. Otherwise, show a big red X.
   if ($compatible) {
     $form['enable'] = array(
       '#type' => 'checkbox',
@@ -1005,17 +1021,24 @@ function _system_modules_build_row($info, $extra) {
     }
   }
   else {
-    $status_short = implode(' ', $reasons_short);
-    $status_long = implode(' ', $reasons_long);  
     $form['enable'] = array(
       '#markup' =>  theme('image', array('uri' => 'core/misc/watchdog-error.png', 'alt' => $status_short, 'title' => $status_short)),
     );
     $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => $status_long));
   }
 
-  // Build operation links.
-  foreach (array('help', 'permissions', 'configure') as $key) {
-    $form['links'][$key] = (isset($extra['links'][$key]) ? $extra['links'][$key] : array());
+  // Build dropbutton links.
+  $links = array();
+  foreach (array('configure', 'permissions') as $key) {
+    if (isset($extra['links'][$key])) {
+      $links[$key] =  $extra['links'][$key];
+    }
+  }
+  if (!empty($links)) {
+    $form['links'] = array(
+      '#type' => 'dropbutton',
+      '#links' => $links,
+    );
   }
 
   return $form;
@@ -2431,30 +2454,50 @@ function theme_system_modules_fieldset($variables) {
   // Iterate through all the modules, which are
   // children of this fieldset.
   foreach (element_children($form) as $key) {
-    // Stick it into $module for easier accessing.
+    // Stick the key into $module for easier access.
     $module = $form[$key];
+    // Create the row for the table.
     $row = array();
     unset($module['enable']['#title']);
+    $module['#requires'] = array_filter($module['#requires']);
+    $module['#required_by'] = array_filter($module['#required_by']);
+
+    $requires = !empty($module['#requires']);
+    $required_by = !empty($module['#required_by']);
+    $requirements = '';
+    $toggle = '';
+
+    // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
-    $label = '<label';
-    if (isset($module['enable']['#id'])) {
-      $label .= ' for="' . $module['enable']['#id'] . '"';
+
+    // Add the second column: module label and expand/collapse functionalty.
+    $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
+
+    // Add the third column: module version number.
+    $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
+
+    if ($requires || $required_by) {
+      $requirements .= ' <div class="requirements">';
+      if ($requires) {
+        $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
+      }
+      if ($required_by) {
+        $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
+      }
+      $requirements .= '</div>';
+
+      // Build a requirements toggle.
+      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
     }
-    $row[] = $label . '><strong>' . backdrop_render($module['name']) . '</strong></label>';
-    $row[] = backdrop_render($module['version']);
+
     // Add the description, along with any modules it requires.
-    $description = backdrop_render($module['description']);
-    if ($module['#requires']) {
-      $description .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
-    }
-    if ($module['#required_by']) {
-      $description .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
-    }
-    $row[] = array('data' => $description, 'class' => array('description'));
-    // Display links (such as help or permissions) in their own columns.
-    foreach (array('help', 'permissions', 'configure') as $key) {
-      $row[] = array('data' => backdrop_render($module['links'][$key]), 'class' => array($key));
-    }
+    $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
+
+    // Add the fourth column: description, along with any modules it requires.
+    $row[] = array('class' => array('description'), 'data' => $details);
+
+    // Add the fifth column: links (such as configure or permissions) in their own columns.
+    $row[] = array('data' => backdrop_render($module['links']), 'class' => array('operations'));
 
     // Hide modules that can't be disabled at all.
     if (!$module["#required_by_distribution"]) {
