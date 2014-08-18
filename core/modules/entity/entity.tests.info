@@ -21,3 +21,9 @@ name = Entity CRUD hooks
 description = Tests the invocation of hooks when inserting, loading, updating or deleting an entity.
 group = Entity API
 file = tests/entity_crud_hook_test.test
+
+[EntityLoadTestCase]
+name = Entity loading
+description = Tests the entity_load() function.
+group = Entity API
+file = tests/entity_crud.test
