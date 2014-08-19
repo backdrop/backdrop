@@ -5058,8 +5058,7 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
     // Add the table drag JavaScript to the page before the module JavaScript
     // to ensure that table drag behaviors are registered before any module
     // uses it.
-    backdrop_add_library('system', 'jquery.cookie');
-    backdrop_add_js('core/misc/tabledrag.js', array('weight' => -1));
+    backdrop_add_library('system', 'backdrop.tabledrag');
     $js_added = TRUE;
   }
 
