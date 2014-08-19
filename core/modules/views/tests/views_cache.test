@@ -180,7 +180,7 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     $system_css_path = backdrop_get_path('module', 'system') . '/system.maintenance.css';
     backdrop_add_css($system_css_path);
-    $system_js_path = backdrop_get_path('module', 'system') . '/system.cron.js';
+    $system_js_path = backdrop_get_path('module', 'user') . '/user.permissions.js';
     backdrop_add_js($system_js_path);
 
     $view->init_display();
