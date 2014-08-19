@@ -12,6 +12,7 @@
   "predef"    : [
     "Backdrop",
     "Drupal",
+    "domready",
     "jQuery"
   ]
 }

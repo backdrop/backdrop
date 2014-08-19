@@ -5,11 +5,14 @@
  * behaviors (the main way of interacting with JS in Backdrop), theming
  * wrappers, and localization functions.
  */
-window.Backdrop = window.Backdrop || { 'settings': {}, 'behaviors': {}, 'locale': {} };
+window.Backdrop = { 'settings': {}, 'behaviors': {}, 'locale': {} };
+
+// Class indicating that JS is enabled; used for styling purpose.
+document.documentElement.className += ' js';
 
 // JavaScript should be made compatible with libraries other than jQuery by
 // wrapping it in an anonymous closure.
-(function ($, undefined) {
+(function (domready, undefined) {
 
 /**
  * Attach all registered behaviors to a page element.
@@ -59,6 +62,9 @@ Backdrop.attachBehaviors = function (context, settings) {
     }
   });
 };
+
+// Attach all behaviors.
+domready(function () { Backdrop.attachBehaviors(document, BackdropSettings); });
 
 /**
  * Detach registered behaviors from a page element.
@@ -254,6 +260,15 @@ Backdrop.formatPlural = function (count, singular, plural, args, options) {
 };
 
 /**
+ * Encodes a Backdrop path for use in a URL.
+ *
+ * For aesthetic reasons slashes are not escaped.
+ */
+Backdrop.encodePath = function (item) {
+  return window.encodeURIComponent(item).replace(/%2F/g, '/');
+};
+
+/**
  * Generate the themed representation of a Backdrop object.
  *
  * All requests for themed output must go through this function. It examines
@@ -280,99 +295,16 @@ Backdrop.theme = function (func) {
 };
 
 /**
- * Freeze the current body height (as minimum height). Used to prevent
- * unnecessary upwards scrolling when doing DOM manipulations.
- */
-Backdrop.freezeHeight = function () {
-  Backdrop.unfreezeHeight();
-  $('<div id="freeze-height"></div>').css({
-    position: 'absolute',
-    top: '0px',
-    left: '0px',
-    width: '1px',
-    height: $('body').css('height')
-  }).appendTo('body');
-};
-
-/**
- * Unfreeze the body height.
- */
-Backdrop.unfreezeHeight = function () {
-  $('#freeze-height').remove();
-};
-
-/**
- * Encodes a Backdrop path for use in a URL.
+ * Formats text for emphasized display in a placeholder inside a sentence.
  *
- * For aesthetic reasons slashes are not escaped.
+ * @param str
+ *   The text to format (plain-text).
+ * @return
+ *   The formatted text (html).
  */
-Backdrop.encodePath = function (item) {
-  return window.encodeURIComponent(item).replace(/%2F/g, '/');
+Backdrop.theme.placeholder = function (str) {
+  return '<em class="placeholder">' + Backdrop.checkPlain(str) + '</em>';
 };
-
-/**
- * Get the text selection in a textarea.
- */
-Backdrop.getSelection = function (element) {
-  var range1, range2, start, end;
-  if (typeof element.selectionStart != 'number' && document.selection) {
-    // The current selection.
-    range1 = document.selection.createRange();
-    range2 = range1.duplicate();
-    // Select all text.
-    range2.moveToElementText(element);
-    // Now move 'dummy' end point to end point of original range.
-    range2.setEndPoint('EndToEnd', range1);
-    // Now we can calculate start and end points.
-    start = range2.text.length - range1.text.length;
-    end = start + range1.text.length;
-    return { 'start': start, 'end': end };
-  }
-  return { 'start': element.selectionStart, 'end': element.selectionEnd };
-};
-
-/**
- * Build an error message from an Ajax response.
- */
-Backdrop.ajaxError = function (xmlhttp, uri) {
-  var statusCode, statusText, pathText, responseText, readyStateText, message;
-  if (xmlhttp.status) {
-    statusCode = "\n" + Backdrop.t("An AJAX HTTP error occurred.") +  "\n" + Backdrop.t("HTTP Result Code: !status", {'!status': xmlhttp.status});
-  }
-  else {
-    statusCode = "\n" + Backdrop.t("An AJAX HTTP request terminated abnormally.");
-  }
-  statusCode += "\n" + Backdrop.t("Debugging information follows.");
-  pathText = "\n" + Backdrop.t("Path: !uri", {'!uri': uri} );
-  statusText = '';
-  // In some cases, when statusCode == 0, xmlhttp.statusText may not be defined.
-  // Unfortunately, testing for it with typeof, etc, doesn't seem to catch that
-  // and the test causes an exception. So we need to catch the exception here.
-  try {
-    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': $.trim(xmlhttp.statusText)});
-  }
-  catch (e) {}
-
-  responseText = '';
-  // Again, we don't have a way to know for sure whether accessing
-  // xmlhttp.responseText is going to throw an exception. So we'll catch it.
-  try {
-    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': $.trim(xmlhttp.responseText) } );
-  } catch (e) {}
-
-  // Make the responseText more readable by stripping HTML tags and newlines.
-  responseText = responseText.replace(/<("[^"]*"|'[^']*'|[^'">])*>/gi,"");
-  responseText = responseText.replace(/[\n]+\s+/g,"\n");
-
-  // We don't need readyState except for status == 0.
-  readyStateText = xmlhttp.status == 0 ? ("\n" + Backdrop.t("ReadyState: !readyState", {'!readyState': xmlhttp.readyState})) : "";
-
-  message = statusCode + pathText + statusText + responseText + readyStateText;
-  return message;
-};
-
-// Class indicating that JS is enabled; used for styling purpose.
-$('html').addClass('js');
 
 /**
  * Additions to jQuery.support.
@@ -388,32 +320,4 @@ $(function () {
   }
 });
 
-// On page ready, attach behaviors in which all other Backdrop JS is handled.
-$(function () {
-  // Alias the Backdrop namespace to Drupal if compatibility is enabled.
-  if (Backdrop.settings.drupalCompatibility) {
-    window.Drupal = Backdrop;
-  }
-
-  Backdrop.attachBehaviors(document, Backdrop.settings);
-});
-
-/**
- * The default themes.
- */
-Backdrop.theme.prototype = {
-
-  /**
-   * Formats text for emphasized display in a placeholder inside a sentence.
-   *
-   * @param str
-   *   The text to format (plain-text).
-   * @return
-   *   The formatted text (html).
-   */
-  placeholder: function (str) {
-    return '<em class="placeholder">' + Backdrop.checkPlain(str) + '</em>';
-  }
-};
-
-})(jQuery);
+})(domready);

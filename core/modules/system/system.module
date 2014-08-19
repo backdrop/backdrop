@@ -1188,6 +1188,16 @@ function system_library_info() {
     ),
   );
 
+  // domReady.
+  $libraries['domready'] = array(
+    'title' => 'domReady',
+    'website' => 'https://github.com/ded/domready',
+    'version' => 'master',
+    'js' => array(
+      'core/misc/domready/ready.min.js' => array('group' => JS_LIBRARY, 'weight' => -21),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',

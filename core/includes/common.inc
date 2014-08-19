@@ -4145,13 +4145,15 @@ function backdrop_region_class($region) {
  *       else being the same, JavaScript added by a call to backdrop_add_js() that
  *       happened later in the page request gets added to the page after one for
  *       which backdrop_add_js() happened earlier in the page request.
- *   - defer: If set to TRUE, the defer attribute is set on the <script>
- *     tag. Defaults to FALSE.
  *   - cache: If set to FALSE, the JavaScript file is loaded anew on every page
  *     call; in other words, it is not cached. Used only when 'type' references
  *     a JavaScript file. Defaults to TRUE.
  *   - preprocess: If TRUE and JavaScript aggregation is enabled, the script
  *     file will be aggregated. Defaults to TRUE.
+ *   - attributes: An associative array of attributes for the <script> tag. This
+ *     may be used to add 'defer', 'async', or custom attributes. Note that
+ *     setting any attributes will disable preprocessing as though the
+ *     'preprocess' option was set to FALSE.
  *   - browsers: An array containing information specifying which browsers
  *     should load the JavaScript item. See
  *     backdrop_pre_render_conditional_comments() for details.
@@ -4177,8 +4179,8 @@ function backdrop_add_js($data = NULL, $options = NULL) {
   }
   $options += backdrop_js_defaults($data);
 
-  // Preprocess can only be set if caching is enabled.
-  $options['preprocess'] = $options['cache'] ? $options['preprocess'] : FALSE;
+  // Preprocess can only be set if caching is enabled and no attributes are set.
+  $options['preprocess'] = $options['cache'] && empty($options['attributes']) ? $options['preprocess'] : FALSE;
 
   // Tweak the weight so that files of the same weight are included in the
   // order of the calls to backdrop_add_js().
@@ -4266,7 +4268,7 @@ function backdrop_js_defaults($data = NULL) {
     'weight' => 0,
     'scope' => 'header',
     'cache' => TRUE,
-    'defer' => FALSE,
+    'attributes' => array(),
     'preprocess' => TRUE,
     'version' => NULL,
     'data' => $data,
@@ -4434,8 +4436,9 @@ function backdrop_pre_render_scripts($elements) {
       foreach ($group['items'] as $item) {
         // Element properties that do not depend on item type.
         $element = $element_defaults;
-        if (!empty($item['defer'])) {
-          $element['#attributes']['defer'] = 'defer';
+        // Attributes may only be set if this script is output independently.
+        if (!empty($element['#attributes']['src']) && !empty($item['attributes'])) {
+          $element['#attributes'] += $item['attributes'];
         }
         $element['#browsers'] = $item['browsers'];
 
