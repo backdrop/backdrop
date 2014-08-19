@@ -285,9 +285,6 @@ function _book_admin_table_tree($tree, &$form) {
 function theme_book_admin_table($variables) {
   $form = $variables['form'];
 
-  backdrop_add_tabledrag('book-outline', 'match', 'parent', 'book-plid', 'book-plid', 'book-mlid', TRUE, MENU_MAX_DEPTH - 2);
-  backdrop_add_tabledrag('book-outline', 'order', 'sibling', 'book-weight');
-
   $header = array(t('Title'), t('Weight'), t('Parent'), t('Operations'));
 
   $rows = array();
@@ -338,5 +335,26 @@ function theme_book_admin_table($variables) {
     $rows[] = $row;
   }
 
-  return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'book-outline'), 'empty' => t('No book content available.')));
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => 'book-outline'),
+    'empty' => t('No book content available.'),
+    'tabledrag' => array(
+      array(
+        'action' => 'match',
+        'relationship' => 'parent',
+        'group' => 'book-plid',
+        'subgroup' => 'book-plid',
+        'source' => 'book-mlid',
+        'hidden' => TRUE,
+        'limit' => MENU_MAX_DEPTH - 2,
+      ),
+      array(
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'book-weight',
+      ),
+    ),
+  ));
 }

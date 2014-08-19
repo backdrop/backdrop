@@ -237,9 +237,6 @@ function menu_overview_form_submit($form, &$form_state) {
 function theme_menu_overview_form($variables) {
   $form = $variables['form'];
 
-  backdrop_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
-  backdrop_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
-
   $header = array(
     t('Menu link'),
     array('data' => t('Enabled'), 'class' => array('checkbox')),
@@ -275,7 +272,25 @@ function theme_menu_overview_form($variables) {
   if (empty($rows)) {
     $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '7'));
   }
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
+
+  $tabledrag = array(
+    array(
+      'action' => 'match',
+      'relationship' => 'parent',
+      'group' => 'menu-plid',
+      'subgroup' => 'menu-plid',
+      'source' => 'menu-mlid',
+      'hidden' => TRUE,
+      'limit' => MENU_MAX_DEPTH - 1,
+    ),
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'menu-weight',
+    ),
+  );
+
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview'), 'tabledrag' => $tabledrag));
   $output .= backdrop_render_children($form);
   return $output;
 }

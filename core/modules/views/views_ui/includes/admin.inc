@@ -3309,7 +3309,14 @@ function theme_views_ui_reorder_displays_form($vars) {
 
   $header = array(t('Display'), t('Weight'), t('Remove'));
   $output = '';
-  backdrop_add_tabledrag('reorder-displays', 'order', 'sibling', 'weight');
+  $tabledrag = array(
+    'reorder-displays',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'weight',
+    ),
+  );
 
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
@@ -3614,15 +3621,22 @@ function theme_views_ui_rearrange_form($variables) {
   if (empty($rows)) {
     $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
   }
+  $tabledrag = array(
+    'arrange',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'weight',
+    ),
+  );
 
   $header = array('', t('Weight'), t('Remove'));
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll" data-backdrop-views-scroll>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange'), 'tabledrag' => $tabledrag));
   $output .= '</div>';
   $output .= backdrop_render_children($form);
-  backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
-
+  
   return $output;
 }
 
@@ -3731,8 +3745,15 @@ function theme_views_ui_build_group_filter_form($variables) {
     );
     $rows[] = array('data' => $data, 'id' => 'views-row-' . $group_id, 'class' => array('draggable'));
   }
-  $table = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('views-filter-groups'), 'id' => 'views-filter-groups'))) . backdrop_render($form['add_group']);
-  backdrop_add_tabledrag('views-filter-groups', 'order', 'sibling', 'weight');
+  $tabledrag = array(
+    'views-filter-groups',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'weight',
+    )
+  );
+  $table = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('views-filter-groups'), 'id' => 'views-filter-groups'), 'tabledrag' => $tabledrag)) . backdrop_render($form['add_group']);
   $render_form = backdrop_render_children($form);
   return $output . $render_form . $table . $more;
 }
@@ -3970,7 +3991,14 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
     if ($group_id !== 'ungroupable') {
       // Set up tabledrag so that it changes the group dropdown when rows are
       // dragged between groups.
-      backdrop_add_tabledrag('views-rearrange-filters', 'match', 'sibling', 'views-group-select', 'views-group-select-' . $group_id);
+      $options = array(
+        'table_id' => 'views-rearrange-filters',
+        'action' => 'match',
+        'relationship' => 'sibling',
+        'group' => 'views-group-select',
+        'subgroup' => 'views-group-select-' . $group_id,
+      );
+      backdrop_attach_tabledrag($form['override'], $options);
 
       // Title row, spanning all columns.
       $row = array();
@@ -4030,14 +4058,20 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   }
 
   if (!empty($ungroupable_rows)) {
-    backdrop_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
     $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
     $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'views-rearrange-filters-ungroupable', 'class' => array('arrange'))));
   }
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
-  backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
+  $tabledrag = array(
+    'views-rearrange-filters',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'weight',
+    ),
+  );
+  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange')), 'tabledrag' => $tabledrag));
   $output .= '</div>';
 
   // When JavaScript is enabled, the button for adding a new group should be

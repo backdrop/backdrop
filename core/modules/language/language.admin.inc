@@ -109,14 +109,22 @@ function theme_language_admin_overview_form_table($variables) {
     $rows[] = $row;
   }
 
+  $tabledrag = array(
+    'language-order',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'language-order-weight',
+    ),
+  );
+
   $output = theme('table', array(
     'header' => $form['#header'],
     'rows' => $rows,
     'attributes' => array('id' => 'language-order'),
+    'tabledrag' => $tabledrag,
   ));
   $output .= backdrop_render_children($form);
-
-  backdrop_add_tabledrag('language-order', 'order', 'sibling', 'language-order-weight');
 
   return $output;
 }

@@ -172,11 +172,16 @@ function theme_language_negotiation_configure_form($variables) {
       'header' => $header,
       'rows' => $rows,
       'attributes' => array('id' => "language-negotiation-providers-$type"),
+      'tabledrag' => array(
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => "language-provider-weight-$type",
+        ),
+      ),
     );
     $table  = theme('table', $variables);
     $table .= backdrop_render_children($form[$type]);
-
-    backdrop_add_tabledrag("language-negotiation-providers-$type", 'order', 'sibling', "language-provider-weight-$type");
 
     $output .= '<div class="form-item">' . $title . $description . $table . '</div>';
   }

@@ -100,11 +100,17 @@ function theme_filter_admin_overview($variables) {
     );
     $rows[] = $row;
   }
+  $tabledrag = array(
+    'text-format-order',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'text-format-order-weight',
+    )
+  );
   $header = array(t('Name'), t('Roles'), t('Weight'), t('Operations'));
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order'), 'tabledrag' => $tabledrag));
   $output .= backdrop_render_children($form);
-
-  backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
 
   return $output;
 }
@@ -326,9 +332,18 @@ function theme_filter_admin_format_filter_order($variables) {
       'class' => array('draggable'),
     );
   }
+  $tabledrag = array(
+    'filter-order',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'filter-order-weight',
+      'hidden' => TRUE,
+    ),
+  );
+  
   $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order'), 'tabledrag' => $tabledrag));
 
   return $output;
 }

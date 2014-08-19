@@ -3,9 +3,9 @@
 /**
  * Drag and drop table rows with field manipulation.
  *
- * Using the backdrop_add_tabledrag() function, any table with weights or parent
- * relationships may be made into draggable tables. Columns containing a field
- * may optionally be hidden, providing a better user experience.
+ * Using the backdrop_attach_tabledrag() function, any table with weights or
+ * parent relationships may be made into draggable tables. Columns containing a
+ * field may optionally be hidden, providing a better user experience.
  *
  * Created tableDrag instances may be modified with custom behaviors by
  * overriding the .onDrag, .onDrop, .row.onSwap, and .row.onIndent methods.
@@ -35,7 +35,7 @@ Backdrop.behaviors.tableDrag = {
  * @param table
  *   DOM object for the table to be made draggable.
  * @param tableSettings
- *   Settings for the table added via backdrop_add_tabledrag().
+ *   Settings for the table added via backdrop_attach_tabledrag().
  */
 Backdrop.tableDrag = function (table, tableSettings) {
   var self = this;
