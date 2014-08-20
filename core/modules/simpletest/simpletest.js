@@ -1,98 +1,57 @@
 (function ($) {
 
 /**
- * Add the cool table collapsing on the testing overview page.
+ * Collapses table rows followed by group rows on the test listing page.
  */
-Backdrop.behaviors.simpleTestMenuCollapse = {
+Backdrop.behaviors.simpleTestGroupCollapse = {
   attach: function (context, settings) {
-    var timeout = null;
-    // Adds expand-collapse functionality.
-    $('div.simpletest-image').once('simpletest-image', function () {
-      var $this = $(this);
-      var direction = settings.simpleTest[this.id].imageDirection;
-      $this.html(settings.simpleTest.images[direction]);
-
-      // Adds group toggling functionality to arrow images.
-      $this.click(function () {
-        var trs = $this.closest('tbody').children('.' + settings.simpleTest[this.id].testClass);
-        var direction = settings.simpleTest[this.id].imageDirection;
-        var row = direction ? trs.length - 1 : 0;
-
-        // If clicked in the middle of expanding a group, stop so we can switch directions.
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-
-        // Function to toggle an individual row according to the current direction.
-        // We set a timeout of 20 ms until the next row will be shown/hidden to
-        // create a sliding effect.
-        function rowToggle() {
-          if (direction) {
-            if (row >= 0) {
-              $(trs[row]).hide();
-              row--;
-              timeout = setTimeout(rowToggle, 20);
-            }
-          }
-          else {
-            if (row < trs.length) {
-              $(trs[row]).removeClass('js-hide').show();
-              row++;
-              timeout = setTimeout(rowToggle, 20);
-            }
-          }
-        }
-
-        // Kick-off the toggling upon a new click.
-        rowToggle();
-
-        // Toggle the arrow image next to the test group title.
-        $this.html(settings.simpleTest.images[(direction ? 0 : 1)]);
-        settings.simpleTest[this.id].imageDirection = !direction;
-
-      });
+      $(context).find('.simpletest-group').once('simpletest-group-collapse', function () {
+        var $group = $(this);
+        var $image = $group.find('.simpletest-image');
+        $image
+          .html(Backdrop.settings.simpleTest.images[0])
+          .on('click', function () {
+            var $tests = $group.nextUntil('.simpletest-group');
+            var expand = !$group.hasClass('expanded');
+            $group.toggleClass('expanded', expand);
+            $tests.toggleClass('js-hide', !expand);
+            $image.html(Backdrop.settings.simpleTest.images[+expand]);
+          });
     });
   }
 };
 
 /**
- * Select/deselect all the inner checkboxes when the outer checkboxes are
- * selected/deselected.
+ * Toggles test checkboxes to match the group checkbox.
  */
 Backdrop.behaviors.simpleTestSelectAll = {
   attach: function (context, settings) {
-    $('td.simpletest-select-all').once('simpletest-select-all', function () {
-      var testCheckboxes = settings.simpleTest['simpletest-test-group-' + $(this).attr('id')].testNames;
-      var groupCheckbox = $('<input type="checkbox" class="form-checkbox" id="' + $(this).attr('id') + '-select-all" />');
+    $(context).find('.simpletest-group').once('simpletest-group-select-all', function () {
+      var $group = $(this);
+      var $cell = $group.find('.simpletest-group-select-all');
+      var $groupCheckbox = $('<input type="checkbox" id="' + $cell.attr('id') + '-group-select-all" class="form-checkbox" />');
+      var $testCheckboxes = $group.nextUntil('.simpletest-group').find('input[type=checkbox]');
+      $cell.append($groupCheckbox);
 
-      // Each time a single-test checkbox is checked or unchecked, make sure
-      // that the associated group checkbox gets the right state too.
-      function updateGroupCheckbox() {
-        var checkedTests = 0;
-        for (var i = 0; i < testCheckboxes.length; i++) {
-          if ($('#' + testCheckboxes[i]).prop('checked')) {
-             checkedTests++;
-           }
-        }
-        $(groupCheckbox).prop('checked', (checkedTests === testCheckboxes.length));
-      }
-
-      // Have the single-test checkboxes follow the group checkbox.
-      groupCheckbox.change(function () {
+      // Toggle the test checkboxes when the group checkbox is toggled.
+      $groupCheckbox.on('change', function () {
         var checked = $(this).prop('checked');
-        for (var i = 0; i < testCheckboxes.length; i++) {
-          $('#' + testCheckboxes[i]).prop('checked', checked);
-        }
+        $testCheckboxes.prop('checked', checked);
       });
 
-      // Have the group checkbox follow the single-test checkboxes.
-      for (var i = 0; i < testCheckboxes.length; i++) {
-        $('#' + testCheckboxes[i]).change(updateGroupCheckbox);
+      // Update the group checkbox when a test checkbox is toggled.
+      function updateGroupCheckbox() {
+        var allChecked = true;
+        $testCheckboxes.each(function () {
+          if (!$(this).prop('checked')) {
+            allChecked = false;
+            return false;
+          }
+        });
+        $groupCheckbox.prop('checked', allChecked);
       }
 
-      // Initialize status for the group checkbox correctly.
-      updateGroupCheckbox();
-      $(this).append(groupCheckbox);
+      $testCheckboxes.on('change', updateGroupCheckbox);
     });
   }
 };

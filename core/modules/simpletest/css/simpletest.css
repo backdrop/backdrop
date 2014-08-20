@@ -1,49 +1,56 @@
+/**
+ * @file
+ * Styles used in selecting tests and displaying results.
+ */
 
-/* Test Table */
+/* Test table */
 #simpletest-form-table th.select-all {
   width: 1em;
 }
-th.simpletest_test {
+#simpletest-form-table th.simpletest-test {
   width: 16em;
 }
-
-.simpletest-image {
+#simpletest-form-table .simpletest-image {
   display: inline-block;
   cursor: pointer;
   width: 1em;
 }
-.simpletest-group-label label {
+#simpletest-form-table td.simpletest-group-label {
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+#simpletest-form-table td.simpletest-group-label label {
   display: inline;
   font-weight: bold;
-}
-.simpletest-test-label label {
   margin-left: 1em; /* LTR */
 }
-.simpletest-test-description .description {
+[dir="rtl"] #simpletest-form-table .simpletest-group-label label {
+  margin-right: 1em;
+}
+#simpletest-form-table .description {
   margin: 0;
 }
 #simpletest-form-table tr td {
   background-color: white;
   color: #494949;
+  border: none;
 }
 #simpletest-form-table tr.simpletest-group td {
   background-color: #edf5fa;
   color: #494949;
 }
-
-table#simpletest-form-table tr.simpletest-group label {
+#simpletest-form-table tr.simpletest-group label {
   display: inline;
 }
 
-div.message > div.item-list {
-  font-weight: normal;
-}
-
-div.simpletest-pass {
+/* Test results */
+.simpletest-pass {
   color: #33a333;
+  font-weight: normal;
 }
 .simpletest-fail {
   color: #981010;
+  font-weight: normal;
 }
 
 tr.simpletest-pass.odd {
