@@ -165,7 +165,12 @@ function theme_simpletest_test_table($variables) {
   }
 
   // Add js array of settings.
-  backdrop_add_js(array('simpleTest' => $js), 'setting');
+  $attached = array();
+  $attached['#attached']['js'][] = array(
+    'data' => array('simpleTest' => $js),
+    'type' => 'setting',
+  );
+  backdrop_render($attached);
 
   if (empty($rows)) {
     return '<strong>' . t('No tests to display.') . '</strong>';
