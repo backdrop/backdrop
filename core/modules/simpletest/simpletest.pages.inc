@@ -87,7 +87,14 @@ function theme_simpletest_test_table($variables) {
       theme('image', array('uri' => 'core/misc/menu-expanded.png', 'width' => 7, 'height' => 7, 'alt' => t('Collapse'), 'title' => t('Collapse'))) . ' <a href="#" class="simpletest-collapse">(' . t('Collapse') . ')</a>',
     ),
   );
-  backdrop_add_js(array('simpleTest' => $js), 'setting');
+
+  // Add js array of settings.
+  $attached = array();
+  $attached['#attached']['js'][] = array(
+    'data' => array('simpleTest' => $js),
+    'type' => 'setting',
+  );
+  backdrop_render($attached);
 
   // Cycle through each test group and create a row.
   $rows = array();
