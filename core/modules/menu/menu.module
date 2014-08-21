@@ -741,13 +741,6 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#description' => t('Choose the menu item to be the default parent for a new link in the content authoring form.'),
     '#attributes' => array('class' => array('menu-title-select')),
   );
-
-  // Call Backdrop.menu_update_parent_list() to filter the list of
-  // available default parent menu items based on the selected menus.
-  backdrop_add_js(
-    '(function ($) { Backdrop.menu_update_parent_list(); })(jQuery);',
-    array('scope' => 'footer', 'type' => 'inline')
-  );
 }
 
 /**
