@@ -25,9 +25,6 @@ function seven_preprocess_html(&$variables) {
     ),
   );
   backdrop_add_html_head($viewport, 'viewport');
-
-  // Add conditional CSS for IE8 and below.
-  backdrop_add_css(path_to_theme() . '/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'weight' => 999, 'preprocess' => FALSE));
 }
 
 /**

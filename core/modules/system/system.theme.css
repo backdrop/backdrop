@@ -19,12 +19,6 @@ hr {
   border: 1px solid gray;
   height: 1px;
 }
-img {
-  border: 0;
-}
-table {
-  border-collapse: collapse;
-}
 th {
   border-bottom: 3px solid #ccc;
   padding-right: 1em; /* LTR */
