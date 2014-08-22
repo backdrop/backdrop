@@ -339,6 +339,17 @@ function _backdrop_default_html_head() {
  */
 function backdrop_get_html_head() {
   $elements = backdrop_add_html_head();
+
+  // Always add the default mobile meta tags.
+  $elements['viewport'] = array(
+    '#type' => 'html_tag',
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'viewport',
+      'content' => 'width=device-width, initial-scale=1',
+    ),
+  );
+
   backdrop_alter('html_head', $elements);
   return backdrop_render($elements);
 }

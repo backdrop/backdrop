@@ -13,21 +13,6 @@ function seven_preprocess_maintenance_page(&$variables) {
 }
 
 /**
- * Override or insert variables into the html template.
- */
-function seven_preprocess_html(&$variables) {
-  // Add viewport setting for mobile.
-  $viewport = array(
-    '#tag' => 'meta',
-    '#attributes' => array(
-      'name' => 'viewport',
-      'content' => 'width=device-width, initial-scale=1',
-    ),
-  );
-  backdrop_add_html_head($viewport, 'viewport');
-}
-
-/**
  * Override or insert variables into the page template.
  */
 function seven_preprocess_page(&$variables) {
