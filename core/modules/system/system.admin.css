@@ -80,6 +80,9 @@ small .admin-link:after {
 #system-modules div.incompatible {
   font-weight: bold;
 }
+#system-modules td.operations {
+  min-width: 110px;
+}
 div.admin-requirements,
 div.admin-required {
   font-size: 0.9em;
@@ -93,24 +96,6 @@ span.admin-enabled {
 }
 span.admin-missing {
   color: #f00;
-}
-a.module-link {
-  display: block;
-  padding: 1px 0 1px 20px; /* LTR */
-  white-space: nowrap;
-}
-a.module-link-help {
-  background: url(../../misc/help.png) 0 50% no-repeat; /* LTR */
-}
-a.module-link-permissions {
-  background: url(../../misc/permissions.png) 0 50% no-repeat; /* LTR */
-}
-a.module-link-configure {
-  background: url(../../misc/configure.png) 0 50% no-repeat; /* LTR */
-}
-.module-help {
-  margin-left: 1em; /* LTR */
-  float: right; /* LTR */
 }
 
 /**

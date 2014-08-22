@@ -1197,6 +1197,14 @@ function system_library_info() {
     ),
   );
 
+  $libraries['backdrop.modules'] = array(
+    'title' => 'Modules Filter',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',

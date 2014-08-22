@@ -46,6 +46,16 @@
 }
 
 /**
+ * For anything you want to show on page load only when JS is enabled.
+ */
+.js-show {
+  display: none;
+}
+.js .js-show {
+  display: block;
+}
+
+/**
  * Collapsible fieldsets.
  *
  * @see collapse.js
