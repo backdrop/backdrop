@@ -34,6 +34,9 @@ class FormsTestCase extends BackdropWebTestCase {
     $elements['url']['element'] = array('#title' => $this->randomName(), '#type' => 'url');
     $elements['url']['empty_values'] = $empty_strings;
 
+    $elements['search']['element'] = array('#title' => $this->randomName(), '#type' => 'search');
+    $elements['search']['empty_values'] = $empty_strings;
+
     $elements['password']['element'] = array('#title' => $this->randomName(), '#type' => 'password');
     $elements['password']['empty_values'] = $empty_strings;
 
@@ -460,7 +463,7 @@ class FormsTestCase extends BackdropWebTestCase {
 
     // All the elements should be marked as disabled, including the ones below
     // the disabled container.
-    $this->assertEqual(count($disabled_elements), 38, 'The correct elements have the disabled property in the HTML code.');
+    $this->assertEqual(count($disabled_elements), 39, 'The correct elements have the disabled property in the HTML code.');
 
     $this->backdropPost(NULL, $edit, t('Submit'));
     $returned_values['hijacked'] = backdrop_json_decode($this->content);
