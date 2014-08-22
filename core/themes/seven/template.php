@@ -1,7 +1,42 @@
 <?php
 
 /**
- * Override or insert variables into the page template.
+ * @file
+ * Functions to support theming in the Seven theme.
+ */
+
+/**
+ * Implements hook_preprocess_HOOK() for maintenance-page.tpl.php.
+ */
+function seven_preprocess_maintenance_page(&$variables) {
+  // While markup for normal pages is split into page.tpl.php and html.tpl.php,
+  // the markup for the maintenance page is all in the single
+  // maintenance-page.tpl.php template. So, to have what's done in
+  // seven_preprocess_html() also happen on the maintenance page, it has to be
+  // called here.
+  seven_preprocess_html($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for html.tpl.php.
+ */
+function seven_preprocess_html(&$variables) {
+  // Add viewport setting for mobile.
+  $viewport = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'viewport',
+      'content' => 'width=device-width, initial-scale=1',
+    ),
+  );
+  backdrop_add_html_head($viewport, 'viewport');
+
+  // Add conditional CSS for IE8 and below.
+  backdrop_add_css(path_to_theme() . '/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'weight' => 999, 'preprocess' => FALSE));
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page.tpl.php.
  */
 function seven_preprocess_page(&$variables) {
   $variables['primary_local_tasks'] = $variables['tabs'];
@@ -13,7 +48,7 @@ function seven_preprocess_page(&$variables) {
 }
 
 /**
- * Display the list of available node types for node creation.
+ * Displays the list of available node types for node creation.
  */
 function seven_node_add_list($variables) {
   $content = $variables['content'];
@@ -37,7 +72,7 @@ function seven_node_add_list($variables) {
 /**
  * Overrides theme_admin_block_content().
  *
- * Use unordered list markup in both compact and extended mode.
+ * Uses an unordered list markup in both compact and extended mode.
  */
 function seven_admin_block_content($variables) {
   $content = $variables['content'];
@@ -58,9 +93,10 @@ function seven_admin_block_content($variables) {
 }
 
 /**
- * Override of theme_tablesort_indicator().
+ * Overrides theme_tablesort_indicator().
  *
- * Use our own image versions, so they show up as black and not gray on gray.
+ * Uses Seven's image versions, so the arrows show up as black and not gray on
+ * gray.
  */
 function seven_tablesort_indicator($variables) {
   $style = $variables['style'];

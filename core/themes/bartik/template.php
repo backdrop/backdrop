@@ -1,8 +1,15 @@
 <?php
 
 /**
- * Add body classes if certain regions have content.
+ * @file
+ * Functions to support theming in the Bartik theme.
  */
+
+/**
+ * Implements hook_preprocess_HOOK() for html.tpl.php.
+ *
+ * Adds body classes if certain regions have content.
+  */
 function bartik_preprocess_html(&$variables) {
   if (!empty($variables['page']['featured'])) {
     $variables['classes_array'][] = 'featured';
@@ -23,7 +30,7 @@ function bartik_preprocess_html(&$variables) {
 }
 
 /**
- * Override or insert variables into the page template for HTML output.
+ * Implements hook_process_HOOK() for html.tpl.php.
  */
 function bartik_process_html(&$variables) {
   // Hook into color.module.
@@ -33,7 +40,7 @@ function bartik_process_html(&$variables) {
 }
 
 /**
- * Override or insert variables into the page template.
+ * Implements hook_process_HOOK() for page.tpl.php.
  */
 function bartik_process_page(&$variables) {
   $site_config = config('system.site');
@@ -80,7 +87,7 @@ function bartik_process_page(&$variables) {
 }
 
 /**
- * Implements hook_preprocess_maintenance_page().
+ * Implements hook_preprocess_HOOK() for maintenance-page.tpl.php.
  */
 function bartik_preprocess_maintenance_page(&$variables) {
   // By default, site_name is set to Backdrop if no db connection is available
@@ -94,7 +101,7 @@ function bartik_preprocess_maintenance_page(&$variables) {
 }
 
 /**
- * Override or insert variables into the maintenance page template.
+ * Implements hook_process_HOOK() for maintenance-page.tpl.php.
  */
 function bartik_process_maintenance_page(&$variables) {
   $site_config = config('system.site');
@@ -113,7 +120,7 @@ function bartik_process_maintenance_page(&$variables) {
 }
 
 /**
- * Override or insert variables into the block template.
+ * Implements hook_preprocess_HOOK() for block.tpl.php.
  */
 function bartik_preprocess_block(&$variables) {
   // In the header region visually hide block titles.

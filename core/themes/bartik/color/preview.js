@@ -1,4 +1,9 @@
 
+/**
+ * @file
+ * Preview for the Bartik theme.
+ */
+
 (function ($) {
   Backdrop.color = {
     logoChanged: false,
