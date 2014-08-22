@@ -199,7 +199,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
   // These forms have the title built in, so set the title here:
   if (empty($form_state['ajax']) && !empty($form_state['title'])) {
     backdrop_set_title($form_state['title']);
-    backdrop_add_css(backdrop_get_path('module', 'views_ui') . '/css/views-admin.css');
+    backdrop_add_css(backdrop_get_path('module', 'views_ui') . '/css/views_ui.admin.css');
   }
 
   if (!empty($form_state['ajax']) && (empty($form_state['executed']) || !empty($form_state['rerender']))) {

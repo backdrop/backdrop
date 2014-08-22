@@ -847,7 +847,7 @@ function locale_block_view($type) {
     $links = language_negotiation_get_switch_links($type, $path);
 
     if (isset($links->links)) {
-      backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+      backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
       $class = "language-switcher-{$links->provider}";
       $variables = array('links' => $links->links, 'attributes' => array('class' => array($class)));
       $block['content'] = theme('links__locale_block', $variables);

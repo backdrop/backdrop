@@ -53,7 +53,7 @@ function file_element_info() {
     '#size' => 22,
     '#extended' => FALSE,
     '#attached' => array(
-      'css' => array($file_path . '/file.admin.css'),
+      'css' => array($file_path . '/css/file.admin.css'),
       'js' => array($file_path . '/file.js'),
     ),
   );

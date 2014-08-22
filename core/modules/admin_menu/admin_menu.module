@@ -120,10 +120,7 @@ function admin_menu_page_build(&$page) {
   $attached = &$page['page_bottom']['admin_menu']['#attached'];
   $options = array('every_page' => TRUE);
 
-  $attached['css'][$path . '/admin_menu.css'] = $options;
-  if ($user->uid == 1) {
-    $attached['css'][$path . '/admin_menu.uid1.css'] = $options;
-  }
+  $attached['css'][$path . '/css/admin_menu.css'] = $options;
   $attached['js'][$path . '/admin_menu.js'] = $options;
 
   // Add current path to support menu item highlighting.

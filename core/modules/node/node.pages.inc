@@ -670,7 +670,7 @@ function node_revision_overview($node) {
     '#rows' => $rows,
     '#header' => $header,
     '#attached' => array (
-      'css' => array(backdrop_get_path('module', 'node') . '/node.admin.css'),
+      'css' => array(backdrop_get_path('module', 'node') . '/css/node.admin.css'),
     ),
   );
 

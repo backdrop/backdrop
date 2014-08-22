@@ -67,12 +67,12 @@
 #palette .down,
 #palette .up,
 #palette .both {
-  background: url(images/hook.png) no-repeat 100% 0; /* LTR */
+  background: url(../images/hook.png) no-repeat 100% 0; /* LTR */
 }
 [dir="rtl"] #palette .down,
 [dir="rtl"] #palette .up,
 [dir="rtl"] #palette .both {
-  background: url(images/hook-rtl.png) no-repeat 0 0;
+  background: url(../images/hook-rtl.png) no-repeat 0 0;
 }
 #palette .up {
   background-position: 100% -27px; /* LTR */
@@ -93,7 +93,7 @@
   left: -10px; /* LTR */
   width: 20px;
   height: 25px;
-  background: url(images/lock.png) no-repeat 50% 2px;
+  background: url(../images/lock.png) no-repeat 50% 2px;
   cursor: pointer;
 }
 [dir="rtl"] #palette .lock {

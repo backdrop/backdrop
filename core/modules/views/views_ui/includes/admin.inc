@@ -16,8 +16,8 @@
 function views_ui_get_admin_css() {
   $module_path = backdrop_get_path('module', 'views_ui');
   $list = array();
-  $list[$module_path . '/css/views-admin.css'] = array();
-  $list[$module_path . '/css/views-admin.theme.css'] = array();
+  $list[$module_path . '/css/views_ui.admin.css'] = array();
+  $list[$module_path . '/css/views_ui.admin.theme.css'] = array();
 
   // Add in any theme specific CSS files we have
   $themes = list_themes();

@@ -583,7 +583,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    * Tests adding a file stylesheet.
    */
   function testAddFile() {
-    $path = backdrop_get_path('module', 'simpletest') . '/simpletest.css';
+    $path = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     $css = backdrop_add_css($path);
     $this->assertEqual($css[$path]['data'], $path, 'Adding a CSS file caches it properly.');
   }
@@ -609,7 +609,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    * Tests rendering the stylesheets.
    */
   function testRenderFile() {
-    $css = backdrop_get_path('module', 'simpletest') . '/simpletest.css';
+    $css = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     backdrop_add_css($css);
     $styles = backdrop_get_css();
     $this->assertTrue(strpos($styles, $css) > 0, 'Rendered CSS includes the added stylesheet.');
@@ -694,16 +694,16 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    */
   function testRenderOrder() {
     // A module CSS file.
-    backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
+    backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
     // A few system CSS files, ordered in a strange way.
     $system_path = backdrop_get_path('module', 'system');
-    backdrop_add_css($system_path . '/system.base.css', array('group' => CSS_SYSTEM, 'weight' => -10));
-    backdrop_add_css($system_path . '/system.theme.css', array('group' => CSS_SYSTEM));
+    backdrop_add_css($system_path . '/css/system.css', array('group' => CSS_SYSTEM, 'weight' => -10));
+    backdrop_add_css($system_path . '/css/system.theme.css', array('group' => CSS_SYSTEM));
 
     $expected = array(
-      $system_path . '/system.base.css',
-      $system_path . '/system.theme.css',
-      backdrop_get_path('module', 'simpletest') . '/simpletest.css',
+      $system_path . '/css/system.css',
+      $system_path . '/css/system.theme.css',
+      backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
 
 
@@ -727,21 +727,21 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     $system = backdrop_get_path('module', 'system');
     $simpletest = backdrop_get_path('module', 'simpletest');
 
-    backdrop_add_css($system . '/system.base.css');
-    backdrop_add_css($simpletest . '/tests/system.base.css');
+    backdrop_add_css($system . '/css/system.css');
+    backdrop_add_css($simpletest . '/tests/system.css');
 
     // The dummy stylesheet should be the only one included.
     $styles = backdrop_get_css();
-    $this->assert(strpos($styles, $simpletest . '/tests/system.base.css') !== FALSE, 'The overriding CSS file is output.');
-    $this->assert(strpos($styles, $system . '/system.base.css') === FALSE, 'The overridden CSS file is not output.');
+    $this->assert(strpos($styles, $simpletest . '/tests/system.css') !== FALSE, 'The overriding CSS file is output.');
+    $this->assert(strpos($styles, $system . '/css/system.css') === FALSE, 'The overridden CSS file is not output.');
 
-    backdrop_add_css($simpletest . '/tests/system.base.css');
-    backdrop_add_css($system . '/system.base.css');
+    backdrop_add_css($simpletest . '/tests/system.css');
+    backdrop_add_css($system . '/css/system.css');
 
     // The standard stylesheet should be the only one included.
     $styles = backdrop_get_css();
-    $this->assert(strpos($styles, $system . '/system.base.css') !== FALSE, 'The overriding CSS file is output.');
-    $this->assert(strpos($styles, $simpletest . '/tests/system.base.css') === FALSE, 'The overridden CSS file is not output.');
+    $this->assert(strpos($styles, $system . '/css/system.css') !== FALSE, 'The overriding CSS file is output.');
+    $this->assert(strpos($styles, $simpletest . '/tests/system.css') === FALSE, 'The overridden CSS file is not output.');
   }
 
   /**
@@ -751,7 +751,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   function testAddCssFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
-    $this->assertRaw(backdrop_get_path('module', 'node') . '/node.admin.css?' . $query_string, 'Query string was appended correctly to css.');
+    $this->assertRaw(backdrop_get_path('module', 'node') . '/css/node.admin.css?' . $query_string, 'Query string was appended correctly to css.');
     $this->assertRaw(backdrop_get_path('module', 'node') . '/node-fake.css?arg1=value1&amp;arg2=value2', 'Query string not escaped on a URI.');
   }
 }
