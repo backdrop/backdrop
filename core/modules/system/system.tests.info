@@ -39,16 +39,10 @@ name = Cron queue functionality
 description = Tests the cron queue runner.
 group = System
 file = system.test
-      
-[AdminMetaTagTestCase]
-name = Fingerprinting meta tag
-description = Confirm that the fingerprinting meta tag appears as expected.
-group = System
-file = system.test
 
-[DefaultMobileMetaTagsTestCase]
-name = Default mobile meta tags
-description = Confirm that the default mobile meta tags appear as expected.
+[MetaTagsTestCase]
+name = Default meta tags
+description = Confirm that the default meta tags appear as expected.
 group = System
 file = system.test
 

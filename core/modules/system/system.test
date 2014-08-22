@@ -709,34 +709,20 @@ class CronQueueTestCase extends BackdropWebTestCase {
 
 }
 
-class AdminMetaTagTestCase extends BackdropWebTestCase {
+class MetaTagsTestCase extends BackdropWebTestCase {
   /**
    * Verify that the meta tag HTML is generated correctly.
    */
   public function testMetaTag() {
     list($version, ) = explode('.', BACKDROP_VERSION);
-    $string = '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />';
-    $this->backdropGet('node');
-    $this->assertRaw($string, t('Fingerprinting meta tag generated correctly.'), t('System'));
-  }
-}
-
-class DefaultMobileMetaTagsTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
-    $this->default_metatags = array(
-      'viewport' => '<meta name="viewport" content="width=device-width" />',
-      'cleartype' => '<meta http-equiv="cleartype" content="on" />',
+    $meta_tags = array(
+      'generator' => '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />',
+      'viewport' => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
     );
-  }
 
-  /**
-   * Verifies that the default mobile meta tags are added.
-   */
-  public function testDefaultMetaTagsExist() {
     $this->backdropGet('');
-    foreach ($this->default_metatags as $name => $metatag) {
-      $this->assertRaw($metatag, 'Default Mobile meta tag "' . $name . '" displayed properly.', t('System'));
+    foreach ($meta_tags as $name => $metatag) {
+      $this->assertRaw($metatag, 'Default meta tag "' . $name . '" displayed properly.', t('System'));
     }
   }
 }
