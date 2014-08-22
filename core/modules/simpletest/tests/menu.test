@@ -1022,22 +1022,22 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('menu-test/breadcrumb/tasks/second/second', $trail, $title, $tree);
 
-    // Verify Taxonomy administration breadcrumbs.
+    // Verify Categorization administration breadcrumbs.
     $trail = $admin + array(
       'admin/structure' => t('Structure'),
     );
-    $this->assertBreadcrumb('admin/structure/taxonomy', $trail);
+    $this->assertBreadcrumb('admin/structure/categorization', $trail);
 
     $trail += array(
-      'admin/structure/taxonomy' => t('Taxonomy'),
+      'admin/structure/categorization' => t('Categorization'),
     );
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags', $trail);
+    $this->assertBreadcrumb('admin/structure/categorization/tags', $trail);
     $trail += array(
-      'admin/structure/taxonomy/tags' => t('Tags'),
+      'admin/structure/categorization/tags' => t('Tags'),
     );
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags/edit', $trail);
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags/fields', $trail);
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags/add', $trail);
+    $this->assertBreadcrumb('admin/structure/categorization/tags/edit', $trail);
+    $this->assertBreadcrumb('admin/structure/categorization/tags/fields', $trail);
+    $this->assertBreadcrumb('admin/structure/categorization/tags/add', $trail);
 
     // Verify Menu administration breadcrumbs.
     $trail = $admin + array(

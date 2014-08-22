@@ -208,7 +208,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
     $edit['name'] = $this->randomName();
     $edit['description[value]'] = $description;
     $edit['path[alias]'] = $this->randomName();
-    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
 
     // Confirm that the alias works.
     $this->backdropGet($edit['path[alias]']);
