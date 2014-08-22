@@ -15,7 +15,7 @@ function config_sync_form(array $form, array &$form_state) {
 
   // Add the AJAX library to the form for dialog support.
   $form['#attached']['library'][] = array('system', 'backdrop.ajax');
-  $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/config.admin.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
     '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p>',

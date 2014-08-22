@@ -10,7 +10,7 @@
  */
 function locale_translate_seek_screen() {
   // Add CSS.
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
   $elements = backdrop_get_form('locale_translation_filter_form');
   $output = backdrop_render($elements);
@@ -126,7 +126,7 @@ function _locale_translate_seek() {
  */
 function _locale_translate_language_list($translation, $limit_language) {
   // Add CSS.
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
   $languages = language_list();
   if (!locale_translate_english()) {

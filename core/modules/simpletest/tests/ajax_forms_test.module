@@ -484,7 +484,7 @@ function ajax_forms_test_lazy_load_form($form, &$form_state) {
 function ajax_forms_test_lazy_load_form_submit($form, &$form_state) {
   if ($form_state['values']['add_files']) {
     backdrop_add_js(array('ajax_forms_test_lazy_load_form_submit' => 'executed'), 'setting');
-    backdrop_add_css(backdrop_get_path('module', 'system') . '/system.admin.css');
+    backdrop_add_css(backdrop_get_path('module', 'system') . '/css/system.admin.css');
     backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
   }
   $form_state['rebuild'] = TRUE;

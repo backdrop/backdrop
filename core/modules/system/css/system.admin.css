@@ -125,10 +125,10 @@ table.system-status-report td.status-icon div {
   width: 16px;
 }
 table.system-status-report tr.error td.status-icon div {
-  background-image: url(../../misc/message-16-error.png);
+  background-image: url(../../../misc/message-16-error.png);
 }
 table.system-status-report tr.warning td.status-icon div {
-  background-image: url(../../misc/message-16-warning.png);
+  background-image: url(../../../misc/message-16-warning.png);
 }
 tr.merge-down,
 tr.merge-down td {

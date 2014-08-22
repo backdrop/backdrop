@@ -154,7 +154,7 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
   text-align: left;
 }
 .more-help-link a {
-  background: url(../../misc/help.png) 0 50% no-repeat; /* LTR */
+  background: url(../../../misc/help.png) 0 50% no-repeat; /* LTR */
   padding: 1px 0 1px 20px; /* LTR */
 }
 [dir="rtl"] .more-help-link a {
@@ -196,7 +196,7 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
  * @see collapse.js
  */
 .js fieldset.collapsible .fieldset-legend a {
-  background: url(../../misc/menu-expanded.png) 5px 65% no-repeat; /* LTR */
+  background: url(../../../misc/menu-expanded.png) 5px 65% no-repeat; /* LTR */
   padding-left: 15px; /* LTR */
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a {
@@ -205,11 +205,11 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
   padding-right: 15px;
 }
 .js fieldset.collapsed .fieldset-legend a {
-  background-image: url(../../misc/menu-collapsed.png); /* LTR */
+  background-image: url(../../../misc/menu-collapsed.png); /* LTR */
   background-position: 5px 50%; /* LTR */
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a {
-  background-image: url(../../misc/menu-collapsed-rtl.png);
+  background-image: url(../../../misc/menu-collapsed-rtl.png);
   background-position: 98% 50%;
 }
 .fieldset-legend span.summary {
@@ -269,7 +269,7 @@ th.checkbox {
   border-radius: 3px;
 }
 .progress .filled {
-  background: #0072b9 url(../../misc/progress.gif);
+  background: #0072b9 url(../../../misc/progress.gif);
 }
 
 /**
@@ -290,15 +290,15 @@ ul.menu li {
   margin: 0 0.5em 0 0;
 }
 ul li.expanded {
-  list-style-image: url(../../misc/menu-expanded.png);
+  list-style-image: url(../../../misc/menu-expanded.png);
   list-style-type: circle;
 }
 ul li.collapsed {
-  list-style-image: url(../../misc/menu-collapsed.png); /* LTR */
+  list-style-image: url(../../../misc/menu-collapsed.png); /* LTR */
   list-style-type: disc;
 }
 [dir="rtl"] ul li.collapsed {
-  list-style-image: url(../../misc/menu-collapsed-rtl.png);
+  list-style-image: url(../../../misc/menu-collapsed-rtl.png);
 }
 ul li.leaf {
   list-style-image: url(../../misc/menu-leaf.png);

@@ -13,7 +13,7 @@
 function block_admin_demo($theme = NULL) {
   return array(
     '#attached' => array(
-      'css' => array(backdrop_get_path('module', 'block') . '/block.admin.css'),
+      'css' => array(backdrop_get_path('module', 'block') . '/css/block.admin.css'),
     ),
   );
 }
@@ -84,7 +84,7 @@ function block_admin_display_prepare_blocks($theme) {
  */
 function block_admin_display_form($form, &$form_state, $blocks, $theme, $block_regions = NULL) {
   $path = backdrop_get_path('module', 'block');
-  $form['#attached']['css'][] = $path . '/block.admin.css';
+  $form['#attached']['css'][] = $path . '/css/block.admin.css';
   $form['#attached']['js'][] = 'core/misc/tableheader.js';
   $form['#attached']['js'][] = $path . '/block.js';
 

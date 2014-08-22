@@ -380,7 +380,7 @@ function locale_language_switcher_url($type, $path) {
  * Return the session language switcher block.
  */
 function locale_language_switcher_session($type, $path) {
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
   $param = config_get('language.negotiation', 'session_parameter');
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;

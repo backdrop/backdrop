@@ -584,7 +584,7 @@ function theme_taxonomy_overview_terms($variables) {
     backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
     backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js');
     backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
-    backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/taxonomy.css');
+    backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
   }
   backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
 

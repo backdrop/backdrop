@@ -30,7 +30,7 @@ function contextual_library_info() {
       $path . '/contextual.js' => array(),
     ),
     'css' => array(
-      $path . '/contextual.css' => array(),
+      $path . '/css/contextual.css' => array(),
     ),
   );
   return $libraries;

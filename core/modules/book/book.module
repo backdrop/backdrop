@@ -419,7 +419,7 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
       '#submit' => array('book_pick_book_nojs_submit'),
       '#weight' => 20,
       '#attached' => array(
-        'css' => array(backdrop_get_path('module', 'book') . '/book.admin.css'),
+        'css' => array(backdrop_get_path('module', 'book') . '/css/book.admin.css'),
       ),
     );
   }
