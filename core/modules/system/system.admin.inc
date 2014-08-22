@@ -993,19 +993,19 @@ function _system_modules_build_row($info, $extra) {
   // Check the core compatibility.
   if (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with this version of Backdrop CMS.');
-    $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
+    $status_short .= t('Incompatible with this version of Backdrop CMS.') . ' ';
+    $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
   }
 
   // Ensure this module is compatible with the currently installed version of PHP.
   if (version_compare(phpversion(), $info['php']) < 0) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with this version of PHP');
+    $status_short .= t('Incompatible with this version of PHP') . ' ';
     $php_required = $info['php'];
     if (substr_count($info['php'], '.') < 2) {
       $php_required .= '.*';
     }
-    $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $php_required, '!php_version' => phpversion()));
+    $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $php_required, '!php_version' => phpversion())) . ' ';
   }
 
   // If this module is compatible, present a checkbox indicating this module
@@ -1022,9 +1022,9 @@ function _system_modules_build_row($info, $extra) {
   }
   else {
     $form['enable'] = array(
-      '#markup' =>  theme('image', array('uri' => 'core/misc/watchdog-error.png', 'alt' => $status_short, 'title' => $status_short)),
+      '#markup' =>  theme('image', array('uri' => 'core/misc/watchdog-error.png', 'alt' => t('Unable to enable'), 'title' => trim($status_short))),
     );
-    $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => $status_long));
+    $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => trim($status_long)));
   }
 
   // Build dropbutton links.
