@@ -671,6 +671,8 @@ fieldset {
 fieldset .fieldset-legend {
   margin-top: 0.5em;
   padding-left: 15px; /* LTR */
+  left: 0; /* LTR */
+  top: 0;
   position: absolute;
   text-transform: uppercase;
 }
@@ -840,7 +842,8 @@ a.button:active {
   background: url(images/buttons.png) 0 -40px repeat-x;
   color: #133B54;
 }
-input.form-submit:active {
+input.form-submit:active,
+a.button:active {
   background: #666;
   color: #fff;
   border-color: #555;
@@ -864,6 +867,8 @@ input.form-file,
 textarea.form-textarea,
 select.form-select {
   padding: 2px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
   border: 1px solid #ccc;
   border-top-color: #999;
   background: #fff;
@@ -1044,7 +1049,6 @@ body.maintenance-page main {
   padding-right: 20px; /* LTR */
   margin-left: 200px; /* LTR */
   -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 [dir="rtl"] body.maintenance-page main {
@@ -1077,7 +1081,6 @@ body.maintenance-page input[type="password"],
 body.maintenance-page select,
 body.maintenance-page .password-parent {
   width: 100%;
-  box-sizing: border-box;
   max-width: 300px;
 }
 body.maintenance-page .form-submit {
