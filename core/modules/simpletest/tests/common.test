@@ -1329,11 +1329,11 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     ));
 
     // Store the expected key for the first item in the cache.
-    $cache = array_keys(variable_get('js_cache_files', array()));
+    $cache = array_keys(state_get('js_cache_files', array()));
     $expected_key = $cache[0];
 
     // Reset variables and add a file in a different scope first.
-    variable_del('js_cache_files');
+    state_set('js_cache_files', FALSE);
     backdrop_static_reset('backdrop_add_js');
     backdrop_add_js('some/custom/javascript_file.js', array('scope' => 'footer'));
     backdrop_add_js('core/misc/ajax.js');
@@ -1347,7 +1347,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     ));
 
     // Compare the expected key for the first file to the current one.
-    $cache = array_keys(variable_get('js_cache_files', array()));
+    $cache = array_keys(state_get('js_cache_files', array()));
     $key = $cache[0];
     $this->assertEqual($key, $expected_key, 'JavaScript aggregation is not affected by ordering in different scopes.');
   }
