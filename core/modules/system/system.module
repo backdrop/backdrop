@@ -373,7 +373,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -1158,15 +1158,6 @@ function system_library_info() {
     'dependencies' => array(
       // collapse.js relies on backdropGetSummary in form.js
       array('system', 'backdrop.form'),
-    ),
-  );
-
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_DEFAULT),
     ),
   );
 
