@@ -201,6 +201,18 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), 'A Content-Encoding header was not sent.');
     $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.site', 'site_name'))), 'Site title matches.');
     $this->assertRaw('</html>', 'Page was not compressed.');
+
+    // Disable compression mode.
+    config_set('system.performance', 'page_compression', FALSE);
+
+    // Verify if cached page is still available for a client with compression support.
+    $this->backdropGet('', array(), array('Accept-Encoding: gzip,deflate'));
+    $this->backdropSetContent(gzinflate(substr($this->backdropGetContent(), 10, -8)));
+    $this->assertRaw('</html>', 'Page was delivered after compression mode is changed (compression support enabled).');
+
+    // Verify if cached page is still available for a client without compression support.
+    $this->backdropGet('');
+    $this->assertRaw('</html>', 'Page was delivered after compression mode is changed (compression support disabled).');
   }
 }
 
