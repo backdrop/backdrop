@@ -185,7 +185,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
     // Go!
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
-    if (!$this->assertText('Updates were attempted')) {
+    if (!$this->assertText(t('Updates were attempted'))) {
       return FALSE;
     }
 
@@ -207,7 +207,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     // Check if there still are pending updates.
     $this->backdropGet($update_url, array('external' => TRUE));
     $this->backdropPost(NULL, array(), t('Continue'));
-    if (!$this->assertText(t('No pending updates.'), t('No pending updates at the end of the update process.'))) {
+    if (!$this->assertText(t('No pending updates.'), 'No pending updates at the end of the update process.')) {
       return FALSE;
     }
 
@@ -235,7 +235,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
     // Check we can load the front page of the new site.
     $this->backdropGet('');
-    return $this->assertText('Powered by Backdrop CMS', t('The front page of the upgraded site loads successfully.'));
+    return $this->assertText('Powered by Backdrop CMS', 'The front page of the upgraded site loads successfully.');
   }
 
   /**
@@ -255,5 +255,4 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
       ->condition('name', $modules, 'NOT IN')
       ->execute();
   }
-
 }

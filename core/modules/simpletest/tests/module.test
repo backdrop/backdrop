@@ -68,9 +68,9 @@ class ModuleUnitTest extends BackdropWebTestCase {
    */
   protected function assertModuleList(Array $expected_values, $condition) {
     $expected_values = array_combine($expected_values, $expected_values);
-    $this->assertEqual($expected_values, module_list(), t('@condition: module_list() returns correct results', array('@condition' => $condition)));
+    $this->assertEqual($expected_values, module_list(), format_string('@condition: module_list() returns correct results', array('@condition' => $condition)));
     ksort($expected_values);
-    $this->assertIdentical($expected_values, module_list(FALSE, FALSE, TRUE), t('@condition: module_list() returns correctly sorted results', array('@condition' => $condition)));
+    $this->assertIdentical($expected_values, module_list(FALSE, FALSE, TRUE), format_string('@condition: module_list() returns correctly sorted results', array('@condition' => $condition)));
   }
 
   /**
@@ -79,16 +79,16 @@ class ModuleUnitTest extends BackdropWebTestCase {
   function testModuleImplements() {
     // Clear the cache.
     cache('bootstrap')->delete('module_implements');
-    $this->assertFalse(cache('bootstrap')->get('module_implements'), t('The module implements cache is empty.'));
+    $this->assertFalse(cache('bootstrap')->get('module_implements'), 'The module implements cache is empty.');
     $this->backdropGet('');
-    $this->assertTrue(cache('bootstrap')->get('module_implements'), t('The module implements cache is populated after requesting a page.'));
+    $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Test again with an authenticated user.
     $this->user = $this->backdropCreateUser();
     $this->backdropLogin($this->user);
     cache('bootstrap')->delete('module_implements');
     $this->backdropGet('');
-    $this->assertTrue(cache('bootstrap')->get('module_implements'), t('The module implements cache is populated after requesting a page.'));
+    $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Make sure group include files are detected properly even when the file is
     // already loaded when the cache is rebuilt.
@@ -109,7 +109,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->backdropGet('module-test/hook-dynamic-loading-invoke');
-    $this->assertText('success!', t('module_invoke() dynamically loads a hook defined in hook_hook_info().'));
+    $this->assertText('success!', 'module_invoke() dynamically loads a hook defined in hook_hook_info().');
   }
 
   /**
@@ -119,7 +119,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->backdropGet('module-test/hook-dynamic-loading-invoke-all');
-    $this->assertText('success!', t('module_invoke_all() dynamically loads a hook defined in hook_hook_info().'));
+    $this->assertText('success!', 'module_invoke_all() dynamically loads a hook defined in hook_hook_info().');
   }
 
   /**
@@ -131,10 +131,10 @@ class ModuleUnitTest extends BackdropWebTestCase {
     // tests below would not work correctly.)
     module_enable(array('module_test'), FALSE);
     module_disable(array('dependency_test2'), FALSE);
-    $this->assertTrue(module_exists('module_test'), t('Test module is enabled.'));
-    $this->assertFalse(module_exists('dependency_test3'), t('Third module is disabled.'));
-    $this->assertFalse(module_exists('dependency_test2'), t('Second module is disabled.'));
-    $this->assertFalse(module_exists('dependency_test1'), t('First module is disabled.'));
+    $this->assertTrue(module_exists('module_test'), 'Test module is enabled.');
+    $this->assertFalse(module_exists('dependency_test3'), 'Third module is disabled.');
+    $this->assertFalse(module_exists('dependency_test2'), 'Second module is disabled.');
+    $this->assertFalse(module_exists('dependency_test1'), 'First module is disabled.');
 
     // First, create a fake missing dependency. Test3 depends on the test2
     // module, which depends on a made-up module, foo. Nothing should be
@@ -142,49 +142,49 @@ class ModuleUnitTest extends BackdropWebTestCase {
     state_set('dependency_test', 'missing dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
-    $this->assertFalse($result, t('module_enable() returns FALSE if dependencies are missing.'));
-    $this->assertFalse(module_exists('dependency_test3'), t('module_enable() aborts if dependencies are missing.'));
+    $this->assertFalse($result, 'module_enable() returns FALSE if dependencies are missing.');
+    $this->assertFalse(module_exists('dependency_test3'), 'module_enable() aborts if dependencies are missing.');
 
     // Now, fix the missing dependency. Test3 module depends on test2, but test2
     // depends on test1 module. module_enable() should work.
     state_set('dependency_test', 'dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
-    $this->assertTrue($result, t('module_enable() returns the correct value.'));
+    $this->assertTrue($result, 'module_enable() returns the correct value.');
     // Verify that the fake dependency chain was installed.
-    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), t('Dependency chain was installed by module_enable().'));
+    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), 'Dependency chain was installed by module_enable().');
     // Verify that the original module was installed.
-    $this->assertTrue(module_exists('dependency_test3'), t('Module installation with unlisted dependencies succeeded.'));
+    $this->assertTrue(module_exists('dependency_test3'), 'Module installation with unlisted dependencies succeeded.');
     // Finally, verify that the modules were enabled in the correct order.
-    $this->assertEqual(variable_get('test_module_enable_order', array()), array('dependency_test1', 'dependency_test2', 'dependency_test3'), t('Modules were enabled in the correct order by module_enable().'));
+    $this->assertEqual(variable_get('test_module_enable_order', array()), array('dependency_test1', 'dependency_test2', 'dependency_test3'), 'Modules were enabled in the correct order by module_enable().');
 
     // Now, disable the test1 module. Both test3 and test2 should be disabled
     // as well, in the correct order.
     module_disable(array('dependency_test1'));
-    $this->assertTrue(!module_exists('dependency_test3') && !module_exists('dependency_test2'), t('Depedency chain was disabled by module_disable().'));
-    $this->assertFalse(module_exists('dependency_test1'), t('Disabling a module with unlisted dependents succeeded.'));
-    $this->assertEqual(variable_get('test_module_disable_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), t('Modules were disabled in the correct order by module_disable().'));
+    $this->assertTrue(!module_exists('dependency_test3') && !module_exists('dependency_test2'), 'Dependency chain was disabled by module_disable().');
+    $this->assertFalse(module_exists('dependency_test1'), 'Disabling a module with unlisted dependents succeeded.');
+    $this->assertEqual(variable_get('test_module_disable_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), 'Modules were disabled in the correct order by module_disable().');
 
     // Disable a module that is listed as a dependency by the installation
     // profile. Make sure that the profile itself is not on the list of
     // dependent modules to be disabled.
     $profile = backdrop_get_profile();
     $info = install_profile_info($profile);
-    $this->assertTrue(in_array('comment', $info['dependencies']), t('Comment module is listed as a dependency of the installation profile.'));
-    $this->assertTrue(module_exists('comment'), t('Comment module is enabled.'));
+    $this->assertTrue(in_array('comment', $info['dependencies']), 'Comment module is listed as a dependency of the installation profile.');
+    $this->assertTrue(module_exists('comment'), 'Comment module is enabled.');
     module_disable(array('comment'));
-    $this->assertFalse(module_exists('comment'), t('Comment module was disabled.'));
+    $this->assertFalse(module_exists('comment'), 'Comment module was disabled.');
     $disabled_modules = variable_get('test_module_disable_order', array());
-    $this->assertTrue(in_array('comment', $disabled_modules), t('Comment module is in the list of disabled modules.'));
-    $this->assertFalse(in_array($profile, $disabled_modules), t('The installation profile is not in the list of disabled modules.'));
+    $this->assertTrue(in_array('comment', $disabled_modules), 'Comment module is in the list of disabled modules.');
+    $this->assertFalse(in_array($profile, $disabled_modules), 'The installation profile is not in the list of disabled modules.');
 
     // Try to uninstall the test1 module by itself. This should be rejected,
     // since the modules which it depends on need to be uninstalled first, and
     // that is too destructive to perform automatically.
     $result = backdrop_uninstall_modules(array('dependency_test1'));
-    $this->assertFalse($result, t('Calling backdrop_uninstall_modules() on a module whose dependents are not uninstalled fails.'));
+    $this->assertFalse($result, 'Calling backdrop_uninstall_modules() on a module whose dependents are not uninstalled fails.');
     foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
-      $this->assertNotEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was not uninstalled.', array('@module' => $module)));
+      $this->assertNotEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, format_string('The @module module was not uninstalled.', array('@module' => $module)));
     }
 
     // Now uninstall all three modules explicitly, but in the incorrect order,
@@ -193,18 +193,18 @@ class ModuleUnitTest extends BackdropWebTestCase {
     $result = backdrop_uninstall_modules(array('dependency_test2', 'dependency_test1', 'dependency_test3'));
     $this->assertTrue($result, t('backdrop_uninstall_modules() returns the correct value.'));
     foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
-      $this->assertEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was uninstalled.', array('@module' => $module)));
+      $this->assertEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, format_string('The @module module was uninstalled.', array('@module' => $module)));
     }
-    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), t('Modules were uninstalled in the correct order by backdrop_uninstall_modules().'));
+    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), 'Modules were uninstalled in the correct order by backdrop_uninstall_modules().');
 
     // Uninstall the profile module from above, and make sure that the profile
     // itself is not on the list of dependent modules to be uninstalled.
     $result = backdrop_uninstall_modules(array('comment'));
-    $this->assertTrue($result, t('backdrop_uninstall_modules() returns the correct value.'));
-    $this->assertEqual(backdrop_get_installed_schema_version('comment'), SCHEMA_UNINSTALLED, t('Comment module was uninstalled.'));
+    $this->assertTrue($result, 'backdrop_uninstall_modules() returns the correct value.');
+    $this->assertEqual(backdrop_get_installed_schema_version('comment'), SCHEMA_UNINSTALLED, 'Comment module was uninstalled.');
     $uninstalled_modules = variable_get('test_module_uninstall_order', array());
-    $this->assertTrue(in_array('comment', $uninstalled_modules), t('Comment module is in the list of uninstalled modules.'));
-    $this->assertFalse(in_array($profile, $uninstalled_modules), t('The installation profile is not in the list of uninstalled modules.'));
+    $this->assertTrue(in_array('comment', $uninstalled_modules), 'Comment module is in the list of uninstalled modules.');
+    $this->assertFalse(in_array($profile, $uninstalled_modules), 'The installation profile is not in the list of uninstalled modules.');
 
     // Enable test3 module again, which should enable both the test2 module
     // and test1 module. But, this time do it with test2 module declaring a
@@ -213,11 +213,11 @@ class ModuleUnitTest extends BackdropWebTestCase {
     state_set('dependency_test', 'version dependency');
     backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('dependency_test3'));
-    $this->assertTrue($result, t('module_enable() returns the correct value.'));
+    $this->assertTrue($result, 'module_enable() returns the correct value.');
     // Verify that the fake dependency chain was installed.
-    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), t('Dependency chain was installed by module_enable().'));
+    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), 'Dependency chain was installed by module_enable().');
     // Verify that the original module was installed.
-    $this->assertTrue(module_exists('dependency_test3'), t('Module installation with version dependencies succeeded.'));
+    $this->assertTrue(module_exists('dependency_test3'), 'Module installation with version dependencies succeeded.');
     // Finally, verify that the modules were enabled in the correct order.
     $enable_order = variable_get('test_module_enable_order', array());
     $first_position = array_search('dependency_test1', $enable_order);
@@ -225,7 +225,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     $third_position = array_search('dependency_test3', $enable_order);
     $first_before_second = $first_position !== FALSE && $second_position !== FALSE && $first_position < $second_position;
     $second_before_third = $second_position !== FALSE && $third_position !== FALSE && $second_position < $third_position;
-    $this->assertTrue($first_before_second && $second_before_third, t('Modules were enabled in the correct order by module_enable().'));
+    $this->assertTrue($first_before_second && $second_before_third, 'Modules were enabled in the correct order by module_enable().');
   }
 }
 
@@ -253,8 +253,8 @@ class ModuleInstallTestCase extends BackdropWebTestCase {
     // Check for data that was inserted using backdrop_write_record() while the
     // 'module_test' module was being installed and enabled.
     $data = db_query("SELECT data FROM {module_test}")->fetchCol();
-    $this->assertTrue(in_array('Data inserted in hook_install()', $data), t('Data inserted using backdrop_write_record() in hook_install() is correctly saved.'));
-    $this->assertTrue(in_array('Data inserted in hook_enable()', $data), t('Data inserted using backdrop_write_record() in hook_enable() is correctly saved.'));
+    $this->assertTrue(in_array('Data inserted in hook_install()', $data), 'Data inserted using backdrop_write_record() in hook_install() is correctly saved.');
+    $this->assertTrue(in_array('Data inserted in hook_enable()', $data), 'Data inserted using backdrop_write_record() in hook_enable() is correctly saved.');
   }
 }
 
@@ -277,6 +277,6 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
 
     // Are the perms defined by module_test removed from {role_permission}.
     $count = db_query("SELECT COUNT(rid) FROM {role_permission} WHERE permission = :perm", array(':perm' => 'module_test perm'))->fetchField();
-    $this->assertEqual(0, $count, t('Permissions were all removed.'));
+    $this->assertEqual(0, $count, 'Permissions were all removed.');
   }
 }
