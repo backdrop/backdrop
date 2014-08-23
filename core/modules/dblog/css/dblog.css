@@ -1,0 +1,74 @@
+/**
+ * @file
+ * Admin styles for the Database Logging module.
+ */
+.dblog-filter-form .form-item-type,
+.dblog-filter-form .form-item-severity {
+  float: left; /* LTR */
+  margin: .1em .9em .1em .1em; /* LTR */
+  padding-right: .8em; /* LTR */
+  margin: 0.1em;
+  /**
+   * In Opera 9, DOM elements with the property of "overflow: auto"
+   * will partially hide its contents with unnecessary scrollbars when
+   * its immediate child is floated without an explicit width set.
+   */
+  width: 15em;
+}
+[dir="rtl"] .dblog-filter-form .form-item-type,
+[dir="rtl"] .dblog-filter-form .form-item-severity {
+  float: right;
+  margin: .1em .1em .1em .9em;
+  padding-left: .8em;
+  padding-right: 0;
+}
+.dblog-filter-form .form-type-select select {
+  width: 100%;
+}
+.dblog-filter-form .form-actions {
+  float: left; /* LTR */
+  padding: 3ex 0 0 1em; /* LTR */
+}
+[dir="rtl"] .dblog-filter-form .form-actions {
+  float: right;
+  padding: 3ex 1em 0 0;
+}
+.dblog-user {
+  background: #ffd;
+}
+.dblog-user .active {
+  background: #eed;
+}
+.dblog-content {
+  background: #ddf;
+}
+.dblog-content .active {
+  background: #cce;
+}
+.dblog-page-not-found,
+.dblog-access-denied {
+  background: #dfd;
+}
+.dblog-page-not-found .active,
+.dblog-access-denied .active {
+  background: #cec;
+}
+.dblog-error {
+  background: #ffc9c9;
+}
+.dblog-error .active {
+  background: #eeb9b9;
+}
+.admin-dblog .icon {
+  background: no-repeat center;
+  width: 16px;
+}
+.admin-dblog .dblog-warning .icon {
+  background-image: url(../../../misc/message-16-warning.png);
+}
+.admin-dblog .dblog-error .icon,
+.admin-dblog .dblog-critical .icon,
+.admin-dblog .dblog-alert .icon,
+.admin-dblog .dblog-emergency .icon {
+  background-image: url(../../misc/message-16-error.png);
+}

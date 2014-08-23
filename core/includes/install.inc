@@ -244,57 +244,27 @@ function backdrop_detect_baseurl($file = 'core/install.php') {
 }
 
 /**
- * Detects all supported databases that are compiled into PHP.
- *
- * @return
- *  An array of database types compiled into PHP.
- */
-function backdrop_detect_database_types() {
-  $databases = backdrop_get_database_types();
-
-  foreach ($databases as $driver => $installer) {
-    $databases[$driver] = $installer->name();
-  }
-
-  return $databases;
-}
-
-/**
  * Returns all supported database installer objects that are compiled into PHP.
  *
  * @return
  *  An array of database installer objects compiled into PHP.
  */
-function backdrop_get_database_types() {
-  $databases = array();
-
-  // We define a driver as a directory in /core/includes/database that in turn
-  // contains a database.inc file. That allows us to drop in additional drivers
-  // without modifying the installer.
-  // Because we have no registry yet, we need to also include the install.inc
-  // file for the driver explicitly.
+function backdrop_load_database_driver() {
+  // Because we have no registry yet, we need to include the install.inc file
+  // for the driver explicitly.
   require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
-  foreach (file_scan_directory(BACKDROP_ROOT . '/core/includes/database', '/^[a-z]*$/i', array('recurse' => FALSE)) as $file) {
-    if (file_exists($file->uri . '/database.inc') && file_exists($file->uri . '/install.inc')) {
-      $drivers[$file->filename] = $file->uri;
-    }
+
+  $driver = array(
+    'name' => 'mysql',
+    'mysql' => BACKDROP_ROOT . '/core/includes/database/mysql',
+  );
+
+  $installer = db_installer_object('mysql');
+  if ($installer->installable()) {
+    return $installer;
   }
 
-  foreach ($drivers as $driver => $file) {
-    $installer = db_installer_object($driver);
-    if ($installer->installable()) {
-      $databases[$driver] = $installer;
-    }
-  }
-
-  // Usability: unconditionally put the MySQL driver on top.
-  if (isset($databases['mysql'])) {
-    $mysql_database = $databases['mysql'];
-    unset($databases['mysql']);
-    $databases = array('mysql' => $mysql_database) + $databases;
-  }
-
-  return $databases;
+  return FALSE;
 }
 
 /**
@@ -493,11 +463,10 @@ abstract class DatabaseTasks {
   public function getFormOptions($database) {
     $form['database'] = array(
       '#type' => 'textfield',
-      '#title' => st('Database name'),
+      '#title' => st('MySQL Database name'),
       '#default_value' => empty($database['database']) ? '' : $database['database'],
       '#size' => 45,
       '#required' => TRUE,
-      '#description' => st('The name of the database your @profile data will be stored in. It must exist on your server before @profile can be installed.', array('@profile' => backdrop_install_profile_distribution_name())),
     );
 
     $form['username'] = array(
@@ -609,11 +578,18 @@ function backdrop_rewrite_settings($settings = array()) {
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additions = '';
 
-  // Build list of setting names and insert the values into the global namespace.
-  $keys = array();
+  // Assign each variable into the global namespace.
   foreach ($settings as $setting => $data) {
-    $GLOBALS[$setting] = $data['value'];
-    $keys[] = $setting;
+    $matches = array();
+    preg_match('!^([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
+    $variable = $matches[1];
+    $nesting = isset($matches[3]) ? explode('\'][\'', $matches[3]) : array();
+
+    $global_array = &$GLOBALS[$variable];
+    foreach ($nesting as $nested_key) {
+      $global_array = &$global_array[$nested_key];
+    }
+    $global_array = $data['value'];
   }
 
   $buffer = NULL;
@@ -629,7 +605,7 @@ function backdrop_rewrite_settings($settings = array()) {
       // Check for variables.
       if (substr($line, 0, 1) == '$') {
         preg_match('/\$([^ =]*) /', $line, $variable);
-        if (in_array($variable[1], $keys)) {
+        if (array_key_exists($variable[1], $settings)) {
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable[1]];

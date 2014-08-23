@@ -6,6 +6,7 @@
  */
 
 include_once BACKDROP_ROOT . '/core/includes/gettext.inc';
+include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
 /**
  * User interface for the translation import screen.

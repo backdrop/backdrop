@@ -114,8 +114,8 @@ function system_test_sleep($seconds) {
 }
 
 function system_test_basic_auth_page() {
-  $output = t('$_SERVER[\'PHP_AUTH_USER\'] is @username.', array('@username' => $_SERVER['PHP_AUTH_USER']));
-  $output .= t('$_SERVER[\'PHP_AUTH_PW\'] is @password.', array('@password' => $_SERVER['PHP_AUTH_PW']));
+  $output = t('Username is @username.', array('@username' => $_SERVER['PHP_AUTH_USER']));
+  $output .= t('Password is @password.', array('@password' => $_SERVER['PHP_AUTH_PW']));
   return $output;
 }
 
@@ -177,7 +177,7 @@ function system_test_redirect_invalid_scheme() {
  * Implements hook_modules_installed().
  */
 function system_test_modules_installed($modules) {
-  if (variable_get('test_verbose_module_hooks')) {
+  if (state_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
       backdrop_set_message(t('hook_modules_installed fired for @module', array('@module' => $module)));
     }
@@ -188,7 +188,7 @@ function system_test_modules_installed($modules) {
  * Implements hook_modules_enabled().
  */
 function system_test_modules_enabled($modules) {
-  if (variable_get('test_verbose_module_hooks')) {
+  if (state_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
       backdrop_set_message(t('hook_modules_enabled fired for @module', array('@module' => $module)));
     }
@@ -199,7 +199,7 @@ function system_test_modules_enabled($modules) {
  * Implements hook_modules_disabled().
  */
 function system_test_modules_disabled($modules) {
-  if (variable_get('test_verbose_module_hooks')) {
+  if (state_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
       backdrop_set_message(t('hook_modules_disabled fired for @module', array('@module' => $module)));
     }
@@ -210,7 +210,7 @@ function system_test_modules_disabled($modules) {
  * Implements hook_modules_uninstalled().
  */
 function system_test_modules_uninstalled($modules) {
-  if (variable_get('test_verbose_module_hooks')) {
+  if (state_get('test_verbose_module_hooks')) {
     foreach ($modules as $module) {
       backdrop_set_message(t('hook_modules_uninstalled fired for @module', array('@module' => $module)));
     }
@@ -247,11 +247,11 @@ function system_test_exit() {
 function system_test_system_info_alter(&$info, $file, $type) {
   // We need a static otherwise the last test will fail to alter common_test.
   static $test;
-  if (($dependencies = variable_get('dependencies', array())) || $test) {
+  if (($dependencies = state_get('system_test_dependencies', array())) || $test) {
     if ($file->name == 'module_test') {
       $info['hidden'] = FALSE;
       $info['dependencies'][] = array_shift($dependencies);
-      variable_set('dependencies', $dependencies);
+      state_set('system_test_dependencies', $dependencies);
       $test = TRUE;
     }
     if ($file->name == 'common_test') {

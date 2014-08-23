@@ -181,7 +181,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     $original_uri = file_unmanaged_copy($file->uri, $scheme . '://', FILE_EXISTS_RENAME);
     // Let the image_module_test module know about this file, so it can claim
     // ownership in hook_file_download().
-    variable_set('image_module_test_file_download', $original_uri);
+    state_set('image_module_test_file_download', $original_uri);
     $this->assertNotIdentical(FALSE, $original_uri, 'Created the generated image file.');
 
     // Get the URL of a file that has not been generated and try to create it.
@@ -192,6 +192,16 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     if (!$clean_url) {
       $this->assertTrue(strpos($generate_url, '?q=') !== FALSE, 'When using non-clean URLS, the system path contains the query string.');
     }
+
+    // Check that the generated URL is the same when we pass in a relative path
+    // rather than a URI. We need to temporarily switch the default scheme to
+    // match the desired scheme before testing this, then switch it back to the
+    // "temporary" scheme used throughout this test afterwards.
+    variable_set('file_default_scheme', $scheme);
+    $relative_path = file_uri_target($original_uri);
+    $generate_url_from_relative_path = image_style_url($this->style_name, $relative_path);
+    $this->assertEqual($generate_url, $generate_url_from_relative_path, 'Generated URL is the same regardless of whether it came from a relative path or a file URI.');
+    variable_set('file_default_scheme', 'temporary');
 
     // Fetch the URL that generates the file.
     $this->backdropGet($generate_url);
@@ -213,7 +223,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
 
       // Make sure that access is denied for existing style files if we do not
       // have access.
-      variable_del('image_module_test_file_download');
+      state_set('image_module_test_file_download', FALSE);
       $this->backdropGet($generate_url);
       $this->assertResponse(403, 'Confirmed that access is denied for the private image style.');
 

@@ -135,7 +135,7 @@ function simpletest_run_tests($test_list, $reporter = 'backdrop') {
     ),
     'finished' => '_simpletest_batch_finished',
     'progress_message' => '',
-    'css' => array(backdrop_get_path('module', 'simpletest') . '/simpletest.css'),
+    'css' => array(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css'),
     'init_message' => t('Processing test @num of @max - %test.', array('%test' => $info['name'], '@num' => '1', '@max' => count($test_list))),
   );
   batch_set($batch);

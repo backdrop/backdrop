@@ -67,7 +67,7 @@ function dblog_menu() {
 function dblog_init() {
   if (arg(0) == 'admin' && arg(1) == 'reports') {
     // Add the CSS for this module
-    backdrop_add_css(backdrop_get_path('module', 'dblog') . '/dblog.css');
+    backdrop_add_css(backdrop_get_path('module', 'dblog') . '/css/dblog.css');
   }
 }
 

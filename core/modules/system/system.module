@@ -114,10 +114,6 @@ function system_theme() {
     'system_compact_link' => array(
       'variables' => array(),
     ),
-    'system_date_time_settings' => array(
-      'render element' => 'form',
-      'file' => 'system.admin.inc',
-    ),
   ));
 }
 
@@ -346,6 +342,15 @@ function system_element_info() {
     '#process' => array('ajax_process_form'),
     '#element_validate' => array('form_validate_number'),
     '#theme' => 'range',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['search'] = array(
+    '#input' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#autocomplete_path' => FALSE,
+    '#process' => array('ajax_process_form'),
+    '#theme' => 'search',
     '#theme_wrappers' => array('form_element'),
   );
   $types['machine_name'] = array(
@@ -805,53 +810,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time'] = array(
-    'title' => 'Date and time',
-    'description' => 'Configure display formats for date and time.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_date_time_settings'),
-    'access arguments' => array('administer site configuration'),
-    'weight' => -15,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types'] = array(
-    'title' => 'Types',
-    'description' => 'Configure display formats for date and time.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_date_time_settings'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types/add'] = array(
-    'title' => 'Add date type',
-    'description' => 'Add new date type.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_add_date_format_type_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_ACTION,
-    'weight' => -10,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types/%/delete'] = array(
-    'title' => 'Delete date type',
-    'description' => 'Allow users to delete a configured date type.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_delete_date_format_type_form', 5),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/formats'] = array(
-    'title' => 'Formats',
-    'description' => 'Configure display format strings for date and time.',
+    'title' => 'Date and time formats',
+    'description' => 'Configure the display of date and time strings.',
     'page callback' => 'system_date_time_formats',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
     'weight' => -9,
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time/formats/add'] = array(
-    'title' => 'Add format',
+    'title' => 'Add date format',
     'description' => 'Allow users to add additional date formats.',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'backdrop_get_form',
@@ -860,15 +827,20 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/regional/date-time/formats/%/edit'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format'] = array(
     'title' => 'Edit date format',
-    'description' => 'Allow users to edit a configured date format.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_configure_date_formats_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/regional/date-time/formats/%/delete'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'Allow users to edit a configured date format.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/regional/date-time/formats/%system_date_format/delete'] = array(
     'title' => 'Delete date format',
     'description' => 'Allow users to delete a configured date format.',
     'page callback' => 'backdrop_get_form',
@@ -1222,6 +1194,14 @@ function system_library_info() {
     'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  $libraries['backdrop.modules'] = array(
+    'title' => 'Modules Filter',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1988,11 +1968,12 @@ function system_init() {
   $path = backdrop_get_path('module', 'system');
   // Add the CSS for this module. These aren't in system.info, because they
   // need to be in the CSS_SYSTEM group rather than the CSS_DEFAULT group.
-  backdrop_add_css($path . '/system.base.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE, 'weight' => -10));
+  backdrop_add_css($path . '/css/system.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   if (path_is_admin(current_path())) {
-    backdrop_add_css($path . '/system.admin.css', array('group' => CSS_SYSTEM));
+    backdrop_add_css($path . '/css/system.admin.css', array('group' => CSS_SYSTEM));
   }
-  backdrop_add_css($path . '/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
   // Ignore slave database servers for this request.
   //
@@ -2054,7 +2035,7 @@ function system_custom_theme() {
  * Implements hook_form_FORM_ID_alter().
  */
 function system_form_user_profile_form_alter(&$form, &$form_state) {
-  if (variable_get('configurable_timezones', 1)) {
+  if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
   return $form;
@@ -2064,7 +2045,8 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
  * Implements hook_form_FORM_ID_alter().
  */
 function system_form_user_register_form_alter(&$form, &$form_state) {
-  if (variable_get('configurable_timezones', 1) && variable_get('user_default_timezone', BACKDROP_USER_TIMEZONE_DEFAULT) == BACKDROP_USER_TIMEZONE_SELECT) {
+  $config = config('system.date');
+  if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
     return $form;
   }
@@ -2074,8 +2056,9 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
  * Implements hook_user_presave().
  */
 function system_user_presave($account) {
-  if (variable_get('configurable_timezones', 1) && empty($account->timezone) && !variable_get('user_default_timezone', BACKDROP_USER_TIMEZONE_DEFAULT)) {
-    $account->timezone = variable_get('date_default_timezone', '');
+  $config = config('system.date');
+  if ($config->get('user_configurable_timezones') && empty($account->timezone) && !$config->get('user_default_timezone')) {
+    $account->timezone = $config->get('default_timezone');
   }
 }
 
@@ -2083,8 +2066,9 @@ function system_user_presave($account) {
  * Implements hook_user_login().
  */
 function system_user_login(&$edit, $account) {
+  $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
-  if (!$account->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
+  if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
     backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
@@ -2105,7 +2089,7 @@ function system_user_timezone(&$form, &$form_state) {
   $form['timezone']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
-    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? variable_get('date_default_timezone', '') : ''),
+    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
     '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
   );
@@ -2793,7 +2777,7 @@ function system_system_info_alter(&$info, $file, $type) {
 }
 
 /**
- * Get the name of the default region for a given theme.
+ * Gets the name of the default region for a given theme.
  *
  * @param $theme
  *   The name of a theme.
@@ -3290,8 +3274,6 @@ function system_cron() {
  * Implements hook_flush_caches().
  */
 function system_flush_caches() {
-  // Rebuild list of date formats.
-  system_date_formats_rebuild();
   // Reset the menu static caches.
   menu_reset_static_cache();
 }
@@ -3549,7 +3531,7 @@ function system_time_zones($blank = NULL) {
     // reasons and should not be used, the list is filtered by a regular
     // expression.
     if (preg_match('!^((Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific)/|UTC$)!', $zone)) {
-      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', variable_get('date_format_long', 'l, F j, Y - H:i') . ' O', $zone)));
+      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern.php') . ' O', $zone)));
     }
   }
   // Sort the translated time zones alphabetically.
@@ -3715,423 +3697,111 @@ function system_run_automated_cron() {
 }
 
 /**
- * Gets the list of available date types and attributes.
- *
- * @param $type
- *   (optional) The date type name.
- *
- * @return
- *   An associative array of date type information keyed by the date type name.
- *   Each date type information array has the following elements:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this date type in its
- *     hook_date_format_types(). An empty string if the date type was
- *     user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- *   If $type was defined, only a single associative array with the above
- *   elements is returned.
- */
-function system_get_date_types($type = NULL) {
-  $types = &backdrop_static(__FUNCTION__);
-
-  if (!isset($types)) {
-    $types = _system_date_format_types_build();
-  }
-
-  return $type ? (isset($types[$type]) ? $types[$type] : FALSE) : $types;
-}
-
-/**
- * Implements hook_date_format_types().
- */
-function system_date_format_types() {
-  return array(
-    'long' => t('Long'),
-    'medium' => t('Medium'),
-    'short' => t('Short'),
-  );
-}
-
-/**
- * Implements hook_date_formats().
- */
-function system_date_formats() {
-  include_once BACKDROP_ROOT . '/core/includes/date.inc';
-  return system_default_date_formats();
-}
-
-/**
  * Gets the list of defined date formats and attributes.
  *
- * @param $type
+ * @param $date_format_name
  *   (optional) The date type name.
  *
  * @return
- *   An associative array of date formats. The top-level keys are the names of
- *   the date types that the date formats belong to. The values are in turn
- *   associative arrays keyed by the format string, with the following keys:
- *   - dfid: The date format ID.
- *   - format: The format string.
- *   - type: The machine-readable name of the date type.
- *   - locales: An array of language codes. This can include both 2 character
- *     language codes like 'en and 'fr' and 5 character language codes like
- *     'en-gb' and 'en-us'.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this date format in its
- *     hook_date_formats(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- *   If $type was defined, only the date formats associated with the given date
- *   type are returned, in a single associative array keyed by format string.
- */
-function system_get_date_formats($type = NULL) {
-  $date_formats = &backdrop_static(__FUNCTION__);
-
-  if (!isset($date_formats)) {
-    $date_formats = _system_date_formats_build();
-  }
-
-  return $type ? (isset($date_formats[$type]) ? $date_formats[$type] : FALSE) : $date_formats;
-}
-
-/**
- * Gets the format details for a particular format ID.
+ *   An associative array of date formats. The top-level keys are the
+ *   machine-readable names of the date formats. The values are associative
+ *   arrays with the following keys:
+ *   - name: The string human readable name of the date format.
+ *   - pattern: The pattern string as usable by the PHP date() function.
  *
- * @param $dfid
- *   A date format ID.
- *
- * @return
- *   A date format object with the following properties:
- *   - dfid: The date format ID.
- *   - format: The date format string.
- *   - type: The name of the date type.
- *   - locked: Whether the date format can be changed or not.
+ *   If $date_format_name was defined, only the date formats associated with the
+ *   given machine name are returned, in an associative array keyed by format
+ *   string.
  */
-function system_get_date_format($dfid) {
-  return db_query('SELECT df.dfid, df.format, df.type, df.locked FROM {date_formats} df WHERE df.dfid = :dfid', array(':dfid' => $dfid))->fetch();
-}
-
-/**
- * Resets the database cache of date formats and saves all new date formats.
- */
-function system_date_formats_rebuild() {
-  backdrop_static_reset('system_get_date_formats');
-  $date_formats = system_get_date_formats(NULL);
-
-  foreach ($date_formats as $type => $formats) {
-    foreach ($formats as $format => $info) {
-      system_date_format_save($info);
+function system_get_date_formats($date_format_name = NULL) {
+  $date_formats = backdrop_static(__FUNCTION__, array());
+  if (empty($date_formats)) {
+    $date_formats = config_get('system.date', 'formats');
+    foreach ($date_formats as $name => $format) {
+      $date_formats[$name]['name'] = $name;
     }
   }
 
-  // Rebuild configured date formats locale list.
-  backdrop_static_reset('system_date_format_locale');
-  system_date_format_locale();
-
-  _system_date_formats_build();
-}
-
-/**
- * Gets the appropriate date format string for a date type and locale.
- *
- * @param $langcode
- *   (optional) Language code for the current locale. This can be a 2 character
- *   language code like 'en' and 'fr' or a 5 character language code like
- *   'en-gb' and 'en-us'.
- * @param $type
- *   (optional) The date type name.
- *
- * @return
- *   If $type and $langcode are specified, returns the corresponding date format
- *   string. If only $langcode is specified, returns an array of all date
- *   format strings for that locale, keyed by the date type. If neither is
- *   specified, or if no matching formats are found, returns FALSE.
- */
-function system_date_format_locale($langcode = NULL, $type = NULL) {
-  $formats = &backdrop_static(__FUNCTION__);
-
-  if (empty($formats)) {
-    $formats = array();
-    $result = db_query("SELECT format, type, language FROM {date_format_locale}");
-    foreach ($result as $record) {
-      if (!isset($formats[$record->language])) {
-        $formats[$record->language] = array();
-      }
-      $formats[$record->language][$record->type] = $record->format;
-    }
-  }
-
-  if ($type && $langcode && !empty($formats[$langcode][$type])) {
-    return $formats[$langcode][$type];
-  }
-  elseif ($langcode && !empty($formats[$langcode])) {
-    return $formats[$langcode];
-  }
-
-  return FALSE;
-}
-
-/**
- * Builds and returns information about available date types.
- *
- * @return
- *   An associative array of date type information keyed by name. Each date type
- *   information array has the following elements:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this format in its
- *     hook_date_format_types(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function _system_date_format_types_build() {
-  $types = array();
-
-  // Get list of modules that implement hook_date_format_types().
-  $modules = module_implements('date_format_types');
-
-  foreach ($modules as $module) {
-    $module_types = module_invoke($module, 'date_format_types');
-    foreach ($module_types as $module_type => $type_title) {
-      $type = array();
-      $type['module'] = $module;
-      $type['type'] = $module_type;
-      $type['title'] = $type_title;
-      $type['locked'] = 1;
-      // Will be over-ridden later if in the db.
-      $type['is_new'] = TRUE;
-      $types[$module_type] = $type;
-    }
-  }
-
-  // Get custom formats added to the database by the end user.
-  $result = db_query('SELECT dft.type, dft.title, dft.locked FROM {date_format_type} dft ORDER BY dft.title');
-  foreach ($result as $record) {
-    if (!isset($types[$record->type])) {
-      $type = array();
-      $type['is_new'] = FALSE;
-      $type['module'] = '';
-      $type['type'] = $record->type;
-      $type['title'] = $record->title;
-      $type['locked'] = $record->locked;
-      $types[$record->type] = $type;
-    }
-    else {
-      $type = array();
-      $type['is_new'] = FALSE;  // Over-riding previous setting.
-      $types[$record->type] = array_merge($types[$record->type], $type);
-    }
-  }
-
-  // Allow other modules to modify these date types.
-  backdrop_alter('date_format_types', $types);
-
-  return $types;
-}
-
-/**
- * Builds and returns information about available date formats.
- *
- * @return
- *   An associative array of date formats. The top-level keys are the names of
- *   the date types that the date formats belong to. The values are in turn
- *   associative arrays keyed by format with the following keys:
- *   - dfid: The date format ID.
- *   - format: The PHP date format string.
- *   - type: The machine-readable name of the date type the format belongs to.
- *   - locales: An array of language codes. This can include both 2 character
- *     language codes like 'en and 'fr' and 5 character language codes like
- *     'en-gb' and 'en-us'.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this format in its
- *     hook_date_formats(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function _system_date_formats_build() {
-  $date_formats = array();
-
-  // First handle hook_date_format_types().
-  $types = _system_date_format_types_build();
-  foreach ($types as $type => $info) {
-    system_date_format_type_save($info);
-  }
-
-  // Get formats supplied by various contrib modules.
-  $module_formats = module_invoke_all('date_formats');
-
-  foreach ($module_formats as $module_format) {
-    // System types are locked.
-    $module_format['locked'] = 1;
-    // If no date type is specified, assign 'custom'.
-    if (!isset($module_format['type'])) {
-      $module_format['type'] = 'custom';
-    }
-    if (!in_array($module_format['type'], array_keys($types))) {
-      continue;
-    }
-    if (!isset($date_formats[$module_format['type']])) {
-      $date_formats[$module_format['type']] = array();
-    }
-
-    // If another module already set this format, merge in the new settings.
-    if (isset($date_formats[$module_format['type']][$module_format['format']])) {
-      $date_formats[$module_format['type']][$module_format['format']] = array_merge_recursive($date_formats[$module_format['type']][$module_format['format']], $module_format);
-    }
-    else {
-      // This setting will be overridden later if it already exists in the db.
-      $module_format['is_new'] = TRUE;
-      $date_formats[$module_format['type']][$module_format['format']] = $module_format;
-    }
-  }
-
-  // Get custom formats added to the database by the end user.
-  $result = db_query('SELECT df.dfid, df.format, df.type, df.locked, dfl.language FROM {date_formats} df LEFT JOIN {date_format_locale} dfl ON df.format = dfl.format AND df.type = dfl.type ORDER BY df.type, df.format');
-  foreach ($result as $record) {
-    // If this date type isn't set, initialise the array.
-    if (!isset($date_formats[$record->type])) {
-      $date_formats[$record->type] = array();
-    }
-    $format = (array) $record;
-    $format['is_new'] = FALSE; // It's in the db, so override this setting.
-    // If this format not already present, add it to the array.
-    if (!isset($date_formats[$record->type][$record->format])) {
-      $format['module'] = '';
-      $format['locales'] = array($record->language);
-      $date_formats[$record->type][$record->format] = $format;
-    }
-    // Format already present, so merge in settings.
-    else {
-      if (!empty($record->language)) {
-        $format['locales'] = array_merge($date_formats[$record->type][$record->format]['locales'], array($record->language));
-      }
-      $date_formats[$record->type][$record->format] = array_merge($date_formats[$record->type][$record->format], $format);
-    }
-  }
-
-  // Allow other modules to modify these formats.
-  backdrop_alter('date_formats', $date_formats);
-
-  return $date_formats;
-}
-
-/**
- * Saves a date type to the database.
- *
- * @param $type
- *   A date type array containing the following keys:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function system_date_format_type_save($type) {
-  $info = array();
-  $info['type'] = $type['type'];
-  $info['title'] = $type['title'];
-  $info['locked'] = $type['locked'];
-
-  // Update date_format table.
-  if (!empty($type['is_new'])) {
-    backdrop_write_record('date_format_type', $info);
+  // Return either the specific format or all formats.
+  if (empty($date_format_name)) {
+    return $date_formats;
   }
   else {
-    backdrop_write_record('date_format_type', $info, 'type');
+    return isset($date_formats[$date_format_name]) ? $date_formats[$date_format_name] : FALSE;
   }
 }
 
 /**
- * Deletes a date type from the database.
+ * Menu loader function for a date format.
  *
- * @param $type
- *   The machine-readable name of the date type.
+ * @param string $date_format_name
+ *   The date type name.
+ * @param bool $include_hidden
+ *   Include hidden, non-configurable date formats, such as those used by HTML5
+ *   date/time elements.
+ *
+ * @return
+ *   The date format id if it exists and is not hidden, FALSE otherwise.
  */
-function system_date_format_type_delete($type) {
-  db_delete('date_formats')
-    ->condition('type', $type)
-    ->execute();
-  db_delete('date_format_type')
-    ->condition('type', $type)
-    ->execute();
-  db_delete('date_format_locale')
-    ->condition('type', $type)
-    ->execute();
+function system_date_format_load($date_format_name, $include_hidden = TRUE) {
+  if (($format = system_get_date_formats($date_format_name)) && ($include_hidden || empty($format['hidden']))) {
+    return $format;
+  }
+  return FALSE;
 }
 
 /**
  * Saves a date format to the database.
  *
- * @param $date_format
+ * @param array $date_format
  *   A date format array containing the following keys:
- *   - type: The name of the date type this format is associated with.
- *   - format: The PHP date format string.
- *   - locked: A boolean indicating whether or not this format should be
- *     configurable from the user interface.
- * @param $dfid
- *   If set, replace the existing date format having this ID with the
- *   information specified in $date_format.
+ *   - name: The machine name of this date format.
+ *   - label: The human-readable label for this date format.
+ *   - pattern: The pattern string as usable by the PHP date() function.
+ *   - langcode: Optional. If multiple languages are available, this specifies
+ *     which language the default format is in.
+ *   - module: If provided by a module, the name of the providing module. This
+ *     will prevent the format from being deleted in the UI.
+ *   - hidden: Optional. A boolean indicating whether or not this format should
+ *     be configurable from the user interface.
  *
- * @see system_get_date_types()
  * @see http://php.net/date
  */
-function system_date_format_save($date_format, $dfid = 0) {
-  $info = array();
-  $info['dfid'] = $dfid;
-  $info['type'] = $date_format['type'];
-  $info['format'] = $date_format['format'];
-  $info['locked'] = $date_format['locked'];
-
-  // Update date_format table.
-  if (!empty($date_format['is_new'])) {
-    backdrop_write_record('date_formats', $info);
+function system_date_format_save($date_format) {
+  $format = array(
+    'label' => $date_format['label'],
+    'pattern' => $date_format['pattern'],
+  );
+  // Trim empty strings from locale settings.
+  if (isset($date_format['locales'])) {
+    $date_format['locales'] = array_filter(array_filter($date_format['locales'], 'trim'));
   }
-  else {
-    $keys = ($dfid ? array('dfid') : array('format', 'type'));
-    backdrop_write_record('date_formats', $info, $keys);
-  }
-
-  // Retrieve an array of language objects for enabled languages.
-  $languages = language_list(TRUE);
-
-  $locale_format = array();
-  $locale_format['type'] = $date_format['type'];
-  $locale_format['format'] = $date_format['format'];
-
-  // Check if the suggested language codes are configured and enabled.
-  if (!empty($date_format['locales'])) {
-    foreach ($date_format['locales'] as $langcode) {
-      // Only proceed if language is enabled.
-      if (isset($languages[$langcode])) {
-        $is_existing = (bool) db_query_range('SELECT 1 FROM {date_format_locale} WHERE type = :type AND language = :language', 0, 1, array(':type' => $date_format['type'], ':language' => $langcode))->fetchField();
-        if (!$is_existing) {
-          $locale_format['language'] = $langcode;
-          backdrop_write_record('date_format_locale', $locale_format);
-        }
-      }
+  // Don't save empty defaults.
+  foreach (array('module', 'hidden', 'locales') as $key) {
+    if (!empty($date_format[$key])) {
+      $format[$key] = $date_format[$key];
     }
   }
+  config_set('system.date', 'formats.' . $date_format['name'], $format);
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**
  * Deletes a date format from the database.
  *
- * @param $dfid
+ * @param $date_format_name
  *   The date format ID.
  */
-function system_date_format_delete($dfid) {
-  db_delete('date_formats')
-    ->condition('dfid', $dfid)
-    ->execute();
+function system_date_format_delete($date_format_name) {
+  // Do not allow deletion of module-provided formats.
+  $format = system_get_date_formats($date_format_name);
+  if (isset($format['module'])) {
+    return FALSE;
+  }
+
+  $format_id = 'formats.' . $date_format_name;
+  config('system.date')->clear($format_id)->save();
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**
@@ -4224,6 +3894,10 @@ function system_config_info() {
   );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.date'] = array(
+    'label' => t('System date'),
     'group' => t('Configuration'),
   );
   return $prefixes;

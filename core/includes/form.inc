@@ -2955,11 +2955,11 @@ function form_process_date($element) {
   $element['#tree'] = TRUE;
 
   // Determine the order of day, month, year in the site's chosen date format.
-  $format = variable_get('date_format_short', 'm/d/Y - H:i');
+  $format = system_date_format_load('short');
   $sort = array();
-  $sort['day'] = max(strpos($format, 'd'), strpos($format, 'j'));
-  $sort['month'] = max(strpos($format, 'm'), strpos($format, 'M'));
-  $sort['year'] = strpos($format, 'Y');
+  $sort['day'] = max(strpos($format['pattern'], 'd'), strpos($format['pattern'], 'j'));
+  $sort['month'] = max(strpos($format['pattern'], 'm'), strpos($format['pattern'], 'M'));
+  $sort['year'] = strpos($format['pattern'], 'Y');
   asort($sort);
   $order = array_keys($sort);
 
@@ -3897,6 +3897,42 @@ function form_validate_email(&$element, &$form_state) {
   if ($value !== '' && !valid_email_address($value)) {
     form_error($element, t('The e-mail address %mail is not valid.', array('%mail' => $value)));
   }
+}
+
+/**
+ * Returns HTML for a search form element.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title, #value, #description, #size, #maxlength,
+ *     #placeholder, #required, #attributes, #autocomplete_path.
+ *
+ * @ingroup themeable
+ */
+function theme_search($variables) {
+  $element = $variables['element'];
+  $element['#attributes']['type'] = 'search';
+  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  _form_set_class($element, array('form-search'));
+
+  $extra = '';
+  if ($element['#autocomplete_path'] && drupal_valid_path($element['#autocomplete_path'])) {
+    drupal_add_library('system', 'drupal.autocomplete');
+    $element['#attributes']['class'][] = 'form-autocomplete';
+
+    $attributes = array();
+    $attributes['type'] = 'hidden';
+    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
+    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['disabled'] = 'disabled';
+    $attributes['class'][] = 'autocomplete';
+    $extra = '<input' . drupal_attributes($attributes) . ' />';
+  }
+
+  $output = '<input' . drupal_attributes($element['#attributes']) . ' />';
+
+  return $output . $extra;
 }
 
 /**

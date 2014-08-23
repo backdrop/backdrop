@@ -2226,7 +2226,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       config_set('language.negotiation', 'url_part', $test['locale_language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
-      variable_set('locale_test_domain', $test['locale_test_domain']);
+      state_set('locale_test_domain', $test['locale_test_domain']);
     }
     $this->backdropGet($test['path'], array(), $test['http_header']);
     $this->assertText($test['expect'], $test['message']);
@@ -2553,7 +2553,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
 
     // Enable content language negotiation UI.
-    variable_set('locale_test_content_language_type', TRUE);
+    state_set('locale_test_content_language_type', TRUE);
 
     // Set interface language detection to user and content language detection
     // to URL. Disable inheritance from interface language to ensure content
@@ -2647,33 +2647,48 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
-    // Configure date formats.
-    $this->backdropGet('admin/config/regional/date-time/locale');
-    $this->assertText('French', 'Configured languages appear.');
+    // Ensure generated URLs stick with English.
+    $GLOBALS['language_url'] = language_default();
+
+    // Add new date format.
     $edit = array(
-      'date_format_long' => 'd.m.Y - H:i',
-      'date_format_medium' => 'd.m.Y - H:i',
-      'date_format_short' => 'd.m.Y - H:i',
+      'label' => 'Example Style',
+      'name' => 'example_style',
+      'pattern' => 'd.m.Y - H:i',
     );
-    $this->backdropPost('admin/config/regional/date-time/locale/fr/edit', $edit, t('Save configuration'));
-    $this->assertText(t('Configuration saved.'), 'French date formats updated.');
+    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
+
+    // Configure the example format.
     $edit = array(
-      'date_format_long' => 'j M Y - g:ia',
-      'date_format_medium' => 'j M Y - g:ia',
-      'date_format_short' => 'j M Y - g:ia',
+      'locales[en]' => 'm.d.Y - H:i',
+      'locales[fr]' => 'Y.m.d - H:i',
     );
-    $this->backdropPost('admin/config/regional/date-time/locale/en/edit', $edit, t('Save configuration'));
-    $this->assertText(t('Configuration saved.'), 'English date formats updated.');
+    $this->backdropPost('admin/config/regional/date-time/formats/example_style/localize', $edit, t('Save configuration'));
+    $this->assertText(t('Date localizations saved.'), 'Localized date formats saved.');
+
+    // Ensure that the original date format is still used on this page's
+    // display, not the localized English version. Hour and minute are omitted
+    // to avoid race conditions between the GET and the assert.
+    $this->backdropGet('admin/config/regional/date-time/formats');
+    $this->assertText(format_date(REQUEST_TIME, 'custom', 'd.m.Y'));
+
+    // Configure the medium format.
+    $edit = array(
+      'locales[en]' => 'D, m/d/Y - g:ia',
+      'locales[fr]' => 'D, Y/m/Y - H:i',
+    );
+    $this->backdropPost('admin/config/regional/date-time/formats/medium/localize', $edit, t('Save configuration'));
+    $this->assertText(t('Date localizations saved.'), 'Medium date formats updated.');
 
     // Create node content.
     $node = $this->backdropCreateNode(array('type' => 'article'));
 
     // Configure format for the node posted date changes with the language.
     $this->backdropGet('node/' . $node->nid);
-    $english_date = format_date($node->created, 'custom', 'j M Y');
+    $english_date = format_date($node->created, 'custom', 'D, m/d/Y - g:ia');
     $this->assertText($english_date, 'English date format appears');
     $this->backdropGet('fr/node/' . $node->nid);
-    $french_date = format_date($node->created, 'custom', 'd.m.Y');
+    $french_date = format_date($node->created, 'custom', 'D, Y/m/Y - H:i');
     $this->assertText($french_date, 'French date format appears');
   }
 }
@@ -2695,8 +2710,8 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
    */
   function testInfoAlterations() {
     // Enable language type/negotiation info alterations.
-    variable_set('locale_test_language_types', TRUE);
-    variable_set('locale_test_language_negotiation_info', TRUE);
+    state_set('locale_test_language_types', TRUE);
+    state_set('locale_test_language_negotiation_info', TRUE);
     $this->languageNegotiationUpdate();
 
     // Check that fixed language types are properly configured without the need
@@ -2705,7 +2720,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Make the content language type configurable by updating the language
     // negotiation settings with the proper flag enabled.
-    variable_set('locale_test_content_language_type', TRUE);
+    state_set('locale_test_content_language_type', TRUE);
     $this->languageNegotiationUpdate();
     $type = LANGUAGE_TYPE_CONTENT;
     $language_types = variable_get('language_types', language_types_get_default());
@@ -2726,7 +2741,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Remove the interface language provider by updating the language
     // negotiation settings with the proper flag enabled.
-    variable_set('locale_test_language_negotiation_info_alter', TRUE);
+    state_set('locale_test_language_negotiation_info_alter', TRUE);
     $this->languageNegotiationUpdate();
     $negotiation = variable_get("language_negotiation_$type", array());
     $this->assertFalse(isset($negotiation[$provider]), 'Interface language provider removed from the stored settings.');

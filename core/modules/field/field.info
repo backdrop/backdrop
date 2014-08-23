@@ -6,4 +6,4 @@ backdrop = 1.x
 dependencies[] = field_sql_storage
 dependencies[] = entity
 required = TRUE
-stylesheets[all][] = theme/field.css
+stylesheets[all][] = css/field.css

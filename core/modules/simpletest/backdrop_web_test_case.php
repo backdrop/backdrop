@@ -1593,7 +1593,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     state_set('install_task', 'done');
     variable_set('clean_url', $this->originalCleanUrl);
     config_set('system.site', 'site_mail', 'simpletest@example.com');
-    variable_set('date_default_timezone', date_default_timezone_get());
+    config_set('system.date', 'date_default_timezone', date_default_timezone_get());
 
     // Set up English language.
     unset($conf['language_default']);
@@ -2351,6 +2351,13 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
     $this->backdropSetContent($content);
     $this->backdropSetSettings($backdrop_settings);
+
+    $verbose = 'AJAX POST request to: ' . $path;
+    $verbose .= '<br />AJAX callback path: ' . $ajax_path;
+    $verbose .= '<hr />Ending URL: ' . $this->getUrl();
+    $verbose .= '<hr />' . $this->content;
+
+    $this->verbose($verbose);    
     return $return;
   }
 
@@ -2751,10 +2758,13 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (isset($urls[$index])) {
       $url_target = $this->getAbsoluteUrl($urls[$index]['href']);
     }
+    else {
+      $url_target = '';
+    }
 
     $this->assertTrue(isset($urls[$index]), t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before)), t('Browser'));
 
-    if (isset($url_target)) {
+    if (!empty($url_target)) {
       return $this->backdropGet($url_target);
     }
     return FALSE;

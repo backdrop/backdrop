@@ -146,14 +146,6 @@ function system_requirements($phase) {
       ));
     }
     else {
-      // Make sure at least one supported database driver exists.
-      $drivers = backdrop_detect_database_types();
-      if (empty($drivers)) {
-        $database_ok = FALSE;
-        $pdo_message = $t('Your web server does not appear to support any common PDO database extensions. Check with your hosting provider to see if they support PDO (PHP Data Objects) and offer any databases that <a href="@support-url">Backdrop CMS supports</a>.', array(
-          '@support-url' => 'http://backdropcms.org/guide/requirements',
-        ));
-      }
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
@@ -703,96 +695,6 @@ function system_schema() {
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
   $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
-
-  $schema['date_format_type'] = array(
-    'description' => 'Stores configured date format types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'title' => array(
-        'description' => 'The human readable name of the format type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'locked' => array(
-        'description' => 'Whether or not this is a system provided format.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('type'),
-    'indexes' => array(
-      'title' => array('title'),
-    ),
-  );
-
-  // This table's name is plural as some versions of MySQL can't create a
-  // table named 'date_format'.
-  $schema['date_formats'] = array(
-    'description' => 'Stores configured date formats.',
-    'fields' => array(
-      'dfid' => array(
-        'description' => 'The date format identifier.',
-        'type' => 'serial',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ),
-      'format' => array(
-        'description' => 'The date format string.',
-        'type' => 'varchar',
-        'length' => 100,
-        'not null' => TRUE,
-        'binary' => TRUE,
-      ),
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'locked' => array(
-        'description' => 'Whether or not this format can be modified.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('dfid'),
-    'unique keys' => array('formats' => array('format', 'type')),
-  );
-
-  $schema['date_format_locale'] = array(
-    'description' => 'Stores configured date formats for each locale.',
-    'fields' => array(
-      'format' => array(
-        'description' => 'The date format string.',
-        'type' => 'varchar',
-        'length' => 100,
-        'not null' => TRUE,
-      ),
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'language' => array(
-        'description' => 'A {language}.langcode for this format to be used with.',
-        'type' => 'varchar',
-        'length' => 12,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('type', 'language'),
-  );
 
   $schema['file_managed'] = array(
     'description' => 'Stores information for uploaded files.',
@@ -2006,6 +1908,130 @@ function system_update_1019() {
 }
 
 /**
+ * Convert date settings to config.
+ */
+function system_update_1020() {
+  // Safety check for date formats.
+  if (!db_table_exists('date_format_type')) {
+    return;
+  }
+
+  // Migrate variables if any.
+  $config = config('system.date');
+  $config->set('first_day', variable_get('date_first_day', 0));
+  $config->set('default_country', variable_get('site_default_country', ''));
+  $config->set('default_timezone', variable_get('date_default_timezone', ''));
+  $config->set('user_configurable_timezones', variable_get('configurable_timezones', 1));
+  $config->set('user_empty_timezone_message', variable_get('empty_timezone_message', 0));
+  $config->set('user_default_timezone', variable_get('user_default_timezone', 0));
+
+  // Delete variables.
+  variable_del('site_default_country');
+  variable_del('date_first_day');
+  variable_del('date_default_timezone');
+  variable_del('configurable_timezones');
+  variable_del('empty_timezone_message');
+  variable_del('user_default_timezone');
+
+  // Migrate date formats. These are the defaults that must exist.
+  $formats = array(
+    'long' => array(
+      'label' => 'Default Long Date',
+      'pattern' => 'l, F j, Y - H:i',
+      'module' => 'system',
+    ),
+    'medium' => array(
+      'label' => 'Default Medium Date',
+      'pattern' => 'D, m/d/Y - H:i',
+      'module' => 'system',
+    ),
+    'short' => array(
+      'label' => 'Default Short Date',
+      'pattern' => 'm/d/Y - H:i',
+      'module' => 'system',
+    ),
+    'html_datetime' => array(
+      'label' => 'HTML Datetime',
+      'pattern' => 'Y-m-d\\TH:i:sO',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_date' => array(
+      'label' => 'HTML Date',
+      'pattern' => 'Y-m-d',
+      'module' => 'system',
+      'hidden' => 1
+    ),
+    'html_time' => array(
+      'label' => 'HTML Time',
+      'pattern' => 'H:i:s',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_yearless_date' => array(
+      'label' => 'HTML Yearless date',
+      'pattern' => 'm-d',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_week' => array(
+      'label' => 'HTML Week',
+      'pattern' => 'Y-\\WW',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_month' => array(
+      'label' => 'HTML Month',
+      'pattern' => 'Y-m',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_year' => array(
+      'label' => 'HTML Year',
+      'pattern' => 'Y',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+  );
+
+  // Update/create custom formats.
+  $result = db_query("SELECT * FROM {date_format_type}");
+  foreach ($result as $row) {
+    if ($pattern = variable_get('date_format_' . $row->type)) {
+      $format = isset($formats[$row->type]) ? $formats[$row->type] : array();
+      $format['label'] = $row->title;
+      $format['pattern'] = $pattern;
+      $formats[$row->type] = $format;
+      variable_del('date_format_' . $row->type);
+    }
+  }
+
+  // Copy over all locale-specific patterns for each date format.
+  $locale_result = db_query("SELECT * FROM {date_format_locale}");
+  foreach ($locale_result as $row) {
+    if (array_key_exists($row->type, $formats)) {
+      $formats[$row->type]['locales'][$row->language] = $row->format;
+    }
+  }
+
+  $config->set('formats', $formats);
+  $config->save();
+
+  db_drop_table('date_formats');
+  db_drop_table('date_format_type');
+  db_drop_table('date_format_locale');
+}
+
+/**
+* Removes the js_cache_files variable.
+*
+* @ingroup config_upgrade
+*/
+function system_update_1021() {
+  variable_del('js_cache_files');
+}
+ 
+ /**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

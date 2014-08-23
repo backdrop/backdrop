@@ -423,7 +423,7 @@ class Config {
         $value = $this->data;
         $key_exists = FALSE;
         foreach ($parts as $part) {
-          if ($value[$part]) {
+          if (is_array($value) && array_key_exists($part, $value)) {
             $value = $value[$part];
             $key_exists = TRUE;
           }

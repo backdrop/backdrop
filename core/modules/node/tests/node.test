@@ -982,7 +982,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
-    variable_set('node_access_test_private', TRUE);
+    state_set('node_access_test_private', TRUE);
   }
 
   /**
@@ -2029,7 +2029,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
     // $account instead of the global $user, we will log in as
     // noAccessUser2.
     $this->backdropLogin($this->noAccessUser2);
-    variable_set('node_test_node_access_all_uid', $this->noAccessUser->uid);
+    state_set('node_test_node_access_all_uid', $this->noAccessUser->uid);
     backdrop_static_reset('node_access_view_all_nodes');
     try {
       $query = db_select('node', 'mytab')
@@ -2044,7 +2044,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
     catch (Exception $e) {
       $this->fail(t('Altered query is malformed'));
     }
-    variable_del('node_test_node_access_all_uid');
+    state_del('node_test_node_access_all_uid');
   }
 }
 
@@ -2174,6 +2174,35 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
       $output = token_replace($input, array('node' => $node), array('language' => $language_interface, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, t('Unsanitized node token %token replaced.', array('%token' => $input)));
     }
+
+    // Repeat for a node without a summary.
+    $settings['body'] = array(LANGUAGE_NONE => array(array('value' => $this->randomName(32), 'summary' => '')));
+    $node = $this->backdropCreateNode($settings);
+
+    // Load node (without summary) so that the body and summary fields are
+    // structured properly.
+    $node = node_load($node->nid);
+    $instance = field_info_instance('node', 'body', $node->type);
+
+    // Generate and test sanitized token - use full body as expected value.
+    $tests = array();
+    $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'value');
+
+    // Test to make sure that we generated something for each token.
+    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated for node without a summary.');
+
+    foreach ($tests as $input => $expected) {
+      $output = token_replace($input, array('node' => $node), array('language' => $language_interface));
+      $this->assertEqual($output, $expected, format_string('Sanitized node token %token replaced for node without a summary.', array('%token' => $input)));
+    }
+
+    // Generate and test unsanitized tokens.
+    $tests['[node:summary]'] = $node->body[$node->langcode][0]['value'];
+
+    foreach ($tests as $input => $expected) {
+      $output = token_replace($input, array('node' => $node), array('language' => $language_interface, 'sanitize' => FALSE));
+      $this->assertEqual($output, $expected, format_string('Unsanitized node token %token replaced for node without a summary.', array('%token' => $input)));
+    }    
   }
 }
 
@@ -2429,5 +2458,72 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
     // Test that the correct build mode has been set.
     $build = node_view($node);
     $this->assertEqual($build['#view_mode'], 'teaser', 'The view mode has correctly been set to teaser.');
+  }
+}
+
+/**
+ * Tests the cache invalidation of node operations.
+ */
+class NodePageCacheTest extends NodeWebTestCase {
+
+  /**
+   * An admin user with administrative permissions for nodes.
+   */
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp();
+
+    variable_set('cache', 1);
+    variable_set('page_cache_maximum_age', 300);
+
+    $this->admin_user = $this->backdropCreateUser(array(
+        'bypass node access',
+        'access content overview',
+        'administer nodes',
+    ));
+  }
+
+  /**
+   * Tests deleting nodes clears page cache.
+   */
+  public function testNodeDelete() {
+    $node_path = 'node/' . $this->backdropCreateNode()->nid;
+
+    // Populate page cache.
+    $this->backdropGet($node_path);
+
+    // Login and delete the node.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost($node_path . '/delete', array(), t('Delete'));
+
+    // Logout and check the node is not available.
+    $this->backdropLogout();
+    $this->backdropGet($node_path);
+    $this->assertResponse(404);
+
+    // Create two new nodes.
+    $nodes[0] = $this->backdropCreateNode();
+    $nodes[1] = $this->backdropCreateNode();
+    $node_path = 'node/' . $nodes[0]->nid;
+
+    // Populate page cache.
+    $this->backdropGet($node_path);
+
+    // Login and delete the nodes.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/content');
+    $edit = array(
+        'operation' => 'delete',
+        'nodes[' . $nodes[0]->nid . ']' => TRUE,
+        'nodes[' . $nodes[1]->nid . ']' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, array(), t('Delete'));
+
+    // Logout and check the node is not available.
+    $this->backdropLogout();
+    $this->backdropGet($node_path);
+    $this->assertResponse(404);
   }
 }

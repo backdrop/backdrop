@@ -491,6 +491,7 @@ function node_admin_nodes() {
   $header['operations'] = array('data' => t('Operations'));
 
   $query = db_select('node', 'n')->extend('PagerDefault')->extend('TableSort');
+  $query->addTag('node_admin_filter');
   node_build_filter_query($query);
 
   if (!user_access('bypass node access')) {
@@ -708,6 +709,7 @@ function node_multiple_delete_confirm($form, &$form_state, $nodes) {
 function node_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     node_delete_multiple(array_keys($form_state['values']['nodes']));
+    cache_clear_all();
     $count = count($form_state['values']['nodes']);
     watchdog('content', 'Deleted @count posts.', array('@count' => $count));
     backdrop_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));

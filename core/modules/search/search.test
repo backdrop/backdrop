@@ -11,6 +11,9 @@ const SEARCH_TYPE = '_test_';
 const SEARCH_TYPE_2 = '_test2_';
 const SEARCH_TYPE_JPN = '_test3_';
 
+/**
+ * Indexes content and queries it.
+ */
 class SearchMatchTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
@@ -291,6 +294,9 @@ class SearchPageText extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Indexes content and tests the advanced search form.
+ */
 class SearchAdvancedSearchForm extends BackdropWebTestCase {
   protected $node;
 
@@ -346,6 +352,9 @@ class SearchAdvancedSearchForm extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Indexes content and tests ranking factors.
+ */
 class SearchRankingTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
@@ -540,6 +549,9 @@ class SearchRankingTestCase extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Tests the rendering of the search block.
+ */
 class SearchBlockTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('search');
@@ -1447,10 +1459,9 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
 /**
  * Tests the search_excerpt() function.
  */
-class SearchExcerptTestCase extends BackdropUnitTestCase {
+class SearchExcerptTestCase extends BackdropWebTestCase {
   function setUp() {
-    backdrop_load('module', 'search');
-    parent::setUp();
+    parent::setUp('search');
   }
 
   /**
@@ -1475,7 +1486,7 @@ class SearchExcerptTestCase extends BackdropUnitTestCase {
     $this->assertEqual($result, 'The quick brown <strong>fox</strong> &amp; jumps over the lazy dog ...', 'Found keyword is highlighted');
 
     $longtext = str_repeat($text . ' ', 10);
-    $result = preg_replace('| +|', ' ', search_excerpt('nothing', $text));
+    $result = preg_replace('| +|', ' ', search_excerpt('nothing', $longtext));
     $this->assertTrue(strpos($result, $expected) === 0, 'When keyword is not found in long string, return value starts as expected');
 
     $entities = str_repeat('k&eacute;sz&iacute;t&eacute;se ', 20);

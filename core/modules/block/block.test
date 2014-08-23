@@ -179,7 +179,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->assertNoText($title, 'Block was not displayed according to block visibility rules regardless of path case.');
 
     // Confirm that an empty block is not displayed.
-    variable_set('block_test_content', '');
+    state_set('block_test_content', '');
     $edit = array();
     $edit['blocks[block_test_test_html_id][region]'] = 'sidebar_first';
     $this->backdropPost('admin/structure/block', $edit, 'Save blocks');
@@ -526,7 +526,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
 
     // Enable our test block. Set some content for it to display.
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
     $this->backdropLogin($this->normal_user);
     $this->backdropGet('');
     $this->assertText($current_content, 'Block content displays.');
@@ -534,7 +534,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
     // Change the content, but the cached copy should still be served.
     $old_content = $current_content;
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
     $this->backdropGet('');
     $this->assertText($old_content, 'Block is served from the cache.');
 
@@ -547,7 +547,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
     // Test whether the cached data is served for the correct users.
     $old_content = $current_content;
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
     $this->backdropLogout();
     $this->backdropGet('');
     $this->assertNoText($old_content, 'Anonymous user does not see content cached per-role for normal user.');
@@ -571,14 +571,14 @@ class BlockCacheTestCase extends BackdropWebTestCase {
   function testCacheGlobal() {
     $this->setCacheMode(BACKDROP_CACHE_GLOBAL);
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     $this->backdropGet('');
     $this->assertText($current_content, 'Block content displays.');
 
     $old_content = $current_content;
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     $this->backdropLogout();
     $this->backdropGet('user');
@@ -591,7 +591,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
   function testNoCache() {
     $this->setCacheMode(BACKDROP_NO_CACHE);
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     // If BACKDROP_NO_CACHE has no effect, the next request would be cached.
     $this->backdropGet('');
@@ -599,7 +599,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
 
     // A cached copy should not be served.
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
     $this->backdropGet('');
     $this->assertText($current_content, 'BACKDROP_NO_CACHE prevents blocks from being cached.');
   }
@@ -610,7 +610,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
   function testCachePerUser() {
     $this->setCacheMode(BACKDROP_CACHE_PER_USER);
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
     $this->backdropLogin($this->normal_user);
 
     $this->backdropGet('');
@@ -618,7 +618,7 @@ class BlockCacheTestCase extends BackdropWebTestCase {
 
     $old_content = $current_content;
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     $this->backdropGet('');
     $this->assertText($old_content, 'Block is served from per-user cache.');
@@ -638,14 +638,14 @@ class BlockCacheTestCase extends BackdropWebTestCase {
   function testCachePerPage() {
     $this->setCacheMode(BACKDROP_CACHE_PER_PAGE);
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     $this->backdropGet('node');
     $this->assertText($current_content, 'Block content displays on the node page.');
 
     $old_content = $current_content;
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
 
     $this->backdropGet('user');
     $this->assertNoText($old_content, 'Block content cached for the node page does not show up for the user page.');
@@ -686,7 +686,7 @@ class BlockHTMLIdTestCase extends BackdropWebTestCase {
 
     // Make sure the block has some content so it will appear
     $current_content = $this->randomName();
-    variable_set('block_test_content', $current_content);
+    state_set('block_test_content', $current_content);
   }
 
   /**

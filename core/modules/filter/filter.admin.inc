@@ -168,7 +168,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#format'] = $format;
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/filter.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/filter.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
 
   $form['name'] = array(
     '#type' => 'textfield',

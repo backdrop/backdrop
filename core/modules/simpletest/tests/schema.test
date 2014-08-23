@@ -108,25 +108,6 @@ class SchemaTestCase extends BackdropWebTestCase {
 
     $count = db_query('SELECT COUNT(*) FROM {test_table}')->fetchField();
     $this->assertEqual($count, 2, 'There were two rows.');
-
-    // Use database specific data type and ensure that table is created.
-    $table_specification = array(
-      'description' => 'Schema table description.',
-      'fields' => array(
-        'timestamp'  => array(
-          'mysql_type' => 'timestamp',
-          'pgsql_type' => 'timestamp',
-          'sqlite_type' => 'datetime',
-          'not null' => FALSE,
-          'default' => NULL,
-        ),
-      ),
-    );
-    try {
-      db_create_table('test_timestamp', $table_specification);
-    }
-    catch (Exception $e) {}
-    $this->assertTrue(db_table_exists('test_timestamp'), 'Table with database specific datatype was created.');
   }
 
   function tryInsert($table = 'test_table') {

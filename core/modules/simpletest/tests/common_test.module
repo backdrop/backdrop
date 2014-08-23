@@ -292,7 +292,7 @@ function common_test_library_info() {
  */
 function common_test_js_and_css_querystring() {
    backdrop_add_js(backdrop_get_path('module', 'node') . '/node.js');
-   backdrop_add_css(backdrop_get_path('module', 'node') . '/node.admin.css');
+   backdrop_add_css(backdrop_get_path('module', 'node') . '/css/node.admin.css');
    // A relative URI may have a query string.
    backdrop_add_css('/' . backdrop_get_path('module', 'node') . '/node-fake.css?arg1=value1&arg2=value2');
    return '';

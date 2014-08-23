@@ -115,14 +115,13 @@ $url += array(
 );
 $url = (object)array_map('urldecode', $url);
 $db_spec = array(
-  'driver' => $url->scheme == 'mysqli' ? 'mysql' : $url->scheme,
+  'driver' => 'mysql',
   'username' => $url->user,
   'password' => $url->pass,
   'port' => $url->port,
-  'host' => $url->scheme == 'sqlite' ? '' : $url->host,
-  // Remove leading / character from database names, unless we're installing
-  // to SQLite (which won't have a slash there unless it's part of a path).
-  'database' => $url->scheme == 'sqlite'  ? $url->host  . $url->path : substr($url->path, 1),
+  'host' => $url->host,
+  // Remove leading / character from database names.
+  'database' => substr($url->path, 1),
 );
 
 

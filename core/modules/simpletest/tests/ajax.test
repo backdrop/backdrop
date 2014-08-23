@@ -110,7 +110,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
     $expected = array(
       'setting_name' => 'ajax_forms_test_lazy_load_form_submit',
       'setting_value' => 'executed',
-      'css' => backdrop_get_path('module', 'system') . '/system.admin.css',
+      'css' => backdrop_get_path('module', 'system') . '/css/system.admin.css',
       'js' => backdrop_get_path('module', 'system') . '/system.js',
     );
     // @todo: Add a backdrop_css_defaults() helper function.
@@ -186,7 +186,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
    * Tests that overridden CSS files are not added during lazy load.
    */
   function testLazyLoadOverriddenCSS() {
-    // The test theme overrides system.base.css without an implementation,
+    // The test theme overrides system.css without an implementation,
     // thereby removing it.
     theme_enable(array('test_theme'));
     variable_set('theme_default', 'test_theme');
@@ -200,7 +200,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
     // information about the file; we only really care about whether it appears
     // in a LINK or STYLE tag, for which Backdrop always adds a query string for
     // cache control.
-    $this->assertNoText('system.base.css?', 'Ajax lazy loading does not add overridden CSS files.');
+    $this->assertNoText('system.css?', 'Ajax lazy loading does not add overridden CSS files.');
   }
 }
 

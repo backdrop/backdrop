@@ -315,7 +315,7 @@ function file_test_file_predelete(File $file) {
 function file_test_file_url_alter(&$uri) {
   // Only run this hook when this variable is set. Otherwise, we'd have to add
   // another hidden test module just for this hook.
-  $alter_mode = variable_get('file_test_hook_file_url_alter', FALSE);
+  $alter_mode = state_get('file_test_hook_file_url_alter', FALSE);
   if (!$alter_mode) {
     return;
   }

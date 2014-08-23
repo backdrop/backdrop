@@ -97,23 +97,6 @@ function backdrop_class_list() {
     'TruncateQuery_mysql' => $path . 'database/mysql/query.inc',
     'DatabaseSchema_mysql' => $path . 'database/mysql/schema.inc',
 
-    'DatabaseConnection_pgsql' => $path . 'database/pgsql/database.inc',
-    'DatabaseTasks_pgsql' => $path . 'database/pgsql/install.inc',
-    'InsertQuery_pgsql' => $path . 'database/pgsql/query.inc',
-    'UpdateQuery_pgsql' => $path . 'database/pgsql/query.inc',
-    'DatabaseSchema_pgsql' => $path . 'database/pgsql/schema.inc',
-    'SelectQuery_pgsql' => $path . 'database/pgsql/select.inc',
-
-    'DatabaseConnection_sqlite' => $path . 'database/sqlite/database.inc',
-    'DatabaseStatement_sqlite' => $path . 'database/sqlite/database.inc',
-    'DatabaseTasks_sqlite' => $path . 'database/sqlite/install.inc',
-    'InsertQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'UpdateQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'DeleteQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'Truncate_sqlite' => $path . 'database/sqlite/query.inc',
-    'DatabaseSchema_sqlite' => $path . 'database/sqlite/schema.inc',
-    'SelectQuery_sqlite' => $path . 'database/sqlite/select.inc',
-
     'FileTransfer' => $path . 'filetransfer/filetransfer.inc',
     'FileTransferException' => $path . 'filetransfer/filetransfer.inc',
     'SkipDotsRecursiveDirectoryIterator' => $path . 'filetransfer/filetransfer.inc',

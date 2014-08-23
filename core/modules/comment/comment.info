@@ -7,4 +7,4 @@ dependencies[] = node
 dependencies[] = text
 dependencies[] = entity
 configure = admin/content/comment
-stylesheets[all][] = comment.css
+stylesheets[all][] = css/comment.css

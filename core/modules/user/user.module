@@ -692,7 +692,6 @@ function user_account_form(&$form, &$form_state) {
   if (!$register) {
     $form['account']['pass'] = array(
       '#type' => 'password_confirm',
-      '#size' => 25,
       '#description' => t('To change the current user password, enter the new password in both fields.'),
     );
     // To skip the current password field, the user must have logged in via a
@@ -717,7 +716,6 @@ function user_account_form(&$form, &$form_state) {
       $form['account']['current_pass'] = array(
         '#type' => 'password',
         '#title' => t('Current password'),
-        '#size' => 25,
         '#access' => !empty($protected_values),
         '#description' => $current_pass_description,
         '#weight' => -5,
@@ -732,7 +730,6 @@ function user_account_form(&$form, &$form_state) {
   elseif (!config_get('user.settings', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
       '#type' => 'password_confirm',
-      '#size' => 25,
       '#description' => t('Provide a password for the new account in both fields.'),
       '#required' => TRUE,
     );
@@ -3115,21 +3112,14 @@ function user_form_process_password_confirm($element) {
 
   $js_settings = array(
     'password' => array(
-      'strengthTitle' => t('Password strength:'),
-      'hasWeaknesses' => t('To make your password stronger:'),
-      'tooShort' => t('Make it at least 6 characters'),
-      'addLowerCase' => t('Add lowercase letters'),
-      'addUpperCase' => t('Add uppercase letters'),
-      'addNumbers' => t('Add numbers'),
-      'addPunctuation' => t('Add punctuation'),
-      'sameAsUsername' => t('Make it different from your username'),
+      'strengthTitle' => t('Password strength: '),
+      'confirmTitle' => t('Passwords match: '),
       'confirmSuccess' => t('yes'),
       'confirmFailure' => t('no'),
-      'weak' => t('Weak'),
-      'fair' => t('Fair'),
-      'good' => t('Good'),
-      'strong' => t('Strong'),
-      'confirmTitle' => t('Passwords match:'),
+      'weak' => t('poor'),
+      'fair' => t('fair'),
+      'good' => t('good'),
+      'strong' => t('excellent'),
       'username' => (isset($user->name) ? $user->name : ''),
     ),
   );

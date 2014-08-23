@@ -9,5 +9,5 @@
  * Implements hook_schema().
  */
 function views_test_schema() {
-  return variable_get('views_test_schema', array());
+  return state_get('views_test_schema', array());
 }

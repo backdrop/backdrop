@@ -583,7 +583,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    * Tests adding a file stylesheet.
    */
   function testAddFile() {
-    $path = backdrop_get_path('module', 'simpletest') . '/simpletest.css';
+    $path = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     $css = backdrop_add_css($path);
     $this->assertEqual($css[$path]['data'], $path, 'Adding a CSS file caches it properly.');
   }
@@ -609,7 +609,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    * Tests rendering the stylesheets.
    */
   function testRenderFile() {
-    $css = backdrop_get_path('module', 'simpletest') . '/simpletest.css';
+    $css = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     backdrop_add_css($css);
     $styles = backdrop_get_css();
     $this->assertTrue(strpos($styles, $css) > 0, 'Rendered CSS includes the added stylesheet.');
@@ -694,16 +694,16 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    */
   function testRenderOrder() {
     // A module CSS file.
-    backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
+    backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
     // A few system CSS files, ordered in a strange way.
     $system_path = backdrop_get_path('module', 'system');
-    backdrop_add_css($system_path . '/system.base.css', array('group' => CSS_SYSTEM, 'weight' => -10));
-    backdrop_add_css($system_path . '/system.theme.css', array('group' => CSS_SYSTEM));
+    backdrop_add_css($system_path . '/css/system.css', array('group' => CSS_SYSTEM, 'weight' => -10));
+    backdrop_add_css($system_path . '/css/system.theme.css', array('group' => CSS_SYSTEM));
 
     $expected = array(
-      $system_path . '/system.base.css',
-      $system_path . '/system.theme.css',
-      backdrop_get_path('module', 'simpletest') . '/simpletest.css',
+      $system_path . '/css/system.css',
+      $system_path . '/css/system.theme.css',
+      backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
 
 
@@ -727,21 +727,21 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     $system = backdrop_get_path('module', 'system');
     $simpletest = backdrop_get_path('module', 'simpletest');
 
-    backdrop_add_css($system . '/system.base.css');
-    backdrop_add_css($simpletest . '/tests/system.base.css');
+    backdrop_add_css($system . '/css/system.css');
+    backdrop_add_css($simpletest . '/tests/system.css');
 
     // The dummy stylesheet should be the only one included.
     $styles = backdrop_get_css();
-    $this->assert(strpos($styles, $simpletest . '/tests/system.base.css') !== FALSE, 'The overriding CSS file is output.');
-    $this->assert(strpos($styles, $system . '/system.base.css') === FALSE, 'The overridden CSS file is not output.');
+    $this->assert(strpos($styles, $simpletest . '/tests/system.css') !== FALSE, 'The overriding CSS file is output.');
+    $this->assert(strpos($styles, $system . '/css/system.css') === FALSE, 'The overridden CSS file is not output.');
 
-    backdrop_add_css($simpletest . '/tests/system.base.css');
-    backdrop_add_css($system . '/system.base.css');
+    backdrop_add_css($simpletest . '/tests/system.css');
+    backdrop_add_css($system . '/css/system.css');
 
     // The standard stylesheet should be the only one included.
     $styles = backdrop_get_css();
-    $this->assert(strpos($styles, $system . '/system.base.css') !== FALSE, 'The overriding CSS file is output.');
-    $this->assert(strpos($styles, $simpletest . '/tests/system.base.css') === FALSE, 'The overridden CSS file is not output.');
+    $this->assert(strpos($styles, $system . '/css/system.css') !== FALSE, 'The overriding CSS file is output.');
+    $this->assert(strpos($styles, $simpletest . '/tests/system.css') === FALSE, 'The overridden CSS file is not output.');
   }
 
   /**
@@ -751,7 +751,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   function testAddCssFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
-    $this->assertRaw(backdrop_get_path('module', 'node') . '/node.admin.css?' . $query_string, 'Query string was appended correctly to css.');
+    $this->assertRaw(backdrop_get_path('module', 'node') . '/css/node.admin.css?' . $query_string, 'Query string was appended correctly to css.');
     $this->assertRaw(backdrop_get_path('module', 'node') . '/node-fake.css?arg1=value1&amp;arg2=value2', 'Query string not escaped on a URI.');
   }
 }
@@ -912,8 +912,8 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request($auth);
 
     $this->backdropSetContent($result->data);
-    $this->assertRaw($username, '$_SERVER["PHP_AUTH_USER"] is passed correctly.');
-    $this->assertRaw($password, '$_SERVER["PHP_AUTH_PW"] is passed correctly.');
+    $this->assertRaw($username, 'Username is passed correctly.');
+    $this->assertRaw($password, 'Password is passed correctly.');
   }
 
   function testBackdropHTTPRequestRedirect() {
@@ -1329,11 +1329,11 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     ));
 
     // Store the expected key for the first item in the cache.
-    $cache = array_keys(variable_get('js_cache_files', array()));
+    $cache = array_keys(state_get('js_cache_files', array()));
     $expected_key = $cache[0];
 
     // Reset variables and add a file in a different scope first.
-    variable_del('js_cache_files');
+    state_set('js_cache_files', FALSE);
     backdrop_static_reset('backdrop_add_js');
     backdrop_add_js('some/custom/javascript_file.js', array('scope' => 'footer'));
     backdrop_add_js('core/misc/ajax.js');
@@ -1347,7 +1347,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     ));
 
     // Compare the expected key for the first file to the current one.
-    $cache = array_keys(variable_get('js_cache_files', array()));
+    $cache = array_keys(state_get('js_cache_files', array()));
     $key = $cache[0];
     $this->assertEqual($key, $expected_key, 'JavaScript aggregation is not affected by ordering in different scopes.');
   }
@@ -2321,14 +2321,20 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('locale');
-    variable_set('configurable_timezones', 1);
-    variable_set('date_format_long', 'l, j. F Y - G:i');
-    variable_set('date_format_medium', 'j. F Y - G:i');
-    variable_set('date_format_short', 'Y M j - g:ia');
+
+    config('system.date')
+      ->set('user_configurable_timezones', 1)
+      ->set('formats.long.pattern', 'l, j. F Y - G:i')
+      ->set('formats.medium.pattern', 'j. F Y - G:i')
+      ->set('formats.short.pattern', 'Y M j - g:ia')
+      ->save();
+    backdrop_static_reset('system_get_date_formats');
+
     $GLOBALS['settings']['locale_custom_strings_' . self::LANGCODE] = array(
       '' => array('Sunday' => 'domingo'),
       'Long month name' => array('March' => 'marzo'),
     );
+
     $this->refreshVariables();
   }
 
@@ -2341,32 +2347,21 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     // Add new date format.
-    $admin_date_format = 'j M y';
-    $edit = array('date_format' => $admin_date_format);
-    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
-
-    // Add a new date format which just differs in the case.
-    $admin_date_format_uppercase = 'j M Y';
-    $edit = array('date_format' => $admin_date_format_uppercase);
-    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
-    $this->assertText(t('Custom date format added.'));
-
-    // Add new date type.
     $edit = array(
-      'date_type' => 'Example Style',
-      'machine_name' => 'example_style',
-      'date_format' => $admin_date_format,
+      'label' => 'Example Style',
+      'name' => 'example_style',
+      'pattern' => 'j M y',
     );
-    $this->backdropPost('admin/config/regional/date-time/types/add', $edit, t('Add date type'));
+    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
 
    // Add a second date format with a different case than the first.
     $edit = array(
-      'machine_name' => 'example_style_uppercase',
-      'date_type' => 'Example Style Uppercase',
-      'date_format' => $admin_date_format_uppercase,
+      'label' => 'Example Style Uppercase',
+      'name' => 'example_style_uppercase',
+      'pattern' => 'j M Y',
     );
-    $this->backdropPost('admin/config/regional/date-time/types/add', $edit, t('Add date type'));
-    $this->assertText(t('New date type added successfully.'));
+    $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
+    $this->assertText(t('Date format updated.'));
 
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');
@@ -2774,6 +2769,21 @@ class ArrayDiffUnitTest extends BackdropUnitTestCase {
   }
 }
 
+/**
+ * Tests the functionality of backdrop_get_query_array().
+ */
+class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
+  /**
+   * Tests that backdrop_get_query_array() correctly explodes query parameters.
+   */
+  public function testBackdropGetQueryArray() {
+    $url = "http://my.site.com/somepath?foo=/content/folder[@name='foo']/folder[@name='bar']";
+    $parsed = parse_url($url);
+    $result = backdrop_get_query_array($parsed['query']);
+    $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
+  }
+
+}
 /**
  * Test for theme_feed_icon().
  */
