@@ -1530,7 +1530,7 @@ function user_menu() {
     // user account pages, the preferred menu link that is used to build the
     // active trail (breadcrumb) will be found in this menu (unless there is
     // more specific link), so the link to 'user' will not be in the breadcrumb.
-    'menu_name' => 'navigation',
+    'menu_name' => 'management',
   );
 
   $items['user/%user/view'] = array(

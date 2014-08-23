@@ -1,6 +1,6 @@
 [MenuTestCase]
 name = Menu link creation/deletion
-description = Add a custom menu, add menu links to the custom menu and Navigation menu, check their data, and delete them using the menu module UI.
+description = Add a custom menu, add menu links to the custom menu and Main menu, check their data, and delete them using the menu module UI.
 group = Menu
 file = menu.test
 

@@ -503,8 +503,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * This hook enables modules to register paths in order to define how URL
  * requests are handled. Paths may be registered for URL handling only, or they
- * can register a link to be placed in a menu (usually the Navigation menu). A
- * path and its associated information is commonly called a "menu router item".
+ * can register a link to be placed in a menu (usually the Main menu). A path
+ * and its associated information is commonly called a "menu router item".
  * This hook is rarely called (for example, when modules are enabled), and
  * its results are cached in the database.
  *
@@ -764,7 +764,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     the menu; higher-weighted items sink. Defaults to 0. Menu items with the
  *     same weight are ordered alphabetically.
  *   - "menu_name": Optional. Set this to a custom menu if you don't want your
- *     item to be placed in Navigation.
+ *     item to be placed in the Main menu.
  *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
  *     this menu item (as a result of other properties), then the menu link is
  *     always expanded, equivalent to its 'always expanded' checkbox being set

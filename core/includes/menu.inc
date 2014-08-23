@@ -413,9 +413,8 @@ function menu_unserialize($data, $map) {
  *   The path.
  * @param $router_item
  *   The router item. Usually a router entry from menu_get_item() is either
- *   modified or set to a different path. This allows the navigation block,
- *   the page title, the breadcrumb, and the page help to be modified in one
- *   call.
+ *   modified or set to a different path. This allows the menu block, the page
+ *   title, the breadcrumb, and the page help to be modified in one call.
  */
 function menu_set_item($path, $router_item) {
   menu_get_item($path, $router_item);
@@ -1738,10 +1737,9 @@ function menu_set_custom_theme() {
  */
 function menu_list_system_menus() {
   return array(
-    'navigation' => 'Navigation',
+    'main-menu' => 'Main menu',
     'management' => 'Management',
     'user-menu' => 'User menu',
-    'main-menu' => 'Main menu',
   );
 }
 
@@ -1812,7 +1810,7 @@ function menu_navigation_links($menu_name, $level = 0) {
   $router_item = menu_get_item();
   $links = array();
   foreach ($tree as $item) {
-    if (!$item['link']['hidden']) {
+    if ($item['link']['access'] && !$item['link']['hidden']) {
       $class = '';
       $l = $item['link']['localized_options'];
       $l['href'] = $item['link']['href'];
@@ -2104,8 +2102,8 @@ function menu_local_tasks($level = 0) {
  *   example 'node' or 'admin/structure/block/manage'.
  * @param $args
  *   A list of dynamic path arguments to append to $parent_path to form the
- *   fully-qualified menu router path; for example, array(123) for a certain
- *   node or array('system', 'navigation') for a certain block.
+ *   fully-qualified menu router path, for example array(123) for a certain
+ *   node or array('system', 'main-menu') for a certain block.
  *
  * @return
  *   A list of menu router items that are local tasks for the passed-in path.
@@ -2611,7 +2609,7 @@ function menu_link_load($mlid) {
 /**
  * Clears the cached cached data for a single named menu.
  */
-function menu_cache_clear($menu_name = 'navigation') {
+function menu_cache_clear($menu_name = 'main-menu') {
   cache('menu')->deletePrefix('links:' . $menu_name . ':');
   // Also clear the menu system static caches.
   menu_reset_static_cache();
@@ -2745,7 +2743,7 @@ function _menu_link_build($item) {
   // the menu links generated automatically from entries in {menu_router}.
   $item['module'] = 'system';
   $item += array(
-    'menu_name' => 'navigation',
+    'menu_name' => 'main-menu',
     'link_title' => $item['title'],
     'link_path' => $item['path'],
     'hidden' => 0,
@@ -2992,7 +2990,7 @@ function _menu_delete_item($item, $force = FALSE) {
  *     normalized first by calling backdrop_get_normal_path() on it.
  *   - link_title: (required) Title to appear in menu for the link.
  *   - menu_name: (optional) The machine name of the menu for the link.
- *     Defaults to 'navigation'.
+ *     Defaults to 'main-menu'.
  *   - weight: (optional) Integer to determine position in menu. Default is 0.
  *   - expanded: (optional) Boolean that determines if the item is expanded.
  *   - options: (optional) An array of options, see l() for more.
@@ -3019,7 +3017,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
   $item['external'] = (url_is_external($item['link_path'])  || $item['link_path'] == '<front>') ? 1 : 0;
   // Load defaults.
   $item += array(
-    'menu_name' => 'navigation',
+    'menu_name' => 'main-menu',
     'weight' => 0,
     'link_title' => '',
     'hidden' => 0,

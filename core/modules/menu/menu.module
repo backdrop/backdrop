@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Allows administrators to customize the site's navigation menus.
+ * Allows administrators to customize the site's menus.
  *
  * A menu (in this context) is a hierarchical collection of links, generally
  * used for navigation. This is not to be confused with the
  * @link menu Menu system @endlink of menu.inc and hook_menu(), which defines
- * page routing requests for Backdrop, and also allows the defined page routing
- * URLs to be added to the main site navigation menu.
+ * page routing requests for Backdrop. The menu system also allows the defined
+ * page routing URLs to be added to these menus.
  */
 
 /**
@@ -449,7 +449,6 @@ function menu_block_info() {
 
   $blocks = array();
   foreach ($menus as $name => $title) {
-    // Default "Navigation" block is handled by system.module.
     $blocks[$name]['info'] = check_plain($title);
     // Menu blocks can't be cached because each menu item can have
     // a custom access callback. menu.inc manages its own caching.

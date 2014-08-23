@@ -28,7 +28,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => variable_get('menu_default_node_menu', 'navigation')),
+        'name' => array('default' => variable_get('menu_default_node_menu', 'main-menu')),
         'context' => array('default' => ''),
         'context_only_inline' => array('default' => FALSE),
        ),
@@ -40,7 +40,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => 'navigation'),
+        'name' => array('default' => 'main-menu'),
        ),
     );
 
