@@ -26,7 +26,7 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
    * Tests a successful upgrade.
    */
   public function testLanguageUpgrade() {
-    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
+    $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
     // Ensure Catalan was properly upgraded to be the new default language.
     $this->assertTrue(language_default()->langcode == 'ca', t('Catalan is the default language'));
