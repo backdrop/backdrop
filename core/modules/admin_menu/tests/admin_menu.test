@@ -253,9 +253,9 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
    * Tests node type links.
    */
   function testNode() {
-    $type = $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
     // Create a content-type with special characters.
-    $type = $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
+    $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
 
     $permissions = $this->basePermissions + array(
       'administer content types',
@@ -297,6 +297,29 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
         ':title' => $title,
       ), "Add content » $title link found.");
     }
+
+    // Remove the node/add items from the management menu and check that the add
+    // links are still added to the menu.
+    module_load_include('inc', 'admin_menu');
+    $link = db_query("SELECT * FROM {menu_links} WHERE router_path = 'node/add' AND module = 'system'")->fetchAssoc();
+    $link = menu_link_load($link['mlid']);
+    $link['menu_name'] = 'main-menu';
+    menu_link_save($link);
+
+    // Delete the special type and check that the link disappears.
+    node_type_delete('special');
+    node_types_rebuild();
+    menu_rebuild();
+
+    $this->backdropGet('');
+    $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+      ':path' => 'node/add/article',
+      ':title' => 'Article',
+    ), "Add content » Article link found after moving Add Content into a different menu.");
+    $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+      ':path' => 'node/add/special',
+      ':title' => 'Cool & Special',
+    ), "Add content » Cool & Special link no longer present after deleting the content type.");
   }
 
   /**

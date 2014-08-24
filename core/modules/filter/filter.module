@@ -57,7 +57,7 @@ function filter_menu() {
     'title' => 'Compose tips',
     'page callback' => 'filter_tips_long',
     'access callback' => TRUE,
-    'type' => MENU_SUGGESTED_ITEM,
+    'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
   $items['admin/config/content/formats'] = array(

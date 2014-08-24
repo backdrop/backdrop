@@ -400,31 +400,38 @@ function admin_menu_admin_menu_output_build(&$content) {
     }
   }
 
-  // Retrieve the "Add content" link tree.
-  $link = db_query("SELECT * FROM {menu_links} WHERE router_path = 'node/add' AND module = 'system'")->fetchAssoc();
-  $conditions = array();
-  for ($i = 1; $i < MENU_MAX_DEPTH; $i++) {
-    if (!empty($link["p$i"])) {
-      $conditions["p$i"] = $link["p$i"];
-    }
+  // Move node/add under the "Content" item if it already exists in the menu.
+  if (isset($content['menu']['menu']['node/add']) && isset($content['menu']['menu']['admin/content'])) {
+    $content['menu']['menu']['admin/content']['node/add'] = $content['menu']['menu']['node/add'];
+    unset($content['menu']['menu']['node/add']);
   }
-  $tree = menu_build_tree($link['menu_name'], array(
-    'conditions' => $conditions,
-    'min_depth' => $link['depth'],
-  ));
-  $links = admin_menu_links_menu($tree);
-  if (!empty($links)) {
-    $key = key($links);
-    $links[$key]['#weight'] = -100;
-
-    // If the user has access to the top-level "Content" category, insert the
-    // "Add content" link tree there.
-    if (isset($content['menu']['menu']['admin/content'])) {
-      $content['menu']['menu']['admin/content'] += $links;
+  // Retrieve and insert node/add if it does not yet exist in the menu.
+  else {
+    $link = db_query("SELECT * FROM {menu_links} WHERE router_path = 'node/add' AND module = 'system'")->fetchAssoc();
+    $conditions = array();
+    for ($i = 1; $i < MENU_MAX_DEPTH; $i++) {
+      if (!empty($link["p$i"])) {
+        $conditions["p$i"] = $link["p$i"];
+      }
     }
-    // Otherwise make insert "Add content" as top-level category.
-    else {
-      $content['menu']['menu'] += $links;
+    $tree = menu_build_tree($link['menu_name'], array(
+      'conditions' => $conditions,
+      'min_depth' => $link['depth'],
+    ));
+    $links = admin_menu_links_menu($tree);
+    if (!empty($links)) {
+      $key = key($links);
+      $links[$key]['#weight'] = -100;
+
+      // If the user has access to the top-level "Content" category, insert the
+      // "Add content" link tree there.
+      if (isset($content['menu']['menu']['admin/content'])) {
+        $content['menu']['menu']['admin/content'] += $links;
+      }
+      // Otherwise make insert "Add content" as top-level category.
+      else {
+        $content['menu']['menu'] += $links;
+      }
     }
   }
 }
