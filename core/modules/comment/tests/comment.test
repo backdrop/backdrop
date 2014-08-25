@@ -159,7 +159,7 @@ class CommentHelperCase extends BackdropWebTestCase {
         $mode_text = 'required';
         break;
     }
-    $this->setCommentSettings('comment_preview', $mode, 'Comment preview ' . $mode_text . '.');
+    $this->setCommentSettings('comment_preview', $mode, format_string('Comment preview @mode_text.', array('@mode_text' => $mode_text)));
   }
 
   /**
@@ -183,7 +183,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   - 2: Contact information required.
    */
   function setCommentAnonymous($level) {
-    $this->setCommentSettings('comment_anonymous', $level, 'Anonymous commenting set to level ' . $level . '.');
+    $this->setCommentSettings('comment_anonymous', $level, format_string('Anonymous commenting set to level @level.', array('@level' => $level)));
   }
 
   /**
@@ -193,7 +193,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   Comments per page value.
    */
   function setCommentsPerPage($number) {
-    $this->setCommentSettings('comment_default_per_page', $number, 'Number of comments per page set to ' . $number . '.');
+    $this->setCommentSettings('comment_default_per_page', $number, format_string('Number of comments per page set to @number.', array('@number' => $number)));
   }
 
   /**
@@ -209,7 +209,7 @@ class CommentHelperCase extends BackdropWebTestCase {
   function setCommentSettings($name, $value, $message) {
     variable_set($name . '_article', $value);
     // Display status message.
-    $this->assertTrue(TRUE, $message);
+    $this->pass($message);
   }
 
   /**
@@ -275,7 +275,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(FALSE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Post comment #1 without subject or preview.
@@ -583,7 +583,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(FALSE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Creates a second user to post comments.
@@ -957,7 +957,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Login as web user and add a signature and a user picture.
@@ -1005,7 +1005,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
 
     $edit = array();
     $edit['subject'] = $this->randomName(8);
@@ -1228,7 +1228,7 @@ class CommentPagerTest extends CommentHelperCase {
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     // Set comments to one per page so that we are able to test paging without
     // needing to insert large numbers of comments.
@@ -1269,7 +1269,7 @@ class CommentPagerTest extends CommentHelperCase {
     // If we switch to threaded mode, the replies on the oldest comment
     // should be bumped to the first page and comment 6 should be bumped
     // to the second page.
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
     $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 0)));
     $this->assertTrue($this->commentExists($reply, TRUE), 'In threaded mode, reply appears on page 1.');
     $this->assertFalse($this->commentExists($comments[1]), 'In threaded mode, comment 2 has been bumped off of page 1.');
@@ -1329,7 +1329,7 @@ class CommentPagerTest extends CommentHelperCase {
     // - 2
     //   - 5
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     $expected_order = array(
       0,
@@ -1343,7 +1343,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->backdropGet('node/' . $node->nid);
     $this->assertCommentOrder($comments, $expected_order);
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
 
     $expected_order = array(
       0,
@@ -1425,7 +1425,7 @@ class CommentPagerTest extends CommentHelperCase {
     // - 2
     //   - 5
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     $expected_pages = array(
       1 => 5, // Page of comment 5
@@ -1443,7 +1443,7 @@ class CommentPagerTest extends CommentHelperCase {
       $this->assertIdentical($expected_page, $returned_page, format_string('Flat mode, @new replies: expected page @expected, returned page @returned.', array('@new' => $new_replies, '@expected' => $expected_page, '@returned' => $returned_page)));
     }
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
 
     $expected_pages = array(
       1 => 5, // Page of comment 5
@@ -1491,7 +1491,7 @@ class CommentNodeAccessTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Post comment.
@@ -2043,7 +2043,7 @@ class CommentThreadingTestCase extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Create a node.
