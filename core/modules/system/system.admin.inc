@@ -278,7 +278,7 @@ function system_theme_enable() {
     }
     backdrop_goto('admin/appearance');
   }
-  return backdrop_access_denied();
+  return MENU_ACCESS_DENIED;
 }
 
 /**
@@ -306,7 +306,7 @@ function system_theme_disable() {
     }
     backdrop_goto('admin/appearance');
   }
-  return backdrop_access_denied();
+  return MENU_ACCESS_DENIED;
 }
 
 /**
@@ -352,7 +352,7 @@ function system_theme_default() {
     }
     backdrop_goto('admin/appearance');
   }
-  return backdrop_access_denied();
+  return MENU_ACCESS_DENIED;
 }
 
 /**
