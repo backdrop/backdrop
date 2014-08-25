@@ -51,3 +51,9 @@ name = Blocks in invalid regions
 description = Checks that an active block assigned to a non-existing region triggers the warning message and is disabled.
 group = Block
 file = block.test
+
+[BlockViewModuleDeltaAlterWebTest]
+name = Block view module delta alter
+description = Test the hook_block_view_MODULE_DELTA_alter() hook.
+group = Block
+file = block.test
