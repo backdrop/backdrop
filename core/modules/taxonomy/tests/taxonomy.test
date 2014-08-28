@@ -653,6 +653,13 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
       $term_objects[$key] = reset($term_objects[$key]);
     }
 
+    // Test editing the node.
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    foreach ($terms as $term) {
+      $this->assertText($term, 'The term was retained after edit and still appears on the node page.');
+    }    
+
     // Delete term 1 from the term edit page.
     $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
     $this->backdropPost(NULL, NULL, t('Delete'));
@@ -661,8 +668,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->backdropPost('taxonomy/term/' . $term_objects['term2']->tid . '/delete', array(), t('Delete'));
     $term_names = array($term_objects['term3']->name, $term_objects['term4']->name);
 
-    // Get the node.
-    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    // Get the node and verify that the terms that should be there still are.
     $this->backdropGet('node/' . $node->nid);
 
     foreach ($term_names as $term_name) {
