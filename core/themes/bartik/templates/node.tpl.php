@@ -66,16 +66,18 @@
  * - $logged_in: Flags true when the current user is a logged-in member.
  * - $is_admin: Flags true when the current user is an administrator.
  *
- * Field variables: for each field instance attached to the node a corresponding
- * variable is defined; for example, $node->body becomes $body. When needing to
- * access a field's raw values, developers/themers are strongly encouraged to
- * use these variables. Otherwise they will have to explicitly specify the
- * desired field language; for example, $node->body['en'], thus overriding any
- * language negotiation rule that was previously applied.
+ * Field variables: For each field instance attached to the node a
+ * corresponding variable is defined, e.g. $node->body becomes $body. When
+ * needing to access a field's raw values, developers/themers are strongly
+ * encouraged to use these variables. Otherwise they will have to explicitly
+ * specify the desired field language, e.g. $node->body['en'], thus overriding
+ * any language negotiation rule that was previously applied.
  *
  * @see template_preprocess()
  * @see template_preprocess_node()
  * @see template_process()
+ *
+ * @ingroup themeable
  */
 ?>
 <article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?> role="article">
