@@ -828,6 +828,7 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
     $testfiles = array(
       'css_input_without_import.css',
       'css_input_with_import.css',
+      'css_subfolder/css_input_with_import.css',
       'comment_hacks.css'
     );
     $path = backdrop_get_path('module', 'simpletest') . '/files/css_test_files';
