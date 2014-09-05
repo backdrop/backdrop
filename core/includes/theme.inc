@@ -1439,12 +1439,6 @@ function theme_get_setting($setting_name, $theme = NULL) {
   if (empty($cache[$theme])) {
     $cache[$theme] = array();
 
-    // Turn on all features by default.
-    $features = _system_default_theme_features();
-    foreach ($features as $feature) {
-      $cache[$theme]['toggle_' . $feature] = 1;
-    }
-
     // Get the values for the theme-specific settings from the .info files of
     // the active theme and all its base themes.
     if ($theme) {

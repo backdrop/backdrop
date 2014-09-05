@@ -378,37 +378,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
 
   $form['var'] = array('#type' => 'hidden', '#value' => $var);
 
-  // Toggle settings
-  $toggles = array(
-    'comment_user_picture'      => t('User pictures in comments'),
-    'comment_user_verification' => t('User verification status in comments'),
-  );
-
-  // Some features are not always available
-  $disabled = array();
-  if (!config_get('user.settings', 'user_pictures')) {
-    $disabled['toggle_comment_user_picture'] = TRUE;
-  }
-  if (!module_exists('comment')) {
-    $disabled['toggle_comment_user_picture'] = TRUE;
-    $disabled['toggle_comment_user_verification'] = TRUE;
-  }
-
-  $form['theme_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Toggle display'),
-    '#description' => t('Enable or disable the display of certain page elements.'),
-  );
-  foreach ($toggles as $name => $title) {
-    if ((!$key) || in_array($name, $features)) {
-      $form['theme_settings']['toggle_' . $name] = array('#type' => 'checkbox', '#title' => $title, '#default_value' => theme_get_setting('toggle_' . $name, $key));
-      // Disable checkboxes for features not supported in the current configuration.
-      if (isset($disabled['toggle_' . $name])) {
-        $form['theme_settings']['toggle_' . $name]['#disabled'] = TRUE;
-      }
-    }
-  }
-
   if ($key) {
     // Call engine-specific settings.
     $function = $themes[$key]->prefix . '_engine_settings';
@@ -1309,9 +1278,6 @@ function system_site_information_settings($form, &$form_state) {
       // Prepare local file path for description.
       if ($original_path && isset($friendly_path)) {
         $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
-      }
-      elseif ($key) {
-        $local_file = backdrop_get_path('theme', $key) . '/' . $default;
       }
       else {
         $local_file = path_to_theme() . '/' . $default;

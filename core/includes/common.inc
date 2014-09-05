@@ -299,6 +299,17 @@ function backdrop_get_logo() {
   return $logo;
 }
 
+function backdrop_get_theme_info($theme = '', $refresh = FALSE) {
+  $info = &drupal_static(__FUNCTION__, array());
+
+  if ($refresh) {
+    $info = array();
+    system_list_reset();
+  }
+
+
+}
+
 /**
  * Gets the file location and mime type for site favicon.
  *

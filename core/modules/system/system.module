@@ -2592,7 +2592,7 @@ function _system_rebuild_theme_data() {
       'page_bottom' => 'Page bottom',
     ),
     'description' => '',
-    'features' => _system_default_theme_features(),
+    'features' => array(),
     'screenshot' => 'screenshot.png',
     'php' => BACKDROP_MINIMUM_PHP,
     'stylesheets' => array(),
@@ -2716,16 +2716,6 @@ function _system_info_add_path($info, $path) {
     }
   }
   return $info;
-}
-
-/**
- * Returns an array of default theme features.
- */
-function _system_default_theme_features() {
-  return array(
-    'comment_user_picture',
-    'comment_user_verification',
-  );
 }
 
 /**

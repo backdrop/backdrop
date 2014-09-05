@@ -215,14 +215,14 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Display author and date information.'),
+    '#title' => t('Display author and date information'),
     '#default_value' => variable_get('node_submitted_' . $type->type, TRUE),
     '#description' => t('Author username and publish date will be displayed.'),
   );
   if (config_get('user.settings', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display the author picture.'),
+      '#title' => t('Display the author picture'),
       '#default_value' => variable_get('node_user_picture_' . $type->type, TRUE),
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
       '#states' => array(
