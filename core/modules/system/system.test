@@ -1101,13 +1101,6 @@ class PageTitleFiltering extends BackdropWebTestCase {
     $slogan = '<script type="text/javascript">alert("Slogan XSS!");</script>';
     $slogan_filtered = filter_xss_admin($slogan);
 
-    // Activate needed appearance settings.
-    $edit = array(
-      'toggle_name'           => TRUE,
-      'toggle_slogan'         => TRUE,
-    );
-    $this->backdropPost('admin/appearance/settings', $edit, t('Save configuration'));
-
     // Set title and slogan.
     $edit = array(
       'site_name'    => $title,

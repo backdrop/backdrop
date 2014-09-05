@@ -2609,9 +2609,7 @@ function template_preprocess_html(&$variables) {
   }
   else {
     $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($site_config->get('site_slogan')) {
-      $head_title['slogan'] = filter_xss_admin($site_config->get('site_slogan'));
-    }
+    $head_title['slogan'] = filter_xss_admin($site_config->get('site_slogan'));
   }
   $variables['head_title_array'] = $head_title;
   $variables['head_title'] = implode(' | ', $head_title);

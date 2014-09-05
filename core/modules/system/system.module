@@ -2723,8 +2723,6 @@ function _system_info_add_path($info, $path) {
  */
 function _system_default_theme_features() {
   return array(
-    'name',
-    'slogan',
     'node_user_picture',
     'comment_user_picture',
     'comment_user_verification',
