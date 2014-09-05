@@ -934,7 +934,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, e-mail address, slogan, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -2723,15 +2723,11 @@ function _system_info_add_path($info, $path) {
  */
 function _system_default_theme_features() {
   return array(
-    'logo',
-    'favicon',
     'name',
     'slogan',
     'node_user_picture',
     'comment_user_picture',
     'comment_user_verification',
-    'main_menu',
-    'secondary_menu',
   );
 }
 
