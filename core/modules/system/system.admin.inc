@@ -380,7 +380,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
 
   // Toggle settings
   $toggles = array(
-    'node_user_picture'         => t('User pictures in posts'),
     'comment_user_picture'      => t('User pictures in comments'),
     'comment_user_verification' => t('User verification status in comments'),
   );
@@ -388,7 +387,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
   // Some features are not always available
   $disabled = array();
   if (!config_get('user.settings', 'user_pictures')) {
-    $disabled['toggle_node_user_picture'] = TRUE;
     $disabled['toggle_comment_user_picture'] = TRUE;
   }
   if (!module_exists('comment')) {

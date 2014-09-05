@@ -205,6 +205,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
+
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -218,6 +219,24 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => variable_get('node_submitted_' . $type->type, TRUE),
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  if (config_get('user.settings', 'user_pictures')) {
+    $form['display']['node_user_picture'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display the author picture.'),
+      '#default_value' => variable_get('node_user_picture_' . $type->type, TRUE),
+      '#description' => t('Author picture will be included along with username and publish date, if provided.'),
+      '#states' => array(
+        'unchecked' => array(
+          'input[name="node_submitted"]' => array('checked' => FALSE),
+        ),
+        // Hide the picture settings when submitted info is disabled.
+        'disabled' => array(
+          'input[name="node_submitted"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+  }
+
   $form['old_type'] = array(
     '#type' => 'value',
     '#value' => $type->type,
