@@ -63,9 +63,6 @@ body.admin-menu {
   width: auto;
 }
 #admin-menu-menu.top-level > li > ul > li > a.active-trail {
-  border-radius: 10px;
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
   padding: 4px 10px;
   margin: 5px 2px 4px;
   text-shadow: #333 0 1px 0;
@@ -270,9 +267,6 @@ body.admin-menu {
 #admin-menu .admin-menu-search input {
   background: #fff none center right no-repeat;
   border: none;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 10px;
   font-size: 12px;
   margin: 0;
   outline: none;

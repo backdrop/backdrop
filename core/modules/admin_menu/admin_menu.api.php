@@ -115,25 +115,20 @@ function hook_admin_menu_output_alter(&$content) {
 /**
  * Return content to be replace via JS in the cached menu output.
  *
- * @param bool $complete
- *   A Boolean indicating whether all available components of the menu will be
- *   output and the cache will be skipped.
+ * @param bool $skip_cache
+ *   A Boolean indicating whether or not the cache will be skipped.
  *
  * @return array
  *   An associative array whose keys are jQuery selectors and whose values are
  *   strings containing the replacement content.
  */
-function hook_admin_menu_replacements($complete) {
+function hook_admin_menu_replacements() {
   $items = array();
-  // If the complete menu is output, then it is uncached and will contain the
-  // current counts already.
-  if (!$complete) {
-    // Check whether the users count component is enabled.
-    $components = config_get('admin_menu.settings', 'components');
-    if (!empty($components['admin_menu.users']) && ($user_count = admin_menu_get_user_count())) {
-      // Replace the counters in the cached menu output with current counts.
-      $items['.admin-menu-users a'] = $user_count;
-    }
+  // Check whether the users count component is enabled.
+  $components = config_get('admin_menu.settings', 'components');
+  if (!empty($components['admin_menu.users']) && ($user_count = admin_menu_get_user_count())) {
+    // Replace the counters in the cached menu output with current counts.
+    $items['.admin-menu-users a'] = $user_count;
   }
   return $items;
 }

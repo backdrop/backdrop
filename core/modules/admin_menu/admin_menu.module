@@ -100,52 +100,31 @@ function admin_menu_menu_link_delete($link) {
 }
 
 /**
- * Implements hook_page_build().
+ * Implements hook_js_alter().
  */
-function admin_menu_page_build(&$page) {
+function admin_menu_js_alter(&$javascript) {
   if (!user_access('access administration menu') || admin_menu_suppress(FALSE)) {
     return;
   }
-  // Performance: Skip this entirely for AJAX requests.
-  if (backdrop_is_ajax()) {
-    return;
-  }
-
-  global $user, $language_interface;
-  $path = backdrop_get_path('module', 'admin_menu');
-
-  $page['page_bottom']['admin_menu'] = array(
-    '#attached' => array(),
-  );
-  $attached = &$page['page_bottom']['admin_menu']['#attached'];
-  $options = array('every_page' => TRUE);
-
-  $attached['css'][$path . '/css/admin_menu.css'] = $options;
-  $attached['js'][$path . '/admin_menu.js'] = $options;
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
   if ($args[0] == 'admin' && !empty($args[1])) {
-    $settings['activeTrail'] = url($args[0] . '/' . $args[1]);
+    $javascript['settings']['activeTrail'] = url($args[0] . '/' . $args[1]);
   }
   elseif (backdrop_is_front_page()) {
-    $settings['activeTrail'] = url('<front>');
+    $javascript['settings']['activeTrail'] = url('<front>');
   }
 
-  // Destination query strings are applied via JS.
-  $settings['destination'] = backdrop_http_build_query(backdrop_get_destination());
+  $javascript['settings']['destination'] = backdrop_http_build_query(backdrop_get_destination());
 
-  // Determine whether we need to show all components and disable all caches.
-  $complete = FALSE;
-  if (current_path() == 'admin/config/administration/admin_menu' && $_SERVER['REQUEST_METHOD'] == 'GET') {
-    $complete = TRUE;
-  }
+  global $user, $language_interface;
 
   // If we have a cached menu for the current user, only output the hash for the
   // client-side HTTP cache callback URL.
   $cid = 'admin_menu:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
-  if (!$complete && ($hash = admin_menu_cache_get($cid))) {
-    $settings['hash'] = $hash;
+  if ($hash = admin_menu_cache_get($cid)) {
+    $javascript['settings']['hash'] = $hash;
 
     // The base path to use for cache requests depends on whether clean URLs
     // are enabled, whether Backdrop runs in a sub-directory, and on the locale
@@ -154,25 +133,20 @@ function admin_menu_page_build(&$page) {
     // add further required components to the URL to provide context. Due to
     // those components, and since url('') returns only base_path() when clean
     // URLs are disabled, we need to use a replacement token as path.  Yuck.
-    $settings['basePath'] = url('admin_menu');
-  }
-  // Otherwise, add the full menu to the page.
-  else {
-    module_load_include('inc', 'admin_menu');
-    $page['page_bottom']['admin_menu']['#markup'] = admin_menu_output($complete);
+    $javascript['settings']['basePath'] = url('admin_menu');
   }
 
-  $replacements = module_invoke_all('admin_menu_replacements', $complete);
+  $replacements = module_invoke_all('admin_menu_replacements', FALSE);
   if (!empty($replacements)) {
-    $settings['replacements'] = $replacements;
+    $javascript['settings']['replacements'] = $replacements;
   }
 
   $config = config('admin_menu.settings');
   if ($setting = $config->get('margin_top')) {
-    $settings['margin_top'] = $setting;
+    $javascript['settings']['margin_top'] = $setting;
   }
   if ($setting = $config->get('position_fixed')) {
-    $settings['position_fixed'] = $setting;
+    $javascript['settings']['position_fixed'] = $setting;
 
     // In fixed positioning, supply a callback function for tableheader.js to
     // allow it to determine the top viewport offset.
@@ -183,8 +157,30 @@ function admin_menu_page_build(&$page) {
   }
 
   $attached['js'][] = array(
-    'data' => array('admin_menu' => $settings),
+    'data' => array('admin_menu' => $javascript['settings']),
     'type' => 'setting',
+  );
+}
+
+/**
+ * Preprocess variables for page.tpl.php.
+ */
+function admin_menu_preprocess_html(&$variables) {
+  if (!user_access('access administration menu') || admin_menu_suppress(FALSE)) {
+    return;
+  }
+
+  // Add assets to the page.
+  $path = backdrop_get_path('module', 'admin_menu');
+  $attached = array();
+  $attached['css'][$path . '/css/admin_menu.css'] = array('every_page' => TRUE);
+  $attached['js'][$path . '/admin_menu.js'] = array('every_page' => TRUE);
+
+  // Attach the rendered menu to the bottom of the page.
+  module_load_include('inc', 'admin_menu');
+  $variables['page']['page_bottom']['admin_menu'] = array(
+    '#attached' => $attached,
+    '#markup' => admin_menu_output(),
   );
 }
 
@@ -328,18 +324,15 @@ function admin_menu_deliver($page_callback_result) {
 /**
  * Implements hook_admin_menu_replacements().
  */
-function admin_menu_admin_menu_replacements($complete) {
+function admin_menu_admin_menu_replacements() {
   $items = array();
-  // If the complete menu is output, then it is uncached and will contain the
-  // current counts already.
-  if (!$complete) {
-    // Check whether the users count component is enabled.
-    $components = config_get('admin_menu.settings', 'components');
-    if (in_array('admin_menu.users', $components) && ($user_count = admin_menu_get_user_count())) {
-      // Replace the counters in the cached menu output with current counts.
-      $items['.admin-menu-users a'] = $user_count;
-    }
+  // Check whether the users count component is enabled.
+  $components = config_get('admin_menu.settings', 'components');
+  if (in_array('admin_menu.users', $components) && ($user_count = admin_menu_get_user_count())) {
+    // Replace the counters in the cached menu output with current counts.
+    $items['.admin-menu-users a'] = $user_count;
   }
+
   return $items;
 }
 

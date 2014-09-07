@@ -8,16 +8,15 @@
 /**
  * Build the administration menu output.
  *
- * @param bool $complete
- *   (optional) Whether to build to the complete menu including all components
- *   and ignore the cache. Defaults to FALSE. Internally used for the settings
- *   page.
+ * @param bool $skip_cache
+ *   (optional) Whether or not the cache will be skipped. Defaults to FALSE.
+ *   Internally used for the settings page.
  */
-function admin_menu_output($complete = FALSE) {
+function admin_menu_output($skip_cache = FALSE) {
   global $user, $language_interface;
   $config = config('admin_menu.settings');
 
-  $cache_server_enabled = !$complete;
+  $cache_server_enabled = !$skip_cache;
   $cid = 'admin_menu:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
 
   // Try to load and output administration menu from server-side cache. The
@@ -33,10 +32,10 @@ function admin_menu_output($complete = FALSE) {
 
   // Rebuild the output.
   if (!isset($content)) {
-    // Retrieve enabled components to display and make them available for others.
+    // Retrieve enabled components to display and make available for others.
     $components = $config->get('components');
     $content['#components'] = $components;
-    $content['#complete'] = $complete;
+    $content['#complete'] = $skip_cache;
 
     // Add site name as CSS class for development/staging theming purposes. We
     // leverage the cookie domain instead of HTTP_HOST to account for many (but
@@ -51,7 +50,7 @@ function admin_menu_output($complete = FALSE) {
     module_load_include('inc', 'admin_menu');
 
     // Add administration menu.
-    if (in_array('admin_menu.menu', $components) || $complete) {
+    if (in_array('admin_menu.menu', $components) || $skip_cache) {
       $content['menu'] = array(
         '#theme' => 'admin_menu_links',
         '#wrapper_attributes' => array(
@@ -66,16 +65,16 @@ function admin_menu_output($complete = FALSE) {
 
     // Add menu additions.
     $content['extra']['extra'] = array();
-    if (in_array('admin_menu.icon', $components) || $complete) {
+    if (in_array('admin_menu.icon', $components) || $skip_cache) {
       $content['icon'] = admin_menu_links_icon();
     }
-    if (in_array('admin_menu.search', $components) || $complete) {
+    if (in_array('admin_menu.search', $components) || $skip_cache) {
       $content['extra']['extra'] += admin_menu_links_search();
     }
-    if (in_array('admin_menu.account', $components) || $complete) {
+    if (in_array('admin_menu.account', $components) || $skip_cache) {
       $content['extra']['extra'] += admin_menu_links_account();
     }
-    if (in_array('admin_menu.users', $components) || $complete) {
+    if (in_array('admin_menu.users', $components) || $skip_cache) {
       $content['extra']['extra'] += admin_menu_links_users();
     }
 
@@ -109,7 +108,7 @@ function admin_menu_output($complete = FALSE) {
   }
 
   // Store the new hash for this user.
-  if (!$complete) {
+  if (!$skip_cache) {
     admin_menu_cache_set($cid, md5($content));
   }
 
