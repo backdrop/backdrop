@@ -69,8 +69,9 @@ function views_test_test_dynamic_access_callback($access, $argument1, $argument2
  */
 function views_test_views_pre_render(&$view) {
   if ($view->name == 'test_cache_header_storage') {
-    backdrop_add_js(backdrop_get_path('module', 'views_test') . '/views_cache.test.js');
-    backdrop_add_css(backdrop_get_path('module', 'views_test') . '/views_cache.test.css');
+    $path = backdrop_get_path('module', 'views_test');
+    $view->element['#attached']['js'][] = "$path/views_cache.test.js";
+    $view->element['#attached']['css'][] = "$path/views_cache.test.css";
     $view->pre_render_called = TRUE;
   }
 }

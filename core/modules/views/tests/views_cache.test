@@ -165,9 +165,9 @@ class ViewsCacheTest extends ViewsSqlTest {
     $view->init_display();
     $view->preview();
     $css = backdrop_add_css();
+    $js = backdrop_add_js();
     $css_path = backdrop_get_path('module', 'views_test') . '/views_cache.test.css';
     $js_path = backdrop_get_path('module', 'views_test') . '/views_cache.test.js';
-    $js = backdrop_add_js();
 
     $this->assertTrue(isset($css[$css_path]), 'Make sure the css is added for cached views.');
     $this->assertTrue(isset($js[$js_path]), 'Make sure the js is added for cached views.');

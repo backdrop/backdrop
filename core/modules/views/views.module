@@ -1135,35 +1135,28 @@ function views_get_module_apis($reset = FALSE) {
 }
 
 /**
- * Include views .css files.
+ * Implements hook_library_info().
  */
-function views_add_css($file) {
-  // We set preprocess to FALSE because we are adding the files conditionally,
-  // and we don't want to generate duplicate cache files.
-  // TODO: at some point investigate adding some files unconditionally and
-  // allowing preprocess.
-  backdrop_add_css(backdrop_get_path('module', 'views') . "/css/$file.css", array('preprocess' => FALSE));
-}
-
-/**
- * Include views .js files.
- */
-function views_add_js($file) {
-  // If javascript has been disabled by the user, never add js files.
-  if (config_get('views.settings', 'no_javascript')) {
-    return;
-  }
-  static $base = TRUE, $ajax = TRUE;
-  if ($base) {
-    backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
-    $base = FALSE;
-  }
-  if ($ajax && in_array($file, array('ajax', 'ajax_view'))) {
-    backdrop_add_library('system', 'backdrop.ajax');
-    backdrop_add_library('system', 'jquery.form');
-    $ajax = FALSE;
-  }
-  backdrop_add_js(backdrop_get_path('module', 'views') . "/js/$file.js");
+function views_library_info() {
+  $path = backdrop_get_path('module', 'views') . '/js';
+  $libraries['views.ajax'] = array(
+    'title' => 'Views AJAX',
+    'version' => VERSION,
+    'js' => array(
+      "$path/base.js" => array('group' => JS_DEFAULT),
+      "$path/ajax.js" => array('group' => JS_DEFAULT),
+      "$path/ajax_view.js" => array('group' => JS_DEFAULT),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'backdrop'),
+      array('system', 'backdropSettings'),
+      array('system', 'jquery.once'),
+      array('system', 'jquery.form'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+  return $libraries;
 }
 
 /**
@@ -1851,7 +1844,7 @@ function views_exposed_form($form, &$form_state) {
 
   // If using AJAX, we need the form plugin.
   if ($view->use_ajax) {
-    backdrop_add_library('system', 'jquery.form');
+    $form['#attached']['library'][] = array('system', 'jquery.form');
   }
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];

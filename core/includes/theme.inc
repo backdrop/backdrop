@@ -2176,7 +2176,7 @@ function theme_table($variables) {
   }
   // If the responsive classes were used, add the matching library.
   if (count($responsive_columns)) {
-    backdrop_add_library('system', 'backdrop.tableresponsive');
+    $vars['view']->element['#attached']['library'][] = array('system', 'backdrop.tableresponsive');
     // Add 'responsive-enabled' class to the table to identify it for JS.
     // This is needed to target tables constructed by this function.
     $attributes['class'][] = 'responsive-enabled';

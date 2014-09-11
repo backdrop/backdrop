@@ -346,18 +346,19 @@ class views_plugin_style extends views_plugin {
    *   Rendered output of given grouping sets.
    */
   function render_grouping_sets($sets, $level = 0) {
-    $output = '';
+    $output = array();
+    $theme_functions = views_theme_functions('views_view_grouping', $this->view, $this->view->display_handler->display);
     foreach ($sets as $set) {
       $row = reset($set['rows']);
       // Render as a grouping set.
       if (is_array($row) && isset($row['group'])) {
-        $output .= theme(views_theme_functions('views_view_grouping', $this->view, $this->display),
-          array(
-            'view' => $this->view,
-            'grouping' => $this->options['grouping'][$level],
-            'grouping_level' => $level,
-            'rows' => $set['rows'],
-            'title' => $set['group'])
+        $output[] = array(
+          '#theme' => $theme_functions,
+          '#view' => $this->view,
+          '#grouping' => $this->options['grouping'][$level],
+          '#grouping_level' => $level,
+          '#rows' => $set['rows'],
+          '#title' => $set['group'],
         );
       }
       // Render as a record set.
@@ -365,17 +366,18 @@ class views_plugin_style extends views_plugin {
         if ($this->uses_row_plugin()) {
           foreach ($set['rows'] as $index => $row) {
             $this->view->row_index = $index;
-            $set['rows'][$index] = $this->row_plugin->render($row);
-          }
+            $render = $this->row_plugin->render($row);
+            // Row render arrays cannot be contained by style render arrays.
+            $set['rows'][$index] = backdrop_render($render);          }
         }
 
-        $output .= theme($this->theme_functions(),
-          array(
-            'view' => $this->view,
-            'options' => $this->options,
-            'grouping_level' => $level,
-            'rows' => $set['rows'],
-            'title' => $set['group'])
+        $output[] = array(
+          '#theme' => $this->theme_functions(),
+          '#view' => $this->view,
+          '#options' => $this->options,
+          '#grouping_level' => $level,
+          '#rows' => $set['rows'],
+          '#title' => $set['group'],
         );
       }
     }

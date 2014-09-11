@@ -69,10 +69,11 @@ class views_plugin_style_summary extends views_plugin_style {
       $rows[] = $row;
     }
 
-    return theme($this->theme_functions(), array(
-      'view' => $this->view,
-      'options' => $this->options,
-      'rows' => $rows
-    ));
+    return array(
+      '#theme' => $this->theme_functions(),
+      '#view' => $this->view,
+      '#options' => $this->options,
+      '#rows' => $rows,
+    );
   }
 }

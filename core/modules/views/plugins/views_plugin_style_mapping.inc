@@ -114,12 +114,12 @@ abstract class views_plugin_style_mapping extends views_plugin_style {
    * Provides the mapping definition as an available variable.
    */
   function render() {
-    return theme($this->theme_functions(), array(
-      'view' => $this->view,
-      'options' => $this->options,
-      'rows' => $this->view->result,
-      'mapping' => $this->define_mapping(),
-    ));
+    return array(
+      '#theme' => $this->theme_functions(),
+      '#view' => $this->view,
+      '#options' => $this->options,
+      '#rows' => $this->view->result,
+      '#mapping' => $this->define_mapping(),
+    );
   }
-
 }
