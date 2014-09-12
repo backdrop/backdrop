@@ -7154,7 +7154,7 @@ function backdrop_common_theme() {
       'variables' => array('timestamp' => NULL, 'text' => NULL, 'attributes' => array(), 'html' => FALSE),
     ),
     'status_messages' => array(
-      'variables' => array('display' => NULL),
+      'variables' => array('display' => NULL, 'messages' => array()),
     ),
     'link' => array(
       'variables' => array('text' => NULL, 'path' => NULL, 'options' => array()),
