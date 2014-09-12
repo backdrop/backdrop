@@ -624,28 +624,12 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
-  $items['admin/appearance/settings'] = array(
-    'title' => 'Settings',
-    'description' => 'Configure default and theme specific settings.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_theme_settings'),
-    'access arguments' => array('administer themes'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'system.admin.inc',
-    'weight' => 20,
-  );
-  // Theme configuration subtabs.
-  $items['admin/appearance/settings/global'] = array(
-    'title' => 'Global settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -1,
-  );
 
   foreach (list_themes() as $key => $theme) {
     $items['admin/appearance/settings/' . $theme->name] = array(
-      'title' => $theme->info['name'],
+      'title' => $theme->info['name'] . ' settings',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('system_theme_settings', $theme->name),
-      'type' => MENU_LOCAL_TASK,
       'access callback' => '_system_themes_access',
       'access arguments' => array($key),
       'file' => 'system.admin.inc',
