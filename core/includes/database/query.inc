@@ -1318,6 +1318,15 @@ class MergeQuery extends Query implements QueryConditionInterface {
   protected $needsUpdate = FALSE;
 
   /**
+   * The result of the merge query.
+   *
+   * Contains either the new ID or number of rows affected.
+   *
+   * @var int
+   */
+  protected $result;
+
+  /**
   * Constructs a MergeQuery object.
   *
   * @param DatabaseConnection $connection
@@ -1595,7 +1604,8 @@ class MergeQuery extends Query implements QueryConditionInterface {
           $update->expression($field, $data['expression'], $data['arguments']);
         }
       }
-      $row_exists = (bool) $update->execute();
+      $this->result = $update->execute();
+      $row_exists = (bool) $this->result;
       // If updated, we have no more work to be done.
       if ($row_exists) {
         return self::STATUS_UPDATE;
@@ -1615,7 +1625,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
         if ($this->defaultFields) {
           $insert->useDefaults($this->defaultFields);
         }
-        $insert->execute();
+        $this->result = $insert->execute();
         return self::STATUS_INSERT;
       }
       catch (Exception $e) {
@@ -1633,6 +1643,18 @@ class MergeQuery extends Query implements QueryConditionInterface {
         }
       }
     }
+  }
+
+  /**
+   * Return the result of the merge query.
+   *
+   * If an insert has been performed, this will be the last ID inserted. On
+   * updates, it will be the number of rows matched by the merge.
+   *
+   * @return int
+   */
+  public function getResult() {
+    return (int) $this->result;
   }
 }
 
