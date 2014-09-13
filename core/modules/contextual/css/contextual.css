@@ -33,7 +33,7 @@ div.contextual-links-wrapper {
   display: block;
 }
 a.contextual-links-trigger {
-  background: transparent url(images/gear-select.png) no-repeat 2px 0;
+  background: transparent url(../images/gear-select.png) no-repeat 2px 0;
   border: 1px solid transparent;
   display: none;
   height: 18px;
