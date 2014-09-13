@@ -1056,22 +1056,24 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
    * Confirm that we can merge-insert a record successfully.
    */
   function testMergeInsert() {
-    $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
+    $max_id_before = db_query('SELECT MAX(id) FROM {test}')->fetchField();
 
-    $result = db_merge('test_people')
+    $merge = db_merge('test')
       ->key(array('job' => 'Presenter'))
       ->fields(array(
         'age' => 31,
         'name' => 'Tiffany',
-      ))
-      ->execute();
+      ));
+    $result = $merge->execute();
 
     $this->assertEqual($result, MergeQuery::STATUS_INSERT, 'Insert status returned.');
+    $this->assertEqual($merge->getResult(), $max_id_before + 1, 'Incremented ID returned.');
 
-    $num_records_after = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_after = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
     $this->assertEqual($num_records_before + 1, $num_records_after, 'Merge inserted properly.');
 
-    $person = db_query('SELECT * FROM {test_people} WHERE job = :job', array(':job' => 'Presenter'))->fetch();
+    $person = db_query('SELECT * FROM {test} WHERE job = :job', array(':job' => 'Presenter'))->fetch();
     $this->assertEqual($person->name, 'Tiffany', 'Name set correctly.');
     $this->assertEqual($person->age, 31, 'Age set correctly.');
     $this->assertEqual($person->job, 'Presenter', 'Job set correctly.');
@@ -1082,17 +1084,18 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
    */
   function testMergeUpdate() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_matched = db_query('SELECT COUNT(*) FROM {test_people} WHERE job = :job', array(':job' => 'Speaker'))->fetchField();
 
-    $result = db_merge('test_people')
+    $merge = db_merge('test_people')
       ->key(array('job' => 'Speaker'))
       ->fields(array(
         'age' => 31,
         'name' => 'Tiffany',
-      ))
-      ->execute();
+      ));
+    $result = $merge->execute();
 
     $this->assertEqual($result, MergeQuery::STATUS_UPDATE, 'Update status returned.');
-
+    $this->assertEqual($merge->getResult(), $num_records_matched, 'Number of updated rows matches.');
     $num_records_after = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
     $this->assertEqual($num_records_before, $num_records_after, 'Merge updated properly.');
 
