@@ -382,7 +382,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
   $toggles = array(
     'logo'                      => t('Logo'),
     'node_user_picture'         => t('User pictures in posts'),
-    'comment_user_picture'      => t('User pictures in comments'),
     'favicon'                   => t('Shortcut icon'),
   );
 
@@ -390,10 +389,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
   $disabled = array();
   if (!config_get('user.settings', 'user_pictures')) {
     $disabled['toggle_node_user_picture'] = TRUE;
-    $disabled['toggle_comment_user_picture'] = TRUE;
-  }
-  if (!module_exists('comment')) {
-    $disabled['toggle_comment_user_picture'] = TRUE;
   }
 
   $form['theme_settings'] = array(
