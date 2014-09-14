@@ -1,19 +1,19 @@
 (function($) {
 
-Backdrop.adminMenu = Backdrop.adminMenu || {};
-Backdrop.adminMenu.behaviors = Backdrop.adminMenu.behaviors || {};
-Backdrop.adminMenu.hashes = Backdrop.adminMenu.hashes || {};
+Backdrop.adminBar = Backdrop.adminBar || {};
+Backdrop.adminBar.behaviors = Backdrop.adminBar.behaviors || {};
+Backdrop.adminBar.hashes = Backdrop.adminBar.hashes || {};
 
 /**
- * Core behavior for Administration menu.
+ * Core behavior for Administration bar.
  *
- * Test whether there is an administration menu is in the output and execute all
+ * Test whether there is an administration bar is in the output and execute all
  * registered behaviors.
  */
-Backdrop.behaviors.adminMenu = {
+Backdrop.behaviors.adminBar = {
   attach: function (context, settings) {
     // Initialize settings.
-    settings.admin_menu = $.extend({
+    settings.admin_bar = $.extend({
       suppress: false,
       margin_top: false,
       position_fixed: false,
@@ -21,22 +21,22 @@ Backdrop.behaviors.adminMenu = {
       basePath: settings.basePath,
       hash: 0,
       replacements: {}
-    }, settings.admin_menu || {});
-    // Check whether administration menu should be suppressed.
-    if (settings.admin_menu.suppress) {
+    }, settings.admin_bar || {});
+    // Check whether administration bar should be suppressed.
+    if (settings.admin_bar.suppress) {
       return;
     }
-    var $adminMenu = $('#admin-menu:not(.admin-menu-processed)', context);
-    // Client-side caching; if administration menu is not in the output, it is
+    var $adminBar = $('#admin-bar:not(.admin-bar-processed)', context);
+    // Client-side caching; if administration bar is not in the output, it is
     // fetched from the server and cached in the browser.
-    if (!$adminMenu.length && settings.admin_menu.hash) {
-      Backdrop.adminMenu.getCache(settings.admin_menu.hash, function (response) {
+    if (!$adminBar.length && settings.admin_bar.hash) {
+      Backdrop.adminBar.getCache(settings.admin_bar.hash, function (response) {
         if (typeof response == 'string' && response.length > 0) {
           $('body', context).append(response);
         }
-        var $adminMenu = $('#admin-menu:not(.admin-menu-processed)', context);
+        var $adminBar = $('#admin-bar:not(.admin-bar-processed)', context);
         // Apply our behaviors.
-        Backdrop.adminMenu.attachBehaviors(context, settings, $adminMenu);
+        Backdrop.adminBar.attachBehaviors(context, settings, $adminBar);
         // Allow resize event handlers to recalculate sizes/positions.
         $(window).triggerHandler('resize');
       });
@@ -44,7 +44,7 @@ Backdrop.behaviors.adminMenu = {
     // If the menu is in the output already, this means there is a new version.
     else {
       // Apply our behaviors.
-      Backdrop.adminMenu.attachBehaviors(context, settings, $adminMenu);
+      Backdrop.adminBar.attachBehaviors(context, settings, $adminBar);
     }
   }
 };
@@ -52,9 +52,9 @@ Backdrop.behaviors.adminMenu = {
 /**
  * Apply active trail highlighting based on current path.
  */
-Backdrop.adminMenu.behaviors.adminMenuActiveTrail = function (context, settings, $adminMenu) {
-  if (settings.admin_menu.activeTrail) {
-    $adminMenu.find('#admin-menu-menu > li > ul > li > a[href="' + settings.admin_menu.activeTrail + '"]').addClass('active-trail');
+Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $adminBar) {
+  if (settings.admin_bar.activeTrail) {
+    $adminBar.find('#admin-bar-menu > li > ul > li > a[href="' + settings.admin_bar.activeTrail + '"]').addClass('active-trail');
   }
 };
 
@@ -65,10 +65,10 @@ Backdrop.adminMenu.behaviors.adminMenuActiveTrail = function (context, settings,
  * flickering/jumping page content with client-side caching, this is a regular
  * Backdrop behavior.
  */
-Backdrop.behaviors.adminMenuMarginTop = {
+Backdrop.behaviors.adminBarMarginTop = {
   attach: function (context, settings) {
-    if (!settings.admin_menu.suppress && settings.admin_menu.margin_top) {
-      $('body:not(.admin-menu)', context).addClass('admin-menu');
+    if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
+      $('body:not(.admin-bar)', context).addClass('admin-bar');
     }
   }
 };
@@ -81,19 +81,19 @@ Backdrop.behaviors.adminMenuMarginTop = {
  * @param onSuccess
  *   A callback function invoked when the cache request was successful.
  */
-Backdrop.adminMenu.getCache = function (hash, onSuccess) {
-  if (Backdrop.adminMenu.hashes.hash !== undefined) {
-    return Backdrop.adminMenu.hashes.hash;
+Backdrop.adminBar.getCache = function (hash, onSuccess) {
+  if (Backdrop.adminBar.hashes.hash !== undefined) {
+    return Backdrop.adminBar.hashes.hash;
   }
   $.ajax({
     cache: true,
     type: 'GET',
     dataType: 'text', // Prevent auto-evaluation of response.
     global: false, // Do not trigger global AJAX events.
-    url: Backdrop.settings.admin_menu.basePath.replace(/admin_menu/, 'js/admin_menu/cache/' + hash),
+    url: Backdrop.settings.admin_bar.basePath.replace(/admin_bar/, 'js/admin_bar/cache/' + hash),
     success: onSuccess,
     complete: function (XMLHttpRequest, status) {
-      Backdrop.adminMenu.hashes.hash = status;
+      Backdrop.adminBar.hashes.hash = status;
     }
   });
 };
@@ -101,13 +101,13 @@ Backdrop.adminMenu.getCache = function (hash, onSuccess) {
 /**
  * TableHeader callback to determine top viewport offset.
  */
-Backdrop.adminMenu.height = function() {
-  var $adminMenu = $('#admin-menu');
-  var height = $adminMenu.outerHeight();
+Backdrop.adminBar.height = function() {
+  var $adminBar = $('#admin-bar');
+  var height = $adminBar.outerHeight();
   // In IE, Shadow filter adds some extra height, so we need to remove it from
   // the returned height.
-  if ($adminMenu.css('filter') && $adminMenu.css('filter').match(/DXImageTransform\.Microsoft\.Shadow/)) {
-    height -= $adminMenu.get(0).filters.item("DXImageTransform.Microsoft.Shadow").strength;
+  if ($adminBar.css('filter') && $adminBar.css('filter').match(/DXImageTransform\.Microsoft\.Shadow/)) {
+    height -= $adminBar.get(0).filters.item("DXImageTransform.Microsoft.Shadow").strength;
   }
   return height;
 };
@@ -120,11 +120,11 @@ Backdrop.adminMenu.height = function() {
 /**
  * Attach administrative behaviors.
  */
-Backdrop.adminMenu.attachBehaviors = function (context, settings, $adminMenu) {
-  if ($adminMenu.length) {
-    $adminMenu.addClass('admin-menu-processed');
-    $.each(Backdrop.adminMenu.behaviors, function() {
-      this(context, settings, $adminMenu);
+Backdrop.adminBar.attachBehaviors = function (context, settings, $adminBar) {
+  if ($adminBar.length) {
+    $adminBar.addClass('admin-bar-processed');
+    $.each(Backdrop.adminBar.behaviors, function() {
+      this(context, settings, $adminBar);
     });
   }
 };
@@ -132,16 +132,16 @@ Backdrop.adminMenu.attachBehaviors = function (context, settings, $adminMenu) {
 /**
  * Apply 'position: fixed'.
  */
-Backdrop.adminMenu.behaviors.positionFixed = function (context, settings, $adminMenu) {
-  if (settings.admin_menu.position_fixed) {
-    $adminMenu.addClass('admin-menu-position-fixed');
-    $adminMenu.css('position', 'fixed');
+Backdrop.adminBar.behaviors.positionFixed = function (context, settings, $adminBar) {
+  if (settings.admin_bar.position_fixed) {
+    $adminBar.addClass('admin-bar-position-fixed');
+    $adminBar.css('position', 'fixed');
 
     // Set a data attribute to inform other parts of the page that we're
     // offsetting the top margin, then trigger an offset change. See
     // tableheader.js for an example of how this is utilized.
-    var height = $adminMenu.height();
-    $adminMenu.attr('data-offset-top', height);
+    var height = $adminBar.height();
+    $adminBar.attr('data-offset-top', height);
     $(document).triggerHandler('offsettopchange');
   }
 };
@@ -149,19 +149,19 @@ Backdrop.adminMenu.behaviors.positionFixed = function (context, settings, $admin
 /**
  * Perform dynamic replacements in cached menu.
  */
-Backdrop.adminMenu.behaviors.replacements = function (context, settings, $adminMenu) {
-  for (var item in settings.admin_menu.replacements) {
-    $(item, $adminMenu).html(settings.admin_menu.replacements[item]);
+Backdrop.adminBar.behaviors.replacements = function (context, settings, $adminBar) {
+  for (var item in settings.admin_bar.replacements) {
+    $(item, $adminBar).html(settings.admin_bar.replacements[item]);
   }
 };
 
 /**
  * Inject destination query strings for current page.
  */
-Backdrop.adminMenu.behaviors.destination = function (context, settings, $adminMenu) {
-  if (settings.admin_menu.destination) {
-    $('a.admin-menu-destination', $adminMenu).each(function() {
-      this.search += (!this.search.length ? '?' : '&') + Backdrop.settings.admin_menu.destination;
+Backdrop.adminBar.behaviors.destination = function (context, settings, $adminBar) {
+  if (settings.admin_bar.destination) {
+    $('a.admin-bar-destination', $adminBar).each(function() {
+      this.search += (!this.search.length ? '?' : '&') + Backdrop.settings.admin_bar.destination;
     });
   }
 };
@@ -169,23 +169,23 @@ Backdrop.adminMenu.behaviors.destination = function (context, settings, $adminMe
 /**
  * Adjust the top level items based on the available viewport width.
  */
-Backdrop.adminMenu.behaviors.collapseWidth = function (context, settings, $adminMenu) {
-  var $menu = $adminMenu.find('#admin-menu-menu');
-  var $extra = $adminMenu.find('#admin-menu-extra');
+Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminBar) {
+  var $menu = $adminBar.find('#admin-bar-menu');
+  var $extra = $adminBar.find('#admin-bar-extra');
   var resizeTimeout;
 
-  $(window).on('resize.adminMenu', function(event) {
+  $(window).on('resize.adminBar', function(event) {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(function() {
       // Expand the menu items to their full width to check their size.
       $menu.removeClass('dropdown').addClass('top-level');
       $extra.removeClass('dropdown').addClass('top-level');
 
-      $adminMenu.trigger('beforeResize');
+      $adminBar.trigger('beforeResize');
 
       var menuWidth = $menu.width();
       var extraWidth = $extra.width();
-      var availableWidth = $adminMenu.width() - $adminMenu.find('#admin-menu-icon').width();
+      var availableWidth = $adminBar.width() - $adminBar.find('#admin-bar-icon').width();
 
       // Collapse the extra items first if needed.
       if (availableWidth - menuWidth - extraWidth < 20) {
@@ -196,9 +196,9 @@ Backdrop.adminMenu.behaviors.collapseWidth = function (context, settings, $admin
       if (availableWidth - menuWidth - extraWidth < 20) {
         $menu.addClass('dropdown').removeClass('top-level');
       }
-      $adminMenu.trigger('afterResize');
+      $adminBar.trigger('afterResize');
     }, 50);
-  }).triggerHandler('resize.adminMenu');
+  }).triggerHandler('resize.adminBar');
 }
 
 /**
@@ -207,17 +207,17 @@ Backdrop.adminMenu.behaviors.collapseWidth = function (context, settings, $admin
  * @todo This has to run last.  If another script registers additional behaviors
  *   it will not run last.
  */
-Backdrop.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
+Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   // Bind events for opening and closing menus on hover/click/touch.
-  $adminMenu.on('mouseenter', 'li.expandable', expandChild);
-  $adminMenu.on('mouseleave', 'li.expandable', closeChild);
+  $adminBar.on('mouseenter', 'li.expandable', expandChild);
+  $adminBar.on('mouseleave', 'li.expandable', closeChild);
 
   // On touch devices, the first click on an expandable link should not go to
   // that page, but a second click will. Use touch start/end events to target
   // these devices.
   var touchElement;
   var needsExpanding;
-  $adminMenu.on('touchstart touchend click', 'li.expandable > a, li.expandable > span', function(e) {
+  $adminBar.on('touchstart touchend click', 'li.expandable > a, li.expandable > span', function(e) {
     // The touchstart event fires before all other events, including mouseenter,
     // allowing us to check the expanded state consistently across devices.
     if (e.type === 'touchstart') {
@@ -244,8 +244,8 @@ Backdrop.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
 
   // Close all menus if clicking outside the menu.
   $(document).bind('click', function (e) {
-    if ($(e.target).closest($adminMenu).length === 0) {
-      $adminMenu.find('ul').removeClass('expanded');
+    if ($(e.target).closest($adminBar).length === 0) {
+      $adminBar.find('ul').removeClass('expanded');
     }
   });
 
@@ -279,8 +279,8 @@ Backdrop.adminMenu.behaviors.hover = function (context, settings, $adminMenu) {
 /**
  * Apply the search bar functionality.
  */
-Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
-  var $input = $adminMenu.find('.admin-menu-search input');
+Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
+  var $input = $adminBar.find('.admin-bar-search input');
   // Initialize the current search needle.
   var needle = $input.val();
   // Cache of all links that can be matched in the menu.
@@ -288,7 +288,7 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
   // Minimum search needle length.
   var needleMinLength = 2;
   // Append the results container.
-  var $results = $('<div class="admin-menu-search-results" />').insertAfter($input.parent());
+  var $results = $('<div class="admin-bar-search-results" />').insertAfter($input.parent());
 
   /**
    * Executes the search upon user input.
@@ -301,11 +301,11 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
       needle = value;
       // Initialize the cache of menu links upon first search.
       if (!links && needle.length >= needleMinLength) {
-        links = buildSearchIndex($adminMenu.find('#admin-menu-menu .dropdown li:not(.admin-menu-action, .admin-menu-action li) > a'));
+        links = buildSearchIndex($adminBar.find('#admin-bar-menu .dropdown li:not(.admin-bar-action, .admin-bar-action li) > a'));
       }
 
       // Close any open items.
-      $adminMenu.find('li.highlight').trigger('mouseleave').removeClass('highlight');
+      $adminBar.find('li.highlight').trigger('mouseleave').removeClass('highlight');
 
       // Empty results container when deleting search text.
       if (needle.length < needleMinLength) {
@@ -319,7 +319,7 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
         // Display results.
         $results.empty().append($html);
       }
-      $adminMenu.trigger('searchChanged');
+      $adminBar.trigger('searchChanged');
     }
   }
 
@@ -363,7 +363,7 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
       var $element = $(this.element);
 
       // Check whether there is a top-level category that can be prepended.
-      var $category = $element.closest('#admin-menu-menu > li > ul > li');
+      var $category = $element.closest('#admin-bar-menu > li > ul > li');
       var categoryText = $category.find('> a').text()
       if ($category.length && categoryText) {
         result = categoryText + ': ' + result;
@@ -387,7 +387,7 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
       e.preventDefault();
     }
     if (show) {
-      $adminMenu.find('.active-search-item').removeClass('active-search-item');
+      $adminBar.find('.active-search-item').removeClass('active-search-item');
       $(this).addClass('active-search-item');
     }
     else {
@@ -410,7 +410,7 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
    */
   function highlightPathHandler(e, link) {
     if (link) {
-      $adminMenu.find('li.highlight').removeClass('highlight');
+      $adminBar.find('li.highlight').removeClass('highlight');
       var $original = $(link).data('original-link');
       var show = e.type === 'showPath';
       // Toggle an additional CSS class to visually highlight the matching link.
@@ -420,13 +420,13 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
   }
 
   function resetSearchDisplay(e) {
-    $hideItems = $adminMenu.find('#admin-menu-extra > li > ul > li:not(li.admin-menu-search)').css('display', '');
+    $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
   }
   function updateSearchDisplay(e) {
     // Build the list of extra items to be hidden if in small window mode.
-    $hideItems = $adminMenu.find('#admin-menu-extra > li > ul > li:not(li.admin-menu-search)').css('display', '');
+    $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
     if ($results.children().length) {
-      if ($adminMenu.find('#admin-menu-extra').hasClass('dropdown')) {
+      if ($adminBar.find('#admin-bar-extra').hasClass('dropdown')) {
         $hideItems.css('display', 'none');
       }
     }
@@ -437,16 +437,16 @@ Backdrop.adminMenu.behaviors.search = function (context, settings, $adminMenu) {
   // Hide the result list after a link has been clicked.
   $results.on('click', 'li', resultsClickHandler);
   // Attach hover/active highlight behavior to search result entries.
-  $adminMenu.on('showPath hidePath', '.admin-menu-search-results li', highlightPathHandler);
+  $adminBar.on('showPath hidePath', '.admin-bar-search-results li', highlightPathHandler);
   // Show/hide the extra parts of the menu on resize.
-  $adminMenu.on('beforeResize', resetSearchDisplay)
-  $adminMenu.on('afterResize searchChanged', updateSearchDisplay);
+  $adminBar.on('beforeResize', resetSearchDisplay)
+  $adminBar.on('afterResize searchChanged', updateSearchDisplay);
   // Attach the search input event handler.
   $input.bind('focus keyup search', keyupHandler);
 
   // Close search if clicking outside the menu.
   $(document).on('click', function (e) {
-    if ($(e.target).closest($adminMenu).length === 0) {
+    if ($(e.target).closest($adminBar).length === 0) {
       $results.empty();
     }
   });
