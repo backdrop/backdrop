@@ -2727,7 +2727,6 @@ function _system_default_theme_features() {
     'favicon',
     'node_user_picture',
     'comment_user_picture',
-    'comment_user_verification',
   );
 }
 

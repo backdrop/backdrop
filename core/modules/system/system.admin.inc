@@ -383,7 +383,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
     'logo'                      => t('Logo'),
     'node_user_picture'         => t('User pictures in posts'),
     'comment_user_picture'      => t('User pictures in comments'),
-    'comment_user_verification' => t('User verification status in comments'),
     'favicon'                   => t('Shortcut icon'),
   );
 
@@ -395,7 +394,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
   }
   if (!module_exists('comment')) {
     $disabled['toggle_comment_user_picture'] = TRUE;
-    $disabled['toggle_comment_user_verification'] = TRUE;
   }
 
   $form['theme_settings'] = array(
