@@ -242,7 +242,7 @@ function menu_test_menu() {
   );
 
   // File inheritance tests. This menu item should inherit the page callback
-  // system_admin_menu_block_page() and therefore render its children as links
+  // system_admin_bar_block_page() and therefore render its children as links
   // on the page.
   $items['admin/config/development/file-inheritance'] = array(
     'title' => 'File inheritance',

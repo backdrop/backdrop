@@ -550,7 +550,7 @@ function system_menu() {
   $items['admin'] = array(
     'title' => 'Administration',
     'access arguments' => array('access administration pages'),
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'weight' => 9,
     'menu_name' => 'management',
     'file' => 'system.admin.inc',
@@ -582,7 +582,7 @@ function system_menu() {
     'description' => 'Administer blocks, content types, menus, etc.',
     'position' => 'right',
     'weight' => -2,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -700,7 +700,7 @@ function system_menu() {
     'description' => 'Administration tools.',
     'position' => 'left',
     'weight' => -12,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -710,7 +710,7 @@ function system_menu() {
     'description' => 'Media tools.',
     'position' => 'left',
     'weight' => -10,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -739,7 +739,7 @@ function system_menu() {
     'description' => 'Tools related to web services.',
     'position' => 'right',
     'weight' => 0,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -758,7 +758,7 @@ function system_menu() {
     'description' => 'Development tools.',
     'position' => 'right',
     'weight' => -10,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -796,7 +796,7 @@ function system_menu() {
     'description' => 'Regional settings, localization and translation.',
     'position' => 'left',
     'weight' => -5,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -862,7 +862,7 @@ function system_menu() {
     'description' => 'Local site search, metadata and SEO.',
     'position' => 'left',
     'weight' => -10,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -890,7 +890,7 @@ function system_menu() {
     'description' => 'General system related configuration.',
     'position' => 'right',
     'weight' => -20,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -955,7 +955,7 @@ function system_menu() {
     'title' => 'User interface',
     'description' => 'Tools that enhance the user interface.',
     'position' => 'right',
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
     'weight' => -15,
@@ -965,7 +965,7 @@ function system_menu() {
     'description' => 'Content workflow, editorial workflow tools.',
     'position' => 'right',
     'weight' => 5,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -974,7 +974,7 @@ function system_menu() {
     'description' => 'Settings related to formatting and authoring content.',
     'position' => 'left',
     'weight' => -15,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
@@ -983,7 +983,7 @@ function system_menu() {
   $items['admin/reports'] = array(
     'title' => 'Reports',
     'description' => 'View reports, updates, and errors.',
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'system_admin_bar_block_page',
     'access arguments' => array('access site reports'),
     'weight' => 5,
     'position' => 'left',
@@ -2184,7 +2184,7 @@ function system_preprocess_block(&$variables) {
  * @param $item
  *   The menu item to be displayed.
  */
-function system_admin_menu_block($item) {
+function system_admin_bar_block($item) {
   $cache = &backdrop_static(__FUNCTION__, array());
   // If we are calling this function for a menu item that corresponds to a
   // local task (for example, admin/tasks), then we want to retrieve the
@@ -3108,7 +3108,7 @@ function system_admin_compact_mode() {
 }
 
 /**
- * Menu callback; Sets whether the admin menu is in compact mode or not.
+ * Menu callback; Sets whether the admin bar is in compact mode or not.
  *
  * @param $mode
  *   Valid values are 'on' and 'off'.
@@ -3144,7 +3144,7 @@ function system_get_module_admin_tasks($module, $info) {
       ->condition('ml.hidden', 0, '>=')
       ->condition('ml.module', 'system')
       ->condition('m.number_parts', 1, '>')
-      ->condition('m.page_callback', 'system_admin_menu_block_page', '<>');
+      ->condition('m.page_callback', 'system_admin_bar_block_page', '<>');
     foreach ($query->execute() as $link) {
       _menu_link_translate($link);
       if ($link['access']) {

@@ -33,7 +33,7 @@ function system_admin_config_page() {
       }
       $block = $item;
       $block['content'] = '';
-      $block['content'] .= theme('admin_block_content', array('content' => system_admin_menu_block($item)));
+      $block['content'] .= theme('admin_block_content', array('content' => system_admin_bar_block($item)));
       if (!empty($block['content'])) {
         $block['show'] = TRUE;
       }
@@ -63,9 +63,9 @@ function system_admin_config_page() {
  * @return
  *   The output HTML.
  */
-function system_admin_menu_block_page() {
+function system_admin_bar_block_page() {
   $item = menu_get_item();
-  if ($content = system_admin_menu_block($item)) {
+  if ($content = system_admin_bar_block($item)) {
     $output = theme('admin_block_content', array('content' => $content));
   }
   else {
@@ -2264,7 +2264,7 @@ function theme_admin_block($variables) {
  * @param $variables
  *   An associative array containing:
  *   - content: An array containing information about the block. Each element
- *     of the array represents an administrative menu item, and must at least
+ *     of the array represents an administrative bar item, and must at least
  *     contain the keys 'title', 'href', and 'localized_options', which are
  *     passed to l(). A 'description' key may also be provided.
  *
