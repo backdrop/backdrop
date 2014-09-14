@@ -111,9 +111,6 @@ function system_theme() {
     'system_powered_by' => array(
       'variables' => array(),
     ),
-    'system_compact_link' => array(
-      'variables' => array(),
-    ),
   ));
 }
 
@@ -553,13 +550,6 @@ function system_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'weight' => 9,
     'menu_name' => 'management',
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/compact'] = array(
-    'title' => 'Compact mode',
-    'page callback' => 'system_admin_compact_page',
-    'access arguments' => array('access administration pages'),
-    'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
   $items['admin/tasks'] = array(
@@ -3085,40 +3075,6 @@ function system_jump_menu_submit($form, &$form_state) {
 }
 
 /**
- * Determines whether the current user is in compact mode.
- *
- * Compact mode shows certain administration pages with less description text,
- * such as the configuration page and the permissions page.
- *
- * Whether the user is in compact mode is determined by a cookie, which is set
- * for the user by system_admin_compact_page().
- *
- * If the user does not have the cookie, the default value is given by the
- * system variable 'admin_compact_mode', which itself defaults to FALSE. This
- * does not have a user interface to set it: it is a hidden variable which can
- * be set in the settings.php file.
- *
- * @return
- *   TRUE when in compact mode, FALSE when in expanded mode.
- */
-function system_admin_compact_mode() {
-  // PHP converts dots into underscores in cookie names to avoid problems with
-  // its parser, so we use a converted cookie name.
-  return isset($_COOKIE['Drupal_visitor_admin_compact_mode']) ? $_COOKIE['Drupal_visitor_admin_compact_mode'] : variable_get('admin_compact_mode', FALSE);
-}
-
-/**
- * Menu callback; Sets whether the admin menu is in compact mode or not.
- *
- * @param $mode
- *   Valid values are 'on' and 'off'.
- */
-function system_admin_compact_page($mode = 'off') {
-  user_cookie_save(array('admin_compact_mode' => ($mode == 'on')));
-  backdrop_goto();
-}
-
-/**
  * Generate a list of tasks offered by a specified module.
  *
  * @param $module
@@ -3577,24 +3533,6 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
  */
 function theme_system_powered_by() {
   return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'http://backdropcms.org')) . '</span>';
-}
-
-/**
- * Returns HTML for a link to show or hide inline help descriptions.
- *
- * @ingroup themeable
- */
-function theme_system_compact_link() {
-  $output = '<div class="compact-link">';
-  if (system_admin_compact_mode()) {
-    $output .= l(t('Show descriptions'), 'admin/compact/off', array('attributes' => array('title' => t('Expand layout to include descriptions.')), 'query' => backdrop_get_destination()));
-  }
-  else {
-    $output .= l(t('Hide descriptions'), 'admin/compact/on', array('attributes' => array('title' => t('Compress layout by hiding descriptions.')), 'query' => backdrop_get_destination()));
-  }
-  $output .= '</div>';
-
-  return $output;
 }
 
 /**

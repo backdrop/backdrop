@@ -80,7 +80,7 @@ function user_theme() {
       'file' => 'user.admin.inc',
     ),
     'user_permission_description' => array(
-      'variables' => array('permission_item' => NULL, 'hide' => NULL),
+      'variables' => array('permission_item' => NULL),
       'file' => 'user.admin.inc',
     ),
     'user_signature' => array(
