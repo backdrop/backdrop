@@ -835,8 +835,8 @@ function theme_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $rid) {
     $header[] = array('data' => backdrop_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
-  $output = theme('system_compact_link');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output = '';
+	$output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= backdrop_render_children($form);
   return $output;
 }

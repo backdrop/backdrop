@@ -2323,7 +2323,6 @@ function theme_admin_page($variables) {
   }
 
   $output = '<div class="admin clearfix">';
-  $output .= theme('system_compact_link');
 
   foreach ($container as $id => $data) {
     $output .= '<div class="' . $id . ' clearfix">';
@@ -2375,7 +2374,6 @@ function theme_system_admin_index($variables) {
   }
 
   $output = '<div class="admin clearfix">';
-  $output .= theme('system_compact_link');
   foreach ($container as $id => $data) {
     $output .= '<div class="' . $id . ' clearfix">';
     $output .= $data;
