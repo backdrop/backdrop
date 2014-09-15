@@ -1178,7 +1178,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow comment title'),
-      '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 1),
+      '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 0),
     );
     $form['comment']['comment_form_location'] = array(
       '#type' => 'checkbox',
