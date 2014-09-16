@@ -43,11 +43,11 @@ function seven_admin_block_content($variables) {
   $content = $variables['content'];
   $output = '';
   if (!empty($content)) {
-    $output = system_admin_compact_mode() ? '<ul class="admin-list compact">' : '<ul class="admin-list">';
+    $output = '<ul class="admin-list">';
     foreach ($content as $item) {
       $output .= '<li class="leaf">';
       $output .= l($item['title'], $item['href'], $item['localized_options']);
-      if (isset($item['description']) && !system_admin_compact_mode()) {
+      if (isset($item['description'])) {
         $output .= '<div class="description">' . filter_xss_admin($item['description']) . '</div>';
       }
       $output .= '</li>';

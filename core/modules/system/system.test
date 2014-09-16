@@ -2219,25 +2219,6 @@ class SystemAdminTestCase extends BackdropWebTestCase {
       }
     }
   }
-
-  /**
-   * Test compact mode.
-   */
-  function testCompactMode() {
-    $this->backdropGet('admin/compact/on');
-    $this->assertTrue($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'Compact mode turns on.');
-    $this->backdropGet('admin/compact/on');
-    $this->assertTrue($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'Compact mode remains on after a repeat call.');
-    $this->backdropGet('');
-    $this->assertTrue($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'Compact mode persists on new requests.');
-
-    $this->backdropGet('admin/compact/off');
-    $this->assertEqual($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'deleted', 'Compact mode turns off.');
-    $this->backdropGet('admin/compact/off');
-    $this->assertEqual($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'deleted', 'Compact mode remains off after a repeat call.');
-    $this->backdropGet('');
-    $this->assertTrue($this->cookies['Backdrop.visitor.admin_compact_mode']['value'], 'Compact mode persists on new requests.');
-  }
 }
 
 /**

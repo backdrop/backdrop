@@ -2276,13 +2276,10 @@ function theme_admin_block_content($variables) {
 
   if (!empty($content)) {
     $class = 'admin-list';
-    if ($compact = system_admin_compact_mode()) {
-      $class .= ' compact';
-    }
     $output .= '<dl class="' . $class . '">';
     foreach ($content as $item) {
       $output .= '<dt>' . l($item['title'], $item['href'], $item['localized_options']) . '</dt>';
-      if (!$compact && isset($item['description'])) {
+      if (isset($item['description'])) {
         $output .= '<dd>' . filter_xss_admin($item['description']) . '</dd>';
       }
     }
@@ -2323,7 +2320,6 @@ function theme_admin_page($variables) {
   }
 
   $output = '<div class="admin clearfix">';
-  $output .= theme('system_compact_link');
 
   foreach ($container as $id => $data) {
     $output .= '<div class="' . $id . ' clearfix">';
@@ -2375,7 +2371,6 @@ function theme_system_admin_index($variables) {
   }
 
   $output = '<div class="admin clearfix">';
-  $output .= theme('system_compact_link');
   foreach ($container as $id => $data) {
     $output .= '<div class="' . $id . ' clearfix">';
     $output .= $data;
