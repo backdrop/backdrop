@@ -378,152 +378,6 @@ function system_theme_settings($form, &$form_state, $key = '') {
 
   $form['var'] = array('#type' => 'hidden', '#value' => $var);
 
-  // Toggle settings
-  $toggles = array(
-    'logo'                      => t('Logo'),
-    'name'                      => t('Site name'),
-    'slogan'                    => t('Site slogan'),
-    'node_user_picture'         => t('User pictures in posts'),
-    'comment_user_picture'      => t('User pictures in comments'),
-    'comment_user_verification' => t('User verification status in comments'),
-    'favicon'                   => t('Shortcut icon'),
-    'main_menu'                 => t('Main menu'),
-    'secondary_menu'            => t('Secondary menu'),
-  );
-
-  // Some features are not always available
-  $disabled = array();
-  if (!config_get('user.settings', 'user_pictures')) {
-    $disabled['toggle_node_user_picture'] = TRUE;
-    $disabled['toggle_comment_user_picture'] = TRUE;
-  }
-  if (!module_exists('comment')) {
-    $disabled['toggle_comment_user_picture'] = TRUE;
-    $disabled['toggle_comment_user_verification'] = TRUE;
-  }
-
-  $form['theme_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Toggle display'),
-    '#description' => t('Enable or disable the display of certain page elements.'),
-  );
-  foreach ($toggles as $name => $title) {
-    if ((!$key) || in_array($name, $features)) {
-      $form['theme_settings']['toggle_' . $name] = array('#type' => 'checkbox', '#title' => $title, '#default_value' => theme_get_setting('toggle_' . $name, $key));
-      // Disable checkboxes for features not supported in the current configuration.
-      if (isset($disabled['toggle_' . $name])) {
-        $form['theme_settings']['toggle_' . $name]['#disabled'] = TRUE;
-      }
-    }
-  }
-
-  if (!element_children($form['theme_settings'])) {
-    // If there is no element in the theme settings fieldset then do not show
-    // it -- but keep it in the form if another module wants to alter.
-    $form['theme_settings']['#access'] = FALSE;
-  }
-
-  // Logo settings
-  if ((!$key) || in_array('logo', $features)) {
-    $form['logo'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Logo image settings'),
-      '#attributes' => array('class' => array('theme-settings-bottom')),
-    );
-    $form['logo']['default_logo'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use the default logo supplied by the theme'),
-      '#default_value' => theme_get_setting('default_logo', $key),
-      '#tree' => FALSE,
-    );
-    $form['logo']['settings'] = array(
-      '#type' => 'container',
-      '#states' => array(
-        // Hide the logo settings when using the default logo.
-        'invisible' => array(
-          'input[name="default_logo"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
-    $form['logo']['settings']['logo_path'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Path to custom logo'),
-      '#default_value' => theme_get_setting('logo_path', $key),
-    );
-    $form['logo']['settings']['logo_upload'] = array(
-      '#type' => 'file',
-      '#title' => t('Upload logo image'),
-      '#maxlength' => 40,
-      '#description' => t("If you don't have direct file access to the server, use this field to upload your logo.")
-    );
-  }
-
-  if ((!$key) || in_array('favicon', $features)) {
-    $form['favicon'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Shortcut icon settings'),
-      '#description' => t("Your shortcut icon, or 'favicon', is displayed in the address bar and bookmarks of most browsers."),
-    );
-    $form['favicon']['default_favicon'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use the default shortcut icon supplied by the theme'),
-      '#default_value' => theme_get_setting('default_favicon', $key),
-    );
-    $form['favicon']['settings'] = array(
-      '#type' => 'container',
-      '#states' => array(
-        // Hide the favicon settings when using the default favicon.
-        'invisible' => array(
-          'input[name="default_favicon"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
-    $form['favicon']['settings']['favicon_path'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Path to custom icon'),
-      '#default_value' => theme_get_setting('favicon_path', $key),
-    );
-    $form['favicon']['settings']['favicon_upload'] = array(
-      '#type' => 'file',
-      '#title' => t('Upload icon image'),
-      '#description' => t("If you don't have direct file access to the server, use this field to upload your shortcut icon.")
-    );
-  }
-
-  // Inject human-friendly values and form element descriptions for logo and
-  // favicon.
-  foreach (array('logo' => 'logo.png', 'favicon' => 'favicon.ico') as $type => $default) {
-    if (isset($form[$type]['settings'][$type . '_path'])) {
-      $element = &$form[$type]['settings'][$type . '_path'];
-
-      // If path is a public:// URI, display the path relative to the files
-      // directory; stream wrappers are not end-user friendly.
-      $original_path = $element['#default_value'];
-      $friendly_path = NULL;
-      if (file_uri_scheme($original_path) == 'public') {
-        $friendly_path = file_uri_target($original_path);
-        $element['#default_value'] = $friendly_path;
-      }
-
-      // Prepare local file path for description.
-      if ($original_path && isset($friendly_path)) {
-        $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
-      }
-      elseif ($key) {
-        $local_file = backdrop_get_path('theme', $key) . '/' . $default;
-      }
-      else {
-        $local_file = path_to_theme() . '/' . $default;
-      }
-
-      $element['#description'] = t('Examples: <code>@implicit-public-file</code> (for a file in the public filesystem), <code>@explicit-file</code>, or <code>@local-file</code>.', array(
-        '@implicit-public-file' => isset($friendly_path) ? $friendly_path : $default,
-        '@explicit-file' => file_uri_scheme($original_path) !== FALSE ? $original_path : 'public://' . $default,
-        '@local-file' => $local_file,
-      ));
-    }
-  }
-
   if ($key) {
     // Call engine-specific settings.
     $function = $themes[$key]->prefix . '_engine_settings';
@@ -579,94 +433,7 @@ function system_theme_settings($form, &$form_state, $key = '') {
   // We don't want to call system_settings_form_submit(), so change #submit.
   array_pop($form['#submit']);
   $form['#submit'][] = 'system_theme_settings_submit';
-  $form['#validate'][] = 'system_theme_settings_validate';
   return $form;
-}
-
-/**
- * Validator for the system_theme_settings() form.
- */
-function system_theme_settings_validate($form, &$form_state) {
-  // Handle file uploads.
-  $validators = array('file_validate_is_image' => array());
-
-  // Check for a new uploaded logo.
-  $file = file_save_upload('logo_upload', $validators);
-  if (isset($file)) {
-    // File upload was attempted.
-    if ($file) {
-      // Put the temporary file in form_values so we can save it on submit.
-      $form_state['values']['logo_upload'] = $file;
-    }
-    else {
-      // File upload failed.
-      form_set_error('logo_upload', t('The logo could not be uploaded.'));
-    }
-  }
-
-  $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
-
-  // Check for a new uploaded favicon.
-  $file = file_save_upload('favicon_upload', $validators);
-  if (isset($file)) {
-    // File upload was attempted.
-    if ($file) {
-      // Put the temporary file in form_values so we can save it on submit.
-      $form_state['values']['favicon_upload'] = $file;
-    }
-    else {
-      // File upload failed.
-      form_set_error('favicon_upload', t('The favicon could not be uploaded.'));
-    }
-  }
-
-  // If the user provided a path for a logo or favicon file, make sure a file
-  // exists at that path.
-  if ($form_state['values']['logo_path']) {
-    $path = _system_theme_settings_validate_path($form_state['values']['logo_path']);
-    if (!$path) {
-      form_set_error('logo_path', t('The custom logo path is invalid.'));
-    }
-  }
-  if ($form_state['values']['favicon_path']) {
-    $path = _system_theme_settings_validate_path($form_state['values']['favicon_path']);
-    if (!$path) {
-      form_set_error('favicon_path', t('The custom favicon path is invalid.'));
-    }
-  }
-}
-
-/**
- * Helper function for the system_theme_settings form.
- *
- * Attempts to validate normal system paths, paths relative to the public files
- * directory, or stream wrapper URIs. If the given path is any of the above,
- * returns a valid path or URI that the theme system can display.
- *
- * @param $path
- *   A path relative to the Backdrop root or to the public files directory, or
- *   a stream wrapper URI.
- * @return mixed
- *   A valid path that can be displayed through the theme system, or FALSE if
- *   the path could not be validated.
- */
-function _system_theme_settings_validate_path($path) {
-  // Absolute local file paths are invalid.
-  if (backdrop_realpath($path) == $path) {
-    return FALSE;
-  }
-  // A path relative to the Backdrop root or a fully qualified URI is valid.
-  if (is_file($path)) {
-    return $path;
-  }
-  // Prepend 'public://' for relative file paths within public filesystem.
-  if (file_uri_scheme($path) === FALSE) {
-    $path = 'public://' . $path;
-  }
-  if (is_file($path)) {
-    return $path;
-  }
-  return FALSE;
 }
 
 /**
@@ -679,37 +446,6 @@ function system_theme_settings_submit($form, &$form_state) {
   unset($form_state['values']['var']);
 
   $values = $form_state['values'];
-
-  // If the user uploaded a new logo or favicon, save it to a permanent location
-  // and use it in place of the default theme-provided file.
-  if ($file = $values['logo_upload']) {
-    unset($values['logo_upload']);
-    $filename = file_unmanaged_copy($file->uri);
-    $values['default_logo'] = 0;
-    $values['logo_path'] = $filename;
-    $values['toggle_logo'] = 1;
-  }
-  if ($file = $values['favicon_upload']) {
-    unset($values['favicon_upload']);
-    $filename = file_unmanaged_copy($file->uri);
-    $values['default_favicon'] = 0;
-    $values['favicon_path'] = $filename;
-    $values['toggle_favicon'] = 1;
-  }
-
-  // If the user entered a path relative to the system files directory for
-  // a logo or favicon, store a public:// URI so the theme system can handle it.
-  if (!empty($values['logo_path'])) {
-    $values['logo_path'] = _system_theme_settings_validate_path($values['logo_path']);
-  }
-  if (!empty($values['favicon_path'])) {
-    $values['favicon_path'] = _system_theme_settings_validate_path($values['favicon_path']);
-  }
-
-  if (empty($values['default_favicon']) && !empty($values['favicon_path'])) {
-    $values['favicon_mimetype'] = file_get_mimetype($values['favicon_path']);
-  }
-
   variable_set($key, $values);
   backdrop_set_message(t('The configuration options have been saved.'));
 
@@ -1399,12 +1135,76 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('site_name'),
     '#required' => TRUE
   );
+
+  // Logo settings
+  $form['site_information']['logo'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Logo settings'),
+    '#attributes' => array('class' => array('theme-settings-bottom')),
+  );
+  $form['site_information']['logo']['site_default_logo'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the logo supplied by the active theme'),
+    '#default_value' => $site_config->get('site_default_logo'),
+    '#tree' => FALSE,
+  );
+  $form['site_information']['logo']['settings'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      // Hide the logo settings when using the default logo.
+      'invisible' => array(
+        'input[name="site_default_logo"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['site_information']['logo']['settings']['site_logo_upload'] = array(
+    '#type' => 'file',
+    '#title' => t('Upload logo'),
+    '#maxlength' => 60,
+  );
+  $form['site_information']['logo']['settings']['site_logo_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to custom logo'),
+    '#default_value' => $site_config->get('site_logo_path'),
+  );
+
+  $form['site_information']['favicon'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Shortcut icon settings'),
+    '#description' => t("Your shortcut icon, or 'favicon', is displayed in the address bar and bookmarks of most browsers."),
+  );
+  $form['site_information']['favicon']['site_default_favicon'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the shortcut icon supplied by the active theme'),
+    '#default_value' => $site_config->get('site_default_favicon'),
+  );
+  $form['site_information']['favicon']['settings'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      // Hide the favicon settings when using the default favicon.
+      'invisible' => array(
+        'input[name="site_default_favicon"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['site_information']['favicon']['settings']['site_favicon_upload'] = array(
+    '#type' => 'file',
+    '#title' => t('Upload icon'),
+    '#maxlength' => 60,
+  );
+  $form['site_information']['favicon']['settings']['site_favicon_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to custom icon'),
+    '#default_value' => $site_config->get('site_favicon_path'),
+  );
+
   $form['site_information']['site_slogan'] = array(
     '#type' => 'textfield',
     '#title' => t('Slogan'),
     '#default_value' => $site_config->get('site_slogan'),
     '#description' => t("How this is used depends on your site's theme."),
   );
+
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
     '#title' => t('E-mail address'),
@@ -1412,6 +1212,7 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
     '#required' => TRUE,
   );
+
   $form['front_page'] = array(
     '#type' => 'fieldset',
     '#title' => t('Front page'),
@@ -1459,6 +1260,37 @@ function system_site_information_settings($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration')
   );
+
+  // Inject human-friendly form element descriptions for logo and favicon.
+  foreach (array('logo' => 'logo.png', 'favicon' => 'favicon.ico') as $type => $default) {
+    if (isset($form['site_information'][$type]['settings']['site_' . $type . '_path'])) {
+      $element = &$form['site_information'][$type]['settings']['site_' . $type . '_path'];
+
+      // If path is a public:// URI, display the path relative to the files
+      // directory; stream wrappers are not end-user friendly.
+      $original_path = $element['#default_value'];
+      $friendly_path = NULL;
+      if (file_uri_scheme($original_path) == 'public') {
+        $friendly_path = file_uri_target($original_path);
+        $element['#default_value'] = $friendly_path;
+      }
+
+      // Prepare local file path for description.
+      if ($original_path && isset($friendly_path)) {
+        $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
+      }
+      else {
+        $local_file = path_to_theme() . '/' . $default;
+      }
+
+      $element['#description'] = t('Examples: <code>@implicit-public-file</code> (for a file in the public filesystem), <code>@explicit-file</code>, or <code>@local-file</code>.', array(
+        '@implicit-public-file' => isset($friendly_path) ? $friendly_path : $default,
+        '@explicit-file' => file_uri_scheme($original_path) !== FALSE ? $original_path : 'public://' . $default,
+        '@local-file' => $local_file,
+      ));
+    }
+  }
+
   return $form;
 }
 
@@ -1466,6 +1298,54 @@ function system_site_information_settings($form, &$form_state) {
  * Validates the submitted site-information form.
  */
 function system_site_information_settings_validate($form, &$form_state) {
+  // Handle file uploads.
+  $validators = array('file_validate_is_image' => array());
+
+  // Check for a new uploaded logo.
+  $file = file_save_upload('site_logo_upload', $validators);
+  if (isset($file)) {
+    // File upload was attempted.
+    if ($file) {
+      // Put the temporary file in form_values so we can save it on submit.
+      $form_state['values']['site_logo_upload'] = $file;
+    }
+    else {
+      // File upload failed.
+      form_set_error('site_logo_upload', t('The logo could not be uploaded.'));
+    }
+  }
+
+  $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
+
+  // Check for a new uploaded favicon.
+  $file = file_save_upload('site_favicon_upload', $validators);
+  if (isset($file)) {
+    // File upload was attempted.
+    if ($file) {
+      // Put the temporary file in form_values so we can save it on submit.
+      $form_state['values']['site_favicon_upload'] = $file;
+    }
+    else {
+      // File upload failed.
+      form_set_error('site_favicon_upload', t('The favicon could not be uploaded.'));
+    }
+  }
+
+  // If the user provided a path for a logo or favicon file, make sure a file
+  // exists at that path.
+  if ($form_state['values']['site_logo_path']) {
+    $path = _system_site_information_settings_validate_path($form_state['values']['site_logo_path']);
+    if (!$path) {
+      form_set_error('site_logo_path', t('The custom logo path is invalid.'));
+    }
+  }
+  if ($form_state['values']['site_favicon_path']) {
+    $path = _system_site_information_settings_validate_path($form_state['values']['site_favicon_path']);
+    if (!$path) {
+      form_set_error('site_favicon_path', t('The custom favicon path is invalid.'));
+    }
+  }
+
   // Check for empty front page path.
   if (empty($form_state['values']['site_frontpage'])) {
     // Set to default "user".
@@ -1497,11 +1377,77 @@ function system_site_information_settings_validate($form, &$form_state) {
 }
 
 /**
+ * Helper function for the system_site_information_settings form.
+ *
+ * Attempts to validate normal system paths, paths relative to the public files
+ * directory, or stream wrapper URIs. If the given path is any of the above,
+ * returns a valid path or URI that the theme system can display.
+ *
+ * @param $path
+ *   A path relative to the Backdrop root or to the public files directory, or
+ *   a stream wrapper URI.
+ * @return mixed
+ *   A valid path that can be displayed through the theme system, or FALSE if
+ *   the path could not be validated.
+ */
+function _system_site_information_settings_validate_path($path) {
+  // Absolute local file paths are invalid.
+  if (backdrop_realpath($path) == $path) {
+    return FALSE;
+  }
+  // A path relative to the Backdrop root or a fully qualified URI is valid.
+  if (is_file($path)) {
+    return $path;
+  }
+  // Prepend 'public://' for relative file paths within public filesystem.
+  if (file_uri_scheme($path) === FALSE) {
+    $path = 'public://' . $path;
+  }
+  if (is_file($path)) {
+    return $path;
+  }
+  return FALSE;
+}
+
+/**
  * Form submission handler for system_site_information_settings().
  */
 function system_site_information_settings_submit($form, &$form_state) {
+  // If the user uploaded a new logo or favicon, save it to a permanent location
+  // and use it in place of the default theme-provided file.
+  if ($file = $form_state['values']['site_logo_upload']) {
+    unset($form_state['values']['site_logo_upload']);
+    $filename = file_unmanaged_copy($file->uri);
+    $form_state['values']['site_default_logo'] = 0;
+    $form_state['values']['site_logo_path'] = $filename;
+  }
+  if ($file = $form_state['values']['site_favicon_upload']) {
+    unset($form_state['values']['site_favicon_upload']);
+    $filename = file_unmanaged_copy($file->uri);
+    $form_state['values']['site_default_favicon'] = 0;
+    $form_state['values']['site_favicon_path'] = $filename;
+  }
+
+  // If the user entered a path relative to the system files directory for
+  // a logo or favicon, store a public:// URI so the theme system can handle it.
+  if (!empty($form_state['values']['site_logo_path'])) {
+    $form_state['values']['site_logo_path'] = _system_site_information_settings_validate_path($form_state['values']['site_logo_path']);
+  }
+  if (!empty($form_state['values']['site_favicon_path'])) {
+    $form_state['values']['site_favicon_path'] = _system_site_information_settings_validate_path($form_state['values']['site_favicon_path']);
+  }
+
+  if (empty($form_state['values']['site_default_favicon']) && !empty($form_state['values']['site_favicon_path'])) {
+    $form_state['values']['site_favicon_mimetype'] = file_get_mimetype($form_state['values']['site_favicon_path']);
+  }
+
   config('system.site')
     ->set('site_name', $form_state['values']['site_name'])
+    ->set('site_default_logo', $form_state['values']['site_default_logo'])
+    ->set('site_logo_path', $form_state['values']['site_logo_path'])
+    ->set('site_default_favicon', $form_state['values']['site_default_favicon'])
+    ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
+    ->set('site_favicon_mime', $form_state['values']['site_favicon_mimetype'])
     ->set('site_mail', $form_state['values']['site_mail'])
     ->set('site_slogan', $form_state['values']['site_slogan'])
     ->set('site_frontpage', $form_state['values']['site_frontpage'])

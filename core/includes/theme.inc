@@ -1437,25 +1437,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
   }
 
   if (empty($cache[$theme])) {
-    // Set the default values for each global setting.
-    // To add new global settings, add their default values below, and then
-    // add form elements to system_theme_settings() in system.admin.inc.
-    $cache[$theme] = array(
-      'default_logo'                     =>  1,
-      'logo_path'                        =>  '',
-      'default_favicon'                  =>  1,
-      'favicon_path'                     =>  '',
-      // Use the IANA-registered MIME type for ICO files as default.
-      'favicon_mimetype'                 =>  'image/vnd.microsoft.icon',
-    );
-    // Turn on all default features.
-    $features = _system_default_theme_features();
-    foreach ($features as $feature) {
-      $cache[$theme]['toggle_' . $feature] = 1;
-    }
+    $cache[$theme] = array();
 
     // Get the values for the theme-specific settings from the .info files of
-    // the theme and all its base themes.
+    // the active theme and all its base themes.
     if ($theme) {
       $themes = list_themes();
       $theme_object = $themes[$theme];
@@ -1475,9 +1460,6 @@ function theme_get_setting($setting_name, $theme = NULL) {
       }
     }
 
-    // Get the saved global settings from the database.
-    $cache[$theme] = array_merge($cache[$theme], variable_get('theme_settings', array()));
-
     if ($theme) {
       // Get the saved theme-specific settings from the database.
       $cache[$theme] = array_merge($cache[$theme], variable_get('theme_' . $theme . '_settings', array()));
@@ -1489,40 +1471,6 @@ function theme_get_setting($setting_name, $theme = NULL) {
           if (!in_array($feature, $theme_object->info['features'])) {
             $cache[$theme]['toggle_' . $feature] = NULL;
           }
-        }
-      }
-
-      // Generate the path to the logo image.
-      if ($cache[$theme]['toggle_logo']) {
-        if ($cache[$theme]['default_logo']) {
-          if (file_exists($logo = dirname($theme_object->filename) . '/logo.png')) {
-            $cache[$theme]['logo'] = file_create_url($logo);
-          }
-          else {
-            $cache[$theme]['logo'] = '';
-            $cache[$theme]['toggle_logo'] = FALSE;
-          }
-        }
-        elseif ($cache[$theme]['logo_path']) {
-          $cache[$theme]['logo'] = file_create_url($cache[$theme]['logo_path']);
-        }
-      }
-
-      // Generate the path to the favicon.
-      if ($cache[$theme]['toggle_favicon']) {
-        if ($cache[$theme]['default_favicon']) {
-          if (file_exists($favicon = dirname($theme_object->filename) . '/favicon.ico')) {
-            $cache[$theme]['favicon'] = file_create_url($favicon);
-          }
-          else {
-            $cache[$theme]['favicon'] = file_create_url('core/misc/favicon.ico');
-          }
-        }
-        elseif ($cache[$theme]['favicon_path']) {
-          $cache[$theme]['favicon'] = file_create_url($cache[$theme]['favicon_path']);
-        }
-        else {
-          $cache[$theme]['toggle_favicon'] = FALSE;
         }
       }
     }
@@ -2642,14 +2590,10 @@ function template_preprocess_html(&$variables) {
   $variables['html_attributes_array']['lang'] = $GLOBALS['language_interface']->langcode;
   $variables['html_attributes_array']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
 
-  // Add favicon.
-  if (theme_get_setting('toggle_favicon')) {
-    $favicon = theme_get_setting('favicon');
-    $type = theme_get_setting('favicon_mimetype');
-    backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon), 'type' => $type));
-  }
+  // Add favicon to the page.
+  $favicon = backdrop_get_favicon();
+  backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon['path']), 'type' => $favicon['type']));
 
-  $site_config = config('system.site');
   // Construct page title.
   if (backdrop_get_title()) {
     $head_title = array(
@@ -2659,9 +2603,7 @@ function template_preprocess_html(&$variables) {
   }
   else {
     $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($site_config->get('site_slogan')) {
-      $head_title['slogan'] = filter_xss_admin($site_config->get('site_slogan'));
-    }
+    $head_title['slogan'] = filter_xss_admin($site_config->get('site_slogan'));
   }
   $variables['head_title_array'] = $head_title;
   $variables['head_title'] = implode(' | ', $head_title);
@@ -2692,7 +2634,17 @@ function template_preprocess_html(&$variables) {
 function template_preprocess_page(&$variables) {
   // Move some variables to the top level for themer convenience and template cleanliness.
   $variables['show_messages'] = $variables['page']['#show_messages'];
-  $site_config = config('system.site');
+
+  // Load default gi info, name and slogan.
+  $site_name = 'Backdrop CMS';
+  $site_slogan = '';
+
+  // Load site config and update, if we can.
+  try {
+    $site_config = config('system.site');
+    $site_name = filter_xss_admin($site_config->get('site_name'));
+    $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
+  }
 
   foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
     if (!isset($variables['page'][$region_key])) {
@@ -2714,15 +2666,15 @@ function template_preprocess_page(&$variables) {
   $variables['feed_icons']        = backdrop_get_feeds();
   $variables['language']          = $GLOBALS['language_interface'];
   $variables['language']->dir     = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
-  $variables['logo']              = theme_get_setting('logo');
+  $variables['logo']              = backdrop_get_logo();
   $variables['action_links']      = menu_local_actions();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin($site_config->get('site_name')) : '');
-  $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? filter_xss_admin($site_config->get('site_slogan')) : '');
   $variables['tabs']              = menu_local_tabs();
+  $variables['site_name']         = $site_name;
+  $variables['site_slogan']       = $site_slogan;
 
-  $variables['main_menu'] = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
-  $variables['secondary_menu'] = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
-  
+  $variables['main_menu'] = menu_main_menu();
+  $variables['secondary_menu'] = menu_secondary_menu();
+
   // Pass the main menu and secondary menu to the template as render arrays.
   if (!empty($variables['main_menu'])) {
     $variables['main_menu'] = array(
@@ -2899,12 +2851,20 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
  * @see maintenance-page.tpl.php
  */
 function template_preprocess_maintenance_page(&$variables) {
-  // Add favicon
-  if (theme_get_setting('toggle_favicon')) {
-    $favicon = theme_get_setting('favicon');
-    $type = theme_get_setting('favicon_mimetype');
-    backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon), 'type' => $type));
+  // Load default gi info, name and slogan.
+  $site_name = 'Backdrop CMS';
+  $site_slogan = '';
+
+  // Load site config and update, if we can.
+  try {
+    $site_config = config('system.site');
+    $site_name = filter_xss_admin($site_config->get('site_name'));
+    $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
   }
+
+  // Add favicon to the page.
+  $favicon = backdrop_get_favicon();
+  backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => backdrop_strip_dangerous_protocols($favicon['path']), 'type' => $favicon['type']));
 
   global $theme;
   // Retrieve the theme data to list all available regions.
@@ -2926,10 +2886,6 @@ function template_preprocess_maintenance_page(&$variables) {
   if (!empty($variables['sidebar_second'])) {
     $variables['layout'] = ($variables['layout'] == 'first') ? 'both' : 'second';
   }
-
-  $site_config = config('system.site');
-  $site_name = $site_config->get('site_name');
-  $site_slogan = $site_config->get('site_slogan');
 
   // Construct page title
   if (backdrop_get_title()) {
@@ -2957,12 +2913,12 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['help']              = '';
   $variables['language']          = $language;
   $variables['language']->dir     = $language->direction ? 'rtl' : 'ltr';
-  $variables['logo']              = theme_get_setting('logo');
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
   $variables['main_menu']         = array();
   $variables['secondary_menu']    = array();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? $site_name : '');
-  $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? $site_slogan : '');
+  $variables['logo']              = backdrop_get_logo();
+  $variables['site_name']         = $site_name;
+  $variables['site_slogan']       = $site_slogan;
   $variables['tabs']              = '';
   $variables['title']             = backdrop_get_title();
 

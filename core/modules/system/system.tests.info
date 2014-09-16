@@ -58,6 +58,12 @@ description = Tests page not found functionality, including custom 404 pages.
 group = System
 file = system.test
 
+[CustomLogoTestCase]
+name = Custom logo
+description = Tests theme based logo and uploaded custom logo functionality.
+group = System
+file = system.test
+
 [SiteMaintenanceTestCase]
 name = Site maintenance mode functionality
 description = Test access to site while in maintenance mode.
