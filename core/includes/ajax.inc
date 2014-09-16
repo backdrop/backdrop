@@ -115,13 +115,9 @@
  *   returns a renderable array (most often a form or form fragment), an HTML
  *   string, or an array of Ajax commands. If returning a renderable array or
  *   a string, the value will replace the original element named in
- *   #ajax['wrapper'], and
- *   theme_status_messages()
- *   will be prepended to that
+ *   #ajax['wrapper'], and theme_status_messages() will be prepended to that
  *   element. (If the status messages are not wanted, return an array
  *   of Ajax commands instead.)
- *   #ajax['wrapper']. If an array of Ajax commands is returned, it will be
- *   executed by the calling code.
  * - #ajax['path']: The menu path to use for the request. This is often omitted
  *   and the default is used. This path should map
  *   to a menu page callback that returns data using ajax_render(). Defaults to
