@@ -28,8 +28,18 @@ function node_page_edit(Node $node) {
  * @see node_menu()
  */
 function node_add_page() {
-  $item = menu_get_item();
-  $content = system_admin_menu_block($item);
+  $content = array();
+  // Only use node types to which the user has access.
+  foreach (node_type_get_types() as $node_type) {
+    if (node_access('create', $node_type->type)) {
+      $content[$node_type->type] = array(
+        'title' => t($node_type->name),
+        'href'=>'node/add/' . $node_type->type,
+        'localized_options' => array('html' => TRUE),
+        'description' => t($node_type->description),
+      );
+    }
+  }
   // Bypass the node/add listing if only one content type is available.
   if (count($content) == 1) {
     $item = array_shift($content);
