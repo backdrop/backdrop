@@ -6,28 +6,6 @@
  */
 
 /**
- * Page callback: Generates the appropriate user administration form.
- *
- * This function generates the user registration, multiple user cancellation,
- * or filtered user list admin form, depending on the argument and the POST
- * form values.
- *
- * @return string
- *   A renderable form array for the respective request.
- */
-function user_admin() {
-  if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'cancel')) {
-    $build['user_multiple_cancel_confirm'] = backdrop_get_form('user_multiple_cancel_confirm');
-  }
-  else {
-    $build['user_filter_form'] = backdrop_get_form('user_filter_form');
-    $build['user_admin_account'] = backdrop_get_form('user_admin_account');
-  }
-
-  return $build;
-}
-
-/**
  * Form builder; Return form for user administration filters.
  *
  * @ingroup forms

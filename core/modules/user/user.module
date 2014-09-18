@@ -1422,24 +1422,6 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
 
-  // User listing pages.
-  $items['admin/people'] = array(
-    'title' => 'People',
-    'description' => 'Manage user accounts, roles, and permissions.',
-    'page callback' => 'user_admin',
-    'access arguments' => array('administer users'),
-    'position' => 'left',
-    'weight' => -7,
-    'file' => 'user.admin.inc',
-  );
-  $items['admin/people/list'] = array(
-    'title' => 'Find user accounts',
-    'description' => 'Find and manage people interacting with your site.',
-    'access arguments' => array('administer users'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-    'file' => 'user.admin.inc',
-  );
   $items['admin/people/create'] = array(
     'title' => 'Add user account',
     'page callback' => 'backdrop_get_form',
