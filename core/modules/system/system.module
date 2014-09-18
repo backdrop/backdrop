@@ -2725,7 +2725,6 @@ function _system_default_theme_features() {
   return array(
     'logo',
     'favicon',
-    'node_user_picture',
   );
 }
 
