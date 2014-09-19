@@ -1277,7 +1277,10 @@ function template_preprocess_node(&$variables) {
   if (variable_get('node_submitted_' . $node->type, TRUE)) {
     $variables['display_submitted'] = TRUE;
     $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
-    $variables['user_picture'] = theme_get_setting('toggle_node_user_picture') ? theme('user_picture', array('account' => $node)) : '';
+    $variables['user_picture'] = '';
+    if (variable_get('node_user_picture_' . $node->type, TRUE)) {
+      $variables['user_picture'] = theme('user_picture', array('account' => $node));
+    }
   }
   else {
     $variables['display_submitted'] = FALSE;

@@ -2716,13 +2716,13 @@ function template_preprocess_page(&$variables) {
   $variables['language']->dir     = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
   $variables['logo']              = theme_get_setting('logo');
   $variables['action_links']      = menu_local_actions();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin($site_config->get('site_name')) : '');
-  $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? filter_xss_admin($site_config->get('site_slogan')) : '');
+  $variables['site_name']         = check_plain($site_config->get('site_name'));
+  $variables['site_slogan']       = filter_xss_admin($site_config->get('site_slogan'));
   $variables['tabs']              = menu_local_tabs();
 
-  $variables['main_menu'] = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
-  $variables['secondary_menu'] = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
-  
+  $variables['main_menu'] = menu_main_menu();
+  $variables['secondary_menu'] = menu_secondary_menu();
+
   // Pass the main menu and secondary menu to the template as render arrays.
   if (!empty($variables['main_menu'])) {
     $variables['main_menu'] = array(
@@ -2928,8 +2928,8 @@ function template_preprocess_maintenance_page(&$variables) {
   }
 
   $site_config = config('system.site');
-  $site_name = $site_config->get('site_name');
-  $site_slogan = $site_config->get('site_slogan');
+  $site_name = check_plain($site_config->get('site_name'));
+  $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
 
   // Construct page title
   if (backdrop_get_title()) {
@@ -2961,8 +2961,8 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
   $variables['main_menu']         = array();
   $variables['secondary_menu']    = array();
-  $variables['site_name']         = (theme_get_setting('toggle_name') ? $site_name : '');
-  $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? $site_slogan : '');
+  $variables['site_name']         = $site_name;
+  $variables['site_slogan']       = $site_slogan;
   $variables['tabs']              = '';
   $variables['title']             = backdrop_get_title();
 

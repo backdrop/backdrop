@@ -1152,17 +1152,17 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_NODE_HIDDEN => t('Hidden'),
       ),
     );
-    $form['comment']['comment_default_mode'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Threading'),
-      '#default_value' => variable_get('comment_default_mode_' . $form['#node_type']->type, COMMENT_MODE_THREADED),
-      '#description' => t('Show comment replies in a threaded list.'),
-    );
     $form['comment']['comment_default_per_page'] = array(
       '#type' => 'select',
       '#title' => t('Comments per page'),
       '#default_value' => variable_get('comment_default_per_page_' . $form['#node_type']->type, 50),
       '#options' => _comment_per_page(),
+    );
+    $form['comment']['comment_default_mode'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show comment replies in a threaded list'),
+      '#default_value' => variable_get('comment_default_mode_' . $form['#node_type']->type, COMMENT_MODE_THREADED),
+      '#description' => t('A threaded list differs from chronologocal in that each comment follows it\'s parent, and is usually indented.'),
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',
@@ -1180,6 +1180,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#title' => t('Allow comment title'),
       '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 1),
     );
+    if (config_get('user.settings', 'user_pictures')) {
+      $form['comment']['comment_user_picture'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Display pictures for comment authors'),
+        '#default_value' => variable_get('comment_user_picture_' . $form['#node_type']->type, 1),
+      );
+    }
     $form['comment']['comment_form_location'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show reply form on the same page as comments'),
@@ -2126,6 +2133,7 @@ function template_preprocess_comment(&$variables) {
   $variables['comment'] = $comment;
   $variables['node'] = $node;
   $variables['author'] = theme('username', array('account' => $comment));
+  $variables['user_picture'] = '';
 
   $variables['created'] = format_date($comment->created);
   // Avoid calling format_date() twice on the same timestamp.
@@ -2137,7 +2145,9 @@ function template_preprocess_comment(&$variables) {
   }
 
   $variables['new'] = !empty($comment->new) ? t('new') : '';
-  $variables['user_picture'] = theme_get_setting('toggle_comment_user_picture') ? theme('user_picture', array('account' => $comment)) : '';
+  if (variable_get('comment_user_picture_' . $node->type, 1)) {
+    $variables['user_picture'] = theme('user_picture', array('account' => $comment));
+  }
   $variables['signature'] = $comment->signature;
 
   $uri = entity_uri('comment', $comment);
