@@ -34,7 +34,7 @@
         <div class="name-and-slogan">
           <?php if ($site_name): ?>
             <strong class="site-name">
-              <span><?php print $site_name; ?></span>
+              <?php print $site_name; ?>
             </strong>
           <?php endif; ?>
 

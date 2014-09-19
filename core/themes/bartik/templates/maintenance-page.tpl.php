@@ -33,7 +33,7 @@
           <?php if ($site_name): ?>
             <div id="site-name"<?php if ($hide_site_name) { print ' class="element-invisible"'; } ?>>
               <strong>
-                <spam><?php print $site_name; ?></span>
+                <?php print $site_name; ?>
               </strong>
             </div>
           <?php endif; ?>
