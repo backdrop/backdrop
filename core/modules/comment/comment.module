@@ -379,6 +379,9 @@ function comment_permission() {
     'administer comments' => array(
       'title' => t('Administer comments and comment settings'),
     ),
+    'administer comment settings' => array(
+      'title' => t('Administer comment settings'),
+    ),
     'access comments' => array(
       'title' => t('View comments'),
     ),
@@ -1205,7 +1208,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
+    '#access' => user_access('administer comment settings') || user_access('administer comments'),
     '#title' => t('Comment settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
