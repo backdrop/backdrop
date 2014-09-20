@@ -5250,7 +5250,7 @@ function backdrop_json_format($json) {
     }
     // If this character is the end of an element, output a new line and indent
     // the next line.
-    else if (($char == '}' || $char == ']') && $out_of_quotes) {
+    elseif (($char == '}' || $char == ']') && $out_of_quotes) {
       $result .= $new_line;
       $pos--;
       for ($j = 0; $j < $pos; $j++) {
@@ -5259,7 +5259,7 @@ function backdrop_json_format($json) {
     }
     // Eat all non-essential whitespace in the input as we do our own here and
     // it would only mess up our process.
-    else if ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
+    elseif ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
       continue;
     }
 

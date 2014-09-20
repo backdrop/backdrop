@@ -322,7 +322,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
       if (count($this->value) == 0) {
         $values = t('Unknown');
       }
-      else if (count($this->value) == 1) {
+      elseif (count($this->value) == 1) {
         // If any, use the 'single' short name of the operator instead.
         if (isset($info[$this->operator]['short_single'])) {
           $operator = check_plain($info[$this->operator]['short_single']);
