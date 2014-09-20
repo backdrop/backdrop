@@ -123,7 +123,7 @@ class views_object {
 
         $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE);
       }
-      else if ($all || !empty($definition[$key])) {
+      elseif ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
       }
     }
