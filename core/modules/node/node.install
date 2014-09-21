@@ -557,6 +557,23 @@ function node_update_1002() {
   db_change_field('node', 'language', 'langcode', $spec);
 }
 
+
+/**
+ * Move theme settings to global site configuration.
+ */
+function node_update_1022() {
+  $types = db_query('SELECT type FROM {node_type}')->fetchCol();
+  $theme = variable_get('theme_default', 'stark');
+  $comment_picture = theme_get_setting('toggle_comment_user_picture', $theme);
+  $comment_picture = is_null($comment_picture) || $comment_picture;
+  $node_picture = theme_get_setting('toggle_node_user_picture', $theme);
+  $node_picture = is_null($node_picture) || $node_picture;
+  foreach ($types as $type_name) {
+    variable_set('node_user_picture_' . $type_name, $node_picture);
+    variable_set('comment_user_picture_' . $type_name, $comment_picture);
+  }
+}
+
 /**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.

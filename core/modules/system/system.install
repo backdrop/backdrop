@@ -2023,15 +2023,13 @@ function system_update_1020() {
 }
 
 /**
-* Removes the js_cache_files variable.
-*
-* @ingroup config_upgrade
-*/
+ * Removes the js_cache_files variable.
+ */
 function system_update_1021() {
   variable_del('js_cache_files');
 }
- 
- /**
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
