@@ -33,7 +33,7 @@
           <?php if ($site_name): ?>
             <div id="site-name">>
               <strong>
-                <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
+                <?php print $site_name; ?>
               </strong>
             </div>
           <?php endif; ?>

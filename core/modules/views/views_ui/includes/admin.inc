@@ -31,7 +31,7 @@ function views_ui_get_admin_css() {
         'group' => CSS_THEME,
       );
     }
-    else if (file_exists($theme_path . "/views-admin.$theme_key.css")) {
+    elseif (file_exists($theme_path . "/views-admin.$theme_key.css")) {
       $list[$theme_path . "/views-admin.$theme_key.css"] = array(
         'group' => CSS_THEME,
       );

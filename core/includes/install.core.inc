@@ -1108,7 +1108,7 @@ function _install_select_profile($profiles) {
         $available_profiles[] = $profile->name;
       }
       // Check for a profile marked as "exclusive".
-      else if (!empty($profile_info['exclusive'])) {
+      elseif (!empty($profile_info['exclusive'])) {
         $exclusive_profiles[] = $profile->name;
       }
     }
@@ -1118,7 +1118,7 @@ function _install_select_profile($profiles) {
       return reset($available_profiles);
     }
     // If there is only one exclusive profile, return it.
-    else if (count($exclusive_profiles) == 1) {
+    elseif (count($exclusive_profiles) == 1) {
       return reset($exclusive_profiles);
     }
   }

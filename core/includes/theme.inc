@@ -1693,6 +1693,7 @@ function theme_datetime($variables) {
  */
 function theme_status_messages($variables) {
   $display = $variables['display'];
+  $message_types = (empty($variables['messages']))? backdrop_get_messages($display) : $variables['messages'];
   $output = '';
 
   $status_heading = array(
@@ -1700,7 +1701,8 @@ function theme_status_messages($variables) {
     'error' => t('Error message'),
     'warning' => t('Warning message'),
   );
-  foreach (backdrop_get_messages($display) as $type => $messages) {
+
+  foreach ($message_types as $type => $messages) {
     $output .= "<div class=\"messages $type\">\n";
     if (!empty($status_heading[$type])) {
       $output .= '<h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
@@ -1717,6 +1719,7 @@ function theme_status_messages($variables) {
     }
     $output .= "</div>\n";
   }
+
   return $output;
 }
 

@@ -27,16 +27,14 @@
 
     <header role="banner">
       <?php if (!empty($logo)): ?>
-        <a href="<?php print $base_path; ?>" title="<?php print t('Home'); ?>" rel="home">
-          <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-        </a>
+        <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
       <?php endif; ?>
 
       <?php if ($site_name || $site_slogan): ?>
         <div class="name-and-slogan">
           <?php if ($site_name): ?>
             <strong class="site-name">
-              <a href="<?php print $base_path ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
+              <?php print $site_name; ?>
             </strong>
           <?php endif; ?>
 
