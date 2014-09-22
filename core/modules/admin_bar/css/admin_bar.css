@@ -1,14 +1,14 @@
 
 /**
  * @file
- * Administration menu.
+ * Administration bar.
  *
  * Implementation of Sons of Suckerfish Dropdowns.
  *
  * @see www.htmldog.com/articles/suckerfish
  */
 
-#admin-menu {
+#admin-bar {
   font: normal 11px "Lucida Grande", Verdana, sans-serif;
   left: 0;
   position: absolute;
@@ -28,41 +28,41 @@
   background: linear-gradient(#2D2D2D 0%, #171717 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2D2D2D', endColorstr='#171717',GradientType=0); /* IE6-9 */
 }
-[dir="rtl"] #admin-menu {
+[dir="rtl"] #admin-bar {
   text-align: right;
 }
-#admin-menu-wrapper {
+#admin-bar-wrapper {
   overflow: hidden;
 }
 
-body.admin-menu {
+body.admin-bar {
   margin-top: 30px !important;
 }
 
 /* Top level items. */
-#admin-menu .top-level {
+#admin-bar .top-level {
   list-style: none;
   margin: 0;
   padding: 0;
   display: inline-block;
   vertical-align: top;
 }
-#admin-menu .top-level > li > a,
-#admin-menu .top-level > li > span {
+#admin-bar .top-level > li > a,
+#admin-bar .top-level > li > span {
   display: none;
 }
-#admin-menu .top-level > li > ul {
+#admin-bar .top-level > li > ul {
   display: inline-block;
   left: auto;
   width: auto;
   right: auto;
   background: transparent;
 }
-#admin-menu .top-level > li > ul > li {
+#admin-bar .top-level > li > ul > li {
   float: left;
   width: auto;
 }
-#admin-menu-menu.top-level > li > ul > li > a.active-trail {
+#admin-bar-menu.top-level > li > ul > li > a.active-trail {
   border-radius: 10px;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
@@ -80,7 +80,7 @@ body.admin-menu {
 }
 
 /* Dropdown lists */
-#admin-menu .dropdown {
+#admin-bar .dropdown {
   line-height: 1.4em;
   list-style: none;
   margin: 0;
@@ -91,8 +91,8 @@ body.admin-menu {
   background: #202020;
   vertical-align: top;
 }
-#admin-menu li > a,
-#admin-menu li > span {
+#admin-bar li > a,
+#admin-bar li > span {
   background: transparent none;
   border: none;
   color: #EEE;
@@ -100,42 +100,42 @@ body.admin-menu {
   text-align: left; /* LTR */
   text-decoration: none;
 }
-[dir="rtl"] #admin-menu li > a,
-[dir="rtl"] #admin-menu li > span {
+[dir="rtl"] #admin-bar li > a,
+[dir="rtl"] #admin-bar li > span {
   text-align: right;
 }
-#admin-menu .dropdown li > a,
-#admin-menu .dropdown li > span {
+#admin-bar .dropdown li > a,
+#admin-bar .dropdown li > span {
   display: block;
   padding: 9px 12px;
 }
 
-#admin-menu a.expanded-trail,
-#admin-menu span.expanded-trail {
+#admin-bar a.expanded-trail,
+#admin-bar span.expanded-trail {
   background: #45454A;
 }
 
-#admin-menu .dropdown .admin-menu-tab a {
+#admin-bar .dropdown .admin-bar-tab a {
   border-left: none; /* LTR */
   border-right: 1px solid #52565E; /* LTR */
 }
-[dir="rtl"] #admin-menu .dropdown .admin-menu-tab a {
+[dir="rtl"] #admin-bar .dropdown .admin-bar-tab a {
   border-left: 1px solid #52565E;
   border-right: none;
 }
-#admin-menu .dropdown li li a {
+#admin-bar .dropdown li li a {
   border-right: none; /* LTR */
   border-top: 1px solid #323232;
 }
-[dir="rtl"] #admin-menu .dropdown li li a {
+[dir="rtl"] #admin-bar .dropdown li li a {
   border-left: none;
 }
-#admin-menu .dropdown a:hover {
+#admin-bar .dropdown a:hover {
   text-decoration: underline;
 }
 
 /* All dropdown list items */
-#admin-menu .dropdown li {
+#admin-bar .dropdown li {
   background-image: none;
   float: left; /* LTR */
   height: 100%;
@@ -144,22 +144,22 @@ body.admin-menu {
   margin: 0 !important;
   padding: 0;
 }
-[dir="rtl"] #admin-menu .dropdown li {
+[dir="rtl"] #admin-bar .dropdown li {
   float: right;
 }
 
 /* First level items */
-#admin-menu .dropdown li li {
+#admin-bar .dropdown li li {
   width: 160px; /* Required for Opera */
 }
-#admin-menu .dropdown li li li {
+#admin-bar .dropdown li li li {
   filter: Alpha(opacity=100);
   opacity: 1;
 }
 
 /* Second-level lists */
 /* Note: We must hide sub-lists or scrollbars might appear (display: none is not read by screen readers). */
-#admin-menu .dropdown li ul {
+#admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
   line-height: 1.2em;
@@ -167,107 +167,107 @@ body.admin-menu {
   position: absolute;
   width: 160px;
 }
-[dir="rtl"] #admin-menu .dropdown li ul {
+[dir="rtl"] #admin-bar .dropdown li ul {
   left: auto;
   right: -999em;
 }
 
 /* Third-and-above-level lists */
-#admin-menu .dropdown li li.expandable ul {
+#admin-bar .dropdown li li.expandable ul {
   margin: -32px 0 0 160px; /* LTR */
 }
-[dir="rtl"] #admin-menu .dropdown li li.expandable ul {
+[dir="rtl"] #admin-bar .dropdown li li.expandable ul {
   margin-left: 160px;
   margin-right: 0;
 }
 
 /* Lists nested under hovered list items */
-#admin-menu .dropdown ul.expanded {
+#admin-bar .dropdown ul.expanded {
   display: block;
   left: auto; /* LTR */
 }
-[dir="rtl"] #admin-menu .dropdown ul.expanded {
+[dir="rtl"] #admin-bar .dropdown ul.expanded {
   right: auto;
 }
 
 /* Second-and-more-level hovering */
-#admin-menu .dropdown li li.expandable > a {
+#admin-bar .dropdown li li.expandable > a {
   background: #45454A url(../images/arrow.png) no-repeat 145px center; /* LTR */
 }
-[dir="rtl"] #admin-menu .dropdown li li.expandable > a {
+[dir="rtl"] #admin-bar .dropdown li li.expandable > a {
   background-image: url(../images/arrow-rtl.png);
   background-position: 5px center;
 }
-#admin-menu .dropdown li li a.expanded-trail {
+#admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;
   border-color: #444;
   color: #EEE;
 }
 
 /* Icon menu */
-#admin-menu-icon.dropdown {
+#admin-bar-icon.dropdown {
   display: inline-block;
   background: transparent;
 }
-#admin-menu-icon li.admin-menu-icon > a {
+#admin-bar-icon li.admin-bar-icon > a {
   padding: 8px 8px 9px;
 }
-#admin-menu-icon .admin-menu-icon img {
+#admin-bar-icon .admin-bar-icon img {
   vertical-align: bottom;
 }
 /* Add a border when using the default Backdrop logo. */
-#admin-menu-icon .admin-menu-icon img[src$="core/misc/favicon.ico"] {
+#admin-bar-icon .admin-bar-icon img[src$="core/misc/favicon.ico"] {
   outline: 1px solid #45454A;
 }
 
 /* Extras menu */
-#admin-menu-extra {
+#admin-bar-extra {
   float: right; /* LTR */
   direction: rtl; /* LTR */
 }
-[dir="rtl"] #admin-menu-extra {
+[dir="rtl"] #admin-bar-extra {
   float: left;
   direction: ltr;
 }
-#admin-menu-extra .dropdown li {
+#admin-bar-extra .dropdown li {
   direction: ltr; /* LTR */
-}[dir="rtl"] #admin-menu-extra .dropdown li {
+}[dir="rtl"] #admin-bar-extra .dropdown li {
    direction: rtl;
  }
 
 /* Online users */
-#admin-menu .dropdown .admin-menu-users a {
+#admin-bar .dropdown .admin-bar-users a {
   background: transparent url(../images/icon_users.png) 90% center no-repeat;
   padding-right: 22px; /* LTR */
 }
-[dir="rtl"] #admin-menu .dropdown .admin-menu-users a {
+[dir="rtl"] #admin-bar .dropdown .admin-bar-users a {
   background-position: 10% center;
   padding-left: 22px;
   padding-right: 0;
 }
 
-#admin-menu .dropdown .admin-menu-action a {
+#admin-bar .dropdown .admin-bar-action a {
   border-left: 1px solid #323232;
   border-right: none;
 }
-[dir="rtl"] #admin-menu .dropdown .admin-menu-action a {
+[dir="rtl"] #admin-bar .dropdown .admin-bar-action a {
   border-left: none;
   border-right: 1px solid #323232;
 }
 
 /* Search form */
-#admin-menu .admin-menu-search .form-item {
+#admin-bar .admin-bar-search .form-item {
   margin: 0;
   padding: 6px;
   width: 92%;
 }
-#admin-menu .top-level .admin-menu-search {
+#admin-bar .top-level .admin-bar-search {
   width: 140px;
 }
-#admin-menu .top-level .admin-menu-search .form-item {
+#admin-bar .top-level .admin-bar-search .form-item {
   padding: 6px 0 0;
 }
-#admin-menu .admin-menu-search input {
+#admin-bar .admin-bar-search input {
   background: #fff none center right no-repeat;
   border: none;
   -webkit-border-radius: 5px;
@@ -282,18 +282,18 @@ body.admin-menu {
   box-sizing: border-box;
 }
 
-#admin-menu .admin-menu-search-results .dropdown {
+#admin-bar .admin-bar-search-results .dropdown {
   display: block !important;
   left: auto !important;
   top: 100%;
 }
-#admin-menu .admin-menu-search-results,
-#admin-menu .admin-menu-search-results li {
+#admin-bar .admin-bar-search-results,
+#admin-bar .admin-bar-search-results li {
   width: 186px;
 }
 
-#admin-menu li.active-search-item > a,
-#admin-menu li.highlight > a {
+#admin-bar li.active-search-item > a,
+#admin-bar li.highlight > a {
   background-color: #0074BD !important;
   color: white !important;
 }
@@ -305,10 +305,10 @@ html.js fieldset.collapsible div.fieldset-wrapper {
 
 /* Hide the menu on print output. */
 @media print {
-  #admin-menu {
+  #admin-bar {
     display: none !important;
   }
-  body.admin-menu {
+  body.admin-bar {
     margin-top: 0 !important;
   }
 }
@@ -316,10 +316,10 @@ html.js fieldset.collapsible div.fieldset-wrapper {
 /**
  * Tweaks permissions, if enabled.
  */
-tr.admin-menu-tweak-permissions-processed {
+tr.admin-bar-tweak-permissions-processed {
   cursor: pointer;
   cursor: hand;
 }
-tr.admin-menu-tweak-permissions-processed td.module {
+tr.admin-bar-tweak-permissions-processed td.module {
   border-top: 0;
 }

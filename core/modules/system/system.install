@@ -1716,16 +1716,16 @@ function system_update_1008() {
  * Enable Admin Menu module.
  */
 function system_update_1009() {
-  update_module_enable(array('admin_menu'));
+  update_module_enable(array('admin_bar'));
 
   // Install default config.
-  config_install_default_config('admin_menu', 'admin_menu.settings');
+  config_install_default_config('admin_bar', 'admin_bar.settings');
 
   // Manually install schema, as update_module_enable() does not do this for us.
-  if (!db_table_exists('cache_admin_menu')) {
-    $cache_admin_menu = backdrop_get_schema_unprocessed('system', 'cache');
-    $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
-    db_create_table('cache_admin_menu', $cache_admin_menu);
+  if (!db_table_exists('cache_admin_bar')) {
+    $cache_admin_bar = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_admin_bar['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
+    db_create_table('cache_admin_bar', $cache_admin_bar);
   }
 }
 
@@ -2056,6 +2056,15 @@ function system_update_1022() {
     if (is_file($settings['favicon_path'])) {
       $config->set('site_favicon_path', $settings['favicon_path']);
     }
+  }
+}
+
+/**
+ * Enable admin_bar, replacing the renamed admin_menu.
+ */
+function system_update_1023() {
+  if (!module_exists('admin_bar')) {
+    module_enable(array('admin_bar'));
   }
 }
 

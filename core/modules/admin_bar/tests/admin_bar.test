@@ -2,27 +2,27 @@
 
 /**
  * @file
- * Tests for the Administration menu module.
+ * Tests for the Administration bar module.
  */
 
 /**
- * Base class for all administration menu web test cases.
+ * Base class for all administration bar web test cases.
  */
-class AdminMenuWebTestCase extends BackdropWebTestCase {
+class AdminBarWebTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   protected $basePermissions = array(
     'system' => 'access administration pages',
     'config' => 'administer site configuration',
-    'admin_menu' => 'access administration menu',
+    'admin_bar' => 'access administration bar',
     'node' => 'access content',
   );
 
   function setUp() {
-    // Enable admin menu module and any other modules.
+    // Enable admin bar module and any other modules.
     $modules = func_get_args();
     $modules = isset($modules[0]) ? $modules[0] : $modules;
-    $modules[] = 'admin_menu';
+    $modules[] = 'admin_bar';
     $modules[] = 'node';
     parent::setUp($modules);
   }
@@ -84,7 +84,7 @@ class AdminMenuWebTestCase extends BackdropWebTestCase {
       $args[':title' . $i] = $title;
       $message .= ($i ? ' » ' : '') . check_plain($title);
     }
-    $xpath = '//div[@id="admin-menu"]/div/ul/li/ul' . implode('/parent::li/ul', $xpath);
+    $xpath = '//div[@id="admin-bar"]/div/ul/li/ul' . implode('/parent::li/ul', $xpath);
     $this->assertElementByXPath($xpath, $args, $message . ' link found.');
   }
 
@@ -103,7 +103,7 @@ class AdminMenuWebTestCase extends BackdropWebTestCase {
       $args[':title' . $i] = $title;
       $message .= ($i ? ' » ' : '') . check_plain($title);
     }
-    $xpath = '//div[@id="admin-menu"]/div/ul' . implode('/parent::li/ul', $xpath);
+    $xpath = '//div[@id="admin-bar"]/div/ul' . implode('/parent::li/ul', $xpath);
     $this->assertNoElementByXPath($xpath, $args, $message . ' link not found.');
   }
 }
@@ -111,7 +111,7 @@ class AdminMenuWebTestCase extends BackdropWebTestCase {
 /**
  * Tests menu links depending on user permissions.
  */
-class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
+class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
   function setUp() {
     parent::setUp(array('node'));
   }
@@ -125,7 +125,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
 
     // Anonymous users should not see the menu.
     $this->backdropGet('');
-    $this->assertNoElementByXPath('//div[@id="admin-menu"]', array(), t('Administration menu not found.'));
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]', array(), t('Administration bar not found.'));
 
     // Create a user who
     // - can access content overview
@@ -137,9 +137,9 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     $this->backdropLogin($admin_user);
 
     // Check that the user can see the admin links, but not the Backdrop links.
-    $this->assertElementByXPath('//div[@id="admin-menu"]', array(), 'Administration menu found.');
-    $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link found.');
-    $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link not found.');
+    $this->assertElementByXPath('//div[@id="admin-bar"]', array(), 'Administration bar found.');
+    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link found.');
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link not found.');
 
     // Create a user "reversed" to the above; i.e., who
     // - cannot access content overview
@@ -149,9 +149,9 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
     );
     $admin_user2 = $this->backdropCreateUser($permissions);
     $this->backdropLogin($admin_user2);
-    $this->assertElementByXPath('//div[@id="admin-menu"]', array(), 'Administration menu found.');
-    $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link not found.');
-    $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link found.');
+    $this->assertElementByXPath('//div[@id="admin-bar"]', array(), 'Administration bar found.');
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/content'), 'Content link not found.');
+    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/contact'), 'Structure » Contact link found.');
   }
 
   /**
@@ -244,7 +244,7 @@ class AdminMenuPermissionsTestCase extends AdminMenuWebTestCase {
 /**
  * Tests appearance, localization, and escaping of dynamic links.
  */
-class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
+class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
   function setUp() {
     parent::setUp(array('node'));
   }
@@ -266,9 +266,9 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     // Verify that dynamic links are displayed.
-    $this->backdropGet('admin/config/administration/admin_menu');
-    $this->assertElementByXPath('//div[@id="admin-menu"]', array(), t('Administration menu found.'));
-    $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
+    $this->backdropGet('admin/config/administration/admin_bar');
+    $this->assertElementByXPath('//div[@id="admin-bar"]', array(), t('Administration bar found.'));
+    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
 
     // Verify link title output escaping.
     $this->assertNoRaw('Cool & Special');
@@ -280,7 +280,7 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
       'admin/structure/types/manage/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
-      $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
         ':path' => $path,
         ':title' => $title,
       ), "Structure » Content types » $title link found.");
@@ -292,7 +292,7 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
       'node/add/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
-      $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
         ':path' => $path,
         ':title' => $title,
       ), "Add content » $title link found.");
@@ -300,7 +300,7 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
 
     // Remove the node/add items from the management menu and check that the add
     // links are still added to the menu.
-    module_load_include('inc', 'admin_menu');
+    module_load_include('inc', 'admin_bar');
     $link = db_query("SELECT * FROM {menu_links} WHERE router_path = 'node/add' AND module = 'system'")->fetchAssoc();
     $link = menu_link_load($link['mlid']);
     $link['menu_name'] = 'main-menu';
@@ -312,11 +312,11 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
     menu_rebuild();
 
     $this->backdropGet('');
-    $this->assertElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
       ':path' => 'node/add/article',
       ':title' => 'Article',
     ), "Add content » Article link found after moving Add Content into a different menu.");
-    $this->assertNoElementByXPath('//div[@id="admin-menu"]//a[contains(@href, :path) and text()=:title]', array(
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
       ':path' => 'node/add/special',
       ':title' => 'Cool & Special',
     ), "Add content » Cool & Special link no longer present after deleting the content type.");
@@ -361,7 +361,7 @@ class AdminMenuDynamicLinksTestCase extends AdminMenuWebTestCase {
 /**
  * Tests appearance of different types of links.
  */
-class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
+class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
   function setUp() {
     parent::setUp();
 
@@ -403,7 +403,7 @@ class AdminMenuLinkTypesTestCase extends AdminMenuWebTestCase {
 /**
  * Tests customized menu links.
  */
-class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
+class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
   function setUp() {
     parent::setUp(array('menu'));
 
@@ -421,12 +421,12 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $node = $this->backdropCreateNode(array('type' => $type->type));
     $text = $this->randomName();
     $xpath = $this->buildXPathQuery('//div[@id=:id]//a[contains(text(), :text)]', array(
-      ':id' => 'admin-menu',
+      ':id' => 'admin-bar',
       ':text' => $text,
     ));
 
     // Verify that the link does not appear in the menu.
-    $this->backdropGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_bar');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Custom link not found.');
 
@@ -439,7 +439,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->backdropPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->backdropGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_bar');
     $elements = $this->xpath($xpath);
     $this->assertTrue($elements, 'Custom link found.');
 
@@ -450,7 +450,7 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->backdropPost('admin/structure/menu/item/' . $this->queryMlidByPath('node/' . $node->nid) . '/edit', $edit, t('Save'));
 
     // Verify that the disabled link does not appear in the menu.
-    $this->backdropGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_bar');
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Disabled custom link not found.');
   }
@@ -468,9 +468,9 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     $this->backdropPost('admin/structure/menu/manage/management/add', $edit, t('Save'));
 
     // Verify that the link appears in the menu.
-    $this->backdropGet('admin/config/administration/admin_menu');
+    $this->backdropGet('admin/config/administration/admin_bar');
     $elements = $this->xpath('//div[@id=:id]//a[@href=:href and contains(text(), :text)]', array(
-      ':id' => 'admin-menu',
+      ':id' => 'admin-bar',
       ':href' => $edit['link_path'],
       ':text' => $edit['link_title'],
     ));
@@ -487,4 +487,3 @@ class AdminMenuCustomizedTestCase extends AdminMenuWebTestCase {
     ))->fetchField();
   }
 }
-
