@@ -29,7 +29,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     );
     $form['color'] += color_scheme_form($form, $form_state, $theme);
     $form['#validate'][] = 'color_scheme_form_validate';
-    $form['#submit'][] = 'color_scheme_form_submit';
+    array_unshift($form['#submit'], 'color_scheme_form_submit');
   }
 }
 
@@ -47,7 +47,7 @@ function _color_html_alter(&$vars) {
   $themes = list_themes();
 
   // Override stylesheets.
-  $color_paths = variable_get('color_' . $theme_key . '_stylesheets', array());
+  $color_paths = theme_get_setting('color.stylesheets');
   if (!empty($color_paths)) {
 
     foreach ($themes[$theme_key]->stylesheets['all'] as $base_filename => $old_path) {
@@ -81,7 +81,7 @@ function _color_page_alter(&$vars) {
   global $theme_key;
 
   // Override logo.
-  $logo = variable_get('color_' . $theme_key . '_logo');
+  $logo = theme_get_setting('color.logo');
   if ($logo && $vars['logo'] && preg_match('!' . $theme_key . '/logo.png$!', $vars['logo'])) {
     $vars['logo'] = file_create_url($logo);
   }
@@ -114,8 +114,11 @@ function color_get_palette($theme, $default = FALSE) {
   $info = color_get_info($theme);
   $palette = $info['schemes']['default']['colors'];
 
-  // Load variable.
-  return $default ? $palette : variable_get('color_' . $theme . '_palette', $palette);
+  // Load config.
+  if (!$default && ($theme_palette = theme_get_setting('color.palette'))) {
+    $palette = $theme_palette;
+  }
+  return $palette;
 }
 
 /**
@@ -143,7 +146,7 @@ function color_scheme_form($complete_form, &$form_state, $theme) {
 
   // See if we're using a predefined scheme.
   // Note: we use the original theme when the default scheme is chosen.
-  $current_scheme = variable_get('color_' . $theme . '_palette', array());
+  $current_scheme = theme_get_setting('color.palette');
   foreach ($schemes as $key => $scheme) {
     if ($current_scheme == $scheme) {
       $scheme_name = $key;
@@ -328,6 +331,9 @@ function color_scheme_form_submit($form, &$form_state) {
   $theme = $form_state['values']['theme'];
   $info = $form_state['values']['info'];
 
+  // Remove color info so it doesn't get saved in config.
+  unset($form_state['values']['info']);
+
   // Resolve palette.
   $palette = $form_state['values']['palette'];
   if ($form_state['values']['scheme'] != '') {
@@ -362,8 +368,11 @@ function color_scheme_form_submit($form, &$form_state) {
   }
 
   // Delete old files.
-  foreach (variable_get('color_' . $theme . '_files', array()) as $file) {
-    @backdrop_unlink($file);
+  $files = theme_get_setting('color.files');
+  if ($files) {
+    foreach ($files as $file) {
+      @backdrop_unlink($file);
+    }
   }
   if (isset($file) && $file = dirname($file)) {
     @backdrop_rmdir($file);
@@ -371,11 +380,9 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Don't render the default colorscheme, use the standard theme instead.
   if (implode(',', color_get_palette($theme, TRUE)) == implode(',', $palette)) {
-    variable_del('color_' . $theme . '_palette');
-    variable_del('color_' . $theme . '_stylesheets');
-    variable_del('color_' . $theme . '_logo');
-    variable_del('color_' . $theme . '_files');
-    variable_del('color_' . $theme . '_screenshot');
+    unset($form_state['values']['scheme']);
+    unset($form_state['values']['palette']);
+    $form_state['values']['color'] = NULL;
     return;
   }
 
@@ -390,10 +397,6 @@ function color_scheme_form_submit($form, &$form_state) {
   $paths['id'] = $id;
   $paths['source'] = backdrop_get_path('theme', $theme) . '/';
   $paths['files'] = $paths['map'] = array();
-
-  // Save palette and logo location.
-  variable_set('color_' . $theme . '_palette', $palette);
-  variable_set('color_' . $theme . '_logo', $paths['target'] . 'logo.png');
 
   // Copy over neutral images.
   foreach ($info['copy'] as $file) {
@@ -440,9 +443,16 @@ function color_scheme_form_submit($form, &$form_state) {
     }
   }
 
-  // Maintain list of files.
-  variable_set('color_' . $theme . '_stylesheets', $css);
-  variable_set('color_' . $theme . '_files', $paths['files']);
+  // Save all the values into form state for saving to config.
+  $form_state['values']['color'] = array(
+    'palette' => $palette,
+    'stylesheets' => $css,
+    'files' => $paths['files'],
+  );
+
+  // Remove color field elements.
+  unset($form_state['values']['scheme']);
+  unset($form_state['values']['palette']);
 }
 
 /**
@@ -578,15 +588,8 @@ function _color_render_images($theme, &$info, &$paths, $palette) {
     $image = backdrop_realpath($paths['target'] . $base);
 
     // Cut out slice.
-    if ($file == 'screenshot.png') {
-      $slice = imagecreatetruecolor(150, 90);
-      imagecopyresampled($slice, $target, 0, 0, $x, $y, 150, 90, $width, $height);
-      variable_set('color_' . $theme . '_screenshot', $image);
-    }
-    else {
-      $slice = imagecreatetruecolor($width, $height);
-      imagecopy($slice, $target, 0, 0, $x, $y, $width, $height);
-    }
+    $slice = imagecreatetruecolor($width, $height);
+    imagecopy($slice, $target, 0, 0, $x, $y, $width, $height);
 
     // Save image.
     imagepng($slice, $image);

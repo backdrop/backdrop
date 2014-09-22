@@ -1782,9 +1782,7 @@ function system_update_1012() {
  * Moves site system settings from variable to config.
  */
 function system_update_1013() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.site');
-  // Migrate variables if any.
+  // Set the default variables for the system.site config file.
   $config = config('system.site');
   $config->set('site_name', variable_get('site_name', 'Backdrop'));
   $config->set('site_mail', variable_get('site_mail', ''));
@@ -2027,6 +2025,38 @@ function system_update_1020() {
  */
 function system_update_1021() {
   variable_del('js_cache_files');
+}
+
+/**
+ * Converts theme logo and shortcut settings to site-wide config.
+ */
+function system_update_1022() {
+  // Update to set the defaults.
+  $config = config('system.site');
+  $config->set('site_default_logo', 1);
+  $config->set('site_logo_path', '');
+  $config->set('site_default_favicon', 1);
+  $config->set('site_favicon_path', 'core/misc/favicon.ico');
+  $config->set('site_favicon_mimetype', 'image/vnd.microsoft.icon');
+
+  $settings = variable_get('theme_settings');
+
+  // Copy over logo settings.
+  if (!empty($settings['toggle_logo'])) {
+    $config->set('site_default_logo', $settings['default_logo']);
+    if (is_file($settings['logo_path'])) {
+      $config->set('site_favicon_path', $settings['logo_path']);
+      $config->set('site_favicon_mimetype', file_get_mimetype($settings['logo_path']));
+    }
+  }
+
+  // Copy over favicon settings.
+  if (!empty($settings['toggle_favicon'])) {
+    $config->set('site_default_favicon', $settings['default_favicon']);
+    if (is_file($settings['favicon_path'])) {
+      $config->set('site_favicon_path', $settings['favicon_path']);
+    }
+  }
 }
 
 /**
