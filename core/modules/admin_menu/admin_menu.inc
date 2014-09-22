@@ -856,12 +856,8 @@ function _admin_menu_flush_cache($name = NULL) {
 function template_preprocess_admin_menu_icon(&$variables) {
   // Image source might have been passed in as theme variable.
   if (!isset($variables['src'])) {
-    if (theme_get_setting('toggle_favicon')) {
-      $variables['src'] = theme_get_setting('favicon');
-    }
-    else {
-      $variables['src'] = base_path() . 'misc/favicon.ico';
-    }
+    $favicon = backdrop_get_favicon();
+    $variables['src'] = $favicon['path'];
   }
   // Strip the protocol without delimiters for transient HTTP/HTTPS support.
   // Since the menu is cached on the server-side and client-side, the cached

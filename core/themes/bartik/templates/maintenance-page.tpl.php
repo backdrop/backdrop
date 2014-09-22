@@ -38,7 +38,7 @@
             </div>
           <?php endif; ?>
           <?php if ($site_slogan): ?>
-            <div id="site-slogan">>
+            <div id="site-slogan">
               <?php print $site_slogan; ?>
             </div>
           <?php endif; ?>

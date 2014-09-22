@@ -614,32 +614,19 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
-  $items['admin/appearance/settings'] = array(
-    'title' => 'Settings',
-    'description' => 'Configure default and theme specific settings.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_theme_settings'),
-    'access arguments' => array('administer themes'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'system.admin.inc',
-    'weight' => 20,
-  );
-  // Theme configuration subtabs.
-  $items['admin/appearance/settings/global'] = array(
-    'title' => 'Global settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -1,
-  );
 
   foreach (list_themes() as $key => $theme) {
-    $items['admin/appearance/settings/' . $theme->name] = array(
-      'title' => $theme->info['name'],
-      'page arguments' => array('system_theme_settings', $theme->name),
-      'type' => MENU_LOCAL_TASK,
-      'access callback' => '_system_themes_access',
-      'access arguments' => array($key),
-      'file' => 'system.admin.inc',
-    );
+    // Only provide pages for themes with settings.
+    if (theme_has_settings($key)) {
+      $items['admin/appearance/settings/' . $theme->name] = array(
+        'title' => $theme->info['name'] . ' settings',
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('system_theme_settings', $theme->name),
+        'access callback' => '_system_themes_access',
+        'access arguments' => array($key),
+        'file' => 'system.admin.inc',
+      );
+    }
   }
 
   // Modules.
@@ -924,7 +911,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, e-mail address, slogan, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -2582,7 +2569,6 @@ function _system_rebuild_theme_data() {
       'page_bottom' => 'Page bottom',
     ),
     'description' => '',
-    'features' => _system_default_theme_features(),
     'screenshot' => 'screenshot.png',
     'php' => BACKDROP_MINIMUM_PHP,
     'stylesheets' => array(),
@@ -2706,16 +2692,6 @@ function _system_info_add_path($info, $path) {
     }
   }
   return $info;
-}
-
-/**
- * Returns an array of default theme features.
- */
-function _system_default_theme_features() {
-  return array(
-    'logo',
-    'favicon',
-  );
 }
 
 /**

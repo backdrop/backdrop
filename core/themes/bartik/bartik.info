@@ -30,5 +30,6 @@ regions[footer_thirdcolumn] = Footer third column
 regions[footer_fourthcolumn] = Footer fourth column
 regions[footer] = Footer
 
-settings[shortcut_module_link] = 0
-
+; We need at least one setting for the theme settings page to appear in the
+; menu. Color module provides our defaults, so we just register a dummy setting.
+settings[color] = true

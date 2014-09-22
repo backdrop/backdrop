@@ -40,3 +40,33 @@ function color_requirements($phase) {
 
   return $requirements;
 }
+
+/**
+ * Convert color module settings to config files.
+ */
+function color_update_1000() {
+  $themes = list_themes();
+  foreach ($themes as $theme_key => $theme_info) {
+    if ($palette = variable_get('color_' . $theme_key . '_palette')) {
+      // Copy any existing settings into config.
+      $config = config($theme_key . '.settings');
+      $color_settings = array(
+        'palette' => $palette,
+        'stylesheets' => variable_get('color_' . $theme_key . '_stylesheets', array()),
+        'files' => variable_get('color_' . $theme_key . '_files', array()),
+      );
+      $config->set('color', $color_settings);
+      $config->save();
+
+      // Delete the legacy variables.
+      variable_del('color_' . $theme_key . '_palette');
+      variable_del('color_' . $theme_key . '_stylesheets');
+      variable_del('color_' . $theme_key . '_files');
+
+      // Screenshot and logo support apparently was removed even in Drupal 7,
+      // delete these variables if they still exist.
+      variable_del('color_' . $theme_key . '_logo');
+      variable_del('color_' . $theme_key . '_screenshot');
+    }
+  }
+}
