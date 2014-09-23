@@ -557,11 +557,10 @@ function node_update_1002() {
   db_change_field('node', 'language', 'langcode', $spec);
 }
 
-
 /**
  * Move theme settings to global site configuration.
  */
-function node_update_1022() {
+function node_update_1003() {
   $types = db_query('SELECT type FROM {node_type}')->fetchCol();
   $theme = variable_get('theme_default', 'stark');
   $settings = variable_get('theme_' . $theme . '_settings', array());
