@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Implements hook_admin_menu_map() on behalf of core modules.
+ * Implements hook_admin_bar_map() on behalf of core modules.
  *
  * @todo Replace all/most of those API functions with direct DB queries;
  *   we only need the menu arguments (keys), not fully loaded objects.
  */
 
 /**
- * Implements hook_admin_menu_map() on behalf of Filter module.
+ * Implements hook_admin_bar_map() on behalf of Filter module.
  */
-function filter_admin_menu_map() {
+function filter_admin_bar_map() {
   if (!user_access('administer filters')) {
     return;
   }
@@ -25,9 +25,9 @@ function filter_admin_menu_map() {
 }
 
 /**
- * Implements hook_admin_menu_map() on behalf of Menu module.
+ * Implements hook_admin_bar_map() on behalf of Menu module.
  */
-function menu_admin_menu_map() {
+function menu_admin_bar_map() {
   if (!user_access('administer menu')) {
     return;
   }
@@ -41,9 +41,9 @@ function menu_admin_menu_map() {
 }
 
 /**
- * Implements hook_admin_menu_map() on behalf of Node module.
+ * Implements hook_admin_bar_map() on behalf of Node module.
  */
-function node_admin_menu_map() {
+function node_admin_bar_map() {
   if (!user_access('administer content types')) {
     return;
   }
@@ -57,11 +57,11 @@ function node_admin_menu_map() {
 }
 
 /**
- * Implements hook_admin_menu_map() on behalf of Field UI module.
+ * Implements hook_admin_bar_map() on behalf of Field UI module.
  *
  * @todo Figure out how to fix the comment entity bundle mappings.
  */
-function field_ui_admin_menu_map() {
+function field_ui_admin_bar_map() {
   $map = array();
 
   foreach (entity_get_info() as $entity_type => $entity_info) {
@@ -108,9 +108,9 @@ function field_ui_admin_menu_map() {
 }
 
 /**
- * Implements hook_admin_menu_map() on behalf of Taxonomy module.
+ * Implements hook_admin_bar_map() on behalf of Taxonomy module.
  */
-function taxonomy_admin_menu_map() {
+function taxonomy_admin_bar_map() {
   if (!user_access('administer taxonomy')) {
     return;
   }
@@ -124,9 +124,9 @@ function taxonomy_admin_menu_map() {
 }
 
 /**
- * Implements hook_admin_menu_map() on behalf of Views UI module.
+ * Implements hook_admin_bar_map() on behalf of Views UI module.
  */
-function views_ui_admin_menu_map() {
+function views_ui_admin_bar_map() {
   if (!user_access('administer views')) {
     return;
   }

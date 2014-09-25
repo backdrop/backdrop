@@ -1,6 +1,6 @@
-name = Administration menu
+name = Administration bar
 description = "Provides a dropdown menu to most administrative tasks and other common destinations."
 package = Core
 backdrop = 1.x
-configure = admin/config/administration/admin-menu
+configure = admin/config/administration/admin-bar
 version = BACKDROP_VERSION

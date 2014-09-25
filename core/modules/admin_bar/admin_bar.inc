@@ -2,28 +2,28 @@
 
 /**
  * @file
- * Menu builder functions for Administration menu.
+ * Menu builder functions for Administration bar.
  */
 
 /**
- * Build the administration menu output.
+ * Build the administration bar output.
  *
  * @param bool $complete
  *   (optional) Whether to build to the complete menu including all components
  *   and ignore the cache. Defaults to FALSE. Internally used for the settings
  *   page.
  */
-function admin_menu_output($complete = FALSE) {
+function admin_bar_output($complete = FALSE) {
   global $user, $language_interface;
-  $config = config('admin_menu.settings');
+  $config = config('admin_bar.settings');
 
   $cache_server_enabled = !$complete;
-  $cid = 'admin_menu:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
+  $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
 
-  // Try to load and output administration menu from server-side cache. The
+  // Try to load and output administration bar from server-side cache. The
   // cache is only valid if a hash key exists, otherwise it needs to be
   // regenerated.
-  $old_hash = admin_menu_cache_get($cid);
+  $old_hash = admin_bar_cache_get($cid);
   if ($cache_server_enabled && $old_hash) {
     $cache = cache('menu')->get($cid);
     if ($cache && isset($cache->data)) {
@@ -41,56 +41,56 @@ function admin_menu_output($complete = FALSE) {
     // Add site name as CSS class for development/staging theming purposes. We
     // leverage the cookie domain instead of HTTP_HOST to account for many (but
     // not all) multi-domain setups (e.g. language-based sub-domains).
-    $classes = 'admin-menu-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
+    $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
-    $content['#prefix'] = '<div id="admin-menu" class="' . $classes . '"><div id="admin-menu-wrapper">';
+    $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
 
     // Load menu builder functions.
-    module_load_include('inc', 'admin_menu');
+    module_load_include('inc', 'admin_bar');
 
-    // Add administration menu.
-    if (in_array('admin_menu.menu', $components) || $complete) {
+    // Add administration bar.
+    if (in_array('admin_bar.menu', $components) || $complete) {
       $content['menu'] = array(
-        '#theme' => 'admin_menu_links',
+        '#theme' => 'admin_bar_links',
         '#wrapper_attributes' => array(
-          'id' => 'admin-menu-menu',
+          'id' => 'admin-bar-menu',
         ),
         '#weight' => 0,
       );
 
-      $content['menu']['menu'] = admin_menu_links_menu(admin_menu_tree('management'));
-      $content['menu']['menu']['#title'] = t('Admin menu');
+      $content['menu']['menu'] = admin_bar_links_menu(admin_bar_tree('management'));
+      $content['menu']['menu']['#title'] = t('Admin bar');
     }
 
     // Add menu additions.
     $content['extra']['extra'] = array();
-    if (in_array('admin_menu.icon', $components) || $complete) {
-      $content['icon'] = admin_menu_links_icon();
+    if (in_array('admin_bar.icon', $components) || $complete) {
+      $content['icon'] = admin_bar_links_icon();
     }
-    if (in_array('admin_menu.search', $components) || $complete) {
-      $content['extra']['extra'] += admin_menu_links_search();
+    if (in_array('admin_bar.search', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_search();
     }
-    if (in_array('admin_menu.account', $components) || $complete) {
-      $content['extra']['extra'] += admin_menu_links_account();
+    if (in_array('admin_bar.account', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_account();
     }
-    if (in_array('admin_menu.users', $components) || $complete) {
-      $content['extra']['extra'] += admin_menu_links_users();
+    if (in_array('admin_bar.users', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_users();
     }
 
     // Allow modules to enhance the menu.
     // Uses '_output' suffix for consistency with the alter hook (see below).
-    foreach (module_implements('admin_menu_output_build') as $module) {
-      $function = $module . '_admin_menu_output_build';
+    foreach (module_implements('admin_bar_output_build') as $module) {
+      $function = $module . '_admin_bar_output_build';
       $function($content);
     }
 
     if ($content['extra']['extra']) {
-      $content['extra']['#theme'] = 'admin_menu_links';
+      $content['extra']['#theme'] = 'admin_bar_links';
       $content['extra']['extra']['#title'] = t('More admin tasks');
       $content['extra']['#wrapper_attributes'] = array(
-        'id' => 'admin-menu-extra',
+        'id' => 'admin-bar-extra',
       );
       $content['extra']['#weight'] = 100;
     }
@@ -98,7 +98,7 @@ function admin_menu_output($complete = FALSE) {
     // Allow modules to alter the output.
     // The '_output' suffix is required to prevent hook implementation function
     // name clashes with the contributed Admin module.
-    backdrop_alter('admin_menu_output', $content);
+    backdrop_alter('admin_bar_output', $content);
 
     $content = backdrop_render($content);
 
@@ -110,25 +110,25 @@ function admin_menu_output($complete = FALSE) {
 
   // Store the new hash for this user.
   if (!$complete) {
-    admin_menu_cache_set($cid, md5($content));
+    admin_bar_cache_set($cid, md5($content));
   }
 
   return $content;
 }
 
 /**
- * Build the full administration menu tree from static and expanded dynamic items.
+ * Build the full administration bar tree from static and expanded dynamic items.
  *
  * @param $menu_name
  *   The menu name to use as base for the tree.
  */
-function admin_menu_tree($menu_name) {
-  // Get placeholder expansion arguments from hook_admin_menu_map()
+function admin_bar_tree($menu_name) {
+  // Get placeholder expansion arguments from hook_admin_bar_map()
   // implementations.
-  module_load_include('inc', 'admin_menu', 'admin_menu.map');
-  $expand_map = module_invoke_all('admin_menu_map');
+  module_load_include('inc', 'admin_bar', 'admin_bar.map');
+  $expand_map = module_invoke_all('admin_bar_map');
   // Allow modules to alter the expansion map.
-  backdrop_alter('admin_menu_map', $expand_map);
+  backdrop_alter('admin_bar_map', $expand_map);
 
   $new_map = array();
   foreach ($expand_map as $path => $data) {
@@ -145,7 +145,7 @@ function admin_menu_tree($menu_name) {
   // @todo Skip entire processing if initial $expand_map is empty and directly
   //   return $tree?
   if (!empty($expand_map)) {
-    $tree_dynamic = admin_menu_tree_dynamic($expand_map);
+    $tree_dynamic = admin_bar_tree_dynamic($expand_map);
   }
   else {
     $tree_dynamic = array();
@@ -153,7 +153,7 @@ function admin_menu_tree($menu_name) {
 
   // Merge local tasks with static menu tree.
   $tree = menu_tree_all_data($menu_name);
-  admin_menu_merge_tree($tree, $tree_dynamic, array());
+  admin_bar_merge_tree($tree, $tree_dynamic, array());
 
   return $tree;
 }
@@ -168,12 +168,12 @@ function admin_menu_tree($menu_name) {
  * @return
  *   An associative array whose keys are the parent paths of the menu router
  *   paths given in $expand_map as well as the parent paths of any child link
- *   deeper down the tree. The parent paths are used in admin_menu_merge_tree()
+ *   deeper down the tree. The parent paths are used in admin_bar_merge_tree()
  *   to check whether anything needs to be merged.
  *
- * @see hook_admin_menu_map()
+ * @see hook_admin_bar_map()
  */
-function admin_menu_tree_dynamic(array $expand_map) {
+function admin_bar_tree_dynamic(array $expand_map) {
   $p_columns = array();
   for ($i = 1; $i <= MENU_MAX_DEPTH; $i++) {
     $p_columns[] = 'p' . $i;
@@ -248,22 +248,22 @@ function admin_menu_tree_dynamic(array $expand_map) {
  * @param &$tree
  *   A menu tree structure as returned by menu_tree_all_data().
  * @param $tree_dynamic
- *   A dynamic menu tree structure as returned by admin_menu_tree_dynamic().
+ *   A dynamic menu tree structure as returned by admin_bar_tree_dynamic().
  * @param $expand_map
  *   An array containing menu router path placeholder expansion argument
  *   mappings.
  *
- * @see hook_admin_menu_map()
- * @see admin_menu_tree_dynamic()
+ * @see hook_admin_bar_map()
+ * @see admin_bar_tree_dynamic()
  * @see menu_tree_all_data()
  */
-function admin_menu_merge_tree(array &$tree, array $tree_dynamic, array $expand_map) {
+function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_map) {
   foreach ($tree as $key => $data) {
     $path = $data['link']['router_path'];
 
     // Recurse into regular menu tree.
     if ($tree[$key]['below']) {
-      admin_menu_merge_tree($tree[$key]['below'], $tree_dynamic, $expand_map);
+      admin_bar_merge_tree($tree[$key]['below'], $tree_dynamic, $expand_map);
     }
     // Nothing to merge, if this parent path is not in our dynamic tree.
     if (!isset($tree_dynamic[$path])) {
@@ -329,7 +329,7 @@ function admin_menu_merge_tree(array &$tree, array $tree_dynamic, array $expand_
       foreach ($current_expand_map as $arguments) {
         // Create the cartesian product for all arguments and create new
         // menu items for each generated combination thereof.
-        foreach (admin_menu_expand_args($arguments) as $replacements) {
+        foreach (admin_bar_expand_args($arguments) as $replacements) {
           $newpath = strtr($path_dynamic, $replacements);
           // Skip this item, if any placeholder could not be replaced.
           // Faster than trying to invoke _menu_translate().
@@ -337,7 +337,7 @@ function admin_menu_merge_tree(array &$tree, array $tree_dynamic, array $expand_
             continue;
           }
           $map = explode('/', $newpath);
-          $item = admin_menu_translate($link, $map);
+          $item = admin_bar_translate($link, $map);
           // Skip this item, if the current user does not have access.
           if (empty($item)) {
             continue;
@@ -347,7 +347,7 @@ function admin_menu_merge_tree(array &$tree, array $tree_dynamic, array $expand_
           foreach ($replacements as $placeholder => $value) {
             $new_expand_map[$placeholder] = array($value);
           }
-          admin_menu_merge_tree($item, $tree_dynamic, array($new_expand_map));
+          admin_bar_merge_tree($item, $tree_dynamic, array($new_expand_map));
           $tree[$key]['below'] += $item;
         }
       }
@@ -365,14 +365,14 @@ function admin_menu_merge_tree(array &$tree, array $tree_dynamic, array $expand_
  * @param $map
  *   A path map with placeholders replaced.
  */
-function admin_menu_translate($router_item, $map) {
+function admin_bar_translate($router_item, $map) {
   _menu_translate($router_item, $map, TRUE);
 
   // Run through hook_translated_menu_link_alter() to add devel information,
   // if configured.
   $router_item['menu_name'] = 'management';
   // @todo Invoke as usual like _menu_link_translate().
-  admin_menu_translated_menu_link_alter($router_item, NULL);
+  admin_bar_translated_menu_link_alter($router_item, NULL);
 
   if ($router_item['access']) {
     // Override mlid to make this item unique; since these items are expanded
@@ -404,9 +404,9 @@ function admin_menu_translate($router_item, $map) {
  * @param $arguments
  *   A two dimensional array of arguments.
  *
- * @see hook_admin_menu_map()
+ * @see hook_admin_bar_map()
  */
-function admin_menu_expand_args($arguments) {
+function admin_bar_expand_args($arguments) {
   $replacements = array();
 
   // Initialize line cursors, move out array keys (placeholders) and assign
@@ -456,19 +456,19 @@ function admin_menu_expand_args($arguments) {
 }
 
 /**
- * Build the administration menu as renderable menu links.
+ * Build the administration bar as renderable menu links.
  *
  * @param $tree
- *   A data structure representing the administration menu tree as returned from
+ *   A data structure representing the administration bar tree as returned from
  *   menu_tree_all_data().
  *
  * @return
- *   The complete administration menu, suitable for theme_admin_menu_links().
+ *   The complete administration bar, suitable for theme_admin_bar_links().
  *
- * @see theme_admin_menu_links()
- * @see admin_menu_menu_alter()
+ * @see theme_admin_bar_links()
+ * @see admin_bar_menu_alter()
  */
-function admin_menu_links_menu($tree) {
+function admin_bar_links_menu($tree) {
   $links = array();
   foreach ($tree as $data) {
     // Skip items that are inaccessible, invisible, or only appear in the
@@ -480,7 +480,7 @@ function admin_menu_links_menu($tree) {
     // @todo Make this configurable.
     if ($data['link']['router_path'] == 'admin') {
       if ($data['below']) {
-        $links = array_merge($links, admin_menu_links_menu($data['below']));
+        $links = array_merge($links, admin_bar_links_menu($data['below']));
       }
       continue;
     }
@@ -506,12 +506,12 @@ function admin_menu_links_menu($tree) {
     // Recurse to add any child links.
     $children = array();
     if ($data['below']) {
-      $children = admin_menu_links_menu($data['below']);
+      $children = admin_bar_links_menu($data['below']);
       $links[$data['link']['href']] += $children;
     }
 
     // Handle links pointing to category/overview pages.
-    if ($data['link']['page_callback'] == 'system_admin_menu_block_page' || $data['link']['page_callback'] == 'system_admin_config_page') {
+    if ($data['link']['page_callback'] == 'system_admin_bar_block_page' || $data['link']['page_callback'] == 'system_admin_config_page') {
       // Apply a marker for others to consume.
       $links[$data['link']['href']]['#is_category'] = TRUE;
       // Automatically hide empty categories.
@@ -528,21 +528,21 @@ function admin_menu_links_menu($tree) {
 /**
  * Build icon menu links; mostly containing maintenance helpers.
  *
- * @see theme_admin_menu_links()
+ * @see theme_admin_bar_links()
  */
-function admin_menu_links_icon() {
+function admin_bar_links_icon() {
   $destination = backdrop_get_destination();
 
   $links = array(
-    '#theme' => 'admin_menu_links',
+    '#theme' => 'admin_bar_links',
     '#wrapper_attributes' => array(
-      'id' => 'admin-menu-icon',
+      'id' => 'admin-bar-icon',
     ),
     '#weight' => -100,
   );
   $links['icon'] = array(
-    '#title' => theme('admin_menu_icon'),
-    '#attributes' => array('class' => array('admin-menu-icon')),
+    '#title' => theme('admin_bar_icon'),
+    '#attributes' => array('class' => array('admin-bar-icon')),
     '#href' => '<front>',
     '#options' => array(
       'html' => TRUE,
@@ -571,18 +571,18 @@ function admin_menu_links_icon() {
     '#title' => t('Flush all caches'),
     '#weight' => 20,
     '#access' => user_access('flush caches'),
-    '#href' => 'admin_menu/flush-cache',
+    '#href' => 'admin_bar/flush-cache',
     '#options' => array(
-      'query' => $destination + array('token' => backdrop_get_token('admin_menu/flush-cache')),
+      'query' => $destination + array('token' => backdrop_get_token('admin_bar/flush-cache')),
     ),
   );
-  $caches = module_invoke_all('admin_menu_cache_info');
+  $caches = module_invoke_all('admin_bar_cache_info');
   foreach ($caches as $name => $cache) {
     $links['icon']['flush-cache'][$name] = array(
       '#title' => $cache['title'],
-      '#href' => 'admin_menu/flush-cache/' . $name,
+      '#href' => 'admin_bar/flush-cache/' . $name,
       '#options' => array(
-        'query' => $destination + array('token' => backdrop_get_token('admin_menu/flush-cache/' . $name)),
+        'query' => $destination + array('token' => backdrop_get_token('admin_bar/flush-cache/' . $name)),
       ),
     );
   }
@@ -593,19 +593,19 @@ function admin_menu_links_icon() {
 /**
  * Builds the account links.
  *
- * @see theme_admin_menu_links()
+ * @see theme_admin_bar_links()
  */
-function admin_menu_links_account() {
+function admin_bar_links_account() {
   $links['account'] = array(
     '#title' => user_format_name($GLOBALS['user']),
     '#weight' => 50,
-    '#attributes' => array('class' => array('admin-menu-account')),
+    '#attributes' => array('class' => array('admin-bar-account')),
     '#href' => 'user/' . $GLOBALS['user']->uid,
   );
   $links['logout'] = array(
     '#title' => t('Log out'),
     '#weight' => 51,
-    '#attributes' => array('class' => array('admin-menu-logout')),
+    '#attributes' => array('class' => array('admin-bar-logout')),
     '#href' => 'user/logout',
   );
   return $links;
@@ -614,15 +614,15 @@ function admin_menu_links_account() {
 /**
  * Builds user counter.
  *
- * @see theme_admin_menu_links()
+ * @see theme_admin_bar_links()
  */
-function admin_menu_links_users() {
+function admin_bar_links_users() {
   // Add link to show current authenticated/anonymous users.
   $links['user-counter'] = array(
-    '#title' => admin_menu_get_user_count(),
+    '#title' => admin_bar_get_user_count(),
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
-    '#attributes' => array('class' => array('admin-menu-action', 'admin-menu-users')),
+    '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
     '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
   );
   return $links;
@@ -631,13 +631,13 @@ function admin_menu_links_users() {
 /**
  * Build search widget.
  *
- * @see theme_admin_menu_links()
+ * @see theme_admin_bar_links()
  */
-function admin_menu_links_search() {
+function admin_bar_links_search() {
   $search['search'] = array(
     '#pre_render' => array(),
     '#attributes' => array(
-      'class' => array('admin-menu-search'),
+      'class' => array('admin-bar-search'),
     ),
   );
   $search['search']['search'] = array(
@@ -657,37 +657,37 @@ function admin_menu_links_search() {
 /**
  * Form builder function for module settings.
  */
-function admin_menu_theme_settings() {
-  $config = config('admin_menu.settings');
+function admin_bar_theme_settings() {
+  $config = config('admin_bar.settings');
   $form['margin_top'] = array(
     '#type' => 'checkbox',
     '#title' => t('Adjust top margin'),
     '#default_value' => $config->get('margin_top'),
-    '#description' => t('Shifts the entire site content down to make room for the administration menu. If disabled, absolute- or fixed-positioned page elements may be covered by the administration menu.'),
+    '#description' => t('Shifts the entire site content down to make room for the administration bar. If disabled, absolute- or fixed-positioned page elements may be covered by the administration bar.'),
   );
   $form['position_fixed'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Keep menu at top of page'),
+    '#title' => t('Keep bar at top of page'),
     '#default_value' => $config->get('position_fixed'),
-    '#description' => t('Displays the administration menu always at the top of the browser viewport, even when scrolling the page.'),
+    '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
 
   $form['components'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
     '#options' => array(
-      'admin_menu.icon' => t('Icon menu'),
-      'admin_menu.menu' => t('Administration menu'),
-      'admin_menu.search' => t('Search bar'),
-      'admin_menu.users' => t('User counts'),
-      'admin_menu.account' => t('Account links'),
+      'admin_bar.icon' => t('Icon menu'),
+      'admin_bar.menu' => t('Administration bar'),
+      'admin_bar.search' => t('Search bar'),
+      'admin_bar.users' => t('User counts'),
+      'admin_bar.account' => t('Account links'),
     ),
     '#default_value' => $config->get('components'),
   );
 
   $process = element_info_property('checkboxes', '#process', array());
-  $form['components']['#process'] = array_merge(array('admin_menu_settings_process_components'), $process);
-  $form['#attached']['js'][] = backdrop_get_path('module', 'admin_menu') . '/admin_menu.admin.js';
+  $form['components']['#process'] = array_merge(array('admin_bar_settings_process_components'), $process);
+  $form['#attached']['js'][] = backdrop_get_path('module', 'admin_bar') . '/admin_bar.admin.js';
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -701,9 +701,9 @@ function admin_menu_theme_settings() {
 }
 
 /**
- * #process callback for component plugin form element in admin_menu_theme_settings().
+ * #process callback for component plugin form element in admin_bar_theme_settings().
  */
-function admin_menu_settings_process_components($element) {
+function admin_bar_settings_process_components($element) {
   // Assign 'rel' attributes to all options to achieve a live preview.
   // Unfortunately, #states relies on wrapping .form-wrapper classes, so it
   // cannot be used here.
@@ -717,10 +717,10 @@ function admin_menu_settings_process_components($element) {
 }
 
 /**
- * Submit handler for admin_menu_theme_settings().
+ * Submit handler for admin_bar_theme_settings().
  */
-function admin_menu_theme_settings_submit($form, $form_state) {
-  $config = config('admin_menu.settings');
+function admin_bar_theme_settings_submit($form, $form_state) {
+  $config = config('admin_bar.settings');
   $config->set('margin_top', $form_state['values']['margin_top']);
   $config->set('position_fixed', $form_state['values']['position_fixed']);
   $config->set('components', array_values(array_filter($form_state['values']['components'])));
@@ -733,12 +733,12 @@ function admin_menu_theme_settings_submit($form, $form_state) {
  * @param $name
  *   (optional) Name of cache to flush.
  */
-function admin_menu_flush_cache($name = NULL) {
+function admin_bar_flush_cache($name = NULL) {
   if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], current_path())) {
     return MENU_ACCESS_DENIED;
   }
   if (isset($name)) {
-    $caches = module_invoke_all('admin_menu_cache_info');
+    $caches = module_invoke_all('admin_bar_cache_info');
     if (!isset($caches[$name])) {
       return MENU_NOT_FOUND;
     }
@@ -762,20 +762,20 @@ function admin_menu_flush_cache($name = NULL) {
 }
 
 /**
- * Implements hook_admin_menu_cache_info().
+ * Implements hook_admin_bar_cache_info().
  */
-function admin_menu_admin_menu_cache_info() {
-  $caches['admin_menu'] = array(
-    'title' => t('Administration menu'),
-    'callback' => '_admin_menu_flush_cache',
+function admin_bar_admin_bar_cache_info() {
+  $caches['admin_bar'] = array(
+    'title' => t('Administration bar'),
+    'callback' => '_admin_bar_flush_cache',
   );
   return $caches;
 }
 
 /**
- * Implements hook_admin_menu_cache_info() on behalf of System module.
+ * Implements hook_admin_bar_cache_info() on behalf of System module.
  */
-function system_admin_menu_cache_info() {
+function system_admin_bar_cache_info() {
   $caches = array(
     'assets' => t('CSS and JavaScript'),
     'cache' => t('Page and else'),
@@ -785,16 +785,16 @@ function system_admin_menu_cache_info() {
   foreach ($caches as $name => $cache) {
     $caches[$name] = array(
       'title' => $cache,
-      'callback' => '_admin_menu_flush_cache',
+      'callback' => '_admin_bar_flush_cache',
     );
   }
   return $caches;
 }
 
 /**
- * Implements hook_admin_menu_cache_info() on behalf of Update module.
+ * Implements hook_admin_bar_cache_info() on behalf of Update module.
  */
-function update_admin_menu_cache_info() {
+function update_admin_bar_cache_info() {
   $caches['update'] = array(
     'title' => t('Update data'),
     'callback' => '_update_cache_clear',
@@ -808,12 +808,12 @@ function update_admin_menu_cache_info() {
  * @param $name
  *   (optional) Name of cache to flush.
  *
- * @see system_admin_menu_cache_info()
+ * @see system_admin_bar_cache_info()
  */
-function _admin_menu_flush_cache($name = NULL) {
+function _admin_bar_flush_cache($name = NULL) {
   switch ($name) {
-    case 'admin_menu':
-      cache('admin_menu')->flush();
+    case 'admin_bar':
+      cache('admin_bar')->flush();
       break;
 
     case 'menu':
@@ -851,14 +851,12 @@ function _admin_menu_flush_cache($name = NULL) {
 }
 
 /**
- * Preprocesses variables for theme_admin_menu_icon().
+ * Preprocesses variables for theme_admin_bar_icon().
  */
-function template_preprocess_admin_menu_icon(&$variables) {
+function template_preprocess_admin_bar_icon(&$variables) {
   // Image source might have been passed in as theme variable.
-  if (!isset($variables['src'])) {
-    $favicon = backdrop_get_favicon();
-    $variables['src'] = $favicon['path'];
-  }
+  $favicon = backdrop_get_favicon();
+  $variables['src'] = $favicon['path'];
   // Strip the protocol without delimiters for transient HTTP/HTTPS support.
   // Since the menu is cached on the server-side and client-side, the cached
   // version might contain a HTTP link, whereas the actual page is on HTTPS.
@@ -870,12 +868,12 @@ function template_preprocess_admin_menu_icon(&$variables) {
 }
 
 /**
- * Renders an icon to display in the administration menu.
+ * Renders an icon to display in the administration bar.
  *
  * @ingroup themeable
  */
-function theme_admin_menu_icon($variables) {
-  return '<img class="admin-menu-icon" src="' . $variables['src'] . '" width="16" height="16" alt="' . $variables['alt'] . '" />';
+function theme_admin_bar_icon($variables) {
+  return '<img class="admin-bar-icon" src="' . $variables['src'] . '" width="16" height="16" alt="' . $variables['alt'] . '" />';
 }
 
 
@@ -893,8 +891,8 @@ function theme_admin_menu_icon($variables) {
  *     - #options: Optional alternative text for the link, passed to l().
  *     The array key of each child element itself is passed as path for l().
  */
-function theme_admin_menu_links($variables) {
-  $destination = &backdrop_static('admin_menu_destination');
+function theme_admin_bar_links($variables) {
+  $destination = &backdrop_static('admin_bar_destination');
   $elements = $variables['elements'];
 
   if (!isset($destination)) {
@@ -907,7 +905,7 @@ function theme_admin_menu_links($variables) {
   // everything again. element_sort() is not sufficient here, as it
   // intentionally retains the order of elements having the same #weight,
   // whereas menu links are supposed to be ordered by #weight and #title.
-  uasort($elements, 'admin_menu_element_sort');
+  uasort($elements, 'admin_bar_element_sort');
   $elements['#sorted'] = TRUE;
 
   $output = '';
@@ -925,7 +923,7 @@ function theme_admin_menu_links($variables) {
       $elements[$path]['#children'] = backdrop_render($elements[$path]);
     }
     else {
-      $elements[$path]['#children'] = theme('admin_menu_links', array('elements' => $elements[$path]));
+      $elements[$path]['#children'] = theme('admin_bar_links', array('elements' => $elements[$path]));
       if (!empty($elements[$path]['#children'])) {
         $elements[$path]['#attributes']['class'][] = 'expandable';
       }
@@ -941,7 +939,7 @@ function theme_admin_menu_links($variables) {
       // for our JavaScript behavior instead.
       if (isset($elements[$path]['#options']['query']['destination']) && $elements[$path]['#options']['query']['destination'] == $destination) {
         unset($elements[$path]['#options']['query']['destination']);
-        $elements[$path]['#options']['attributes']['class'][] = 'admin-menu-destination';
+        $elements[$path]['#options']['attributes']['class'][] = 'admin-bar-destination';
       }
 
       $link = l($elements[$path]['#title'], $elements[$path]['#href'], $elements[$path]['#options']);
@@ -976,7 +974,7 @@ function theme_admin_menu_links($variables) {
 /**
  * Function used by uasort to sort structured arrays by #weight AND #title.
  */
-function admin_menu_element_sort($a, $b) {
+function admin_bar_element_sort($a, $b) {
   // @see element_sort()
   $a_weight = isset($a['#weight']) ? $a['#weight'] : 0;
   $b_weight = isset($b['#weight']) ? $b['#weight'] : 0;
