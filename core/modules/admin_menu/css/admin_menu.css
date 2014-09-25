@@ -192,10 +192,10 @@ body.admin-menu {
 
 /* Second-and-more-level hovering */
 #admin-menu .dropdown li li.expandable > a {
-  background: #45454A url(images/arrow.png) no-repeat 145px center; /* LTR */
+  background: #45454A url(../images/arrow.png) no-repeat 145px center; /* LTR */
 }
 [dir="rtl"] #admin-menu .dropdown li li.expandable > a {
-  background-image: url(images/arrow-rtl.png);
+  background-image: url(../images/arrow-rtl.png);
   background-position: 5px center;
 }
 #admin-menu .dropdown li li a.expanded-trail {
@@ -237,7 +237,7 @@ body.admin-menu {
 
 /* Online users */
 #admin-menu .dropdown .admin-menu-users a {
-  background: transparent url(images/icon_users.png) 90% center no-repeat;
+  background: transparent url(../images/icon_users.png) 90% center no-repeat;
   padding-right: 22px; /* LTR */
 }
 [dir="rtl"] #admin-menu .dropdown .admin-menu-users a {

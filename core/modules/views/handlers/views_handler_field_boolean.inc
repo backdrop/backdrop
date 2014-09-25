@@ -100,7 +100,7 @@ class views_handler_field_boolean extends views_handler_field {
     if ($this->options['type'] == 'custom') {
       return $value ? filter_xss_admin($this->options['type_custom_true']) : filter_xss_admin($this->options['type_custom_false']);
     }
-    else if (isset($this->formats[$this->options['type']])) {
+    elseif (isset($this->formats[$this->options['type']])) {
       return $value ? $this->formats[$this->options['type']][0] : $this->formats[$this->options['type']][1];
     }
     else {

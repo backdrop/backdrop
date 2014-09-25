@@ -558,6 +558,26 @@ function node_update_1002() {
 }
 
 /**
+ * Move theme settings to global site configuration.
+ */
+function node_update_1003() {
+  $types = db_query('SELECT type FROM {node_type}')->fetchCol();
+  $theme = variable_get('theme_default', 'stark');
+  $settings = variable_get('theme_' . $theme . '_settings', array());
+
+  // Each setting defaults to TRUE if not set at all.
+  $comment_picture = !isset($settings['toggle_comment_user_picture']) || $settings['toggle_comment_user_picture'];
+  $node_picture = !isset($settings['toggle_node_user_picture']) || $settings['toggle_node_user_picture'];
+
+  // These variables will be converted to be node type settings when converted
+  // to saving in config.
+  foreach ($types as $type_name) {
+    variable_set('node_user_picture_' . $type_name, $node_picture);
+    variable_set('comment_user_picture_' . $type_name, $comment_picture);
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
