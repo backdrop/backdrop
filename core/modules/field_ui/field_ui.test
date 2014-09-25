@@ -229,7 +229,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     // different entity types; e.g. if a field was added in a node entity, it
     // should also appear in the 'taxonomy term' entity.
     $vocabulary = taxonomy_vocabulary_load(1);
-    $this->backdropGet('admin/structure/taxonomy/' . $vocabulary->machine_name . '/fields');
+    $this->backdropGet('admin/structure/categorization/' . $vocabulary->machine_name . '/fields');
     $this->assertTrue($this->xpath('//select[@name="fields[_add_existing_field][field_name]"]//option[@value="' . $this->field_name . '"]'), 'Existing field was found in account settings.');
   }
 

@@ -114,8 +114,8 @@ function taxonomy_admin_menu_map() {
   if (!user_access('administer taxonomy')) {
     return;
   }
-  $map['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
-    'parent' => 'admin/structure/taxonomy',
+  $map['admin/structure/categorization/%taxonomy_vocabulary_machine_name'] = array(
+    'parent' => 'admin/structure/categorization',
     'arguments' => array(
       array('%taxonomy_vocabulary_machine_name' => array_keys(taxonomy_vocabulary_get_names())),
     ),

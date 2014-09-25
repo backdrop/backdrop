@@ -62,7 +62,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
    */
   function testVocabularyInterface() {
     // Visit the main taxonomy administration page.
-    $this->backdropGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/categorization');
 
     // Create a new vocabulary.
     $this->clickLink(t('Add vocabulary'));
@@ -75,23 +75,23 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
 
     // Edit the vocabulary.
-    $this->backdropGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/categorization');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
     $this->clickLink(t('Edit vocabulary'));
     $edit = array();
     $edit['name'] = $this->randomName();
     $this->backdropPost(NULL, $edit, t('Save'));
-    $this->backdropGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/categorization');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
 
     // Try to submit a vocabulary with a duplicate machine name.
     $edit['machine_name'] = $machine_name;
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/add', $edit, t('Save'));
     $this->assertText(t('The machine-readable name is already in use. It must be unique.'));
 
     // Try to submit an invalid machine name.
     $edit['machine_name'] = '!&^%';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/add', $edit, t('Save'));
     $this->assertText(t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
 
     // Ensure that vocabulary titles are escaped properly.
@@ -99,10 +99,10 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit['name'] = 'Don\'t Panic';
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = 'don_t_panic';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/add', $edit, t('Save'));
 
     $site_name = config_get('system.site', 'site_name');
-    $this->backdropGet('admin/structure/taxonomy/don_t_panic');
+    $this->backdropGet('admin/structure/categorization/don_t_panic');
     $this->assertTitle(t('Don\'t Panic | @site-name', array('@site-name' => $site_name)));
     $this->assertNoTitle(t('Don&#039;t Panic | @site-name', array('@site-name' => $site_name)));
   }
@@ -124,7 +124,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
       $edit[$key . '[weight]'] = $vocabulary->weight;
     }
     // Saving the new weights via the interface.
-    $this->backdropPost('admin/structure/taxonomy', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization', $edit, t('Save'));
 
     // Load the vocabularies from the database.
     $new_vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
@@ -146,7 +146,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     }
     // Confirm that no vocabularies are found in the database.
     $this->assertFalse(taxonomy_vocabulary_load_multiple(FALSE), 'No vocabularies found in the database.');
-    $this->backdropGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/categorization');
     // Check the default message for no vocabularies.
     $this->assertText(t('No vocabularies available.'), 'No vocabularies were found.');
   }
@@ -160,7 +160,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
     );
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/add', $edit, t('Save'));
     $this->assertText(t('Created new vocabulary'), 'New vocabulary was created.');
 
     // Check the created vocabulary.
@@ -172,7 +172,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
 
     // Delete the vocabulary.
     $edit = array();
-    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit', $edit, t('Delete'));
+    $this->backdropPost('admin/structure/categorization/' . $vocabulary->machine_name . '/edit', $edit, t('Delete'));
     $this->assertRaw(t('Are you sure you want to delete the vocabulary %name?', array('%name' => $vocabulary->name)), '[confirm deletion] Asks for confirmation.');
     $this->assertText(t('Deleting a vocabulary will delete all the terms in it. This action cannot be undone.'), '[confirm deletion] Inform that all terms will be deleted.');
 
@@ -718,14 +718,14 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $edit['parent[]'] = array(0);
 
     // Create the term to edit.
-    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
 
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
     $term = reset($terms);
     $this->assertNotNull($term, 'Term found in database.');
 
     // Submitting a term takes us to the add page; we need the List page.
-    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/categorization/' . $this->vocabulary->machine_name);
 
     // Test edit link as accessed from Taxonomy administration pages.
     // Because Simpletest creates its own database when running tests, we know
@@ -744,7 +744,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
 
     // Check that the term is still present at admin UI after edit.
-    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/categorization/' . $this->vocabulary->machine_name);
     $this->assertText($edit['name'], 'The randomly generated term name is present.');
     $this->assertLink(t('Edit'));
 
@@ -792,7 +792,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     backdrop_static_reset('taxonomy_get_treeterms');
     list($term1, $term2, $term3) = taxonomy_get_tree($this->vocabulary->vid);
 
-    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/categorization/' . $this->vocabulary->machine_name);
 
     // Each term has four hidden fields, "tid:1:0[tid]", "tid:1:0[parent]",
     // "tid:1:0[depth]", and "tid:1:0[weight]". Change the order to term2,
@@ -822,7 +822,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->assertEqual($terms[1]->parents, array($term2->tid), 'Term 3 was made a child of term 2.');
     $this->assertEqual($terms[2]->tid, $term1->tid, 'Term 1 was moved below term 2.');
 
-    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name, array(), t('Reset to alphabetical'));
+    $this->backdropPost('admin/structure/categorization/' . $this->vocabulary->machine_name, array(), t('Reset to alphabetical'));
     // Submit confirmation form.
     $this->backdropPost(NULL, array(), t('Reset to alphabetical'));
 
@@ -850,7 +850,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
       'parent[]' => array(0, $parent->tid),
     );
     // Save the new term.
-    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
 
     // Check that the term was successfully created.
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
@@ -1296,7 +1296,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'antonym' => 'Long',
     );
-    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/categorization/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
     $term = reset($terms);
     $this->assertEqual($term->antonym, $edit['antonym'], 'Antonym was loaded into the term object.');
@@ -1744,7 +1744,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
     // Adding a term to a vocabulary is considered an administrative action and
     // should use the administrative theme.
     $vocabulary = $this->createVocabulary();
-    $this->backdropGet('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add');
+    $this->backdropGet('admin/structure/categorization/' . $vocabulary->machine_name . '/add');
     $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page for adding a taxonomy term.");
 
     // Viewing a taxonomy term should use the default theme.

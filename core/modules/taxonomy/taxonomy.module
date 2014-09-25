@@ -84,8 +84,8 @@ function taxonomy_entity_info() {
     $return['taxonomy_term']['bundles'][$machine_name] = array(
       'label' => $vocabulary->name,
       'admin' => array(
-        'path' => 'admin/structure/taxonomy/%taxonomy_vocabulary_machine_name',
-        'real path' => 'admin/structure/taxonomy/' . $machine_name,
+        'path' => 'admin/structure/categorization/%taxonomy_vocabulary_machine_name',
+        'real path' => 'admin/structure/categorization/' . $machine_name,
         'bundle argument' => 3,
         'access arguments' => array('administer taxonomy'),
       ),
@@ -224,20 +224,20 @@ function taxonomy_theme() {
  * Implements hook_menu().
  */
 function taxonomy_menu() {
-  $items['admin/structure/taxonomy'] = array(
-    'title' => 'Taxonomy',
-    'description' => 'Manage tagging, categorization, and classification of your content.',
+  $items['admin/structure/categorization'] = array(
+    'title' => 'Categorization',
+    'description' => 'Manage categorization, tagging, and classification of your content.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_vocabularies'),
     'access arguments' => array('administer taxonomy'),
     'file' => 'taxonomy.admin.inc',
   );
-  $items['admin/structure/taxonomy/list'] = array(
-    'title' => 'List',
+  $items['admin/structure/categorization/list'] = array(
+    'title' => 'List vocabularies',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/structure/taxonomy/add'] = array(
+  $items['admin/structure/categorization/add'] = array(
     'title' => 'Add vocabulary',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary'),
@@ -299,7 +299,7 @@ function taxonomy_menu() {
     'file' => 'taxonomy.pages.inc',
   );
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
+  $items['admin/structure/categorization/%taxonomy_vocabulary_machine_name'] = array(
     'title callback' => 'entity_label',
     'title arguments' => array('taxonomy_vocabulary', 3),
     'page callback' => 'backdrop_get_form',
@@ -307,12 +307,12 @@ function taxonomy_menu() {
     'access arguments' => array('administer taxonomy'),
     'file' => 'taxonomy.admin.inc',
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/list'] = array(
+  $items['admin/structure/categorization/%taxonomy_vocabulary_machine_name/list'] = array(
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20,
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/edit'] = array(
+  $items['admin/structure/categorization/%taxonomy_vocabulary_machine_name/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary', 3),
@@ -322,7 +322,7 @@ function taxonomy_menu() {
     'file' => 'taxonomy.admin.inc',
   );
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/add'] = array(
+  $items['admin/structure/categorization/%taxonomy_vocabulary_machine_name/add'] = array(
     'title' => 'Add term',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_term', NULL, 3),
