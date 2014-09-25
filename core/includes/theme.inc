@@ -2666,7 +2666,6 @@ function template_preprocess_page(&$variables) {
   $variables['site_name']         = check_plain($site_config->get('site_name'));
   $variables['site_slogan']       = filter_xss_admin($site_config->get('site_slogan'));
   $variables['tabs']              = menu_local_tabs();
-
   $variables['main_menu'] = menu_main_menu();
   $variables['secondary_menu'] = menu_secondary_menu();
 
@@ -2866,6 +2865,11 @@ function template_preprocess_maintenance_page(&$variables) {
   $theme_data = list_themes();
   $regions = $theme_data[$theme]->info['regions'];
 
+  // Initializes attributes which are specific to the html element.
+  $variables['html_attributes_array'] = array();
+  $variables['html_attributes_array']['lang'] = $GLOBALS['language_interface']->langcode;
+  $variables['html_attributes_array']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+
   // Get all region content set with backdrop_add_region_content().
   foreach (array_keys($regions) as $region) {
     // Assign region to a region variable.
@@ -2950,6 +2954,7 @@ function template_preprocess_maintenance_page(&$variables) {
  * @see template_process_html()
  */
 function template_process_maintenance_page(&$variables) {
+  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
   $variables['head']    = backdrop_get_html_head();
   $variables['css']     = backdrop_add_css();
   $variables['styles']  = backdrop_get_css();
