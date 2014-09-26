@@ -1789,9 +1789,10 @@ function system_image_toolkit_settings() {
 /**
  * Form builder; Configure how the site handles RSS feeds.
  *
+ * @see system_rss_feeds_settings_submit()
  * @ingroup forms
  */
-function system_rss_feeds_settings() {
+function system_rss_feeds_settings($form, &$form_state) {
   $rss_config = config('system.rss');
   $form['feed_description'] = array(
     '#type' => 'textarea',
@@ -1823,8 +1824,21 @@ function system_rss_feeds_settings() {
     '#type' => 'submit',
     '#value' => t('Save configuration')
   );
-
   return $form;
+}
+
+/**
+ * Form submission handler for system_rss_feeds_settings().
+ *
+ * @see system_rss_feeds_settings()
+ */
+function system_rss_feeds_settings_submit($form, &$form_state) {
+  config('system.rss')
+    ->set('rss_description', $form_state['values']['feed_description'])
+    ->set('rss_limit', $form_state['values']['feed_default_items'])
+    ->set('rss_viewmode', $form_state['values']['feed_item_length'])
+    ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
