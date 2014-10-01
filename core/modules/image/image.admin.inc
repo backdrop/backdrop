@@ -699,8 +699,15 @@ function theme_image_style_effects($variables) {
     )));
   }
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'image-style-effects')));
-  backdrop_add_tabledrag('image-style-effects', 'order', 'sibling', 'image-effect-order-weight');
+  $tabledrag = array(
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => $order_class,
+    ),
+  );
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'image-style-effects'), 'tabledrag' => $tabledrag));
   return $output;
 }
 

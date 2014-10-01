@@ -102,12 +102,20 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
+  $tabledrag = '';
   if (isset($form['actions'])) {
     $header[] = t('Weight');
-    backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
+    $tabledrag = array(
+      'taxonomy',
+      array(
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'vocabulary-weight',
+      ),
+    );
   }
   $header[] = t('Operations');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy'))) . backdrop_render_children($form);
+  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy'), 'tabledrag' => $tabledrag)) . backdrop_render_children($form);
 }
 
 /**
@@ -580,13 +588,29 @@ function theme_taxonomy_overview_terms($variables) {
 
   // Add drag and drop if parent fields are present in the form.
   if ($form['#parent_fields']) {
-    backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
-    backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
+    backdrop_attach_tabledrag('taxonomy', array(
+      'action' => 'match',
+      'relationship' => 'parent',
+      'group' => 'term-parent',
+      'subgroup' => 'term-parent',
+      'source' => 'term-id',
+      'hidden' => FALSE,
+    ));
+    backdrop_attach_tabledrag('taxonomy', array(
+      'action' => 'depth',
+      'relationship' => 'group',
+      'group' => 'term-depth',
+      'hidden' => FALSE,
+    ));
     backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js');
     backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
     backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
   }
-  backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
+  backdrop_attach_tabledrag('taxonomy', array(
+    'action' => 'order',
+    'relationship' => 'sibling',
+    'group' => 'term-weight',
+  ));
 
   $errors = form_get_errors() != FALSE ? form_get_errors() : array();
   $rows = array();

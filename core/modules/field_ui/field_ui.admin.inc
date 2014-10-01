@@ -134,7 +134,15 @@ function field_ui_display_overview_row_region($row) {
  * This function is assigned as a #pre_render callback in
  * field_ui_element_info().
  *
- * @see backdrop_render().
+ * @param array $element
+ *   A structured array containing two sub-levels of elements. Properties
+ *   used:
+ *   - #tabledrag: The value is a list of $options arrays that are passed to
+ *     backdrop_attach_tabledrag(). The HTML ID of the table is added to each
+ *     $options array.
+ *
+ * @see backdrop_render()
+ * @see backdrop_pre_render_table()
  */
 function field_ui_table_pre_render($elements) {
   $js_settings = array();
@@ -201,6 +209,15 @@ function field_ui_table_pre_render($elements) {
     'type' => 'setting',
     'data' => array('fieldUIRowsData' => $js_settings),
   );
+  // If the custom #tabledrag is set and there is a HTML ID, add the table's
+  // HTML ID to the options and attach the behavior.
+  // @see backdrop_pre_render_table()
+  if (!empty($elements['#tabledrag']) && isset($elements['#attributes']['id'])) {
+    foreach ($elements['#tabledrag'] as $options) {
+      $options['table_id'] = $elements['#attributes']['id'];
+      backdrop_attach_tabledrag($elements, $options);
+    }
+  }
 
   return $elements;
 }
@@ -658,8 +675,18 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   );
 
   // Add tabledrag behavior.
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
+  $form['#attached']['backdrop_attach_tabledrag'][] = array('field-overview', array(
+    'action' => 'order',
+    'relationship' => 'sibling',
+    'group' => 'field-weight',
+  ));
+  $form['#attached']['backdrop_attach_tabledrag'][] = array('field-overview', array(
+    'action' => 'match',
+    'relationship' => 'parent',
+    'group' => 'field-parent',
+    'subgroup' => 'field-parent',
+    'source' => 'field-name',
+  ));
 
   return $form;
 }
@@ -943,6 +970,20 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
     // Add Ajax wrapper.
     '#prefix' => '<div id="field-display-overview-wrapper">',
     '#suffix' => '</div>',
+    '#tabledrag' => array(
+      array(
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'field-weight',
+      ),
+      array(
+        'action' => 'match',
+        'relationship' => 'parent',
+        'group' => 'field-parent',
+        'subgroup' => 'field-parent',
+        'source' => 'field-name',
+      ),
+    ),
   );
 
   $field_label_options = array(
@@ -1234,10 +1275,6 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
-
-  // Add tabledrag behavior.
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
 
   return $form;
 }

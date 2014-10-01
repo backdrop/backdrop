@@ -344,14 +344,18 @@ function theme_field_multiple_value_form($variables) {
         'class' => array('draggable'),
       );
     }
+    $tabledrag = array(
+      array(
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => $order_class,
+    ));
 
     $output = '<div class="form-item">';
-    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table')), 'tabledrag' => $tabledrag));
     $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
     $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
     $output .= '</div>';
-
-    backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
   }
   else {
     foreach (element_children($element) as $key) {

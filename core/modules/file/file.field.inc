@@ -849,11 +849,16 @@ function theme_file_widget_multiple($variables) {
       'class' => isset($widget['#attributes']['class']) ? array_merge($widget['#attributes']['class'], array('draggable')) : array('draggable'),
     );
   }
-
-  backdrop_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
+  $tabledrag = array(
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => $order_class,
+    ),
+  );
 
   $output = '';
-  $output = empty($rows) ? '' : theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $table_id)));
+  $output = empty($rows) ? '' : theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $table_id), 'tabledrag' => $tabledrag));
   $output .= backdrop_render_children($element);
   return $output;
 }

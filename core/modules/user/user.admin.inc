@@ -978,9 +978,16 @@ function theme_user_admin_roles($variables) {
   }
   $rows[] = array(array('data' => backdrop_render($form['name']) . backdrop_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));
 
-  backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
+  $tabledrag = array(
+    'user-roles',
+    array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'role-weight',
+    ),
+  );
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles'), 'tabledrag' => $tabledrag));
   $output .= backdrop_render_children($form);
 
   return $output;

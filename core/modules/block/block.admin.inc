@@ -96,8 +96,19 @@ function block_admin_display_form($form, &$form_state, $blocks, $theme, $block_r
   $block_regions_with_disabled = $block_regions + array(BLOCK_REGION_NONE => BLOCK_REGION_NONE);
 
   foreach ($block_regions_with_disabled as $region => $title) {
-    $form['#attached']['backdrop_add_tabledrag'][] = array('blocks', 'match', 'sibling', 'block-region-select', 'block-region-' . $region, NULL, FALSE);
-    $form['#attached']['backdrop_add_tabledrag'][] = array('blocks', 'order', 'sibling', 'block-weight', 'block-weight-' . $region);
+    $form['#attached']['backdrop_attach_tabledrag'][] = array(
+      'action' => 'match',
+      'relationship' => 'sibling',
+      'group' => 'block-region-select',
+      'subgroup' => 'block-region-' . $region,
+      'hidden' => FALSE,
+    );
+    $form['#attached']['backdrop_attach_tabledrag'][] = array(
+      'action' => 'order',
+      'relationship' => 'sibling',
+      'group' => 'block-weight',
+      'subgroup' => 'block-weight-' . $region,
+    );
   }
 
   // Weights range from -delta to +delta, so delta should be at least half
