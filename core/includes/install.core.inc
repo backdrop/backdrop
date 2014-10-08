@@ -1829,7 +1829,10 @@ function install_configure_form_submit($form, &$form_state) {
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_mail', $form_state['values']['site_mail'])
     ->save();
-  config_set('system.date', 'default_timezone', $form_state['values']['date_default_timezone']);
+  config('system.date')
+    ->set('default_timezone', $form_state['values']['date_default_timezone'])
+    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->save();
 
   // Enable update.module if this option was selected.
   if ($form_state['values']['update_status_module'][1]) {
@@ -1861,4 +1864,24 @@ function install_configure_form_submit($form, &$form_state) {
 
   // Record when this install ran.
   state_set('install_time', $_SERVER['REQUEST_TIME']);
+}
+
+/**
+ * Get a country code for the provided timezone.
+ */
+function _install_get_timezone_country($timezone) {
+  // Get timezone countries list
+  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+  $timezone_countries = timezone_country_get_list();
+
+  // Replace spaces in provided timezone with underscores
+  $timezone = str_replace(' ', '_', $timezone);
+
+  // Return timezone's country code or empty string
+  if (isset($timezone_countries[$timezone])) {
+    return $timezone_countries[$timezone];
+  }
+  else {
+    return '';
+  }
 }

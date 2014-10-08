@@ -840,3 +840,17 @@ function country_get_list() {
   backdrop_alter('countries', $countries);
   return $countries;
 }
+
+/**
+ * Get list of all predefined and custom timezone countries.
+ *
+ * @return
+ *   An array of all timezone => country code pairs.
+ */
+function timezone_country_get_list() {
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  $timezone_countries = standard_timezone_country_list();
+  // Allow other modules to modify the timezone_country list.
+  backdrop_alter('timezone_countries', $timezone_countries);
+  return $timezone_countries;
+}
