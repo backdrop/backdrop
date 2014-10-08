@@ -883,7 +883,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
     );
     foreach ($supported_paths as $input => $expected) {
       $edit = array(
-        'site_default_logo' => FALSE,
+        'site_logo_theme' => FALSE,
         'site_logo_path' => $input,
       );
       $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
@@ -954,7 +954,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/system/site-information');
     foreach ($unsupported_paths as $path) {
       $edit = array(
-        'site_default_logo' => FALSE,
+        'site_logo_theme' => FALSE,
         'site_logo_path' => $path,
       );
       $this->backdropPost(NULL, $edit, t('Save configuration'));
@@ -963,7 +963,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
 
     // Upload a file to use for the logo.
     $edit = array(
-      'site_default_logo' => FALSE,
+      'site_logo_theme' => FALSE,
       'site_logo_path' => '',
       'files[site_logo_upload]' => backdrop_realpath($file->uri),
     );

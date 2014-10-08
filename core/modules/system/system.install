@@ -2033,9 +2033,9 @@ function system_update_1021() {
 function system_update_1022() {
   // Update to set the defaults.
   $config = config('system.site');
-  $config->set('site_default_logo', 1);
+  $config->set('site_logo_theme', 1);
   $config->set('site_logo_path', '');
-  $config->set('site_default_favicon', 1);
+  $config->set('site_favicon_theme', 1);
   $config->set('site_favicon_path', 'core/misc/favicon.ico');
   $config->set('site_favicon_mimetype', 'image/vnd.microsoft.icon');
 
@@ -2043,7 +2043,7 @@ function system_update_1022() {
 
   // Copy over logo settings.
   if (!empty($settings['toggle_logo'])) {
-    $config->set('site_default_logo', $settings['default_logo']);
+    $config->set('site_logo_theme', $settings['default_logo']);
     if (is_file($settings['logo_path'])) {
       $config->set('site_favicon_path', $settings['logo_path']);
       $config->set('site_favicon_mimetype', file_get_mimetype($settings['logo_path']));
@@ -2052,7 +2052,7 @@ function system_update_1022() {
 
   // Copy over favicon settings.
   if (!empty($settings['toggle_favicon'])) {
-    $config->set('site_default_favicon', $settings['default_favicon']);
+    $config->set('site_favicon_theme', $settings['default_favicon']);
     if (is_file($settings['favicon_path'])) {
       $config->set('site_favicon_path', $settings['favicon_path']);
     }
