@@ -284,7 +284,7 @@ function backdrop_get_logo() {
   try {
     $site_config = config('system.site');
 
-    if ($site_config->get('site_default_logo')) {
+    if ($site_config->get('site_logo_theme')) {
       global $theme;
       $theme_data = list_themes();
       $theme_object = $theme_data[$theme];
@@ -323,7 +323,7 @@ function backdrop_get_favicon() {
   try {
     $site_config = config('system.site');
 
-    if ($site_config->get('site_default_favicon')) {
+    if ($site_config->get('site_favicon_theme')) {
       global $theme;
       $theme_data = list_themes();
       $theme_object = $theme_data[$theme];

@@ -1118,10 +1118,10 @@ function system_site_information_settings($form, &$form_state) {
     '#title' => t('Logo settings'),
     '#attributes' => array('class' => array('theme-settings-bottom')),
   );
-  $form['logo']['site_default_logo'] = array(
+  $form['logo']['site_logo_theme'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the logo supplied by the active theme'),
-    '#default_value' => $site_config->get('site_default_logo'),
+    '#default_value' => $site_config->get('site_logo_theme'),
     '#tree' => FALSE,
   );
   $form['logo']['settings'] = array(
@@ -1129,7 +1129,7 @@ function system_site_information_settings($form, &$form_state) {
     '#states' => array(
       // Hide the logo settings when using the default logo.
       'invisible' => array(
-        'input[name="site_default_logo"]' => array('checked' => TRUE),
+        'input[name="site_logo_theme"]' => array('checked' => TRUE),
       ),
     ),
   );
@@ -1149,17 +1149,17 @@ function system_site_information_settings($form, &$form_state) {
     '#title' => t('Shortcut icon settings'),
     '#description' => t("Your shortcut icon, or 'favicon', is displayed in the address bar and bookmarks of most browsers."),
   );
-  $form['favicon']['site_default_favicon'] = array(
+  $form['favicon']['site_favicon_theme'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the shortcut icon supplied by the active theme'),
-    '#default_value' => $site_config->get('site_default_favicon'),
+    '#default_value' => $site_config->get('site_favicon_theme'),
   );
   $form['favicon']['settings'] = array(
     '#type' => 'container',
     '#states' => array(
       // Hide the favicon settings when using the default favicon.
       'invisible' => array(
-        'input[name="site_default_favicon"]' => array('checked' => TRUE),
+        'input[name="site_favicon_theme"]' => array('checked' => TRUE),
       ),
     ),
   );
@@ -1394,13 +1394,13 @@ function system_site_information_settings_submit($form, &$form_state) {
   if ($file = $form_state['values']['site_logo_upload']) {
     unset($form_state['values']['site_logo_upload']);
     $filename = file_unmanaged_copy($file->uri);
-    $form_state['values']['site_default_logo'] = 0;
+    $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
   }
   if ($file = $form_state['values']['site_favicon_upload']) {
     unset($form_state['values']['site_favicon_upload']);
     $filename = file_unmanaged_copy($file->uri);
-    $form_state['values']['site_default_favicon'] = 0;
+    $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
   }
 
@@ -1413,7 +1413,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     $form_state['values']['site_favicon_path'] = _system_site_information_settings_validate_path($form_state['values']['site_favicon_path']);
   }
 
-  if (empty($form_state['values']['site_default_favicon']) && !empty($form_state['values']['site_favicon_path'])) {
+  if (empty($form_state['values']['site_favicon_theme']) && !empty($form_state['values']['site_favicon_path'])) {
     $form_state['values']['site_favicon_mimetype'] = file_get_mimetype($form_state['values']['site_favicon_path']);
   }
   else {
@@ -1422,9 +1422,9 @@ function system_site_information_settings_submit($form, &$form_state) {
 
   config('system.site')
     ->set('site_name', $form_state['values']['site_name'])
-    ->set('site_default_logo', $form_state['values']['site_default_logo'])
+    ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
     ->set('site_logo_path', $form_state['values']['site_logo_path'])
-    ->set('site_default_favicon', $form_state['values']['site_default_favicon'])
+    ->set('site_favicon_theme', $form_state['values']['site_favicon_theme'])
     ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
     ->set('site_favicon_mimetype', $form_state['values']['site_favicon_mimetype'])
     ->set('site_mail', $form_state['values']['site_mail'])

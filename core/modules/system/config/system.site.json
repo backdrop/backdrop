@@ -6,9 +6,9 @@
     "site_403": "",
     "site_404": "",
     "site_frontpage": "user",
-    "site_default_logo": 0,
+    "site_logo_theme": 0,
     "site_logo_path": "",
-    "site_default_favicon": 0,
+    "site_favicon_theme": 0,
     "site_favicon_path": "core/misc/favicon.ico",
     "site_favicon_mimetype": "image/vnd.microsoft.icon"
 }
