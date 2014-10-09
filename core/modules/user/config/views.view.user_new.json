@@ -1,6 +1,7 @@
 {
   "_config_name": "views.view.user_new",
   "name": "user_new",
+  "module": "user",
   "description": "Lists new users who have accessed the site successfully.",
   "tag": "default",
   "disabled": false,
