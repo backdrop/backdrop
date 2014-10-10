@@ -319,7 +319,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
         form_error($form['prefix'][$langcode], t('The prefix may only be left blank for the default language.'));
       }
     }
-    else if (isset($count[$value]) && $count[$value] > 1) {
+    elseif (isset($count[$value]) && $count[$value] > 1) {
       // Validation error if there are two languages with the same domain/prefix.
       form_error($form['prefix'][$langcode], t('The prefix for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }
@@ -336,7 +336,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
         form_error($form['domain'][$langcode], t('The domain may only be left blank for the default language.'));
       }
     }
-    else if (isset($count[$value]) && $count[$value] > 1) {
+    elseif (isset($count[$value]) && $count[$value] > 1) {
       // Validation error if there are two languages with the same domain/domain.
       form_error($form['domain'][$langcode], t('The domain for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }

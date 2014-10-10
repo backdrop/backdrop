@@ -368,7 +368,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       if ($this->current_page < 0) {
         $this->current_page = 0;
       }
-      else if ($this->current_page >= $pager_total[$pager_id]) {
+      elseif ($this->current_page >= $pager_total[$pager_id]) {
         // Pages are numbered from 0 so if there are 10 pages, the last page is 9.
         $this->current_page = $pager_total[$pager_id] - 1;
       }

@@ -1,23 +1,23 @@
-[AdminMenuPermissionsTestCase]
+[AdminBarPermissionsTestCase]
 name = Menu link access permissions
 description = Tests appearance of menu links depending on user permissions.
-group = Administration menu
-file = tests/admin_menu.test
+group = Administration bar
+file = tests/admin_bar.test
 
-[AdminMenuDynamicLinksTestCase]
+[AdminBarDynamicLinksTestCase]
 name = Dynamic links
 description = Tests appearance, localization, and escaping of dynamic links.
-group = Administration menu
-file = tests/admin_menu.test
+group = Administration bar
+file = tests/admin_bar.test
 
-[AdminMenuLinkTypesTestCase]
+[AdminBarLinkTypesTestCase]
 name = Link types
 description = Tests appearance of different types of links.
-group = Administration menu
-file = tests/admin_menu.test
+group = Administration bar
+file = tests/admin_bar.test
 
-[AdminMenuCustomizedTestCase]
+[AdminBarCustomizedTestCase]
 name = Customized links
 description = Tests customized menu links.
-group = Administration menu
-file = tests/admin_menu.test
+group = Administration bar
+file = tests/admin_bar.test

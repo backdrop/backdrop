@@ -1716,16 +1716,16 @@ function system_update_1008() {
  * Enable Admin Menu module.
  */
 function system_update_1009() {
-  update_module_enable(array('admin_menu'));
+  update_module_enable(array('admin_bar'));
 
   // Install default config.
-  config_install_default_config('admin_menu', 'admin_menu.settings');
+  config_install_default_config('admin_bar', 'admin_bar.settings');
 
   // Manually install schema, as update_module_enable() does not do this for us.
-  if (!db_table_exists('cache_admin_menu')) {
-    $cache_admin_menu = backdrop_get_schema_unprocessed('system', 'cache');
-    $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
-    db_create_table('cache_admin_menu', $cache_admin_menu);
+  if (!db_table_exists('cache_admin_bar')) {
+    $cache_admin_bar = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_admin_bar['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
+    db_create_table('cache_admin_bar', $cache_admin_bar);
   }
 }
 
@@ -1782,9 +1782,7 @@ function system_update_1012() {
  * Moves site system settings from variable to config.
  */
 function system_update_1013() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.site');
-  // Migrate variables if any.
+  // Set the default variables for the system.site config file.
   $config = config('system.site');
   $config->set('site_name', variable_get('site_name', 'Backdrop'));
   $config->set('site_mail', variable_get('site_mail', ''));
@@ -2023,15 +2021,54 @@ function system_update_1020() {
 }
 
 /**
-* Removes the js_cache_files variable.
-*
-* @ingroup config_upgrade
-*/
+ * Removes the js_cache_files variable.
+ */
 function system_update_1021() {
   variable_del('js_cache_files');
 }
- 
- /**
+
+/**
+ * Converts theme logo and shortcut settings to site-wide config.
+ */
+function system_update_1022() {
+  // Update to set the defaults.
+  $config = config('system.site');
+  $config->set('site_logo_theme', 1);
+  $config->set('site_logo_path', '');
+  $config->set('site_favicon_theme', 1);
+  $config->set('site_favicon_path', 'core/misc/favicon.ico');
+  $config->set('site_favicon_mimetype', 'image/vnd.microsoft.icon');
+
+  $settings = variable_get('theme_settings');
+
+  // Copy over logo settings.
+  if (!empty($settings['toggle_logo'])) {
+    $config->set('site_logo_theme', $settings['default_logo']);
+    if (is_file($settings['logo_path'])) {
+      $config->set('site_favicon_path', $settings['logo_path']);
+      $config->set('site_favicon_mimetype', file_get_mimetype($settings['logo_path']));
+    }
+  }
+
+  // Copy over favicon settings.
+  if (!empty($settings['toggle_favicon'])) {
+    $config->set('site_favicon_theme', $settings['default_favicon']);
+    if (is_file($settings['favicon_path'])) {
+      $config->set('site_favicon_path', $settings['favicon_path']);
+    }
+  }
+}
+
+/**
+ * Enable admin_bar, replacing the renamed admin_menu.
+ */
+function system_update_1023() {
+  if (!module_exists('admin_bar')) {
+    module_enable(array('admin_bar'));
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

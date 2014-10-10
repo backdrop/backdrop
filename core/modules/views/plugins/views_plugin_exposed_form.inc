@@ -194,7 +194,7 @@ class views_plugin_exposed_form extends views_plugin {
           if (!$sort->is_exposed()) {
             $sort->query();
           }
-          else if ($key == $sort_by) {
+          elseif ($key == $sort_by) {
             if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('ASC', 'DESC'))) {
               $sort->options['order'] = $exposed_data['sort_order'];
             }

@@ -376,7 +376,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     if ($hook == 'insert' || $hook == 'update') {
       node_invoke($node, $hook);
     }
-    else if ($hook == 'predelete') {
+    elseif ($hook == 'predelete') {
       // 'delete' is triggered in 'predelete' is here to preserve hook ordering
       // from Drupal 7.
       node_invoke($node, 'delete');

@@ -268,6 +268,85 @@ function backdrop_get_breadcrumb() {
 }
 
 /**
+ * Gets the site logo.
+ *
+ * Falls back to none (empty string) if not defined or theme provided.
+ *
+ * @return (string) $logo
+ *   URL to the logo file to use for the site.
+ */
+function backdrop_get_logo() {
+  $logo = '';
+
+  // The logo may be needed on pages prior to config being ready, e.g. during
+  // installer or on maintenance pages. Default to an empty string if unable to
+  // load the configuration.
+  try {
+    $site_config = config('system.site');
+
+    if ($site_config->get('site_logo_theme')) {
+      global $theme;
+      $theme_data = list_themes();
+      $theme_object = $theme_data[$theme];
+      if (file_exists($logo = dirname($theme_object->filename) . '/logo.png')) {
+        $logo = file_create_url($logo);
+      }
+    }
+    elseif ($site_config->get('site_logo_path')) {
+      $logo = file_create_url($site_config->get('site_logo_path'));
+    }
+  }
+  catch (ConfigException $e) {
+    // Use the default empty logo.
+  }
+
+  return $logo;
+}
+
+/**
+ * Gets the file location and mime type for site favicon.
+ *
+ * Falls back to the Backdrop favicon if not defined or theme provided.
+ *
+ * @return (array) $favicon
+ *   Information about the favicon to use for the site.  Keys include:
+ *   - path: Relative path to the file to be used.
+ *   - type: mime type for the icon being used.
+ */
+function backdrop_get_favicon() {
+  $favicon = array(
+    'path' => file_create_url('core/misc/favicon.ico'),
+    'type' => 'image/vnd.microsoft.icon',
+  );
+
+  // Load the config and update, if we can.
+  try {
+    $site_config = config('system.site');
+
+    if ($site_config->get('site_favicon_theme')) {
+      global $theme;
+      $theme_data = list_themes();
+      $theme_object = $theme_data[$theme];
+      if (file_exists($favicon = dirname($theme_object->filename) . '/favicon.ico')) {
+        $favicon['path'] = file_create_url($favicon);
+      }
+    }
+    elseif ($site_config->get('site_favicon_path')) {
+      $favicon['path'] = file_create_url($site_config->get('site_favicon_path'));
+      $favicon['type'] = $site_config->get('site_favicon_mime');
+    }
+  }
+  catch (ConfigException $e) {
+    // Use the default.
+  }
+
+  // Safety check to prevent user-provided javascript: URLs or the like.
+  $favicon['path'] = backdrop_strip_dangerous_protocols($favicon['path']);
+
+  return $favicon;
+}
+
+/**
  * Adds output to the HEAD tag of the HTML page.
  *
  * This function can be called as long as the headers aren't sent. Pass no
@@ -5250,7 +5329,7 @@ function backdrop_json_format($json) {
     }
     // If this character is the end of an element, output a new line and indent
     // the next line.
-    else if (($char == '}' || $char == ']') && $out_of_quotes) {
+    elseif (($char == '}' || $char == ']') && $out_of_quotes) {
       $result .= $new_line;
       $pos--;
       for ($j = 0; $j < $pos; $j++) {
@@ -5259,7 +5338,7 @@ function backdrop_json_format($json) {
     }
     // Eat all non-essential whitespace in the input as we do our own here and
     // it would only mess up our process.
-    else if ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
+    elseif ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
       continue;
     }
 
