@@ -369,34 +369,6 @@ function node_schema() {
     'primary key' => array('type'),
   );
 
-  $schema['block_node_type'] = array(
-    'description' => 'Sets up display criteria for blocks based on content types',
-    'fields' => array(
-      'module' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'description' => "The block's origin module, from {block}.module.",
-      ),
-      'delta' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'description' => "The block's unique delta within module, from {block}.delta.",
-      ),
-      'type' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'description' => "The machine-readable name of this type from {node_type}.type.",
-      ),
-    ),
-    'primary key' => array('module', 'delta', 'type'),
-    'indexes' => array(
-      'type' => array('type'),
-    ),
-  );
-
   $schema['history'] = array(
     'description' => 'A record of which {users} have read which {node}s.',
     'fields' => array(
@@ -506,6 +478,19 @@ function _update_7000_node_get_types() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function node_update_dependencies() {
+  // Do not drop the block tables until after System module has enabled and
+  // migrated blocks into layouts.
+  $dependencies['node'][1004] = array(
+    'system' => 1025,
+  );
+
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-8.x
  * @{
  */
@@ -575,6 +560,13 @@ function node_update_1003() {
     variable_set('node_user_picture_' . $type_name, $node_picture);
     variable_set('comment_user_picture_' . $type_name, $comment_picture);
   }
+}
+
+/**
+ * Remove the block_node_type table, now stored in layout configuration files.
+ */
+function node_update_1004() {
+  db_drop_table('block_node_type');
 }
 
 /**

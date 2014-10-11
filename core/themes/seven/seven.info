@@ -1,12 +1,7 @@
 name = Seven
-description = A simple one-column, tableless, fluid width administration theme.
+description = The default administration theme for Backdrop CMS.
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 stylesheets[screen][] = style.css
 stylesheets[screen][] = seven.base.css
-regions[content] = Content
-regions[page_top] = Page top
-regions[page_bottom] = Page bottom
-regions[sidebar_first] = First sidebar
-regions_hidden[] = sidebar_first

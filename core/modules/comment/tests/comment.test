@@ -13,7 +13,7 @@ class CommentHelperCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('comment', 'search');
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer blocks'));
+    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer layouts'));
     $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
@@ -1649,20 +1649,22 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
   function testRecentCommentBlock() {
     $this->backdropLogin($this->admin_user);
 
-    // Set the block to a region to confirm block is available.
-    $edit = array(
-      'blocks[comment_recent][region]' => 'sidebar_first',
-    );
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block saved to first sidebar region.');
-
-    // Set block title and variables.
+    // Add the block to the sidebar region in the default layout.
+    $layout_name = 'default';
+    $region = 'sidebar';
     $block = array(
-      'title' => $this->randomName(),
-      'comment_block_count' => 2,
+      'module' => 'comment',
+      'delta' => 'recent',
     );
-    $this->backdropPost('admin/structure/block/manage/comment/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block saved.');
+    $block_title = $this->randomName(16);
+    $edit = array(
+      'region' => $region,
+      'title' => $block_title,
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'block_settings[comment_count]' => 2,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Add some test comments, one without a subject.
     $comment1 = $this->postComment($this->node, $this->randomName(), $this->randomName());
@@ -1677,14 +1679,14 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
     // posting a node from a node form.
     cache_clear_all();
     $this->backdropGet('');
-    $this->assertNoText($block['title'], 'Block was not found.');
+    $this->assertNoText($block_title, 'Block was not found.');
     user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access comments'));
 
     // Test that a user with the 'access comments' permission can see the
     // block.
     $this->backdropLogin($this->web_user);
     $this->backdropGet('');
-    $this->assertText($block['title'], 'Block was found.');
+    $this->assertText($block_title, 'Block was found.');
 
     // Test the only the 2 latest comments are shown and in the proper order.
     $this->assertNoText($comment1->subject, 'Comment not found in block.');
@@ -1695,11 +1697,11 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
     // Set the number of recent comments to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
-    $block = array(
-      'comment_block_count' => 10,
+    $edit = array(
+      'block_settings[comment_count]' => 10,
     );
-    $this->backdropPost('admin/structure/block/manage/comment/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block saved.');
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Post an additional comment.
     $comment4 = $this->postComment($this->node, $this->randomName(), $this->randomName());

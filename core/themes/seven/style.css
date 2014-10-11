@@ -1,4 +1,16 @@
 /**
+ * Blocks.
+ */
+.block {
+  width: 100%;
+
+  /* Clearfix */
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/**
  * Menus and lists.
  */
 .block ul,
@@ -74,91 +86,88 @@ ul.menu li.expanded {
 }
 
 /**
- * Branding.
+ * Header contents.
  */
-#branding {
-  overflow: hidden;
-  padding: 20px 20px 0 20px; /* LTR */
-  position: relative;
-  background-color: #e0e0d8;
-}
-[dir="rtl"] #branding {
-  padding: 20px 20px 0 20px;
-}
-#branding div.breadcrumb {
+.breadcrumb {
   font-size: 0.846em;
   padding-bottom: 5px;
 }
-#branding div.block {
-  position: relative;
-  float: right; /* LTR */
-  width: 240px;
-  padding-left: 10px; /* LTR */
-  background: #333;
+@media screen and (min-width:720px) {
+  .block-system-header .name-and-slogan {
+    float: left; /* LTR */
+  }
+  [dir="rtl"] .block-system-header .name-and-slogan {
+    float: right;
+  }
+  .header-menu {
+    text-align: right; /* LTR */
+  }
 }
-[dir="rtl"] #branding div.block {
-  float: left;
-  padding-left: 0;
-  padding-right: 10px;
+.block-system-header .site-name {
+  font-size: 3em;
+  line-height: 1.2;
 }
-#branding div.block form label {
-  display: none;
-}
-#branding div.block form div.form-item {
-  float: left; /* LTR */
-  border: 0;
+.header-menu ul.links {
   margin: 0;
   padding: 0;
 }
-[dir="rtl"] #branding div.block form div.form-item {
-  float: right;
+.header-menu ul.links li {
+  padding: 0 10px 10px 0; /* LTR */
+  display: inline-block;
 }
-#branding div.block form input.form-text {
-  width: 140px;
-  margin-right: 10px; /* LTR */
+[dir="rtl"] .header-menu ul.links li {
+  padding: 0 0 10px 10px; /* LTR */
 }
-[dir="rtl"] #branding div.block form input.form-text {
-  margin-left: 10px;
-  margin-right: 0;
-}
-#branding div.block form input.form-submit {
+.header-menu ul.links li a {
+  font-size: 0.923em;
+  background: #777;
+  color: #fff;
   text-align: center;
+  padding: 5px;
+  height: 55px;
   width: 80px;
+  overflow: hidden;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.header-menu ul.links li a:hover {
+  background: #999;
 }
 
-/**
- * Help.
- */
-#help {
-  font-size: 0.923em;
-  margin-top: 1em;
+#header ul.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline;
 }
-#help p {
-  margin: 0 0 10px;
+#header ul.menu li {
+  padding-right: 1em; /* LTR */
 }
-#help div.more-help-link {
-  text-align: right; /* LTR */
+[dir="rtl"] #header ul.menu li {
+  padding-left: 1em;
+  padding-right: 0;
 }
-[dir="rtl"] #help div.more-help-link {
-  text-align: left;
+#header ul.menu li {
+  display: inline;
+}
+.header-menu ul.links li.active-trail a,
+.header-menu ul.links li a.active {
+  background: #333;
 }
 
 /**
  * Page title.
  */
 #page-title {
-  background: #333;
-  padding-top: 20px;
-}
-#branding h1.page-title {
   color: #000;
-  margin: 0;
-  padding-bottom: 10px;
+  margin: 0 0 10px;
+  padding: 0;
+  line-height: 1.3;
   font-size: 1.385em;
   font-weight: normal;
   float: left; /* LTR */
 }
-[dir="rtl"] #branding h1.page-title {
+[dir="rtl"] #page-title {
   float: right;
 }
 
@@ -177,7 +186,6 @@ ul.primary {
   border-bottom: none;
   text-transform: uppercase;
   font-size: 0.923em;
-  height: 2.60em;
   margin: 0;
   padding-top: 0;
 }
@@ -197,8 +205,8 @@ ul.primary li a:hover,
 ul.primary li.active a {
   display: block;
   float: left; /* LTR */
-  height: 2.60em;
-  line-height: 2.60em;
+  height: 2em;
+  line-height: 2.6;
   padding: 0 18px 8px;
   background-color: #a6a7a2;
   color: #000;
@@ -227,19 +235,19 @@ ul.primary li a:hover {
 ul.primary li.active a:hover {
   color: #000;
 }
-.tabs-secondary {
-  clear: both;
-}
 ul.secondary {
-  float: right; /* LTR */
+  text-align: right; /* LTR */
   font-size: 0.923em;
-  padding: 0 3px 5px;
+  padding: 16px 23px;
+  margin: 0 -20px;
   line-height: 1.385em;
   overflow: hidden;
   background-color: #fff;
+  clear: both;
+  border: none;
 }
 [dir="rtl"] ul.secondary {
-  float: left;
+  text-align: left;
 }
 ul.secondary li {
   margin: 0 5px;
@@ -257,6 +265,7 @@ ul.secondary li.active a.active {
   padding: 2px 10px;
   -moz-border-radius: 7px;
   border-radius: 7px;
+  border: none;
 }
 ul.secondary li a:hover,
 ul.secondary li.active a,
@@ -268,63 +277,23 @@ ul.secondary li.active a.active {
 /**
  * Page layout.
  */
-#page {
-  background: #fff;
-  color: #333;
-  margin-left: 13px;
-  margin-right: 13px;
-  padding: 20px 0 40px 0;
-  position: relative;
+.layout {
+  /* Add a margin to all layouts. */
+  margin: 0 20px;
 }
-@media screen and (min-width:450px) {
-  #page {
-    margin-left: 20px;
-    margin-right: 20px;
-  }
+#header {
+  /* Then add a negative margin the header the same amount. */
+  padding: 20px 20px 0;
+  margin: 0 -20px 20px;
+  background-color: #e0e0d8;
 }
-@media screen and (min-width:720px) {
-  #page {
-    margin-left: 40px;
-    margin-right: 40px;
-  }
+.layout-one-column #messages,
+.layout-one-column #content .section {
+  /* Make the one column layout margin match other layouts. */
+  margin: 0 15px;
 }
-#secondary-links ul.links li {
-  padding: 0 10px 10px 0; /* LTR */
-}
-[dir="rtl"] #secondary-links ul.links li {
-  padding: 0 0 10px 10px; /* LTR */
-}
-#secondary-links ul.links li a {
-  font-size: 0.923em;
-  background: #777;
-  color: #fff;
-  text-align: center;
-  padding: 5px;
-  height: 55px;
-  width: 80px;
-  overflow: hidden;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-}
-#secondary-links ul.links li a:hover {
-  background: #999;
-}
-ul.links li,
-ul.inline li {
-  padding-right: 1em; /* LTR */
-}
-[dir="rtl"] ul.links li,
-[dir="rtl"] ul.inline li {
-  padding-left: 1em;
-  padding-right: 0;
-}
-ul.inline li {
-  display: inline;
-}
-#secondary-links ul.links li.active-trail a,
-#secondary-links ul.links li a.active {
-  background: #333;
-}
+
+/* Administration page listings. */
 ul.admin-list li {
   position: relative;
   padding-left: 30px; /* LTR */
@@ -851,6 +820,25 @@ div.admin-panel h3 {
   margin-top: 0;
 }
 
+/**
+ * Layout configuration.
+ */
+#layout-edit-main {
+  padding: 20px;
+  background: #F8F9F4;
+}
+#layout-edit-main .layout {
+  margin: 0;
+}
+#layout-edit-main #header {
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+#layout-edit-main #page-title {
+  float: none;
+}
+
 /* Update options. */
 div.admin-options {
   background: #f8f8f8;
@@ -895,6 +883,7 @@ body.maintenance-page #page {
   max-width: 770px;
   min-width: 255px;
   margin: 0 auto;
+  background: white;
 }
 body.maintenance-page #page:after {
   left: 100%; /* LTR */

@@ -10,6 +10,7 @@ dependencies[] = comment
 dependencies[] = config
 dependencies[] = contextual
 dependencies[] = image
+dependencies[] = layout
 dependencies[] = list
 dependencies[] = menu
 dependencies[] = number

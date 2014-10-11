@@ -974,18 +974,12 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->admin_user = $this->backdropCreateUser($perms);
     $this->backdropLogin($this->admin_user);
 
-    // This test puts menu links in the Main menu and then tests for their
-    // presence on the page, so we need to ensure that the Main block
-    // will be displayed in all active themes.
-    db_update('block')
-      ->fields(array(
-        // Use a region that is valid for all themes.
-        'region' => 'content',
-        'status' => 1,
-      ))
-      ->condition('module', 'system')
-      ->condition('delta', 'main-menu')
-      ->execute();
+    // This test confirms that menu links work on both the front-end and the
+    // back-end. The default layout already has the main menu block, but the
+    // admin layout needs to have it added for these tests.
+    $layout = layout_load('admin_default');
+    $layout->addBlock('system', 'main-menu', 'header');
+    $layout->save();
   }
 
   /**
@@ -1290,7 +1284,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       // untranslated menu links automatically generated from menu router items
       // ('taxonomy/term/%') should never be translated and appear in any menu
       // other than the breadcrumb trail.
-      $elements = $this->xpath('//div[@id=:menu]/descendant::a[@href=:href]', array(
+      $elements = $this->xpath('//*[contains(@class,:menu)]/descendant::a[@href=:href]', array(
         ':menu' => 'block-system-main-menu',
         ':href' => url($link['link_path']),
       ));
@@ -1432,11 +1426,10 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     // Verify that we can access recent log entries, there is a corresponding
     // page title, and that the breadcrumb is empty (because the user is not
     // able to access "Administer", so the trail cannot recurse into it).
-    $trail = array();
+    $trail = $home;
     $this->assertBreadcrumb('admin', $trail, t('Access denied'));
     $this->assertResponse(403);
 
-    $trail = $home;
     $this->assertBreadcrumb('admin/reports', $trail, t('Reports'));
     $this->assertNoResponse(403);
 
@@ -1459,31 +1452,16 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages'));
     $this->backdropLogin($this->admin_user);
 
-    // This test puts menu links in the Main menu and then tests for their
-    // presence on the page, so we need to ensure that the Main menu block
-    // will be displayed in all active themes.
-    db_update('block')
-      ->fields(array(
-        // Use a region that is valid for all themes.
-        'region' => 'content',
-        'status' => 1,
-      ))
-      ->condition('module', 'system')
-      ->condition('delta', 'main-menu')
-      ->execute();
+    // Add blocks for management to the default layout.
+    $layout = layout_load('default');
+    $layout->addBlock('system', 'management', 'content');
+    $layout->save();
 
-    // This test puts menu links in the Management menu and then tests for
-    // their presence on the page, so we need to ensure that the Management
-    // block will be displayed in all active themes.
-    db_update('block')
-      ->fields(array(
-        // Use a region that is valid for all themes.
-        'region' => 'content',
-        'status' => 1,
-      ))
-      ->condition('module', 'system')
-      ->condition('delta', 'management')
-      ->execute();
+    // Add blocks for management and main menu to the admin layout.
+    $layout = layout_load('admin_default');
+    $layout->addBlock('system', 'management', 'content');
+    $layout->addBlock('system', 'main-menu', 'content');
+    $layout->save();
   }
 
   /**

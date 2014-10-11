@@ -829,8 +829,7 @@ function locale_block_info() {
   foreach (language_types_get_configurable(FALSE) as $type) {
     $block[$type] = array(
       'info' => t('Language switcher (@type)', array('@type' => $info[$type]['name'])),
-      // Not worth caching.
-      'cache' => BACKDROP_NO_CACHE,
+      'description' => t('Switches the site language for the @type portions of the page.', array('@type' => $info[$type]['name'])),
     );
   }
   return $block;

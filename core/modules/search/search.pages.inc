@@ -79,8 +79,6 @@ function search_view($module = NULL, $keys = '') {
  * @see search-results.tpl.php
  */
 function template_preprocess_search_results(&$variables) {
-  debug('first');
-
   global $language_interface;
   $variables['search_results'] = array();
   if (!empty($variables['module'])) {

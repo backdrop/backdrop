@@ -39,8 +39,9 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     // Enable the language switcher block.
     $language_type = LANGUAGE_TYPE_INTERFACE;
-    $edit = array("blocks[locale_$language_type][region]" => 'sidebar_first');
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    $layout = layout_load('default');
+    $layout->addBlock('locale', $language_type, 'sidebar');
+    $layout->save();
 
     // Reset static caches in our local language environment.
     $this->resetCaches();

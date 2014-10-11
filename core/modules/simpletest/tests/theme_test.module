@@ -139,9 +139,9 @@ function _theme_test_suggestion() {
 }
 
 /**
- * Implements hook_preprocess_html().
+ * Implements hook_preprocess_page().
  */
-function theme_test_preprocess_html(&$variables) {
+function theme_test_preprocess_page(&$variables) {
   $variables['html_attributes_array']['theme_test_html_attribute'] = 'theme test html attribute value';
   $variables['body_attributes_array']['theme_test_body_attribute'] = 'theme test body attribute value';
 }

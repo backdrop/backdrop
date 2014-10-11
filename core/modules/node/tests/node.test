@@ -712,15 +712,18 @@ class NodeBlockTestCase extends BackdropWebTestCase {
    * Tests that the "Syndicate" block is shown when enabled.
    */
   function testSyndicateBlock() {
-    // Set block title to confirm that the interface is available.
-    $this->backdropPost('admin/structure/block/manage/node/syndicate/configure', array('title' => $this->randomName(8)), t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block configuration set.');
+    $layout = layout_load('default');
+    $layout->addBlock('node', 'syndicate', 'footer');
+    $layout->save();
 
-    // Set the block to a region to confirm block is available.
-    $edit = array();
-    $edit['blocks[node_syndicate][region]'] = 'footer';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block successfully moved to footer region.');
+    $syndicate_selector = '//*[contains(@class,"block-node-syndicate")]//a[contains(@class,"feed-icon")]';
+    $this->backdropGet('node');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on /node.');
+
+    $this->backdropGet('user');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block not shown on /user.');
   }
 }
 
@@ -753,7 +756,6 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $elements = $this->xpath('//div[contains(@class,:class)]', array(':class' => 'submitted'));
     $this->assertEqual(count($elements), 1, 'Post information is displayed.');
   }
@@ -1733,7 +1735,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     parent::setUp('node', 'block');
 
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks'));
+    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create article content'));
   }
 
@@ -1749,19 +1751,17 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
 
     // Set the block to a region to confirm block is available.
-    $edit = array(
-      'blocks[node_recent][region]' => 'sidebar_first',
-    );
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block saved to first sidebar region.');
+    $layout = layout_load('default');
+    $block = $layout->addBlock('node', 'recent', 'sidebar');
 
     // Set block title and variables.
-    $block = array(
-      'title' => $this->randomName(),
-      'node_recent_block_count' => 2,
+    $block_title = $this->randomName();
+    $block->settings['title'] = $block_title;
+    $block->settings['title_display'] = LAYOUT_TITLE_CUSTOM;
+    $block->settings['block_settings'] = array(
+      'node_count' => 2,
     );
-    $this->backdropPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block saved.');
+    $layout->save();
 
     // Test that block is not visible without nodes
     $this->backdropGet('');
@@ -1791,7 +1791,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // see the block.
     $this->backdropLogout();
     $this->backdropGet('');
-    $this->assertNoText($block['title'], t('Block was not found.'));
+    $this->assertNoText($block_title, t('Block was not found.'));
 
     // Test that only the 2 latest nodes are shown.
     $this->backdropLogin($this->web_user);
@@ -1800,18 +1800,19 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//div[@id="block-node-recent"]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-node-recent")]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
-    $block = array(
-      'node_recent_block_count' => 10,
+
+    $block->settings['block_settings'] = array(
+      'node_count' => 10,
     );
-    $this->backdropPost('admin/structure/block/manage/node/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), t('Block saved.'));
+    $layout->save();
 
     // Post an additional node.
+    $default_settings['type'] = 'page';
     $node4 = $this->backdropCreateNode($default_settings);
     // backdropCreateNode() does not automatically flush content caches unlike
     // posting a node from a node form.
@@ -1828,29 +1829,36 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $custom_block = array();
     $custom_block['info'] = $this->randomName();
     $custom_block['title'] = $this->randomName();
-    $custom_block['types[article]'] = TRUE;
     $custom_block['body[value]'] = $this->randomName(32);
-    $custom_block['regions[' . variable_get('theme_default', 'stark') . ']'] = 'content';
-    if ($admin_theme = variable_get('admin_theme')) {
-      $custom_block['regions[' . $admin_theme . ']'] = 'content';
-    }
     $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
 
-    $bid = db_query("SELECT bid FROM {block_custom} WHERE info = :info", array(':info' => $custom_block['info']))->fetchField();
-    $this->assertTrue($bid, t('Custom block with visibility rule was created.'));
+    // Add a new layout with the node/% path.
+    $edit = array(
+      'title' => 'Article layout',
+      'name' => 'article_layout',
+      'layout' => 'two_column',
+      'path' => 'node/%',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a condition to specify only the article type should have this layout.
+    $this->backdropPost('admin/structure/layouts/manage/article_layout/settings', array(), t('Add condition'));
+    $this->backdropPost(NULL, array('condition' => 'node_type'), t('Add condition'));
+    $this->backdropPost(NULL, array('bundles[article]' => 1), t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Add the custom block to the layout.
+    $layout = layout_load('article_layout');
+    $layout->addBlock('block', 1, 'sidebar');
+    $layout->save();
 
     // Verify visibility rules.
     $this->backdropGet('');
-    $this->assertNoText($custom_block['title'], t('Block was displayed on the front page.'));
-    $this->backdropGet('node/add/article');
-    $this->assertText($custom_block['title'], t('Block was displayed on the node/add/article page.'));
+    $this->assertNoText($custom_block['title'], 'Block was not displayed the front page.');
     $this->backdropGet('node/' . $node1->nid);
-    $this->assertText($custom_block['title'], t('Block was displayed on the node/N.'));
-
-    // Delete the created custom block & verify that it's been deleted.
-    $this->backdropPost('admin/structure/block/manage/block/' . $bid . '/delete', array(), t('Delete'));
-    $bid = db_query("SELECT 1 FROM {block_node_type} WHERE module = 'block' AND delta = :delta", array(':delta' => $bid))->fetchField();
-    $this->assertFalse($bid, t('Custom block was deleted.'));
+    $this->assertText($custom_block['title'], 'Block was displayed on the article node.');
+    $this->backdropGet('node/' . $node4->nid);
+    $this->assertNoText($custom_block['title'], 'Block was not displayed on the page node.');
   }
 }
 

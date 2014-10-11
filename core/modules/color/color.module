@@ -42,7 +42,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
  *
  * @see theme()
  */
-function _color_html_alter(&$vars) {
+function _color_page_alter(&$vars) {
   global $theme_key;
   $themes = list_themes();
 
@@ -77,7 +77,7 @@ function _color_html_alter(&$vars) {
  *
  * @see theme()
  */
-function _color_page_alter(&$vars) {
+function _color_header_alter(&$vars) {
   global $theme_key;
 
   // Override logo.

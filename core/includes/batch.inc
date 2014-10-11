@@ -68,6 +68,9 @@ function _batch_page() {
     }
   }
 
+  // Surpress messages during batch requests.
+  backdrop_show_messages(FALSE);
+
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
   $output = NULL;
   switch ($op) {
@@ -88,6 +91,8 @@ function _batch_page() {
       break;
 
     case 'finished':
+      // Show messages on the completion page.
+      backdrop_show_messages(TRUE);
       $output = _batch_finished();
       break;
   }

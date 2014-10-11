@@ -100,28 +100,25 @@ function admin_bar_menu_link_delete($link) {
 }
 
 /**
- * Implements hook_page_build().
+ * Implements hook_preprocess_page().
  */
-function admin_bar_page_build(&$page) {
+function admin_bar_preprocess_page(&$variables) {
   if (!user_access('access administration bar') || admin_bar_suppress(FALSE)) {
     return;
   }
+
   // Performance: Skip this entirely for AJAX requests.
-  if (backdrop_is_ajax()) {
+  if (!backdrop_is_html()) {
     return;
   }
 
   global $user, $language_interface;
   $path = backdrop_get_path('module', 'admin_bar');
 
-  $page['page_bottom']['admin_bar'] = array(
-    '#attached' => array(),
-  );
-  $attached = &$page['page_bottom']['admin_bar']['#attached'];
   $options = array('every_page' => TRUE);
 
-  $attached['css'][$path . '/css/admin_bar.css'] = $options;
-  $attached['js'][$path . '/admin_bar.js'] = $options;
+  backdrop_add_css($path . '/css/admin_bar.css', $options);
+  backdrop_add_js($path . '/admin_bar.js', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
@@ -159,7 +156,7 @@ function admin_bar_page_build(&$page) {
   // Otherwise, add the full menu to the page.
   else {
     module_load_include('inc', 'admin_bar');
-    $page['page_bottom']['admin_bar']['#markup'] = admin_bar_output($complete);
+    $variables['page_bottom'] .= admin_bar_output($complete);
   }
 
   $replacements = module_invoke_all('admin_bar_replacements', $complete);
@@ -173,19 +170,9 @@ function admin_bar_page_build(&$page) {
   }
   if ($setting = $config->get('position_fixed')) {
     $settings['position_fixed'] = $setting;
-
-    // In fixed positioning, supply a callback function for tableheader.js to
-    // allow it to determine the top viewport offset.
-    $attached['js'][] = array(
-      'data' => array('tableHeaderOffset' => 'Backdrop.adminBar.height'),
-      'type' => 'setting',
-    );
   }
 
-  $attached['js'][] = array(
-    'data' => array('admin_bar' => $settings),
-    'type' => 'setting',
-  );
+  backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
 /**
@@ -349,7 +336,7 @@ function admin_bar_admin_bar_replacements($complete) {
  * @see user_block(), user.module
  */
 function admin_bar_get_user_count() {
-  $interval   = REQUEST_TIME - variable_get('user_block_seconds_online', 900);
+  $interval   = REQUEST_TIME - 900;
   $count_anon = admin_bar_session_count($interval, TRUE);
   $count_auth = admin_bar_session_count($interval, FALSE);
 

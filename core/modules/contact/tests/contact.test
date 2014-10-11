@@ -145,9 +145,8 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     }
     // Submit contact form one over limit.
     $this->backdropGet('contact');
-    $this->assertResponse(403, 'Access denied to anonymous user after reaching message treshold.');
     $config = config('contact.settings');
-    $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => variable_get('contact_threshold_limit', 3), '@interval' => format_interval(600))), 'Message threshold reached.');
+    $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => $config->get('contact_threshold_limit'), '@interval' => format_interval(600))), 'Message threshold reached.');
 
     // Delete created categories.
     $this->backdropLogin($admin_user);

@@ -18,6 +18,7 @@ function user_autocomplete($string = '') {
   }
 
   backdrop_json_output($matches);
+  backdrop_exit();
 }
 
 /**
@@ -535,7 +536,7 @@ function user_page() {
   global $user;
   if ($user->uid) {
     menu_set_active_item('user/' . $user->uid);
-    return menu_execute_active_handler(NULL, FALSE);
+    return menu_execute_active_handler(NULL, FALSE, 'menu_default_route_handler');
   }
   else {
     return backdrop_get_form('user_login');

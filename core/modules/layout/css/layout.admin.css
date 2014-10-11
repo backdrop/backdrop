@@ -1,0 +1,149 @@
+/* Layout listing form. */
+#layout-list .layout-group td {
+  background: #E1E2DC;
+}
+#layout-list .layout-group td:first-child {
+  font-weight: bold;
+}
+#layout-list .layout-row td:first-child {
+  padding-left: 24px;
+}
+#layout-list tr.disabled td {
+  color: #999;
+}
+
+/* Individual layout settings form. */
+.layout-settings-form .layout-options {
+  width: 100%;
+}
+.layout-settings-form .layout-options .form-type-radio {
+  float: left;
+  text-align: center;
+}
+.layout-settings-form .layout-icon .caption {
+  width: 90px;
+  margin-bottom: 1em;
+}
+.layout-settings-form .form-item-path {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Menu item argument settings. */
+#layout-arguments strong,
+#layout-context-table strong {
+  text-decoration: underline;
+}
+
+#layout-context-table {
+  width: auto;
+}
+
+/* Buttons that are displayed as links. */
+.layout-access-remove,
+.layout-access-configure {
+  padding-left: 10px; /* LTR */
+}
+[dir="rtl"] .layout-access-remove,
+[dir="rtl"] .layout-access-configure {
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+/* Layout dialogs. */
+.layout-dialog {
+  max-width: 600px;
+}
+.layout-block-list {
+  max-height: 300px;
+  overflow: auto;
+}
+
+/* Layout editor. */
+.layout-editor-region-content {
+  min-height: 70px;
+  border: 1px dashed #CCC;
+  padding: 5px;
+  background: white;
+}
+.layout-editor-region-title .label {
+  float: left;
+  vertical-align: middle;
+  margin: 10px 12px 10px 0; /* LTR */
+}
+[dir="rtl"] .layout-editor-region-title .label {
+  margin: 10px 0 10px 12px;
+}
+.layout-editor-region-title .dropbutton-wrapper {
+  float: left;
+  width: 94px;
+  margin: 7px 0;
+}
+.ui-sortable .layout-editor-block {
+  cursor: move;
+}
+.layout-editor-block {
+  margin: -1px -1px 1em -1px;
+  background: #FFF;
+}
+.layout-editor-block:last-child {
+  margin-bottom: 0;
+}
+.layout-editor-block-title {
+  border: 1px solid #CCC;
+  background: #F3F4EE;
+  padding: 0.4em 1em;
+}
+.layout-editor-block-title .text {
+  font-size: 120%;
+  line-height: 1.5;
+  font-weight: bold;
+}
+.layout-editor-block-title .buttons {
+  float: right; /* LTR */
+  width: 120px;
+}
+[dir="rtl"] .layout-editor-block-title .buttons {
+  float: left;
+}
+.layout-editor-block-content {
+  border: 1px solid #CCC;
+  border-top: none;
+  padding: 0.4em 1em;
+  min-height: 20px;
+  font-size: 90%;
+  line-height: 1.5;
+}
+.layout-editor-block-content p {
+  margin: 0 0 12px;
+}
+.layout-editor-block-content p:last-child {
+  margin: 0;
+}
+.layout-editor-block-content fieldset {
+  border: none;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+.layout-editor-block-content fieldset .fieldset-legend {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+.layout-editor-block-content .item-list  ul {
+  margin: 0;
+  padding: 0;
+}
+.layout-editor-block-content .item-list ul li {
+  padding: 0;
+  margin: 0 0 0 12px; /* LTR */
+  list-style-type: disc;
+}
+[dir="rtl"] .layout-editor-block-content .item-list ul li {
+  margin: 0 12px 0 0;
+}
+.layout-editor-placeholder {
+  background-color: #EFEFEF;
+}

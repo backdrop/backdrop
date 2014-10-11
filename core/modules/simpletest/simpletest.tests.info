@@ -268,12 +268,6 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = tests/common.test
 
-[CommonRegionContentTestCase]
-name = Region content
-description = Tests setting and retrieving content from theme regions.
-group = Common
-file = tests/common.test
-
 [CommonBackdropGotoTestCase]
 name = Redirect functionality
 description = Tests the backdrop_goto() and hook_backdrop_goto_alter() functionality.

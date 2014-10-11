@@ -75,6 +75,7 @@ function comment_entity_info() {
   $return = array(
     'comment' => array(
       'label' => t('Comment'),
+      'bundle label' => t('Node type'),
       'base table' => 'comment',
       'fieldable' => TRUE,
       'controller class' => 'CommentStorageController',
@@ -173,7 +174,7 @@ function comment_field_extra_fields() {
 function comment_theme() {
   return array(
     'comment_block' => array(
-      'variables' => array(),
+      'variables' => array('comments' => array()),
     ),
     'comment_preview' => array(
       'variables' => array('comment' => NULL),
@@ -408,8 +409,10 @@ function comment_views_api() {
  * Implements hook_block_info().
  */
 function comment_block_info() {
-  $blocks['recent']['info'] = t('Recent comments');
-  $blocks['recent']['properties']['administrative'] = TRUE;
+  $blocks['recent'] = array(
+    'info' => t('Recent comments'),
+    'description' => t('A list of recent comments posted to the site.'),
+  );
 
   return $blocks;
 }
@@ -417,11 +420,14 @@ function comment_block_info() {
 /**
  * Implements hook_block_configure().
  */
-function comment_block_configure($delta = '') {
-  $form['comment_block_count'] = array(
+function comment_block_configure($delta = '', $settings = array()) {
+  $settings += array(
+    'comment_count' => 10,
+  );
+  $form['comment_count'] = array(
     '#type' => 'select',
     '#title' => t('Number of recent comments'),
-    '#default_value' => variable_get('comment_block_count', 10),
+    '#default_value' => $settings['comment_count'],
     '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
   );
 
@@ -429,21 +435,18 @@ function comment_block_configure($delta = '') {
 }
 
 /**
- * Implements hook_block_save().
- */
-function comment_block_save($delta = '', $edit = array()) {
-  variable_set('comment_block_count', (int) $edit['comment_block_count']);
-}
-
-/**
  * Implements hook_block_view().
  *
  * Generates a block with the most recent comments.
  */
-function comment_block_view($delta = '') {
-  if (user_access('access comments')) {
+function comment_block_view($delta = '', $settings = array()) {
+  if (user_access('access comments') && $delta === 'recent') {
+    $settings += array(
+      'comment_count' => 10,
+    );
+    $comments = comment_get_recent($settings['comment_count']);
     $block['subject'] = t('Recent comments');
-    $block['content'] = theme('comment_block');
+    $block['content'] = theme('comment_block', array('comments' => $comments));
 
     return $block;
   }
@@ -478,7 +481,7 @@ function comment_permalink($cid) {
     $_GET['page'] = $page;
 
     // Return the node view, this will show the correct comment in context.
-    return menu_execute_active_handler('node/' . $node->nid, FALSE);
+    return menu_execute_active_handler('node/' . $node->nid, FALSE, 'menu_default_route_handler');
   }
   return MENU_NOT_FOUND;
 }
@@ -585,10 +588,9 @@ function comment_new_page_count($num_comments, $new_replies, Node $node) {
  *
  * @ingroup themeable
  */
-function theme_comment_block() {
+function theme_comment_block($variables) {
   $items = array();
-  $number = variable_get('comment_block_count', 10);
-  foreach (comment_get_recent($number) as $comment) {
+  foreach ($variables['comments'] as $comment) {
     $items[] = l($comment->subject, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_interval(REQUEST_TIME - $comment->changed))) . '</span>';
   }
 

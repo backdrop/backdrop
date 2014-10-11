@@ -1845,7 +1845,7 @@ function form_builder($form_id, &$element, &$form_state) {
     $element['#array_parents'] = array();
   }
 
-  if (!isset($element['#id'])) {
+  if (!array_key_exists('#id', $element)) {
     $element['#id'] = backdrop_html_id('edit-' . implode('-', $element['#parents']));
   }
   // Handle input elements.
@@ -3115,6 +3115,11 @@ function form_pre_render_conditional_form_element($element) {
     }
   }
 
+  // Merge in any wrapper attributes.
+  if (isset($element['#wrapper_attributes'])) {
+    $element['#attributes'] = array_merge($element['#attributes'], $element['#wrapper_attributes']);
+  }
+
   // Add the element type to the wrapping container.
   if (isset($element['#type'])) {
     $element['#attributes']['class'][] = 'form-' . $element['#type'];
@@ -3229,7 +3234,7 @@ function form_process_actions($element, &$form_state) {
  */
 function form_process_container($element, &$form_state) {
   // Generate the ID of the element if it's not explicitly given.
-  if (!isset($element['#id'])) {
+  if (!array_key_exists('#id', $element)) {
     $element['#id'] = backdrop_html_id(implode('-', $element['#parents']) . '-wrapper');
   }
   return $element;
@@ -3255,7 +3260,7 @@ function theme_container($variables) {
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
     // Assign an html ID.
-    if (!isset($element['#attributes']['id'])) {
+    if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
     // Add the 'form-wrapper' class.

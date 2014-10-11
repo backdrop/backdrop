@@ -475,7 +475,7 @@ class AJAXFormPageCacheTestCase extends AJAXTestCase {
    * Return the build id of the current form.
    */
   protected function getFormBuildId() {
-    $build_id_fields = $this->xpath('//input[@name="form_build_id"]');
+    $build_id_fields = $this->xpath('//*[@id="content"]//input[@name="form_build_id"]');
     $this->assertEqual(count($build_id_fields), 1, 'One form build id field on the page');
     return (string) $build_id_fields[0]['value'];
   }

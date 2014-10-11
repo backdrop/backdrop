@@ -47,7 +47,7 @@ class BookTestCase extends BackdropWebTestCase {
     // Create users.
     $this->book_author = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books'));
     $this->web_user = $this->backdropCreateUser(array('access printer-friendly version', 'node test view'));
-    $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer blocks', 'administer permissions', 'administer book outlines', 'node test view'));
+    $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
   }
 
   /**
@@ -299,16 +299,21 @@ class BookTestCase extends BackdropWebTestCase {
   function testBookNavigationBlock() {
     $this->backdropLogin($this->admin_user);
 
-    // Set block title to confirm that the interface is available.
+    // Add the block to the sidebar region in the default layout.
+    $layout_name = 'default';
+    $region = 'sidebar';
+    $block = array(
+      'module' => 'book',
+      'delta' => 'navigation',
+    );
     $block_title = $this->randomName(16);
-    $this->backdropPost('admin/structure/block/manage/book/navigation/configure', array('title' => $block_title), t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block configuration set.');
-
-    // Set the block to a region to confirm block is available.
-    $edit = array();
-    $edit['blocks[book_navigation][region]'] = 'footer';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block successfully move to footer region.');
+    $edit = array(
+      'region' => $region,
+      'title' => $block_title,
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Give anonymous users the permission 'node test view'.
     $edit = array();
@@ -329,22 +334,26 @@ class BookTestCase extends BackdropWebTestCase {
    */
    function testNavigationBlockOnAccessModuleEnabled() {
      $this->backdropLogin($this->admin_user);
-     $edit = array();
 
      // Set the block title.
      $block_title = $this->randomName(16);
-     $edit['title'] = $block_title;
 
-     // Set block display to 'Show block only on book pages'.
-     $edit['book_block_mode'] = 'book pages';
-     $this->backdropPost('admin/structure/block/manage/book/navigation/configure', $edit, t('Save block'));
-     $this->assertText(t('The block configuration has been saved.'), 'Block configuration set.');
-
-     // Set the block to a region to confirm block is available.
-     $edit = array();
-     $edit['blocks[book_navigation][region]'] = 'footer';
-     $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-     $this->assertText(t('The block settings have been updated.'), 'Block successfully move to footer region.');
+     // Add the block to the sidebar region in the default layout.
+     $layout_name = 'default';
+     $region = 'sidebar';
+     $block = array(
+       'module' => 'book',
+       'delta' => 'navigation',
+     );
+     $block_title = $this->randomName(16);
+     $edit = array(
+       'region' => $region,
+       'title' => $block_title,
+       'title_display' => LAYOUT_TITLE_CUSTOM,
+       'block_settings[book_mode]' => 'book pages',
+     );
+     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
      // Give anonymous users the permission 'node test view'.
      $edit = array();

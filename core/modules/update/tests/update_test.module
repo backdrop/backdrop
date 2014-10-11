@@ -119,6 +119,7 @@ function update_test_mock_page($project_name) {
 
   $path = backdrop_get_path('module', 'update_test');
   readfile("$path/$project_name.$availability_scenario.xml");
+  backdrop_exit();
 }
 
 /**
