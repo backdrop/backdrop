@@ -3920,6 +3920,20 @@ function hook_countries_alter(&$countries) {
 }
 
 /**
+ * Alter the default timezone country list.
+ *
+ * @param $timezone_countries
+ *   The associative array of ISO 3166-1 country codes keyed by timezone.
+ *
+ * @see timezone_country_get_list()
+ * @see standard_timezone_country_list()
+ */
+function hook_timezone_countries_alter(&$timezone_countries) {
+  // Elbonia is now independent, so add its timezone to the list.
+  $timezone_countries['Europe/Elbonia'] = 'EB';
+}
+
+/**
  * Control site status before menu dispatching.
  *
  * The hook is called after checking whether the site is offline but before
