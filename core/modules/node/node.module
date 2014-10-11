@@ -95,12 +95,6 @@ function node_theme() {
       'variables' => array('name' => NULL, 'type' => NULL),
       'file' => 'content_types.inc',
     ),
-    'node_recent_block' => array(
-      'variables' => array('nodes' => NULL),
-    ),
-    'node_recent_content' => array(
-      'variables' => array('node' => NULL),
-    ),
   );
 }
 
@@ -1221,9 +1215,6 @@ function node_preprocess_block(&$variables) {
       case 'syndicate':
         $variables['attributes_array']['role'] = 'complementary';
         break;
-      case 'recent':
-        $variables['attributes_array']['role'] = 'navigation';
-        break;
     }
   }
 }
@@ -2007,9 +1998,6 @@ function node_block_info() {
   // Not worth caching.
   $blocks['syndicate']['cache'] = BACKDROP_NO_CACHE;
 
-  $blocks['recent']['info'] = t('Recent content');
-  $blocks['recent']['properties']['administrative'] = TRUE;
-
   return $blocks;
 }
 
@@ -2029,46 +2017,8 @@ function node_block_view($delta = '') {
       );
       break;
 
-    case 'recent':
-      if (user_access('access content')) {
-        $block['subject'] = t('Recent content');
-        if ($nodes = node_get_recent(variable_get('node_recent_block_count', 10))) {
-          $block['content'] = array(
-            '#theme' => 'node_recent_block',
-            '#nodes' => $nodes,
-          );
-        } else {
-          $block['content'] = t('No content available.');
-        }
-      }
-      break;
   }
   return $block;
-}
-
-/**
- * Implements hook_block_configure().
- */
-function node_block_configure($delta = '') {
-  $form = array();
-  if ($delta == 'recent') {
-    $form['node_recent_block_count'] = array(
-      '#type' => 'select',
-      '#title' => t('Number of recent content items to display'),
-      '#default_value' => variable_get('node_recent_block_count', 10),
-      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
-    );
-  }
-  return $form;
-}
-
-/**
- * Implements hook_block_save().
- */
-function node_block_save($delta = '', $edit = array()) {
-  if ($delta == 'recent') {
-    variable_set('node_recent_block_count', $edit['node_recent_block_count']);
-  }
 }
 
 /**
@@ -2110,69 +2060,6 @@ function node_get_recent($number = 10) {
   $nodes = node_load_multiple($nids);
 
   return $nodes ? $nodes : array();
-}
-
-/**
- * Returns HTML for a list of recent content.
- *
- * @param $variables
- *   An associative array containing:
- *   - nodes: An array of recent node entities.
- *
- * @ingroup themeable
- */
-function theme_node_recent_block($variables) {
-  $rows = array();
-  $output = '';
-
-  $l_options = array('query' => backdrop_get_destination());
-  foreach ($variables['nodes'] as $node) {
-    $row = array();
-    $row[] = array(
-      'data' => theme('node_recent_content', array('node' => $node)),
-      'class' => 'title-author',
-    );
-    $row[] = array(
-      'data' => node_access('update', $node) ? l(t('edit'), 'node/' . $node->nid . '/edit', $l_options) : '',
-      'class' => 'edit',
-    );
-    $row[] = array(
-      'data' => node_access('delete', $node) ? l(t('delete'), 'node/' . $node->nid . '/delete', $l_options) : '',
-      'class' => 'delete',
-    );
-    $rows[] = $row;
-  }
-
-  if ($rows) {
-    $output = theme('table', array('rows' => $rows));
-    if (user_access('access content overview')) {
-      $output .= theme('more_link', array('url' => 'admin/content', 'title' => t('Show more content')));
-    }
-  }
-
-  return $output;
-}
-
-/**
- * Returns HTML for a recent node to be displayed in the recent content block.
- *
- * @param $variables
- *   An associative array containing:
- *   - node: A node entity.
- *
- * @ingroup themeable
- */
-function theme_node_recent_content($variables) {
-  $node = $variables['node'];
-
-  $output = '<div class="node-title">';
-  $output .= l($node->title, 'node/' . $node->nid);
-  $output .= theme('mark', array('type' => node_mark($node->nid, $node->changed)));
-  $output .= '</div><div class="node-author">';
-  $output .= theme('username', array('account' => user_load($node->uid)));
-  $output .= '</div>';
-
-  return $output;
 }
 
 /**
