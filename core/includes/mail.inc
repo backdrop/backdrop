@@ -118,7 +118,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  *   accepted at php-level, which still doesn't guarantee it to be delivered.)
  */
 function backdrop_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
-  $site_mail = config_get('system.site', 'site_mail');
+  $site_mail = config_get('system.core', 'site_mail');
   if (empty($site_mail))  {
     $site_mail = ini_get('sendmail_from');
   }

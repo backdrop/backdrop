@@ -1531,7 +1531,7 @@ function hook_mail_alter(&$message) {
       $message['send'] = FALSE;
       return;
     }
-    $message['body'][] = "--\nMail sent out from " . config_get('system.site', 'site_name');
+    $message['body'][] = "--\nMail sent out from " . config_get('system.core', 'site_name');
   }
 }
 
@@ -1908,7 +1908,7 @@ function hook_watchdog(array $log_entry) {
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
-    '@site_name' => config_get('system.site', 'site_name'),
+    '@site_name' => config_get('system.core', 'site_name'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
   ));
 
@@ -1974,7 +1974,7 @@ function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
   $variables = array(
-    '%site_name' => config_get('system.site', 'site_name'),
+    '%site_name' => config_get('system.core', 'site_name'),
     '%username' => user_format_name($account),
   );
   if ($context['hook'] == 'taxonomy') {
@@ -2417,7 +2417,7 @@ function hook_file_download($uri) {
   if (!file_prepare_directory($uri)) {
     $uri = FALSE;
   }
-  if (strpos(file_uri_target($uri), config_get('user.settings', 'user_picture_path') . '/picture-') === 0) {
+  if (strpos(file_uri_target($uri), config_get('system.core', 'user_picture_path') . '/picture-') === 0) {
     if (!user_access('access user profiles')) {
       // Access to the file is denied.
       return -1;
@@ -3651,7 +3651,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $name = ($node->uid == 0) ? config_get('user.settings', 'anonymous') : $node->name;
+          $name = ($node->uid == 0) ? config_get('system.core', 'anonymous') : $node->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 

@@ -11,7 +11,7 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
   }
 
   function testRegistrationWithEmailVerification() {
-    $config = config('user.settings');
+    $config = config('system.core');
 
     // Require e-mail verification.
     $config->set('user_email_verification', TRUE);
@@ -45,7 +45,7 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
   }
 
   function testRegistrationWithoutEmailVerification() {
-    $config = config('user.settings');
+    $config = config('system.core');
 
     // Don't require e-mail verification.
     $config->set('user_email_verification', FALSE)->save();
@@ -106,7 +106,7 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
   }
 
   function testRegistrationEmailDuplicates() {
-    $config = config('user.settings');
+    $config = config('system.core');
 
     // Don't require e-mail verification.
     $config->set('user_email_verification', FALSE)->save();
@@ -133,7 +133,7 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
   }
 
   function testRegistrationDefaultValues() {
-    $config_user_settings = config('user.settings');
+    $config_user_settings = config('system.core');
 
     // Allow registration by site visitors without administrator approval.
     $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
@@ -652,7 +652,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
-    $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('user.settings', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
+    $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('system.core', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
 
     // Confirm account cancellation.
     $timestamp = time();
@@ -768,7 +768,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   function testMassUserCancelByAdmin() {
     variable_set('user_cancel_method', 'user_cancel_reassign');
     // Enable account cancellation notification.
-    config_set('user.settings', 'account_status_cancelled', TRUE);
+    config_set('system.core', 'user_mail_status_canceled_notify', TRUE);
 
     // Create administrative user.
     $admin_user = $this->backdropCreateUser(array('administer users'));
@@ -823,7 +823,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
     // Enable user pictures.
-    config_set('user.settings', 'user_pictures', 1);
+    config_set('system.core', 'user_pictures', 1);
 
     $this->user = $this->backdropCreateUser();
 
@@ -832,7 +832,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $file_check = file_prepare_directory($file_dir, FILE_CREATE_DIRECTORY);
     // TODO: Test public and private methods?
 
-    $picture_dir = config_get('user.settings', 'user_picture_path');
+    $picture_dir = config_get('system.core', 'user_picture_path');
     $picture_path = $file_dir . $picture_dir;
 
     $pic_check = file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY);
@@ -865,7 +865,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] - 10) . 'x' . ($info['height'] - 10);
-      config('user.settings')
+      config('system.core')
         ->set('user_picture_dimensions', $test_dim)
         ->set('user_picture_file_size', 0)
         ->save();
@@ -876,7 +876,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
       $text = t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $test_dim));
       $this->assertRaw($text, 'Image was resized.');
       $alt = t("@user's picture", array('@user' => user_format_name($this->user)));
-      $style = config_get('user.settings', 'user_picture_style');
+      $style = config_get('system.core', 'user_picture_style');
       $this->assertRaw(image_style_url($style, $pic_path), "Image is displayed in user's edit page");
 
       // Check if file is located in proper directory.
@@ -904,7 +904,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
       // Set new variables: valid dimensions, invalid filesize.
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
       $test_size = 1;
-      config('user.settings')
+      config('system.core')
         ->set('user_picture_dimensions', $test_dim)
         ->set('user_picture_file_size', $test_size)
         ->save();
@@ -938,7 +938,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: invalid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] - 10) . 'x' . ($info['height'] - 10);
-      config('user.settings')
+      config('system.core')
         ->set('user_picture_dimensions', $test_dim)
         ->set('user_picture_file_size', 0)
         ->save();
@@ -973,7 +973,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
       // Set new variables: valid dimensions, invalid filesize.
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
       $test_size = 1;
-      config('user.settings')
+      config('system.core')
         ->set('user_picture_dimensions', $test_dim)
         ->set('user_picture_file_size', $test_size)
         ->save();
@@ -1006,7 +1006,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new variables: valid dimensions, valid filesize (0 = no limit).
       $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
-      config('user.settings')
+      config('system.core')
         ->set('user_picture_dimensions', $test_dim)
         ->set('user_picture_file_size', 0)
         ->save();
@@ -1022,7 +1022,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
       // Set new picture dimensions.
       $test_dim = ($info['width'] + 5) . 'x' . ($info['height'] + 5);
-      config_set('user.settings', 'user_picture_dimensions', $test_dim);
+      config_set('system.core', 'user_picture_dimensions', $test_dim);
 
       $pic_path2 = $this->saveUserPicture($image);
       $this->assertNotEqual($pic_path, $pic_path2, 'Filename of second picture is different.');
@@ -1038,7 +1038,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $images = $this->backdropGetTestFiles('image');
     $image = $images[0];
     $pic_path = file_create_url($image->uri);
-    config_set('user.settings', 'user_picture_default', $pic_path);
+    config_set('system.core', 'user_picture_default', $pic_path);
 
     // Check if image is displayed in user's profile page.
     $this->backdropGet('user');
@@ -1060,7 +1060,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
     // Set new variables: valid dimensions, valid filesize (0 = no limit).
     $test_dim = ($info['width'] + 10) . 'x' . ($info['height'] + 10);
-    config('user.settings')
+    config('system.core')
       ->set('user_picture_dimensions', $test_dim)
       ->set('user_picture_file_size', 0)
       ->save();
@@ -1370,7 +1370,7 @@ class UserAdminSettingsFormTest extends SystemConfigFormCase {
     $this->values = array(
       'anonymous' => array(
         '#value' => $this->randomString(10),
-        '#config_name' => 'user.settings',
+        '#config_name' => 'system.core',
         '#config_key' => 'anonymous',
       ),
       'user_mail_cancel_confirm_body' => array(
@@ -1722,7 +1722,7 @@ class UserEditTestCase extends BackdropWebTestCase {
    */
   function testUserEdit() {
     // Test user edit functionality with user pictures disabled.
-    $config = config('user.settings');
+    $config = config('system.core');
     $config->set('user_pictures', 0)->save();
     $user1 = $this->backdropCreateUser(array('change own username'));
     $user2 = $this->backdropCreateUser(array());
@@ -1790,7 +1790,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     parent::setUp('comment');
 
     // Enable user signatures.
-    config_set('user.settings', 'user_signatures', 1);
+    config_set('system.core', 'user_signatures', 1);
 
     // Prefetch text formats.
     $this->full_html_format = filter_format_load('full_html');
@@ -1865,7 +1865,7 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
-    config_set('user.settings', 'user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
+    config_set('system.core', 'user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
 
     // Create a new user account and log in.
     $account = $this->backdropCreateUser(array('change own username'));
@@ -2196,7 +2196,7 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
 
     // Setup a random anonymous name to be sure the name is used.
     $name = $this->randomName();
-    config_set('user.settings', 'anonymous', $name);
+    config_set('system.core', 'anonymous', $name);
     $this->assertEqual(entity_label('user', $this->anonymous), $name, t('The variable anonymous should be used for name of uid 0'));
   }
 

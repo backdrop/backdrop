@@ -1496,7 +1496,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   // max-age > 0, allowing the page to be cached by external proxies, when a
   // session cookie is present unless the Vary header has been replaced or
   // unset in hook_boot().
-  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.performance', 'page_cache_maximum_age') : 0;
+  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.core', 'page_cache_maximum_age') : 0;
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
   // Entity tag should change if the output changes.
@@ -2504,7 +2504,7 @@ function _backdrop_bootstrap_configuration() {
   // Check that the config directory is not empty.
   if (!empty($GLOBALS['config_directories']['active']) && !backdrop_installation_attempted()) {
     $directory = $GLOBALS['config_directories']['active'];
-    if (!is_file($directory . '/system.performance.json')) {
+    if (!(is_file($directory . '/system.core.json') || is_file($directory . '/system.performance.json'))) {
       throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
     }
   }
@@ -2528,7 +2528,7 @@ function _backdrop_bootstrap_page_cache() {
   }
   else {
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_VARIABLES, FALSE);
-    $cache_enabled = config_get('system.performance', 'cache');
+    $cache_enabled = config_get('system.core', 'cache');
   }
   // If there is no session cookie and cache is enabled (or forced), try
   // to serve a cached page.

@@ -12,7 +12,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
    * Test the error handler.
    */
   function testErrorHandler() {
-    $config = config('system.logging');
+    $config = config('system.core');
     $error_notice = array(
       '%type' => 'Notice',
       '!message' => 'Undefined variable: bananas',

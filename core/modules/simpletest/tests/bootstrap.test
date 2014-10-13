@@ -102,7 +102,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    * Test support for requests containing If-Modified-Since and If-None-Match headers.
    */
   function testConditionalRequests() {
-    config_set('system.performance', 'cache', 1);
+    config_set('system.core', 'cache', 1);
 
     // Fill the cache.
     $this->backdropGet('');
@@ -140,7 +140,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    * Test cache headers.
    */
   function testPageCache() {
-    config_set('system.performance', 'cache', 1);
+    config_set('system.core', 'cache', 1);
 
     // Fill the cache.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
@@ -184,7 +184,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    * mod_deflate Apache module.
    */
   function testPageCompression() {
-    config_set('system.performance', 'cache', 1);
+    config_set('system.core', 'cache', 1);
 
     // Fill the cache and verify that output is compressed.
     $this->backdropGet('', array(), array('Accept-Encoding: gzip,deflate'));
@@ -203,11 +203,11 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), 'A Content-Encoding header was not sent.');
-    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.site', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
     $this->assertRaw('</html>', 'Page was not compressed.');
 
     // Disable compression mode.
-    config_set('system.performance', 'page_compression', FALSE);
+    config_set('system.core', 'page_compression', FALSE);
 
     // Verify if cached page is still available for a client with compression support.
     $this->backdropGet('', array(), array('Accept-Encoding: gzip,deflate'));
@@ -272,14 +272,14 @@ class HookBootExitTestCase extends BackdropWebTestCase {
    */
   function testHookBootExit() {
     // Test with cache disabled. Boot and exit should always fire.
-    config_set('system.performance', 'cache', 0);
+    config_set('system.core', 'cache', 0);
     $this->backdropGet('');
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
 
     // Test with normal cache. Boot and exit should be called.
-    config_set('system.performance', 'cache', 1);
+    config_set('system.core', 'cache', 1);
     $this->backdropGet('');
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));

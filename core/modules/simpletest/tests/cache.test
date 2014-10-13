@@ -95,7 +95,7 @@ class CacheTestCase extends BackdropWebTestCase {
    *   The time in seconds the cache should minimal live.
    */
   protected function setupLifetime($time) {
-    config_set('system.performance', 'cache_lifetime', $time);
+    config_set('system.core', 'cache_lifetime', $time);
     variable_set('cache_flush', 0);
   }
 }

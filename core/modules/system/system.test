@@ -594,7 +594,7 @@ class CronRunTestCase extends BackdropWebTestCase {
     $cron_last = time();
     $cron_safe_threshold = 100;
     state_set('cron_last', $cron_last);
-    config('system.cron')
+    config('system.core')
       ->set('cron_safe_threshold', $cron_safe_threshold)
       ->save();
     $this->backdropGet('');
@@ -780,7 +780,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
-    config_set('system.site', 'site_403', 'user');
+    config_set('system.core', 'site_403', 'user');
     $this->backdropPost('admin/structure/block', array('blocks[user_login][region]' => '-1'), t('Save blocks'));
 
     // Check that we can log in from the 403 page.
@@ -1011,7 +1011,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     $admin_message = format_string('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
     $user_message = 'Operating in maintenance mode.';
-    $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.site', 'site_name')));
+    $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
 
     $this->backdropGet('');
     $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
@@ -1290,7 +1290,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->node_path = "node/" . $this->backdropCreateNode(array('promote' => 1))->nid;
 
     // Enable front page logging in system_test.module.
-    config_set('system.site', 'front_page_output', 1);
+    config_set('system.core', 'front_page_output', 1);
   }
 
   /**
@@ -1707,15 +1707,15 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     );
 
     // Set a few site variables.
-    config('system.site')
+    config('system.core')
       ->set('site_name', '<strong>Backdrop<strong>')
       ->set('site_slogan', '<blink>Slogan</blink>')
       ->save();
 
     // Generate and test sanitized tokens.
     $tests = array();
-    $tests['[site:name]'] = check_plain(config_get('system.site', 'site_name'));
-    $tests['[site:slogan]'] = check_plain(config_get('system.site', 'site_slogan'));
+    $tests['[site:name]'] = check_plain(config_get('system.core', 'site_name'));
+    $tests['[site:slogan]'] = check_plain(config_get('system.core', 'site_slogan'));
     $tests['[site:mail]'] = 'simpletest@example.com';
     $tests['[site:url]'] = url('<front>', $url_options);
     $tests['[site:url-brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
@@ -1730,8 +1730,8 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     }
 
     // Generate and test unsanitized tokens.
-    $tests['[site:name]'] = config_get('system.site', 'site_name');
-    $tests['[site:slogan]'] = config_get('system.site', 'site_slogan');
+    $tests['[site:name]'] = config_get('system.core', 'site_name');
+    $tests['[site:slogan]'] = config_get('system.core', 'site_slogan');
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array(), array('language' => $language_interface, 'sanitize' => FALSE));

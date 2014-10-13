@@ -101,7 +101,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit['machine_name'] = 'don_t_panic';
     $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
 
-    $site_name = config_get('system.site', 'site_name');
+    $site_name = config_get('system.core', 'site_name');
     $this->backdropGet('admin/structure/taxonomy/don_t_panic');
     $this->assertTitle(t('Don\'t Panic | @site-name', array('@site-name' => $site_name)));
     $this->assertNoTitle(t('Don&#039;t Panic | @site-name', array('@site-name' => $site_name)));

@@ -218,7 +218,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => variable_get('node_submitted_' . $type->type, TRUE),
     '#description' => t('Author username and publish date will be displayed.'),
   );
-  if (config_get('user.settings', 'user_pictures')) {
+  if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display the author picture.'),

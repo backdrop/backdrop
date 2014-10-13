@@ -1180,7 +1180,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#title' => t('Allow comment title'),
       '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 1),
     );
-    if (config_get('user.settings', 'user_pictures')) {
+    if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
         '#type' => 'checkbox',
         '#title' => t('Display pictures for comment authors'),
@@ -1740,7 +1740,7 @@ function comment_form($form, &$form_state, $comment) {
       '#default_value' => $author,
       '#maxlength' => 60,
       '#size' => 30,
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get('user.settings', 'anonymous'))),
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
     );
   }
@@ -1901,7 +1901,7 @@ function comment_preview($comment) {
       $comment->picture = $account->picture;
     }
     elseif (empty($comment->name)) {
-      $comment->name = config_get('user.settings', 'anonymous');
+      $comment->name = config_get('system.core', 'anonymous');
     }
 
     $comment->created = !empty($comment->created) ? $comment->created : REQUEST_TIME;
@@ -1989,7 +1989,7 @@ function comment_submit($comment) {
   // If the comment was posted by an anonymous user and no author name was
   // required, use "Anonymous" by default.
   if ($comment->is_anonymous && (!isset($comment->name) || $comment->name === '')) {
-    $comment->name = config_get('user.settings', 'anonymous');
+    $comment->name = config_get('system.core', 'anonymous');
   }
 
   // Validate the comment's subject. If not specified, extract from comment body.
@@ -2230,7 +2230,7 @@ function theme_comment_post_forbidden($variables) {
         $destination = array('destination' => "node/$node->nid#comment-form");
       }
 
-      if (config_get('user.settings', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+      if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
         // Users can register themselves.
         return t('<a href="@login">Log in</a> or <a href="@register">register</a> to post comments', array('@login' => url('user/login', array('query' => $destination)), '@register' => url('user/register', array('query' => $destination))));
       }

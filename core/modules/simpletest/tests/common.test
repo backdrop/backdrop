@@ -880,7 +880,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
     $this->backdropSetContent($result->data);
-    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.site', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
     $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
@@ -1092,8 +1092,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     parent::setUp('locale', 'simpletest', 'common_test');
 
     // Disable preprocessing
-    $this->preprocess_js = config_get('system.performance', 'preprocess_js');
-    config_set('system.performance', 'preprocess_js', 0);
+    $this->preprocess_js = config_get('system.core', 'preprocess_js');
+    config_set('system.core', 'preprocess_js', 0);
 
     // Reset backdrop_add_js() and backdrop_add_library() statics before each test.
     backdrop_static_reset('backdrop_add_js');
@@ -1102,7 +1102,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
 
   function tearDown() {
     // Restore configured value for JavaScript preprocessing.
-    config_set('system.performance', 'preprocess_js', $this->preprocess_js);
+    config_set('system.core', 'preprocess_js', $this->preprocess_js);
     parent::tearDown();
   }
 
@@ -1300,7 +1300,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // Now ensure that with aggregation on, one file is made for the
     // 'every_page' files, and one file is made for the others.
     backdrop_static_reset('backdrop_add_js');
-    config_set('system.performance', 'preprocess_js', 1);
+    config_set('system.core', 'preprocess_js', 1);
     backdrop_add_js('core/misc/ajax.js');
     backdrop_add_js('core/misc/collapse.js', array('every_page' => TRUE));
     backdrop_add_js('core/misc/autocomplete.js');
@@ -1822,7 +1822,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
     );
     $message = t('%type: !message in %function (line ', $error);
 
-    config_set('system.logging', 'error_level', ERROR_REPORTING_DISPLAY_ALL);
+    config_set('system.core', 'error_level', ERROR_REPORTING_DISPLAY_ALL);
     $this->backdropGet('common-test/backdrop-render-invalid-keys');
     $this->assertResponse(200, t('Received expected HTTP status code.'));
     $this->assertRaw($message, t('Found error message: !message.', array('!message' => $message)));

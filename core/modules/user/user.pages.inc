@@ -128,7 +128,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
   }
   else {
     // Time out, in seconds, until login URL expires.
-    $timeout = config_get('user.settings', 'user_password_reset_timeout');
+    $timeout = config_get('system.core', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
     // Some redundant checks for extra security ?
     $users = user_load_multiple(array($uid), array('status' => '1'));
@@ -363,7 +363,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
   );
   // Also allow to send account canceled notification mail, if enabled.
-  $default_notify = config_get('user.settings', 'account_status_cancelled');
+  $default_notify = config_get('system.core', 'user_mail_status_canceled_notify');
   $form['user_cancel_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
@@ -449,7 +449,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  * @see user_multiple_cancel_confirm()
  */
 function user_cancel_methods() {
-  $anonymous_name = config_get('user.settings', 'anonymous');
+  $anonymous_name = config_get('system.core', 'anonymous');
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content.'),
@@ -503,7 +503,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
     // Validate expiration and hashed password/login.
     if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
       $edit = array(
-        'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('user.settings', 'user_mail_status_canceled_notify'),
+        'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );
       user_cancel($edit, $account->uid, $account->data['user_cancel_method']);
       // Since user_cancel() is not invoked via Form API, batch processing needs
