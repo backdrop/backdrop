@@ -32,17 +32,14 @@ function views_schema() {
  */
 
 /**
- * Convert database-based views to configuration files.
+ * Convert default views to configuration files.
  */
 function views_update_1000() {
-  // Install default views.
-  config_install_default_config('views', 'views.view.comments_recent');
-  config_install_default_config('views', 'views.view.frontpage');
-  config_install_default_config('views', 'views.view.taxonomy_term');
+  // This update removed. Updates for default views are in individual modules.
 }
 
 /**
- * Convert available database image styles to configuration files.
+ * Convert available database views to configuration files.
  */
 function views_update_1001() {
   if (db_table_exists('views_view')) {

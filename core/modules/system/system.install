@@ -1718,7 +1718,17 @@ function system_update_1009() {
   update_module_enable(array('admin_bar'));
 
   // Install default config.
-  config_install_default_config('admin_bar', 'admin_bar.settings');
+  $config = config('admin_bar.settings');
+  $config->set('margin_top', 1);
+  $config->set('position_fixed', 0);
+  $config->set('components', array(
+    'admin_bar.icon',
+    'admin_bar.menu',
+    'admin_bar.search',
+    'admin_bar.users',
+    'admin_bar.account',
+  ));
+  $config->save();
 
   // Manually install schema, as update_module_enable() does not do this for us.
   if (!db_table_exists('cache_admin_bar')) {
@@ -1834,12 +1844,11 @@ function system_update_1015() {
  * Moves action_max_stack from variable to config.
  */
 function system_update_1016() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.action');
-  // Migrate variables if any.
+  // Migrate variables to config.
   $config = config('system.action');
   $config->set('action_recursion_limit', variable_get('actions_max_stack', 35));
   $config->save();
+
   // Delete variables.
   variable_del('actions_max_stack');
 }
