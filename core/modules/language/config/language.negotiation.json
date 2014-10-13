@@ -3,9 +3,9 @@
     "session_parameter": "language",
     "url_part": "path_prefix",
     "url_prefixes": {
-    	"en": ""
+        "en": ""
     },
     "url_domains": {
-    	"en": ""
+        "en": ""
     }
 }
