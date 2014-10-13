@@ -5274,14 +5274,18 @@ function backdrop_clear_js_cache() {
 function backdrop_json_encode($var, $pretty_print = FALSE) {
   if ($pretty_print) {
     if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-      return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+      $string = json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
     else {
       $string = json_encode($var);
       $string = backdrop_json_format($string);
       $string = backdrop_json_decode_unicode($string);
-      return $string;
+      $string = str_replace('\/', '/', $string);
     }
+    // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
+    // consistent with PHP 5.4.28+.
+    $string = preg_replace('/\[[\s]+\]/m', '[]', $string);
+    return $string;
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
   else {
@@ -5314,7 +5318,7 @@ function backdrop_json_format($json) {
   $result = '';
   $pos = 0; // Indentation level.
   $strlen = strlen($json);
-  $indent = "  ";
+  $indent = "    ";
   $new_line = "\n";
   $prev_char = '';
   $out_of_quotes = TRUE;
@@ -5338,7 +5342,7 @@ function backdrop_json_format($json) {
     }
     // Eat all non-essential whitespace in the input as we do our own here and
     // it would only mess up our process.
-    elseif ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
+    elseif ($out_of_quotes && FALSE !== strpos(" \t\r\n", $char)) {
       continue;
     }
 

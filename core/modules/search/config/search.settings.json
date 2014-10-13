@@ -2,7 +2,7 @@
     "_config_name": "search.settings",
     "search_active_modules": [
         "node",
-        "user" 
+        "user"
     ],
     "search_and_or_limit": 7,
     "search_default_module": "node",

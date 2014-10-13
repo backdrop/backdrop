@@ -850,7 +850,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
   public function write($name, array $data) {
     // Ensure that the config name is included in the written file.
     $data = array_merge(array('_config_name' => $name), $data);
-    $data = $this->encode($data);
+    $data = $this->encode($data) . "\n";
     $status = @file_put_contents($this->getFilePath($name), $data);
     if ($status === FALSE) {
       throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name));

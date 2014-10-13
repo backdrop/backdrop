@@ -1,18 +1,18 @@
 {
-  "_config_name": "image.styles.large.json",
-  "storage": 4,
-  "module": "image",
-  "label": "Large (480x480)",
-  "name": "large",
-  "effects": [
-    {
-      "name": "image_scale",
-      "data": {
-        "width": "480",
-        "height": "480",
-        "upscale": 1
-      },
-      "weight": 1
-    }
-  ]
+    "_config_name": "image.styles.large.json",
+    "storage": 4,
+    "module": "image",
+    "label": "Large (480x480)",
+    "name": "large",
+    "effects": [
+        {
+            "name": "image_scale",
+            "data": {
+                "width": "480",
+                "height": "480",
+                "upscale": 1
+            },
+            "weight": 1
+        }
+    ]
 }
