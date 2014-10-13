@@ -511,7 +511,7 @@ function admin_bar_links_menu($tree) {
     }
 
     // Handle links pointing to category/overview pages.
-    if ($data['link']['page_callback'] == 'system_admin_bar_block_page' || $data['link']['page_callback'] == 'system_admin_config_page') {
+    if ($data['link']['page_callback'] == 'system_admin_menu_block_page' || $data['link']['page_callback'] == 'system_admin_config_page') {
       // Apply a marker for others to consume.
       $links[$data['link']['href']]['#is_category'] = TRUE;
       // Automatically hide empty categories.
