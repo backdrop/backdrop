@@ -275,7 +275,7 @@ function system_requirements($phase) {
 
   // Report cron status.
   if ($phase == 'runtime') {
-    $config = config('system.cron');
+    $config = config('system.core');
     // Cron warning threshold defaults to two days.
     $threshold_warning = $config->get('cron_threshold_warning');
     // Cron error threshold defaults to two weeks.
@@ -1582,8 +1582,7 @@ function system_update_1002() {
  * Convert performance module settings to use configuration files.
  */
 function system_update_1003() {
-  config_install_default_config('system', 'system.performance');
-  $config = config('system.performance');
+  $config = config('system.core');
   $config->set('cache', variable_get('cache', 0));
   $config->set('cache_lifetime', variable_get('cache_lifetime', '0'));
   $config->set('page_cache_maximum_age', variable_get('page_cache_maximum_age', '0'));
@@ -1762,15 +1761,14 @@ function system_update_1011() {
  * Convert cron settings to use configuration files.
  */
 function system_update_1012() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.cron');
-  // Migrate variables if any.
-  $config = config('system.cron');
+  // Migrate the variable settings.
+  $config = config('system.core');
   $config->set('cron_threshold_warning', variable_get('cron_threshold_warning', 172800));
   $config->set('cron_safe_threshold', variable_get('cron_safe_threshold', 10800));
   $config->set('cron_max_threshold', variable_get('cron_max_threshold', 10800));
   $config->set('cron_threshold_error', variable_get('cron_threshold_error', 1209600));
   $config->save();
+
   // Delete variables.
   variable_del('cron_threshold_warning');
   variable_del('cron_safe_threshold');
@@ -1783,7 +1781,7 @@ function system_update_1012() {
  */
 function system_update_1013() {
   // Set the default variables for the system.site config file.
-  $config = config('system.site');
+  $config = config('system.core');
   $config->set('site_name', variable_get('site_name', 'Backdrop'));
   $config->set('site_mail', variable_get('site_mail', ''));
   $config->set('site_slogan', variable_get('site_slogan', ''));
@@ -1804,13 +1802,12 @@ function system_update_1013() {
  * Move the system maintenance settings from variable to config.
  */
 function system_update_1014() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.maintenance');
-  // Migrate variables if any.
-  $config = config('system.maintenance');
+  // Migrate variables to config.
+  $config = config('system.core');
   $config->set('maintenance_enabled', variable_get('maintenance_mode', 'enabled'));
   $config->set('maintenance_message', variable_get('maintenance_mode_message', 'message'));
   $config->save();
+
   // Delete variables.
   variable_del('maintenance_mode');
   variable_del('maintenance_mode_message');
@@ -1820,14 +1817,13 @@ function system_update_1014() {
  *  Convert RSS publishing settings to use configuration files.
  */
 function system_update_1015() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.rss');
-  // Migrate variables if any.
-  $config = config('system.rss');
+  // Migrate variables to config.
+  $config = config('system.core');
   $config->set('rss_description', variable_get('feed_description', ''));
   $config->set('rss_limit', variable_get('feed_default_items', 10));
   $config->set('rss_viewmode', variable_get('feed_item_length', 'fulltext'));
   $config->save();
+
   // Delete variables.
   variable_del('feed_description');
   variable_del('feed_default_items');
@@ -1852,16 +1848,15 @@ function system_update_1016() {
  * Moves system logging settings from variables to config.
  */
 function system_update_1017() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.logging');
-  // Migrate variables if any.
-  $config = config('system.logging');
+  // Migrate variables to config.
+  $config = config('system.core');
   $config->set('log_row_limit', variable_get('dblog_row_limit', 1000));
   $config->set('log_identity', variable_get('syslog_identity', 'backdrop'));
   $config->set('log_facility', variable_get('syslog_facility', LOG_LOCAL0));
   $config->set('log_format', variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
   $config->set('error_level', variable_get('error_level', 'all'));
   $config->save();
+
   // Delete variables.
   variable_del('error_level');
   variable_del('dblog_row_limit');
@@ -1874,9 +1869,7 @@ function system_update_1017() {
  * Moves authorize system settings from variable to config.
  */
 function system_update_1018() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.authorize');
-  // Migrate variables if any.
+  // Migrate variables to config.
   $config = config('system.authorize');
   $config->set('filetransfer_default', variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM variable WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
@@ -1885,6 +1878,7 @@ function system_update_1018() {
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
   }
   $config->save();
+
   // Delete variables.
   variable_del('allow_authorize_operations');
   variable_del('authorize_filetransfer_default');
@@ -1895,12 +1889,11 @@ function system_update_1018() {
  * Converts active_menus_default variable to config.
  */
 function system_update_1019() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'system.menu');
-  // Migrate variables if any.
-  $config = config('system.menu');
+  // Migrate variables to config.
+  $config = config('system.core');
   $config->set('active_menus_default', variable_get('menu_default_active_menus', array()));
   $config->save();
+
   // Delete variables.
   variable_del('menu_default_active_menus');
 }
@@ -2032,7 +2025,7 @@ function system_update_1021() {
  */
 function system_update_1022() {
   // Update to set the defaults.
-  $config = config('system.site');
+  $config = config('system.core');
   $config->set('site_logo_theme', 1);
   $config->set('site_logo_path', '');
   $config->set('site_favicon_theme', 1);
@@ -2066,6 +2059,44 @@ function system_update_1023() {
   if (!module_exists('admin_bar')) {
     module_enable(array('admin_bar'));
   }
+}
+
+/**
+ * Consolidate common config files into "system.core".
+ */
+function system_update_1024() {
+  // This update only affects HEAD2HEAD upgrades, as system.core is used in all
+  // previous updates instead of the old files names updated here.
+  $core_config = config('system.core');
+  if (!$core_config->isNew()) {
+    return;
+  }
+
+  $files_to_upgrade = array(
+    'system.site',
+    'system.rss',
+    'system.performance',
+    'system.menu',
+    'system.maintenance',
+    'system.logging',
+    'system.cron',
+    'user.settings',
+  );
+
+  $combined_data = array();
+  foreach ($files_to_upgrade as $file) {
+    $config = config($file);
+    if ($config_data = $config->get()) {
+      $combined_data = array_merge($combined_data, $config_data);
+    }
+    $config->delete();
+  }
+  $combined_data['_config_name'] = 'system.core';
+  $combined_data['_config_static'] = TRUE;
+  ksort($combined_data);
+
+  $core_config->setData($combined_data);
+  $core_config->save();
 }
 
 /**

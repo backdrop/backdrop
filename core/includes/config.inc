@@ -25,9 +25,27 @@
  *
  */
 function config($config_file, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
-  return new Config($config_file, $storage);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $loaded_configs;
+  if (!isset($loaded_configs)) {
+    $loaded_configs = &backdrop_static(__FUNCTION__, array());
+  }
+
+  if (!isset($loaded_configs[$type][$config_file])) {
+    $directory = config_get_config_directory($type);
+    $storage = new ConfigFileStorage($directory);
+    $config = new Config($config_file, $storage);
+    $config->load();
+    $cache = $config->get('_config_static');
+    if ($cache) {
+      $loaded_configs[$type][$config_file] = $config;
+    }
+  }
+  else {
+    $config = $loaded_configs[$type][$config_file];
+  }
+
+  return $config;
 }
 
 /**
@@ -579,6 +597,15 @@ class Config {
     $this->data = array_merge(array('_config_name' => $this->name), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
+
+    // Empty static caches of this config file.
+    $static = &backdrop_static('config', array());
+    foreach ($static as $type => $configs) {
+      if (array_key_exists($this->name, $configs)) {
+        unset($static[$type][$this->name]);
+      }
+    }
+
     return $this;
   }
 

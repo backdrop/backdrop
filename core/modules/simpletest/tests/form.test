@@ -1329,7 +1329,7 @@ class FormsFormStoragePageCacheTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp('form_test');
 
-    config_set('system.performance', 'cache', TRUE);
+    config_set('system.core', 'cache', TRUE);
   }
 
   /**
@@ -1890,7 +1890,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
       ),
     );
     field_create_instance($instance);
-    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**

@@ -38,7 +38,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
     if (!$this->inCURL()) {
       $this->backdropGet('node');
       $this->assertTrue($this->backdropGetHeader('Date'), 'An HTTP header was received.');
-      $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.site', 'site_name'))), 'Site title matches.');
+      $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
       $this->assertNoTitle('Foo', 'Site title does not match.');
       // Make sure that we are locked out of the installer when prefixing
       // using the user-agent header. This is an important security check.
@@ -308,7 +308,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
 class SimpleTestBrowserTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
-    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**

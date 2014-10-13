@@ -130,7 +130,7 @@ class SessionTestCase extends BackdropWebTestCase {
     $this->assertSessionEmpty(TRUE);
 
     // The same behavior is expected when caching is enabled.
-    config_set('system.performance', 'cache', 1);
+    config_set('system.core', 'cache', 1);
     $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);

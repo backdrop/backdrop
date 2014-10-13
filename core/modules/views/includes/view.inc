@@ -1704,7 +1704,7 @@ class view {
       foreach ($this->build_info['breadcrumb'] as $path => $title) {
         // Check to see if the frontpage is in the breadcrumb trail; if it
         // is, we'll remove that from the actual breadcrumb later.
-        if ($path == config_get('system.site', 'site_frontpage')) {
+        if ($path == config_get('system.core', 'site_frontpage')) {
           $base = FALSE;
           $title = t('Home');
         }

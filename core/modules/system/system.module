@@ -3595,7 +3595,7 @@ function system_run_automated_cron() {
   // If the site is not fully installed, suppress the automated cron run.
   // Otherwise it could be triggered prematurely by Ajax requests during
   // installation.
-  if (($threshold = config('system.cron')->get('cron_safe_threshold')) > 0 && state_get('install_task') == 'done') {
+  if (($threshold = config('system.core')->get('cron_safe_threshold')) > 0 && state_get('install_task') == 'done') {
     $cron_last = state_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
       backdrop_cron_run();
@@ -3767,36 +3767,12 @@ function system_autoload_info() {
  * Implements hook_config_info().
  */
 function system_config_info() {
-  $prefixes['system.performance'] = array(
-    'label' => t('System performance'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.cron'] = array(
-    'label' => t('System cron'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.site'] = array(
-    'label' => t('System site'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.maintenance'] = array(
-    'label' => t('System maintenance'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.rss'] = array(
-    'label' => t('System RSS'),
+  $prefixes['system.core'] = array(
+    'label' => t('System core settings'),
     'group' => t('Configuration'),
   );
   $prefixes['system.action'] = array(
     'label' => t('System action'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.menu'] = array(
-    'label' => t('System menu'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.logging'] = array(
-    'label' => t('System logging'),
     'group' => t('Configuration'),
   );
   $prefixes['system.authorize'] = array(

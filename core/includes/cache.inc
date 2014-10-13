@@ -355,7 +355,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
     // If the cached data is temporary and subject to a per-user minimum
     // lifetime, compare the cache entry timestamp with the user session
     // cache_expiration timestamp. If the cache entry is too old, ignore it.
-    if ($cache->expire != CACHE_PERMANENT && config_get('system.performance', 'cache_lifetime') && isset($_SESSION['cache_expiration'][$this->bin]) && $_SESSION['cache_expiration'][$this->bin] > $cache->created) {
+    if ($cache->expire != CACHE_PERMANENT && config_get('system.core', 'cache_lifetime') && isset($_SESSION['cache_expiration'][$this->bin]) && $_SESSION['cache_expiration'][$this->bin] > $cache->created) {
       // Ignore cache data that is too old and thus not valid for this user.
       return FALSE;
     }
@@ -440,7 +440,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Implements BackdropCacheInterface::expire().
    */
   function expire() {
-    if (config_get('system.performance', 'cache_lifetime')) {
+    if (config_get('system.core', 'cache_lifetime')) {
       // We store the time in the current user's session. We then simulate
       // that the cache was flushed for this user by not returning cached
       // data that was cached before the timestamp.
@@ -451,7 +451,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
         // This is the first request to clear the cache; start a timer.
         variable_set('cache_flush_' . $this->bin, REQUEST_TIME);
       }
-      elseif (REQUEST_TIME > ($cache_flush + config_get('system.performance', 'cache_lifetime'))) {
+      elseif (REQUEST_TIME > ($cache_flush + config_get('system.core', 'cache_lifetime'))) {
         // Clear the cache for everyone; cache_lifetime seconds have passed
         // since the first request to clear the cache.
         db_delete($this->bin)
@@ -474,7 +474,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Implements BackdropCacheInterface::garbageCollection().
    */
   function garbageCollection() {
-    $cache_lifetime = config_get('system.performance', 'cache_lifetime');
+    $cache_lifetime = config_get('system.core', 'cache_lifetime');
 
     // Clean-up the per-user cache expiration session data, so that the session
     // handler can properly clean-up the session data for anonymous users.

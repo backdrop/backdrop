@@ -2346,7 +2346,7 @@ function node_block_list_alter(&$blocks) {
  */
 function node_feed($nids = FALSE, $channel = array()) {
   global $base_url, $language_content;
-  $rss_config = config('system.rss');
+  $rss_config = config('system.core');
 
   if ($nids === FALSE) {
     $nids = db_select('node', 'n')
@@ -2397,7 +2397,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => config_get('system.site', 'site_name'),
+    'title'       => config_get('system.core', 'site_name'),
     'link'        => $base_url,
     'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
@@ -2452,7 +2452,7 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
  * @see node_menu()
  */
 function node_page_default() {
-  $site_config = config('system.site');
+  $site_config = config('system.core');
   $select = db_select('node', 'n')
     ->fields('n', array('nid', 'sticky', 'created'))
     ->condition('n.promote', 1)

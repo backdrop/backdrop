@@ -1095,7 +1095,7 @@ function system_modules_uninstall_submit($form, &$form_state) {
  * @see system_settings_form()
  */
 function system_site_information_settings($form, &$form_state) {
-  $site_config = config('system.site');
+  $site_config = config('system.core');
   $site_mail = $site_config->get('site_mail');
   if (empty($site_mail)) {
     $site_mail = ini_get('sendmail_from');
@@ -1206,7 +1206,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => variable_get('default_nodes_main', 10),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
-    '#access' => (config_get('system.site', 'site_frontpage') == 'node'),
+    '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
@@ -1420,7 +1420,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     $form_state['values']['site_favicon_mimetype'] = '';
   }
 
-  config('system.site')
+  config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
     ->set('site_logo_path', $form_state['values']['site_logo_path'])
@@ -1469,7 +1469,7 @@ function system_cron_settings($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Run cron every'),
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
-    '#default_value' => config('system.cron')->get('cron_safe_threshold'),
+    '#default_value' => config('system.core')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
@@ -1488,7 +1488,7 @@ function system_cron_settings($form, &$form_state) {
  * @see system_settings_form()
  */
 function system_cron_settings_submit($form, &$form_state) {
-  config('system.cron')
+  config('system.core')
     ->set('cron_safe_threshold', $form_state['values']['cron_safe_threshold'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
@@ -1521,7 +1521,7 @@ function system_logging_settings($form, &$form_state) {
   $form['error_level'] = array(
     '#type' => 'radios',
     '#title' => t('Error messages to display'),
-    '#default_value' => config_get('system.logging', 'error_level'),
+    '#default_value' => config_get('system.core', 'error_level'),
     '#options' => array(
       ERROR_REPORTING_HIDE => t('None'),
       ERROR_REPORTING_DISPLAY_SOME => t('Errors and warnings'),
@@ -1544,7 +1544,7 @@ function system_logging_settings($form, &$form_state) {
  * @ingroup forms
  */
 function system_logging_settings_submit($form, &$form_state) {
-  config('system.logging')
+  config('system.core')
     ->set('error_level', $form_state['values']['error_level'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
@@ -1558,15 +1558,7 @@ function system_logging_settings_submit($form, &$form_state) {
  */
 function system_performance_settings($form, &$form_state) {
   backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
-  $form_state['config'] = array(
-    'cache' => 'system.performance',
-    'page_compression' => 'system.performance',
-    'page_cache_maximum_age' => 'system.performance',
-    'preprocess_css' => 'system.performance',
-    'preprocess_js' => 'system.performance',
-  );
-
-  $config = config('system.performance');
+  $config = config('system.core');
 
   $form['clear_cache'] = array(
     '#type' => 'fieldset',
@@ -1666,7 +1658,7 @@ function system_performance_settings($form, &$form_state) {
  * @ingroup forms
  */
 function system_performance_settings_submit($form, &$form_state) {
-  $config = config('system.performance');
+  $config = config('system.core');
   $config->set('cache', $form_state['values']['cache']);
   $config->set('cache_lifetime', $form_state['values']['cache_lifetime']);
   $config->set('page_cache_maximum_age', $form_state['values']['page_cache_maximum_age']);
@@ -1792,7 +1784,7 @@ function system_image_toolkit_settings() {
  * @ingroup forms
  */
 function system_rss_feeds_settings() {
-  $rss_config = config('system.rss');
+  $rss_config = config('system.core');
   $form['feed_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Feed description'),
@@ -1943,7 +1935,7 @@ function system_regional_settings_submit($form, &$form_state) {
  * @see system_site_maintenance_mode_submit()
  */
 function system_site_maintenance_mode($form, &$form_state) {
-  $config = config('system.maintenance');
+  $config = config('system.core');
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
@@ -1953,7 +1945,7 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => t($config->get('maintenance_message'), array('@site' => config_get('system.site', 'site_name'))),
+    '#default_value' => t($config->get('maintenance_message'), array('@site' => config_get('system.core', 'site_name'))),
   );
 
   $form['actions']['#type'] = 'actions';

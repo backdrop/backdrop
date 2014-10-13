@@ -269,7 +269,7 @@ function user_admin_account_validate($form, &$form_state) {
  * @see system_settings_form()
  */
 function user_admin_settings($form, &$form_state) {
-  $config = config('user.settings');
+  $config = config('system.core');
   $mail_config = config('user.mail');
 
   // Settings for anonymous users.
@@ -358,9 +358,9 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
-  $config = config('user.settings');
+  $config = config('system.core');
   if ($config->get('user_pictures')) {
-    $picture_path =  file_default_scheme() . '://' . config_get('user.settings', 'user_picture_path');
+    $picture_path =  file_default_scheme() . '://' . config_get('system.core', 'user_picture_path');
     if (!file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY)) {
       form_set_error('user_picture_path', t('The directory %directory does not exist or is not writable.', array('%directory' => $picture_path)));
       watchdog('file system', 'The directory %directory does not exist or is not writable.', array('%directory' => $picture_path), WATCHDOG_ERROR);
@@ -630,7 +630,7 @@ function user_admin_settings($form, &$form_state) {
   $form['email_canceled']['user_mail_status_canceled_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
-    '#default_value' => $config->get('account_status_cancelled'),
+    '#default_value' => $config->get('user_mail_status_canceled_notify'),
   );
   $form['email_canceled']['settings'] = array(
     '#type' => 'container',
@@ -666,7 +666,7 @@ function user_admin_settings($form, &$form_state) {
  * Form submission handler for user_admin_settings().
  */
 function user_admin_settings_submit($form, &$form_state) {
-  config('user.settings')
+  config('system.core')
     ->set('anonymous', $form_state['values']['anonymous'])
     ->set('user_admin_role', $form_state['values']['user_admin_role'])
     ->set('user_register', $form_state['values']['user_register'])

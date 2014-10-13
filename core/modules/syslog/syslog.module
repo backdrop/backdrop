@@ -25,7 +25,7 @@ else {
  * Implements hook_form_FORM_ID_alter().
  */
 function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
-  $config = config('system.logging');
+  $config = config('system.core');
   $help = module_exists('help') ? ' ' . l(t('More information'), 'admin/help/syslog') . '.' : NULL;
   $form['syslog_identity'] = array(
     '#type'          => 'textfield',
@@ -57,7 +57,7 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
  * @see syslog_form_system_logging_settings_alter()
  */
 function syslog_logging_settings_submit($form, &$form_state) {
-  config('system.logging')
+  config('system.core')
     ->set('log_identity', $form_state['values']['syslog_identity'])
     ->set('log_facility', $form_state['values']['syslog_facility'])
     ->set('log_format', $form_state['values']['syslog_format'])
@@ -90,7 +90,7 @@ function syslog_watchdog(array $log_entry) {
   global $base_url;
 
   $log_init = &backdrop_static(__FUNCTION__, FALSE);
-  $config = config('system.logging');
+  $config = config('system.core');
 
   if (!$log_init) {
     $log_init = TRUE;

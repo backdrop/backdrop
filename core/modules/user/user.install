@@ -338,10 +338,8 @@ function user_update_1002() {
  * Moves account settings from variable to config.
  */
 function user_update_1003() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'user.settings');
-  // Migrate variables if any.
-  $config = config('user.settings');
+  // Migrate variables to config.
+  $config = config('system.core');
   $config->set('user_admin_role', variable_get('user_admin_role', ''));
   $config->set('anonymous', variable_get('anonymous', 'Anonymous'));
   $config->set('user_email_verification', variable_get('user_email_verification', 1));
@@ -446,7 +444,7 @@ function user_update_1005() {
  */
 function user_update_1006() {
   // Migrate variables if any.
-  $config = config('user.settings');
+  $config = config('system.core');
   $config->set('user_pictures', variable_get('user_pictures', 0));
   $config->set('user_picture_path', variable_get('user_picture_path', 'pictures'));
   $config->set('user_picture_default', variable_get('user_picture_default', ''));

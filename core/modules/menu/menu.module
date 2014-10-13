@@ -246,7 +246,7 @@ function menu_save($menu) {
       // Make sure the menu is present in the active menus variable so that its
       // items may appear in the menu active trail.
       // @see menu_set_active_menu_names()
-      $config = config('system.menu');
+      $config = config('system.core');
 
       $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());
       if (!in_array($menu['menu_name'], $active_menus)) {
@@ -288,7 +288,7 @@ function menu_save($menu) {
  * hook_menu_delete().
  */
 function menu_delete($menu) {
-  $config = config('system.menu');
+  $config = config('system.core');
 
   // Delete all links from the menu.
   menu_delete_links($menu['menu_name']);

@@ -1825,7 +1825,7 @@ function install_configure_form_validate($form, &$form_state) {
 function install_configure_form_submit($form, &$form_state) {
   global $user;
 
-  config('system.site')
+  config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_mail', $form_state['values']['site_mail'])
     ->save();

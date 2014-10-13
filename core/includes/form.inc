@@ -576,7 +576,7 @@ function form_set_cache($form_build_id, $form, $form_state) {
   }
 
   // Cache form state.
-  if (config_get('system.performance', 'cache') && backdrop_page_is_cacheable()) {
+  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
     $form_state['build_info']['immutable'] = TRUE;
   }
   if ($data = array_diff_key($form_state, array_flip(form_state_keys_no_cache()))) {
@@ -914,7 +914,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
       // We'll clear out the cached copies of the form and its stored data
       // here, as we've finished with them. The in-memory copies are still
       // here, though.
-      if (!config_get('system.performance', 'cache') && !empty($form_state['values']['form_build_id'])) {
+      if (!config_get('system.core', 'cache') && !empty($form_state['values']['form_build_id'])) {
         tempstore_clear('form', $form_state['values']['form_build_id']);
         tempstore_clear('form_state', $form_state['values']['form_build_id']);
       }

@@ -29,7 +29,7 @@ function hook_config_info() {
   );
   // If this configuration file points to one particular file, a "name" key
   // will display that exact string for that file.
-  $prefixes['system.performance'] = array(
+  $prefixes['system.core'] = array(
     'label' => t('System performance'),
     'group' => t('Configuration'),
   );

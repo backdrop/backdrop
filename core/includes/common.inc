@@ -282,7 +282,7 @@ function backdrop_get_logo() {
   // installer or on maintenance pages. Default to an empty string if unable to
   // load the configuration.
   try {
-    $site_config = config('system.site');
+    $site_config = config('system.core');
 
     if ($site_config->get('site_logo_theme')) {
       global $theme;
@@ -321,7 +321,7 @@ function backdrop_get_favicon() {
 
   // Load the config and update, if we can.
   try {
-    $site_config = config('system.site');
+    $site_config = config('system.core');
 
     if ($site_config->get('site_favicon_theme')) {
       global $theme;
@@ -2740,7 +2740,7 @@ function backdrop_deliver_html_page($page_callback_result) {
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.site');
+    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -2808,7 +2808,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         backdrop_maintenance_theme();
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.maintenance', 'maintenance_message'), array('@site' => config_get('system.site', 'site_name'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_message'), array('@site' => config_get('system.core', 'site_name'))))));
         break;
     }
   }
@@ -2834,7 +2834,7 @@ function backdrop_page_footer() {
   // Commit the user session, if needed.
   backdrop_session_commit();
 
-  if (config_get('system.performance', 'cache') && ($cache = backdrop_page_set_cache())) {
+  if (config_get('system.core', 'cache') && ($cache = backdrop_page_set_cache())) {
     backdrop_serve_page_from_cache($cache);
   }
   else {
@@ -3400,7 +3400,7 @@ function backdrop_group_css($css) {
  * @see system_element_info()
  */
 function backdrop_aggregate_css(&$css_groups) {
-  $preprocess_css = !defined('MAINTENANCE_MODE') && config_get('system.performance', 'preprocess_css');
+  $preprocess_css = !defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_css');
 
   // For each group that needs aggregation, aggregate its items.
   foreach ($css_groups as $key => $group) {
@@ -4670,7 +4670,7 @@ function backdrop_group_js($javascript) {
  * @see backdrop_pre_render_scripts()
  */
 function backdrop_aggregate_js(&$js_groups) {
-  if (!defined('MAINTENANCE_MODE') && config_get('system.performance', 'preprocess_js')) {
+  if (!defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_js')) {
     foreach ($js_groups as $key => $group) {
       if ($group['type'] == 'file' && $group['preprocess']) {
         $js_groups[$key]['data'] = backdrop_build_js_cache($group['items']);
@@ -5546,7 +5546,7 @@ function backdrop_page_set_cache() {
   if (backdrop_page_is_cacheable()) {
 
     // Check whether the current page might be compressed.
-    $page_compressed = config_get('system.performance', 'page_compression') && extension_loaded('zlib');
+    $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
 
     $cache = (object) array(
       'cid' => $base_root . request_uri(),

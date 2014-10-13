@@ -19,7 +19,7 @@ class BackdropMatchPathTestCase extends BackdropWebTestCase {
 
     // Set up a random site front page to test the '<front>' placeholder.
     $this->front = $this->randomName();
-    config_set('system.site', 'site_frontpage', $this->front);
+    config_set('system.core', 'site_frontpage', $this->front);
     // Refresh our static variables from the database.
     $this->refreshVariables();
   }

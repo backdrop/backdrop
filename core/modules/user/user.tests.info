@@ -42,7 +42,7 @@ file = tests/user.test
 
 [UserAdminSettingsFormTest]
 name = User admin settings
-description = Configuration object user.mail and user.settings save test.
+description = Configuration object user mail and user settings save test.
 group = User
 file = tests/user.test
 

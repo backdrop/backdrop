@@ -2258,11 +2258,10 @@ function theme_menu_local_tasks(&$variables) {
  *
  * @return
  *   An array of menu machine names, in order of preference. The
- *   'system.menu.active_menus_default' config item may be used to assert a menu
+ *   'system.core.active_menus_default' config item may be used to assert a menu
  *   order different from the order of creation, or to prevent a particular menu
- *   from being used at all in the active trail.
- *   E.g., $conf['system.menu']['active_menus_default'] = array('tools',
- *   'main').
+ *   from being used at all in the active trail. For example,
+ *   $conf['system.core']['active_menus_default'] = array('tools', 'main').
  */
 function menu_set_active_menu_names($menu_names = NULL) {
   $active = &backdrop_static(__FUNCTION__);
@@ -2271,7 +2270,7 @@ function menu_set_active_menu_names($menu_names = NULL) {
     $active = $menu_names;
   }
   elseif (!isset($active)) {
-    $active = config_get('system.menu', 'active_menus_default') ?: array_keys(menu_list_system_menus());
+    $active = config_get('system.core', 'active_menus_default') ?: array_keys(menu_list_system_menus());
   }
   return $active;
 }

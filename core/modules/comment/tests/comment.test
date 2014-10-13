@@ -610,7 +610,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertEqual($node->comment_count, 1, 'The value of node comment_count is 1.');
 
     // Prepare for anonymous comment submission (comment approval enabled).
-    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
     $this->backdropLogin($this->admin_user);
     user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
       'access comments' => TRUE,
@@ -797,7 +797,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     }
 
     // Change user settings.
-    config_set('user.settings', 'user_register', $info['user_register']);
+    config_set('system.core', 'user_register', $info['user_register']);
 
     // Change user permissions.
     $rid = ($this->loggedInUser ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID);
@@ -962,7 +962,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Login as web user and add a signature and a user picture.
     $this->backdropLogin($this->web_user);
-    config('user.settings')
+    config('system.core')
       ->set('user_signatures', 1)
       ->set('user_pictures', 1)
       ->save();
@@ -1066,7 +1066,7 @@ class CommentPreviewTest extends CommentHelperCase {
 class CommentAnonymous extends CommentHelperCase {
   function setUp() {
     parent::setUp();
-    config_set('user.settings', 'user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**

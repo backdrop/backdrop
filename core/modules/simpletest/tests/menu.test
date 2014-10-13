@@ -209,7 +209,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The theme callback system is correctly triggered for an administrator when the site is in maintenance mode.');
     $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page.");
 
-    config_set('system.maintenance', 'maintenance_enabled', 0);
+    config_set('system.core', 'maintenance_enabled', 0);
   }
 
   /**
@@ -220,14 +220,14 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testMaintenanceModeLoginPaths() {
     state_set('maintenance_mode', TRUE);
 
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.site', 'site_name')));
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
     $this->backdropLogout();
     $this->backdropGet('node');
     $this->assertText($offline_message);
     $this->backdropGet('menu_login_callback');
     $this->assertText('This is menu_login_callback().', 'Maintenance mode can be bypassed through hook_login_paths().');
 
-    config_set('system.maintenance', 'maintenance_enabled', 0);
+    config_set('system.core', 'maintenance_enabled', 0);
   }
 
   /**
@@ -1554,7 +1554,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
    */
   function testCustom403And404Pages() {
     // Set the custom 403 and 404 pages we will use.
-    config('system.site')
+    config('system.core')
       ->set('site_403', 'menu-test/custom-403-page')
       ->set('site_404', 'menu-test/custom-404-page')
       ->save();

@@ -2598,7 +2598,7 @@ function template_preprocess_html(&$variables) {
   $favicon = backdrop_get_favicon();
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
-  $site_config = config('system.site');
+  $site_config = config('system.core');
   // Construct page title.
   if (backdrop_get_title()) {
     $head_title = array(
@@ -2639,7 +2639,7 @@ function template_preprocess_html(&$variables) {
 function template_preprocess_page(&$variables) {
   // Move some variables to the top level for themer convenience and template cleanliness.
   $variables['show_messages'] = $variables['page']['#show_messages'];
-  $site_config = config('system.site');
+  $site_config = config('system.core');
 
   foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
     if (!isset($variables['page'][$region_key])) {
@@ -2848,7 +2848,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
 function template_preprocess_maintenance_page(&$variables) {
   // Load site config if available, fallback to the default.
   try {
-    $site_config = config('system.site');
+    $site_config = config('system.core');
     $site_name = filter_xss_admin($site_config->get('site_name'));
     $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
   }

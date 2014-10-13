@@ -136,7 +136,7 @@ function node_form_validate($form, &$form_state) {
  */
 function node_form($form, &$form_state, Node $node) {
   global $user;
-  $config = config('user.settings');
+  $config = config('system.core');
 
   // During initial form build, add the node entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
