@@ -146,7 +146,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if (variable_get('comment_subject_field_' . $type->type, 1) == 1) {
+    if (variable_get('comment_title_field_' . $type->type, 1) == 1) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -154,9 +154,9 @@ function comment_field_extra_fields() {
             'description' => t('Author textfield'),
             'weight' => -2,
           ),
-          'subject' => array(
-            'label' => t('Subject'),
-            'description' => t('Subject textfield'),
+          'title' => array(
+            'label' => t('Title'),
+            'description' => t('Title textfield'),
             'weight' => -1,
           ),
         ),
@@ -321,7 +321,7 @@ function comment_node_type_delete($info) {
     'comment_default_mode',
     'comment_default_per_page',
     'comment_anonymous',
-    'comment_subject_field',
+    'comment_title_field',
     'comment_preview',
     'comment_form_location',
   );
@@ -589,7 +589,7 @@ function theme_comment_block() {
   $items = array();
   $number = variable_get('comment_block_count', 10);
   foreach (comment_get_recent($number) as $comment) {
-    $items[] = l($comment->subject, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_interval(REQUEST_TIME - $comment->changed))) . '</span>';
+    $items[] = l($comment->title, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_interval(REQUEST_TIME - $comment->changed))) . '</span>';
   }
 
   if ($items) {
@@ -1175,10 +1175,10 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
     );
-    $form['comment']['comment_subject_field'] = array(
+    $form['comment']['comment_title_field'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow comment title'),
-      '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 1),
+      '#default_value' => variable_get('comment_title_field_' . $form['#node_type']->type, 1),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -1636,7 +1636,7 @@ function comment_get_display_page($cid, $node_type) {
  * @see comment_menu()
  */
 function comment_edit_page($comment) {
-  backdrop_set_title(t('Edit comment %comment', array('%comment' => $comment->subject)), PASS_THROUGH);
+  backdrop_set_title(t('Edit comment %comment', array('%comment' => $comment->title)), PASS_THROUGH);
   $node = node_load($comment->nid);
   return backdrop_get_form("comment_node_{$node->type}_form", $comment);
 }
@@ -1709,7 +1709,7 @@ function comment_form($form, &$form_state, $comment) {
     );
   }
   else {
-    // Sets the author form elements above the subject.
+    // Sets the author form elements above the title.
     $form['author'] = array(
       '#weight' => -2,
     );
@@ -1806,12 +1806,12 @@ function comment_form($form, &$form_state, $comment) {
     '#access' => $is_admin,
   );
 
-  $form['subject'] = array(
+  $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Subject'),
+    '#title' => t('Title'),
     '#maxlength' => 64,
-    '#default_value' => $comment->subject,
-    '#access' => variable_get('comment_subject_field_' . $node->type, 1) == 1,
+    '#default_value' => $comment->title,
+    '#access' => variable_get('comment_title_field_' . $node->type, 1) == 1,
     '#weight' => -1,
   );
 
@@ -1992,8 +1992,8 @@ function comment_submit($comment) {
     $comment->name = config_get('system.core', 'anonymous');
   }
 
-  // Validate the comment's subject. If not specified, extract from comment body.
-  if (trim($comment->subject) == '') {
+  // Validate the comment's title. If not specified, extract from comment body.
+  if (trim($comment->title) == '') {
     // The body may be in any format, so:
     // 1) Filter it into HTML
     // 2) Strip out all HTML tags
@@ -2005,11 +2005,11 @@ function comment_submit($comment) {
     else {
       $comment_text = check_plain($comment_body['value']);
     }
-    $comment->subject = truncate_utf8(trim(decode_entities(strip_tags($comment_text))), 29, TRUE);
+    $comment->title = truncate_utf8(trim(decode_entities(strip_tags($comment_text))), 29, TRUE);
     // Edge cases where the comment body is populated only by HTML tags will
-    // require a default subject.
-    if ($comment->subject == '') {
-      $comment->subject = t('(No subject)');
+    // require a default title.
+    if ($comment->title == '') {
+      $comment->title = t('(No title)');
     }
   }
   return $comment;
@@ -2054,7 +2054,7 @@ function comment_form_submit($form, &$form_state) {
     $form_state['values']['cid'] = $comment->cid;
 
     // Add an entry to the watchdog log.
-    watchdog('content', 'Comment posted: %subject.', array('%subject' => $comment->subject), WATCHDOG_NOTICE, l(t('view'), 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)));
+    watchdog('content', 'Comment posted: %title.', array('%title' => $comment->title), WATCHDOG_NOTICE, l(t('view'), 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)));
 
     // Explain the approval queue if necessary.
     if ($comment->status == COMMENT_NOT_PUBLISHED) {
@@ -2075,8 +2075,8 @@ function comment_form_submit($form, &$form_state) {
     $redirect = array('node/' . $node->nid, array('query' => $query, 'fragment' => 'comment-' . $comment->cid));
   }
   else {
-    watchdog('content', 'Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject), WATCHDOG_WARNING);
-    backdrop_set_message(t('Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject)), 'error');
+    watchdog('content', 'Comment: unauthorized comment submitted or comment submitted to a closed post %title.', array('%title' => $comment->title), WATCHDOG_WARNING);
+    backdrop_set_message(t('Comment: unauthorized comment submitted or comment submitted to a closed post %title.', array('%title' => $comment->title)), 'error');
     // Redirect the user to the node they are commenting on.
     $redirect = 'node/' . $node->nid;
   }
@@ -2153,7 +2153,7 @@ function template_preprocess_comment(&$variables) {
   $uri = entity_uri('comment', $comment);
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
 
-  $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
+  $variables['title'] = l($comment->title, $uri['path'], $uri['options']);
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['author'], '!datetime' => $variables['created']));
 
@@ -2338,19 +2338,19 @@ function comment_action_info() {
  * @ingroup actions
  */
 function comment_publish_action($comment, $context = array()) {
-  if (isset($comment->subject)) {
-    $subject = $comment->subject;
+  if (isset($comment->title)) {
+    $title = $comment->title;
     $comment->status = COMMENT_PUBLISHED;
   }
   else {
     $cid = $context['cid'];
-    $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
+    $title = db_query('SELECT title FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
     db_update('comment')
       ->fields(array('status' => COMMENT_PUBLISHED))
       ->condition('cid', $cid)
       ->execute();
   }
-  watchdog('action', 'Published comment %subject.', array('%subject' => $subject));
+  watchdog('action', 'Published comment %title.', array('%title' => $title));
 }
 
 /**
@@ -2365,19 +2365,19 @@ function comment_publish_action($comment, $context = array()) {
  * @ingroup actions
  */
 function comment_unpublish_action($comment, $context = array()) {
-  if (isset($comment->subject)) {
-    $subject = $comment->subject;
+  if (isset($comment->title)) {
+    $title = $comment->title;
     $comment->status = COMMENT_NOT_PUBLISHED;
   }
   else {
     $cid = $context['cid'];
-    $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
+    $title = db_query('SELECT title FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
     db_update('comment')
       ->fields(array('status' => COMMENT_NOT_PUBLISHED))
       ->condition('cid', $cid)
       ->execute();
   }
-  watchdog('action', 'Unpublished comment %subject.', array('%subject' => $subject));
+  watchdog('action', 'Unpublished comment %title.', array('%title' => $title));
 }
 
 /**
@@ -2399,7 +2399,7 @@ function comment_unpublish_by_keyword_action($comment, $context) {
     $text = backdrop_render($comment);
     if (strpos($text, $keyword) !== FALSE) {
       $comment->status = COMMENT_NOT_PUBLISHED;
-      watchdog('action', 'Unpublished comment %subject.', array('%subject' => $comment->subject));
+      watchdog('action', 'Unpublished comment %title.', array('%title' => $comment->title));
       break;
     }
   }

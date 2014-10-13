@@ -25,7 +25,7 @@ function comment_uninstall() {
     variable_del('comment_default_per_page_' . $node_type);
     variable_del('comment_form_location_' . $node_type);
     variable_del('comment_preview_' . $node_type);
-    variable_del('comment_subject_field_' . $node_type);
+    variable_del('comment_title_field_' . $node_type);
   }
 }
 
@@ -109,7 +109,7 @@ function comment_schema() {
         'default' => 0,
         'description' => 'The {users}.uid who authored the comment. If set to 0, this comment was created by an anonymous user.',
       ),
-      'subject' => array(
+      'title' => array(
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,

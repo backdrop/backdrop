@@ -86,21 +86,21 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     unset($display_options['fields']);
 
     /* Field: Comment: Title */
-    $display_options['fields']['subject']['id'] = 'subject';
-    $display_options['fields']['subject']['table'] = 'comment';
-    $display_options['fields']['subject']['field'] = 'subject';
-    $display_options['fields']['subject']['label'] = '';
-    $display_options['fields']['subject']['alter']['alter_text'] = 0;
-    $display_options['fields']['subject']['alter']['make_link'] = 0;
-    $display_options['fields']['subject']['alter']['absolute'] = 0;
-    $display_options['fields']['subject']['alter']['trim'] = 0;
-    $display_options['fields']['subject']['alter']['word_boundary'] = 0;
-    $display_options['fields']['subject']['alter']['ellipsis'] = 0;
-    $display_options['fields']['subject']['alter']['strip_tags'] = 0;
-    $display_options['fields']['subject']['alter']['html'] = 0;
-    $display_options['fields']['subject']['hide_empty'] = 0;
-    $display_options['fields']['subject']['empty_zero'] = 0;
-    $display_options['fields']['subject']['link_to_comment'] = 1;
+    $display_options['fields']['title']['id'] = 'title';
+    $display_options['fields']['title']['table'] = 'comment';
+    $display_options['fields']['title']['field'] = 'title';
+    $display_options['fields']['title']['label'] = '';
+    $display_options['fields']['title']['alter']['alter_text'] = 0;
+    $display_options['fields']['title']['alter']['make_link'] = 0;
+    $display_options['fields']['title']['alter']['absolute'] = 0;
+    $display_options['fields']['title']['alter']['trim'] = 0;
+    $display_options['fields']['title']['alter']['word_boundary'] = 0;
+    $display_options['fields']['title']['alter']['ellipsis'] = 0;
+    $display_options['fields']['title']['alter']['strip_tags'] = 0;
+    $display_options['fields']['title']['alter']['html'] = 0;
+    $display_options['fields']['title']['hide_empty'] = 0;
+    $display_options['fields']['title']['empty_zero'] = 0;
+    $display_options['fields']['title']['link_to_comment'] = 1;
 
     return $display_options;
   }

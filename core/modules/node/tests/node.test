@@ -2352,7 +2352,7 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
       $comment = entity_create('comment', array(
         'uid' => $this->web_user->uid,
         'nid' => $node->nid,
-        'subject' => $this->randomName(),
+        'title' => $this->randomName(),
         'comment_body' => array(
           LANGUAGE_NONE => array(
             array('value' => $this->randomName()),

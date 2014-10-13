@@ -20,8 +20,8 @@
  *   The comment object.
  */
 function hook_comment_presave($comment) {
-  // Remove leading & trailing spaces from the comment subject.
-  $comment->subject = trim($comment->subject);
+  // Remove leading & trailing spaces from the comment title.
+  $comment->title = trim($comment->title);
 }
 
 /**
@@ -112,7 +112,7 @@ function hook_comment_view_alter(&$build) {
  *   The comment the action is being performed on.
  */
 function hook_comment_publish($comment) {
-  backdrop_set_message(t('Comment: @subject has been published', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @title has been published', array('@title' => $comment->title)));
 }
 
 /**
@@ -122,7 +122,7 @@ function hook_comment_publish($comment) {
  *   The comment the action is being performed on.
  */
 function hook_comment_unpublish($comment) {
-  backdrop_set_message(t('Comment: @subject has been unpublished', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @title has been unpublished', array('@title' => $comment->title)));
 }
 
 /**
@@ -161,7 +161,7 @@ function hook_comment_predelete($comment) {
  * @see entity_delete_multiple()
  */
 function hook_comment_delete($comment) {
-  backdrop_set_message(t('Comment: @subject has been deleted', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @title has been deleted', array('@title' => $comment->title)));
 }
 
 /**

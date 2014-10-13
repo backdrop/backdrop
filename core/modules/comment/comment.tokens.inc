@@ -151,7 +151,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           break;
 
         case 'title':
-          $replacements[$original] = $sanitize ? filter_xss($comment->subject) : $comment->subject;
+          $replacements[$original] = $sanitize ? filter_xss($comment->title) : $comment->title;
           break;
 
         case 'body':
@@ -181,7 +181,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
         case 'parent':
           if (!empty($comment->pid)) {
             $parent = comment_load($comment->pid);
-            $replacements[$original] = $sanitize ? filter_xss($parent->subject) : $parent->subject;
+            $replacements[$original] = $sanitize ? filter_xss($parent->title) : $parent->title;
           }
           break;
 

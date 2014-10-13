@@ -738,9 +738,9 @@ function hook_node_update(Node $node) {
  */
 function hook_node_update_index(Node $node) {
   $text = '';
-  $comments = db_query('SELECT subject, comment, format FROM {comment} WHERE nid = :nid AND status = :status', array(':nid' => $node->nid, ':status' => COMMENT_PUBLISHED));
+  $comments = db_query('SELECT title, comment, format FROM {comment} WHERE nid = :nid AND status = :status', array(':nid' => $node->nid, ':status' => COMMENT_PUBLISHED));
   foreach ($comments as $comment) {
-    $text .= '<h2>' . check_plain($comment->subject) . '</h2>' . check_markup($comment->comment, $comment->format, '', TRUE);
+    $text .= '<h2>' . check_plain($comment->title) . '</h2>' . check_markup($comment->comment, $comment->format, '', TRUE);
   }
   return $text;
 }

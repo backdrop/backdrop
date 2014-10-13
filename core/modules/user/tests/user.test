@@ -693,13 +693,13 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Create comment.
     $langcode = LANGUAGE_NONE;
     $edit = array();
-    $edit['subject'] = $this->randomName(8);
+    $edit['title'] = $this->randomName(8);
     $edit['comment_body[' . $langcode . '][0][value]'] = $this->randomName(16);
 
     $this->backdropPost('comment/reply/' . $node->nid, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));
     $this->assertText(t('Your comment has been posted.'));
-    $comments = comment_load_multiple(FALSE, array('subject' => $edit['subject']));
+    $comments = comment_load_multiple(FALSE, array('title' => $edit['title']));
     $comment = reset($comments);
     $this->assertTrue($comment->cid, 'Comment found.');
 
@@ -1835,7 +1835,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     // Create a comment.
     $langcode = LANGUAGE_NONE;
     $edit = array();
-    $edit['subject'] = $this->randomName(8);
+    $edit['title'] = $this->randomName(8);
     $edit['comment_body[' . $langcode . '][0][value]'] = $this->randomName(16);
     $this->backdropPost('comment/reply/' . $node->nid, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));

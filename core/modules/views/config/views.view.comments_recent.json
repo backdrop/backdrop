@@ -46,10 +46,10 @@
                     }
                 },
                 "fields": {
-                    "subject": {
-                        "id": "subject",
+                    "title": {
+                        "id": "title",
                         "table": "comment",
-                        "field": "subject",
+                        "field": "title",
                         "label": "",
                         "link_to_comment": 1
                     },
@@ -120,10 +120,10 @@
                         "label": "",
                         "date_format": "time ago"
                     },
-                    "subject": {
-                        "id": "subject",
+                    "title": {
+                        "id": "title",
                         "table": "comment",
-                        "field": "subject",
+                        "field": "title",
                         "label": "",
                         "link_to_comment": 1
                     },

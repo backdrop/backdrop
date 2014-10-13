@@ -179,11 +179,11 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
       $handler->display->display_options["relationships"]["nid"]["table"] = "comments";
       $handler->display->display_options["relationships"]["nid"]["field"] = "nid";
       /* Field: Comment: Title */
-      $handler->display->display_options["fields"]["subject"]["id"] = "subject";
-      $handler->display->display_options["fields"]["subject"]["table"] = "comments";
-      $handler->display->display_options["fields"]["subject"]["field"] = "subject";
-      $handler->display->display_options["fields"]["subject"]["label"] = "";
-      $handler->display->display_options["fields"]["subject"]["link_to_comment"] = 1;
+      $handler->display->display_options["fields"]["title"]["id"] = "title";
+      $handler->display->display_options["fields"]["title"]["table"] = "comments";
+      $handler->display->display_options["fields"]["title"]["field"] = "title";
+      $handler->display->display_options["fields"]["title"]["label"] = "";
+      $handler->display->display_options["fields"]["title"]["link_to_comment"] = 1;
       /* Field: Comment: Post date */
       $handler->display->display_options["fields"]["timestamp"]["id"] = "timestamp";
       $handler->display->display_options["fields"]["timestamp"]["table"] = "comments";
@@ -232,11 +232,11 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
       $handler->display->display_options["fields"]["timestamp"]["label"] = "";
       $handler->display->display_options["fields"]["timestamp"]["date_format"] = "time ago";
       /* Field: Comment: Title */
-      $handler->display->display_options["fields"]["subject"]["id"] = "subject";
-      $handler->display->display_options["fields"]["subject"]["table"] = "comments";
-      $handler->display->display_options["fields"]["subject"]["field"] = "subject";
-      $handler->display->display_options["fields"]["subject"]["label"] = "";
-      $handler->display->display_options["fields"]["subject"]["link_to_comment"] = 1;
+      $handler->display->display_options["fields"]["title"]["id"] = "title";
+      $handler->display->display_options["fields"]["title"]["table"] = "comments";
+      $handler->display->display_options["fields"]["title"]["field"] = "title";
+      $handler->display->display_options["fields"]["title"]["label"] = "";
+      $handler->display->display_options["fields"]["title"]["link_to_comment"] = 1;
       /* Field: Comment: Body */
       $handler->display->display_options["fields"]["comment"]["id"] = "comment";
       $handler->display->display_options["fields"]["comment"]["table"] = "comments";

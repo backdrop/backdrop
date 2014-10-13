@@ -74,7 +74,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
       'pid' => 0,
       'nid' => $nid,
       'uid' => 1,
-      'subject' => 'Test comment',
+      'title' => 'Test comment',
       'created' => REQUEST_TIME,
       'changed' => REQUEST_TIME,
       'status' => 1,
@@ -100,7 +100,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
     ));
 
     $_SESSION['entity_crud_hook_test'] = array();
-    $comment->subject = 'New subject';
+    $comment->title = 'New title';
     comment_save($comment);
 
     $this->assertHookMessageOrder(array(

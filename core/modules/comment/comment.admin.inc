@@ -69,7 +69,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
   // Load the comments that need to be displayed.
   $status = ($arg == 'approval') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
   $header = array(
-    'subject' => array('data' => t('Subject'), 'field' => 'subject'),
+    'title' => array('data' => t('Title'), 'field' => 'title'),
     'author' => array('data' => t('Author'), 'field' => 'name', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
     'posted_in' => array('data' => t('Posted in'), 'field' => 'node_title', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'changed' => array('data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
@@ -81,7 +81,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
   $query->addField('n', 'title', 'node_title');
   $query->addTag('node_access');
   $result = $query
-    ->fields('c', array('cid', 'subject', 'name', 'changed'))
+    ->fields('c', array('cid', 'title', 'name', 'changed'))
     ->condition('c.status', $status)
     ->limit(50)
     ->orderByHeader($header)
@@ -106,10 +106,10 @@ function comment_admin_overview($form, &$form_state, $arg) {
     // the comment.
     $comment->node_title = array_shift($node_titles);
     $options[$comment->cid] = array(
-      'subject' => array(
+      'title' => array(
         'data' => array(
           '#type' => 'link',
-          '#title' => $comment->subject,
+          '#title' => $comment->title,
           '#href' => 'comment/' . $comment->cid,
           '#options' => array('attributes' => array('title' => truncate_utf8($comment->comment_body[LANGUAGE_NONE][0]['value'], 128)), 'fragment' => 'comment-' . $comment->cid),
         ),
@@ -214,8 +214,8 @@ function comment_multiple_delete_confirm($form, &$form_state) {
   foreach (array_filter($edit['comments']) as $cid => $value) {
     $comment = comment_load($cid);
     if (is_object($comment) && is_numeric($comment->cid)) {
-      $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
-      $form['comments'][$cid] = array('#type' => 'hidden', '#value' => $cid, '#prefix' => '<li>', '#suffix' => check_plain($subject) . '</li>');
+      $title = db_query('SELECT title FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
+      $form['comments'][$cid] = array('#type' => 'hidden', '#value' => $cid, '#prefix' => '<li>', '#suffix' => check_plain($title) . '</li>');
       $comment_counter++;
     }
   }
@@ -280,7 +280,7 @@ function comment_confirm_delete($form, &$form_state, $comment) {
   $form['cid'] = array('#type' => 'value', '#value' => $comment->cid);
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the comment %title?', array('%title' => $comment->subject)),
+    t('Are you sure you want to delete the comment %title?', array('%title' => $comment->title)),
     'node/' . $comment->nid,
     t('Any replies to this comment will be lost. This action cannot be undone.'),
     t('Delete'),
