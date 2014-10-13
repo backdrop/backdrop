@@ -138,7 +138,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
 
     $item = new stdClass();
     $item->description = $item_text;
-    $item->title = $comment->subject;
+    $item->title = $comment->title;
     $item->link = $comment->link;
     $item->elements = $comment->rss_elements;
     $item->cid = $comment->cid;

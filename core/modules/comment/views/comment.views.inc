@@ -38,8 +38,8 @@ function comment_views_data() {
   // ----------------------------------------------------------------
   // Fields
 
-  // subject
-  $data['comment']['subject'] = array(
+  // title
+  $data['comment']['title'] = array(
     'title' => t('Title'),
     'help' => t('The title of the comment.'),
     'field' => array(

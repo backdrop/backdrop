@@ -36,7 +36,7 @@ class Comment extends Entity {
    *
    * @var string
    */
-  public $subject;
+  public $title;
 
 
   /**
@@ -91,7 +91,7 @@ class Comment extends Entity {
    * Implements EntityInterface::label().
    */
   public function label() {
-    return $this->subject;
+    return $this->title;
   }
 
   /**
