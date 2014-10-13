@@ -116,7 +116,62 @@ function image_requirements($phase) {
  * Provide default image styles for the Image module.
  */
 function image_update_1000() {
-  config_install_default_config('image');
+  $data = array(
+    'overridden' => FALSE,
+    'module' => 'image',
+    'label' => 'Thumbnail (100x100)',
+    'name' => 'thumbnail',
+    'effects' => array(
+      'name' => 'image_scale',
+      'data' => array(
+        'width' => 100,
+        'height' => 100,
+        'upscale' => 1,
+      ),
+      'weight' => 1,
+    ),
+  );
+  $config = config('image.styles.thumbnail');
+  $config->setData($data);
+  $config->save();
+
+  $data = array(
+    'overridden' => FALSE,
+    'module' => 'image',
+    'label' => 'Medium (220x220)',
+    'name' => 'medium',
+    'effects' => array(
+      'name' => 'image_scale',
+      'data' => array(
+        'width' => 220,
+        'height' => 220,
+        'upscale' => 1,
+      ),
+      'weight' => 1,
+    ),
+  );
+  $config = config('image.styles.medium');
+  $config->setData($data);
+  $config->save();
+
+  $data = array(
+    'overridden' => FALSE,
+    'module' => 'image',
+    'label' => 'Large (480x480)',
+    'name' => 'large',
+    'effects' => array(
+      'name' => 'image_scale',
+      'data' => array(
+        'width' => 480,
+        'height' => 480,
+        'upscale' => 1,
+      ),
+      'weight' => 1,
+    ),
+  );
+  $config = config('image.styles.large');
+  $config->setData($data);
+  $config->save();
 }
 
 /**

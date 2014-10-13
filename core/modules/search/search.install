@@ -154,9 +154,7 @@ function search_schema() {
  * Update search module to use the configuration system.
  */
 function search_update_1000() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'search.settings');
-  // Migrate variables if any.
+  // Migrate variables to config.
   $config = config('search.settings');
   $config->set('search_minimum_word_size', variable_get('minimum_word_size', 3));
   $config->set('search_overlap_cjk', variable_get('overlap_cjk', 1));
@@ -179,6 +177,7 @@ function search_update_1000() {
   $config->set('search_and_or_limit', variable_get('search_and_or_limit', 7));
   $config->set('search_default_module', variable_get('search_default_module', 'node'));
   $config->save();
+
   // Delete variables.
   variable_del('minimum_word_size');
   variable_del('overlap_cjk');

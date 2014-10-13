@@ -97,14 +97,13 @@ function book_schema() {
  * Move book settings from variables to config.
  */
 function book_update_1000() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'book.settings');
-  // Migrate variables if any.
+  // Migrate variables to config.
   $config = config('book.settings');
   $config->set('book_allowed_types', variable_get('book_allowed_types', array('book')));
   $config->set('book_child_type', variable_get('book_child_type', 'book'));
   $config->set('book_block_mode', variable_get('book_block_mode', 'all pages'));
   $config->save();
+
   // Delete variables.
   variable_del('book_allowed_types');
   variable_del('book_child_type');
