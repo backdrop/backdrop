@@ -39,7 +39,7 @@ function node_overview_types() {
           'weight' => 10,
         );
       }
-      if ($type->custom) {
+      if ($type->module === 'node') {
         $links['Delete'] = array(
           'title' => t('Delete'),
           'href' => 'admin/structure/types/manage/' . $type_url_str . '/delete',
@@ -101,11 +101,11 @@ function theme_node_admin_overview($variables) {
  */
 function node_type_form($form, &$form_state, $type = NULL) {
   if (!isset($type->type)) {
-    // This is a new type. Node module managed types are custom and unlocked.
-    $type = node_type_set_defaults(array('custom' => 1, 'locked' => 0));
+    // This is a new type. Populate with the defaults.
+    $type = node_type_set_defaults();
   }
 
-  // Make the type object available to implementations of hook_form_alter.
+  // Make the type object available to implementations of hook_form_alter().
   $form['#node_type'] = $type;
 
   $form['name'] = array(
@@ -121,7 +121,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'machine_name',
     '#default_value' => $type->type,
     '#maxlength' => 32,
-    '#disabled' => $type->locked,
+    '#disabled' => $type->module !== 'node',
     '#machine_name' => array(
       'exists' => 'node_type_load',
     ),
@@ -166,7 +166,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['submission']['node_preview'] = array(
     '#type' => 'radios',
     '#title' => t('Preview before submitting'),
-    '#default_value' => variable_get('node_preview_' . $type->type, BACKDROP_OPTIONAL),
+    '#default_value' => $type->settings['node_preview'],
     '#options' => array(
       BACKDROP_DISABLED => t('Disabled'),
       BACKDROP_OPTIONAL => t('Optional'),
@@ -181,30 +181,107 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['workflow'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Publishing options'),
+    '#title' => t('Publishing settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
   );
-  $form['workflow']['node_options'] = array('#type' => 'checkboxes',
-    '#title' => t('Default options'),
-    '#default_value' => variable_get('node_options_' . $type->type, array('status', 'promote')),
+  $form['workflow']['status_default'] = array(
+    '#type' => 'radios',
+    '#title' => t('Published status'),
     '#options' => array(
-      'status' => t('Published'),
-      'promote' => t('Promoted to front page'),
-      'sticky' => t('Sticky at top of lists'),
-      'revision' => t('Create new revision'),
+      1 => t('Published'),
+      0 => t('Unpublished'),
     ),
-    '#description' => t('Users with the <em>Administer content</em> permission will be able to override these options.'),
+    '#default_value' => (int) $type->settings['status_default'],
+    '#description' => t('Unpublished content is only accessible to the content creator or site administrators.')
   );
+
   if (module_exists('language')) {
     $form['workflow']['node_type_language'] = array(
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
-      '#default_value' => variable_get('node_type_language_' . $type->type, 0),
+      '#default_value' => $type->settings['node_type_language'],
       '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
+
+  $form['workflow']['sticky'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Sticky'),
+    '#options' => array(
+      'sticky_enabled' => t('Show option to make posts sticky'),
+      'sticky_default' => t('Make posts sticky by default'),
+    ),
+    '#description' => t('Sticky posts may be shown at the top of listings.'),
+  );
+  $form['workflow']['sticky']['sticky_enabled'] = array(
+    '#default_value' => $type->settings['sticky_enabled'],
+    '#parents' => array('sticky_enabled'),
+    '#return_value' => 1,
+  );
+  $form['workflow']['sticky']['sticky_default'] = array(
+    '#default_value' => $type->settings['sticky_default'],
+    '#parents' => array('sticky_default'),
+    '#return_value' => 1,
+    '#states' => array(
+      'invisible' => array(
+        'input[name="sticky_enabled"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['workflow']['promote'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Promote'),
+    '#options' => array(
+      'promote_enabled' => t('Show option to promote posts'),
+      'promote_default' => t('Promote posts by default'),
+    ),
+    '#description' => t('Promoted posts will often be shown on the main homepage or blog.'),
+  );
+  $form['workflow']['promote']['promote_enabled'] = array(
+    '#default_value' => $type->settings['promote_enabled'],
+    '#parents' => array('promote_enabled'),
+    '#return_value' => 1,
+  );
+  $form['workflow']['promote']['promote_default'] = array(
+    '#default_value' => $type->settings['promote_default'],
+    '#parents' => array('promote_default'),
+    '#return_value' => 1,
+    '#states' => array(
+      'invisible' => array(
+        'input[name="promote_enabled"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['revision'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Revision settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+  );
+  $form['revision']['revision']['revision_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show option to create new revisions'),
+    '#default_value' => $type->settings['revision_enabled'],
+    '#parents' => array('revision_enabled'),
+    '#description' => t('Revisions allow content editors to view changes over time and revert changes if needed.'),
+  );
+  $form['revision']['revision']['revision_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create new revision by default'),
+    '#default_value' => $type->settings['revision_default'],
+    '#parents' => array('revision_default'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="revision_enabled"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -214,23 +291,20 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Display author and date information.'),
-    '#default_value' => variable_get('node_submitted_' . $type->type, TRUE),
+    '#title' => t('Display author and date information'),
+    '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display the author picture.'),
-      '#default_value' => variable_get('node_user_picture_' . $type->type, TRUE),
+      '#title' => t('Display the author picture'),
+      '#default_value' => $type->settings['node_user_picture'],
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
       '#states' => array(
-        'unchecked' => array(
-          'input[name="node_submitted"]' => array('checked' => FALSE),
-        ),
         // Hide the picture settings when submitted info is disabled.
-        'disabled' => array(
-          'input[name="node_submitted"]' => array('checked' => FALSE),
+        'visible' => array(
+          'input[name="node_submitted"]' => array('checked' => TRUE),
         ),
       ),
     );
@@ -240,26 +314,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'value',
     '#value' => $type->type,
   );
-  $form['orig_type'] = array(
-    '#type' => 'value',
-    '#value' => isset($type->orig_type) ? $type->orig_type : '',
-  );
-  $form['base'] = array(
-    '#type' => 'value',
-    '#value' => $type->base,
-  );
-  $form['custom'] = array(
-    '#type' => 'value',
-    '#value' => $type->custom,
-  );
-  $form['modified'] = array(
-    '#type' => 'value',
-    '#value' => $type->modified,
-  );
-  $form['locked'] = array(
-    '#type' => 'value',
-    '#value' => $type->locked,
-  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -268,14 +322,15 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#weight' => 40,
   );
 
-  if ($type->custom) {
-    if (!empty($type->type)) {
-      $form['actions']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('Delete content type'),
-        '#weight' => 45,
-      );
-    }
+  if ($type->module === 'node' && !empty($type->type)) {
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete content type'),
+      '#weight' => 45,
+      '#limit_validation_errors' => array(),
+      '#validate' => array(),
+      '#submit' => array('node_type_form_delete'),
+    );
   }
 
   return $form;
@@ -303,12 +358,10 @@ function node_type_form_validate($form, &$form_state) {
 
   $types = node_type_get_names();
 
-  if (!$form_state['values']['locked']) {
-    // 'theme' conflicts with theme_node_form().
-    // '0' is invalid, since elsewhere we check it using empty().
-    if (in_array($type->type, array('0', 'theme'))) {
-      form_set_error('type', t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $type->type)));
-    }
+  // 'theme' conflicts with theme_node_form().
+  // '0' is invalid, since elsewhere we check it using empty().
+  if (in_array($type->type, array('0', 'theme'))) {
+    form_set_error('type', t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $type->type)));
   }
 
   $names = array_flip($types);
@@ -324,13 +377,10 @@ function node_type_form_validate($form, &$form_state) {
  * @see node_type_form_validate()
  */
 function node_type_form_submit($form, &$form_state) {
-  $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
-
-  $type = node_type_set_defaults();
+  $type = $form['#node_type'];
 
   $type->type = $form_state['values']['type'];
   $type->name = trim($form_state['values']['name']);
-  $type->orig_type = trim($form_state['values']['orig_type']);
   $type->old_type = isset($form_state['values']['old_type']) ? $form_state['values']['old_type'] : $type->type;
 
   $type->description = $form_state['values']['description'];
@@ -339,62 +389,26 @@ function node_type_form_submit($form, &$form_state) {
   // title_label is required in core; has_title will always be true, unless a
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
-
-  $type->base = !empty($form_state['values']['base']) ? $form_state['values']['base'] : 'node_content';
-  $type->custom = $form_state['values']['custom'];
   $type->modified = TRUE;
-  $type->locked = $form_state['values']['locked'];
-  if (isset($form['#node_type']->module)) {
-    $type->module = $form['#node_type']->module;
-  }
 
-  if ($op == t('Delete content type')) {
-    $form_state['redirect'] = 'admin/structure/types/manage/' . str_replace('_', '-', $type->old_type) . '/delete';
-    return;
-  }
-
-  $variables = $form_state['values'];
-
-  // Remove everything that's been saved already - whatever's left is assumed
-  // to be a persistent variable.
-  foreach ($variables as $key => $value) {
-    if (isset($type->$key)) {
-      unset($variables[$key]);
+  // Check for any keys that match those provided by hook_node_type_load(). Any
+  // values that match a settings key are saved automatically.
+  foreach ($form_state['values'] as $key => $value) {
+    if (array_key_exists($key, $type->settings)) {
+      $type->settings[$key] = $value;
     }
   }
 
-  unset($variables['form_token'], $variables['op'], $variables['submit'], $variables['delete'], $variables['reset'], $variables['form_id'], $variables['form_build_id']);
-
-  // Save or reset persistent variable values.
-  foreach ($variables as $key => $value) {
-    $variable_new = $key . '_' . $type->type;
-    $variable_old = $key . '_' . $type->old_type;
-
-    if (is_array($value)) {
-      $value = array_keys(array_filter($value));
-    }
-    variable_set($variable_new, $value);
-
-    if ($variable_new != $variable_old) {
-      variable_del($variable_old);
-    }
-  }
-
-  // Saving the content type after saving the variables allows modules to act
-  // on those variables via hook_node_type_insert().
   $status = node_type_save($type);
-
-  node_types_rebuild();
   menu_rebuild();
-  $t_args = array('%name' => $type->name);
 
   if ($status == SAVED_UPDATED) {
-    backdrop_set_message(t('The content type %name has been updated.', $t_args));
+    backdrop_set_message(t('The content type %name has been updated.', array('%name' => $type->name)));
   }
   elseif ($status == SAVED_NEW) {
     node_add_body_field($type);
-    backdrop_set_message(t('The content type %name has been added.', $t_args));
-    watchdog('node', 'Added content type %name.', $t_args, WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
+    backdrop_set_message(t('The content type %name has been added.', array('%name' => $type->name)));
+    watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
   $form_state['redirect'] = 'admin/structure/types';
@@ -402,15 +416,42 @@ function node_type_form_submit($form, &$form_state) {
 }
 
 /**
- * Implements hook_node_type_insert().
+ * Form submission handler for node_type_form().
  */
-function node_node_type_insert($info) {
-  if (!empty($info->old_type) && $info->old_type != $info->type) {
-    $update_count = node_type_update_nodes($info->old_type, $info->type);
+function node_type_form_delete($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/types/manage/' . str_replace('_', '-', $form['#node_type']->type) . '/delete';
+}
 
-    if ($update_count) {
-      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
-    }
+/**
+ * Implements hook_node_type_load().
+ */
+function node_node_type_load(&$types) {
+  foreach ($types as $type_name => $type) {
+    $types[$type_name]->settings += array(
+      // Basic workflow settings.
+      'status_default' => TRUE,
+      'promote_enabled' => TRUE,
+      'promote_default' => FALSE,
+      'sticky_enabled' => TRUE,
+      'sticky_default' => FALSE,
+      'revision_enabled' => TRUE,
+      'revision_default' => FALSE,
+
+      // Preview of nodes.
+      'node_preview' => BACKDROP_OPTIONAL,
+
+      // Submitted information.
+      'node_submitted' => TRUE,
+      'node_user_picture' => TRUE,
+
+      // Though Language module is required to change this setting, all node
+      // types have a language setting, even if it is disabled by default.
+      'node_type_language' => 0,
+
+      // Enable permissions for this node type.
+      // See node_permissions_get_configured_types().
+      'node_permissions' => TRUE,
+    );
   }
 }
 
@@ -482,14 +523,12 @@ function node_type_delete_confirm($form, &$form_state, $type) {
  * @see node_type_delete_confirm()
  */                                                
 function node_type_delete_confirm_submit($form, &$form_state) {
-  node_type_delete($form_state['values']['type']);
+  $type_name = $form_state['values']['type'];
+  node_type_delete($type_name);
 
-  variable_del('node_preview_' . $form_state['values']['type']);
-  $t_args = array('%name' => $form_state['values']['name']);
-  backdrop_set_message(t('The content type %name has been deleted.', $t_args));
-  watchdog('node', 'Deleted content type %name.', $t_args, WATCHDOG_NOTICE);
+  backdrop_set_message(t('The content type %name has been deleted.', array('%name' => $type_name)));
+  watchdog('node', 'Deleted content type %name.', array('%name' => $type_name), WATCHDOG_NOTICE);
 
-  node_types_rebuild();
   menu_rebuild();
 
   $form_state['redirect'] = 'admin/structure/types';

@@ -486,7 +486,8 @@ function translation_node_get_translations($tnid) {
  *   TRUE if translation is supported, and FALSE if not.
  */
 function translation_supported_type($type) {
-  return variable_get('node_type_language_' . $type, 0) == TRANSLATION_ENABLED;
+  $node_type = node_type_get_type($type);
+  return $node_type->settings['node_type_language'] == TRANSLATION_ENABLED;
 }
 
 /**

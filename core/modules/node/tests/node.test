@@ -476,13 +476,15 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $title_key = "title";
     $body_key = "body[$langcode][0][value]";
     // Force revision on "Basic page" content.
-    variable_set('node_options_page', array('status', 'revision'));
+    $node_type = node_type_load('page');
+    $node_type->settings['revision_enabled'] = TRUE;
+    $node_type->settings['revision_default'] = TRUE;
+    node_type_save($node_type);
 
     // Fill in node creation form and preview node.
     $edit = array();
     $edit[$title_key] = $this->randomName(8);
     $edit[$body_key] = $this->randomName(16);
-    $edit['log'] = $this->randomName(32);
     $this->backdropPost('node/add/page', $edit, t('Preview'));
 
     // Check that the preview is displaying the title and body.
@@ -493,6 +495,16 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     // Check that the title and body fields are displayed with the correct values.
     $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
     $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
+
+    // Save the node with the current values.
+    $this->backdropPost(NULL, array(), t('Save'));
+    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
+
+    // Edit the page and make sure that the preview is updated.
+    $edit = array();
+    $edit[$body_key] = $this->randomName(16);
+    $edit['log'] = $this->randomName(32);
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Preview'));
 
     // Check that the log field has the correct value.
     $this->assertFieldByName('log', $edit['log'], 'Log field displayed.');
@@ -578,7 +590,10 @@ class NodeCreationTestCase extends BackdropWebTestCase {
    */
   function testUnpublishedNodeCreation() {
     // Set "Basic page" content type to be unpublished by default.
-    variable_set('node_options_page', array());
+    $node_type = node_type_get_type('page');
+    $node_type->settings['status_default'] = 0;
+    node_type_save($node_type);
+
     // Set the front page to the default "node" page.
     config_set('system.core', 'site_frontpage', 'node');
 
@@ -1305,8 +1320,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Create a content type programmaticaly.
     $type = $this->backdropCreateContentType();
 
-    $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $type->type))->fetchField();
-    $this->assertTrue($type_exists, 'The new content type has been created in the database.');
+    $config = config('node.type.' . $type->type);
+    $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
 
     // Login a test user.
     $web_user = $this->backdropCreateUser(array('create ' . $type->name . ' content'));
@@ -1324,8 +1339,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
       'type' => 'foo',
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
-    $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => 'foo'))->fetchField();
-    $this->assertTrue($type_exists, 'The new content type has been created in the database.');
+    $config = config('node.type.foo');
+    $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
   }
 
   /**
@@ -1382,12 +1397,11 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that node_types_rebuild() correctly handles the 'disabled' flag.
+   * Tests that node types correctly handle the 'disabled' flag.
    */
   function testNodeTypeStatus() {
     // Enable all core node modules, and all types should be active.
     module_enable(array('book'), FALSE);
-    node_types_rebuild();
     $types = node_type_get_types();
     foreach (array('book', 'article', 'page') as $type) {
       $this->assertTrue(isset($types[$type]), format_string('%type is found in node types.', array('%type' => $type)));
@@ -1395,9 +1409,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     }
 
     // Disable book module and the respective type should still be active, since
-    // it is not provided by hook_node_info().
+    // it is not disabled in book_disable().
     module_disable(array('book'), FALSE);
-    node_types_rebuild();
     $types = node_type_get_types();
     $this->assertTrue(isset($types['book']) && empty($types['book']->disabled), "Book module's node type still active.");
     $this->assertTrue(isset($types['article']) && empty($types['article']->disabled), "Article node type still active.");
@@ -1405,7 +1418,6 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Re-enable the modules and verify that the types are active again.
     module_enable(array('book'), FALSE);
-    node_types_rebuild();
     $types = node_type_get_types();
     foreach (array('book', 'article', 'page') as $type) {
       $this->assertTrue(isset($types[$type]), format_string('%type is found in node types.', array('%type' => $type)));
@@ -1428,10 +1440,9 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
     // Enable the test module and verify that the test node type is in the DB
     // and is not disabled.
     module_enable(array('node_test'), FALSE);
-    node_types_rebuild();
-    $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
-    $this->assertNotIdentical($disabled, FALSE, 'Test node type found in the database');
-    $this->assertEqual($disabled, 0, 'Test node type is not disabled');
+    $config = config('node.type.test');
+    $this->assertFalse($config->isNew(), 'Test node type found in config.');
+    $this->assertEqual($config->get('disabled'), 0, 'Test node type is not disabled');
 
     // Check that test node type (uncustomized) shows up.
     $this->backdropGet('node/add');
@@ -1448,34 +1459,30 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
 
     // Disable test node module and check that the node type gets disabled.
     module_disable(array('node_test'), FALSE);
-    node_types_rebuild();
-    $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
-    $this->assertEqual($disabled, 1, 'Test node type is disabled');
+    $node_type = node_type_get_type('test');
+    $this->assertEqual($node_type->disabled, 1, 'Test node type is disabled');
     $this->backdropGet('node/add');
     $this->assertNoText('book', 'Test node type is not found on node/add');
 
     // Reenable the test node module and check that the customization survived
     // the module disable.
     module_enable(array('node_test'), FALSE);
-    node_types_rebuild();
-    $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
-    $this->assertEqual($disabled, 0, 'Test node type is not disabled');
+    $node_type = node_type_get_type('test');
+    $this->assertEqual($node_type->disabled, 0, 'Test node type is not disabled');
     $this->backdropGet('node/add');
     $this->assertText($description, 'Customized description found');
 
     // Disable and uninstall book.
     module_disable(array('node_test'), FALSE);
-    node_types_rebuild();
-    $result = backdrop_uninstall_modules(array('node_test'));
-    $disabled = db_query('SELECT disabled FROM {node_type} WHERE type = :type', array(':type' => 'test'))->fetchField();
-    $this->assertTrue($disabled, 'Test node type is in the database and is disabled');
+    backdrop_uninstall_modules(array('node_test'));
+    $node_type = node_type_get_type('test');
+    $this->assertTrue($node_type->disabled, 'Test node type still exists after uninstalling, but is disabled');
     $this->backdropGet('node/add');
     $this->assertNoText('test', 'Test type is no longer found on node/add');
 
     // Reenable the test node module and check that the customization survived
     // the module uninstall.
     module_enable(array('node_test'), FALSE);
-    node_types_rebuild();
     $this->backdropGet('node/add');
     $this->assertText($description, 'Customized description is found even after uninstall and reenable.');
   }
@@ -2473,7 +2480,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
     $node = $this->backdropGetNodeByTitle($edit["title"]);
 
     // Set the flag to alter the view mode and view the node.
-    variable_set('node_test_change_view_mode', 'teaser');
+    state_set('node_test_change_view_mode', 'teaser');
     $this->backdropGet('node/' . $node->nid);
 
     // Check that teaser mode is viewed.

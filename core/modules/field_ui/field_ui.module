@@ -34,7 +34,7 @@ function field_ui_menu() {
           // Extract path information from the bundle.
           $path = $bundle_info['admin']['path'];
           // Different bundles can appear on the same path (e.g. %node_type and
-          // %comment_node_type). To allow field_ui_menu_load() to extract the
+          // %comment_menu_node_type). To allow field_ui_menu_load() to extract the
           // actual bundle object from the translated menu router path
           // arguments, we need to identify the argument position of the bundle
           // name string ('bundle argument') and pass that position to the menu
@@ -173,7 +173,7 @@ function field_ui_menu_load($field_name, $entity_type, $bundle_name, $bundle_pos
   // The menu router path to manage fields of an entity can be shared among
   // multiple bundles. For example:
   // - admin/structure/types/manage/%node_type/fields/%field_ui_menu
-  // - admin/structure/types/manage/%comment_node_type/fields/%field_ui_menu
+  // - admin/structure/types/manage/%comment_menu_node_type/fields/%field_ui_menu
   // The menu system will automatically load the correct bundle depending on the
   // actual path arguments, but this menu loader function only receives the node
   // type string as $bundle_name, which is not the bundle name for comments.

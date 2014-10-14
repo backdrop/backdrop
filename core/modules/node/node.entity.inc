@@ -141,6 +141,18 @@ class Node extends Entity {
   public $revision_uid;
 
   /**
+   * Create a new Node instance.
+   */
+  function __construct(array $values = array()) {
+    parent::__construct($values);
+
+    // Set the created time to now.
+    if (empty($this->created)) {
+      $this->created = REQUEST_TIME;
+    }
+  }
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -197,20 +209,6 @@ class Node extends Entity {
  * special handling for node entities.
  */
 class NodeStorageController extends EntityDatabaseStorageController {
-
-  /**
-   * Overrides EntityDatabaseStorageController::create().
-   */
-  public function create(array $values) {
-    $node = parent::create($values);
-
-    // Set the created time to now.
-    if (empty($node->created)) {
-      $node->created = REQUEST_TIME;
-    }
-
-    return $node;
-  }
 
   /**
    * Overrides EntityDatabaseStorageController::delete().

@@ -12,14 +12,16 @@
  *
  * Each content type is maintained by a primary module, which is either
  * node.module (for content types created in the user interface) or the module
- * that implements hook_node_info() to define the content type.
+ * that provides a node type in its default config directory. Modules that
+ * provide a content type should explicitly set the "module" key in their
+ * config file.
  *
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
  * - Node-type-specific hooks: These hooks are only invoked on the primary
- *   module, using the "base" return component of hook_node_info() as the
- *   function prefix.
+ *   module, using the "base" key provided in the default config file provided
+ *   for that content type.
  * - All-module hooks: This set of hooks is invoked on all implementing modules,
  *   to allow other modules to modify what the primary node module is doing. For
  *   example, hook_node_insert() is invoked on all modules when creating a book
@@ -868,61 +870,6 @@ function hook_node_view_alter(&$build) {
 }
 
 /**
- * Define module-provided node types.
- *
- * This hook allows a module to define one or more of its own node types. The
- * name and attributes of each desired node type are specified in an array
- * returned by the hook.
- *
- * Only module-provided node types should be defined through this hook. User-
- * provided (or 'custom') node types should be defined only in the 'node_type'
- * database table, and should be maintained by using the node_type_save() and
- * node_type_delete() functions.
- *
- * @return
- *   An array of information defining the module's node types. The array
- *   contains a sub-array for each node type, with the the machine name of a
- *   content type as the key. Each sub-array has up to 10 attributes.
- *   Possible attributes:
- *   - name: (required) The human-readable name of the node type.
- *   - base: (required) The base string used to construct callbacks
- *     corresponding to this node type (for example, if base is defined as
- *     example_foo, then example_foo_insert will be called when inserting a node
- *     of that type). This string is usually the name of the module, but not
- *     always.
- *   - description: (required) A brief description of the node type.
- *   - help: (optional) Help information shown to the user when creating a node
- *     of this type.
- *   - has_title: (optional) A Boolean indicating whether or not this node type
- *     has a title field.
- *   - title_label: (optional) The label for the title field of this content
- *     type.
- *   - locked: (optional) A Boolean indicating whether the administrator can
- *     change the machine name of this type. FALSE = changeable (not locked),
- *     TRUE = unchangeable (locked).
- *
- * The machine name of a node type should contain only letters, numbers, and
- * underscores. Underscores will be converted into hyphens for the purpose of
- * constructing URLs.
- *
- * All attributes of a node type that are defined through this hook (except for
- * 'locked') can be edited by a site administrator. This includes the
- * machine-readable name of a node type, if 'locked' is set to FALSE.
- *
- * @ingroup node_api_hooks
- */
-function hook_node_info() {
-  return array(
-    'blog' => array(
-      'name' => t('Blog post'),
-      'base' => 'blog',
-      'description' => t('A <em>Blog post</em> is a discussion starter.'),
-      'title_label' => t('Subject'),
-    )
-  );
-}
-
-/**
  * Provide additional methods of scoring for core search results for nodes.
  *
  * A node's search score is used to rank it among other nodes matched by the
@@ -984,6 +931,34 @@ function hook_ranking() {
   }
 }
 
+/**
+ * Respond to the loading a node types.
+ *
+ * This hook is called after loading node types from configuration files. It can
+ * be used to populate default values within a node type's settings. Note that
+ * after loading, if the node type is later saved, these defaults are saved into
+ * configuration.
+ *
+ * @param $types
+ *   An array of type information, passed by reference. Each item is keyed by
+ *   the node type name, and is an array of values as loaded from the node
+ *   type config file. The most common use is to populate the "settings" array
+ *   with defaults. For a complete list of keys for a node type, see
+ *   _node_types_build().
+ *
+ * @see _node_types_build()
+ */
+function hook_node_type_load(&$types) {
+  foreach ($types as $type_name => $type) {
+    $types[$type_name]['settings'] += array(
+      'status_default' => TRUE,
+      'promote_default' => FALSE,
+      'sticky_default' => FALSE,
+      'revision_default' => FALSE,
+      'show_submitted_info' => TRUE,
+    );
+  }
+}
 
 /**
  * Respond to node type creation.
@@ -1008,10 +983,13 @@ function hook_node_type_insert($info) {
  *   The node type object that is being updated.
  */
 function hook_node_type_update($info) {
+  // Update a setting that pointed at the old type name to the new type name.
   if (!empty($info->old_type) && $info->old_type != $info->type) {
-    $setting = variable_get('comment_' . $info->old_type, COMMENT_NODE_OPEN);
-    variable_del('comment_' . $info->old_type);
-    variable_set('comment_' . $info->type, $setting);
+    $config = config('my_module.settings');
+    $default_type = $config->get('defaut_node_type');
+    if ($default_type === $info->old_type) {
+      $config->set('default_node_type', $info->type);
+    }
   }
 }
 
@@ -1025,7 +1003,14 @@ function hook_node_type_update($info) {
  *   The node type object that is being deleted.
  */
 function hook_node_type_delete($info) {
-  variable_del('comment_' . $info->type);
+  // Remove the deleted node type from a module's config.
+  $config = config('my_module.settings');
+  $enabled_types = $config->get('enabled_types');
+  $key = array_search($info->type, $enabled_types);
+  if ($key !== FALSE) {
+    unset($enabled_types[$key]);
+    $config->set('enabled_types', $enabled_types);
+  }
 }
 
 /**

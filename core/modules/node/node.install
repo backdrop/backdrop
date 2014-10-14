@@ -28,7 +28,7 @@ function node_schema() {
         'default' => NULL,
       ),
       'type' => array(
-        'description' => 'The {node_type}.type of this node.',
+        'description' => 'The type of this node.',
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
@@ -421,18 +421,11 @@ function node_install() {
  * Implements hook_uninstall().
  */
 function node_uninstall() {
-  // Delete node type variables.
-  $types = db_query('SELECT type FROM {node_type}')->fetchCol();
-  foreach ($types as $type) {
-    db_delete('variable')
-      ->condition(db_or()
-        ->condition('name', 'node_preview_' . $type)
-        ->condition('name', 'node_options_' . $type)
-        ->condition('name', 'node_submitted_' . $type)
-        ->condition('name', 'node_permissions_' . $type)
-        ->condition('name', 'node_type_language_' . $type)
-      )
-      ->execute();
+  // Delete node types.
+  $names = config_get_names_with_prefix('node.type');
+  foreach ($names as $config_name) {
+    $config = config_load($config_name);
+    $config->delete();
   }
 
   // Delete node search ranking variables.
@@ -445,48 +438,24 @@ function node_uninstall() {
   // Delete remaining general module variables.
   variable_del('node_access_needs_rebuild');
   variable_del('node_admin_theme');
-  variable_del('node_cron_last');
+  state_del('node_cron_last');
   variable_del('node_recent_block_count');
   variable_del('default_nodes_main');
-}
-
-/**
- * Fetches node types directly from the database.
- *
- * @ingroup update-api-7.x-to-8.x
- */
-function _update_7000_node_get_types() {
-  $node_types = db_query('SELECT * FROM {node_type}')->fetchAllAssoc('type', PDO::FETCH_OBJ);
-
-  // Create default settings for orphaned nodes.
-  $all_types = db_query('SELECT DISTINCT type FROM {node}')->fetchCol();
-  $extra_types = array_diff($all_types, array_keys($node_types));
-
-  foreach ($extra_types as $type) {
-    $type_object = new stdClass();
-    $type_object->type = $type;
-    // In Drupal 6, whether you have a body field or not is a flag in the node
-    // type table. If it's enabled, nodes may or may not have an empty string
-    // for the bodies. As we can't detect what this setting should be in
-    // Drupal 7 without access to the Drupal 6 node type settings, we assume
-    // the default, which is to enable the body field.
-    $type_object->has_body = 1;
-    $type_object->body_label = 'Body';
-    $node_types[$type_object->type] = $type_object;
-  }
-  return $node_types;
 }
 
 /**
  * Implements hook_update_dependencies().
  */
 function node_update_dependencies() {
+  // Ensure that Entity module is enabled before running any of our updates.
+  $dependencies['node'][1000] = array(
+    'system' => 1000,
+  );
   // Do not drop the block tables until after System module has enabled and
   // migrated blocks into layouts.
   $dependencies['node'][1004] = array(
     'system' => 1025,
   );
-
   return $dependencies;
 }
 
@@ -567,6 +536,68 @@ function node_update_1003() {
  */
 function node_update_1004() {
   db_drop_table('block_node_type');
+}
+
+/**
+ * Convert content types to configuration files.
+ */
+function node_update_1005() {
+  // Basic sanity check.
+  if (!db_table_exists('node_type')) {
+    return;
+  }
+
+  // Ensure module-provided code is loaded.
+  backdrop_load('module', 'node');
+  backdrop_load('module', 'entity');
+
+  $result = db_query("SELECT * FROM {node_type}");
+  foreach ($result as $row) {
+    $node_type = (object) $row;
+    unset($node_type->locked);
+    unset($node_type->custom);
+
+    // To help assist moving to config from Features in Drupal 7, reclaim node
+    // types owned by other modules that use the standard node base type.
+    if ($node_type->base === 'node_content') {
+      $node_type->module = 'node';
+    }
+
+    // Create each content type.
+    $options = variable_get('node_options_' . $node_type->type, array('status', 'promote'));
+    $node_type->settings = array(
+      'status_default' => in_array('status', $options),
+      'sticky_enabled' => TRUE,
+      'sticky_default' => in_array('sticky', $options),
+      'promote_enabled' => TRUE,
+      'promote_default' => in_array('promote', $options),
+      'revision_enabled' => TRUE,
+      'revision_default' => in_array('revision', $options),
+      'node_preview' => variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
+      'node_submitted' => variable_get('node_submitted_' . $node_type->type, TRUE),
+      'node_user_picture' => variable_get('node_user_picture_' . $node_type->type, TRUE),
+      'node_type_language' => variable_get('node_type_language_' . $node_type->type),
+    );
+    node_type_save($node_type);
+
+    // Delete the migrated variables.
+    variable_del('node_options_' . $node_type->type);
+    variable_del('node_preview_' . $node_type->type);
+    variable_del('node_submitted_' . $node_type->type);
+    variable_del('node_user_picture_' . $node_type->type);
+    variable_del('node_type_language_' . $node_type->type);
+  }
+}
+
+/**
+ * Delete the node_type table after conversions to configuration files.
+ */
+function node_update_1006() {
+  // This update is separate from node_update_1004() in the event that a module
+  // needs to use the node_type table before it is deleted.
+  if (db_table_exists('node_type')) {
+    db_drop_table('node_type');
+  }
 }
 
 /**

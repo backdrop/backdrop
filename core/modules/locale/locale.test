@@ -1241,7 +1241,9 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $this->assertEqual($GLOBALS['language_interface']->langcode, $this->langcode, format_string('Current language: %lang', array('%lang' => $GLOBALS['language_interface']->langcode)));
 
     // Enable multilingual workflow option for articles.
-    variable_set('node_type_language_article', 1);
+    $node_type = node_type_load('article');
+    $node_type->settings['node_type_language'] = 1;
+    node_type_save($node_type);
 
     // Change JavaScript translations directory.
     variable_set('locale_js_directory', 'js_translations');

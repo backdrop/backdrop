@@ -308,7 +308,6 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     // Delete the special type and check that the link disappears.
     node_type_delete('special');
-    node_types_rebuild();
     menu_rebuild();
 
     $this->backdropGet('');

@@ -9,20 +9,6 @@
  */
 
 /**
- * Implements hook_node_info().
- */
-function node_test_node_info() {
-  return array(
-    'test' => array(
-      'name' => t('Test type'),
-      'base' => 'test',
-      'description' => t('A <em>test page</em> is here for testing purposes.'),
-      'title_label' => t('Test name'),
-    )
-  );
-}
-
-/**
  * Implements hook_node_load().
  */
 function node_test_node_load($nodes, $types) {
@@ -171,7 +157,7 @@ function node_test_node_update(Node $node) {
  */
 function node_test_entity_view_mode_alter(&$view_mode, $context) {
   // Only alter the view mode if we are on the test callback.
-  if ($change_view_mode = variable_get('node_test_change_view_mode', '')) {
+  if ($change_view_mode = state_get('node_test_change_view_mode', '')) {
     $view_mode = $change_view_mode;
   }
 }

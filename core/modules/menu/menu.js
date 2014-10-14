@@ -2,9 +2,10 @@
 
 Backdrop.behaviors.menuFieldsetSummaries = {
   attach: function (context) {
-    $('fieldset.menu-link-form', context).backdropSetSummary(function (context) {
-      if ($('.form-item-menu-enabled input', context).is(':checked')) {
-        return Backdrop.checkPlain($('.form-item-menu-link-title input', context).val());
+    var $context = $(context);
+    $context.find('fieldset.menu-link-form').backdropSetSummary(function () {
+      if ($context.find('.form-item-menu-enabled input').is(':checked')) {
+        return Backdrop.checkPlain($context.find('.form-item-menu-link-title input').val());
       }
       else {
         return Backdrop.t('Not in menu');
@@ -18,7 +19,7 @@ Backdrop.behaviors.menuFieldsetSummaries = {
  */
 Backdrop.behaviors.menuLinkAutomaticTitle = {
   attach: function (context) {
-    $('fieldset.menu-link-form', context).each(function () {
+    $(context).find('fieldset.menu-link-form').each(function () {
       // Try to find menu settings widget elements as well as a 'title' field in
       // the form, but play nicely with user permissions and form alterations.
       var $checkbox = $('.form-item-menu-enabled input', this);

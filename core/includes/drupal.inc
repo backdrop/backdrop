@@ -768,5 +768,18 @@ function drupal_var_export($var, $prefix = '') {
 }
 
 /**
+ * Drupal-compatible wrapper for clearing caches.
+ *
+ * Backdrop no longer needs to "rebuild" its node types, which previously
+ * were synced between the code and database in Drupal 7. In Backdrop, all
+ * node types are always stored in config.
+ *
+ * @deprecated since 1.0
+ */
+function node_types_rebuild() {
+  node_type_cache_reset();
+}
+
+/**
  * @} End of "defgroup drupal_compatibility".
  */
