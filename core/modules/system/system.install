@@ -2109,6 +2109,52 @@ function system_update_1024() {
 }
 
 /**
+ * Enable Views module.
+ */
+function system_update_1025() {
+  update_module_enable(array('views'));
+
+  // Install default config.
+  $config = config('views.settings');
+  $config->set('no_javascript', FALSE);
+  $config->set('exposed_filter_any_label', FALSE);
+  $config->set('show_additional_queries', FALSE);
+  $config->set('sql_signature', FALSE);
+  $config->set('devel_output', FALSE);
+  $config->set('devel_region', 'footer');
+  $config->set('display_extenders', array());
+  $config->set('field_rewrite_elements', (object) array(
+    '' => '- Use default -',
+    '0' => '- None -',
+    'div' => 'DIV',
+    'span' => 'SPAN',
+    'h1' => 'H1',
+    'h2' => 'H2',
+    'h3' => 'H3',
+    'h4' => 'H4',
+    'h5' => 'H5',
+    'h6' => 'H6',
+    'p' => 'P',
+    'strong' => 'STRONG',
+    'em' => 'EM',
+  ));
+  $config->save();
+
+  // Manually install schema, as update_module_enable() does not do this for us.
+  if (!db_table_exists('cache_views')) {
+    $cache_views = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_views['description'] = 'Cache table for Views to store loaded view configurations.';
+    db_create_table('cache_views', $cache_views);
+  }
+  if (!db_table_exists('cache_views_data')) {
+    $cache_views_data = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_views_data['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+    $cache_views_data['fields']['serialized']['default'] = 1;
+    db_create_table('cache_views_data', $cache_views_data);
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
