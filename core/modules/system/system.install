@@ -2123,7 +2123,7 @@ function system_update_1025() {
   $config->set('devel_output', FALSE);
   $config->set('devel_region', 'footer');
   $config->set('display_extenders', array());
-  $config->set('field_rewrite_elements', (object) array(
+  $config->set('field_rewrite_elements', array(
     '' => '- Use default -',
     '0' => '- None -',
     'div' => 'DIV',
