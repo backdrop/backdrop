@@ -209,7 +209,6 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $first_tab = $this->createGroup('default', $data);
-    $first_tab_id = 'node_article_full_' . $first_tab->group_name;
 
     $data = array(
       'label' => 'Tab 2',
@@ -228,7 +227,6 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $second_tab = $this->createGroup('default', $data);
-    $second_tab_id = 'node_article_full_' . $first_tab->group_name;
 
     $data = array(
       'label' => 'Tabs',
@@ -258,8 +256,8 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     $this->assertRaw('class="collapsible collapsed test-class-2', t('Second tab is default collapsed'));
 
     // Test if correctly nested
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$first_tab_id')]", NULL, 'First tab is displayed as child of the wrapper.');
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$second_tab_id')]", NULL, 'Second tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class')]", NULL, 'First tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class-2')]", NULL, 'Second tab is displayed as child of the wrapper.');
 
   }
 
@@ -285,7 +283,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $first_tab = $this->createGroup('default', $data);
-    $first_tab_id = 'node_article_full_' . $first_tab->group_name;
+    $first_tab_id = 'edit-' . $first_tab->group_name;
 
     $data = array(
       'label' => 'Tab 2',
@@ -304,7 +302,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $second_tab = $this->createGroup('default', $data);
-    $second_tab_id = 'node_article_full_' . $first_tab->group_name;
+    $second_tab_id = 'edit-' . $second_tab->group_name;
 
     $data = array(
       'label' => 'Tabs',
