@@ -16,7 +16,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     return array(
       'name' => 'Display tests',
       'description' => 'Test the field group display.',
-      'group' => 'Field group',
+      'group' => 'Field Group',
     );
   }
 
