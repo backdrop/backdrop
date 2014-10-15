@@ -1880,8 +1880,10 @@ function field_group_attach_groups(&$element, $view_mode, $form_state = array())
   // Create a lookup array.
   $group_children = array();
   foreach ($element['#groups'] as $group_name => $group) {
-    foreach ($group->children as $child) {
-      $group_children[$child] = $group_name;
+    if (!empty($group->children)) {
+      foreach ($group->children as $child) {
+        $group_children[$child] = $group_name;
+      }
     }
   }
   $element['#group_children'] = $group_children;
