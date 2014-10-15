@@ -210,7 +210,7 @@ body.admin-bar {
   background: transparent;
 }
 #admin-bar-icon li.admin-bar-icon > a {
-  padding: 8px 8px 9px;
+  padding: 7px 8px 11px;
 }
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: bottom;

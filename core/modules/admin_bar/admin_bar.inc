@@ -854,16 +854,7 @@ function _admin_bar_flush_cache($name = NULL) {
  * Preprocesses variables for theme_admin_bar_icon().
  */
 function template_preprocess_admin_bar_icon(&$variables) {
-  // Image source might have been passed in as theme variable.
-  $favicon = backdrop_get_favicon();
-  $variables['src'] = $favicon['path'];
-  // Strip the protocol without delimiters for transient HTTP/HTTPS support.
-  // Since the menu is cached on the server-side and client-side, the cached
-  // version might contain a HTTP link, whereas the actual page is on HTTPS.
-  // Relative paths will work fine, but theme_get_setting() returns an
-  // absolute URI.
-  $variables['src'] = preg_replace('@^https?:@', '', $variables['src']);
-  $variables['src'] = check_plain($variables['src']);
+  $variables['src'] = backdrop_get_path('module', 'admin_bar') . '/images/home.png';
   $variables['alt'] = t('Home');
 }
 
@@ -873,7 +864,7 @@ function template_preprocess_admin_bar_icon(&$variables) {
  * @ingroup themeable
  */
 function theme_admin_bar_icon($variables) {
-  return '<img class="admin-bar-icon" src="' . $variables['src'] . '" width="16" height="16" alt="' . $variables['alt'] . '" />';
+  return '<img class="admin-bar-icon" src="' . $variables['src'] . '" width="14" height="12" alt="' . $variables['alt'] . '" />';
 }
 
 
