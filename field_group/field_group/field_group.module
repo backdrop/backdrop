@@ -292,7 +292,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -310,13 +310,13 @@ function field_group_field_group_formatter_info() {
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
         'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
@@ -328,14 +328,14 @@ function field_group_field_group_formatter_info() {
       'htabs' => array(
         'label' => t('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
       ),
       'multipage-group' => array(
         'label' => t('Multipage group'),
@@ -352,7 +352,7 @@ function field_group_field_group_formatter_info() {
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('effect' => 'none', 'classes' => ''),
+        'instance_settings' => array('effect' => 'none', 'classes' => '', 'id' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
@@ -366,7 +366,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -384,13 +384,13 @@ function field_group_field_group_formatter_info() {
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
         'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
@@ -402,7 +402,7 @@ function field_group_field_group_formatter_info() {
       'htabs' => array(
         'label' => t('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
@@ -414,7 +414,7 @@ function field_group_field_group_formatter_info() {
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'effect' => 'bounceslide'),
+        'instance_settings' => array('description' => '', 'classes' => '', 'effect' => 'bounceslide', 'id' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
@@ -727,6 +727,10 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
     $element_attributes['class'] .= ' ' . $group->classes;
   }
 
+  if (isset($element['#id'])) {
+    $element_attributes['id'] = $element['#id'];
+  }
+
   $attributes = drupal_attributes($element_attributes);
 
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
@@ -810,9 +814,11 @@ function field_group_pre_render_accordion(&$element, $group, &$form) {
   // Add the jQuery UI accordion.
   $element['#attached']['library'][] = array('system', 'ui.accordion');
 
+  $id = !empty($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
+
   $element += array(
     '#type' => 'markup',
-    '#prefix' => '<div class="' . $group->classes . '">',
+    '#prefix' => '<div class="' . $group->classes . '"' . $id .'>',
     '#suffix' => '</div>',
   );
 }
@@ -850,11 +856,18 @@ function field_group_pre_render_accordion_item(&$element, $group, &$form) {
  */
 function field_group_pre_render_htabs(&$element, $group, &$form) {
 
+  $classes = 'field-group-' . $group->format_type . '-wrapper';
+  if (!empty($group->classes)) {
+    $classes .= ' ' . $group->classes;
+  }
+
+  $id = !empty($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
+
   $element += array(
     '#type' => 'horizontal_tabs',
     '#title' => check_plain(t($group->label)),
     '#theme_wrappers' => array('horizontal_tabs'),
-    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#prefix' => '<div class="' . $classes . '"' . $id . '>',
     '#suffix' => '</div>',
   );
 
@@ -964,10 +977,17 @@ function field_group_pre_render_multipage(&$element, $group, &$form) {
  */
 function field_group_pre_render_tabs(&$element, $group, &$form) {
 
+  $classes = 'field-group-' . $group->format_type . '-wrapper';
+  if (!empty($group->classes)) {
+    $classes .= ' ' . $group->classes;
+  }
+
+  $id = !empty($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
+
   $element += array(
     '#type' => 'vertical_tabs',
     '#theme_wrappers' => array('vertical_tabs'),
-    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#prefix' => '<div class="' . $classes . '"' . $id . '>',
     '#suffix' => '</div>',
   );
 
