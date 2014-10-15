@@ -229,6 +229,8 @@ function field_group_update_7001() {
     ->condition('name', 'field_group')
     ->execute();
 
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
 
 /**
@@ -246,6 +248,8 @@ function field_group_update_7002() {
   // See http://drupal.org/node/1018550.
   _field_group_recreate_identifiers();
 
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
 
 /**
@@ -257,6 +261,8 @@ function field_group_update_7003() {
   module_load_include('module', 'field_group');
   _field_group_recreate_identifiers();
 
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
 
 /**
@@ -295,6 +301,8 @@ function field_group_update_7005() {
     drupal_write_record('field_group', $row, array('id'));
   }
 
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
 
 /**
@@ -330,6 +338,8 @@ function field_group_update_7006() {
     }
   }
 
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
 
 /**
@@ -360,4 +370,7 @@ function field_group_update_7007() {
       drupal_write_record('field_group', $row, array('id'));
     }
   }
+
+  // Clear drupal and static cache.
+  field_group_info_groups(NULL, NULL, NULL, TRUE);
 }
