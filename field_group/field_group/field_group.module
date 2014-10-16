@@ -123,6 +123,20 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
 }
 
 /**
+ * Ctools load callback to load fieldgroup by identifier.
+ */
+function field_group_load_field_group_by_identifier($identifier) {
+
+  $parts = explode('|', $identifier);
+  if (count($parts) != 4) {
+    return;
+  }
+
+  return field_group_load_field_group($parts[0], $parts[1], $parts[2], $parts[3]);
+
+}
+
+/**
  * Loads a group definition.
  *
  * @param $group_name
