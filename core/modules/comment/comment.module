@@ -155,8 +155,8 @@ function comment_field_extra_fields() {
             'weight' => -2,
           ),
           'subject' => array(
-            'label' => t('Subject'),
-            'description' => t('Subject textfield'),
+            'label' => t('Title'),
+            'description' => t('Title textfield'),
             'weight' => -1,
           ),
         ),
@@ -1808,7 +1808,7 @@ function comment_form($form, &$form_state, $comment) {
 
   $form['subject'] = array(
     '#type' => 'textfield',
-    '#title' => t('Subject'),
+    '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
     '#access' => variable_get('comment_subject_field_' . $node->type, 1) == 1,

@@ -48,7 +48,7 @@ class CommentHelperCase extends BackdropWebTestCase {
       $edit['subject'] = $subject;
     }
     else {
-      $this->assertNoFieldByName('subject', '', 'Subject field not found.');
+      $this->assertNoFieldByName('subject', '', 'Title field not found.');
     }
 
     if ($contact !== NULL && is_array($contact)) {
@@ -981,11 +981,11 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the preview is displaying the title and body.
     $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
-    $this->assertText($edit['subject'], 'Subject displayed.');
+    $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
 
     // Check that the title and body fields are displayed with the correct values.
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
 
     // Check that the signature is displaying with the correct text format.
@@ -1020,13 +1020,13 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the preview is displaying the subject, comment, author and date correctly.
     $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
-    $this->assertText($edit['subject'], 'Subject displayed.');
+    $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
     $this->assertText($edit['name'], 'Author displayed.');
     $this->assertText($expected_text_date, 'Date displayed.');
 
     // Check that the subject, comment, author and date fields are displayed with the correct values.
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
     $this->assertFieldByName('name', $edit['name'], 'Author field displayed.');
     $this->assertFieldByName('date', $edit['date'], 'Date field displayed.');
@@ -1037,7 +1037,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the comment fields are correct after loading the saved comment.
     $this->backdropGet('comment/' . $comment->id . '/edit');
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
     $this->assertFieldByName('name', $edit['name'], 'Author field displayed.');
     $this->assertFieldByName('date', $expected_form_date, 'Date field displayed.');
@@ -1052,7 +1052,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the saved comment is still correct.
     $comment_loaded = comment_load($comment->id);
-    $this->assertEqual($comment_loaded->subject, $edit['subject'], 'Subject loaded.');
+    $this->assertEqual($comment_loaded->subject, $edit['subject'], 'Title loaded.');
     $this->assertEqual($comment_loaded->comment_body[$langcode][0]['value'], $edit['comment_body[' . $langcode . '][0][value]'], 'Comment body loaded.');
     $this->assertEqual($comment_loaded->name, $edit['name'], 'Name loaded.');
     $this->assertEqual($comment_loaded->created, $raw_date, 'Date loaded.');
@@ -1177,7 +1177,7 @@ class CommentAnonymous extends CommentHelperCase {
     // Attempt to view node-comment form while disallowed.
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('You are not authorized to post comments', 'Error attempting to post comment.');
-    $this->assertNoFieldByName('subject', '', 'Subject field not found.');
+    $this->assertNoFieldByName('subject', '', 'Title field not found.');
     $this->assertNoFieldByName("comment_body[$langcode][0][value]", '', 'Comment field not found.');
 
     user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
@@ -1197,7 +1197,7 @@ class CommentAnonymous extends CommentHelperCase {
     ));
     $this->backdropGet('node/' . $this->node->nid);
     $this->assertNoPattern('@<h2[^>]*>Comments</h2>@', 'Comments were not displayed.');
-    $this->assertFieldByName('subject', '', 'Subject field found.');
+    $this->assertFieldByName('subject', '', 'Title field found.');
     $this->assertFieldByName("comment_body[$langcode][0][value]", '', 'Comment field found.');
 
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $anonymous_comment3->id);
