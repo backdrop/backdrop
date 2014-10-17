@@ -342,6 +342,22 @@ function node_form($form, &$form_state, Node $node) {
     '#default_value' => $node->sticky,
   );
 
+  // Prepare cancel link.
+  if (isset($_GET['destination'])) {
+    $path = urldecode($_GET['destination']);
+  }
+  elseif (isset($_SERVER['HTTP_REFERER'])) {
+    $path = urldecode($_SERVER['HTTP_REFERER']);
+  }
+  elseif (isset($node->nid)) {
+    $path = url('node/' . $node->nid);
+  }
+  else {
+    $path = url(); //Frontpage
+  }
+  $options = backdrop_parse_url($path);
+  $options['attributes']['class'][] = 'form-cancel';
+
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -366,6 +382,13 @@ function node_form($form, &$form_state, Node $node) {
       '#submit' => array('node_form_delete_submit'),
     );
   }
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+    '#weight' => 20,
+  );
   // This form uses a button-level #submit handler for the form's main submit
   // action. node_form_submit() manually invokes all form-level #submit handlers
   // of the form. Without explicitly setting #submit, Form API would auto-detect
