@@ -3316,10 +3316,30 @@ function user_register_form($form, &$form_state) {
     $form_state['redirect'] = $_GET['q'];
   }
 
+  // Prepare cancel link.
+  if (isset($_GET['destination'])) {
+    $path = urldecode($_GET['destination']);
+  }
+  elseif (isset($_SERVER['HTTP_REFERER'])) {
+    $path = urldecode($_SERVER['HTTP_REFERER']);
+  }
+  else {
+    $path = 'admin/people';
+  }
+  $options = backdrop_parse_url($path);
+  $options['attributes']['class'][] = 'form-cancel';
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Create new account'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+    '#weight' => 1,
   );
 
   $form['#validate'][] = 'user_register_validate';

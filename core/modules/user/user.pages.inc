@@ -267,6 +267,22 @@ function user_profile_form($form, &$form_state, $account) {
   // Attach field widgets.
   field_attach_form('user', $account, $form, $form_state);
 
+  // Prepare cancel link.
+  if (isset($_GET['destination'])) {
+    $path = urldecode($_GET['destination']);
+  }
+  elseif (isset($_SERVER['HTTP_REFERER'])) {
+    $path = urldecode($_SERVER['HTTP_REFERER']);
+  }
+  elseif (isset($account->uid)) {
+    $path = 'user/' . $account->uid;
+  }
+  else {
+    $path = '<front>';
+  }
+  $options = backdrop_parse_url($path);
+  $options['attributes']['class'][] = 'form-cancel';
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -277,6 +293,13 @@ function user_profile_form($form, &$form_state, $account) {
     '#value' => t('Cancel account'),
     '#submit' => array('user_edit_cancel_submit'),
     '#access' => $account->uid > 1 && (($account->uid == $user->uid && user_access('cancel account')) || user_access('administer users')),
+  );
+  $form['actions']['cancel_form'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+    '#weight' => 1,
   );
 
   $form['#validate'][] = 'user_profile_form_validate';
