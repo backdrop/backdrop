@@ -53,9 +53,7 @@ first and then reference it in the title of the pull request.
 
 Documentation
 -------------
-The [Backdrop Handbook](http://handbook.backdropcms.org/) is the place to find
-documentation. You can contribute to the handbook by sending a pull request to
-[the handbook repository](https://github.com/backdrop/handbook).
+Please see the the [Backdrop Handbook](http://backdropcms.org/) on the main Backdrop CMS website.
 
 License
 -------
