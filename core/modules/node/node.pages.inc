@@ -350,10 +350,10 @@ function node_form($form, &$form_state, Node $node) {
     $path = urldecode($_SERVER['HTTP_REFERER']);
   }
   elseif (isset($node->nid)) {
-    $path = url('node/' . $node->nid);
+    $path = 'node/' . $node->nid;
   }
   else {
-    $path = url(); //Frontpage
+    $path = '<front>';
   }
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
