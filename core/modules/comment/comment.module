@@ -146,7 +146,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if (variable_get('comment_subject_field_' . $type->type, 1) == 1) {
+    if (variable_get('comment_subject_field_' . $type->type, 0) == 1) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -1178,7 +1178,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow comment title'),
-      '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 1),
+      '#default_value' => variable_get('comment_subject_field_' . $form['#node_type']->type, 0),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -1811,7 +1811,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => variable_get('comment_subject_field_' . $node->type, 1) == 1,
+    '#access' => variable_get('comment_subject_field_' . $node->type, 0) == 1,
     '#weight' => -1,
   );
 
