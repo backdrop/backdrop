@@ -3323,8 +3323,11 @@ function user_register_form($form, &$form_state) {
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = urldecode($_SERVER['HTTP_REFERER']);
   }
-  else {
+  elseif (user_access('administer users')) {
     $path = 'admin/people';
+  }
+  else {
+    $path = '<front>';
   }
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
