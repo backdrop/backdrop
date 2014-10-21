@@ -788,6 +788,9 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = urldecode($_SERVER['HTTP_REFERER']);
   }
+  elseif (user_access('administer taxonomy')) {
+    $path = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
+  }
   elseif (isset($term->tid)) {
     $path = 'taxonomy/term/' . $term->tid;
   }
