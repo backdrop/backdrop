@@ -1355,10 +1355,9 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
   function testLanguageBlock() {
     // Enable the language switching block.
     $language_type = LANGUAGE_TYPE_INTERFACE;
-    $edit = array(
-      "blocks[locale_{$language_type}][region]" => 'sidebar_first',
-    );
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    $layout = layout_load('default');
+    $layout->addBlock('locale', $language_type, 'sidebar');
+    $layout->save();
 
     // Add language.
     $edit = array(
@@ -1375,7 +1374,7 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
     $this->assertText(t('Languages'), 'Language switcher block found.');
 
     // Assert that only the current language is marked as active.
-    list($language_switcher) = $this->xpath('//div[@id=:id]/div[@class="content"]', array(':id' => 'block-locale-' . str_replace('_', '-', $language_type)));
+    list($language_switcher) = $this->xpath('//*[contains(@class,:class)]/div[@class="block-content"]', array(':class' => 'block-locale-' . str_replace('_', '-', $language_type)));
     $links = array(
       'active' => array(),
       'inactive' => array(),
@@ -2261,8 +2260,9 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->backdropGet('admin/config/regional/language/detection');
 
     // Enable the language switcher block.
-    $edit = array('blocks[locale_language_interface][region]' => 'sidebar_first');
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    $layout = layout_load('default');
+    $layout->addBlock('locale', 'language_interface', 'sidebar');
+    $layout->save();
 
     // Access the front page without specifying any valid URL language prefix
     // and having as browser language preference a non-default language.
@@ -2273,11 +2273,11 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     // Check that the language switcher active link matches the given browser
     // language.
     $args = array(':url' => base_path() . (!empty($GLOBALS['conf']['clean_url']) ? $langcode_browser_fallback : "?q=$langcode_browser_fallback"));
-    $fields = $this->xpath('//div[@id="block-locale-language-interface"]//a[@class="language-link active" and @href=:url]', $args);
+    $fields = $this->xpath('//*[contains(@class,"block-locale-language-interface")]//a[@class="language-link active" and @href=:url]', $args);
     $this->assertTrue($fields[0] == $languages[$langcode_browser_fallback]->name, 'The browser language is the URL active language');
 
     // Check that URLs are rewritten using the given browser language.
-    $fields = $this->xpath('//div[@id="site-name"]//a[@rel="home" and @href=:url]//span', $args);
+    $fields = $this->xpath('//*[contains(@class,"site-name")]//a[@rel="home" and @href=:url]//span', $args);
     $this->assertTrue($fields[0] == 'Backdrop', 'URLs are rewritten using the browser language.');
   }
 

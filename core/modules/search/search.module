@@ -107,10 +107,10 @@ function search_views_api() {
  * Implements hook_block_info().
  */
 function search_block_info() {
-  $blocks['form']['info'] = t('Search form');
-  // Not worth caching.
-  $blocks['form']['cache'] = BACKDROP_NO_CACHE;
-  $blocks['form']['properties']['administrative'] = TRUE;
+  $blocks['form'] = array(
+    'info' => t('Search form'),
+    'description' => t('The search form for searching site content.'),
+  );
   return $blocks;
 }
 

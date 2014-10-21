@@ -304,6 +304,7 @@ function file_ajax_progress($key) {
   }
 
   backdrop_json_output($progress);
+  backdrop_exit();
 }
 
 /**

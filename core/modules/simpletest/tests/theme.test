@@ -364,7 +364,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    * @param $message
    *   (optional) An assertion message.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '') {
+  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
     $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
       . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'

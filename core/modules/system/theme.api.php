@@ -211,7 +211,7 @@ function hook_process_HOOK(&$variables) {
  */
 function hook_themes_enabled($theme_list) {
   foreach ($theme_list as $theme) {
-    block_theme_initialize($theme);
+    mymodule_prepare_theme($theme);
   }
 }
 

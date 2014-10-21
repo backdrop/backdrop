@@ -781,7 +781,6 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
     config_set('system.core', 'site_403', 'user');
-    $this->backdropPost('admin/structure/block', array('blocks[user_login][region]' => '-1'), t('Save blocks'));
 
     // Check that we can log in from the 403 page.
     $this->backdropLogout();
@@ -921,7 +920,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
 
       // Verify the actual 'src' attribute of the logo being output.
       $this->backdropGet('');
-      $elements = $this->xpath('//header/a[@rel=:rel]/img', array(
+      $elements = $this->xpath('//header//a[@rel=:rel]/img', array(
           ':rel' => 'home',
         )
       );
@@ -973,7 +972,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
     $uploaded_filename = 'public://' . $fields[0]['value'];
 
     $this->backdropGet('');
-    $elements = $this->xpath('//header/a[@rel=:rel]/img', array(
+    $elements = $this->xpath('//header//a[@rel=:rel]/img', array(
         ':rel' => 'home',
       )
     );
@@ -1330,7 +1329,7 @@ class SystemBlockTestCase extends BackdropWebTestCase {
     parent::setUp('block');
 
     // Create and login user
-    $admin_user = $this->backdropCreateUser(array('administer blocks', 'access administration pages'));
+    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages'));
     $this->backdropLogin($admin_user);
   }
 
@@ -1338,34 +1337,50 @@ class SystemBlockTestCase extends BackdropWebTestCase {
    * Test displaying and hiding the powered-by and help blocks.
    */
   function testSystemBlocks() {
-    // Set block title and some settings to confirm that the interface is available.
-    $this->backdropPost('admin/structure/block/manage/system/powered-by/configure', array('title' => $this->randomName(8)), t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block configuration set.');
-
-    // Set the powered-by block to the footer region.
-    $edit = array();
-    $edit['blocks[system_powered-by][region]'] = 'footer';
-    $edit['blocks[system_main][region]'] = 'content';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block successfully moved to footer region.');
-
-    // Confirm that the block is being displayed.
+    // The powered-by block is enabled by default. Confirm that the block is
+    // being displayed.
     $this->backdropGet('node');
-    $this->assertRaw('id="block-system-powered-by"', 'Block successfully being displayed on the page.');
+    $this->assertRaw('block-system-powered-by', 'Block successfully being displayed on the page.');
 
-    // Set the block to the disabled region.
-    $edit = array();
-    $edit['blocks[system_powered-by][region]'] = '-1';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    // Configure the header block in various combinations.
+    $layout = layout_load('default');
+    // Assume that the header block is the first block in the default layout.
+    $header_uuid = reset($layout->positions['header']);
+    $header_block = $layout->content[$header_uuid];
 
-    // Confirm that the block is hidden.
-    $this->assertNoRaw('id="block-system-powered-by"', 'Block no longer appears on page.');
+    // Set the header menu to use a different menu.
+    $header_block->settings['block_settings']['menu'] = 'management';
 
-    // For convenience of developers, set the block to its default settings.
-    $edit = array();
-    $edit['blocks[system_powered-by][region]'] = 'footer';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->backdropPost('admin/structure/block/manage/system/powered-by/configure', array('title' => ''), t('Save block'));
+    // Hide the logo (showing the logo tested by the logo test already).
+    $header_block->settings['block_settings']['logo'] = 0;
+
+    // Save the layout containing the block.
+    $layout->save();
+
+    // Set a logo.
+    $edit = array(
+      'site_logo_theme' => FALSE,
+      'site_logo_path' => $GLOBALS['base_url'] . '/' . 'core/misc/feed.png',
+    );
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+
+    $this->backdropGet('<front>');
+
+    $elements = $this->xpath('//*[contains(@class, :block)]//*[@class="site-name"]', array(
+      ':block' => 'block-system-header',
+    ));
+    $this->assert(count($elements) === 1, 'Site title found.');
+
+    $elements = $this->xpath('//*[contains(@class, :block)]//a[@class="logo"]', array(
+      ':block' => 'block-system-header',
+    ));
+    $this->assert(count($elements) === 0, 'Site logo hidden in header block.');
+
+    $elements = $this->xpath('//*[contains(@class, :block)]//*[@class="header-menu"]//a[@href=:href]', array(
+      ':block' => 'block-system-header',
+      ':href' => url('admin'),
+    ));
+    $this->assert(count($elements) === 1, 'Management menu is set as the header.');
   }
 }
 
@@ -1384,7 +1399,7 @@ class SystemMainContentFallback extends BackdropWebTestCase {
       'access administration pages',
       'administer site configuration',
       'administer modules',
-      'administer blocks',
+      'administer layouts',
       'administer nodes',
     ));
     $this->backdropLogin($this->admin_user);
@@ -1397,47 +1412,26 @@ class SystemMainContentFallback extends BackdropWebTestCase {
    * Test availability of main content.
    */
   function testMainContentFallback() {
-    $edit = array();
-    // Disable the block module.
-    $edit['modules[Core][block][enable]'] = FALSE;
-    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
-    module_list(TRUE);
-    $this->assertFalse(module_exists('block'), 'Block module disabled.');
+    // Disable the layout module.
+    module_disable(array('layout'));
+    $this->assertFalse(module_exists('layout'), 'Layout module disabled.');
 
     // At this point, no region is filled and fallback should be triggered.
     $this->backdropGet('admin/config/system/site-information');
     $this->assertField('site_name', 'Admin interface still available.');
 
     // Fallback should not trigger when another module is handling content.
-    $this->backdropGet('system-test/main-content-handling');
-    $this->assertRaw('id="system-test-content"', 'Content handled by another module');
-    $this->assertText(t('Content to test main content fallback'), 'Main content still displayed.');
-
-    // Fallback should trigger when another module
-    // indicates that it is not handling the content.
     $this->backdropGet('system-test/main-content-fallback');
-    $this->assertText(t('Content to test main content fallback'), 'Main content fallback properly triggers.');
-
-    // Fallback should not trigger when another module is handling content.
-    // Note that this test ensures that no duplicate
-    // content gets created by the fallback.
-    $this->backdropGet('system-test/main-content-duplication');
-    $this->assertNoText(t('Content to test main content fallback'), 'Main content not duplicated.');
+    $this->assertText(t('Content to test main content fallback'), 'Main content still displayed without Layout module enabled.');
 
     // Request a user* page and see if it is displayed.
     $this->backdropLogin($this->web_user);
     $this->backdropGet('user/' . $this->web_user->uid . '/edit');
     $this->assertField('mail', 'User interface still available.');
 
-    // Enable the block module again.
-    $this->backdropLogin($this->admin_user);
-    $edit = array();
-    $edit['modules[Core][block][enable]'] = 'block';
-    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
-    module_list(TRUE);
-    $this->assertTrue(module_exists('block'), 'Block module re-enabled.');
+    // Enable the layout module again.
+    module_enable(array('layout'));
+    $this->assertTrue(module_exists('layout'), 'Layout module re-enabled.');
   }
 }
 
@@ -1519,14 +1513,10 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->clickLink(t('Set default'));
     $this->assertEqual(variable_get('theme_default', ''), 'bartik');
 
-    // Test the default theme on the secondary links (blocks admin page).
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('Bartik(' . t('active tab') . ')', 'Default local task on blocks admin page is the default theme.');
-    // Switch back to Stark and test again to test that the menu cache is cleared.
+    // Switch back to Stark and test again.
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Set default'), 0);
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('Stark(' . t('active tab') . ')', 'Default local task on blocks admin page has changed.');
+    $this->assertEqual(variable_get('theme_default', ''), 'stark');
   }
 }
 
@@ -1848,8 +1838,6 @@ class SystemInfoAlterTestCase extends BackdropWebTestCase {
 
     $info = $this->getSystemInfo('seven', 'theme');
     $this->assertTrue(isset($info['regions']['test_region']), 'Altered theme info was added to {system}.info.');
-    $seven_regions = system_region_list('seven');
-    $this->assertTrue(isset($seven_regions['test_region']), 'Altered theme info was returned by system_region_list().');
     $system_list_themes = system_list('theme');
     $info = $system_list_themes['seven']->info;
     $this->assertTrue(isset($info['regions']['test_region']), 'Altered theme info was returned by system_list().');
@@ -1863,8 +1851,6 @@ class SystemInfoAlterTestCase extends BackdropWebTestCase {
 
     $info = $this->getSystemInfo('seven', 'theme');
     $this->assertFalse(isset($info['regions']['test_region']), 'Altered theme info was removed from {system}.info.');
-    $seven_regions = system_region_list('seven');
-    $this->assertFalse(isset($seven_regions['test_region']), 'Altered theme info was not returned by system_region_list().');
     $system_list_themes = system_list('theme');
     $info = $system_list_themes['seven']->info;
     $this->assertFalse(isset($info['regions']['test_region']), 'Altered theme info was not returned by system_list().');

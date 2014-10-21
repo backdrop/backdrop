@@ -2127,13 +2127,8 @@ function system_batch_page() {
   if ($output === FALSE) {
     backdrop_access_denied();
   }
-  elseif (isset($output)) {
-    // Force a page without blocks or messages to
-    // display a list of collected messages later.
-    backdrop_set_page_content($output);
-    $page = element_info('page');
-    $page['#show_messages'] = FALSE;
-    return $page;
+  else {
+    return $output;
   }
 }
 

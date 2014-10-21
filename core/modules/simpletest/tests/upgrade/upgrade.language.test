@@ -60,7 +60,10 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
     // Ensure that the language switcher has been correctly upgraded. We need to
     // assert the expected HTML id because the block might appear even if the
     // language negotiation settings are not properly upgraded.
-    $this->assertTrue($this->xpath('//div[@id="block-locale-language-interface"]'), t('The language switcher block is being correctly showed.'));
+    $elements = $this->xpath('//*[contains(@class, :block)]', array(
+      ':block' => 'block-locale-language-interface',
+    ));
+    $this->assertTrue($elements, t('The language switcher block is being correctly showed.'));
 
     // Test that the 'language' property was properly renamed to 'langcode'.
     $language_none_nid = 38;

@@ -1,0 +1,43 @@
+/**
+ * @file
+ * CSS for the three-three-four layout.
+ */
+.layout-two-column #header div.section,
+.layout-two-column #main,
+.layout-two-column #footer {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.layout-two-column #content .section,
+.layout-two-column .sidebar .section {
+  padding: 0 15px;
+}
+
+@media all and (min-width: 851px) {
+  .layout-two-column #content,
+  .layout-two-column #sidebar {
+    display: inline;
+    float: left; /* LTR */
+    position: relative;
+  }
+  [dir="rtl"] .layout-two-column #content,
+  [dir="rtl"] .layout-two-column #sidebar {
+    float: right;
+  }
+  .layout-two-column #content {
+    margin-right: 30%;
+    width: 70%;
+  }
+  [dir="rtl"] .layout-two-column #content {
+    margin-left: 30%;
+    margin-right: 0;
+  }
+  .layout-two-column #sidebar {
+    width: 30%;
+    margin-left: -30%; /* LTR */
+  }
+  [dir="rtl"] .layout-two-column #sidebar {
+    margin-right: -30%;
+  }
+}

@@ -1,15 +1,21 @@
 <?php
 
 /**
- * Override or insert variables into the page template.
+ * Process layout variables before output.
  */
-function seven_preprocess_page(&$variables) {
-  $variables['primary_local_tasks'] = $variables['tabs'];
-  unset($variables['primary_local_tasks']['#secondary']);
-  $variables['secondary_local_tasks'] = array(
-    '#theme' => 'menu_local_tasks',
-    '#secondary' => $variables['tabs']['#secondary'],
-  );
+function seven_process_layout(&$variables) {
+  // Move the page title and tabs into the "header" area, to fit with Seven's
+  // markup requirements.
+  if ($variables['title']) {
+    $title = '<h1 class="title" id="page-title">' . $variables['title'] . '</h1>';
+    $variables['content']['header'] .= $title;
+    $variables['title'] = NULL;
+  }
+  if ($variables['tabs']) {
+    $tabs = '<div class="tabs">' . $variables['tabs'] . '</div>';
+    $variables['content']['header'] .= $tabs;
+    $variables['tabs'] = NULL;
+  }
 }
 
 /**

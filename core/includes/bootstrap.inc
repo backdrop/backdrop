@@ -2009,7 +2009,7 @@ function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE)
  * @see theme_status_messages()
  */
 function backdrop_get_messages($type = NULL, $clear_queue = TRUE) {
-  if ($messages = backdrop_set_message()) {
+  if (backdrop_show_messages() && $messages = backdrop_set_message()) {
     if ($type) {
       if ($clear_queue) {
         unset($_SESSION['messages'][$type]);
@@ -2026,6 +2026,24 @@ function backdrop_get_messages($type = NULL, $clear_queue = TRUE) {
     }
   }
   return array();
+}
+
+/**
+ * Determines whether or not messages should be shown on the current page.
+ *
+ * @param bool $show
+ *   Set the show messages flag. If not provided, the current status of the flag
+ *   will be returned.
+ * @return bool
+ *   TRUE if messages should be shown on the current page. FALSE if the messages
+ *   should be queued until the next page request.
+ */
+function backdrop_show_messages($show = NULL) {
+  $value = &backdrop_static(__FUNCTION__, TRUE);
+  if (isset($show)) {
+    $value = $show;
+  }
+  return $value;
 }
 
 /**
@@ -3431,6 +3449,13 @@ function backdrop_static_reset($name = NULL) {
  */
 function backdrop_is_cli() {
   return (!isset($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
+}
+
+/**
+ * Detects if this is an HTML HTTP request.
+ */
+function backdrop_is_html() {
+  return strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0 || ((empty($_SERVER['HTTP_ACCEPT']) || $_SERVER['HTTP_ACCEPT'] === '*/*') && empty($_SERVER['X_REQUESTED_WITH']));
 }
 
 /**

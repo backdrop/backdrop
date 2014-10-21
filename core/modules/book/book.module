@@ -257,11 +257,13 @@ function book_entity_info_alter(&$info) {
  * Implements hook_block_info().
  */
 function book_block_info() {
-  $block = array();
-  $block['navigation']['info'] = t('Book navigation');
-  $block['navigation']['cache'] = BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE;
+  $blocks['navigation'] = array(
+    'info' => t('Book navigation'),
+    'description' => t('Shows the table of contents expanded to the current page if viewing book content.'),
+    'cache' =>  BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE,
+  );
 
-  return $block;
+  return $blocks;
 }
 
 /**
@@ -270,14 +272,14 @@ function book_block_info() {
  * Displays the book table of contents in a block when the current page is a
  * single-node view of a book node.
  */
-function book_block_view($delta = '') {
+function book_block_view($delta = '', $settings = array()) {
   $block = array();
   $current_bid = 0;
   if ($node = menu_get_object()) {
     $current_bid = empty($node->book['bid']) ? 0 : $node->book['bid'];
   }
 
-  if (config_get('book.settings', 'book_block_mode') == 'all pages') {
+  if ($settings['book_mode'] == 'all pages') {
     $block['subject'] = t('Book navigation');
     $book_menus = array();
     $pseudo_tree = array(0 => array('below' => FALSE));
@@ -325,29 +327,23 @@ function book_block_view($delta = '') {
 /**
  * Implements hook_block_configure().
  */
-function book_block_configure($delta = '') {
-  $block = array();
+function book_block_configure($delta = '', $settings = array()) {
+  $settings += array(
+    'book_mode' => 'all pages',
+  );
   $options = array(
     'all pages' => t('Show block on all pages'),
     'book pages' => t('Show block only on book pages'),
   );
-  $form['book_block_mode'] = array(
+  $form['book_mode'] = array(
     '#type' => 'radios',
     '#title' => t('Book navigation block display'),
     '#options' => $options,
-    '#default_value' => config_get('book.settings', 'book_block_mode'),
+    '#default_value' => $settings['book_mode'],
     '#description' => t("If <em>Show block on all pages</em> is selected, the block will contain the automatically generated menus for all of the site's books. If <em>Show block only on book pages</em> is selected, the block will contain only the one menu corresponding to the current page's book. In this case, if the current page is not in a book, no block will be displayed. The <em>Page specific visibility settings</em> or other visibility settings can be used in addition to selectively display this block."),
-    );
+  );
 
   return $form;
-}
-
-/**
- * Implements hook_block_save().
- */
-function book_block_save($delta = '', $edit = array()) {
-  $block = array();
-  config_set('book.settings', 'book_block_mode', $edit['book_block_mode']);
 }
 
 /**
@@ -887,12 +883,12 @@ function book_node_view(Node $node, $view_mode) {
 }
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_init().
  *
  * Adds the book menu to the list of menus used to build the active trail when
  * viewing a book page.
  */
-function book_page_alter(&$page) {
+function book_init() {
   if (($node = menu_get_object()) && !empty($node->book['bid'])) {
     $active_menus = menu_get_active_menu_names();
     $active_menus[] = $node->book['menu_name'];
@@ -1048,7 +1044,7 @@ function _book_link_defaults($nid) {
  * Implements hook_preprocess_block().
  */
 function book_preprocess_block(&$variables) {
-  if ($variables['block']-> module == 'book') {
+  if ($variables['block']->module == 'book') {
     $variables['attributes_array']['role'] = 'navigation';
   }
 }

@@ -22,8 +22,7 @@ function contact_site_form($form, &$form_state) {
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms')) {
     backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    backdrop_access_denied();
-    backdrop_exit();
+    return array();
   }
 
   // Get an array of the categories.
@@ -192,8 +191,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('administer users')) {
     backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    backdrop_access_denied();
-    backdrop_exit();
+    return array();
   }
 
   backdrop_set_title(t('Contact @username', array('@username' => user_format_name($recipient))), PASS_THROUGH);

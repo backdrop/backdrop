@@ -205,6 +205,18 @@ function locale_schema() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function locale_update_dependencies() {
+  // Make sure Locale module updates block tables before System module port the
+  // blocks to layouts.
+  $dependencies['system'][1025] = array(
+    'locale' => 1001,
+  );
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-8.x
  * @{
  */

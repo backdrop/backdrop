@@ -848,7 +848,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The URL currently loaded in the internal browser.
    *
-   * @var string
+   * @var string9
    */
   protected $url;
 
@@ -1329,9 +1329,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     );
     $this->backdropPost('user', $edit, t('Log in'));
 
-    // If a "log out" link appears on the page, it is almost certainly because
-    // the login was successful.
-    $pass = $this->assertLink(t('Log out'), 0, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
+    // Check for the logged-in class.
+    $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
+    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
 
     if ($pass) {
       $this->loggedInUser = $account;

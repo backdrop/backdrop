@@ -9,13 +9,14 @@ Backdrop.toggleFieldset = function (fieldset) {
     var $content = $('> .fieldset-wrapper', fieldset).hide();
     $fieldset
       .removeClass('collapsed')
-      .trigger({ type: 'collapsed', value: false })
       .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Hide'));
     $content.slideDown({
       duration: 'fast',
       easing: 'linear',
       complete: function () {
         Backdrop.collapseScrollIntoView(fieldset);
+        $fieldset.trigger({ type: 'collapsed', value: false });
+        $(window).triggerHandler('resize');
         fieldset.animating = false;
       },
       step: function () {
@@ -25,11 +26,12 @@ Backdrop.toggleFieldset = function (fieldset) {
     });
   }
   else {
-    $fieldset.trigger({ type: 'collapsed', value: true });
     $('> .fieldset-wrapper', fieldset).slideUp('fast', function () {
       $fieldset
         .addClass('collapsed')
         .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Show'));
+      $fieldset.trigger({ type: 'collapsed', value: true });
+      $(window).triggerHandler('resize');
       fieldset.animating = false;
     });
   }
@@ -55,11 +57,12 @@ Backdrop.collapseScrollIntoView = function (node) {
 
 Backdrop.behaviors.collapse = {
   attach: function (context, settings) {
+    var hasHash = location.hash && location.hash != '#' && $(window).find(location.hash).length;
     $('fieldset.collapsible', context).once('collapse', function () {
       var $fieldset = $(this);
       // Expand fieldset if there are errors inside, or if it contains an
       // element that is targeted by the URI fragment identifier.
-      var anchor = location.hash && location.hash != '#' ? ', ' + location.hash : '';
+      var anchor = hasHash ? ', ' + location.hash : '';
       if ($fieldset.find('.error' + anchor).length) {
         $fieldset.removeClass('collapsed');
       }

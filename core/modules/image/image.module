@@ -874,9 +874,6 @@ function image_style_flush($style) {
   backdrop_theme_rebuild();
 
   // Clear page caches when flushing.
-  if (module_exists('block')) {
-    cache('block')->flush();
-  }
   cache('page')->flush();
 }
 

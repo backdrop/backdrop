@@ -27,19 +27,20 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $desc = $this->get_option('block_description');
+    $info = $this->get_option('block_description');
 
     if (empty($desc)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $desc = t('View: !view', array('!view' => $this->view->get_human_name()));
+        $info = t('View: !view', array('!view' => $this->view->get_human_name()));
       }
       else {
-        $desc = t('View: !view: !display', array('!view' => $this->view->get_human_name(), '!display' => $this->display->display_title));
+        $info = t('View: !view: !display', array('!view' => $this->view->get_human_name(), '!display' => $this->display->display_title));
       }
     }
     return array(
       $delta => array(
-        'info' => $desc,
+        'info' => $info,
+        'description' => check_plain($this->view->description),
         'cache' => $this->get_cache_type()
       ),
     );
@@ -166,15 +167,11 @@ class views_plugin_display_block extends views_plugin_display {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
-      case 'display_id':
-        $this->update_block_bid($form_state['view']->name, $this->display->id, $this->display->new_id);
-        break;
       case 'block_description':
         $this->set_option('block_description', $form_state['values']['block_description']);
         break;
       case 'block_caching':
         $this->set_option('block_caching', $form_state['values']['block_caching']);
-        $this->save_block_cache($form_state['view']->name . '-'. $form_state['display_id'], $form_state['values']['block_caching']);
         break;
     }
   }
@@ -182,62 +179,10 @@ class views_plugin_display_block extends views_plugin_display {
   /**
    * Block views use exposed widgets only if AJAX is set.
    */
-    function uses_exposed() {
-      if ($this->use_ajax()) {
-        return parent::uses_exposed();
-      }
-      return FALSE;
+  function uses_exposed() {
+    if ($this->use_ajax()) {
+      return parent::uses_exposed();
     }
-
-  /**
-   * Update the block delta when you change the machine readable name of the display.
-   */
-  function update_block_bid($name, $old_delta, $delta) {
-    $old_hashes = $hashes = variable_get('views_block_hashes', array());
-
-    $old_delta = $name . '-' . $old_delta;
-    $delta = $name . '-' . $delta;
-    if (strlen($old_delta) >= 32) {
-      $old_delta = md5($old_delta);
-      unset($hashes[$old_delta]);
-    }
-    if (strlen($delta) >= 32) {
-      $md5_delta = md5($delta);
-      $hashes[$md5_delta] = $delta;
-      $delta = $md5_delta;
-    }
-
-    // Maybe people don't have block module installed, so let's skip this.
-    if (db_table_exists('block')) {
-      db_update('block')
-        ->fields(array('delta' => $delta))
-        ->condition('delta', $old_delta)
-        ->execute();
-    }
-
-    // Update the hashes if needed.
-    if ($hashes != $old_hashes) {
-      variable_set('views_block_hashes', $hashes);
-    }
-  }
-
-  /**
-   * Save the block cache setting in the blocks table if this block allready
-   * exists in the blocks table. Dirty fix untill http://drupal.org/node/235673 gets in.
-   */
-  function save_block_cache($delta, $cache_setting) {
-    if (strlen($delta) >= 32) {
-      $delta = md5($delta);
-    }
-    if (db_table_exists('block') && $bid = db_query("SELECT bid FROM {block} WHERE module = 'views' AND delta = :delta", array(
-        ':delta' => $delta))->fetchField()) {
-      db_update('block')
-        ->fields(array(
-        'cache' => $cache_setting,
-        ))
-        ->condition('module','views')
-        ->condition('delta', $delta)
-        ->execute();
-    }
+    return FALSE;
   }
 }

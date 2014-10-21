@@ -99,6 +99,7 @@ function user_entity_info() {
   return array(
     'user' => array(
       'label' => t('User'),
+      'bundle label' => t('Type'),
       'controller class' => 'UserStorageController',
       'base table' => 'users',
       'fieldable' => TRUE,
@@ -947,17 +948,19 @@ function user_login_block($form) {
 function user_block_info() {
   global $user;
 
-  $blocks['login']['info'] = t('User login');
-  // Not worth caching.
-  $blocks['login']['cache'] = BACKDROP_NO_CACHE;
-
-  $blocks['new']['info'] = t('Who\'s new');
-  $blocks['new']['properties']['administrative'] = TRUE;
-
-  // Too dynamic to cache.
-  $blocks['online']['info'] = t('Who\'s online');
-  $blocks['online']['cache'] = BACKDROP_NO_CACHE;
-  $blocks['online']['properties']['administrative'] = TRUE;
+  $blocks['login'] = array(
+    'info' => t('User login'),
+    'description' => t('The user login form if logged out.'),
+  );
+  $blocks['new'] = array(
+    'info' => t('Who\'s new'),
+    'description' => t('A listing of newly registered users.'),
+    'cache' => BACKDROP_CACHE_PER_ROLE,
+  );
+  $blocks['online'] = array(
+    'info' => t('Who\'s online'),
+    'description' => t('A listing of currently online users.'),
+  );
 
   return $blocks;
 }
@@ -965,49 +968,48 @@ function user_block_info() {
 /**
  * Implements hook_block_configure().
  */
-function user_block_configure($delta = '') {
-  global $user;
-
+function user_block_configure($delta = '', $settings = array()) {
   switch ($delta) {
     case 'new':
-      $form['user_block_whois_new_count'] = array(
+      $settings += array(
+        'new_count' => 5,
+      );
+      $form['new_count'] = array(
         '#type' => 'select',
         '#title' => t('Number of users to display'),
-        '#default_value' => variable_get('user_block_whois_new_count', 5),
+        '#default_value' => $settings['new_count'],
         '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
       );
       return $form;
 
     case 'online':
+      $settings += array(
+        'seconds_online' => 900,
+        'list_count' => 10,
+      );
       $period = backdrop_map_assoc(array(30, 60, 120, 180, 300, 600, 900, 1800, 2700, 3600, 5400, 7200, 10800, 21600, 43200, 86400), 'format_interval');
-      $form['user_block_seconds_online'] = array('#type' => 'select', '#title' => t('User activity'), '#default_value' => variable_get('user_block_seconds_online', 900), '#options' => $period, '#description' => t('A user is considered online for this long after they have last viewed a page.'));
-      $form['user_block_max_list_count'] = array('#type' => 'select', '#title' => t('User list length'), '#default_value' => variable_get('user_block_max_list_count', 10), '#options' => backdrop_map_assoc(array(0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100)), '#description' => t('Maximum number of currently online users to display.'));
+      $form['seconds_online'] = array(
+        '#type' => 'select',
+        '#title' => t('User activity'),
+        '#default_value' => $settings['seconds_online'],
+        '#options' => $period,
+        '#description' => t('A user is considered online for this long after they have last viewed a page.'),
+      );
+      $form['list_count'] = array(
+        '#type' => 'select',
+        '#title' => t('User list length'),
+        '#default_value' => $settings['list_count'],
+        '#options' => backdrop_map_assoc(array(0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100)),
+        '#description' => t('Maximum number of currently online users to display.'),
+      );
       return $form;
-  }
-}
-
-/**
- * Implements hook_block_save().
- */
-function user_block_save($delta = '', $edit = array()) {
-  global $user;
-
-  switch ($delta) {
-    case 'new':
-      variable_set('user_block_whois_new_count', $edit['user_block_whois_new_count']);
-      break;
-
-    case 'online':
-      variable_set('user_block_seconds_online', $edit['user_block_seconds_online']);
-      variable_set('user_block_max_list_count', $edit['user_block_max_list_count']);
-      break;
   }
 }
 
 /**
  * Implements hook_block_view().
  */
-function user_block_view($delta = '') {
+function user_block_view($delta = '', $settings = array()) {
   global $user;
 
   $block = array();
@@ -1025,7 +1027,8 @@ function user_block_view($delta = '') {
     case 'new':
       if (user_access('access content')) {
         // Retrieve a list of new users who have subsequently accessed the site successfully.
-        $items = db_query_range('SELECT uid, name FROM {users} WHERE status <> 0 AND access <> 0 ORDER BY created DESC', 0, variable_get('user_block_whois_new_count', 5))->fetchAll();
+        $new_count = isset($settings['new_count']) ? $settings['new_count'] : 5;
+        $items = db_query_range('SELECT uid, name FROM {users} WHERE status <> 0 AND access <> 0 ORDER BY created DESC', 0, $new_count)->fetchAll();
         $output = theme('user_list', array('users' => $items));
 
         $block['subject'] = t('Who\'s new');
@@ -1036,7 +1039,8 @@ function user_block_view($delta = '') {
     case 'online':
       if (user_access('access content')) {
         // Count users active within the defined period.
-        $interval = REQUEST_TIME - variable_get('user_block_seconds_online', 900);
+        $seconds = isset($settings['seconds_online']) ? $settings['seconds_online'] : 900;
+        $interval = REQUEST_TIME - $seconds;
 
         // Perform database queries to gather online user lists. We use s.timestamp
         // rather than u.access because it is much faster.
@@ -1045,7 +1049,7 @@ function user_block_view($delta = '') {
         $output = '<p>' . format_plural($authenticated_count, 'There is currently 1 user online.', 'There are currently @count users online.') . '</p>';
 
         // Display a list of currently online users.
-        $max_users = variable_get('user_block_max_list_count', 10);
+        $max_users = isset($settings['list_count']) ? $settings['list_count'] : 10;
         if ($authenticated_count && $max_users) {
           $items = db_query_range('SELECT u.uid, u.name, MAX(s.timestamp) AS max_timestamp FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.timestamp >= :interval AND s.uid > 0 GROUP BY u.uid, u.name ORDER BY max_timestamp DESC', 0, $max_users, array(':interval' => $interval))->fetchAll();
           $output .= theme('user_list', array('users' => $items));

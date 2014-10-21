@@ -415,9 +415,6 @@ function drupal_cron_cleanup() {
 function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   return backdrop_system_listing($mask, $directory, $key, $min_depth);
 }
-function drupal_set_page_content($content = NULL) {
-  return backdrop_set_page_content($content);
-}
 function drupal_pre_render_conditional_comments($elements) {
   return backdrop_pre_render_conditional_comments($elements);
 }

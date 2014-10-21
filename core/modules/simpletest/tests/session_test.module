@@ -128,6 +128,7 @@ function _session_test_id_from_cookie() {
 function _session_test_set_message() {
   backdrop_set_message(t('This is a dummy message.'));
   print t('A message was set.');
+  backdrop_exit();
   // Do not return anything, so the current request does not result in a themed
   // page with messages. The message will be displayed in the following request
   // instead.

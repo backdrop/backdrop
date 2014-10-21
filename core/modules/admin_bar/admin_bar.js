@@ -99,20 +99,6 @@ Backdrop.adminBar.getCache = function (hash, onSuccess) {
 };
 
 /**
- * TableHeader callback to determine top viewport offset.
- */
-Backdrop.adminBar.height = function() {
-  var $adminBar = $('#admin-bar');
-  var height = $adminBar.outerHeight();
-  // In IE, Shadow filter adds some extra height, so we need to remove it from
-  // the returned height.
-  if ($adminBar.css('filter') && $adminBar.css('filter').match(/DXImageTransform\.Microsoft\.Shadow/)) {
-    height -= $adminBar.get(0).filters.item("DXImageTransform.Microsoft.Shadow").strength;
-  }
-  return height;
-};
-
-/**
  * @defgroup admin_behaviors Administration behaviors.
  * @{
  */

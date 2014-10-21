@@ -70,7 +70,10 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertText($node2->title);
 
     // Check if we have the feed.
-    $this->assertLinkByHref(url($view2['page[feed_properties][path]']));
+    $link = $this->xpath('/html/head/link[@type="application/rss+xml"][@href=:url]', array(
+      ':url' => url($view2['page[feed_properties][path]'], array('absolute' => TRUE)),
+    ));
+    $this->assertEqual(count($link), 1, 'RSS Feed found in page header.');
     $this->backdropGet($view2['page[feed_properties][path]']);
     $this->assertRaw('<rss version="2.0"');
     // The feed should have the same title and nodes as the page.
@@ -116,12 +119,10 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertText($view3['description']);
     $this->assertLinkByHref(url($view3['page[path]']));
 
-    // Put the block into the first sidebar region.
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('View: ' . $view3['human_name']);
-    $edit = array();
-    $edit["blocks[views_{$view3['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $layout->addBlock('views', $view3['name'] . '-block', 'sidebar');
+    $layout->save();
 
     // Visit a random page (not the one that displays the view itself) and look
     // for the expected node title in the block.
@@ -499,11 +500,11 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     // Put the block into the first sidebar region, visit a page that displays
     // the block, and check that the nodes we expect appear in the correct
     // order.
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('View: ' . $view['human_name']);
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $layout->save();
+
     $this->backdropGet('user');
     $content = $this->backdropGetContent();
     $this->assertText($node5->title);
@@ -742,17 +743,19 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
     $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
 
-    // Put the block into the first sidebar region, and make sure it will not
+    // Put the block into the sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
     // presence/absence of the view's title in both the page and the block).
-    $this->backdropGet('admin/structure/block');
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $edit = array();
-    $edit['visibility'] = BLOCK_VISIBILITY_NOTLISTED;
-    $edit['pages'] = $view_path;
-    $this->backdropPost("admin/structure/block/manage/views/{$view['name']}-block/configure", $edit, t('Save block'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $block = $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $block->conditions[] = layout_create_access('path', array(
+      'settings' => array(
+        'visibility_setting' => 0,
+        'paths' => $view_path,
+      )
+    ));
+    $layout->save();
 
     // Add a node that will appear in the view, so that the block will actually
     // be displayed.
@@ -801,14 +804,16 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     // Put the block into the first sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
     // presence/absence of the view's title in both the page and the block).
-    $this->backdropGet('admin/structure/block');
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $edit = array();
-    $edit['visibility'] = BLOCK_VISIBILITY_NOTLISTED;
-    $edit['pages'] = $view['page[path]'];
-    $this->backdropPost("admin/structure/block/manage/views/{$view['name']}-block/configure", $edit, t('Save block'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $block = $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $block->conditions[] = layout_create_access('path', array(
+      'settings' => array(
+        'visibility_setting' => 0,
+        'paths' => $view['page[path]'],
+      )
+    ));
+    $layout->save();
 
     // Add a node that will appear in the view, so that the block will actually
     // be displayed.

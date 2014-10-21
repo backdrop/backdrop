@@ -533,7 +533,7 @@ Backdrop.ajax.prototype.commands = {
     // $(response.data) as new HTML rather than a CSS selector. Also, if
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).
-    var new_content_wrapped = $('<div></div>').html(response.data);
+    var new_content_wrapped = $('<div></div>').html(response.data.replace(/^\s+|\s+$/gm, ''));
     var new_content = new_content_wrapped.contents();
 
     // For legacy reasons, the effects processing code assumes that new_content

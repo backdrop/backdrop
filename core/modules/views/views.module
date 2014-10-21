@@ -552,9 +552,9 @@ function views_page($name, $display_id) {
 }
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_preprocess_layout().
  */
-function views_page_alter(&$page) {
+function views_preprocess_layout(&$variables) {
   // If the main content of this page contains a view, attach its contextual
   // links to the overall page array. This allows them to be rendered directly
   // next to the page title.
@@ -565,46 +565,7 @@ function views_page_alter(&$page) {
       $view = $view->view;
     }
 
-    views_add_contextual_links($page, 'page', $view, $view->current_display);
-  }
-}
-
-/**
- * Implements MODULE_preprocess_HOOK().
- */
-function views_preprocess_html(&$variables) {
-  // If the page contains a view as its main content, contextual links may have
-  // been attached to the page as a whole; for example, by views_page_alter().
-  // This allows them to be associated with the page and rendered by default
-  // next to the page title (which we want). However, it also causes the
-  // Contextual Links module to treat the wrapper for the entire page (i.e.,
-  // the <body> tag) as the HTML element that these contextual links are
-  // associated with. This we don't want; for better visual highlighting, we
-  // prefer a smaller region to be chosen. The region we prefer differs from
-  // theme to theme and depends on the details of the theme's markup in
-  // page.tpl.php, so we can only find it using JavaScript. We therefore remove
-  // the "contextual-links-region" class from the <body> tag here and add
-  // JavaScript that will insert it back in the correct place.
-  if (!empty($variables['page']['#views_contextual_links_info'])) {
-    $key = array_search('contextual-links-region', $variables['classes_array']);
-    if ($key !== FALSE) {
-      unset($variables['classes_array'][$key]);
-      // Add the JavaScript, with a group and weight such that it will run
-      // before modules/contextual/contextual.js.
-      backdrop_add_js(backdrop_get_path('module', 'views') . '/js/views-contextual.js', array('group' => JS_LIBRARY, 'weight' => -1));
-    }
-  }
-}
-
-/**
- * Implements hook_contextual_links_view_alter().
- */
-function views_contextual_links_view_alter(&$element, $items) {
-  // If we are rendering views-related contextual links attached to the overall
-  // page array, add a class to the list of contextual links. This will be used
-  // by the JavaScript added in views_preprocess_html().
-  if (!empty($element['#element']['#views_contextual_links_info']) && !empty($element['#element']['#type']) && $element['#element']['#type'] == 'page') {
-    $element['#attributes']['class'][] = 'views-contextual-links-page';
+    views_add_contextual_links($variables['content'], 'page', $view, $view->current_display);
   }
 }
 
@@ -646,30 +607,6 @@ function views_block_info() {
     }
   }
 
-  // block.module has a delta length limit of 32, but our deltas can
-  // unfortunately be longer because view names can be 32 and display IDs
-  // can also be 32. So for very long deltas, change to md5 hashes.
-  $hashes = array();
-
-  // get the keys because we're modifying the array and we don't want to
-  // confuse PHP too much.
-  $keys = array_keys($items);
-  foreach ($keys as $delta) {
-    if (strlen($delta) >= 32) {
-      $hash = md5($delta);
-      $hashes[$hash] = $delta;
-      $items[$hash] = $items[$delta];
-      unset($items[$delta]);
-    }
-  }
-
-  // Only save hashes if they have changed.
-  // @todo: Convert to state system when available.
-  // https://github.com/backdrop/backdrop-issues/issues/141
-  $old_hashes = variable_get('views_block_hashes', array());
-  if ($hashes != $old_hashes) {
-    variable_set('views_block_hashes', $hashes);
-  }
   // Save memory: Destroy those views.
   foreach ($views as $view) {
     $view->destroy();
@@ -684,15 +621,6 @@ function views_block_info() {
  * Implement hook_block_view().
  */
 function views_block_view($delta) {
-  $start = microtime(TRUE);
-  // if this is 32, this should be an md5 hash.
-  if (strlen($delta) == 32) {
-    $hashes = variable_get('views_block_hashes', array());
-    if (!empty($hashes[$delta])) {
-      $delta = $hashes[$delta];
-    }
-  }
-
   // This indicates it's a special one.
   if (substr($delta, 0, 1) == '-') {
     list($nothing, $type, $name, $display_id) = explode('-', $delta);
@@ -867,12 +795,6 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
         // array.
         if ($valid) {
           $render_element['#contextual_links'][$module] = array($link['parent path'], $args);
-          $render_element['#views_contextual_links_info'][$module] = array(
-            'location' => $location,
-            'view' => $view,
-            'view_name' => $view->name,
-            'view_display_id' => $display_id,
-          );
         }
       }
     }
@@ -942,6 +864,10 @@ function views_field_delete_instance($instance) {
  * Invalidate the views cache, forcing a rebuild on the next grab of table data.
  */
 function views_invalidate_cache() {
+  // Clear static caches.
+  backdrop_static_reset('views_get_all_views');
+  backdrop_static_reset('views_get_view');
+
   // Clear the views cache.
   cache('views')->flush();
 

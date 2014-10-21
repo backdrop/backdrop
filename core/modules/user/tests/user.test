@@ -1479,13 +1479,13 @@ class UserAutocompleteTestCase extends BackdropWebTestCase {
 
 
 /**
- * Tests user links in the secondary menu.
+ * Tests user links in the header menu.
  */
 class UserAccountLinksUnitTests extends BackdropWebTestCase {
   /**
    * Test the user login block.
    */
-  function testSecondaryMenu() {
+  function testAccountMenu() {
     // Create a regular user.
     $user = $this->backdropCreateUser(array());
 
@@ -1495,15 +1495,15 @@ class UserAccountLinksUnitTests extends BackdropWebTestCase {
 
     // For a logged-in user, expect the secondary menu to have links for "My
     // account" and "Log out".
-    $link = $this->xpath('//ul[@id=:menu_id]/li/a[contains(@href, :href) and text()=:text]', array(
-      ':menu_id' => 'secondary-menu-links',
+    $link = $this->xpath('//*[contains(@class, :menu_id)]//a[contains(@href, :href) and text()=:text]', array(
+      ':menu_id' => 'header-menu',
       ':href' => 'user',
       ':text' => 'My account',
     ));
     $this->assertEqual(count($link), 1, 'My account link is in secondary menu.');
 
-    $link = $this->xpath('//ul[@id=:menu_id]/li/a[contains(@href, :href) and text()=:text]', array(
-      ':menu_id' => 'secondary-menu-links',
+    $link = $this->xpath('//*[contains(@class, :menu_id)]//a[contains(@href, :href) and text()=:text]', array(
+      ':menu_id' => 'header-menu',
       ':href' => 'user/logout',
       ':text' => 'Log out',
     ));
@@ -1577,7 +1577,7 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
     $this->insertSession(array('uid' => $user2->uid, 'timestamp' => REQUEST_TIME + 1));
 
     // Insert an inactive logged-in user who should not be seen in the block.
-    $this->insertSession(array('uid' => $user3->uid, 'timestamp' => (REQUEST_TIME - variable_get('user_block_seconds_online', 900) - 1)));
+    $this->insertSession(array('uid' => $user3->uid, 'timestamp' => (REQUEST_TIME - 901)));
 
     // Insert two anonymous user sessions.
     $this->insertSession();

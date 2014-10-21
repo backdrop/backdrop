@@ -59,11 +59,11 @@ function contextual_element_info() {
 }
 
 /**
- * Implements hook_preprocess().
+ * Implements hook_process().
  *
  * @see contextual_pre_render_links()
  */
-function contextual_preprocess(&$variables, $hook) {
+function contextual_process(&$variables, $hook) {
   // Nothing to do here if the user is not permitted to access contextual links.
   if (!user_access('access contextual links')) {
     return;
@@ -91,7 +91,8 @@ function contextual_preprocess(&$variables, $hook) {
       '#element' => $element,
     );
     // Mark this element as potentially having contextual links attached to it.
-    $variables['classes_array'][] = 'contextual-links-region';
+    $variables['classes'] .= ' contextual-links-region';
+    unset($element['#contextual_links']);
   }
 }
 

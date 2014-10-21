@@ -332,6 +332,7 @@
   background: #fff;
   border: solid 1px #ccc;
   padding: 0;
+  z-index: 1001;
 }
 .ui-dialog .ui-dialog-titlebar {
   font-weight: bold;
@@ -361,6 +362,12 @@
   color: #fff;
   border-color: #555;
   text-shadow: #222 0px -1px 0px;
+}
+.ui-widget-overlay {
+  background: #000;
+  opacity: 0.2;
+  filter: Alpha(opacity=20);
+  z-index: 1000;
 }
 
 /**

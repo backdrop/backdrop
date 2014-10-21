@@ -26,12 +26,10 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->big_user);
     $this->items = array();
 
-    // Find the Main menu on the block settings page.
-    $this->backdropGet('admin/structure/block');
-    $this->assertRaw(t('Main menu'), 'Main menu block found.');
     // Add Main menu block into sidebar.
-    $this->backdropPost('admin/structure/block', array('blocks[system_main-menu][region]' => 'sidebar_first'), t('Save blocks'));
-    $this->assertFieldByName('blocks[system_main-menu][region]', 'sidebar_first', 'Main menu block is enabled in first sidebar.');
+    $layout = layout_load('default');
+    $layout->addBlock('system', 'main-menu', 'sidebar');
+    $layout->save();
 
     // Do standard menu tests.
     $this->doStandardMenuTests();
@@ -161,13 +159,12 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertText($title, 'Menu created');
 
     // Enable the custom menu block.
-    $menu_name = 'menu-' . $menu_name; // Backdrop prepends the name with 'menu-'.
-    $edit = array();
-    $edit['blocks[menu_' . $menu_name . '][region]'] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertResponse(200);
-    $this->assertText(t('The block settings have been updated.'), 'Custom menu block was enabled');
+    $menu_name = 'menu-' . $menu_name;
+    $layout = layout_load('default');
+    $layout->addBlock('menu', $menu_name, 'sidebar');
+    $layout->save();
 
+    backdrop_static_reset();
     return menu_load($menu_name);
   }
 

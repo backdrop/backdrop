@@ -40,6 +40,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
       return backdrop_not_found();
     }
     print $output;
+    backdrop_exit();
   }
 
   function preview() {

@@ -60,10 +60,11 @@ function book_export($type, $nid) {
 
   if (function_exists($export_function)) {
     print call_user_func($export_function, $nid);
+    backdrop_exit();
   }
   else {
     backdrop_set_message(t('Unknown export format.'));
-    backdrop_not_found();
+    return MENU_NOT_FOUND;
   }
 }
 

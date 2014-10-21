@@ -1,0 +1,6 @@
+name = Layout
+description = Provides a drag and drop page building tool.
+package = Core
+version = BACKDROP_VERSION
+backdrop = 1.x
+required = TRUE
