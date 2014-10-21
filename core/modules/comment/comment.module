@@ -1840,6 +1840,25 @@ function comment_form($form, &$form_state, $comment) {
     '#value' => $comment_langcode,
   );
 
+  // Prepare cancel link.
+  if (isset($_GET['destination'])) {
+    $path = urldecode($_GET['destination']);
+  }
+  elseif (isset($node->nid) && !isset($comment->cid)) {
+    $path = 'node/' . $node->nid;
+  }
+  elseif (isset($_SERVER['HTTP_REFERER'])) {
+    $path = urldecode($_SERVER['HTTP_REFERER']);
+  }
+  elseif (isset($comment->cid)) {
+    $path = 'comment/' . $comment->cid . '#comment-' . $comment->cid;
+  }
+  else {
+    $path = '<front>';
+  }
+  $options = backdrop_parse_url($path);
+  $options['attributes']['class'][] = 'form-cancel';
+
   // Only show the save button if comment previews are optional or if we are
   // already previewing the submission.
   $form['actions'] = array('#type' => 'actions');
@@ -1855,6 +1874,13 @@ function comment_form($form, &$form_state, $comment) {
     '#access' => (variable_get('comment_preview_' . $node->type, BACKDROP_OPTIONAL) != BACKDROP_DISABLED),
     '#weight' => 20,
     '#submit' => array('comment_form_build_preview'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+    '#weight' => 21,
   );
 
   // Attach fields.
