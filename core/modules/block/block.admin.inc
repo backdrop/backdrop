@@ -118,11 +118,11 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
 
   $form['settings']['title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Block title'),
+    '#title' => t('Title'),
     '#maxlength' => 64,
     '#description' => t('The title of the block as shown to the user.'),
     '#default_value' => isset($custom_block['title']) ? $custom_block['title'] : '',
-    '#weight' => -19,
+    '#weight' => -18,
   );
 
   // Module-specific block configuration.

@@ -154,20 +154,19 @@ function block_custom_block_form($edit = array()) {
   );
   $form['info'] = array(
     '#type' => 'textfield',
-    '#title' => t('Block description'),
+    '#title' => t('Name'),
     '#default_value' => $edit['info'],
     '#maxlength' => 64,
     '#description' => t('Used in administrative interfaces and not shown to end-users.'),
     '#required' => TRUE,
-    '#weight' => -18,
+    '#weight' => -19,
   );
   $form['body'] = array(
     '#type' => 'text_format',
-    '#title' => t('Block body'),
+    '#title' => t('Body'),
     '#default_value' => $edit['body'],
     '#format' => $edit['format'],
     '#rows' => 8,
-    '#description' => t('The content of the block as shown to the user.'),
     '#required' => TRUE,
     '#weight' => -17,
   );
