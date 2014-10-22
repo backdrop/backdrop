@@ -132,10 +132,33 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     }
   }
 
+  // Prepare cancel link.
+  if (isset($_GET['destination'])) {
+    $path = urldecode($_GET['destination']);
+  }
+  elseif (isset($_SERVER['HTTP_REFERER'])) {
+    $path = urldecode($_SERVER['HTTP_REFERER']);
+  }
+  elseif (user_access('administer blocks')) {
+    $path = 'admin/structure/block';
+  }
+  else {
+    $path = '<front>';
+  }
+  $options = backdrop_parse_url($path);
+  $options['attributes']['class'][] = 'form-cancel';
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save block'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+    '#weight' => 1,
   );
 
   return $form;
