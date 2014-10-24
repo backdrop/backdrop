@@ -361,7 +361,7 @@ function layout_page_menu_item(array $menu, array $access_arguments, array $page
 /**
  * Menu title callback; Return the title for editing a layout.
  */
-function layout_page_title(Layout &$layout) {
+function layout_page_title(Layout $layout) {
   // Page titles are run through check_plain() before output, so no escaping
   // here is intentional. See backdrop_get_title().
   $path = $layout->getPath();
