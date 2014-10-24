@@ -63,11 +63,6 @@ body.admin-bar {
   width: auto;
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
-  border-radius: 10px;
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
-  padding: 4px 10px;
-  margin: 5px 2px 4px;
   text-shadow: #333 0 1px 0;
   background: #9F9F9F; /* Old browsers */
   background: -moz-linear-gradient(#9F9F9F 0%, #808080 100%); /* FF3.6+ */
@@ -270,9 +265,6 @@ body.admin-bar {
 #admin-bar .admin-bar-search input {
   background: #fff none center right no-repeat;
   border: none;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 10px;
   font-size: 12px;
   margin: 0;
   outline: none;
