@@ -373,7 +373,7 @@ function config_import_single_form(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'config', 'includes/config.sync');
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => 'admin/config/development/configuration/single/export')) . '</p>',
+    '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => url('admin/config/development/configuration/single/export'))) . '</p>',
   );
   $form['import'] = array(
     '#title' => t('Paste your configuration here'),
