@@ -1160,8 +1160,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  */
 function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups, $entity) {
 
-  $exceptions = array('user__account', 'comment__author');
-
   $children = element_children($element);
 
   $hasChildren = FALSE;
@@ -1171,15 +1169,7 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
       if (in_array($childname, $groups)) {
         field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups, $entity);
       }
-      $exception = $entity . '__' . $childname;
-      $empty_child = TRUE;
-      if (
-        isset($element[$childname]['#type'])
-        || isset($element[$childname]['#markup'])
-        || isset($element[$childname]['#prefix'])) {
-        $empty_child = FALSE;
-      }
-      $hasChildren = $hasChildren ? TRUE : (!$empty_child || in_array($exception, $exceptions));
+      $hasChildren = $hasChildren ? TRUE : _field_group_is_empty_element($element, $entity, $childname, $groups);
 
     }
   }
@@ -1201,6 +1191,43 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
     $element['#access'] = FALSE;
 
   }
+
+}
+
+/**
+ * Determine if an element has non-empty children.
+ */
+function _field_group_is_empty_element($element, $entity, $childname, $groups) {
+
+  $exceptions = array('user__account', 'comment__author');
+  $exception = $entity . '__' . $childname;
+
+  if (in_array($exception, $exceptions)) {
+    return TRUE;
+  }
+
+  if (isset($element[$childname]['#type'])
+    || isset($element[$childname]['#markup'])
+    || isset($element[$childname]['#prefix'])
+    || isset($element[$childname]['#suffix'])
+  ) {
+    return TRUE;
+  }
+
+  // Prevent a double recursive loop (groups are already recursive looped in field_group_remove_empty_form_groups.
+  if (in_array($childname, $groups)) {
+    return FALSE;
+  }
+
+  $children = element_children($element[$childname]);
+
+  foreach ($children as $child) {
+    if (_field_group_is_empty_element($element[$childname], $entity, $child, $groups)) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
 
 }
 
