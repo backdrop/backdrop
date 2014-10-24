@@ -111,9 +111,6 @@ function field_ui_admin_bar_map() {
  * Implements hook_admin_bar_map() on behalf of Taxonomy module.
  */
 function taxonomy_admin_bar_map() {
-  if (!user_access('administer taxonomy')) {
-    return;
-  }
   $map['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
     'parent' => 'admin/structure/taxonomy',
     'arguments' => array(

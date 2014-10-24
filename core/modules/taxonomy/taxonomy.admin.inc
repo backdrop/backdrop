@@ -16,39 +16,54 @@ function taxonomy_overview_vocabularies($form) {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $form['#tree'] = TRUE;
   foreach ($vocabularies as $vocabulary) {
-    $form[$vocabulary->vid]['#vocabulary'] = $vocabulary;
-    $form[$vocabulary->vid]['name'] = array('#markup' => check_plain($vocabulary->name));
-    $form[$vocabulary->vid]['weight'] = array(
-      '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $vocabulary->name)),
-      '#title_display' => 'invisible',
-      '#delta' => 10,
-      '#default_value' => $vocabulary->weight,
-    );
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit vocabulary'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
-    );
-    $links['list'] = array(
-      'title' => t('List terms'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name",
-    );
-    $links['add'] = array(
-      'title' => t('Add terms'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
-    );
-    $form[$vocabulary->vid]['operations'] = array(
-      '#type' => 'operations',
-      '#links' => $links,
-    );
+    // Only display vocabularies the user has access to.
+    if (taxonomy_vocabulary_access(FALSE, $vocabulary)) {
+      $form[$vocabulary->vid]['#vocabulary'] = $vocabulary;
+      $form[$vocabulary->vid]['name'] = array('#markup' => check_plain($vocabulary->name));
+      // Only display weight if user has 'administer taxonomy' permission.
+      if (user_access('administer taxonomy')) {
+        $form[$vocabulary->vid]['weight'] = array(
+          '#type' => 'weight',
+          '#title' => t('Weight for @title', array('@title' => $vocabulary->name)),
+          '#title_display' => 'invisible',
+          '#delta' => 10,
+          '#default_value' => $vocabulary->weight,
+        );
+      }
+      $links = array();
+      // Only display Edit link if user has 'administer taxonomy' permission.
+      if (user_access('administer taxonomy')) {
+        $links['edit'] = array(
+          'title' => t('Edit vocabulary'),
+          'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
+        );
+      }
+      $links['list'] = array(
+        'title' => t('List terms'),
+        'href' => "admin/structure/taxonomy/$vocabulary->machine_name",
+      );
+      // Only display Add link if user can add terms to this vocabulary.
+      if (taxonomy_vocabulary_access('add', $vocabulary)) {
+        $links['add'] = array(
+          'title' => t('Add terms'),
+          'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
+        );
+      }
+      $form[$vocabulary->vid]['operations'] = array(
+        '#type' => 'operations',
+        '#links' => $links,
+      );
+    }
   }
 
   // Only make this form include a submit button and weight if more than one
   // vocabulary exists.
-  if (count($vocabularies) > 1) {
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  if (count(element_children($form)) > 1) {
+    // Only display submit button if user has 'administer taxonomy' permission.
+    if (user_access('administer taxonomy')) {
+      $form['actions'] = array('#type' => 'actions');
+      $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+    }
   }
   elseif (isset($vocabulary)) {
     unset($form[$vocabulary->vid]['weight']);
@@ -102,7 +117,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
-  if (isset($form['actions'])) {
+  if (user_access('administer taxonomy')) {
     $header[] = t('Weight');
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
   }
@@ -394,25 +409,34 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
         // Same as above, the depth is modified by javascript, so it's a default_value.
         '#default_value' => $term->depth,
       );
-      $form[$key]['weight'] = array(
-        '#type' => 'weight',
-        '#delta' => $delta,
-        '#title_display' => 'invisible',
-        '#title' => t('Weight for added term'),
-        '#default_value' => $term->weight,
-      );
+      // Only display Weight if user can edit this term.
+      if (taxonomy_term_access('edit', $term)) {
+        $form[$key]['weight'] = array(
+          '#type' => 'weight',
+          '#delta' => $delta,
+          '#title_display' => 'invisible',
+          '#title' => t('Weight for added term'),
+          '#default_value' => $term->weight,
+        );
+      }
     }
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'taxonomy/term/' . $term->tid . '/edit',
-      'query' => backdrop_get_destination(),
-    );
-    $links['delete'] = array(
-      'title' => t('Delete'),
-      'href' => 'taxonomy/term/' . $term->tid . '/delete',
-      'query' => backdrop_get_destination(),
-    );
+    // Only display Edit link if user can edit this term.
+    if (taxonomy_term_access('edit', $term)) {
+      $links['edit'] = array(
+        'title' => t('Edit'),
+        'href' => 'taxonomy/term/' . $term->tid . '/edit',
+        'query' => backdrop_get_destination(),
+      );
+    }
+    // Only display Delete link if user can delete this term.
+    if (taxonomy_term_access('delete', $term)) {
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'taxonomy/term/' . $term->tid . '/delete',
+        'query' => backdrop_get_destination(),
+      );
+    }
     $form[$key]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
@@ -426,7 +450,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $form['#forward_step'] = $forward_step;
   $form['#empty_text'] = t('No terms available. <a href="@link">Add term</a>.', array('@link' => url('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add')));
 
-  if ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE && count($tree) > 1) {
+  if ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE && count($tree) > 1 && taxonomy_vocabulary_access('edit', $vocabulary)) {
     $form['actions'] = array('#type' => 'actions', '#tree' => FALSE);
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -578,15 +602,18 @@ function theme_taxonomy_overview_terms($variables) {
   $back_step     = $form['#back_step'];
   $forward_step  = $form['#forward_step'];
 
-  // Add drag and drop if parent fields are present in the form.
-  if ($form['#parent_fields']) {
-    backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
-    backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
-    backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js');
-    backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
-    backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
+  // Add drag and drop if parent fields are present in the form & if user can
+  // edit terms in this vocabulary.
+  if (taxonomy_vocabulary_access('edit', $form['#vocabulary'])) {
+    if ($form['#parent_fields']) {
+      backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
+      backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
+      backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js');
+      backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
+      backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
+    }
+    backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
   }
-  backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
 
   $errors = form_get_errors() != FALSE ? form_get_errors() : array();
   $rows = array();
@@ -602,8 +629,11 @@ function theme_taxonomy_overview_terms($variables) {
         $term['depth']['#attributes']['class'] = array('term-depth');
         $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
-      $term['weight']['#attributes']['class'] = array('term-weight');
-      $row[] = backdrop_render($term['weight']);
+      // Only show Weight if user can edit this term
+      if (taxonomy_term_access('edit', (object) $term['#term'])) {
+        $term['weight']['#attributes']['class'] = array('term-weight');
+        $row[] = backdrop_render($term['weight']);
+      }
       $row[] = backdrop_render($term['operations']);
       $row = array('data' => $row);
       $rows[$key] = $row;
@@ -645,7 +675,11 @@ function theme_taxonomy_overview_terms($variables) {
     $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '3'));
   }
 
-  $header = array(t('Name'), t('Weight'), t('Operations'));
+  $header = array(t('Name'));
+  if (taxonomy_vocabulary_access('edit', $form['#vocabulary'])) {
+    $header[] = t('Weight');
+  }
+  $header[] = t('Operations');
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'taxonomy')));
   $output .= backdrop_render_children($form);
   $output .= theme('pager');
