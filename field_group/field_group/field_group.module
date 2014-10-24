@@ -1172,7 +1172,14 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
         field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups, $entity);
       }
       $exception = $entity . '__' . $childname;
-      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || isset($element[$childname]['#markup']) || in_array($exception, $exceptions));
+      $empty_child = TRUE;
+      if (
+        isset($element[$childname]['#type'])
+        || isset($element[$childname]['#markup'])
+        || isset($element[$childname]['#prefix'])) {
+        $empty_child = FALSE;
+      }
+      $hasChildren = $hasChildren ? TRUE : (!$empty_child || in_array($exception, $exceptions));
 
     }
   }
