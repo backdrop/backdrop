@@ -641,7 +641,7 @@ function admin_bar_links_search() {
     ),
   );
   $search['search']['search'] = array(
-    '#type' => 'textfield',
+    '#type' => 'search',
     '#title' => t('Admin search'),
     '#title_display' => 'attribute',
     '#attributes' => array(
