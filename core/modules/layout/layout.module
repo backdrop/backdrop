@@ -882,24 +882,21 @@ function layout_get_all_configs($type) {
     }
 
     // Sort the configs by path and weight.
-    uasort($configs, function($a, $b) {
-      if ($a['path'] == $b['path']) {
-        if ($a['weight'] == $b['weight']) {
-          return 0;
-        }
-        return ($a['weight'] < $b['weight']) ? -1 : 1;
-      }
-      else {
-        // Put default layouts at the bottom.
-        if (empty($b['path'])) {
-          return -1;
-        }
-        elseif (empty($a['path'])) {
-          return 1;
-        }
-        return strcmp($a['path'], $b['path']);
-      }
-    });
+    backdrop_sort($configs, array(
+      'path' => SORT_STRING,
+      'weight' => SORT_NUMERIC,
+    ));
+
+    // Put default layouts at the bottom.
+    if ($type === 'layout') {
+      $default = $configs['default'];
+      $admin_default = $configs['admin_default'];
+      unset($configs['default']);
+      unset($configs['admin_default']);
+      $configs['default'] = $default;
+      $configs['admin_default'] = $admin_default;
+    }
+
     cache()->set('layout:' . $type . ':config', $configs);
   }
 
@@ -1060,9 +1057,7 @@ function layout_get_layout_info($layout_name = NULL) {
     }
 
     // Sort the available layouts by display name.
-    uasort($info, function($a, $b) {
-      return strcasecmp($a['title'], $b['title']);
-    });
+    backdrop_sort($info, array('title' => SORT_STRING));
   }
 
   if ($layout_name) {

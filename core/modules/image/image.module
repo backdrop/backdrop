@@ -528,12 +528,7 @@ function image_styles() {
           }
         }
         // Sort the effects by weight.
-        uasort($style['effects'], function ($a, $b) {
-          if ($a['weight'] == $b['weight']) {
-            return $a['ieid'] < $b['ieid'] ? -1 : 1;
-          }
-          return $a['weight'] < $b['weight'] ? -1 : 1;
-        });
+        backdrop_sort($style['effects'], array('weight', 'ieid'));
         $styles[$style['name']] = $style;
       }
       backdrop_alter('image_styles', $styles);
@@ -978,7 +973,7 @@ function image_effect_definitions() {
           $effects[$name] = $effect;
         }
       }
-      uasort($effects, '_image_effect_definitions_sort');
+      backdrop_sort($effects, array('name' => SORT_STRING));
       backdrop_alter('image_effect_info', $effects);
       cache()->set("image_effect_definitions:$langcode", $effects);
     }
@@ -1173,13 +1168,4 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
       return $current_pixels / 2 - $new_pixels / 2;
   }
   return $value;
-}
-
-/**
- * Internal function for sorting image effect definitions through uasort().
- *
- * @see image_effect_definitions()
- */
-function _image_effect_definitions_sort($a, $b) {
-  return strcasecmp($a['name'], $b['name']);
 }

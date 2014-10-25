@@ -648,7 +648,7 @@ class views_handler_filter extends views_handler {
    */
   function build_group_submit($form, &$form_state) {
     $groups = array();
-    uasort($form_state['values']['options']['group_info']['group_items'], 'backdrop_sort_weight');
+    backdrop_sort($form_state['values']['options']['group_info']['group_items']);
     // Filter out removed items.
 
     // Start from 1 to avoid problems with #default_value in the widget.

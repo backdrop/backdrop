@@ -3211,17 +3211,6 @@ function views_ui_reorder_displays_form($form, &$form_state) {
 }
 
 /**
- * Display position sorting function
- */
-function _views_position_sort($display1, $display2) {
-  if ($display1->position != $display2->position) {
-    return $display1->position < $display2->position ? -1 : 1;
-  }
-
-  return 0;
-}
-
-/**
  * Submit handler for rearranging display form
  */
 function views_ui_reorder_displays_form_submit($form, &$form_state) {
@@ -3259,7 +3248,12 @@ function views_ui_reorder_displays_form_submit($form, &$form_state) {
   }
 
   // Sorting back the display array as the position is not enough
-  uasort($form_state['view']->display, '_views_position_sort');
+  uasort($form_state['view']->display, function($display1, $display2) {
+    if ($display1->position != $display2->position) {
+      return $display1->position < $display2->position ? -1 : 1;
+    }
+    return 0;
+  });
 
   // Store in cache
   views_ui_cache_set($form_state['view']);

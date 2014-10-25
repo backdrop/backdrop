@@ -669,7 +669,7 @@ function update_resolve_dependencies($starting_updates) {
   // Perform the depth-first search and sort the results.
   require_once BACKDROP_ROOT . '/core/includes/graph.inc';
   backdrop_depth_first_search($graph);
-  uasort($graph, 'backdrop_sort_weight');
+  backdrop_sort($graph);
 
   foreach ($graph as $function => &$data) {
     $module = $data['module'];

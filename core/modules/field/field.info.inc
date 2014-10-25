@@ -121,7 +121,7 @@ function _field_info_collate_types() {
         }
       }
       backdrop_alter('field_widget_info', $info['widget types']);
-      uasort($info['widget types'], 'backdrop_sort_weight');
+      backdrop_sort($info['widget types']);
 
       // Populate formatter types.
       foreach (module_implements('field_formatter_info') as $module) {

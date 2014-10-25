@@ -596,20 +596,10 @@ function filter_get_filters() {
     }
     // Allow modules to alter filter definitions.
     backdrop_alter('filter_info', $filters);
-
-    uasort($filters, '_filter_list_cmp');
+    backdrop_sort($filters, array('title' => SORT_STRING));
   }
 
   return $filters;
-}
-
-/**
- * Sorts an array of filters by filter name.
- *
- * Callback for uasort() within filter_get_filters().
- */
-function _filter_list_cmp($a, $b) {
-  return strcmp($a['title'], $b['title']);
 }
 
 /**

@@ -302,9 +302,6 @@ function drupal_add_css($data = NULL, $options = NULL) {
 function drupal_get_css($css = NULL, $skip_alter = FALSE) {
   return backdrop_get_css($css, $skip_alter);
 }
-function drupal_sort_css_js($a, $b) {
-  return backdrop_sort_css_js($a, $b);
-}
 function drupal_group_css($css) {
   return backdrop_group_css($css);
 }
@@ -454,12 +451,65 @@ function drupal_render_cid_parts($granularity = NULL) {
 function drupal_render_cid_create($elements) {
   return backdrop_render_cid_create($elements);
 }
+
+/**
+ * Sorts a structured array by '#title' property.
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
+function element_sort_by_title($a, $b) {
+  $a_title = (is_array($a) && isset($a['#title'])) ? $a['#title'] : '';
+  $b_title = (is_array($b) && isset($b['#title'])) ? $b['#title'] : '';
+  return strnatcasecmp($a_title, $b_title);
+}
+
+/**
+ * Sorts a structured array by '#weight' property.
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
+function element_sort($a, $b) {
+  $a_weight = (is_array($a) && isset($a['#weight'])) ? $a['#weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['#weight'])) ? $b['#weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
+}
+
+/**
+ * Sorts a structured array by 'weight' key (no # prefix).
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
 function drupal_sort_weight($a, $b) {
-  return backdrop_sort_weight($a, $b);
+  $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
 }
+
+/**
+ * Sorts a structured array by 'title' key (no # prefix).
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
 function drupal_sort_title($a, $b) {
-  return backdrop_sort_title($a, $b);
+  if (!isset($b['title'])) {
+    return -1;
+  }
+  if (!isset($a['title'])) {
+    return 1;
+  }
+  return strcasecmp($a['title'], $b['title']);
 }
+
 function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }

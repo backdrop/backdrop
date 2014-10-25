@@ -122,7 +122,7 @@ function theme_simpletest_test_table($variables) {
     $rows[] = array('data' => $row, 'class' => array('simpletest-group'));
 
     // Sorting $element by children's #title attribute instead of by class name.
-    uasort($element, 'element_sort_by_title');
+    backdrop_sort($element, array('#title' => SORT_STRING));
 
     // Cycle through each test within the current group.
     foreach (element_children($element) as $test_name) {
