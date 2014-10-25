@@ -7936,11 +7936,6 @@ function backdrop_flush_all_caches() {
 
   entity_info_cache_clear();
 
-  // @todo Split cache flushing from rebuilding.
-  // @see http://drupal.org/node/996236
-  if (module_exists('node')) {
-    node_types_rebuild();
-  }
   // node_menu() defines menu items based on node types so it needs to come
   // after node types are rebuilt.
   menu_rebuild();

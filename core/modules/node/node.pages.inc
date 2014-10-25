@@ -135,7 +135,6 @@ function node_form_validate($form, &$form_state) {
  * @ingroup forms
  */
 function node_form($form, &$form_state, Node $node) {
-  global $user;
   $config = config('system.core');
 
   // During initial form build, add the node entity to the form state for use
@@ -148,6 +147,7 @@ function node_form($form, &$form_state, Node $node) {
   else {
     $node = $form_state['node'];
   }
+  $node_type = node_type_get_type($node->type);
 
   // Some special stuff when previewing a node.
   if (isset($form_state['node_preview'])) {
@@ -192,7 +192,7 @@ function node_form($form, &$form_state, Node $node) {
   // @todo D8: Remove. Modules should access the node using $form_state['node'].
   $form['#node'] = $node;
 
-  if (variable_get('node_type_language_' . $node->type, 0) && module_exists('language')) {
+  if ($node_type->settings['node_type_language'] && module_exists('language')) {
     $languages = language_list(TRUE);
     $language_options = array();
     foreach ($languages as $langcode => $language) {
@@ -236,7 +236,7 @@ function node_form($form, &$form_state, Node $node) {
       'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
     ),
     '#weight' => 20,
-    '#access' => $node->revision || user_access('administer nodes'),
+    '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
   $form['revision_information']['revision'] = array(
     '#type' => 'checkbox',
@@ -282,7 +282,7 @@ function node_form($form, &$form_state, Node $node) {
         ),
       ),
     ),
-    '#weight' => 90,
+    '#weight' => -5,
   );
   $form['author']['name'] = array(
     '#type' => 'textfield',
@@ -324,7 +324,7 @@ function node_form($form, &$form_state, Node $node) {
     '#attached' => array(
       'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
     ),
-    '#weight' => 95,
+    '#weight' => -10,
   );
   $form['options']['status'] = array(
     '#type' => 'checkbox',
@@ -335,11 +335,13 @@ function node_form($form, &$form_state, Node $node) {
     '#type' => 'checkbox',
     '#title' => t('Promoted to front page'),
     '#default_value' => $node->promote,
+    '#access' => $node_type->settings['promote_enabled'],
   );
   $form['options']['sticky'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sticky at top of lists'),
     '#default_value' => $node->sticky,
+    '#access' => $node_type->settings['sticky_enabled'],
   );
 
   // Prepare cancel link.
@@ -362,13 +364,13 @@ function node_form($form, &$form_state, Node $node) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#access' => variable_get('node_preview_' . $node->type, BACKDROP_OPTIONAL) != BACKDROP_REQUIRED || (!form_get_errors() && isset($form_state['node_preview'])),
+    '#access' => $node_type->settings['node_preview'] != BACKDROP_REQUIRED || (!form_get_errors() && isset($form_state['node_preview'])),
     '#value' => t('Save'),
     '#weight' => 5,
     '#submit' => array('node_form_submit'),
   );
   $form['actions']['preview'] = array(
-    '#access' => variable_get('node_preview_' . $node->type, BACKDROP_OPTIONAL) != BACKDROP_DISABLED,
+    '#access' => $node_type->settings['node_preview'] != BACKDROP_DISABLED,
     '#type' => 'submit',
     '#value' => t('Preview'),
     '#weight' => 10,

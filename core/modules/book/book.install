@@ -37,13 +37,15 @@ function _book_install_type_create() {
     'custom' => 1,
     'modified' => 1,
     'locked' => 0,
+    'is_new' => TRUE,
+    'settings' => array(
+      'promote_enabled' => FALSE,
+    ),
   );
 
   $book_node_type = node_type_set_defaults($book_node_type);
   node_type_save($book_node_type);
   node_add_body_field($book_node_type);
-  // Default to not promoted.
-  variable_set('node_options_book', array('status'));
 }
 
 /**

@@ -1190,7 +1190,7 @@ function state_del($name) {
     ->condition('name', $name)
     ->execute();
   cache('cache')->delete('states');
-  if (array_key_exists($name, $states)) {
+  if ($states && array_key_exists($name, $states)) {
     unset($states[$name]);
   }
 }

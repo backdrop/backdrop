@@ -1842,6 +1842,7 @@ class view {
    * Revert the view based on its module-provided default version (if any).
    */
   function revert($clear = TRUE) {
+    config('views.view.' . $this->name)->delete();
     config_install_default_config($this->module, 'views.view.' . $this->name);
     cache('views')->deletePrefix('views_query:' . $this->name);
 

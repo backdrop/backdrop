@@ -85,20 +85,36 @@ function standard_install() {
     array(
       'type' => 'page',
       'name' => st('Basic page'),
-      'base' => 'node_content',
       'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
-      'custom' => 1,
-      'modified' => 1,
-      'locked' => 0,
+      'settings' => array(
+        'status_default' => TRUE,
+        'promote_enabled' => FALSE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'show_submitted_info' => FALSE,
+        'comments_default' => COMMENT_NODE_CLOSED,
+      ),
+      'is_new' => TRUE,
     ),
     array(
       'type' => 'article',
       'name' => st('Article'),
-      'base' => 'node_content',
       'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
-      'custom' => 1,
-      'modified' => 1,
-      'locked' => 0,
+      'settings' => array(
+        'status_default' => TRUE,
+        'promote_enabled' => TRUE,
+        'promote_default' => TRUE,
+        'sticky_enabled' => TRUE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'show_submitted_info' => TRUE,
+        'comments_default' => COMMENT_NODE_OPEN,
+      ),
+      'is_new' => TRUE,
     ),
   );
 
@@ -107,13 +123,6 @@ function standard_install() {
     node_type_save($type);
     node_add_body_field($type);
   }
-
-  // Default "Basic page" to not be promoted and have comments disabled.
-  variable_set('node_options_page', array('status'));
-  variable_set('comment_page', COMMENT_NODE_HIDDEN);
-
-  // Don't display date and author information for "Basic page" nodes by default.
-  variable_set('node_submitted_page', FALSE);
 
   // Enable user picture support and set the default to a square thumbnail option.
   config('system.core')

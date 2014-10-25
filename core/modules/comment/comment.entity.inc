@@ -269,7 +269,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
   protected function updateNodeStatistics($nid) {
     // Allow bulk updates and inserts to temporarily disable the
     // maintenance of the {node_comment_statistics} table.
-    if (!variable_get('comment_maintain_node_statistics', TRUE)) {
+    if (!state_get('comment_maintain_node_statistics', TRUE)) {
       return;
     }
 

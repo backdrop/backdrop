@@ -940,6 +940,7 @@ function image_style_path($style_name, $uri) {
  */
 function image_default_style_revert($style) {
   image_style_flush($style);
+  config('image.styles.' . $style['name'])->delete();
   config_install_default_config($style['module'], 'image.styles.' . $style['name']);
   return TRUE;
 }

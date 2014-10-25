@@ -173,8 +173,11 @@ function config_install_default_config($module, $config_name = NULL) {
       if (is_null($config_name) || $file_config_name === $config_name) {
         $data = $storage->read($file_config_name);
         $config = config($file_config_name);
-        $config->setData($data);
-        $config->save();
+        // We only create new configs, and do not overwrite existing ones.
+        if ($config->isNew()) {
+          $config->setData($data);
+          $config->save();
+        }
       }
     }
   }

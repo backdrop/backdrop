@@ -69,6 +69,18 @@ function menu_uninstall() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function menu_update_dependencies() {
+  // menu_update_1001() updates menu variables to save into the node type config
+  // files, which are created in node_update_1005().
+  $dependencies['menu'][1001] = array(
+    'node' => 1005,
+  );
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
@@ -88,6 +100,30 @@ function menu_update_1000() {
   // Delete variables.
   variable_del('menu_main_links_source');
   variable_del('menu_secondary_links_source');
+}
+
+/**
+ * Move menu content type settings into configuration files.
+ */
+function menu_update_1001() {
+  // Ensure module-provided code is loaded.
+  backdrop_load('module', 'node');
+  backdrop_load('module', 'entity');
+
+  $node_types = node_type_get_types();
+  foreach ($node_types as $node_type) {
+    // Move the comment variables into each node type's config.
+    $settings = array(
+      'menu_options' => variable_get('menu_options_' . $node_type->type, array('main-menu')),
+      'menu_parent' => variable_get('menu_parent_' . $node_type->type, 'main-menu:0'),
+    );
+    $node_type->settings = array_merge($node_type->settings, $settings);
+    node_type_save($node_type);
+
+    // Delete the migrated variables.
+    variable_del('menu_options_' . $node_type->type);
+    variable_del('menu_parent_' . $node_type->type);
+  }
 }
 
 /**

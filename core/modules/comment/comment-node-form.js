@@ -7,26 +7,29 @@
 
 Backdrop.behaviors.commentFieldsetSummaries = {
   attach: function (context) {
-    $('fieldset.comment-node-settings-form', context).backdropSetSummary(function (context) {
-      return Backdrop.checkPlain($('.form-item-comment input:checked', context).next('label').text());
+    var $context = $(context);
+    $context.find('fieldset.comment-node-settings-form').backdropSetSummary(function () {
+      return Backdrop.checkPlain($context.find('.form-item-comment input:checked').next('label').text());
     });
 
     // Provide the summary for the node type form.
-    $('fieldset.comment-node-type-settings-form', context).backdropSetSummary(function(context) {
+    $context.find('fieldset.comment-node-type-settings-form').backdropSetSummary(function() {
       var vals = [];
 
       // Default comment setting.
-      vals.push($(".form-item-comment select option:selected", context).text());
-
-      // Threading.
-      var threading = $(".form-item-comment-default-mode input:checked", context).next('label').text();
-      if (threading) {
-        vals.push(threading);
-      }
+      vals.push($context.find(".form-item-comment-default select option:selected").text());
 
       // Comments per page.
-      var number = $(".form-item-comment-default-per-page select option:selected", context).val();
+      var number = parseInt($context.find(".form-item-comment-per-page select option:selected").val());
       vals.push(Backdrop.t('@number comments per page', {'@number': number}));
+
+      // Threading.
+      if ($context.find(".form-item-comment-mode input:checked").length) {
+        vals.push(Backdrop.t('Threaded'));
+      }
+      else {
+        vals.push(Backdrop.t('Flat list'));
+      }
 
       return Backdrop.checkPlain(vals.join(', '));
     });

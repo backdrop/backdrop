@@ -306,7 +306,7 @@ function hook_update_index() {
 
     // Save the changed time of the most recent indexed node, for the search
     // results half-life calculation.
-    variable_set('node_cron_last', $node->changed);
+    state_set('node_cron_last', $node->changed);
 
     // Render the node.
     node_build_content($node, 'search_index');

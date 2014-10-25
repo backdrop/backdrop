@@ -1086,6 +1086,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'body_label' => 'Body',
       'has_title' => 1,
       'has_body' => 1,
+      'is_new' => TRUE,
     );
     // Imposed values for a custom type.
     $forced = array(
@@ -1100,7 +1101,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     $type = (object) $type;
 
     $saved_type = node_type_save($type);
-    node_types_rebuild();
     menu_rebuild();
     node_add_body_field($type);
 
