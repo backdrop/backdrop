@@ -2247,3 +2247,27 @@ function views_autoload_info() {
     'ViewsSqlTest' => 'tests/views_query.inc',
   );
 }
+/**
+ * Implements hook_config_info().
+ */
+function views_config_info() {
+  $prefixes['views.settings'] = array(
+    'label' => t('View Settings'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['views.view.comments_recent'] = array(
+    'label' => t('Views Recent Comments'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['views.view.frontpage'] = array(
+    'label' => t('Views Frontpage'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['views.view.taxonomy_term'] = array(
+    'label' => t('Views Taxonomy Terms'),
+    'group' => t('Configuration'),
+  );
+
+
+  return $prefixes;
+}
