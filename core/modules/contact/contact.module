@@ -182,8 +182,6 @@ function contact_load($cid) {
  *   An array of contact categoryies data.
  */
 function contact_config_data() {
-
-  $categories = array();
   $config_data = array();
 
   $config = config('contact.categories');
@@ -193,12 +191,7 @@ function contact_config_data() {
 
   // Sort the categories by weight then category.
   if ($categories) {
-    uasort($categories, function ($a, $b) {
-      if ($a['weight'] == $b['weight']) {
-        return $a['category'] < $b['category'] ? -1 : 1;
-      }
-      return $a['weight'] < $b['weight'] ? -1 : 1;
-    });
+    backdrop_sort($categories, array('weight' => SORT_NUMERIC, 'category' => SORT_STRING));
   }
   $config_data['categories'] = $categories;
 

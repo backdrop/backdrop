@@ -90,7 +90,7 @@ function system_admin_index() {
     // Only display a section if there are any available tasks.
     if ($admin_tasks = system_get_module_admin_tasks($module, $info->info)) {
       // Sort links by title.
-      uasort($admin_tasks, 'backdrop_sort_title');
+      backdrop_sort($admin_tasks, array('title' => SORT_STRING));
       // Move 'Configure permissions' links to the bottom of each section.
       $permission_key = "admin/config/people/permissions#module-$module";
       if (isset($admin_tasks[$permission_key])) {
@@ -636,7 +636,7 @@ function system_modules($form, $form_state = array()) {
   }
 
   // Lastly, sort all fieldsets by title.
-  uasort($form['modules'], 'element_sort_by_title');
+  backdrop_sort($form['modules'], array('#title' => SORT_STRING));
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

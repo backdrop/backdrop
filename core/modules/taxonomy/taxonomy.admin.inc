@@ -470,7 +470,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
   }
 
   // Sort term order based on weight.
-  uasort($form_state['values'], 'backdrop_sort_weight');
+  backdrop_sort($form_state['values']);
 
   $vocabulary = $form['#vocabulary'];
   // Update the current hierarchy type as we go.

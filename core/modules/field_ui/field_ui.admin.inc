@@ -88,7 +88,7 @@ function _field_ui_reduce_order($array, $a) {
     $array[] = $a['name'];
   }
   if (!empty($a['children'])) {
-    uasort($a['children'], 'backdrop_sort_weight');
+    backdrop_sort($a['children']);
     $array = array_merge($array, array_reduce($a['children'], '_field_ui_reduce_order'));
   }
   return $array;

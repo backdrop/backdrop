@@ -905,7 +905,7 @@ function theme_admin_bar_links($variables) {
   // everything again. element_sort() is not sufficient here, as it
   // intentionally retains the order of elements having the same #weight,
   // whereas menu links are supposed to be ordered by #weight and #title.
-  uasort($elements, 'admin_bar_element_sort');
+  backdrop_sort($elements, array('#weight' => SORT_NUMERIC, '#title' => SORT_STRING));
   $elements['#sorted'] = TRUE;
 
   $output = '';
@@ -969,20 +969,4 @@ function theme_admin_bar_links($variables) {
     $output = '<ul' . $attributes . '>' . $output . '</ul>';
   }
   return $output;
-}
-
-/**
- * Function used by uasort to sort structured arrays by #weight AND #title.
- */
-function admin_bar_element_sort($a, $b) {
-  // @see element_sort()
-  $a_weight = isset($a['#weight']) ? $a['#weight'] : 0;
-  $b_weight = isset($b['#weight']) ? $b['#weight'] : 0;
-  if ($a_weight == $b_weight) {
-    // @see element_sort_by_title()
-    $a_title = isset($a['#title']) ? $a['#title'] : '';
-    $b_title = isset($b['#title']) ? $b['#title'] : '';
-    return strnatcasecmp($a_title, $b_title);
-  }
-  return ($a_weight < $b_weight) ? -1 : 1;
 }
