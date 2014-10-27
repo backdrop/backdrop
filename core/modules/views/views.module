@@ -948,7 +948,7 @@ function views_check_perm($perm, $account = NULL) {
 function views_check_roles($rids, $account = NULL) {
   global $user;
   $account = isset($account) ? $account : $user;
-  $roles = array_keys($account->roles);
+  $roles = $account->roles;
   $roles[] = $account->uid ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID;
   return user_access('access all views', $account) || array_intersect(array_filter($rids), $roles);
 }

@@ -109,9 +109,8 @@ function _backdrop_session_read($sid) {
     $user->data = unserialize($user->data);
 
     // Add roles element to $user.
-    $user->roles = array();
-    $user->roles[BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
-    $user->roles += db_query("SELECT r.rid, r.name FROM {role} r INNER JOIN {users_roles} ur ON ur.rid = r.rid WHERE ur.uid = :uid", array(':uid' => $user->uid))->fetchAllKeyed(0, 1);
+    $user->roles = db_query("SELECT rid FROM {users_roles} WHERE uid = :uid", array(':uid' => $user->uid))->fetchCol();
+    array_unshift($user->roles, BACKDROP_AUTHENTICATED_RID);
   }
   elseif ($user) {
     // The user is anonymous or blocked. Only preserve two fields from the

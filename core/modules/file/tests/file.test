@@ -533,9 +533,9 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
   function testPrivateFileComment() {
     $user = $this->backdropCreateUser(array('access comments'));
 
-    // Remove access comments permission from anon user.
+    // Remove access comments permission from anonymous user.
     $edit = array(
-      '1[access comments]' => FALSE,
+      'anonymous[access comments]' => FALSE,
     );
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
 

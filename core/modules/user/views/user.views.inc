@@ -400,39 +400,9 @@ function user_views_data() {
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_users_roles_rid',
-      'name table' => 'role',
-      'name field' => 'name',
       'empty field name' => t('No role'),
       'zero is null' => TRUE,
       'numeric' => TRUE,
-    ),
-  );
-
-  // ----------------------------------------------------------------------
-  // role table
-
-  $data['role']['table']['join'] = array(
-     // Directly links to users table.
-    'users' => array(
-      'left_table' => 'users_roles',
-      'left_field' => 'rid',
-      'field' => 'rid',
-    ),
-    // needed for many to one helper sometimes
-    'users_roles' => array(
-      'left_field' => 'rid',
-      'field' => 'rid',
-    ),
-  );
-
-  $data['role']['table']['default_relationship'] = array(
-    'node' => array(
-      'table' => 'node',
-      'field' => 'uid',
-    ),
-    'node_revision' => array(
-      'table' => 'node_revision',
-      'field' => 'uid',
     ),
   );
 

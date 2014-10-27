@@ -195,14 +195,15 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     $admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($admin_user);
 
-    // Extract the user role ID that was created for above permissions.
-    $rid = key(array_diff_key($admin_user->roles, array(BACKDROP_AUTHENTICATED_RID => 0)));
+    // Extract the user role name that was created for above permissions.
+    $roles = array_diff($admin_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $role_name = reset($roles);
 
     // Verify that Configuration does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Configuration')));
     // Grant the 'administer site configuration' permission to ourselves.
     $edit = array(
-      $rid . '[administer site configuration]' => TRUE,
+      $role_name . '[administer site configuration]' => TRUE,
     );
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
     // Verify that Configuration appears.
@@ -213,29 +214,28 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     // Create a new role.
     $edit = array(
       'name' => 'test',
+      'label' => 'Test',
     );
     $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
-    // It should be safe to assume that the new role gets the next ID.
-    $test_rid = $rid + 1;
+
     // Grant the 'administer content types' permission for the role.
     $edit = array(
-      $test_rid . '[administer content types]' => TRUE,
+      'test[administer content types]' => TRUE,
     );
-    $this->backdropPost('admin/config/people/permissions/' . $test_rid, $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/people/permissions/test', $edit, t('Save permissions'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
     // Assign the role to ourselves.
     $edit = array(
-      'roles[' . $test_rid . ']' => TRUE,
+      'roles[test]' => TRUE,
     );
     $this->backdropPost('user/' . $admin_user->uid . '/edit', $edit, t('Save'));
     // Verify that Structure » Content types appears.
     $this->assertLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
     // Delete the role.
-    $this->backdropPost('admin/config/people/roles/edit/' . $test_rid, array(), t('Delete role'));
-    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropPost('admin/config/people/roles/delete/test', array(), t('Delete'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
   }

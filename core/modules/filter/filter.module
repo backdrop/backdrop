@@ -449,33 +449,33 @@ function filter_formats_reset() {
  *   An object representing the text format.
  *
  * @return
- *   An array of role names, keyed by role ID.
+ *   An unindexed array of role names.
  */
 function filter_get_roles_by_format($format) {
   // Handle the fallback format upfront (all roles have access to this format).
   if ($format->format == filter_fallback_format()) {
-    return user_roles();
+    return array_keys(user_roles());
   }
   // Do not list any roles if the permission does not exist.
   $permission = filter_permission_name($format);
-  return !empty($permission) ? user_roles(FALSE, $permission) : array();
+  return !empty($permission) ? array_keys(user_roles(FALSE, $permission)) : array();
 }
 
 /**
  * Retrieves a list of text formats that are allowed for a given role.
  *
- * @param $rid
- *   The user role ID to retrieve text formats for.
+ * @param string $role_name
+ *   The user role name to retrieve text formats for.
  *
  * @return
  *   An array of text format objects that are allowed for the role, keyed by
  *   the text format ID and ordered by weight.
  */
-function filter_get_formats_by_role($rid) {
+function filter_get_formats_by_role($role_name) {
   $formats = array();
   foreach (filter_formats() as $format) {
     $roles = filter_get_roles_by_format($format);
-    if (isset($roles[$rid])) {
+    if (in_array($role_name, $roles)) {
       $formats[$format->format] = $format;
     }
   }

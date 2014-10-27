@@ -304,7 +304,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['format'] = backdrop_strtolower($this->randomName());
     $edit['name'] = $this->randomName();
-    $edit['roles[2]'] = 1;
+    $edit['roles[authenticated]'] = 1;
     $edit['filters[' . $second_filter . '][status]'] = TRUE;
     $edit['filters[' . $first_filter . '][status]'] = TRUE;
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
@@ -314,7 +314,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $format = filter_format_load($edit['format']);
     $this->assertNotNull($format, 'Format found in database.');
 
-    $this->assertFieldByName('roles[2]', '', 'Role found.');
+    $this->assertFieldByName('roles[authenticated]', '', 'Role found.');
     $this->assertFieldByName('filters[' . $second_filter . '][status]', '', 'Line break filter found.');
     $this->assertFieldByName('filters[' . $first_filter . '][status]', '', 'Url filter found.');
 
@@ -325,8 +325,8 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Allow authenticated users on full HTML.
     $format = filter_format_load($full);
     $edit = array();
-    $edit['roles[1]'] = 0;
-    $edit['roles[2]'] = 1;
+    $edit['roles[anonymous]'] = 0;
+    $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), 'Full HTML format successfully updated.');
 
@@ -376,10 +376,10 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     // Full HTML.
     $edit = array();
-    $edit['roles[2]'] = FALSE;
+    $edit['roles[authenticated]'] = FALSE;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), 'Full HTML format successfully reverted.');
-    $this->assertFieldByName('roles[2]', $edit['roles[2]'], 'Changes reverted.');
+    $this->assertFieldByName('roles[authenticated]', $edit['roles[authenticated]'], 'Changes reverted.');
 
     // Filter order.
     $edit = array();
@@ -528,23 +528,24 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    * Tests if text format is available to a role.
    */
   function testFormatRoles() {
-    // Get the role ID assigned to the regular user; it must be the maximum.
-    $rid = max(array_keys($this->web_user->roles));
+    // Get the role name assigned to the regular user.
+    $roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $role_name = reset($roles);
 
     // Check that this role appears in the list of roles that have access to an
     // allowed text format, but does not appear in the list of roles that have
     // access to a disallowed text format.
-    $this->assertTrue(in_array($rid, array_keys(filter_get_roles_by_format($this->allowed_format))), 'A role which has access to a text format appears in the list of roles that have access to that format.');
-    $this->assertFalse(in_array($rid, array_keys(filter_get_roles_by_format($this->disallowed_format))), 'A role which does not have access to a text format does not appear in the list of roles that have access to that format.');
+    $this->assertTrue(in_array($role_name, filter_get_roles_by_format($this->allowed_format)), 'A role which has access to a text format appears in the list of roles that have access to that format.');
+    $this->assertFalse(in_array($role_name, filter_get_roles_by_format($this->disallowed_format)), 'A role which does not have access to a text format does not appear in the list of roles that have access to that format.');
 
     // Check that the correct text format appears in the list of formats
     // available to that role.
-    $this->assertTrue(in_array($this->allowed_format->format, array_keys(filter_get_formats_by_role($rid))), 'A text format which a role has access to appears in the list of formats available to that role.');
-    $this->assertFalse(in_array($this->disallowed_format->format, array_keys(filter_get_formats_by_role($rid))), 'A text format which a role does not have access to does not appear in the list of formats available to that role.');
+    $this->assertTrue(in_array($this->allowed_format->format, array_keys(filter_get_formats_by_role($role_name))), 'A text format which a role has access to appears in the list of formats available to that role.');
+    $this->assertFalse(in_array($this->disallowed_format->format, array_keys(filter_get_formats_by_role($role_name))), 'A text format which a role does not have access to does not appear in the list of formats available to that role.');
 
     // Check that the fallback format is always allowed.
-    $this->assertEqual(filter_get_roles_by_format(filter_format_load(filter_fallback_format())), user_roles(), 'All roles have access to the fallback format.');
-    $this->assertTrue(in_array(filter_fallback_format(), array_keys(filter_get_formats_by_role($rid))), 'The fallback format appears in the list of allowed formats for any role.');
+    $this->assertEqual(filter_get_roles_by_format(filter_format_load(filter_fallback_format())), array_keys(user_roles()), 'All roles have access to the fallback format.');
+    $this->assertTrue(in_array(filter_fallback_format(), array_keys(filter_get_formats_by_role($role_name))), 'The fallback format appears in the list of allowed formats for any role.');
   }
 
   /**
@@ -1808,7 +1809,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['format'] = backdrop_strtolower($this->randomName());
     $edit['name'] = $name;
-    $edit['roles[1]'] = 1;
+    $edit['roles[anonymous]'] = 1;
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertRaw(t('Added text format %format.', array('%format' => $name)), t('New format created.'));
     $this->assertText('hook_filter_format_insert invoked.', t('hook_filter_format_insert was invoked.'));
@@ -1817,7 +1818,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
 
     // Update text format.
     $edit = array();
-    $edit['roles[2]'] = 1;
+    $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $name)), 'Format successfully updated.');
     $this->assertText('hook_filter_format_update invoked.', 'hook_filter_format_update() was invoked.');

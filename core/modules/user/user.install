@@ -9,75 +9,6 @@
  * Implements hook_schema().
  */
 function user_schema() {
-  $schema['role_permission'] = array(
-    'description' => 'Stores the permissions assigned to user roles.',
-    'fields' => array(
-      'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Foreign Key: {role}.rid.',
-      ),
-      'permission' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'A single permission granted to the role identified by rid.',
-      ),
-      'module' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "The module declaring the permission.",
-      ),
-    ),
-    'primary key' => array('rid', 'permission'),
-    'indexes' => array(
-      'permission' => array('permission'),
-    ),
-    'foreign keys' => array(
-      'role' => array(
-        'table' => 'roles',
-        'columns' => array('rid' => 'rid'),
-      ),
-    ),
-  );
-
-  $schema['role'] = array(
-    'description' => 'Stores user roles.',
-    'fields' => array(
-      'rid' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary Key: Unique role ID.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Unique role name.',
-        'translatable' => TRUE,
-      ),
-      'weight' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'The weight of this role in listings and the user interface.',
-      ),
-    ),
-    'unique keys' => array(
-      'name' => array('name'),
-    ),
-    'primary key' => array('rid'),
-    'indexes' => array(
-      'name_weight' => array('name', 'weight'),
-    ),
-  );
-
   // The table name here is plural, despite Backdrop table naming standards,
   // because "user" is a reserved word in many databases.
   $schema['users'] = array(
@@ -212,11 +143,10 @@ function user_schema() {
         'description' => 'Primary Key: {users}.uid for user.',
       ),
       'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
+        'type' => 'varchar',
+        'length' => 64,
+        'description' => 'Primary Key: The name of the role.',
         'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Primary Key: {role}.rid for role.',
       ),
     ),
     'primary key' => array('uid', 'rid'),
@@ -227,10 +157,6 @@ function user_schema() {
       'user' => array(
         'table' => 'users',
         'columns' => array('uid' => 'uid'),
-      ),
-      'role' => array(
-        'table' => 'roles',
-        'columns' => array('rid' => 'rid'),
       ),
     ),
   );
@@ -264,30 +190,17 @@ function user_install() {
       'data' => NULL,
     ))
     ->execute();
+}
 
-  // Built-in roles.
-  $rid_anonymous = db_insert('role')
-    ->fields(array('name' => 'anonymous user', 'weight' => 0))
-    ->execute();
-  $rid_authenticated = db_insert('role')
-    ->fields(array('name' => 'authenticated user', 'weight' => 1))
-    ->execute();
-
-  // Sanity check to ensure the anonymous and authenticated role IDs are the
-  // same as the Backdrop defined constants. In certain situations, this will
-  // not be true.
-  if ($rid_anonymous != BACKDROP_ANONYMOUS_RID) {
-    db_update('role')
-      ->fields(array('rid' => BACKDROP_ANONYMOUS_RID))
-      ->condition('rid', $rid_anonymous)
-      ->execute();
-  }
-  if ($rid_authenticated != BACKDROP_AUTHENTICATED_RID) {
-    db_update('role')
-      ->fields(array('rid' => BACKDROP_AUTHENTICATED_RID))
-      ->condition('rid', $rid_authenticated)
-      ->execute();
-  }
+/**
+ * Implements hook_update_dependencies().
+ */
+function system_update_dependencies() {
+  // Ensure layouts have been converted before renaming our user roles.
+  $dependencies['user'][1007] = array(
+    'system' => 1025,
+  );
+  return $dependencies;
 }
 
 /**
@@ -459,6 +372,68 @@ function user_update_1006() {
   variable_del('user_picture_dimensions');
   variable_del('user_picture_file_size');
   variable_del('user_picture_guidelines');
+}
+
+/**
+ * Convert user roles to configuration files.
+ */
+function user_update_1007() {
+  // Update role ID to be a varchar instead of an integer.
+  $rid_column = array(
+    'type' => 'varchar',
+    'length' => 64,
+    'description' => 'Primary Key: The name of the role.',
+    'not null' => TRUE,
+  );
+  db_change_field('users_roles', 'rid', 'rid', $rid_column);
+
+  $admin_role_id = config_get('system.core', 'user_admin_role');
+  $role_result = db_query("SELECT * FROM {role}");
+  foreach ($role_result as $row) {
+    $role_data = array(
+      'name' => $row->rid,
+      'label' => backdrop_ucfirst($row->name),
+      'weight' => $row->weight,
+    );
+
+    // Ensure default role names are correct.
+    if ($row->rid == 1) {
+      $role_data['name'] = 'anonymous';
+      $role_data['label'] = 'Anonymous';
+    }
+    if ($row->rid == 2) {
+      $role_data['name'] = 'authenticated';
+      $role_data['label'] = 'Authenticated';
+    }
+
+    // Build the list of permissions.
+    $role_data['permissions'] = array();
+    $permission_result = db_query("SELECT * FROM {role_permission} WHERE rid = :rid", array(':rid' => $row->rid));
+    foreach ($permission_result as $permission_row) {
+      $role_data['permissions'][] = $permission_row->permission;
+    }
+
+    // Save the new user role.
+    $config = config('user.role.' . $role_data['name']);
+    $config->setData($role_data);
+    $config->save();
+
+    // Update the users table to match the new role names.
+    db_update('users_roles')
+      ->fields(array(
+        'rid' => $role_data['name'],
+      ))
+      ->condition('rid', $row->rid)
+      ->execute();
+
+    // Update the admin role.
+    if ($admin_role_id == $row->rid) {
+      config_set('system.core', 'user_admin_role', $role_data['name']);
+    }
+  }
+
+  db_drop_table('role');
+  db_drop_table('role_permission');
 }
 
 /**

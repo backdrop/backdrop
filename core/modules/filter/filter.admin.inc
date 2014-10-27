@@ -33,7 +33,11 @@ function filter_admin_overview($form) {
     }
     else {
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
-      $roles = array_map('check_plain', filter_get_roles_by_format($format));
+      $roles = array();
+      foreach (filter_get_roles_by_format($format) as $role_name) {
+        $role = user_role_load($role_name);
+        $roles[] = check_plain($role->label);
+      }
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
       $links['disable'] = array(
         'title' => t('Disable'),
@@ -199,7 +203,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
   if (!empty($format->format)) {
     // If editing an existing text format, pre-select its current permissions.
-    $form['roles']['#default_value'] = array_keys(filter_get_roles_by_format($format));
+    $form['roles']['#default_value'] = filter_get_roles_by_format($format);
   }
   elseif ($admin_role = config_get('system.core', 'user_admin_role')) {
     // If adding a new text format and the site has an administrative role,

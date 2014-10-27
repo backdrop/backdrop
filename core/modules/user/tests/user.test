@@ -1134,9 +1134,8 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
 
     // Find the new role ID - it must be the maximum.
-    $all_rids = array_keys($this->admin_user->roles);
-    sort($all_rids);
-    $this->rid = array_pop($all_rids);
+    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $this->role_name = reset($roles);
   }
 
   /**
@@ -1144,27 +1143,27 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
    */
   function testUserPermissionChanges() {
     $this->backdropLogin($this->admin_user);
-    $rid = $this->rid;
+    $role_name = $this->role_name;
     $account = $this->admin_user;
 
     // Add a permission.
     $this->assertFalse(user_access('administer nodes', $account), 'User does not have "administer nodes" permission.');
     $edit = array();
-    $edit[$rid . '[administer nodes]'] = TRUE;
+    $edit[$role_name . '[administer nodes]'] = TRUE;
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
+    backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
-    backdrop_static_reset('user_role_permissions');
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
 
     // Remove a permission.
     $this->assertTrue(user_access('access user profiles', $account), 'User has "access user profiles" permission.');
     $edit = array();
-    $edit[$rid . '[access user profiles]'] = FALSE;
+    $edit[$role_name . '[access user profiles]'] = FALSE;
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
+    backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
-    backdrop_static_reset('user_role_permissions');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
   }
 
@@ -1177,7 +1176,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
 
     // Set the user's role to be the administrator role.
     $edit = array();
-    $edit['user_admin_role'] = $this->rid;
+    $edit['user_admin_role'] = $this->role_name;
     $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
 
     // Enable book module and ensure the 'administer book outlines' permission
@@ -1185,6 +1184,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['modules[Core][book][enable]'] = TRUE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    backdrop_static_reset('user_roles');
     $this->assertTrue(user_access('administer book outlines', $this->admin_user), 'The permission was automatically assigned to the administrator role');
   }
 
@@ -1192,7 +1192,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
    * Verify proper permission changes by user_role_change_permissions().
    */
   function testUserRoleChangePermissions() {
-    $rid = $this->rid;
+    $role_name = $this->role_name;
     $account = $this->admin_user;
 
     // Verify current permissions.
@@ -1205,7 +1205,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
       'administer nodes' => 1,
       'access user profiles' => 0,
     );
-    user_role_change_permissions($rid, $permissions);
+    user_role_change_permissions($role_name, $permissions);
 
     // Verify proper permission changes.
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
@@ -1252,7 +1252,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
 
     // Test for existence of edit link in table.
     $link = l(t('Edit'), "user/$user_a->uid/edit", array('query' => array('destination' => 'admin/people')));
-     $this->assertRaw($link, 'Found user A edit link on admin users page');
+    $this->assertRaw($link, 'Found user A edit link on admin users page');
 
     // Filter the users by permission 'administer taxonomy'.
     $edit = array();
@@ -1265,7 +1265,8 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertText($user_c->name, 'Found user C on filtered by perm admin users page');
 
     // Filter the users by role. Grab the system-generated role name for User C.
-    $edit['role'] = max(array_flip($user_c->roles));
+    $c_roles = array_diff($user_c->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $edit['role'] = reset($c_roles);
     $this->backdropPost('admin/people', $edit, t('Refine'));
 
     // Check if the correct users show up when filtered by role.
@@ -1911,42 +1912,43 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   function testRoleAdministration() {
     $this->backdropLogin($this->admin_user);
 
-    // Test adding a role. (In doing so, we use a role name that happens to
-    // correspond to an integer, to test that the role administration pages
-    // correctly distinguish between role names and IDs.)
+    // Test adding a role.
     $role_name = '123';
-    $edit = array('name' => $role_name);
+    $edit = array('name' => $role_name, 'label' => $role_name);
     $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
     $this->assertText(t('The role has been added.'), 'The role has been added.');
-    $role = user_role_load_by_name($role_name);
-    $this->assertTrue(is_object($role), 'The role was successfully retrieved from the database.');
+    backdrop_static_reset('user_roles');
+    $role = user_role_load($role_name);
+    $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
 
     // Try adding a duplicate role.
     $this->backdropPost(NULL, $edit, t('Add role'));
-    $this->assertRaw(t('The role name %name already exists. Choose another role name.', array('%name' => $role_name)), 'Duplicate role warning displayed.');
+    $this->assertRaw(t('The machine-readable name is already in use. It must be unique.'), 'Duplicate role warning displayed.');
 
     // Test renaming a role.
-    $old_name = $role_name;
-    $role_name = '456';
-    $edit = array('name' => $role_name);
-    $this->backdropPost("admin/config/people/roles/edit/{$role->rid}", $edit, t('Save role'));
+    $old_label = $role->label;
+    $new_label = '456';
+    $edit = array('label' => $new_label);
+    $this->backdropPost("admin/config/people/roles/edit/$role_name", $edit, t('Save role'));
     $this->assertText(t('The role has been renamed.'), 'The role has been renamed.');
-    $this->assertFalse(user_role_load_by_name($old_name), 'The role can no longer be retrieved from the database using its old name.');
-    $this->assertTrue(is_object(user_role_load_by_name($role_name)), 'The role can be retrieved from the database using its new name.');
+    backdrop_static_reset('user_roles');
+    $role = user_role_load($role_name);
+    $this->assertFalse($role->label === $old_label, 'The role has had its label changed.');
+    $this->assertTrue($role->label === $new_label, 'The role has the new label.');
 
     // Test deleting a role.
-    $this->backdropPost("admin/config/people/roles/edit/{$role->rid}", NULL, t('Delete role'));
-    $this->backdropPost(NULL, NULL, t('Delete'));
+    $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
     $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
-    $this->assertNoLinkByHref("admin/config/people/roles/edit/{$role->rid}", 'Role edit link removed.');
-    $this->assertFalse(user_role_load_by_name($role_name), 'A deleted role can no longer be loaded.');
+    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
+    backdrop_static_reset('user_roles');
+    $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
 
-    // Make sure that the system-defined roles cannot be edited via the user
-    // interface.
+    // Make sure that the system-defined roles can still be edited, to adjust
+    // their labels.
     $this->backdropGet('admin/config/people/roles/edit/' . DRUPAL_ANONYMOUS_RID);
-    $this->assertResponse(403, 'Access denied when trying to edit the built-in anonymous role.');
+    $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
     $this->backdropGet('admin/config/people/roles/edit/' . DRUPAL_AUTHENTICATED_RID);
-    $this->assertResponse(403, 'Access denied when trying to edit the built-in authenticated role.');
+    $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
   }
 
   /**
@@ -1955,18 +1957,19 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   function testRoleWeightChange() {
     $this->backdropLogin($this->admin_user);
 
-    // Pick up a random role and get its weight.
-    $rid = array_rand(user_roles());
-    $role = user_role_load($rid);
+    // Pick up a role and get its weight.
+    $role_name = 'administrator';
+    $role = user_role_load($role_name);
     $old_weight = $role->weight;
 
     // Change the role weight and submit the form.
-    $edit = array('roles['. $rid .'][weight]' => $old_weight + 1);
+    $edit = array('roles['. $role_name .'][weight]' => $old_weight + 1);
     $this->backdropPost('admin/config/people/roles', $edit, t('Save order'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Retrieve the saved role and compare its weight.
-    $role = user_role_load($rid);
+    backdrop_static_reset('user_roles');
+    $role = user_role_load($role_name);
     $new_weight = $role->weight;
     $this->assertTrue(($old_weight + 1) == $new_weight, 'Role weight updated successfully.');
   }
@@ -2088,20 +2091,20 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * again.
    */
   function testAssignAndRemoveRole()  {
-    $rid = $this->backdropCreateRole(array('administer content types'));
+    $role_name = $this->backdropCreateRole(array('administer content types'));
     $account = $this->backdropCreateUser();
 
     // Assign the role to the user.
-    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => $rid), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => $role_name), t('Save'));
     $this->assertText(t('The changes have been saved.'));
-    $this->assertFieldChecked('edit-roles-' . $rid, 'Role is assigned.');
-    $this->userLoadAndCheckRoleAssigned($account, $rid);
+    $this->assertFieldChecked('edit-roles-' . strtolower($role_name), 'Role is assigned.');
+    $this->userLoadAndCheckRoleAssigned($account, $role_name);
 
     // Remove the role from the user.
-    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
-    $this->assertNoFieldChecked('edit-roles-' . $rid, 'Role is removed from user.');
-    $this->userLoadAndCheckRoleAssigned($account, $rid, FALSE);
+    $this->assertNoFieldChecked('edit-roles-' . strtolower($role_name), 'Role is removed from user.');
+    $this->userLoadAndCheckRoleAssigned($account, $role_name, FALSE);
   }
 
   /**
@@ -2109,14 +2112,14 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * be removed again.
    */
   function testCreateUserWithRole() {
-    $rid = $this->backdropCreateRole(array('administer content types'));
+    $role_name = $this->backdropCreateRole(array('administer content types'));
     // Create a new user and add the role at the same time.
     $edit = array(
       'name' => $this->randomName(),
       'mail' => $this->randomName() . '@example.com',
       'pass[pass1]' => $pass = $this->randomString(),
       'pass[pass2]' => $pass,
-      "roles[$rid]" => $rid,
+      "roles[$role_name]" => $role_name,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertText(t('Created a new user account for !name.', array('!name' => $edit['name'])));
@@ -2124,30 +2127,30 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
     $account = user_load_by_name($edit['name']);
 
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->assertFieldChecked('edit-roles-' . $rid, 'Role is assigned.');
-    $this->userLoadAndCheckRoleAssigned($account, $rid);
+    $this->assertFieldChecked('edit-roles-' . strtolower($role_name), 'Role is assigned.');
+    $this->userLoadAndCheckRoleAssigned($account, $role_name);
 
     // Remove the role again.
-    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$rid]" => FALSE), t('Save'));
+    $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
-    $this->assertNoFieldChecked('edit-roles-' . $rid, 'Role is removed from user.');
-    $this->userLoadAndCheckRoleAssigned($account, $rid, FALSE);
+    $this->assertNoFieldChecked('edit-roles-' . strtolower($role_name), 'Role is removed from user.');
+    $this->userLoadAndCheckRoleAssigned($account, $role_name, FALSE);
   }
 
   /**
    * Check role on user object.
    *
    * @param object $account User.
-   * @param integer $rid Role id.
+   * @param integer $role_name Role name.
    * @param bool $is_assigned True if the role should present on the account.
    */
-  private function userLoadAndCheckRoleAssigned($account, $rid, $is_assigned = TRUE) {
+  private function userLoadAndCheckRoleAssigned($account, $role_name, $is_assigned = TRUE) {
     $account = user_load($account->uid, TRUE);
     if ($is_assigned) {
-      $this->assertTrue(array_key_exists($rid, $account->roles), 'The role is present in the user object.');
+      $this->assertTrue(in_array($role_name, $account->roles), 'The role is present in the user object.');
     }
     else {
-      $this->assertFalse(array_key_exists($rid, $account->roles), 'The role is not present in the user object.');
+      $this->assertFalse(in_array($role_name, $account->roles), 'The role is not present in the user object.');
     }
   }
 }

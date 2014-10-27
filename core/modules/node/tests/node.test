@@ -877,9 +877,9 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
     // Clear permissions for authenticated users.
-    db_delete('role_permission')
-      ->condition('rid', BACKDROP_AUTHENTICATED_RID)
-      ->execute();
+    $role = user_role_load(BACKDROP_AUTHENTICATED_RID);
+    $role->permissions = array();
+    user_role_save($role);
   }
 
   /**

@@ -12,7 +12,7 @@ class AnonymousUser {
   public $uid = 0;
   public $name = NULL;
   public $hostname = NULL;
-  public $roles = array(BACKDROP_ANONYMOUS_RID => 'anonymous user');
+  public $roles = array(BACKDROP_ANONYMOUS_RID);
   public $cache = 0;
 
   /**

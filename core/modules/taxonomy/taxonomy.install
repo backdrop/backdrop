@@ -237,6 +237,19 @@ function taxonomy_field_schema($field) {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function taxonomy_update_dependencies() {
+  // Do not allow user module to convert user roles to configuration until after
+  // we have renamed our permissions in taxonomy_update_1001().
+  $dependencies['user'][1007] = array(
+    'taxonomy' => 1001,
+  );
+
+  return $dependencies;
+}
+
+/**
  * Remove the {taxonomy_vocabulary}.module field.
  */
 function taxonomy_update_1000() {

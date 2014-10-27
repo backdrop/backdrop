@@ -14,7 +14,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     parent::setUp('comment', 'search');
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer layouts'));
-    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments'));
+    $this->web_user = $this->backdropCreateUser(array('create article content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
 
@@ -805,9 +805,9 @@ class CommentInterfaceTest extends CommentHelperCase {
     config_set('system.core', 'user_register', $info['user_register']);
 
     // Change user permissions.
-    $rid = ($this->loggedInUser ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID);
+    $role_name = ($this->loggedInUser ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID);
     $perms = array_intersect_key($info, array('access comments' => 1, 'post comments' => 1, 'skip comment approval' => 1, 'edit own comments' => 1));
-    user_role_change_permissions($rid, $perms);
+    user_role_change_permissions($role_name, $perms);
 
     // Output verbose debugging information.
     // @see BackdropTestCase::error()

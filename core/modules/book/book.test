@@ -317,8 +317,8 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Give anonymous users the permission 'node test view'.
     $edit = array();
-    $edit['1[node test view]'] = TRUE;
-    $this->backdropPost('admin/config/people/permissions/1', $edit, t('Save permissions'));
+    $edit['anonymous[node test view]'] = TRUE;
+    $this->backdropPost('admin/config/people/permissions/anonymous', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), "Permission 'node test view' successfully assigned to anonymous users.");
 
     // Test correct display of the block.
@@ -357,8 +357,8 @@ class BookTestCase extends BackdropWebTestCase {
 
      // Give anonymous users the permission 'node test view'.
      $edit = array();
-     $edit['1[node test view]'] = TRUE;
-     $this->backdropPost('admin/config/people/permissions/1', $edit, t('Save permissions'));
+     $edit['anonymous[node test view]'] = TRUE;
+     $this->backdropPost('admin/config/people/permissions/anonymous', $edit, t('Save permissions'));
      $this->assertText(t('The changes have been saved.'), "Permission 'node test view' successfully assigned to anonymous users.");
 
      // Create a book.

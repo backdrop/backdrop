@@ -204,8 +204,9 @@ class TextFieldTestCase extends BackdropWebTestCase {
     $format = filter_format_load($edit['format']);
     $format_id = $format->format;
     $permission = filter_permission_name($format);
-    $rid = max(array_keys($this->web_user->roles));
-    user_role_grant_permissions($rid, array($permission));
+    $web_user_roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $web_user_role = reset($web_user_roles);
+    user_role_grant_permissions($web_user_role, array($permission));
     $this->backdropLogin($this->web_user);
 
     // Display edition form.

@@ -157,14 +157,14 @@ const BACKDROP_BOOTSTRAP_LANGUAGE = 6;
 const BACKDROP_BOOTSTRAP_FULL = 7;
 
 /**
- * Role ID for anonymous users; should match what's in the "role" table.
+ * Role ID for anonymous users.
  */
-const BACKDROP_ANONYMOUS_RID = 1;
+const BACKDROP_ANONYMOUS_RID = 'anonymous';
 
 /**
- * Role ID for authenticated users; should match what's in the "role" table.
+ * Role ID for authenticated users.
  */
-const BACKDROP_AUTHENTICATED_RID = 2;
+const BACKDROP_AUTHENTICATED_RID = 'authenticated';
 
 /**
  * The number of bytes in a kilobyte.

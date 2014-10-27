@@ -193,13 +193,12 @@ function user_admin_account() {
   $destination = backdrop_get_destination();
 
   $status = array(t('blocked'), t('active'));
-  $roles = array_map('check_plain', user_roles(TRUE));
-  $accounts = array();
+  $roles = user_roles(TRUE);
   foreach ($result as $account) {
     $users_roles = array();
     $roles_result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
     foreach ($roles_result as $user_role) {
-      $users_roles[] = $roles[$user_role->rid];
+      $users_roles[] = check_plain($roles[$user_role->rid]);
     }
     asort($users_roles);
 
@@ -706,21 +705,18 @@ function user_admin_settings_submit($form, &$form_state) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function user_admin_permissions($form, $form_state, $rid = NULL) {
+function user_admin_permissions($form, $form_state, $role_name = NULL) {
 
   // Retrieve role names for columns.
-  $role_names = user_roles();
-  if (is_numeric($rid)) {
-    $role_names = array($rid => $role_names[$rid]);
+  $roles = user_roles(FALSE, NULL, TRUE);
+  if (isset($roles[$role_name])) {
+    $roles = array($role_name => $roles[$role_name]);
   }
-  // Fetch permissions for all roles or the one selected role.
-  $role_permissions = user_role_permissions($role_names);
-
-  // Store $role_names for use when saving the data.
-  $form['role_names'] = array(
+  $form['roles'] = array(
     '#type' => 'value',
-    '#value' => $role_names,
+    '#value' => $roles,
   );
+
   // Render role/permission overview:
   $options = array();
   $module_info = system_get_info('module');
@@ -752,10 +748,10 @@ function user_admin_permissions($form, $form_state, $rid = NULL) {
           '#markup' => $perm_item['title'],
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
-        foreach ($role_names as $rid => $name) {
+        foreach ($roles as $role_name => $role) {
           // Builds arrays for checked boxes for each role
-          if (isset($role_permissions[$rid][$perm])) {
-            $status[$rid][] = $perm;
+          if (in_array($perm, $role->permissions)) {
+            $status[$role_name][] = $perm;
           }
         }
       }
@@ -763,14 +759,17 @@ function user_admin_permissions($form, $form_state, $rid = NULL) {
   }
 
   // Have to build checkboxes here after checkbox arrays are built
-  foreach ($role_names as $rid => $name) {
-    $form['checkboxes'][$rid] = array(
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#default_value' => isset($status[$rid]) ? $status[$rid] : array(),
-      '#attributes' => array('class' => array('rid-' . $rid)),
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
     );
-    $form['role_names'][$rid] = array('#markup' => check_plain($name), '#tree' => TRUE);
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
   }
 
   $form['actions'] = array('#type' => 'actions');
@@ -787,8 +786,8 @@ function user_admin_permissions($form, $form_state, $rid = NULL) {
  * @see user_admin_permissions()
  */
 function user_admin_permissions_submit($form, &$form_state) {
-  foreach ($form_state['values']['role_names'] as $rid => $name) {
-    user_role_change_permissions($rid, $form_state['values'][$rid]);
+  foreach ($form_state['values']['roles'] as $role_name => $role) {
+    user_role_change_permissions($role->name, $form_state['values'][$role->name]);
   }
 
   backdrop_set_message(t('The changes have been saved.'));
@@ -814,7 +813,7 @@ function theme_user_admin_permissions($variables) {
     $row = array();
     // Module name
     if (is_numeric($key)) {
-      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['role_names']['#value']) + 1);
+      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['roles']['#value']) + 1);
     }
     else {
       // Permission row.
@@ -824,7 +823,7 @@ function theme_user_admin_permissions($variables) {
       );
       foreach (element_children($form['checkboxes']) as $rid) {
         $form['checkboxes'][$rid][$key]['#title'] = $roles[$rid] . ': ' . $form['permission'][$key]['#markup'];
-        $form['checkboxes'][$rid][$key]['#title_display'] = 'invisible';
+        $form['checkboxes'][$rid][$key]['#title_display'] = 'attribute';
         $row[] = array('data' => backdrop_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'));
       }
     }
@@ -874,64 +873,79 @@ function theme_user_permission_description($variables) {
  * @see theme_user_admin_roles()
  */
 function user_admin_roles($form, $form_state) {
-  $roles = user_roles();
+  $roles = user_roles(FALSE, NULL, TRUE);
 
   $form['roles'] = array(
     '#tree' => TRUE,
   );
   $order = 0;
-  foreach ($roles as $rid => $name) {
-    $form['roles'][$rid]['#role'] = (object) array(
-      'rid' => $rid,
-      'name' => $name,
-      'weight' => $order,
-    );
-    $form['roles'][$rid]['#weight'] = $order;
-    $form['roles'][$rid]['weight'] = array(
+  foreach ($roles as $role_name => $role) {
+    $form['roles'][$role_name]['#role'] = $role;
+    $form['roles'][$role_name]['#weight'] = $order;
+    $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
-      '#title' => t('Weight for @title', array('@title' => $name)),
+      '#title' => t('Weight for @title', array('@title' => check_plain($role->label))),
       '#title_display' => 'invisible',
       '#size' => 4,
       '#default_value' => $order,
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
-    if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
-      $links['edit'] = array(
-        'title' => t('Edit role'),
-        'href' => 'admin/config/people/roles/edit/' . $rid,
+    $links['edit'] = array(
+      'title' => t('Edit role'),
+      'href' => 'admin/config/people/roles/edit/' . $role_name,
+      'weight' => 0,
+    );
+    $links['permissions'] = array(
+      'title' => t('Edit permissions'),
+      'href' => 'admin/config/people/permissions/' . $role_name,
+      'weight' => 5,
+    );
+    if ($role_name !== BACKDROP_ANONYMOUS_RID && $role_name !== BACKDROP_AUTHENTICATED_RID) {
+      $links['delete'] = array(
+        'title' => t('Delete role'),
+        'href' => 'admin/config/people/roles/delete/' . $role_name,
         'weight' => 0,
       );
     }
-    $links['permissions'] = array(
-      'title' => t('Edit permissions'),
-      'href' => 'admin/config/people/permissions/' . $rid,
-      'weight' => 5,
-    );
-    $form['roles'][$rid]['operations'] = array(
+    $form['roles'][$role_name]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
     );
     $order++;
   }
 
-  $form['name'] = array(
+  $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name'),
+    '#title' => t('Add new role'),
     '#title_display' => 'invisible',
+    '#required' => TRUE,
     '#size' => 32,
     '#maxlength' => 64,
+  );
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#required' => TRUE,
+    '#size' => 32,
+    '#maxlength' => 64,
+    '#machine_name' => array(
+      'source' => array('label'),
+      'exists' => 'user_role_load',
+      'standalone' => TRUE,
+      'label' => '',
+    ),
+    '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
   $form['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add role'),
-    '#validate' => array('user_admin_role_validate'),
-    '#submit' => array('user_admin_role_submit'),
+    '#submit' => array('user_admin_roles_add_submit'),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save order'),
+    '#limit_validation_errors' => array(array('roles')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -951,6 +965,19 @@ function user_admin_roles_order_submit($form, &$form_state) {
 }
 
 /**
+ * Form submit function. Create a new user role.
+ */
+function user_admin_roles_add_submit($form, &$form_state) {
+  $role = (object) array(
+    'name' => $form_state['values']['name'],
+    'label' => $form_state['values']['label'],
+  );
+  user_role_save($role);
+  backdrop_set_message(t('The role has been added.'));
+  $form_state['redirect'] = 'admin/config/people/roles';
+}
+
+/**
  * Returns HTML for the role order and new role form.
  *
  * @param $variables
@@ -964,19 +991,23 @@ function theme_user_admin_roles($variables) {
 
   $header = array(t('Name'), t('Weight'), t('Operations'));
   foreach (element_children($form['roles']) as $rid) {
-    $name = $form['roles'][$rid]['#role']->name;
+    $label = $form['roles'][$rid]['#role']->label;
     $row = array();
     if (in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
-      $row[] = t('@name <em>(locked)</em>', array('@name' => $name));
+      $row[] = t('@name <em>(required)</em>', array('@name' => $label));
     }
     else {
-      $row[] = check_plain($name);
+      $row[] = check_plain($label);
     }
     $row[] = backdrop_render($form['roles'][$rid]['weight']);
     $row[] = backdrop_render($form['roles'][$rid]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
-  $rows[] = array(array('data' => backdrop_render($form['name']) . backdrop_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));
+  $row = array();
+  $row[] = array('data' => backdrop_render($form['label']) . backdrop_render($form['name']), 'class' => 'edit-name');
+  $row[] = '';
+  $row[] = backdrop_render($form['add']);
+  $rows[] = $row;
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
@@ -990,27 +1021,30 @@ function theme_user_admin_roles($variables) {
  * Form to configure a single role.
  *
  * @ingroup forms
- * @see user_admin_role_validate()
  * @see user_admin_role_submit()
  */
 function user_admin_role($form, $form_state, $role) {
-  if ($role->rid == BACKDROP_ANONYMOUS_RID || $role->rid == BACKDROP_AUTHENTICATED_RID) {
-    backdrop_goto('admin/people/permissions/roles');
-  }
+  $form_state['role'] = $role;
 
-  // Display the edit role form.
-  $form['name'] = array(
+  $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Role name'),
-    '#default_value' => $role->name,
+    '#default_value' => $role->label,
     '#size' => 30,
     '#required' => TRUE,
     '#maxlength' => 64,
     '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
   );
-  $form['rid'] = array(
-    '#type' => 'value',
-    '#value' => $role->rid,
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#size' => 32,
+    '#maxlength' => 64,
+    '#default_value' => $role->name,
+    '#disabled' => TRUE,
+    '#machine_name' => array(
+      'exists' => 'user_role_load',
+    ),
+    '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
   $form['weight'] = array(
     '#type' => 'value',
@@ -1021,77 +1055,37 @@ function user_admin_role($form, $form_state, $role) {
     '#type' => 'submit',
     '#value' => t('Save role'),
   );
-  $form['actions']['delete'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete role'),
-    '#submit' => array('user_admin_role_delete_submit'),
-  );
 
   return $form;
-}
-
-/**
- * Form validation handler for the user_admin_role() form.
- */
-function user_admin_role_validate($form, &$form_state) {
-  if (!empty($form_state['values']['name'])) {
-    if ($form_state['values']['op'] == t('Save role')) {
-      $role = user_role_load_by_name($form_state['values']['name']);
-      if ($role && $role->rid != $form_state['values']['rid']) {
-        form_set_error('name', t('The role name %name already exists. Choose another role name.', array('%name' => $form_state['values']['name'])));
-      }
-    }
-    elseif ($form_state['values']['op'] == t('Add role')) {
-      if (user_role_load_by_name($form_state['values']['name'])) {
-        form_set_error('name', t('The role name %name already exists. Choose another role name.', array('%name' => $form_state['values']['name'])));
-      }
-    }
-  }
-  else {
-    form_set_error('name', t('You must specify a valid role name.'));
-  }
 }
 
 /**
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
-  $role = (object) $form_state['values'];
-  if ($form_state['values']['op'] == t('Save role')) {
-    user_role_save($role);
-    backdrop_set_message(t('The role has been renamed.'));
-  }
-  elseif ($form_state['values']['op'] == t('Add role')) {
-    user_role_save($role);
-    backdrop_set_message(t('The role has been added.'));
-  }
+  $role = $form_state['role'];
+  $role->label = $form_state['values']['label'];
+  user_role_save($role);
+  backdrop_set_message(t('The role has been renamed.'));
   $form_state['redirect'] = 'admin/config/people/roles';
-  return;
-}
-
-/**
- * Form submit handler for the user_admin_role() form.
- */
-function user_admin_role_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/people/roles/delete/' . $form_state['values']['rid'];
 }
 
 /**
  * Form to confirm role delete operation.
  */
 function user_admin_role_delete_confirm($form, &$form_state, $role) {
-  $form['rid'] = array(
+  $form['role_name'] = array(
     '#type' => 'value',
-    '#value' => $role->rid,
+    '#value' => $role->name,
   );
-  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->name)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->label)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
 }
 
 /**
  * Form submit handler for user_admin_role_delete_confirm().
  */
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
-  user_role_delete((int) $form_state['values']['rid']);
+  user_role_delete($form_state['values']['role_name']);
   backdrop_set_message(t('The role has been deleted.'));
   $form_state['redirect'] = 'admin/config/people/roles';
 }

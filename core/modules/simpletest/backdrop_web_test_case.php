@@ -1195,10 +1195,10 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function backdropCreateUser(array $permissions = array()) {
     // Create a role with the given permission set, if any.
-    $rid = FALSE;
+    $role_name = FALSE;
     if ($permissions) {
-      $rid = $this->backdropCreateRole($permissions);
-      if (!$rid) {
+      $role_name = $this->backdropCreateRole($permissions);
+      if (!$role_name) {
         return FALSE;
       }
     }
@@ -1209,8 +1209,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     $edit['mail']   = $edit['name'] . '@example.com';
     $edit['pass']   = user_password();
     $edit['status'] = 1;
-    if ($rid) {
-      $edit['roles'] = array($rid => $rid);
+    if ($role_name) {
+      $edit['roles'] = array($role_name);
     }
 
     $account = entity_create('user', $edit);
@@ -1234,7 +1234,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $name
    *   (optional) String for the name of the role.  Defaults to a random string.
    * @return
-   *   Role ID of newly created role, or FALSE if role creation failed.
+   *   Role name of newly created role, or FALSE if role creation failed.
    */
   protected function backdropCreateRole(array $permissions, $name = NULL) {
     // Generate random name if it was not passed.
@@ -1250,14 +1250,14 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Create new role.
     $role = new stdClass();
     $role->name = $name;
+    $role->label = $name;
     user_role_save($role);
-    user_role_grant_permissions($role->rid, $permissions);
-
-    $this->assertTrue(isset($role->rid), t('Created role of name: @name, id: @rid', array('@name' => $name, '@rid' => (isset($role->rid) ? $role->rid : t('-n/a-')))), t('Role'));
-    if ($role && !empty($role->rid)) {
-      $count = db_query('SELECT COUNT(*) FROM {role_permission} WHERE rid = :rid', array(':rid' => $role->rid))->fetchField();
-      $this->assertTrue($count == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
-      return $role->rid;
+    user_role_grant_permissions($role->name, $permissions);
+    $role = user_role_load($role->name);
+    $this->assertTrue(isset($role->name), t('Created role of name: @name', array('@name' => $name)), t('Role'));
+    if ($role && !empty($role->name)) {
+      $this->assertTrue(count($role->permissions) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+      return $role->name;
     }
     else {
       return FALSE;
@@ -1649,6 +1649,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     cache('bootstrap')->delete('variables');
     $conf = variable_initialize();
     backdrop_static_reset('states');
+    backdrop_static_reset('config');
   }
 
   /**

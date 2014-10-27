@@ -270,13 +270,18 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
    * Tests the hook_modules_uninstalled() of the user module.
    */
   function testUserPermsUninstalled() {
+    // Grant the test permission to the authenticate user role.
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_RID, array('module_test perm'));
+    $role = user_role_load(BACKDROP_AUTHENTICATED_RID);
+    $this->assertTrue(in_array('module_test perm', $role->permissions), 'Test module permission enabled.');
+
     // Uninstalls the module_test module, so hook_modules_uninstalled()
     // is executed.
     module_disable(array('module_test'));
     backdrop_uninstall_modules(array('module_test'));
 
-    // Are the perms defined by module_test removed from {role_permission}.
-    $count = db_query("SELECT COUNT(rid) FROM {role_permission} WHERE permission = :perm", array(':perm' => 'module_test perm'))->fetchField();
-    $this->assertEqual(0, $count, 'Permissions were all removed.');
+    // Check the perms defined by module_test are removed from the role.
+    $role = user_role_load(BACKDROP_AUTHENTICATED_RID);
+    $this->assertFalse(in_array('module_test perm', $role->permissions), 'Test module permission removed upon uninstall.');
   }
 }

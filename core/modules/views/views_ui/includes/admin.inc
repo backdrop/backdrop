@@ -4888,22 +4888,6 @@ function views_ui_config_style_form_submit($form, &$form_state) {
 }
 
 /**
- * Get a list of roles in the system.
- */
-function views_ui_get_roles() {
-  static $roles = NULL;
-  if (!isset($roles)) {
-    $roles = array();
-    $result = db_query("SELECT r.rid, r.name FROM {role} r ORDER BY r.name");
-    foreach ($result as $obj) {
-      $roles[$obj->rid] = $obj->name;
-    }
-  }
-
-  return $roles;
-}
-
-/**
  * Form builder for the admin display defaults page.
  */
 function views_ui_admin_settings_basic() {

@@ -53,16 +53,4 @@ class views_handler_field_user_permissions extends views_handler_field_prerender
   function render_item($count, $item) {
     return $item['permission'];
   }
-
-  /*
-  function document_self_tokens(&$tokens) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = t('The name of the role.');
-    $tokens['[' . $this->options['id'] . '-rid' . ']'] = t('The role ID of the role.');
-  }
-
-  function add_self_tokens(&$tokens, $item) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = $item['role'];
-    $tokens['[' . $this->options['id'] . '-rid' . ']'] = $item['rid'];
-  }
-  */
 }

@@ -2307,10 +2307,19 @@ function system_update_1025() {
         $role_result = db_query("SELECT * FROM {block_role} WHERE module = :module AND delta = :delta", array(':module' => $block_row->module, ':delta' => $block_row->delta));
         $roles = array();
         foreach ($role_result as $role_row) {
-          $roles[] = $role_row->rid;
+          switch ($role_row->rid) {
+            case 1:
+              $roles[] = 'anonymous';
+              break;
+            case 2:
+              $roles[] = 'authenticated';
+              break;
+            default:
+              $roles[] = $role_row->rid;
+          }
         }
         if ($roles) {
-          $settings = array('rids' => $roles);
+          $settings = array('roles' => $roles);
           $access_config = array(
             'plugin' => 'user_role',
             'data' => array(

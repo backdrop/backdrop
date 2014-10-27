@@ -26,10 +26,11 @@
  */
 function config($config_file, $type = 'active') {
   // Use the advanced backdrop_static() pattern, since this is called very often.
-  static $loaded_configs;
-  if (!isset($loaded_configs)) {
-    $loaded_configs = &backdrop_static(__FUNCTION__, array());
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['loaded_configs'] = &backdrop_static(__FUNCTION__);
   }
+  $loaded_configs = &$backdrop_static_fast['loaded_configs'];
 
   if (!isset($loaded_configs[$type][$config_file])) {
     $directory = config_get_config_directory($type);
@@ -602,10 +603,11 @@ class Config {
     $this->isNew = FALSE;
 
     // Empty static caches of this config file.
-    $static = &backdrop_static('config', array());
-    foreach ($static as $type => $configs) {
-      if (array_key_exists($this->name, $configs)) {
-        unset($static[$type][$this->name]);
+    if ($static = &backdrop_static('config')) {
+      foreach ($static as $type => $configs) {
+        if (array_key_exists($this->name, $configs)) {
+          unset($static[$type][$this->name]);
+        }
       }
     }
 
