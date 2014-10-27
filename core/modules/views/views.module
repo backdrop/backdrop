@@ -2247,3 +2247,19 @@ function views_autoload_info() {
     'ViewsSqlTest' => 'tests/views_query.inc',
   );
 }
+/**
+ * Implements hook_config_info().
+ */
+function views_config_info() {
+  $prefixes['views.settings'] = array(
+    'label' => t('View Settings'),
+    'group' => t('Views'),
+  );
+
+  $prefixes['views.view'] = array(
+    'name_key' => 'name',
+    'label_key' => 'human_name',
+    'group' => t('Views'),
+  );
+  return $prefixes;
+}
