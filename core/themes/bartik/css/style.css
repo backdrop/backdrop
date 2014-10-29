@@ -676,6 +676,9 @@ article .link-wrapper {
 .user-picture img {
   margin: 0 0 1em;
 }
+.field-type-image .floated-image img {
+  margin: 0;
+}
 article .link-wrapper ul.links {
   color: #68696b;
   font-size: 0.821em;
