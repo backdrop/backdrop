@@ -39,6 +39,11 @@ function taxonomy_permission() {
   );
   foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
     $permissions += array(
+      'add terms in ' . $vocabulary->vid => array(
+        'title' => t('Add terms in %vocabulary', array('%vocabulary' => $vocabulary->name)),
+      ),
+    );
+    $permissions += array(
       'edit terms in ' . $vocabulary->vid => array(
         'title' => t('Edit terms in %vocabulary', array('%vocabulary' => $vocabulary->name)),
       ),
@@ -230,7 +235,7 @@ function taxonomy_menu() {
     'description' => 'Manage tagging, categorization, and classification of your content.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_vocabularies'),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_overview_access',
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
@@ -305,7 +310,8 @@ function taxonomy_menu() {
     'title arguments' => array('taxonomy_vocabulary', 3),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_terms', 3),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_access',
+    'access arguments' => array(FALSE, 3),
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/list'] = array(
@@ -327,7 +333,8 @@ function taxonomy_menu() {
     'title' => 'Add term',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_term', NULL, 3),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_access',
+    'access arguments' => array('add', 3),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'taxonomy.admin.inc',
   );
@@ -344,6 +351,83 @@ function taxonomy_admin_paths() {
     'taxonomy/term/*/delete' => TRUE,
   );
   return $paths;
+}
+
+/**
+ * Access callback: Checks if a user has permission to view the vocabulary
+ * overview page. This is anone who can add/edit/delete terms in any existing
+ * vocabulary.
+ *
+ * @return
+ *   TRUE if the user has access, FALSE otherwise.
+ *
+ * @see taxonomy_menu()
+ */
+function taxonomy_vocabulary_overview_access() {
+  // Users with the 'administer taxonomy' permission always have access.
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+
+  // Check access for each add/edit/delete operation for terms in all
+  // vocabularies and return TRUE if any of them are allowed.
+  $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
+  $operations = array('add', 'edit', 'delete');
+  foreach ($vocabularies as $vocabulary) {
+    foreach ($operations as $operation) {
+      if (user_access("$operation terms in $vocabulary->vid")) {
+        return TRUE;
+      }
+    }
+  }
+
+  // Deny access if the user doesn't have any permissions for any vocabularies.
+  return FALSE;
+}
+
+/**
+ * Access callback: Checks a user's permission for performing operations on
+ * taxonomy terms in a vocabulary.
+ *
+ * @param $op
+ *   The operation to be performed on taxonomy terms in the vocabulary, or FALSE
+ *   to check access for any operation.
+ * @param $vocabulary
+ *   The $vocabulary object that contains the terms on which the operation is to
+ *   be performed.
+ *
+ * @return
+ *   TRUE if the user has access, FALSE otherwise.
+ *
+ * @see taxonomy_menu()
+ */
+function taxonomy_vocabulary_access($op, $vocabulary) {
+  // Deny access if there is no vocabulary to check against.
+  if (!$vocabulary) {
+    return FALSE;
+  }
+
+  // Users with the 'administer taxonomy' permission always have access.
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+
+  if ($op !== FALSE) {
+    return user_access("$op terms in $vocabulary->vid");
+  }
+  else {
+    // Check access for each add/edit/delete operation for terms in the
+    // vocabulary and return TRUE if any of them are allowed.
+    $operations = array('add', 'edit', 'delete');
+    foreach ($operations as $operation) {
+      if (user_access("$operation terms in $vocabulary->vid")) {
+        return TRUE;
+      }
+    }
+
+    // Deny access if the user doesn't have any permissions for the vocabulary.
+    return FALSE;
+  }
 }
 
 /**
