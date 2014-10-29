@@ -15,13 +15,10 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
    */
   function createVocabulary() {
     // Create a vocabulary.
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
+    $vocabulary = new TaxonomyVocabulary(array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'langcode' => LANGUAGE_NONE,
-      'help' => '',
-      'nodes' => array('article' => 'article'),
       'weight' => mt_rand(0, 10),
     ));
     taxonomy_vocabulary_save($vocabulary);
@@ -37,7 +34,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
       'description' => $this->randomName(),
       // Use the first available text format.
       'format' => db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
-      'vid' => $vocabulary->vid,
+      'vocabulary' => $vocabulary->machine_name,
       'langcode' => LANGUAGE_NONE,
     ));
     taxonomy_term_save($term);
@@ -119,19 +116,18 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
     $edit = array();
     foreach ($vocabularies as $key => $vocabulary) {
-      $vocabulary->weight = -$vocabulary->weight;
-      $vocabularies[$key]->weight = $vocabulary->weight;
-      $edit[$key . '[weight]'] = $vocabulary->weight;
+      $edit[$key . '[weight]'] = -$vocabulary->weight;
     }
     // Saving the new weights via the interface.
     $this->backdropPost('admin/structure/taxonomy', $edit, t('Save'));
 
     // Load the vocabularies from the database.
+    backdrop_static_reset('taxonomy_vocabulary_load_multiple');
     $new_vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
 
     // Check that the weights are saved in the database correctly.
     foreach ($vocabularies as $key => $vocabulary) {
-      $this->assertEqual($new_vocabularies[$key]->weight, $vocabularies[$key]->weight, 'The vocabulary weight was changed.');
+      $this->assertEqual($new_vocabularies[$key]->weight, $edit[$key . '[weight]'], 'The vocabulary weight was changed.');
     }
   }
 
@@ -156,31 +152,24 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
    */
   function testTaxonomyAdminDeletingVocabulary() {
     // Create a vocabulary.
+    $vocabulary_name = backdrop_strtolower($this->randomName());
     $edit = array(
       'name' => $this->randomName(),
-      'machine_name' => backdrop_strtolower($this->randomName()),
+      'machine_name' => $vocabulary_name,
     );
     $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
     $this->assertText(t('Created new vocabulary'), 'New vocabulary was created.');
 
     // Check the created vocabulary.
-    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $vid = $vocabularies[count($vocabularies) - 1]->vid;
-    entity_get_controller('taxonomy_vocabulary')->resetCache();
-    $vocabulary = taxonomy_vocabulary_load($vid);
+    backdrop_static_reset('taxonomy_vocabulary_load_multiple');
+    $vocabulary = taxonomy_vocabulary_load($vocabulary_name);
     $this->assertTrue($vocabulary, 'Vocabulary found in database.');
 
     // Delete the vocabulary.
-    $edit = array();
-    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit', $edit, t('Delete'));
-    $this->assertRaw(t('Are you sure you want to delete the vocabulary %name?', array('%name' => $vocabulary->name)), '[confirm deletion] Asks for confirmation.');
-    $this->assertText(t('Deleting a vocabulary will delete all the terms in it. This action cannot be undone.'), '[confirm deletion] Inform that all terms will be deleted.');
-
-    // Confirm deletion.
-    $this->backdropPost(NULL, NULL, t('Delete'));
+    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/delete', NULL, t('Delete'));
     $this->assertRaw(t('Deleted vocabulary %name.', array('%name' => $vocabulary->name)), 'Vocabulary deleted.');
-    entity_get_controller('taxonomy_vocabulary')->resetCache();
-    $this->assertFalse(taxonomy_vocabulary_load($vid), 'Vocabulary is not found in the database.');
+    backdrop_static_reset('taxonomy_vocabulary_load_multiple');
+    $this->assertFalse(taxonomy_vocabulary_load($vocabulary_name), 'Vocabulary is not found in config.');
   }
 }
 
@@ -197,33 +186,12 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   }
 
   /**
-   * Ensure that when an invalid vocabulary vid is loaded, it is possible
-   * to load the same vid successfully if it subsequently becomes valid.
-   */
-  function testTaxonomyVocabularyLoadReturnFalse() {
-    // Load a vocabulary that doesn't exist.
-    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $vid = count($vocabularies) + 1;
-    $vocabulary = taxonomy_vocabulary_load($vid);
-    // This should not return an object because no such vocabulary exists.
-    $this->assertTrue(empty($vocabulary), 'No object loaded.');
-
-    // Create a new vocabulary.
-    $this->createVocabulary();
-    // Load the vocabulary with the same $vid from earlier.
-    // This should return a vocabulary object since it now matches a real vid.
-    $vocabulary = taxonomy_vocabulary_load($vid);
-    $this->assertTrue(!empty($vocabulary) && is_object($vocabulary), 'Vocabulary is an object.');
-    $this->assertEqual($vocabulary->vid, $vid, 'Valid vocabulary vid is the same as our previously invalid one.');
-  }
-
-  /**
    * Test deleting a taxonomy that contains terms.
    */
   function testTaxonomyVocabularyDeleteWithTerms() {
     // Delete any existing vocabularies.
     foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
-      taxonomy_vocabulary_delete($vocabulary->vid);
+      taxonomy_vocabulary_delete($vocabulary->machine_name);
     }
 
     // Assert that there are no terms left.
@@ -245,7 +213,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     // Assert that there are now 5 terms.
     $this->assertEqual(5, db_query('SELECT COUNT(*) FROM {taxonomy_term_data}')->fetchField());
 
-    taxonomy_vocabulary_delete($vocabulary->vid);
+    taxonomy_vocabulary_delete($vocabulary->machine_name);
 
     // Assert that there are no terms left.
     $this->assertEqual(0, db_query('SELECT COUNT(*) FROM {taxonomy_term_data}')->fetchField());
@@ -255,7 +223,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
    * Ensure that the vocabulary static reset works correctly.
    */
   function testTaxonomyVocabularyLoadStaticReset() {
-    $original_vocabulary = taxonomy_vocabulary_load($this->vocabulary->vid);
+    $original_vocabulary = taxonomy_vocabulary_load($this->vocabulary->machine_name);
     $this->assertTrue(is_object($original_vocabulary), 'Vocabulary loaded successfully.');
     $this->assertEqual($this->vocabulary->name, $original_vocabulary->name, 'Vocabulary loaded successfully.');
 
@@ -266,14 +234,14 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     taxonomy_vocabulary_save($vocabulary);
 
     // Load the vocabulary.
-    $new_vocabulary = taxonomy_vocabulary_load($original_vocabulary->vid);
+    $new_vocabulary = taxonomy_vocabulary_load($original_vocabulary->machine_name);
     $this->assertEqual($new_vocabulary->name, $vocabulary->name);
     $this->assertEqual($new_vocabulary->name, $vocabulary->name);
 
     // Delete the vocabulary.
-    taxonomy_vocabulary_delete($this->vocabulary->vid);
+    taxonomy_vocabulary_delete($this->vocabulary->machine_name);
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $this->assertTrue(!isset($vocabularies[$this->vocabulary->vid]), 'The vocabulary was deleted.');
+    $this->assertTrue(!isset($vocabularies[$this->vocabulary->machine_name]), 'The vocabulary was deleted.');
   }
 
   /**
@@ -283,7 +251,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
 
     // Delete any existing vocabularies.
     foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
-      taxonomy_vocabulary_delete($vocabulary->vid);
+      taxonomy_vocabulary_delete($vocabulary->machine_name);
     }
 
     // Create some vocabularies and assign weights.
@@ -299,59 +267,14 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
 
     // Fetch the names for all vocabularies, confirm that they are keyed by
     // machine name.
-    $names = taxonomy_vocabulary_get_names();
-    $this->assertEqual($names[$vocabulary1->machine_name]->name, $vocabulary1->name, 'Vocabulary 1 name found.');
+    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
+    $this->assertEqual($vocabularies[$vocabulary1->machine_name]->name, $vocabulary1->name, 'Vocabulary 1 name found.');
 
     // Fetch all of the vocabularies using taxonomy_vocabulary_load_multiple(FALSE).
     // Confirm that the vocabularies are ordered by weight.
-    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary1->vid, 'Vocabulary was found in the vocabularies array.');
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary2->vid, 'Vocabulary was found in the vocabularies array.');
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary3->vid, 'Vocabulary was found in the vocabularies array.');
-
-    // Fetch the vocabularies with taxonomy_vocabulary_load_multiple(), specifying IDs.
-    // Ensure they are returned in the same order as the original array.
-    $vocabularies = taxonomy_vocabulary_load_multiple(array($vocabulary3->vid, $vocabulary2->vid, $vocabulary1->vid));
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary3->vid, 'Vocabulary loaded successfully by ID.');
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary2->vid, 'Vocabulary loaded successfully by ID.');
-    $this->assertEqual(array_shift($vocabularies)->vid, $vocabulary1->vid, 'Vocabulary loaded successfully by ID.');
-
-    // Fetch vocabulary 1 by name.
-    $vocabulary = current(taxonomy_vocabulary_load_multiple(array(), array('name' => $vocabulary1->name)));
-    $this->assertEqual($vocabulary->vid, $vocabulary1->vid, 'Vocabulary loaded successfully by name.');
-
-    // Fetch vocabulary 1 by name and ID.
-    $this->assertEqual(current(taxonomy_vocabulary_load_multiple(array($vocabulary1->vid), array('name' => $vocabulary1->name)))->vid, $vocabulary1->vid, 'Vocabulary loaded successfully by name and ID.');
-  }
-
-  /**
-   * Tests that machine name changes are properly reflected.
-   */
-  function testTaxonomyVocabularyChangeMachineName() {
-    // Add a field instance to the vocabulary.
-    $field = array(
-      'field_name' => 'field_test',
-      'type' => 'test_field',
-    );
-    field_create_field($field);
-    $instance = array(
-      'field_name' => 'field_test',
-      'entity_type' => 'taxonomy_term',
-      'bundle' => $this->vocabulary->machine_name,
-    );
-    field_create_instance($instance);
-
-    // Change the machine name.
-    $old_name = $this->vocabulary->machine_name;
-    $new_name = backdrop_strtolower($this->randomName());
-    $this->vocabulary->machine_name = $new_name;
-    taxonomy_vocabulary_save($this->vocabulary);
-
-    // Check that entity bundles are properly updated.
-    $info = entity_get_info('taxonomy_term');
-    $this->assertFalse(isset($info['bundles'][$old_name]), 'The old bundle name does not appear in entity_get_info().');
-    $this->assertTrue(isset($info['bundles'][$new_name]), 'The new bundle name appears in entity_get_info().');
-    $this->assertTrue(field_info_instance('taxonomy_term', 'field_test', $new_name), 'The bundle name was updated correctly.');
+    $this->assertEqual(array_shift($vocabularies)->machine_name, $vocabulary1->machine_name, 'Vocabulary was found in the vocabularies array.');
+    $this->assertEqual(array_shift($vocabularies)->machine_name, $vocabulary2->machine_name, 'Vocabulary was found in the vocabularies array.');
+    $this->assertEqual(array_shift($vocabularies)->machine_name, $vocabulary3->machine_name, 'Vocabulary was found in the vocabularies array.');
   }
 
   /**
@@ -380,7 +303,6 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     // connected to this vocabulary name should have been removed when the
     // module was uninstalled. Creating a new field with the same name and
     // an instance of this field on the same bundle name should be successful.
-    unset($this->vocabulary->vid);
     taxonomy_vocabulary_save($this->vocabulary);
     unset($this->field['id']);
     field_create_field($this->field);
@@ -398,7 +320,7 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
     $valid_term = $this->createTerm($vocabulary);
     // Delete a valid term.
     taxonomy_term_delete($valid_term->tid);
-    $terms = taxonomy_term_load_multiple(array(), array('vid' => $vocabulary->vid));
+    $terms = taxonomy_term_load_multiple(array(), array('vocabulary' => $vocabulary->machine_name));
     $this->assertTrue(empty($terms), 'Vocabulary is empty after deletion.');
 
     // Delete an invalid term. Should not throw any notices.
@@ -438,11 +360,11 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
      * ------ term[3] | depth: 3
      */
     // Count $term[1] parents with $max_depth = 1.
-    $tree = taxonomy_get_tree($vocabulary->vid, $term[1]->tid, 1);
+    $tree = taxonomy_get_tree($vocabulary->machine_name, $term[1]->tid, 1);
     $this->assertEqual(1, count($tree), 'We have one parent with depth 1.');
 
     // Count all vocabulary tree elements.
-    $tree = taxonomy_get_tree($vocabulary->vid);
+    $tree = taxonomy_get_tree($vocabulary->machine_name);
     $this->assertEqual(8, count($tree), 'We have all vocabulary tree elements.');
 
     // Count elements in every tree depth.
@@ -539,7 +461,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $term2 = $this->createTerm($this->vocabulary);
 
     // Check that hierarchy is flat.
-    $vocabulary = taxonomy_vocabulary_load($this->vocabulary->vid);
+    $vocabulary = taxonomy_vocabulary_load($this->vocabulary->machine_name);
     $this->assertEqual(0, $vocabulary->hierarchy, 'Vocabulary is flat.');
 
     // Edit $term2, setting $term1 as parent.
@@ -633,7 +555,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     foreach ($terms as $term) {
       $this->assertText($term, 'The term appears on the node preview.');
     }
-    $tree = taxonomy_get_tree($this->vocabulary->vid);
+    $tree = taxonomy_get_tree($this->vocabulary->machine_name);
     $this->assertTrue(empty($tree), 'The terms are not created on preview.');
 
     // taxonomy.module does not maintain its static caches.
@@ -790,7 +712,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     backdrop_static_reset('taxonomy_get_tree');
     backdrop_static_reset('taxonomy_get_treeparent');
     backdrop_static_reset('taxonomy_get_treeterms');
-    list($term1, $term2, $term3) = taxonomy_get_tree($this->vocabulary->vid);
+    list($term1, $term2, $term3) = taxonomy_get_tree($this->vocabulary->machine_name);
 
     $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
 
@@ -817,7 +739,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     backdrop_static_reset('taxonomy_get_tree');
     backdrop_static_reset('taxonomy_get_treeparent');
     backdrop_static_reset('taxonomy_get_treeterms');
-    $terms = taxonomy_get_tree($this->vocabulary->vid);
+    $terms = taxonomy_get_tree($this->vocabulary->machine_name);
     $this->assertEqual($terms[0]->tid, $term2->tid, 'Term 2 was moved above term 1.');
     $this->assertEqual($terms[1]->parents, array($term2->tid), 'Term 3 was made a child of term 2.');
     $this->assertEqual($terms[2]->tid, $term1->tid, 'Term 1 was moved below term 2.');
@@ -829,7 +751,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     backdrop_static_reset('taxonomy_get_tree');
     backdrop_static_reset('taxonomy_get_treeparent');
     backdrop_static_reset('taxonomy_get_treeterms');
-    $terms = taxonomy_get_tree($this->vocabulary->vid);
+    $terms = taxonomy_get_tree($this->vocabulary->machine_name);
     $this->assertEqual($terms[0]->tid, $term1->tid, 'Term 1 was moved to back above term 2.');
     $this->assertEqual($terms[1]->tid, $term2->tid, 'Term 2 was moved to back below term 1.');
     $this->assertEqual($terms[2]->tid, $term3->tid, 'Term 3 is still below term 2.');
@@ -899,7 +821,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $new_vocabulary = $this->createVocabulary();
     $new_term = entity_create('taxonomy_term', array(
       'name' => $term->name,
-      'vid' => $new_vocabulary->vid,
+      'vocabulary' => $new_vocabulary->machine_name,
     ));
     taxonomy_term_save($new_term);
 
@@ -1238,7 +1160,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
       $this->createTerm($vocabulary);
     }
     // Load the terms from the vocabulary.
-    $terms = taxonomy_term_load_multiple(NULL, array('vid' => $vocabulary->vid));
+    $terms = taxonomy_term_load_multiple(NULL, array('vocabulary' => $vocabulary->machine_name));
     $count = count($terms);
     $this->assertEqual($count, 5, format_string('Correct number of terms were loaded. !count terms.', array('!count' => $count)));
 
@@ -1248,7 +1170,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
     $this->assertEqual($terms, $terms2, 'Both arrays contain the same terms.');
 
     // Load the terms by tid, with a condition on vid.
-    $terms3 = taxonomy_term_load_multiple(array_keys($terms2), array('vid' => $vocabulary->vid));
+    $terms3 = taxonomy_term_load_multiple(array_keys($terms2), array('vocabulary' => $vocabulary->machine_name));
     $this->assertEqual($terms2, $terms3, 'Same terms found when limiting load to vocabulary.');
 
     // Remove one term from the array, then delete it.
@@ -1257,8 +1179,8 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
     $deleted_term = taxonomy_term_load($deleted->tid);
     $this->assertFalse($deleted_term);
 
-    // Load terms from the vocabulary by vid.
-    $terms4 = taxonomy_term_load_multiple(NULL, array('vid' => $vocabulary->vid));
+    // Load terms from the vocabulary by vocabulary name.
+    $terms4 = taxonomy_term_load_multiple(NULL, array('vocabulary' => $vocabulary->machine_name));
     $this->assertEqual(count($terms4), 4, 'Correct number of terms were loaded.');
     $this->assertFalse(isset($terms4[$deleted->tid]));
 
@@ -1277,7 +1199,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
 class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('taxonomy', 'taxonomy_test');
-    module_load_include('inc', 'taxonomy', 'taxonomy.pages');
+    module_load_include('inc', 'taxonomy', 'includes/taxonomy.pages');
     $taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
     $this->backdropLogin($taxonomy_admin);
   }
@@ -1429,43 +1351,9 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
     $this->assertText($term->name, 'Term name is displayed.');
 
     // Delete the vocabulary and verify that the widget is gone.
-    taxonomy_vocabulary_delete($this->vocabulary->vid);
+    taxonomy_vocabulary_delete($this->vocabulary->machine_name);
     $this->backdropGet('test-entity/add/test-bundle');
     $this->assertNoFieldByName("{$this->field_name}[$langcode]", '', 'Widget is not displayed.');
-  }
-
-  /**
-   * Tests that vocabulary machine name changes are mirrored in field definitions.
-   */
-  function testTaxonomyTermFieldChangeMachineName() {
-    // Add several entries in the 'allowed_values' setting, to make sure that
-    // they all get updated.
-    $this->field['settings']['allowed_values'] = array(
-      array(
-        'vocabulary' => $this->vocabulary->machine_name,
-        'parent' => '0',
-      ),
-      array(
-        'vocabulary' => $this->vocabulary->machine_name,
-        'parent' => '0',
-      ),
-      array(
-        'vocabulary' => 'foo',
-        'parent' => '0',
-      ),
-    );
-    field_update_field($this->field);
-    // Change the machine name.
-    $new_name = backdrop_strtolower($this->randomName());
-    $this->vocabulary->machine_name = $new_name;
-    taxonomy_vocabulary_save($this->vocabulary);
-
-    // Check that the field instance is still attached to the vocabulary.
-    $field = field_info_field($this->field_name);
-    $allowed_values = $field['settings']['allowed_values'];
-    $this->assertEqual($allowed_values[0]['vocabulary'], $new_name, 'Index 0: Machine name was updated correctly.');
-    $this->assertEqual($allowed_values[1]['vocabulary'], $new_name, 'Index 1: Machine name was updated correctly.');
-    $this->assertEqual($allowed_values[2]['vocabulary'], 'foo', 'Index 2: Machine name was left untouched.');
   }
 }
 
@@ -1551,7 +1439,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
     $this->assertText($term2->name, 'Term 2 name is displayed.');
 
     // Delete vocabulary 2.
-    taxonomy_vocabulary_delete($this->vocabulary2->vid);
+    taxonomy_vocabulary_delete($this->vocabulary2->machine_name);
 
     // Re-render the content.
     $entity = field_test_entity_test_load($id);
@@ -1694,7 +1582,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
 
     // Generate and test sanitized tokens.
     $tests = array();
-    $tests['[vocabulary:vid]'] = $this->vocabulary->vid;
+    $tests['[vocabulary:machine-name]'] = $this->vocabulary->machine_name;
     $tests['[vocabulary:name]'] = check_plain($this->vocabulary->name);
     $tests['[vocabulary:description]'] = filter_xss($this->vocabulary->description);
     $tests['[vocabulary:node-count]'] = 1;

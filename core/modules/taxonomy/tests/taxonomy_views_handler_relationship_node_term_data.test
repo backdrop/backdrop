@@ -20,7 +20,7 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
       'description' => $this->randomName(),
       // Use the first available text format.
       'format' => db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
-      'vid' => $vocabulary->vid,
+      'vocabulary' => $vocabulary->machine_name,
     ));
     taxonomy_term_save($term);
     return $term;
@@ -32,7 +32,7 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     //$web_user = $this->backdropCreateUser(array('create article content'));
     //$this->backdropLogin($web_user);
 
-    $vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+    $vocabulary = taxonomy_vocabulary_load('tags');
     $this->term_1 = $this->createTerm($vocabulary);
     $this->term_2 = $this->createTerm($vocabulary);
 

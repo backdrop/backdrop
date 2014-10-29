@@ -94,7 +94,6 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         }
 
         $query = db_select('taxonomy_term_data', 'td');
-        $query->leftJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
         $query->fields('td');
         $query->condition('td.tid', $argument);
         $query->addTag('term_access');
@@ -104,7 +103,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         }
         $term = taxonomy_term_load($term->tid);
         $this->argument->validated_title = check_plain(entity_label('taxonomy_term', $term));
-        return empty($vocabularies) || !empty($vocabularies[$term->vocabulary_machine_name]);
+        return empty($vocabularies) || !empty($vocabularies[$term->vocabulary]);
 
       case 'tids':
         // An empty argument is not a term so doesn't pass.
@@ -139,15 +138,13 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         // if unverified tids left - verify them and cache results
         if (count($test)) {
           $query = db_select('taxonomy_term_data', 'td');
-          $query->leftJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
           $query->fields('td');
-          $query->fields('tv', array('machine_name'));
           $query->condition('td.tid', $test);
 
           $result = $query->execute();
 
           foreach ($result as $term) {
-            if ($vocabularies && empty($vocabularies[$term->machine_name])) {
+            if ($vocabularies && empty($vocabularies[$term->vocabulary])) {
               $validated_cache[$term->tid] = FALSE;
               return FALSE;
             }
@@ -167,11 +164,9 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       case 'name':
       case 'convert':
         $query = db_select('taxonomy_term_data', 'td');
-        $query->leftJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
         $query->fields('td');
-        $query->fields('tv', array('machine_name'));
         if (!empty($vocabularies)) {
-          $query->condition('tv.machine_name', $vocabularies);
+          $query->condition('td.vocabulary', $vocabularies);
         }
         if ($transform) {
           $query->where("replace(td.name, ' ', '-') = :name", array(':name' => $argument));
@@ -205,8 +200,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       $query->condition('tid', $args);
       $query->addField('td', 'tid', 'tid');
       if (!empty($vocabularies)) {
-        $query->leftJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
-        $query->condition('tv.machine_name', $vocabularies);
+        $query->condition('td.vocabulary', $vocabularies);
       }
       if ($transform) {
         $query->addExpression("REPLACE(td.name, ' ', '-')", 'name');

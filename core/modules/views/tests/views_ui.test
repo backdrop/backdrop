@@ -239,7 +239,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->node_type_without_tags = $this->backdropCreateContentType();
 
     // Create the vocabulary for the tag field.
-    $this->tag_vocabulary = entity_create('taxonomy_vocabulary', array(
+    $this->tag_vocabulary = new TaxonomyVocabulary(array(
       'name' => 'Views testing tags',
       'machine_name' => 'views_testing_tags',
     ));
@@ -669,7 +669,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a taxonomy term and return its expected path.
    */
   function createTaxonomyTermAndGetPath() {
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
+    $vocabulary = new TaxonomyVocabulary(array(
       'name' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
     ));
@@ -677,7 +677,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
-      'vid' => $vocabulary->vid,
+      'vocabulary' => $vocabulary->machine_name,
     ));
     taxonomy_term_save($term);
 

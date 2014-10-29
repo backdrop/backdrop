@@ -91,7 +91,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   }
 
   function value_form(&$form, &$form_state) {
-    $vocabulary = taxonomy_vocabulary_machine_name_load($this->options['vocabulary']);
+    $vocabulary = taxonomy_vocabulary_load($this->options['vocabulary']);
     if (empty($vocabulary) && $this->options['limit']) {
       $form['markup'] = array(
         '#markup' => '<div class="form-item">' . t('An invalid vocabulary is selected. Please change it in the options.') . '</div>',
@@ -121,7 +121,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       );
 
       if ($this->options['limit']) {
-        $form['value']['#autocomplete_path'] = 'admin/views/ajax/autocomplete/taxonomy/' . $vocabulary->vid;
+        $form['value']['#autocomplete_path'] = 'admin/views/ajax/autocomplete/taxonomy/' . $vocabulary->machine_name;
       }
     }
     else {
@@ -140,15 +140,13 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       else {
         $options = array();
         $query = db_select('taxonomy_term_data', 'td');
-        $query->innerJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
         $query->fields('td');
-        $query->orderby('tv.weight');
-        $query->orderby('tv.name');
+        $query->orderby('td.vocabulary');
         $query->orderby('td.weight');
         $query->orderby('td.name');
         $query->addTag('term_access');
         if ($this->options['limit']) {
-          $query->condition('tv.machine_name', $vocabulary->machine_name);
+          $query->condition('td.vocabulary', $vocabulary->machine_name);
         }
         $result = $query->execute();
         foreach ($result as $term) {
@@ -308,10 +306,9 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     $query = db_select('taxonomy_term_data', 'td');
-    $query->innerJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
     $query->fields('td');
     $query->condition('td.name', $names);
-    $query->condition('tv.machine_name', $this->options['vocabulary']);
+    $query->condition('td.vocabulary', $this->options['vocabulary']);
     $query->addTag('term_access');
     $result = $query->execute();
     foreach ($result as $term) {

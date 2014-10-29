@@ -72,9 +72,8 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
       $def['type'] = empty($this->options['required']) ? 'LEFT' : 'INNER';
 
       $query = db_select('taxonomy_term_data', 'td');
-      $query->addJoin($def['type'], 'taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
       $query->addJoin($def['type'], 'taxonomy_index', 'tn', 'tn.tid = td.tid');
-      $query->condition('tv.machine_name', array_filter($this->options['vocabularies']));
+      $query->condition('td.vocabulary', array_filter($this->options['vocabularies']));
       if (empty($this->query->options['disable_sql_rewrite'])) {
         $query->addTag('term_access');
       }

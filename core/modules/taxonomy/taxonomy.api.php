@@ -21,11 +21,11 @@
  */
 function hook_taxonomy_vocabulary_load(array $vocabularies) {
   $result = db_select('mytable', 'm')
-    ->fields('m', array('vid', 'foo'))
-    ->condition('m.vid', array_keys($vocabularies), 'IN')
+    ->fields('m', array('vocabulary', 'foo'))
+    ->condition('m.vocabulary', array_keys($vocabularies), 'IN')
     ->execute();
   foreach ($result as $record) {
-    $vocabularies[$record->vid]->foo = $record->foo;
+    $vocabularies[$record->vocabulary]->foo = $record->foo;
   }
 }
 
@@ -36,7 +36,7 @@ function hook_taxonomy_vocabulary_load(array $vocabularies) {
  * inserted or updated.
  *
  * @param TaxonomyVocabulary $vocabulary
- *   A taxonomy vocabulary entity.
+ *   A taxonomy vocabulary.
  */
 function hook_taxonomy_vocabulary_presave(TaxonomyVocabulary $vocabulary) {
   $vocabulary->foo = 'bar';
@@ -49,11 +49,16 @@ function hook_taxonomy_vocabulary_presave(TaxonomyVocabulary $vocabulary) {
  * to the database.
  *
  * @param TaxonomyVocabulary $vocabulary
- *   A taxonomy vocabulary entity.
+ *   A taxonomy vocabulary.
  */
 function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
   if ($vocabulary->machine_name == 'my_vocabulary') {
-    $vocabulary->weight = 100;
+    db_insert('mytable')
+      ->fields(array(
+        'vocabulary' => $vocabulary->machine_name,
+        'foo' => $vocabulary->foo,
+      ))
+      ->execute();
   }
 }
 
@@ -63,12 +68,12 @@ function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
  * Modules implementing this hook can act on the vocabulary object when updated.
  *
  * @param TaxonomyVocabulary $vocabulary
- *   A taxonomy vocabulary entity.
+ *   A taxonomy vocabulary.
  */
 function hook_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
   db_update('mytable')
     ->fields(array('foo' => $vocabulary->foo))
-    ->condition('vid', $vocabulary->vid)
+    ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
 }
 
@@ -80,15 +85,15 @@ function hook_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
  * removed from the database.
  *
  * @param TaxonomyVocabulary $vocabulary
- *   The taxonomy vocabulary entity that is about to be deleted.
+ *   The taxonomy vocabulary that is about to be deleted.
  *
  * @see hook_taxonomy_vocabulary_delete()
  * @see taxonomy_vocabulary_delete()
  */
 function hook_taxonomy_vocabulary_predelete(TaxonomyVocabulary $vocabulary) {
-  if (variable_get('taxonomy_' . $vocabulary->vid . '_synonyms', FALSE)) {
-    variable_del('taxonomy_' . $vocabulary->vid . '_synonyms');
-  }
+  db_delete('mytable')
+    ->condition('vocabulary', $vocabulary->machine_name)
+    ->execute();
 }
 
 /**
@@ -99,14 +104,14 @@ function hook_taxonomy_vocabulary_predelete(TaxonomyVocabulary $vocabulary) {
  * been removed from the database.
  *
  * @param TaxonomyVocabulary $vocabulary
- *   The taxonomy vocabulary entity that has been deleted.
+ *   The taxonomy vocabulary that has been deleted.
  *
  * @see hook_taxonomy_vocabulary_predelete()
  * @see taxonomy_vocabulary_delete()
  */
 function hook_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
   db_delete('mytable')
-    ->condition('vid', $vocabulary->vid)
+    ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
 }
 

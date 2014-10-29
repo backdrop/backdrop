@@ -41,13 +41,6 @@ function entity_crud_hook_test_taxonomy_term_presave() {
 }
 
 /**
- * Implements hook_taxonomy_vocabulary_presave().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_presave() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
  * Implements hook_user_presave().
  */
 function entity_crud_hook_test_user_presave() {
@@ -86,13 +79,6 @@ function entity_crud_hook_test_node_insert() {
  * Implements hook_taxonomy_term_insert().
  */
 function entity_crud_hook_test_taxonomy_term_insert() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
- * Implements hook_taxonomy_vocabulary_insert().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_insert() {
   $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
 }
 
@@ -139,13 +125,6 @@ function entity_crud_hook_test_taxonomy_term_load() {
 }
 
 /**
- * Implements hook_taxonomy_vocabulary_load().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_load() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
  * Implements hook_user_load().
  */
 function entity_crud_hook_test_user_load() {
@@ -184,13 +163,6 @@ function entity_crud_hook_test_node_update() {
  * Implements hook_taxonomy_term_update().
  */
 function entity_crud_hook_test_taxonomy_term_update() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
- * Implements hook_taxonomy_vocabulary_update().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_update() {
   $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
 }
 
@@ -237,13 +209,6 @@ function entity_crud_hook_test_taxonomy_term_predelete() {
 }
 
 /**
- * Implements hook_taxonomy_vocabulary_predelete().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_predelete() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
  * Implements hook_user_predelete().
  */
 function entity_crud_hook_test_user_predelete() {
@@ -282,13 +247,6 @@ function entity_crud_hook_test_node_delete() {
  * Implements hook_taxonomy_term_delete().
  */
 function entity_crud_hook_test_taxonomy_term_delete() {
-  $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
-}
-
-/**
- * Implements hook_taxonomy_vocabulary_delete().
- */
-function entity_crud_hook_test_taxonomy_vocabulary_delete() {
   $_SESSION['entity_crud_hook_test'][] = (__FUNCTION__ . ' called');
 }
 

@@ -137,7 +137,7 @@ function standard_install() {
 
   // Create a default vocabulary named "Tags", enabled for the 'article' content type.
   $description = st('Use tags to group articles on similar topics into categories.');
-  $vocabulary = entity_create('taxonomy_vocabulary', array(
+  $vocabulary = new TaxonomyVocabulary(array(
     'name' => st('Tags'),
     'description' => $description,
     'machine_name' => 'tags',

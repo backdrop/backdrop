@@ -15,17 +15,13 @@ class views_handler_field_taxonomy extends views_handler_field {
   /**
    * Constructor to provide additional field to add.
    *
-   * This constructer assumes the taxonomy_term_data table. If using another
+   * This constructor assumes the taxonomy_term_data table. If using another
    * table, we'll need to be more specific.
    */
   function construct() {
     parent::construct();
-    $this->additional_fields['vid'] = 'vid';
     $this->additional_fields['tid'] = 'tid';
-    $this->additional_fields['vocabulary_machine_name'] = array(
-      'table' => 'taxonomy_vocabulary',
-      'field' => 'machine_name',
-    );
+    $this->additional_fields['vocabulary'] = 'vocabulary';
   }
 
   function option_definition() {
@@ -64,8 +60,7 @@ class views_handler_field_taxonomy extends views_handler_field {
     if (!empty($this->options['link_to_taxonomy']) && !empty($tid) && $data !== NULL && $data !== '') {
       $term = entity_create('taxonomy_term', array(
         'tid' => $tid,
-        'vid' => $this->get_value($values, 'vid'),
-        'vocabulary_machine_name' => $values->{$this->aliases['vocabulary_machine_name']},
+        'vocabulary' => $this->get_value($values, 'vocabulary'),
       ));
       $this->options['alter']['make_link'] = TRUE;
       $uri = entity_uri('taxonomy_term', $term);
