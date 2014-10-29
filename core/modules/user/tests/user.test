@@ -1242,7 +1242,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $user_c = $this->backdropCreateUser(array('administer taxonomy'));
 
     // Create admin user to delete registered user.
-    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
     $this->backdropLogin($admin_user);
     $this->backdropGet('admin/people');
     $this->assertText($user_a->name, 'Found user A on admin users page');
@@ -1252,12 +1252,12 @@ class UserAdminTestCase extends BackdropWebTestCase {
 
     // Test for existence of edit link in table.
     $link = l(t('Edit'), "user/$user_a->uid/edit", array('query' => array('destination' => 'admin/people')));
-     $this->assertRaw($link, 'Found user A edit link on admin users page');
+    $this->assertRaw($link, 'Found user A edit link on admin users page');
 
     // Filter the users by permission 'administer taxonomy'.
     $edit = array();
     $edit['permission'] = 'administer taxonomy';
-    $this->backdropPost('admin/people', $edit, t('Filter'));
+    $this->backdropGet('admin/people', array('query' => array('permission' => 'administer taxonomy')));
 
     // Check if the correct users show up.
     $this->assertNoText($user_a->name, 'User A not on filtered by perm admin users page');
@@ -1266,7 +1266,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
 
     // Filter the users by role. Grab the system-generated role name for User C.
     $edit['role'] = max(array_flip($user_c->roles));
-    $this->backdropPost('admin/people', $edit, t('Refine'));
+    $this->backdropGet('admin/people', array('query' => array('rid' => $edit['role'])));
 
     // Check if the correct users show up when filtered by role.
     $this->assertNoText($user_a->name, 'User A not on filtered by role on admin users page');
@@ -1277,17 +1277,17 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $account = user_load($user_c->uid);
     $this->assertEqual($account->status, 1, 'User C not blocked');
     $edit = array();
-    $edit['operation'] = 'block';
-    $edit['accounts[' . $account->uid . ']'] = TRUE;
-    $this->backdropPost('admin/people', $edit, t('Update'));
+    $edit['action'] = 'user_block_user_action';
+    $edit['bulk_form[0]'] = $user_c->uid;
+    $this->backdropPost('admin/people', $edit, t('Apply'));
     $account = user_load($user_c->uid, TRUE);
     $this->assertEqual($account->status, 0, 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
     $editunblock = array();
-    $editunblock['operation'] = 'unblock';
-    $editunblock['accounts[' . $account->uid . ']'] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Update'));
+    $editunblock['action'] = 'user_unblock_user_action';
+    $editunblock['bulk_form[0]'] = $user_c->uid;
+    $this->backdropPost('admin/people', $editunblock, t('Apply'));
     $account = user_load($user_c->uid, TRUE);
     $this->assertEqual($account->status, 1, 'User C unblocked');
     $this->assertMail("to", $account->mail, "Activation mail sent to user C");
