@@ -246,7 +246,13 @@ function standard_install() {
       'teaser' => array(
         'label' => 'hidden',
         'type' => 'image',
-        'settings' => array('image_style' => 'medium', 'image_link' => 'content'),
+        'settings' => array(
+          'image_style' => 'medium',
+          'image_link' => 'content',
+          'image_float' => 'left',
+          'image_margin_side' => '1em',
+          'image_margin_bottom' => '0.5em',
+        ),
         'weight' => -1,
       ),
     ),

@@ -475,7 +475,13 @@ function image_field_formatter_info() {
     'image' => array(
       'label' => t('Image'),
       'field types' => array('image'),
-      'settings' => array('image_style' => '', 'image_link' => ''),
+      'settings' => array(
+        'image_style' => '',
+        'image_link' => '',
+        'image_float' => '',
+        'image_margin_side' => '1em',
+        'image_margin_bottom' => '0.5em',
+      ),
     ),
   );
 
@@ -508,6 +514,44 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#default_value' => $settings['image_link'],
     '#empty_option' => t('Nothing'),
     '#options' => $link_types,
+  );
+
+  $element['image_float'] = array(
+    '#title' => t('Float image'),
+    '#type' => 'select',
+    '#description' => t('Display the image on the left or right, with the rest of the node wrapping around it.'),
+    '#default_value' => $settings['image_float'],
+    '#empty_option' => t('No'),
+    '#options' => array(
+      'left' => t('Left'),
+      'right' => t('Right'),
+    ),
+  );
+
+  $element['image_margin_side'] = array(
+    '#title' => t('Side margin'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['image_margin_side'],
+    '#maxlength' => 7,
+    '#size' => 6,
+    '#states' => array(
+      'invisible' => array(
+        'select[name$="[image_float]"]' => array('value' => ''),
+      ),
+    ),
+  );
+
+  $element['image_margin_bottom'] = array(
+    '#title' => t('Bottom margin'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['image_margin_bottom'],
+    '#maxlength' => 7,
+    '#size' => 6,
+    '#states' => array(
+      'invisible' => array(
+        'select[name$="[image_float]"]' => array('value' => ''),
+      ),
+    ),
   );
 
   return $element;
@@ -543,6 +587,15 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = $link_types[$settings['image_link']];
   }
 
+  if (!empty($settings['image_float'])) {
+    $summary[] = t('Floated: @side', array('@side' => $settings['image_float']));
+    $summary[] = t('Side margin: @margin', array('@margin' => $settings['image_margin_side']));
+    $summary[] = t('Bottom margin: @margin', array('@margin' => $settings['image_margin_bottom']));
+  }
+  else {
+    $summary[] = t('Floated: No');
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -550,14 +603,24 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
  * Implements hook_field_formatter_view().
  */
 function image_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $settings = $display['settings'];
   $element = array();
 
   // Check if the formatter involves a link.
-  if ($display['settings']['image_link'] == 'content') {
+  if ($settings['image_link'] == 'content') {
     $uri = entity_uri($entity_type, $entity);
   }
-  elseif ($display['settings']['image_link'] == 'file') {
+  elseif ($settings['image_link'] == 'file') {
     $link_file = TRUE;
+  }
+
+  // Check if image is floated.
+  $float = array();
+  if (!empty($settings['image_float'])) {
+    $float['direction'] = $settings['image_float'];
+    $float['margin_direction'] = ($settings['image_float'] == 'left') ? 'right' : 'left';
+    $float['margin_side'] = $settings['image_margin_side'];
+    $float['margin_bottom'] = $settings['image_margin_bottom'];
   }
 
   foreach ($items as $delta => $item) {
@@ -572,6 +635,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       '#item' => $item,
       '#image_style' => $display['settings']['image_style'],
       '#path' => isset($uri) ? $uri : '',
+      '#float' => $float,
     );
   }
 
@@ -613,6 +677,16 @@ function theme_image_formatter($variables) {
     // When displaying an image inside a link, the html option must be TRUE.
     $options['html'] = TRUE;
     $output = l($output, $path, $options);
+  }
+
+  // Wrap image in floated div
+  if (!empty($variables['float'])) {
+    $styles = array(
+      'float: ' . $variables['float']['direction'] . ';',
+      'margin-' . $variables['float']['margin_direction'] . ': ' . $variables['float']['margin_side'] . ';',
+      'margin-bottom: ' . $variables['float']['margin_bottom'] . ';',
+    );
+    $output = '<div class="floated-image" style="' . implode(' ', $styles) . '">' . $output . '</div>';
   }
 
   return $output;
