@@ -11,11 +11,6 @@
 const USERNAME_MAX_LENGTH = 60;
 
 /**
- * Maximum length of user e-mail text field.
- */
-const EMAIL_MAX_LENGTH = 254;
-
-/**
  * Only administrators can create user accounts.
  */
 const USER_REGISTER_ADMINISTRATORS_ONLY = 'admin_only';
@@ -374,43 +369,23 @@ function user_password($length = 10) {
 /**
  * Determine the permissions for one or more roles.
  *
- * @param $roles
- *   An array whose keys are the role IDs of interest, such as $user->roles.
+ * @param $role_names
+ *   An unindexed array of role names, such as those in $user->roles.
  *
  * @return
  *   If $roles is a non-empty array, an array indexed by role ID is returned.
  *   Each value is an array whose keys are the permission strings for the given
  *   role ID. If $roles is empty nothing is returned.
  */
-function user_role_permissions($roles = array()) {
-  $cache = &backdrop_static(__FUNCTION__, array());
-
-  $role_permissions = $fetch = array();
-
-  if ($roles) {
-    foreach ($roles as $rid => $name) {
-      if (isset($cache[$rid])) {
-        $role_permissions[$rid] = $cache[$rid];
-      }
-      else {
-        // Add this rid to the list of those needing to be fetched.
-        $fetch[] = $rid;
-        // Prepare in case no permissions are returned.
-        $cache[$rid] = array();
-      }
-    }
-
-    if ($fetch) {
-      // Get from the database permissions that were not in the static variable.
-      // Only role IDs with at least one permission assigned will return rows.
-      $result = db_query("SELECT rid, permission FROM {role_permission} WHERE rid IN (:fetch)", array(':fetch' => $fetch));
-
-      foreach ($result as $row) {
-        $cache[$row->rid][$row->permission] = TRUE;
-      }
-      foreach ($fetch as $rid) {
-        // For every rid, we know we at least assigned an empty array.
-        $role_permissions[$rid] = $cache[$rid];
+function user_role_permissions($role_names = array()) {
+  $all_roles = user_roles(FALSE, NULL, TRUE);
+  $role_permissions = array();
+  foreach ($role_names as $role_name) {
+    if (isset($all_roles[$role_name])) {
+      foreach ($all_roles[$role_name]->permissions as $permission) {
+        if (!in_array($permission, $role_permissions)) {
+          $role_permissions[] = $permission;
+        }
       }
     }
   }
@@ -433,7 +408,7 @@ function user_role_permissions($roles = array()) {
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
-function user_access($string, $account = NULL) {
+function user_access($permission_name, $account = NULL) {
   global $user;
 
   if (!isset($account)) {
@@ -454,16 +429,10 @@ function user_access($string, $account = NULL) {
   }
   $perm = &$backdrop_static_fast['perm'];
   if (!isset($perm[$account->uid])) {
-    $role_permissions = user_role_permissions($account->roles);
-
-    $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
-    }
-    $perm[$account->uid] = $perms;
+    $perm[$account->uid] = user_role_permissions($account->roles);
   }
 
-  return isset($perm[$account->uid][$string]);
+  return in_array($permission_name, $perm[$account->uid]);
 }
 
 /**
@@ -751,25 +720,16 @@ function user_account_form(&$form, &$form_state) {
   );
 
   $roles = array_map('check_plain', user_roles(TRUE));
-  // The disabled checkbox subelement for the 'authenticated user' role
-  // must be generated separately and added to the checkboxes element,
-  // because of a limitation in Form API not supporting a single disabled
-  // checkbox within a set of checkboxes.
-  // @todo This should be solved more elegantly. See issue #119038.
-  $checkbox_authenticated = array(
-    '#type' => 'checkbox',
-    '#title' => $roles[BACKDROP_AUTHENTICATED_RID],
-    '#default_value' => TRUE,
-    '#disabled' => TRUE,
-  );
-  unset($roles[BACKDROP_AUTHENTICATED_RID]);
   $form['account']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
-    '#default_value' => (!$register && isset($account->roles) ? array_keys($account->roles) : array()),
+    '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
     '#options' => $roles,
     '#access' => $roles && user_access('administer permissions'),
-    BACKDROP_AUTHENTICATED_RID => $checkbox_authenticated,
+  );
+  $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
+    '#disabled' => TRUE,
+    '#value' => 'authenticated',
   );
 
   $form['account']['notify'] = array(
@@ -1484,14 +1444,13 @@ function user_menu() {
   $items['admin/config/people/roles/edit/%user_role'] = array(
     'title' => 'Edit role',
     'page arguments' => array('user_admin_role', 5),
-    'access callback' => 'user_role_edit_access',
-    'access arguments' => array(5),
+    'access arguments' => array('administer permissions'),
   );
   $items['admin/config/people/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_role_delete_confirm', 5),
-    'access callback' => 'user_role_edit_access',
+    'access callback' => 'user_role_delete_access',
     'access arguments' => array(5),
     'file' => 'user.admin.inc',
   );
@@ -2371,7 +2330,7 @@ function user_mail_tokens(&$replacements, $data, $options) {
 /**
  * Retrieve an array of roles matching specified conditions.
  *
- * @param $membersonly
+ * @param $members_only
  *   Set this to TRUE to exclude the 'anonymous' role.
  * @param $permission
  *   A string containing a permission. If set, only roles containing that
@@ -2381,100 +2340,76 @@ function user_mail_tokens(&$replacements, $data, $options) {
  *   An associative array with the role id as the key and the role name as
  *   value.
  */
-function user_roles($membersonly = FALSE, $permission = NULL) {
+function user_roles($members_only = FALSE, $permission = NULL, $full_objects = FALSE) {
   $user_roles = &backdrop_static(__FUNCTION__);
 
-  // Do not cache roles for specific permissions. This data is not requested
-  // frequently enough to justify the additional memory use.
-  if (empty($permission)) {
-    $cid = $membersonly ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID;
-    if (isset($user_roles[$cid])) {
-      return $user_roles[$cid];
+  if (!isset($user_roles)) {
+    $user_roles = array();
+
+    // @todo: Consider a cache get here instead of reading from disk.
+    $names = config_get_names_with_prefix('user.role.');
+    foreach ($names as $config_name) {
+      $config = config($config_name);
+      $role_name = str_replace('user.role.', '', $config_name);
+      $role_data = $config->get();
+      $role_data += array(
+        'weight' => 0,
+        'permissions' => array(),
+      );
+      $user_roles[$role_name] = $role_data;
+    }
+    backdrop_sort($user_roles, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
+
+    // Convert user roles into objects.
+    // @todo: Consider using classes and a constructor here.
+    foreach ($user_roles as $role_name => $role_data) {
+      $user_roles[$role_name] = (object) $user_roles[$role_name];
+      $user_roles[$role_name]->label = t($role_data['label']);
     }
   }
 
-  $query = db_select('role', 'r');
-  $query->addTag('translatable');
-  $query->fields('r', array('rid', 'name'));
-  $query->orderBy('weight');
-  $query->orderBy('name');
-  if (!empty($permission)) {
-    $query->innerJoin('role_permission', 'p', 'r.rid = p.rid');
-    $query->condition('p.permission', $permission);
+  $return_roles = $user_roles;
+  if ($members_only) {
+    unset($return_roles['anonymous']);
   }
-  $result = $query->execute();
 
-  $roles = array();
-  foreach ($result as $role) {
-    switch ($role->rid) {
-      // We only translate the built in role names
-      case BACKDROP_ANONYMOUS_RID:
-        if (!$membersonly) {
-          $roles[$role->rid] = t($role->name);
-        }
-        break;
-      case BACKDROP_AUTHENTICATED_RID:
-        $roles[$role->rid] = t($role->name);
-        break;
-      default:
-        $roles[$role->rid] = $role->name;
+  if ($permission) {
+    foreach ($return_roles as $role_name => $role) {
+      if (array_search($permission, $role->permissions) === FALSE) {
+        unset($return_roles[$role_name]);
+      }
     }
   }
 
-  if (empty($permission)) {
-    $user_roles[$cid] = $roles;
-    return $user_roles[$cid];
+  if (!$full_objects) {
+    foreach ($return_roles as $role_name => $role) {
+      $return_roles[$role_name] = $role->label;
+    }
   }
 
-  return $roles;
+  return $return_roles;
 }
 
 /**
- * Fetches a user role by role ID.
+ * Load a user role.
  *
- * @param $rid
- *   An integer representing the role ID.
+ * @param string $role_name
+ *   The role name to be loaded.
  *
  * @return
  *   A fully-loaded role object if a role with the given ID exists, or FALSE
  *   otherwise.
- *
- * @see user_role_load_by_name()
  */
-function user_role_load($rid) {
-  return db_select('role', 'r')
-    ->fields('r')
-    ->condition('rid', $rid)
-    ->execute()
-    ->fetchObject();
-}
-
-/**
- * Fetches a user role by role name.
- *
- * @param $role_name
- *   A string representing the role name.
- *
- * @return
- *   A fully-loaded role object if a role with the given name exists, or FALSE
- *   otherwise.
- *
- * @see user_role_load()
- */
-function user_role_load_by_name($role_name) {
-  return db_select('role', 'r')
-    ->fields('r')
-    ->condition('name', $role_name)
-    ->execute()
-    ->fetchObject();
+function user_role_load($role_name) {
+  $roles = user_roles(FALSE, NULL, TRUE);
+  return isset($roles[$role_name]) ? $roles[$role_name] : FALSE;
 }
 
 /**
  * Save a user role to the database.
  *
  * @param $role
- *   A role object to modify or add. If $role->rid is not specified, a new
- *   role will be created.
+ *   A role object to modify or add.
  * @return
  *   Status constant indicating if role was created or updated.
  *   Failure to write the user role record will return FALSE. Otherwise.
@@ -2482,32 +2417,42 @@ function user_role_load_by_name($role_name) {
  *   performed.
  */
 function user_role_save($role) {
-  if ($role->name) {
-    // Prevent leading and trailing spaces in role names.
-    $role->name = trim($role->name);
-  }
+  // Trim spaces from names.
+  $role->name = trim($role->name);
+  $role->label = trim($role->label);
+
   if (!isset($role->weight)) {
     // Set a role weight to make this new role last.
-    $query = db_select('role');
-    $query->addExpression('MAX(weight)');
-    $role->weight = $query->execute()->fetchField() + 1;
+    $weight = 0;
+    foreach (user_roles(FALSE, NULL, TRUE) as $existing_role) {
+      $weight = max($existing_role->weight, $weight);
+    }
+    $role->weight = $weight + 1;
   }
 
   // Let modules modify the user role before it is saved to the database.
   module_invoke_all('user_role_presave', $role);
 
-  if (!empty($role->rid) && $role->name) {
-    $status = backdrop_write_record('role', $role, 'rid');
+  $config = config('user.role.' . $role->name);
+  $config->set('name', $role->name);
+  $config->set('label', $role->label);
+  $config->set('weight', $role->weight);
+  if (isset($role->permissions)) {
+    $config->set('permissions', $role->permissions);
+  }
+  $config->save();
+  if ($config->isNew()) {
     module_invoke_all('user_role_update', $role);
+    $status = SAVED_NEW;
   }
   else {
-    $status = backdrop_write_record('role', $role);
     module_invoke_all('user_role_insert', $role);
+    $status = SAVED_UPDATED;
   }
 
   // Clear the user access cache.
+  backdrop_static_reset('user_roles');
   backdrop_static_reset('user_access');
-  backdrop_static_reset('user_role_permissions');
 
   return $status;
 }
@@ -2515,41 +2460,33 @@ function user_role_save($role) {
 /**
  * Delete a user role from database.
  *
- * @param $role
- *   A string with the role name, or an integer with the role ID.
+ * @param string $role_name
+ *   The name of the role to be deleted.
  */
-function user_role_delete($role) {
-  if (is_int($role)) {
-    $role = user_role_load($role);
-  }
-  else {
-    $role = user_role_load_by_name($role);
-  }
+function user_role_delete($role_name) {
+  $role = user_role_load($role_name);
 
-  db_delete('role')
-    ->condition('rid', $role->rid)
-    ->execute();
-  db_delete('role_permission')
-    ->condition('rid', $role->rid)
-    ->execute();
+  $config = config('user.role.' . $role_name);
+  $config->delete();
+
   // Update the users who have this role set:
   db_delete('users_roles')
-    ->condition('rid', $role->rid)
+    ->condition('role', $role_name)
     ->execute();
 
   module_invoke_all('user_role_delete', $role);
 
   // Clear the user access cache.
+  backdrop_static_reset('user_roles');
   backdrop_static_reset('user_access');
-  backdrop_static_reset('user_role_permissions');
 }
 
 /**
- * Menu access callback for user role editing.
+ * Menu access callback for deleting a user.
  */
-function user_role_edit_access($role) {
-  // Prevent the system-defined roles from being altered or removed.
-  if ($role->rid == BACKDROP_ANONYMOUS_RID || $role->rid == BACKDROP_AUTHENTICATED_RID) {
+function user_role_delete_access($role) {
+  // Prevent the system-defined roles from being removed.
+  if ($role->name == BACKDROP_ANONYMOUS_ROLE || $role->name == BACKDROP_AUTHENTICATED_ROLE) {
     return FALSE;
   }
 
@@ -2581,9 +2518,9 @@ function user_permission_get_modules() {
  * role, the form submit handler may directly pass the submitted values for the
  * checkboxes form element to this function.
  *
- * @param $rid
- *   The ID of a user role to alter.
- * @param $permissions
+ * @param string $role_name
+ *   The name of a user role to alter.
+ * @param array $permissions
  *   An associative array, where the key holds the permission name and the value
  *   determines whether to grant or revoke that permission. Any value that
  *   evaluates to TRUE will cause the permission to be granted. Any value that
@@ -2602,71 +2539,52 @@ function user_permission_get_modules() {
  * @see user_role_grant_permissions()
  * @see user_role_revoke_permissions()
  */
-function user_role_change_permissions($rid, array $permissions = array()) {
+function user_role_change_permissions($role_name, array $permissions = array()) {
   // Grant new permissions for the role.
   $grant = array_filter($permissions);
   if (!empty($grant)) {
-    user_role_grant_permissions($rid, array_keys($grant));
+    user_role_grant_permissions($role_name, array_keys($grant));
   }
   // Revoke permissions for the role.
   $revoke = array_diff_assoc($permissions, $grant);
   if (!empty($revoke)) {
-    user_role_revoke_permissions($rid, array_keys($revoke));
+    user_role_revoke_permissions($role_name, array_keys($revoke));
   }
 }
 
 /**
  * Grant permissions to a user role.
  *
- * @param $rid
- *   The ID of a user role to alter.
- * @param $permissions
+ * @param string $role_name
+ *   The name of a user role to alter.
+ * @param array $permissions
  *   A list of permission names to grant.
  *
  * @see user_role_change_permissions()
  * @see user_role_revoke_permissions()
  */
-function user_role_grant_permissions($rid, array $permissions = array()) {
-  $modules = user_permission_get_modules();
-  // Grant new permissions for the role.
-  foreach ($permissions as $name) {
-    db_merge('role_permission')
-      ->key(array(
-        'rid' => $rid,
-        'permission' => $name,
-      ))
-      ->fields(array(
-        'module' => $modules[$name],
-      ))
-      ->execute();
-  }
-
-  // Clear the user access cache.
-  backdrop_static_reset('user_access');
-  backdrop_static_reset('user_role_permissions');
+function user_role_grant_permissions($role_name, array $permissions = array()) {
+  $user_role = user_role_load($role_name);
+  $user_role->permissions = array_values(array_unique(array_merge($user_role->permissions, $permissions)));
+  user_role_save($user_role);
 }
 
 /**
  * Revoke permissions from a user role.
  *
- * @param $rid
- *   The ID of a user role to alter.
- * @param $permissions
+ * @param string $role_name
+ *   The name of a user role to alter.
+ * @param array $permissions
  *   A list of permission names to revoke.
  *
  * @see user_role_change_permissions()
  * @see user_role_grant_permissions()
  */
-function user_role_revoke_permissions($rid, array $permissions = array()) {
+function user_role_revoke_permissions($role_name, array $permissions = array()) {
   // Revoke permissions for the role.
-  db_delete('role_permission')
-    ->condition('rid', $rid)
-    ->condition('permission', $permissions, 'IN')
-    ->execute();
-
-  // Clear the user access cache.
-  backdrop_static_reset('user_access');
-  backdrop_static_reset('user_role_permissions');
+  $user_role = user_role_load($role_name);
+  $user_role->permissions = array_values(array_diff($user_role->permissions, $permissions));
+  user_role_save($user_role);
 }
 
 /**
@@ -2689,7 +2607,7 @@ function user_user_operations($form = array(), $form_state = array()) {
 
   if (user_access('administer permissions')) {
     $roles = user_roles(TRUE);
-    unset($roles[BACKDROP_AUTHENTICATED_RID]);  // Can't edit authenticated role.
+    unset($roles[BACKDROP_AUTHENTICATED_ROLE]);  // Can't edit authenticated role.
 
     $add_roles = array();
     foreach ($roles as $key => $value) {
@@ -2718,14 +2636,14 @@ function user_user_operations($form = array(), $form_state = array()) {
   // If the form has been posted, we need to insert the proper data for
   // role editing if necessary.
   if (!empty($form_state['submitted'])) {
-    $operation_rid = explode('-', $form_state['values']['operation']);
-    $operation = $operation_rid[0];
+    $operation_parts = explode('-', $form_state['values']['operation']);
+    $operation = $operation_parts[0];
     if ($operation == 'add_role' || $operation == 'remove_role') {
-      $rid = $operation_rid[1];
+      $role_name = $operation_parts[1];
       if (user_access('administer permissions')) {
         $operations[$form_state['values']['operation']] = array(
           'callback' => 'user_multiple_role_edit',
-          'callback arguments' => array($operation, $rid),
+          'callback arguments' => array($operation, $role_name),
         );
       }
       else {
@@ -2772,16 +2690,15 @@ function user_user_operations_block($accounts) {
 /**
  * Callback function for admin mass adding/deleting a user role.
  */
-function user_multiple_role_edit($accounts, $operation, $rid) {
-  $role_name = db_query('SELECT name FROM {role} WHERE rid = :rid', array(':rid' => $rid))->fetchField();
-
+function user_multiple_role_edit($accounts, $operation, $role_name) {
   switch ($operation) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
         // Skip adding the role to the user if they already have it.
-        if ($account !== FALSE && !isset($account->roles[$rid])) {
-          $roles = $account->roles + array($rid => $role_name);
+        if ($account !== FALSE && !in_array($role_name, $account->roles)) {
+          $roles = $account->roles;
+          $roles[] = $role_name;
           // For efficiency manually save the original account before applying
           // any changes.
           $account->original = clone $account;
@@ -2794,8 +2711,8 @@ function user_multiple_role_edit($accounts, $operation, $rid) {
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
         // Skip removing the role from the user if they already don't have it.
-        if ($account !== FALSE && isset($account->roles[$rid])) {
-          $roles = array_diff($account->roles, array($rid => $role_name));
+        if ($account !== FALSE && in_array($role_name, $account->roles)) {
+          $roles = array_diff($account->roles, array($role_name));
           // For efficiency manually save the original account before applying
           // any changes.
           $account->original = clone $account;
@@ -2910,11 +2827,11 @@ function user_filters() {
   // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[BACKDROP_AUTHENTICATED_RID]); // Don't list authorized role.
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]); // Don't list authorized role.
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
-      'field' => 'ur.rid',
+      'field' => 'ur.role',
       'options' => array(
         '[any]' => t('any'),
       ) + $roles,
@@ -2968,17 +2885,23 @@ function user_build_filter_query(SelectQuery $query) {
     if ($key == 'permission') {
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
-      $account->roles = array(BACKDROP_AUTHENTICATED_RID => 1);
+      $account->roles = array(BACKDROP_AUTHENTICATED_ROLE);
       if (user_access($value, $account)) {
         continue;
       }
+      $role_list = array();
+      $user_roles = user_roles(FALSE, NULL, TRUE);
+      foreach ($user_roles as $user_role) {
+        if (in_array($value, $user_role->permissions)) {
+          $role_list[] = $user_role->name;
+        }
+      }
       $users_roles_alias = $query->join('users_roles', 'ur', '%alias.uid = u.uid');
-      $permission_alias = $query->join('role_permission', 'p', $users_roles_alias . '.rid = %alias.rid');
-      $query->condition($permission_alias . '.permission', $value);
+      $query->condition($users_roles_alias . '.role', $role_list);
     }
     elseif ($key == 'role') {
       $users_roles_alias = $query->join('users_roles', 'ur', '%alias.uid = u.uid');
-      $query->condition($users_roles_alias . '.rid' , $value);
+      $query->condition($users_roles_alias . '.role' , $value);
     }
     else {
       $query->condition($filters[$key]['field'], $value);
@@ -3385,6 +3308,11 @@ function user_register_submit($form, &$form_state) {
   // Remove unneeded values.
   form_state_values_clean($form_state);
 
+  // Convert checkbox values to an unindexed list.
+  if (isset($form_state['values']['roles'])) {
+    $form_state['values']['roles'] = array_keys(array_filter($form_state['values']['roles']));
+  }
+
   $form_state['values']['pass'] = $pass;
   $form_state['values']['init'] = $form_state['values']['mail'];
 
@@ -3445,8 +3373,9 @@ function user_register_submit($form, &$form_state) {
  */
 function user_modules_installed($modules) {
   // Assign all available permissions to the administrator role.
-  $rid = config_get('system.core', 'user_admin_role');
-  if ($rid) {
+  $role_name = config_get('system.core', 'user_admin_role');
+  $role = user_role_load($role_name);
+  if ($role) {
     $permissions = array();
     foreach ($modules as $module) {
       if ($module_permissions = module_invoke($module, 'permission')) {
@@ -3454,7 +3383,7 @@ function user_modules_installed($modules) {
       }
     }
     if (!empty($permissions)) {
-      user_role_grant_permissions($rid, $permissions);
+      user_role_grant_permissions($role_name, $permissions);
     }
   }
 }
@@ -3463,9 +3392,18 @@ function user_modules_installed($modules) {
  * Implements hook_modules_uninstalled().
  */
 function user_modules_uninstalled($modules) {
-   db_delete('role_permission')
-     ->condition('module', $modules, 'IN')
-     ->execute();
+  // Remove permissions provided by a module upon uninstall.
+  $removed_permissions = array();
+  foreach ($modules as $module_name) {
+    if ($module_permissions = module_invoke($module_name, 'permission')) {
+      $removed_permissions = array_merge($removed_permissions, array_keys($module_permissions));
+    }
+  }
+
+  $roles = user_roles();
+  foreach ($roles as $role_name => $role_label) {
+    user_role_revoke_permissions($role_name, $removed_permissions);
+  }
 }
 
 /**
@@ -3515,7 +3453,7 @@ function user_autoload_info() {
 
     // Views handlers.
     'views_handler_argument_user_uid' => 'views/views_handler_argument_user_uid.inc',
-    'views_handler_argument_users_roles_rid' => 'views/views_handler_argument_users_roles_rid.inc',
+    'views_handler_argument_users_roles' => 'views/views_handler_argument_users_roles.inc',
     'views_handler_field_user' => 'views/views_handler_field_user.inc',
     'views_handler_field_user_language' => 'views/views_handler_field_user_language.inc',
     'views_handler_field_user_link' => 'views/views_handler_field_user_link.inc',
@@ -3557,5 +3495,10 @@ function user_config_info() {
   $prefixes['user.mail'] = array(
     'label' => t('User email templates'),
     'group' => t('Configuration'),
+  );
+  $prefixes['user.role'] = array(
+    'name_key' => 'name',
+    'label_key' => 'label',
+    'group' => t('User roles'),
   );
 }

@@ -122,7 +122,7 @@ class views_handler_filter extends views_handler {
         'remember' => array('default' => FALSE, 'bool' => TRUE),
         'multiple' => array('default' => FALSE, 'bool' => TRUE),
         'remember_roles' => array('default' => array(
-          BACKDROP_AUTHENTICATED_RID => BACKDROP_AUTHENTICATED_RID,
+          BACKDROP_AUTHENTICATED_ROLE => BACKDROP_AUTHENTICATED_ROLE,
         )),
       ),
     );

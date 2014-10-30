@@ -1357,17 +1357,25 @@ function comment_node_update_index(Node $node) {
 
   if ($index_comments === NULL) {
     // Find and save roles that can 'access comments' or 'search content'.
-    $perms = array('access comments' => array(), 'search content' => array());
-    $result = db_query("SELECT rid, permission FROM {role_permission} WHERE permission IN ('access comments', 'search content')");
-    foreach ($result as $record) {
-      $perms[$record->permission][$record->rid] = $record->rid;
+    $perms = array(
+      'access comments' => array(),
+      'search content' => array(),
+    );
+    $roles = user_roles(FALSE, NULL, TRUE);
+    foreach ($roles as $role_name => $role) {
+      if (in_array('access comments', $role->permissions)) {
+        $perms['access comments'][$role_name] = $role_name;
+      }
+      if (in_array('search content', $role->permissions)) {
+        $perms['search content'][$role_name] = $role_name;
+      }
     }
 
     // Prevent indexing of comments if there are any roles that can search but
     // not view comments.
     $index_comments = TRUE;
-    foreach ($perms['search content'] as $rid) {
-      if (!isset($perms['access comments'][$rid]) && ($rid <= BACKDROP_AUTHENTICATED_RID || !isset($perms['access comments'][BACKDROP_AUTHENTICATED_RID]))) {
+    foreach ($perms['search content'] as $role_name) {
+      if (!isset($perms['access comments'][$role_name]) && ($role_name === DRUPAL_AUTHENTICATED_RID || $role_name === DRUPAL_ANONYMOUS_RID || !isset($perms['access comments'][DRUPAL_AUTHENTICATED_RID]))) {
         $index_comments = FALSE;
         break;
       }
@@ -2270,7 +2278,7 @@ function theme_comment_post_forbidden($variables) {
       // We only output a link if we are certain that users will get permission
       // to post comments by logging in.
       $comment_roles = user_roles(TRUE, 'post comments');
-      $authenticated_post_comments = isset($comment_roles[BACKDROP_AUTHENTICATED_RID]);
+      $authenticated_post_comments = isset($comment_roles[BACKDROP_AUTHENTICATED_ROLE]);
     }
 
     if ($authenticated_post_comments) {

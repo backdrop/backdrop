@@ -13,7 +13,7 @@
 class views_handler_filter_user_roles extends views_handler_filter_many_to_one {
   function get_value_options() {
     $this->value_options = user_roles(TRUE);
-    unset($this->value_options[BACKDROP_AUTHENTICATED_RID]);
+    unset($this->value_options[BACKDROP_AUTHENTICATED_ROLE]);
   }
 
   /**
@@ -21,8 +21,8 @@ class views_handler_filter_user_roles extends views_handler_filter_many_to_one {
    */
   function operators() {
     $operators = parent::operators();
-    $operators['empty']['title'] = t("Only has the 'authenticated user' role");
-    $operators['not empty']['title'] = t("Has roles in addition to 'authenticated user'");
+    $operators['empty']['title'] = t("Only has the 'Authenticated' role");
+    $operators['not empty']['title'] = t("Has roles in addition to 'Authenticated'");
     return $operators;
   }
 }

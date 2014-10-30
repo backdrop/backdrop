@@ -121,8 +121,8 @@ function update_prepare_bootstrap() {
   // to happen AFTER the database bootstraps because of
   // backdrop_get_installed_schema_version().
   $system_schema = backdrop_get_installed_schema_version('system');
-  if ($system_schema > 7000) {
-    $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION;
+  if ($system_schema > 7000 || $system_schema < 6000) {
+    $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION || $system_schema < 6000;
     $requirements = array(
       'drupal 7 version' => array(
         'title' => 'Drupal 7 version',
@@ -185,6 +185,18 @@ function update_prepare_bootstrap() {
           'primary key' => array('name'),
         );
         db_create_table('state', $schema);
+      }
+
+      // Update role ID to be a varchar instead of an integer.
+      $role_column = array(
+        'type' => 'varchar',
+        'length' => 64,
+        'description' => 'Primary Key: The name of the role.',
+        'not null' => TRUE,
+        'default' => '',
+      );
+      if (!db_field_exists('users_roles', 'role')) {
+        db_add_field('users_roles', 'role', $role_column);
       }
     }
   }

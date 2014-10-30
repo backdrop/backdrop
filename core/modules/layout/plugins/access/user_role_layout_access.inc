@@ -10,7 +10,7 @@ class UserRoleLayoutAccess extends LayoutAccess {
   function __construct($plugin_name, array $data = array()) {
     parent::__construct($plugin_name, $data);
     $this->settings += array(
-      'rids' => array(),
+      'roles' => array(),
     );
   }
 
@@ -18,8 +18,8 @@ class UserRoleLayoutAccess extends LayoutAccess {
    * {@inheritdoc}
    */
   function summary() {
-    $rids = backdrop_map_assoc($this->settings['rids']);
-    $roles = array_intersect_key(user_roles(), $rids);
+    $role_names = backdrop_map_assoc($this->settings['roles']);
+    $roles = array_intersect_key(user_roles(), $role_names);
     if (empty($roles)) {
       return t('User can have any role');
     }
@@ -31,8 +31,8 @@ class UserRoleLayoutAccess extends LayoutAccess {
    */
   function checkAccess() {
     $account = $this->contexts['user']->data;
-    $rids = array_keys($account->roles);
-    return count(array_intersect($this->settings['rids'], $rids)) > 0;
+    $roles = $account->roles;
+    return count(array_intersect($this->settings['roles'], $roles)) > 0;
   }
 
   /**
@@ -40,10 +40,10 @@ class UserRoleLayoutAccess extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['rids'] = array(
+    $form['roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Role'),
-      '#default_value' => $this->settings['rids'],
+      '#default_value' => $this->settings['roles'],
       '#options' => user_roles(),
       '#description' => t('Only the checked roles will be granted access.'),
     );
@@ -54,6 +54,6 @@ class UserRoleLayoutAccess extends LayoutAccess {
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
-    $this->settings['rids'] = array_keys(array_filter($form_state['values']['rids']));
+    $this->settings['roles'] = array_keys(array_filter($form_state['values']['roles']));
   }
 }

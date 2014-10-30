@@ -2609,7 +2609,7 @@ function _form_options_flatten($array) {
       _form_options_flatten($value);
     }
     else {
-      $return[$key] = 1;
+      $return[$key] = $value;
     }
   }
 

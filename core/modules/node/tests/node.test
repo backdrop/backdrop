@@ -877,9 +877,9 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
     // Clear permissions for authenticated users.
-    db_delete('role_permission')
-      ->condition('rid', BACKDROP_AUTHENTICATED_RID)
-      ->execute();
+    $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
+    $role->permissions = array();
+    user_role_save($role);
   }
 
   /**
@@ -1521,7 +1521,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     // Remove the "view own unpublished content" permission which is set
     // by default for authenticated users so we can test this permission
     // correctly.
-    user_role_revoke_permissions(BACKDROP_AUTHENTICATED_RID, array('view own unpublished content'));
+    user_role_revoke_permissions(BACKDROP_AUTHENTICATED_ROLE, array('view own unpublished content'));
 
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'access content overview', 'administer nodes', 'bypass node access'));
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
@@ -1753,7 +1753,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     // Disallow anonymous users to view content.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access content' => FALSE,
     ));
 

@@ -325,6 +325,9 @@ function user_profile_form_submit($form, &$form_state) {
   // Remove unneeded values.
   form_state_values_clean($form_state);
 
+  // Convert checkbox values to an unindexed list.
+  $form_state['values']['roles'] = array_keys(array_filter($form_state['values']['roles']));
+
   entity_form_submit_build_entity('user', $account, $form, $form_state);
   $account->save();
   $form_state['values']['uid'] = $account->uid;

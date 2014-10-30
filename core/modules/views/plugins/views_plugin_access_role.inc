@@ -28,9 +28,9 @@ class views_plugin_access_role extends views_plugin_access {
       return t('Multiple roles');
     }
     else {
-      $rids = views_ui_get_roles();
-      $rid = reset($this->options['role']);
-      return check_plain($rids[$rid]);
+      $roles = user_roles();
+      $role_name = reset($this->options['role']);
+      return check_plain($roles[$role_name]);
     }
   }
 
@@ -48,7 +48,7 @@ class views_plugin_access_role extends views_plugin_access {
       '#type' => 'checkboxes',
       '#title' => t('Role'),
       '#default_value' => $this->options['role'],
-      '#options' => array_map('check_plain', views_ui_get_roles()),
+      '#options' => array_map('check_plain', user_roles()),
       '#description' => t('Only the checked roles will be able to access this display. Note that users with "access all views" can see any view, regardless of role.'),
     );
   }
