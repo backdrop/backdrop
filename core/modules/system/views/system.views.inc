@@ -217,12 +217,6 @@ function system_views_data() {
       'left_field' => 'tid',
       'extra' => array(array('field' => 'type', 'value' => 'taxonomy_term')),
     ),
-    // Link ourself to the {taxonomy_vocabulary} table so we can provide taxonomy_vocabulary->file relationships.
-    'taxonomy_vocabulary' => array(
-      'field' => 'id',
-      'left_field' => 'vid',
-      'extra' => array(array('field' => 'type', 'value' => 'taxonomy_vocabulary')),
-    ),
   );
 
   // Provide a relationship between the files table and each entity type, and between each entity

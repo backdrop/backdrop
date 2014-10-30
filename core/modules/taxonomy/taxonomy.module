@@ -39,12 +39,12 @@ function taxonomy_permission() {
   );
   foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
     $permissions += array(
-      'edit terms in ' . $vocabulary->vid => array(
+      'edit terms in ' . $vocabulary->machine_name => array(
         'title' => t('Edit terms in %vocabulary', array('%vocabulary' => $vocabulary->name)),
       ),
     );
     $permissions += array(
-       'delete terms in ' . $vocabulary->vid => array(
+       'delete terms in ' . $vocabulary->machine_name => array(
          'title' => t('Delete terms from %vocabulary', array('%vocabulary' => $vocabulary->name)),
       ),
     );
@@ -66,7 +66,7 @@ function taxonomy_entity_info() {
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'tid',
-        'bundle' => 'vocabulary_machine_name',
+        'bundle' => 'vocabulary',
       ),
       'bundle keys' => array(
         'bundle' => 'machine_name',
@@ -81,7 +81,7 @@ function taxonomy_entity_info() {
       ),
     ),
   );
-  foreach (taxonomy_vocabulary_get_names() as $machine_name => $vocabulary) {
+  foreach (taxonomy_vocabulary_load_multiple(FALSE) as $machine_name => $vocabulary) {
     $return['taxonomy_term']['bundles'][$machine_name] = array(
       'label' => $vocabulary->name,
       'admin' => array(
@@ -92,16 +92,6 @@ function taxonomy_entity_info() {
       ),
     );
   }
-  $return['taxonomy_vocabulary'] = array(
-    'label' => t('Taxonomy vocabulary'),
-    'entity class' => 'TaxonomyVocabulary',
-    'controller class' => 'TaxonomyVocabularyController',
-    'base table' => 'taxonomy_vocabulary',
-    'entity keys' => array(
-      'id' => 'vid',
-    ),
-    'fieldable' => FALSE,
-  );
 
   return $return;
 }
@@ -216,7 +206,7 @@ function taxonomy_theme() {
     ),
     'taxonomy_term' => array(
       'render element' => 'elements',
-      'template' => 'taxonomy-term',
+      'template' => 'templates/taxonomy-term',
     ),
   );
 }
@@ -231,7 +221,7 @@ function taxonomy_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_vocabularies'),
     'access arguments' => array('administer taxonomy'),
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
     'title' => 'List',
@@ -244,7 +234,7 @@ function taxonomy_menu() {
     'page arguments' => array('taxonomy_form_vocabulary'),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
 
   $items['taxonomy/term/%taxonomy_term'] = array(
@@ -254,7 +244,7 @@ function taxonomy_menu() {
     'page callback' => 'taxonomy_term_page',
     'page arguments' => array(2),
     'access arguments' => array('access content'),
-    'file' => 'taxonomy.pages.inc',
+    'file' => 'includes/taxonomy.pages.inc',
   );
   $items['taxonomy/term/%taxonomy_term/view'] = array(
     'title' => 'View',
@@ -270,7 +260,7 @@ function taxonomy_menu() {
     'access arguments' => array('edit', 2),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
   $items['taxonomy/term/%taxonomy_term/delete'] = array(
     'title' => 'Delete',
@@ -280,7 +270,7 @@ function taxonomy_menu() {
     'access arguments' => array('delete', 2),
     'type' => MENU_LOCAL_TASK,
     'weight' => 11,
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
   $items['taxonomy/term/%taxonomy_term/feed'] = array(
     'title' => 'Taxonomy term',
@@ -290,46 +280,55 @@ function taxonomy_menu() {
     'page arguments' => array(2),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
-    'file' => 'taxonomy.pages.inc',
+    'file' => 'includes/taxonomy.pages.inc',
   );
   $items['taxonomy/autocomplete'] = array(
     'title' => 'Autocomplete taxonomy',
     'page callback' => 'taxonomy_autocomplete',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
-    'file' => 'taxonomy.pages.inc',
+    'file' => 'includes/taxonomy.pages.inc',
   );
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
-    'title callback' => 'entity_label',
-    'title arguments' => array('taxonomy_vocabulary', 3),
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary'] = array(
+    'title callback' => 'taxonomy_vocabulary_title',
+    'title arguments' => array(3),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_terms', 3),
     'access arguments' => array('administer taxonomy'),
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/list'] = array(
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20,
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/edit'] = array(
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary', 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_TASK,
     'weight' => -10,
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
   );
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/add'] = array(
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/add'] = array(
     'title' => 'Add term',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_term', NULL, 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'taxonomy.admin.inc',
+    'file' => 'includes/taxonomy.admin.inc',
+  );
+
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('taxonomy_vocabulary_confirm_delete', 3),
+    'access arguments' => array('administer taxonomy'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/taxonomy.admin.inc',
   );
 
   return $items;
@@ -369,19 +368,14 @@ function taxonomy_term_access($op, $term) {
     return FALSE;
   }
 
-  return user_access("$op terms in $term->vid") || user_access('administer taxonomy');
+  return user_access("$op terms in $term->vocabulary") || user_access('administer taxonomy');
 }
 
 /**
- * Returns the sanitized name of a vocabulary.
- *
- * Deprecated. This function was previously used as a menu item title callback
- * but has been replaced by the label() method which does not sanitize the title
- * (since the menu system does that automatically). Use the label() method for
- * title callbacks, and call check_plain() directly if you need it sanitized.
+ * Returns the title of a vocabulary.
  */
-function taxonomy_admin_vocabulary_title_callback(TaxonomyVocabulary $vocabulary) {
-  return check_plain($vocabulary->label());
+function taxonomy_vocabulary_title(TaxonomyVocabulary $vocabulary) {
+  return $vocabulary->name;
 }
 
 /**
@@ -406,18 +400,21 @@ function taxonomy_vocabulary_save(TaxonomyVocabulary $vocabulary) {
  * vocabulary references. All taxonomy terms of the deleted vocabulary
  * will be deleted as well.
  */
-function taxonomy_vocabulary_delete($vid) {
-  taxonomy_vocabulary_delete_multiple(array($vid));
+function taxonomy_vocabulary_delete($vocabulary_name) {
+  $vocabulary = taxonomy_vocabulary_load($vocabulary_name);
+  $vocabulary->delete();
 }
 
 /**
  * Deletes vocabularies.
  *
- * @param $vids
- *   The vocabulary ids.
+ * @param array $vocabulary_names
+ *   The vocabulary machine names.
  */
-function taxonomy_vocabulary_delete_multiple(array $vids) {
-  entity_delete_multiple('taxonomy_vocabulary', $vids);
+function taxonomy_vocabulary_delete_multiple(array $vocabulary_names) {
+  foreach ($vocabulary_names as $vocabulary_name) {
+    taxonomy_vocabulary_delete($vocabulary_name);
+  }
 }
 
 /**
@@ -465,7 +462,7 @@ function taxonomy_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
  *   An integer that represents the level of the vocabulary's hierarchy.
  */
 function taxonomy_check_vocabulary_hierarchy(TaxonomyVocabulary $vocabulary, $changed_term) {
-  $tree = taxonomy_get_tree($vocabulary->vid);
+  $tree = taxonomy_get_tree($vocabulary->machine_name);
   $hierarchy = TAXONOMY_HIERARCHY_DISABLED;
   foreach ($tree as $term) {
     // Update the changed term with the new parent value before comparison.
@@ -704,10 +701,10 @@ function template_preprocess_taxonomy_term(&$variables) {
   field_attach_preprocess('taxonomy_term', $term, $variables['content'], $variables);
 
   // Gather classes, and clean up name so there are no underscores.
-  $vocabulary_name_css = str_replace('_', '-', $term->vocabulary_machine_name);
+  $vocabulary_name_css = str_replace('_', '-', $term->vocabulary);
   $variables['classes_array'][] = 'vocabulary-' . $vocabulary_name_css;
 
-  $variables['theme_hook_suggestions'][] = 'taxonomy_term__' . $term->vocabulary_machine_name;
+  $variables['theme_hook_suggestions'][] = 'taxonomy_term__' . $term->vocabulary;
   $variables['theme_hook_suggestions'][] = 'taxonomy_term__' . $term->tid;
 }
 
@@ -742,21 +739,22 @@ function taxonomy_vocabulary_static_reset(array $ids = NULL) {
 /**
  * Get names for all taxonomy vocabularies.
  *
+ * This function previously queried the database for a list of vocabulary names,
+ * but now is unnecessary as vocabulary names are stored exclusively in
+ * configuration. The return value is compatible with that of loading the
+ * full vocabularies through taxonomy_vocabulary_load_multiple().
+ *
  * @return
  *   An associative array of objects keyed by vocabulary machine name with
  *   information about taxonomy vocabularies. Each object has properties:
  *   - name: The vocabulary name.
  *   - machine_name: The machine name.
- *   - vid: The vocabulary ID.
+ *
+ * @deprecated since 1.0
+ * @see taxonomy_vocabulary_load_multiple()
  */
 function taxonomy_vocabulary_get_names() {
-  $names = &backdrop_static(__FUNCTION__);
-
-  if (!isset($names)) {
-    $names = db_query('SELECT name, machine_name, vid FROM {taxonomy_vocabulary}')->fetchAllAssoc('machine_name');
-  }
-
-  return $names;
+  return taxonomy_vocabulary_load_multiple(FALSE);
 }
 
 /**
@@ -817,14 +815,14 @@ function taxonomy_term_load_parents_all($tid) {
  *
  * @param $tid
  *   A taxonomy term ID.
- * @param $vid
- *   An optional vocabulary ID to restrict the child search.
+ * @param $vocabulary_name
+ *   An optional vocabulary name to restrict the child search.
  *
  * @return
  *   An array of term objects that are the children of the term $tid, or an
  *   empty array when no children exist.
  */
-function taxonomy_term_load_children($tid, $vid = 0) {
+function taxonomy_term_load_children($tid, $vocabulary_name = NULL) {
   $children = &backdrop_static(__FUNCTION__, array());
 
   if ($tid && !isset($children[$tid])) {
@@ -832,8 +830,8 @@ function taxonomy_term_load_children($tid, $vid = 0) {
     $query->join('taxonomy_term_hierarchy', 'h', 'h.tid = t.tid');
     $query->addField('t', 'tid');
     $query->condition('h.parent', $tid);
-    if ($vid) {
-      $query->condition('t.vid', $vid);
+    if ($vocabulary_name) {
+      $query->condition('t.vocabulary', $vocabulary_name);
     }
     $query->addTag('term_access');
     $query->orderBy('t.weight');
@@ -848,14 +846,14 @@ function taxonomy_term_load_children($tid, $vid = 0) {
 /**
  * Create a hierarchical representation of a vocabulary.
  *
- * @param $vid
- *   Which vocabulary to generate the tree for.
- * @param $parent
+ * @param string $vocabulary_name
+ *   The vocabulary for which to generate the tree.
+ * @param int $parent
  *   The term ID under which to generate the tree. If 0, generate the tree
  *   for the entire vocabulary.
- * @param $max_depth
+ * @param int $max_depth
  *   The number of levels of the tree to return. Leave NULL to return all levels.
- * @param $load_entities
+ * @param bool $load_entities
  *   If TRUE, a full entity load will occur on the term objects. Otherwise they
  *   are partial objects queried directly from the {taxonomy_term_data} table to
  *   save execution time and memory consumption when listing large numbers of
@@ -867,17 +865,17 @@ function taxonomy_term_load_children($tid, $vid = 0) {
  *   Results are statically cached. Term objects will be partial or complete
  *   depending on the $load_entities parameter.
  */
-function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities = FALSE) {
+function taxonomy_get_tree($vocabulary_name, $parent = 0, $max_depth = NULL, $load_entities = FALSE) {
   $children = &backdrop_static(__FUNCTION__, array());
   $parents = &backdrop_static(__FUNCTION__ . ':parents', array());
   $terms = &backdrop_static(__FUNCTION__ . ':terms', array());
 
   // We cache trees, so it's not CPU-intensive to call taxonomy_get_tree() on a
   // term and its children, too.
-  if (!isset($children[$vid])) {
-    $children[$vid] = array();
-    $parents[$vid] = array();
-    $terms[$vid] = array();
+  if (!isset($children[$vocabulary_name])) {
+    $children[$vocabulary_name] = array();
+    $parents[$vocabulary_name] = array();
+    $terms[$vocabulary_name] = array();
 
     $query = db_select('taxonomy_term_data', 't');
     $query->join('taxonomy_term_hierarchy', 'h', 'h.tid = t.tid');
@@ -886,25 +884,25 @@ function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities 
       ->addTag('term_access')
       ->fields('t')
       ->fields('h', array('parent'))
-      ->condition('t.vid', $vid)
+      ->condition('t.vocabulary', $vocabulary_name)
       ->orderBy('t.weight')
       ->orderBy('t.name')
       ->execute();
 
     foreach ($result as $term) {
-      $children[$vid][$term->parent][] = $term->tid;
-      $parents[$vid][$term->tid][] = $term->parent;
-      $terms[$vid][$term->tid] = $term;
+      $children[$vocabulary_name][$term->parent][] = $term->tid;
+      $parents[$vocabulary_name][$term->tid][] = $term->parent;
+      $terms[$vocabulary_name][$term->tid] = $term;
     }
   }
 
   // Load full entities, if necessary. The entity controller statically
   // caches the results.
   if ($load_entities) {
-    $term_entities = taxonomy_term_load_multiple(array_keys($terms[$vid]));
+    $term_entities = taxonomy_term_load_multiple(array_keys($terms[$vocabulary_name]));
   }
 
-  $max_depth = (!isset($max_depth)) ? count($children[$vid]) : $max_depth;
+  $max_depth = (!isset($max_depth)) ? count($children[$vocabulary_name]) : $max_depth;
   $tree = array();
 
   // Keeps track of the parents we have to process, the last entry is used
@@ -918,24 +916,24 @@ function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities 
     $parent = array_pop($process_parents);
     // The number of parents determines the current depth.
     $depth = count($process_parents);
-    if ($max_depth > $depth && !empty($children[$vid][$parent])) {
+    if ($max_depth > $depth && !empty($children[$vocabulary_name][$parent])) {
       $has_children = FALSE;
-      $child = current($children[$vid][$parent]);
+      $child = current($children[$vocabulary_name][$parent]);
       do {
         if (empty($child)) {
           break;
         }
-        $term = $load_entities ? $term_entities[$child] : $terms[$vid][$child];
-        if (isset($parents[$vid][$term->tid])) {
+        $term = $load_entities ? $term_entities[$child] : $terms[$vocabulary_name][$child];
+        if (isset($parents[$vocabulary_name][$term->tid])) {
           // Clone the term so that the depth attribute remains correct
           // in the event of multiple parents.
           $term = clone $term;
         }
         $term->depth = $depth;
         unset($term->parent);
-        $term->parents = $parents[$vid][$term->tid];
+        $term->parents = $parents[$vocabulary_name][$term->tid];
         $tree[] = $term;
-        if (!empty($children[$vid][$term->tid])) {
+        if (!empty($children[$vocabulary_name][$term->tid])) {
           $has_children = TRUE;
 
           // We have to continue with this parent later.
@@ -945,17 +943,17 @@ function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities 
 
           // Reset pointers for child lists because we step in there more often
           // with multi parents.
-          reset($children[$vid][$term->tid]);
+          reset($children[$vocabulary_name][$term->tid]);
           // Move pointer so that we get the correct term the next time.
-          next($children[$vid][$parent]);
+          next($children[$vocabulary_name][$parent]);
           break;
         }
-      } while ($child = next($children[$vid][$parent]));
+      } while ($child = next($children[$vocabulary_name][$parent]));
 
       if (!$has_children) {
         // We processed all terms in this hierarchy-level, reset pointer
         // so that this function works the next time it gets called.
-        reset($children[$vid][$parent]);
+        reset($children[$vocabulary_name][$parent]);
       }
     }
   }
@@ -971,23 +969,16 @@ function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities 
  *
  * @param $name
  *   Name of the term to search for.
- * @param $vocabulary
+ * @param $vocabulary_name
  *   (optional) Vocabulary machine name to limit the search. Defaults to NULL.
  *
  * @return
  *   An array of matching term objects.
  */
-function taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL) {
+function taxonomy_term_load_multiple_by_name($name, $vocabulary_name = NULL) {
   $conditions = array('name' => trim($name));
-  if (isset($vocabulary)) {
-    $vocabularies = taxonomy_vocabulary_get_names();
-    if (isset($vocabularies[$vocabulary])){
-      $conditions['vid'] = $vocabularies[$vocabulary]->vid;
-    }
-    else {
-      // Return an empty array when filtering by a non-existing vocabulary.
-      return array();
-    }
+  if (isset($vocabulary_name)) {
+    $conditions['vocabulary'] = $vocabulary_name;
   }
   return taxonomy_term_load_multiple(array(), $conditions);
 }
@@ -997,24 +988,22 @@ function taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL) {
  */
 function taxonomy_autoload_info() {
   return array(
-    'TaxonomyTerm' => 'taxonomy.entity.inc',
-    'TaxonomyTermController' => 'taxonomy.entity.inc',
-    'TaxonomyVocabulary' => 'taxonomy.entity.inc',
-    'TaxonomyVocabularyController' => 'taxonomy.entity.inc',
+    'TaxonomyTerm' => 'includes/taxonomy.entity.inc',
+    'TaxonomyTermController' => 'includes/taxonomy.entity.inc',
+    'TaxonomyVocabulary' => 'includes/taxonomy_vocabulary.class.inc',
     // Views handlers.
     'views_handler_argument_taxonomy' => 'views/views_handler_argument_taxonomy.inc',
     'views_handler_argument_term_node_tid' => 'views/views_handler_argument_term_node_tid.inc',
     'views_handler_argument_term_node_tid_depth' => 'views/views_handler_argument_term_node_tid_depth.inc',
     'views_handler_argument_term_node_tid_depth_modifier' => 'views/views_handler_argument_term_node_tid_depth_modifier.inc',
-    'views_handler_argument_vocabulary_vid' => 'views/views_handler_argument_vocabulary_vid.inc',
-    'views_handler_argument_vocabulary_machine_name' => 'views/views_handler_argument_vocabulary_machine_name.inc',
+    'views_handler_argument_vocabulary' => 'views/views_handler_argument_vocabulary.inc',
     'views_handler_field_taxonomy' => 'views/views_handler_field_taxonomy.inc',
     'views_handler_field_term_node_tid' => 'views/views_handler_field_term_node_tid.inc',
     'views_handler_field_term_link_edit' => 'views/views_handler_field_term_link_edit.inc',
+    'views_handler_field_vocabulary' => 'views/views_handler_field_vocabulary.inc',
     'views_handler_filter_term_node_tid' => 'views/views_handler_filter_term_node_tid.inc',
     'views_handler_filter_term_node_tid_depth' => 'views/views_handler_filter_term_node_tid_depth.inc',
-    'views_handler_filter_vocabulary_vid' => 'views/views_handler_filter_vocabulary_vid.inc',
-    'views_handler_filter_vocabulary_machine_name' => 'views/views_handler_filter_vocabulary_machine_name.inc',
+    'views_handler_filter_vocabulary' => 'views/views_handler_filter_vocabulary.inc',
     'views_handler_relationship_node_term_data' => 'views/views_handler_relationship_node_term_data.inc',
     'views_plugin_argument_validate_taxonomy_term' => 'views/views_plugin_argument_validate_taxonomy_term.inc',
     'views_plugin_argument_default_taxonomy_tid' => 'views/views_plugin_argument_default_taxonomy_tid.inc',
@@ -1059,50 +1048,109 @@ function taxonomy_term_load_multiple($tids = array(), $conditions = array()) {
  *
  * @see entity_load()
  *
- * @param $vids
- *  An array of taxonomy vocabulary IDs, or FALSE to load all vocabularies.
- * @param $conditions
- *  An array of conditions to add to the query.
+ * @param $vocabulary_names
+ *  An array of taxonomy vocabulary machine names, or FALSE to load all
+ *  vocabularies.
  *
  * @return
- *  An array of vocabulary objects, indexed by vid.
+ *  An array of vocabulary objects, indexed by machine name.
  */
-function taxonomy_vocabulary_load_multiple($vids = array(), $conditions = array()) {
-  return entity_load('taxonomy_vocabulary', $vids, $conditions);
+function taxonomy_vocabulary_load_multiple($machine_names = array()) {
+  $static = backdrop_static(__FUNCTION__, array(
+    'vocabularies' => array(),
+    'machine_names' => NULL,
+  ));
+
+  // Populate the list of machine names if FALSE is provided.
+  if ($machine_names === FALSE) {
+    if (isset($static['machine_names'])) {
+      $machine_names = $static['machine_names'];
+    }
+    else {
+      $machine_names = array();
+      $config_names = config_get_names_with_prefix('taxonomy.vocabulary.');
+      foreach ($config_names as $config_name) {
+        $machine_names[] = str_replace('taxonomy.vocabulary.', '', $config_name);
+      }
+      $static['machine_names'] = $machine_names;
+    }
+  }
+
+  // Read each machine name out of config.
+  $new_vocabularies = array();
+  foreach ($machine_names as $machine_name) {
+    if (!isset($static['vocabularies'][$machine_name])) {
+      $config = config('taxonomy.vocabulary.' . $machine_name);
+      $data = $config->get();
+      $new_vocabularies[$machine_name] = $data ? new TaxonomyVocabulary($data) : FALSE;
+    }
+  }
+
+  // Allow modules to load additional data into the new vocabularies.
+  foreach (module_implements('taxonomy_vocabulary_load') as $module) {
+    $function = $module . '_taxonomy_vocabulary_load';
+    $function($new_vocabularies);
+  }
+
+  // Add the new vocabularies to the list of statically cached vocabularies.
+  $static['vocabularies'] += $new_vocabularies;
+
+  // Return only the requested vocabularies.
+  $return = array();
+  foreach ($machine_names as $machine_name) {
+    if (isset($static['vocabularies'][$machine_name])) {
+      $return[$machine_name] = $static['vocabularies'][$machine_name];
+    }
+    else {
+      $return[$machine_name] = FALSE;
+    }
+  }
+
+  // Sort the returned vocabularies.
+  uasort($return, function($a, $b) {
+    if ($a->weight != $b->weight) {
+      return $a->weight < $b->weight ? -1 : 1;
+    }
+  });
+
+  return $return;
 }
 
 /**
  * Return the taxonomy vocabulary entity matching a vocabulary ID.
  *
- * @param $vid
- *   The vocabulary's ID.
+ * @param $machine_name
+ *   The vocabulary's machine name.
  *
  * @return TaxonomyVocabulary|false
- *   The taxonomy vocabulary entity, if exists, FALSE otherwise. Results are
+ *   The taxonomy vocabulary, if it exists, FALSE otherwise. Results are
  *   statically cached.
  *
  * @see taxonomy_vocabulary_machine_name_load()
  */
-function taxonomy_vocabulary_load($vid) {
-  $vocabularies = taxonomy_vocabulary_load_multiple(array($vid));
+function taxonomy_vocabulary_load($machine_name) {
+  $vocabularies = taxonomy_vocabulary_load_multiple(array($machine_name));
   return reset($vocabularies);
 }
 
 /**
- * Return the taxonomy vocabulary entity matching a vocabulary machine name.
+ * Drupal-compatible wrapper to load a vocabulary by machine name.
  *
- * @param $name
- *   The vocabulary's machine name.
+ * This function is no longer necessary, as all vocabularies are always loaded
+ * by machine name. Simply call taxonomy_vocabulary_load() directly.
  *
- * @return TaxonomyVocabulary|false
- *   The taxonomy vocabulary entity, if exists, FALSE otherwise. Results are
- *   statically cached.
- *
+ * @deprecated since 1.0
  * @see taxonomy_vocabulary_load()
  */
-function taxonomy_vocabulary_machine_name_load($name) {
-  $vocabularies = taxonomy_vocabulary_load_multiple(NULL, array('machine_name' => $name));
-  return reset($vocabularies);
+function taxonomy_vocabulary_machine_name_load($machine_name) {
+  return taxonomy_vocabulary_load($machine_name);
+}
+
+/**
+ * Load all Taxonomy vocabularies.
+ */
+function taxonomy_get_vocabularies() {
+  return taxonomy_vocabulary_load_multiple(FALSE);
 }
 
 /**
@@ -1135,11 +1183,11 @@ function _taxonomy_get_tid_from_term(TaxonomyTerm $term) {
  *
  * @see backdrop_explode_tags()
  */
-function taxonomy_implode_tags($tags, $vid = NULL) {
+function taxonomy_implode_tags($tags, $vocabulary_name = NULL) {
   $typed_tags = array();
   foreach ($tags as $tag) {
     // Extract terms belonging to the vocabulary in question.
-    if (!isset($vid) || $tag->vid == $vid) {
+    if (!isset($vocabulary_name) || $tag->vocabulary == $vocabulary_name) {
       // Make sure we have a completed loaded taxonomy term.
       if (isset($tag->name)) {
         // Commas and quotes in tag names are special cases, so encode 'em.
@@ -1251,7 +1299,7 @@ function taxonomy_field_validate($entity_type, $entity, $field, $instance, $lang
         foreach ($field['settings']['allowed_values'] as $settings) {
           // If no parent is specified, check if the term is in the vocabulary.
           if (isset($settings['vocabulary']) && empty($settings['parent'])) {
-            if ($settings['vocabulary'] == $terms[$item['tid']]->vocabulary_machine_name) {
+            if ($settings['vocabulary'] == $terms[$item['tid']]->vocabulary) {
               $validate = TRUE;
               break;
             }
@@ -1376,8 +1424,8 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
 function taxonomy_allowed_values($field) {
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
-    if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
-      if ($terms = taxonomy_get_tree($vocabulary->vid, $tree['parent'])) {
+    if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+      if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
           $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
         }
@@ -1483,8 +1531,8 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
     $field = field_widget_field($element, $form_state);
     $vocabularies = array();
     foreach ($field['settings']['allowed_values'] as $tree) {
-      if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
-        $vocabularies[$vocabulary->vid] = $vocabulary;
+      if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+        $vocabularies[$vocabulary->machine_name] = $vocabulary;
       }
     }
 
@@ -1493,16 +1541,15 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
     foreach ($typed_terms as $typed_term) {
       // See if the term exists in the chosen vocabulary and return the tid;
       // otherwise, create a new 'autocreate' term for insert/update.
-      if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)))) {
+      if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vocabulary' => array_keys($vocabularies)))) {
         $term = array_pop($possibilities);
       }
       else {
         $vocabulary = reset($vocabularies);
         $term = array(
           'tid' => 'autocreate',
-          'vid' => $vocabulary->vid,
           'name' => $typed_term,
-          'vocabulary_machine_name' => $vocabulary->machine_name,
+          'vocabulary' => $vocabulary->machine_name,
         );
       }
       $value[] = (array)$term;
@@ -1704,35 +1751,3 @@ function taxonomy_taxonomy_term_delete(TaxonomyTerm $term) {
 /**
  * @} End of "defgroup taxonomy_index".
  */
-
-/**
- * Implements hook_entity_query_alter().
- *
- * Converts EntityFieldQuery instances on taxonomy terms that have an entity
- * condition on term bundles (vocabulary machine names). Since the vocabulary
- * machine name is not present in the {taxonomy_term_data} table itself, we have
- * to convert the bundle condition into a property condition of vocabulary IDs
- * to match against {taxonomy_term_data}.vid.
- */
-function taxonomy_entity_query_alter($query) {
-  $conditions = &$query->entityConditions;
-
-  // Alter only taxonomy term queries with bundle conditions.
-  if (isset($conditions['entity_type']) && $conditions['entity_type']['value'] == 'taxonomy_term' && isset($conditions['bundle'])) {
-    // Convert vocabulary machine names to vocabulary IDs.
-    $vocabulary_data = taxonomy_vocabulary_get_names();
-    $vids = array();
-    if (is_array($conditions['bundle']['value'])) {
-      foreach ($conditions['bundle']['value'] as $vocabulary_machine_name) {
-        $vids[] = $vocabulary_data[$vocabulary_machine_name]->vid;
-      }
-    }
-    else {
-      $vocabulary_machine_name = $conditions['bundle']['value'];
-      $vids = $vocabulary_data[$vocabulary_machine_name]->vid;
-    }
-
-    $query->propertyCondition('vid', $vids, $conditions['bundle']['operator']);
-    unset($conditions['bundle']);
-  }
-}

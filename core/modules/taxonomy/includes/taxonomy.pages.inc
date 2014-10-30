@@ -129,14 +129,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
 
   $term_matches = array();
   if ($tag_last != '') {
-
-    // Part of the criteria for the query come from the field's own settings.
-    $vids = array();
-    $vocabularies = taxonomy_vocabulary_get_names();
-    foreach ($field['settings']['allowed_values'] as $tree) {
-      $vids[] = $vocabularies[$tree['vocabulary']]->vid;
-    }
-
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
     $query->addTag('term_access');
@@ -146,9 +138,10 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
       $query->condition('t.name', $tags_typed, 'NOT IN');
     }
     // Select rows that match by term name.
+    $vocabulary_list = isset($field['settings']['allowed_values']) ? $field['settings']['allowed_values'] : array();
     $tags_return = $query
       ->fields('t', array('tid', 'name'))
-      ->condition('t.vid', $vids)
+      ->condition('t.vocabulary', $vocabulary_list)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
       ->range(0, 10)
       ->execute()

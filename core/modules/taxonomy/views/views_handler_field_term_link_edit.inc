@@ -14,11 +14,7 @@ class views_handler_field_term_link_edit extends views_handler_field {
   function construct() {
     parent::construct();
     $this->additional_fields['tid'] = 'tid';
-    $this->additional_fields['vid'] = 'vid';
-    $this->additional_fields['vocabulary_machine_name'] = array(
-      'table' => 'taxonomy_vocabulary',
-      'field' => 'machine_name',
-    );
+    $this->additional_fields['vocabulary'] = 'vocabulary';
   }
 
   function option_definition() {
@@ -46,13 +42,12 @@ class views_handler_field_term_link_edit extends views_handler_field {
   function render($values) {
     // Check there is an actual value, as on a relationship there may not be.
     if ($tid = $this->get_value($values, 'tid')) {
-      // Mock a term object for taxonomy_term_edit_access(). Use machine name and
-      // vid to ensure compatibility with vid based and machine name based
-      // access checks. See http://drupal.org/node/995156
-      $term = new stdClass();
-      $term->vid = $values->{$this->aliases['vid']};
-      $term->vocabulary_machine_name = $values->{$this->aliases['vocabulary_machine_name']};
-      if (taxonomy_term_edit_access($term)) {
+      // Mock a term object for taxonomy_term_access().
+      $term = new TaxonomyTerm(array(
+        'tid' => $tid,
+        'vocabulary' => $this->get_value($values, 'vocabulary')
+      ));
+      if (taxonomy_term_access('edit', $term)) {
         $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
         $tid = $this->get_value($values, 'tid');
         return l($text, 'taxonomy/term/'. $tid . '/edit', array('query' => backdrop_get_destination()));

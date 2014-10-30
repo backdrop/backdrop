@@ -202,7 +202,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
    */
   function testTermAlias() {
     // Create a term in the default 'Tags' vocabulary with URL alias.
-    $vocabulary = taxonomy_vocabulary_load(1);
+    $vocabulary = taxonomy_vocabulary_load('tags');
     $description = $this->randomName();;
     $edit = array();
     $edit['name'] = $this->randomName();

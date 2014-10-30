@@ -835,16 +835,15 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
     $field = field_info_field($element['#field_name']);
     $vocabularies = array();
     if (!empty($field['settings']['allowed_values'])) {
-      foreach ($field['settings']['allowed_values'] as $tree) {
-        if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
-          $vocabularies[$vocabulary->vid] = $tree['vocabulary'];
-        }
+      $vocabularies = $field['settings']['allowed_values'];
+      foreach ($vocabularies as $index => $settings) {
+        $vocabularies[$index] = $settings['vocabulary'];
       }
     }
     // Store the term ID of each (valid) tag that the user typed.
     $typed_terms = backdrop_explode_tags($tags);
     foreach ($typed_terms as $typed_term) {
-      if ($terms = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)))) {
+      if ($terms = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vocabulary' => $vocabularies))) {
         $term = array_pop($terms);
         $value['tids'][] = $term->tid;
       }

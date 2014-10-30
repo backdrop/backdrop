@@ -1887,14 +1887,14 @@ function hook_mail($key, &$message, $params) {
   );
   if ($context['hook'] == 'taxonomy') {
     $entity = $params['entity'];
-    $vocabulary = taxonomy_vocabulary_load($entity->vid);
+    $vocabulary = taxonomy_vocabulary_load($entity->vocabulary);
     $variables += array(
       '%term_name' => $entity->name,
       '%term_description' => $entity->description,
       '%term_id' => $entity->tid,
       '%vocabulary_name' => $vocabulary->name,
       '%vocabulary_description' => $vocabulary->description,
-      '%vocabulary_id' => $vocabulary->vid,
+      '%vocabulary_machine_name' => $vocabulary->machine_name,
     );
   }
 

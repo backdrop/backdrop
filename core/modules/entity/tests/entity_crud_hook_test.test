@@ -237,7 +237,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
    * Tests hook invocations for CRUD operations on taxonomy terms.
    */
   public function testTaxonomyTermHooks() {
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
+    $vocabulary = new TaxonomyVocabulary(array(
       'name' => 'Test vocabulary',
       'machine_name' => 'test',
       'description' => NULL,
@@ -246,8 +246,8 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
     taxonomy_vocabulary_save($vocabulary);
 
     $term = entity_create('taxonomy_term', array(
-      'vid' => $vocabulary->vid,
       'name' => 'Test term',
+      'vocabulary' => $vocabulary->machine_name,
       'description' => NULL,
       'format' => 1,
     ));
@@ -288,56 +288,6 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
       'entity_crud_hook_test_entity_predelete called for type taxonomy_term',
       'entity_crud_hook_test_taxonomy_term_delete called',
       'entity_crud_hook_test_entity_delete called for type taxonomy_term',
-    ));
-  }
-
-  /**
-   * Tests hook invocations for CRUD operations on taxonomy vocabularies.
-   */
-  public function testTaxonomyVocabularyHooks() {
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
-      'name' => 'Test vocabulary',
-      'machine_name' => 'test',
-      'description' => NULL,
-      'module' => 'entity_crud_hook_test',
-    ));
-    $_SESSION['entity_crud_hook_test'] = array();
-    taxonomy_vocabulary_save($vocabulary);
-
-    $this->assertHookMessageOrder(array(
-      'entity_crud_hook_test_taxonomy_vocabulary_presave called',
-      'entity_crud_hook_test_entity_presave called for type taxonomy_vocabulary',
-      'entity_crud_hook_test_taxonomy_vocabulary_insert called',
-      'entity_crud_hook_test_entity_insert called for type taxonomy_vocabulary',
-    ));
-
-    $_SESSION['entity_crud_hook_test'] = array();
-    $vocabulary = taxonomy_vocabulary_load($vocabulary->vid);
-
-    $this->assertHookMessageOrder(array(
-      'entity_crud_hook_test_entity_load called for type taxonomy_vocabulary',
-      'entity_crud_hook_test_taxonomy_vocabulary_load called',
-    ));
-
-    $_SESSION['entity_crud_hook_test'] = array();
-    $vocabulary->name = 'New name';
-    taxonomy_vocabulary_save($vocabulary);
-
-    $this->assertHookMessageOrder(array(
-      'entity_crud_hook_test_taxonomy_vocabulary_presave called',
-      'entity_crud_hook_test_entity_presave called for type taxonomy_vocabulary',
-      'entity_crud_hook_test_taxonomy_vocabulary_update called',
-      'entity_crud_hook_test_entity_update called for type taxonomy_vocabulary',
-    ));
-
-    $_SESSION['entity_crud_hook_test'] = array();
-    taxonomy_vocabulary_delete($vocabulary->vid);
-
-    $this->assertHookMessageOrder(array(
-      'entity_crud_hook_test_taxonomy_vocabulary_predelete called',
-      'entity_crud_hook_test_entity_predelete called for type taxonomy_vocabulary',
-      'entity_crud_hook_test_taxonomy_vocabulary_delete called',
-      'entity_crud_hook_test_entity_delete called for type taxonomy_vocabulary',
     ));
   }
 
