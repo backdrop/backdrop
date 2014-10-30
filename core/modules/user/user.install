@@ -142,16 +142,17 @@ function user_schema() {
         'default' => 0,
         'description' => 'Primary Key: {users}.uid for user.',
       ),
-      'rid' => array(
+      'role' => array(
         'type' => 'varchar',
         'length' => 64,
         'description' => 'Primary Key: The name of the role.',
         'not null' => TRUE,
+        'default' => '',
       ),
     ),
-    'primary key' => array('uid', 'rid'),
+    'primary key' => array('uid', 'role'),
     'indexes' => array(
-      'rid' => array('rid'),
+      'role' => array('role'),
     ),
     'foreign keys' => array(
       'user' => array(
@@ -379,13 +380,26 @@ function user_update_1006() {
  */
 function user_update_1007() {
   // Update role ID to be a varchar instead of an integer.
-  $rid_column = array(
-    'type' => 'varchar',
-    'length' => 64,
-    'description' => 'Primary Key: The name of the role.',
-    'not null' => TRUE,
-  );
-  db_change_field('users_roles', 'rid', 'rid', $rid_column);
+  if (db_field_exists('users_roles', 'rid')) {
+    db_drop_primary_key('users_roles');
+    db_drop_index('users_roles', 'rid');
+    // This column is added as part of the initial Backdrop update fixing
+    // initial compatibility. See update_prepare_bootstrap().
+    if (db_field_exists('users_roles', 'role')) {
+      db_drop_field('users_roles', 'role');
+    }
+    $role_column = array(
+      'type' => 'varchar',
+      'length' => 64,
+      'description' => 'Primary Key: The name of the role.',
+      'not null' => TRUE,
+      'default' => '',
+    );
+    db_change_field('users_roles', 'rid', 'role', $role_column);
+
+    db_add_primary_key('users_roles', array('uid', 'role'));
+    db_add_index('users_roles', 'role', array('role'));
+  }
 
   $admin_role_id = config_get('system.core', 'user_admin_role');
   $role_result = db_query("SELECT * FROM {role}");
@@ -421,9 +435,9 @@ function user_update_1007() {
     // Update the users table to match the new role names.
     db_update('users_roles')
       ->fields(array(
-        'rid' => $role_data['name'],
+        'role' => $role_data['name'],
       ))
-      ->condition('rid', $row->rid)
+      ->condition('role', $row->rid)
       ->execute();
 
     // Update the admin role.
@@ -434,6 +448,42 @@ function user_update_1007() {
 
   db_drop_table('role');
   db_drop_table('role_permission');
+  db_drop_field('users_roles', 'rid');
+}
+
+/**
+ * Update views that used the old role ID handlers to use role name instead.
+ */
+function user_update_1008() {
+  $configs = config_get_names_with_prefix('views.view.');
+  foreach ($configs as $config_name) {
+    $config = config($config_name);
+    $view_data = $config->get();
+    $changed = FALSE;
+    foreach ($view_data['display'] as $display_name => $display_data) {
+      foreach (array('fields', 'filters') as $handler_type) {
+        if (isset($display_data['display_options'][$handler_type])) {
+          foreach ($display_data['display_options'][$handler_type] as $handler_key => $handler_data) {
+            // Change users_roles.rid to users_roles.role.
+            if ($handler_data['table'] === 'users_roles' && $handler_data['field'] === 'rid') {
+              $view_data['display'][$display_name]['display_options'][$handler_type][$handler_key]['field'] = 'role';
+              $changed = TRUE;
+            }
+            // Change role_permission.permission to users_roles.permissions.
+            if ($handler_data['table'] === 'role_permission' && $handler_data['field'] === 'permission') {
+              $view_data['display'][$display_name]['display_options'][$handler_type][$handler_key]['table'] = 'users_roles';
+              $view_data['display'][$display_name]['display_options'][$handler_type][$handler_key]['field'] = 'permissions';
+              $changed = TRUE;
+            }
+          }
+        }
+      }
+    }
+    if ($changed) {
+      $config->setData($view_data);
+      $config->save();
+    }
+  }
 }
 
 /**

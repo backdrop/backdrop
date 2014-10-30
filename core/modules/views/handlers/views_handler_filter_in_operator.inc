@@ -309,16 +309,19 @@ class views_handler_filter_in_operator extends views_handler_filter {
       return;
     }
 
+    // Flatten the list of potential options.
+    $flat_options = form_options_flatten($this->value_options);
+
     $operator = check_plain($info[$this->operator]['short']);
     $values = '';
     if (in_array($this->operator, $this->operator_values(1))) {
       // Remove every element which is not known.
       foreach ($this->value as $value) {
-        if (!isset($this->value_options[$value])) {
+        if (!isset($flat_options[$value])) {
           unset($this->value[$value]);
         }
       }
-      // Choose different kind of ouput for 0, a single and multiple values.
+      // Choose different kind of output for 0, a single and multiple values.
       if (count($this->value) == 0) {
         $values = t('Unknown');
       }
@@ -330,8 +333,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
         $keys = $this->value;
         $value = array_shift($keys);
-        if (isset($this->value_options[$value])) {
-          $values = check_plain($this->value_options[$value]);
+        if (isset($flat_options[$value])) {
+          $values = check_plain($flat_options[$value]);
         }
         else {
           $values = '';
@@ -346,8 +349,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
             $values .= '...';
             break;
           }
-          if (isset($this->value_options[$value])) {
-            $values .= check_plain($this->value_options[$value]);
+          if (isset($flat_options[$value])) {
+            $values .= check_plain($flat_options[$value]);
           }
         }
       }
@@ -418,7 +421,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
           unset($this->value[$value]);
         }
       }
-      // Choose different kind of ouput for 0, a single and multiple values.
+      // Choose different kind of output for 0, a single and multiple values.
       if (count($this->value) == 0) {
         $errors[] = t('No valid values found on filter: @filter.', array('@filter' => $this->ui_name(TRUE)));
       }

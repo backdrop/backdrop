@@ -48,6 +48,11 @@ const BACKDROP_REQUIRED = 2;
 const BACKDROP_WEIGHT_SELECT_MAX = 100;
 
 /**
+ * Maximum length of e-mail fields.
+ */
+const EMAIL_MAX_LENGTH = 254;
+
+/**
  * Implements hook_theme().
  */
 function system_theme() {

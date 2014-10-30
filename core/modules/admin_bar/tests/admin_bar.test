@@ -196,7 +196,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     $this->backdropLogin($admin_user);
 
     // Extract the user role name that was created for above permissions.
-    $roles = array_diff($admin_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $roles = array_diff($admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $role_name = reset($roles);
 
     // Verify that Configuration does not appear.

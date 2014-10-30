@@ -1126,7 +1126,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
 class UserPermissionsTestCase extends BackdropWebTestCase {
   protected $admin_user;
-  protected $rid;
+  protected $role_name;
 
   function setUp() {
     parent::setUp();
@@ -1134,7 +1134,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
 
     // Find the new role ID - it must be the maximum.
-    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $this->role_name = reset($roles);
   }
 
@@ -1265,7 +1265,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertText($user_c->name, 'Found user C on filtered by perm admin users page');
 
     // Filter the users by role. Grab the system-generated role name for User C.
-    $c_roles = array_diff($user_c->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $c_roles = array_diff($user_c->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $edit['role'] = reset($c_roles);
     $this->backdropPost('admin/people', $edit, t('Refine'));
 

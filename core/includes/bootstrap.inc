@@ -159,12 +159,12 @@ const BACKDROP_BOOTSTRAP_FULL = 7;
 /**
  * Role ID for anonymous users.
  */
-const BACKDROP_ANONYMOUS_RID = 'anonymous';
+const BACKDROP_ANONYMOUS_ROLE = 'anonymous';
 
 /**
  * Role ID for authenticated users.
  */
-const BACKDROP_AUTHENTICATED_RID = 'authenticated';
+const BACKDROP_AUTHENTICATED_ROLE = 'authenticated';
 
 /**
  * The number of bytes in a kilobyte.

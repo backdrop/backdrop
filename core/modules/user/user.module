@@ -11,11 +11,6 @@
 const USERNAME_MAX_LENGTH = 60;
 
 /**
- * Maximum length of user e-mail text field.
- */
-const EMAIL_MAX_LENGTH = 254;
-
-/**
  * Only administrators can create user accounts.
  */
 const USER_REGISTER_ADMINISTRATORS_ONLY = 'admin_only';
@@ -386,9 +381,11 @@ function user_role_permissions($role_names = array()) {
   $all_roles = user_roles(FALSE, NULL, TRUE);
   $role_permissions = array();
   foreach ($role_names as $role_name) {
-    foreach ($all_roles[$role_name]->permissions as $permission) {
-      if (!in_array($permission, $role_permissions)) {
-        $role_permissions[] = $permission;
+    if (isset($all_roles[$role_name])) {
+      foreach ($all_roles[$role_name]->permissions as $permission) {
+        if (!in_array($permission, $role_permissions)) {
+          $role_permissions[] = $permission;
+        }
       }
     }
   }
@@ -730,7 +727,7 @@ function user_account_form(&$form, &$form_state) {
     '#options' => $roles,
     '#access' => $roles && user_access('administer permissions'),
   );
-  $form['account']['roles'][BACKDROP_AUTHENTICATED_RID] = array(
+  $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
   );
@@ -2474,7 +2471,7 @@ function user_role_delete($role_name) {
 
   // Update the users who have this role set:
   db_delete('users_roles')
-    ->condition('rid', $role_name)
+    ->condition('role', $role_name)
     ->execute();
 
   module_invoke_all('user_role_delete', $role);
@@ -2489,7 +2486,7 @@ function user_role_delete($role_name) {
  */
 function user_role_delete_access($role) {
   // Prevent the system-defined roles from being removed.
-  if ($role->name == BACKDROP_ANONYMOUS_RID || $role->name == BACKDROP_AUTHENTICATED_RID) {
+  if ($role->name == BACKDROP_ANONYMOUS_ROLE || $role->name == BACKDROP_AUTHENTICATED_ROLE) {
     return FALSE;
   }
 
@@ -2610,7 +2607,7 @@ function user_user_operations($form = array(), $form_state = array()) {
 
   if (user_access('administer permissions')) {
     $roles = user_roles(TRUE);
-    unset($roles[BACKDROP_AUTHENTICATED_RID]);  // Can't edit authenticated role.
+    unset($roles[BACKDROP_AUTHENTICATED_ROLE]);  // Can't edit authenticated role.
 
     $add_roles = array();
     foreach ($roles as $key => $value) {
@@ -2830,11 +2827,11 @@ function user_filters() {
   // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[BACKDROP_AUTHENTICATED_RID]); // Don't list authorized role.
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]); // Don't list authorized role.
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
-      'field' => 'ur.rid',
+      'field' => 'ur.role',
       'options' => array(
         '[any]' => t('any'),
       ) + $roles,
@@ -2888,7 +2885,7 @@ function user_build_filter_query(SelectQuery $query) {
     if ($key == 'permission') {
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
-      $account->roles = array(BACKDROP_AUTHENTICATED_RID);
+      $account->roles = array(BACKDROP_AUTHENTICATED_ROLE);
       if (user_access($value, $account)) {
         continue;
       }
@@ -2900,11 +2897,11 @@ function user_build_filter_query(SelectQuery $query) {
         }
       }
       $users_roles_alias = $query->join('users_roles', 'ur', '%alias.uid = u.uid');
-      $query->condition($users_roles_alias . '.rid', $role_list);
+      $query->condition($users_roles_alias . '.role', $role_list);
     }
     elseif ($key == 'role') {
       $users_roles_alias = $query->join('users_roles', 'ur', '%alias.uid = u.uid');
-      $query->condition($users_roles_alias . '.rid' , $value);
+      $query->condition($users_roles_alias . '.role' , $value);
     }
     else {
       $query->condition($filters[$key]['field'], $value);
@@ -3456,7 +3453,7 @@ function user_autoload_info() {
 
     // Views handlers.
     'views_handler_argument_user_uid' => 'views/views_handler_argument_user_uid.inc',
-    'views_handler_argument_users_roles_rid' => 'views/views_handler_argument_users_roles_rid.inc',
+    'views_handler_argument_users_roles' => 'views/views_handler_argument_users_roles.inc',
     'views_handler_field_user' => 'views/views_handler_field_user.inc',
     'views_handler_field_user_language' => 'views/views_handler_field_user_language.inc',
     'views_handler_field_user_link' => 'views/views_handler_field_user_link.inc',
@@ -3500,7 +3497,7 @@ function user_config_info() {
     'group' => t('Configuration'),
   );
   $prefixes['user.role'] = array(
-    'name_key' => 'rid',
+    'name_key' => 'name',
     'label_key' => 'label',
     'group' => t('User roles'),
   );

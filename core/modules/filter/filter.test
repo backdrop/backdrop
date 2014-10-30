@@ -529,7 +529,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    */
   function testFormatRoles() {
     // Get the role name assigned to the regular user.
-    $roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $role_name = reset($roles);
 
     // Check that this role appears in the list of roles that have access to an

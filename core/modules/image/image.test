@@ -696,7 +696,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
    */
   function testImageFieldFormattersPrivate() {
     // Remove access content permission from anonymous users.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array('access content' => FALSE));
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content' => FALSE));
     $this->_testImageFieldFormatters('private');
   }
 

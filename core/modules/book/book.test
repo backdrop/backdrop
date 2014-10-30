@@ -288,7 +288,7 @@ class BookTestCase extends BackdropWebTestCase {
     // Now grant anonymous users permission to view the printer-friendly
     // version and verify that node access restrictions still prevent them from
     // seeing it.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access printer-friendly version'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access printer-friendly version'));
     $this->backdropGet('book/export/html/' . $this->book->nid);
     $this->assertResponse('403', 'Anonymous user properly forbidden from seeing the printer-friendly version when denied by node access.');
   }

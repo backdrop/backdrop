@@ -25,32 +25,35 @@ class views_handler_field_user_permissions extends views_handler_field_prerender
     $uids = array();
     $this->items = array();
 
+    // Assemble authenticated permissions which are available for all accounts.
+    $permissions = module_invoke_all('permission');
+    $all_roles = user_roles(FALSE, NULL, TRUE);
+    $authenticated_permissions = array();
+    foreach ($all_roles[BACKDROP_AUTHENTICATED_ROLE]->permissions as $permission) {
+      $authenticated_permissions[$permission]['permissions'] = $permissions[$permission]['title'];
+    }
+
     foreach ($values as $result) {
-      $uids[] = $this->get_value($result, NULL, TRUE);
+      $uid = $this->get_value($result, NULL, TRUE);
+      $this->items[$uid] = $authenticated_permissions;
+      $uids[] = $uid;
     }
 
     if ($uids) {
-      // Get a list of all the modules implementing a hook_permission() and sort by
-      // display name.
-      $module_info = system_get_info('module');
-      $modules = array();
-      foreach (module_implements('permission') as $module) {
-        $modules[$module] = $module_info[$module]['name'];
-      }
-      asort($modules);
-
-      $permissions = module_invoke_all('permission');
-
-      $result = db_query("SELECT u.uid, u.rid, rp.permission FROM {role_permission} rp INNER JOIN {users_roles} u ON u.rid = rp.rid WHERE u.uid IN (:uids) AND rp.module IN (:modules) ORDER BY rp.permission",
-        array(':uids' => $uids, ':modules' => array_keys($modules)));
-
-      foreach ($result as $perm) {
-        $this->items[$perm->uid][$perm->permission]['permission'] = $permissions[$perm->permission]['title'];
+      $result = db_query("SELECT u.uid, u.role FROM {users_roles} u WHERE u.uid IN (:uids)", array(':uids' => $uids));
+      foreach ($result as $user) {
+        foreach ($all_roles as $user_role) {
+          foreach ($user_role->permissions as $permission) {
+            if (isset($permissions[$permission])) {
+              $this->items[$user->uid][$permission]['permissions'] = $permissions[$permission]['title'];
+            }
+          }
+        }
       }
     }
   }
 
   function render_item($count, $item) {
-    return $item['permission'];
+    return $item['permissions'];
   }
 }

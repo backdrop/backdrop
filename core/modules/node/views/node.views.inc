@@ -757,7 +757,7 @@ function node_views_analyze($view) {
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
           $roles = user_roles(FALSE, NULL, TRUE);
-          if (!in_array('access content', $roles[BACKDROP_ANONYMOUS_RID]->permissions) || !in_array('access content', $roles[BACKDROP_AUTHENTICATED_RID]->permissions)) {
+          if (!in_array('access content', $roles[BACKDROP_ANONYMOUS_ROLE]->permissions) || !in_array('access content', $roles[BACKDROP_AUTHENTICATED_ROLE]->permissions)) {
             $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
           }
           $filters = $display->handler->get_option('filters');

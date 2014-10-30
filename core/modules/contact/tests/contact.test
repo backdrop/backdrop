@@ -36,7 +36,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->deleteCategories();
 
     // Ensure that the contact form won't be shown without categories.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropLogout();
     $this->backdropGet('contact');
     $this->assertResponse(404);
@@ -77,7 +77,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     // Ensure that the contact form is shown without a category selection input.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropLogout();
     $this->backdropGet('contact');
     $this->assertText(t('Your e-mail address'), 'Contact form is shown when there is one category.');
@@ -103,12 +103,12 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
 
     // Check to see that anonymous user cannot see contact page without permission.
-    user_role_revoke_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropGet('contact');
     $this->assertResponse(403, 'Access denied to anonymous user without permission.');
 
     // Give anonymous user permission and see that page is viewable.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access site-wide contact form'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropGet('contact');
     $this->assertResponse(200, 'Access granted to anonymous user with permission.');
 
@@ -335,12 +335,12 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
 
     // Test that anonymous users can access the contact form.
     $this->backdropLogout();
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access user contact forms'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access user contact forms'));
     $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
     // Revoke the personal contact permission for the anonymous user.
-    user_role_revoke_permissions(BACKDROP_ANONYMOUS_RID, array('access user contact forms'));
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array('access user contact forms'));
     $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(403);
 

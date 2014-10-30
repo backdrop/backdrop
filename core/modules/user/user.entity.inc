@@ -183,17 +183,17 @@ class UserStorageController extends EntityDatabaseStorageController {
       $queried_users[$key]->data = unserialize($record->data);
       $queried_users[$key]->roles = array();
       if ($record->uid) {
-        $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_RID;
+        $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_ROLE;
       }
       else {
-        $queried_users[$record->uid]->roles[] = BACKDROP_ANONYMOUS_RID;
+        $queried_users[$record->uid]->roles[] = BACKDROP_ANONYMOUS_ROLE;
       }
     }
 
     // Add any additional roles from the database.
-    $result = db_query('SELECT rid, uid FROM {users_roles} WHERE uid IN (:uids)', array(':uids' => array_keys($queried_users)));
+    $result = db_query('SELECT role, uid FROM {users_roles} WHERE uid IN (:uids)', array(':uids' => array_keys($queried_users)));
     foreach ($result as $record) {
-      $queried_users[$record->uid]->roles[] = $record->rid;
+      $queried_users[$record->uid]->roles[] = $record->role;
     }
 
     // Add the full file objects for user pictures if enabled.
@@ -218,7 +218,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       $values['created'] = REQUEST_TIME;
     }
     // Users always have the authenticated user role.
-    $values['roles'][] = BACKDROP_AUTHENTICATED_RID;
+    $values['roles'][] = BACKDROP_AUTHENTICATED_ROLE;
 
     return parent::create($values);
   }
@@ -332,12 +332,12 @@ class UserStorageController extends EntityDatabaseStorageController {
           ->condition('uid', $entity->uid)
           ->execute();
 
-        $query = db_insert('users_roles')->fields(array('uid', 'rid'));
+        $query = db_insert('users_roles')->fields(array('uid', 'role'));
         foreach ($entity->roles as $role_name) {
-          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
+          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
             $query->values(array(
               'uid' => $entity->uid,
-              'rid' => $role_name,
+              'role' => $role_name,
             ));
           }
         }
@@ -359,12 +359,12 @@ class UserStorageController extends EntityDatabaseStorageController {
     else {
       // Save user roles.
       if (count($entity->roles) > 1) {
-        $query = db_insert('users_roles')->fields(array('uid', 'rid'));
+        $query = db_insert('users_roles')->fields(array('uid', 'role'));
         foreach ($entity->roles as $role_name) {
-          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
+          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
             $query->values(array(
               'uid' => $entity->uid,
-              'rid' => $role_name,
+              'role' => $role_name,
             ));
           }
         }

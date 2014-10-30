@@ -196,9 +196,9 @@ function user_admin_account() {
   $roles = user_roles(TRUE);
   foreach ($result as $account) {
     $users_roles = array();
-    $roles_result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
+    $roles_result = db_query('SELECT role FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
     foreach ($roles_result as $user_role) {
-      $users_roles[] = check_plain($roles[$user_role->rid]);
+      $users_roles[] = check_plain($roles[$user_role->role]);
     }
     asort($users_roles);
 
@@ -293,8 +293,8 @@ function user_admin_settings($form, &$form_state) {
   // Do not allow users to set the anonymous or authenticated user roles as the
   // administrator role.
   $roles = user_roles();
-  unset($roles[BACKDROP_ANONYMOUS_RID]);
-  unset($roles[BACKDROP_AUTHENTICATED_RID]);
+  unset($roles[BACKDROP_ANONYMOUS_ROLE]);
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   $roles[0] = t('disabled');
 
   $form['admin_role']['user_admin_role'] = array(
@@ -821,17 +821,17 @@ function theme_user_admin_permissions($variables) {
         'data' => backdrop_render($form['permission'][$key]),
         'class' => array('permission'),
       );
-      foreach (element_children($form['checkboxes']) as $rid) {
-        $form['checkboxes'][$rid][$key]['#title'] = $roles[$rid] . ': ' . $form['permission'][$key]['#markup'];
-        $form['checkboxes'][$rid][$key]['#title_display'] = 'attribute';
-        $row[] = array('data' => backdrop_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'));
+      foreach (element_children($form['checkboxes']) as $role_name) {
+        $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
+        $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
+        $row[] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
       }
     }
     $rows[] = $row;
   }
   $header[] = (t('Permission'));
-  foreach (element_children($form['role_names']) as $rid) {
-    $header[] = array('data' => backdrop_render($form['role_names'][$rid]), 'class' => array('checkbox'));
+  foreach (element_children($form['role_names']) as $role_name) {
+    $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
   }
   $output = '';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
@@ -901,7 +901,7 @@ function user_admin_roles($form, $form_state) {
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
-    if ($role_name !== BACKDROP_ANONYMOUS_RID && $role_name !== BACKDROP_AUTHENTICATED_RID) {
+    if ($role_name !== BACKDROP_ANONYMOUS_ROLE && $role_name !== BACKDROP_AUTHENTICATED_ROLE) {
       $links['delete'] = array(
         'title' => t('Delete role'),
         'href' => 'admin/config/people/roles/delete/' . $role_name,
@@ -956,8 +956,8 @@ function user_admin_roles($form, $form_state) {
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
-  foreach ($form_state['values']['roles'] as $rid => $role_values) {
-    $role = $form['roles'][$rid]['#role'];
+  foreach ($form_state['values']['roles'] as $role_name => $role_values) {
+    $role = $form['roles'][$role_name]['#role'];
     $role->weight = $role_values['weight'];
     user_role_save($role);
   }
@@ -990,17 +990,17 @@ function theme_user_admin_roles($variables) {
   $form = $variables['form'];
 
   $header = array(t('Name'), t('Weight'), t('Operations'));
-  foreach (element_children($form['roles']) as $rid) {
-    $label = $form['roles'][$rid]['#role']->label;
+  foreach (element_children($form['roles']) as $role_name) {
+    $label = $form['roles'][$role_name]['#role']->label;
     $row = array();
-    if (in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
+    if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
       $row[] = t('@name <em>(required)</em>', array('@name' => $label));
     }
     else {
       $row[] = check_plain($label);
     }
-    $row[] = backdrop_render($form['roles'][$rid]['weight']);
-    $row[] = backdrop_render($form['roles'][$rid]['operations']);
+    $row[] = backdrop_render($form['roles'][$role_name]['weight']);
+    $row[] = backdrop_render($form['roles'][$role_name]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
   $row = array();

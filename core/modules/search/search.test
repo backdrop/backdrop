@@ -700,9 +700,9 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/content/formats/' . $filtered_html_format_id, $edit, t('Save configuration'));
     // Allow anonymous users to search content.
     $edit = array(
-      BACKDROP_ANONYMOUS_RID . '[search content]' => 1,
-      BACKDROP_ANONYMOUS_RID . '[access comments]' => 1,
-      BACKDROP_ANONYMOUS_RID . '[post comments]' => 1,
+      BACKDROP_ANONYMOUS_ROLE . '[search content]' => 1,
+      BACKDROP_ANONYMOUS_ROLE . '[access comments]' => 1,
+      BACKDROP_ANONYMOUS_ROLE . '[post comments]' => 1,
     );
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
 
@@ -760,7 +760,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   function testSearchResultsCommentAccess() {
     $comment_body = 'Test comment body';
     $this->comment_subject = 'Test comment subject';
-    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_RID));
+    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $this->admin_role = reset($roles);
 
     // Create a node.
@@ -774,17 +774,17 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit_comment, t('Save'));
 
     $this->backdropLogout();
-    $this->setRolePermissions(BACKDROP_ANONYMOUS_RID);
+    $this->setRolePermissions(BACKDROP_ANONYMOUS_ROLE);
     $this->assertCommentAccess('Anon user has search permission but no access comments permission, comments should not be indexed');
 
-    $this->setRolePermissions(BACKDROP_ANONYMOUS_RID, TRUE);
+    $this->setRolePermissions(BACKDROP_ANONYMOUS_ROLE, TRUE);
     $this->assertCommentAccess('Anon user has search permission and access comments permission, comments should be indexed', TRUE);
 
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/permissions');
 
     // Disable search access for authenticated user to test admin user.
-    $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID, FALSE, FALSE);
+    $this->setRolePermissions(BACKDROP_AUTHENTICATED_ROLE, FALSE, FALSE);
 
     $this->setRolePermissions($this->admin_role);
     $this->assertCommentAccess('Admin user has search permission but no access comments permission, comments should not be indexed');
@@ -792,21 +792,21 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $this->setRolePermissions($this->admin_role, TRUE);
     $this->assertCommentAccess('Admin user has search permission and access comments permission, comments should be indexed', TRUE);
 
-    $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID);
+    $this->setRolePermissions(BACKDROP_AUTHENTICATED_ROLE);
     $this->assertCommentAccess('Authenticated user has search permission but no access comments permission, comments should not be indexed');
 
-    $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID, TRUE);
+    $this->setRolePermissions(BACKDROP_AUTHENTICATED_ROLE, TRUE);
     $this->assertCommentAccess('Authenticated user has search permission and access comments permission, comments should be indexed', TRUE);
 
     // Verify that access comments permission is inherited from the
     // authenticated role.
-    $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID, TRUE, FALSE);
+    $this->setRolePermissions(BACKDROP_AUTHENTICATED_ROLE, TRUE, FALSE);
     $this->setRolePermissions($this->admin_role);
     $this->assertCommentAccess('Admin user has search permission and no access comments permission, but comments should be indexed because admin user inherits authenticated user\'s permission to access comments', TRUE);
 
     // Verify that search content permission is inherited from the authenticated
     // role.
-    $this->setRolePermissions(BACKDROP_AUTHENTICATED_RID, TRUE, TRUE);
+    $this->setRolePermissions(BACKDROP_AUTHENTICATED_ROLE, TRUE, TRUE);
     $this->setRolePermissions($this->admin_role, TRUE, FALSE);
     $this->assertCommentAccess('Admin user has access comments permission and no search permission, but comments should be indexed because admin user inherits authenticated user\'s permission to search', TRUE);
 
