@@ -1793,7 +1793,7 @@ function menu_list_system_menus() {
   return array(
     'main-menu' => 'Main menu',
     'management' => 'Management',
-    'user-menu' => 'User menu',
+    'user-menu' => 'Account menu',
   );
 }
 
