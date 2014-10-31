@@ -1470,10 +1470,6 @@ class CommentPagerTest extends CommentHelperCase {
 
 /**
  * Tests comments with node access.
- *
- * See http://drupal.org/node/886752 -- verify there is no PostgreSQL error when
- * viewing a node with threaded comments (a comment and a reply), if a node
- * access module is in use.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
   function setUp() {

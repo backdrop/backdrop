@@ -7565,8 +7565,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
     // column allows this.
     //
     // MySQL PDO silently casts e.g. FALSE and '' to 0 when inserting the value
-    // into an integer column, but PostgreSQL PDO does not. Also type cast NULL
-    // when the column does not allow this.
+    // into an integer column. Also type cast NULL when the column does not
+    // allow this.
     if (isset($object->$field) || !empty($info['not null'])) {
       if ($info['type'] == 'int' || $info['type'] == 'serial') {
         $fields[$field] = (int) $fields[$field];

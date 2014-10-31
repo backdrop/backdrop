@@ -598,12 +598,6 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   array('primary key' => array('bar')));
    * @endcode
    *
-   * The reasons for this are due to the different database engines:
-   *
-   * On PostgreSQL, changing a field definition involves adding a new field
-   * and dropping an old one which* causes any indices, primary keys and
-   * sequences (from serial-type fields) that use the changed field to be dropped.
-   *
    * On MySQL, all type 'serial' fields must be part of at least one key
    * or index as soon as they are created. You cannot use
    * db_add_{primary_key,unique_key,index}() for this purpose because
