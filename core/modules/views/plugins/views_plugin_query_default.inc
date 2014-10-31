@@ -796,8 +796,6 @@ class views_plugin_query_default extends views_plugin_query {
     // Make sure an alias is assigned
     $alias = $alias ? $alias : $field;
 
-    // PostgreSQL truncates aliases to 63 characters: http://drupal.org/node/571548
-
     // We limit the length of the original alias up to 60 characters
     // to get a unique alias later if its have duplicates
     $alias = strtolower(substr($alias, 0, 60));

@@ -15,13 +15,12 @@ Backdrop aims to provide:
 Requirements
 ------------
 - PHP 5.3.2 or higher
-- MySQL 5.0.15 or PostgreSQL 8.3 or higher with PDO enabled
+- MySQL 5.0.15 or higher with PDO enabled
 
 Installation
 ------------
 
-1. Create a new database, username, and password for Backdrop to use in MySQL
-   or PostgreSQL.
+1. Create a new database, username, and password for Backdrop to use in MySQL.
 
 2. Point your browser at the URL of your Backdrop installation. On Apache web
    servers, you will be directed to the install screen. If you're not
