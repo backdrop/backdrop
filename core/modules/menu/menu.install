@@ -12,7 +12,7 @@ function menu_install() {
   $system_menus = menu_list_system_menus();
   $t = get_t();
   $descriptions = array(
-    'main-menu' => $t('The <em>Main</em> menu is used on many sites to show the major sections of the site, often in a top navigation bar.'),
+    'main-menu' => $t('The <em>Primary navigation</em> menu is used on many sites to show the major sections of the site, often in a top navigation bar.'),
     'management' => $t('The <em>Administration</em> menu contains links for administrative tasks and content entry.'),
     'user-menu' => $t("The <em>Account</em> menu contains links related to each user's account, as well as links to 'Log in' and 'Log out'."),
   );

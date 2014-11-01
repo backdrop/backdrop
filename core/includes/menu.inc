@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API for the Backdrop menu system.
@@ -1791,7 +1790,7 @@ function menu_set_custom_theme() {
  */
 function menu_list_system_menus() {
   return array(
-    'main-menu' => 'Main menu',
+    'main-menu' => 'Primary navigation',
     'management' => 'Administration menu',
     'user-menu' => 'Account menu',
   );
