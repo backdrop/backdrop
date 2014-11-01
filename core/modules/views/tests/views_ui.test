@@ -556,7 +556,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
         break;
       }
     }
-    $this->assertTrue($found, t('Found a link to %path in the main menu', array('%path' => $view['page[path]'])));
+    $this->assertTrue($found, t('Found a link to %path in the primary navigation', array('%path' => $view['page[path]'])));
   }
 }
 
