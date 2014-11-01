@@ -2,4 +2,4 @@
 name = DBLog functionality
 description = Generate events and verify dblog entries; verify user access to log reports based on persmissions.
 group = DBLog
-file = dblog.test
+file = tests/dblog.test

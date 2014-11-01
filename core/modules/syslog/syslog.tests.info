@@ -2,4 +2,4 @@
 name = Syslog functionality
 description = Test syslog settings.
 group = Syslog
-file = syslog.test
+file = tests/syslog.test

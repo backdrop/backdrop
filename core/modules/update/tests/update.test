@@ -652,7 +652,7 @@ class UpdateTestUploadCase extends UpdateTestHelper {
     // Check to ensure an existing module can't be reinstalled. Also checks that
     // the archive was extracted since we can't know if the module is already
     // installed until after extraction.
-    $validArchiveFile = backdrop_get_path('module', 'update') . '/tests/aaa_update_test.tar.gz';
+    $validArchiveFile = backdrop_get_path('module', 'update') . '/tests/aaa_update_test/aaa_update_test.tar.gz';
     $edit = array(
       'files[project_upload]' => $validArchiveFile,
     );
