@@ -7,56 +7,56 @@
 name = SimpleTest functionality
 description = Test SimpleTest's web interface: check that the intended tests were run and ensure that test reports display the intended results. Also test SimpleTest's internal browser and APIs both explicitly and implicitly.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestBrowserTestCase]
 name = SimpleTest browser
 description = Test the internal browser of the testing framework.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestMailCaptureTestCase]
 name = SimpleTest e-mail capturing
 description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestFolderTestCase]
 name = Testing SimpleTest setUp
 description = This test will check SimpleTest's treatment of hook_install during setUp.  Image module is used for test.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestMissingDependentModuleUnitTest]
 name = Testing dependent module test
 description = This test should not load since it requires a module that is not found.
 group = SimpleTest
 dependencies[] = simpletest_missing_module
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestBrokenSetUp]
 name = Broken SimpleTest method
 description = Tests a test case that does not call parent::setUp().
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestMissingCheckedRequirements]
 name = Broken requirements test
 description = Tests a test case with missing requirements.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestInstallationProfileModuleTestsTestCase]
 name = Installation profile module tests
 description = Verifies that tests bundled with installation profile modules are found.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [SimpleTestOtherInstallationProfileModuleTestsTestCase]
 name = Other Installation profiles
 description = Verifies that tests in other installation profiles are not found.
 group = SimpleTest
-file = simpletest.test
+file = tests/simpletest.test
 
 [ActionsConfigurationTestCase]
 name = Actions configuration
