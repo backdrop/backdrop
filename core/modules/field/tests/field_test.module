@@ -102,7 +102,7 @@ function field_test_field_test_op_multiple($entity_type, $entities, $field, $ins
  * Implements hook_field_available_languages_alter().
  */
 function field_test_field_available_languages_alter(&$languages, $context) {
-  if (variable_get('field_test_field_available_languages_alter', FALSE)) {
+  if (state_get('field_test_field_available_languages_alter', FALSE)) {
     // Add an unavailable language.
     $languages[] = 'xx';
     // Remove an available language.
@@ -115,7 +115,7 @@ function field_test_field_available_languages_alter(&$languages, $context) {
  * Implements hook_field_language_alter().
  */
 function field_test_field_language_alter(&$display_language, $context) {
-  if (variable_get('field_test_language_fallback', TRUE)) {
+  if (state_get('field_test_language_fallback', TRUE)) {
     locale_field_language_fallback($display_language, $context['entity'], $context['language']);
   }
 }

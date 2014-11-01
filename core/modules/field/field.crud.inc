@@ -54,70 +54,25 @@
  * See: @link field Field API data structures @endlink.
  */
 function field_create_field($field) {
-  // Field name is required.
-  if (empty($field['field_name'])) {
-    throw new FieldException('Attempt to create an unnamed field.');
-  }
-  // Field type is required.
-  if (empty($field['type'])) {
-    throw new FieldException('Attempt to create a field with no type.');
-  }
-  // Field name cannot contain invalid characters.
-  if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $field['field_name'])) {
-    throw new FieldException('Attempt to create a field with invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character');
-  }
+  // Populate defaults.
+  $field += field_defaults_field();
+  $field['settings'] += field_info_field_settings($field['type']);
 
-  // Field name cannot be longer than 32 characters. We use backdrop_strlen()
-  // because the DB layer assumes that column widths are given in characters,
-  // not bytes.
-  if (backdrop_strlen($field['field_name']) > 32) {
-    throw new FieldException(t('Attempt to create a field with a name longer than 32 characters: %name',
-      array('%name' => $field['field_name'])));
-  }
-
-  // Ensure the field name is unique over active and disabled fields.
-  // We do not care about deleted fields.
-  $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE));
-  if (!empty($prior_field)) {
-    $message = $prior_field['active']?
-      t('Attempt to create field name %name which already exists and is active.', array('%name' => $field['field_name'])):
-      t('Attempt to create field name %name which already exists, although it is inactive.', array('%name' => $field['field_name']));
-    throw new FieldException($message);
-  }
-
-  // Disallow reserved field names. This can't prevent all field name
-  // collisions with existing entity properties, but some is better
-  // than none.
-  foreach (entity_get_info() as $type => $info) {
-    if (in_array($field['field_name'], $info['entity keys'])) {
-      throw new FieldException(t('Attempt to create field name %name which is reserved by entity type %type.', array('%name' => $field['field_name'], '%type' => $type)));
-    }
-  }
-
-  $field += array(
-    'entity_types' => array(),
-    'cardinality' => 1,
-    'translatable' => FALSE,
-    'locked' => FALSE,
-    'settings' => array(),
-    'storage' => array(),
-    'deleted' => 0,
-  );
+  // Validate the fully populated field.
+  field_validate_field($field);
 
   // Check that the field type is known.
   $field_type = field_info_field_types($field['type']);
   if (!$field_type) {
     throw new FieldException(t('Attempt to create a field of unknown type %type.', array('%type' => $field['type'])));
   }
-  // Create all per-field-type properties (needed here as long as we have
-  // settings that impact column definitions).
-  $field['settings'] += field_info_field_settings($field['type']);
+
   $field['module'] = $field_type['module'];
   $field['active'] = 1;
 
   // Provide default storage.
   $field['storage'] += array(
-    'type' => variable_get('field_storage_default', 'field_sql_storage'),
+    'type' => 'field_sql_storage',
     'settings' => array(),
   );
   // Check that the storage type is known.
@@ -129,67 +84,41 @@ function field_create_field($field) {
   $field['storage']['settings'] += field_info_storage_settings($field['storage']['type']);
   $field['storage']['module'] = $storage_type['module'];
   $field['storage']['active'] = 1;
+
+  // Fields have a large amount of data that is generated on load, so trim down
+  // the entire structure to just that which is not replaced on load.
+  $field_data = array_intersect_key($field, field_defaults_field());
+
+  // Store the field in config.
+  $config = config('field.field.' . $field['field_name']);
+  $config->setData($field_data);
+  $config->save();
+
   // Collect storage information.
   module_load_install($field['module']);
   $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array('columns' => array(), 'indexes' => array(), 'foreign keys' => array());
-  // 'columns' are hardcoded in the field type.
-  $field['columns'] = $schema['columns'];
-  // 'foreign keys' are hardcoded in the field type.
-  $field['foreign keys'] = $schema['foreign keys'];
-  // 'indexes' can be both hardcoded in the field type, and specified in the
-  // incoming $field definition.
-  $field += array(
+  $schema += array(
+    'columns' => array(),
     'indexes' => array(),
+    'foreign keys' => array(),
   );
-  $field['indexes'] += $schema['indexes'];
+  $field['columns'] = $schema['columns'];
+  $field['foreign keys'] = $schema['foreign keys'];
+  $field['indexes'] = $schema['indexes'];
 
-  // The serialized 'data' column contains everything from $field that does not
-  // have its own column and is not automatically populated when the field is
-  // read.
-  $data = $field;
-  unset($data['columns'], $data['field_name'], $data['type'], $data['active'], $data['module'], $data['storage_type'], $data['storage_active'], $data['storage_module'], $data['locked'], $data['cardinality'], $data['deleted']);
-  // Additionally, do not save the 'bundles' property populated by
-  // field_info_field().
-  unset($data['bundles']);
-
-  $record = array(
-    'field_name' => $field['field_name'],
-    'type' => $field['type'],
-    'module' => $field['module'],
-    'active' => $field['active'],
-    'storage_type' => $field['storage']['type'],
-    'storage_module' => $field['storage']['module'],
-    'storage_active' => $field['storage']['active'],
-    'locked' => $field['locked'],
-    'data' => $data,
-    'cardinality' => $field['cardinality'],
-    'translatable' => $field['translatable'],
-    'deleted' => $field['deleted'],
-  );
-
-  // Store the field and get the id back.
-  backdrop_write_record('field_config', $record);
-  $field['id'] = $record['id'];
-
-  // Invoke hook_field_storage_create_field after the field is
-  // complete (e.g. it has its id).
   try {
     // Invoke hook_field_storage_create_field after
     // backdrop_write_record() sets the field id.
     module_invoke($storage_type['module'], 'field_storage_create_field', $field);
   }
   catch (Exception $e) {
-    // If storage creation failed, remove the field_config record before
-    // rethrowing the exception.
-    db_delete('field_config')
-      ->condition('id', $field['id'])
-      ->execute();
+    // Delete the config if the field storage could not be created.
+    $config->delete();
     throw $e;
   }
 
   // Clear caches
-  field_cache_clear(TRUE);
+  field_cache_clear();
 
   // Invoke external hooks after the cache is cleared for API consistency.
   module_invoke_all('field_create_field', $field);
@@ -219,7 +148,7 @@ function field_create_field($field) {
  */
 function field_update_field($field) {
   // Check that the specified field exists.
-  $prior_field = field_read_field($field['field_name']);
+  $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE, 'include_deleted' => TRUE));
   if (empty($prior_field)) {
     throw new FieldException('Attempt to update a non-existent field.');
   }
@@ -227,7 +156,12 @@ function field_update_field($field) {
   // Use the prior field values for anything not specifically set by the new
   // field to be sure that all values are set.
   $field += $prior_field;
+  $field += field_defaults_field();
   $field['settings'] += $prior_field['settings'];
+  $field['settings'] += field_info_field_settings($field['type']);
+
+  // Validate the fully populated field.
+  field_validate_field($field, TRUE);
 
   // Some updates are always disallowed.
   if ($field['type'] != $prior_field['type']) {
@@ -240,21 +174,27 @@ function field_update_field($field) {
     throw new FieldException("Cannot change an existing field's storage type.");
   }
 
+  // Fields have a large amount of data that is generated on load, so trim down
+  // the entire structure to just that which is not replaced on load.
+  $field_data = array_intersect_key($field, field_defaults_field());
+
+  // Store the field in config.
+  $config = config('field.field.' . $field['field_name']);
+  $config->setData($field_data);
+  $config->save();
+
   // Collect the new storage information, since what is in
   // $prior_field may no longer be right.
   module_load_install($field['module']);
   $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array('columns' => array(), 'indexes' => array(), 'foreign keys' => array());
-  // 'columns' are hardcoded in the field type.
-  $field['columns'] = $schema['columns'];
-  // 'foreign keys' are hardcoded in the field type.
-  $field['foreign keys'] = $schema['foreign keys'];
-  // 'indexes' can be both hardcoded in the field type, and specified in the
-  // incoming $field definition.
-  $field += array(
+  $schema += array(
+    'columns' => array(),
     'indexes' => array(),
+    'foreign keys' => array(),
   );
-  $field['indexes'] += $schema['indexes'];
+  $field['columns'] = $schema['columns'];
+  $field['foreign keys'] = $schema['foreign keys'];
+  $field['indexes'] = $schema['indexes'];
 
   $has_data = field_has_data($field);
 
@@ -269,29 +209,71 @@ function field_update_field($field) {
   $storage_type = field_info_storage_types($field['storage']['type']);
   module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
 
-  // Save the new field definition. @todo: refactor with
-  // field_create_field.
-
-  // The serialized 'data' column contains everything from $field that does not
-  // have its own column and is not automatically populated when the field is
-  // read.
-  $data = $field;
-  unset($data['columns'], $data['field_name'], $data['type'], $data['locked'], $data['module'], $data['cardinality'], $data['active'], $data['deleted']);
-  // Additionally, do not save the 'bundles' property populated by
-  // field_info_field().
-  unset($data['bundles']);
-
-  $field['data'] = $data;
-
-  // Store the field and create the id.
-  $primary_key = array('id');
-  backdrop_write_record('field_config', $field, $primary_key);
-
   // Clear caches
   field_cache_clear(TRUE);
 
   // Invoke external hooks after the cache is cleared for API consistency.
   module_invoke_all('field_update_field', $field, $prior_field, $has_data);
+}
+
+/**
+ * Validates a field configuration.
+ */
+function field_validate_field($field, $update = FALSE) {
+  // Field name is required.
+  if (empty($field['field_name'])) {
+    throw new FieldException(t('A field was attempted to be created, but no name was specified.'));
+  }
+  // Field type is required.
+  if (empty($field['type'])) {
+    throw new FieldException(t('The field "@name" did not specify a field type.', array('@name' => $field['field_name'])));
+  }
+  // Field name cannot contain invalid characters.
+  if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $field['field_name'])) {
+    throw new FieldException(t('The field "@name" contains invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character.', array('@name' => $field['field_name'])));
+  }
+
+  // Validations that only apply to newly created fields.
+  if (!$update) {
+    // Field module must exist when creating a field (but not updating it).
+    $field_info = field_info_field_types($field['type']);
+    if (!module_exists($field_info['module'])) {
+      throw new FieldException(t('The field "@name" could not be created because it requires the "@module" module.', array('@name' => $field['field_name'], 'module' => $field['module'])));
+    }
+
+    // Ensure the table namespaces are available.
+    if (db_table_exists('field_data_' . $field['field_name'])) {
+      throw new FieldException(t('The field "@name" could not be created because a database table with the name "@table" already exists.', array('@name' => $field['field_name'], '@table' => 'field_data_' . $field['field_name'])));
+    }
+    if (db_table_exists('field_revision_' . $field['field_name'])) {
+      throw new FieldException(t('The field "@name" could not be created because a database table with the name "@table" already exists.', array('@name' => $field['field_name'], '@table' => 'field_revision_' . $field['field_name'])));
+    }
+
+    // Ensure the field name is unique.
+    $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    if (!empty($prior_field)) {
+      $message = $prior_field['active']?
+        t('The field "@name" already exists.', array('@name' => $field['field_name'])):
+        t('The field "@name" already exists, but it is inactive. To create a field with the same name, the configuration and data from the old field must be manually deleted.', array('@name' => $field['field_name']));
+      throw new FieldException($message);
+    }
+
+    // Field name cannot be longer than 32 characters. We use backdrop_strlen()
+    // because the DB layer assumes that column widths are given in characters,
+    // not bytes.
+    if (backdrop_strlen($field['field_name']) > 32) {
+      throw new FieldException(t('The field "@name" could not be created because the field name may be no longer than 32 characters.', array('@name' => $field['field_name'])));
+    }
+
+    // Disallow reserved field names. This can't prevent all field name
+    // collisions with existing entity properties, but some is better
+    // than none.
+    foreach (entity_get_info() as $type => $info) {
+      if (in_array($field['field_name'], $info['entity keys'])) {
+        throw new FieldException(t('Cannot create a field with the name "@name", which is reserved by entity type @type.', array('@name' => $field['field_name'], '@type' => $type)));
+      }
+    }
+  }
 }
 
 /**
@@ -314,7 +296,7 @@ function field_update_field($field) {
  */
 function field_read_field($field_name, $include_additional = array()) {
   $fields = field_read_fields(array('field_name' => $field_name), $include_additional);
-  return $fields ? current($fields) : FALSE;
+  return isset($fields[$field_name]) ? $fields[$field_name] : FALSE;
 }
 
 /**
@@ -334,55 +316,81 @@ function field_read_field($field_name, $include_additional = array()) {
  *   by field id, otherwise it is keyed by field name.
  */
 function field_read_fields($params = array(), $include_additional = array()) {
-  $query = db_select('field_config', 'fc', array('fetch' => PDO::FETCH_ASSOC));
-  $query->fields('fc');
+  $include_inactive = isset($include_additional['include_inactive']) && $include_additional['include_inactive'];
+  $include_deleted = isset($include_additional['include_deleted']) && $include_additional['include_deleted'];
 
-  // Turn the conditions into a query.
-  foreach ($params as $key => $value) {
-    $query->condition($key, $value);
-  }
-  if (!isset($include_additional['include_inactive']) || !$include_additional['include_inactive']) {
-    $query
-      ->condition('fc.active', 1)
-      ->condition('fc.storage_active', 1);
-  }
-  $include_deleted = (isset($include_additional['include_deleted']) && $include_additional['include_deleted']);
-  if (!$include_deleted) {
-    $query->condition('fc.deleted', 0);
+  $prefix = 'field.field.';
+  if (isset($params['field_name'])) {
+    $prefix .= $params['field_name'];
+    unset($params['field_name']);
   }
 
   $fields = array();
-  $results = $query->execute();
-  foreach ($results as $record) {
-    $field = unserialize($record['data']);
-    $field['id'] = $record['id'];
-    $field['field_name'] = $record['field_name'];
-    $field['type'] = $record['type'];
-    $field['module'] = $record['module'];
-    $field['active'] = $record['active'];
-    $field['storage']['type'] = $record['storage_type'];
-    $field['storage']['module'] = $record['storage_module'];
-    $field['storage']['active'] = $record['storage_active'];
-    $field['locked'] = $record['locked'];
-    $field['cardinality'] = $record['cardinality'];
-    $field['translatable'] = $record['translatable'];
-    $field['deleted'] = $record['deleted'];
+  $config_names = config_get_names_with_prefix($prefix);
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $field = $config->get();
+
+    // Continue if the config does not match passed parameters.
+    if ($params) {
+      foreach ($params as $param_key => $param_value) {
+        if ($field[$param_key] != $param_value) {
+          continue 2;
+        }
+      }
+    }
+
+    // Continue if this is an inactive field.
+    if ((!$field['active'] || !$field['storage']['active']) && !$include_inactive) {
+      continue;
+    }
+    // Or a deleted field.
+    if ($field['deleted'] && !$include_deleted) {
+      continue;
+    }
 
     module_invoke_all('field_read_field', $field);
 
     // Populate storage information.
     module_load_install($field['module']);
     $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-    $schema += array('columns' => array(), 'indexes' => array());
+    $schema += array(
+      'columns' => array(),
+      'indexes' => array(),
+      'foreign keys' => array(),
+    );
     $field['columns'] = $schema['columns'];
+    $field['indexes'] = $schema['indexes'];
+    $field['foreign keys'] = $schema['foreign keys'];
+
+    // Populate defaults.
+    $field += field_defaults_field($field['type']);
+    $field['settings'] += field_info_field_settings($field['type']);
 
     $field_name = $field['field_name'];
-    if ($include_deleted) {
-      $field_name = $field['id'];
-    }
     $fields[$field_name] = $field;
   }
+
   return $fields;
+}
+
+/**
+ * Provides a list of default settings for a field.
+ */
+function field_defaults_field() {
+  return array(
+    'field_name' => '',
+    'type' => '',
+    'module' => '',
+    'active' => 1,
+    'locked' => 0,
+    'cardinality' => 1,
+    'translatable' => 0,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'settings' => array(),
+    'storage' => array(),
+  );
 }
 
 /**
@@ -394,10 +402,15 @@ function field_read_fields($params = array(), $include_additional = array()) {
 function field_delete_field($field_name) {
   // Delete all non-deleted instances.
   $field = field_info_field($field_name);
+
+  // Sanity check to prevent writing a new empty config file.
+  field_validate_field($field, TRUE);
+
   if (isset($field['bundles'])) {
+    $instances = field_info_instances();
     foreach ($field['bundles'] as $entity_type => $bundles) {
       foreach ($bundles as $bundle) {
-        $instance = field_info_instance($entity_type, $field_name, $bundle);
+        $instance = $instances[$entity_type][$bundle][$field_name];
         field_delete_instance($instance, FALSE);
       }
     }
@@ -407,15 +420,17 @@ function field_delete_field($field_name) {
   module_invoke($field['storage']['module'], 'field_storage_delete_field', $field);
 
   // Mark the field for deletion.
-  db_update('field_config')
-    ->fields(array('deleted' => 1))
-    ->condition('field_name', $field_name)
-    ->execute();
+  $config = config('field.field.' . $field_name);
+  $config->set('deleted', 1);
+  $config->save();
 
   // Clear the cache.
-  field_cache_clear(TRUE);
+  field_cache_clear();
 
   module_invoke_all('field_delete_field', $field);
+
+  // Do a purge to delete any empty tables immediately.
+  field_purge_batch(0);
 }
 
 /**
@@ -428,7 +443,8 @@ function field_delete_field($field_name) {
  *   - label: the field name
  *   - description: empty string
  *   - required: FALSE
- *   - default_value_function: empty string
+ *   - default_value: NULL
+ *   - default_value_function: NULL
  *   - settings: each omitted setting is given the default value specified in
  *     hook_field_info().
  *   - widget:
@@ -454,34 +470,8 @@ function field_delete_field($field_name) {
  * See: @link field Field API data structures @endlink.
  */
 function field_create_instance($instance) {
-  $field = field_read_field($instance['field_name']);
-  if (empty($field)) {
-    throw new FieldException(t("Attempt to create an instance of a field @field_name that doesn't exist or is currently inactive.", array('@field_name' => $instance['field_name'])));
-  }
-  // Check that the required properties exists.
-  if (empty($instance['entity_type'])) {
-    throw new FieldException(t('Attempt to create an instance of field @field_name without an entity type.', array('@field_name' => $instance['field_name'])));
-  }
-  if (empty($instance['bundle'])) {
-    throw new FieldException(t('Attempt to create an instance of field @field_name without a bundle.', array('@field_name' => $instance['field_name'])));
-  }
-  // Check that the field can be attached to this entity type.
-  if (!empty($field['entity_types']) && !in_array($instance['entity_type'], $field['entity_types'])) {
-    throw new FieldException(t('Attempt to create an instance of field @field_name on forbidden entity type @entity_type.', array('@field_name' => $instance['field_name'], '@entity_type' => $instance['entity_type'])));
-  }
-
-  // Set the field id.
-  $instance['field_id'] = $field['id'];
-
-  // Note that we do *not* prevent creating a field on non-existing bundles,
-  // because that would break the 'Body as field' upgrade for contrib
-  // node types.
-
-  // TODO: Check that the widget type is known and can handle the field type ?
-  // TODO: Check that the formatters are known and can handle the field type ?
-  // TODO: Check that the display view modes are known for the entity type ?
-  // Those checks should probably happen in _field_write_instance() ?
-  // Problem : this would mean that a UI module cannot update an instance with a disabled formatter.
+  // Populate defaults.
+  $instance += field_defaults_instance();
 
   // Ensure the field instance is unique within the bundle.
   // We only check for instances of active fields, since adding an instance of
@@ -491,6 +481,18 @@ function field_create_instance($instance) {
     $message = t('Attempt to create an instance of field @field_name on bundle @bundle that already has an instance of that field.', array('@field_name' => $instance['field_name'], '@bundle' => $instance['bundle']));
     throw new FieldException($message);
   }
+
+  // Give the instance a default label.
+  if (strlen($instance['label']) === 0) {
+    $instance['label'] = $instance['field_name'];
+  }
+
+  // Populate the instance default settings.
+  $field = field_read_field($instance['field_name']);
+  $instance['settings'] += field_info_instance_settings($field['type']);
+
+  // Validate the fully populated instance.
+  field_validate_instance($instance, FALSE, TRUE);
 
   _field_write_instance($instance);
 
@@ -534,21 +536,22 @@ function field_create_instance($instance) {
  * @see field_create_instance()
  */
 function field_update_instance($instance) {
-  // Check that the specified field exists.
-  $field = field_read_field($instance['field_name']);
-  if (empty($field)) {
-    throw new FieldException(t('Attempt to update an instance of a nonexistent field @field.', array('@field' => $instance['field_name'])));
-  }
-
   // Check that the field instance exists (even if it is inactive, since we
   // want to be able to replace inactive widgets with new ones).
   $prior_instance = field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle'], array('include_inactive' => TRUE));
   if (empty($prior_instance)) {
-    throw new FieldException(t("Attempt to update an instance of field @field on bundle @bundle that doesn't exist.", array('@field' => $instance['field_name'], '@bundle' => $instance['bundle'])));
+    throw new FieldException(t('The field instance "@label" of field "@field" cannot be saved because an instance of this field on the bundle "@bundle" does not exist.', array('@label' => $instance['label'], '@field' => $instance['field_name'], '@bundle' => $instance['bundle'])));
   }
 
-  $instance['id'] = $prior_instance['id'];
-  $instance['field_id'] = $prior_instance['field_id'];
+  // Populate defaults.
+  $field = field_read_field($instance['field_name']);
+  $instance += $prior_instance;
+  $instance += field_defaults_instance();
+  $instance['settings'] += $prior_instance['settings'];
+  $instance['settings'] += field_info_instance_settings($field['type']);
+
+  // Validate the fully populated field.
+  field_validate_instance($instance, TRUE);
 
   _field_write_instance($instance, TRUE);
 
@@ -556,6 +559,36 @@ function field_update_instance($instance) {
   field_cache_clear();
 
   module_invoke_all('field_update_instance', $instance, $prior_instance);
+}
+
+/**
+ * Validates a field instance.
+ */
+function field_validate_instance($instance, $update = FALSE, $load_field = TRUE) {
+  $label = isset($instance['label']) ? $instance['label'] : $instance['field_name'];
+
+  // Check that the required properties exists.
+  if (empty($instance['entity_type'])) {
+    throw new FieldException(t('The field instance "@label" does not specify an entity type.', array('@label' => $label)));
+  }
+  if (empty($instance['bundle'])) {
+    throw new FieldException(t('The field instance "@label" does not specify a bundle type.', array('@label' => $label)));
+  }
+
+  if ($load_field) {
+    $field = field_read_field($instance['field_name']);
+    if (empty($field)) {
+      throw new FieldException(t('The field instance "@label" cannot be saved because the field "@name" does not exist.', array('@label' => $label, '@name' => $instance['field_name'])));
+    }
+    // Check that the field can be attached to this entity type.
+    if (!empty($field['entity_types']) && !in_array($instance['entity_type'], $field['entity_types'])) {
+      throw new FieldException(t('The field instance "@label" on the type "@entity_type" is not allowed.', array('@label' => $label, '@entity_type' => $instance['entity_type'])));
+    }
+
+    // @todo: Check that the widget type is known and can handle the field type.
+    // @todo: Check that the formatters are known and can handle the field type.
+    // @todo: Check that the display view modes are known for the entity type.
+  }
 }
 
 /**
@@ -569,20 +602,6 @@ function field_update_instance($instance) {
 function _field_write_instance($instance, $update = FALSE) {
   $field = field_read_field($instance['field_name']);
   $field_type = field_info_field_types($field['type']);
-
-  // Set defaults.
-  $instance += array(
-    'settings' => array(),
-    'display' => array(),
-    'widget' => array(),
-    'required' => FALSE,
-    'label' => $instance['field_name'],
-    'description' => '',
-    'deleted' => 0,
-  );
-
-  // Set default instance settings.
-  $instance['settings'] += field_info_instance_settings($field['type']);
 
   // Set default widget and settings.
   $instance['widget'] += array(
@@ -624,30 +643,12 @@ function _field_write_instance($instance, $update = FALSE) {
     $instance['display'][$view_mode] = $display;
   }
 
-  // The serialized 'data' column contains everything from $instance that does
-  // not have its own column and is not automatically populated when the
-  // instance is read.
-  $data = $instance;
-  unset($data['id'], $data['field_id'], $data['field_name'], $data['entity_type'], $data['bundle'], $data['deleted']);
+  // Include only defined data in the configuration file.
+  $instance_data = array_intersect_key($instance, field_defaults_instance());
 
-  $record = array(
-    'field_id' => $instance['field_id'],
-    'field_name' => $instance['field_name'],
-    'entity_type' => $instance['entity_type'],
-    'bundle' => $instance['bundle'],
-    'data' => $data,
-    'deleted' => $instance['deleted'],
-  );
-  // We need to tell backdrop_write_record() the primary keys to trigger an
-  // update.
-  if ($update) {
-    $record['id'] = $instance['id'];
-    $primary_key = array('id');
-  }
-  else {
-    $primary_key = array();
-  }
-  backdrop_write_record('field_config_instance', $record, $primary_key);
+  $config = config('field.instance.' . $instance['entity_type'] . '.' . $instance['bundle'] . '.' . $instance['field_name']);
+  $config->setData($instance_data);
+  $config->save();
 }
 
 /**
@@ -681,9 +682,11 @@ function field_read_instance($entity_type, $field_name, $bundle, $include_additi
  * Reads in field instances that match an array of conditions.
  *
  * @param $param
- *   An array of properties to use in selecting a field
- *   instance. Valid keys include any column of the
- *   field_config_instance table. If NULL, all instances will be returned.
+ *   An array of properties to use in selecting a field instance. Supported
+ *   properties include:
+ *   - entity_type: The entity type to which to limit instances.
+ *   - bundle: The bundle type within the entity to which instances should be
+ *     limited. If specified, an entity_type must be specified as well.
  * @param $include_additional
  *   The default behavior of this function is to not return field
  *   instances that have been marked deleted, or whose field is inactive.
@@ -697,45 +700,93 @@ function field_read_instances($params = array(), $include_additional = array()) 
   $include_inactive = isset($include_additional['include_inactive']) && $include_additional['include_inactive'];
   $include_deleted = isset($include_additional['include_deleted']) && $include_additional['include_deleted'];
 
-  $query = db_select('field_config_instance', 'fci', array('fetch' => PDO::FETCH_ASSOC));
-  $query->join('field_config', 'fc', 'fc.id = fci.field_id');
-  $query->fields('fci');
+  $prefix = 'field.instance.';
+  if (isset($params['entity_type'])) {
+    $prefix .= $params['entity_type'] . '.';
+    unset($params['entity_type']);
+    if (isset($params['bundle'])) {
+      $prefix .= $params['bundle'] . '.';
+      unset($params['bundle']);
+      if (isset($params['field_name'])) {
+        $prefix .= $params['field_name'];
+        unset($params['field_name']);
+      }
+    }
+  }
 
-  // Turn the conditions into a query.
-  foreach ($params as $key => $value) {
-    $query->condition('fci.' . $key, $value);
-  }
-  if (!$include_inactive) {
-    $query
-      ->condition('fc.active', 1)
-      ->condition('fc.storage_active', 1);
-  }
-  if (!$include_deleted) {
-    $query->condition('fc.deleted', 0);
-    $query->condition('fci.deleted', 0);
-  }
+  // Fields used for reference.
+  $fields = _field_read_fields_cache();
 
   $instances = array();
-  $results = $query->execute();
+  $config_names = config_get_names_with_prefix($prefix);
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $instance = $config->get();
 
-  foreach ($results as $record) {
+    if ($params) {
+      foreach ($params as $param_key => $param_value) {
+        if ($instance[$param_key] != $param_value) {
+          continue 2;
+        }
+      }
+    }
+
+    // Continue if this is a deleted instance.
+    if (!$include_deleted && $instance['deleted']) {
+      continue;
+    }
+
+    // Load the field providing this instance.
+    if (!isset($fields[$instance['field_name']])) {
+      continue;
+    }
+    $field = $fields[$instance['field_name']];
+
+    // Continue if the instance's field has been deleted or is inactive.
+    if (!$include_deleted && $field['deleted']) {
+      continue;
+    }
+    if (!$include_inactive && !$field['active']) {
+      continue;
+    }
+
+    // Set default instance settings.
+    $instance += field_defaults_instance();
+    $instance['settings'] += field_info_instance_settings($field['type']);
+
     // Filter out instances on unknown entity types (for instance because the
     // module exposing them was disabled).
-    $entity_info = entity_get_info($record['entity_type']);
+    $entity_info = entity_get_info($instance['entity_type']);
     if ($include_inactive || $entity_info) {
-      $instance = unserialize($record['data']);
-      $instance['id'] = $record['id'];
-      $instance['field_id'] = $record['field_id'];
-      $instance['field_name'] = $record['field_name'];
-      $instance['entity_type'] = $record['entity_type'];
-      $instance['bundle'] = $record['bundle'];
-      $instance['deleted'] = $record['deleted'];
-
       module_invoke_all('field_read_instance', $instance);
       $instances[] = $instance;
     }
+
+    // Reset the field read cache to avoid storing two copies of all fields.
+    backdrop_static_reset('_field_read_fields_cache');
   }
+
   return $instances;
+}
+
+/**
+ * Provides a list of defaults for instance arrays.
+ */
+function field_defaults_instance() {
+  return array(
+    'field_name' => NULL,
+    'entity_type' => NULL,
+    'bundle' => NULL,
+    'label' => '',
+    'description' => '',
+    'required' => 0,
+    'deleted' => 0,
+    'default_value' => NULL,
+    'default_value_function' => NULL,
+    'widget' => array(),
+    'settings' => array(),
+    'display' => array(),
+  );
 }
 
 /**
@@ -749,13 +800,13 @@ function field_read_instances($params = array(), $include_additional = array()) 
  *   fields left without instances. Defaults to TRUE.
  */
 function field_delete_instance($instance, $field_cleanup = TRUE) {
+  // Sanity check to prevent writing a new empty config file.
+  field_validate_instance($instance, TRUE, FALSE);
+
   // Mark the field instance for deletion.
-  db_update('field_config_instance')
-    ->fields(array('deleted' => 1))
-    ->condition('field_name', $instance['field_name'])
-    ->condition('entity_type', $instance['entity_type'])
-    ->condition('bundle', $instance['bundle'])
-    ->execute();
+  $config = config('field.instance.' . $instance['entity_type'] . '.' . $instance['bundle'] . '.' . $instance['field_name']);
+  $config->set('deleted', 1);
+  $config->save();
 
   // Clear the cache.
   field_cache_clear();
@@ -867,7 +918,7 @@ function field_purge_batch($batch_size) {
 
   foreach ($instances as $instance) {
     // field_purge_data() will need the field array.
-    $field = field_info_field_by_id($instance['field_id']);
+    $field = field_info_field($instance['field_name']);
     // Retrieve some entities.
     $query = new EntityFieldQuery();
     $results = $query
@@ -879,14 +930,24 @@ function field_purge_batch($batch_size) {
 
     if ($results) {
       foreach ($results as $entity_type => $stub_entities) {
-        field_attach_load($entity_type, $stub_entities, FIELD_LOAD_CURRENT, array('field_id' => $field['id'], 'deleted' => 1));
+        field_attach_load($entity_type, $stub_entities, FIELD_LOAD_CURRENT, array('field_name' => $field['field_name'], 'deleted' => 1));
         foreach ($stub_entities as $stub_entity) {
           // Purge the data for the entity.
           field_purge_data($entity_type, $stub_entity, $field, $instance);
         }
       }
     }
-    else {
+
+    // Check if any data remains.
+    $query = new EntityFieldQuery();
+    $count = $query
+      ->fieldCondition($field)
+      ->entityCondition('bundle', $instance['bundle'])
+      ->deleted(TRUE)
+      ->count()
+      ->execute();
+
+    if (empty($count)) {
       // No field data remains for the instance, so we can remove it.
       field_purge_instance($instance);
     }
@@ -895,7 +956,7 @@ function field_purge_batch($batch_size) {
   // Retrieve all deleted fields. Any that have no instances can be purged.
   $fields = field_read_fields(array('deleted' => 1), array('include_deleted' => 1));
   foreach ($fields as $field) {
-    $instances = field_read_instances(array('field_id' => $field['id']), array('include_deleted' => 1));
+    $instances = field_read_instances(array('field_name' => $field['field_name']), array('include_deleted' => 1));
     if (empty($instances)) {
       field_purge_field($field);
     }
@@ -921,7 +982,7 @@ function field_purge_batch($batch_size) {
 function field_purge_data($entity_type, $entity, $field, $instance) {
   // Each field type's hook_field_delete() only expects to operate on a single
   // field at a time, so we can use it as-is for purging.
-  $options = array('field_id' => $instance['field_id'], 'deleted' => TRUE);
+  $options = array('field_name' => $instance['field_name'], 'deleted' => TRUE);
   _field_invoke('delete', $entity_type, $entity, $dummy, $dummy, $options);
 
   // Tell the field storage system to purge the data.
@@ -944,12 +1005,11 @@ function field_purge_data($entity_type, $entity, $field, $instance) {
  *   The instance record to purge.
  */
 function field_purge_instance($instance) {
-  db_delete('field_config_instance')
-    ->condition('id', $instance['id'])
-    ->execute();
+  $config = config('field.instance.' . $instance['entity_type'] . '.' . $instance['bundle'] . '.' . $instance['field_name']);
+  $config->delete();
 
   // Notify the storage engine.
-  $field = field_info_field_by_id($instance['field_id']);
+  $field = field_info_field($instance['field_name']);
   module_invoke($field['storage']['module'], 'field_storage_purge_instance', $instance);
 
   // Clear the cache.
@@ -969,14 +1029,13 @@ function field_purge_instance($instance) {
  *   The field record to purge.
  */
 function field_purge_field($field) {
-  $instances = field_read_instances(array('field_id' => $field['id']), array('include_deleted' => 1));
+  $instances = field_read_instances(array('field_name' => $field['field_name']), array('include_deleted' => TRUE));
   if (count($instances) > 0) {
     throw new FieldException(t('Attempt to purge a field @field_name that still has instances.', array('@field_name' => $field['field_name'])));
   }
 
-  db_delete('field_config')
-    ->condition('id', $field['id'])
-    ->execute();
+  $config = config('field.field.' . $field['field_name']);
+  $config->delete();
 
   // Notify the storage engine.
   module_invoke($field['storage']['module'], 'field_storage_purge_field', $field);

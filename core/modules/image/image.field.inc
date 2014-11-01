@@ -15,7 +15,7 @@ function image_field_info() {
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
         'uri_scheme' => variable_get('file_default_scheme', 'public'),
-        'default_image' => 0,
+        'default_image' => '',
       ),
       'instance_settings' => array(
         'file_extensions' => 'png gif jpg jpeg',
@@ -25,7 +25,7 @@ function image_field_info() {
         'title_field' => 0,
         'max_resolution' => '',
         'min_resolution' => '',
-        'default_image' => 0,
+        'default_image' => '',
       ),
       'default_widget' => 'image_image',
       'default_formatter' => 'image',
@@ -52,16 +52,25 @@ function image_field_settings_form($field, $instance) {
     '#description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
   );
 
-  // When the user sets the scheme on the UI, even for the first time, it's
-  // updating a field because fields are created on the "Manage fields"
-  // page. So image_field_update_field() can handle this change.
   $form['default_image'] = array(
-    '#title' => t('Default image'),
-    '#type' => 'managed_file',
-    '#description' => t('If no image is uploaded, this image will be shown on display.'),
-    '#default_value' => $field['settings']['default_image'],
-    '#upload_location' => $settings['uri_scheme'] . '://default_images/',
+    '#element_validate' => array('_image_field_default_image_validate'),
+    '#default_scheme' => $field['settings']['uri_scheme'],
+    '#target' => array('field', 'settings', 'default_image'),
   );
+  $form['default_image']['file'] = array(
+    '#title' => t('Default image'),
+    '#type' => 'file',
+    '#description' => t('If no image is uploaded, this image will be shown on display.'),
+  );
+  if ($field['settings']['default_image']) {
+    $link = l(basename($field['settings']['default_image']), file_create_url($field['settings']['default_image']), array('attributes' => array('target' => '_blank')));
+    $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
+
+    $form['default_image']['remove'] = array(
+      '#type' => t('checkbox'),
+      '#title' => t('Remove default image'),
+    );
+  }
 
   return $form;
 }
@@ -155,12 +164,24 @@ function image_field_instance_settings_form($field, $instance) {
 
   // Add the default image to the instance.
   $form['default_image'] = array(
-    '#title' => t('Default image'),
-    '#type' => 'managed_file',
-    '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
-    '#default_value' => $settings['default_image'],
-    '#upload_location' => $field['settings']['uri_scheme'] . '://default_images/',
+    '#element_validate' => array('_image_field_default_image_validate'),
+    '#default_scheme' => $field['settings']['uri_scheme'],
+    '#target' => array('instance', 'settings', 'default_image'),
   );
+  $form['default_image']['file'] = array(
+    '#title' => t('Default image'),
+    '#type' => 'file',
+    '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
+  );
+  if ($settings['default_image']) {
+    $link = l(basename($settings['default_image']), file_create_url($settings['default_image']), array('attributes' => array('target' => '_blank')));
+    $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
+
+    $form['default_image']['remove'] = array(
+      '#type' => t('checkbox'),
+      '#title' => t('Remove default image'),
+    );
+  }
 
   return $form;
 }
@@ -184,6 +205,34 @@ function _image_field_resolution_validate($element, &$form_state) {
 }
 
 /**
+ * Element validation function for setting a default image.
+ */
+function _image_field_default_image_validate($element, &$form_state) {
+  // Save the file into the temporary directory.
+  $file = file_save_upload(implode('_', $element['file']['#parents']), array('file_validate_is_image' => array()));
+
+  if ($file) {
+    // Move the file to the final location, and don't manage it in the database.
+    // Because field configurations should not be tied to database auto-increment
+    // IDs, we only track the URI.
+    $uri = file_unmanaged_move($file->uri, $element['#default_scheme'] . '://default_images');
+
+    // Delete the file entity record.
+    file_delete($file->fid);
+  }
+  if (isset($element['remove']) && $element['remove']['#value']) {
+    $uri = '';
+  }
+
+  if (isset($uri)) {
+    backdrop_array_set_nested_value($form_state['values'], $element['#target'], $uri, TRUE);
+  }
+  else {
+    backdrop_array_unset_nested_value($form_state['values'], $element['#target']);
+  }
+}
+
+/**
  * Implements hook_field_load().
  */
 function image_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
@@ -197,19 +246,20 @@ function image_field_prepare_view($entity_type, $entities, $field, $instances, $
   // If there are no files specified at all, use the default.
   foreach ($entities as $id => $entity) {
     if (empty($items[$id])) {
-      $fid = 0;
+      $default_uri = '';
       // Use the default for the instance if one is available.
       if (!empty($instances[$id]['settings']['default_image'])) {
-        $fid = $instances[$id]['settings']['default_image'];
+        $default_uri = $instances[$id]['settings']['default_image'];
       }
       // Otherwise, use the default for the field.
       elseif ($field['settings']['default_image']) {
-        $fid = $field['settings']['default_image'];
+        $default_uri = $field['settings']['default_image'];
       }
 
       // Add the default image if one is found.
-      if ($fid && ($file = file_load($fid))) {
-        $items[$id][0] = (array) $file + array(
+      if ($default_uri) {
+        $items[$id][0] = (array) array(
+          'uri' => $default_uri,
           'is_default' => TRUE,
           'alt' => '',
           'title' => '',

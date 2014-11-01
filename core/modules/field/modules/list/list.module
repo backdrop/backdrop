@@ -201,6 +201,13 @@ function list_field_update_field($field, $prior_field, $has_data) {
 }
 
 /**
+ * Implements hook_field_delete_field().
+ */
+function list_field_delete_field($field) {
+  backdrop_static_reset('list_allowed_values');
+}
+
+/**
  * Returns the array of allowed values for a list field.
  *
  * The strings are not safe for output. Keys and values of the array should be
@@ -222,7 +229,7 @@ function list_field_update_field($field, $prior_field, $has_data) {
 function list_allowed_values($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
   $allowed_values = &backdrop_static(__FUNCTION__, array());
 
-  if (!isset($allowed_values[$field['id']])) {
+  if (!isset($allowed_values[$field['field_name']])) {
     $function = $field['settings']['allowed_values_function'];
     // If $cacheable is FALSE, then the allowed values are not statically
     // cached.
@@ -235,14 +242,14 @@ function list_allowed_values($field, $instance = NULL, $entity_type = NULL, $ent
     }
 
     if ($cacheable) {
-      $allowed_values[$field['id']] = $values;
+      $allowed_values[$field['field_name']] = $values;
     }
     else {
       return $values;
     }
   }
 
-  return $allowed_values[$field['id']];
+  return $allowed_values[$field['field_name']];
 }
 
 /**

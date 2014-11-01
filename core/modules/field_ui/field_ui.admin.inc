@@ -731,12 +731,10 @@ function _field_ui_field_overview_form_validate_add_new($form, &$form_state) {
  *   Whether or not the field machine name is taken.
  */
 function _field_ui_field_name_exists($value) {
-  // Prefix with 'field_'.
-  $field_name = 'field_' . $value;
-
-  // We need to check inactive fields as well, so we can't use
-  // field_info_fields().
-  return (bool) field_read_fields(array('field_name' => $field_name), array('include_inactive' => TRUE));
+  if (!empty($value)) {
+    // field_info_fields() does not include inactive fields.
+    return (bool) field_read_fields(array('field_name' => 'field_' . $value), array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+  }
 }
 
 /**
@@ -1747,7 +1745,7 @@ function field_ui_field_delete_form($form, &$form_state, $instance) {
 
   $form['entity_type'] = array('#type' => 'value', '#value' => $entity_type);
   $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $form['field_name'] = array('#type' => 'value', '#value' => $field['field_name']);
+  $form['field_name'] = array('#type' => 'value', '#value' => $instance['field_name']);
 
   $output = confirm_form($form,
     t('Are you sure you want to delete the field %field?', array('%field' => $instance['label'])),
@@ -1757,7 +1755,7 @@ function field_ui_field_delete_form($form, &$form_state, $instance) {
     'confirm'
   );
 
-  if ($field['locked']) {
+  if (!empty($field['locked'])) {
     unset($output['actions']['submit']);
     $output['description']['#markup'] = t('This field is <strong>locked</strong> and cannot be deleted.');
   }
@@ -1787,7 +1785,7 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
     backdrop_set_message(t('The field %field has been deleted from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)));
   }
   else {
-    backdrop_set_message(t('There was a problem removing the %field from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)), 'error');
+    backdrop_set_message(t('There was a problem removing the field %field from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)), 'error');
   }
 
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
@@ -1796,10 +1794,12 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
   // Fields are purged on cron. However field module prevents disabling modules
   // when field types they provided are used in a field until it is fully
   // purged. In the case that a field has minimal or no content, a single call
-  // to field_purge_batch() will remove it from the system. Call this with a
-  // low batch limit to avoid administrators having to wait for cron runs when
-  // removing instances that meet this criteria.
-  field_purge_batch(10);
+  // to field_purge_batch() will remove it from the system.
+  $limit = config_get('system.core', 'field_purge_batch_size');
+  field_purge_batch($limit);
+
+  // Call purge again to actually delete the instance if no data remains.
+  field_purge_batch(0);
 }
 
 /**

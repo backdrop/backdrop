@@ -10,6 +10,7 @@
     "cron_max_threshold": 10800,
     "cron_threshold_error": 1209600,
     "error_level": "all",
+    "field_purge_batch_size": 200,
     "log_row_limit": 1000,
     "log_identity": "backdrop",
     "log_facility": "",

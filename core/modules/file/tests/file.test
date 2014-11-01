@@ -61,13 +61,17 @@ class FileFieldTestCase extends BackdropWebTestCase {
    *   A list of widget settings that will be added to the widget defaults.
    */
   function createFileField($name, $type_name, $field_settings = array(), $instance_settings = array(), $widget_settings = array()) {
+    $cardinality = 1;
+    if (isset($field_settings['cardinality'])) {
+      $cardinality = $field_settings['cardinality'];
+      unset($field_settings['cardinality']);
+    }
     $field = array(
       'field_name' => $name,
       'type' => 'file',
-      'settings' => array(),
-      'cardinality' => !empty($field_settings['cardinality']) ? $field_settings['cardinality'] : 1,
+      'cardinality' => $cardinality,
+      'settings' => $field_settings,
     );
-    $field['settings'] = array_merge($field['settings'], $field_settings);
     field_create_field($field);
 
     $this->attachFileField($name, 'node', $type_name, $instance_settings, $widget_settings);
@@ -822,6 +826,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
 
     // Try again with a multiple value field.
     field_delete_field($field_name);
+    field_purge_batch(10);
     $this->createFileField($field_name, $type_name, array('cardinality' => FIELD_CARDINALITY_UNLIMITED), array('required' => '1'));
 
     // Try to post a new node without uploading a file in the multivalue field.

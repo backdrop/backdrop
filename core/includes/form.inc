@@ -1988,18 +1988,20 @@ function form_builder($form_id, &$element, &$form_state) {
  */
 function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
   if (!isset($element['#name'])) {
-    $name = array_shift($element['#parents']);
-    $element['#name'] = $name;
     if ($element['#type'] == 'file') {
       // To make it easier to handle $_FILES in file.inc, we place all
       // file fields in the 'files' array. Also, we do not support
       // nested file names.
-      $element['#name'] = 'files[' . $element['#name'] . ']';
+      $element['#name'] = 'files[' . implode('_', $element['#parents']) . ']';
     }
-    elseif (count($element['#parents'])) {
-      $element['#name'] .= '[' . implode('][', $element['#parents']) . ']';
+    else {
+      $name = array_shift($element['#parents']);
+      $element['#name'] = $name;
+      if (count($element['#parents'])) {
+        $element['#name'] .= '[' . implode('][', $element['#parents']) . ']';
+      }
+      array_unshift($element['#parents'], $name);
     }
-    array_unshift($element['#parents'], $name);
   }
 
   // Setting #disabled to TRUE results in user input being ignored, regardless

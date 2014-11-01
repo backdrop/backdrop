@@ -111,9 +111,6 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
  * array $instance:
  * - id (integer, read-only): The primary identifier of this field instance.
  *   It is assigned automatically by field_create_instance().
- * - field_id (integer, read-only): The foreign key of the field attached to
- *   the bundle by this instance. It is populated automatically by
- *   field_create_instance().
  * - field_name (string): The name of the field attached to the bundle by this
  *   instance.
  * - entity_type (string): The name of the entity type the instance is attached
@@ -297,7 +294,7 @@ function field_cron() {
   field_sync_field_status();
 
   // Do a pass of purging on deleted Field API data, if any exists.
-  $limit = variable_get('field_purge_batch_size', 10);
+  $limit = config_get('system.core', 'field_purge_batch_size');
   field_purge_batch($limit);
 }
 
@@ -359,8 +356,12 @@ function field_autoload_info() {
  * Implements hook_flush_caches().
  */
 function field_flush_caches() {
-  // Refresh the 'active' status of fields.
-  field_sync_field_status();
+  // Refresh the 'active' status of fields. We only do this if not in
+  // maintenance mode to prevent it running during update.php, where the full
+  // API of field module may not be available.
+  if (!defined('MAINTENANCE_MODE')) {
+    field_sync_field_status();
+  }
 
  // Request a flush of our cache table.
   return array('field');
@@ -383,7 +384,199 @@ function field_modules_disabled($modules) {
 }
 
 /**
- * Refreshes the 'active' and 'storage_active' columns for fields.
+ * Implements hook_config_info().
+ */
+function field_config_info() {
+  $prefixes['field.field'] = array(
+    'name_key' => 'field_name',
+    'label_key' => 'field_name',
+    'group' => t('Fields'),
+  );
+  $prefixes['field.instance'] = array(
+    'name_key' => array('entity_type', 'bundle', 'field_name'),
+    'label_callback' => 'field_config_label_instance',
+    'group' => t('Field instances'),
+  );
+  $prefixes['field.bundle'] = array(
+    'name_key' => array('entity_type', 'bundle'),
+    'label_callback' => 'field_config_label_bundle',
+    'group' => t('Field display settings'),
+  );
+
+  return $prefixes;
+}
+
+/**
+ * Given a field array, display a unique label.
+ */
+function field_config_label_instance($instance, $config_name) {
+  list($entity_type_name, $bundle, $field_name) = explode('.', str_replace('field.instance.', '', $config_name));
+  $entity_type = entity_get_info($entity_type_name);
+  $entity_label = $entity_type['label'];
+  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+  return $entity_label . ' - ' . $bundle_label . ' - ' . $instance['label'];
+}
+
+/**
+ * Given a bundle config file, display a unique label.
+ */
+function field_config_label_bundle($bundle_config, $config_name) {
+  list($entity_type_name, $bundle) = explode('.', str_replace('field.bundle.', '', $config_name));
+  $entity_type = entity_get_info($entity_type_name);
+  $entity_label = $entity_type['label'];
+  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+
+  return $entity_label . ' - ' . $bundle_label;
+}
+
+/**
+ * Implements hook_config_create_validate().
+ */
+function field_config_create_validate(Config $staging_config, $all_changes) {
+  $config_name = $staging_config->getName();
+
+  // Field validation.
+  if (strpos($config_name, 'field.field.') === 0) {
+    // Ensure fields are not created with existing names.
+    $field_name = str_replace('field.field.', '', $config_name);
+    if (field_info_field($field_name)) {
+      throw new ConfigValidateException(t('The field "@name" cannot be created because another field with the same name already exists. Delete the field manually before importing the new field.', array('@name' => $field_name)));
+    }
+
+    // Do the complete field validation and rethrow any errors that occur.
+    try {
+      $field = $staging_config->get();
+      field_validate_field($field);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+
+  // Instance validation.
+  if (strpos($config_name, 'field.instance.') === 0) {
+    // Ensure instances reference new or existing fields. Because we do not know
+    // the configuration names of entity types, each module providing an entity
+    // type must validate the type exists. See node_config_create_validate(),
+    // comment_config_create_validate(), and taxonomy_config_create_validate().
+    $field_name = $staging_config->get('field_name');
+    $label = $staging_config->get('label');
+    if (!field_info_field($field_name) && empty($all_changes['field.field.' . $field_name])) {
+      throw new ConfigValidateException(t('The field instance "@label" cannot be created because the field type "@field" does not exist.', array('@label' => $label, '@field' => $field_name)));
+    }
+
+    // Do the complete instance validation and rethrow any errors that occur.
+    try {
+      $instance = $staging_config->get();
+      field_validate_instance($instance, FALSE, FALSE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create_update().
+ */
+function field_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+  $config_name = $staging_config->getName();
+
+  // Field validation.
+  if (strpos($config_name, 'field.field.') === 0) {
+    // Ensure the field type does not change in updates. Fields must be manually
+    // deleted and then imported if changing a field type.
+    $field_name = str_replace('field.field.', '', $config_name);
+    $current_type = $active_config->get('type');
+    $new_type = $staging_config->get('type');
+    if ($current_type !== $new_type) {
+      throw new ConfigValidateException(t('The field "@name" cannot be created because another field with the same name already exists and is a different type of field. The current type is "@current" and the imported type would be "@new". Delete the field manually before importing the new field.', array('@name' => $field_name, '@current' => $current_type, '@new' => $new_type)));
+    }
+
+    // Do the complete field validation and rethrow any errors that occur.
+    try {
+      $field = $staging_config->get();
+      field_validate_field($field, TRUE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+
+  // Instance validation.
+  if (strpos($config_name, 'field.instance.') === 0) {
+    // Do the complete instance validation and rethrow any errors that occur.
+    try {
+      $instance = $staging_config->get();
+      field_validate_instance($instance, FALSE, FALSE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+}
+
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function field_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+
+  // @todo: We could support field deletion through config updates, but the
+  // additional processing time or required cron runs to clear the data could
+  // cause long imports or user confusion. For now fields have to be manually
+  // deleted when they contain data, rather than deleted through config.
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field_name = $active_config->get('field_name');
+    $field = $active_config->get();
+    if (field_has_data($field)) {
+      throw new ConfigValidateException(t('The field "@field" cannot be deleted through a configuration import. Delete the field manually first, then retry the import.', array('@field' => $field_name)));
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create().
+ */
+function field_config_create(Config $staging_config) {
+  $config_name = $staging_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field = $staging_config->get();
+    field_create_field($field);
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function field_config_update(Config $staging_config, Config $active_config) {
+  $config_name = $staging_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field = $staging_config->get();
+    field_update_field($field);
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function field_config_delete(Config $active_config) {
+  // This should only be called on fields that have no data at all, as fields
+  // with data are prevented from deletion in field_config_delete_validate().
+  $config_name = $active_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field_name = $active_config->get('field_name');
+    if (($field = field_read_field($field_name)) && !field_has_data($field)) {
+      field_delete_field($field_name);
+      // Fields are only marked for deletion. Purge to the field entirely.
+      field_purge_batch(0);
+    }
+  }
+}
+
+/**
+ * Refreshes the 'active' and 'storage[active]' properties on fields.
  */
 function field_sync_field_status() {
   // Refresh the 'active' and 'storage_active' columns according to the current
@@ -392,14 +585,16 @@ function field_sync_field_status() {
   foreach ($modules as $module_name) {
     field_associate_fields($module_name);
   }
-  db_update('field_config')
-    ->fields(array('active' => 0))
-    ->condition('module', $modules, 'NOT IN')
-    ->execute();
-  db_update('field_config')
-    ->fields(array('storage_active' => 0))
-    ->condition('storage_module', $modules, 'NOT IN')
-    ->execute();
+
+  $fields = field_read_fields(array(), array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+  foreach ($fields as $field) {
+    $current_field = $field;
+    $field['active'] = (int) in_array($field['module'], $modules);
+    $field['storage']['active'] = (int) in_array($field['storage']['module'], $modules);
+    if ($current_field !== $field) {
+      field_update_field($field);
+    }
+  }
 }
 
 /**
@@ -411,19 +606,21 @@ function field_sync_field_status() {
 function field_associate_fields($module) {
   // Associate field types.
   $field_types = (array) module_invoke($module, 'field_info');
-  if ($field_types) {
-    db_update('field_config')
-      ->fields(array('module' => $module, 'active' => 1))
-      ->condition('type', array_keys($field_types))
-      ->execute();
-  }
-  // Associate storage backends.
   $storage_types = (array) module_invoke($module, 'field_storage_info');
-  if ($storage_types) {
-    db_update('field_config')
-      ->fields(array('storage_module' => $module, 'storage_active' => 1))
-      ->condition('storage_type', array_keys($storage_types))
-      ->execute();
+  $fields = field_read_fields();
+  foreach ($fields as $field) {
+    $old_field = $field;
+    if (array_key_exists($field['type'], $field_types)) {
+      $field['module'] = $module;
+      $field['active'] = 1;
+    }
+    if (array_key_exists($field['storage']['type'], $storage_types)) {
+      $field['storage']['module'] = $module;
+      $field['storage']['active'] = 1;
+    }
+    if ($old_field !== $field) {
+      field_update_field($field);
+    }
   }
 }
 
@@ -545,11 +742,17 @@ function _field_sort_items_value_helper($a, $b) {
  */
 function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
   if (isset($settings)) {
-    variable_set('field_bundle_settings_' . $entity_type . '__' . $bundle, $settings);
+    $config = config('field.bundle.' . $entity_type . '.' . $bundle);
+    $config->setData($settings);
+    $config->save();
     field_info_cache_clear();
   }
   else {
-    $settings = variable_get('field_bundle_settings_' . $entity_type . '__' . $bundle, array());
+    $config = config('field.bundle.' . $entity_type . '.' . $bundle);
+    $settings = $config->get();
+    if (empty($settings)) {
+      $settings = array();
+    }
     $settings += array(
       'view_modes' => array(),
       'extra_fields' => array(),

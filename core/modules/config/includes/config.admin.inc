@@ -258,7 +258,7 @@ function config_import_full_form_submit(array &$form, array &$form_state) {
     catch (\Exception $e) {
       form_set_error('import_tarball', t('Could not extract the contents of the tar file. The error message is "@message".', array('@message' => $e->getMessage())));
     }
-    file_delete($file, TRUE);
+    file_delete($file->fid);
 
     // Compare the files to see if any config actually differs.
     $config_statuses = array_filter(config_get_statuses());
@@ -278,6 +278,7 @@ function config_import_full_form_submit(array &$form, array &$form_state) {
  */
 function config_export_single_form(array $form, array &$form_state, $config_group = NULL, $config_name = NULL) {
   $form_state['config_groups'] = config_get_prefix_groups();
+  $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
     '#markup' => '<p>' . t('This form may be used to export a single configuration so that it may be imported on a different site. Select a configuration group and name to generate configuration for copy/paste.') . '</p>',
