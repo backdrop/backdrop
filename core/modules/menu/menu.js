@@ -11,6 +11,35 @@ Backdrop.behaviors.menuFieldsetSummaries = {
         return Backdrop.t('Not in menu');
       }
     });
+
+    $context.find('fieldset.menu-form-status').backdropSetSummary(function () {
+      var vals = [];
+
+      if ($context.find('.form-item-enabled input').is(':checked')) {
+        vals.push(Backdrop.t('Enabled'));
+      }
+      else {
+        vals.push(Backdrop.t('Disabled'));
+      }
+
+      if ($context.find('.form-item-expanded input').is(':checked')) {
+        vals.push(Backdrop.t('Expanded'));
+      }
+      else {
+        vals.push(Backdrop.t('Not expanded'));
+      }
+
+      return vals.join(', ');
+    });
+
+    $context.find('fieldset.menu-form-position').backdropSetSummary(function () {
+      var vals = [];
+
+      vals.push(Backdrop.t('Parent: @parent', {'@parent': $context.find('.form-item-parent select option:selected').text()}));
+      vals.push(Backdrop.t('Weight: @weight', {'@weight': $context.find('.form-item-weight select option:selected').text()}));
+
+      return vals.join(', ');
+    });
   }
 };
 

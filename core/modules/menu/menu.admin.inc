@@ -351,26 +351,58 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#rows' => 1,
     '#description' => t('Shown when hovering over the menu link.'),
   );
-  $form['enabled'] = array(
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+  $form['status'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Status'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('menu-form-status'),
+    ),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'menu') . '/menu.js'),
+    ),
+    '#weight' => 0,
+  );
+  $form['status']['enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enabled'),
     '#default_value' => !$item['hidden'],
     '#description' => t('Menu links that are not enabled will not be listed in any menu.'),
   );
-  $form['expanded'] = array(
+  $form['status']['expanded'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show as expanded'),
     '#default_value' => $item['expanded'],
     '#description' => t('If selected and this menu link has children, the menu will always appear expanded.'),
   );
 
+  $form['position'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Menu position'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('menu-form-position'),
+    ),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'menu') . '/menu.js'),
+    ),
+    '#weight' => 5,
+  );
   // Generate a list of possible parents (not including this link or descendants).
   $options = menu_parent_options(menu_get_menus(), $item);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
     $default = 'main-menu:0';
   }
-  $form['parent'] = array(
+  $form['position']['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
     '#default_value' => $default,
@@ -378,7 +410,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
   );
-  $form['weight'] = array(
+  $form['position']['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
     '#delta' => 50,
