@@ -946,8 +946,6 @@ class TruncateQuery extends Query {
     // In most cases, TRUNCATE is not a transaction safe statement as it is a
     // DDL statement which results in an implicit COMMIT. When we are in a
     // transaction, fallback to the slower, but transactional, DELETE.
-    // PostgreSQL also locks the entire table for a TRUNCATE strongly reducing
-    // the concurrency with other transactions.
     if ($this->connection->inTransaction()) {
       return $comments . 'DELETE FROM {' . $this->connection->escapeTable($this->table) . '}';
     }
@@ -1227,9 +1225,9 @@ class UpdateQuery extends Query implements QueryConditionInterface {
  *   INSERT (column1 [, column2 ...]) VALUES (value1 [, value2 ...
  * @endcode
  *
- * Thus far, many databases (most notably MySQL, PostgreSQL or SQLite) do not
- * directly implement MERGE queries and will emulate this statement by running
- * an UPDATE, and if that does not match any rows, then an INSERT.
+ * MySQL does not directly implement MERGE queries and will emulate this
+ * statement by running an UPDATE, and if that does not match any rows, then
+ * an INSERT.
  *
  * The condition is built exactly like SelectQuery or UpdateQuery conditions,
  * the UPDATE query part is built similarly like an UpdateQuery and finally the

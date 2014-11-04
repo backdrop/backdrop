@@ -558,7 +558,7 @@ function user_search_access() {
  */
 function user_search_execute($keys = NULL, $conditions = NULL) {
   $find = array();
-  // Replace wildcards with MySQL/PostgreSQL wildcards.
+  // Replace wildcards with MySQL wildcards.
   $keys = preg_replace('!\*+!', '%', $keys);
   $query = db_select('users')->extend('PagerDefault');
   $query->fields('users', array('uid'));

@@ -1298,9 +1298,8 @@ abstract class DatabaseConnection extends PDO {
    * Retrieves an unique id from a given sequence.
    *
    * Use this function if for some reason you can't use a serial field. For
-   * example, MySQL has no ways of reading of the current value of a sequence
-   * and PostgreSQL can not advance the sequence to be larger than a given
-   * value. Or sometimes you just need a unique integer.
+   * example, MySQL has no ways of reading of the current value of a sequence.
+   * Or sometimes you just need a unique integer.
    *
    * @param $existing_id
    *   After a database import, it might be that the sequences table is behind,
@@ -2988,12 +2987,6 @@ function db_drop_index($table, $name) {
  *   array('type' => 'serial', 'not null' => TRUE),
  *   array('primary key' => array('bar')));
  * @endcode
- *
- * The reasons for this are due to the different database engines:
- *
- * On PostgreSQL, changing a field definition involves adding a new field and
- * dropping an old one which causes any indices, primary keys and sequences
- * (from serial-type fields) that use the changed field to be dropped.
  *
  * On MySQL, all type 'serial' fields must be part of at least one key or index
  * as soon as they are created. You cannot use
