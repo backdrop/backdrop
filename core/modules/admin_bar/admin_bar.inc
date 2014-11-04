@@ -854,7 +854,7 @@ function _admin_bar_flush_cache($name = NULL) {
  * Preprocesses variables for theme_admin_bar_icon().
  */
 function template_preprocess_admin_bar_icon(&$variables) {
-  $variables['src'] = backdrop_get_path('module', 'admin_bar') . '/images/home.png';
+  $variables['src'] = $GLOBALS['base_url'] . '/' . backdrop_get_path('module', 'admin_bar') . '/images/home.png';
   $variables['alt'] = t('Home');
 }
 
