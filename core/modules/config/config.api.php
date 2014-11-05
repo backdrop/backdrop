@@ -23,6 +23,9 @@
  *     the name_key can be specified as a simple string.
  *   - label_key: A string indicating the entry within the configuration file
  *     that will be used as a label.
+ *   - label_callback: Alternatively, if the "label" or "label_key" options are
+ *     not suitable for generating a label, a function may be specified as a
+ *     label callback.
  *   - group: A translated string to be used as the configuration group.
  */
 function hook_config_info() {
