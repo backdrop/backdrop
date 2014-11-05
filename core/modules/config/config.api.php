@@ -14,8 +14,15 @@
  * exporting. Each entry in the returned array should contain at least the
  * following values:
  *   - label: A translated string for the name of the configuration file.
+ *   - name_key: A string or array indicating the entry or entries within the
+ *     configuration file that will be used as the machine name. If specifying
+ *     an array, it should be ordered the same as the name of the configuration
+ *     file. For example if the configuration file is named
+ *     "my_module.feature.key_a.key_b.json", the expected name keys would be
+ *     array('key_a', 'key_b'). In most case when only a single key is needed,
+ *     the name_key can be specified as a simple string.
  *   - label_key: A string indicating the entry within the configuration file
- *       that will be used as a label.
+ *     that will be used as a label.
  *   - group: A translated string to be used as the configuration group.
  */
 function hook_config_info() {

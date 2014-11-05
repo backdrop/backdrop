@@ -26,12 +26,7 @@ function field_sql_storage_field_storage_info() {
  *   A string containing the generated name for the database table
  */
 function _field_sql_storage_tablename($field) {
-  if ($field['deleted']) {
-    return "field_deleted_data_{$field['id']}";
-  }
-  else {
-    return "field_data_{$field['field_name']}";
-  }
+  return "field_data_{$field['field_name']}";
 }
 
 /**
@@ -43,12 +38,7 @@ function _field_sql_storage_tablename($field) {
  *   A string containing the generated name for the database table
  */
 function _field_sql_storage_revision_tablename($field) {
-  if ($field['deleted']) {
-    return "field_deleted_revision_{$field['id']}";
-  }
-  else {
-    return "field_revision_{$field['field_name']}";
-  }
+  return "field_revision_{$field['field_name']}";
 }
 
 /**
@@ -95,7 +85,7 @@ function _field_sql_storage_indexname($name, $index) {
 function _field_sql_storage_schema($field) {
   $deleted = $field['deleted'] ? 'deleted ' : '';
   $current = array(
-    'description' => "Data storage for {$deleted}field {$field['id']} ({$field['field_name']})",
+    'description' => "Data storage for {$deleted}field {$field['field_name']}",
     'fields' => array(
       'entity_type' => array(
         'type' => 'varchar',
@@ -183,7 +173,7 @@ function _field_sql_storage_schema($field) {
 
   // Construct the revision table.
   $revision = $current;
-  $revision['description'] = "Revision archive storage for {$deleted}field {$field['id']} ({$field['field_name']})";
+  $revision['description'] = "Revision archive storage for {$deleted}field {$field['field_name']}";
   $revision['primary key'] = array('entity_type', 'entity_id', 'revision_id', 'deleted', 'delta', 'language');
   $revision['fields']['revision_id']['not null'] = TRUE;
   $revision['fields']['revision_id']['description'] = 'The entity revision id this data is attached to';
@@ -221,9 +211,8 @@ function field_sql_storage_field_update_forbid($field, $prior_field, $has_data) 
  * Implements hook_field_storage_update_field().
  */
 function field_sql_storage_field_storage_update_field($field, $prior_field, $has_data) {
-  if (! $has_data) {
+  if (!$has_data) {
     // There is no data. Re-create the tables completely.
-
     if (Database::getConnection()->supportsTransactionalDDL()) {
       // If the database supports transactional DDL, we can go ahead and rely
       // on it. If not, we will have to rollback manually if something fails.
@@ -257,31 +246,7 @@ function field_sql_storage_field_storage_update_field($field, $prior_field, $has
     }
   }
   else {
-    // There is data, so there are no column changes. Drop all the
-    // prior indexes and create all the new ones, except for all the
-    // priors that exist unchanged.
-    $table = _field_sql_storage_tablename($prior_field);
-    $revision_table = _field_sql_storage_revision_tablename($prior_field);
-    foreach ($prior_field['indexes'] as $name => $columns) {
-      if (!isset($field['indexes'][$name]) || $columns != $field['indexes'][$name]) {
-        $real_name = _field_sql_storage_indexname($field['field_name'], $name);
-        db_drop_index($table, $real_name);
-        db_drop_index($revision_table, $real_name);
-      }
-    }
-    $table = _field_sql_storage_tablename($field);
-    $revision_table = _field_sql_storage_revision_tablename($field);
-    foreach ($field['indexes'] as $name => $columns) {
-      if (!isset($prior_field['indexes'][$name]) || $columns != $prior_field['indexes'][$name]) {
-        $real_name = _field_sql_storage_indexname($field['field_name'], $name);
-        $real_columns = array();
-        foreach ($columns as $column_name) {
-          $real_columns[] = _field_sql_storage_columnname($field['field_name'], $column_name);
-        }
-        db_add_index($table, $real_name, $real_columns);
-        db_add_index($revision_table, $real_name, $real_columns);
-      }
-    }
+    // No changes can be done to fields with existing data.
   }
   backdrop_get_schema(NULL, TRUE);
 }
@@ -291,38 +256,31 @@ function field_sql_storage_field_storage_update_field($field, $prior_field, $has
  */
 function field_sql_storage_field_storage_delete_field($field) {
   // Mark all data associated with the field for deletion.
-  $field['deleted'] = 0;
   $table = _field_sql_storage_tablename($field);
   $revision_table = _field_sql_storage_revision_tablename($field);
   db_update($table)
     ->fields(array('deleted' => 1))
     ->execute();
-
-  // Move the table to a unique name while the table contents are being deleted.
-  $field['deleted'] = 1;
-  $new_table = _field_sql_storage_tablename($field);
-  $revision_new_table = _field_sql_storage_revision_tablename($field);
-  db_rename_table($table, $new_table);
-  db_rename_table($revision_table, $revision_new_table);
-  backdrop_get_schema(NULL, TRUE);
+  db_update($revision_table)
+    ->fields(array('deleted' => 1))
+    ->execute();
 }
 
 /**
  * Implements hook_field_storage_load().
  */
 function field_sql_storage_field_storage_load($entity_type, $entities, $age, $fields, $options) {
-  $field_info = field_info_field_by_ids();
+  $field_info = field_info_fields(TRUE);
   $load_current = $age == FIELD_LOAD_CURRENT;
 
-  foreach ($fields as $field_id => $ids) {
-    $field = $field_info[$field_id];
-    $field_name = $field['field_name'];
+  foreach ($fields as $field_name => $entity_ids) {
+    $field = $field_info[$field_name];
     $table = $load_current ? _field_sql_storage_tablename($field) : _field_sql_storage_revision_tablename($field);
 
     $query = db_select($table, 't')
       ->fields('t')
       ->condition('entity_type', $entity_type)
-      ->condition($load_current ? 'entity_id' : 'revision_id', $ids, 'IN')
+      ->condition($load_current ? 'entity_id' : 'revision_id', $entity_ids, 'IN')
       ->condition('language', field_available_languages($entity_type, $field), 'IN')
       ->orderBy('delta');
 
@@ -364,9 +322,8 @@ function field_sql_storage_field_storage_write($entity_type, $entity, $op, $fiel
     $vid = $id;
   }
 
-  foreach ($fields as $field_id) {
-    $field = field_info_field_by_id($field_id);
-    $field_name = $field['field_name'];
+  foreach ($fields as $field_name) {
+    $field = field_info_field($field_name);
     $table_name = _field_sql_storage_tablename($field);
     $revision_name = _field_sql_storage_revision_tablename($field);
 
@@ -447,8 +404,8 @@ function field_sql_storage_field_storage_delete($entity_type, $entity, $fields) 
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   foreach (field_info_instances($entity_type, $bundle) as $instance) {
-    if (isset($fields[$instance['field_id']])) {
-      $field = field_info_field_by_id($instance['field_id']);
+    if (isset($fields[$instance['field_name']])) {
+      $field = field_info_field($instance['field_name']);
       field_sql_storage_field_storage_purge($entity_type, $entity, $field, $instance);
     }
   }
@@ -639,8 +596,8 @@ function field_sql_storage_field_storage_delete_revision($entity_type, $entity, 
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   if (isset($vid)) {
-    foreach ($fields as $field_id) {
-      $field = field_info_field_by_id($field_id);
+    foreach ($fields as $field_name) {
+      $field = field_info_field($field_name);
       $revision_name = _field_sql_storage_revision_tablename($field);
       db_delete($revision_name)
         ->condition('entity_type', $entity_type)
@@ -679,7 +636,7 @@ function field_sql_storage_field_attach_rename_bundle($entity_type, $bundle_old,
   // We need to account for deleted or inactive fields and instances.
   $instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle_new), array('include_deleted' => TRUE, 'include_inactive' => TRUE));
   foreach ($instances as $instance) {
-    $field = field_info_field_by_id($instance['field_id']);
+    $field = field_info_field($instance['field_name']);
     if ($field['storage']['type'] == 'field_sql_storage') {
       $table_name = _field_sql_storage_tablename($field);
       $revision_name = _field_sql_storage_revision_tablename($field);

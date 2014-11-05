@@ -9,7 +9,7 @@
  * Implements hook_entity_info().
  */
 function field_test_entity_info() {
-  $bundles = variable_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
+  $bundles = state_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
   $test_entity_modes = array(
     'full' => array(
       'label' => t('Full object'),
@@ -159,9 +159,9 @@ function field_test_entity_info_translatable($entity_type = NULL, $translatable 
  *   name will be used.
  */
 function field_test_create_bundle($bundle, $text = NULL) {
-  $bundles = variable_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
+  $bundles = state_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
   $bundles += array($bundle => array('label' => $text ? $text : $bundle));
-  variable_set('field_test_bundles', $bundles);
+  state_set('field_test_bundles', $bundles);
 
   $info = field_test_entity_info();
   foreach ($info as $type => $type_info) {
@@ -178,10 +178,10 @@ function field_test_create_bundle($bundle, $text = NULL) {
  *   The new machine-readable name of the bundle.
  */
 function field_test_rename_bundle($bundle_old, $bundle_new) {
-  $bundles = variable_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
+  $bundles = state_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
   $bundles[$bundle_new] = $bundles[$bundle_old];
   unset($bundles[$bundle_old]);
-  variable_set('field_test_bundles', $bundles);
+  state_set('field_test_bundles', $bundles);
 
   $info = field_test_entity_info();
   foreach ($info as $type => $type_info) {
@@ -196,9 +196,9 @@ function field_test_rename_bundle($bundle_old, $bundle_new) {
  *   The machine-readable name of the bundle to delete.
  */
 function field_test_delete_bundle($bundle) {
-  $bundles = variable_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
+  $bundles = state_get('field_test_bundles', array('test_bundle' => array('label' => 'Test Bundle')));
   unset($bundles[$bundle]);
-  variable_set('field_test_bundles', $bundles);
+  state_set('field_test_bundles', $bundles);
 
   $info = field_test_entity_info();
   foreach ($info as $type => $type_info) {

@@ -1454,6 +1454,26 @@ function comment_user_predelete($account) {
 }
 
 /**
+ * Implements hook_config_create_validate()
+ */
+function comment_config_create_validate(Config $staging_config, $all_changes) {
+  $config_name = $staging_config->getName();
+
+  // Ensure entity types and bundles exist or will be imported.
+  if (strpos($config_name, 'field.instance.comment.') === 0) {
+    list($node_type, $field_name) = explode('.', str_replace('field.instance.comment.', '', $config_name));
+    $node_type = str_replace('comment_node_', '', $node_type);
+
+    // Check that the node type does or will exist.
+    $type_exists = (bool) node_type_get_type($node_type);
+    $type_created = $all_changes['node.type.' . $node_type];
+    if (!$type_exists && !$type_created) {
+      throw new ConfigValidateException(t('The comment field "@name" cannot be added because the node type "@type" does not exist.', array('@name' => $field_name, '@type' => $node_type)));
+    }
+  }
+}
+
+/**
  * Determines whether the current user has access to a particular comment.
  *
  * Authenticated users can edit their comments as long they have not been

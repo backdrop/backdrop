@@ -9,24 +9,6 @@
  * Parent class for Field API tests.
  */
 class FieldTestCase extends BackdropWebTestCase {
-  var $default_storage = 'field_sql_storage';
-
-  /**
-   * Set the default field storage backend for fields created during tests.
-   */
-  function setUp() {
-    // Since this is a base class for many test cases, support the same
-    // flexibility that BackdropWebTestCase::setUp() has for the modules to be
-    // passed in as either an array or a variable number of string arguments.
-    $modules = func_get_args();
-    if (isset($modules[0]) && is_array($modules[0])) {
-      $modules = $modules[0];
-    }
-    parent::setUp($modules);
-    // Set default storage backend.
-    variable_set('field_storage_default', $this->default_storage);
-  }
-
   /**
    * Generate random values for a field_test field.
    *
@@ -98,13 +80,11 @@ class FieldAttachTestCase extends FieldTestCase {
   function createFieldWithInstance($suffix = '') {
     $field_name = 'field_name' . $suffix;
     $field = 'field' . $suffix;
-    $field_id = 'field_id' . $suffix;
     $instance = 'instance' . $suffix;
 
     $this->$field_name = backdrop_strtolower($this->randomName() . '_field_name' . $suffix);
     $this->$field = array('field_name' => $this->$field_name, 'type' => 'test_field', 'cardinality' => 4);
     $this->$field = field_create_field($this->$field);
-    $this->$field_id = $this->{$field}['id'];
     $this->$instance = array(
       'field_name' => $this->$field_name,
       'entity_type' => 'test_entity',
@@ -224,7 +204,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
       $field_names[$i] = 'field_' . $i;
       $field = array('field_name' => $field_names[$i], 'type' => 'test_field');
       $field = field_create_field($field);
-      $field_ids[$i] = $field['id'];
+      $field_names[$i] = $field['field_name'];
       foreach ($field_bundles_map[$i] as $bundle) {
         $instance = array(
           'field_name' => $field_names[$i],
@@ -266,7 +246,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
 
     // Check that the single-field load option works.
     $entity = field_test_create_stub_entity(1, 1, $bundles[1]);
-    field_attach_load($entity_type, array(1 => $entity), FIELD_LOAD_CURRENT, array('field_id' => $field_ids[1]));
+    field_attach_load($entity_type, array(1 => $entity), FIELD_LOAD_CURRENT, array('field_name' => $field_names[1]));
     $this->assertEqual($entity->{$field_names[1]}[$langcode][0]['value'], $values[1][$field_names[1]], format_string('Entity %index: expected value was found.', array('%index' => 1)));
     $this->assertEqual($entity->{$field_names[1]}[$langcode][0]['additional_key'], 'additional_value', format_string('Entity %index: extra information was found', array('%index' => 1)));
     $this->assert(!isset($entity->{$field_names[2]}), format_string('Entity %index: field %field_name is not loaded.', array('%index' => 2, '%field_name' => $field_names[2])));
@@ -894,7 +874,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
 
     // Load a single field, and check that no cache entry is present.
     $entity = clone($entity_init);
-    field_attach_load($entity_type, array($entity->ftid => $entity), FIELD_LOAD_CURRENT, array('field_id' => $this->field_id));
+    field_attach_load($entity_type, array($entity->ftid => $entity), FIELD_LOAD_CURRENT, array('field_name' => $this->field_name));
     $cache = cache('field')->get($cid);
     $this->assertFalse(cache('field')->get($cid), 'Cached: no cache entry on loading a single field');
 
@@ -1292,13 +1272,9 @@ class FieldInfoTestCase extends FieldTestCase {
     // Simulate a stored field definition missing a field setting (e.g. a
     // third-party module adding a new field setting has been enabled, and
     // existing fields do not know the setting yet).
-    $data = db_query('SELECT data FROM {field_config} WHERE field_name = :field_name', array(':field_name' => $field_definition['field_name']))->fetchField();
-    $data = unserialize($data);
-    $data['settings'] = array();
-    db_update('field_config')
-      ->fields(array('data' => serialize($data)))
-      ->condition('field_name', $field_definition['field_name'])
-      ->execute();
+    $config = config('field.field.' . $field_definition['field_name']);
+    $config->set('settings', array());
+    $config->save();
 
     field_cache_clear();
 
@@ -1329,18 +1305,15 @@ class FieldInfoTestCase extends FieldTestCase {
     // Simulate a stored instance definition missing various settings (e.g. a
     // third-party module adding instance, widget or display settings has been
     // enabled, but existing instances do not know the new settings).
-    $data = db_query('SELECT data FROM {field_config_instance} WHERE field_name = :field_name AND bundle = :bundle', array(':field_name' => $instance_definition['field_name'], ':bundle' => $instance_definition['bundle']))->fetchField();
-    $data = unserialize($data);
-    $data['settings'] = array();
-    $data['widget']['settings'] = 'unavailable_widget';
-    $data['widget']['settings'] = array();
-    $data['display']['default']['type'] = 'unavailable_formatter';
-    $data['display']['default']['settings'] = array();
-    db_update('field_config_instance')
-      ->fields(array('data' => serialize($data)))
-      ->condition('field_name', $instance_definition['field_name'])
-      ->condition('bundle', $instance_definition['bundle'])
-      ->execute();
+    $config = config('field.instance.test_entity.' . $instance_definition['bundle'] . '.' . $instance_definition['field_name']);
+    $instance = $config->get();
+    $instance['settings'] = array();
+    $instance['widget']['settings'] = 'unavailable_widget';
+    $instance['widget']['settings'] = array();
+    $instance['display']['default']['type'] = 'unavailable_formatter';
+    $instance['display']['default']['settings'] = array();
+    $config->setData($instance);
+    $config->save();
 
     field_cache_clear();
 
@@ -2140,24 +2113,23 @@ class FieldCrudTestCase extends FieldTestCase {
     $mem = field_test_memorize();
     $this->assertIdentical($mem['field_test_field_create_field'][0][0], $field_definition, 'hook_field_create_field() called with correct arguments.');
 
-    // Read the raw record from the {field_config_instance} table.
-    $result = db_query('SELECT * FROM {field_config} WHERE field_name = :field_name', array(':field_name' => $field_definition['field_name']));
-    $record = $result->fetchAssoc();
-    $record['data'] = unserialize($record['data']);
+    // Read the raw record from the config file.
+    $config = config('field.field.' . $field_definition['field_name']);
+    $config_data = $config->get();
 
     // Ensure that basic properties are preserved.
-    $this->assertEqual($record['field_name'], $field_definition['field_name'], 'The field name is properly saved.');
-    $this->assertEqual($record['type'], $field_definition['type'], 'The field type is properly saved.');
+    $this->assertEqual($config_data['field_name'], $field_definition['field_name'], 'The field name is properly saved.');
+    $this->assertEqual($config_data['type'], $field_definition['type'], 'The field type is properly saved.');
 
     // Ensure that cardinality defaults to 1.
-    $this->assertEqual($record['cardinality'], 1, 'Cardinality defaults to 1.');
+    $this->assertEqual($config_data['cardinality'], 1, 'Cardinality defaults to 1.');
 
     // Ensure that default settings are present.
     $field_type = field_info_field_types($field_definition['type']);
-    $this->assertIdentical($record['data']['settings'], $field_type['settings'], 'Default field settings have been written.');
+    $this->assertIdentical($config_data['settings'], $field_type['settings'], 'Default field settings have been written.');
 
     // Ensure that default storage was set.
-    $this->assertEqual($record['storage_type'], variable_get('field_storage_default'), 'The field type is properly saved.');
+    $this->assertEqual($config_data['storage']['type'], 'field_sql_storage', 'The field type is properly saved.');
 
     // Guarantee that the name is unique.
     try {
@@ -2252,11 +2224,10 @@ class FieldCrudTestCase extends FieldTestCase {
   function testCreateFieldFail() {
     $field_name = 'duplicate';
     $field_definition = array('field_name' => $field_name, 'type' => 'test_field', 'storage' => array('type' => 'field_test_storage_failure'));
-    $query = db_select('field_config')->condition('field_name', $field_name)->countQuery();
 
     // The field does not appear in field_config.
-    $count = $query->execute()->fetchField();
-    $this->assertEqual($count, 0, 'A field_config row for the field does not exist.');
+    $config = config('field.field.' . $field_name);
+    $this->assertTrue($config->isNew(), 'A field config file for the field does not exist.');
 
     // Try to create the field.
     try {
@@ -2267,9 +2238,9 @@ class FieldCrudTestCase extends FieldTestCase {
       $this->assertTrue(TRUE, 'Field creation (correctly) fails.');
     }
 
-    // The field does not appear in field_config.
-    $count = $query->execute()->fetchField();
-    $this->assertEqual($count, 0, 'A field_config row for the field does not exist.');
+    // The field should still not exist in config.
+    $config = config('field.field.' . $field_name);
+    $this->assertTrue($config->isNew(), 'A field config file for the field does not exist.');
   }
 
   /**
@@ -2285,49 +2256,6 @@ class FieldCrudTestCase extends FieldTestCase {
     // Read the field back.
     $field = field_read_field($field_definition['field_name']);
     $this->assertTrue($field_definition < $field, 'The field was properly read.');
-  }
-
-  /**
-   * Test creation of indexes on data column.
-   */
-  function testFieldIndexes() {
-    // Check that indexes specified by the field type are used by default.
-    $field_definition = array(
-      'field_name' => 'field_1',
-      'type' => 'test_field',
-    );
-    field_create_field($field_definition);
-    $field = field_read_field($field_definition['field_name']);
-    $expected_indexes = array('value' => array('value'));
-    $this->assertEqual($field['indexes'], $expected_indexes, 'Field type indexes saved by default');
-
-    // Check that indexes specified by the field definition override the field
-    // type indexes.
-    $field_definition = array(
-      'field_name' => 'field_2',
-      'type' => 'test_field',
-      'indexes' => array(
-        'value' => array(),
-      ),
-    );
-    field_create_field($field_definition);
-    $field = field_read_field($field_definition['field_name']);
-    $expected_indexes = array('value' => array());
-    $this->assertEqual($field['indexes'], $expected_indexes, 'Field definition indexes override field type indexes');
-
-    // Check that indexes specified by the field definition add to the field
-    // type indexes.
-    $field_definition = array(
-      'field_name' => 'field_3',
-      'type' => 'test_field',
-      'indexes' => array(
-        'value_2' => array('value'),
-      ),
-    );
-    field_create_field($field_definition);
-    $field = field_read_field($field_definition['field_name']);
-    $expected_indexes = array('value' => array('value'), 'value_2' => array('value'));
-    $this->assertEqual($field['indexes'], $expected_indexes, 'Field definition indexes are merged with field type indexes');
   }
 
   /**
@@ -2361,6 +2289,26 @@ class FieldCrudTestCase extends FieldTestCase {
     $this->assertTrue(!empty($field) && empty($field['deleted']), 'A new field is not marked for deletion.');
     field_delete_field($this->field['field_name']);
 
+    // Fields that have no data will be purged entirely.
+    $field = field_read_field($this->field['field_name'], array('include_deleted' => TRUE));
+    $this->assertFalse($field, 'A deleted field is completely purged when it has no data.');
+
+    // The instances of that field should be purged entirely as well.
+    $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle'], array('include_deleted' => TRUE));
+    $this->assertFalse($instance, 'An instance for a deleted field is completely purged when it has no data.');
+
+    // Re-create the field and attempt again with data in the fields.
+    field_create_field($this->field);
+    field_create_instance($this->instance_definition);
+
+    // Add an entry.
+    $entity = field_test_create_stub_entity(1, 1, $this->instance_definition['bundle']);
+    $entity->{$this->field['field_name']}[LANGUAGE_NONE][0]['value'] = 1;
+    field_attach_insert('test_entity', $entity);
+
+    // Delete the field again.
+    field_delete_field($this->field['field_name']);
+
     // Make sure that the field is marked as deleted when it is specifically
     // loaded.
     $field = field_read_field($this->field['field_name'], array('include_deleted' => TRUE));
@@ -2385,30 +2333,12 @@ class FieldCrudTestCase extends FieldTestCase {
     $another_instance = field_read_instance('test_entity', $this->another_instance_definition['field_name'], $this->another_instance_definition['bundle']);
     $this->assertTrue(!empty($another_instance) && empty($another_instance['deleted']), 'An instance of a non-deleted field is not marked for deletion.');
 
-    // Try to create a new field the same name as a deleted field and
-    // write data into it.
-    field_create_field($this->field);
-    field_create_instance($this->instance_definition);
-    $field = field_read_field($this->field['field_name']);
-    $this->assertTrue(!empty($field) && empty($field['deleted']), 'A new field with a previously used name is created.');
-    $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
-    $this->assertTrue(!empty($instance) && empty($instance['deleted']), 'A new instance for a previously used field name is created.');
+    // Run a purge to delete the piece of content and check if the field is
+    // deleted entirely.
+    field_purge_batch(1);
 
-    // Save an entity with data for the field
-    $entity = field_test_create_stub_entity(0, 0, $instance['bundle']);
-    $langcode = LANGUAGE_NONE;
-    $values[0]['value'] = mt_rand(1, 127);
-    $entity->{$field['field_name']}[$langcode] = $values;
-    $entity_type = 'test_entity';
-    field_attach_insert('test_entity', $entity);
-
-    // Verify the field is present on load
-    $entity = field_test_create_stub_entity(0, 0, $this->instance_definition['bundle']);
-    field_attach_load($entity_type, array(0 => $entity));
-    $this->assertIdentical(count($entity->{$field['field_name']}[$langcode]), count($values), "Data in previously deleted field saves and loads correctly");
-    foreach ($values as $delta => $value) {
-      $this->assertEqual($entity->{$field['field_name']}[$langcode][$delta]['value'], $values[$delta]['value'], "Data in previously deleted field saves and loads correctly");
-    }
+    $field = field_read_field($this->field['field_name'], array('include_deleted' => TRUE));
+    $this->assertFalse($field, 'Field is deleted after a batch run.');
   }
 
   function testUpdateNonExistentField() {
@@ -2599,27 +2529,28 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   function testCreateFieldInstance() {
     field_create_instance($this->instance_definition);
 
-    // Read the raw record from the {field_config_instance} table.
-    $result = db_query('SELECT * FROM {field_config_instance} WHERE field_name = :field_name AND bundle = :bundle', array(':field_name' => $this->instance_definition['field_name'], ':bundle' => $this->instance_definition['bundle']));
-    $record = $result->fetchAssoc();
-    $record['data'] = unserialize($record['data']);
+    // Read the raw record from the config
+    $field_name = $this->instance_definition['field_name'];
+    $bundle = $this->instance_definition['bundle'];
+    $entity_type = $this->instance_definition['entity_type'];
+    $config_data = config('field.instance.' . $entity_type . '.' . $bundle . '.' . $field_name)->get();
 
     $field_type = field_info_field_types($this->field['type']);
     $widget_type = field_info_widget_types($field_type['default_widget']);
     $formatter_type = field_info_formatter_types($field_type['default_formatter']);
 
     // Check that default values are set.
-    $this->assertIdentical($record['data']['required'], FALSE, 'Required defaults to false.');
-    $this->assertIdentical($record['data']['label'], $this->instance_definition['field_name'], 'Label defaults to field name.');
-    $this->assertIdentical($record['data']['description'], '', 'Description defaults to empty string.');
-    $this->assertIdentical($record['data']['widget']['type'], $field_type['default_widget'], 'Default widget has been written.');
-    $this->assertTrue(isset($record['data']['display']['default']), 'Display for "full" view_mode has been written.');
-    $this->assertIdentical($record['data']['display']['default']['type'], $field_type['default_formatter'], 'Default formatter for "full" view_mode has been written.');
+    $this->assertIdentical($config_data['required'], 0, 'Required defaults to false.');
+    $this->assertIdentical($config_data['label'], $this->instance_definition['field_name'], 'Label defaults to field name.');
+    $this->assertIdentical($config_data['description'], '', 'Description defaults to empty string.');
+    $this->assertIdentical($config_data['widget']['type'], $field_type['default_widget'], 'Default widget has been written.');
+    $this->assertTrue(isset($config_data['display']['default']), 'Display for "full" view_mode has been written.');
+    $this->assertIdentical($config_data['display']['default']['type'], $field_type['default_formatter'], 'Default formatter for "full" view_mode has been written.');
 
     // Check that default settings are set.
-    $this->assertIdentical($record['data']['settings'], $field_type['instance_settings'] , 'Default instance settings have been written.');
-    $this->assertIdentical($record['data']['widget']['settings'], $widget_type['settings'] , 'Default widget settings have been written.');
-    $this->assertIdentical($record['data']['display']['default']['settings'], $formatter_type['settings'], 'Default formatter settings for "full" view_mode have been written.');
+    $this->assertIdentical($config_data['settings'], $field_type['instance_settings'] , 'Default instance settings have been written.');
+    $this->assertIdentical($config_data['widget']['settings'], $widget_type['settings'] , 'Default widget settings have been written.');
+    $this->assertIdentical($config_data['display']['default']['settings'], $formatter_type['settings'], 'Default formatter settings for "full" view_mode have been written.');
 
     // Guarantee that the field/bundle combination is unique.
     try {
@@ -2781,7 +2712,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     // Make sure the field is deleted when its last instance is deleted.
     field_delete_instance($another_instance);
     $field = field_read_field($another_instance['field_name'], array('include_deleted' => TRUE));
-    $this->assertTrue(!empty($field['deleted']), 'A deleted field is marked for deletion after all its instances have been marked for deletion.');
+    $this->assertFalse($field, 'A deleted field is deleted its instances have been deleted.');
   }
 }
 
@@ -2839,7 +2770,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Test hook_field_languages() invocation on a translatable field.
-    variable_set('field_test_field_available_languages_alter', TRUE);
+    state_set('field_test_field_available_languages_alter', TRUE);
     $enabled_languages = field_content_languages();
     $available_languages = field_available_languages($this->entity_type, $this->field);
     foreach ($available_languages as $delta => $langcode) {
@@ -3080,7 +3011,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     $this->assertTrue(isset($entity->{$this->field_name}[$langcode]) && $langcode != $requested_language, format_string('The display language for the (single) field %field_name is %language.', array('%field_name' => $field_name, '%language' => $langcode)));
 
     // Test field_language() basic behavior without language fallback.
-    variable_set('field_test_language_fallback', FALSE);
+    variable_set('state_test_language_fallback', FALSE);
     $entity->{$this->field_name}[$requested_language] = mt_rand(1, 127);
     backdrop_static_reset('field_language');
     $display_language = field_language($entity_type, $entity, $this->field_name, $requested_language);
@@ -3278,7 +3209,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
     field_delete_instance($instance);
 
     // The instance still exists, deleted.
-    $instances = field_read_instances(array('field_id' => $field['id'], 'deleted' => 1), array('include_deleted' => 1, 'include_inactive' => 1));
+    $instances = field_read_instances(array('field_name' => $field['field_name'], 'deleted' => 1), array('include_deleted' => 1, 'include_inactive' => 1));
     $this->assertEqual(count($instances), 1, 'There is one deleted instance');
     $this->assertEqual($instances[0]['bundle'], $bundle, 'The deleted instance is for the correct bundle');
 
@@ -3298,7 +3229,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
       ->entityCondition('bundle', $bundle)
       ->deleted(TRUE)
       ->execute();
-    field_attach_load($this->entity_type, $found[$this->entity_type], FIELD_LOAD_CURRENT, array('field_id' => $field['id'], 'deleted' => 1));
+    field_attach_load($this->entity_type, $found[$this->entity_type], FIELD_LOAD_CURRENT, array('field_name' => $field['field_name'], 'deleted' => 1));
     $this->assertEqual(count($found['test_entity']), 10, 'Correct number of entities found after deleting');
     foreach ($found['test_entity'] as $id => $entity) {
       $this->assertEqual($this->entities[$id]->{$field['field_name']}, $entity->{$field['field_name']}, "Entity $id with deleted data loaded correctly");
@@ -3355,20 +3286,13 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
     }
     $this->checkHooksInvocations($hooks, $actual_hooks);
 
-    // The instance still exists, deleted.
-    $instances = field_read_instances(array('field_id' => $field['id'], 'deleted' => 1), array('include_deleted' => 1, 'include_inactive' => 1));
-    $this->assertEqual(count($instances), 1, 'There is one deleted instance');
-
-    // Purge the instance.
-    field_purge_batch($batch_size);
-
     // The instance is gone.
-    $instances = field_read_instances(array('field_id' => $field['id'], 'deleted' => 1), array('include_deleted' => 1, 'include_inactive' => 1));
+    $instances = field_read_instances(array('field_name' => $field['field_name'], 'deleted' => 1), array('include_deleted' => 1, 'include_inactive' => 1));
     $this->assertEqual(count($instances), 0, 'The instance is gone');
 
     // The field still exists, not deleted, because it has a second instance.
-    $fields = field_read_fields(array('id' => $field['id']), array('include_deleted' => 1, 'include_inactive' => 1));
-    $this->assertTrue(isset($fields[$field['id']]), 'The field exists and is not deleted');
+    $fields = field_read_fields(array('field_name' => $field['field_name']), array('include_deleted' => 1, 'include_inactive' => 1));
+    $this->assertTrue(isset($fields[$field['field_name']]), 'The field exists and is not deleted');
   }
 
   /**
@@ -3407,44 +3331,24 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
     }
     $this->checkHooksInvocations($hooks, $actual_hooks);
 
-    // Purge again to purge the instance.
-    field_purge_batch(0);
+    // Check that the instance has been deleted.
+    $instances = field_read_instances(array('field_name' => $field['field_name'], 'bundle' => $bundle), array('include_deleted' => 1));
+    $this->assertEqual(count($instances), 0, 'The first instance has been deleted.');
 
     // The field still exists, not deleted.
-    $fields = field_read_fields(array('id' => $field['id']), array('include_deleted' => 1));
-    $this->assertTrue(isset($fields[$field['id']]) && !$fields[$field['id']]['deleted'], 'The field exists and is not deleted');
+    $fields = field_read_fields(array('field_name' => $field['field_name']), array('include_deleted' => 1));
+    $this->assertTrue(isset($fields[$field['field_name']]) && !$fields[$field['field_name']]['deleted'], 'The field exists and is not deleted because one instance still remains.');
 
     // Delete the second instance.
     $bundle = next($this->bundles);
     $instance = field_info_instance($this->entity_type, $field['field_name'], $bundle);
     field_delete_instance($instance);
 
-    // Assert that hook_field_delete() was not called yet.
-    $mem = field_test_memorize();
-    $this->assertEqual(count($mem), 0, 'No field hooks were called.');
-
-    // Purge the data.
+    // One more purge to delete remaining data.
     field_purge_batch(10);
 
-    // Check hooks invocations (same as above, for the 2nd bundle).
-    $actual_hooks = field_test_memorize();
-    $hooks = array();
-    $stubs = $this->_generateStubEntities($this->entity_type, $this->entities_by_bundles[$bundle], $field['field_name']);
-    $hooks['field_test_field_load'][] = $stubs;
-    foreach ($stubs as $stub) {
-      $hooks['field_test_field_delete'][] = $stub;
-    }
-    $this->checkHooksInvocations($hooks, $actual_hooks);
-
-    // The field still exists, deleted.
-    $fields = field_read_fields(array('id' => $field['id']), array('include_deleted' => 1));
-    $this->assertTrue(isset($fields[$field['id']]) && $fields[$field['id']]['deleted'], 'The field exists and is deleted');
-
-    // Purge again to purge the instance and the field.
-    field_purge_batch(0);
-
     // The field is gone.
-    $fields = field_read_fields(array('id' => $field['id']), array('include_deleted' => 1, 'include_inactive' => 1));
+    $fields = field_read_fields(array('field_name' => $field['field_name']), array('include_deleted' => 1, 'include_inactive' => 1));
     $this->assertEqual(count($fields), 0, 'The field is purged.');
   }
 }

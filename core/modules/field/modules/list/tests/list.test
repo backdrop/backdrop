@@ -87,7 +87,7 @@ class ListFieldTestCase extends FieldTestCase {
 
     // Options are reset when a new field with the same name is created.
     field_delete_field($this->field_name);
-    unset($this->field['id']);
+
     $this->field['settings']['allowed_values'] = array(1 => 'One', 2 => 'Two', 3 => 'Three');
     $this->field = field_create_field($this->field);
     $this->instance = array(

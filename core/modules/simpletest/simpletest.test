@@ -6,6 +6,8 @@
  */
 
 class SimpleTestFunctionalTest extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+
   /**
    * The results array that has been parsed by getTestResults().
    */

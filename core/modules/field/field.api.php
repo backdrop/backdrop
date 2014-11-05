@@ -1573,11 +1573,11 @@ function hook_field_attach_create_bundle($entity_type, $bundle) {
 function hook_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
   // Update the extra weights variable with new information.
   if ($bundle_old !== $bundle_new) {
-    $extra_weights = variable_get('field_extra_weights', array());
+    $extra_weights = config_get('my_module.settings', 'field_extra_weights');
     if (isset($info[$entity_type][$bundle_old])) {
       $extra_weights[$entity_type][$bundle_new] = $extra_weights[$entity_type][$bundle_old];
       unset($extra_weights[$entity_type][$bundle_old]);
-      variable_set('field_extra_weights', $extra_weights);
+      config_get('my_module.settings', 'field_extra_weights');
     }
   }
 }
@@ -1597,10 +1597,10 @@ function hook_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new)
  */
 function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
   // Remove the extra weights variable information for this bundle.
-  $extra_weights = variable_get('field_extra_weights', array());
+  $extra_weights = config_get('my_module.settings', 'field_extra_weights');
   if (isset($extra_weights[$entity_type][$bundle])) {
     unset($extra_weights[$entity_type][$bundle]);
-    variable_set('field_extra_weights', $extra_weights);
+    config_set('my_module.settings', 'field_extra_weights', $extra_weights);
   }
 }
 
@@ -1741,8 +1741,10 @@ function hook_field_storage_details_alter(&$details, $field) {
  *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  * @param $fields
  *   An array listing the fields to be loaded. The keys of the array are field
- *   IDs, and the values of the array are the entity IDs (or revision IDs,
- *   depending on the $age parameter) to add each field to.
+ *   names, and the values of the array are the entity IDs (or revision IDs,
+ *   depending on the $age parameter) to add each field to. Note that deleted
+ *   data may need to be loaded, so requests to field_info_fields() should
+ *   the $include_deleted flag to ensure the field definition is loaded.
  * @param $options
  *   An associative array of additional options, with the following keys:
  *   - deleted: If TRUE, deleted fields should be loaded as well as
@@ -1750,18 +1752,18 @@ function hook_field_storage_details_alter(&$details, $field) {
  *     loaded.
  */
 function hook_field_storage_load($entity_type, $entities, $age, $fields, $options) {
-  $field_info = field_info_field_by_ids();
+  $field_info = field_info_fields(TRUE);
   $load_current = $age == FIELD_LOAD_CURRENT;
 
-  foreach ($fields as $field_id => $ids) {
-    $field = $field_info[$field_id];
+  foreach ($fields as $field_name => $entity_ids) {
+    $field = $field_info[$field_name];
     $field_name = $field['field_name'];
     $table = $load_current ? _field_sql_storage_tablename($field) : _field_sql_storage_revision_tablename($field);
 
     $query = db_select($table, 't')
       ->fields('t')
       ->condition('entity_type', $entity_type)
-      ->condition($load_current ? 'entity_id' : 'revision_id', $ids, 'IN')
+      ->condition($load_current ? 'entity_id' : 'revision_id', $entity_ids, 'IN')
       ->condition('language', field_available_languages($entity_type, $field), 'IN')
       ->orderBy('delta');
 
@@ -1817,8 +1819,8 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
     $vid = $id;
   }
 
-  foreach ($fields as $field_id) {
-    $field = field_info_field_by_id($field_id);
+  foreach ($fields as $field_name) {
+    $field = field_info_field($field_name);
     $field_name = $field['field_name'];
     $table_name = _field_sql_storage_tablename($field);
     $revision_name = _field_sql_storage_revision_tablename($field);
@@ -1909,8 +1911,8 @@ function hook_field_storage_delete($entity_type, $entity, $fields) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   foreach (field_info_instances($entity_type, $bundle) as $instance) {
-    if (isset($fields[$instance['field_id']])) {
-      $field = field_info_field_by_id($instance['field_id']);
+    if (isset($fields[$instance['field_name']])) {
+      $field = field_info_field($instance['field_name']);
       field_sql_storage_field_storage_purge($entity_type, $entity, $field, $instance);
     }
   }
@@ -1939,8 +1941,8 @@ function hook_field_storage_delete_revision($entity_type, $entity, $fields) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   if (isset($vid)) {
-    foreach ($fields as $field_id) {
-      $field = field_info_field_by_id($field_id);
+    foreach ($fields as $field_name) {
+      $field = field_info_field($field_name);
       $revision_name = _field_sql_storage_revision_tablename($field);
       db_delete($revision_name)
         ->condition('entity_type', $entity_type)
@@ -2163,7 +2165,7 @@ function hook_field_storage_delete_instance($instance) {
  *   that your module has already loaded a field.
  * @param $options
  *   An associative array of additional options, with the following keys:
- *   - field_id: The field ID that should be loaded. If unset, all fields
+ *   - field_name: The field name that should be loaded. If empty, all fields
  *     should be loaded.
  *   - deleted: If TRUE, deleted fields should be loaded as well as
  *     non-deleted fields. If unset or FALSE, only non-deleted fields should be

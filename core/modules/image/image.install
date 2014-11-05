@@ -108,6 +108,19 @@ function image_requirements($phase) {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function image_update_dependencies() {
+  // Ensure that field module has updated fields to config before updating image
+  // fields to use default image URIs.
+  $dependencies['image'][1004] = array(
+    'field' => 1000,
+  );
+
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
@@ -231,6 +244,70 @@ function image_update_1003() {
     }
   }
   cache('cache')->delete('image_styles');
+}
+
+/**
+ * Update all image fields to use a static default image URI.
+ */
+function image_update_1004() {
+  $old_fids = array();
+
+  // Update field configs.
+  $config_names = config_get_names_with_prefix('field.field.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $data = $config->get();
+    if (array_key_exists('default_image', $data['settings'])) {
+      if ($old_fid = _image_update_1004($data)) {
+        $old_fids[] = $old_fid;
+        $config->setData($data);
+        $config->save();
+      }
+    }
+  }
+
+  // Update field instances.
+  $config_names = config_get_names_with_prefix('field.instance.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $data = $config->get();
+    if (array_key_exists('default_image', $data['settings'])) {
+      if ($old_fid = _image_update_1004($data)) {
+        $old_fids[] = $old_fid;
+        $config->setData($data);
+        $config->save();
+      }
+    }
+  }
+
+  // Clean up the now unneeded file entities.
+  if ($old_fids) {
+    db_delete('file_managed')
+      ->condition('fid', $old_fids, 'IN')
+      ->execute();
+    db_delete('file_usage')
+      ->condition('fid', $old_fids, 'IN')
+      ->execute();
+  }
+}
+
+/**
+ * Helper function to update an image field or instance's default image.
+ */
+function _image_update_1004(&$data) {
+  $old_fid = NULL;
+  $old_default = $data['settings']['default_image'];
+  if ($old_default && is_numeric($old_default)) {
+    $old_default = db_query("SELECT * FROM {file_managed} WHERE fid = :fid", array(':fid' => $old_default))->fetchAssoc();
+  }
+  if (is_array($old_default)) {
+    $data['settings']['default_image'] = $old_default['uri'];
+    $old_fid = $old_default['fid'];
+  }
+  else {
+    $data['settings']['default_image'] = '';
+  }
+  return $old_fid;
 }
 
 /**

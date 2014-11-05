@@ -172,12 +172,10 @@ function _field_info_collate_types_reset() {
  *
  * @return
  *   An associative array containing:
- *   - fields: Array of existing fields, keyed by field ID. This element
+ *   - fields: Array of existing fields, keyed by field name. This element
  *     lists deleted and non-deleted fields, but not inactive ones.
  *     Each field has an additional element, 'bundles', which is an array
  *     of all non-deleted instances of that field.
- *   - field_ids: Array of field IDs, keyed by field name. This element
- *     only lists non-deleted, active fields.
  *   - instances: Array of existing instances, keyed by entity type, bundle
  *     name and field name. This element only lists non-deleted instances
  *     whose field is active.
@@ -199,22 +197,14 @@ function _field_info_collate_fields() {
     }
     else {
       $definitions = array(
-        'field_ids' => field_read_fields(array(), array('include_deleted' => 1)),
+        'fields' => _field_read_fields_cache(),
         'instances' => field_read_instances(),
       );
 
-      // Populate 'fields' with all fields, keyed by ID.
+      // Populate 'fields' with all fields, keyed by field name.
       $info['fields'] = array();
-      foreach ($definitions['field_ids'] as $key => $field) {
-        $info['fields'][$key] = $definitions['field_ids'][$key] = _field_info_prepare_field($field);
-      }
-
-      // Build an array of field IDs for non-deleted fields, keyed by name.
-      $info['field_ids'] = array();
-      foreach ($info['fields'] as $key => $field) {
-        if (!$field['deleted']) {
-          $info['field_ids'][$field['field_name']] = $key;
-        }
+      foreach ($definitions['fields'] as $field_name => $field) {
+        $info['fields'][$field_name] = $definitions['fields'][$field_name] = _field_info_prepare_field($field);
       }
 
       // Populate 'instances'. Only non-deleted instances are considered.
@@ -225,14 +215,14 @@ function _field_info_collate_fields() {
         }
       }
       foreach ($definitions['instances'] as $instance) {
-        $field = $info['fields'][$instance['field_id']];
+        $field = $info['fields'][$instance['field_name']];
         $instance = _field_info_prepare_instance($instance, $field);
         $info['instances'][$instance['entity_type']][$instance['bundle']][$instance['field_name']] = $instance;
         // Enrich field definitions with the list of bundles where they have
-        // instances. NOTE: Deleted fields in $info['field_ids'] are not
+        // instances. NOTE: Deleted fields in $info['fields'] are not
         // enriched because all of their instances are deleted, too, and
         // are thus not in $definitions['instances'].
-        $info['fields'][$instance['field_id']]['bundles'][$instance['entity_type']][] = $instance['bundle'];
+        $info['fields'][$instance['field_name']]['bundles'][$instance['entity_type']][] = $instance['bundle'];
       }
 
       // Populate 'extra_fields'.
@@ -258,7 +248,29 @@ function _field_info_collate_fields() {
  */
 function _field_info_collate_fields_reset() {
   backdrop_static_reset('_field_info_collate_fields');
+  backdrop_static_reset('_field_read_fields_cache');
   cache('field')->delete('field_info_fields');
+}
+
+/**
+ * Helper function used by _field_info_collate_fields().
+ *
+ * This function keeps a static variable of all raw field configurations,
+ * without any defaults loaded or "enriched" with cross-references between its
+ * instances and the storage system.
+ *
+ * This cache exists so that when instances are read in field_read_instances(),
+ * they have a fully loaded list of all fields in the system that they can
+ * reference to determine default values and if the field has been disabled.
+ */
+function _field_read_fields_cache() {
+  $definitions = &backdrop_static(__FUNCTION__);
+
+  if (!isset($definitions)) {
+    $definitions = field_read_fields(array(), array('include_deleted' => 1));
+  }
+
+  return $definitions;
 }
 
 /**
@@ -272,6 +284,11 @@ function _field_info_collate_fields_reset() {
  */
 function _field_info_prepare_field($field) {
   // Make sure all expected field settings are present.
+  $field += array(
+    'settings' => array(),
+    'storage' => array(),
+    'bundles' => array(),
+  );
   $field['settings'] += field_info_field_settings($field['type']);
   $field['storage']['settings'] += field_info_storage_settings($field['storage']['type']);
 
@@ -279,9 +296,6 @@ function _field_info_prepare_field($field) {
   $details = (array) module_invoke($field['storage']['module'], 'field_storage_details', $field);
   backdrop_alter('field_storage_details', $details, $field, $instance);
   $field['storage']['details'] = $details;
-
-  // Initialize the 'bundles' list.
-  $field['bundles'] = array();
 
   return $field;
 }
@@ -602,11 +616,11 @@ function field_info_bundles($entity_type = NULL) {
  *   additional property, 'bundles', which is an array of all the bundles to
  *   which this field belongs keyed by entity type.
  */
-function field_info_fields() {
+function field_info_fields($include_deleted = FALSE) {
   $fields = array();
   $info = _field_info_collate_fields();
   foreach ($info['fields'] as $key => $field) {
-    if (!$field['deleted']) {
+    if (!$field['deleted'] || $include_deleted) {
       $fields[$field['field_name']] = $field;
     }
   }
@@ -617,64 +631,21 @@ function field_info_fields() {
  * Returns data about an individual field, given a field name.
  *
  * @param $field_name
- *   The name of the field to retrieve. $field_name can only refer to a
- *   non-deleted, active field. For deleted fields, use
- *   field_info_field_by_id(). To retrieve information about inactive fields,
- *   use field_read_fields().
+ *   The name of the field to retrieve. $field_name can refer to a deleted or
+ *   non-deleted field, but not inactive fields. To retrieve information about
+ *   inactive fields, use field_read_fields().
  *
  * @return
  *   The field array, as returned by field_read_fields(), with an
  *   additional element 'bundles', whose value is an array of all the bundles
  *   this field belongs to keyed by entity type. NULL if the field was not
  *   found.
- *
- * @see field_info_field_by_id()
  */
 function field_info_field($field_name) {
   $info = _field_info_collate_fields();
-  if (isset($info['field_ids'][$field_name])) {
-    return $info['fields'][$info['field_ids'][$field_name]];
+  if (isset($info['fields'][$field_name])) {
+    return $info['fields'][$field_name];
   }
-}
-
-/**
- * Returns data about an individual field, given a field ID.
- *
- * @param $field_id
- *   The id of the field to retrieve. $field_id can refer to a
- *   deleted field, but not an inactive one.
- *
- * @return
- *   The field array, as returned by field_read_fields(), with an
- *   additional element 'bundles', whose value is an array of all the bundles
- *   this field belongs to.
- *
- * @see field_info_field()
- */
-function field_info_field_by_id($field_id) {
-  $info = _field_info_collate_fields();
-  if (isset($info['fields'][$field_id])) {
-    return $info['fields'][$field_id];
-  }
-}
-
-/**
- * Returns the same data as field_info_field_by_id() for every field.
- *
- * This function is typically used when handling all fields of some entities
- * to avoid thousands of calls to field_info_field_by_id().
- *
- * @return
- *   An array, each key is a field ID and the values are field arrays as
- *   returned by field_read_fields(), with an additional element 'bundles',
- *   whose value is an array of all the bundle this field belongs to.
- *
- * @see field_info_field()
- * @see field_info_field_by_id()
- */
-function field_info_field_by_ids() {
-  $info = _field_info_collate_fields();
-  return $info['fields'];
 }
 
 /**

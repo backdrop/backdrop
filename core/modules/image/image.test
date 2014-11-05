@@ -873,15 +873,14 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // Add a default image to the public imagefield instance.
     $images = $this->backdropGetTestFiles('image');
     $edit = array(
-      'files[field_settings_default_image]' => backdrop_realpath($images[0]->uri),
+      'files[field_settings_default_image_file]' => backdrop_realpath($images[0]->uri),
     );
     $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
     field_info_cache_clear();
     $field = field_info_field($field_name);
-    $image = file_load($field['settings']['default_image']);
-    $this->assertTrue($image->status == FILE_STATUS_PERMANENT, 'The default image status is permanent.');
-    $default_output = theme('image', array('uri' => $image->uri));
+    $image_uri = $field['settings']['default_image'];
+    $default_output = theme('image', array('uri' => $image_uri));
     $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($default_output, 'Default image displayed when no user supplied image is present.');
 
@@ -901,7 +900,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Remove default image from the field and make sure it is no longer used.
     $edit = array(
-      'field[settings][default_image][fid]' => 0,
+      'field[settings][default_image][remove]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
@@ -914,17 +913,16 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->createImageField($private_field_name, 'article', array('uri_scheme' => 'private'));
     // Add a default image to the new field.
     $edit = array(
-      'files[field_settings_default_image]' => backdrop_realpath($images[1]->uri),
+      'files[field_settings_default_image_file]' => backdrop_realpath($images[1]->uri),
     );
     $this->backdropPost('admin/structure/types/manage/article/fields/' . $private_field_name, $edit, t('Save settings'));
     $private_field = field_info_field($private_field_name);
-    $image = file_load($private_field['settings']['default_image']);
-    $this->assertEqual('private', file_uri_scheme($image->uri), 'Default image uses private:// scheme.');
-    $this->assertTrue($image->status == FILE_STATUS_PERMANENT, 'The default image status is permanent.');
+    $uri = $private_field['settings']['default_image'];
+    $this->assertEqual('private', file_uri_scheme($uri), 'Default image uses private:// scheme.');
     // Create a new node with no image attached and ensure that default private
     // image is displayed.
     $node = $this->backdropCreateNode(array('type' => 'article'));
-    $default_output = theme('image', array('uri' => $image->uri));
+    $default_output = theme('image', array('uri' => $uri));
     $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($default_output, 'Default private image displayed when no user supplied image is present.');
   }
@@ -1319,18 +1317,17 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $files = $this->backdropGetTestFiles('image');
     $default_images = array();
     foreach (array('field', 'instance', 'instance2', 'field_new', 'instance_new') as $image_target) {
-      $file = entity_create('file', (array) array_pop($files));
-      $file->save();
-      $default_images[$image_target] = $file;
+      $file = (array) array_pop($files);
+      $default_images[$image_target] = $file['uri'];
     }
 
     // Create an image field and add an instance to the article content type.
     $field_name = strtolower($this->randomName());
     $field_settings = array(
-      'default_image' => $default_images['field']->fid,
+      'default_image' => $default_images['field'],
     );
     $instance_settings = array(
-      'default_image' => $default_images['instance']->fid,
+      'default_image' => $default_images['instance'],
     );
     $widget_settings = array(
       'preview_image_style' => 'medium',
@@ -1343,7 +1340,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $instance2 = array_merge($instance, array(
       'bundle' => 'page',
       'settings' => array(
-        'default_image' => $default_images['instance2']->fid,
+        'default_image' => $default_images['instance2'],
       ),
     ));
     field_create_instance($instance2);
@@ -1352,51 +1349,35 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
 
     // Confirm the defaults are present on the article field admin form.
     $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
-    $this->assertFieldByXpath(
-      '//input[@name="field[settings][default_image][fid]"]',
-      $default_images['field']->fid,
-      format_string(
-        'Article image field default equals expected file ID of @fid.',
-        array('@fid' => $default_images['field']->fid)
-      )
-    );
-    $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
-      $default_images['instance']->fid,
-      format_string(
-        'Article image field instance default equals expected file ID of @fid.',
-        array('@fid' => $default_images['instance']->fid)
-      )
-    );
+
+    // Article instance settings.
+    $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance'])));
+    $this->assertEqual(count($xpath), 1, format_string('Article image field instance default references expected file uri of @uri.', array('@uri' => $default_images['instance'])));
+
+    // Global field settings.
+    $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field'])));
+    $this->assertEqual(count($xpath), 1, format_string('Article image field default references expected file uri of @uri.', array('@uri' => $default_images['field'])));
 
     // Confirm the defaults are present on the page field admin form.
     $this->backdropGet("admin/structure/types/manage/page/fields/$field_name");
-    $this->assertFieldByXpath(
-      '//input[@name="field[settings][default_image][fid]"]',
-      $default_images['field']->fid,
-      format_string(
-        'Page image field default equals expected file ID of @fid.',
-        array('@fid' => $default_images['field']->fid)
-      )
-    );
-    $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
-      $default_images['instance2']->fid,
-      format_string(
-        'Page image field instance default equals expected file ID of @fid.',
-        array('@fid' => $default_images['instance2']->fid)
-      )
-    );
+
+    // Page instance settings.
+    $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance2'])));
+    $this->assertEqual(count($xpath), 1, format_string('Page image field instance default references expected file uri of @uri.', array('@uri' => $default_images['instance2'])));
+
+    // Global field settings.
+    $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field'])));
+    $this->assertEqual(count($xpath), 1, format_string('Page image field default references expected file uri of @uri.', array('@uri' => $default_images['field'])));
 
     // Confirm that the image default is shown for a new article node.
     $article = $this->backdropCreateNode(array('type' => 'article'));
     $article_built = node_view($article);
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance']->fid,
+      $article_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance'],
       format_string(
-        'A new article node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance']->fid)
+        'A new article node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance'])
       )
     );
 
@@ -1404,64 +1385,52 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $page = $this->backdropCreateNode(array('type' => 'page'));
     $page_built = node_view($page);
     $this->assertEqual(
-      $page_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance2']->fid,
+      $page_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance2'],
       format_string(
-        'A new page node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance2']->fid)
+        'A new page node without an image has the expected default image file ID of @uri.',
+        array('@uri' => $default_images['instance2'])
       )
     );
 
     // Upload a new default for the field.
-    $field['settings']['default_image'] = $default_images['field_new']->fid;
+    $field['settings']['default_image'] = $default_images['field_new'];
     field_update_field($field);
 
     // Confirm that the new field default is used on the article admin form.
     $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
-    $this->assertFieldByXpath(
-      '//input[@name="field[settings][default_image][fid]"]',
-      $default_images['field_new']->fid,
-      format_string(
-        'Updated image field default equals expected file ID of @fid.',
-        array('@fid' => $default_images['field_new']->fid)
-      )
-    );
+    $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field_new'])));
+    $this->assertEqual(count($xpath), 1, format_string('Updated image field default references expected file uri of @uri.', array('@uri' => $default_images['field_new'])));
 
     // Reload the nodes and confirm the field instance defaults are used.
     $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
     $page_built = node_view($page = node_load($page->nid, NULL, $reset = TRUE));
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance']->fid,
+      $article_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance'],
       format_string(
-        'An existing article node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance']->fid)
+        'An existing article node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance'])
       )
     );
     $this->assertEqual(
-      $page_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance2']->fid,
+      $page_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance2'],
       format_string(
-        'An existing page node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance2']->fid)
+        'An existing page node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance2'])
       )
     );
 
     // Upload a new default for the article's field instance.
-    $instance['settings']['default_image'] = $default_images['instance_new']->fid;
+    $instance['settings']['default_image'] = $default_images['instance_new'];
     field_update_instance($instance);
 
     // Confirm the new field instance default is used on the article field
     // admin form.
     $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
-    $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
-      $default_images['instance_new']->fid,
-      format_string(
-        'Updated article image field instance default equals expected file ID of @fid.',
-        array('@fid' => $default_images['instance_new']->fid)
-      )
-    );
+    $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance_new'])));
+    $this->assertEqual(count($xpath), 1, format_string('Updated image field default references expected file uri of @uri.', array('@uri' => $default_images['instance_new'])));
 
     // Reload the nodes.
     $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
@@ -1469,20 +1438,20 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
 
     // Confirm the article uses the new default.
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance_new']->fid,
+      $article_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance_new'],
       format_string(
-        'An existing article node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance_new']->fid)
+        'An existing article node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance_new'])
       )
     );
     // Confirm the page remains unchanged.
     $this->assertEqual(
-      $page_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance2']->fid,
+      $page_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance2'],
       format_string(
-        'An existing page node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance2']->fid)
+        'An existing page node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance2'])
       )
     );
 
@@ -1492,31 +1461,28 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
 
     // Confirm the article field instance default has been removed.
     $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
-    $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
-      '',
-      'Updated article image field instance default has been successfully removed.'
-    );
+    $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance_new'])));
+    $this->assertEqual(count($xpath), 0, format_string('Updated article image field instance default has been successfully removed.'));
 
     // Reload the nodes.
     $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
     $page_built = node_view($page = node_load($page->nid, NULL, $reset = TRUE));
     // Confirm the article uses the new field (not instance) default.
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['fid'],
-      $default_images['field_new']->fid,
+      $article_built[$field_name]['#items'][0]['uri'],
+      $default_images['field_new'],
       format_string(
-        'An existing article node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['field_new']->fid)
+        'An existing article node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['field_new'])
       )
     );
     // Confirm the page remains unchanged.
     $this->assertEqual(
-      $page_built[$field_name]['#items'][0]['fid'],
-      $default_images['instance2']->fid,
+      $page_built[$field_name]['#items'][0]['uri'],
+      $default_images['instance2'],
       format_string(
-        'An existing page node without an image has the expected default image file ID of @fid.',
-        array('@fid' => $default_images['instance2']->fid)
+        'An existing page node without an image has the expected default image file URI of @uri.',
+        array('@uri' => $default_images['instance2'])
       )
     );
   }
