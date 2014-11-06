@@ -189,7 +189,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
     // The test theme overrides system.css without an implementation,
     // thereby removing it.
     theme_enable(array('test_theme'));
-    variable_set('theme_default', 'test_theme');
+    config_set('system.core', 'theme_default', 'test_theme');
 
     // This gets the form, and emulates an Ajax submission on it, including
     // adding markup to the HEAD and BODY for any lazy loaded JS/CSS files.

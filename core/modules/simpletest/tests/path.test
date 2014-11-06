@@ -191,7 +191,7 @@ class UrlAlterFunctionalTest extends BackdropWebTestCase {
   protected function assertUrlOutboundAlter($original, $final) {
     // Test outbound altering.
     $result = url($original);
-    $base_path = base_path() . (variable_get('clean_url', '0') ? '' : '?q=');
+    $base_path = base_path() . (config_get('system.core', 'clean_url') ? '' : '?q=');
     $result = substr($result, strlen($base_path));
     $this->assertIdentical($result, $final, format_string('Altered outbound URL %original, expected %final, and got %result.', array('%original' => $original, '%final' => $final, '%result' => $result)));
   }

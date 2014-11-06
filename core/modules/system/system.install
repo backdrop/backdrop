@@ -247,9 +247,9 @@ function system_requirements($phase) {
     file_ensure_htaccess();
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => variable_get('file_public_path', 'files'),
+      'directory' => config_get('system.core', 'file_public_path'),
     );
-    if ($private_files_directory = variable_get('file_private_path')) {
+    if ($private_files_directory = config_get('system.core', 'file_private_path')) {
       $htaccess_files['private://.htaccess'] = array(
         'title' => $t('Private files directory'),
         'directory' => $private_files_directory,
@@ -257,7 +257,7 @@ function system_requirements($phase) {
     }
     $htaccess_files['temporary://.htaccess'] = array(
       'title' => $t('Temporary files directory'),
-      'directory' => variable_get('file_temporary_path', file_directory_temp()),
+      'directory' => file_directory_temp(),
     );
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
@@ -318,20 +318,20 @@ function system_requirements($phase) {
 
   // Test files directories.
   $directories = array(
-    variable_get('file_public_path', 'files'),
+    config_get('system.core', 'file_public_path'),
     // By default no private files directory is configured. For private files
     // to be secure the admin needs to provide a path outside the webroot.
-    variable_get('file_private_path', FALSE),
+    config_get('system.core', 'file_private_path'),
   );
 
   // Do not check for the temporary files directory during installation
   // unless it has been set in settings.php. In this case the user has
   // no alternative but to fix the directory if it is not writable.
   if ($phase == 'install') {
-    $directories[] = variable_get('file_temporary_path', FALSE);
+    $directories[] = config_get('system.core', 'file_temporary_path');
   }
   else {
-    $directories[] = variable_get('file_temporary_path', file_directory_temp());
+    $directories[] = file_directory_temp();
   }
 
   $requirements['file system'] = array(
@@ -498,12 +498,12 @@ function system_requirements($phase) {
     $requirements['update status']['title'] = $t('Update notifications');
 
     // Check that Backdrop can issue HTTP requests.
-    if (variable_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
+    if (state_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
       $requirements['http requests'] = array(
         'title' => $t('HTTP request status'),
         'value' => $t('Fails'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$conf[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$state[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
       );
     }
   }
@@ -530,7 +530,6 @@ function system_install() {
   system_rebuild_theme_data();
 
   // Enable the default theme.
-  variable_set('theme_default', 'stark');
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
@@ -1812,11 +1811,9 @@ function system_update_1013() {
  * Move the system maintenance settings from variable to config.
  */
 function system_update_1014() {
-  // Migrate variables to config.
-  $config = config('system.core');
-  $config->set('maintenance_enabled', variable_get('maintenance_mode', 'enabled'));
-  $config->set('maintenance_message', variable_get('maintenance_mode_message', 'message'));
-  $config->save();
+  // Migrate variables to state and config.
+  state_set('maintenance_enabled', variable_get('maintenance_mode', 'enabled'));
+  config_set('system.core', 'maintenance_mode_message', variable_get('maintenance_mode_message', 'message'));
 
   // Delete variables.
   variable_del('maintenance_mode');
@@ -2377,6 +2374,41 @@ function system_update_1025() {
 
   // Set layout as the default route handler.
   config_set('system.core', 'menu_route_handler', 'layout_route_handler');
+}
+
+/**
+ * Convert file system, clean URL, profile, and theme variables to config.
+ */
+function system_update_1026() {
+  $config = config('system.core');
+  $config->set('file_default_scheme', variable_get('file_default_scheme', 'public'));
+  $config->set('file_public_path', variable_get('file_public_path', 'files'));
+  $config->set('file_temporary_path', variable_get('file_temporary_path', ''));
+  $config->set('file_private_path', variable_get('file_private_path', ''));
+  $config->set('install_profile', variable_get('install_profile', 'standard'));
+  $config->set('clean_url', variable_get('clean_url', 0));
+  $config->set('theme_default', variable_get('theme_default', 'stark'));
+  $config->set('admin_theme', variable_get('admin_theme', ''));
+  $config->set('node_admin_theme', variable_get('node_admin_theme', ''));
+  $config->save();
+
+  // Delete variables.
+  variable_del('file_default_scheme');
+  variable_del('file_public_path');
+  variable_del('file_temporary_path');
+  variable_del('file_private_path');
+  variable_del('install_profile');
+  variable_del('clean_url');
+  variable_del('theme_default');
+  variable_del('admin_theme');
+  variable_del('node_admin_theme');
+
+  // These variables have been converted to settings:
+  variable_del('css_gzip_compression');
+  variable_del('js_gzip_compression');
+
+  // And these variables have been converted to state:
+  variable_del('javascript_parsed');
 }
 
 /**

@@ -114,7 +114,7 @@ function module_test_hook_dynamic_loading_invoke_all() {
 function module_test_modules_enabled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were enabled in the correct sequence.
-  variable_set('test_module_enable_order', $modules);
+  state_set('test_module_enable_order', $modules);
 }
 
 /**
@@ -123,7 +123,7 @@ function module_test_modules_enabled($modules) {
 function module_test_modules_disabled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were disabled in the correct sequence.
-  variable_set('test_module_disable_order', $modules);
+  state_set('test_module_disable_order', $modules);
 }
 
 /**

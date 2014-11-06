@@ -688,7 +688,7 @@ function _locale_parse_js_file($filepath) {
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
-  $parsed = variable_get('javascript_parsed', array());
+  $parsed = state_get('javascript_parsed', array());
 
   if (empty($langcode)) {
     // Invalidate all languages.
@@ -705,7 +705,7 @@ function _locale_invalidate_js($langcode = NULL) {
     $parsed['refresh:' . $langcode] = 'waiting';
   }
 
-  variable_set('javascript_parsed', $parsed);
+  state_set('javascript_parsed', $parsed);
   return $parsed;
 }
 

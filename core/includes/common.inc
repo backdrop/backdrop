@@ -231,7 +231,7 @@ function backdrop_get_profile() {
     $profile = $install_state['parameters']['profile'];
   }
   else {
-    $profile = variable_get('install_profile', 'standard');
+    $profile = config_get('system.core', 'install_profile');
   }
 
   return $profile;
@@ -984,7 +984,7 @@ function backdrop_http_request($url, array $options = array()) {
     // server's ability to make outgoing HTTP requests the next time that
     // requirements checking is performed.
     // See system_requirements().
-    variable_set('backdrop_http_request_fails', TRUE);
+    state_set('backdrop_http_request_fails', TRUE);
 
     return $result;
   }
@@ -2422,8 +2422,18 @@ function url($path = NULL, array $options = array()) {
   $base = $options['absolute'] ? $options['base_url'] . '/' : base_path();
   $prefix = empty($path) ? rtrim($options['prefix'], '/') : $options['prefix'];
 
+  // Cache the clean URLs setting, as url() is called very frequently.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['clean_url'] = &backdrop_static(__FUNCTION__);
+  }
+  $clean_url = &$backdrop_static_fast['clean_url'];
+  if (!isset($clean_url)) {
+    $clean_url = config_get('system.core', 'clean_url');
+  }
+
   // With Clean URLs.
-  if (!empty($GLOBALS['conf']['clean_url'])) {
+  if (!empty($clean_url)) {
     $path = backdrop_encode_path($prefix . $path);
     if ($options['query']) {
       return $base . $path . '?' . backdrop_http_build_query($options['query']) . $options['fragment'];
@@ -2792,7 +2802,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         backdrop_maintenance_theme();
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_message'), array('@site' => config_get('system.core', 'site_name'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))))));
         break;
     }
   }
@@ -3604,7 +3614,7 @@ function backdrop_pre_render_styles($elements) {
 function backdrop_build_css_cache($css) {
   $data = '';
   $uri = '';
-  $map = variable_get('css_cache_files', array());
+  $map = state_get('css_cache_files', array());
   // Create a new array so that only the file names are used to create the hash.
   // This prevents new aggregates from being created unnecessarily.
   $css_data = array();
@@ -3661,14 +3671,14 @@ function backdrop_build_css_cache($css) {
     // that rewrite rules are working) and the zlib extension is available then
     // create a gzipped version of this file. This file is served conditionally
     // to browsers that accept gzip using .htaccess rules.
-    if (variable_get('css_gzip_compression', TRUE) && variable_get('clean_url', 0) && extension_loaded('zlib')) {
+    if (settings_get('css_gzip_compression', TRUE) && config_get('system.core', 'clean_url') && extension_loaded('zlib')) {
       if (!file_exists($uri . '.gz') && !file_unmanaged_save_data(gzencode($data, 9, FORCE_GZIP), $uri . '.gz', FILE_EXISTS_REPLACE)) {
         return FALSE;
       }
     }
     // Save the updated map.
     $map[$key] = $uri;
-    variable_set('css_cache_files', $map);
+    state_set('css_cache_files', $map);
   }
   return $uri;
 }
@@ -3839,7 +3849,7 @@ function _backdrop_load_stylesheet($matches) {
  * Deletes old cached CSS files.
  */
 function backdrop_clear_css_cache() {
-  variable_del('css_cache_files');
+  state_del('css_cache_files');
   file_scan_directory('public://css', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }
 
@@ -5172,7 +5182,7 @@ function backdrop_build_js_cache($files) {
     // that rewrite rules are working) and the zlib extension is available then
     // create a gzipped version of this file. This file is served conditionally
     // to browsers that accept gzip using .htaccess rules.
-    if (variable_get('js_gzip_compression', TRUE) && variable_get('clean_url', 0) && extension_loaded('zlib')) {
+    if (settings_get('system.core', 'js_gzip_compression') && config_get('system.core', 'clean_url') && extension_loaded('zlib')) {
       if (!file_exists($uri . '.gz') && !file_unmanaged_save_data(gzencode($contents, 9, FORCE_GZIP), $uri . '.gz', FILE_EXISTS_REPLACE)) {
         return FALSE;
       }
@@ -5187,7 +5197,7 @@ function backdrop_build_js_cache($files) {
  * Deletes old cached JavaScript files and variables.
  */
 function backdrop_clear_js_cache() {
-  variable_del('javascript_parsed');
+  state_del('javascript_parsed');
   state_set('js_cache_files', FALSE);
   file_scan_directory('public://js', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }
@@ -5356,9 +5366,9 @@ function backdrop_get_hash_salt() {
  *   The private key.
  */
 function backdrop_get_private_key() {
-  if (!($key = variable_get('private_key', 0))) {
+  if (!($key = config_get('system.core', 'private_key'))) {
     $key = backdrop_random_key();
-    variable_set('private_key', $key);
+    config_set('system.core', 'private_key', $key);
   }
   return $key;
 }
@@ -7659,7 +7669,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Parses Backdrop module and theme .info files.
  *
  * Info files are NOT for placing arbitrary theme and module-specific settings.
- * Use variable_get() and variable_set() for that.
+ * Use config_get() and config_set() for managing settings.
  *
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.

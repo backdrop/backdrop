@@ -519,7 +519,7 @@ abstract class BackdropTestCase {
   public function run(array $methods = array()) {
     $config = config('simpletest.settings');
     // Initialize verbose debugging.
-    simpletest_verbose(NULL, variable_get('file_public_path', 'files'), get_class($this));
+    simpletest_verbose(NULL, config_get('system.core', 'file_public_path'), get_class($this));
 
     // HTTP auth settings (<username>:<password>) for the simpletest browser
     // when sending requests to the test site.
@@ -773,7 +773,7 @@ class BackdropUnitTestCase extends BackdropTestCase {
     global $conf;
 
     // Store necessary current values before switching to the test environment.
-    $this->originalFileDirectory = variable_get('file_public_path', 'files');
+    $this->originalFileDirectory = config_get('system.core', 'file_public_path');
 
     $this->prepareDatabasePrefix();
 
@@ -1142,7 +1142,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $original = backdrop_get_path('module', 'simpletest') . '/files';
       $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
       foreach ($files as $file) {
-        file_unmanaged_copy($file->uri, variable_get('file_public_path', 'files'));
+        file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
       }
 
       $this->generatedTestFiles = TRUE;
@@ -1414,9 +1414,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->originalLanguage = $language_interface;
     $this->originalLanguageDefault = variable_get('language_default');
     $this->originalConfigDirectories = $config_directories;
-    $this->originalFileDirectory = variable_get('file_public_path', 'files');
+    $this->originalFileDirectory = config_get('system.core', 'file_public_path', 'files');
     $this->originalProfile = backdrop_get_profile();
-    $this->originalCleanUrl = variable_get('clean_url', 0);
+    $this->originalCleanUrl = config_get('system.core', 'clean_url');
     $this->originalUser = $user;
     $this->originalSettings = $settings;
 
@@ -1529,16 +1529,20 @@ class BackdropWebTestCase extends BackdropTestCase {
     // the test's profile as a module. Without this, the installation profile of
     // the parent site (executing the test) is registered, and the test
     // profile's hook_install() and other hook implementations are never invoked.
-    $conf['install_profile'] = $this->profile;
+    config_install_default_config('system');
+    config_set('system.core', 'install_profile', $this->profile);
 
     // Perform the actual Backdrop installation.
     include_once BACKDROP_ROOT . '/core/includes/install.inc';
     backdrop_install_system();
 
     // Set path variables.
-    variable_set('file_public_path', $this->public_files_directory);
-    variable_set('file_private_path', $this->private_files_directory);
-    variable_set('file_temporary_path', $this->temp_files_directory);
+    $core_config = config('system.core');
+    $core_config->set('file_default_scheme', 'public');
+    $core_config->set('file_public_path', $this->public_files_directory);
+    $core_config->set('file_private_path', $this->private_files_directory);
+    $core_config->set('file_temporary_path', $this->temp_files_directory);
+    $core_config->save();
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
@@ -1550,7 +1554,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     backdrop_static_reset('backdrop_get_schema_versions');
 
     // Include the testing profile.
-    variable_set('install_profile', $this->profile);
+    config_set('system.core', 'install_profile', $this->profile);
     $profile_details = install_profile_info($this->profile, 'en');
 
     // Install the modules specified by the testing profile.
@@ -1591,9 +1595,10 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Restore necessary variables.
     state_set('install_task', 'done');
-    variable_set('clean_url', $this->originalCleanUrl);
+    config_set('system.core', 'clean_url', $this->originalCleanUrl);
     config_set('system.core', 'site_mail', 'simpletest@example.com');
     config_set('system.date', 'date_default_timezone', date_default_timezone_get());
+    backdrop_static_reset('url');
 
     // Set up English language.
     unset($conf['language_default']);

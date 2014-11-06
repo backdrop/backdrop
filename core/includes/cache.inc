@@ -445,10 +445,10 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
       // data that was cached before the timestamp.
       $_SESSION['cache_expiration'][$this->bin] = REQUEST_TIME;
 
-      $cache_flush = variable_get('cache_flush_' . $this->bin, 0);
+      $cache_flush = state_get('cache_flush_' . $this->bin, 0);
       if ($cache_flush == 0) {
         // This is the first request to clear the cache; start a timer.
-        variable_set('cache_flush_' . $this->bin, REQUEST_TIME);
+        state_set('cache_flush_' . $this->bin, REQUEST_TIME);
       }
       elseif (REQUEST_TIME > ($cache_flush + config_get('system.core', 'cache_lifetime'))) {
         // Clear the cache for everyone; cache_lifetime seconds have passed
@@ -457,7 +457,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
           ->condition('expire', CACHE_PERMANENT, '<>')
           ->condition('expire', REQUEST_TIME, '<')
           ->execute();
-        variable_set('cache_flush_' . $this->bin, 0);
+        state_set('cache_flush_' . $this->bin, 0);
       }
     }
     else {
@@ -496,11 +496,11 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
     }
     // When cache lifetime is in force, avoid running garbage collection too
     // often since this will remove temporary cache items indiscriminately.
-    $cache_flush = variable_get('cache_flush_' . $this->bin, 0);
+    $cache_flush = state_get('cache_flush_' . $this->bin, 0);
     if ($cache_flush && ($cache_flush + $cache_lifetime <= REQUEST_TIME)) {
-      // Reset the variable immediately to prevent a meltdown in heavy load
+      // Reset the state immediately to prevent a meltdown in heavy load
       // situations.
-      variable_set('cache_flush_' . $this->bin, 0);
+      state_set('cache_flush_' . $this->bin, 0);
       // Time to flush old cache data
       db_delete($this->bin)
         ->condition('expire', CACHE_PERMANENT, '<>')

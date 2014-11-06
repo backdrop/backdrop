@@ -1616,8 +1616,8 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
 
     // Make sure we are using distinct default and administrative themes for
     // the duration of these tests.
-    variable_set('theme_default', 'bartik');
-    variable_set('admin_theme', 'seven');
+    config_set('system.core', 'theme_default', 'bartik');
+    config_set('system.core', 'admin_theme', 'seven');
 
     // Create and log in as a user who has permission to add and edit taxonomy
     // terms and view the administrative theme.

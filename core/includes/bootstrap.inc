@@ -960,6 +960,8 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
  * The variable table is composed of values that have been saved in the table
  * with variable_set() as well as those explicitly specified in the
  * configuration file.
+ *
+ * @deprecated since 1.0
  */
 function variable_initialize($conf = array()) {
   // NOTE: caching the variables improves performance by 20% when serving
@@ -1021,6 +1023,13 @@ function settings_get($name, $default = NULL) {
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  *
+ * This function is deprecated in Backdrop and will be removed in a future
+ * release. Variables are not managed through the configuration system, so they
+ * cannot be moved between environments safely. If your module needs to save
+ * configuration settings, use config_get() instead. If you need to save an
+ * environment-specific setting (such as the last time cron ran), use
+ * state_get() instead.
+ *
  * @param $name
  *   The name of the variable to return.
  * @param $default
@@ -1031,6 +1040,10 @@ function settings_get($name, $default = NULL) {
  *
  * @see variable_del()
  * @see variable_set()
+ * @see config_get()
+ * @see state_get()
+ *
+ * @deprecated since 1.0
  */
 function variable_get($name, $default = NULL) {
   global $conf;
@@ -1045,6 +1058,13 @@ function variable_get($name, $default = NULL) {
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  *
+ * This function is deprecated in Backdrop and will be removed in a future
+ * release. Variables are not managed through the configuration system, so they
+ * cannot be moved between environments safely. If your module needs to save
+ * configuration settings, use config_set() instead. If you need to save an
+ * environment-specific setting (such as the last time cron ran), use
+ * state_set() instead.
+ *
  * @param $name
  *   The name of the variable to set.
  * @param $value
@@ -1053,6 +1073,10 @@ function variable_get($name, $default = NULL) {
  *
  * @see variable_del()
  * @see variable_get()
+ * @see config_set()
+ * @see state_set()
+ *
+ * @deprecated since 1.0
  */
 function variable_set($name, $value) {
   global $conf;
@@ -1076,6 +1100,8 @@ function variable_set($name, $value) {
  *
  * @see variable_get()
  * @see variable_set()
+ *
+ * @deprecated since 1.0
  */
 function variable_del($name) {
   global $conf;
@@ -2748,12 +2774,12 @@ function backdrop_maintenance_theme() {
  * accounted for in this function.
  */
 function fast_404() {
-  $exclude_paths = variable_get('404_fast_paths_exclude', FALSE);
+  $exclude_paths = settings_get('404_fast_paths_exclude', FALSE);
   if ($exclude_paths && !preg_match($exclude_paths, $_GET['q'])) {
-    $fast_paths = variable_get('404_fast_paths', FALSE);
+    $fast_paths = settings_get('404_fast_paths', FALSE);
     if ($fast_paths && preg_match($fast_paths, $_GET['q'])) {
       backdrop_add_http_header('Status', '404 Not Found');
-      $fast_404_html = variable_get('404_fast_html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>');
+      $fast_404_html = settings_get('404_fast_html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>');
       // Replace @path in the variable with the page path.
       print strtr($fast_404_html, array('@path' => check_plain(request_uri())));
       exit;

@@ -1734,7 +1734,7 @@ function views_exposed_form($form, &$form_state) {
 
   $form['#info'] = array();
 
-  if (!variable_get('clean_url', FALSE)) {
+  if (!config_get('system.core', 'clean_url')) {
     $form['q'] = array(
       '#type' => 'hidden',
       '#value' => $view->get_url(),

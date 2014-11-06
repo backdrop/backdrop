@@ -768,7 +768,7 @@ class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
    * Implements abstract public function getDirectoryPath()
    */
   public function getDirectoryPath() {
-    return variable_get('file_public_path', 'files');
+    return config_get('system.core', 'file_public_path');
   }
 
   /**
@@ -794,7 +794,7 @@ class BackdropPrivateStreamWrapper extends BackdropLocalStreamWrapper {
    * Implements abstract public function getDirectoryPath()
    */
   public function getDirectoryPath() {
-    return variable_get('file_private_path', '');
+    return config_get('system.core', 'file_private_path');
   }
 
   /**
@@ -821,7 +821,11 @@ class BackdropTemporaryStreamWrapper extends BackdropLocalStreamWrapper {
    * Implements abstract public function getDirectoryPath()
    */
   public function getDirectoryPath() {
-    return variable_get('file_temporary_path', file_directory_temp());
+    $temp = config_get('system.core', 'file_temporary_path');
+    if (empty($temp)) {
+      $temp = file_directory_temp();
+    }
+    return $temp;
   }
 
   /**

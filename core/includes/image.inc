@@ -65,7 +65,7 @@ function image_get_toolkit() {
 
   if (!isset($toolkit)) {
     $toolkits = image_get_available_toolkits();
-    $toolkit = variable_get('image_toolkit', 'gd');
+    $toolkit = config_get('system.core', 'image_toolkit');
     if (!isset($toolkits[$toolkit]) || !function_exists('image_' . $toolkit . '_load')) {
       // The selected toolkit isn't available so return the first one found. If
       // none are available this will return FALSE.

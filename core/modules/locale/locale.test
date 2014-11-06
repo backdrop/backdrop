@@ -1311,7 +1311,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $this->assertFalse(config_get('language.negotiation', 'session_parameter'), t('Visit language negotiation method settings cleared.'));
 
     // Check JavaScript parsed.
-    $javascript_parsed_count = count(variable_get('javascript_parsed', array()));
+    $javascript_parsed_count = count(state_get('javascript_parsed', array()));
     $this->assertEqual($javascript_parsed_count, 0, format_string('JavaScript parsed count: %count', array('%count' => $javascript_parsed_count)));
 
     // Check JavaScript translations directory.
@@ -1799,7 +1799,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
 
     // Test that both node titles link to our path alias.
     $this->backdropGet('<front>');
-    $custom_path_url = base_path() . (variable_get('clean_url', 0) ? $custom_path : '?q=' . $custom_path);
+    $custom_path_url = base_path() . (config_get('system.core', 'clean_url') ? $custom_path : '?q=' . $custom_path);
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $first_node->title));
     $this->assertTrue(!empty($elements), 'First node links to the path alias.');
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $second_node->title));
@@ -2274,7 +2274,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Check that the language switcher active link matches the given browser
     // language.
-    $args = array(':url' => base_path() . (!empty($GLOBALS['conf']['clean_url']) ? $langcode_browser_fallback : "?q=$langcode_browser_fallback"));
+    $args = array(':url' => base_path() . (config_get('system.core', 'clean_url') ? $langcode_browser_fallback : "?q=$langcode_browser_fallback"));
     $fields = $this->xpath('//*[contains(@class,"block-locale-language-interface")]//a[@class="language-link active" and @href=:url]', $args);
     $this->assertTrue($fields[0] == $languages[$langcode_browser_fallback]->name, 'The browser language is the URL active language');
 
@@ -2310,7 +2310,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
 
     // Build the link we're going to test based on the clean URL setting.
-    $link = (!empty($GLOBALS['conf']['clean_url'])) ? 'it.example.com/admin' : 'it.example.com/?q=admin';
+    $link = (config_get('system.core', 'clean_url')) ? 'it.example.com/admin' : 'it.example.com/?q=admin';
 
     global $is_https;
     // Test URL in another language: http://it.example.com/?q=admin.

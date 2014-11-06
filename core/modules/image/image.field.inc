@@ -14,7 +14,7 @@ function image_field_info() {
       'label' => t('Image'),
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
-        'uri_scheme' => variable_get('file_default_scheme', 'public'),
+        'uri_scheme' => config_get('system.core', 'file_default_scheme'),
         'default_image' => '',
       ),
       'instance_settings' => array(

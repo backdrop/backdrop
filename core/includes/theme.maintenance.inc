@@ -42,15 +42,12 @@ function _backdrop_maintenance_theme() {
       require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
     }
 
-    // We use the default theme as the maintenance theme. If a default theme
-    // isn't specified in the database or in settings.php, we use Bartik.
-    // @todo Should use the actual default theme configured, but that depends on
-    //   configuration being available while possibly not having a working
-    //   database connection (yet). And only if that fails, should fall back to
-    //   Stark otherwise. Since there is no low-level access to configuration
-    //   currently, we only consult settings.php and fall back to Bartik
-    //   otherwise, as it looks generic enough and way more user-friendly.
-    $custom_theme = settings_get('maintenance_theme', variable_get('theme_default', 'bartik'));
+    // We use the default theme as the maintenance theme. If a maintenance theme
+    // isn't specified in the database or in settings.php, we use the default.
+    $custom_theme = config_get('system.core', 'maintenance_theme');
+    if (empty($custom_theme)) {
+      $custom_theme = config_get('system.core', 'theme_default');
+    }
   }
 
   // Ensure that system.module is loaded.

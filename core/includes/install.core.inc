@@ -1580,7 +1580,7 @@ function install_finished(&$install_state) {
   backdrop_flush_all_caches();
 
   // Remember the profile which was used.
-  variable_set('install_profile', backdrop_get_profile());
+  config_set('system.core', 'install_profile', backdrop_get_profile());
 
   // Installation profiles are always loaded last
   db_update('system')
@@ -1859,7 +1859,8 @@ function install_configure_form_submit($form, &$form_state) {
   user_login_finalize();
 
   if (isset($form_state['values']['clean_url'])) {
-    variable_set('clean_url', $form_state['values']['clean_url']);
+    config_set('system.core', 'clean_url', $form_state['values']['clean_url']);
+    backdrop_static_reset('url');
   }
 
   // Record when this install ran.

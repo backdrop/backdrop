@@ -431,7 +431,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
     $input = 'Backdrop<br /><p>' . str_repeat('x', 2100) . '</><br />Backdrop';
     $output = backdrop_html_to_text($input);
     // This awkward construct comes from includes/mail.inc lines 8-13.
-    $eol = variable_get('mail_line_endings', MAIL_LINE_ENDINGS);
+    $eol = settings_get('mail_line_endings', MAIL_LINE_ENDINGS);
     // We must use strlen() rather than backdrop_strlen() in order to count
     // octets rather than characters.
     $line_length_limit = 1000 - backdrop_strlen($eol);

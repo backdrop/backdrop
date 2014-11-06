@@ -113,7 +113,7 @@ function system_themes_page() {
   $themes = system_rebuild_theme_data();
   uasort($themes, 'system_sort_modules_by_info_name');
 
-  $theme_default = variable_get('theme_default', 'stark');
+  $theme_default = config_get('system.core', 'theme_default');
   $theme_groups  = array();
 
   foreach ($themes as &$theme) {
@@ -241,7 +241,7 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
     '#options' => array(0 => t('Default theme')) + $theme_options,
     '#title' => t('Administration theme'),
     '#description' => t('Choose "Default theme" to always use the same theme as the rest of the site.'),
-    '#default_value' => variable_get('admin_theme', 0),
+    '#default_value' => config_get('system.core', 'admin_theme'),
   );
   $form['admin_theme']['actions'] = array('#type' => 'actions');
   $form['admin_theme']['actions']['submit'] = array(
@@ -256,7 +256,7 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
  */
 function system_themes_admin_form_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
-  variable_set('admin_theme', $form_state['values']['admin_theme']);
+  config_set('system.core', 'admin_theme', $form_state['values']['admin_theme']);
 }
 
 /**
@@ -292,7 +292,7 @@ function system_theme_disable() {
 
     // Check if the specified theme is one recognized by the system.
     if (!empty($themes[$theme])) {
-      if ($theme == variable_get('theme_default', 'stark')) {
+      if ($theme == config_get('system.core', 'theme_default')) {
         // Don't disable the default theme.
         backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
       }
@@ -325,7 +325,7 @@ function system_theme_default() {
        theme_enable(array($theme));
       }
       // Set the default theme.
-      variable_set('theme_default', $theme);
+      config_set('system.core', 'theme_default', $theme);
 
       // Rebuild the menu. This duplicates the menu_rebuild() in theme_enable().
       // However, modules must know the current default theme in order to use
@@ -336,8 +336,8 @@ function system_theme_default() {
 
       // The status message depends on whether an admin theme is currently in use:
       // a value of 0 means the admin theme is set to be the default theme.
-      $admin_theme = variable_get('admin_theme', 0);
-      if ($admin_theme != 0 && $admin_theme != $theme) {
+      $admin_theme = config_get('system.core', 'admin_theme');
+      if ($admin_theme && $admin_theme != $theme) {
         backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
           '%selected_theme' => $themes[$theme]->info['name'],
@@ -1199,7 +1199,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
   );
   $form['front_page']['default_nodes_main'] = array(
     '#type' => 'select', '#title' => t('Number of posts on front page'),
@@ -1218,7 +1218,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('site_403'),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
   );
   $form['error_page']['site_404'] = array(
     '#type' => 'textfield',
@@ -1226,7 +1226,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('site_404'),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
   );
 
   $form['#validate'][] = 'system_site_information_settings_validate';
@@ -1253,7 +1253,7 @@ function system_site_information_settings($form, &$form_state) {
 
       // Prepare local file path for description.
       if ($original_path && isset($friendly_path)) {
-        $local_file = strtr($original_path, array('public:/' => variable_get('file_public_path', 'files')));
+        $local_file = strtr($original_path, array('public:/' => config_get('system.core', 'file_public_path')));
       }
       else {
         $local_file = path_to_theme() . '/' . $default;
@@ -1459,7 +1459,7 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $form['cron_url'] = array(
-    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'backdrop')))))) . '</p>',
+    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))) . '</p>',
   );
 
   $form['cron'] = array(
@@ -1697,7 +1697,7 @@ function system_file_system_settings() {
   $form['file_public_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Public file system path'),
-    '#default_value' => variable_get('file_public_path', 'files'),
+    '#default_value' => config_get('system.core', 'file_public_path'),
     '#maxlength' => 255,
     '#description' => t('A local file system path where public files will be stored. This directory must exist and be writable by Backdrop. This directory must be relative to the Backdrop installation directory and be accessible over the web.'),
     '#after_build' => array('system_check_directory'),
@@ -1706,7 +1706,7 @@ function system_file_system_settings() {
   $form['file_private_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Private file system path'),
-    '#default_value' => variable_get('file_private_path', ''),
+    '#default_value' => config_get('system.core', 'file_private_path'),
     '#maxlength' => 255,
     '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'http://drupal.org/handbook/modules/file')),
     '#after_build' => array('system_check_directory'),
@@ -1715,7 +1715,7 @@ function system_file_system_settings() {
   $form['file_temporary_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Temporary directory'),
-    '#default_value' => variable_get('file_temporary_path', file_directory_temp()),
+    '#default_value' => file_directory_temp(),
     '#maxlength' => 255,
     '#description' => t('A local file system path where temporary files will be stored. This directory should not be accessible over the web.'),
     '#after_build' => array('system_check_directory'),
@@ -1727,16 +1727,38 @@ function system_file_system_settings() {
   }
 
   if (!empty($options)) {
+    $default_scheme = config_get('system.core', 'file_default_scheme');
+    $default_scheme = isset($options[$default_scheme]) ? $default_scheme : key($options);
     $form['file_default_scheme'] = array(
       '#type' => 'radios',
       '#title' => t('Default download method'),
-      '#default_value' => variable_get('file_default_scheme', isset($options['public']) ? 'public' : key($options)),
+      '#default_value' => $default_scheme,
       '#options' => $options,
       '#description' => t('This setting is used as the preferred download method. The use of public files is more efficient, but does not provide any access control.'),
     );
   }
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for system_file_system_settings().
+ */
+function system_file_system_settings_submit($form, &$form_state) {
+  backdrop_set_message(t('The configuration options have been saved.'));
+  $config = config('system.core');
+  $config->set('file_public_path', $form_state['values']['file_public_path']);
+  $config->set('file_private_path', $form_state['values']['file_private_path']);
+  $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
+  $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
+  $config->save();
+
 }
 
 /**
@@ -1750,7 +1772,7 @@ function system_image_toolkit_settings() {
   $current_toolkit = image_get_toolkit();
 
   if (count($toolkits_available) == 0) {
-    variable_del('image_toolkit');
+    config_set('system.core', 'image_toolkit', '');
     $form['image_toolkit_help'] = array(
       '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should consult your system administrator to have them enabled, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
     );
@@ -1761,12 +1783,15 @@ function system_image_toolkit_settings() {
     $form['image_toolkit'] = array(
       '#type' => 'radios',
       '#title' => t('Select an image processing toolkit'),
-      '#default_value' => variable_get('image_toolkit', $current_toolkit),
+      '#default_value' => $current_toolkit,
       '#options' => $toolkits_available
     );
   }
   else {
-    variable_set('image_toolkit', key($toolkits_available));
+    $form['image_toolkit'] = array(
+      '#type' => 'value',
+      '#value' => $current_toolkit,
+    );
   }
 
   // Get the toolkit's settings form.
@@ -1775,7 +1800,35 @@ function system_image_toolkit_settings() {
     $form['image_toolkit_settings'] = $function();
   }
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for system_image_toolkit_settings().
+ */
+function system_image_toolkit_settings_submit($form, &$form_state) {
+  form_state_values_clean($form_state);
+  $config = config('system.core');
+
+  // Save the toolkit itself.
+  $config->set('image_toolkit', $form_state['values']['image_toolkit']);
+
+  // Save toolkit settings.
+  $toolkit_keys = element_children($form['image_toolkit_settings']);
+  foreach ($form_state['values'] as $key => $value) {
+    if (in_array($key, $toolkit_keys)) {
+      $config->set($key, $value);
+    }
+  }
+
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1817,6 +1870,18 @@ function system_rss_feeds_settings() {
   );
 
   return $form;
+}
+
+/**
+ * Submit handler for system_rss_feeds_settings().
+ */
+function system_rss_feeds_settings_submit($form, &$form_state) {
+  $config = config('system.core');
+  $config->set('feed_description', $form_state['values']['feed_description']);
+  $config->set('feed_default_items', $form_state['values']['feed_default_items']);
+  $config->set('feed_item_length', $form_state['values']['feed_item_length']);
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1945,7 +2010,7 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => t($config->get('maintenance_message'), array('@site' => config_get('system.core', 'site_name'))),
+    '#default_value' => t($config->get('maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -1961,7 +2026,7 @@ function system_site_maintenance_mode($form, &$form_state) {
  */
 function system_site_maintenance_mode_submit($form, &$form_state) {
   state_set('maintenance_mode', (int) $form_state['values']['maintenance_mode']);
-  variable_set('maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
+  config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
 
   // Give specific messages on the primary action for this form.
   if ($form_state['values']['maintenance_mode']) {
@@ -2003,7 +2068,7 @@ function system_clean_url_settings($form, &$form_state) {
     else {
       // If the test failed while clean URLs are enabled, make sure clean URLs
       // can be disabled.
-      if (variable_get('clean_url', 0)) {
+      if (config_get('system.core', 'clean_url')) {
         $conflict = TRUE;
         // Warn the user of a conflicting situation, unless after processing
         // a submitted form.
@@ -2024,10 +2089,14 @@ function system_clean_url_settings($form, &$form_state) {
     $form['clean_url'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable clean URLs'),
-      '#default_value' => variable_get('clean_url', 0),
+      '#default_value' => config_get('system.core', 'clean_url'),
       '#description' => t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
     );
-    $form = system_settings_form($form);
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save configuration'),
+    );
     if ($conflict) {
       // $form_state['redirect'] needs to be set to the non-clean URL,
       // otherwise the setting is not saved.
@@ -2049,12 +2118,10 @@ function system_clean_url_settings($form, &$form_state) {
       '#type' => 'markup',
       '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@handbook">online handbook</a>.', array('@handbook' => 'http://drupal.org/node/15365')) . '</p>',
     );
-    $form['actions'] = array(
-      '#type' => 'actions',
-      'clean_url_test' => array(
-        '#type' => 'submit',
-        '#value' => t('Run the clean URL test'),
-      ),
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['clean_url_test'] = array(
+      '#type' => 'submit',
+      '#value' => t('Run the clean URL test'),
     );
     $form['clean_url_test_execute'] = array(
       '#type' => 'hidden',
@@ -2063,6 +2130,14 @@ function system_clean_url_settings($form, &$form_state) {
   }
 
   return $form;
+}
+
+/**
+ * Submit handler for system_clean_url_settings().
+ */
+function system_clean_url_settings_submit($form, $form_state) {
+  backdrop_set_message(t('The configuration options have been saved.'));
+  config_set('system.core', 'clean_url', $form_state['values']['clean_url']);
 }
 
 /**

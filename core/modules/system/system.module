@@ -140,7 +140,7 @@ function system_permission() {
     ),
     'view the administration theme' => array(
       'title' => t('View the administration theme'),
-      'description' => variable_get('admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
+      'description' => config_get('system.core', 'admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
     ),
     'access site reports' => array(
       'title' => t('View site reports'),
@@ -1728,7 +1728,7 @@ function system_stream_wrappers() {
   );
 
   // Only register the private file stream wrapper if a file path has been set.
-  if (variable_get('file_private_path', FALSE)) {
+  if (config_get('system.core', 'file_private_path')) {
     $wrappers['private'] = array(
       'name' => t('Private files'),
       'class' => 'BackdropPrivateStreamWrapper',
@@ -2007,7 +2007,7 @@ function system_add_module_assets() {
  */
 function system_custom_theme() {
   if (user_access('view the administration theme') && path_is_admin(current_path())) {
-    return variable_get('admin_theme');
+    return config_get('system.core', 'admin_theme');
   }
 }
 
@@ -3517,7 +3517,7 @@ function system_check_http_request() {
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);
-  variable_set('backdrop_http_request_fails', !$works);
+  state_set('backdrop_http_request_fails', !$works);
   return $works;
 }
 

@@ -433,7 +433,7 @@ function ajax_base_page_theme() {
     // to see the default theme, token validation isn't required for that, and
     // bypassing it allows most use-cases to work even when accessed from the
     // page cache.
-    if ($theme === variable_get('theme_default', 'stark') || backdrop_valid_token($token, $theme)) {
+    if ($theme === config_get('system.core', 'theme_default') || backdrop_valid_token($token, $theme)) {
       return $theme;
     }
   }
@@ -565,7 +565,7 @@ function ajax_prepare_response($page_callback_result) {
         break;
 
       case MENU_SITE_OFFLINE:
-        $commands[] = ajax_command_alert(filter_xss_admin(t(config_get('system.core', 'maintenance_message'), array('@site' => config_get('system.core', 'site_name')))));
+        $commands[] = ajax_command_alert(filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name')))));
         break;
     }
   }

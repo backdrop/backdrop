@@ -312,7 +312,7 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for contextual filters: For example, "node/%/feed".'),
           '#default_value' => $this->get_option('path'),
-	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
 	  '#field_suffix' => '</span>&lrm;',
 	  '#attributes' => array('dir'=>'ltr'),
         );
