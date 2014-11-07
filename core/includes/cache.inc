@@ -51,7 +51,7 @@ function cache_clear_all() {
   if (module_exists('layout')) {
     cache('layout_path')->flush();
   }
-  cache('page')->expire();
+  cache('page')->flush();
 }
 
 /**
@@ -170,12 +170,7 @@ interface BackdropCacheInterface {
   function flush();
 
   /**
-   * Expires temporary items from the cache.
-   */
-  function expire();
-
-  /**
-   * Performs garbage collection on a cache bin.
+   * Performs garbage collection on a cache bin. Removing expired items.
    */
   function garbageCollection();
 
@@ -304,9 +299,6 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    */
   function getMultiple(&$cids) {
     try {
-      // Garbage collection necessary when enforcing a minimum cache lifetime.
-      $this->garbageCollection($this->bin);
-
       // When serving cached pages, the overhead of using db_select() was found
       // to add around 30% overhead to the request. Since $this->bin is a
       // variable, this means the call to db_query() here uses a concatenated
@@ -351,16 +343,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
     if (!isset($cache->data)) {
       return FALSE;
     }
-    // If the cached data is temporary and subject to a per-user minimum
-    // lifetime, compare the cache entry timestamp with the user session
-    // cache_expiration timestamp. If the cache entry is too old, ignore it.
-    if ($cache->expire != CACHE_PERMANENT && config_get('system.core', 'cache_lifetime') && isset($_SESSION['cache_expiration'][$this->bin]) && $_SESSION['cache_expiration'][$this->bin] > $cache->created) {
-      // Ignore cache data that is too old and thus not valid for this user.
-      return FALSE;
-    }
 
-    // If the data is permanent or not subject to a minimum cache lifetime,
-    // unserialize and return the cached data.
     if ($cache->serialized) {
       $cache->data = unserialize($cache->data);
     }
@@ -436,77 +419,13 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   }
 
   /**
-   * Implements BackdropCacheInterface::expire().
-   */
-  function expire() {
-    if (config_get('system.core', 'cache_lifetime')) {
-      // We store the time in the current user's session. We then simulate
-      // that the cache was flushed for this user by not returning cached
-      // data that was cached before the timestamp.
-      $_SESSION['cache_expiration'][$this->bin] = REQUEST_TIME;
-
-      $cache_flush = state_get('cache_flush_' . $this->bin, 0);
-      if ($cache_flush == 0) {
-        // This is the first request to clear the cache; start a timer.
-        state_set('cache_flush_' . $this->bin, REQUEST_TIME);
-      }
-      elseif (REQUEST_TIME > ($cache_flush + config_get('system.core', 'cache_lifetime'))) {
-        // Clear the cache for everyone; cache_lifetime seconds have passed
-        // since the first request to clear the cache.
-        db_delete($this->bin)
-          ->condition('expire', CACHE_PERMANENT, '<>')
-          ->condition('expire', REQUEST_TIME, '<')
-          ->execute();
-        state_set('cache_flush_' . $this->bin, 0);
-      }
-    }
-    else {
-      // No minimum cache lifetime; flush all temporary cache entries now.
-      db_delete($this->bin)
-        ->condition('expire', CACHE_PERMANENT, '<>')
-        ->condition('expire', REQUEST_TIME, '<')
-        ->execute();
-    }
-  }
-
-  /**
    * Implements BackdropCacheInterface::garbageCollection().
    */
   function garbageCollection() {
-    $cache_lifetime = config_get('system.core', 'cache_lifetime');
-
-    // Clean-up the per-user cache expiration session data, so that the session
-    // handler can properly clean-up the session data for anonymous users.
-    if (isset($_SESSION['cache_expiration'])) {
-      $expire = REQUEST_TIME - $cache_lifetime;
-      foreach ($_SESSION['cache_expiration'] as $bin => $timestamp) {
-        if ($timestamp < $expire) {
-          unset($_SESSION['cache_expiration'][$bin]);
-        }
-      }
-      if (!$_SESSION['cache_expiration']) {
-        unset($_SESSION['cache_expiration']);
-      }
-    }
-
-    // Garbage collection of temporary items is only necessary when enforcing
-    // a minimum cache lifetime.
-    if (!$cache_lifetime) {
-      return;
-    }
-    // When cache lifetime is in force, avoid running garbage collection too
-    // often since this will remove temporary cache items indiscriminately.
-    $cache_flush = state_get('cache_flush_' . $this->bin, 0);
-    if ($cache_flush && ($cache_flush + $cache_lifetime <= REQUEST_TIME)) {
-      // Reset the state immediately to prevent a meltdown in heavy load
-      // situations.
-      state_set('cache_flush_' . $this->bin, 0);
-      // Time to flush old cache data
-      db_delete($this->bin)
-        ->condition('expire', CACHE_PERMANENT, '<>')
-        ->condition('expire', $cache_flush, '<=')
-        ->execute();
-    }
+    db_delete($this->bin)
+      ->condition('expire', CACHE_PERMANENT, '<>')
+      ->condition('expire', REQUEST_TIME, '<')
+      ->execute();
   }
 
   /**

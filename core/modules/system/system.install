@@ -1325,12 +1325,6 @@ function system_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'cache' => array(
-        'description' => "The time of this user's last post. This is used when the site has specified a minimum_cache_lifetime. See BackdropCacheInterface::get().",
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
       'session' => array(
         'description' => 'The serialized contents of $_SESSION, an array of name/value pairs that persists across page requests by this session ID. Backdrop loads $_SESSION from here at the start of each request and saves it at the end.',
         'type' => 'blob',
@@ -1589,6 +1583,13 @@ function system_update_1003() {
   $config->set('preprocess_css', variable_get('preprocess_css', 0));
   $config->set('preprocess_js', variable_get('preprocess_js', 0));
   $config->save();
+
+  variable_del('cache');
+  variable_del('cache_lifetime');
+  variable_del('page_cache_maximum_age');
+  variable_del('page_compression');
+  variable_del('preprocess_css');
+  variable_del('preprocess_js');
 }
 
 /**
@@ -2409,6 +2410,19 @@ function system_update_1026() {
 
   // And these variables have been converted to state:
   variable_del('javascript_parsed');
+}
+
+/**
+ * Remove the per-user cache column from the session table.
+ */
+function system_update_1027() {
+  if (db_field_exists('sessions', 'cache')) {
+    db_drop_field('sessions', 'cache');
+  }
+
+  $config = config('system.core');
+  $config->clear('cache_lifetime');
+  $config->save();
 }
 
 /**

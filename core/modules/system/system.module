@@ -3206,10 +3206,11 @@ function system_cron() {
     }
   }
 
+  // Remove expired and temporary items from cache bins.
   $core = array('cache', 'path', 'filter', 'page', 'menu');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
-    cache($bin)->expire();
+    cache($bin)->garbageCollection();
   }
 
   // Cleanup the batch table and the queue for failed batches.
