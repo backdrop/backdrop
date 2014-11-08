@@ -1495,8 +1495,8 @@ class MenuTrailTestCase extends MenuWebTestCase {
     variable_del('menu_test_menu_tree_set_path');
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 
-    // Override the active trail for the Management tree; it should not affect
-    // the Main tree.
+    // Override the active trail for the Administration tree; it should not
+    // affect the Main tree.
     variable_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 
@@ -1517,12 +1517,12 @@ class MenuTrailTestCase extends MenuWebTestCase {
       'admin/config/system/site-information' => t('Site information'),
     );
 
-    // Test the tree generation for the Management menu.
+    // Test the tree generation for the Administration menu.
     variable_del('menu_test_menu_tree_set_path');
     $this->assertBreadcrumb('admin/config/development/menu-trail', $breadcrumb, t('Menu trail - Case 2'), $tree);
 
-    // Override the active trail for the Management tree; it should affect the
-    // breadcrumbs and Management tree.
+    // Override the active trail for the Administration tree; it should affect
+    // both the breadcrumbs and Administration menu tree.
     variable_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('admin/config/development/menu-trail', $override_breadcrumb, t('Menu trail - Case 2'), $override_tree);
   }
