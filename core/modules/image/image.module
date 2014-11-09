@@ -854,7 +854,7 @@ function image_style_url($style_name, $uri) {
   // with the query string. If the file does not exist, use url() to ensure
   // that it is included. Once the file exists it's fine to fall back to the
   // actual file path, this avoids bootstrapping PHP once the files are built.
-  if (!variable_get('clean_url') && file_uri_scheme($uri) == 'public' && !file_exists($uri)) {
+  if (!config_get('system.core', 'clean_url') && file_uri_scheme($uri) == 'public' && !file_exists($uri)) {
     $directory_path = file_stream_wrapper_get_instance_by_uri($uri)->getDirectoryPath();
     return url($directory_path . '/' . file_uri_target($uri), array('absolute' => TRUE));
   }

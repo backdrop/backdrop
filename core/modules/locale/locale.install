@@ -91,7 +91,7 @@ function locale_uninstall() {
   variable_del('language_content_type_negotiation');
   variable_del('locale_cache_strings');
   variable_del('locale_js_directory');
-  variable_del('javascript_parsed');
+  state_del('javascript_parsed');
   variable_del('locale_field_language_fallback');
   variable_del('locale_cache_length');
   variable_del('locale_translation_plurals');

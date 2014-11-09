@@ -58,13 +58,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
     // during installation due to any full bootstraps that may occur at the
     // same time (for example, Ajax requests triggered by the installer). If we
     // didn't try to clear it whenever this function is called, the data in the
-    // cache would become stale; for example, the installer sometimes calls
-    // variable_set(), which updates the {variable} table and then clears the
-    // cache to make sure that the next page request picks up the new value.
-    // Not actually clearing the cache here therefore leads old variables to be
-    // loaded on the first page requests after installation, which can cause
-    // subtle bugs, some of which would not be fixed unless the site
-    // administrator cleared the cache manually.
+    // cache would become stale.
     try {
       if (class_exists('Database')) {
         parent::clear($cid, $wildcard);

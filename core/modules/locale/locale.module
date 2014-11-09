@@ -734,7 +734,7 @@ function locale_js_alter(&$javascript) {
   global $language_interface;
 
   $dir = 'public://' . variable_get('locale_js_directory', 'languages');
-  $parsed = variable_get('javascript_parsed', array());
+  $parsed = state_get('javascript_parsed', array());
   $files = $new_files = FALSE;
 
   // Require because locale_js_alter() could be called without locale_init().
@@ -770,12 +770,12 @@ function locale_js_alter(&$javascript) {
       unset($parsed['refresh:' . $language_interface->langcode]);
     }
     // Store any changes after refresh was attempted.
-    variable_set('javascript_parsed', $parsed);
+    state_set('javascript_parsed', $parsed);
   }
   // If no refresh was attempted, but we have new source files, we need
   // to store them too. This occurs if current page is in English.
   elseif ($new_files) {
-    variable_set('javascript_parsed', $parsed);
+    state_set('javascript_parsed', $parsed);
   }
 
   // Add the translation JavaScript file to the page.

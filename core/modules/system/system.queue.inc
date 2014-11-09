@@ -80,13 +80,13 @@ class BackdropQueue {
   public static function get($name, $reliable = FALSE) {
     static $queues;
     if (!isset($queues[$name])) {
-      $class = variable_get('queue_class_' . $name, NULL);
+      $class = settings_get('queue_class_' . $name, NULL);
       if (!$class) {
-        $class = variable_get('queue_default_class', 'SystemQueue');
+        $class = settings_get('queue_default_class', 'SystemQueue');
       }
       $object = new $class($name);
       if ($reliable && !$object instanceof BackdropReliableQueueInterface) {
-        $class = variable_get('queue_default_reliable_class', 'SystemQueue');
+        $class = settings_get('queue_default_reliable_class', 'SystemQueue');
         $object = new $class($name);
       }
       $queues[$name] = $object;

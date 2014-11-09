@@ -527,7 +527,7 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
 class RemoteFileUnmanagedSaveDataTest extends FileUnmanagedSaveDataTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -849,7 +849,7 @@ class FileSaveUploadTest extends FileHookTestCase {
 class RemoteFileSaveUploadTest extends FileSaveUploadTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -959,12 +959,12 @@ class FileDirectoryTest extends FileTestCase {
    * Ensure that the file_directory_temp() function always returns a value.
    */
   function testFileDirectoryTemp() {
-    // Start with an empty variable to ensure we have a clean slate.
-    variable_set('file_temporary_path', '');
+    // Start with an empty config to ensure we have a clean slate.
+    config_set('system.core', 'file_temporary_path', '');
     $tmp_directory = file_directory_temp();
     $this->assertEqual(empty($tmp_directory), FALSE, 'file_directory_temp() returned a non-empty value.');
-    $setting = variable_get('file_temporary_path', '');
-    $this->assertEqual($setting, $tmp_directory, "The 'file_temporary_path' variable has the same value that file_directory_temp() returned.");
+    $setting = config_get('system.core', 'file_temporary_path', '');
+    $this->assertEqual($setting, $tmp_directory, "The 'file_temporary_path' config setting has the same value that file_directory_temp() returned.");
   }
 }
 
@@ -974,7 +974,7 @@ class FileDirectoryTest extends FileTestCase {
 class RemoteFileDirectoryTest extends FileDirectoryTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -1105,7 +1105,7 @@ class FileScanDirectoryTest extends FileTestCase {
 class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -1152,7 +1152,7 @@ class FileUnmanagedDeleteTest extends FileTestCase {
 class RemoteFileUnmanagedDeleteTest extends FileUnmanagedDeleteTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -1230,7 +1230,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
 class RemoteFileUnmanagedDeleteRecursiveTest extends FileUnmanagedDeleteRecursiveTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -1304,7 +1304,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
 class RemoteFileUnmanagedMoveTest extends FileUnmanagedMoveTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -1394,7 +1394,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
 class RemoteFileUnmanagedCopyTest extends FileUnmanagedCopyTest {
   function setUp() {
     parent::setUp('file_test');
-    variable_set('file_default_scheme', 'dummy-remote');
+    config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
 
@@ -2243,7 +2243,8 @@ class FileDownloadTest extends FileTestCase {
    *   The value of the clean_url setting
    */
   private function checkUrl($scheme, $directory, $filename, $expected_url, $clean_url = '1') {
-    variable_set('clean_url', $clean_url);
+    config_set('system.core', 'clean_url', $clean_url);
+    backdrop_static_reset('url');
 
     // Convert $filename to a valid filename, i.e. strip characters not
     // supported by the filesystem, and create the file in the specified
@@ -2533,10 +2534,10 @@ class StreamWrapperTest extends BackdropWebTestCase {
 
     // Test file_build_uri() and BackdropLocalStreamWrapper::getDirectoryPath().
     $this->assertEqual(file_build_uri('foo/bar.txt'), 'public://foo/bar.txt', 'Expected scheme was added.');
-    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath(), variable_get('file_public_path'), 'Expected default directory path was returned.');
-    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath(), variable_get('file_temporary_path'), 'Expected temporary directory path was returned.');
+    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath(), config_get('system.core', 'file_public_path'), 'Expected default directory path was returned.');
+    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath(), config_get('system.core', 'file_temporary_path'), 'Expected temporary directory path was returned.');
 
-    variable_set('file_default_scheme', 'private');
+    config_set('system.core', 'file_default_scheme', 'private');
     $this->assertEqual(file_build_uri('foo/bar.txt'), 'private://foo/bar.txt', 'Got a valid URI from foo/bar.txt.');
   }
 

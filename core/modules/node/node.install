@@ -437,7 +437,6 @@ function node_uninstall() {
 
   // Delete remaining general module variables.
   variable_del('node_access_needs_rebuild');
-  variable_del('node_admin_theme');
   state_del('node_cron_last');
   variable_del('node_recent_block_count');
   variable_del('default_nodes_main');

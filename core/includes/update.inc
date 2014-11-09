@@ -313,8 +313,15 @@ function update_module_add_to_system($modules = array()) {
  * made which make it impossible to continue using the prior version.
  */
 function update_fix_requirements() {
-  if (backdrop_get_installed_schema_version('system') > 7000 && !variable_get('update_backdrop_requirements', FALSE)) {
-    variable_set('update_backdrop_requirements', TRUE);
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_backdrop_requirements', FALSE)) {
+    // Copy over the private key for continuity between the sites. If this is
+    // not migrated, a random key will be generated when visiting update.php.
+    if ($key = variable_get('drupal_private_key')) {
+      config_set('system.core', 'private_key', $key);
+      variable_del('drupal_private_key');
+    }
+
+    state_set('update_backdrop_requirements', TRUE);
   }
 }
 

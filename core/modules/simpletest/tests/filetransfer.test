@@ -71,7 +71,7 @@ class FileTranferTest extends BackdropWebTestCase {
 
     $gotit = TRUE;
     try {
-      $this->testConnection->copyDirectory($source, BACKDROP_ROOT . '/'. variable_get('file_public_path', 'files'));
+      $this->testConnection->copyDirectory($source, BACKDROP_ROOT . '/'. config_get('system.core', 'file_public_path'));
     }
     catch (FileTransferException $e) {
       $gotit = FALSE;

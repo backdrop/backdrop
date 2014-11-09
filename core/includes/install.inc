@@ -780,6 +780,8 @@ function backdrop_verify_profile($install_state) {
  * functions can be made available while other modules are installed.
  */
 function backdrop_install_system() {
+  config_install_default_config('system');
+
   $system_path = backdrop_get_path('module', 'system');
   require_once BACKDROP_ROOT . '/' . $system_path . '/system.install';
   module_invoke('system', 'install');
@@ -799,7 +801,6 @@ function backdrop_install_system() {
       ))
     ->execute();
   system_rebuild_module_data();
-  config_install_default_config('system');
 }
 
 /**

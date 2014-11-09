@@ -166,8 +166,9 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   function _testImageStyleUrlAndPath($scheme, $clean_url = TRUE) {
     // Make the default scheme neither "public" nor "private" to verify the
     // functions work for other than the default scheme.
-    variable_set('file_default_scheme', 'temporary');
-    variable_set('clean_url', $clean_url);
+    config_set('system.core', 'file_default_scheme', 'temporary');
+    config_set('system.core', 'clean_url', $clean_url);
+    backdrop_static_reset('url');
 
     // Create the directories for the styles.
     $directory = $scheme . '://styles/' . $this->style_name;
@@ -197,11 +198,11 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     // rather than a URI. We need to temporarily switch the default scheme to
     // match the desired scheme before testing this, then switch it back to the
     // "temporary" scheme used throughout this test afterwards.
-    variable_set('file_default_scheme', $scheme);
+    config_set('system.core', 'file_default_scheme', $scheme);
     $relative_path = file_uri_target($original_uri);
     $generate_url_from_relative_path = image_style_url($this->style_name, $relative_path);
     $this->assertEqual($generate_url, $generate_url_from_relative_path, 'Generated URL is the same regardless of whether it came from a relative path or a file URI.');
-    variable_set('file_default_scheme', 'temporary');
+    config_set('system.core', 'file_default_scheme', 'temporary');
 
     // Fetch the URL that generates the file.
     $this->backdropGet($generate_url);

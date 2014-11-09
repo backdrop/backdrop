@@ -1134,7 +1134,7 @@ function hook_form_alter(&$form, &$form_state, $form_id) {
     $form['workflow']['upload_' . $form['type']['#value']] = array(
       '#type' => 'radios',
       '#title' => t('Attachments'),
-      '#default_value' => variable_get('upload_' . $form['type']['#value'], 1),
+      '#default_value' => config_get('my_module.settings', 'upload_' . $form['type']['#value']),
       '#options' => array(t('Disabled'), t('Enabled')),
     );
   }
@@ -3115,7 +3115,7 @@ function hook_install_tasks(&$install_state) {
   // Here, we define a variable to allow tasks to indicate that a particular,
   // processor-intensive batch process needs to be triggered later on in the
   // installation.
-  $myprofile_needs_batch_processing = variable_get('myprofile_needs_batch_processing', FALSE);
+  $myprofile_needs_batch_processing = state_get('myprofile_needs_batch_processing', FALSE);
   $tasks = array(
     // This is an example of a task that defines a form which the user who is
     // installing the site will be asked to fill out. To implement this task,
@@ -3123,7 +3123,7 @@ function hook_install_tasks(&$install_state) {
     // as a normal form API callback function, with associated validation and
     // submit handlers. In the submit handler, in addition to saving whatever
     // other data you have collected from the user, you might also call
-    // variable_set('myprofile_needs_batch_processing', TRUE) if the user has
+    // state_set('myprofile_needs_batch_processing', TRUE) if the user has
     // entered data which requires that batch processing will need to occur
     // later on.
     'myprofile_data_import_form' => array(
@@ -3159,7 +3159,7 @@ function hook_install_tasks(&$install_state) {
     // function named myprofile_final_site_setup(), in which additional,
     // automated site setup operations would be performed. Since this is the
     // last task defined by your profile, you should also use this function to
-    // call variable_del('myprofile_needs_batch_processing') and clean up the
+    // call state_del('myprofile_needs_batch_processing') and clean up the
     // variable that was used above. If you want the user to pass to the final
     // Backdrop installation tasks uninterrupted, return no output from this
     // function. Otherwise, return themed output that the user will see (for
@@ -3921,7 +3921,7 @@ function hook_filetransfer_info() {
  * @see hook_filetransfer_info()
  */
 function hook_filetransfer_info_alter(&$filetransfer_info) {
-  if (variable_get('paranoia', FALSE)) {
+  if (config_get('mymodule.settings', 'paranoia')) {
     // Remove the FTP option entirely.
     unset($filetransfer_info['ftp']);
     // Make sure the SSH option is listed first.

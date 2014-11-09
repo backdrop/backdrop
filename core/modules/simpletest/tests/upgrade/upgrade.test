@@ -102,7 +102,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     // Login as uid 1.
     $user = db_query('SELECT * FROM {users} WHERE uid = :uid', array(':uid' => 1))->fetchObject();
 
-    // Generate and set a D6-compatible session cookie.
+    // Generate and set a session cookie.
     $this->curlInitialize();
     $sid = backdrop_hash_base64(uniqid(mt_rand(), TRUE) . backdrop_random_bytes(55));
     curl_setopt($this->curlHandle, CURLOPT_COOKIE, rawurlencode(session_name()) . '=' . rawurlencode($sid));

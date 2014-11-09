@@ -277,7 +277,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       '#title' => t('%language (%langcode) path prefix', array('%language' => $language->name, '%langcode' => $language->langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
-      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (variable_get('clean_url', 0) ? '' : '?q=')
+      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',

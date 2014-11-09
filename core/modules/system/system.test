@@ -463,7 +463,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->assertModules(array('dependency_test3', 'dependency_test2', 'dependency_test1'), TRUE);
 
     // Check the actual order which is saved by module_test_modules_enabled().
-    $this->assertIdentical(variable_get('test_module_enable_order', FALSE), $expected_order, 'Modules enabled in the correct order.');
+    $this->assertIdentical(state_get('test_module_enable_order', FALSE), $expected_order, 'Modules enabled in the correct order.');
   }
 
   /**
@@ -841,7 +841,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     theme_enable(array('stark'));
-    variable_set('theme_default', 'stark');
+    config_set('system.core', 'theme_default', 'stark');
   }
 
   /**
@@ -850,7 +850,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
   function testCustomLogo() {
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
-    $file_relative = strtr($file->uri, array('public://' => variable_get('file_public_path', 'files') . '/'));
+    $file_relative = strtr($file->uri, array('public://' => config_get('system.core', 'file_public_path') . '/'));
     $default_theme_path = 'core/themes/stark';
 
     $supported_paths = array(
@@ -902,7 +902,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       if (file_uri_scheme($input) == 'public') {
         $implicit_public_file = file_uri_target($input);
         $explicit_file = $input;
-        $local_file = strtr($input, array('public://' => variable_get('file_public_path', 'files') . '/'));
+        $local_file = strtr($input, array('public://' => config_get('system.core', 'file_public_path') . '/'));
       }
       // Adjust for fully qualified stream wrapper URI elsewhere.
       elseif (file_uri_scheme($input) !== FALSE) {
@@ -912,7 +912,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       elseif ($input == file_uri_target($file->uri)) {
         $implicit_public_file = $input;
         $explicit_file = 'public://' . $input;
-        $local_file = variable_get('file_public_path', 'files') . '/' . $input;
+        $local_file = config_get('system.core', 'file_public_path') . '/' . $input;
       }
       $this->assertEqual((string) $elements[0], $implicit_public_file);
       $this->assertEqual((string) $elements[1], $explicit_file);
@@ -940,9 +940,9 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       // Relative path within the public filesystem to non-existing file.
       'whatever.png',
       // Relative path to non-existing file in public filesystem.
-      variable_get('file_public_path', 'files') . '/whatever.png',
+      config_get('system.core', 'file_public_path') . '/whatever.png',
       // Semi-absolute path to non-existing file in public filesystem.
-      '/' . variable_get('file_public_path', 'files') . '/whatever.png',
+      '/' . config_get('system.core', 'file_public_path') . '/whatever.png',
       // Relative path to arbitrary non-existing file.
       'core/misc/whatever.png',
       // Semi-absolute path to arbitrary non-existing file.
@@ -1456,7 +1456,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    */
   function testAdministrationTheme() {
     theme_enable(array('stark'));
-    variable_set('theme_default', 'stark');
+    config_set('system.core', 'theme_default', 'stark');
     // Enable an administration theme and show it on the node admin pages.
     $edit = array(
       'admin_theme' => 'seven',
@@ -1489,7 +1489,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw('core/themes/stark', 'Site default theme used on the add content page.');
 
     // Reset to the default theme settings.
-    variable_set('theme_default', 'bartik');
+    config_set('system.core', 'theme_default', 'bartik');
     $edit = array(
       'admin_theme' => '0',
       'node_admin_theme' => FALSE,
@@ -1511,12 +1511,12 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     theme_enable(array('bartik'));
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Set default'));
-    $this->assertEqual(variable_get('theme_default', ''), 'bartik');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
 
     // Switch back to Stark and test again.
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Set default'), 0);
-    $this->assertEqual(variable_get('theme_default', ''), 'stark');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'stark');
   }
 }
 

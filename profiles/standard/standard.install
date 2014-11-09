@@ -71,7 +71,7 @@ function standard_install() {
   // Enable Bartik theme and set it as default theme instead of Stark.
   // @see system_install()
   $default_theme = 'bartik';
-  variable_set('theme_default', $default_theme);
+  config_set('system.core', 'theme_default', $default_theme);
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
@@ -290,6 +290,6 @@ function standard_install() {
     ->condition('type', 'theme')
     ->condition('name', 'seven')
     ->execute();
-  variable_set('admin_theme', 'seven');
-  variable_set('node_admin_theme', '1');
+  config_set('system.core', 'admin_theme', 'seven');
+  config_set('system.core', 'node_admin_theme', '1');
 }

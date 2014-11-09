@@ -76,7 +76,7 @@ function backdrop_theme_access($theme) {
  * @see backdrop_theme_access()
  */
 function _backdrop_theme_access($theme) {
-  $admin_theme = variable_get('admin_theme');
+  $admin_theme = config_get('system.core', 'admin_theme');
   return !empty($theme->status) || ($admin_theme && $theme->name == $admin_theme);
 }
 
@@ -94,8 +94,8 @@ function backdrop_theme_initialize() {
   backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE);
   $themes = list_themes();
 
-  // Load the default theme, Stark.
-  $theme = variable_get('theme_default', 'stark');
+  // Load the default theme.
+  $theme = config_get('system.core', 'theme_default');
 
   // Allow modules to override the theme. Validation has already been performed
   // inside menu_get_custom_theme(), so we do not need to check it again here.
@@ -1545,7 +1545,7 @@ function theme_enable($theme_list) {
  */
 function theme_disable($theme_list) {
   // Don't disable the default theme.
-  if ($pos = array_search(variable_get('theme_default', 'stark'), $theme_list) !== FALSE) {
+  if ($pos = array_search(config_get('system.core', 'theme_default'), $theme_list) !== FALSE) {
     unset($theme_list[$pos]);
     if (empty($theme_list)) {
       return;

@@ -56,7 +56,7 @@ class ColorTestCase extends BackdropWebTestCase {
    * Tests the Color module functionality using the given theme.
    */
   function _testColor($theme, $test_values) {
-    variable_set('theme_default', $theme);
+    config_set('system.core', 'theme_default', $theme);
     $settings_path = 'admin/appearance/settings/' . $theme;
 
     $this->backdropLogin($this->big_user);
@@ -100,7 +100,7 @@ class ColorTestCase extends BackdropWebTestCase {
    * Tests whether the provided color is valid.
    */
   function testValidColor() {
-    variable_set('theme_default', 'bartik');
+    config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
 
     $this->backdropLogin($this->big_user);

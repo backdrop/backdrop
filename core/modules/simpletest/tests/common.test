@@ -238,7 +238,8 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
       $absolute_string = $absolute ? 'absolute' : NULL;
 
       // Disable Clean URLs.
-      $GLOBALS['conf']['clean_url'] = 0;
+      config_set('system.core', 'clean_url', 0);
+      backdrop_static_reset('url');
 
       $url = $base . '?q=node/123';
       $result = url('node/123', array('absolute' => $absolute));
@@ -273,7 +274,8 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
       $this->assertEqual($url, $result, "$url == $result");
 
       // Enable Clean URLs.
-      $GLOBALS['conf']['clean_url'] = 1;
+      config_set('system.core', 'clean_url', 1);
+      backdrop_static_reset('url');
 
       $url = $base . 'node/123';
       $result = url('node/123', array('absolute' => $absolute));
