@@ -184,6 +184,14 @@ function search_admin_settings_submit($form, &$form_state) {
     backdrop_set_message(t('The active search modules have been changed.'));
     variable_set('menu_rebuild_needed', TRUE);
   }
+
+  // This values are set by node's module implementation of hook_search_admin.
+  foreach (array_keys($form_state['values']) as $value) {
+    if (strpos($value, 'node_rank_') === 0) {
+      $config->set($value, $form_state['values'][$value]);
+    }
+  }
+
   $config->save();
 }
 
