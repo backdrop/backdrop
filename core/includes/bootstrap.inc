@@ -2428,7 +2428,7 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
           break;
 
         case BACKDROP_BOOTSTRAP_SESSION:
-          require_once BACKDROP_ROOT . '/' . variable_get('session_inc', 'core/includes/session.inc');
+          require_once BACKDROP_ROOT . '/' . settings_get('session_inc', 'core/includes/session.inc');
           backdrop_session_initialize();
           break;
 
@@ -2563,11 +2563,11 @@ function _backdrop_bootstrap_page_cache() {
   // Allow specifying special cache handlers in settings.php, like
   // using memcached or files for storing cache information.
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
-  foreach (variable_get('cache_backends', array()) as $include) {
+  foreach (settings_get('cache_backends', array()) as $include) {
     require_once BACKDROP_ROOT . '/' . $include;
   }
   // Check for a cache mode force from settings.php.
-  if (variable_get('page_cache_without_database')) {
+  if (settings_get('page_cache_without_database')) {
     $cache_enabled = TRUE;
   }
   else {
@@ -2591,13 +2591,13 @@ function _backdrop_bootstrap_page_cache() {
       date_default_timezone_set(backdrop_get_user_timezone());
       // If the skipping of the bootstrap hooks is not enforced, call
       // hook_boot.
-      if (variable_get('page_cache_invoke_hooks', TRUE)) {
+      if (settings_get('page_cache_invoke_hooks', TRUE)) {
         bootstrap_invoke_all('boot');
       }
       backdrop_serve_page_from_cache($cache);
       // If the skipping of the bootstrap hooks is not enforced, call
       // hook_exit.
-      if (variable_get('page_cache_invoke_hooks', TRUE)) {
+      if (settings_get('page_cache_invoke_hooks', TRUE)) {
         bootstrap_invoke_all('exit');
       }
       // We are done.
@@ -2658,8 +2658,18 @@ function _backdrop_bootstrap_database() {
 function _backdrop_bootstrap_variables() {
   global $conf;
 
+  // Populate global settings for this test if set. Because state_get() has
+  // overhead of locking/unlocking, we use the simpler tempstore_get() function
+  // when needing to populate settings in tests.
+  if ($test_prefix = backdrop_valid_test_ua() && db_table_exists('tempstore')) {
+    include_once BACKDROP_ROOT . '/core/includes/common.inc';
+    if ($settings = tempstore_get('simpletest', 'settings')) {
+      $GLOBALS['settings'] = array_merge($GLOBALS['settings'], $settings);
+    }
+  }
+
   // Initialize the lock system.
-  require_once BACKDROP_ROOT . '/' . variable_get('lock_inc', 'core/includes/lock.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('lock_inc', 'core/includes/lock.inc');
   lock_initialize();
 
   // Load variables from the database, but do not overwrite variables set in settings.php.
@@ -3362,7 +3372,7 @@ function backdrop_autoload($class) {
  *   // $stack tracks the number of recursive calls.
  *   static $stack;
  *   $stack++;
- *   if ($stack > variable_get('actions_max_stack', 35)) {
+ *   if ($stack > config_get('system.core', 'action_recursion_limit', 35)) {
  *     ...
  *     return;
  *   }

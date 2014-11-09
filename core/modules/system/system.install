@@ -2426,6 +2426,19 @@ function system_update_1027() {
 }
 
 /**
+ * Convert filter fallback and user cancellation method variables to config.
+ */
+function system_update_1028() {
+  $config = config('system.core');
+  $config->set('filter_fallback_format', variable_get('filter_fallback_format', 'plain_text'));
+  $config->set('user_cancel_method', variable_get('user_cancel_method', 'user_cancel_block'));
+  $config->save();
+
+  variable_del('filter_fallback_format');
+  variable_del('user_cancel_method');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

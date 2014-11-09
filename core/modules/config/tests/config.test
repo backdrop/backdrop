@@ -202,10 +202,10 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $this->assertFieldById('edit-submit', t('Import all'));
 
     // Check that the locking message works when an import is in-progress.
-    variable_set('config_sync', REQUEST_TIME);
+    state_set('config_sync', REQUEST_TIME);
     $this->backdropPost(NULL, array(), t('Import all'));
     $this->assertText('Another request may be synchronizing configuration already or a sync failed unexpectedly.');
-    variable_del('config_sync');
+    state_del('config_sync');
 
     // Import and verify that both do not appear anymore.
     $this->backdropPost(NULL, array(), t('Import all'));

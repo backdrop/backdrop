@@ -2798,6 +2798,11 @@ function system_header_block($settings) {
  * your own submission handler in the form array before calling this function,
  * or just use your own submission handler instead of calling this function.
  *
+ * This function is deprecated in Backdrop because it saves to the old
+ * "variables" table. In Backdrop sites, developers are encouraged to save
+ * configuration using the config system. See config(), config_set(), and
+ * config_get() for information on saving into configuration.
+ *
  * @param $form
  *   An associative array containing the structure of the form.
  *
@@ -2805,6 +2810,8 @@ function system_header_block($settings) {
  *   The form structure.
  *
  * @see system_settings_form_submit()
+ *
+ * @deprecated since 1.0
  *
  * @ingroup forms
  */
@@ -2828,6 +2835,14 @@ function system_settings_form($form) {
  *
  * If you want node type configure style handling of your checkboxes,
  * add an array_filter value to your form.
+ *
+ * Use of this function is discouraged because it is not compatible with the
+ * configuration system. See config(), config_set(), and config_get() for
+ * alternatives. Rather than reusing this submit handler throughout settings
+ * forms, developers should create separate submit handlers for each form
+ * to save the settings into various configuration files as needed.
+ *
+ * @deprecated since 1.0
  */
 function system_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.

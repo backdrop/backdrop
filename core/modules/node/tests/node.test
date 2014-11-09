@@ -2507,8 +2507,8 @@ class NodePageCacheTest extends NodeWebTestCase {
   function setUp() {
     parent::setUp();
 
-    variable_set('cache', 1);
-    variable_set('page_cache_maximum_age', 300);
+    config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
 
     $this->admin_user = $this->backdropCreateUser(array(
         'bypass node access',

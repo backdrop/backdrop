@@ -2763,7 +2763,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Check language negotiation results.
     $this->backdropGet('');
-    $last = variable_get('locale_test_language_negotiation_last', array());
+    $last = state_get('locale_test_language_negotiation_last', array());
     foreach (language_types_get_all() as $type) {
       $langcode = $last[$type];
       $value = $type == LANGUAGE_TYPE_CONTENT || strpos($type, 'test') !== FALSE ? 'it' : 'en';

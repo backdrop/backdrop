@@ -668,6 +668,7 @@ function user_admin_settings_submit($form, &$form_state) {
   config('system.core')
     ->set('anonymous', $form_state['values']['anonymous'])
     ->set('user_admin_role', $form_state['values']['user_admin_role'])
+    ->set('user_cancel_method', $form_state['values']['user_cancel_method'])
     ->set('user_register', $form_state['values']['user_register'])
     ->set('user_email_verification', $form_state['values']['user_email_verification'])
     ->set('user_signatures', $form_state['values']['user_signatures'])

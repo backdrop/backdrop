@@ -502,12 +502,12 @@ function _batch_test_theme_callback() {
  */
 function batch_test_stack($data = NULL, $reset = FALSE) {
   if ($reset) {
-    variable_del('batch_test_stack');
+    state_del('batch_test_stack');
   }
   if (!isset($data)) {
-    return variable_get('batch_test_stack', array());
+    return state_get('batch_test_stack', array());
   }
-  $stack = variable_get('batch_test_stack', array());
+  $stack = state_get('batch_test_stack', array());
   $stack[] = $data;
-  variable_set('batch_test_stack', $stack);
+  state_set('batch_test_stack', $stack);
 }

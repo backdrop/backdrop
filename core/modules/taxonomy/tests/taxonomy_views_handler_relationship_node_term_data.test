@@ -53,7 +53,6 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
       ),
     );
     $this->column_map = array('nid' => 'nid');
-    debug($view->result);
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 

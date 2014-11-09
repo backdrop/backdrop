@@ -78,8 +78,8 @@ function hook_image_effect_info_alter(&$effects) {
 function hook_image_style_save($style) {
   // If a module defines an image style and that style is renamed by the user
   // the module should update any references to that style.
-  if (isset($style['old_name']) && $style['old_name'] == variable_get('mymodule_image_style', '')) {
-    variable_set('mymodule_image_style', $style['name']);
+  if (isset($style['old_name']) && $style['old_name'] == config_get('mymodule.settings', 'image_style')) {
+     config_set('mymodule.settings', 'image_style', $style['name']);
   }
 }
 
@@ -97,8 +97,8 @@ function hook_image_style_save($style) {
 function hook_image_style_delete($style) {
   // Administrators can choose an optional replacement style when deleting.
   // Update the modules style variable accordingly.
-  if (isset($style['old_name']) && $style['old_name'] == variable_get('mymodule_image_style', '')) {
-    variable_set('mymodule_image_style', $style['name']);
+  if (isset($style['old_name']) && $style['old_name'] == config_get('mymodule.settings', 'image_style')) {
+    config_set('mymodule.settings', 'image_style', $style['name']);
   }
 }
 

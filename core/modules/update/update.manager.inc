@@ -277,7 +277,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
  */
 function theme_update_manager_update_form($variables) {
   $form = $variables['form'];
-  $last = variable_get('update_last_check', 0);
+  $last = state_get('update_last_check', 0);
   $output = theme('update_last_check', array('last' => $last));
   $output .= backdrop_render_children($form);
   return $output;

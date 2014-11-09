@@ -691,7 +691,10 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   function testSearchResultsComment() {
     $comment_body = 'Test comment body';
 
-    variable_set('comment_preview_article', BACKDROP_OPTIONAL);
+    $node_type = node_type_get_type('article');
+    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
+    node_type_save($node_type);
+
     // Enable check_plain() for 'Filtered HTML' text format.
     $filtered_html_format_id = 'filtered_html';
     $edit = array(
@@ -763,8 +766,11 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $this->admin_role = reset($roles);
 
+    $node_type = node_type_get_type('article');
+    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
+    node_type_save($node_type);
+
     // Create a node.
-    variable_set('comment_preview_article', BACKDROP_OPTIONAL);
     $this->node = $this->backdropCreateNode(array('type' => 'article'));
 
     // Post a comment using 'Full HTML' text format.

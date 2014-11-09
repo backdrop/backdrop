@@ -27,10 +27,10 @@
  * @see hook_menu_delete()
  */
 function hook_menu_insert($menu) {
-  // For example, we track available menus in a variable.
-  $my_menus = variable_get('my_module_menus', array());
+  // For example, we track available menus in state.
+  $my_menus = state_get('my_module_menus', array());
   $my_menus[$menu['menu_name']] = $menu['menu_name'];
-  variable_set('my_module_menus', $my_menus);
+  state_set('my_module_menus', $my_menus);
 }
 
 /**
@@ -52,10 +52,10 @@ function hook_menu_insert($menu) {
  * @see hook_menu_delete()
  */
 function hook_menu_update($menu) {
-  // For example, we track available menus in a variable.
-  $my_menus = variable_get('my_module_menus', array());
+  // For example, we track available menus in state.
+  $my_menus = state_get('my_module_menus', array());
   $my_menus[$menu['menu_name']] = $menu['menu_name'];
-  variable_set('my_module_menus', $my_menus);
+  state_set('my_module_menus', $my_menus);
 }
 
 /**
@@ -76,10 +76,10 @@ function hook_menu_update($menu) {
  * @see hook_menu_update()
  */
 function hook_menu_delete($menu) {
-  // Delete the record from our variable.
-  $my_menus = variable_get('my_module_menus', array());
+  // Delete the record from our state setting.
+  $my_menus = state_get('my_module_menus', array());
   unset($my_menus[$menu['menu_name']]);
-  variable_set('my_module_menus', $my_menus);
+  state_set('my_module_menus', $my_menus);
 }
 
 /**

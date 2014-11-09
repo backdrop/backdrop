@@ -195,14 +195,14 @@ class ModuleUnitTest extends BackdropWebTestCase {
     foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
       $this->assertEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, format_string('The @module module was uninstalled.', array('@module' => $module)));
     }
-    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), 'Modules were uninstalled in the correct order by backdrop_uninstall_modules().');
+    $this->assertEqual(state_get('test_module_uninstall_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), 'Modules were uninstalled in the correct order by backdrop_uninstall_modules().');
 
     // Uninstall the profile module from above, and make sure that the profile
     // itself is not on the list of dependent modules to be uninstalled.
     $result = backdrop_uninstall_modules(array('comment'));
     $this->assertTrue($result, 'backdrop_uninstall_modules() returns the correct value.');
     $this->assertEqual(backdrop_get_installed_schema_version('comment'), SCHEMA_UNINSTALLED, 'Comment module was uninstalled.');
-    $uninstalled_modules = variable_get('test_module_uninstall_order', array());
+    $uninstalled_modules = state_get('test_module_uninstall_order', array());
     $this->assertTrue(in_array('comment', $uninstalled_modules), 'Comment module is in the list of uninstalled modules.');
     $this->assertFalse(in_array($profile, $uninstalled_modules), 'The installation profile is not in the list of uninstalled modules.');
 

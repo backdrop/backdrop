@@ -1973,8 +1973,8 @@ function hook_modules_preenable($modules) {
  * @see hook_install()
  */
 function hook_modules_installed($modules) {
-  if (in_array('lousy_module', $modules)) {
-    variable_set('lousy_module_conflicting_variable', FALSE);
+  if (in_array('other_module', $modules)) {
+    backdrop_set_message(t('My module works together with Other Module. See the settings page for new options.'));
   }
 }
 
@@ -2940,7 +2940,7 @@ function hook_update_last_removed() {
  * Remove any information that the module sets.
  *
  * The information that the module should remove includes:
- * - variables that the module has set using variable_set() or system_settings_form()
+ * - settings that the module has set using state_set().
  * - modifications to existing tables
  *
  * The module should not remove its entry from the {system} table. Database
@@ -2965,7 +2965,7 @@ function hook_update_last_removed() {
  * @see hook_modules_uninstalled()
  */
 function hook_uninstall() {
-  variable_del('upload_file_types');
+  state_del('my_module_last_cron');
 }
 
 /**
@@ -3052,10 +3052,10 @@ function hook_class_registry_alter(&$class_registry, $modules) {
  * access to this information.
  *
  * Remember that a user installing Backdrop interactively will be able to reload
- * an installation page multiple times, so you should use variable_set() and
- * variable_get() if you are collecting any data that you need to store and
+ * an installation page multiple times, so you should use state_set() and
+ * state_get() if you are collecting any data that you need to store and
  * inspect later. It is important to remove any temporary variables using
- * variable_del() before your last task has completed and control is handed
+ * state_del() before your last task has completed and control is handed
  * back to the installer.
  * 
  * @param array $install_state

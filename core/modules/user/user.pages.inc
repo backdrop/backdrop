@@ -368,7 +368,6 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   $form['_account'] = array('#type' => 'value', '#value' => $account);
 
   // Display account cancellation method selection, if allowed.
-  $default_method = variable_get('user_cancel_method', 'user_cancel_block');
   $admin_access = user_access('administer users');
   $can_select_method = $admin_access || user_access('select account cancellation method');
   $form['user_cancel_method'] = array(
@@ -500,7 +499,7 @@ function user_cancel_methods() {
   backdrop_alter('user_cancel_methods', $methods);
 
   // Turn all methods into real form elements.
-  $default_method = variable_get('user_cancel_method', 'user_cancel_block');
+  $default_method = config_get('system.core', 'user_cancel_method');
   foreach ($methods as $name => $method) {
     $form[$name] = array(
       '#type' => 'radio',

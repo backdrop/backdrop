@@ -459,7 +459,7 @@ function node_update_dependencies() {
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
