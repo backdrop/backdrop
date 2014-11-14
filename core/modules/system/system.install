@@ -2428,7 +2428,7 @@ function system_update_1027() {
 /**
  * Enable Views module.
  */
-function system_update_1025() {
+function system_update_1028() {
   update_module_enable(array('views'));
 
   // Install default config.
