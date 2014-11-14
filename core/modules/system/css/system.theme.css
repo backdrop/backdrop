@@ -487,3 +487,15 @@ div.messages ul {
 div.messages ul li {
   list-style-image: none;
 }
+
+/**
+ * Floated images.
+ */
+img.align-left {
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+img.align-right {
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
