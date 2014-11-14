@@ -1791,7 +1791,7 @@ function menu_set_custom_theme() {
  */
 function menu_list_system_menus() {
   return array(
-    'main-menu' => 'Main menu',
+    'main-menu' => 'Primary navigation',
     'management' => 'Management',
     'user-menu' => 'User menu',
   );

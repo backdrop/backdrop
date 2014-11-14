@@ -545,7 +545,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/menu/manage/main-menu');
         $this->assertResponse($response);
     if ($response == 200) {
-      $this->assertText(t('Main menu'), 'Main menu menu node was displayed');
+      $this->assertText(t('Primary navigation'), 'Primary navigation menu node was displayed');
     }
 
     // View menu edit node.
