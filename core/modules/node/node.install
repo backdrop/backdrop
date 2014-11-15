@@ -600,6 +600,23 @@ function node_update_1006() {
 }
 
 /**
+ * Convert variables to configuration.
+ */
+function node_update_1007() {
+  $config = config('search.settings');
+  $config->set('node_rank_comments', variable_get('node_rank_comments', 0));
+  $config->set('node_rank_relevance', variable_get('node_rank_relevance', 0));
+  $config->set('node_rank_sticky', variable_get('node_rank_sticky', 0));
+  $config->set('node_rank_promote', variable_get('node_rank_promote', 0));
+  $config->save();
+
+  variable_del('node_rank_comments');
+  variable_del('node_rank_relevance');
+  variable_del('node_rank_sticky');
+  variable_del('node_rank_promote');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
