@@ -374,9 +374,13 @@ class UserLoginTestCase extends BackdropWebTestCase {
    */
   function testPasswordRehashOnLogin() {
     // Load password hashing API.
-    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
     // Set initial $count_log2 to the default, BACKDROP_HASH_COUNT.
-    variable_set('password_count_log2', BACKDROP_HASH_COUNT);
+    $GLOBALS['settings']['password_count_log2'] = BACKDROP_HASH_COUNT;
+    tempstore_set('simpletest', 'settings', array(
+      'password_count_log2' => BACKDROP_HASH_COUNT,
+    ), REQUEST_TIME + 3600);
+
     // Create a new user and authenticate.
     $account = $this->backdropCreateUser(array());
     $password = $account->pass_raw;
@@ -386,7 +390,10 @@ class UserLoginTestCase extends BackdropWebTestCase {
     $account = user_load($account->uid);
     $this->assertIdentical(_password_get_count_log2($account->pass), BACKDROP_HASH_COUNT);
     // Change $count_log2 and log in again.
-    variable_set('password_count_log2', BACKDROP_HASH_COUNT + 1);
+    tempstore_set('simpletest', 'settings', array(
+      'password_count_log2' => BACKDROP_HASH_COUNT + 1,
+    ), REQUEST_TIME + 3600);
+
     $account->pass_raw = $password;
     $this->backdropLogin($account);
     // Load the stored user, which should have a different password hash now.
@@ -437,7 +444,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Attempt to cancel account without permission.
    */
   function testUserCancelWithoutPermission() {
-    variable_set('user_cancel_method', 'user_cancel_reassign');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
     $account = $this->backdropCreateUser(array());
@@ -473,7 +480,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   function testUserCancelUid1() {
     // Update uid 1's name and password to we know it.
     $password = user_password();
-    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
     $account = array(
       'name' => 'user1',
       'pass' => user_hash_password(trim($password)),
@@ -507,7 +514,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Attempt invalid account cancellations.
    */
   function testUserCancelInvalid() {
-    variable_set('user_cancel_method', 'user_cancel_reassign');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
     $account = $this->backdropCreateUser(array('cancel account'));
@@ -549,7 +556,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Disable account and keep all content.
    */
   function testUserBlock() {
-    variable_set('user_cancel_method', 'user_cancel_block');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_block');
 
     // Create a user.
     $web_user = $this->backdropCreateUser(array('cancel account'));
@@ -584,7 +591,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Disable account and unpublish all content.
    */
   function testUserBlockUnpublish() {
-    variable_set('user_cancel_method', 'user_cancel_block_unpublish');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_block_unpublish');
 
     // Create a user.
     $account = $this->backdropCreateUser(array('cancel account'));
@@ -628,7 +635,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Delete account and anonymize all content.
    */
   function testUserAnonymize() {
-    variable_set('user_cancel_method', 'user_cancel_reassign');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
     $account = $this->backdropCreateUser(array('cancel account'));
@@ -679,7 +686,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Delete account and remove all content.
    */
   function testUserDelete() {
-    variable_set('user_cancel_method', 'user_cancel_delete');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_delete');
 
     // Create a user.
     $account = $this->backdropCreateUser(array('cancel account', 'post comments', 'skip comment approval'));
@@ -741,7 +748,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Create an administrative user and delete another user.
    */
   function testUserCancelByAdmin() {
-    variable_set('user_cancel_method', 'user_cancel_reassign');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a regular user.
     $account = $this->backdropCreateUser(array());
@@ -766,7 +773,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * Create an administrative user and mass-delete other users.
    */
   function testMassUserCancelByAdmin() {
-    variable_set('user_cancel_method', 'user_cancel_reassign');
+    config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
     // Enable account cancellation notification.
     config_set('system.core', 'user_mail_status_canceled_notify', TRUE);
 

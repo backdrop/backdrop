@@ -110,7 +110,7 @@ function config_sync_form(array $form, array &$form_state) {
  * Submit handler for config_sync_form().
  */
 function config_sync_form_submit(array &$form, array &$form_state) {
-  $last_sync_time = variable_get('config_sync');
+  $last_sync_time = state_get('config_sync');
   if ($last_sync_time == NULL || $last_sync_time < REQUEST_TIME - 120) {
     module_load_include('inc', 'config', 'includes/config.sync');
     $config_sync_batch = config_sync_batch($form_state['config_statuses']);

@@ -1132,7 +1132,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
   $original = $filename;
 
   // Allow potentially insecure uploads for very savvy users and admin
-  if (!variable_get('allow_insecure_uploads', 0)) {
+  if (!settings_get('allow_insecure_uploads', 0)) {
     // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
@@ -1485,7 +1485,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   // rename filename.php.foo and filename.php to filename.php.foo.txt and
   // filename.php.txt, respectively). Don't rename if 'allow_insecure_uploads'
   // evaluates to TRUE.
-  if (!variable_get('allow_insecure_uploads', 0) && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+  if (!settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
     $file->filemime = 'text/plain';
     $file->uri .= '.txt';
     $file->filename .= '.txt';

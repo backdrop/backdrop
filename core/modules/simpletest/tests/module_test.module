@@ -132,5 +132,5 @@ function module_test_modules_disabled($modules) {
 function module_test_modules_uninstalled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were uninstalled in the correct sequence.
-  variable_set('test_module_uninstall_order', $modules);
+  state_set('test_module_uninstall_order', $modules);
 }

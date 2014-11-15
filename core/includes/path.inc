@@ -64,7 +64,7 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
 
   // Retrieve the path alias whitelist.
   if (!isset($cache['whitelist'])) {
-    $cache['whitelist'] = variable_get('path_alias_whitelist', NULL);
+    $cache['whitelist'] = state_get('path_alias_whitelist', NULL);
     if (!isset($cache['whitelist'])) {
       $cache['whitelist'] = backdrop_path_alias_whitelist_rebuild();
     }
@@ -368,7 +368,7 @@ function backdrop_path_alias_whitelist_rebuild($source = NULL) {
   // When paths are inserted, only rebuild the whitelist if the system path
   // has a top level component which is not already in the whitelist.
   if (!empty($source)) {
-    $whitelist = variable_get('path_alias_whitelist', NULL);
+    $whitelist = state_get('path_alias_whitelist', NULL);
     if (isset($whitelist[strtok($source, '/')])) {
       return $whitelist;
     }
@@ -381,7 +381,7 @@ function backdrop_path_alias_whitelist_rebuild($source = NULL) {
   foreach ($result as $row) {
     $whitelist[$row->path] = TRUE;
   }
-  variable_set('path_alias_whitelist', $whitelist);
+  state_set('path_alias_whitelist', $whitelist);
   return $whitelist;
 }
 

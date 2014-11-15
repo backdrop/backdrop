@@ -82,7 +82,6 @@ class ActionLoopTestCase extends BackdropWebTestCase {
     // recursion level should be kept low enough to prevent the xdebug
     // infinite recursion protection mechanism from aborting the request.
     // See http://drupal.org/node/587634.
-    variable_set('actions_max_stack', 7);
     config_set('system.action', 'action_recursion_limit', 7);
     $this->triggerActions();
   }
@@ -97,6 +96,9 @@ class ActionLoopTestCase extends BackdropWebTestCase {
     $expected = array();
     $expected[] = 'Triggering action loop';
     $recursion_limit = config_get('system.action', 'action_recursion_limit');
+    if (empty($recursion_limit)) {
+      $recursion_limit = 35;
+    }
     for ($i = 1; $i <= $recursion_limit; $i++) {
       $expected[] = "Test log #$i";
     }

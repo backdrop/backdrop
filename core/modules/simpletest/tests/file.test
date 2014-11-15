@@ -720,7 +720,10 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     // Ensure dangerous files are not renamed when insecure uploads is TRUE.
     // Turn on insecure uploads.
-    variable_set('allow_insecure_uploads', 1);
+    tempstore_set('simpletest', 'settings', array(
+      'allow_insecure_uploads' => 1,
+    ), REQUEST_TIME + 3600);
+
     // Reset the hook counters.
     file_test_reset();
 
@@ -734,15 +737,13 @@ class FileSaveUploadTest extends FileHookTestCase {
     $this->assertFileHooksCalled(array('validate', 'insert'));
 
     // Turn off insecure uploads.
-    variable_set('allow_insecure_uploads', 0);
+    tempstore_clear('simpletest', 'settings');
   }
 
   /**
    * Test file munge handling.
    */
   function testHandleFileMunge() {
-    // Ensure insecure uploads are disabled for this test.
-    variable_set('allow_insecure_uploads', 0);
     $this->image = file_move($this->image, $this->image->uri . '.foo.' . $this->image_extension);
 
     // Reset the hook counters to get rid of the 'move' we just called.
@@ -2356,8 +2357,6 @@ class FileNameMungingTest extends FileTestCase {
    * Create a file and munge/unmunge the name.
    */
   function testMunging() {
-    // Disable insecure uploads.
-    variable_set('allow_insecure_uploads', 0);
     $munged_name = file_munge_filename($this->name, '', TRUE);
     $messages = backdrop_get_messages();
     $this->assertTrue(in_array(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $munged_name)), $messages['status']), 'Alert properly set when a file is renamed.');
@@ -2378,7 +2377,7 @@ class FileNameMungingTest extends FileTestCase {
    * come out untouched, no matter how evil the filename.
    */
   function testMungeIgnoreInsecure() {
-    variable_set('allow_insecure_uploads', 1);
+    $GLOBALS['settings']['allow_insecure_uploads'] = 1;
     $munged_name = file_munge_filename($this->name, '');
     $this->assertIdentical($munged_name, $this->name, format_string('The original filename (%original) matches the munged filename (%munged) when insecure uploads are enabled.', array('%munged' => $munged_name, '%original' => $this->name)));
   }

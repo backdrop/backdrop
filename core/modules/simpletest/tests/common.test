@@ -1284,7 +1284,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    */
   function testAggregationOrder() {
     // Enable JavaScript aggregation.
-    variable_set('preprocess_js', 1);
+    config_set('system.core', 'preprocess_js', 1);
     backdrop_static_reset('backdrop_add_js');
 
     // Add two JavaScript files to the current request and build the cache.

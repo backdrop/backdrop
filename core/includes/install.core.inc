@@ -422,7 +422,7 @@ function install_run_task($task, &$install_state) {
   elseif ($task['type'] == 'batch') {
     // Start a new batch based on the task function, if one is not running
     // already.
-    $current_batch = variable_get('install_current_batch');
+    $current_batch = state_get('install_current_batch');
     if (!$install_state['interactive'] || !$current_batch) {
       $batch = $function($install_state);
       if (empty($batch)) {
@@ -435,7 +435,7 @@ function install_run_task($task, &$install_state) {
       // task is currently running. Otherwise, we need to make sure the batch
       // will complete in one page request.
       if ($install_state['interactive']) {
-        variable_set('install_current_batch', $function);
+        state_set('install_current_batch', $function);
       }
       else {
         $batch =& batch_get();
@@ -455,7 +455,7 @@ function install_run_task($task, &$install_state) {
       // longer requesting a batch ID.
       if ($output === FALSE) {
         // Return nothing so the next task will run in the same request.
-        variable_del('install_current_batch');
+        state_del('install_current_batch');
         return;
       }
       else {
@@ -800,14 +800,14 @@ function install_system_module(&$install_state) {
   module_enable(array('entity', 'user'), FALSE);
 
   // Save the list of other modules to install for the upcoming tasks.
-  // variable_set() can be used now that system.module is installed.
+  // state_set() can be used now that system.module is installed.
   $modules = $install_state['profile_info']['dependencies'];
 
   // The installation profile is also a module, which needs to be installed
   // after all the dependencies have been installed.
   $modules[] = backdrop_get_profile();
 
-  variable_set('install_profile_modules', array_diff($modules, array('system')));
+  state_set('install_profile_modules', array_diff($modules, array('system')));
   $install_state['database_tables_exist'] = TRUE;
 }
 
@@ -1423,9 +1423,9 @@ function install_bootstrap_full(&$install_state) {
  *   The batch definition.
  */
 function install_profile_modules(&$install_state) {
-  $modules = variable_get('install_profile_modules', array());
+  $modules = state_get('install_profile_modules', array());
   $files = system_rebuild_module_data();
-  variable_del('install_profile_modules');
+  state_del('install_profile_modules');
 
   // Always install required modules first. Respect the dependencies between
   // the modules.

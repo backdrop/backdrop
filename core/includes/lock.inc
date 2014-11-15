@@ -55,7 +55,7 @@
  * whose duration has exceeded the timeout specified when it was acquired.
  *
  * Alternative implementations of this API (such as APC) may be substituted
- * by setting the 'lock_inc' variable to an alternate include filepath. Since
+ * by changing the $settings['lock_inc'] variable to an include filepath. Since
  * this is an API intended to support alternative implementations, code using
  * this API should never rely upon specific implementation details (for example
  * no code should look for or directly modify a lock in the {semaphore} table).

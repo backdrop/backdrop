@@ -205,7 +205,9 @@ class SessionTestCase extends BackdropWebTestCase {
     $this->assertEqual($times4->timestamp, $times3->timestamp, 'Sessions table was not updated.');
 
     // Force updating of users and sessions table once per second.
-    variable_set('session_write_interval', 0);
+    tempstore_set('simpletest', 'settings', array(
+      'session_write_interval' => 0,
+    ), REQUEST_TIME + 3600);
     $this->backdropGet('');
     $times5 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
     $this->assertNotEqual($times5->access, $times4->access, 'Users table was updated.');

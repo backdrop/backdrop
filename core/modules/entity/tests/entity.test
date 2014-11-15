@@ -90,7 +90,7 @@ class EntityAPIInfoTestCase extends BackdropWebTestCase  {
    */
   function testEntityInfoCacheWatchdog() {
     module_enable(array('entity_cache_test'));
-    $info = variable_get('entity_cache_test');
+    $info = state_get('entity_cache_test');
     $this->assertEqual($info['label'], 'Entity Cache Test', 'Entity info label is correct.');
     $this->assertEqual($info['controller class'], 'DefaultEntityController', 'Entity controller class info is correct.');
   }

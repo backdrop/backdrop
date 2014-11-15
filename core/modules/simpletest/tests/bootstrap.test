@@ -251,10 +251,10 @@ class BootstrapVariableTestCase extends BackdropWebTestCase {
    */
   function testVariableDefaults() {
     // Tests passing nothing through to the default.
-    $this->assertIdentical(NULL, variable_get('simpletest_bootstrap_variable_test'), 'Variables are correctly defaulting to NULL.');
+    $this->assertIdentical(NULL, state_get('simpletest_bootstrap_variable_test'), 'Variables are correctly defaulting to NULL.');
 
     // Tests passing 5 to the default parameter.
-    $this->assertIdentical(5, variable_get('simpletest_bootstrap_variable_test', 5), 'The default variable parameter is passed through correctly.');
+    $this->assertIdentical(5, state_get('simpletest_bootstrap_variable_test', 5), 'The default variable parameter is passed through correctly.');
   }
 
 }
@@ -284,13 +284,6 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with normal cache.'));
-
-    // Boot and exit should not fire since the page is cached.
-    variable_set('page_cache_invoke_hooks', FALSE);
-    $this->assertTrue(cache('page')->get(url('', array('absolute' => TRUE))), t('Page has been cached.'));
-    $this->backdropGet('');
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot not called with aggressive cache and a cached page.'));
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit not called with aggressive cache and a cached page.'));
 
     // Test with page cache cleared, boot and exit should be called.
     $this->assertTrue(db_delete('cache_page')->execute(), t('Page cache cleared.'));

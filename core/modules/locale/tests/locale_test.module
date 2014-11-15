@@ -97,7 +97,7 @@ function locale_test_store_language_negotiation() {
   foreach (language_types_get_all() as $type) {
     $last[$type] = $GLOBALS[$type]->langcode;
   }
-  variable_set('locale_test_language_negotiation_last', $last);
+  state_set('locale_test_language_negotiation_last', $last);
 }
 
 /**

@@ -145,5 +145,5 @@ function filter_install() {
   filter_format_save($plain_text_format);
 
   // Set the fallback format to plain text.
-  variable_set('filter_fallback_format', $plain_text_format->format);
+  config_set('system.core', 'filter_fallback_format', $plain_text_format->format);
 }

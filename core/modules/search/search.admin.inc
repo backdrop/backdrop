@@ -182,7 +182,7 @@ function search_admin_settings_submit($form, &$form_state) {
   if ($config->get('search_active_modules') != $new_modules) {
     $config->set('search_active_modules', $new_modules);
     backdrop_set_message(t('The active search modules have been changed.'));
-    variable_set('menu_rebuild_needed', TRUE);
+    state_set('menu_rebuild_needed', TRUE);
   }
 
   // This values are set by node's module implementation of hook_search_admin.

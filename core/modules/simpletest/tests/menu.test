@@ -287,7 +287,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testHookCustomTheme() {
     // Trigger hook_custom_theme() to dynamically request the Stark theme for
     // the requested page.
-    variable_set('menu_test_hook_custom_theme_name', 'stark');
+    state_set('menu_test_hook_custom_theme_name', 'stark');
     theme_enable(array('stark'));
 
     // Visit a page that does not implement a theme callback. The above request
@@ -303,7 +303,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testThemeCallbackHookCustomTheme() {
     // Trigger hook_custom_theme() to dynamically request the Stark theme for
     // the requested page.
-    variable_set('menu_test_hook_custom_theme_name', 'stark');
+    state_set('menu_test_hook_custom_theme_name', 'stark');
     theme_enable(array('stark'));
 
     // The menu "theme callback" should take precedence over a value set in
@@ -485,7 +485,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
    * Test menu_get_item() with empty ancestors.
    */
   function testMenuGetItemNoAncestors() {
-    variable_set('menu_masks', array());
+    state_set('menu_masks', array());
     $this->backdropGet('');
   }
 
@@ -853,7 +853,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
 
     // Now we enable the rebuild variable and trigger menu_execute_active_handler()
     // to rebuild the menu item. Now 'admin' should exist.
-    variable_set('menu_rebuild_needed', TRUE);
+    state_set('menu_rebuild_needed', TRUE);
     // menu_execute_active_handler() should trigger the rebuild.
     $this->backdropGet('<front>');
     $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
@@ -1492,12 +1492,12 @@ class MenuTrailTestCase extends MenuWebTestCase {
     );
 
     // Test the tree generation for the Main menu.
-    variable_del('menu_test_menu_tree_set_path');
+    state_del('menu_test_menu_tree_set_path');
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 
     // Override the active trail for the Management tree; it should not affect
     // the Main tree.
-    variable_set('menu_test_menu_tree_set_path', $test_menu_path);
+    state_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('menu-test/menu-trail', $breadcrumb, t('Menu trail - Case 1'), $tree);
 
     $breadcrumb = $config + array(
@@ -1518,12 +1518,12 @@ class MenuTrailTestCase extends MenuWebTestCase {
     );
 
     // Test the tree generation for the Management menu.
-    variable_del('menu_test_menu_tree_set_path');
+    state_del('menu_test_menu_tree_set_path');
     $this->assertBreadcrumb('admin/config/development/menu-trail', $breadcrumb, t('Menu trail - Case 2'), $tree);
 
     // Override the active trail for the Management tree; it should affect the
     // breadcrumbs and Management tree.
-    variable_set('menu_test_menu_tree_set_path', $test_menu_path);
+    state_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('admin/config/development/menu-trail', $override_breadcrumb, t('Menu trail - Case 2'), $override_tree);
   }
 
@@ -1575,13 +1575,13 @@ class MenuTrailTestCase extends MenuWebTestCase {
     foreach (array(403, 404) as $status_code) {
       // Before visiting the page, trigger the code in the menu_test module
       // that will record the active trail (so we can check it in this test).
-      variable_set('menu_test_record_active_trail', TRUE);
+      state_set('menu_test_record_active_trail', TRUE);
       $this->backdropGet($paths[$status_code]);
       $this->assertResponse($status_code);
 
       // Check that the initial trail (during the Backdrop bootstrap) matches
       // what we expect.
-      $initial_trail = variable_get('menu_test_active_trail_initial', array());
+      $initial_trail = state_get('menu_test_active_trail_initial', array());
       $this->assertEqual(count($initial_trail), count($expected_trail[$status_code]['initial']), format_string('The initial active trail for a @status_code page contains the expected number of items (expected: @expected, found: @found).', array(
         '@status_code' => $status_code,
         '@expected' => count($expected_trail[$status_code]['initial']),
@@ -1598,7 +1598,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
 
       // Check that the final trail (after the user has been redirected to the
       // custom 403/404 page) matches what we expect.
-      $final_trail = variable_get('menu_test_active_trail_final', array());
+      $final_trail = state_get('menu_test_active_trail_final', array());
       $this->assertEqual(count($final_trail), count($expected_trail[$status_code]['final']), format_string('The final active trail for a @status_code page contains the expected number of items (expected: @expected, found: @found).', array(
         '@status_code' => $status_code,
         '@expected' => count($expected_trail[$status_code]['final']),

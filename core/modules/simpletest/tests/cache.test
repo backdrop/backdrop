@@ -263,9 +263,7 @@ class CacheClearCase extends CacheTestCase {
     $this->assertTrue($this->checkCacheExists('test_cid_clear3', $this->default_value),
                       'Entry was not cleared from the cache');
 
-    // Set the cache clear threshold to 2 to confirm that the full bin is cleared
-    // when the threshold is exceeded.
-    variable_set('cache_clear_threshold', 2);
+    // Check clearing multiple cache entries at the same time.
     $cache->set('test_cid_clear1', $this->default_value);
     $cache->set('test_cid_clear2', $this->default_value);
     $this->assertTrue($this->checkCacheExists('test_cid_clear1', $this->default_value)

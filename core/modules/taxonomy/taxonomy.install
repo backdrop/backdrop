@@ -250,6 +250,11 @@ function taxonomy_update_dependencies() {
 }
 
 /**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
  * Remove the {taxonomy_vocabulary}.module field.
  */
 function taxonomy_update_1000() {
@@ -334,3 +339,17 @@ function taxonomy_update_1002() {
     db_add_index('taxonomy_term_data', 'vocabulary_name', array('vocabulary', 'name'));
   }
 }
+
+/**
+ * Create the taxonomy.settings config file.
+ */
+function taxonomy_update_1003() {
+  $config = config('taxonomy.settings');
+  $config->set('maintain_index_table', TRUE);
+  $config->save();
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

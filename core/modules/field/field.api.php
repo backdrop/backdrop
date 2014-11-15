@@ -462,7 +462,7 @@ function hook_field_presave($entity_type, $entity, $field, $instance, $langcode,
  * @see hook_field_delete()
  */
 function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
+  if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
     $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created', ));
     foreach ($items as $item) {
       $query->values(array(
@@ -503,7 +503,7 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * @see hook_field_delete()
  */
 function hook_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
+  if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
     $first_call = &backdrop_static(__FUNCTION__, array());
 
     // We don't maintain data for old revisions, so clear all previous values
@@ -1560,7 +1560,7 @@ function hook_field_available_languages_alter(&$languages, $context) {
 function hook_field_attach_create_bundle($entity_type, $bundle) {
   // When a new bundle is created, the menu needs to be rebuilt to add the
   // Field UI menu item tabs.
-  variable_set('menu_rebuild_needed', TRUE);
+  state_set('menu_rebuild_needed', TRUE);
 }
 
 /**

@@ -25,9 +25,7 @@ function config_sync_batch($config_statuses = NULL) {
  * Batch API callback. Start the config import.
  */
 function _config_sync_start($config_statuses, &$context) {
-  // @todo: Switch to a proper state system, since variables should be
-  // deprecated by the configuration system.
-  variable_set('config_sync', REQUEST_TIME);
+  state_set('config_sync', REQUEST_TIME);
 
   // The complete list of changes are stored in the results array. This makes
   // these values available in all subsequent batch callbacks.
@@ -107,7 +105,7 @@ function _config_sync_finished($status, $results, &$context) {
     $config_storage = new ConfigFileStorage($config_dir);
     $config_storage->deleteAll();
   }
-  variable_del('config_sync');
+  state_del('config_sync');
 }
 
 /**
