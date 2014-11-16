@@ -11,7 +11,7 @@
  */
 class BackdropDummyStreamWrapper extends BackdropLocalStreamWrapper {
   function getDirectoryPath() {
-    return variable_get('stream_public_path', 'sites/default/files');
+    return 'files';
   }
 
   /**

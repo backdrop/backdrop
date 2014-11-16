@@ -428,18 +428,9 @@ function node_uninstall() {
     $config->delete();
   }
 
-  // Delete node search ranking variables.
-  // @see node_ranking(), _node_rankings()
-  variable_del('node_rank_relevance');
-  variable_del('node_rank_sticky');
-  variable_del('node_rank_promote');
-  variable_del('node_rank_recent');
-
-  // Delete remaining general module variables.
-  variable_del('node_access_needs_rebuild');
+  // Delete remaining general module settings.
+  state_del('node_access_needs_rebuild');
   state_del('node_cron_last');
-  variable_del('node_recent_block_count');
-  variable_del('default_nodes_main');
 }
 
 /**

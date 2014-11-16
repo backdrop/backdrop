@@ -1203,7 +1203,7 @@ function system_site_information_settings($form, &$form_state) {
   );
   $form['front_page']['default_nodes_main'] = array(
     '#type' => 'select', '#title' => t('Number of posts on front page'),
-    '#default_value' => variable_get('default_nodes_main', 10),
+    '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
     '#access' => (config_get('system.core', 'site_frontpage') == 'node'),

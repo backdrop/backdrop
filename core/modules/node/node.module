@@ -1330,8 +1330,9 @@ function node_views_api() {
 function _node_rankings(SelectQueryExtender $query) {
   if ($ranking = module_invoke_all('ranking')) {
     $tables = &$query->getTables();
+    $config = config('search.settings');
     foreach ($ranking as $rank => $values) {
-      if ($node_rank = variable_get('node_rank_' . $rank, 0)) {
+      if ($node_rank = $config->get('node_rank_' . $rank)) {
         // If the table defined in the ranking isn't already joined, then add it.
         if (isset($values['join']) && !isset($tables[$values['join']['alias']])) {
           $query->addJoin($values['join']['type'], $values['join']['table'], $values['join']['alias'], $values['join']['on']);
@@ -2261,7 +2262,7 @@ function node_page_default() {
     ->orderBy('n.sticky', 'DESC')
     ->orderBy('n.created', 'DESC')
     ->extend('PagerDefault')
-    ->limit(variable_get('default_nodes_main', 10))
+    ->limit($site_config->get('default_nodes_main'))
     ->addTag('node_access');
 
   $nids = $select->execute()->fetchCol();

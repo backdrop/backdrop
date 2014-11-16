@@ -716,7 +716,7 @@ function theme_image_style_effects($variables) {
 function theme_image_style_preview($variables) {
   $style = $variables['style'];
 
-  $sample_image = variable_get('image_style_preview_image', backdrop_get_path('module', 'image') . '/sample.png');
+  $sample_image = isset($variables['sample_image']) ? $variables['sample_image'] : backdrop_get_path('module', 'image') . '/sample.png';
   $sample_width = 160;
   $sample_height = 160;
 

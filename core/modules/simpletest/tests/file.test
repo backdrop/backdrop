@@ -517,7 +517,7 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
     $this->assertTrue($filepath, 'Unnamed file saved correctly.');
     $this->assertEqual('asdf.txt', backdrop_basename($filepath), 'File was named correctly.');
     $this->assertEqual($contents, file_get_contents($filepath), 'Contents of the file are correct.');
-    $this->assertFilePermissions($filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($filepath, settings_get('file_chmod_file', 0664));
   }
 }
 
@@ -890,7 +890,7 @@ class FileDirectoryTest extends FileTestCase {
     }
 
     // Test that the directory has the correct permissions.
-    $this->assertDirectoryPermissions($directory, variable_get('file_chmod_directory', 0775));
+    $this->assertDirectoryPermissions($directory, settings_get('file_chmod_directory', 0775));
 
     // Remove .htaccess file to then test that it gets re-created.
     @backdrop_unlink(file_default_scheme() . '://.htaccess');
@@ -1253,7 +1253,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
     $this->assertEqual($new_filepath, $desired_filepath, 'Returned expected filepath.');
     $this->assertTrue(file_exists($new_filepath), 'File exists at the new location.');
     $this->assertFalse(file_exists($file->uri), 'No file remains at the old location.');
-    $this->assertFilePermissions($new_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($new_filepath, settings_get('file_chmod_file', 0664));
 
     // Moving with rename.
     $desired_filepath = 'public://' . $this->randomName();
@@ -1264,7 +1264,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
     $this->assertNotEqual($newer_filepath, $desired_filepath, 'Returned expected filepath.');
     $this->assertTrue(file_exists($newer_filepath), 'File exists at the new location.');
     $this->assertFalse(file_exists($new_filepath), 'No file remains at the old location.');
-    $this->assertFilePermissions($newer_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($newer_filepath, settings_get('file_chmod_file', 0664));
 
     // TODO: test moving to a directory (rather than full directory/file path)
     // TODO: test creating and moving normal files (rather than streams)
@@ -1327,7 +1327,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
     $this->assertEqual($new_filepath, $desired_filepath, 'Returned expected filepath.');
     $this->assertTrue(file_exists($file->uri), 'Original file remains.');
     $this->assertTrue(file_exists($new_filepath), 'New file exists.');
-    $this->assertFilePermissions($new_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($new_filepath, settings_get('file_chmod_file', 0664));
 
     // Copying with rename.
     $desired_filepath = 'public://' . $this->randomName();
@@ -1337,7 +1337,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
     $this->assertNotEqual($newer_filepath, $desired_filepath, 'Returned expected filepath.');
     $this->assertTrue(file_exists($file->uri), 'Original file remains.');
     $this->assertTrue(file_exists($newer_filepath), 'New file exists.');
-    $this->assertFilePermissions($newer_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($newer_filepath, settings_get('file_chmod_file', 0664));
 
     // TODO: test copying to a directory (rather than full directory/file path)
     // TODO: test copying normal files using normal paths (rather than only streams)
@@ -1367,7 +1367,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
     $this->assertNotEqual($new_filepath, $file->uri, 'Copied file has a new name.');
     $this->assertTrue(file_exists($file->uri), 'Original file exists after copying onto itself.');
     $this->assertTrue(file_exists($new_filepath), 'Copied file exists after copying onto itself.');
-    $this->assertFilePermissions($new_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($new_filepath, settings_get('file_chmod_file', 0664));
 
     // Copy the file onto itself without renaming fails.
     $new_filepath = file_unmanaged_copy($file->uri, $file->uri, FILE_EXISTS_ERROR);
@@ -1385,7 +1385,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
     $this->assertNotEqual($new_filepath, $file->uri, 'Copied file has a new name.');
     $this->assertTrue(file_exists($file->uri), 'Original file exists after copying onto itself.');
     $this->assertTrue(file_exists($new_filepath), 'Copied file exists after copying onto itself.');
-    $this->assertFilePermissions($new_filepath, variable_get('file_chmod_file', 0664));
+    $this->assertFilePermissions($new_filepath, settings_get('file_chmod_file', 0664));
   }
 }
 

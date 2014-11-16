@@ -418,7 +418,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
     foreach ($node_ranks as $node_rank) {
       // Disable all relevancy rankings except the one we are testing.
       foreach ($node_ranks as $var) {
-        variable_set('node_rank_' . $var, $var == $node_rank ? 10 : 0);
+        config_set('search.settings', 'node_rank_' . $var, $var == $node_rank ? 10 : 0);
       }
 
       // Do the search and assert the results.
@@ -469,7 +469,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
     // Disable all other rankings.
     $node_ranks = array('sticky', 'promote', 'recent', 'comments');
     foreach ($node_ranks as $node_rank) {
-      variable_set('node_rank_' . $node_rank, 0);
+      config_set('search.settings', 'node_rank_' . $node_rank, 0);
     }
     $set = node_search_execute('rocks');
 
@@ -540,7 +540,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
     $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments');
     foreach ($node_ranks as $var) {
       $value = ($var == 'sticky' || $var == 'comments') ? 10 : 0;
-      variable_set('node_rank_' . $var, $value);
+      config_set('search.settings', 'node_rank_' . $var, $value);
     }
 
     // Do the search and assert the results.
@@ -1356,7 +1356,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
 
     // Test that the form does not save with an invalid word length.
     $edit = array(
-      'minimum_word_size' => $this->randomName(3),
+      'search_minimum_word_size' => $this->randomName(3),
     );
     $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
     $this->assertNoText(t('The active search modules have been changed.'), 'Form does not save with an invalid word length.');

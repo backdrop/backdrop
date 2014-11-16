@@ -801,7 +801,7 @@ function file_icon_url(File $file, $icon_directory = NULL) {
 function file_icon_path(File $file, $icon_directory = NULL) {
   // Use the default set of icons if none specified.
   if (!isset($icon_directory)) {
-    $icon_directory = variable_get('file_icon_directory', backdrop_get_path('module', 'file') . '/icons');
+    $icon_directory = backdrop_get_path('module', 'file') . '/icons';
   }
 
   // If there's an icon matching the exact mimetype, go for it.
