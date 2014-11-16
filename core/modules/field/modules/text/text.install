@@ -76,7 +76,7 @@ function text_field_schema($field) {
  * Delete teaser_length variable.
  */
 function text_update_1000() {
-  variable_del('teaser_length');
+  update_variable_del('teaser_length');
 }
 
 /**

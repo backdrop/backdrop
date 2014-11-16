@@ -158,25 +158,25 @@ function _update_requirement_check($project, $type) {
 function update_update_1000() {
   // Migrate variables to config.
   $config = config('update.settings');
-  $config->set('update_disabled_extensions', variable_get('update_check_disabled', 0));
-  $config->set('update_interval_days', variable_get('update_check_frequency', 1));
-  $config->set('update_url', variable_get('update_fetch_url', ''));
-  $config->set('update_max_attempts', variable_get('update_max_fetch_attempts', 2));
-  $config->set('update_timeout', variable_get('update_max_fetch_time', 5));
-  $config->set('update_emails', variable_get('update_notify_emails', array()));
-  $config->set('update_threshold', variable_get('update_notification_threshold', 0));
-  $config->set('update_projects', variable_get('update_advanced_project_settings', array()));
+  $config->set('update_disabled_extensions', update_variable_get('update_check_disabled', 0));
+  $config->set('update_interval_days', update_variable_get('update_check_frequency', 1));
+  $config->set('update_url', update_variable_get('update_fetch_url', ''));
+  $config->set('update_max_attempts', update_variable_get('update_max_fetch_attempts', 2));
+  $config->set('update_timeout', update_variable_get('update_max_fetch_time', 5));
+  $config->set('update_emails', update_variable_get('update_notify_emails', array()));
+  $config->set('update_threshold', update_variable_get('update_notification_threshold', 0));
+  $config->set('update_projects', update_variable_get('update_advanced_project_settings', array()));
   $config->save();
 
   // Delete variables.
-  variable_del('update_check_disabled');
-  variable_del('update_check_frequency');
-  variable_del('update_fetch_url');
-  variable_del('update_max_fetch_attempts');
-  variable_del('update_max_fetch_time');
-  variable_del('update_notify_emails');
-  variable_del('update_notification_threshold');
-  variable_del('update_advanced_project_settings');
+  update_variable_del('update_check_disabled');
+  update_variable_del('update_check_frequency');
+  update_variable_del('update_fetch_url');
+  update_variable_del('update_max_fetch_attempts');
+  update_variable_del('update_max_fetch_time');
+  update_variable_del('update_notify_emails');
+  update_variable_del('update_notification_threshold');
+  update_variable_del('update_advanced_project_settings');
 }
 
 /**

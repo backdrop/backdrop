@@ -479,11 +479,11 @@ function node_update_1000() {
 function node_update_1001() {
   $types = db_query('SELECT type FROM {node_type}')->fetchCol();
   foreach ($types as $type) {
-    $language = variable_get('language_content_type_' . $type);
+    $language = update_variable_get('language_content_type_' . $type);
     if (isset($language)) {
-      variable_set('node_type_language_' . $type, $language);
+      update_variable_set('node_type_language_' . $type, $language);
     }
-    variable_del('language_content_type_' . $type);
+    update_variable_del('language_content_type_' . $type);
   }
 }
 
@@ -506,8 +506,8 @@ function node_update_1002() {
  */
 function node_update_1003() {
   $types = db_query('SELECT type FROM {node_type}')->fetchCol();
-  $theme = variable_get('theme_default', 'stark');
-  $settings = variable_get('theme_' . $theme . '_settings', array());
+  $theme = update_variable_get('theme_default', 'stark');
+  $settings = update_variable_get('theme_' . $theme . '_settings', array());
 
   // Each setting defaults to TRUE if not set at all.
   $comment_picture = !isset($settings['toggle_comment_user_picture']) || $settings['toggle_comment_user_picture'];
@@ -516,8 +516,8 @@ function node_update_1003() {
   // These variables will be converted to be node type settings when converted
   // to saving in config.
   foreach ($types as $type_name) {
-    variable_set('node_user_picture_' . $type_name, $node_picture);
-    variable_set('comment_user_picture_' . $type_name, $comment_picture);
+    update_variable_set('node_user_picture_' . $type_name, $node_picture);
+    update_variable_set('comment_user_picture_' . $type_name, $comment_picture);
   }
 }
 
@@ -554,7 +554,7 @@ function node_update_1005() {
     }
 
     // Create each content type.
-    $options = variable_get('node_options_' . $node_type->type, array('status', 'promote'));
+    $options = update_variable_get('node_options_' . $node_type->type, array('status', 'promote'));
     $node_type->settings = array(
       'status_default' => in_array('status', $options),
       'sticky_enabled' => TRUE,
@@ -563,19 +563,19 @@ function node_update_1005() {
       'promote_default' => in_array('promote', $options),
       'revision_enabled' => TRUE,
       'revision_default' => in_array('revision', $options),
-      'node_preview' => variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
-      'node_submitted' => variable_get('node_submitted_' . $node_type->type, TRUE),
-      'node_user_picture' => variable_get('node_user_picture_' . $node_type->type, TRUE),
-      'node_type_language' => variable_get('node_type_language_' . $node_type->type),
+      'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
+      'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
+      'node_user_picture' => update_variable_get('node_user_picture_' . $node_type->type, TRUE),
+      'node_type_language' => update_variable_get('node_type_language_' . $node_type->type),
     );
     node_type_save($node_type);
 
     // Delete the migrated variables.
-    variable_del('node_options_' . $node_type->type);
-    variable_del('node_preview_' . $node_type->type);
-    variable_del('node_submitted_' . $node_type->type);
-    variable_del('node_user_picture_' . $node_type->type);
-    variable_del('node_type_language_' . $node_type->type);
+    update_variable_del('node_options_' . $node_type->type);
+    update_variable_del('node_preview_' . $node_type->type);
+    update_variable_del('node_submitted_' . $node_type->type);
+    update_variable_del('node_user_picture_' . $node_type->type);
+    update_variable_del('node_type_language_' . $node_type->type);
   }
 }
 
@@ -595,16 +595,16 @@ function node_update_1006() {
  */
 function node_update_1007() {
   $config = config('search.settings');
-  $config->set('node_rank_comments', variable_get('node_rank_comments', 0));
-  $config->set('node_rank_relevance', variable_get('node_rank_relevance', 0));
-  $config->set('node_rank_sticky', variable_get('node_rank_sticky', 0));
-  $config->set('node_rank_promote', variable_get('node_rank_promote', 0));
+  $config->set('node_rank_comments', update_variable_get('node_rank_comments', 0));
+  $config->set('node_rank_relevance', update_variable_get('node_rank_relevance', 0));
+  $config->set('node_rank_sticky', update_variable_get('node_rank_sticky', 0));
+  $config->set('node_rank_promote', update_variable_get('node_rank_promote', 0));
   $config->save();
 
-  variable_del('node_rank_comments');
-  variable_del('node_rank_relevance');
-  variable_del('node_rank_sticky');
-  variable_del('node_rank_promote');
+  update_variable_del('node_rank_comments');
+  update_variable_del('node_rank_relevance');
+  update_variable_del('node_rank_sticky');
+  update_variable_del('node_rank_promote');
 }
 
 /**

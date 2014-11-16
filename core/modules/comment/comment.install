@@ -13,7 +13,6 @@ function comment_uninstall() {
   field_delete_field('comment_body');
 
   // Remove variables.
-  variable_del('comment_block_count');
   state_del('node_cron_comments_scale');
   $node_types = node_type_get_types();
   foreach ($node_types as $type_name => $node_type) {
@@ -314,28 +313,28 @@ function comment_update_1001() {
   foreach ($node_types as $node_type) {
     // Move the comment variables into each node type's config.
     $settings = array(
-      'comment_default' => variable_get('comment_' . $node_type->type, COMMENT_NODE_OPEN),
-      'comment_per_page' => variable_get('comment_default_per_page_' . $node_type->type, 50),
-      'comment_mode' => variable_get('comment_default_mode_' . $node_type->type, COMMENT_MODE_THREADED),
-      'comment_anonymous' => variable_get('comment_anonymous_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
-      'comment_subject_field' => variable_get('comment_subject_field_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
-      'comment_user_picture' => variable_get('comment_user_picture_' . $node_type->type, 1),
-      'comment_form_location' => variable_get('comment_form_location_' . $node_type->type, COMMENT_FORM_BELOW),
-      'comment_preview' => variable_get('comment_preview_' . $node_type->type, BACKDROP_OPTIONAL),
+      'comment_default' => update_variable_get('comment_' . $node_type->type, COMMENT_NODE_OPEN),
+      'comment_per_page' => update_variable_get('comment_default_per_page_' . $node_type->type, 50),
+      'comment_mode' => update_variable_get('comment_default_mode_' . $node_type->type, COMMENT_MODE_THREADED),
+      'comment_anonymous' => update_variable_get('comment_anonymous_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
+      'comment_subject_field' => update_variable_get('comment_subject_field_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
+      'comment_user_picture' => update_variable_get('comment_user_picture_' . $node_type->type, 1),
+      'comment_form_location' => update_variable_get('comment_form_location_' . $node_type->type, COMMENT_FORM_BELOW),
+      'comment_preview' => update_variable_get('comment_preview_' . $node_type->type, BACKDROP_OPTIONAL),
     );
     $node_type->settings = array_merge($node_type->settings, $settings);
     node_type_save($node_type);
 
     // Delete the migrated variables.
-    variable_del('comment_' . $node_type->type);
-    variable_del('comment_default_per_page_' . $node_type->type);
-    variable_del('comment_default_mode_' . $node_type->type);
-    variable_del('comment_anonymous_' . $node_type->type);
-    variable_del('comment_subject_field_' . $node_type->type);
-    variable_del('comment_subject_field_' . $node_type->type);
-    variable_del('comment_user_picture_' . $node_type->type);
-    variable_del('comment_form_location_' . $node_type->type);
-    variable_del('comment_preview_' . $node_type->type);
+    update_variable_del('comment_' . $node_type->type);
+    update_variable_del('comment_default_per_page_' . $node_type->type);
+    update_variable_del('comment_default_mode_' . $node_type->type);
+    update_variable_del('comment_anonymous_' . $node_type->type);
+    update_variable_del('comment_subject_field_' . $node_type->type);
+    update_variable_del('comment_subject_field_' . $node_type->type);
+    update_variable_del('comment_user_picture_' . $node_type->type);
+    update_variable_del('comment_form_location_' . $node_type->type);
+    update_variable_del('comment_preview_' . $node_type->type);
   }
 }
 
@@ -345,11 +344,11 @@ function comment_update_1001() {
 function comment_update_1002() {
   // These variables are environment-specific, so they use state instead of
   // config files.
-  state_set('node_cron_comments_scale', variable_get('node_cron_comments_scale', 1.0));
-  variable_del('node_cron_comments_scale');
+  state_set('node_cron_comments_scale', update_variable_get('node_cron_comments_scale', 1.0));
+  update_variable_del('node_cron_comments_scale');
 
-  state_set('comment_maintain_node_statistics', variable_get('comment_maintain_node_statistics', TRUE));
-  variable_del('comment_maintain_node_statistics');
+  state_set('comment_maintain_node_statistics', update_variable_get('comment_maintain_node_statistics', TRUE));
+  update_variable_del('comment_maintain_node_statistics');
 }
 
 /**

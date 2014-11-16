@@ -78,7 +78,7 @@ function block_update_dependencies() {
  * Block cache is always enabled in Backdrop.
  */
 function block_update_1000() {
-  variable_del('block_cache');
+  update_variable_del('block_cache');
 }
 
 /**

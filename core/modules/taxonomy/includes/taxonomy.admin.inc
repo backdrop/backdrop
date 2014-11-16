@@ -261,7 +261,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $form['#parent_fields'] = FALSE;
 
   $page            = isset($_GET['page']) ? $_GET['page'] : 0;
-  $page_increment  = variable_get('taxonomy_terms_per_page_admin', 100);  // Number of terms per page.
+  $page_increment  = config_get('taxonomy.settings', 'terms_per_page_admin');  // Number of terms per page.
   $page_entries    = 0;   // Elements shown on this page.
   $before_entries  = 0;   // Elements at the root level before this page.
   $after_entries   = 0;   // Elements at the root level after this page.
@@ -722,39 +722,33 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     '#weight' => 10,
   );
 
-  // taxonomy_get_tree and taxonomy_term_load_parents may contain large numbers of
-  // items so we check for taxonomy_override_selector before loading the
-  // full vocabulary. Contrib modules can then intercept before
-  // hook_form_alter to provide scalable alternatives.
-  if (!variable_get('taxonomy_override_selector', FALSE)) {
-    $parent = array_keys(taxonomy_term_load_parents($term->tid));
-    $children = taxonomy_get_tree($vocabulary->machine_name, $term->tid);
+  $parent = array_keys(taxonomy_term_load_parents($term->tid));
+  $children = taxonomy_get_tree($vocabulary->machine_name, $term->tid);
 
-    // A term can't be the child of itself, nor of its children.
-    foreach ($children as $child) {
-      $exclude[] = $child->tid;
-    }
-    $exclude[] = $term->tid;
-
-    $tree = taxonomy_get_tree($vocabulary->machine_name);
-    $options = array('<' . t('root') . '>');
-    if (empty($parent)) {
-      $parent = array(0);
-    }
-    foreach ($tree as $item) {
-      if (!in_array($item->tid, $exclude)) {
-        $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
-      }
-    }
-    $form['relations']['parent'] = array(
-      '#type' => 'select',
-      '#title' => t('Parent terms'),
-      '#options' => $options,
-      '#default_value' => $parent,
-      '#multiple' => TRUE,
-    );
-
+  // A term can't be the child of itself, nor of its children.
+  foreach ($children as $child) {
+    $exclude[] = $child->tid;
   }
+  $exclude[] = $term->tid;
+
+  $tree = taxonomy_get_tree($vocabulary->machine_name);
+  $options = array('<' . t('root') . '>');
+  if (empty($parent)) {
+    $parent = array(0);
+  }
+  foreach ($tree as $item) {
+    if (!in_array($item->tid, $exclude)) {
+      $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
+    }
+  }
+  $form['relations']['parent'] = array(
+    '#type' => 'select',
+    '#title' => t('Parent terms'),
+    '#options' => $options,
+    '#default_value' => $parent,
+    '#multiple' => TRUE,
+  );
+
   $form['relations']['weight'] = array(
     '#type' => 'textfield',
     '#title' => t('Weight'),

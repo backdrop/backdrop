@@ -101,15 +101,15 @@ function book_schema() {
 function book_update_1000() {
   // Migrate variables to config.
   $config = config('book.settings');
-  $config->set('book_allowed_types', variable_get('book_allowed_types', array('book')));
-  $config->set('book_child_type', variable_get('book_child_type', 'book'));
-  $config->set('book_block_mode', variable_get('book_block_mode', 'all pages'));
+  $config->set('book_allowed_types', update_variable_get('book_allowed_types', array('book')));
+  $config->set('book_child_type', update_variable_get('book_child_type', 'book'));
+  $config->set('book_block_mode', update_variable_get('book_block_mode', 'all pages'));
   $config->save();
 
   // Delete variables.
-  variable_del('book_allowed_types');
-  variable_del('book_child_type');
-  variable_del('book_block_mode');
+  update_variable_del('book_allowed_types');
+  update_variable_del('book_child_type');
+  update_variable_del('book_block_mode');
 }
 
 /**
