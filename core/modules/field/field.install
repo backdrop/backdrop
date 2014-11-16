@@ -73,5 +73,5 @@ function field_update_1000() {
   db_query("DELETE FROM {variable} WHERE name LIKE 'field_bundle_settings_%'");
 
   // Update purge size variable to config.
-  config_set('system.core', 'field_purge_batch_size', variable_get('field_purge_batch_size', 200));
+  config_set('system.core', 'field_purge_batch_size', update_variable_get('field_purge_batch_size', 200));
 }

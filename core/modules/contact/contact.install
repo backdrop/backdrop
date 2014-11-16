@@ -41,15 +41,15 @@ function contact_install() {
 function contact_update_1000() {
   // Migrate variables to config.
   $config = config('contact.settings');
-  $config->set('contact_default_status', variable_get('contact_default_status', 1));
-  $config->set('contact_threshold_limit', variable_get('contact_threshold_limit', 5));
-  $config->set('contact_threshold_window', variable_get('contact_threshold_window', 3600));
+  $config->set('contact_default_status', update_variable_get('contact_default_status', 1));
+  $config->set('contact_threshold_limit', update_variable_get('contact_threshold_limit', 5));
+  $config->set('contact_threshold_window', update_variable_get('contact_threshold_window', 3600));
   $config->save();
 
   // Delete variables.
-  variable_del('contact_default_status');
-  variable_del('contact_threshold_limit');
-  variable_del('contact_threshold_window');
+  update_variable_del('contact_default_status');
+  update_variable_del('contact_threshold_limit');
+  update_variable_del('contact_threshold_window');
 }
 
 /**

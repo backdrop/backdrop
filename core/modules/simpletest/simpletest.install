@@ -223,19 +223,19 @@ function simpletest_update_1000() {
 function simpletest_update_1001() {
   // Migrate variables to config.
   $config = config('simpletest.settings');
-  $config->set('simpletest_clear_results', variable_get('simpletest_clear_results', 1));
-  $config->set('simpletest_method', variable_get('simpletest_httpauth_method', 1));
-  $config->set('simpletest_password', variable_get('simpletest_httpauth_password', ''));
-  $config->set('simpletest_username', variable_get('simpletest_httpauth_username', ''));
-  $config->set('simpletest_verbose', variable_get('simpletest_verbose', 1));
+  $config->set('simpletest_clear_results', update_variable_get('simpletest_clear_results', 1));
+  $config->set('simpletest_method', update_variable_get('simpletest_httpauth_method', 1));
+  $config->set('simpletest_password', update_variable_get('simpletest_httpauth_password', ''));
+  $config->set('simpletest_username', update_variable_get('simpletest_httpauth_username', ''));
+  $config->set('simpletest_verbose', update_variable_get('simpletest_verbose', 1));
   $config->save();
 
   // Delete variables.
-  variable_del('simpletest_clear_results');
-  variable_del('simpletest_httpauth_method');
-  variable_del('simpletest_httpauth_password');
-  variable_del('simpletest_httpauth_username');
-  variable_del('simpletest_verbose');
+  update_variable_del('simpletest_clear_results');
+  update_variable_del('simpletest_httpauth_method');
+  update_variable_del('simpletest_httpauth_password');
+  update_variable_del('simpletest_httpauth_username');
+  update_variable_del('simpletest_verbose');
 }
 
 /**

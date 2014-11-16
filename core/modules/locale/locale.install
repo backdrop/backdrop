@@ -247,27 +247,27 @@ function locale_update_1000() {
 function locale_update_1001() {
   // Only change language_types if we had this setting saved. Keep order
   // of types because that is significant for value dependency.
-  $types = variable_get('language_types', NULL);
+  $types = update_variable_get('language_types', NULL);
   if (!empty($types) && isset($types['language'])) {
     $new_types = array();
     foreach ($types as $key => $type) {
       $new_types[$key == 'language' ? 'language_interface' : $key] = $type;
     }
-    variable_set('language_types', $new_types);
+    update_variable_set('language_types', $new_types);
   }
 
   // Rename language_negotiation_language setting if exists.
-  $setting = variable_get('language_negotiation_language', NULL);
+  $setting = update_variable_get('language_negotiation_language', NULL);
   if ($setting !== NULL) {
-    variable_set('language_negotiation_language_interface', $setting);
-    variable_del('language_negotiation_language');
+    update_variable_set('language_negotiation_language_interface', $setting);
+    update_variable_del('language_negotiation_language');
   }
 
   // Rename locale_language_providers_weight_language setting if exists.
-  $weight = variable_get('locale_language_providers_weight_language', NULL);
+  $weight = update_variable_get('locale_language_providers_weight_language', NULL);
   if ($weight !== NULL) {
-    variable_set('locale_language_providers_weight_language_interface', $weight);
-    variable_del('locale_language_providers_weight_language');
+    update_variable_set('locale_language_providers_weight_language_interface', $weight);
+    update_variable_del('locale_language_providers_weight_language');
   }
 
   // Update block data in all core block related tables. Contributed modules
@@ -332,13 +332,13 @@ function locale_update_1002() {
 function locale_update_1003() {
   // Set up new config file for language negotiation.
   $config = config('language.negotiation');
-  $config->set('session_parameter', variable_get('locale_language_negotiation_session_param', 'language'));
-  $config->set('url_part', variable_get('locale_language_negotiation_url_part', 'path_prefix'));
+  $config->set('session_parameter', update_variable_get('locale_language_negotiation_session_param', 'language'));
+  $config->set('url_part', update_variable_get('locale_language_negotiation_url_part', 'path_prefix'));
 
   // Ensure defaults are set for all enabled languages.
   $languages = language_list();
-  $prefixes_old = variable_get('locale_language_negotiation_url_prefixes', array('en' => ''));
-  $domains_old = variable_get('locale_language_negotiation_url_domains', array('en' => ''));
+  $prefixes_old = update_variable_get('locale_language_negotiation_url_prefixes', array('en' => ''));
+  $domains_old = update_variable_get('locale_language_negotiation_url_domains', array('en' => ''));
 
   $prefixes = array();
   $domains = array();
@@ -355,10 +355,10 @@ function locale_update_1003() {
   $config->save();
 
   // Delete variables.
-  variable_del('locale_language_negotiation_session_param');
-  variable_del('locale_language_negotiation_url_part');
-  variable_del('locale_language_negotiation_url_prefixes');
-  variable_del('locale_language_negotiation_url_domains');
+  update_variable_del('locale_language_negotiation_session_param');
+  update_variable_del('locale_language_negotiation_url_part');
+  update_variable_del('locale_language_negotiation_url_prefixes');
+  update_variable_del('locale_language_negotiation_url_domains');
 }
 
 /**

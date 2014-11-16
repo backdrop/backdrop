@@ -9,10 +9,6 @@
  * Implements hook_uninstall().
  */
 function taxonomy_uninstall() {
-  // Remove variables.
-  variable_del('taxonomy_override_selector');
-  variable_del('taxonomy_terms_per_page_admin');
-
   // Remove taxonomy_term bundles.
   $configs = config_get_names_with_prefix('taxonomy.vocabulary.');
   foreach ($configs as $config_name) {
@@ -347,6 +343,17 @@ function taxonomy_update_1003() {
   $config = config('taxonomy.settings');
   $config->set('maintain_index_table', TRUE);
   $config->save();
+}
+
+/**
+ * Convert taxonomy terms per page to config.
+ */
+function taxonomy_update_1004() {
+  $config = config('taxonomy.settings');
+  $config->set('terms_per_page_admin', update_variable_get('taxonomy_terms_per_page_admin', 100));
+  $config->save();
+
+  update_variable_del('taxonomy_terms_per_page_admin');
 }
 
 /**

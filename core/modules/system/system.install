@@ -545,9 +545,6 @@ function system_install() {
  * Implements hook_schema().
  */
 function system_schema() {
-  // NOTE: {variable} needs to be created before all other tables, as
-  // some database drivers, e.g. Oracle and DB2, will require variable_get()
-  // and variable_set() for overcoming some database specific limitations.
   $schema['variable'] = array(
     'description' => 'Named variable/value pairs created by Backdrop core or any other module or theme. All variables are cached in memory at the start of every Backdrop request so developers should not be careless about what is stored here.',
     'fields' => array(
@@ -1546,8 +1543,8 @@ function system_update_1000() {
 function system_update_1001() {
   $themes = array('theme_default', 'maintenance_theme', 'admin_theme');
   foreach ($themes as $theme) {
-    if (variable_get($theme) == 'garland') {
-      variable_set($theme, 'bartik');
+    if (update_variable_get($theme) == 'garland') {
+      update_variable_set($theme, 'bartik');
     }
   }
 }
@@ -1565,9 +1562,9 @@ function system_update_1001() {
  * @see http://drupal.org/node/1181776
  */
 function system_update_1002() {
-  $theme = variable_get('theme_default');
+  $theme = update_variable_get('theme_default');
   if (!isset($theme)) {
-    variable_set('theme_default', 'bartik');
+    update_variable_set('theme_default', 'bartik');
   }
 }
 
@@ -1576,20 +1573,20 @@ function system_update_1002() {
  */
 function system_update_1003() {
   $config = config('system.core');
-  $config->set('cache', variable_get('cache', 0));
-  $config->set('cache_lifetime', variable_get('cache_lifetime', '0'));
-  $config->set('page_cache_maximum_age', variable_get('page_cache_maximum_age', '0'));
-  $config->set('page_compression', variable_get('page_compression', 1));
-  $config->set('preprocess_css', variable_get('preprocess_css', 0));
-  $config->set('preprocess_js', variable_get('preprocess_js', 0));
+  $config->set('cache', update_variable_get('cache', 0));
+  $config->set('cache_lifetime', update_variable_get('cache_lifetime', '0'));
+  $config->set('page_cache_maximum_age', update_variable_get('page_cache_maximum_age', '0'));
+  $config->set('page_compression', update_variable_get('page_compression', 1));
+  $config->set('preprocess_css', update_variable_get('preprocess_css', 0));
+  $config->set('preprocess_js', update_variable_get('preprocess_js', 0));
   $config->save();
 
-  variable_del('cache');
-  variable_del('cache_lifetime');
-  variable_del('page_cache_maximum_age');
-  variable_del('page_compression');
-  variable_del('preprocess_css');
-  variable_del('preprocess_js');
+  update_variable_del('cache');
+  update_variable_del('cache_lifetime');
+  update_variable_del('page_cache_maximum_age');
+  update_variable_del('page_compression');
+  update_variable_del('preprocess_css');
+  update_variable_del('preprocess_js');
 }
 
 /**
@@ -1633,8 +1630,8 @@ function system_update_1005() {
     'css_js_query_string' => '',
   );
   foreach ($variables as $name => $default) {
-    state_set($name, variable_get($name, $default));
-    variable_del($name);
+    state_set($name, update_variable_get($name, $default));
+    update_variable_del($name);
   }
 }
 
@@ -1754,15 +1751,15 @@ function system_update_1010() {
  * Specify the files directory manually if needed.
  */
 function system_update_1011() {
-  $file_path = variable_get('file_public_path', NULL);
+  $file_path = update_variable_get('file_public_path', NULL);
   if (is_null($file_path)) {
     $conf_path = conf_path();
     if ($conf_path != '.') {
       $conf_path = str_replace('./', '', $conf_path);
-      variable_set('file_public_path', $conf_path . '/files');
+      update_variable_set('file_public_path', $conf_path . '/files');
     }
     else {
-      variable_set('file_public_path', 'sites/default/files');
+      update_variable_set('file_public_path', 'sites/default/files');
     }
   }
 }
@@ -1773,17 +1770,17 @@ function system_update_1011() {
 function system_update_1012() {
   // Migrate the variable settings.
   $config = config('system.core');
-  $config->set('cron_threshold_warning', variable_get('cron_threshold_warning', 172800));
-  $config->set('cron_safe_threshold', variable_get('cron_safe_threshold', 10800));
-  $config->set('cron_max_threshold', variable_get('cron_max_threshold', 10800));
-  $config->set('cron_threshold_error', variable_get('cron_threshold_error', 1209600));
+  $config->set('cron_threshold_warning', update_variable_get('cron_threshold_warning', 172800));
+  $config->set('cron_safe_threshold', update_variable_get('cron_safe_threshold', 10800));
+  $config->set('cron_max_threshold', update_variable_get('cron_max_threshold', 10800));
+  $config->set('cron_threshold_error', update_variable_get('cron_threshold_error', 1209600));
   $config->save();
 
   // Delete variables.
-  variable_del('cron_threshold_warning');
-  variable_del('cron_safe_threshold');
-  variable_del('cron_max_threshold');
-  variable_del('cron_threshold_error');
+  update_variable_del('cron_threshold_warning');
+  update_variable_del('cron_safe_threshold');
+  update_variable_del('cron_max_threshold');
+  update_variable_del('cron_threshold_error');
 }
 
 /**
@@ -1792,20 +1789,20 @@ function system_update_1012() {
 function system_update_1013() {
   // Set the default variables for the system.site config file.
   $config = config('system.core');
-  $config->set('site_name', variable_get('site_name', 'Backdrop'));
-  $config->set('site_mail', variable_get('site_mail', ''));
-  $config->set('site_slogan', variable_get('site_slogan', ''));
-  $config->set('site_frontpage', variable_get('site_frontpage', 'user'));
-  $config->set('site_403', variable_get('site_403', ''));
-  $config->set('site_404', variable_get('site_404', ''));
+  $config->set('site_name', update_variable_get('site_name', 'Backdrop'));
+  $config->set('site_mail', update_variable_get('site_mail', ''));
+  $config->set('site_slogan', update_variable_get('site_slogan', ''));
+  $config->set('site_frontpage', update_variable_get('site_frontpage', 'user'));
+  $config->set('site_403', update_variable_get('site_403', ''));
+  $config->set('site_404', update_variable_get('site_404', ''));
   $config->save();
   // Delete variables.
-  variable_del('site_name');
-  variable_del('site_mail');
-  variable_del('site_slogan');
-  variable_del('site_frontpage');
-  variable_del('site_403');
-  variable_del('site_404');
+  update_variable_del('site_name');
+  update_variable_del('site_mail');
+  update_variable_del('site_slogan');
+  update_variable_del('site_frontpage');
+  update_variable_del('site_403');
+  update_variable_del('site_404');
 }
 
 /**
@@ -1813,12 +1810,12 @@ function system_update_1013() {
  */
 function system_update_1014() {
   // Migrate variables to state and config.
-  state_set('maintenance_enabled', variable_get('maintenance_mode', 'enabled'));
-  config_set('system.core', 'maintenance_mode_message', variable_get('maintenance_mode_message', 'message'));
+  state_set('maintenance_enabled', update_variable_get('maintenance_mode', 'enabled'));
+  config_set('system.core', 'maintenance_mode_message', update_variable_get('maintenance_mode_message', 'message'));
 
   // Delete variables.
-  variable_del('maintenance_mode');
-  variable_del('maintenance_mode_message');
+  update_variable_del('maintenance_mode');
+  update_variable_del('maintenance_mode_message');
 }
 
 /**
@@ -1827,15 +1824,15 @@ function system_update_1014() {
 function system_update_1015() {
   // Migrate variables to config.
   $config = config('system.core');
-  $config->set('rss_description', variable_get('feed_description', ''));
-  $config->set('rss_limit', variable_get('feed_default_items', 10));
-  $config->set('rss_viewmode', variable_get('feed_item_length', 'fulltext'));
+  $config->set('rss_description', update_variable_get('feed_description', ''));
+  $config->set('rss_limit', update_variable_get('feed_default_items', 10));
+  $config->set('rss_viewmode', update_variable_get('feed_item_length', 'fulltext'));
   $config->save();
 
   // Delete variables.
-  variable_del('feed_description');
-  variable_del('feed_default_items');
-  variable_del('feed_item_length');
+  update_variable_del('feed_description');
+  update_variable_del('feed_default_items');
+  update_variable_del('feed_item_length');
 }
 
 /**
@@ -1844,11 +1841,11 @@ function system_update_1015() {
 function system_update_1016() {
   // Migrate variables to config.
   $config = config('system.action');
-  $config->set('action_recursion_limit', variable_get('actions_max_stack', 35));
+  $config->set('action_recursion_limit', update_variable_get('actions_max_stack', 35));
   $config->save();
 
   // Delete variables.
-  variable_del('actions_max_stack');
+  update_variable_del('actions_max_stack');
 }
 
 /**
@@ -1857,19 +1854,19 @@ function system_update_1016() {
 function system_update_1017() {
   // Migrate variables to config.
   $config = config('system.core');
-  $config->set('log_row_limit', variable_get('dblog_row_limit', 1000));
-  $config->set('log_identity', variable_get('syslog_identity', 'backdrop'));
-  $config->set('log_facility', variable_get('syslog_facility', LOG_LOCAL0));
-  $config->set('log_format', variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
-  $config->set('error_level', variable_get('error_level', 'all'));
+  $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
+  $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
+  $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
+  $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
+  $config->set('error_level', update_variable_get('error_level', 'all'));
   $config->save();
 
   // Delete variables.
-  variable_del('error_level');
-  variable_del('dblog_row_limit');
-  variable_del('syslog_identity');
-  variable_del('syslog_facility');
-  variable_del('syslog_format');
+  update_variable_del('error_level');
+  update_variable_del('dblog_row_limit');
+  update_variable_del('syslog_identity');
+  update_variable_del('syslog_facility');
+  update_variable_del('syslog_format');
 }
 
 /**
@@ -1878,7 +1875,7 @@ function system_update_1017() {
 function system_update_1018() {
   // Migrate variables to config.
   $config = config('system.authorize');
-  $config->set('filetransfer_default', variable_get('authorize_filetransfer_default', ''));
+  $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM variable WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
   foreach ($settings as $row)  {
     $row = unserialize($row);
@@ -1887,8 +1884,8 @@ function system_update_1018() {
   $config->save();
 
   // Delete variables.
-  variable_del('allow_authorize_operations');
-  variable_del('authorize_filetransfer_default');
+  update_variable_del('allow_authorize_operations');
+  update_variable_del('authorize_filetransfer_default');
 
 }
 
@@ -1898,11 +1895,11 @@ function system_update_1018() {
 function system_update_1019() {
   // Migrate variables to config.
   $config = config('system.core');
-  $config->set('active_menus_default', variable_get('menu_default_active_menus', array()));
+  $config->set('active_menus_default', update_variable_get('menu_default_active_menus', array()));
   $config->save();
 
   // Delete variables.
-  variable_del('menu_default_active_menus');
+  update_variable_del('menu_default_active_menus');
 }
 
 /**
@@ -1916,20 +1913,20 @@ function system_update_1020() {
 
   // Migrate variables if any.
   $config = config('system.date');
-  $config->set('first_day', variable_get('date_first_day', 0));
-  $config->set('default_country', variable_get('site_default_country', ''));
-  $config->set('default_timezone', variable_get('date_default_timezone', ''));
-  $config->set('user_configurable_timezones', variable_get('configurable_timezones', 1));
-  $config->set('user_empty_timezone_message', variable_get('empty_timezone_message', 0));
-  $config->set('user_default_timezone', variable_get('user_default_timezone', 0));
+  $config->set('first_day', update_variable_get('date_first_day', 0));
+  $config->set('default_country', update_variable_get('site_default_country', ''));
+  $config->set('default_timezone', update_variable_get('date_default_timezone', ''));
+  $config->set('user_configurable_timezones', update_variable_get('configurable_timezones', 1));
+  $config->set('user_empty_timezone_message', update_variable_get('empty_timezone_message', 0));
+  $config->set('user_default_timezone', update_variable_get('user_default_timezone', 0));
 
   // Delete variables.
-  variable_del('site_default_country');
-  variable_del('date_first_day');
-  variable_del('date_default_timezone');
-  variable_del('configurable_timezones');
-  variable_del('empty_timezone_message');
-  variable_del('user_default_timezone');
+  update_variable_del('site_default_country');
+  update_variable_del('date_first_day');
+  update_variable_del('date_default_timezone');
+  update_variable_del('configurable_timezones');
+  update_variable_del('empty_timezone_message');
+  update_variable_del('user_default_timezone');
 
   // Migrate date formats. These are the defaults that must exist.
   $formats = array(
@@ -1995,12 +1992,12 @@ function system_update_1020() {
   // Update/create custom formats.
   $result = db_query("SELECT * FROM {date_format_type}");
   foreach ($result as $row) {
-    if ($pattern = variable_get('date_format_' . $row->type)) {
+    if ($pattern = update_variable_get('date_format_' . $row->type)) {
       $format = isset($formats[$row->type]) ? $formats[$row->type] : array();
       $format['label'] = $row->title;
       $format['pattern'] = $pattern;
       $formats[$row->type] = $format;
-      variable_del('date_format_' . $row->type);
+      update_variable_del('date_format_' . $row->type);
     }
   }
 
@@ -2024,7 +2021,7 @@ function system_update_1020() {
  * Removes the js_cache_files variable.
  */
 function system_update_1021() {
-  variable_del('js_cache_files');
+  update_variable_del('js_cache_files');
 }
 
 /**
@@ -2039,7 +2036,7 @@ function system_update_1022() {
   $config->set('site_favicon_path', 'core/misc/favicon.ico');
   $config->set('site_favicon_mimetype', 'image/vnd.microsoft.icon');
 
-  $settings = variable_get('theme_settings');
+  $settings = update_variable_get('theme_settings');
 
   // Copy over logo settings.
   if (!empty($settings['toggle_logo'])) {
@@ -2236,7 +2233,7 @@ function system_update_1025() {
     ),
   );
 
-  $current_theme = variable_get('theme_default', 'bartik');
+  $current_theme = update_variable_get('theme_default', 'bartik');
 
   // Load the default layout to prepare copying blocks into it.
   $layout_regions = state_get('upgrade_layout_regions', array(
@@ -2382,34 +2379,34 @@ function system_update_1025() {
  */
 function system_update_1026() {
   $config = config('system.core');
-  $config->set('file_default_scheme', variable_get('file_default_scheme', 'public'));
-  $config->set('file_public_path', variable_get('file_public_path', 'files'));
-  $config->set('file_temporary_path', variable_get('file_temporary_path', ''));
-  $config->set('file_private_path', variable_get('file_private_path', ''));
-  $config->set('install_profile', variable_get('install_profile', 'standard'));
-  $config->set('clean_url', variable_get('clean_url', 0));
-  $config->set('theme_default', variable_get('theme_default', 'stark'));
-  $config->set('admin_theme', variable_get('admin_theme', ''));
-  $config->set('node_admin_theme', variable_get('node_admin_theme', ''));
+  $config->set('file_default_scheme', update_variable_get('file_default_scheme', 'public'));
+  $config->set('file_public_path', update_variable_get('file_public_path', 'files'));
+  $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
+  $config->set('file_private_path', update_variable_get('file_private_path', ''));
+  $config->set('install_profile', update_variable_get('install_profile', 'standard'));
+  $config->set('clean_url', update_variable_get('clean_url', 0));
+  $config->set('theme_default', update_variable_get('theme_default', 'stark'));
+  $config->set('admin_theme', update_variable_get('admin_theme', ''));
+  $config->set('node_admin_theme', update_variable_get('node_admin_theme', ''));
   $config->save();
 
   // Delete variables.
-  variable_del('file_default_scheme');
-  variable_del('file_public_path');
-  variable_del('file_temporary_path');
-  variable_del('file_private_path');
-  variable_del('install_profile');
-  variable_del('clean_url');
-  variable_del('theme_default');
-  variable_del('admin_theme');
-  variable_del('node_admin_theme');
+  update_variable_del('file_default_scheme');
+  update_variable_del('file_public_path');
+  update_variable_del('file_temporary_path');
+  update_variable_del('file_private_path');
+  update_variable_del('install_profile');
+  update_variable_del('clean_url');
+  update_variable_del('theme_default');
+  update_variable_del('admin_theme');
+  update_variable_del('node_admin_theme');
 
   // These variables have been converted to settings:
-  variable_del('css_gzip_compression');
-  variable_del('js_gzip_compression');
+  update_variable_del('css_gzip_compression');
+  update_variable_del('js_gzip_compression');
 
   // And these variables have been converted to state:
-  variable_del('javascript_parsed');
+  update_variable_del('javascript_parsed');
 }
 
 /**
@@ -2430,12 +2427,12 @@ function system_update_1027() {
  */
 function system_update_1028() {
   $config = config('system.core');
-  $config->set('filter_fallback_format', variable_get('filter_fallback_format', 'plain_text'));
-  $config->set('user_cancel_method', variable_get('user_cancel_method', 'user_cancel_block'));
+  $config->set('filter_fallback_format', update_variable_get('filter_fallback_format', 'plain_text'));
+  $config->set('user_cancel_method', update_variable_get('user_cancel_method', 'user_cancel_block'));
   $config->save();
 
-  variable_del('filter_fallback_format');
-  variable_del('user_cancel_method');
+  update_variable_del('filter_fallback_format');
+  update_variable_del('user_cancel_method');
 }
 
 /**
@@ -2443,8 +2440,8 @@ function system_update_1028() {
  */
 function system_update_1029() {
   $config = config('system.core');
-  $config->set('config_sync_batch_size', variable_get('config_sync_batch_size', 50));
-  $config->set('default_nodes_main', variable_get('default_nodes_main', 10));
+  $config->set('config_sync_batch_size', update_variable_get('config_sync_batch_size', 50));
+  $config->set('default_nodes_main', update_variable_get('default_nodes_main', 10));
   $config->save();
 }
 

@@ -316,9 +316,9 @@ function update_fix_requirements() {
   if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_backdrop_requirements', FALSE)) {
     // Copy over the private key for continuity between the sites. If this is
     // not migrated, a random key will be generated when visiting update.php.
-    if ($key = variable_get('drupal_private_key')) {
+    if ($key = update_variable_get('drupal_private_key')) {
       config_set('system.core', 'private_key', $key);
-      variable_del('drupal_private_key');
+      update_variable_del('drupal_private_key');
     }
 
     state_set('update_backdrop_requirements', TRUE);
@@ -355,6 +355,61 @@ function update_module_enable(array $modules) {
     system_list_reset();
     //  @todo: figure out what to do about hook_install() and hook_enable().
   }
+}
+
+/**
+ * Gets the value of a variable from the database during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_get().
+ *
+ * @param string $name
+ *   The name of the variable.
+ * @param mixed $default
+ *   The default value of the variable.
+ * @return
+ *   The value of the variable in the database unserialized, or NULL if not set.
+ */
+function update_variable_get($name, $default = NULL) {
+  $result = db_query('SELECT value FROM {variable} WHERE name = :name', array(':name' => $name))->fetchField();
+  if ($result !== FALSE) {
+    return unserialize($result);
+  }
+  return $default;
+}
+
+/**
+ * Sets a persistent variable during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_set().
+ *
+ * @param string $name
+ *   The name of the variable.
+ * @param mixed $value
+ *   The value of the variable to be set.
+ */
+function update_variable_set($name, $value) {
+  db_merge('variable')
+    ->key(array(
+      'name' => $name,
+    ))
+    ->fields(array(
+      'value' => serialize($value),
+    ))
+    ->execute();
+}
+
+/**
+ * Delete a variable from the database during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_del().
+ *
+ * @param string $name
+ *   The name of the variable to delete.
+ */
+function update_variable_del($name) {
+  db_delete('variable')
+    ->condition('name', $name)
+    ->execute();
 }
 
 /**
