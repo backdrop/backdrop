@@ -1005,14 +1005,14 @@ abstract class DiffFormatter {
    * This should be left at zero for this class, but subclasses
    * may want to set this to other values.
    */
-  protected $leadingContextLines = 0;
+  protected $leadingContextLines = 2;
 
   /** @var int Number of trailing context "lines" to preserve.
    *
    * This should be left at zero for this class, but subclasses
    * may want to set this to other values.
    */
-  protected $trailingContextLines = 0;
+  protected $trailingContextLines = 2;
 
   /**
    * Format a diff.
@@ -1210,12 +1210,6 @@ class BackdropDiffFormatter extends DiffFormatter {
     'offset' => array('x' => 0, 'y' => 0),
   );
   private $showHeader = 0;
-
-  function __construct() {
-    $this->leadingContextLines = variable_get('diff_context_lines_leading', 2);
-    $this->trailingContextLines = variable_get('diff_context_lines_trailing', 2);
-    $this->showHeader = variable_get('diff_show_header', 0);
-  }
 
   protected function startDiff() {
     $this->rows = array();

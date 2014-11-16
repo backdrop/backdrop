@@ -217,9 +217,8 @@ function backdrop_get_region_content($region = NULL, $delimiter = ' ') {
  *
  * When this function is called during Backdrop's initial installation process,
  * the name of the profile that's about to be installed is stored in the global
- * installation state. At all other times, the standard Backdrop systems variable
- * table contains the name of the current profile, and we can call
- * variable_get() to determine what one is active.
+ * installation state. At all other times, the standard Backdrop system.core
+ * config file contains the name of the current profile.
  *
  * @return $profile
  *   The name of the installation profile.
@@ -3862,7 +3861,7 @@ function backdrop_clear_css_cache() {
  */
 function backdrop_delete_file_if_stale($uri) {
   // Default stale file threshold is 30 days.
-  if (REQUEST_TIME - filemtime($uri) > variable_get('stale_file_threshold', 2592000)) {
+  if (REQUEST_TIME - filemtime($uri) > settings_get('stale_file_threshold', 2592000)) {
     file_unmanaged_delete($uri);
   }
 }
@@ -4446,10 +4445,6 @@ function backdrop_pre_render_scripts($elements) {
   $embed_prefix = "\n<!--//--><![CDATA[//><!--\n";
   $embed_suffix = "\n//--><!]]>\n";
 
-  // Since JavaScript may look for arguments in the URL and act on them, some
-  // third-party code might require the use of a different query string.
-  $js_version_string = variable_get('js_version_query_string', 'v=');
-
   // Defaults for each SCRIPT element.
   $element_defaults = array(
     '#type' => 'html_tag',
@@ -4497,7 +4492,7 @@ function backdrop_pre_render_scripts($elements) {
             break;
 
           case 'file':
-            $query_string = empty($item['version']) ? $default_query_string : $js_version_string . $item['version'];
+            $query_string = empty($item['version']) ? $default_query_string : 'v=' . $item['version'];
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
             $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
             break;
@@ -5571,8 +5566,6 @@ function backdrop_cron_run() {
     foreach ($queues as $queue_name => $info) {
       BackdropQueue::get($queue_name)->createQueue();
     }
-    // Register shutdown callback.
-    backdrop_register_shutdown_function('backdrop_cron_cleanup');
 
     // Iterate through the modules calling their cron handlers (if any):
     foreach (module_implements('cron') as $module) {
@@ -5621,22 +5614,6 @@ function backdrop_cron_run() {
   backdrop_save_session($original_session_saving);
 
   return $return;
-}
-
-/**
- * Shutdown function: Performs cron cleanup.
- *
- * @see backdrop_cron_run()
- * @see backdrop_register_shutdown_function()
- */
-function backdrop_cron_cleanup() {
-  // See if the semaphore is still locked.
-  if (variable_get('cron_semaphore', FALSE)) {
-    watchdog('cron', 'Cron run exceeded the time limit and was aborted.', array(), WATCHDOG_WARNING);
-
-    // Release cron semaphore.
-    variable_del('cron_semaphore');
-  }
 }
 
 /**

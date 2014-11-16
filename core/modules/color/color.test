@@ -87,7 +87,7 @@ class ColorTestCase extends BackdropWebTestCase {
     // Test with aggregated CSS turned on.
     config_set('system.core', 'preprocess_css', 1);
     $this->backdropGet('<front>');
-    $stylesheets = variable_get('css_cache_files', array());
+    $stylesheets = state_get('css_cache_files', array());
     $stylesheet_content = '';
     foreach ($stylesheets as $key => $uri) {
       $stylesheet_content .= join("\n", file(backdrop_realpath($uri)));

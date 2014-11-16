@@ -11,7 +11,7 @@
 function block_test_block_info() {
   $blocks['test_cache'] = array(
     'info' => t('Test block caching'),
-    'cache' => variable_get('block_test_caching', BACKDROP_CACHE_PER_ROLE),
+    'cache' => state_get('block_test_caching', BACKDROP_CACHE_PER_ROLE),
   );
 
   $blocks['test_underscore'] = array(

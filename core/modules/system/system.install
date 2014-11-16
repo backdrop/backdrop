@@ -2439,6 +2439,16 @@ function system_update_1028() {
 }
 
 /**
+ * Convert config sync size to config.
+ */
+function system_update_1029() {
+  $config = config('system.core');
+  $config->set('config_sync_batch_size', variable_get('config_sync_batch_size', 50));
+  $config->set('default_nodes_main', variable_get('default_nodes_main', 10));
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

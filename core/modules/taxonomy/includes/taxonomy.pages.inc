@@ -50,7 +50,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
     'term' => taxonomy_term_view($term, 'full'),
   );
 
-  if ($nids = taxonomy_select_nodes($term->tid, TRUE, variable_get('default_nodes_main', 10))) {
+  if ($nids = taxonomy_select_nodes($term->tid, TRUE, config_get('system.core', 'default_nodes_main'))) {
     $nodes = node_load_multiple($nids);
     $build += node_view_multiple($nodes);
     $build['pager'] = array(

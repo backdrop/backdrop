@@ -406,9 +406,6 @@ function drupal_page_set_cache() {
 function drupal_cron_run() {
   return backdrop_cron_run();
 }
-function drupal_cron_cleanup() {
-  return backdrop_cron_cleanup();
-}
 function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   return backdrop_system_listing($mask, $directory, $key, $min_depth);
 }

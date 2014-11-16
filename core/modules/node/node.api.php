@@ -375,7 +375,7 @@ function hook_node_grants_alter(&$grants, $account, $op) {
   // array for roles specified in our variable setting.
 
   // Get our list of banned roles.
-  $restricted = variable_get('example_restricted_roles', array());
+  $restricted = config_get('my_module.settings', 'example_restricted_roles', array());
 
   if ($op != 'view' && !empty($restricted)) {
     // Now check the roles for this account against the restrictions.
@@ -650,7 +650,7 @@ function hook_node_access($node, $op, $account) {
  */
 function hook_node_prepare(Node $node) {
   if (!isset($node->comment)) {
-    $node->comment = variable_get("comment_$node->type", COMMENT_NODE_OPEN);
+    $node->my_setting = config_get('my_module.settings', 'my_setting');
   }
 }
 
@@ -914,7 +914,8 @@ function hook_node_view_alter(&$build) {
  */
 function hook_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
-  if (variable_get('vote_node_enabled', TRUE)) {
+  $config = config_get('my_module.settings');
+  if ($config->get('vote_node_enabled')) {
     return array(
       'vote_average' => array(
         'title' => t('Average vote'),
@@ -925,7 +926,7 @@ function hook_ranking() {
         // always 0, should be 0.
         'score' => 'vote_node_data.average / CAST(%f AS DECIMAL)',
         // Pass in the highest possible voting score as a decimal argument.
-        'arguments' => array(variable_get('vote_score_max', 5)),
+        'arguments' => array($config->get('vote_score_max')),
       ),
     );
   }

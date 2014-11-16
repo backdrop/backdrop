@@ -39,7 +39,7 @@ function _config_sync_start($config_statuses, &$context) {
  */
 function _config_sync_validate(&$context) {
   if (!isset($context['sandbox']['batch_size'])) {
-    $context['sandbox']['batch_size'] = variable_get('config_sync_batch_size', 50);
+    $context['sandbox']['batch_size'] = config_get('system.core', 'config_sync_batch_size');
     $context['sandbox']['total_size'] = count($context['results']['pending_changes']);
     $context['sandbox']['current_index'] = 0;
   }
@@ -71,7 +71,7 @@ function _config_sync_import(&$context) {
   }
 
   if (!isset($context['sandbox']['batch_size'])) {
-    $context['sandbox']['batch_size'] = variable_get('config_sync_batch_size', 50);
+    $context['sandbox']['batch_size'] = config_get('system.core', 'config_sync_batch_size');
     $context['sandbox']['total_size'] = count($context['results']['pending_changes']);
     $context['sandbox']['current_index'] = 0;
   }

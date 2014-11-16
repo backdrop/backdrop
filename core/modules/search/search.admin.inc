@@ -91,7 +91,7 @@ function search_admin_settings($form, &$form_state) {
   $form['indexing_settings']['info'] = array(
     '#markup' => t('<p><em>Changing the settings below will cause the site index to be rebuilt. The search index is not cleared but systematically updated to reflect the new settings. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p><p><em>The default settings should be appropriate for the majority of sites.</em></p>')
   );
-  $form['indexing_settings']['minimum_word_size'] = array(
+  $form['indexing_settings']['search_minimum_word_size'] = array(
     '#type' => 'number',
     '#title' => t('Minimum word length to index'),
     '#default_value' => $config->get('search_minimum_word_size'),
@@ -99,7 +99,7 @@ function search_admin_settings($form, &$form_state) {
     '#max' => 10000,
     '#description' => t('The number of characters a word has to be to be indexed. A lower setting means better search result ranking, but also a larger database. Each search query must contain at least one keyword that is this size (or longer).'),
   );
-  $form['indexing_settings']['overlap_cjk'] = array(
+  $form['indexing_settings']['search_overlap_cjk'] = array(
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
     '#default_value' => $config->get('search_overlap_cjk'),
@@ -164,9 +164,9 @@ function search_admin_settings_validate($form, &$form_state) {
 function search_admin_settings_submit($form, &$form_state) {
   $config = config('search.settings');
   // If these settings change, the index needs to be rebuilt.
-  if (($config->get('search_minimum_word_size') != $form_state['values']['minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['overlap_cjk'])) {
-    $config->set('search_minimum_word_size', $form_state['values']['minimum_word_size']);
-    $config->set('search_overlap_cjk', $form_state['values']['overlap_cjk']);
+  if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk'])) {
+    $config->set('search_minimum_word_size', $form_state['values']['search_minimum_word_size']);
+    $config->set('search_overlap_cjk', $form_state['values']['search_overlap_cjk']);
     backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();
   }
@@ -185,10 +185,11 @@ function search_admin_settings_submit($form, &$form_state) {
     state_set('menu_rebuild_needed', TRUE);
   }
 
-  // This values are set by node's module implementation of hook_search_admin.
-  foreach (array_keys($form_state['values']) as $value) {
-    if (strpos($value, 'node_rank_') === 0) {
-      $config->set($value, $form_state['values'][$value]);
+  // Save all other settings provided by any other modules.
+  form_state_values_clean($form_state);
+  foreach ($form_state['values'] as $key => $value) {
+    if (strpos($key, 'search_') !== 0) {
+      $config->set($key, $value);
     }
   }
 

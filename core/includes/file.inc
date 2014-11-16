@@ -2193,10 +2193,10 @@ function file_get_mimetype($uri, $mapping = NULL) {
 function backdrop_chmod($uri, $mode = NULL) {
   if (!isset($mode)) {
     if (is_dir($uri)) {
-      $mode = variable_get('file_chmod_directory', 0775);
+      $mode = settings_get('file_chmod_directory', 0775);
     }
     else {
-      $mode = variable_get('file_chmod_file', 0664);
+      $mode = settings_get('file_chmod_file', 0664);
     }
   }
 
@@ -2365,7 +2365,7 @@ function backdrop_basename($uri, $suffix = NULL) {
  */
 function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
   if (!isset($mode)) {
-    $mode = variable_get('file_chmod_directory', 0775);
+    $mode = settings_get('file_chmod_directory', 0775);
   }
 
   if (!isset($context)) {

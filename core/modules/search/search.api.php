@@ -113,13 +113,14 @@ function hook_search_admin() {
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
+  $config = config('search.settings');
   $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
     $form['content_ranking']['factors']['node_rank_' . $var] = array(
       '#title' => $values['title'],
       '#type' => 'select',
       '#options' => $options,
-      '#default_value' => variable_get('node_rank_' . $var, 0),
+      '#default_value' => $config->get('node_rank_' . $var),
     );
   }
   return $form;

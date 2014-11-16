@@ -325,19 +325,8 @@ function menu_delete($menu) {
  * @return
  *   An array of menu link titles keyed on the a string containing the menu name
  *   and mlid. The list excludes the given item and its children.
- *
- * @todo This has to be turned into a #process form element callback. The
- *   'menu_override_parent_selector' variable is entirely superfluous.
  */
 function menu_parent_options($menus, $item, $type = '') {
-  // The menu_links table can be practically any size and we need a way to
-  // allow contrib modules to provide more scalable pattern choosers.
-  // hook_form_alter is too late in itself because all the possible parents are
-  // retrieved here, unless menu_override_parent_selector is set to TRUE.
-  if (variable_get('menu_override_parent_selector', FALSE)) {
-    return array();
-  }
-
   $available_menus = array();
   if (!is_array($item)) {
     // If $item is not an array then it is a node type.
