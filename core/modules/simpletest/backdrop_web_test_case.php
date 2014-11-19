@@ -1412,7 +1412,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language_interface;
-    $this->originalLanguageDefault = variable_get('language_default');
+    $this->originalLanguageDefault = config_get('system.core', 'language_default');
     $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = config_get('system.core', 'file_public_path', 'files');
     $this->originalProfile = backdrop_get_profile();

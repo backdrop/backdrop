@@ -77,7 +77,6 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * @code
  * function mymodule_language_negotiation_info_alter(&$negotiation_info) {
  *   // Replace the core function with our own function.
- *   module_load_include('language', 'inc', 'language.negotiation');
  *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['callbacks']['language'] = 'mymodule_from_url';
  *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['file'] = backdrop_get_path('module', 'mymodule') . '/mymodule.module';
  * }
@@ -85,8 +84,7 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * function mymodule_from_url($languages) {
  *   // Use the core URL language negotiation provider to get a valid language
  *   // code.
- *   module_load_include('language', 'inc', 'language.negotiation');
- *   $langcode = language_from_url($languages);
+ *   $langcode = locale_language_from_url($languages);
  *
  *   // If we are on an administrative path, override with the default language.
  *   if (isset($_GET['q']) && strtok($_GET['q'], '/') == 'admin') {
@@ -104,7 +102,12 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * Chooses a language based on language negotiation provider settings.
  *
  * @param $type
- *   The language type key to find the language for.
+ *   The type of language to retrieve as provided by hook_language_types_info().
+ *   In Backdrop core, the available language types will be one of the
+ *   following:
+ *   - language_interface
+ *   - language_content
+ *   - language_url
  *
  * @return
  *   The negotiated language object.
@@ -112,10 +115,17 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
 function language_types_initialize($type) {
   // Execute the language negotiation providers in the order they were set up
   // and return the first valid language found.
-  $negotiation = variable_get("language_negotiation_$type", array());
+  $negotiation_order = language_negotiation_order($type);
 
-  foreach ($negotiation as $provider_id => $provider) {
-    $language = language_provider_invoke($provider_id, $provider);
+  if (empty($negotiation_order)) {
+    $language_types = language_types_info();
+    if (isset($language_types[$type]['fixed'])) {
+      $negotiation_order = $language_types[$type]['fixed'];
+    }
+  }
+
+  foreach ($negotiation_order as $provider_id) {
+    $language = language_provider_invoke($provider_id);
     if ($language) {
       // Remember the provider key used to detect the language.
       $language->provider = $provider_id;
@@ -153,94 +163,26 @@ function language_types_info() {
 /**
  * Returns only the configurable language types.
  *
- * A language type maybe configurable or fixed. A fixed language type is a type
+ * A language type may be configurable or fixed. A fixed language type is a type
  * whose language negotiation providers are module-defined and not altered
  * through the user interface.
- *
- * @param $stored
- *   Optional. By default retrieves values from the 'language_types' variable to
- *   avoid unnecessary hook invocations.
- *   If set to FALSE retrieves values from the actual language type definitions.
- *   This allows to react to alterations performed on the definitions by modules
- *   installed after the 'language_types' variable is set.
  *
  * @return
  *   An array of language type names.
  */
-function language_types_get_configurable($stored = TRUE) {
+function language_types_get_configurable() {
   $configurable = &backdrop_static(__FUNCTION__);
 
-  if ($stored && !isset($configurable)) {
-    $types = variable_get('language_types', language_types_get_default());
-    $configurable = array_keys(array_filter($types));
-  }
-
-  if (!$stored) {
-    $result = array();
+  if (!isset($configurable)) {
+    $configurable = array();
     foreach (language_types_info() as $type => $info) {
       if (!isset($info['fixed'])) {
-        $result[] = $type;
+        $configurable[] = $type;
       }
     }
-    return $result;
   }
 
   return $configurable;
-}
-
-/**
- * Disables the given language types.
- *
- * @param $types
- *   An array of language types.
- */
-function language_types_disable($types) {
-  $enabled_types = variable_get('language_types', language_types_get_default());
-
-  foreach ($types as $type) {
-    unset($enabled_types[$type]);
-  }
-
-  variable_set('language_types', $enabled_types);
-}
-
-/**
- * Updates the language type configuration.
- */
-function language_types_set() {
-  // Ensure that we are getting the defined language negotiation information. An
-  // invocation of module_enable() or module_disable() could outdate the cached
-  // information.
-  backdrop_static_reset('language_types_info');
-  backdrop_static_reset('language_negotiation_info');
-
-  // Determine which language types are configurable and which not by checking
-  // whether the 'fixed' key is defined. Non-configurable (fixed) language types
-  // have their language negotiation settings stored there.
-  $language_types = array();
-  $defined_providers = language_negotiation_info();
-  foreach (language_types_info() as $type => $info) {
-    if (isset($info['fixed'])) {
-      $language_types[$type] = FALSE;
-      $negotiation = array();
-      foreach ($info['fixed'] as $weight => $id) {
-        if (isset($defined_providers[$id])) {
-          $negotiation[$id] = $weight;
-        }
-      }
-      language_negotiation_set($type, $negotiation);
-    }
-    else {
-      $language_types[$type] = TRUE;
-    }
-  }
-
-  // Save enabled language types.
-  variable_set('language_types', $language_types);
-
-  // Ensure that subsequent calls of language_types_get_configurable() return
-  // the updated language type information.
-  backdrop_static_reset('language_types_get_configurable');
 }
 
 /**
@@ -260,17 +202,17 @@ function language_types_set() {
  *   The provider ID if it is enabled, FALSE otherwise.
  */
 function language_negotiation_get($type, $provider_id = NULL) {
-  $negotiation = variable_get("language_negotiation_$type", array());
+  $negotiation = language_negotiation_order($type);
 
   if (empty($negotiation)) {
     return empty($provider_id) ? LANGUAGE_NEGOTIATION_DEFAULT : FALSE;
   }
 
   if (empty($provider_id)) {
-    return key($negotiation);
+    return reset($negotiation);
   }
 
-  if (isset($negotiation[$provider_id])) {
+  if (in_array($provider_id, $negotiation)) {
     return $provider_id;
   }
 
@@ -310,14 +252,10 @@ function language_negotiation_get_any($provider_id) {
  */
 function language_negotiation_get_switch_links($type, $path) {
   $links = FALSE;
-  $negotiation = variable_get("language_negotiation_$type", array());
-
-  // Only get the languages if we have more than one.
-  if (count(language_list()) >= 2) {
-    $language = language_types_initialize($type);
-  }
-
-  foreach ($negotiation as $id => $provider) {
+  $negotiation_order = language_negotiation_order($type);
+  $negotiation_info = language_negotiation_info();
+  foreach ($negotiation_order as $id) {
+    $provider = $negotiation_info[$id];
     if (isset($provider['callbacks']['switcher'])) {
       if (isset($provider['file'])) {
         require_once BACKDROP_ROOT . '/' . $provider['file'];
@@ -353,18 +291,32 @@ function language_negotiation_purge() {
   // information.
   backdrop_static_reset('language_negotiation_info');
   backdrop_static_reset('language_types_info');
+  backdrop_static_reset('language_types_get_configurable');
+
+  // Do not attempt to read/write to the language settings file if it does not
+  // exist, which may happen if this function is called when language.module
+  // is not enabled.
+  $config = config('language.settings');
+  if ($config->isNew()) {
+    return;
+  }
 
   $defined_providers = language_negotiation_info();
-  foreach (language_types_info() as $type => $type_info) {
-    $weight = 0;
-    $negotiation = array();
-    foreach (variable_get("language_negotiation_$type", array()) as $id => $provider) {
-      if (isset($defined_providers[$id])) {
-        $negotiation[$id] = $weight++;
-      }
+  $language_types = language_types_info();
+  $configured_types = $config->get('language_negotiation');
+  foreach ($configured_types as $configured_type => $configured_settings) {
+    // Remove the entire language type if it no longer exists.
+    if (!isset($language_types[$configured_type])) {
+      unset($configured_types[$configured_type]);
     }
-    language_negotiation_set($type, $negotiation);
+    // Remove negotiation providers if they no longer exist.
+    $configured_types[$configured_type] = array_values(array_intersect($configured_settings, array_keys($defined_providers)));
   }
+  $config->set('language_negotiation', $configured_types);
+  $config->save();
+
+  backdrop_static_reset('language_types_info');
+  backdrop_static_reset('language_negotiation_info');
 }
 
 /**
@@ -372,29 +324,17 @@ function language_negotiation_purge() {
  *
  * @param $type
  *   The language negotiation type.
- * @param $language_providers
- *   An array of language negotiation provider weights keyed by provider ID.
+ * @param $negotiation
+ *   An array of language negotiation providers in the order they should be
+ *   executed.
  *
- * @see language_provider_weight()
  */
-function language_negotiation_set($type, $language_providers) {
-  // Save only the necessary fields.
-  $provider_fields = array('callbacks', 'file', 'cache');
-
-  $negotiation = array();
-  $providers_weight = array();
+function language_negotiation_set($type, $negotiation) {
   $defined_providers = language_negotiation_info();
-  $default_types = language_types_get_configurable(FALSE);
+  $default_types = language_types_get_configurable();
+  $negotiation_data = array();
 
-  // Initialize the providers weight list.
-  foreach ($language_providers as $id => $provider) {
-    $providers_weight[$id] = language_provider_weight($provider);
-  }
-
-  // Order providers list by weight.
-  asort($providers_weight);
-
-  foreach ($providers_weight as $id => $weight) {
+  foreach ($negotiation as $id) {
     if (isset($defined_providers[$id])) {
       $provider = $defined_providers[$id];
       // If the provider does not express any preference about types, make it
@@ -402,18 +342,33 @@ function language_negotiation_set($type, $language_providers) {
       $types = array_flip(isset($provider['types']) ? $provider['types'] : $default_types);
       // Check whether the provider is defined and has the right type.
       if (isset($types[$type])) {
-        $provider_data = array();
-        foreach ($provider_fields as $field) {
-          if (isset($provider[$field])) {
-            $provider_data[$field] = $provider[$field];
-          }
-        }
-        $negotiation[$id] = $provider_data;
+        $negotiation_data[] = $id;
       }
     }
   }
 
-  variable_set("language_negotiation_$type", $negotiation);
+  config_set('language.settings', "language_negotiation.$type", $negotiation_data);
+}
+
+/**
+ * Get the language negotiator provider order for a language type.
+ *
+ * @param $type
+ *   The language negotiation type.
+ * @return array
+ *   An array of language negotiation providers.
+ */
+function language_negotiation_order($type) {
+  $types = language_types_info();
+  if (isset($types[$type]['fixed'])) {
+    return $types[$type]['fixed'];
+  }
+  elseif ($configured_order = config_get('language.settings', "language_negotiation.$type")) {
+    return $configured_order;
+  }
+  else {
+    return array();
+  }
 }
 
 /**
@@ -469,7 +424,9 @@ function language_provider_invoke($provider_id, $provider = NULL) {
 
     if (!isset($provider)) {
       $providers = language_negotiation_info();
-      $provider = $providers[$provider_id];
+      if (isset($providers[$provider_id])) {
+        $provider = $providers[$provider_id];
+      }
     }
 
     if (isset($provider['file'])) {
@@ -479,7 +436,7 @@ function language_provider_invoke($provider_id, $provider = NULL) {
     // If the language negotiation provider has no cache preference or this is
     // satisfied we can execute the callback.
     $cache = !isset($provider['cache']) || $user->uid || $provider['cache'] == config_get('system.core', 'cache');
-    $callback = isset($provider['callbacks']['language']) ? $provider['callbacks']['language'] : FALSE;
+    $callback = isset($provider['callbacks']['language']) ? $provider['callbacks']['language'] : '';
     $langcode = $cache && function_exists($callback) ? $callback($languages) : FALSE;
     $results[$provider_id] = isset($languages[$langcode]) ? $languages[$langcode] : FALSE;
   }
@@ -489,20 +446,6 @@ function language_provider_invoke($provider_id, $provider = NULL) {
   // same providers might be used with different language types based on
   // configuration.
   return !empty($results[$provider_id]) ? clone($results[$provider_id]) : $results[$provider_id];
-}
-
-/**
- * Returns the passed language negotiation provider weight or a default value.
- *
- * @param $provider
- *   A language negotiation provider data structure.
- *
- * @return
- *   A numeric weight.
- */
-function language_provider_weight($provider) {
-  $default = is_numeric($provider) ? $provider : 0;
-  return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
 }
 
 /**

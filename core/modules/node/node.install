@@ -35,7 +35,7 @@ function node_schema() {
         'default' => '',
       ),
       'langcode' => array(
-        'description' => 'The {language}.langcode of this node.',
+        'description' => 'The language code of this node.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
@@ -492,7 +492,7 @@ function node_update_1001() {
  */
 function node_update_1002() {
   $spec = array(
-    'description' => 'The {language}.langcode of this node.',
+    'description' => 'The language code of this node.',
     'type' => 'varchar',
     'length' => 12,
     'not null' => TRUE,

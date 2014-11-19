@@ -232,7 +232,7 @@ function locale_language_from_user($languages) {
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_session($languages) {
-  $param = config_get('language.negotiation', 'session_parameter');
+  $param = config_get('locale.settings', 'language_negotiation_session_parameter');
 
   // Request parameter: we need to update the session parameter only if we have
   // an authenticated user.
@@ -268,7 +268,7 @@ function locale_language_from_url($languages) {
     return $language_url;
   }
 
-  switch (config_get('language.negotiation', 'url_part')) {
+  switch (config_get('locale.settings', 'language_negotiation_url_part')) {
     case LANGUAGE_NEGOTIATION_URL_PREFIX:
       // $_GET['q'] might not be available at this time, because
       // path initialization runs after the language bootstrap phase.
@@ -337,9 +337,9 @@ function locale_language_from_url($languages) {
  * @return
  *   A valid language code.
  */
-function locale_language_url_fallback($language = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
+function locale_language_url_fallback($languages = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
   $default = language_default();
-  $prefix = (config_get('language.negotiation', 'url_part') == LANGUAGE_NEGOTIATION_URL_PREFIX);
+  $prefix = (config_get('locale.settings', 'language_negotiation_url_part') == LANGUAGE_NEGOTIATION_URL_PREFIX);
 
   // If the default language is not configured to convey language information,
   // a missing URL language information indicates that URL language should be
@@ -382,7 +382,7 @@ function locale_language_switcher_url($type, $path) {
 function locale_language_switcher_session($type, $path) {
   backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
-  $param = config_get('language.negotiation', 'session_parameter');
+  $param = config_get('locale.settings', 'language_negotiation_session_parameter');
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
@@ -439,7 +439,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
   }
 
   if (isset($options['language'])) {
-    switch (config_get('language.negotiation', 'url_part')) {
+    switch (config_get('locale.settings', 'language_negotiation_url_part')) {
       case LANGUAGE_NEGOTIATION_URL_DOMAIN:
         $domains = locale_language_negotiation_url_domains();
         if (!empty($domains[$options['language']->langcode])) {
@@ -473,28 +473,28 @@ function locale_language_url_rewrite_url(&$path, &$options) {
  * Reads language prefixes and uses the langcode if no prefix is set.
  */
 function locale_language_negotiation_url_prefixes() {
-  return config_get('language.negotiation', 'url_prefixes');
+  return config_get('locale.settings', 'language_negotiation_url_prefixes');
 }
 
 /**
  * Saves language prefix settings.
  */
 function locale_language_negotiation_url_prefixes_save(array $prefixes) {
-  config_set('language.negotiation', 'url_prefixes', $prefixes);
+  config_set('locale.settings', 'language_negotiation_url_prefixes', $prefixes);
 }
 
 /**
  * Reads language domains.
  */
 function locale_language_negotiation_url_domains() {
-  return config_get('language.negotiation', 'url_domains');
+  return config_get('locale.settings', 'language_negotiation_url_domains');
 }
 
 /**
  * Saves the language domain settings.
  */
 function locale_language_negotiation_url_domains_save(array $domains) {
-  config_set('language.negotiation', 'url_domains', $domains);
+  config_set('locale.settings', 'language_negotiation_url_domains', $domains);
 }
 
 /**
@@ -510,7 +510,7 @@ function locale_language_url_rewrite_session(&$path, &$options) {
     if (!$user->uid) {
       // Get the enabled languages only.
       $languages = language_list(TRUE);
-      $query_param = check_plain(config_get('language.negotiation', 'session_parameter'));
+      $query_param = check_plain(config_get('locale.settings', 'language_negotiation_session_parameter'));
       $query_value = isset($_GET[$query_param]) ? check_plain($_GET[$query_param]) : NULL;
       $query_rewrite = isset($languages[$query_value]) && language_negotiation_get_any(LANGUAGE_NEGOTIATION_SESSION);
     }
@@ -688,7 +688,7 @@ function _locale_parse_js_file($filepath) {
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
-  $parsed = state_get('javascript_parsed', array());
+  $parsed = state_get('locale_javascript_parsed', array());
 
   if (empty($langcode)) {
     // Invalidate all languages.
@@ -705,7 +705,7 @@ function _locale_invalidate_js($langcode = NULL) {
     $parsed['refresh:' . $langcode] = 'waiting';
   }
 
-  state_set('javascript_parsed', $parsed);
+  state_set('locale_javascript_parsed', $parsed);
   return $parsed;
 }
 
@@ -742,7 +742,7 @@ function _locale_rebuild_js($langcode = NULL) {
 
     $data = "Backdrop.locale = { ";
 
-    $locale_plurals = variable_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', array());
     if (!empty($locale_plurals[$language->langcode])) {
       $data .= "'pluralFormula': function (\$n) { return Number({$locale_plurals[$language->langcode]['formula']}); }, ";
     }
@@ -752,11 +752,10 @@ function _locale_rebuild_js($langcode = NULL) {
   }
 
   // Construct the filepath where JS translation files are stored.
-  // There is (on purpose) no front end to edit that variable.
-  $dir = 'public://' . variable_get('locale_js_directory', 'languages');
+  $dir = 'public://' . settings_get('locale_js_directory', 'languages');
 
   // Delete old file, if we have no translations anymore, or a different file to be saved.
-  $locale_javascripts = variable_get('locale_translation_javascript', array());
+  $locale_javascripts = state_get('locale_translation_javascript', array());
   $changed_hash = !isset($locale_javascripts[$language->langcode]) || ($locale_javascripts[$language->langcode] != $data_hash);
   if (!empty($locale_javascripts[$language->langcode]) && (!$data || $changed_hash)) {
     file_unmanaged_delete($dir . '/' . $language->langcode . '_' . $locale_javascripts[$language->langcode] . '.js');
@@ -800,7 +799,7 @@ function _locale_rebuild_js($langcode = NULL) {
   // deleted). Act only if some operation was executed that changed the hash
   // code.
   if ($status && $changed_hash) {
-    variable_set('locale_translation_javascript', $locale_javascripts);
+    state_set('locale_translation_javascript', $locale_javascripts);
   }
 
   // Log the operation and return success flag.

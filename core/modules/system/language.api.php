@@ -24,15 +24,15 @@
  * did not happen yet and thus they cannot rely on translated variables.
  */
 function hook_language_init() {
-  global $language, $conf;
+  global $language_interface, $settings;
 
-  switch ($language->language) {
+  switch ($language_interface->language) {
     case 'it':
-      $conf['system.core']['site_name'] = 'Il mio sito Backdrop';
+      $settings['locale_custom_strings_en']['site_name'] = 'Il mio sito Backdrop';
       break;
 
     case 'fr':
-      $conf['system.core']['site_name'] = 'Mon site Backdrop';
+      $settings['locale_custom_strings_en']['site_name'] = 'Mon site Backdrop';
       break;
   }
 }

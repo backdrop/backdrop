@@ -1590,7 +1590,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
  * Defines the critical hooks that force modules to always be loaded.
  */
 function bootstrap_hooks() {
-  return array('boot', 'exit', 'watchdog', 'language_init');
+  return array('boot', 'exit', 'watchdog', 'language_init', 'language_negotiation_info', 'language_negotiation_info_alter', 'language_types_info', 'language_types_info_alter');
 }
 
 /**
@@ -1697,7 +1697,7 @@ function t($string, array $args = array(), array $options = array()) {
     $string = $custom_strings[$options['langcode']][$options['context']][$string];
   }
   // Translate with locale module if enabled.
-  elseif ($options['langcode'] != LANGUAGE_SYSTEM && ($options['langcode'] != 'en' || variable_get('locale_translate_english', FALSE)) && function_exists('locale')) {
+  elseif ($options['langcode'] != LANGUAGE_SYSTEM && ($options['langcode'] != 'en' || config_get('locale.settings', 'translate_english')) && function_exists('locale')) {
     $string = locale($string, $options['context'], $options['langcode']);
   }
   if (empty($args)) {
@@ -2844,20 +2844,21 @@ function get_t() {
  * Initializes all the defined language types.
  */
 function backdrop_language_initialize() {
-  $types = language_types_get_all();
 
   // Ensure the language is correctly returned, even without multilanguage
   // support. Also make sure we have a $language fallback, in case a language
   // negotiation callback needs to do a full bootstrap.
   // Useful for eg. XML/HTML 'lang' attributes.
   $default = language_default();
-  foreach ($types as $type) {
-    $GLOBALS[$type] = $default;
+  $default_types = language_types_get_default();
+  foreach ($default_types as $type_name => $configurable) {
+    $GLOBALS[$type_name] = $default;
   }
   if (language_multilingual()) {
     include_once BACKDROP_ROOT . '/core/includes/language.inc';
-    foreach ($types as $type) {
-      $GLOBALS[$type] = language_types_initialize($type);
+    $types = language_types_info();
+    foreach ($types as $type_name => $type_info) {
+      $GLOBALS[$type_name] = language_types_initialize($type_name);
     }
     // Allow modules to react on language system initialization in multilingual
     // environments.
@@ -2865,16 +2866,6 @@ function backdrop_language_initialize() {
   }
 }
 
-/**
- * Returns an array of the available language types.
- *
- * @return
- *   An array of all language types where the keys of each are the language
- *   type name and its value is its configurability (TRUE/FALSE).
- */
-function language_types_get_all() {
-  return array_keys(variable_get('language_types', language_types_get_default()));
-}
 /**
  * Returns a list of the built-in language types.
  *
@@ -2900,7 +2891,7 @@ function language_multilingual() {
   // The "language_count" variable stores the number of enabled languages to
   // avoid unnecessarily querying the database when building the list of
   // enabled languages on monolingual sites.
-  return variable_get('language_count', 1) > 1;
+  return config_get('system.core', 'language_count') > 1;
 }
 
 /**
@@ -2921,21 +2912,37 @@ function language_list($only_enabled = FALSE) {
     $languages = array('all' => array(), 'enabled' => array());
 
     // Fill in master language list based on current configuration.
-    $default = language_default();
-    if (language_multilingual() || module_exists('language')) {
+    $default_langcode = config_get('system.core', 'language_default');
+    $config_languages = config_get('language.settings', 'languages');
+    if ($config_languages) {
       // Use language module configuration if available.
-      $languages['all'] = db_query('SELECT * FROM {language} ORDER BY weight ASC, name ASC')->fetchAllAssoc('langcode');
+      include_once BACKDROP_ROOT . '/core/includes/common.inc';
+      foreach ($config_languages as $langcode => $language) {
+        $language += array(
+          'enabled' => TRUE,
+          'weight' => 0,
+        );
+        $languages['all'][$langcode] = (object) $language;
+      }
     }
-    else {
-      // No language module, so use the default language only.
-      $languages['all'][$default->langcode] = $default;
+
+    if (empty($languages['all'])) {
+      // No language module, so only English is supported.
+      $languages['all']['en'] = (object) array(
+        'langcode' => 'en',
+        'name' => 'English',
+        'direction' => 0,
+        'enabled' => TRUE,
+        'weight' => 0,
+        'default' => TRUE,
+      );
     }
 
     // Initialize default property so callers have an easy reference and can
     // save the same object without data loss. Also fill in the filtered list
     // of enabled languages only.
     foreach ($languages['all'] as $langcode => $language) {
-      $languages['all'][$langcode]->default = ($langcode == $default->langcode);
+      $languages['all'][$langcode]->default = ($langcode == $default_langcode);
       if ($language->enabled) {
         $languages['enabled'][$langcode] = $languages['all'][$langcode];
       }
@@ -2987,14 +2994,37 @@ function language_name($langcode) {
  *   A language object.
  */
 function language_default() {
-  $default = variable_get('language_default', (object) array(
-    'langcode' => 'en',
-    'name' => 'English',
-    'direction' => 0,
-    'enabled' => 1,
-    'weight' => 0,
-  ));
-  $default->default = TRUE;
+  $default = &backdrop_static(__FUNCTION__);
+
+  if (!isset($default)) {
+    $default_langcode = config_get('system.core', 'language_default');
+    if ($default_langcode !== 'en') {
+      $languages = language_list();
+      if (isset($languages[$default_langcode])) {
+        $default = $languages[$default_langcode];
+      }
+      else {
+        $default = (object) array(
+          'langcode' => $default_langcode,
+          'name' => 'Default',
+          'direction' => 0,
+          'enabled' => TRUE,
+          'weight' => 0,
+        );
+      }
+    }
+    else {
+      $default = (object) array(
+        'langcode' => 'en',
+        'name' => 'English',
+        'direction' => 0,
+        'enabled' => TRUE,
+        'weight' => 0,
+      );
+    }
+    $default->default = TRUE;
+  }
+
   return $default;
 }
 

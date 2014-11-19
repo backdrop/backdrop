@@ -14,24 +14,19 @@
 function locale_install() {
   require_once BACKDROP_ROOT . '/core/includes/language.inc';
 
-  // We cannot rely on language negotiation hooks here, because locale module is
-  // not enabled yet. Therefore language_negotiation_set() cannot be used.
-  $info = locale_language_negotiation_info();
-  $provider = $info[LANGUAGE_NEGOTIATION_URL];
-  $provider_fields = array('callbacks', 'file', 'cache');
-  $negotiation = array();
-
-  // Store only the needed data.
-  foreach ($provider_fields as $field) {
-    if (isset($provider[$field])) {
-      $negotiation[LANGUAGE_NEGOTIATION_URL][$field] = $provider[$field];
-    }
-  }
-
-  // Enable URL language detection for each (core) configurable language type.
+  // Enable URL language detection for each configurable language type.
+  $language_config = config('language.settings');
   foreach (language_types_get_configurable() as $type) {
-    variable_set("language_negotiation_$type", $negotiation);
+    $negotiation = $language_config->get("language_negotiation.$type");
+    if (empty($negotiation)) {
+      $negotiation = array(LANGUAGE_NEGOTIATION_URL, LANGUAGE_NEGOTIATION_DEFAULT);
+    }
+    else {
+      array_unshift($negotiation, LANGUAGE_NEGOTIATION_URL);
+    }
+    $language_config->set("language_negotiation.$type", $negotiation);
   }
+  $language_config->save();
 }
 
 /**
@@ -66,10 +61,10 @@ function locale_enable() {
  */
 function locale_uninstall() {
   // Delete all JavaScript translation files.
-  $locale_js_directory = 'public://' . variable_get('locale_js_directory', 'languages');
+  $locale_js_directory = 'public://' . settings_get('locale_js_directory', 'languages');
 
   if (is_dir($locale_js_directory)) {
-    $locale_javascripts = variable_get('locale_translation_javascript', array());
+    $locale_javascripts = state_get('locale_translation_javascript', array());
     foreach ($locale_javascripts as $langcode => $file_suffix) {
       if (!empty($file_suffix)) {
         file_unmanaged_delete($locale_js_directory . '/' . $langcode . '_' . $file_suffix . '.js');
@@ -81,32 +76,9 @@ function locale_uninstall() {
     }
   }
 
-  // Clear variables.
-  variable_del('language_types');
-  variable_del('locale_language_negotiation_url_part');
-  variable_del('locale_language_negotiation_url_prefixes');
-  variable_del('locale_language_negotiation_url_domains');
-  variable_del('locale_language_negotiation_session_param');
-  variable_del('language_content_type_default');
-  variable_del('language_content_type_negotiation');
-  variable_del('locale_cache_strings');
-  variable_del('locale_js_directory');
-  state_del('javascript_parsed');
-  variable_del('locale_field_language_fallback');
-  variable_del('locale_cache_length');
-  variable_del('locale_translation_plurals');
-  variable_del('locale_translation_javascript');
-
-  foreach (language_types_get_all() as $type) {
-    variable_del("language_negotiation_$type");
-    variable_del("locale_language_providers_weight_$type");
-  }
-
-  // Remove all node type language variables. Node module might have been
-  // enabled, but may be disabled, so use a wildcard delete.
-  db_delete('variable')
-    ->condition('name', db_like('language_content_type_') . '%', 'LIKE')
-    ->execute();
+  // Clear state values.
+  state_del('locale_javascript_parsed');
+  state_del('locale_translation_javascript');
 }
 
 /**
@@ -172,7 +144,7 @@ function locale_schema() {
         'length' => 12,
         'not null' => TRUE,
         'default' => '',
-        'description' => 'Language code. References {language}.langcode.',
+        'description' => 'Language code from the language.settings config file',
       ),
       'plid' => array(
         'type' => 'int',
@@ -217,7 +189,7 @@ function locale_update_dependencies() {
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
@@ -245,17 +217,6 @@ function locale_update_1000() {
  * Language type 'language' renamed to 'language_interface'.
  */
 function locale_update_1001() {
-  // Only change language_types if we had this setting saved. Keep order
-  // of types because that is significant for value dependency.
-  $types = update_variable_get('language_types', NULL);
-  if (!empty($types) && isset($types['language'])) {
-    $new_types = array();
-    foreach ($types as $key => $type) {
-      $new_types[$key == 'language' ? 'language_interface' : $key] = $type;
-    }
-    update_variable_set('language_types', $new_types);
-  }
-
   // Rename language_negotiation_language setting if exists.
   $setting = update_variable_get('language_negotiation_language', NULL);
   if ($setting !== NULL) {
@@ -327,31 +288,32 @@ function locale_update_1002() {
 }
 
 /**
- * Move language negotation settings from variables to config.
+ * Move language negotiation settings from variables to config.
  */
 function locale_update_1003() {
   // Set up new config file for language negotiation.
-  $config = config('language.negotiation');
-  $config->set('session_parameter', update_variable_get('locale_language_negotiation_session_param', 'language'));
-  $config->set('url_part', update_variable_get('locale_language_negotiation_url_part', 'path_prefix'));
+  $config = config('locale.settings');
+  $config->set('_config_static', true);
+
+  $config->set('language_negotiation_session_parameter', update_variable_get('locale_language_negotiation_session_param', 'language'));
+  $config->set('language_negotiation_url_part', update_variable_get('locale_language_negotiation_url_part', 'path_prefix'));
 
   // Ensure defaults are set for all enabled languages.
-  $languages = language_list();
+  $languages = db_query('SELECT * FROM {language} ORDER BY weight ASC, name ASC')->fetchAllAssoc('langcode');
   $prefixes_old = update_variable_get('locale_language_negotiation_url_prefixes', array('en' => ''));
   $domains_old = update_variable_get('locale_language_negotiation_url_domains', array('en' => ''));
-
+  $default_language = update_variable_get('language_default');
   $prefixes = array();
   $domains = array();
 
   foreach ($languages as $langcode => $language) {
     // Keep the old prefix or fill in based on whether the language is default.
-    $prefixes[$langcode] = empty($prefixes_old[$langcode]) ? (empty($language->default) ? $langcode : '') : $prefixes_old[$langcode];
+    $prefixes[$langcode] = empty($prefixes_old[$langcode]) ? ($default_language->langcode == $langcode ? '' : $langcode) : $prefixes_old[$langcode];
     // Keep the old domain or fill in empty value.
     $domains[$langcode] = empty($domains_old[$langcode]) ? '' : $domains_old[$langcode];
   }
-
-  $config->set('url_prefixes', $prefixes);
-  $config->set('url_domains', $domains);
+  $config->set('language_negotiation_url_prefixes', $prefixes);
+  $config->set('language_negotiation_url_domains', $domains);
   $config->save();
 
   // Delete variables.
@@ -359,6 +321,50 @@ function locale_update_1003() {
   update_variable_del('locale_language_negotiation_url_part');
   update_variable_del('locale_language_negotiation_url_prefixes');
   update_variable_del('locale_language_negotiation_url_domains');
+}
+
+/**
+ * Update locale settings to config.
+ */
+function locale_update_1004() {
+  $config = config('locale.settings');
+
+  // Previously we had stored these settings in language.negotiation config, so
+  // move them if they exist.
+  $old_config = config('language.negotiation');
+  if (!$old_config->isNew()) {
+    $config->set('language_negotiation_session_parameter', $old_config->get('session_parameter'));
+    $config->set('language_negotiation_url_part', $old_config->get('url_part'));
+    $config->set('language_negotiation_url_prefixes', $old_config->get('url_prefixes'));
+    $config->set('language_negotiation_url_domains', $old_config->get('url_domains'));
+    $old_config->delete();
+  }
+
+  $config->set('language_negotiation_url_type', update_variable_get('locale_language_negotiation_url_type', 'language_interface'));
+  $config->set('language_providers_weight_language_interface', update_variable_get('locale_language_providers_weight_language_interface'));
+  $config->set('cache_length', update_variable_get('locale_cache_length', 75));
+  $config->set('field_language_fallback', update_variable_get('locale_field_language_fallback', TRUE));
+  $config->set('translate_english', update_variable_get('locale_translate_english', FALSE));
+
+  $config->save();
+
+  state_set('locale_translation_plurals', update_variable_get('locale_translation_plurals', array()));
+
+  // Moved to config:
+  update_variable_del('locale_language_negotiation_url_type');
+  update_variable_del('locale_language_providers_weight_language_interface');
+  update_variable_del('locale_cache_length');
+  update_variable_del('locale_field_language_fallback');
+  update_variable_del('locale_translate_english');
+
+  // Moved to $settings:
+  update_variable_del('locale_translate_file_directory');
+  update_variable_del('locale_js_directory');
+  update_variable_del('locale_cache_strings');
+
+  // Moved to state:
+  update_variable_del('locale_translation_plurals');
+  update_variable_del('locale_translation_javascript');
 }
 
 /**

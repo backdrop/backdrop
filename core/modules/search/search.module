@@ -248,7 +248,7 @@ function search_get_info($all = FALSE) {
   }
 
   // Return only modules that are set to active in search settings.
-  return array_intersect_key($search_hooks, array_flip(config_get('search.settings', 'search_active_modules')));
+  return array_intersect_key($search_hooks, array_flip((array) config_get('search.settings', 'search_active_modules')));
 }
 
 /**

@@ -672,7 +672,7 @@ function hook_views_query_substitutions($view) {
     '***CURRENT_VERSION***' => BACKDROP_VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
     '***CURRENT_LANGUAGE***' => $language_content->langcode,
-    '***DEFAULT_LANGUAGE***' => language_default('language')->langcode,
+    '***DEFAULT_LANGUAGE***' => language_default()->langcode,
   );
 }
 

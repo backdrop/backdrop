@@ -137,11 +137,6 @@ function update_prepare_bootstrap() {
       // Bootstrap variables so we can update theme while preparing the update
       // process.
       backdrop_bootstrap(BACKDROP_BOOTSTRAP_VARIABLES);
-      // Update the dynamic include paths that might be used before running the
-      // proper update functions.
-      update_prepare_stored_includes();
-      // Update the environment for the language bootstrap if needed.
-      update_prepare_language();
 
       // Change language column to langcode in url_alias.
       if (db_table_exists('url_alias') && db_field_exists('url_alias', 'language')) {
@@ -198,23 +193,11 @@ function update_prepare_bootstrap() {
       if (!db_field_exists('users_roles', 'role')) {
         db_add_field('users_roles', 'role', $role_column);
       }
-    }
-  }
-}
 
-/**
- * Fix stored include paths to match the "/core" migration.
- */
-function update_prepare_stored_includes() {
-  // Update language negotiation settings.
-  foreach (language_types_get_all() as $language_type) {
-    $negotiation = variable_get("language_negotiation_$language_type", array());
-    foreach ($negotiation as $id => &$provider) {
-      if (isset($negotiation[$id]['file']) && $negotiation[$id]['file'] == 'includes/locale.inc') {
-        $negotiation[$id]['file'] = 'core/includes/locale.inc';
-      }
+      // Update the environment for the language bootstrap if needed. Language
+      // depends on the state table, so this runs after its creation.
+      update_prepare_language();
     }
-    variable_set("language_negotiation_$language_type", $negotiation);
   }
 }
 
@@ -239,10 +222,10 @@ function update_prepare_language() {
       $prefixes[$language->language] = $language->prefix;
       $domains[$language->language] = $language->domain;
     }
-    variable_set('locale_translation_plurals', $plurals);
-    variable_set('locale_translation_javascript', $javascript);
-    config_set('language.negotiation', 'url_prefixes', $prefixes);
-    config_set('language.negotiation', 'url_domains', $domains);
+    state_set('locale_translation_plurals', $plurals);
+    state_set('locale_translation_javascript', $javascript);
+    config_set('locale.settings', 'language_negotiation_url_prefixes', $prefixes);
+    config_set('locale.settings', 'language_negotiation_url_domains', $domains);
 
     // Drop now unneeded columns.
     db_drop_field('languages', 'plurals');

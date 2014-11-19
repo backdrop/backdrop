@@ -1124,8 +1124,10 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     //   breadcrumbs may differ, possibly due to template.php overrides.
     $menus = array('main-menu', 'main-menu');
     // Alter node type menu settings.
-    variable_set("menu_options_$type", $menus);
-    variable_set("menu_parent_$type", 'main-menu:0');
+    $node_type = node_type_get_type($type);
+    $node_type->settings['menu_options'] = $menus;
+    $node_type->settings['menu_parent'] = 'main-menu:0';
+    node_type_save($node_type);
 
     foreach ($menus as $menu) {
       // Create a parent node in the current menu.
