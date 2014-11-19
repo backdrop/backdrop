@@ -392,7 +392,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
     case 'db-store':
       // We got header information.
       if ($value['msgid'] == '') {
-        $locale_plurals = variable_get('locale_translation_plurals', array());
+        $locale_plurals = state_get('locale_translation_plurals', array());
         if (($mode != LOCALE_IMPORT_KEEP) || empty($locale_plurals[$lang]['plurals'])) {
           // Since we only need to parse the header if we ought to update the
           // plural formula, only run this if we don't need to keep existing
@@ -406,7 +406,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
               'plurals' => $nplurals,
               'formula' => $formula,
             );
-            variable_set('locale_translation_plurals', $locale_plurals);
+            state_set('locale_translation_plurals', $locale_plurals);
           }
         }
         $header_done = TRUE;
@@ -914,7 +914,7 @@ function _locale_export_get_strings($language = NULL) {
 function _locale_export_po_generate($language = NULL, $strings = array(), $header = NULL) {
   global $user;
 
-  $locale_plurals = variable_get('locale_translation_plurals', array());
+  $locale_plurals = state_get('locale_translation_plurals', array());
 
   if (!isset($header)) {
     if (isset($language)) {

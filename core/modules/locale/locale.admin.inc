@@ -16,7 +16,7 @@ function language_negotiation_configure_form() {
   $form = array(
     '#submit' => array('language_negotiation_configure_form_submit'),
     '#theme' => 'language_negotiation_configure_form',
-    '#language_types' => language_types_get_configurable(FALSE),
+    '#language_types' => language_types_get_configurable(),
     '#language_types_info' => language_types_info(),
     '#language_providers' => language_negotiation_info(),
   );
@@ -51,27 +51,25 @@ function language_negotiation_configure_form_table(&$form, $type) {
   );
 
   $language_providers = $form['#language_providers'];
-  $enabled_providers = variable_get("language_negotiation_$type", array());
-  $providers_weight = variable_get("locale_language_providers_weight_$type", array());
-
-  // Add missing data to the providers lists.
-  foreach ($language_providers as $id => $provider) {
-    if (!isset($providers_weight[$id])) {
-      $providers_weight[$id] = language_provider_weight($provider);
-    }
-  }
+  $enabled_providers = (array) config_get('language.settings', "language_negotiation.$type");
 
   // Order providers list by weight.
-  asort($providers_weight);
+  foreach ($language_providers as $id => $provider) {
+    $set_weight = array_search($id, $enabled_providers);
+    $language_providers[$id]['set_weight'] = $set_weight !== FALSE ? $set_weight - 10 : 20;
+  }
+  // Put the default language at the bottom of the list.
+  $last_provider = end($enabled_providers);
+  if ($last_provider === LANGUAGE_NEGOTIATION_DEFAULT) {
+    $language_providers[$id]['set_weight'] = 21;
+  }
+  backdrop_sort($language_providers, array('set_weight' => SORT_NUMERIC, 'weight' => SORT_NUMERIC));
+  if ($last_provider === LANGUAGE_NEGOTIATION_DEFAULT) {
+    $language_providers[$id]['set_weight'] = 10;
+  }
 
-  foreach ($providers_weight as $id => $weight) {
-    // A language provider might be no more available if the defining module has
-    // been disabled after the last configuration saving.
-    if (!isset($language_providers[$id])) {
-      continue;
-    }
-
-    $enabled = isset($enabled_providers[$id]);
+  foreach ($language_providers as $id => $provider) {
+    $enabled = in_array($id, $enabled_providers);
     $provider = $language_providers[$id];
 
     // List the provider only if the current type is defined in its 'types' key.
@@ -82,28 +80,28 @@ function language_negotiation_configure_form_table(&$form, $type) {
       $table_form['#language_providers'][$id] = $provider;
       $provider_name = check_plain($provider['name']);
 
-      $table_form['weight'][$id] = array(
+      $table_form[$id]['weight'] = array(
         '#type' => 'weight',
         '#title' => t('Weight for !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
-        '#default_value' => $weight,
+        '#default_value' => $provider['set_weight'] > 10 ? $provider['weight'] : $provider['set_weight'],
         '#attributes' => array('class' => array("language-provider-weight-$type")),
       );
 
-      $table_form['title'][$id] = array('#markup' => $provider_name);
+      $table_form[$id]['title'] = array('#markup' => $provider_name);
 
-      $table_form['enabled'][$id] = array(
+      $table_form[$id]['enabled'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
         '#default_value' => $enabled,
       );
       if ($id === LANGUAGE_NEGOTIATION_DEFAULT) {
-        $table_form['enabled'][$id]['#default_value'] = TRUE;
-        $table_form['enabled'][$id]['#attributes'] = array('disabled' => 'disabled');
+        $table_form[$id]['enabled']['#default_value'] = TRUE;
+        $table_form[$id]['enabled']['#attributes'] = array('disabled' => 'disabled');
       }
 
-      $table_form['description'][$id] = array('#markup' => filter_xss_admin($provider['description']));
+      $table_form[$id]['description'] = array('#markup' => filter_xss_admin($provider['description']));
 
       $config_op = array();
       if (isset($provider['config'])) {
@@ -111,7 +109,7 @@ function language_negotiation_configure_form_table(&$form, $type) {
         // If there is at least one operation enabled show the operation column.
         $table_form['#show_operations'] = TRUE;
       }
-      $table_form['operation'][$id] = $config_op;
+      $table_form[$id]['operation'] = $config_op;
     }
   }
 
@@ -137,20 +135,19 @@ function theme_language_negotiation_configure_form($variables) {
     $title = '<label>' . $form[$type]['#title'] . '</label>';
     $description = '<div class="description">' . $form[$type]['#description'] . '</div>';
 
-    foreach ($form[$type]['title'] as $id => $element) {
-      // Do not take form control structures.
-      if (is_array($element) && element_child($id)) {
+    foreach (element_children($form[$type]) as $id) {
+      if (array_key_exists('title', $form[$type][$id])) {
         $row = array(
           'data' => array(
-            '<strong>' . backdrop_render($form[$type]['title'][$id]) . '</strong>',
-            backdrop_render($form[$type]['description'][$id]),
-            backdrop_render($form[$type]['enabled'][$id]),
-            backdrop_render($form[$type]['weight'][$id]),
+            '<strong>' . backdrop_render($form[$type][$id]['title']) . '</strong>',
+            backdrop_render($form[$type][$id]['description']),
+            backdrop_render($form[$type][$id]['enabled']),
+            backdrop_render($form[$type][$id]['weight']),
           ),
           'class' => array('draggable'),
         );
         if ($form[$type]['#show_operations']) {
-          $row['data'][] = backdrop_render($form[$type]['operation'][$id]);
+          $row['data'][] = backdrop_render($form[$type][$id]['operation']);
         }
         $rows[] = $row;
       }
@@ -193,25 +190,18 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
 
   foreach ($configurable_types as $type) {
     $negotiation = array();
-    $enabled_providers = $form_state['values'][$type]['enabled'];
-    $enabled_providers[LANGUAGE_NEGOTIATION_DEFAULT] = TRUE;
-    $providers_weight = $form_state['values'][$type]['weight'];
+    $providers = $form_state['values'][$type];
+    $providers[LANGUAGE_NEGOTIATION_DEFAULT]['enabled'] = 1;
+    backdrop_sort($providers);
 
-    foreach ($providers_weight as $id => $weight) {
-      if ($enabled_providers[$id]) {
-        $provider = $form[$type]['#language_providers'][$id];
-        $provider['weight'] = $weight;
-        $negotiation[$id] = $provider;
+    foreach ($providers as $id => $provider_settings) {
+      if ($provider_settings['enabled']) {
+        $negotiation[] = $id;
       }
     }
 
     language_negotiation_set($type, $negotiation);
-    variable_set("locale_language_providers_weight_$type", $providers_weight);
   }
-
-  // Update non-configurable language types and the related language negotiation
-  // configuration.
-  language_types_set();
 
   $form_state['redirect'] = 'admin/config/regional/language/detection';
   backdrop_set_message(t('Language negotiation configuration saved.'));
@@ -231,7 +221,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       LANGUAGE_NEGOTIATION_URL_PREFIX => t('Path prefix'),
       LANGUAGE_NEGOTIATION_URL_DOMAIN => t('Domain'),
     ),
-    '#default_value' => config_get('language.negotiation', 'url_part'),
+    '#default_value' => config_get('locale.settings', 'language_negotiation_url_part'),
   );
 
   $form['prefix'] = array(
@@ -348,7 +338,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
  */
 function language_negotiation_configure_url_form_submit($form, &$form_state) {
   // Save selected format (prefix or domain).
-  config_set('language.negotiation', 'url_part', $form_state['values']['locale_language_negotiation_url_part']);
+  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['locale_language_negotiation_url_part']);
 
   // Save new domain and prefix values.
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
@@ -363,10 +353,10 @@ function language_negotiation_configure_url_form_submit($form, &$form_state) {
  * @see language_negotiation_configure_session_form_submit()
  */
 function language_negotiation_configure_session_form($form, &$form_state) {
-  $form['locale_language_negotiation_session_param'] = array(
+  $form['language_negotiation_session_parameter'] = array(
     '#title' => t('Request/session parameter'),
     '#type' => 'textfield',
-    '#default_value' => config_get('language.negotiation', 'session_parameter'),
+    '#default_value' => config_get('locale.settings', 'language_negotiation_session_parameter'),
     '#description' => t('Name of the request/session parameter used to determine the desired language.'),
   );
 
@@ -384,7 +374,7 @@ function language_negotiation_configure_session_form($form, &$form_state) {
  * Form submission handler for language_negotiation_configure_session_form().
  */
 function language_negotiation_configure_session_form_submit($form, &$form_state) {
-  config_set('language.negotiation', 'session_parameter', $form_state['values']['language_negotiation_session_param']);
+  config_set('locale.settings', 'language_negotiation_session_parameter', $form_state['values']['language_negotiation_session_parameter']);
   backdrop_set_message(t('The configuration options have been saved.'));
 }
 

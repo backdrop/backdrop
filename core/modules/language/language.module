@@ -61,6 +61,35 @@ function language_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function language_config_info() {
+  $prefixes['language.settings'] = array(
+    'label' => t('Language settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
+
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function language_modules_enabled($modules) {
+  include_once BACKDROP_ROOT . '/core/includes/language.inc';
+  language_negotiation_purge();
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function language_modules_disabled($modules) {
+  include_once BACKDROP_ROOT . '/core/includes/language.inc';
+  language_negotiation_purge();
+}
+
+/**
  * Implements hook_theme().
  */
 function language_theme() {
@@ -79,7 +108,8 @@ function language_theme() {
  *   Language object with properties corresponding to 'language' table columns.
  */
 function language_save($language) {
-  $language->is_new = !(bool) db_query_range('SELECT 1 FROM {language} WHERE langcode = :langcode', 0, 1, array(':langcode' => $language->langcode))->fetchField();
+  $config = config('language.settings');
+  $language->is_new = !$config->get('languages.' . $language->langcode);
 
   // If name was not set, we add a predefined language.
   if (!isset($language->name)) {
@@ -98,25 +128,50 @@ function language_save($language) {
 
   // Save the record and inform others about the change.
   $t_args = array('%language' => $language->name, '%langcode' => $language->langcode);
+
+  // Make sure only applicable data is saved.
+  $language_data = (array) $language;
+  $defaults = array(
+    'langcode' => '',
+    'name' => '',
+    'direction' => 0,
+    'enabled' => TRUE,
+    'weight' => 0,
+  );
+  $language_data += $defaults;
+  $language_data = array_intersect_key($language_data, $defaults);
+
+  // Insert the new language in order.
+  $all_languages = $config->get('languages');
+  $all_languages[$language->langcode] = (array) $language_data;
+  backdrop_sort($all_languages);
+  $config->set('languages', $all_languages);
+  $config->save();
+
   if ($language->is_new) {
-    backdrop_write_record('language', $language);
     module_invoke_all('language_insert', $language);
     watchdog('language', 'The %language (%langcode) language has been created.', $t_args);
   }
   else {
-    backdrop_write_record('language', $language, array('langcode'));
     module_invoke_all('language_update', $language);
     watchdog('language', 'The %language (%langcode) language has been updated.', $t_args);
   }
 
   if (!empty($language->default)) {
     // Set the new version of this language as default in a variable.
-    $default_language = language_default();
-    variable_set('language_default', $language);
+    config_set('system.core', 'language_default', $language->langcode);
+    backdrop_static_reset('language_default');
   }
 
   // Update language count based on enabled language count.
-  variable_set('language_count', db_query('SELECT COUNT(langcode) FROM {language} WHERE enabled = 1')->fetchField());
+  $current_languages = $config->get('languages');
+  $language_count = 0;
+  foreach ($current_languages as $language) {
+    if ($language['enabled']) {
+      $language_count++;
+    }
+  }
+  config_set('system.core', 'language_count', $language_count);
 
   // Kill the static cache in language_list().
   backdrop_static_reset('language_list');
@@ -140,12 +195,14 @@ function language_delete($langcode) {
     module_invoke_all('language_delete', $language);
 
     // Remove the language.
-    db_delete('language')
-      ->condition('langcode', $language->langcode)
-      ->execute();
+    $config = config('language.settings');
+    $config->clear('languages.' . $language->langcode);
+    $config->save();
 
     if ($language->enabled) {
-      variable_set('language_count', variable_get('language_count', 1) - 1);
+      $core_config = config('system.core');
+      $core_config->set('language_count', $core_config->get('language_count', 1) - 1);
+      $core_config->save();
     }
 
     backdrop_static_reset('language_list');
@@ -155,14 +212,4 @@ function language_delete($langcode) {
     return TRUE;
   }
   return FALSE;
-}
-
-/**
- * Implements hook_config_info().
- */
-function language_config_info() {
-  $prefixes['language.negotiation'] = array(
-    'label' => t('Language negotiation'),
-    'group' => t('Configuration'),
-  );
 }

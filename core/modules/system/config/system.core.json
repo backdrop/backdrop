@@ -22,6 +22,8 @@
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
     "install_profile": "",
+    "language_count": 1,
+    "language_default": "en",
     "log_row_limit": 1000,
     "log_identity": "backdrop",
     "log_facility": "",

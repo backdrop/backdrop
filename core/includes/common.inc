@@ -5192,7 +5192,7 @@ function backdrop_build_js_cache($files) {
  * Deletes old cached JavaScript files and variables.
  */
 function backdrop_clear_js_cache() {
-  state_del('javascript_parsed');
+  state_del('locale_javascript_parsed');
   state_set('js_cache_files', FALSE);
   file_scan_directory('public://js', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }

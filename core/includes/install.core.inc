@@ -1204,11 +1204,6 @@ function install_find_translations() {
   foreach ($files as $key => $file) {
     // Strip off the file name component before the language code.
     $files[$key]->langcode = preg_replace('!^(.+\.)?([^\.]+)$!', '\2', $file->name);
-    // Language codes cannot exceed 12 characters to fit into the {language}
-    // table.
-    if (strlen($files[$key]->langcode) > 12) {
-      unset($files[$key]);
-    }
   }
   return $files;
 }
@@ -1228,7 +1223,7 @@ function install_find_translations() {
  * @see file_scan_directory()
  */
 function install_find_translation_files($langcode = NULL) {
-  $directory = variable_get('locale_translate_file_directory', 'files/translations');
+  $directory = settings_get('locale_translate_file_directory', 'files/translations');
   $files = file_scan_directory($directory, '!install\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
@@ -1268,7 +1263,7 @@ function install_select_language(&$install_state) {
     // is doing.
     if (count($files) == 1) {
       if ($install_state['interactive']) {
-        $directory = variable_get('locale_translate_file_directory', 'files/translations');
+        $directory = settings_get('locale_translate_file_directory', 'files/translations');
 
         backdrop_set_title(st('Choose language'));
         if (!empty($install_state['parameters']['translate'])) {

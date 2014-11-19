@@ -60,7 +60,7 @@ class BackdropQueue {
   /**
    * Returns the queue object for a given name.
    *
-   * The following variables can be set by variable_set or $conf overrides:
+   * The following can be set in settings.php through the $settings variable:
    * - queue_class_$name: the class to be used for the queue $name.
    * - queue_default_class: the class to use when queue_class_$name is not
    *   defined. Defaults to SystemQueue, a reliable backend using SQL.

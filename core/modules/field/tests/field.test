@@ -3011,7 +3011,6 @@ class FieldTranslationsTestCase extends FieldTestCase {
     $this->assertTrue(isset($entity->{$this->field_name}[$langcode]) && $langcode != $requested_language, format_string('The display language for the (single) field %field_name is %language.', array('%field_name' => $field_name, '%language' => $langcode)));
 
     // Test field_language() basic behavior without language fallback.
-    variable_set('state_test_language_fallback', FALSE);
     $entity->{$this->field_name}[$requested_language] = mt_rand(1, 127);
     backdrop_static_reset('field_language');
     $display_language = field_language($entity_type, $entity, $this->field_name, $requested_language);

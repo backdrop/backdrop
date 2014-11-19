@@ -148,6 +148,18 @@ function locale_autoload_info() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function locale_config_info() {
+  $prefixes['locale.settings'] = array(
+    'label' => t('Locale settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
+
+/**
  * Form builder callback to display language selection widget.
  *
  * @ingroup forms
@@ -259,7 +271,7 @@ function locale_theme() {
 function locale_field_language_alter(&$display_language, $context) {
   // Do not apply core language fallback rules if they are disabled or if Locale
   // is not registered as a translation handler.
-  if (variable_get('locale_field_language_fallback', TRUE) && field_has_translation_handler($context['entity_type'], 'locale')) {
+  if (config_get('locale.settings', 'field_language_fallback') && field_has_translation_handler($context['entity_type'], 'locale')) {
     locale_field_language_fallback($display_language, $context['entity'], $context['language']);
   }
 }
@@ -420,22 +432,6 @@ function locale_language_negotiation_info() {
 }
 
 /**
- * Implements hook_modules_enabled().
- */
-function locale_modules_enabled($modules) {
-  include_once BACKDROP_ROOT . '/core/includes/language.inc';
-  language_types_set();
-  language_negotiation_purge();
-}
-
-/**
- * Implements hook_modules_disabled().
- */
-function locale_modules_disabled($modules) {
-  locale_modules_enabled($modules);
-}
-
-/**
  * Implements hook_language_insert().
  */
 function locale_language_insert($language) {
@@ -558,7 +554,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
     // the exact list of strings used on a page. From a performance
     // perspective that is a really bad idea, so we have no user
     // interface for this. Be careful when turning this option off!
-    if (variable_get('locale_cache_strings', 1) == 1) {
+    if (settings_get('locale_cache_strings', 1) == 1) {
       if ($cache = cache()->get('locale:' . $langcode)) {
         $locale_t[$langcode] = $cache->data;
       }
@@ -566,7 +562,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         // Refresh database stored cache of translations for given language.
         // We only store short strings used in current version, to improve
         // performance and consume less memory.
-        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => BACKDROP_VERSION, ':length' => variable_get('locale_cache_length', 75)));
+        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => BACKDROP_VERSION, ':length' => config_get('locale.settings', 'cache_length')));
         foreach ($result as $data) {
           $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
         }
@@ -578,13 +574,20 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
 
   // If we have the translation cached, skip checking the database
   if (!isset($locale_t[$langcode][$context][$string])) {
-
     // We do not have this translation cached, so get it from the DB.
-    $translation = db_query("SELECT s.lid, t.translation, s.version FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.source = :source AND s.context = :context", array(
-      ':language' => $langcode,
-      ':source' => $string,
-      ':context' => (string) $context,
-    ))->fetchObject();
+    try {
+      $translation = db_query("SELECT s.lid, t.translation, s.version FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.source = :source AND s.context = :context", array(
+        ':language' => $langcode,
+        ':source' => $string,
+        ':context' => (string) $context,
+      ))->fetchObject();
+    }
+    // In the event the table does not exist (such as when uninstalling the
+    // module), just return the untranslated string.
+    catch (PDOException $e) {
+      return $string;
+    }
+
     if ($translation) {
       // We have the source string at least.
       // Cache translation string or TRUE if no translation exists.
@@ -658,7 +661,7 @@ function locale_get_plural($count, $langcode = NULL) {
   if (!isset($plural_indexes[$langcode][$count])) {
     // Retrieve and statically cache the plural formulas for all languages.
     if (empty($plural_formulas)) {
-      $plural_formulas = variable_get('locale_translation_plurals', array());
+      $plural_formulas = state_get('locale_translation_plurals', array());
     }
     // If there is a plural formula for the language, evaluate it for the given
     // $count and statically cache the result for the combination of language
@@ -733,8 +736,8 @@ function locale_system_update($components) {
 function locale_js_alter(&$javascript) {
   global $language_interface;
 
-  $dir = 'public://' . variable_get('locale_js_directory', 'languages');
-  $parsed = state_get('javascript_parsed', array());
+  $dir = 'public://' . settings_get('locale_js_directory', 'languages');
+  $parsed = state_get('locale_javascript_parsed', array());
   $files = $new_files = FALSE;
 
   // Require because locale_js_alter() could be called without locale_init().
@@ -770,16 +773,16 @@ function locale_js_alter(&$javascript) {
       unset($parsed['refresh:' . $language_interface->langcode]);
     }
     // Store any changes after refresh was attempted.
-    state_set('javascript_parsed', $parsed);
+    state_set('locale_javascript_parsed', $parsed);
   }
   // If no refresh was attempted, but we have new source files, we need
   // to store them too. This occurs if current page is in English.
   elseif ($new_files) {
-    state_set('javascript_parsed', $parsed);
+    state_set('locale_javascript_parsed', $parsed);
   }
 
   // Add the translation JavaScript file to the page.
-  $locale_javascripts = variable_get('locale_translation_javascript', array());
+  $locale_javascripts = state_get('locale_translation_javascript', array());
   if ($files && !empty($locale_javascripts[$language_interface->langcode])) {
     // Add the translation JavaScript file to the page.
     $file = $dir . '/' . $language_interface->langcode . '_' . $locale_javascripts[$language_interface->langcode] . '.js';
@@ -826,7 +829,7 @@ function locale_block_info() {
   include_once BACKDROP_ROOT . '/core/includes/language.inc';
   $block = array();
   $info = language_types_info();
-  foreach (language_types_get_configurable(FALSE) as $type) {
+  foreach (language_types_get_configurable() as $type) {
     $block[$type] = array(
       'info' => t('Language switcher (@type)', array('@type' => $info[$type]['name'])),
       'description' => t('Switches the site language for the @type portions of the page.', array('@type' => $info[$type]['name'])),
@@ -883,11 +886,12 @@ function locale_url_outbound_alter(&$path, &$options, $original_path) {
       $callbacks = array();
       include_once BACKDROP_ROOT . '/core/includes/language.inc';
 
+      $negotiation_info = language_negotiation_info();
       foreach (language_types_get_configurable() as $type) {
         // Get URL rewriter callbacks only from enabled language providers.
-        $negotiation = variable_get("language_negotiation_$type", array());
-
-        foreach ($negotiation as $id => $provider) {
+        $negotiation_providers = language_negotiation_order($type);
+        foreach ($negotiation_providers as $id) {
+          $provider = $negotiation_info[$id];
           if (isset($provider['callbacks']['url_rewrite'])) {
             if (isset($provider['file'])) {
               require_once BACKDROP_ROOT . '/' . $provider['file'];
@@ -999,14 +1003,14 @@ function locale_form_language_admin_edit_form_alter(&$form, &$form_state) {
  * Submission handler to record our custom setting.
  */
 function locale_form_language_admin_edit_form_alter_submit($form, $form_state) {
-  variable_set('locale_translate_english', $form_state['values']['locale_translate_english']);
+  config_set('locale.settings', 'translate_english', $form_state['values']['locale_translate_english']);
 }
 
 /**
  * Utility function to tell if locale translates to English.
  */
 function locale_translate_english() {
-  return variable_get('locale_translate_english', FALSE);
+  return config_get('locale.settings', 'translate_english');
 }
 
 /**
@@ -1018,7 +1022,7 @@ function locale_form_system_file_system_settings_alter(&$form, $form_state) {
   $form['locale_translate_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Interface translations directory'),
-    '#default_value' => variable_get('locale_translate_file_directory', 'files/translations'),
+    '#default_value' => settings_get('locale_translate_file_directory', 'files/translations'),
     '#maxlength' => 255,
     '#description' => t('A local file system path where interface translation files are looked for. This directory must exist.'),
     '#after_build' => array('system_check_directory'),

@@ -373,8 +373,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     require_once BACKDROP_ROOT . '/core/includes/locale.inc';
     _locale_rebuild_js($langcode);
 
-    $locale_javascripts = variable_get('locale_translation_javascript', array());
-    $js_file = 'public://' . variable_get('locale_js_directory', 'languages') . '/' . $langcode . '_' . $locale_javascripts[$langcode] . '.js';
+    $locale_javascripts = state_get('locale_translation_javascript', array());
+    $js_file = 'public://' . settings_get('locale_js_directory', 'languages') . '/' . $langcode . '_' . $locale_javascripts[$langcode] . '.js';
     $this->assertTrue($result = file_exists($js_file), format_string('JavaScript file created: %file', array('%file' => $result ? $js_file : 'not found')));
 
     // Test JavaScript translation rebuilding.
@@ -767,7 +767,12 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     parent::setUp('locale', 'locale_test');
 
     // Set the translation file directory.
-    variable_set('locale_translate_file_directory', backdrop_get_path('module', 'locale_test'));
+    $source = backdrop_get_path('module', 'locale_test');
+    $destination = settings_get('locale_translate_file_directory', 'files/translations');
+    file_prepare_directory($destination);
+    foreach (file_scan_directory($source, '/.*\.po/') as $file) {
+      file_unmanaged_copy($file->uri, $destination . '/' . $file->filename, FILE_EXISTS_REPLACE);
+    }
 
     $this->admin_user = $this->backdropCreateUser(array('administer languages', 'translate interface', 'access administration pages'));
     $this->backdropLogin($this->admin_user);
@@ -789,7 +794,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => 9, '%update' => 0, '%delete' => 0)), 'The translation file was successfully imported.');
 
     // This import should have saved plural forms to have 2 variants.
-    $locale_plurals = variable_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', array());
     $this->assert($locale_plurals['fr']['plurals'] == 2, 'Plural number initialized.');
 
     // Ensure we were redirected correctly.
@@ -836,7 +841,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertText(t('No strings available.'), 'String not overwritten by imported string.');
 
     // This import should not have changed number of plural forms.
-    $locale_plurals = variable_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', array());
     $this->assert($locale_plurals['fr']['plurals'] == 2, 'Plural numbers untouched.');
 
     // Try importing a .po file with overriding strings, and ensure existing
@@ -857,7 +862,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/translate/translate', $search, t('Filter'));
     $this->assertNoText(t('No strings available.'), 'String overwritten by imported string.');
     // This import should have changed number of plural forms.
-    $locale_plurals = variable_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', array());
     $this->assert($locale_plurals['fr']['plurals'] == 3, 'Plural numbers changed.');
   }
 
@@ -1246,7 +1251,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     node_type_save($node_type);
 
     // Change JavaScript translations directory.
-    variable_set('locale_js_directory', 'js_translations');
+    settings_get('locale_js_directory', 'js_translations');
 
     // Build the JavaScript translation file for French.
     $user = $this->backdropCreateUser(array('translate interface', 'access administration pages'));
@@ -1258,24 +1263,22 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $edit = array('translations[fr]' => 'french translation');
     $this->backdropPost('admin/config/regional/translate/edit/' . $string->lid, $edit, t('Save translations'));
     _locale_rebuild_js('fr');
-    $locale_javascripts = variable_get('locale_translation_javascript', array());
-    $js_file = 'public://' . variable_get('locale_js_directory', 'languages') . '/fr_' . $locale_javascripts['fr'] . '.js';
+    $locale_javascripts = state_get('locale_translation_javascript', array());
+    $js_file = 'public://' . settings_get('locale_js_directory', 'languages') . '/fr_' . $locale_javascripts['fr'] . '.js';
     $this->assertTrue($result = file_exists($js_file), format_string('JavaScript file created: %file', array('%file' => $result ? $js_file : t('none'))));
-
-    // Disable string caching.
-    variable_set('locale_cache_strings', 0);
 
     // Change language negotiation options.
     backdrop_load('module', 'locale');
-    variable_set('language_types', language_types_get_default() + array('language_custom' => TRUE));
-    variable_set('language_negotiation_' . LANGUAGE_TYPE_INTERFACE, locale_language_negotiation_info());
-    variable_set('language_negotiation_' . LANGUAGE_TYPE_CONTENT, locale_language_negotiation_info());
-    variable_set('language_negotiation_' . LANGUAGE_TYPE_URL, locale_language_negotiation_info());
+    config('language.settings')
+      ->set('language_negotiation.' . LANGUAGE_TYPE_INTERFACE, array_keys(locale_language_negotiation_info()))
+      ->set('language_negotiation.' . LANGUAGE_TYPE_CONTENT, array_keys(locale_language_negotiation_info()))
+      ->set('language_negotiation.' . LANGUAGE_TYPE_URL, array_keys(locale_language_negotiation_info()))
+      ->save();
 
     // Change language providers settings.
-    config('language.negotiation')
-      ->set('url_part', FALSE)
-      ->set('session_parameter', FALSE)
+    config('locale.settings')
+      ->set('language_negotiation_url_part', FALSE)
+      ->set('language_negotiation_session_parameter', FALSE)
       ->save();
 
     // Uninstall Locale.
@@ -1293,34 +1296,33 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $this->assertTrue($result = !file_exists($js_file), format_string('JavaScript file deleted: %file', array('%file' => $result ? $js_file : 'found')));
 
     // Check language count.
-    $language_count = variable_get('language_count', 1);
+    $language_count = config_get('system.core', 'language_count');
     $this->assertEqual($language_count, 1, format_string('Language count: %count', array('%count' => $language_count)));
+
+    backdrop_static_reset('language_types_info');
+    backdrop_static_reset('language_negotiation_info');
 
     // Check language negotiation.
     require_once BACKDROP_ROOT . '/core/includes/language.inc';
-    $this->assertTrue(count(language_types_get_all()) == count(language_types_get_default()), 'Language types reset');
+    $this->assertTrue(count(language_types_info()) == 0, 'Language types reset');
     $language_negotiation = language_negotiation_get(LANGUAGE_TYPE_INTERFACE) == LANGUAGE_NEGOTIATION_DEFAULT;
-    $this->assertTrue($language_negotiation, t('Interface language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
+    $this->assertTrue($language_negotiation, format_string('Interface language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
     $language_negotiation = language_negotiation_get(LANGUAGE_TYPE_CONTENT) == LANGUAGE_NEGOTIATION_DEFAULT;
-    $this->assertTrue($language_negotiation, t('Content language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
+    $this->assertTrue($language_negotiation, format_string('Content language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
     $language_negotiation = language_negotiation_get(LANGUAGE_TYPE_URL) == LANGUAGE_NEGOTIATION_DEFAULT;
-    $this->assertTrue($language_negotiation, t('URL language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
+    $this->assertTrue($language_negotiation, format_string('URL language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
 
     // Check language providers settings.
-    $this->assertFalse(config_get('language.negotiation', 'url_part'), t('URL language negotiation method indicator settings cleared.'));
-    $this->assertFalse(config_get('language.negotiation', 'session_parameter'), t('Visit language negotiation method settings cleared.'));
+    $this->assertFalse(config_get('locale.settings', 'language_negotiation_url_part'), format_string('URL language negotiation method indicator settings cleared.'));
+    $this->assertFalse(config_get('locale.settings', 'language_negotiation_session_parameter'), format_string('Visit language negotiation method settings cleared.'));
 
     // Check JavaScript parsed.
-    $javascript_parsed_count = count(state_get('javascript_parsed', array()));
+    $javascript_parsed_count = count(state_get('locale_javascript_parsed', array()));
     $this->assertEqual($javascript_parsed_count, 0, format_string('JavaScript parsed count: %count', array('%count' => $javascript_parsed_count)));
 
     // Check JavaScript translations directory.
-    $locale_js_directory = variable_get('locale_js_directory', 'languages');
+    $locale_js_directory = settings_get('locale_js_directory', 'languages');
     $this->assertEqual($locale_js_directory, 'languages', format_string('JavaScript translations directory: %dir', array('%dir' => $locale_js_directory)));
-
-    // Check string caching.
-    $locale_cache_strings = variable_get('locale_cache_strings', 1);
-    $this->assertEqual($locale_cache_strings, 1, format_string('String caching: %status', array('%status' => t($locale_cache_strings ? 'enabled': 'disabled'))));
   }
 }
 
@@ -1368,7 +1370,7 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[enabled][locale-url]' => '1');
+    $edit = array('language_interface[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Assert that the language switching block is displayed on the frontpage.
@@ -1623,7 +1625,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
 
     // Set language negotiation.
     $edit = array(
-      'language_interface[enabled][locale-url]' => TRUE,
+      'language_interface[locale-url][enabled]' => TRUE,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->assertText(t('Language negotiation configuration saved.'), 'Set language negotiation.');
@@ -2101,18 +2103,22 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     // is for some reason not found when doing translate search. This might
     // be some bug.
     backdrop_static_reset('language_list');
+    $core_config = config('system.core');
     $languages = language_list(TRUE);
-    variable_set('language_default', $languages['vi']);
+    $default_langcode = $core_config->get('language_default');
+    $core_config->set('language_default', $languages['vi']->langcode);
+    $core_config->save();
     // First visit this page to make sure our target string is searchable.
     $this->backdropGet('admin/config');
     // Now the t()'ed string is in db so switch the language back to default.
-    variable_del('language_default');
+    $core_config->set('language_default', $default_langcode);
+    $core_config->save();
 
     // Translate the string.
     $language_browser_fallback_string = "In $langcode_browser_fallback In $langcode_browser_fallback In $langcode_browser_fallback";
     $language_string = "In $langcode In $langcode In $langcode";
     // Do a translate search of our target string.
-    $edit = array( 'string' => $default_string);
+    $edit = array('string' => $default_string);
     $this->backdropPost('admin/config/regional/translate/translate', $edit, t('Filter'));
     // Should find the string and now click edit to post translated string.
     $this->clickLink('Edit');
@@ -2123,7 +2129,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save translations'));
 
     // Configure URL language rewrite.
-    variable_set('locale_language_negotiation_url_type', LANGUAGE_TYPE_INTERFACE);
+    config_get('locale.settings', 'language_negotiation_url_type', LANGUAGE_TYPE_INTERFACE);
 
     $tests = array(
       // Default, browser preference should have no influence.
@@ -2178,7 +2184,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     }
 
     // Unknown language prefix should return 404.
-    variable_set('language_negotiation_' . LANGUAGE_TYPE_INTERFACE, locale_language_negotiation_info());
+    config_set('language.settings', 'language_negotiation.' . LANGUAGE_TYPE_INTERFACE, array_keys(locale_language_negotiation_info()));
     $this->backdropGet("$langcode_unknown/admin/config", array(), $http_header_browser_fallback);
     $this->assertResponse(404, "Unknown language path prefix should return 404");
 
@@ -2220,11 +2226,10 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
   protected function runTest($test) {
     if (!empty($test['language_negotiation'])) {
-      $negotiation = array_flip($test['language_negotiation']);
-      language_negotiation_set(LANGUAGE_TYPE_INTERFACE, $negotiation);
+      language_negotiation_set(LANGUAGE_TYPE_INTERFACE, $test['language_negotiation']);
     }
     if (!empty($test['locale_language_negotiation_url_part'])) {
-      config_set('language.negotiation', 'url_part', $test['locale_language_negotiation_url_part']);
+      config_set('locale.settings', 'language_negotiation_url_part', $test['locale_language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
       state_set('locale_test_domain', $test['locale_test_domain']);
@@ -2253,10 +2258,10 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Enable browser and URL language detection.
     $edit = array(
-      'language_interface[enabled][locale-browser]' => TRUE,
-      'language_interface[enabled][locale-url]' => TRUE,
-      'language_interface[weight][locale-browser]' => -8,
-      'language_interface[weight][locale-url]' => -10,
+      'language_interface[locale-browser][enabled]' => TRUE,
+      'language_interface[locale-browser][weight]' => -8,
+      'language_interface[locale-url][enabled]' => TRUE,
+      'language_interface[locale-url][weight]' => -10,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->backdropGet('admin/config/regional/language/detection');
@@ -2297,8 +2302,8 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Enable browser and URL language detection.
     $edit = array(
-      'language_interface[enabled][locale-url]' => TRUE,
-      'language_interface[weight][locale-url]' => -10,
+      'language_interface[locale-url][enabled]' => TRUE,
+      'language_interface[locale-url][weight]' => -10,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -2364,7 +2369,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language', $edit, t('Save configuration'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[enabled][locale-url]' => 1);
+    $edit = array('language_interface[locale-url][enabled]' => 1);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Reset static caching.
@@ -2441,7 +2446,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
     language_save($language);
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[enabled][locale-url]' => '1');
+    $edit = array('language_interface[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Set "Basic page" content type to use multilingual support.
@@ -2486,7 +2491,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet("node/$node->nid/edit");
     $edit = array(
       $title_key => $this->randomName(8),
-      'langcode' => 'it'
+      'langcode' => 'it',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit[$title_key]);
@@ -2562,9 +2567,9 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     // language will fall back to the default language if no URL language can be
     // detected.
     $edit = array(
-      'language_interface[enabled][locale-user]' => TRUE,
-      'language_content[enabled][locale-url]' => TRUE,
-      'language_content[enabled][locale-interface]' => FALSE,
+      'language_interface[locale-user][enabled]' => TRUE,
+      'language_content[locale-url][enabled]' => TRUE,
+      'language_content[locale-interface][enabled]' => FALSE,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -2645,7 +2650,7 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     // Set language negotiation.
     $language_type = LANGUAGE_TYPE_INTERFACE;
     $edit = array(
-      "{$language_type}[enabled][locale-url]" => TRUE,
+      "{$language_type}[locale-url][enabled]" => TRUE,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -2716,28 +2721,25 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
     state_set('locale_test_language_negotiation_info', TRUE);
     $this->languageNegotiationUpdate();
 
-    // Check that fixed language types are properly configured without the need
-    // of saving the language negotiation settings.
-    $this->checkFixedLanguageTypes();
-
     // Make the content language type configurable by updating the language
     // negotiation settings with the proper flag enabled.
     state_set('locale_test_content_language_type', TRUE);
     $this->languageNegotiationUpdate();
     $type = LANGUAGE_TYPE_CONTENT;
-    $language_types = variable_get('language_types', language_types_get_default());
-    $this->assertTrue($language_types[$type], 'Content language type is configurable.');
+
+    $language_types = language_types_get_configurable();
+    $this->assertTrue(in_array($type, $language_types), 'Content language type is configurable.');
 
     // Enable some core and custom language providers. The test language type is
     // supposed to be configurable.
     $test_type = 'test_language_type';
     $provider = LANGUAGE_NEGOTIATION_INTERFACE;
     $test_provider = 'test_language_provider';
-    $form_field = $type . '[enabled]['. $provider .']';
+    $form_field = $type . '['. $provider .'][enabled]';
     $edit = array(
       $form_field => TRUE,
-      $type . '[enabled][' . $test_provider . ']' => TRUE,
-      $test_type . '[enabled][' . $test_provider . ']' => TRUE,
+      $type . '[' . $test_provider . '][enabled]' => TRUE,
+      $test_type . '[' . $test_provider . '][enabled]' => TRUE,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -2745,14 +2747,14 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
     // negotiation settings with the proper flag enabled.
     state_set('locale_test_language_negotiation_info_alter', TRUE);
     $this->languageNegotiationUpdate();
-    $negotiation = variable_get("language_negotiation_$type", array());
+    $negotiation = (array) config_get('language.settings', "language_negotiation.$type");
     $this->assertFalse(isset($negotiation[$provider]), 'Interface language provider removed from the stored settings.');
     $this->assertNoFieldByXPath("//input[@name=\"$form_field\"]", NULL, 'Interface language provider unavailable.');
 
     // Check that type-specific language providers can be assigned only to the
     // corresponding language types.
     foreach (language_types_get_configurable() as $type) {
-      $form_field = $type . '[enabled][test_language_provider_ts]';
+      $form_field = $type . '[test_language_provider_ts][enabled]';
       if ($type == $test_type) {
         $this->assertFieldByXPath("//input[@name=\"$form_field\"]", NULL, format_string('Type-specific test language provider available for %type.', array('%type' => $type)));
       }
@@ -2764,10 +2766,10 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
     // Check language negotiation results.
     $this->backdropGet('');
     $last = state_get('locale_test_language_negotiation_last', array());
-    foreach (language_types_get_all() as $type) {
-      $langcode = $last[$type];
-      $value = $type == LANGUAGE_TYPE_CONTENT || strpos($type, 'test') !== FALSE ? 'it' : 'en';
-      $this->assertEqual($langcode, $value, format_string('The negotiated language for %type is %language', array('%type' => $type, '%language' => $langcode)));
+    foreach (language_types_info() as $type_name => $type_info) {
+      $langcode = $last[$type_name];
+      $value = ($type_name == LANGUAGE_TYPE_CONTENT || strpos($type_name, 'test') !== FALSE) ? 'it' : 'en';
+      $this->assertEqual($langcode, $value, format_string('The negotiated language for %type is %language', array('%type' => $type_name, '%language' => $langcode)));
     }
 
     // Disable locale_test and check that everything is set back to the original
@@ -2775,17 +2777,13 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
     $this->languageNegotiationUpdate('disable');
 
     // Check that only the core language types are available.
-    foreach (language_types_get_all() as $type) {
-      $this->assertTrue(strpos($type, 'test') === FALSE, format_string('The %type language is still available', array('%type' => $type)));
+    foreach (language_types_info() as $type_name => $type_info) {
+      $this->assertTrue(strpos($type_name, 'test') === FALSE, format_string('The %type language is still available', array('%type' => $type_name)));
     }
-
-    // Check that fixed language types are properly configured, even those
-    // previously set to configurable.
-    $this->checkFixedLanguageTypes();
 
     // Check that unavailable language providers are not present in the
     // negotiation settings.
-    $negotiation = variable_get("language_negotiation_$type", array());
+    $negotiation = (array) config_get('language.settings', "language_negotiation.$type");
     $this->assertFalse(isset($negotiation[$test_provider]), 'The disabled test language provider is not part of the content language negotiation settings.');
 
     // Check that configuration page presents the correct options and settings.
@@ -2814,29 +2812,13 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     backdrop_static_reset('language_types_info');
     backdrop_static_reset('language_negotiation_info');
-    $function = "locale_modules_{$op}d";
+    backdrop_static_reset('language_types_get_configurable');
+
+    $function = "language_modules_{$op}d";
     if (function_exists($function)) {
       $function($modules);
     }
 
     $this->backdropGet('admin/config/regional/language/detection');
-  }
-
-  /**
-   * Check that language negotiation for fixed types matches the stored one.
-   */
-  protected function checkFixedLanguageTypes() {
-    backdrop_static_reset('language_types_info');
-    foreach (language_types_info() as $type => $info) {
-      if (isset($info['fixed'])) {
-        $negotiation = variable_get("language_negotiation_$type", array());
-        $equal = count($info['fixed']) == count($negotiation);
-        while ($equal && list($id) = each($negotiation)) {
-          list(, $info_id) = each($info['fixed']);
-          $equal = $info_id == $id;
-        }
-        $this->assertTrue($equal, format_string('language negotiation for %type is properly set up', array('%type' => $type)));
-      }
-    }
   }
 }

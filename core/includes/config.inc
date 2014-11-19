@@ -185,6 +185,26 @@ function config_install_default_config($module, $config_name = NULL) {
 }
 
 /**
+ * Uninstall all the configuration provided by a module.
+ */
+function config_uninstall_config($module, $config_name = NULL) {
+  backdrop_load('module', $module);
+  if ($configs = module_invoke($module, 'config_info')) {
+    foreach ($configs as $config_name => $config_info) {
+      if (isset($config_info['name_key'])) {
+        $sub_names = config_get_names_with_prefix($config_name . '.');
+        foreach ($sub_names as $sub_name) {
+          config($sub_name)->delete();
+        }
+      }
+      else {
+        config($config_name)->delete();
+      }
+    }
+  }
+}
+
+/**
  * A base exception thrown in any configuration system operations.
  */
 class ConfigException extends Exception {}
@@ -883,10 +903,12 @@ class ConfigFileStorage implements ConfigStorageInterface {
     // Ensure that the config name is included in the written file.
     $data = array_merge(array('_config_name' => $name), $data);
     $data = $this->encode($data) . "\n";
-    $status = @file_put_contents($this->getFilePath($name), $data);
+    $file_path = $this->getFilePath($name);
+    $status = @file_put_contents($file_path, $data);
     if ($status === FALSE) {
       throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name));
     }
+    clearstatcache(FALSE, $file_path);
     return TRUE;
   }
 
@@ -900,7 +922,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
       return FALSE;
     }
-    return backdrop_unlink($this->getFilePath($name));
+    $file_path = $this->getFilePath($name);
+    $status = backdrop_unlink($file_path);
+    clearstatcache(FALSE, $file_path);
+    return $status;
   }
 
   /**

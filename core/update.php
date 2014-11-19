@@ -412,8 +412,8 @@ update_prepare_bootstrap();
 // Determine if the current user has access to run update.php.
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
 
-// The interface language global has been renamed in D8, we must ensure that it
-// contains a valid value while language settings are upgraded.
+// The interface language global has been renamed in Backdrop, we must ensure
+// that it contains a valid value while language settings are upgraded.
 $GLOBALS[LANGUAGE_TYPE_INTERFACE] = language_default();
 
 // Only allow the requirements check to proceed if the current user has access
