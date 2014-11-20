@@ -300,7 +300,7 @@ function _image_update_1004(&$data) {
   if ($old_default && is_numeric($old_default)) {
     $old_default = db_query("SELECT * FROM {file_managed} WHERE fid = :fid", array(':fid' => $old_default))->fetchAssoc();
   }
-  if (is_array($old_default)) {
+  if (is_array($old_default) && isset($old_default['uri'])) {
     $data['settings']['default_image'] = $old_default['uri'];
     $old_fid = $old_default['fid'];
   }

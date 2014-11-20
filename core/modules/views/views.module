@@ -1189,8 +1189,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     return $handler;
   }
 
-  // Identify missing handlers
-  backdrop_set_message(t("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key)), 'error');
+  // Return missing handlers as broken.
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',

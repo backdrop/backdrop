@@ -185,6 +185,11 @@ function locale_update_dependencies() {
   $dependencies['system'][1025] = array(
     'locale' => 1001,
   );
+  // Locale update 1003 uses variables modified by language update 1001. Make
+  // sure that Locale runs first as is the expected order.
+  $dependencies['language'][1001] = array(
+    'locale' => 1003,
+  );
   return $dependencies;
 }
 
@@ -302,7 +307,13 @@ function locale_update_1003() {
   $languages = db_query('SELECT * FROM {language} ORDER BY weight ASC, name ASC')->fetchAllAssoc('langcode');
   $prefixes_old = update_variable_get('locale_language_negotiation_url_prefixes', array('en' => ''));
   $domains_old = update_variable_get('locale_language_negotiation_url_domains', array('en' => ''));
-  $default_language = update_variable_get('language_default');
+  $default_language = update_variable_get('language_default', (object) array(
+    'langcode' => 'en',
+    'name' => 'English',
+    'direction' => 0,
+    'enabled' => TRUE,
+    'weight' => 0,
+  ));
   $prefixes = array();
   $domains = array();
 

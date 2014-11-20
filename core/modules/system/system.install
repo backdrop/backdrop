@@ -1792,7 +1792,7 @@ function system_update_1013() {
   $config->set('site_name', update_variable_get('site_name', 'Backdrop'));
   $config->set('site_mail', update_variable_get('site_mail', ''));
   $config->set('site_slogan', update_variable_get('site_slogan', ''));
-  $config->set('site_frontpage', update_variable_get('site_frontpage', 'user'));
+  $config->set('site_frontpage', update_variable_get('site_frontpage', 'node'));
   $config->set('site_403', update_variable_get('site_403', ''));
   $config->set('site_404', update_variable_get('site_404', ''));
   $config->save();

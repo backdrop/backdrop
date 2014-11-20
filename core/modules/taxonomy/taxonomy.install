@@ -277,14 +277,14 @@ function taxonomy_update_1001() {
   if (db_table_exists('taxonomy_vocabulary')) {
     $result = db_query("SELECT * FROM {taxonomy_vocabulary}");
     foreach ($result as $row) {
-      $term_data = (array) $row;
-      $vid = $term_data['vid'];
-      $machine_name = $term_data['machine_name'];
-      unset($term_data['vid']);
+      $vocabulary_data = (array) $row;
+      $vid = $vocabulary_data['vid'];
+      $machine_name = $vocabulary_data['machine_name'];
+      unset($vocabulary_data['vid']);
 
       // Save the vocabulary as config.
       $config = config('taxonomy.vocabulary.'. $machine_name);
-      $config->setData($term_data);
+      $config->setData($vocabulary_data);
       $config->save();
 
       // Update the term data table.

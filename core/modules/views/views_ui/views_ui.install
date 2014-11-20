@@ -23,15 +23,9 @@ function views_ui_update_1000() {
 
   // Update the UI variables.
   $config = config('views_ui.settings');
-  $current_variables = db_select('variable')
-    ->fields('variable')
-    ->condition('name', array_keys($update_variables), 'IN')
-    ->execute()
-    ->fetchAllAssoc('name');
-  $current_variables = array_map('unserialize', $current_variables);
   foreach ($update_variables as $name => $default) {
-    $name = str_replace('views_', '', $name);
-    $value = isset($current_variables[$name]) ? $current_variables[$name] : $default;
+    $value = update_variable_get($name, $default);
+    $name = str_replace('views_ui_', '', $name);
     $config->set($name, $value);
   }
   $config->save();
