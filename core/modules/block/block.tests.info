@@ -2,4 +2,4 @@
 name = Block functionality
 description = Add, edit and delete custom block. Configure and move a module-defined block.
 group = Block
-file = block.test
+file = tests/block.test
