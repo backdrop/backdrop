@@ -115,7 +115,13 @@ function language_update_1000() {
  */
 function language_update_1001() {
   // Save the always-required settings in system.core config.
-  $default_language = update_variable_get('language_default');
+  $default_language = update_variable_get('language_default', (object) array(
+    'langcode' => 'en',
+    'name' => 'English',
+    'direction' => 0,
+    'enabled' => TRUE,
+    'weight' => 0,
+  ));
   $core_config = config('system.core');
 
   // The default language setting used to be an object, now it's just langcode.
