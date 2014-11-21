@@ -19,9 +19,14 @@
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: These hooks are only invoked on the primary
- *   module, using the "base" key provided in the default config file provided
- *   for that content type.
+ * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ *   returns a 'base' component. Node-type-specific hooks are named
+ *   base_hookname() instead of mymodule_hookname() (in a module called
+ *   'mymodule' for example). Only the node type's corresponding implementation
+ *   is invoked. For example, book_node_info() in book.module defines the base
+ *   for the 'book' node type as 'book'. So when a book node is created,
+ *   hook_insert() is invoked on book_insert() only. Hooks that are
+ *   node-type-specific are noted below.
  * - All-module hooks: This set of hooks is invoked on all implementing modules,
  *   to allow other modules to modify what the primary node module is doing. For
  *   example, hook_node_insert() is invoked on all modules when creating a book
@@ -1017,8 +1022,11 @@ function hook_node_type_delete($info) {
 /**
  * Respond to node deletion.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_delete() to respond to all node deletions).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_delete() to respond to node deletion of all node types.
  *
  * This hook is invoked from node_delete_multiple() before hook_node_delete()
  * is invoked and before field_attach_delete() is called.
@@ -1046,8 +1054,11 @@ function hook_delete(Node $node) {
 /**
  * Act on a node object about to be shown on the add/edit form.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_prepare() to act on all node preparations).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_prepare() to respond to node preparation of all node types.
  *
  * This hook is invoked from node_object_prepare() before the general
  * hook_node_prepare() is invoked.
@@ -1075,6 +1086,13 @@ function hook_prepare(Node $node) {
 
 /**
  * Display a node editing form.
+ *
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_form_BASE_FORM_ID_alter(), with base form ID 'node_form', to alter
+ * node forms for all node types.
  *
  * This hook, implemented by node modules, is called to retrieve the form
  * that is displayed to create or edit a node. This form is displayed at path
@@ -1131,8 +1149,11 @@ function hook_form(Node $node, &$form_state) {
 /**
  * Respond to creation of a new node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_insert() to act on all node insertions).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_insert() to respond to node insertion of all node types.
  *
  * This hook is invoked from node_save() after the node is inserted into the
  * node table in the database, before field_attach_insert() is called, and
@@ -1155,8 +1176,11 @@ function hook_insert(Node $node) {
 /**
  * Act on nodes being loaded from the database.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_load() to respond to all node loads).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_load() to respond to node load of all node types.
  *
  * This hook is invoked during node loading, which is handled by entity_load(),
  * via classes NodeController and DefaultEntityController. After the node
@@ -1189,8 +1213,11 @@ function hook_load($nodes) {
 /**
  * Respond to updates to a node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_update() to act on all node updates).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_update() to respond to node update of all node types.
  *
  * This hook is invoked from node_save() after the node is updated in the
  * node table in the database, before field_attach_update() is called, and
@@ -1211,8 +1238,11 @@ function hook_update(Node $node) {
 /**
  * Perform node validation before a node is created or updated.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_validate() to act on all node validations).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_validate() to respond to node validation of all node types.
  *
  * This hook is invoked from node_validate(), after a user has finished
  * editing the node and is previewing or submitting it. It is invoked at the end
@@ -1245,8 +1275,11 @@ function hook_validate(Node $node, $form, &$form_state) {
 /**
  * Display a node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_view() to act on all node views).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_view() to respond to node view of all node types.
  *
  * This hook is invoked during node viewing after the node is fully loaded, so
  * that the node type module can define a custom method for display, or add to
