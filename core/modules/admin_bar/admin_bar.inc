@@ -387,7 +387,7 @@ function admin_bar_translate($router_item, $map) {
       $router_item['type'] = MENU_NORMAL_ITEM;
     }
 
-    // @see _menu_tree_check_access()
+    // @see menu_tree_check_access()
     $key = (50000 + $router_item['weight']) . ' ' . $router_item['title'] . ' ' . $router_item['mlid'];
     return array($key => array(
       'link' => $router_item,

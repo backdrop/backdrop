@@ -1254,7 +1254,7 @@ function theme_user_list($variables) {
  */
 function user_is_anonymous() {
   // Menu administrators can see items for anonymous when administering.
-  return !$GLOBALS['user']->uid || !empty($GLOBALS['menu_admin']);
+  return !$GLOBALS['user']->uid;
 }
 
 /**
