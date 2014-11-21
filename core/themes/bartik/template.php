@@ -1,7 +1,11 @@
 <?php
+/**
+ * @file
+ * Functions to support theming in the Bartik theme.
+ */
 
 /**
- * Override or insert variables into the page template for HTML output.
+ * Implements hook_process_HOOK() for page.tpl.php.
  */
 function bartik_process_page(&$variables) {
   // Hook into color.module.
@@ -11,7 +15,7 @@ function bartik_process_page(&$variables) {
 }
 
 /**
- * Implements hook_preprocess_maintenance_page().
+ * Implements hook_preprocess_HOOK() for maintenance-page.tpl.php.
  */
 function bartik_preprocess_maintenance_page(&$variables) {
   backdrop_add_css(backdrop_get_path('theme', 'bartik') . '/css/maintenance-page.css');
