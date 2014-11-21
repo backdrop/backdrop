@@ -308,7 +308,7 @@ function field_system_info_alter(&$info, $file, $type) {
   if ($type == 'module' && module_hook($file->name, 'field_info')) {
     $fields = field_read_fields(array('module' => $file->name), array('include_deleted' => TRUE));
     if ($fields) {
-      $info['required'] = TRUE;
+      $info['disabled'] = TRUE;
 
       // Provide an explanation message (only mention pending deletions if there
       // remains no actual, non-deleted fields)

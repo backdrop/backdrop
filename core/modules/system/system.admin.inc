@@ -533,9 +533,10 @@ function system_modules($form, $form_state = array()) {
   foreach ($visible_files as $filename => $module) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
+    $extra['disabled'] = (array_key_exists('disabled', $module->info)) ? $module->info['disabled'] : FALSE;
 
-    // Some modules are always required by core and cannot be disabled, e.g.
-    // node, system, entity.
+    // Some modules are always required by core and cannot be disabled, for
+    // example: entity, node, system, and user.
     $extra['required_by_distribution'] = FALSE;
     if (!empty($module->info['required'] )) {
       $extra['disabled'] = TRUE;
@@ -552,6 +553,7 @@ function system_modules($form, $form_state = array()) {
       // Only display visible modules.
       elseif (isset($visible_files[$requires])) {
         $requires_name = $files[$requires]->info['name'];
+
         // Disable this module if it is incompatible with the dependency's version.
         if ($incompatible_version = backdrop_check_incompatibility($v, str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $files[$requires]->info['version']))) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
@@ -560,8 +562,8 @@ function system_modules($form, $form_state = array()) {
           ));
           $extra['disabled'] = TRUE;
         }
-        // Disable this module if the dependency is incompatible with this
-        // version of Backdrop core.
+
+        // Disable this module if the dependency is incompatible with this version of Backdrop core.
         elseif ($files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Backdrop core)', array(
             '@module' => $requires_name,
