@@ -380,8 +380,8 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     // own default file or image field, this test can be made more robust by
     // using a custom node type.
     $type_name = 'page';
-    $field_name = strtolower($this->randomName());
-    $field_name2 = strtolower($this->randomName());
+    $field_name = 'file1';
+    $field_name2 = 'file2';
     $this->createFileField($field_name, $type_name, array('cardinality' => 3));
     $this->createFileField($field_name2, $type_name, array('cardinality' => 3));
 
