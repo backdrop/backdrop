@@ -566,47 +566,6 @@ function system_schema() {
     'primary key' => array('name'),
   );
 
-  $schema['actions'] = array(
-    'description' => 'Stores action information.',
-    'fields' => array(
-      'aid' => array(
-        'description' => 'Primary Key: Unique actions ID.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '0',
-      ),
-      'type' => array(
-        'description' => 'The object that that action acts on (node, user, comment, system or custom types.)',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'callback' => array(
-        'description' => 'The callback function that executes when the action runs.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'parameters' => array(
-        'description' => 'Parameters to be passed to the callback function.',
-        'type' => 'blob',
-        'not null' => TRUE,
-        'size' => 'big',
-      ),
-      'label' => array(
-        'description' => 'Label of the action.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '0',
-      ),
-    ),
-    'primary key' => array('aid'),
-  );
-
   $schema['batch'] = array(
     'description' => 'Stores details about batches (processes that run in multiple HTTP requests).',
     'fields' => array(
@@ -1840,7 +1799,7 @@ function system_update_1015() {
  */
 function system_update_1016() {
   // Migrate variables to config.
-  $config = config('system.action');
+  $config = config('system.core');
   $config->set('action_recursion_limit', update_variable_get('actions_max_stack', 35));
   $config->save();
 
@@ -2453,6 +2412,27 @@ function system_update_1030() {
   $config->setData(update_variable_get('mail_system', array('default-system' => 'DefaultMailSystem')));
   $config->save();
   update_variable_del('mail_system');
+}
+
+/**
+ * Drop the actions table, no longer used by Backdrop.
+ */
+function system_update_1031() {
+  // The actions UI and table were removed in Backdrop. Module-provided actions
+  // may still be defined through hook_action_info(), including potentially
+  // configurable actions, but core no longer attempts to manage them directly.
+  if (db_table_exists('actions')) {
+    db_drop_table('actions');
+  }
+
+  // Actions had been given it's own config file, now it is part of system.core.
+  $action_config = config('system.action');
+  if (!$action_config->isNew()) {
+    $config = config('system.core');
+    $config->set('action_recursion_limit', $action_config->get('action_recursion_limit'));
+    $config->save();
+    $action_config->delete();
+  }
 }
 
 /**

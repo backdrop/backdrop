@@ -3112,8 +3112,6 @@ function user_action_info() {
     'user_block_user_action' => array(
       'label' => t('Block user(s)'),
       'type' => 'user',
-      'configurable' => FALSE,
-      'behavior' => array('changes_property')
     ),
   );
 }
@@ -3121,32 +3119,14 @@ function user_action_info() {
 /**
  * Blocks a specific user or the current user, if one is not specified.
  *
- * @param $entity
- *   (optional) An entity object; if it is provided and it has a uid property,
- *   the user with that ID is blocked.
- * @param $context
- *   (optional) An associative array; if no user ID is found in $entity, the
- *   'uid' element of this array determines the user to block.
+ * @param User $account
+ *   The user entity whose account will be blocked.
  *
  * @ingroup actions
  */
-function user_block_user_action(&$entity, $context = array()) {
-  // First priority: If there is a $entity->uid, block that user.
-  // This is most likely a user object or the author if a node or comment.
-  if (isset($entity->uid)) {
-    $uid = $entity->uid;
-  }
-  elseif (isset($context['uid'])) {
-    $uid = $context['uid'];
-  }
-  // If neither of those are valid, then block the current user.
-  else {
-    $uid = $GLOBALS['user']->uid;
-  }
-  $account = user_load($uid);
+function user_block_user_action(User $account, $context = array()) {
   $account->status = 0;
   $account->save();
-  watchdog('action', 'Blocked user %name.', array('%name' => $account->name));
 }
 
 /**

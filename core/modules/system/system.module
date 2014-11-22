@@ -129,9 +129,6 @@ function system_permission() {
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
     ),
-    'administer actions' => array(
-      'title' => t('Administer actions'),
-    ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -872,44 +869,6 @@ function system_menu() {
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions'] = array(
-    'title' => 'Actions',
-    'description' => 'Manage the actions defined for your site.',
-    'access arguments' => array('administer actions'),
-    'page callback' => 'system_actions_manage',
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/manage'] = array(
-    'title' => 'Manage actions',
-    'description' => 'Manage the actions defined for your site.',
-    'page callback' => 'system_actions_manage',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -2,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/configure'] = array(
-    'title' => 'Configure an advanced action',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_actions_configure'),
-    'access arguments' => array('administer actions'),
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/delete/%actions'] = array(
-    'title' => 'Delete action',
-    'description' => 'Delete an action.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_actions_delete_form', 5),
-    'access arguments' => array('administer actions'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/orphan'] = array(
-    'title' => 'Remove orphans',
-    'page callback' => 'system_actions_remove_orphans',
-    'access arguments' => array('administer actions'),
-    'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
   $items['admin/config/system/site-information'] = array(
@@ -3257,155 +3216,6 @@ function system_flush_caches() {
 }
 
 /**
- * Implements hook_action_info().
- */
-function system_action_info() {
-  return array(
-    'system_message_action' => array(
-      'type' => 'system',
-      'label' => t('Display a message to the user'),
-      'configurable' => TRUE,
-    ),
-    'system_send_email_action' => array(
-      'type' => 'system',
-      'label' => t('Send e-mail'),
-      'configurable' => TRUE,
-    ),
-    'system_block_ip_action' => array(
-      'type' => 'user',
-      'label' => t('Ban IP address of current user'),
-      'configurable' => FALSE,
-    ),
-    'system_goto_action' => array(
-      'type' => 'system',
-      'label' => t('Redirect to URL'),
-      'configurable' => TRUE,
-    ),
-  );
-}
-
-/**
- * Return a form definition so the Send email action can be configured.
- *
- * @param $context
- *   Default values (if we are editing an existing action instance).
- *
- * @return
- *   Form definition.
- *
- * @see system_send_email_action_validate()
- * @see system_send_email_action_submit()
- */
-function system_send_email_action_form($context) {
-  // Set default values for form.
-  if (!isset($context['recipient'])) {
-    $context['recipient'] = '';
-  }
-  if (!isset($context['subject'])) {
-    $context['subject'] = '';
-  }
-  if (!isset($context['message'])) {
-    $context['message'] = '';
-  }
-
-  $form['recipient'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Recipient'),
-    '#default_value' => $context['recipient'],
-    '#maxlength' => '254',
-    '#description' => t('The e-mail address to which the message should be sent OR enter [node:author:mail], [comment:author:mail], etc. if you would like to send an e-mail to the author of the original post.'),
-  );
-  $form['subject'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Subject'),
-    '#default_value' => $context['subject'],
-    '#maxlength' => '254',
-    '#description' => t('The subject of the message.'),
-  );
-  $form['message'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Message'),
-    '#default_value' => $context['message'],
-    '#cols' => '80',
-    '#rows' => '20',
-    '#description' => t('The message that should be sent. You may include placeholders like [node:title], [user:name], and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
-  );
-  return $form;
-}
-
-/**
- * Validate system_send_email_action form submissions.
- */
-function system_send_email_action_validate($form, $form_state) {
-  $form_values = $form_state['values'];
-  // Validate the configuration form.
-  if (!valid_email_address($form_values['recipient']) && strpos($form_values['recipient'], ':mail') === FALSE) {
-    // We want the literal %author placeholder to be emphasized in the error message.
-    form_set_error('recipient', t('Enter a valid email address or use a token e-mail address such as %author.', array('%author' => '[node:author:mail]')));
-  }
-}
-
-/**
- * Process system_send_email_action form submissions.
- */
-function system_send_email_action_submit($form, $form_state) {
-  $form_values = $form_state['values'];
-  // Process the HTML form to store configuration. The keyed array that
-  // we return will be serialized to the database.
-  $params = array(
-    'recipient' => $form_values['recipient'],
-    'subject'   => $form_values['subject'],
-    'message'   => $form_values['message'],
-  );
-  return $params;
-}
-
-/**
- * Sends an e-mail message.
- *
- * @param object $entity
- *   An optional node entity, which will be added as $context['node'] if
- *   provided.
- * @param array $context
- *   Array with the following elements:
- *   - 'recipient': E-mail message recipient. This will be passed through
- *     token_replace().
- *   - 'subject': The subject of the message. This will be passed through
- *     token_replace().
- *   - 'message': The message to send. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement.
- *
- * @ingroup actions
- */
-function system_send_email_action($entity, $context) {
-  if (empty($context['node'])) {
-    $context['node'] = $entity;
-  }
-
-  $recipient = token_replace($context['recipient'], $context);
-
-  // If the recipient is a registered user with a language preference, use
-  // the recipient's preferred language. Otherwise, use the system default
-  // language.
-  $recipient_account = user_load_by_mail($recipient);
-  if ($recipient_account) {
-    $language = user_preferred_language($recipient_account);
-  }
-  else {
-    $language = language_default();
-  }
-  $params = array('context' => $context);
-
-  if (backdrop_mail('system', 'action_send_email', $recipient, $language, $params)) {
-    watchdog('action', 'Sent email to %recipient', array('%recipient' => $recipient));
-  }
-  else {
-    watchdog('error', 'Unable to send email to %recipient', array('%recipient' => $recipient));
-  }
-}
-
-/**
  * Implements hook_mail().
  */
 function system_mail($key, &$message, $params) {
@@ -3416,83 +3226,6 @@ function system_mail($key, &$message, $params) {
 
   $message['subject'] .= str_replace(array("\r", "\n"), '', $subject);
   $message['body'][] = $body;
-}
-
-function system_message_action_form($context) {
-  $form['message'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Message'),
-    '#default_value' => isset($context['message']) ? $context['message'] : '',
-    '#required' => TRUE,
-    '#rows' => '8',
-    '#description' => t('The message to be displayed to the current user. You may include placeholders like [node:title], [user:name], and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
-  );
-  return $form;
-}
-
-function system_message_action_submit($form, $form_state) {
-  return array('message' => $form_state['values']['message']);
-}
-
-/**
- * Sends a message to the current user's screen.
- *
- * @param object $entity
- *   An optional node entity, which will be added as $context['node'] if
- *   provided.
- * @param array $context
- *   Array with the following elements:
- *   - 'message': The message to send. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement in
- *     the message.
- *
- * @ingroup actions
- */
-function system_message_action(&$entity, $context = array()) {
-  if (empty($context['node'])) {
-    $context['node'] = $entity;
-  }
-
-  $context['message'] = token_replace(filter_xss_admin($context['message']), $context);
-  backdrop_set_message($context['message']);
-}
-
-/**
- * Settings form for system_goto_action().
- */
-function system_goto_action_form($context) {
-  $form['url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL'),
-    '#description' => t('The URL to which the user should be redirected. This can be an internal URL like node/1234 or an external URL like http://backdropcms.org.'),
-    '#default_value' => isset($context['url']) ? $context['url'] : '',
-    '#required' => TRUE,
-  );
-  return $form;
-}
-
-function system_goto_action_submit($form, $form_state) {
-  return array(
-    'url' => $form_state['values']['url']
-  );
-}
-
-/**
- * Redirects to a different URL.
- *
- * @param $entity
- *   Ignored.
- * @param array $context
- *   Array with the following elements:
- *   - 'url': URL to redirect to. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement.
- *
- * @ingroup actions
- */
-function system_goto_action($entity, $context) {
-  backdrop_goto(token_replace($context['url'], $context));
 }
 
 /**
@@ -3808,10 +3541,6 @@ function system_autoload_info() {
 function system_config_info() {
   $prefixes['system.core'] = array(
     'label' => t('System core settings'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['system.action'] = array(
-    'label' => t('System action'),
     'group' => t('Configuration'),
   );
   $prefixes['system.authorize'] = array(

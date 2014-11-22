@@ -58,12 +58,6 @@ description = Verifies that tests in other installation profiles are not found.
 group = SimpleTest
 file = tests/simpletest.test
 
-[ActionsConfigurationTestCase]
-name = Actions configuration
-description = Tests complex actions configuration by adding, editing, and deleting a complex action.
-group = Actions
-file = tests/actions.test
-
 [ActionLoopTestCase]
 name = Actions executing in a potentially infinite loop
 description = Tests actions executing in a loop, and makes sure they abort properly.
