@@ -9,10 +9,11 @@
  * Menu callback which shows an overview page of all the custom menus and their descriptions.
  */
 function menu_overview_page() {
-  $result = db_query("SELECT * FROM {menu_custom} ORDER BY title", array(), array('fetch' => PDO::FETCH_ASSOC));
+  $menus = menu_load_all();
+  backdrop_sort($menus, array('title' => SORT_STRING));
   $header = array(t('Title'), t('Operations'));
   $rows = array();
-  foreach ($result as $menu) {
+  foreach ($menus as $menu) {
     $row = array();
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
@@ -478,8 +479,6 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#title' => t('Title'),
     '#default_value' => $menu['title'],
     '#required' => TRUE,
-    // The title of a system menu cannot be altered.
-    '#access' => !isset($system_menus[$menu['menu_name']]),
   );
 
   $form['menu_name'] = array(
@@ -561,7 +560,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
 
   // System-defined menus may not be deleted - only menus defined by this module.
   $system_menus = menu_list_system_menus();
-  if (isset($system_menus[$menu['menu_name']])  || !(db_query("SELECT 1 FROM {menu_custom} WHERE menu_name = :menu", array(':menu' => $menu['menu_name']))->fetchField())) {
+  if (isset($system_menus[$menu['menu_name']])) {
     return;
   }
 
@@ -594,7 +593,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
 function menu_edit_menu_name_exists($value) {
   // 'menu-' is added to the menu name to avoid name-space conflicts.
   $value = 'menu-' . $value;
-  $custom_exists = db_query_range('SELECT 1 FROM {menu_custom} WHERE menu_name = :menu', 0, 1, array(':menu' => $value))->fetchField();
+  $custom_exists = (bool) menu_load($value);
   $link_exists = db_query_range("SELECT 1 FROM {menu_links} WHERE menu_name = :menu", 0, 1, array(':menu' => $value))->fetchField();
 
   return $custom_exists || $link_exists;

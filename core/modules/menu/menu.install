@@ -6,41 +6,6 @@
  */
 
 /**
- * Implements hook_schema().
- */
-function menu_schema() {
-  $schema['menu_custom'] = array(
-    'description' => 'Holds definitions for top-level custom menus (for example, Main menu).',
-    'fields' => array(
-      'menu_name' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Primary Key: Unique key for menu. This is used as a block delta so length is 32.',
-      ),
-      'title' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Menu title; displayed at top of block.',
-        'translatable' => TRUE,
-      ),
-      'description' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'description' => 'Menu description.',
-        'translatable' => TRUE,
-      ),
-    ),
-    'primary key' => array('menu_name'),
-  );
-
-  return $schema;
-}
-
-/**
  * Implements hook_install().
  */
 function menu_install() {
@@ -87,8 +52,6 @@ function menu_update_dependencies() {
 
 /**
  * Moves menu settings from variables to config.
- *
- * @ingroup config_upgrade
  */
 function menu_update_1000() {
   // Migrate variables to config.
@@ -124,6 +87,25 @@ function menu_update_1001() {
     update_variable_del('menu_options_' . $node_type->type);
     update_variable_del('menu_parent_' . $node_type->type);
   }
+}
+
+/**
+ * Move individual menus into config files.
+ */
+function menu_update_1002() {
+  if (!db_table_exists('menu_custom')) {
+    return;
+  }
+
+  $menus = db_query("SELECT * FROM {menu_custom}")->fetchAllAssoc('menu_name');
+  foreach ($menus as $menu) {
+    $menu = (array) $menu;
+    $config = config('menu.menu.' . $menu['menu_name']);
+    $config->setData($menu);
+    $config->save();
+  }
+
+  db_drop_table('menu_custom');
 }
 
 /**

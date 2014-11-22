@@ -148,6 +148,22 @@ function menu_theme() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function menu_config_info() {
+  $prefixes['menu.settings'] = array(
+    'label' => t('Menu settings'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['menu.menu'] = array(
+    'name_key' => 'menu_name',
+    'label_key' => 'title',
+    'group' => t('Menus'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_enable().
  *
  * Add a link for each custom menu.
@@ -157,8 +173,8 @@ function menu_enable() {
   $base_link = db_query("SELECT mlid AS plid, menu_name FROM {menu_links} WHERE link_path = 'admin/structure/menu' AND module = 'system'")->fetchAssoc();
   $base_link['router_path'] = 'admin/structure/menu/manage/%';
   $base_link['module'] = 'menu';
-  $result = db_query("SELECT * FROM {menu_custom}", array(), array('fetch' => PDO::FETCH_ASSOC));
-  foreach ($result as $menu) {
+  $menus = menu_load_all();
+  foreach ($menus as $menu) {
     // $link is passed by reference to menu_link_save(), so we make a copy of $base_link.
     $link = $base_link;
     $link['mlid'] = 0;
@@ -205,12 +221,16 @@ function menu_load($menu_name) {
 function menu_load_all() {
   $custom_menus = &backdrop_static(__FUNCTION__);
   if (!isset($custom_menus)) {
-    if ($cached = cache('menu')->get('menu_custom')) {
+    if ($cached = cache('menu')->get('menu_configs')) {
       $custom_menus = $cached->data;
     }
     else {
-      $custom_menus = db_query('SELECT * FROM {menu_custom}')->fetchAllAssoc('menu_name', PDO::FETCH_ASSOC);
-      cache('menu')->set('menu_custom', $custom_menus);
+      $config_names = config_get_names_with_prefix('menu.menu.');
+      foreach ($config_names as $config_name) {
+        $menu = config_get($config_name);
+        $custom_menus[$menu['menu_name']] = $menu;
+      }
+      cache('menu')->set('menu_configs', $custom_menus);
     }
   }
   return $custom_menus;
@@ -232,13 +252,18 @@ function menu_load_all() {
  * @see menu_load()
  */
 function menu_save($menu) {
-  $status = db_merge('menu_custom')
-    ->key(array('menu_name' => $menu['menu_name']))
-    ->fields(array(
-      'title' => $menu['title'],
-      'description' => $menu['description'],
-    ))
-    ->execute();
+  $menu_defaults = array(
+    'menu_name' => '',
+    'title' => '',
+    'description' => '',
+  );
+  $menu += $menu_defaults;
+  $menu = array_intersect_key($menu, $menu_defaults);
+
+  $config = config('menu.menu.' . $menu['menu_name']);
+  $status = $config->isNew() ? SAVED_NEW : SAVED_UPDATED;
+  $config->setData($menu);
+  $config->save();
   menu_cache_clear_all();
 
   switch ($status) {
@@ -303,9 +328,7 @@ function menu_delete($menu) {
   }
 
   // Delete the custom menu.
-  db_delete('menu_custom')
-    ->condition('menu_name', $menu['menu_name'])
-    ->execute();
+  config('menu.menu.' . $menu['menu_name'])->delete();
 
   menu_cache_clear_all();
   module_invoke_all('menu_delete', $menu);
@@ -787,15 +810,4 @@ function menu_preprocess_block(&$variables) {
   if ($variables['block']->module == 'menu') {
     $variables['attributes_array']['role'] = 'navigation';
   }
-}
-
-/**
- * Implements hook_config_info().
- */
-function menu_config_info() {
-  $prefixes['menu.settings'] = array(
-    'label' => t('Menu settings'),
-    'group' => t('Configuration'),
-  );
-  return $prefixes;
 }
