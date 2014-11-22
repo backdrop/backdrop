@@ -212,8 +212,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $from =
  *   By default, all messages are sent via PHP's mail() function by the
  *   DefaultMailSystem implementation.
  *
- * The selection of a particular implementation is controlled via the variable
- * 'mail_system', which is a keyed array.  The default implementation
+ * The selection of a particular implementation is controlled via the config
+ * 'system.mail', which contains a keyed array.  The default implementation
  * is the class whose name is the value of 'default-system' key. A more specific
  * match first to key and then to module will be used in preference to the
  * default. To specify a different class for all mail sent by one module, set
@@ -262,7 +262,7 @@ function backdrop_mail_system($module, $key) {
 
   $id = $module . '_' . $key;
 
-  $configuration = variable_get('mail_system', array('default-system' => 'DefaultMailSystem'));
+  $configuration = config_get('system.mail');
 
   // Look for overrides for the default class, starting from the most specific
   // id, and falling back to the module name.
@@ -272,8 +272,11 @@ function backdrop_mail_system($module, $key) {
   elseif (isset($configuration[$module])) {
     $class = $configuration[$module];
   }
-  else {
+  elseif (isset($configuration['default-system'])) {
     $class = $configuration['default-system'];
+  }
+  else {
+    $class = 'DefaultMailSystem';
   }
 
   if (empty($instances[$class])) {

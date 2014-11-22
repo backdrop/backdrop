@@ -3822,6 +3822,10 @@ function system_config_info() {
     'label' => t('System date'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.mail'] = array(
+    'label' => t('Mail systems'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 

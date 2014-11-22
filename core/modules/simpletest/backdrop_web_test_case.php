@@ -1500,7 +1500,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see BackdropWebTestCase::prepareEnvironment()
    */
   protected function setUp() {
-    global $user, $language, $conf;
+    global $user, $language_interface, $conf;
 
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
@@ -1605,7 +1605,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $language_interface = language_default();
 
     // Use the test mail class instead of the default mail handler class.
-    variable_set('mail_system', array('default-system' => 'TestingMailSystem'));
+    config_set('system.mail', 'default-system', 'TestingMailSystem');
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
