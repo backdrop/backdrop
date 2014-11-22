@@ -7899,9 +7899,6 @@ function backdrop_flush_all_caches() {
   // after node types are rebuilt.
   menu_rebuild();
 
-  // Synchronize to catch any actions that were added or removed.
-  actions_synchronize();
-
   // Ordered so clearing the page cache will always be the last action.
   $core = array('cache', 'path', 'filter', 'bootstrap', 'page');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);

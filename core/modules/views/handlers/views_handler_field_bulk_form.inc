@@ -143,10 +143,8 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function views_form_submit(&$form, &$form_state) {
     if ($form_state['step'] == 'views_form_views_form') {
-      $action = $form_state['values']['action'];
-      $action = actions_load($action);
-      $action_list = actions_list();
-      $action_info = $action_list[$action->callback];
+      $action_name = $form_state['values']['action'];
+      $action_info = actions_get_info($form_state['values']['action']);
       $count = 0;
 
       // Filter only selected checkboxes.
@@ -154,21 +152,20 @@ class views_handler_field_bulk_form extends views_handler_field {
       if (!empty($selected)) {
         $entity_type = $this->get_entity_type();
         $entities = entity_load($entity_type, $selected);
+        $context = array();
         foreach ($entities as $entity) {
-          actions_do($action->aid, $entity);
-
-          // If changing a property only, save the entity after the change.
-          if (isset($action_info['behavior']) && array_search('changes_property', $action_info['behavior']) !== FALSE) {
-            $entity->save();
-          }
+          actions_execute($action_name, $entity, $context);
           $count++;
+        }
+
+        // Redirect the user the same as we would for $form_state['redirect'].
+        if (isset($context['redirect'])) {
+          actions_redirect($context['redirect']);
         }
       }
 
       if ($count) {
-        backdrop_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', array(
-          '%action' => $action->label,
-        )));
+        backdrop_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', array('%action' => $action_info['label'])));
       }
     }
   }
@@ -184,13 +181,14 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   protected function get_bulk_options($filtered = TRUE) {
     // Get all available actions.
-    $actions = actions_get_all_actions();
+    $actions = actions_get_info();
+
     $entity_type = $this->get_entity_type();
     $options = array();
     // Filter the action list.
-    foreach ($actions as $id => $action) {
+    foreach ($actions as $action_name => $action_info) {
       if ($filtered) {
-        $in_selected = in_array($id, $this->options['selected_actions']);
+        $in_selected = in_array($action_name, $this->options['selected_actions']);
         // If the field is configured to include only the selected actions,
         // skip actions that were not selected.
         if (($this->options['include_exclude'] == 'include') && !$in_selected) {
@@ -203,8 +201,8 @@ class views_handler_field_bulk_form extends views_handler_field {
         }
       }
       // Only allow actions that are valid for this entity type.
-      if (($action['type'] == $entity_type) && empty($action['configurable'])) {
-        $options[$id] = $action['label'];
+      if ($action_info['type'] == $entity_type) {
+        $options[$action_name] = $action_info['label'];
       }
     }
 

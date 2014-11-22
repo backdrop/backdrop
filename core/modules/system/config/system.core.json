@@ -1,6 +1,7 @@
 {
     "_config_name": "system.performance",
     "_config_static": true,
+    "action_recursion_limit": 35,
     "active_menus_default": [],
     "admin_theme": "",
     "anonymous": "Anonymous",
