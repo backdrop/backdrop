@@ -2446,6 +2446,16 @@ function system_update_1029() {
 }
 
 /**
+ * Convert mail system variable to config.
+ */
+function system_update_1030() {
+  $config = config('system.mail');
+  $config->setData(update_variable_get('mail_system', array('default-system' => 'DefaultMailSystem')));
+  $config->save();
+  update_variable_del('mail_system');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
