@@ -1757,8 +1757,8 @@ function taxonomy_config_info() {
     'group' => t('Configuration'),
   );
   $prefixes['taxonomy.vocabulary'] = array(
-    'name_key' => 'name',
-    'label_key' => 'machine_name',
+    'name_key' => 'machine_name',
+    'label_key' => 'name',
     'group' => t('Vocabularies'),
   );
   return $prefixes;

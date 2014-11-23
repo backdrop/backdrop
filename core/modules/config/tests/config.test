@@ -185,7 +185,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
 
     $this->assertIdentical($staging_storage->exists($name), TRUE, $name . ' found.');
 
-    // Create new config entity.
+    // Create new config.
     $original_dynamic_data = array(
       'id' => 'new',
       'label' => 'New',
@@ -219,8 +219,24 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Verify configuration has changed.
     $this->assertIdentical($favorite_animal, config_get($name, 'favorite_animal'));
 
-    // Verify that new config entity exists.
+    // Verify that new config exists.
     $this->assertIdentical($original_dynamic_data, config_get($dynamic_name));
+
+    // Create a second config that is not declared in hook_config_info().
+    $this->copyConfig('active', 'staging');
+    $dynamic_name2 = $dynamic_name . '2';
+    $staging_storage->write($dynamic_name2, $original_dynamic_data);
+    $this->assertIdentical($staging_storage->exists($dynamic_name2), TRUE, $dynamic_name2 . ' found in staging.');
+
+    // Attempt an import which should fail.
+    $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
+
+    // Validation should fail, as this config file is not owned by a module.
+    $error_message = t('The configuration "@name" is not owned by any module. Try enabling the module that provides this configuration, then importing again.', array('@name' => $dynamic_name2));
+    $this->assertText($error_message, 'Validation properly prevents import when a config is not declared by a module.');
+
+    // Empty out the staging config.
+    $staging_storage->deleteAll();
   }
 
   /**
@@ -279,7 +295,8 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $archive_data = $this->backdropGetContent();
 
     // Temporarily save the archive file.
-    $uri = file_unmanaged_save_data($archive_data, 'temporary://config.tar.gz');
+    $uri = 'temporary://config.tar.gz';
+    file_put_contents($uri, $archive_data);
 
     // Extract the archive and verify it's not empty.
     $file_path = file_directory_temp() . '/' . file_uri_target($uri);
@@ -300,6 +317,82 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Assert that the downloaded archive file contents are the same as the test
     // site active store.
     $this->assertIdentical($archive_files, $config_files, 'Downloaded archive contains all active configuration files.');
+
+    // Delete the archive.
+    unlink($uri);
+  }
+
+  /**
+   * Test full import validation.
+   */
+  function testFullImportValidation() {
+    // Enable all non-test core modules to populate all default config files.
+    $core_modules = db_query("SELECT name FROM {system} WHERE type = 'module' AND filename LIKE 'core/modules%' AND filename NOT LIKE '%/tests/%'")->fetchCol();
+    module_enable($core_modules);
+
+    // Submit the export form and verify response.
+    $this->backdropPost('admin/config/development/configuration/full/export', array(), t('Export'));
+    $this->assertResponse(200, 'User can access the download callback.');
+
+    // Get the archived binary file provided to user for download.
+    $archive_data = $this->backdropGetContent();
+
+    // Save the archive file.
+    $uri = 'temporary://config.tar.gz';
+    file_put_contents($uri, $archive_data);
+    $realpath = backdrop_realpath($uri);
+
+    // Expand the archive file to modify its contents.
+    $directory = 'temporary://' . basename($uri, '.tar.gz');
+    $archiver = new Archive_Tar($realpath);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+    $archiver->extract($directory);
+
+    // Delete the old archive.
+    unset($archiver);
+    unlink($uri);
+
+    // Modify each and every config file.
+    $files = file_scan_directory($directory, '/.*\.json/');
+    foreach ($files as $filepath => $file) {
+      $config_data = json_decode(file_get_contents($filepath), TRUE);
+      $config_data['config_test_addition'] = 'test';
+      file_put_contents($filepath, backdrop_json_encode($config_data, TRUE));
+    }
+
+    // Add back into the archive.
+    $archiver = new Archive_Tar($realpath);
+    $archiver->createModify(array_keys($files), '', $directory);
+
+    // Delete the modified files.
+    file_unmanaged_delete_recursive($directory);
+
+    // Upload the archive into the import form.
+    $edit = array(
+      'files[import_tarball]' => $uri,
+    );
+    $this->backdropPost('admin/config/development/configuration/full', $edit, t('Stage import'));
+
+    // Delete the new archive.
+    unlink($uri);
+
+    $this->backdropGet('admin/config/development/configuration');
+
+    // Check that every config file is changed.
+    foreach ($files as $file) {
+      $this->assertText(str_replace('.json', '', $file->filename), format_string('Config file "@file" staged for import.', array('@file' => $file->filename)));
+    }
+
+    $this->backdropPost(NULL, array(), t('Import all'));
+
+    // Confirm the import was successful.
+    $this->assertText(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($files))));
+
+    // Display any errors directly as a failure.
+    $errors = $this->xpath('//div[@id="messages"]//div[contains(@class, "error")]');
+    if (count($errors)) {
+      $this->fail(strip_tags($errors[0]->asXML()));
+    }
   }
 
   /**

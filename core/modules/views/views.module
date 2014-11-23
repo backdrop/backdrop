@@ -2122,6 +2122,22 @@ function views_views_api() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function views_config_info() {
+  $prefixes['views.view'] = array(
+    'name_key' => 'name',
+    'label_key' => 'human_name',
+    'group' => t('Views'),
+  );
+  $prefixes['views.settings'] = array(
+    'label' => t('Views settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function views_autoload_info() {

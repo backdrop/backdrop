@@ -57,6 +57,17 @@ function book_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function book_config_info() {
+  $prefixes['book.settings'] = array(
+    'label' => t('Book settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_views_api().
  */
 function book_views_api() {
@@ -1437,14 +1448,4 @@ function book_menu_subtree_data($link) {
   }
 
   return $tree[$cid];
-}
-
-/**
- * Implements hook_config_info().
- */
-function book_config_info() {
-  $prefixes['book.settings'] = array(
-    'label' => t('Book settings'),
-    'group' => t('Configuration'),
-  );
 }

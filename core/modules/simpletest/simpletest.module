@@ -70,6 +70,17 @@ function simpletest_theme() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function simpletest_config_info() {
+  $prefixes['simpletest.settings'] = array(
+    'label' => t('Testing settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function simpletest_autoload_info() {
@@ -519,14 +530,4 @@ function simpletest_mail_alter(&$message) {
   if ($message['id'] == 'simpletest_cancel_test') {
     $message['send'] = FALSE;
   }
-}
-
-/**
- * Implements hook_config_info().
- */
-function simpletest_config_info() {
-  $prefixes['simpletest.settings'] = array(
-    'label' => t('Simpletest settings'),
-    'group' => t('Configuration'),
-  );
 }

@@ -489,6 +489,26 @@ function user_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function user_config_info() {
+  $prefixes['user.flood'] = array(
+    'label' => t('User flood'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['user.mail'] = array(
+    'label' => t('User email templates'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['user.role'] = array(
+    'name_key' => 'name',
+    'label_key' => 'label',
+    'group' => t('User roles'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_views_api().
  */
 function user_views_api() {
@@ -3466,23 +3486,4 @@ function user_file_download_access($field, $entity_type, $entity) {
   if ($entity_type == 'user') {
     return user_view_access($entity);
   }
-}
-
-/**
- * Implements hook_config_info().
- */
-function user_config_info() {
-  $prefixes['user.flood'] = array(
-    'label' => t('User flood'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['user.mail'] = array(
-    'label' => t('User email templates'),
-    'group' => t('Configuration'),
-  );
-  $prefixes['user.role'] = array(
-    'name_key' => 'name',
-    'label_key' => 'label',
-    'group' => t('User roles'),
-  );
 }

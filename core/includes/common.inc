@@ -8084,7 +8084,7 @@ function archiver_get_extensions() {
  *   The full path of the archive file. Note that stream wrapper paths are
  *   supported, but not remote ones.
  *
- * @return
+ * @return ArchiverInterface
  *   A newly created instance of the archiver class appropriate
  *   for the specified file, already bound to that file.
  *   If no appropriate archiver class was found, will return FALSE.

@@ -2401,7 +2401,7 @@ function system_update_1028() {
  */
 function system_update_1029() {
   $config = config('system.core');
-  $config->set('config_sync_batch_size', update_variable_get('config_sync_batch_size', 50));
+  $config->set('config_sync_batch_size', update_variable_get('config_sync_batch_size', 20));
   $config->set('default_nodes_main', update_variable_get('default_nodes_main', 10));
   $config->save();
 }

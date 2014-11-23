@@ -87,6 +87,17 @@ function translation_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function translation_config_info() {
+  $prefixes['translation.settings'] = array(
+    'label' => t('Translation settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_views_api().
  */
 function translation_views_api() {

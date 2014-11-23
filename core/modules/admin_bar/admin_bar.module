@@ -68,6 +68,17 @@ function admin_bar_theme() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function admin_bar_config_info() {
+  $prefixes['admin_bar.settings'] = array(
+    'label' => t('Admin bar settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_menu_alter().
  */
 function admin_bar_menu_alter(&$items) {

@@ -278,6 +278,17 @@ function views_ui_custom_theme() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function views_ui_config_info() {
+  $prefixes['views_ui.settings'] = array(
+    'label' => t('Views UI settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function views_ui_autoload_info() {
