@@ -2342,6 +2342,7 @@ function system_update_1026() {
   $config->set('file_public_path', update_variable_get('file_public_path', 'files'));
   $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
   $config->set('file_private_path', update_variable_get('file_private_path', ''));
+  $config->set('image_jpeg_quality', update_variable_get('image_jpeg_quality', 75));
   $config->set('install_profile', update_variable_get('install_profile', 'standard'));
   $config->set('clean_url', update_variable_get('clean_url', 0));
   $config->set('theme_default', update_variable_get('theme_default', 'stark'));
@@ -2359,6 +2360,7 @@ function system_update_1026() {
   update_variable_del('theme_default');
   update_variable_del('admin_theme');
   update_variable_del('node_admin_theme');
+  update_variable_del('image_jpeg_quality');
 
   // These variables have been converted to settings:
   update_variable_del('css_gzip_compression');
