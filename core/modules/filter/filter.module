@@ -173,6 +173,7 @@ function filter_format_load($format_id) {
  */
 function filter_format_save($format) {
   $format->name = trim($format->name);
+  // @todo Update hook sets cache property to string 0 or 1; this changes it to true or false. Which value is intended?
   $format->cache = _filter_format_is_cacheable($format);
   if (!isset($format->status)) {
     $format->status = 1;
@@ -180,17 +181,6 @@ function filter_format_save($format) {
   if (!isset($format->weight)) {
     $format->weight = 0;
   }
-
-  // Insert or update the text format.
-  $return = db_merge('filter_format')
-    ->key(array('format' => $format->format))
-    ->fields(array(
-      'name' => $format->name,
-      'cache' => (int) $format->cache,
-      'status' => (int) $format->status,
-      'weight' => (int) $format->weight,
-    ))
-    ->execute();
 
   // Programmatic saves may not contain any filters.
   if (!isset($format->filters)) {
@@ -217,24 +207,16 @@ function filter_format_save($format) {
     else {
       $format->filters[$name]['settings'] = isset($filter['default settings']) ? $filter['default settings'] : array();
     }
-
-    $fields = array();
-    $fields['weight'] = $format->filters[$name]['weight'];
-    $fields['status'] = $format->filters[$name]['status'];
-    $fields['module'] = $format->filters[$name]['module'];
-    $fields['settings'] = serialize($format->filters[$name]['settings']);
-
-    db_merge('filter')
-      ->key(array(
-        'format' => $format->format,
-        'name' => $name,
-      ))
-      ->fields($fields)
-      ->execute();
   }
 
-  if ($return == SAVED_NEW) {
+  // Save the filter format.
+  $config = config('filter.format.' . $format->format);
+  $config->setData((array) $format);
+  $config->save();
+
+  if (!empty($format->is_new)) {
     module_invoke_all('filter_format_insert', $format);
+    $return = SAVED_NEW;
   }
   else {
     module_invoke_all('filter_format_update', $format);
@@ -254,6 +236,28 @@ function filter_format_save($format) {
 }
 
 /**
+ * Enables a text format.
+ *
+ * There is no core facility to re-enable a disabled format. It is not deleted
+ * to keep information for contrib and to make sure the format ID is never
+ * reused. As there might be content using the disabled format, this would lead
+ * to data corruption.
+ *
+ * @param $format
+ *   The text format object to be enabled.
+ */
+function filter_format_enable($format) {
+  config_set('filter.format.' . $format->format, 'status', 1);
+
+  // Allow modules to react on text format enablement.
+  module_invoke_all('filter_format_enable', $format);
+
+  // Clear the filter cache whenever a text format is enabled.
+  filter_formats_reset();
+  cache('filter')->deletePrefix($format->format . ':');
+}
+
+/**
  * Disables a text format.
  *
  * There is no core facility to re-enable a disabled format. It is not deleted
@@ -265,12 +269,9 @@ function filter_format_save($format) {
  *   The text format object to be disabled.
  */
 function filter_format_disable($format) {
-  db_update('filter_format')
-    ->fields(array('status' => 0))
-    ->condition('format', $format->format)
-    ->execute();
+  config_set('filter.format.' . $format->format, 'status', 0);
 
-  // Allow modules to react on text format deletion.
+  // Allow modules to react on text format disablement.
   module_invoke_all('filter_format_disable', $format);
 
   // Clear the filter cache whenever a text format is disabled.
@@ -292,7 +293,8 @@ function filter_format_disable($format) {
  * @see filter_format_load()
  */
 function filter_format_exists($format_id) {
-  return (bool) db_query_range('SELECT 1 FROM {filter_format} WHERE format = :format', 0, 1, array(':format' => $format_id))->fetchField();
+  $filter_format_names = config_get_names_with_prefix('filter.format');
+  return in_array('filter.format.' . $format_id, $filter_format_names, TRUE);
 }
 
 /**
@@ -384,12 +386,19 @@ function filter_modules_disabled($modules) {
 /**
  * Retrieves a list of text formats, ordered by weight.
  *
- * @param $account
+ * @todo
+ * The query only returns enabled formats; retain or add $status parameter for
+ * all or enabled only? See notes on filter_format_load() and filter_format_exists().
+ * That behavior is driven by not providing an enablement operation.
+ * This code checks !empty($filter_format->status).
+ * If add enable operation, still include in cache only the enabled ones?
+ *
+ * @param object $account
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
  *
- * @return
+ * @return array
  *   An array of text format objects, keyed by the format ID and ordered by
  *   weight.
  *
@@ -405,14 +414,25 @@ function filter_formats($account = NULL) {
       $formats['all'] = $cache->data;
     }
     else {
-      $formats['all'] = db_select('filter_format', 'ff')
-        ->addTag('translatable')
-        ->fields('ff')
-        ->condition('status', 1)
-        ->orderBy('weight')
-        ->execute()
-        ->fetchAllAssoc('format');
+      $formats['all'] = array();
 
+      $filter_format_names = config_get_names_with_prefix('filter.format');
+      $filter_formats = config_load_multiple($filter_format_names);
+      foreach ($filter_formats as $format_name => $filter_format) {
+        $filter_format = (object) $filter_format;
+        if (!empty($filter_format->status)) {
+          $formats['all'][$filter_format->format] = $filter_format;
+        }
+      }
+      // Sort the formats by weight.
+      uasort($formats['all'], function ($a, $b) {
+        if ($a->weight == $b->weight) {
+          return $a->name < $b->name ? -1 : 1;
+        }
+        return $a->weight < $b->weight ? -1 : 1;
+      });
+
+      // @todo At this point, image calls backdrop_alter('filter_formats', $formats); Do the same?
       cache()->set("filter_formats:{$language_interface->langcode}", $formats['all']);
     }
   }
@@ -549,13 +569,8 @@ function filter_default_format($account = NULL) {
  * @see filter_default_format()
  */
 function filter_fallback_format() {
-  // This variable is automatically set in the database for all installations
-  // of Backdrop. In the event that it gets disabled or deleted somehow, there
-  // is no safe default to return, since we do not want to risk making an
-  // existing (and potentially unsafe) text format on the site automatically
-  // available to all users. Returning NULL at least guarantees that this
-  // cannot happen.
-  return config_get('system.core', 'filter_fallback_format');
+  // @todo Tie this in to settings
+  return config_get('filter.settings', 'fallback_format');
 }
 
 /**
@@ -673,13 +688,22 @@ function filter_list_format($format_id) {
       $filters['all'] = $cache->data;
     }
     else {
-      $result = db_query('SELECT * FROM {filter} ORDER BY weight, module, name');
-      foreach ($result as $record) {
-        $filters['all'][$record->format][$record->name] = $record;
+      $filter_format_names = config_get_names_with_prefix('filter.format');
+      $filter_formats = config_load_multiple($filter_format_names);
+      foreach ($filter_formats as $format_name => $filter_format) {
+        $filter_format = (object) $filter_format;
+        $filters['all'][$filter_format->format] = $filter_format;
       }
+      // Save the formats to cache.
       cache()->set('filter_list_format', $filters['all']);
     }
   }
+
+  // @todo This returns what is stored in the 'filters' property of the config
+  // files. This would have keys of format and name which are not in the 'filters'
+  // property, but they are redundant and do not appear to be used. Here each
+  // filter item is an object (as it would come from the $record above) while an
+  // array in the 'filters' property.
 
   if (!isset($filters[$format_id])) {
     $format_filters = array();
@@ -688,6 +712,7 @@ function filter_list_format($format_id) {
       if (isset($filter_info[$name])) {
         $filter->title = $filter_info[$name]['title'];
         // Unpack stored filter settings.
+        // @todo Remove next line as config file data will not be serialized.
         $filter->settings = (isset($filter->settings) ? unserialize($filter->settings) : array());
         // Merge in default settings.
         if (isset($filter_info[$name]['default settings'])) {

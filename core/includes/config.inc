@@ -151,6 +151,23 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
 }
 
 /**
+ * Loads configuration objects by name.
+ *
+ * @param array $names
+ *   The list of configuration names to load.
+ * @param string $type
+ *   The configuration type, either "staging" or "active".
+ *
+ * @return array
+ *   An array containing matching configuration objects.
+ */
+function config_load_multiple($names, $type = 'active') {
+  $directory = config_get_config_directory($type);
+  $storage = new ConfigFileStorage($directory);
+  return $storage->readMultiple($names);
+}
+
+/**
  * Moves the default config supplied by a module to the live config directory.
  *
  * @param string $module
