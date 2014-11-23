@@ -130,7 +130,7 @@ function config_get_info($config_name = NULL) {
   if ($config_name) {
     $return_config_info = FALSE;
     foreach ($config_info as $prefix => $this_config_info) {
-      if (strpos($config_name, $prefix) === 0) {
+      if ($config_name === $prefix || strpos($config_name, $prefix . '.') === 0) {
         $return_config_info = $this_config_info;
         break;
       }

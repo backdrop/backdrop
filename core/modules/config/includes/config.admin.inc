@@ -247,12 +247,10 @@ function config_import_full_form_submit(array &$form, array &$form_state) {
 
     // Convert the file URI to a file path that is readable by ArchiverTar.
     $file = file_load($fid);
-    $stream_wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
-    $directory = $stream_wrapper->getDirectoryPath();
-    $file_path = str_replace('temporary://', $directory . '/', $file->uri);
+    $realpath = backdrop_realpath($file->uri);
 
     try {
-      $archiver = new ArchiverTar($file_path);
+      $archiver = new ArchiverTar($realpath);
       $archiver->extract($config_dir, $archiver->listContents());
     }
     catch (\Exception $e) {
@@ -267,7 +265,7 @@ function config_import_full_form_submit(array &$form, array &$form_state) {
       backdrop_set_message(t('The uploaded configuration matches the current site configuration exactly. No changes were made.'), 'warning');
     }
     else {
-      backdrop_set_message(t('Your configuration files were successfully uploaded. You may view the differences below and import using the "Import all" button.'));
+      backdrop_set_message(t('Your configuration files were successfully uploaded. You may view the differences below. Import into your site by using the "Import all" button.'));
       $form_state['redirect'] = 'admin/config/development/configuration';
     }
   }
@@ -450,6 +448,7 @@ function config_import_single_form_validate(array &$form, array &$form_state) {
 function config_import_single_form_submit(array &$form, array &$form_state) {
   $data = $form_state['config_data'];
   config_sync_file($data['_config_name'], $form_state['config_change_type'], $data);
+  backdrop_flush_all_caches();
   backdrop_set_message(t('The %name configuration was imported successfully.', array('%name' => $data['_config_name'])));
 }
 

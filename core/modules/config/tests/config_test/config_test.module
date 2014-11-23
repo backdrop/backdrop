@@ -17,5 +17,9 @@ function config_test_config_info() {
     'name' => t('Configuration test simple'),
     'group' => t('Configuration'),
   );
+  $prefixes['config_test.dynamic.new'] = array(
+    'name' => t('Dynamic config file'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }

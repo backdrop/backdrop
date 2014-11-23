@@ -554,6 +554,23 @@ function layout_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function layout_config_info() {
+  $prefixes['layout.layout'] = array(
+    'name_key' => 'name',
+    'label_key' => 'title',
+    'group' => t('Layouts'),
+  );
+  $prefixes['layout.menu_item'] = array(
+    'name_key' => 'name',
+    'label_key' => 'path',
+    'group' => t('Layout menu items'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_layout_api().
  */
 function layout_layout_api() {
