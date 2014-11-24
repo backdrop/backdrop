@@ -1297,7 +1297,6 @@ function template_preprocess_field(&$variables, $hook) {
  *   - classes: Array containing the classes for the wrapping div.
  *
  * @see template_preprocess_field()
- * @see template_process_field()
  * @see field.tpl.php
  *
  * @ingroup themeable

@@ -50,7 +50,6 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_comment()
- * @see template_process()
  * @see theme_comment()
  */
 ?>

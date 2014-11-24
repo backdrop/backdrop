@@ -36,20 +36,20 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_html()
- * @see template_process()
  *
  * @ingroup themeable
  */
 ?><!DOCTYPE html>
 <html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
-    <?php print $head; ?>
+    <?php print backdrop_get_html_head(); ?>
     <title><?php print $head_title; ?></title>
-    <?php print $styles; ?>
-    <?php print $scripts; ?>
+    <?php print backdrop_get_css(); ?>
+    <?php print backdrop_get_js(); ?>
   </head>
   <body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($body_attributes);?>>
     <?php print $page; ?>
     <?php print $page_bottom; ?>
+    <?php print backdrop_get_js('footer'); ?>
   </body>
 </html>

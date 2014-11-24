@@ -76,7 +76,6 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_node()
- * @see template_process()
  */
 ?>
 <article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">

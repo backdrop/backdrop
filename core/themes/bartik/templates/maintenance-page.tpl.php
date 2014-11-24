@@ -14,10 +14,10 @@
 <!DOCTYPE html>
 <html lang="<?php print $language->langcode; ?>" dir="<?php print $language->dir; ?>">
 <head>
-  <?php print $head; ?>
+  <?php print backdrop_get_html_head(); ?>
   <title><?php print $head_title; ?></title>
-  <?php print $styles; ?>
-  <?php print $scripts; ?>
+  <?php print backdrop_get_css(); ?>
+  <?php print backdrop_get_js(); ?>
 </head>
 <body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($attributes); ?>>
 

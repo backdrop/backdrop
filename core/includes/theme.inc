@@ -946,17 +946,6 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   variables for all theme hooks with template implementations.
  * - THEME_preprocess_HOOK(&$variables): Allows the theme to set necessary
  *   variables specific to the particular theme hook.
- * - template_process(&$variables, $hook): Creates an additional set of default
- *   variables for all theme hooks with template implementations. The variables
- *   created in this function are derived from ones created by
- *   template_preprocess(), but potentially altered by the other preprocess
- *   functions listed above. For example, any preprocess function can add to or
- *   modify the $variables['attributes'] variable, and after all of them
- *   have finished executing, template_process() flattens it into a
- *   $variables['attributes'] string for convenient use by templates.
- * - template_process_HOOK(&$variables): Should be implemented by the module
- *   that registers the theme hook, if it needs to perform additional variable
- *   processing after all preprocess functions have finished.
  * - MODULE_process(&$variables, $hook): hook_process() is invoked on all
  *   implementing modules.
  * - MODULE_process_HOOK(&$variables): hook_process_HOOK() is invoked on
@@ -1024,7 +1013,6 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @see themeable
  * @see hook_theme()
  * @see template_preprocess()
- * @see template_process()
  */
 function theme($hook, $variables = array()) {
   // If called before all modules are loaded, we do not necessarily have a full
@@ -2443,7 +2431,6 @@ function _theme_table_cell($cell, $header = FALSE) {
  * about the full sequence.
  *
  * @see theme()
- * @see template_process()
  */
 function template_preprocess(&$variables, $hook) {
   global $user;
@@ -2581,26 +2568,6 @@ function template_preprocess_page(&$variables) {
   }
   $variables['head_title_array'] = $head_title;
   $variables['head_title'] = implode(' | ', $head_title);
-}
-
-/**
- * Process variables for html.tpl.php
- *
- * Perform final addition and modification of variables before passing into
- * the template. To customize these variables, call backdrop_render() on elements
- * in $variables['page'] during THEME_preprocess_page().
- *
- * @see template_preprocess_page()
- * @see page.tpl.php
- */
-function template_process_page(&$variables) {
-  // Add footer JS to the page bottom.
-  $variables['page_bottom'] .= backdrop_get_js('footer');
-
-  $variables['head']    = backdrop_get_html_head();
-  $variables['css']     = backdrop_add_css();
-  $variables['styles']  = backdrop_get_css();
-  $variables['scripts'] = backdrop_get_js();
 }
 
 /**
@@ -2780,20 +2747,4 @@ function template_preprocess_maintenance_page(&$variables) {
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
     $variables['theme_hook_suggestion'] = 'maintenance_page__offline';
   }
-}
-
-/**
- * Theme process function for theme_maintenance_field().
- *
- * The variables array generated here is a mirror of template_process_html().
- * This processor will run its course when theme_maintenance_page() is invoked.
- *
- * @see maintenance-page.tpl.php
- * @see template_process_html()
- */
-function template_process_maintenance_page(&$variables) {
-  $variables['head']    = backdrop_get_html_head();
-  $variables['css']     = backdrop_add_css();
-  $variables['styles']  = backdrop_get_css();
-  $variables['scripts'] = backdrop_get_js();
 }
