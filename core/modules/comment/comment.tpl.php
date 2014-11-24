@@ -63,7 +63,7 @@
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
-  <h3<?php print $title_attributes; ?>><?php print $title; ?></h3>
+  <h3><?php print $title; ?></h3>
   <?php print render($title_suffix); ?>
 
   <footer>

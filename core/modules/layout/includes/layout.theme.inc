@@ -265,7 +265,7 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Title tag and classes.
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes_array'] = array(
+  $variables['title_attributes'] = array(
     'class' => array_filter(explode(' ', $style->settings['title_classes'])),
   );
 

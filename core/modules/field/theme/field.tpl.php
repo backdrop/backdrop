@@ -48,7 +48,7 @@ HTML comment.
 -->
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php if (!$label_hidden): ?>
-    <div class="field-label"<?php print $title_attributes; ?>><?php print $label ?>:&nbsp;</div>
+    <div class="field-label"><?php print $label ?>:&nbsp;</div>
   <?php endif; ?>
   <div class="field-items"<?php print $content_attributes; ?>>
     <?php foreach ($items as $delta => $item): ?>

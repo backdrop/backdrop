@@ -30,7 +30,7 @@
 
 <?php print render($title_prefix); ?>
 <?php if ($title): ?>
-  <<?php print $title_tag; ?><?php print $title_attributes; ?>><?php print $title; ?></<?php print $title_tag; ?>>
+  <<?php print $title_tag; ?><?php print backdrop_attributes($title_attributes); ?>><?php print $title; ?></<?php print $title_tag; ?>>
 <?php endif;?>
 <?php print render($title_suffix); ?>
 
