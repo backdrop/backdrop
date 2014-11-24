@@ -1140,8 +1140,6 @@ function template_preprocess_user_picture(&$variables) {
  * Modules that make any changes to variables like 'name' or 'extra' must insure
  * that the final string is safe to include directly in the output by using
  * check_plain() or filter_xss().
- *
- * @see template_process_username()
  */
 function template_preprocess_username(&$variables) {
   $account = $variables['account'];
@@ -1188,27 +1186,6 @@ function template_preprocess_username(&$variables) {
 }
 
 /**
- * Processes variables for theme_username().
- *
- * @see template_preprocess_username()
- */
-function template_process_username(&$variables) {
-  // Finalize the link_options array for passing to the l() function.
-  // This is done in the process phase so that attributes may be added by
-  // modules or the theme during the preprocess phase.
-  if (isset($variables['link_path'])) {
-    // $variables['attributes'] contains attributes that should be applied
-    // regardless of whether a link is being rendered or not.
-    // $variables['link_attributes'] contains attributes that should only be
-    // applied if a link is being rendered. Preprocess functions are encouraged
-    // to use the former unless they want to add attributes on the link only.
-    // If a link is being rendered, these need to be merged. Some attributes are
-    // themselves arrays, so the merging needs to be recursive.
-    $variables['link_options']['attributes'] = array_merge_recursive($variables['link_attributes'], $variables['attributes']);
-  }
-}
-
-/**
  * Returns HTML for a username, potentially linked to the user's page.
  *
  * @param $variables
@@ -1224,19 +1201,24 @@ function template_process_username(&$variables) {
  *     backdrop_attributes() function if not linking to the user's page.
  *
  * @see template_preprocess_username()
- * @see template_process_username()
  */
 function theme_username($variables) {
   if (isset($variables['link_path'])) {
+    // Finalize the link_options array for passing to the l() function.
+    // Additional classes may be added here as array elements like
+    // $variables['attributes']['class'][] = 'myclass';
+
+    // $variables['attributes'] contains attributes that should be applied
+    // regardless of whether a link is being rendered.
+    // $variables['link_attributes'] contains attributes that should only be
+    // applied if a link is being rendered.
+    // If a link is being rendered, these need to be merged. Some attributes are
+    // themselves arrays, so the merging needs to be recursive.
+    $variables['link_options']['attributes'] = array_merge_recursive($variables['link_attributes'], $variables['attributes']);
     // We have a link path, so we should generate a link using l().
-    // Additional classes may be added as array elements like
-    // $variables['link_options']['attributes']['class'][] = 'myclass';
     $output = l($variables['name'] . $variables['extra'], $variables['link_path'], $variables['link_options']);
   }
   else {
-    // Modules may have added important attributes so they must be included
-    // in the output. Additional classes may be added as array elements like
-    // $variables['attributes']['class'][] = 'myclass';
     $output = '<span' . backdrop_attributes($variables['attributes']) . '>' . $variables['name'] . $variables['extra'] . '</span>';
   }
   return $output;
