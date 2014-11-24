@@ -1241,17 +1241,6 @@ function template_preprocess_field(&$variables, $hook) {
 }
 
 /**
- * Theme process function for theme_field() and field.tpl.php.
- *
- * @see theme_field()
- * @see field.tpl.php
- */
-function template_process_field(&$variables, $hook) {
-  foreach ($variables['items'] as $delta => $item) {
-    $variables['item_attributes'][$delta] = empty($variables['item_attributes_array'][$delta]) ? '' : backdrop_attributes($variables['item_attributes_array'][$delta]);
-  }
-}
-/**
  * @} End of "defgroup field".
  */
 
@@ -1304,7 +1293,7 @@ function template_process_field(&$variables, $hook) {
  *   - content_attributes: An array of additional HTML attributes for the
  *     content's wrapper div.
  *   - items: An array of field items.
- *   - item_attributes: An array of attributes for each item.
+ *   - item_attributes: An array of additional HTML attributes for each item.
  *   - classes: Array containing the classes for the wrapping div.
  *
  * @see template_preprocess_field()

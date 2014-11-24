@@ -2554,12 +2554,12 @@ function template_preprocess_page(&$variables) {
   }
 
   // Initializes attributes which are specific to the html and body elements.
-  $variables['html_attributes_array'] = array();
-  $variables['body_attributes_array'] = array();
+  $variables['html_attributes'] = array();
+  $variables['body_attributes'] = array();
 
   // HTML element attributes.
-  $variables['html_attributes_array']['lang'] = $GLOBALS['language_interface']->langcode;
-  $variables['html_attributes_array']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
 
   // Add favicon.
   $favicon = backdrop_get_favicon();
@@ -2594,10 +2594,6 @@ function template_preprocess_page(&$variables) {
  * @see page.tpl.php
  */
 function template_process_page(&$variables) {
-  // Flatten out html_attributes and body_attributes.
-  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
-  $variables['body_attributes'] = backdrop_attributes($variables['body_attributes_array']);
-
   // Add footer JS to the page bottom.
   $variables['page_bottom'] .= backdrop_get_js('footer');
 
