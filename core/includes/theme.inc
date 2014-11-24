@@ -951,7 +951,7 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   created in this function are derived from ones created by
  *   template_preprocess(), but potentially altered by the other preprocess
  *   functions listed above. For example, any preprocess function can add to or
- *   modify the $variables['attributes_array'] variable, and after all of them
+ *   modify the $variables['attributes'] variable, and after all of them
  *   have finished executing, template_process() flattens it into a
  *   $variables['attributes'] string for convenient use by templates.
  * - template_process_HOOK(&$variables): Should be implemented by the module
@@ -2462,6 +2462,9 @@ function template_preprocess(&$variables, $hook) {
   // Initialize html class attribute for the current hook.
   $variables['classes'] = array(backdrop_html_class($hook));
 
+  // Initialize additional attribute placeholder for the current hook.
+  $variables['attributes'] = array();
+
   // Merge in variables that don't depend on hook and don't change during a
   // single page request.
   // Use the advanced backdrop_static() pattern, since this is called very often.
@@ -2487,7 +2490,7 @@ function _template_preprocess_default_variables() {
 
   // Variables that don't depend on a database connection.
   $variables = array(
-    'attributes_array' => array(),
+    'attributes' => array(),
     'title_attributes_array' => array(),
     'content_attributes_array' => array(),
     'title_prefix' => array(),
@@ -2536,11 +2539,7 @@ function _template_preprocess_default_variables() {
  * @see template_preprocess()
  */
 function template_process(&$variables, $hook) {
-  // Flatten out attributes, title_attributes, and content_attributes.
-  // Because this function can be called very often, and often with empty
-  // attributes, optimize performance by only calling backdrop_attributes() if
-  // necessary.
-  $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
+  // Flatten out title_attributes, and content_attributes.
   $variables['title_attributes'] = $variables['title_attributes_array'] ? backdrop_attributes($variables['title_attributes_array']) : '';
   $variables['content_attributes'] = $variables['content_attributes_array'] ? backdrop_attributes($variables['content_attributes_array']) : '';
 }

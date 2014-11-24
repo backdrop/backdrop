@@ -1191,6 +1191,7 @@ function field_extract_bundle($entity_type, $bundle) {
  */
 function template_preprocess_field(&$variables, $hook) {
   $element = $variables['element'];
+  $variables['attributes'] = array();
 
   // There's some overhead in calling check_plain() so only call it if the label
   // variable is being displayed. Otherwise, set it to NULL to avoid PHP
@@ -1251,7 +1252,6 @@ function template_process_field(&$variables, $hook) {
   // performance, only call backdrop_attributes() when needed, and note that
   // template_preprocess_field() does not initialize the
   // *_attributes_array variables.
-  $variables['attributes'] = empty($variables['attributes_array']) ? '' : backdrop_attributes($variables['attributes_array']);
   $variables['title_attributes'] = empty($variables['title_attributes_array']) ? '' : backdrop_attributes($variables['title_attributes_array']);
   $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : backdrop_attributes($variables['content_attributes_array']);
   foreach ($variables['items'] as $delta => $item) {
@@ -1314,7 +1314,6 @@ function template_process_field(&$variables, $hook) {
  *   - items: An array of field items.
  *   - item_attributes: An array of attributes for each item.
  *   - classes: Array containing the classes for the wrapping div.
- *   - attributes: A string containing the attributes for the wrapping div.
  *
  * @see template_preprocess_field()
  * @see template_process_field()
@@ -1339,7 +1338,7 @@ function theme_field($variables) {
   $output .= '</div>';
 
   // Render the top-level DIV.
-  $output = '<div class="' . implode(' ', $variables['classes']) . '"' . $variables['attributes'] . '>' . $output . '</div>';
+  $output = '<div class="' . implode(' ', $variables['classes']) . '"' . backdrop_attributes($variables['attributes']) . '>' . $output . '</div>';
 
   return $output;
 }

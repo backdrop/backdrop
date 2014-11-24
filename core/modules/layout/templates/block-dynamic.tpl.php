@@ -25,7 +25,7 @@
  */
 ?>
 <?php if ($wrapper_tag): ?>
-<<?php print $wrapper_tag; ?> class="<?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
+<<?php print $wrapper_tag; ?> class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
 <?php endif; ?>
 
 <?php print render($title_prefix); ?>

@@ -1026,7 +1026,7 @@ function _book_link_defaults($nid) {
  */
 function book_preprocess_block(&$variables) {
   if ($variables['block']->module == 'book') {
-    $variables['attributes_array']['role'] = 'navigation';
+    $variables['attributes']['role'] = 'navigation';
   }
 }
 

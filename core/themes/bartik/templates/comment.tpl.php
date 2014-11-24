@@ -35,6 +35,8 @@
  *   - comment-unpublished: An unpublished comment visible only to administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
  *   - comment-new: New comment since last the visit.
+ * - $attributes: Array of additional HTML attributes that should be added to
+ *   the wrapper element. Flatten with backdrop_attributes().
  * - $title_prefix (array): An array containing additional output populated by
  *   modules, intended to be displayed in front of the main title tag that
  *   appears in the template.
@@ -52,7 +54,7 @@
  * @see theme_comment()
  */
 ?>
-<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print $attributes; ?> role="article">
+<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">
   <header class="comment-header">
     <div class="attribution">
       <?php print $user_picture; ?>

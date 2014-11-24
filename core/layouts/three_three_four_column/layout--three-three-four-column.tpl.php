@@ -26,7 +26,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-three-three-four-column <?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
+<div class="layout-three-three-four-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php if ($content['header']): ?>
     <header id="header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
       <?php print $content['header']; ?>

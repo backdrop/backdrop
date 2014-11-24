@@ -104,7 +104,7 @@ function system_theme() {
     ),
     'block__system__main' => array(
       'template' => 'templates/block--system--main',
-      //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes_array' => array()),
+      //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
     ),
   ));
@@ -2193,13 +2193,13 @@ function system_preprocess_block(&$variables) {
 
     switch ($variables['block']->delta) {
       case 'powered-by':
-        $variables['attributes_array']['role'] = 'complementary';
+        $variables['attributes']['role'] = 'complementary';
         break;
 
       // System menu blocks should get the same class as menu module blocks.
       default:
         if (in_array($variables['block']->delta, array_keys(menu_list_system_menus()))) {
-          $variables['attributes_array']['role'] = 'navigation';
+          $variables['attributes']['role'] = 'navigation';
           $variables['classes'][] = 'block-menu';
         }
     }

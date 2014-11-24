@@ -2169,7 +2169,7 @@ function comment_form_submit($form, &$form_state) {
  */
 function comment_preprocess_block(&$variables) {
   if ($variables['block']->module == 'comment') {
-    $variables['attributes_array']['role'] = 'navigation';
+    $variables['attributes']['role'] = 'navigation';
   }
 }
 

@@ -7,7 +7,8 @@
  *
  * Variables:
  * - $classes: Array of CSS classes to be added to the layout wrapper.
- * - $attributes: A string of attributes to be added to the layout wrapper.
+ * - $attributes: Array of additional HTML attributes to be added to the layout
+ *     wrapper. Flatten using backdrop_attributes().
  * - $content: An array of content, each item in the array is keyed to one
  *   region of the layout. This layout supports the following sections:
  *   - $content['header']
@@ -17,7 +18,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-two-column <?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
+<div class="layout-two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>

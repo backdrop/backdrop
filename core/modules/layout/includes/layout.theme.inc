@@ -261,7 +261,7 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Classes for the wrapper set in template_preprocess_block().
   $variables['wrapper_tag'] = $style->settings['wrapper_tag'];
-  $variables['attributes_array'] = array();
+  $variables['attributes'] = array();
 
   // Title tag and classes.
   $variables['title_tag'] = $style->settings['title_tag'];
