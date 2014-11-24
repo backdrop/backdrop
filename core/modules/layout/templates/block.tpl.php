@@ -4,7 +4,7 @@
  * Template for outputting the default block styling within a Layout.
  *
  * Variables available:
- * - $classes: Classes that should be displayed on this block's wrapper.
+ * - $classes: Array of classes that should be displayed on the block's wrapper.
  * - $title: The title of the block.
  * - $title_prefix/$title_suffix: A prefix and suffix for the title tag. This
  *   is important to print out as administrative links to edit this block are
@@ -12,7 +12,7 @@
  * - $content: The actual content of the block.
  */
 ?>
-<div class="<?php print $classes; ?>">
+<div class="<?php print implode(' ', $classes); ?>">
 
 <?php print render($title_prefix); ?>
 <?php if ($title): ?>

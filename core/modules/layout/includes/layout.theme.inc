@@ -189,7 +189,7 @@ function template_preprocess_block(&$variables) {
   $block = $variables['block'];
   $style = $block->style;
 
-  $variables['classes_array'] = array();
+  $variables['classes'] = array();
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
@@ -224,18 +224,18 @@ function template_preprocess_block(&$variables) {
           'library' => array(array('contextual', 'contextual-links')),
         ),
       );
-      $variables['classes_array'][] = 'contextual-links-region';
+      $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
   }
 
   // Basic classes.
-  $variables['classes_array'][] = 'block';
-  $variables['classes_array'][] = backdrop_html_class('block-' . $block->module . '-' . $block->delta);
+  $variables['classes'][] = 'block';
+  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . $block->delta);
 
   // Add custom classes if sent in.
   if (!empty($style->settings['classes'])) {
-    $variables['classes_array'] = array_merge($variables['classes_array'], array_filter(explode(' ', $style->settings['classes'])));
+    $variables['classes'] = array_merge($variables['classes'], array_filter(explode(' ', $style->settings['classes'])));
   }
 
   // Set up some placeholders for constructing template file names.

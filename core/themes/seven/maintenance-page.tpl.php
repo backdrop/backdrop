@@ -6,7 +6,7 @@
     <?php print $styles; ?>
     <?php print $scripts; ?>
   </head>
-  <body class="<?php print $classes; ?>">
+  <body class="<?php print implode(' ', $classes); ?>">
     <div id="page">
 
     <?php if ($sidebar_first): ?>

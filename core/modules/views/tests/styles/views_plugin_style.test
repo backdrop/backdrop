@@ -245,12 +245,13 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     $count = 0;
     foreach ($rows as $row) {
       $attributes = $row->attributes();
+      //debug($attributes['class']);
       $class = (string) $attributes['class'][0];
-      $this->assertTrue(strpos($class, $random_name) !== FALSE, 'Take sure that a custom css class is added to the output.');
+      $this->assertTrue(strpos($class, $random_name) !== FALSE, 'Make sure that a custom CSS class is added to the output.');
 
       // Check token replacement.
       $name = $view->field['name']->get_value($view->result[$count]);
-      $this->assertTrue(strpos($class, "test-token-$name") !== FALSE, 'Take sure that a token in custom css class is replaced.');
+      $this->assertTrue(strpos($class, "test-token-$name") !== FALSE, 'Make sure that a token in custom CSS class is replaced.');
 
       $count++;
     }

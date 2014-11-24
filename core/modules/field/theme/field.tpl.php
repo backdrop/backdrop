@@ -11,10 +11,8 @@
  * - $items: An array of field values. Use render() to output them.
  * - $label: The item label.
  * - $label_hidden: Whether the label display is set to 'hidden'.
- * - $classes: String of classes that can be used to style contextually through
- *   CSS. It can be manipulated through the variable $classes_array from
- *   preprocess functions. The default values can be one or more of the
- *   following:
+ * - $classes: Array of classes that can be used to style contextually through
+ *   CSS. The default values can be one or more of the following:
  *   - field: The current template type, i.e., "theming hook".
  *   - field-name-[field_name]: The current field name. For example, if the
  *     field name is "field_description" it would result in
@@ -35,8 +33,6 @@
  *   hidden.
  * - $field_name_css: The css-compatible field name.
  * - $field_type_css: The css-compatible field type.
- * - $classes_array: Array of html class attribute values. It is flattened
- *   into a string within the variable $classes.
  *
  * @see template_preprocess_field()
  * @see theme_field()
@@ -50,7 +46,7 @@ See http://api.drupal.org/api/function/theme_field/7 for details.
 After copying this file to your theme's folder and customizing it, remove this
 HTML comment.
 -->
-<div class="<?php print $classes; ?>"<?php print $attributes; ?>>
+<div class="<?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
   <?php if (!$label_hidden): ?>
     <div class="field-label"<?php print $title_attributes; ?>><?php print $label ?>:&nbsp;</div>
   <?php endif; ?>

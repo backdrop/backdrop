@@ -7,6 +7,7 @@
  * includes responsive and collapsible columns.
  *
  * Variables:
+ * - $classes: Array of CSS classes to be added to the layout wrapper.
  * - $attributes: A string of attributes to be added to the layout wrapper.
  * - $content: An array of content, each item in the array is keyed to one
  *   region of the layout. This layout supports the following sections:
@@ -25,7 +26,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-three-three-four-column <?php print $classes; ?>"<?php print $attributes; ?>>
+<div class="layout-three-three-four-column <?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
   <?php if ($content['header']): ?>
     <header id="header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
       <?php print $content['header']; ?>

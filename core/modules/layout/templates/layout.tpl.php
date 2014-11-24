@@ -4,7 +4,8 @@
  * Template for a single column layout.
  *
  * Variables:
- * - $attributes: A string of attributes to be added to the layout wrapper.
+ * - $classes: Array of classes to be added to the layout wrapper.
+ * - $attributes: Additional attributes to be added to the layout wrapper.
  * - $content: An array of content, each item in the array is keyed to one
  *   region of the layout. This layout supports the following sections:
  *   - $content['header']
@@ -13,7 +14,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-one-column <?php print $classes; ?>"<?php print $attributes; ?>>
+<div class="layout-one-column <?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>

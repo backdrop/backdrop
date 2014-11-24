@@ -5,14 +5,13 @@
  * Main view template.
  *
  * Variables available:
- * - $classes_array: An array of classes determined in
+ * - $classes: An array of classes determined in
  *   template_preprocess_views_view(). Default classes are:
  *     .view
  *     .view-[css_name]
  *     .view-id-[view_name]
  *     .view-display-id-[display_name]
  *     .view-dom-id-[dom_id]
- * - $classes: A string version of $classes_array for use in the class attribute
  * - $css_name: A css-safe version of the view name.
  * - $css_class: The user-specified classes names, if any
  * - $header: The view header
@@ -27,7 +26,7 @@
  * @ingroup views_templates
  */
 ?>
-<div class="<?php print $classes; ?>">
+<div class="<?php print implode(' ', $classes); ?>">
   <?php print render($title_prefix); ?>
   <?php if ($title): ?>
     <?php print $title; ?>

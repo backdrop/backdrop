@@ -31,7 +31,7 @@
  * - $page_bottom: Final closing markup from any modules that have altered the
  *   page. This variable should always be output last, after all other dynamic
  *   content.
- * - $classes String of classes that can be used to style contextually through
+ * - $classes Array of classes that can be used to style contextually through
  *   CSS.
  *
  * @see template_preprocess()
@@ -48,7 +48,7 @@
     <?php print $styles; ?>
     <?php print $scripts; ?>
   </head>
-  <body class="<?php print $classes; ?>" <?php print $body_attributes;?>>
+  <body class="<?php print implode(' ', $classes); ?>" <?php print $body_attributes;?>>
     <?php print $page; ?>
     <?php print $page_bottom; ?>
   </body>

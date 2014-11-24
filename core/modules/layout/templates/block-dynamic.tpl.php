@@ -12,7 +12,7 @@
  *
  * Variables available:
  * - $wrapper_tag: The HTML tag to be used around the entire block.
- * - $classes: Classes that should be displayed on this block's wrapper.
+ * - $classes: Array of classes that should be displayed on the block's wrapper.
  * - $attributes: Attributes that should be displayed on this block's wrapper.
  * - $title: The title of the block.
  * - $title_prefix/$title_suffix: A prefix and suffix for the title tag. This
@@ -25,7 +25,7 @@
  */
 ?>
 <?php if ($wrapper_tag): ?>
-<<?php print $wrapper_tag; ?> class="<?php print $classes; ?>"<?php print $attributes; ?>>
+<<?php print $wrapper_tag; ?> class="<?php print implode(' ', $classes); ?>"<?php print $attributes; ?>>
 <?php endif; ?>
 
 <?php print render($title_prefix); ?>

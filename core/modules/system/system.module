@@ -2200,7 +2200,7 @@ function system_preprocess_block(&$variables) {
       default:
         if (in_array($variables['block']->delta, array_keys(menu_list_system_menus()))) {
           $variables['attributes_array']['role'] = 'navigation';
-          $variables['classes_array'][] = 'block-menu';
+          $variables['classes'][] = 'block-menu';
         }
     }
   }

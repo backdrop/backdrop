@@ -9,18 +9,18 @@
  */
 function template_preprocess_layout__three_three_four_column(&$variables) {
   if ($variables['content']['sidebar_first'] && $variables['content']['sidebar_second']) {
-    $variables['classes_array'][] = 'layout-two-sidebars';
+    $variables['classes'][] = 'layout-two-sidebars';
   }
   elseif ($variables['content']['sidebar_first'] || $variables['content']['sidebar_second']) {
-    $variables['classes_array'][] = 'layout-one-sidebar';
+    $variables['classes'][] = 'layout-one-sidebar';
     if ($variables['content']['sidebar_first']) {
-      $variables['classes_array'][] = 'layout-sidebar-first';
+      $variables['classes'][] = 'layout-sidebar-first';
     }
     else {
-      $variables['classes_array'][] = 'layout-sidebar-second';
+      $variables['classes'][] = 'layout-sidebar-second';
     }
   }
   else {
-    $variables['classes_array'][] = 'layout-no-sidebars';
+    $variables['classes'][] = 'layout-no-sidebars';
   }
 }

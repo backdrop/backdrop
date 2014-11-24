@@ -91,7 +91,7 @@ function contextual_process(&$variables, $hook) {
       '#element' => $element,
     );
     // Mark this element as potentially having contextual links attached to it.
-    $variables['classes'] .= ' contextual-links-region';
+    $variables['classes'][] = 'contextual-links-region';
     unset($element['#contextual_links']);
   }
 }

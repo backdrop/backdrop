@@ -2257,20 +2257,20 @@ function template_preprocess_comment(&$variables) {
   // 'comment-published' class is not needed, it is either 'comment-preview' or
   // 'comment-unpublished'.
   if ($variables['status'] != 'comment-published') {
-    $variables['classes_array'][] = $variables['status'];
+    $variables['classes'][] = $variables['status'];
   }
   if ($variables['new']) {
-    $variables['classes_array'][] = 'comment-new';
+    $variables['classes'][] = 'comment-new';
   }
   if (!$comment->uid) {
-    $variables['classes_array'][] = 'comment-by-anonymous';
+    $variables['classes'][] = 'comment-by-anonymous';
   }
   else {
     if ($comment->uid == $variables['node']->uid) {
-      $variables['classes_array'][] = 'comment-by-node-author';
+      $variables['classes'][] = 'comment-by-node-author';
     }
     if ($comment->uid == $variables['user']->uid) {
-      $variables['classes_array'][] = 'comment-by-viewer';
+      $variables['classes'][] = 'comment-by-viewer';
     }
   }
 }

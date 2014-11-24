@@ -43,7 +43,7 @@ function bartik_field__taxonomy_term_reference($variables) {
   $output .= '</ul>';
 
   // Render the top-level DIV.
-  $output = '<div class="' . $variables['classes'] . (!in_array('clearfix', $variables['classes_array']) ? ' clearfix' : '') . '"' . $variables['attributes'] .'>' . $output . '</div>';
+  $output = '<div class="' . implode(' ', $variables['classes']) . (!in_array('clearfix', $variables['classes']) ? ' clearfix' : '') . '"' . $variables['attributes'] .'>' . $output . '</div>';
 
   return $output;
 }
