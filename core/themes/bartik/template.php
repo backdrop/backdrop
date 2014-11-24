@@ -1,16 +1,6 @@
 <?php
 
 /**
- * Override or insert variables into the page template for HTML output.
- */
-function bartik_process_page(&$variables) {
-  // Hook into color.module.
-  if (module_exists('color')) {
-    _color_page_alter($variables);
-  }
-}
-
-/**
  * Implements hook_preprocess_maintenance_page().
  */
 function bartik_preprocess_maintenance_page(&$variables) {

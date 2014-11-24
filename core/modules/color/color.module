@@ -34,22 +34,18 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
 }
 
 /**
+ * Implements hook_css_alter().
+ *
  * Replaces style sheets with color-altered style sheets.
- *
- * A theme that supports the color module should call this function from its
- * THEME_process_html() function, so that the correct style sheets are
- * included when html.tpl.php is rendered.
- *
- * @see theme()
  */
-function _color_page_alter(&$vars) {
+function color_css_alter(&$css) {
   global $theme_key;
   $themes = list_themes();
 
   // Override stylesheets.
   $color_paths = theme_get_setting('color.stylesheets');
-  if (!empty($color_paths)) {
 
+  if (!empty($color_paths)) {
     foreach ($themes[$theme_key]->stylesheets['all'] as $base_filename => $old_path) {
       // Loop over the path array with recolored CSS files to find matching
       // paths which could replace the non-recolored paths.
@@ -59,12 +55,10 @@ function _color_page_alter(&$vars) {
         if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
           // Replace the path to the new css file.
           // This keeps the order of the stylesheets intact.
-          $vars['css'][$old_path]['data'] = $color_path;
+          $css[$old_path]['data'] = $color_path;
         }
       }
     }
-
-    $vars['styles'] = backdrop_get_css($vars['css']);
   }
 }
 
