@@ -43,14 +43,18 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
 
     // Alter some text format properties and save again.
     $format->name = 'Altered format';
-    $format->filters['filter_url']['status'] = 0;
-    $format->filters['filter_autop']['status'] = 1;
+    $format->filters['filter_url']->status = 0;
+    $format->filters['filter_autop'] = (object) array(
+      'status' => 1,
+    );
     filter_format_save($format);
     $this->verifyTextFormat($format);
     $this->verifyFilters($format);
 
     // Add a uncacheable filter and save again.
-    $format->filters['filter_test_uncacheable']['status'] = 1;
+    $format->filters['filter_test_uncacheable'] = (object) array(
+      'status' => 1,
+    );
     filter_format_save($format);
     $this->verifyTextFormat($format);
     $this->verifyFilters($format);
@@ -58,8 +62,8 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
     // Disable the text format.
     filter_format_disable($format);
 
-    $db_format = db_query("SELECT * FROM {filter_format} WHERE format = :format", array(':format' => $format->format))->fetchObject();
-    $this->assertFalse($db_format->status, 'Database: Disabled text format is marked as disabled.');
+    $config_format = config_get('filter.format.' . $format->format);
+    $this->assertFalse($config_format['status'], 'Disabled text format is marked as disabled in config.');
     $formats = filter_formats();
     $this->assertTrue(!isset($formats[$format->format]), 'filter_formats: Disabled text format no longer exists.');
   }
@@ -70,15 +74,11 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
   function verifyTextFormat($format) {
     $t_args = array('%format' => $format->name);
     // Verify text format database record.
-    $db_format = db_select('filter_format', 'ff')
-      ->fields('ff')
-      ->condition('format', $format->format)
-      ->execute()
-      ->fetchObject();
-    $this->assertEqual($db_format->format, $format->format, format_string('Database: Proper format id for text format %format.', $t_args));
-    $this->assertEqual($db_format->name, $format->name, format_string('Database: Proper title for text format %format.', $t_args));
-    $this->assertEqual($db_format->cache, $format->cache, format_string('Database: Proper cache indicator for text format %format.', $t_args));
-    $this->assertEqual($db_format->weight, $format->weight, format_string('Database: Proper weight for text format %format.', $t_args));
+    $config_format = (object) config_get('filter.format.' . $format->format);
+    $this->assertEqual($config_format->format, $format->format, format_string('Database: Proper format id for text format %format.', $t_args));
+    $this->assertEqual($config_format->name, $format->name, format_string('Database: Proper title for text format %format.', $t_args));
+    $this->assertEqual($config_format->cache, $format->cache, format_string('Database: Proper cache indicator for text format %format.', $t_args));
+    $this->assertEqual($config_format->weight, $format->weight, format_string('Database: Proper weight for text format %format.', $t_args));
 
     // Verify filter_format_load().
     $filter_format = filter_format_load($format->format);
@@ -89,9 +89,8 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
 
     // Verify the 'cache' text format property according to enabled filters.
     $filter_info = filter_get_filters();
-    $filters = filter_list_format($filter_format->format);
     $cacheable = TRUE;
-    foreach ($filters as $name => $filter) {
+    foreach ($filter_format->filters as $name => $filter) {
       // If this filter is not cacheable, update $cacheable accordingly, so we
       // can verify $format->cache after iterating over all filters.
       if ($filter->status && isset($filter_info[$name]['cache']) && !$filter_info[$name]['cache']) {
@@ -107,48 +106,28 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
    */
   function verifyFilters($format) {
     // Verify filter database records.
-    $filters = db_query("SELECT * FROM {filter} WHERE format = :format", array(':format' => $format->format))->fetchAllAssoc('name');
+    $config_filters = (object) config_get('filter.format.' . $format->format, 'filters');
     $format_filters = $format->filters;
-    foreach ($filters as $name => $filter) {
+    $all_filter_info = filter_get_filters();
+    foreach ($config_filters as $name => $config_filter) {
+      $config_filter = (object) $config_filter;
       $t_args = array('%format' => $format->name, '%filter' => $name);
 
       // Verify that filter status is properly stored.
-      $this->assertEqual($filter->status, $format_filters[$name]['status'], format_string('Database: Proper status for %filter in text format %format.', $t_args));
+      $this->assertEqual($config_filter->status, $format_filters[$name]->status, format_string('Proper status for %filter in text format %format in config.', $t_args));
 
       // Verify that filter settings were properly stored.
-      $this->assertEqual(unserialize($filter->settings), isset($format_filters[$name]['settings']) ? $format_filters[$name]['settings'] : array(), format_string('Database: Proper filter settings for %filter in text format %format.', $t_args));
+      $this->assertEqual($config_filter->settings, $format_filters[$name]->settings, format_string('Proper filter settings for %filter in text format %format in config.', $t_args));
 
       // Verify that each filter has a module name assigned.
-      $this->assertTrue(!empty($filter->module), format_string('Database: Proper module name for %filter in text format %format.', $t_args));
+      $this->assertEqual($config_filter->module, $all_filter_info[$name]['module'], format_string('Module name assigned for %filter in text format %format.', $t_args));
 
       // Remove the filter from the copy of saved $format to check whether all
       // filters have been processed later.
       unset($format_filters[$name]);
     }
     // Verify that all filters have been processed.
-    $this->assertTrue(empty($format_filters), 'Database contains values for all filters in the saved format.');
-
-    // Verify filter_list_format().
-    $filters = filter_list_format($format->format);
-    $format_filters = $format->filters;
-    foreach ($filters as $name => $filter) {
-      $t_args = array('%format' => $format->name, '%filter' => $name);
-
-      // Verify that filter status is properly stored.
-      $this->assertEqual($filter->status, $format_filters[$name]['status'], format_string('filter_list_format: Proper status for %filter in text format %format.', $t_args));
-
-      // Verify that filter settings were properly stored.
-      $this->assertEqual($filter->settings, isset($format_filters[$name]['settings']) ? $format_filters[$name]['settings'] : array(), format_string('filter_list_format: Proper filter settings for %filter in text format %format.', $t_args));
-
-      // Verify that each filter has a module name assigned.
-      $this->assertTrue(!empty($filter->module), format_string('filter_list_format: Proper module name for %filter in text format %format.', $t_args));
-
-      // Remove the filter from the copy of saved $format to check whether all
-      // filters have been processed later.
-      unset($format_filters[$name]);
-    }
-    // Verify that all filters have been processed.
-    $this->assertTrue(empty($format_filters), 'filter_list_format: Loaded filters contain values for all filters in the saved format.');
+    $this->assertTrue(empty($format_filters), 'Config contains values for all filters in the saved format.');
   }
 }
 
@@ -186,6 +165,17 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'name' => $name,
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    // Attempt to create a format of the same human readable name as the
+    // format but with a different machine name.
+    $edit = array(
+      'format' => 'new_format',
+      'name' => $name,
+    );
+    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+    $this->assertRaw(t('Text format names must be unique. A format named %name already exists.', array(
+      '%name' => $name,
+    )));
 
     // Verify default weight of the text format.
     $this->backdropGet('admin/config/content/formats');
@@ -225,17 +215,6 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertText('The machine-readable name is already in use. It must be unique.');
-
-    // Attempt to create a format of the same human readable name as the
-    // disabled format but with a different machine name.
-    $edit = array(
-      'format' => 'new_format',
-      'name' => $name,
-    );
-    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
-    $this->assertRaw(t('Text format names must be unique. A format named %name already exists.', array(
-      '%name' => $name,
-    )));
   }
 
   /**
@@ -266,6 +245,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
     $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], 'Allowed HTML tag added.');
 
     $result = db_query('SELECT * FROM {cache_filter}')->fetchObject();
@@ -282,6 +262,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit['filters[' . $second_filter . '][weight]'] = 1;
     $edit['filters[' . $first_filter . '][weight]'] = 2;
     $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', 1, 'Order saved successfully.');
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', 2, 'Order saved successfully.');
 
@@ -291,14 +272,15 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     ));
     $this->assertTrue(!empty($elements), 'Reorder confirmed in admin interface.');
 
-    $result = db_query('SELECT * FROM {filter} WHERE format = :format ORDER BY weight ASC', array(':format' => $filtered));
+    $config_filters = config_get('filter.format.' . $filtered, 'filters');
     $filters = array();
-    foreach ($result as $filter) {
-      if ($filter->name == $second_filter || $filter->name == $first_filter) {
+    foreach ($config_filters as $filter_name => $filter) {
+      if ($filter_name == $second_filter || $filter_name == $first_filter) {
+        $filter['name'] = $filter_name;
         $filters[] = $filter;
       }
     }
-    $this->assertTrue(($filters[0]->name == $second_filter && $filters[1]->name == $first_filter), 'Order confirmed in database.');
+    $this->assertTrue(($filters[0]['name'] == $second_filter && $filters[1]['name'] == $first_filter), 'Order confirmed in database.');
 
     // Add format.
     $edit = array();
@@ -312,7 +294,8 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     backdrop_static_reset('filter_formats');
     $format = filter_format_load($edit['format']);
-    $this->assertNotNull($format, 'Format found in database.');
+    $this->assertNotNull($format, 'Format found in config.');
+    $this->backdropGet('admin/config/content/formats/' . $edit['format']);
 
     $this->assertFieldByName('roles[authenticated]', '', 'Role found.');
     $this->assertFieldByName('filters[' . $second_filter . '][status]', '', 'Line break filter found.');
@@ -328,7 +311,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit['roles[anonymous]'] = 0;
     $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), 'Full HTML format successfully updated.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully updated.');
 
     // Switch user.
     $this->backdropLogout();
@@ -372,13 +355,15 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
     $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], 'Changes reverted.');
 
     // Full HTML.
     $edit = array();
     $edit['roles[authenticated]'] = FALSE;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), 'Full HTML format successfully reverted.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully reverted.');
+    $this->backdropGet('admin/config/content/formats/' . $full);
     $this->assertFieldByName('roles[authenticated]', $edit['roles[authenticated]'], 'Changes reverted.');
 
     // Filter order.
@@ -386,6 +371,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit['filters[' . $second_filter . '][weight]'] = 2;
     $edit['filters[' . $first_filter . '][weight]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', $edit['filters[' . $second_filter . '][weight]'], 'Changes reverted.');
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', $edit['filters[' . $first_filter . '][weight]'], 'Changes reverted.');
   }
@@ -707,10 +693,9 @@ class FilterDefaultFormatTestCase extends BackdropWebTestCase {
 
     // Adjust the weights so that the first and second formats (in that order)
     // are the two lowest weighted formats available to any user.
-    $minimum_weight = db_query("SELECT MIN(weight) FROM {filter_format}")->fetchField();
     $edit = array();
-    $edit['formats[' . $first_format->format . '][weight]'] = $minimum_weight - 2;
-    $edit['formats[' . $second_format->format . '][weight]'] = $minimum_weight - 1;
+    $edit['formats[' . $first_format->format . '][weight]'] = '-2';
+    $edit['formats[' . $second_format->format . '][weight]'] = '-1';
     $this->backdropPost('admin/config/content/formats', $edit, t('Save changes'));
     $this->resetFilterCaches();
 
@@ -722,7 +707,7 @@ class FilterDefaultFormatTestCase extends BackdropWebTestCase {
     // Reorder the two formats, and check that both users now have the same
     // default.
     $edit = array();
-    $edit['formats[' . $second_format->format . '][weight]'] = $minimum_weight - 3;
+    $edit['formats[' . $second_format->format . '][weight]'] = '-3';
     $this->backdropPost('admin/config/content/formats', $edit, t('Save changes'));
     $this->resetFilterCaches();
     $this->assertEqual(filter_default_format($first_user), filter_default_format($second_user), 'After the formats are reordered, both users have the same default format.');
@@ -791,7 +776,7 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
     // Verify that filter_test_replace filter replaced the content.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, 'Node body not found.');
-    $this->assertText('Filter: Testing filter', 'Testing filter output found.');
+    $this->assertText('Filter: filter_test_replace', 'Testing filter output found.');
 
     // Disable the text format entirely.
     $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
@@ -1820,7 +1805,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
-    $this->assertRaw(t('The text format %format has been updated.', array('%format' => $name)), 'Format successfully updated.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $name)), 'Format successfully updated.');
     $this->assertText('hook_filter_format_update invoked.', 'hook_filter_format_update() was invoked.');
 
     // Add a new custom block.
@@ -1872,11 +1857,11 @@ class FilterSettingsTestCase extends BackdropWebTestCase {
 
     // Verify that default weights defined in hook_filter_info() were applied.
     $saved_settings = array();
-    foreach ($filter_defaults_format->filters as $name => $settings) {
+    foreach ($filter_defaults_format->filters as $name => $filter) {
       $expected_weight = (isset($filter_info[$name]['weight']) ? $filter_info[$name]['weight'] : 0);
-      $this->assertEqual($settings['weight'], $expected_weight, format_string('@name filter weight %saved equals %default', array(
+      $this->assertEqual($filter->weight, $expected_weight, format_string('@name filter weight %saved equals %default', array(
         '@name' => $name,
-        '%saved' => $settings['weight'],
+        '%saved' => $filter->weight,
         '%default' => $expected_weight,
       )));
       $saved_settings[$name]['weight'] = $expected_weight;
@@ -1887,13 +1872,12 @@ class FilterSettingsTestCase extends BackdropWebTestCase {
     // Reload it from scratch.
     filter_formats_reset();
     $filter_defaults_format = filter_format_load($filter_defaults_format->format);
-    $filter_defaults_format->filters = filter_list_format($filter_defaults_format->format);
 
     // Verify that saved filter settings have not been changed.
-    foreach ($filter_defaults_format->filters as $name => $settings) {
-      $this->assertEqual($settings->weight, $saved_settings[$name]['weight'], format_string('@name filter weight %saved equals %previous', array(
+    foreach ($filter_defaults_format->filters as $name => $filter) {
+      $this->assertEqual($filter->weight, $saved_settings[$name]['weight'], format_string('@name filter weight %saved equals %previous', array(
         '@name' => $name,
-        '%saved' => $settings->weight,
+        '%saved' => $filter->weight,
         '%previous' => $saved_settings[$name]['weight'],
       )));
     }

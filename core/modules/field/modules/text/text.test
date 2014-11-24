@@ -244,7 +244,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
   function testFirstSentenceQuestion() {
     $text = 'A question? A sentence. Another sentence.';
     $expected = 'A question? A sentence.';
-    $this->callTextSummary($text, $expected, NULL, 30);
+    $this->assertTextSummary($text, $expected, NULL, 30);
   }
 
   /**
@@ -259,7 +259,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
                 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ' .
                 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
     // First three sentences add up to: 336, so add one for space and then 3 to get half-way into next word.
-    $this->callTextSummary($text, $expected, NULL, 340);
+    $this->assertTextSummary($text, $expected, NULL, 340);
   }
 
   /**
@@ -357,18 +357,17 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
-      $this->callTextSummary($text, $expected[$i],    NULL, $i);
-      $this->callTextSummary($text, $expected_lb[$i], 'plain_text', $i);
-      $this->callTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
+      $this->assertTextSummary($text, $expected[$i],    NULL, $i);
+      $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
     }
   }
 
   /**
    * Calls text_summary() and asserts that the expected teaser is returned.
    */
-  function callTextSummary($text, $expected, $format = NULL, $size = NULL) {
+  function assertTextSummary($text, $expected, $format = NULL, $size = NULL) {
     $summary = text_summary($text, $format, $size);
-    $this->assertIdentical($summary, $expected, format_string('Generated summary "@summary" matches expected "@expected".', array('@summary' => $summary, '@expected' => $expected)));
+    $this->assertIdentical($summary, $expected, format_string('Generated @format summary "@summary" matches expected "@expected".', array('@format' => $format, '@summary' => str_replace("\n", '\n', $summary), '@expected' => str_replace("\n", '\n', $expected))));
   }
 
   /**

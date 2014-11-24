@@ -315,7 +315,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  *
  * @param $text
  *   The content for which a summary will be generated.
- * @param $format
+ * @param $format_id
  *   The format of the content.
  *   If the PHP filter is present and $text contains PHP code, we do not
  *   split it up to prevent parse errors.
@@ -330,7 +330,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  * @return
  *   The generated summary.
  */
-function text_summary($text, $format = NULL, $size = 600) {
+function text_summary($text, $format_id = NULL, $size = 600) {
   // Find where the delimiter is in the body
   $delimiter = strpos($text, '<!--break-->');
 
@@ -344,14 +344,13 @@ function text_summary($text, $format = NULL, $size = 600) {
     return substr($text, 0, $delimiter);
   }
 
+  $format = filter_format_load($format_id);
+
   // We check for the presence of the PHP evaluator filter in the current
   // format. If the body contains PHP code, we do not split it up to prevent
   // parse errors.
-  if (isset($format)) {
-    $filters = filter_list_format($format);
-    if (isset($filters['php_code']) && $filters['php_code']->status && strpos($text, '<?') !== FALSE) {
-      return $text;
-    }
+  if (isset($format->filters['php_code']) && $format->filters['php_code']->status && strpos($text, '<?') !== FALSE) {
+    return $text;
   }
 
   // If we have a short body, the entire body is the summary.
@@ -388,7 +387,7 @@ function text_summary($text, $format = NULL, $size = 600) {
   $line_breaks = array('<br />' => 6, '<br>' => 4);
   // Newline only indicates a line break if line break converter
   // filter is present.
-  if (isset($filters['filter_autop'])) {
+  if (isset($format->filters['filter_autop'])) {
     $line_breaks["\n"] = 1;
   }
   $break_points[] = $line_breaks;
@@ -416,7 +415,7 @@ function text_summary($text, $format = NULL, $size = 600) {
   }
 
   // If the htmlcorrector filter is present, apply it to the generated summary.
-  if (isset($filters['filter_htmlcorrector'])) {
+  if (isset($format->filters['filter_htmlcorrector'])) {
     $summary = _filter_htmlcorrector($summary);
   }
 

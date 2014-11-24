@@ -117,12 +117,33 @@ function _filter_disable_format_access($format) {
 }
 
 /**
- * Implements hook_autoload_info()
+ * Implements hook_config_info().
  */
-function filter_autoload_info() {
-  return array(
-    'views_handler_field_filter_format_name' => 'views/views_handler_field_filter_format_name.inc',
+function filter_config_info() {
+  $prefixes['filter.format'] = array(
+    'name_key' => 'format',
+    'label_key' => 'name',
+    'group' => t('Text formats'),
   );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_config_data_validate().
+ */
+function filter_config_data_validate(Config $config, array $config_info) {
+  if (strpos($config->getName(), 'filter.format.') === 0) {
+    $filters = $config->get('filters');
+    $all_filter_info = filter_get_filters();
+    foreach ($filters as $filter_name => $filter) {
+      if (isset($filter['module']) && !module_exists($filter['module'])) {
+        throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" that provides the filter "@filter" is not enabled.', array('@file' => $config->getName(), '@module' => $filter['module'], '@filter' => $filter_name)));
+      }
+      if (!isset($all_filter_info[$filter_name])) {
+        throw new ConfigValidateException(t('The configuration "@file" could not be imported because the filter "@filter" is not recognized. Be sure that the module providing this filter is enabled.', array('@file' => $config->getName(), '@filter' => $filter_name)));
+      }
+    }
+  }
 }
 
 /**
@@ -173,7 +194,6 @@ function filter_format_load($format_id) {
  */
 function filter_format_save($format) {
   $format->name = trim($format->name);
-  // @todo Update hook sets cache property to string 0 or 1; this changes it to true or false. Which value is intended?
   $format->cache = _filter_format_is_cacheable($format);
   if (!isset($format->status)) {
     $format->status = 1;
@@ -186,35 +206,45 @@ function filter_format_save($format) {
   if (!isset($format->filters)) {
     $format->filters = array();
   }
-  $filter_info = filter_get_filters();
-  foreach ($filter_info as $name => $filter) {
-    // If the format does not specify an explicit weight for a filter, assign
-    // a default weight, either defined in hook_filter_info(), or the default of
-    // 0 by filter_get_filters()
-    if (!isset($format->filters[$name]['weight'])) {
-      $format->filters[$name]['weight'] = $filter['weight'];
-    }
-    $format->filters[$name]['status'] = isset($format->filters[$name]['status']) ? $format->filters[$name]['status'] : 0;
-    $format->filters[$name]['module'] = $filter['module'];
+  $all_filter_info = filter_get_filters();
+  foreach ($format->filters as $name => $filter) {
+    $filter_info = $all_filter_info[$name];
 
-    // If settings were passed, only ensure default settings.
-    if (isset($format->filters[$name]['settings'])) {
-      if (isset($filter['default settings'])) {
-        $format->filters[$name]['settings'] = array_merge($filter['default settings'], $format->filters[$name]['settings']);
-      }
-    }
-    // Otherwise, use default settings or fall back to an empty array.
-    else {
-      $format->filters[$name]['settings'] = isset($filter['default settings']) ? $filter['default settings'] : array();
-    }
+    // Ensure the $filter variable is an object. In Drupal 7, it was an array on
+    // save, but an object on load. We always use an object in Backdrop for
+    // consistency.
+    $filter = (object) $filter;
+
+    // If the format does not specify an explicit weight for a filter, assign
+    // a default weight from hook_filter_info().
+    $filter->weight = (int) (isset($filter->weight) ? $filter->weight : $filter_info['weight']);
+    $filter->status = (int) (isset($filter->status) ? $filter->status : 0);
+    $filter->module = $filter_info['module'];
+    $filter->settings = isset($filter->settings) ? $filter->settings : array();
+    $format->filters[$name] = $filter;
   }
 
   // Save the filter format.
   $config = config('filter.format.' . $format->format);
-  $config->setData((array) $format);
+  $is_new = $config->isNew();
+
+  // Convert the object to arrays for saving.
+  $format_data = (array) $format;
+  foreach ($format_data['filters'] as $filter_name => $filter) {
+    $filter_data = (array) $filter;
+    if (isset($filter_data['name'])) {
+      unset($filter_data['name']);
+    }
+    $format_data['filters'][$filter_name] = $filter_data;
+  }
+  if (isset($format_data['is_new'])) {
+    unset($format_data['is_new']);
+  }
+
+  $config->setData($format_data);
   $config->save();
 
-  if (!empty($format->is_new)) {
+  if ($is_new) {
     module_invoke_all('filter_format_insert', $format);
     $return = SAVED_NEW;
   }
@@ -356,16 +386,6 @@ function filter_permission_name($format) {
 }
 
 /**
- * Implements hook_views_api().
- */
-function filter_views_api() {
-  return array(
-    'api' => '3.0',
-    'path' => backdrop_get_path('module', 'filter') . '/views',
-  );
-}
-
-/**
  * Implements hook_modules_enabled().
  */
 function filter_modules_enabled($modules) {
@@ -386,14 +406,7 @@ function filter_modules_disabled($modules) {
 /**
  * Retrieves a list of text formats, ordered by weight.
  *
- * @todo
- * The query only returns enabled formats; retain or add $status parameter for
- * all or enabled only? See notes on filter_format_load() and filter_format_exists().
- * That behavior is driven by not providing an enablement operation.
- * This code checks !empty($filter_format->status).
- * If add enable operation, still include in cache only the enabled ones?
- *
- * @param object $account
+ * @param User $account
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
@@ -416,23 +429,42 @@ function filter_formats($account = NULL) {
     else {
       $formats['all'] = array();
 
-      $filter_format_names = config_get_names_with_prefix('filter.format');
-      $filter_formats = config_load_multiple($filter_format_names);
+      $all_filter_info = filter_get_filters();
+      $config_names = config_get_names_with_prefix('filter.format.');
+      $filter_formats = config_load_multiple($config_names);
+      backdrop_sort($filter_formats, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
       foreach ($filter_formats as $format_name => $filter_format) {
+        $filter_format += array(
+          'status' => 1,
+          'weight' => 0,
+        );
         $filter_format = (object) $filter_format;
-        if (!empty($filter_format->status)) {
-          $formats['all'][$filter_format->format] = $filter_format;
-        }
-      }
-      // Sort the formats by weight.
-      uasort($formats['all'], function ($a, $b) {
-        if ($a->weight == $b->weight) {
-          return $a->name < $b->name ? -1 : 1;
-        }
-        return $a->weight < $b->weight ? -1 : 1;
-      });
 
-      // @todo At this point, image calls backdrop_alter('filter_formats', $formats); Do the same?
+        // We don't include disabled formats.
+        if (!$filter_format->status) {
+          continue;
+        }
+
+        // Sort the filters by weight.
+        backdrop_sort($filter_format->filters);
+
+        // Populate defaults for the filters and cast to an object.
+        foreach ($filter_format->filters as $filter_name => $filter) {
+          $filter += array(
+            'name' => $filter_name,
+            'status' => 1,
+            'weight' => 0,
+            'settings' => array(),
+          );
+          if (isset($all_filter_info[$filter_name]['default settings'])) {
+            $filter['settings'] += $all_filter_info[$filter_name]['default settings'];
+          }
+          $filter_format->filters[$filter_name] = (object) $filter;
+        }
+
+        $formats['all'][$filter_format->format] = $filter_format;
+      }
+
       cache()->set("filter_formats:{$language_interface->langcode}", $formats['all']);
     }
   }
@@ -457,8 +489,6 @@ function filter_formats($account = NULL) {
  */
 function filter_formats_reset() {
   cache()->deletePrefix('filter_formats');
-  cache()->deletePrefix('filter_list_format');
-  backdrop_static_reset('filter_list_format');
   backdrop_static_reset('filter_formats');
 }
 
@@ -569,8 +599,7 @@ function filter_default_format($account = NULL) {
  * @see filter_default_format()
  */
 function filter_fallback_format() {
-  // @todo Tie this in to settings
-  return config_get('filter.settings', 'fallback_format');
+  return config_get('system.core', 'filter_fallback_format');
 }
 
 /**
@@ -657,7 +686,7 @@ function _filter_format_is_cacheable($format) {
   $filter_info = filter_get_filters();
   foreach ($format->filters as $name => $filter) {
     // By default, 'cache' is TRUE for all filters unless specified otherwise.
-    if (!empty($filter['status']) && isset($filter_info[$name]['cache']) && !$filter_info[$name]['cache']) {
+    if (!empty($filter->status) && isset($filter_info[$name]['cache']) && !$filter_info[$name]['cache']) {
       return FALSE;
     }
   }
@@ -667,10 +696,8 @@ function _filter_format_is_cacheable($format) {
 /**
  * Retrieves a list of filters for a given text format.
  *
- * Note that this function returns all associated filters regardless of whether
- * they are enabled or disabled. All functions working with the filter
- * information outside of filter administration should test for $filter->status
- * before performing actions with the filter.
+ * This function is deprecated in Backdrop. All text format object already have
+ * all filters loaded in the "filters" property of the object.
  *
  * @param $format_id
  *   The format ID to retrieve filters for.
@@ -678,54 +705,16 @@ function _filter_format_is_cacheable($format) {
  * @return
  *   An array of filter objects associated to the given text format, keyed by
  *   filter name.
+ *
+ * @deprecated since 1.0
  */
 function filter_list_format($format_id) {
-  $filters = &backdrop_static(__FUNCTION__, array());
-  $filter_info = filter_get_filters();
-
-  if (!isset($filters['all'])) {
-    if ($cache = cache()->get('filter_list_format')) {
-      $filters['all'] = $cache->data;
-    }
-    else {
-      $filter_format_names = config_get_names_with_prefix('filter.format');
-      $filter_formats = config_load_multiple($filter_format_names);
-      foreach ($filter_formats as $format_name => $filter_format) {
-        $filter_format = (object) $filter_format;
-        $filters['all'][$filter_format->format] = $filter_format;
-      }
-      // Save the formats to cache.
-      cache()->set('filter_list_format', $filters['all']);
-    }
+  if ($format = filter_format_load($format_id)) {
+    return $format->filters;
   }
-
-  // @todo This returns what is stored in the 'filters' property of the config
-  // files. This would have keys of format and name which are not in the 'filters'
-  // property, but they are redundant and do not appear to be used. Here each
-  // filter item is an object (as it would come from the $record above) while an
-  // array in the 'filters' property.
-
-  if (!isset($filters[$format_id])) {
-    $format_filters = array();
-    $filter_map = isset($filters['all'][$format_id]) ? $filters['all'][$format_id] : array();
-    foreach ($filter_map as $name => $filter) {
-      if (isset($filter_info[$name])) {
-        $filter->title = $filter_info[$name]['title'];
-        // Unpack stored filter settings.
-        // @todo Remove next line as config file data will not be serialized.
-        $filter->settings = (isset($filter->settings) ? unserialize($filter->settings) : array());
-        // Merge in default settings.
-        if (isset($filter_info[$name]['default settings'])) {
-          $filter->settings += $filter_info[$name]['default settings'];
-        }
-
-        $format_filters[$name] = $filter;
-      }
-    }
-    $filters[$format_id] = $format_filters;
+  else {
+    return array();
   }
-
-  return isset($filters[$format_id]) ? $filters[$format_id] : array();
 }
 
 /**
@@ -782,7 +771,7 @@ function check_markup($text, $format_id = NULL, $langcode = '', $cache = FALSE) 
   $text = str_replace(array("\r\n", "\r"), "\n", $text);
 
   // Get a complete list of filters, ordered properly.
-  $filters = filter_list_format($format->format);
+  $filters = $format->filters;
   $filter_info = filter_get_filters();
 
   // Give filters the chance to escape HTML-like data such as code or formulas.
@@ -1066,9 +1055,8 @@ function _filter_tips($format_id, $long = FALSE) {
   }
 
   foreach ($formats as $format) {
-    $filters = filter_list_format($format->format);
     $tips[$format->name] = array();
-    foreach ($filters as $name => $filter) {
+    foreach ($format->filters as $name => $filter) {
       if ($filter->status && isset($filter_info[$name]['tips callback'])) {
         $tip = $filter_info[$name]['tips callback']($filter, $format, $long);
         if (isset($tip)) {
@@ -1261,9 +1249,7 @@ function filter_filter_info() {
  *
  * Filter settings callback for the HTML content filter.
  */
-function _filter_html_settings($form, &$form_state, $filter, $format, $defaults) {
-  $filter->settings += $defaults;
-
+function _filter_html_settings($form, &$form_state, $filter, $format) {
   $settings['allowed_html'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed HTML tags'),
@@ -1414,9 +1400,7 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
  *
  * @see filter_filter_info()
  */
-function _filter_url_settings($form, &$form_state, $filter, $format, $defaults) {
-  $filter->settings += $defaults;
-
+function _filter_url_settings($form, &$form_state, $filter, $format) {
   $settings['filter_url_length'] = array(
     '#type' => 'number',
     '#title' => t('Maximum link text length'),

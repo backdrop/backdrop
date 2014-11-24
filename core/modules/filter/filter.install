@@ -16,63 +16,44 @@ function filter_schema() {
 }
 
 /**
- * Implements hook_install().
- */
-function filter_install() {
-  // All sites require at least one text format (the fallback format) that all
-  // users have access to, so add it here. We initialize it as a simple, safe
-  // plain text format with very basic formatting, but it can be modified by
-  // installation profiles to have other properties.
-
-  // Set the fallback format to plain text.
-  // Save the config object.
-  $config = config('filter.settings');
-  $config->set('fallback_format', 'filter.format.plain_text');
-  $config->save();
-}
-
-/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
 /**
- * Provide default filter formats for the Filter module.
+ * Convert filter formats to configuration.
  */
 function filter_update_1000() {
-  config_install_default_config('filter');
-}
+  if (!db_table_exists('filter_format')) {
+    return;
+  }
 
-/**
- * Migrate existing filter formats into configuration.
- *
- * @ingroup config_upgrade [???]
- */
-function filter_update_1001() {
   $result = db_query('SELECT format, name, cache, status, weight FROM {filter_format}', array(), array('fetch' => PDO::FETCH_ASSOC));
   foreach ($result as $format) {
-    $id = $format['format'];
+    $format_name = $format['format'];
 
     // Add user roles.
     $format['roles'] = array_keys(user_roles(FALSE, 'use text format ' . $format['format']));
 
     // Retrieve and prepare all filters.
-    $filters = db_query('SELECT name, module, status, weight, settings FROM {filter} WHERE format = :format ORDER BY weight, module, name', array(
-      ':format' => $id,
-    ), array('fetch' => PDO::FETCH_ASSOC))->fetchAllAssoc('name');
+    $filters = db_query('SELECT name, module, status, weight, settings FROM {filter} WHERE format = :format ORDER BY weight, module, name', array(':format' => $format_name), array('fetch' => PDO::FETCH_ASSOC))->fetchAllAssoc('name');
     foreach ($filters as $name => &$filter) {
       // The filter name is used as key only.
       unset($filter['name']);
-      $filter['settings'] = unserialize($filter['settings']);
+      if ($filter['settings']) {
+        $filter['settings'] = unserialize($filter['settings']);
+      }
     }
     $format['filters'] = $filters;
 
     // Save the config object.
-    $config = config('filter.format.' . $id);
+    $config = config('filter.format.' . $format_name);
     $config->setData($format);
     $config->save();
   }
-  // @todo Drop the filter tables?
+
+  db_drop_table('filter_format');
+  db_drop_table('filter');
 }
 
 /**
