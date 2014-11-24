@@ -2491,7 +2491,7 @@ function _template_preprocess_default_variables() {
   // Variables that don't depend on a database connection.
   $variables = array(
     'attributes' => array(),
-    'content_attributes_array' => array(),
+    'content_attributes' => array(),
     'title_prefix' => array(),
     'title_suffix' => array(),
     'user' => $user,
@@ -2520,26 +2520,6 @@ function _template_preprocess_default_variables() {
   }
 
   return $variables;
-}
-
-/**
- * Adds helper variables derived from variables defined during preprocessing.
- *
- * When preparing variables for a theme hook implementation, all 'preprocess'
- * functions run first, then all 'process' functions (see theme() for details
- * about the full sequence).
- *
- * This function serializes array variables manipulated during the preprocessing
- * phase into strings for convenient use by templates. As with
- * template_preprocess(), this function does not get called for theme hooks
- * implemented as functions.
- *
- * @see theme()
- * @see template_preprocess()
- */
-function template_process(&$variables, $hook) {
-  // Flatten out content_attributes.
-  $variables['content_attributes'] = $variables['content_attributes_array'] ? backdrop_attributes($variables['content_attributes_array']) : '';
 }
 
 /**

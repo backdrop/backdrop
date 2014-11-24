@@ -77,7 +77,7 @@
     <h3><?php print $title; ?></h3>
     <?php print render($title_suffix); ?>
 
-    <div class="content"<?php print $content_attributes; ?>>
+    <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
       <?php
         // We hide the comments and links now so that we can render them later.
         hide($content['links']);

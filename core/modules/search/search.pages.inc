@@ -117,7 +117,7 @@ function template_preprocess_search_results(&$variables) {
     );
     
     if (isset($result['language']) && $result['language'] != $language_interface->langcode && $result['language'] != LANGUAGE_NONE) {
-      $variables['content_attributes_array']['lang'] = $result['language'];
+      $variables['content_attributes']['lang'] = $result['language'];
     }
   }
     $variables['pager'] = theme('pager', array('tags' => NULL));

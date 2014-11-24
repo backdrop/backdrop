@@ -35,7 +35,7 @@
 <?php print render($title_suffix); ?>
 
 <?php if ($content_tag): ?>
-<<?php print $content_tag; ?><?php print $content_attributes; ?>>
+<<?php print $content_tag; ?><?php print backdrop_attributes($content_attributes); ?>>
 <?php endif; ?>
 <?php print render($content); ?>
 <?php if ($content_tag): ?>

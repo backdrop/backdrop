@@ -101,7 +101,7 @@
     </footer>
   <?php endif; ?>
 
-  <div class="content"<?php print $content_attributes; ?>>
+  <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
       // We hide the links now so that we can render them later.
       hide($content['links']);

@@ -271,7 +271,7 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Content tag and classes.
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes_array'] = array(
+  $variables['content_attributes'] = array(
     'class' => array_filter(explode(' ', $style->settings['content_classes']))
   );
 }

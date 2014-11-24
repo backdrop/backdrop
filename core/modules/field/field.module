@@ -1247,11 +1247,6 @@ function template_preprocess_field(&$variables, $hook) {
  * @see field.tpl.php
  */
 function template_process_field(&$variables, $hook) {
-  // The default theme implementation is a function, so template_process() does
-  // not automatically run, so we need to flatten the attributes here. For best
-  // performance, only call backdrop_attributes() when needed, and note that
-  // template_preprocess_field() does not initialize contents_attributes_array.
-  $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : backdrop_attributes($variables['content_attributes_array']);
   foreach ($variables['items'] as $delta => $item) {
     $variables['item_attributes'][$delta] = empty($variables['item_attributes_array'][$delta]) ? '' : backdrop_attributes($variables['item_attributes_array'][$delta]);
   }
@@ -1306,8 +1301,8 @@ function template_process_field(&$variables, $hook) {
  *   An associative array containing:
  *   - label_hidden: A boolean indicating to show or hide the field label.
  *   - label: The label for the field.
- *   - content_attributes: A string containing the attributes for the content's
- *     div.
+ *   - content_attributes: An array of additional HTML attributes for the
+ *     content's wrapper div.
  *   - items: An array of field items.
  *   - item_attributes: An array of attributes for each item.
  *   - classes: Array containing the classes for the wrapping div.
@@ -1327,10 +1322,12 @@ function theme_field($variables) {
   }
 
   // Render the items.
-  $output .= '<div class="field-items"' . $variables['content_attributes'] . '>';
+  $content_attributes = (isset($variables['content_attributes'])) ? backdrop_attributes($variables['content_attributes']) : '';
+  $output .= '<div class="field-items"' . $content_attributes . '>';
   foreach ($variables['items'] as $delta => $item) {
     $classes = 'field-item ' . ($delta % 2 ? 'odd' : 'even');
-    $output .= '<div class="' . $classes . '"' . $variables['item_attributes'][$delta] . '>' . backdrop_render($item) . '</div>';
+    $item_attributes = (isset($variables['item_attributes'][$delta])) ? backdrop_attributes($variables['item_attributes'][$delta]) : '';
+    $output .= '<div class="' . $classes . '"' . $item_attributes . '>' . backdrop_render($item) . '</div>';
   }
   $output .= '</div>';
 
