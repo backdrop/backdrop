@@ -65,13 +65,12 @@ function filter_admin_overview($form) {
  * Form submission handler for filter_admin_overview().
  */
 function filter_admin_overview_submit($form, &$form_state) {
+  $formats = filter_formats();
   foreach ($form_state['values']['formats'] as $id => $data) {
-    if (is_array($data) && isset($data['weight'])) {
-      // Only update if this is a form element with weight.
-      db_update('filter_format')
-        ->fields(array('weight' => $data['weight']))
-        ->condition('format', $id)
-        ->execute();
+    if (is_array($data) && isset($data['weight']) && $data['weight'] != $formats[$id]->weight) {
+      // Update the weight of this filter.
+      $formats[$id]->weight = $data['weight'];
+      filter_format_save($formats[$id]);
     }
   }
   filter_formats_reset();
@@ -141,6 +140,10 @@ function filter_admin_format_page($format = NULL) {
     $format = (object) array(
       'format' => NULL,
       'name' => '',
+      'cache' => 1,
+      'status' => 1,
+      'is_new' => TRUE,
+      'filters' => array(),
     );
   }
   return backdrop_get_form('filter_admin_format_form', $format);
@@ -169,7 +172,7 @@ function filter_admin_format_page($format = NULL) {
 function filter_admin_format_form($form, &$form_state, $format) {
   $is_fallback = ($format->format == filter_fallback_format());
 
-  $form['#format'] = $format;
+  $form_state['format'] = $format;
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/filter.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
@@ -185,10 +188,10 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#required' => TRUE,
     '#default_value' => $format->format,
     '#maxlength' => 255,
+    '#disabled' => !empty($format->format),
     '#machine_name' => array(
       'exists' => 'filter_format_exists',
     ),
-    '#disabled' => !empty($format->format),
   );
 
   // Add user role access selection.
@@ -214,20 +217,21 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
   // Retrieve available filters and load all configured filters for existing
   // text formats.
-  $filter_info = filter_get_filters();
-  $filters = !empty($format->format) ? filter_list_format($format->format) : array();
+  $all_filter_info = filter_get_filters();
+  $filters = $format->filters;
 
   // Prepare filters for form sections.
-  foreach ($filter_info as $name => $filter) {
+  foreach ($all_filter_info as $name => $filter_info) {
     // Create an empty filter object for new/unconfigured filters.
     if (!isset($filters[$name])) {
-      $filters[$name] = new stdClass();
-      $filters[$name]->format = $format->format;
-      $filters[$name]->module = $filter['module'];
-      $filters[$name]->name = $name;
-      $filters[$name]->status = 0;
-      $filters[$name]->weight = $filter['weight'];
-      $filters[$name]->settings = array();
+      $filters[$name] = (object) array(
+        'format' => $format->format,
+        'module' => $filter_info['module'],
+        'name' => $name,
+        'status' => 0,
+        'weight' => $filter_info['weight'],
+        'settings' => isset($filter_info['default settings']) ? $filter_info['default settings'] : array(),
+      );
     }
   }
   $form['#filters'] = $filters;
@@ -239,14 +243,14 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#prefix' => '<div id="filters-status-wrapper">',
     '#suffix' => '</div>',
   );
-  foreach ($filter_info as $name => $filter) {
+  foreach ($all_filter_info as $name => $filter_info) {
     $form['filters']['status'][$name] = array(
       '#type' => 'checkbox',
-      '#title' => $filter['title'],
+      '#title' => $filter_info['title'],
       '#default_value' => $filters[$name]->status,
       '#parents' => array('filters', $name, 'status'),
-      '#description' => $filter['description'],
-      '#weight' => $filter['weight'],
+      '#description' => $filter_info['description'],
+      '#weight' => $filter_info['weight'],
     );
   }
 
@@ -256,13 +260,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#title' => t('Filter processing order'),
     '#theme' => 'filter_admin_format_filter_order',
   );
-  foreach ($filter_info as $name => $filter) {
+  foreach ($all_filter_info as $name => $filter_info) {
     $form['filters']['order'][$name]['filter'] = array(
-      '#markup' => $filter['title'],
+      '#markup' => check_plain($filter_info['title']),
     );
     $form['filters']['order'][$name]['weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $filter['title'])),
+      '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
       '#title_display' => 'invisible',
       '#delta' => 50,
       '#default_value' => $filters[$name]->weight,
@@ -280,19 +284,16 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#type' => 'vertical_tabs',
   );
 
-  foreach ($filter_info as $name => $filter) {
-    if (isset($filter['settings callback'])) {
-      $function = $filter['settings callback'];
-      // Pass along stored filter settings and default settings, but also the
-      // format object and all filters to allow for complex implementations.
-      $defaults = (isset($filter['default settings']) ? $filter['default settings'] : array());
-      $settings_form = $function($form, $form_state, $filters[$name], $format, $defaults, $filters);
+  foreach ($all_filter_info as $name => $filter_info) {
+    if (isset($filter_info['settings callback'])) {
+      $function = $filter_info['settings callback'];
+      $settings_form = $function($form, $form_state, $filters[$name], $format);
       if (!empty($settings_form)) {
         $form['filters']['settings'][$name] = array(
           '#type' => 'fieldset',
-          '#title' => $filter['title'],
+          '#title' => $filter_info['title'],
           '#parents' => array('filters', $name, 'settings'),
-          '#weight' => $filter['weight'],
+          '#weight' => $filter_info['weight'],
           '#group' => 'filter_settings',
         );
         $form['filters']['settings'][$name] += $settings_form;
@@ -301,7 +302,10 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
 
   return $form;
 }
@@ -350,9 +354,11 @@ function filter_admin_format_form_validate($form, &$form_state) {
   form_set_value($form['format'], $format_format, $form_state);
   form_set_value($form['name'], $format_name, $form_state);
 
-  $result = db_query("SELECT format FROM {filter_format} WHERE name = :name AND format <> :format", array(':name' => $format_name, ':format' => $format_format))->fetchField();
-  if ($result) {
-    form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
+  $formats = filter_formats();
+  foreach ($formats as $format) {
+    if ($format->format !== $format_format && $format->name === $format_name) {
+      form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
+    }
   }
 }
 
@@ -364,9 +370,11 @@ function filter_admin_format_form_validate($form, &$form_state) {
 function filter_admin_format_form_submit($form, &$form_state) {
   // Remove unnecessary values.
   form_state_values_clean($form_state);
+  unset($form_state['values']['filter_settings']);
+  unset($form_state['values']['actions']);
 
   // Add the submitted form values to the text format, and save it.
-  $format = $form['#format'];
+  $format = $form_state['format'];
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
@@ -385,9 +393,11 @@ function filter_admin_format_form_submit($form, &$form_state) {
       break;
 
     case SAVED_UPDATED:
-      backdrop_set_message(t('The text format %format has been updated.', array('%format' => $format->name)));
+      backdrop_set_message(t('Updated text format %format.', array('%format' => $format->name)));
       break;
   }
+
+  $form_state['redirect'] = 'admin/config/content/formats';
 }
 
 /**
@@ -401,7 +411,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function filter_admin_disable($form, &$form_state, $format) {
-  $form['#format'] = $format;
+  $form_state['format'] = $format;
 
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
@@ -415,9 +425,9 @@ function filter_admin_disable($form, &$form_state, $format) {
  * Form submission handler for filter_admin_disable().
  */
 function filter_admin_disable_submit($form, &$form_state) {
-  $format = $form['#format'];
+  $format = $form_state['format'];
+
   filter_format_disable($format);
   backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
-
   $form_state['redirect'] = 'admin/config/content/formats';
 }

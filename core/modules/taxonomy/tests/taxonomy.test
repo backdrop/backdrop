@@ -32,8 +32,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
-      // Use the first available text format.
-      'format' => db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
+      'format' => filter_default_format(),
       'vocabulary' => $vocabulary->machine_name,
       'langcode' => LANGUAGE_NONE,
     ));

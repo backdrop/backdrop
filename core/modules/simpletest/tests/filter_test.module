@@ -52,7 +52,7 @@ function filter_test_filter_info() {
  */
 function filter_test_replace($text, $filter, $format, $langcode, $cache, $cache_id) {
   $text = array();
-  $text[] = 'Filter: ' . $filter->title . ' (' . $filter->name . ')';
+  $text[] = 'Filter: ' . $filter->name;
   $text[] = 'Format: ' . $format->name . ' (' . $format->format . ')';
   $text[] = 'Language: ' . $langcode;
   $text[] = 'Cache: ' . ($cache ? 'Enabled' : 'Disabled');

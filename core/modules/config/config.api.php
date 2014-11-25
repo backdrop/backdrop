@@ -47,6 +47,29 @@ function hook_config_info() {
 }
 
 /**
+ * Validate a configuration before saving it.
+ *
+ * If any problems are encountered with the configuration, implementations of
+ * this hook should throw a ConfigValidateException to prevent the configuration
+ * from saving.
+ *
+ * @param Config $config
+ *   The configuration object for the settings about to be saved.
+ * @param array $config_info
+ *   The information about the configuration being imported, as provided by
+ *   hook_config_info().
+ *
+ * @throws ConfigValidateException
+ */
+function hook_config_data_validate(Config $config, array $config_info) {
+  if ($config->getName() === 'mymodule.settings') {
+    if (!module_exists($config->get('module'))) {
+      throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" is not enabled.', array('@file' => $config->getName(), '@module' => $config->get('module'))));
+    }
+  }
+}
+
+/**
  * Validate a new configuration before saving it.
  *
  * If any problems are encountered with the configuration, implementations of

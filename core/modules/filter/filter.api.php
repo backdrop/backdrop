@@ -142,16 +142,10 @@ function hook_filter_info_alter(&$info) {
  * @param $form_state
  *   The state of the (entire) configuration form.
  * @param $filter
- *   The filter object containing the current settings for the given format,
- *   in $filter->settings.
+ *   The filter array containing the current settings for the given format,
+ *   in $filter['settings'].
  * @param $format
  *   The format object being configured.
- * @param $defaults
- *   The default settings for the filter, as defined in 'default settings' in
- *   hook_filter_info(). These should be combined with $filter->settings to
- *   define the form element defaults.
- * @param $filters
- *   The complete list of filter objects that are enabled for the given format.
  *
  * @return
  *   An array of form elements defining settings for the filter. Array keys
@@ -159,9 +153,7 @@ function hook_filter_info_alter(&$info) {
  *
  * @ingroup callbacks
  */
-function callback_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
-  $filter->settings += $defaults;
-
+function callback_filter_settings($form, &$form_state, $filter, $format) {
   $elements = array();
   $elements['nofollow'] = array(
     '#type' => 'checkbox',

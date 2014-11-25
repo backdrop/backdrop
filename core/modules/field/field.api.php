@@ -259,12 +259,6 @@ function hook_field_schema($field) {
     'indexes' => array(
       'format' => array('format'),
     ),
-    'foreign keys' => array(
-      'format' => array(
-        'table' => 'filter_format',
-        'columns' => array('format' => 'format'),
-      ),
-    ),
   );
 }
 
