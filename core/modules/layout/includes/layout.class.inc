@@ -303,6 +303,7 @@ class Layout {
   function revert() {
     if (!empty($this->module)) {
       // Restore the module-provided layout config.
+      config('layout.layout.' . $this->name)->delete();
       config_install_default_config($this->module, 'layout.layout.' . $this->name);
 
       // Restore the module-provided menu settings if this layout provides the
