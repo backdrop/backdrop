@@ -944,6 +944,61 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests that the correct layout is used in various situations.
+ */
+class LayoutSelectionTest extends BackdropWebTestCase {
+  /**
+   * Tests the correct layout is used on 404 and 403 pages.
+   */
+  function testErrorPages() {
+    // Create and login admin user.
+    $admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer content types',
+      'view the administration theme',
+    ));
+    $this->backdropLogin($admin_user);
+
+    // Check that a known page is using the admin (one-column) layout.
+    $this->backdropGet('admin/config/content/formats/plain_text');
+    $this->assertIsAdminLayout();
+
+    // Check that a 403 page uses the admin layout.
+    $this->backdropGet('admin/appearance');
+    $this->assertIsAdminLayout();
+
+    // Check that a 404 page uses the admin layout.
+    $this->backdropGet('admin/config/content/formats/fake-format');
+    $this->assertIsAdminLayout();
+
+    // Check that the front-end is using the default layout.
+    $this->backdropGet('node');
+    $this->assertIsDefaultLayout();
+
+    // Check that anonymous users get the Default layout for admin paths.
+    $this->backdropLogout();
+
+    // Anonymous 403.
+    $this->backdropGet('admin/config/content/formats/plain_text');
+    $this->assertIsDefaultLayout();
+
+    // Anonymous 404.
+    $this->backdropGet('admin/config/content/formats/fake-format');
+    $this->assertIsDefaultLayout();
+  }
+
+  private function assertIsDefaultLayout($message = '') {
+    $result = $this->xpath('//div[contains(@class, "layout-two-column")]');
+    $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
+  }
+
+  private function assertIsAdminLayout($message = '') {
+    $result = $this->xpath('//div[contains(@class, "layout-one-column")]');
+    $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
+  }
+}
+
+/**
  * Tests the upgrade path from block-based regions to layouts.
  */
 class LayoutUpgradePathTest extends UpgradePathTestCase {

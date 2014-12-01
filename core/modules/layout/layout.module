@@ -418,11 +418,21 @@ function layout_route_handler($router_item) {
 
   // If no layout matches at the path, use the default layout.
   if (!$selected_layout) {
-    if (path_is_admin($router_item['path'])) {
+    if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
       $selected_layout = layout_load('admin_default');
     }
     else {
       $selected_layout = layout_load('default');
+    }
+  }
+
+  // Special handling for 404 and 403 pages to render in admin theme. The
+  // current path will be the 404/403 system path, and we need to check the
+  // original path, which is stored in "destination" by
+  // backdrop_deliver_html_page().
+  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('view the administration theme')) {
+    if (isset($_GET['destination']) && path_is_admin($_GET['destination'])) {
+      $selected_layout = layout_load('admin_default');
     }
   }
 
