@@ -304,6 +304,24 @@ function update_fix_requirements() {
       update_variable_del('drupal_private_key');
     }
 
+    // Enable the Views module if necessary.
+    if (!db_query("SELECT name FROM {system} WHERE name = 'views' AND type = 'module' AND status = 1")->fetchField()) {
+      $schema_cache_views = backdrop_get_schema_unprocessed('system', 'cache');
+      $schema_cache_views['description'] = 'Cache table for Views to store loaded view configurations.';
+
+      $schema_cache_views_data = backdrop_get_schema_unprocessed('system', 'cache');
+      $schema_cache_views_data['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+      $schema_cache_views_data['fields']['serialized']['default'] = 1;
+
+      if (!db_table_exists('cache_views')) {
+        db_create_table('cache_views', $schema_cache_views);
+      }
+      if (!db_table_exists('cache_views_data')) {
+        db_create_table('cache_views_data', $schema_cache_views_data);
+      }
+      update_module_enable(array('views'));
+    }
+
     state_set('update_backdrop_requirements', TRUE);
   }
 }
