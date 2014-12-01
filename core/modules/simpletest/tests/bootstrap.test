@@ -437,6 +437,28 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
   }
 
   /**
+   * Test that settings.php variables can be overridden by the server.
+   */
+  function testBackdropSettingsOverride() {
+    // This test only works on Travis CI through the SetEnv call in
+    // core/misc/travis-ci/vhost.conf. See backdrop_settings_initialize().
+    if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+      $this->assertEqual(settings_get('test_setting'), 'foo', 'Custom setting set through the server environment variables in BACKDROP_SETTINGS.');
+
+      $test_database_array = array(
+        'default' => array(
+          'driver' => 'mysql',
+          'database' => 'test_database',
+          'username' => 'test_username',
+          'password' => 'test_password',
+          'host' => 'test_host',
+        )
+      );
+      $this->assertEqual($GLOBALS['databases']['test_database'], $test_database_array, 'Custom database set through the server environment variables in BACKDROP_SETTINGS.');
+    }
+  }
+
+  /**
    * Tests that the backdrop_check_memory_limit() function works as expected.
    */
   function testCheckMemoryLimit() {

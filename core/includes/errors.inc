@@ -148,7 +148,7 @@ function _backdrop_render_exception_safe($exception) {
  *   TRUE if an error should be displayed.
  */
 function error_displayable($error = NULL) {
-  $error_level = config_get('system.core', 'error_level');
+  $error_level = function_exists('config_get') ? config_get('system.core', 'error_level') : ERROR_REPORTING_DISPLAY_ALL;
   $updating = (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE == 'update');
   $all_errors_displayed = ($error_level == ERROR_REPORTING_DISPLAY_ALL);
   $error_needs_display = ($error_level == ERROR_REPORTING_DISPLAY_SOME &&

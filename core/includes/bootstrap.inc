@@ -771,6 +771,36 @@ function backdrop_settings_initialize() {
   }
 
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+
+  // Load settings specified by the server, if present
+  if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+    $server_settings = @json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
+    if (!is_array($server_settings)) {
+      trigger_error('The values in $_SERVER[BACKDROP_SETTINGS] could not be read. Ensure it is a valid JSON string with no spaces.', E_USER_ERROR);
+    }
+    else {
+      foreach ($server_settings as $key => $value) {
+        // One level of depth should be enough for $settings and $databases.
+        if ($key == 'settings') {
+          foreach($value as $settings_key => $settings_value) {
+            $settings[$settings_key] = $settings_value;
+          }
+        }
+        elseif ($key == 'databases') {
+          // Protect default configuration but allow the specification of
+          // additional databases.
+          if (!isset($databases) || !is_array($databases)) {
+            $databases = array();
+          }
+          $databases = array_replace_recursive($databases, $value);
+        }
+        else {
+          $$key = $value;
+        }
+      }
+    }
+  }
+
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);
