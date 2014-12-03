@@ -82,7 +82,7 @@ Backdrop.behaviors.collapse = {
       $('<span class="fieldset-legend-prefix element-invisible"></span>')
         .append($fieldset.hasClass('collapsed') ? Backdrop.t('Show') : Backdrop.t('Hide'))
         .prependTo($legend)
-        .after(' ');
+        .after(document.createTextNode(' '));
 
       // .wrapInner() does not retain bound events.
       var $link = $('<a class="fieldset-title" href="#"></a>')
