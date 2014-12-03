@@ -423,6 +423,20 @@ Backdrop.behaviors.viewsUiPreview = {
   }
 };
 
+/**
+ * Remove links when rearranging fields.
+ */
+Backdrop.behaviors.viewsUiRemoveLink = {
+  attach: function (context) {
+    $('a.views-remove-link').once('views-processed').click(function(event) {
+      var id = $(this).attr('id').replace('views-remove-link-', '');
+      $('#views-row-' + id).hide();
+      $('#views-removed-' + id).attr('checked', true);
+      event.preventDefault();
+    });
+  }
+};
+
 Backdrop.behaviors.viewsUiRearrangeFilter = {
   attach: function (context) {
     // Only act on the rearrange filter form.
