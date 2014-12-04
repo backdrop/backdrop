@@ -59,11 +59,11 @@ function contextual_element_info() {
 }
 
 /**
- * Implements hook_process().
+ * Implements hook_preprocess().
  *
  * @see contextual_pre_render_links()
  */
-function contextual_process(&$variables, $hook) {
+function contextual_preprocess(&$variables, $hook) {
   // Nothing to do here if the user is not permitted to access contextual links.
   if (!user_access('access contextual links')) {
     return;
