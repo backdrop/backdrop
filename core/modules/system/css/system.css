@@ -323,3 +323,13 @@ section,
 summary {
   display: block;
 }
+
+/**
+ * Floated images.
+ */
+img.align-left {
+  float: left;
+}
+img.align-right {
+  float: right;
+}
