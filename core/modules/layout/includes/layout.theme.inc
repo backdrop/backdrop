@@ -124,36 +124,15 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Preprocess variables for layout.tpl.php files.
+ * Prepares variables for layout templates.
  */
 function template_preprocess_layout(&$variables) {
+  $settings = $variables['layout']->settings;
   $variables += array(
     'action_links' => NULL,
     'tabs' => NULL,
     'messages' => NULL,
     'title' => NULL,
-  );
-
-  if (!$variables['admin']) {
-    $variables['action_links'] = menu_local_actions();
-    $variables['tabs'] =  menu_local_tabs();
-  }
-}
-
-/**
- * Process variables for layout.tpl.php files.
- *
- * Perform final addition of variables before passing them into the template.
- * To customize these variables, simply set them in an earlier step.
- *
- * @see template_preprocess_layout()
- * @see page.tpl.php
- */
-function template_process_layout(&$variables) {
-  $settings = $variables['layout']->settings;
-  $variables += array(
-    'title' => NULL,
-    'messages' => NULL,
   );
 
   if (!$variables['admin']) {
@@ -179,10 +158,15 @@ function template_process_layout(&$variables) {
   else {
     $variables['title'] = t('Page title');
   }
+
+  if (!$variables['admin']) {
+    $variables['action_links'] = menu_local_actions();
+    $variables['tabs'] =  menu_local_tabs();
+  }
 }
 
 /**
- * Preprocess the variables for the block.tpl.php file.
+ * Prepares variables for block templates.
  */
 function template_preprocess_block(&$variables) {
   $content = $variables['content'];
@@ -250,7 +234,7 @@ function template_preprocess_block(&$variables) {
 }
 
 /**
- * Preprocess the variables for the block-dynamic.tpl.php file.
+ * Prepares variables for block-dynamic templates.
  */
 function template_preprocess_block_dynamic(&$variables) {
   // Re-use all the preprocessing provided by the default block template.

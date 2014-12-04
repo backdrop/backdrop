@@ -7,6 +7,12 @@
  * includes responsive and collapsible columns.
  *
  * Variables:
+ * - $title: The page title, for use in the actual HTML content.
+ * - $messages: Status and error messages. Should be displayed prominently.
+ * - $tabs: Tabs linking to any sub-pages beneath the current page
+ *   (e.g., the view and edit tabs when displaying a node).
+ * - $action_links: Array of actions local to the page, such as 'Add menu' on
+ *   the menu administration interface.
  * - $classes: Array of CSS classes to be added to the layout wrapper.
  * - $attributes: A string of attributes to be added to the layout wrapper.
  * - $content: An array of content, each item in the array is keyed to one
