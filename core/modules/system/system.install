@@ -211,35 +211,6 @@ function system_requirements($phase) {
     }
   }
 
-  // Test settings.php file writability
-  if ($phase == 'runtime') {
-    $conf_path = BACKDROP_ROOT . ltrim('.', conf_path());
-    $conf_dir = backdrop_verify_install_file($conf_path, FILE_NOT_WRITABLE, 'dir');
-    $conf_file = backdrop_verify_install_file($conf_path . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
-    if (!$conf_dir || !$conf_file) {
-      $requirements['settings.php'] = array(
-        'value' => $t('Not protected'),
-        'severity' => REQUIREMENT_ERROR,
-        'description' => '',
-      );
-      if (!$conf_dir) {
-        $requirements['settings.php']['description'] .= $t('The directory %file is not protected from modifications and poses a security risk. You must change the directory\'s permissions to be non-writable. ', array('%file' => $conf_path));
-      }
-      if (!$conf_file) {
-        $requirements['settings.php']['description'] .= $t('The file %file is not protected from modifications and poses a security risk. You must change the file\'s permissions to be non-writable.', array('%file' => $conf_path . '/settings.php'));
-      }
-      if ($requirements['settings.php']['description']) {
-        $requirements['settings.php']['description'] .= ' ' . $t('If unsure how to set these permissions, see the <a href="!url">online handbook</a>.', array('!url' => 'http://backdropcms.org/guide/installation'));
-      }
-    }
-    else {
-      $requirements['settings.php'] = array(
-        'value' => $t('Protected'),
-      );
-    }
-    $requirements['settings.php']['title'] = $t('Configuration file');
-  }
-
   // Test the contents of the .htaccess files.
   if ($phase == 'runtime') {
     // Try to write the .htaccess files first, to prevent false alarms in case

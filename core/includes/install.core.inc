@@ -1594,12 +1594,6 @@ function install_finished(&$install_state) {
 
   $message = '<strong>' . st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name())) . '</strong>';
 
-  // Warn about settings.php permissions risk.
-  $settings_file = conf_path() . '/settings.php';
-  if (backdrop_verify_install_file($settings_file, FILE_WRITABLE)) {
-    $message .= ' ' . st('Now that installation is complete, you should remove write permissions to the settings.php file. See the site <a href="!status-report">status report</a> for more information.', array('%file' => $settings_file, '!status-report' => url('admin/reports/status')));
-  }
-
   backdrop_set_message($message);
   backdrop_goto('<front>');
 }
