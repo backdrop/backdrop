@@ -1690,8 +1690,6 @@ function file_validate_extensions(File $file, $extensions) {
 /**
  * Checks that the file's size is below certain limits.
  *
- * This check is not enforced for the user #1.
- *
  * @param File $file
  *   A file entity.
  * @param $file_limit
@@ -1712,17 +1710,15 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
 
   $errors = array();
 
-  // Bypass validation for uid  = 1.
-  if ($user->uid != 1) {
-    if ($file_limit && $file->filesize > $file_limit) {
-      $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
-    }
-
-    // Save a query by only calling file_space_used() when a limit is provided.
-    if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
-      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
-    }
+  if ($file_limit && $file->filesize > $file_limit) {
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
   }
+
+  // Save a query by only calling file_space_used() when a limit is provided.
+  if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
+      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
+  }
+
   return $errors;
 }
 
@@ -1967,7 +1963,7 @@ function file_download() {
   }
   else {
     backdrop_not_found();
-  }  
+  }
   backdrop_exit();
 }
 
