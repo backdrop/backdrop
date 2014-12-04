@@ -1,11 +1,10 @@
 <?php
-
 /**
  * @file
  * Template for each row inside the "boxes" on the display query edit screen.
  */
 ?>
-<div class="views-display-setting <?php print implode(' ', $classes); ?> <?php print $zebra; ?> clearfix" <?php print backdrop_attributes($attributes); ?>>
+<div class="views-display-setting <?php print implode(' ', $classes); ?> <?php print $zebra; ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
   <?php if ($description): ?>
     <span class="label"><?php print $description; ?></span>
   <?php endif; ?>

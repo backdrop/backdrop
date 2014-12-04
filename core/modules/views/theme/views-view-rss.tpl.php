@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default template for feed displays that use the RSS style.

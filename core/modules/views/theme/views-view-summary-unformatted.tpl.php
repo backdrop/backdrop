@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default simple view template to display a group of summary lines.

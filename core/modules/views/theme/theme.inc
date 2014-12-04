@@ -163,15 +163,6 @@ function template_preprocess_views_view(&$vars) {
 }
 
 /**
- * Process function to render certain elements into the view.
- */
-function template_process_views_view(&$vars) {
-  if (is_array($vars['rows'])) {
-    $vars['rows'] = backdrop_render($vars['rows']);
-  }
-}
-
-/**
  * Preprocess theme function to print a single record from a row, with fields
  */
 function template_preprocess_views_view_fields(&$vars) {
@@ -521,21 +512,19 @@ function template_preprocess_views_view_table(&$vars) {
         $vars['header'][$field] = l($label, $_GET['q'], $link_options);
       }
 
-      $vars['header_classes'][$field] = '';
+      $vars['header_classes'][$field] = array();
       // Set up the header label class.
       if ($fields[$field]->options['element_default_classes']) {
-        $vars['header_classes'][$field] .= "views-field views-field-" . $vars['fields'][$field];
+        $vars['header_classes'][$field][] = "views-field";
+        $vars['header_classes'][$field][] = "views-field-" . $vars['fields'][$field];
       }
       $class = $fields[$field]->element_label_classes(0);
       if ($class) {
-        if ($vars['header_classes'][$field]) {
-          $vars['header_classes'][$field] .= ' ';
-        }
-        $vars['header_classes'][$field] .= $class;
+        $vars['header_classes'][$field][] = $class;
       }
       // Add a CSS align class to each field if one was set
       if (!empty($options['info'][$field]['align'])) {
-        $vars['header_classes'][$field] .= ' ' . backdrop_clean_css_identifier($options['info'][$field]['align']);
+        $vars['header_classes'][$field][] = backdrop_clean_css_identifier($options['info'][$field]['align']);
       }
 
       // Add a header label wrapper if one was selected.
@@ -555,19 +544,17 @@ function template_preprocess_views_view_table(&$vars) {
 
     // Render each field into its appropriate column.
     foreach ($result as $num => $row) {
-      // Add field classes
-      $vars['field_classes'][$field][$num] = '';
+      // Add field classes and attributes.
+      $vars['field_attributes'][$field][$num] = array();
+      $vars['field_classes'][$field][$num] = array();
       if ($fields[$field]->options['element_default_classes']) {
-        $vars['field_classes'][$field][$num] = "views-field views-field-" . $vars['fields'][$field];
+        $vars['field_classes'][$field][$num][] = "views-field";
+        $vars['field_classes'][$field][$num][] = "views-field-" . $vars['fields'][$field];
       }
       if ($classes = $fields[$field]->element_classes($num)) {
-        if ($vars['field_classes'][$field][$num]) {
-          $vars['field_classes'][$field][$num] .= ' ';
-        }
-
-        $vars['field_classes'][$field][$num] .= $classes;
+        $classes_array = explode(' ', $classes);
+        $vars['field_classes'][$field][$num] = array_merge($vars['field_classes'][$field][$num], $classes_array);
       }
-      $vars['field_attributes'][$field][$num] = array();
 
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
         $field_output = $renders[$num][$field];
@@ -627,8 +614,8 @@ function template_preprocess_views_view_table(&$vars) {
   }
 
   if ($row_class_special) {
-    $vars['row_classes'][0][] = 'views-row-first';
-    $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
+    $vars['row_classes'][0][] = 'first';
+    $vars['row_classes'][count($vars['row_classes']) - 1][] = 'last';
   }
 
   $vars['classes'] = array('views-table');
@@ -746,7 +733,7 @@ function template_preprocess_views_view_grid(&$vars) {
         $row_classes[] =  'row-last';
       }
     }
-    $vars['row_classes'][$row_number] = implode(' ', $row_classes);
+    $vars['row_classes'][$row_number] = $row_classes;
     foreach ($rows[$row_number] as $column_number => $item) {
       $column_classes = array();
       if ($default_row_class) {
@@ -763,11 +750,11 @@ function template_preprocess_views_view_grid(&$vars) {
       if (isset($row_indexes[$row_number][$column_number]) && $column_class = $view->style_plugin->get_row_class($row_indexes[$row_number][$column_number])) {
         $column_classes[] = $column_class;
       }
-      $vars['column_classes'][$row_number][$column_number] = implode(' ', $column_classes);
+      $vars['column_classes'][$row_number][$column_number] = $column_classes;
     }
   }
   $vars['rows'] = $rows;
-  $vars['class'] = 'views-view-grid cols-' . $columns;
+  $vars['classes'] = array('views-view-grid', 'cols-' . $columns);
 
   // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
@@ -792,7 +779,7 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $style = $view->style_plugin;
   $options = $style->options;
 
-  $vars['classes'] = array();
+  $vars['row_classes'] = array();
   $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : FALSE;
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : FALSE;
   // Set up striping values.
@@ -801,21 +788,21 @@ function template_preprocess_views_view_unformatted(&$vars) {
   foreach ($rows as $id => $row) {
     $count++;
     if ($default_row_class) {
-      $vars['classes'][$id][] = 'views-row';
-      $vars['classes'][$id][] = 'views-row-' . $count;
+      $vars['row_classes'][$id][] = 'views-row';
+      $vars['row_classes'][$id][] = 'views-row-' . $count;
     }
     if ($row_class_special) {
-      $vars['classes'][$id][] = 'views-row-' . ($count % 2 ? 'odd' : 'even');
+      $vars['row_classes'][$id][] = ($count % 2 ? 'odd' : 'even');
       if ($count == 1) {
-        $vars['classes'][$id][] = 'views-row-first';
+        $vars['row_classes'][$id][] = 'first';
       }
       if ($count == $max) {
-        $vars['classes'][$id][] = 'views-row-last';
+        $vars['row_classes'][$id][] = 'last';
       }
     }
 
     if ($row_class = $view->style_plugin->get_row_class($id)) {
-      $vars['classes'][$id][] = $row_class;
+      $vars['row_classes'][$id][] = $row_class;
     }
   }
 }

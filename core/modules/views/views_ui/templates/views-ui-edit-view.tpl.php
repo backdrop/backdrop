@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Template for the primary view editing window.

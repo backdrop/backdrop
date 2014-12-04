@@ -33,8 +33,11 @@ function bartik_field__taxonomy_term_reference($variables) {
   }
   $output .= '</ul>';
 
-  // Render the top-level DIV.
-  $output = '<div class="' . implode(' ', $variables['classes']) . (!in_array('clearfix', $variables['classes']) ? ' clearfix' : '') . '"' . backdrop_attributes($variables['attributes']) . '>' . $output . '</div>';
+  // Render the surrounding DIV with appropriate classes and attributes.
+  if (!in_array('clearfix', $variables['classes'])) {
+    $variables['classes'][] = 'clearfix';
+  }
+  $output = '<div class="' . implode(' ', $variables['classes']) . '"' . backdrop_attributes($variables['attributes']) . '>' . $output . '</div>';
 
   return $output;
 }

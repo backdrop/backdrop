@@ -1,11 +1,10 @@
 <?php
-
 /**
  * @file
  * Template for each "box" on the display query edit screen.
  */
 ?>
-<div class="<?php print $classes; ?>" <?php print backdrop_attributes($attributes); ?>>
+<div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php print $item_help_icon; ?>
   <?php if(!empty($actions)) : ?>
     <?php print $actions; ?>

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This template handles the layout of the views exposed filter form.

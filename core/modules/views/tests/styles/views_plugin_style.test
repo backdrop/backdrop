@@ -245,7 +245,6 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     $count = 0;
     foreach ($rows as $row) {
       $attributes = $row->attributes();
-      //debug($attributes['class']);
       $class = (string) $attributes['class'][0];
       $this->assertTrue(strpos($class, $random_name) !== FALSE, 'Make sure that a custom CSS class is added to the output.');
 
