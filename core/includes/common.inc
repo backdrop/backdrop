@@ -6825,10 +6825,10 @@ function element_set_attributes(array &$element, array $map) {
  * $value = backdrop_array_get_nested_value($form, $parents);
  * @endcode
  *
- * The return value will be NULL, regardless of whether the actual value is NULL
- * or whether the requested key does not exist. If it is required to know
- * whether the nested array key actually exists, pass a third argument that is
- * altered by reference:
+ * A return value of NULL is ambiguous, and can mean either that the requested
+ * key does not exist, or that the actual value is NULL. If it is required to
+ * know whether the nested array key actually exists, pass a third argument that
+ * is altered by reference:
  * @code
  * $key_exists = NULL;
  * $value = backdrop_array_get_nested_value($form, $parents, $key_exists);
