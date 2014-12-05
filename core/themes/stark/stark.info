@@ -4,3 +4,4 @@ package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 stylesheets[all][] = layout.css
+hidden = TRUE

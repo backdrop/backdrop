@@ -114,7 +114,10 @@ function system_themes_page() {
   uasort($themes, 'system_sort_modules_by_info_name');
 
   $theme_default = config_get('system.core', 'theme_default');
-  $theme_groups  = array();
+  $theme_groups  = array(
+    'enabled' => array(),
+    'disabled' => array(),
+  );
 
   foreach ($themes as &$theme) {
     if (!empty($theme->info['hidden'])) {
@@ -211,10 +214,10 @@ function system_themes_page() {
 
   // There are two possible theme groups.
   $theme_group_titles = array(
-    'enabled' => format_plural(count($theme_groups['enabled']), 'Enabled theme', 'Enabled themes'),
+    'enabled' => t('Enabled themes'),
   );
   if (!empty($theme_groups['disabled'])) {
-    $theme_group_titles['disabled'] = format_plural(count($theme_groups['disabled']), 'Disabled theme', 'Disabled themes');
+    $theme_group_titles['disabled'] = t('Disabled themes');
   }
 
   uasort($theme_groups['enabled'], 'system_sort_themes');
