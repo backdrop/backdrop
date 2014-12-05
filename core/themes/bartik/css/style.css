@@ -674,7 +674,7 @@ article .link-wrapper {
 }
 .field-type-image img,
 .user-picture img {
-  margin: 0 0 1em;
+  margin-bottom: 1em;
 }
 article .link-wrapper ul.links {
   color: #68696b;
