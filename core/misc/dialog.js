@@ -17,7 +17,7 @@ Backdrop.settings.dialog = {
   // jQuery UI defaults to 300px, use 100% width to allow for responsive
   // dialogs. CSS can override by specifying a max-width.
   width: '100%',
-  position: 'center',
+  position: { my: "center", at: "center", of: window },
   close: function (e) {
     Backdrop.detachBehaviors(e.target, null, 'unload');
   }
@@ -33,7 +33,10 @@ Backdrop.dialog = function (element, options) {
 
     if (settings.autoResize === true || settings.autoResize === 'true') {
       $element
-        .dialog('option', { resizable: false, draggable: false })
+        .dialog('option', {
+            resizable: false,
+            draggable: false,
+        })
         .dialog('widget').css('position', 'fixed');
       $(window)
         .on('resize.dialogResize scroll.dialogResize', settings, autoResizeCallback)

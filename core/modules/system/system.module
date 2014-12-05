@@ -1349,6 +1349,9 @@ function system_library_info() {
     'js' => array(
       'core/misc/ui/jquery.ui.draggable.min.js' => array(),
     ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.draggable.css' => array(),
+    ),
     'dependencies' => array(
       array('system', 'ui.widget'),
       array('system', 'ui.mouse'),
@@ -1445,6 +1448,23 @@ function system_library_info() {
       array('system', 'ui.mouse'),
     ),
   );
+
+  $libraries['ui.selectmenu'] = array(
+    'title' => 'jQuery UI: Select Menu',
+    'website' => 'http://jqueryui.com/selectmenu/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.selectmenu.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.selectmenu.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.position'),
+      array('system', 'ui.menu'),
+    ),
+  );
   $libraries['ui.slider'] = array(
     'title' => 'jQuery UI: Slider',
     'website' => 'http://jqueryui.com/slider/',
@@ -1466,6 +1486,9 @@ function system_library_info() {
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.sortable.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.sortable.css' => array(),
     ),
     'dependencies' => array(
       array('system', 'ui.widget'),
@@ -1608,6 +1631,17 @@ function system_library_info() {
       array('system', 'effects'),
     ),
   );
+  $libraries['effects.puff'] = array(
+    'title' => 'jQuery UI: Effects Puff',
+    'website' => 'http://jqueryui.com/effect/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-puff.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
   $libraries['effects.pulsate'] = array(
     'title' => 'jQuery UI: Effects Pulsate',
     'website' => 'http://jqueryui.com/effect/',
@@ -1636,6 +1670,17 @@ function system_library_info() {
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.effect-shake.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.scale'] = array(
+    'title' => 'jQuery UI: Effects Scale',
+    'website' => 'http://jqueryui.com/effect/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
