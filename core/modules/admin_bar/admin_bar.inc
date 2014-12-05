@@ -677,12 +677,13 @@ function admin_bar_theme_settings() {
     '#title' => t('Enabled components'),
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
-      'admin_bar.menu' => t('Administration bar'),
+      'admin_bar.menu' => t('Management menu'),
       'admin_bar.search' => t('Search bar'),
       'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
     ),
     '#default_value' => $config->get('components'),
+    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
 
   $process = element_info_property('checkboxes', '#process', array());
