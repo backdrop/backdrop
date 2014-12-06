@@ -1501,6 +1501,15 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/add');
     $this->assertRaw('core/themes/bartik', 'Site default theme used on the add content page.');
+
+    // Check that Stark does not show up on the Appearance page.
+    $this->backdropGet('admin/appearance');
+    $this->assertNoText('Stark', 'Stark theme not shown on appearance page.');
+
+    // Turn on the theme test module, which makes Stark unhidden.
+    module_enable(array('theme_test'));
+    $this->backdropGet('admin/appearance');
+    $this->assertText('Stark', 'Stark theme now shown when hook_system_info_alter() unhides the theme.');
   }
 
   /**
@@ -1513,10 +1522,10 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->clickLink(t('Set default'));
     $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
 
-    // Switch back to Stark and test again.
+    // Switch back to Seven and test again.
     $this->backdropGet('admin/appearance');
-    $this->clickLink(t('Set default'), 0);
-    $this->assertEqual(config_get('system.core', 'theme_default'), 'stark');
+    $this->clickLink(t('Enable and set default'), 0);
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'seven');
   }
 }
 

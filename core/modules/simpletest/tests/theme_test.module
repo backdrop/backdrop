@@ -152,3 +152,12 @@ function theme_test_preprocess_page(&$variables) {
 function theme_theme_test_foo($variables) {
   return $variables['foo'];
 }
+
+/**
+ * Implements hook_system_info_alter().
+ */
+function theme_test_system_info_alter(&$info, $file, $type) {
+  if ($type === 'theme' && $file->name === 'stark') {
+    unset($info['hidden']);
+  }
+}
