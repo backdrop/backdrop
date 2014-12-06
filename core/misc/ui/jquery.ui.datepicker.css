@@ -1,5 +1,5 @@
 /*!
- * jQuery UI Datepicker 1.10.4
+ * jQuery UI Datepicker 1.11.2
  * http://jqueryui.com
  *
  * Copyright 2014 jQuery Foundation and other contributors
@@ -60,7 +60,7 @@
 }
 .ui-datepicker select.ui-datepicker-month,
 .ui-datepicker select.ui-datepicker-year {
-	width: 49%;
+	width: 45%;
 }
 .ui-datepicker table {
 	width: 100%;

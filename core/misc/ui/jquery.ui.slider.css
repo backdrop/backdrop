@@ -1,5 +1,5 @@
 /*!
- * jQuery UI Slider 1.10.4
+ * jQuery UI Slider 1.11.2
  * http://jqueryui.com
  *
  * Copyright 2014 jQuery Foundation and other contributors
@@ -18,6 +18,8 @@
 	width: 1.2em;
 	height: 1.2em;
 	cursor: default;
+	-ms-touch-action: none;
+	touch-action: none;
 }
 .ui-slider .ui-slider-range {
 	position: absolute;
@@ -28,7 +30,7 @@
 	background-position: 0 0;
 }
 
-/* For IE8 - See #6727 */
+/* support: IE8 - See #6727 */
 .ui-slider.ui-state-disabled .ui-slider-handle,
 .ui-slider.ui-state-disabled .ui-slider-range {
 	filter: inherit;
