@@ -1097,7 +1097,6 @@ function system_modules_uninstall_submit($form, &$form_state) {
  * Form builder; The general site information form.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_site_information_settings($form, &$form_state) {
   $site_config = config('system.core');
@@ -1444,7 +1443,6 @@ function system_site_information_settings_submit($form, &$form_state) {
 /**
  * Form builder; Cron form.
  *
- * @see system_settings_form()
  * @ingroup forms
  */
 function system_cron_settings($form, &$form_state) {
@@ -1490,7 +1488,6 @@ function system_cron_settings($form, &$form_state) {
  * Form submit handler; Handle submission for cron settings.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_cron_settings_submit($form, &$form_state) {
   config('system.core')
@@ -1688,7 +1685,6 @@ function system_clear_page_cache_submit($form, &$form_state) {
  * Form builder; Configure the site file handling.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_file_system_settings() {
   $form['file_public_path'] = array(
@@ -1762,7 +1758,6 @@ function system_file_system_settings_submit($form, &$form_state) {
  * Form builder; Configure site image toolkit usage.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_image_toolkit_settings() {
   $toolkits_available = image_get_available_toolkits();
@@ -2041,7 +2036,6 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
  * Form builder; Configure clean URL settings.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function system_clean_url_settings($form, &$form_state) {
   $available = FALSE;

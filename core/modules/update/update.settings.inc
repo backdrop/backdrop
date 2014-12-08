@@ -56,9 +56,6 @@ function update_settings($form, &$form_state) {
 
   // Custom validation callback for the email notification setting.
   $form['#validate'][] = 'update_settings_validate';
-  // We need to call our own submit callback first, not the one from
-  // system_settings_form(), so that we can process and save the emails.
-  unset($form['#submit']);
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
