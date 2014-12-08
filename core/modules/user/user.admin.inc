@@ -265,7 +265,6 @@ function user_admin_account_validate($form, &$form_state) {
  * Form builder; Configure user settings for this site.
  *
  * @ingroup forms
- * @see system_settings_form()
  */
 function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
