@@ -525,7 +525,11 @@ function image_field_formatter_info() {
     'image' => array(
       'label' => t('Image'),
       'field types' => array('image'),
-      'settings' => array('image_style' => '', 'image_link' => ''),
+      'settings' => array(
+        'image_style' => '',
+        'image_link' => '',
+        'image_float' => '',
+      ),
     ),
   );
 
@@ -558,6 +562,18 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#default_value' => $settings['image_link'],
     '#empty_option' => t('Nothing'),
     '#options' => $link_types,
+  );
+
+  $element['image_float'] = array(
+    '#title' => t('Float image'),
+    '#type' => 'select',
+    '#description' => t('Display the image on the left or right, with the rest of the content wrapping around it.'),
+    '#default_value' => $settings['image_float'],
+    '#empty_option' => t('No'),
+    '#options' => array(
+      'left' => t('Left'),
+      'right' => t('Right'),
+    ),
   );
 
   return $element;
@@ -593,6 +609,11 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = $link_types[$settings['image_link']];
   }
 
+  // Display this setting only if image is floated.
+  if (!empty($settings['image_float'])) {
+    $summary[] = t('Floated: @side', array('@side' => $settings['image_float']));
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -611,6 +632,11 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
+    // Add class for floating the image
+    if (!empty($display['settings']['image_float'])) {
+      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+    }
+
     if (isset($link_file)) {
       $uri = array(
         'path' => file_create_url($item['uri']),
