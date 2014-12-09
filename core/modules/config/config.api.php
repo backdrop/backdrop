@@ -32,7 +32,7 @@ function hook_config_info() {
   // If there are a large number of configuration files prefixed with this
   // string, provide a "name_key" that will be read from the configuration file
   // and used when listing the configuration file.
-  $prefixes['image.styles'] = array(
+  $prefixes['image.style'] = array(
     'name_key' => 'name',
     'label_key' => 'name',
     'group' => t('Image styles'),
@@ -141,7 +141,7 @@ function hook_config_update_validate(Config $staging_config, Config $active_conf
  * @throws ConfigValidateException
  */
 function hook_config_delete_validate(Config $active_config, $all_changes) {
-  if (strpos($active_config->getName(), 'image.styles') === 0) {
+  if (strpos($active_config->getName(), 'image.style') === 0) {
     // Check if another configuration depends on this configuration.
     if (!isset($all_changes['mymodule.settings']) || $all_changes['mymodule.settings'] !== 'delete') {
       $my_config = config('mymodule.settings');
@@ -162,7 +162,7 @@ function hook_config_delete_validate(Config $active_config, $all_changes) {
  *   that are saved.
  */
 function hook_config_create(Config $staging_config) {
-  if (strpos($staging_config->getName(), 'image.styles') === 0) {
+  if (strpos($staging_config->getName(), 'image.style') === 0) {
     // Set a value before the config is saved.
     $staging_config->set('some_key', 'default');
   }
@@ -179,7 +179,7 @@ function hook_config_create(Config $staging_config) {
  *   The configuration object for the settings being replaced.
  */
 function hook_config_update(Config $staging_config, Config $active_config) {
-  if (strpos($staging_config->getName(), 'image.styles') === 0) {
+  if (strpos($staging_config->getName(), 'image.style') === 0) {
     // Set a value before the config is saved.
     if (is_null($active_config->get('some_key'))) {
       $staging_config->set('some_key', 'default');
@@ -197,7 +197,7 @@ function hook_config_update(Config $staging_config, Config $active_config) {
  *   The configuration object for the settings being deleted.
  */
 function hook_config_delete(Config $active_config) {
-  if (strpos($active_config->getName(), 'image.styles') === 0) {
+  if (strpos($active_config->getName(), 'image.style') === 0) {
     $image_style_name = $active_config->get('name');
     config('mymodule.image_style_addons.' . $image_style_name)->delete();
   }

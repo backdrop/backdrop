@@ -146,7 +146,7 @@ function image_update_1000() {
       ),
     ),
   );
-  $config = config('image.styles.thumbnail');
+  $config = config('image.style.thumbnail');
   $config->setData($data);
   $config->save();
 
@@ -167,7 +167,7 @@ function image_update_1000() {
       ),
     ),
   );
-  $config = config('image.styles.medium');
+  $config = config('image.style.medium');
   $config->setData($data);
   $config->save();
 
@@ -188,7 +188,7 @@ function image_update_1000() {
       ),
     ),
   );
-  $config = config('image.styles.large');
+  $config = config('image.style.large');
   $config->setData($data);
   $config->save();
 }
@@ -215,7 +215,7 @@ function image_update_1001() {
         $style['effects'][] = $effect;
       }
       unset($style['isid']);
-      $config = config('image.styles.' . $style['name']);
+      $config = config('image.style.' . $style['name']);
       $config->setData($style);
       $config->save();
     }
@@ -240,7 +240,7 @@ function image_update_1002() {
  * Add labels to all available styles.
  */
 function image_update_1003() {
-  $names = config_get_names_with_prefix('image.styles.');
+  $names = config_get_names_with_prefix('image.style.');
   foreach ($names as $config_file) {
     $config = config($config_file);
     $label = $config->get('label');
@@ -314,6 +314,20 @@ function _image_update_1004(&$data) {
     $data['settings']['default_image'] = '';
   }
   return $old_fid;
+}
+
+/**
+ * Rename image config files.
+ */
+function image_update_1005() {
+  $config_names = config_get_names_with_prefix('image.styles.');
+  foreach ($config_names as $config_name) {
+    $old_config = config($config_name);
+    $new_config = config(str_replace('image.styles.', 'image.style.', $config_name));
+    $new_config->setData($old_config->get());
+    $new_config->save();
+    $old_config->delete();
+  }
 }
 
 /**
