@@ -1755,6 +1755,7 @@ function _filter_xss_split($m, $store = FALSE) {
  */
 function _filter_xss_attributes($attr) {
   $attrarr = array();
+  $skip = FALSE;
   $mode = 0;
   $attrname = '';
 
@@ -4233,6 +4234,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       // url() generates the prefix using hook_url_outbound_alter(). Instead of
       // running the hook_url_outbound_alter() again here, extract the prefix
       // from url().
+      $prefix = '';
       url('', array('prefix' => &$prefix));
       $javascript = array(
         'settings' => array(
@@ -7770,13 +7772,14 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
     foreach ($matches as $match) {
       // Fetch the key and value string.
       $i = 0;
+      $parts = array();
       foreach (array('key', 'value1', 'value2', 'value3') as $var) {
-        $$var = isset($match[++$i]) ? $match[$i] : '';
+        $parts[$var] = isset($match[++$i]) ? $match[$i] : '';
       }
-      $value = stripslashes(substr($value1, 1, -1)) . stripslashes(substr($value2, 1, -1)) . $value3;
+      $value = stripslashes(substr($parts['value1'], 1, -1)) . stripslashes(substr($parts['value2'], 1, -1)) . $parts['value3'];
 
       // Parse array syntax.
-      $keys = preg_split('/\]?\[/', rtrim($key, ']'));
+      $keys = preg_split('/\]?\[/', rtrim($parts['key'], ']'));
       $last = array_pop($keys);
       $parent = &$info;
 
