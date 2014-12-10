@@ -651,7 +651,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoLink($node_title);
 
-    // Add a menu link to the Management menu.
+    // Add a menu link to the Administration menu.
     $item = array(
       'link_path' => 'node/' . $node->nid,
       'link_title' => $this->randomName(16),
@@ -659,10 +659,10 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     menu_link_save($item);
 
-    // Assert that disabled Management menu is not shown on the node/$nid/edit page.
+    // Assert that disabled Administration menu is not shown on the node/$nid/edit page.
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertText('Provide a menu link', 'Link in not allowed menu not shown in node edit form');
-    // Assert that the link is still in the management menu after save.
+    // Assert that the link is still in the Administration menu after save.
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $link = menu_link_load($item['mlid']);
     $this->assertTrue($link, 'Link in not allowed menu still exists after saving node');
