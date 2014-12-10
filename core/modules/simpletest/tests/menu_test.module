@@ -398,6 +398,7 @@ function menu_test_init() {
     'Example title' => 'Alternative example title',
   );
   $GLOBALS['settings']['locale_custom_strings_en'] = array('' => $string_overrides);
+  backdrop_static_reset('t');
 }
 
 /**
