@@ -605,6 +605,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       $view['page[style][style_plugin]'] = 'jump_menu';
       $view['page[style][row_plugin]'] = 'fields';
       $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+      $this->backdropGet($view['page[path]']);
 
       // Submit the jump menu form, and check that we are redirected to the
       // expected URL.

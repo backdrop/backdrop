@@ -109,28 +109,32 @@ class views_handler_field_bulk_form extends views_handler_field {
       );
     }
 
-    // Replace the form submit button label.
-    $form['actions']['submit']['#value'] = t('Apply');
-
     // Ensure a consistent container for filters/operations in the view header.
     $form['header'] = array(
-      '#type' => 'container',
       '#weight' => -100,
     );
 
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
     $form['header'][$this->options['id']] = array(
-      '#type' => 'container',
+      '#type' => 'fieldset',
+      '#title' => t('Operations'),
+      '#attributes' => array('class' => array('views-bulk-form')),
+      '#id' => NULL,
     );
     $form['header'][$this->options['id']]['action'] = array(
       '#type' => 'select',
-      '#title' => t('With selection'),
       '#options' => $this->get_bulk_options(),
+      '#empty_option' => '- ' . t('Choose an action') . ' -',
     );
 
-    // Duplicate the form actions into the action container in the header.
-    $form['header'][$this->options['id']]['actions'] = $form['actions'];
+    // Set the form actions container in the header.
+    $actions['#type'] = 'actions';
+    $actions['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Execute'),
+    );
+    $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
   /**

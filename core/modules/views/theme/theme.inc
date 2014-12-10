@@ -466,6 +466,7 @@ function template_preprocess_views_view_table(&$vars) {
 
   $active   = !empty($handler->active) ? $handler->active : '';
   $order    = !empty($handler->order) ? $handler->order : 'asc';
+  $responsive_columns = array();
 
   $query    = tablesort_get_query_parameters();
   if (isset($view->exposed_raw_input)) {
@@ -526,6 +527,10 @@ function template_preprocess_views_view_table(&$vars) {
       if (!empty($options['info'][$field]['align'])) {
         $vars['header_classes'][$field][] = backdrop_clean_css_identifier($options['info'][$field]['align']);
       }
+      // Add active class.
+      if ($active == $field) {
+        $vars['header_classes'][$field][] = 'active';
+      }
 
       // Add a header label wrapper if one was selected.
       if ($vars['header'][$field]) {
@@ -535,6 +540,16 @@ function template_preprocess_views_view_table(&$vars) {
         }
       }
 
+      // Track responsive classes for each column as needed. Only the header
+      // cells for a column are marked up with the responsive classes by a
+      // module developer or themer. The responsive classes on the header cells
+      // must be transferred to the content cells.
+      if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $vars['header_classes'][$field])) {
+        $responsive_columns[$field] =  RESPONSIVE_PRIORITY_MEDIUM;
+      }
+      elseif (in_array(RESPONSIVE_PRIORITY_LOW, $vars['header_classes'][$field])) {
+        $responsive_columns[$field] =  RESPONSIVE_PRIORITY_LOW;
+      }
     }
 
     // Add a CSS align class to each field if one was set
@@ -550,6 +565,11 @@ function template_preprocess_views_view_table(&$vars) {
       if ($fields[$field]->options['element_default_classes']) {
         $vars['field_classes'][$field][$num][] = "views-field";
         $vars['field_classes'][$field][$num][] = "views-field-" . $vars['fields'][$field];
+      }
+      // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
+      // class from header to cell as needed.
+      if (isset($responsive_columns[$field])) {
+        $vars['field_classes'][$field][$num][] = $responsive_columns[$field];
       }
       if ($classes = $fields[$field]->element_classes($num)) {
         $classes_array = explode(' ', $classes);
@@ -623,13 +643,21 @@ function template_preprocess_views_view_table(&$vars) {
     $vars['rows'][0][0] = $view->display_handler->render_area('empty');
     // Calculate the amounts of rows with output.
     $vars['field_attributes'][0][0]['colspan'] = count($vars['header']);
-    $vars['field_classes'][0][0] = 'views-empty';
+    $vars['field_classes'][0][0] = array('views-empty');
   }
 
 
   if (!empty($options['sticky'])) {
     backdrop_add_js('core/misc/tableheader.js');
-    $vars['classes'][] = "sticky-enabled";
+    $vars['classes'][] = 'sticky-enabled';
+  }
+
+  // If the responsive classes were used, add the matching library.
+  if (count($responsive_columns)) {
+    backdrop_add_library('system', 'backdrop.tableresponsive');
+    // Add 'responsive-enabled' class to the table to identify it for JS.
+    // This is needed to target tables constructed by this function.
+    $vars['classes'][] = 'responsive-enabled';
   }
   $vars['classes'][] = 'cols-'. count($vars['header']);
 

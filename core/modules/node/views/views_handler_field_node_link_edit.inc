@@ -25,7 +25,7 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
     $this->options['alter']['path'] = "node/$node->nid/edit";
     $this->options['alter']['query'] = backdrop_get_destination();
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
+    $text = !empty($this->options['text']) ? $this->options['text'] : t('Edit');
     return $text;
   }
 }

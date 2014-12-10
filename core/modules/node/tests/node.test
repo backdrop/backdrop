@@ -1534,8 +1534,14 @@ class NodeAdminTestCase extends BackdropWebTestCase {
    */
   function testContentAdminSort() {
     $this->backdropLogin($this->admin_user);
-    foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
-      $this->backdropCreateNode(array('title' => $prefix . $this->randomName(6)));
+    foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $index => $prefix) {
+      $node = $this->backdropCreateNode(array('title' => $prefix . $this->randomName(6)));
+      db_update('node')
+        ->fields(array(
+          'changed' => REQUEST_TIME + $index
+        ))
+        ->condition('nid', $node->nid)
+        ->execute();
     }
 
     // Test that the default sort by node.changed DESC actually fires properly.
@@ -1548,7 +1554,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $nodes_form = array();
     $this->backdropGet('admin/content');
     foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
-      $nodes_form[] = $input;
+      $nodes_form[] = (string) $input;
     }
     $this->assertEqual($nodes_query, $nodes_form, 'Nodes are sorted in the form according to the default query.');
 
@@ -1561,7 +1567,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       ->fetchCol();
 
     $nodes_form = array();
-    $this->backdropGet('admin/content', array('query' => array('sort' => 'asc', 'order' => 'Title')));
+    $this->backdropGet('admin/content', array('query' => array('sort' => 'asc', 'order' => 'title')));
     foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
       $nodes_form[] = $input;
     }
@@ -1586,34 +1592,30 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     // Verify view, edit, and delete links for any content.
     $this->backdropGet('admin/content');
     $this->assertResponse(200);
+    $index = 0;
     foreach ($nodes as $node) {
       $this->assertLinkByHref('node/' . $node->nid);
       $this->assertLinkByHref('node/' . $node->nid . '/edit');
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
       // Verify tableselect.
-      $this->assertFieldByName('nodes[' . $node->nid . ']', '', 'Tableselect found.');
+      $this->assertFieldByName('bulk_form[' . $index . ']', '', 'Tableselect found.');
+      $index++;
     }
 
     // Verify filtering by publishing status.
-    $edit = array(
-      'status' => 'status-1',
-    );
-    $this->backdropPost(NULL, $edit, t('Filter'));
+    $this->backdropGet('admin/content/node', array('query' => array('status' => '1')));
 
-    $this->assertRaw(t('where %property is %value', array('%property' => t('status'), '%value' => 'published')), 'Content list is filtered by status.');
+    $this->assertFieldByXPath('//select[@name="status"]', '1', 'Content list is filtered by status.');
 
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid . '/edit');
     $this->assertLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
     $this->assertNoLinkByHref('node/' . $nodes['unpublished_page_1']->nid . '/edit');
 
     // Verify filtering by status and content type.
-    $edit = array(
-      'type' => 'page',
-    );
-    $this->backdropPost(NULL, $edit, t('Refine'));
+    $this->backdropGet('admin/content/node', array('query' => array('status' => '1', 'type' => 'page')));
 
-    $this->assertRaw(t('where %property is %value', array('%property' => t('status'), '%value' => 'published')), 'Content list is filtered by status.');
-    $this->assertRaw(t('and where %property is %value', array('%property' => t('type'), '%value' => 'Basic page')), 'Content list is filtered by content type.');
+    $this->assertFieldByXPath('//select[@name="status"]', '1', 'Content list is filtered by status.');
+    $this->assertFieldByXPath('//select[@name="type"]', 'page', 'Content list is filtered by content type.');
 
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid . '/edit');
     $this->assertNoLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
@@ -2547,11 +2549,11 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/content');
     $edit = array(
-        'operation' => 'delete',
-        'nodes[' . $nodes[0]->nid . ']' => TRUE,
-        'nodes[' . $nodes[1]->nid . ']' => TRUE,
+        'action' => 'node_delete_action',
+        'bulk_form[0]' => TRUE,
+        'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->backdropPost(NULL, array(), t('Delete'));
 
     // Logout and check the node is not available.

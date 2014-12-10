@@ -1873,14 +1873,14 @@ function layout_menu_item_form($form, &$form_state, $menu_item) {
     );
   }
   $form['menu']['parent']['weight'] = array(
-    '#title' => t('Tab weight'),
+    '#title' => t('Item weight'),
     '#type' => 'textfield',
     '#default_value' => $menu_settings['parent']['weight'],
     '#size' => 5,
-    '#description' => t('If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be.'),
+    '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
     '#states' => array(
-      'visible' => array(
-        ':input[name="menu[parent][type]"]' => array('value' => 'tab'),
+      'invisible' => array(
+        ':input[name="menu[parent][type]"]' => array('value' => 'none'),
       ),
     ),
   );

@@ -321,6 +321,12 @@
   overflow: auto;
 }
 
+.views-ui-dialog input,
+.views-ui-dialog select,
+.views-ui-dialog textarea {
+  max-width: 100%;
+}
+
 /* @end */
 
 /* @group Settings forms */

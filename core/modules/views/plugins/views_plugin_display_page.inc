@@ -416,7 +416,7 @@ class views_plugin_display_page extends views_plugin_display {
           '#title' => t('Weight'),
           '#type' => 'textfield',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
-          '#description' => t('The lower the weight the higher/further left it will appear.'),
+          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
           '#states' => array(
             'visible' => array(
               array(
@@ -539,14 +539,22 @@ class views_plugin_display_page extends views_plugin_display {
         }
         $form['tab_options']['weight'] = array(
           '#suffix' => '</div>',
-          '#title' => t('Tab weight'),
+          '#title' => t('Item weight'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['weight'],
           '#size' => 5,
-          '#description' => t('If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be.'),
+          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
           '#states' => array(
             'visible' => array(
-              ':input[name="tab_options[type]"]' => array('value' => 'tab'),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'tab'),
+              ),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'default tab'),
+              ),
             ),
           ),
         );
