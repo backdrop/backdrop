@@ -1705,7 +1705,14 @@ function backdrop_unpack($obj, $field = 'data') {
  */
 function t($string, array $args = array(), array $options = array()) {
   global $language_interface;
-  //static $custom_strings;
+
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['t'] = &backdrop_static(__FUNCTION__, array());
+  }
+  $custom_strings = &$backdrop_static_fast['t']['custom_strings'];
+  $translate_english = &$backdrop_static_fast['t']['translate_english'];
 
   // Merge in default.
   if (empty($options['langcode'])) {
@@ -1713,6 +1720,12 @@ function t($string, array $args = array(), array $options = array()) {
   }
   if (empty($options['context'])) {
     $options['context'] = '';
+  }
+
+  // Locale module may not have been enabled, so we check for NULL value here
+  // and statically cache the result for performance.
+  if (!isset($translate_english)) {
+    $translate_english = config_get('locale.settings', 'translate_english') ? TRUE : FALSE;
   }
 
   // First, check for an array of customized strings. If present, use the array
@@ -1727,7 +1740,7 @@ function t($string, array $args = array(), array $options = array()) {
     $string = $custom_strings[$options['langcode']][$options['context']][$string];
   }
   // Translate with locale module if enabled.
-  elseif ($options['langcode'] != LANGUAGE_SYSTEM && ($options['langcode'] != 'en' || config_get('locale.settings', 'translate_english')) && function_exists('locale')) {
+  elseif ($options['langcode'] != LANGUAGE_SYSTEM && ($options['langcode'] != 'en' || $translate_english) && function_exists('locale')) {
     $string = locale($string, $options['context'], $options['langcode']);
   }
   if (empty($args)) {

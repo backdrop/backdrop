@@ -629,6 +629,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
  * Reset static variables used by locale().
  */
 function locale_reset() {
+  backdrop_static_reset('t');
   backdrop_static_reset('locale');
 }
 
