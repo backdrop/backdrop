@@ -163,6 +163,7 @@ function template_process_layout(&$variables) {
       }
       elseif ($settings['title_display'] === LAYOUT_TITLE_CUSTOM) {
         $variables['title'] = check_plain(t($settings['title']));
+        backdrop_set_title(t($settings['title']));
       }
       else {
         $variables['title'] = backdrop_get_title();
