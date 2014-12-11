@@ -4040,7 +4040,7 @@ function backdrop_html_id($id) {
  * drag-and-drop or dynamic Ajax loading, in a theme-independent way.
  *
  * @param $region
- *   The name of the page region (for example, 'page_top' or 'content').
+ *   The name of the page region (for example, 'page_bottom' or 'content').
  *
  * @return
  *   An HTML class that identifies the region (for example, 'region-page-top'
@@ -7104,7 +7104,7 @@ function backdrop_common_theme() {
   return array(
     // From theme.inc.
     'page' => array(
-      'variables' => array('page_top' => '', 'page' => '', 'page_bottom' => ''),
+      'variables' => array('page' => '', 'page_bottom' => ''),
       'template' => 'templates/page',
     ),
     'header' => array(

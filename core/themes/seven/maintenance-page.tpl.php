@@ -7,7 +7,6 @@
     <?php print $scripts; ?>
   </head>
   <body class="<?php print $classes; ?>">
-    <?php print $page_top; ?>
     <div id="page">
 
     <?php if ($sidebar_first): ?>
