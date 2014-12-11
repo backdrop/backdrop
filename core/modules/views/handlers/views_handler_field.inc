@@ -276,12 +276,15 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = explode(' ', $this->options['element_class']);
-    foreach ($classes as &$class) {
-      $class = $this->tokenize_value($class, $row_index);
-      $class = backdrop_clean_css_identifier($class);
+    if ($this->options['element_class']) {
+      $classes = explode(' ', $this->options['element_class']);
+      foreach ($classes as &$class) {
+        $class = $this->tokenize_value($class, $row_index);
+        $class = backdrop_clean_css_identifier($class);
+      }
+      return implode(' ', $classes);
     }
-    return implode(' ', $classes);
+    return '';
   }
 
   /**
