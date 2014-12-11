@@ -1792,7 +1792,7 @@ function menu_set_custom_theme() {
 function menu_list_system_menus() {
   return array(
     'main-menu' => 'Main menu',
-    'management' => 'Management',
+    'management' => 'Administration menu',
     'user-menu' => 'Account menu',
   );
 }
