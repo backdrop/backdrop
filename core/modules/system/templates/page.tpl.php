@@ -25,7 +25,6 @@
  * - $styles: Style tags necessary to import all CSS files for the page.
  * - $scripts: Script tags necessary to load the JavaScript files and settings
  *   for the page.
- * - $page_top: Initial markup from any modules that have altered the
  *   page. This variable should always be output first, before all other dynamic
  *   content.
  * - $page: The rendered page content.
@@ -50,7 +49,6 @@
     <?php print $scripts; ?>
   </head>
   <body class="<?php print $classes; ?>" <?php print $body_attributes;?>>
-    <?php print $page_top; ?>
     <?php print $page; ?>
     <?php print $page_bottom; ?>
   </body>
