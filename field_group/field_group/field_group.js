@@ -41,9 +41,17 @@ Drupal.FieldGroup.Effects.processAccordion = {
     $('div.field-group-accordion-wrapper', context).once('fieldgroup-effects', function () {
       var wrapper = $(this);
 
+      // Get the index to set active.
+      var active_index = false;
+      wrapper.find('.accordion-item').each(function(i) {
+        if ($(this).hasClass('field-group-accordion-active')) {
+          active_index = i;
+        }
+      });
+
       wrapper.accordion({
         heightStyle: "content",
-        active: '.field-group-accordion-active',
+        active: active_index,
         collapsible: true,
         changestart: function(event, ui) {
           if ($(this).hasClass('effect-none')) {
