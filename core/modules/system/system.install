@@ -2412,9 +2412,7 @@ function system_update_1031() {
  * Enable config module.
  */
 function system_update_1032() {
-  if (!module_exists('config')) {
-    module_enable(array('config'));
-  }
+  update_module_enable(array('config'));
 }
 
 /**
