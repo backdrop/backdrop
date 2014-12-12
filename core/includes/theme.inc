@@ -2280,7 +2280,7 @@ function theme_feed_icon($variables) {
  *     - #value_suffix: (optional) A string to append to #value, e.g. a CDATA
  *       wrapper suffix.
  */
-function theme_html_tag($variables) {
+function theme_head_tag($variables) {
   $element = $variables['element'];
   $attributes = isset($element['#attributes']) ? backdrop_attributes($element['#attributes']) : '';
   if (!isset($element['#value'])) {

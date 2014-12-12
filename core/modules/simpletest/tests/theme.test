@@ -515,20 +515,20 @@ class ThemeFastTestCase extends BackdropWebTestCase {
 }
 
 /**
- * Unit tests for theme_html_tag().
+ * Unit tests for meta tags.
  */
-class ThemeHtmlTag extends BackdropUnitTestCase {
+class ThemeHeadTag extends BackdropUnitTestCase {
   /**
-   * Test function theme_html_tag()
+   * Test function theme_head_tag()
    */
-  function testThemeHtmlTag() {
+  function testThemeHeadTag() {
     // Test auto-closure meta tag generation
     $tag['element'] = array('#tag' => 'meta', '#attributes' => array('name' => 'description', 'content' => 'Backdrop test'));
-    $this->assertEqual('<meta name="description" content="Backdrop test" />'."\n", theme_html_tag($tag), 'Test auto-closure meta tag generation.');
+    $this->assertEqual('<meta name="description" content="Backdrop test" />'."\n", theme_head_tag($tag), 'Test auto-closure meta tag generation.');
 
     // Test title tag generation
     $tag['element'] = array('#tag' => 'title', '#value' => 'title test');
-    $this->assertEqual('<title>title test</title>'."\n", theme_html_tag($tag), 'Test title tag generation.');
+    $this->assertEqual('<title>title test</title>'."\n", theme_head_tag($tag), 'Test title tag generation.');
   }
 }
 
