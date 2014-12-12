@@ -1166,7 +1166,7 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
   if (count($children)) {
     foreach ($children as $childname) {
 
-      if (in_array($childname, $groups)) {
+      if (in_array($childname, $groups, TRUE)) {
         field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups, $entity);
       }
       $hasChildren = $hasChildren ? TRUE : _field_group_is_empty_element($element, $entity, $childname, $groups);
@@ -2020,9 +2020,12 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
   // Create all groups and keep a flat list of references to these groups.
   $group_references = array();
   foreach ($element['#fieldgroups'] as $group_name => $group) {
-    // Construct own weight, as some fields (for example preprocess fields) don't have weight set.
-    $element[$group_name] = array();
-    $group_references[$group_name] = &$element[$group_name];
+    // check for any erroneous groups from other modules
+    if (is_string($group_name)) {
+      // Construct own weight, as some fields (for example preprocess fields) don't have weight set.
+      $element[$group_name] = array();
+      $group_references[$group_name] = &$element[$group_name];
+    }
   }
 
   // Loop through all form children looking for those that are supposed to be
