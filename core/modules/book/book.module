@@ -14,10 +14,6 @@ function book_theme() {
       'variables' => array('book_link' => NULL),
       'template' => 'book-navigation',
     ),
-    'book_export_html' => array(
-      'variables' => array('title' => NULL, 'contents' => NULL, 'depth' => NULL),
-      'template' => 'book-export-html',
-    ),
     'book_admin_table' => array(
       'render element' => 'form',
     ),
@@ -27,10 +23,6 @@ function book_theme() {
     'book_all_books_block' => array(
       'render element' => 'book_menus',
       'template' => 'book-all-books-block',
-    ),
-    'book_node_export_html' => array(
-      'variables' => array('node' => NULL, 'children' => NULL),
-      'template' => 'book-node-export-html',
     ),
   );
 }
@@ -48,10 +40,6 @@ function book_permission() {
     ),
     'add content to books' => array(
       'title' => t('Add content and child pages to books'),
-    ),
-    'access printer-friendly version' => array(
-      'title' => t('View printer-friendly books'),
-      'description' => t('View a book page and all of its sub-pages as a single document for ease of printing. Can be performance heavy.'),
     ),
   );
 }
@@ -107,14 +95,6 @@ function book_node_view_link(Node $node, $view_mode) {
           'query' => array('parent' => $node->book['mlid']),
         );
       }
-
-      if (user_access('access printer-friendly version')) {
-        $links['book_printer'] = array(
-          'title' => t('Printer-friendly version'),
-          'href' => 'book/export/html/' . $node->nid,
-          'attributes' => array('title' => t('Show a printer-friendly version of this book page and its sub-pages.'))
-        );
-      }
     }
   }
 
@@ -166,13 +146,6 @@ function book_menu() {
     'page callback' => 'book_render',
     'access arguments' => array('access content'),
     'type' => MENU_SUGGESTED_ITEM,
-    'file' => 'book.pages.inc',
-  );
-  $items['book/export/%/%'] = array(
-    'page callback' => 'book_export',
-    'page arguments' => array(2, 3),
-    'access arguments' => array('access printer-friendly version'),
-    'type' => MENU_CALLBACK,
     'file' => 'book.pages.inc',
   );
   $items['node/%node/outline'] = array(
@@ -1198,119 +1171,6 @@ function book_toc($bid, $depth_limit, $exclude = array()) {
   _book_toc_recurse($tree, '', $toc, $exclude, $depth_limit);
 
   return $toc;
-}
-
-/**
- * Preprocesses variables for book-export-html.tpl.php.
- *
- * @param $variables
- *   An associative array containing the following keys:
- *   - title
- *   - contents
- *   - depth
- *
- * @see book-export-html.tpl.php
- */
-function template_preprocess_book_export_html(&$variables) {
-  global $base_url, $language_interface;
-
-  $variables['title'] = check_plain($variables['title']);
-  $variables['base_url'] = $base_url;
-  $variables['language'] = $language_interface;
-  $variables['language_rtl'] = ($language_interface->direction == LANGUAGE_RTL);
-  $variables['head'] = backdrop_get_html_head();
-
-  // HTML element attributes.
-  $variables['html_attributes_array']['lang'] = $language_interface->langcode;
-  $variables['html_attributes_array']['dir'] = $language_interface->direction ? 'rtl' : 'ltr';
-}
-
-/**
- * Processes variables for book-export-html.tpl.php.
- *
- * @see book-export-html.tpl.php
- */
-function template_process_book_export_html(&$variables) {
-  // Flatten out html_attributes
-  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
-}
-
-/**
- * Traverses the book tree to build printable or exportable output.
- *
- * During the traversal, the $visit_func() callback is applied to each node and
- * is called recursively for each child of the node (in weight, title order).
- *
- * @param $tree
- *   A subtree of the book menu hierarchy, rooted at the current page.
- * @param $visit_func
- *   A function callback to be called upon visiting a node in the tree.
- *
- * @return
- *   The output generated in visiting each node.
- */
-function book_export_traverse($tree, $visit_func) {
-  $output = '';
-
-  foreach ($tree as $data) {
-    // Note- access checking is already performed when building the tree.
-    if ($node = node_load($data['link']['nid'], FALSE)) {
-      $children = '';
-
-      if ($data['below']) {
-        $children = book_export_traverse($data['below'], $visit_func);
-      }
-
-      if (!empty($visit_func)) {
-        $output .= call_user_func($visit_func, $node, $children);
-      }
-      else {
-        // Use the default function.
-        $output .= book_node_export($node, $children);
-      }
-    }
-  }
-
-  return $output;
-}
-
-/**
- * Generates printer-friendly HTML for a node.
- *
- * @param Node $node
- *   The node that will be output.
- * @param $children
- *   (optional) All the rendered child nodes within the current node. Defaults
- *   to an empty string.
- *
- * @return
- *   The HTML generated for the given node.
- *
- * @see book_export_traverse()
- */
-function book_node_export(Node $node, $children = '') {
-  $build = node_view($node, 'print');
-  unset($build['#theme']);
-  // @todo Rendering should happen in the template using render().
-  $node->rendered = backdrop_render($build);
-
-  return theme('book_node_export_html', array('node' => $node, 'children' => $children));
-}
-
-/**
- * Processes variables for book-node-export-html.tpl.php.
- *
- * @param $variables
- *   An associative array containing the following keys:
- *   - node
- *   - children
- *
- * @see book-node-export-html.tpl.php
- */
-function template_preprocess_book_node_export_html(&$variables) {
-  $variables['depth'] = $variables['node']->book['depth'];
-  $variables['title'] = check_plain($variables['node']->title);
-  $variables['content'] = $variables['node']->rendered;
 }
 
 /**

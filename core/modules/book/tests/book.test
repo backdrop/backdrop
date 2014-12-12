@@ -25,7 +25,7 @@ class BookTestCase extends BackdropWebTestCase {
   protected $book_author;
 
   /**
-   * A user with permission to view a book and access printer-friendly version.
+   * A user with permission to view a book.
    *
    * @var object
    */
@@ -46,7 +46,7 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Create users.
     $this->book_author = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books'));
-    $this->web_user = $this->backdropCreateUser(array('access printer-friendly version', 'node test view'));
+    $this->web_user = $this->backdropCreateUser(array('node test view'));
     $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
   }
 
@@ -185,11 +185,6 @@ class BookTestCase extends BackdropWebTestCase {
     // Compare expected and got breadcrumbs.
     $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
 
-    // Check printer friendly version.
-    $this->backdropGet('book/export/html/' . $node->nid);
-    $this->assertText($node->title, 'Printer friendly title found.');
-    $this->assertRaw(check_markup($node->body[LANGUAGE_NONE][0]['value'], $node->body[LANGUAGE_NONE][0]['format']), 'Printer friendly body found.');
-
     $number++;
   }
 
@@ -246,51 +241,6 @@ class BookTestCase extends BackdropWebTestCase {
     $number++;
 
     return $node;
-  }
-
-  /**
-   * Tests book export ("printer-friendly version") functionality.
-   */
-  function testBookExport() {
-    // Create a book.
-    $nodes = $this->createBook();
-
-    // Login as web user and view printer-friendly version.
-    $this->backdropLogin($this->web_user);
-    $this->backdropGet('node/' . $this->book->nid);
-    $this->clickLink(t('Printer-friendly version'));
-
-    // Make sure each part of the book is there.
-    foreach ($nodes as $node) {
-      $this->assertText($node->title, 'Node title found in printer friendly version.');
-      $this->assertRaw(check_markup($node->body[LANGUAGE_NONE][0]['value'], $node->body[LANGUAGE_NONE][0]['format']), 'Node body found in printer friendly version.');
-    }
-
-    // Make sure we can't export an unsupported format.
-    $this->backdropGet('book/export/foobar/' . $this->book->nid);
-    $this->assertResponse('404', 'Unsupported export format returned "not found".');
-
-    // Make sure we get a 404 on a not existing book node.
-    $this->backdropGet('book/export/html/123');
-    $this->assertResponse('404', 'Not existing book node returned "not found".');
-
-    // Make sure an anonymous user cannot view printer-friendly version.
-    $this->backdropLogout();
-
-    // Load the book and verify there is no printer-friendly version link.
-    $this->backdropGet('node/' . $this->book->nid);
-    $this->assertNoLink(t('Printer-friendly version'), 'Anonymous user is not shown link to printer-friendly version.');
-
-    // Try getting the URL directly, and verify it fails.
-    $this->backdropGet('book/export/html/' . $this->book->nid);
-    $this->assertResponse('403', 'Anonymous user properly forbidden.');
-
-    // Now grant anonymous users permission to view the printer-friendly
-    // version and verify that node access restrictions still prevent them from
-    // seeing it.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access printer-friendly version'));
-    $this->backdropGet('book/export/html/' . $this->book->nid);
-    $this->assertResponse('403', 'Anonymous user properly forbidden from seeing the printer-friendly version when denied by node access.');
   }
 
   /**
