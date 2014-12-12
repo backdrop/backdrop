@@ -521,26 +521,6 @@ function &drupal_register_shutdown_function($callback = NULL) {
 // Functions from common.inc.
 
 /**
- * Adds content to a specified region.
- *
- * @deprecated since 1.0.0
- * @see backdrop_add_region_content()
- */
-function drupal_add_region_content($region = NULL, $data = NULL) {
-  return backdrop_add_region_content($region, $data);
-}
-
-/**
- * Gets assigned content for a given region.
- *
- * @deprecated since 1.0.0
- * @see backdrop_get_region_content()
- */
-function drupal_get_region_content($region = NULL, $delimiter = ' ') {
-  return backdrop_get_region_content($region, $delimiter);
-}
-
-/**
  * Gets the name of the currently active installation profile.
  *
  * @deprecated since 1.0.0

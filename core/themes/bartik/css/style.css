@@ -1450,15 +1450,6 @@ input.form-button-disabled:active,
 .comment-form input.form-file {
   width: auto;
 }
-.no-sidebars .comment-form .form-text {
-  width: 800px;
-}
-.one-sidebar .comment-form .form-text {
-  width: 500px;
-}
-.two-sidebars .comment-form .form-text {
-  width: 320px;
-}
 .comment-form .form-item .description {
   font-size: 0.786em;
   line-height: 1.2;
