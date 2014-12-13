@@ -3924,8 +3924,8 @@ function theme_search($variables) {
   _form_set_class($element, array('form-search'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && drupal_valid_path($element['#autocomplete_path'])) {
-    drupal_add_library('system', 'drupal.autocomplete');
+  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+    backdrop_add_library('system', 'drupal.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
@@ -3934,10 +3934,10 @@ function theme_search($variables) {
     $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
-    $extra = '<input' . drupal_attributes($attributes) . ' />';
+    $extra = '<input' . backdrop_attributes($attributes) . ' />';
   }
 
-  $output = '<input' . drupal_attributes($element['#attributes']) . ' />';
+  $output = '<input' . backdrop_attributes($element['#attributes']) . ' />';
 
   return $output . $extra;
 }
