@@ -5,11 +5,17 @@
  * behaviors (the main way of interacting with JS in Backdrop), theming
  * wrappers, and localization functions.
  */
-window.Backdrop = window.Backdrop || { 'settings': {}, 'behaviors': {}, 'locale': {} };
-
-// JavaScript should be made compatible with libraries other than jQuery by
-// wrapping it in an anonymous closure.
 (function ($, undefined) {
+
+// Define the main Backdrop object that holds settings, behavior callbacks, and
+// translated strings.
+window.Backdrop = window.Backdrop || {};
+$.extend(true, window.Backdrop, { 'settings': {}, 'behaviors': {}, 'locale': {} });
+
+// Alias the Backdrop namespace to Drupal if compatibility is enabled.
+if (Backdrop.settings.drupalCompatibility) {
+  window.Drupal = Backdrop;
+}
 
 /**
  * Attach all registered behaviors to a page element.
@@ -390,11 +396,6 @@ $(function () {
 
 // On page ready, attach behaviors in which all other Backdrop JS is handled.
 $(function () {
-  // Alias the Backdrop namespace to Drupal if compatibility is enabled.
-  if (Backdrop.settings.drupalCompatibility) {
-    window.Drupal = Backdrop;
-  }
-
   Backdrop.attachBehaviors(document, Backdrop.settings);
 });
 
