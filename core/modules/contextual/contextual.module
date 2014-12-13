@@ -25,7 +25,7 @@ function contextual_library_info() {
   $libraries['contextual-links'] = array(
     'title' => 'Contextual Links',
     'website' => 'http://drupal.org/node/473268',
-    'version' => '1.0',
+    'version' => BACKDROP_VERSION,
     'js' => array(
       $path . '/contextual.js' => array(),
     ),

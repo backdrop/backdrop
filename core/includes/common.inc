@@ -87,7 +87,7 @@ const JS_THEME = 100;
 /**
  * The default group for JavaScript settings added to the page.
  */
-const JS_SETTING = 200;
+const JS_SETTING = -200;
 
 /**
  * Error code indicating that the request exceeded the specified timeout.
@@ -4260,6 +4260,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'cache' => TRUE,
           'defer' => FALSE,
           'browsers' => array(),
+          'version' => BACKDROP_VERSION,
         ),
       );
       // Backwards-compatibility for JavaScript.
@@ -4483,7 +4484,7 @@ function backdrop_pre_render_scripts($elements) {
         switch ($item['type']) {
           case 'setting':
             $element['#value_prefix'] = $embed_prefix;
-            $element['#value'] = 'jQuery.extend(Backdrop.settings, ' . backdrop_json_encode(backdrop_array_merge_deep_array($item['data'])) . ");";
+            $element['#value'] = 'window.Backdrop = {settings: ' . backdrop_json_encode(backdrop_array_merge_deep_array($item['data'])) . "};";
             $element['#value_suffix'] = $embed_suffix;
             break;
 
