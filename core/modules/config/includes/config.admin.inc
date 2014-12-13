@@ -282,10 +282,12 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
     '#markup' => '<p>' . t('This form may be used to export a single configuration so that it may be imported on a different site. Select a configuration group and name to generate configuration for copy/paste.') . '</p>',
   );
 
+  $group_options = backdrop_map_assoc(array_keys($form_state['config_groups']));
+  natsort($group_options);
   $form['config_group'] = array(
     '#title' => t('Configuration group'),
     '#type' => 'select',
-    '#options' => backdrop_map_assoc(array_keys($form_state['config_groups'])),
+    '#options' => $group_options,
     '#default_value' => $config_group,
     '#required' => TRUE,
     '#ajax' => array(
@@ -295,10 +297,15 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   );
 
   $default_type = isset($form_state['values']['config_group']) ? $form_state['values']['config_group'] : $config_group;
+  $config_names = array();
+  if ($default_type) {
+    $config_names = $form_state['config_groups'][$default_type];
+    natsort($config_names);
+  }
   $form['config_name'] = array(
     '#title' => t('Configuration name'),
     '#type' => 'select',
-    '#options' => $default_type ? $form_state['config_groups'][$default_type] : array(),
+    '#options' => $config_names,
     '#default_value' => $config_name,
     '#required' => TRUE,
     '#prefix' => '<div id="edit-config-type-wrapper">',
