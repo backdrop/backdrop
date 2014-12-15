@@ -938,7 +938,7 @@ function hook_ranking() {
 }
 
 /**
- * Respond to the loading a node types.
+ * Respond to the loading of node types.
  *
  * This hook is called after loading node types from configuration files. It can
  * be used to populate default values within a node type's settings. Note that
@@ -956,7 +956,7 @@ function hook_ranking() {
  */
 function hook_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
-    $types[$type_name]['settings'] += array(
+    $types[$type_name]->settings += array(
       'status_default' => TRUE,
       'promote_default' => FALSE,
       'sticky_default' => FALSE,
