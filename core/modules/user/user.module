@@ -914,7 +914,7 @@ function user_login_block($form) {
     '#value' => t('Log in'),
   );
   $items = array();
-  if (config_get('system.core', 'user_register')) {
+  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
   $items[] = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
