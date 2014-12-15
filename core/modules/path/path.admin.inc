@@ -228,7 +228,7 @@ function path_admin_form_validate($form, &$form_state) {
   if ($has_alias) {
     form_set_error('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
   }
-  if (!backdrop_valid_path($source)) {
+  if (!backdrop_valid_path($source, FALSE, TRUE)) {
     form_set_error('source', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $source)));
   }
 }

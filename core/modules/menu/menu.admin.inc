@@ -65,7 +65,6 @@ function theme_menu_admin_overview($variables) {
  * relevant operations.
  */
 function menu_overview_form($form, &$form_state, $menu) {
-  global $menu_admin;
   $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.css');
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
@@ -78,12 +77,9 @@ function menu_overview_form($form, &$form_state, $menu) {
     $links[] = $item;
   }
   $tree = menu_tree_data($links);
+
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
-  // We indicate that a menu administrator is running the menu access check.
-  $menu_admin = TRUE;
-  menu_tree_check_access($tree, $node_links);
-  $menu_admin = FALSE;
 
   $form = array_merge($form, _menu_overview_tree_form($tree));
   $form['#menu'] =  $menu;
@@ -114,62 +110,72 @@ function _menu_overview_tree_form($tree) {
     $item = $data['link'];
     // Don't show callbacks; these have $item['hidden'] < 0.
     if ($item && $item['hidden'] >= 0) {
-      $mlid = 'mlid:' . $item['mlid'];
-      $form[$mlid]['#item'] = $item;
-      $form[$mlid]['#attributes'] = $item['hidden'] ? array('class' => array('menu-disabled')) : array('class' => array('menu-enabled'));
-      $form[$mlid]['title']['#markup'] = l($item['title'], $item['href'], $item['localized_options']);
-      if ($item['hidden']) {
-        $form[$mlid]['title']['#markup'] .= ' (' . t('disabled') . ')';
-      }
-      elseif ($item['link_path'] == 'user' && $item['module'] == 'system') {
-        $form[$mlid]['title']['#markup'] .= ' (' . t('logged in users only') . ')';
-      }
+      if (!strstr($item['link_path'], '%')) {
+        if (!is_array($item['options'])) {
+          $item['options'] = unserialize($item['options']);
+        }
+        $item['href'] = $item['link_path'];
+        $item['title'] = $item['link_title'];
+        $item['localized_options'] = $item['options'];
+        
+        $mlid = 'mlid:' . $item['mlid'];
+        $form[$mlid]['#item'] = $item;
+        $form[$mlid]['#attributes'] = $item['hidden'] ? array('class' => array('menu-disabled')) : array('class' => array('menu-enabled'));
+        $form[$mlid]['title']['#markup'] = l($item['title'], $item['href'], $item['localized_options']);
+        if ($item['hidden']) {
+          $form[$mlid]['title']['#markup'] .= ' (' . t('disabled') . ')';
+        }
+        elseif ($item['link_path'] == 'user' && $item['module'] == 'system') {
+          $form[$mlid]['title']['#markup'] .= ' (' . t('logged in users only') . ')';
+        }
 
-      $form[$mlid]['hidden'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Enable @title menu link', array('@title' => $item['title'])),
-        '#title_display' => 'invisible',
-        '#default_value' => !$item['hidden'],
-      );
-      $form[$mlid]['weight'] = array(
-        '#type' => 'weight',
-        '#delta' => 50,
-        '#default_value' => $item['weight'],
-        '#title_display' => 'invisible',
-        '#title' => t('Weight for @title', array('@title' => $item['title'])),
-      );
-      $form[$mlid]['mlid'] = array(
-        '#type' => 'hidden',
-        '#value' => $item['mlid'],
-      );
-      $form[$mlid]['plid'] = array(
-        '#type' => 'hidden',
-        '#default_value' => $item['plid'],
-      );
-      // Build a list of operations.
-      $links = array();
-      $links['edit'] = array(
-        'title' => t('Edit'),
-        'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/edit',
-      );
-      // Only items created by the menu module can be deleted.
-      if ($item['module'] == 'menu' || $item['updated'] == 1) {
-        $links['delete'] = array(
-          'title' => t('Delete'),
-          'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/delete',
+        $form[$mlid]['hidden'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Enable @title menu link', array('@title' => $item['title'])),
+          '#title_display' => 'invisible',
+          '#default_value' => !$item['hidden'],
+        );
+        $form[$mlid]['weight'] = array(
+          '#type' => 'weight',
+          '#delta' => 50,
+          '#default_value' => $item['weight'],
+          '#title_display' => 'invisible',
+          '#title' => t('Weight for @title', array('@title' => $item['title'])),
+        );
+        $form[$mlid]['mlid'] = array(
+          '#type' => 'hidden',
+          '#value' => $item['mlid'],
+        );
+        $form[$mlid]['plid'] = array(
+          '#type' => 'hidden',
+          '#default_value' => $item['plid'],
+        );
+
+        // Build a list of operations.
+        $links = array();
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/edit',
+        );
+        // Only items created by the menu module can be deleted.
+        if ($item['module'] == 'menu' || $item['updated'] == 1) {
+          $links['delete'] = array(
+            'title' => t('Delete'),
+            'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/delete',
+          );
+        }
+        // Set the reset column.
+        elseif ($item['module'] == 'system' && $item['customized']) {
+          $links['reset'] = array(
+            'title' => t('Reset'),
+            'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/reset',
+          );
+        }
+        $form[$mlid]['operations'] = array(
+          '#type' => 'operations',
+          '#links' => $links,
         );
       }
-      // Set the reset column.
-      elseif ($item['module'] == 'system' && $item['customized']) {
-        $links['reset'] = array(
-          'title' => t('Reset'),
-          'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/reset',
-        );
-      }
-      $form[$mlid]['operations'] = array(
-        '#type' => 'operations',
-        '#links' => $links,
-      );
     }
 
     if ($data['below']) {
@@ -421,7 +427,7 @@ function menu_edit_item_validate($form, &$form_state) {
       $item['link_path'] = $parsed_link['path'];
     }
   }
-  if (!trim($item['link_path']) || !backdrop_valid_path($item['link_path'], TRUE)) {
+  if (!trim($item['link_path']) || !backdrop_valid_path($item['link_path'], TRUE, TRUE)) {
     form_set_error('link_path', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $item['link_path'])));
   }
 }

@@ -1336,7 +1336,7 @@ function system_site_information_settings_validate($form, &$form_state) {
     form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
   }
   // Validate front page path.
-  if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
+  if (!backdrop_valid_path($form_state['values']['site_frontpage'], FALSE, TRUE)) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
   // Get the normal paths of both error pages.
@@ -1347,11 +1347,11 @@ function system_site_information_settings_validate($form, &$form_state) {
     form_set_value($form['error_page']['site_404'], backdrop_get_normal_path($form_state['values']['site_404']), $form_state);
   }
   // Validate 403 error path.
-  if (!empty($form_state['values']['site_403']) && !backdrop_valid_path($form_state['values']['site_403'])) {
+  if (!empty($form_state['values']['site_403']) && !backdrop_valid_path($form_state['values']['site_403'], FALSE, TRUE)) {
     form_set_error('site_403', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403'])));
   }
   // Validate 404 error path.
-  if (!empty($form_state['values']['site_404']) && !backdrop_valid_path($form_state['values']['site_404'])) {
+  if (!empty($form_state['values']['site_404']) && !backdrop_valid_path($form_state['values']['site_404'], FALSE, TRUE)) {
     form_set_error('site_404', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404'])));
   }
 }

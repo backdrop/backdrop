@@ -429,7 +429,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
     $elements = $this->xpath($xpath);
     $this->assertFalse($elements, 'Custom link not found.');
 
-    // Add a custom link to the node to the menu.
+    // Add a custom link to this node into the menu.
     $edit = array(
       'link_path' => 'node/' . $node->nid,
       'link_title' => $text,

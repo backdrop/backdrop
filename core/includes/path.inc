@@ -545,15 +545,14 @@ function path_get_admin_paths() {
  *   The path to check.
  * @param $dynamic_allowed
  *   Whether paths with menu wildcards (like user/%) should be allowed.
+ * @param $skip_access
+ *   Whether to skip access checks, for example: when administering menus.
  *
  * @return
  *   TRUE if it is a valid path AND the current user has access permission,
  *   FALSE otherwise.
  */
-function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
-  global $menu_admin;
-  // We indicate that a menu administrator is running the menu access check.
-  $menu_admin = TRUE;
+function backdrop_valid_path($path, $dynamic_allowed = FALSE, $skip_access = FALSE) {
   if ($path == '<front>' || url_is_external($path)) {
     $item = array('access' => TRUE);
   }
@@ -564,13 +563,15 @@ function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
       $item['link_title'] = $item['title'];
       $item['external']   = FALSE;
       $item['options'] = '';
-      _menu_link_translate($item);
+      _menu_link_translate($item, FALSE, $skip_access);
     }
   }
   else {
     $item = menu_get_item($path);
+    if ($skip_access) {
+      $item['access'] = TRUE;
+    }
   }
-  $menu_admin = FALSE;
   return $item && $item['access'];
 }
 

@@ -884,6 +884,8 @@ function menu_tail_load($arg, &$map, $index) {
  *   (optional) Whether to try to translate a link containing dynamic path
  *   argument placeholders (%) based on the menu router item of the current
  *   path. Defaults to FALSE. Internally used for breadcrumbs.
+ * @param $skip_access
+ *   Whether to skip access checks, for example: when administering menus.
  *
  * @return
  *   Returns the map of path arguments with objects loaded as defined in the
@@ -894,7 +896,7 @@ function menu_tail_load($arg, &$map, $index) {
  *   $item['options'] is unserialized; it is also changed within the call here
  *   to $item['localized_options'] by _menu_item_localize().
  */
-function _menu_link_translate(&$item, $translate = FALSE) {
+function _menu_link_translate(&$item, $translate = FALSE, $skip_access = FALSE) {
   if (!is_array($item['options'])) {
     $item['options'] = unserialize($item['options']);
   }
@@ -951,7 +953,9 @@ function _menu_link_translate(&$item, $translate = FALSE) {
         $item['access'] = FALSE;
         return FALSE;
       }
-      _menu_check_access($item, $map);
+      if (!$skip_access) {
+        _menu_check_access($item, $map);
+      }
     }
     // For performance, don't localize a link the user can't access.
     if ($item['access']) {
@@ -1251,6 +1255,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
 
   // Check if the active trail has been overridden for this menu tree.
   $active_path = menu_tree_get_path($menu_name);
+
   // Load the menu item corresponding to the current page.
   if ($item = menu_get_item($active_path)) {
     if (isset($max_depth)) {
@@ -1271,7 +1276,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
     }
 
     if (!isset($tree[$cid])) {
-      // If the static variable doesn't have the data, check {cache_menu}.
+      // If the static variable doesn't have the data, check the menu cache.
       $cache = cache('menu')->get($cid);
       if ($cache && isset($cache->data)) {
         // If the cache entry exists, it contains the parameters for
@@ -1394,9 +1399,9 @@ function menu_build_tree($menu_name, array $parameters = array()) {
 /**
  * Builds a menu tree.
  *
- * This function may be used build the data for a menu tree only, for example
- * to further massage the data manually before further processing happens.
- * menu_tree_check_access() needs to be invoked afterwards.
+ * This function should only be used build the data for a menu tree. If, for
+ * example, the data needed to be massaged manually before further processing.
+ * menu_tree_check_access() will need to be invoked afterwards.
  *
  * @see menu_build_tree()
  */
@@ -1411,7 +1416,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
   }
   $tree_cid = 'links:' . $menu_name . ':tree-data:' . $GLOBALS['language_interface']->langcode . ':' . hash('sha256', serialize($parameters));
 
-  // If we do not have this tree in the static cache, check {cache_menu}.
+  // If we do not have this tree in the static cache, check the menu cache.
   if (!isset($trees[$tree_cid])) {
     $cache = cache('menu')->get($tree_cid);
     if ($cache && isset($cache->data)) {
@@ -1530,6 +1535,8 @@ function menu_tree_check_access(&$tree, $node_links = array()) {
     $nids = $select->execute()->fetchCol();
     foreach ($nids as $nid) {
       foreach ($node_links[$nid] as $mlid => $link) {
+        // Since $node_links contains references to $tree this line actually
+        // modifies the $tree variable, which is passed by reference.
         $node_links[$nid][$mlid]['access'] = TRUE;
       }
     }
@@ -1544,6 +1551,10 @@ function _menu_tree_check_access(&$tree) {
   $new_tree = array();
   foreach ($tree as $key => $v) {
     $item = &$tree[$key]['link'];
+    if ($item['module'] == 'menu' && $item['router_path'] == '') {
+      // Set access to true for manually created links that should 404.
+      $item['access'] = TRUE;
+    }
     _menu_link_translate($item);
     if ($item['access'] || ($item['in_active_trail'] && strpos($item['href'], '%') !== FALSE)) {
       if ($tree[$key]['below']) {
@@ -1555,6 +1566,7 @@ function _menu_tree_check_access(&$tree) {
       $new_tree[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $tree[$key];
     }
   }
+
   // Sort siblings in the tree based on the weights and localized titles.
   ksort($new_tree);
   $tree = $new_tree;
