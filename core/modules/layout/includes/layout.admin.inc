@@ -1620,7 +1620,7 @@ function layout_break_lock_page($item, $type = 'layout') {
 
   layout_clear_layout_tempstore($item->name, $type);
   backdrop_set_message(t('The lock has been cleared and all changes discarded. You may now make changes to this page.'));
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
