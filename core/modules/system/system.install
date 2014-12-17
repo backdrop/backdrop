@@ -1990,9 +1990,7 @@ function system_update_1022() {
  * Enable admin_bar, replacing the renamed admin_menu.
  */
 function system_update_1023() {
-  if (!module_exists('admin_bar')) {
-    module_enable(array('admin_bar'));
-  }
+  // This update is no longer necessary and has been removed.
 }
 
 /**
