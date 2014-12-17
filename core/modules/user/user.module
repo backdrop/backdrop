@@ -926,64 +926,14 @@ function user_login_block($form) {
  * Implements hook_block_info().
  */
 function user_block_info() {
-  global $user;
+  $blocks = array();
 
   $blocks['login'] = array(
     'info' => t('User login'),
     'description' => t('The user login form if logged out.'),
   );
-  $blocks['new'] = array(
-    'info' => t('Who\'s new'),
-    'description' => t('A listing of newly registered users.'),
-    'cache' => BACKDROP_CACHE_PER_ROLE,
-  );
-  $blocks['online'] = array(
-    'info' => t('Who\'s online'),
-    'description' => t('A listing of currently online users.'),
-  );
 
   return $blocks;
-}
-
-/**
- * Implements hook_block_configure().
- */
-function user_block_configure($delta = '', $settings = array()) {
-  switch ($delta) {
-    case 'new':
-      $settings += array(
-        'new_count' => 5,
-      );
-      $form['new_count'] = array(
-        '#type' => 'select',
-        '#title' => t('Number of users to display'),
-        '#default_value' => $settings['new_count'],
-        '#options' => range(1, 10),
-      );
-      return $form;
-
-    case 'online':
-      $settings += array(
-        'seconds_online' => 900,
-        'list_count' => 10,
-      );
-      $period = backdrop_map_assoc(array(30, 60, 120, 180, 300, 600, 900, 1800, 2700, 3600, 5400, 7200, 10800, 21600, 43200, 86400), 'format_interval');
-      $form['seconds_online'] = array(
-        '#type' => 'select',
-        '#title' => t('User activity'),
-        '#default_value' => $settings['seconds_online'],
-        '#options' => $period,
-        '#description' => t('A user is considered online for this long after they have last viewed a page.'),
-      );
-      $form['list_count'] = array(
-        '#type' => 'select',
-        '#title' => t('User list length'),
-        '#default_value' => $settings['list_count'],
-        '#options' => backdrop_map_assoc(array(0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100)),
-        '#description' => t('Maximum number of currently online users to display.'),
-      );
-      return $form;
-  }
 }
 
 /**
@@ -991,7 +941,6 @@ function user_block_configure($delta = '', $settings = array()) {
  */
 function user_block_view($delta = '', $settings = array()) {
   global $user;
-
   $block = array();
 
   switch ($delta) {
@@ -1001,42 +950,6 @@ function user_block_view($delta = '', $settings = array()) {
 
         $block['subject'] = t('User login');
         $block['content'] = backdrop_get_form('user_login_block');
-      }
-      return $block;
-
-    case 'new':
-      if (user_access('access content')) {
-        // Retrieve a list of new users who have subsequently accessed the site successfully.
-        $new_count = isset($settings['new_count']) ? $settings['new_count'] : 5;
-        $items = db_query_range('SELECT uid, name FROM {users} WHERE status <> 0 AND access <> 0 ORDER BY created DESC', 0, $new_count)->fetchAll();
-        $output = theme('user_list', array('users' => $items));
-
-        $block['subject'] = t('Who\'s new');
-        $block['content'] = $output;
-      }
-      return $block;
-
-    case 'online':
-      if (user_access('access content')) {
-        // Count users active within the defined period.
-        $seconds = isset($settings['seconds_online']) ? $settings['seconds_online'] : 900;
-        $interval = REQUEST_TIME - $seconds;
-
-        // Perform database queries to gather online user lists. We use s.timestamp
-        // rather than u.access because it is much faster.
-        $authenticated_count = db_query("SELECT COUNT(DISTINCT s.uid) FROM {sessions} s WHERE s.timestamp >= :timestamp AND s.uid > 0", array(':timestamp' => $interval))->fetchField();
-
-        $output = '<p>' . format_plural($authenticated_count, 'There is currently 1 user online.', 'There are currently @count users online.') . '</p>';
-
-        // Display a list of currently online users.
-        $max_users = isset($settings['list_count']) ? $settings['list_count'] : 10;
-        if ($authenticated_count && $max_users) {
-          $items = db_query_range('SELECT u.uid, u.name, MAX(s.timestamp) AS max_timestamp FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.timestamp >= :interval AND s.uid > 0 GROUP BY u.uid, u.name ORDER BY max_timestamp DESC', 0, $max_users, array(':interval' => $interval))->fetchAll();
-          $output .= theme('user_list', array('users' => $items));
-        }
-
-        $block['subject'] = t('Who\'s online');
-        $block['content'] = $output;
       }
       return $block;
   }
@@ -1051,12 +964,15 @@ function user_preprocess_block(&$variables) {
       case 'login':
         $variables['attributes']['role'] = 'form';
         break;
+<<<<<<< HEAD
       case 'new':
         $variables['attributes']['role'] = 'complementary';
         break;
       case 'online':
         $variables['attributes']['role'] = 'complementary';
         break;
+=======
+>>>>>>> Issues #147 & #148: Removed Who's Online & Who's New blocks.
     }
   }
 }
