@@ -23,7 +23,7 @@
   <?php print $scripts; ?>
 </head>
 <body class="<?php print $classes; ?>">
-  <div class="l-container">
+  <div id="page">
 
     <header role="banner">
       <?php if (!empty($logo)): ?>
@@ -43,8 +43,6 @@
           <?php endif; ?>
         </div> <!-- /.name-and-slogan -->
       <?php endif; ?>
-
-      <?php print $header; ?>
     </header>
 
     <main role="main">
@@ -57,16 +55,10 @@
       <?php print $content; ?>
     </main>
 
-    <?php if (!empty($sidebar_first)): ?>
-      <aside class="l-sidebar-first" role="complementary">
-        <?php print $sidebar_first; ?>
-      </aside> <!-- /.l-sidebar-first -->
-    <?php endif; ?>
-
-    <?php if (!empty($sidebar_second)): ?>
-      <aside class="l-sidebar-second" role="complementary">
-        <?php print $sidebar_second; ?>
-      </aside> <!-- /.l-sidebar-second -->
+    <?php if ($sidebar): ?>
+      <div id="sidebar" class="sidebar">
+        <?php print $sidebar ?>
+      </div>
     <?php endif; ?>
 
     <?php if (!empty($footer)): ?>
@@ -75,7 +67,7 @@
       </footer>
     <?php endif; ?>
 
-  </div> <!-- /.l-container -->
+  </div> <!-- /#page -->
 
 </body>
 </html>

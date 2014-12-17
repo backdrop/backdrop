@@ -203,12 +203,6 @@ function &drupal_register_shutdown_function($callback = NULL) {
 }
 
 // Functions from common.inc.
-function drupal_add_region_content($region = NULL, $data = NULL) {
-  return backdrop_add_region_content($region, $data);
-}
-function drupal_get_region_content($region = NULL, $delimiter = ' ') {
-  return backdrop_get_region_content($region, $delimiter);
-}
 function drupal_get_profile() {
   return backdrop_get_profile();
 }
