@@ -1355,6 +1355,7 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'ui.widget'),
       array('system', 'ui.mouse'),
+      array('system', 'ui.touch-punch'),
     ),
   );
   $libraries['ui.droppable'] = array(
@@ -1491,8 +1492,8 @@ function system_library_info() {
       'core/misc/ui/jquery.ui.sortable.css' => array(),
     ),
     'dependencies' => array(
-      array('system', 'ui.widget'),
-      array('system', 'ui.mouse'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.droppable'),
     ),
   );
   $libraries['ui.spinner'] = array(
@@ -1706,6 +1707,20 @@ function system_library_info() {
     ),
     'dependencies' => array(
       array('system', 'effects'),
+    ),
+  );
+
+  // Touch Punch for jQuery UI touch support.
+  $libraries['ui.touch-punch'] = array(
+    'title' => 'jQuery UI Touch Punch',
+    'website' => 'http://touchpunch.furf.com/',
+    'version' => '0.2.3',
+    'js' => array(
+      'core/misc/jquery.ui.touch-punch.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.mouse'),
     ),
   );
 
