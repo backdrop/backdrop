@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default theme implementation to display a single Backdrop page while offline.
@@ -14,7 +13,7 @@
  */
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php print $language->langcode ?>" lang="<?php print $language->langcode ?>" dir="<?php print $language->dir ?>">
+<html<?php print backdrop_attributes($html_attributes); ?>>
 
 <head>
   <?php print backdrop_get_html_head(); ?>

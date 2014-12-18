@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * The theme system, which controls the output of Backdrop.
@@ -2512,13 +2511,11 @@ function template_preprocess_page(&$variables) {
     $variables['classes'][] = backdrop_html_class('node-type-' . $node->type);
   }
 
-  // Initializes attributes which are specific to the html and body elements.
+  // Initialize attributes which are specific to the html and body elements.
   $variables['html_attributes'] = array();
-  $variables['body_attributes'] = array();
-
-  // HTML element attributes.
   $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
   $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['body_attributes'] = array();
 
   // Add favicon.
   $favicon = backdrop_get_favicon();
@@ -2679,6 +2676,11 @@ function template_preprocess_maintenance_page(&$variables) {
   // set the default language if necessary
   $language = isset($GLOBALS['language_interface']) ? $GLOBALS['language_interface'] : language_default();
 
+  // Initialize attributes which are specific to the html element.
+  $variables['html_attributes'] = array();
+  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+
   $variables['head_title_array']  = $head_title;
   $variables['head_title']        = implode(' | ', $head_title);
   $variables['base_path']         = base_path();
@@ -2686,8 +2688,6 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['breadcrumb']        = '';
   $variables['feed_icons']        = '';
   $variables['help']              = '';
-  $variables['language']          = $language;
-  $variables['language']->dir     = $language->direction ? 'rtl' : 'ltr';
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
   $variables['main_menu']         = array();
   $variables['secondary_menu']    = array();
