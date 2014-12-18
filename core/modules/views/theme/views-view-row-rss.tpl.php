@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default view template to display a item in an RSS feed.

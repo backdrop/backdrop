@@ -1803,14 +1803,14 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $variables['settings_links'] = implode('<span class="label">&nbsp;|&nbsp;</span>', $variables['settings_links']);
 
   // Add classes associated with this display tab to the overall list.
-  $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
+  $variables['classes'] = array_merge($variables['classes'], $variables['class']);
 
   if (!empty($variables['defaulted'])) {
-    $variables['classes_array'][] = 'defaulted';
+    $variables['classes'][] = 'defaulted';
   }
   if (!empty($variables['overridden'])) {
-    $variables['classes_array'][] = 'overridden';
-    $variables['attributes_array']['title'][] = t('Overridden');
+    $variables['classes'][] = 'overridden';
+    $variables['attributes']['title'][] = t('Overridden');
   }
 
   // Append a colon to the description, if requested.
@@ -1827,11 +1827,11 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
     $variables['item_help_icon'] = render($element['#item_help_icon']);
   }
   if (!empty($element['#name'])) {
-    $variables['classes_array'][] = backdrop_clean_css_identifier(strtolower($element['#name']));
+    $variables['classes'][] = backdrop_clean_css_identifier(strtolower($element['#name']));
   }
   if (!empty($element['#overridden'])) {
-    $variables['classes_array'][] = 'overridden';
-    $variables['attributes_array']['title'][] = t('Overridden');
+    $variables['classes'][] = 'overridden';
+    $variables['attributes']['title'][] = t('Overridden');
   }
 
   $variables['content'] = $element['#children'];

@@ -18,10 +18,8 @@
  * - $display_submitted: Whether submission information should be displayed.
  * - $submitted: Submission information created from $name and $date during
  *   template_preprocess_node().
- * - $classes: String of classes that can be used to style contextually through
- *   CSS. It can be manipulated through the variable $classes_array from
- *   preprocess functions. The default values can be one or more of the
- *   following:
+ * - $classes: Array of classes that can be used to style contextually through
+ *   CSS. The default values can be one or more of the following:
  *   - node: The current template type; for example, "theming hook".
  *   - node-[type]: The current node type. For example, if the node is a
  *     "Article" it would result in "node-article". Note that the machine
@@ -33,6 +31,8 @@
  *   - sticky: Nodes ordered above other non-sticky nodes in teaser
  *     listings.
  *   - unpublished: Unpublished nodes visible only to administrators.
+ * - $attributes: Array of additional HTML attributes that should be added to
+ *   the wrapper element. Flatten with backdrop_attributes().
  * - $title_prefix (array): An array containing additional output populated by
  *   modules, intended to be displayed in front of the main title tag that
  *   appears in the template.
@@ -45,8 +45,6 @@
  * - $type: Node type; for example, article, basic page, blog, etc.
  * - $uid: User ID of the node author.
  * - $created: Time the node was published formatted in Unix timestamp.
- * - $classes_array: Array of html class attribute values. It is flattened
- *   into a string within the variable $classes.
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.
  * - $id: Position of the node. Increments each time it's output.
@@ -83,16 +81,15 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_node()
- * @see template_process()
  *
  * @ingroup themeable
  */
 ?>
-<article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
   <?php if (!$page): ?>
-    <h2<?php print $title_attributes; ?>><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
+    <h2><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
   <?php endif; ?>
   <?php print render($title_suffix); ?>
 
@@ -103,7 +100,7 @@
     </footer>
   <?php endif; ?>
 
-  <div class="content"<?php print $content_attributes; ?>>
+  <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
       // We hide the links now so that we can render them later.
       hide($content['links']);

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This template is used to print a single grouping in a view.

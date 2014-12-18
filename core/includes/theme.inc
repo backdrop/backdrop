@@ -505,7 +505,6 @@ class ThemeRegistry Extends BackdropCacheArray {
  *     'render element' is not specified in a later one, then the previous
  *     definition is kept.
  *   - 'preprocess functions': See theme() for detailed documentation.
- *   - 'process functions': See theme() for detailed documentation.
  * @param $name
  *   The name of the module, theme engine, base theme engine, theme or base
  *   theme implementing hook_theme().
@@ -529,13 +528,6 @@ class ThemeRegistry Extends BackdropCacheArray {
  */
 function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
   $result = array();
-
-  // Processor functions work in two distinct phases with the process
-  // functions always being executed after the preprocess functions.
-  $variable_process_phases = array(
-    'preprocess functions' => 'preprocess',
-    'process functions'    => 'process',
-  );
 
   $hook_defaults = array(
     'variables' => TRUE,
@@ -595,85 +587,83 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         }
       }
 
-      // Allow variable processors for all theming hooks, whether the hook is
+      // Allow variable preprocessors for all theming hooks, whether the hook is
       // implemented as a template or as a function.
-      foreach ($variable_process_phases as $phase_key => $phase) {
-        // Check for existing variable processors. Ensure arrayness.
-        if (!isset($info[$phase_key]) || !is_array($info[$phase_key])) {
-          $info[$phase_key] = array();
-          $prefixes = array();
-          if ($type == 'module') {
-            // Default variable processor prefix.
-            $prefixes[] = 'template';
-            // Add all modules so they can intervene with their own variable
-            // processors. This allows them to provide variable processors even
-            // if they are not the owner of the current hook.
-            $prefixes += module_list();
+      // Check for existing variable preprocessors. Ensure arrayness.
+      if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
+        $info['preprocess functions'] = array();
+        $prefixes = array();
+
+        if ($type == 'module') {
+          // Default variable preprocessor prefix.
+          $prefixes[] = 'template';
+          // Add all modules so they can intervene with their own variable
+          // preprocessors. This allows them to provide variable preprocessors
+          // even if they are not the owner of the current hook.
+          $prefixes += module_list();
+        }
+        elseif ($type == 'theme_engine' || $type == 'base_theme_engine') {
+          // Theme engines get an extra set that come before the normally
+          // named variable preprocessors.
+          $prefixes[] = $name . '_engine';
+          // The theme engine registers on behalf of the theme using the
+          // theme's name.
+          $prefixes[] = $theme;
+        }
+        else {
+          // This applies when the theme manually registers their own variable
+          // preprocessors.
+          $prefixes[] = $name;
+        }
+
+        foreach ($prefixes as $prefix) {
+          // Only use non-hook-specific variable preprocessors for theming hooks
+          // implemented as templates. See theme().
+          if (isset($info['template']) && function_exists($prefix . '_preprocess')) {
+            $info['preprocess functions'][] = $prefix . '_preprocess';
           }
-          elseif ($type == 'theme_engine' || $type == 'base_theme_engine') {
-            // Theme engines get an extra set that come before the normally
-            // named variable processors.
-            $prefixes[] = $name . '_engine';
-            // The theme engine registers on behalf of the theme using the
-            // theme's name.
-            $prefixes[] = $theme;
-          }
-          else {
-            // This applies when the theme manually registers their own variable
-            // processors.
-            $prefixes[] = $name;
-          }
-          foreach ($prefixes as $prefix) {
-            // Only use non-hook-specific variable processors for theming hooks
-            // implemented as templates. See theme().
-            if (isset($info['template']) && function_exists($prefix . '_' . $phase)) {
-              $info[$phase_key][] = $prefix . '_' . $phase;
-            }
-            if (function_exists($prefix . '_' . $phase . '_' . $hook)) {
-              $info[$phase_key][] = $prefix . '_' . $phase . '_' . $hook;
-            }
+          if (function_exists($prefix . '_preprocess_' . $hook)) {
+            $info['preprocess functions'][] = $prefix . '_preprocess_' . $hook;
           }
         }
-        // Check for the override flag and prevent the cached variable
-        // processors from being used. This allows themes or theme engines to
-        // remove variable processors set earlier in the registry build.
-        if (!empty($info['override ' . $phase_key])) {
-          // Flag not needed inside the registry.
-          unset($result[$hook]['override ' . $phase_key]);
-        }
-        elseif (isset($cache[$hook][$phase_key]) && is_array($cache[$hook][$phase_key])) {
-          $info[$phase_key] = array_merge($cache[$hook][$phase_key], $info[$phase_key]);
-        }
-        $result[$hook][$phase_key] = $info[$phase_key];
       }
+      // Check for the override flag and prevent the cached variable
+      // preprocessors from being used. This allows themes or theme engines to
+      // remove variable preprocessors set earlier in the registry build.
+      if (!empty($info['override ' . 'preprocess functions'])) {
+        // Flag not needed inside the registry.
+        unset($result[$hook]['override ' . 'preprocess functions']);
+      }
+      elseif (isset($cache[$hook]['preprocess functions']) && is_array($cache[$hook]['preprocess functions'])) {
+        $info['preprocess functions'] = array_merge($cache[$hook]['preprocess functions'], $info['preprocess functions']);
+      }
+      $result[$hook]['preprocess functions'] = $info['preprocess functions'];
     }
 
     // Merge the newly created theme hooks into the existing cache.
     $cache = $result + $cache;
   }
 
-  // Let themes have variable processors even if they didn't register a
+  // Let themes have variable preprocessors even if they didn't register a
   // template.
   if ($type == 'theme' || $type == 'base_theme') {
     foreach ($cache as $hook => $info) {
       // Check only if not registered by the theme or engine.
       if (empty($result[$hook])) {
-        foreach ($variable_process_phases as $phase_key => $phase) {
-          if (!isset($info[$phase_key])) {
-            $cache[$hook][$phase_key] = array();
-          }
-          // Only use non-hook-specific variable processors for theming hooks
-          // implemented as templates. See theme().
-          if (isset($info['template']) && function_exists($name . '_' . $phase)) {
-            $cache[$hook][$phase_key][] = $name . '_' . $phase;
-          }
-          if (function_exists($name . '_' . $phase . '_' . $hook)) {
-            $cache[$hook][$phase_key][] = $name . '_' . $phase . '_' . $hook;
-            $cache[$hook]['theme path'] = $path;
-          }
-          // Ensure uniqueness.
-          $cache[$hook][$phase_key] = array_unique($cache[$hook][$phase_key]);
+        if (!isset($info['preprocess functions'])) {
+          $cache[$hook]['preprocess functions'] = array();
         }
+        // Only use non-hook-specific variable preprocessors for theming hooks
+        // implemented as templates. See theme().
+        if (isset($info['template']) && function_exists($name . '_preprocess')) {
+          $cache[$hook]['preprocess functions'][] = $name . '_preprocess';
+        }
+        if (function_exists($name . '_preprocess_' . $hook)) {
+          $cache[$hook]['preprocess functions'][] = $name . '_preprocess_' . $hook;
+          $cache[$hook]['theme path'] = $path;
+        }
+        // Ensure uniqueness.
+        $cache[$hook]['preprocess functions'] = array_unique($cache[$hook]['preprocess functions']);
       }
     }
   }
@@ -734,10 +724,8 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
 
   // Optimize the registry to not have empty arrays for functions.
   foreach ($cache as $hook => $info) {
-    foreach (array('preprocess functions', 'process functions') as $phase) {
-      if (empty($info[$phase])) {
-        unset($cache[$hook][$phase]);
-      }
+    if (empty($info['preprocess functions'])) {
+      unset($cache[$hook]['preprocess functions']);
     }
   }
   return $cache;
@@ -946,41 +934,22 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   variables for all theme hooks with template implementations.
  * - THEME_preprocess_HOOK(&$variables): Allows the theme to set necessary
  *   variables specific to the particular theme hook.
- * - template_process(&$variables, $hook): Creates an additional set of default
- *   variables for all theme hooks with template implementations. The variables
- *   created in this function are derived from ones created by
- *   template_preprocess(), but potentially altered by the other preprocess
- *   functions listed above. For example, any preprocess function can add to or
- *   modify the $variables['attributes_array'] variable, and after all of them
- *   have finished executing, template_process() flattens it into a
- *   $variables['attributes'] string for convenient use by templates.
- * - template_process_HOOK(&$variables): Should be implemented by the module
- *   that registers the theme hook, if it needs to perform additional variable
- *   processing after all preprocess functions have finished.
  * - MODULE_process(&$variables, $hook): hook_process() is invoked on all
  *   implementing modules.
  * - MODULE_process_HOOK(&$variables): hook_process_HOOK() is invoked on
  *   on all implementing modules, so that modules that didn't define the theme
  *   hook can alter the variables.
- * - ENGINE_engine_process(&$variables, $hook): Allows the theme engine to
- *   process variables for all theme hooks with template implementations.
- * - ENGINE_engine_process_HOOK(&$variables): Allows the theme engine to process
- *   the variables specific to the theme hook.
- * - THEME_process(&$variables, $hook):  Allows the theme to process the
- *   variables for all theme hooks with template implementations.
- * - THEME_process_HOOK(&$variables):  Allows the theme to process the
- *   variables specific to the theme hook.
  *
  * @subsection sub_preprocess_theme_funcs Preprocessing for Theme Functions
  * If the implementation is a function, only the theme-hook-specific preprocess
- * and process functions (the ones ending in _HOOK) are called from the
- * list above. This is because theme hooks with function implementations
- * need to be fast, and calling the non-theme-hook-specific preprocess and
- * process functions for them would incur a noticeable performance penalty.
+ * functions (the ones ending in _HOOK) are called from the list above. This is
+ * because theme hooks with function implementations need to be fast, and
+ * calling the non-theme-hook-specific preprocess functions for them would incur
+ * a noticeable performance penalty.
  *
  * @subsection sub_alternate_suggestions Suggesting Alternate Hooks
- * There are two special variables that these preprocess and process functions
- * can set: 'theme_hook_suggestion' and 'theme_hook_suggestions'. These will be
+ * There are two special variables that these preprocess functions can set:
+ * 'theme_hook_suggestion' and 'theme_hook_suggestions'. These will be
  * merged together to form a list of 'suggested' alternate theme hooks to use,
  * in reverse order of priority. theme_hook_suggestion will always be a higher
  * priority than items in theme_hook_suggestions. theme() will use the
@@ -989,7 +958,7 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * suggestions are similar to and are used for similar reasons as calling
  * theme() with an array as the $hook parameter (see below). The difference
  * is whether the suggestions are determined by the code that calls theme() or
- * by a preprocess or process function.
+ * by a preprocess function.
  *
  * @param $hook
  *   The name of the theme hook to call. If the name contains a
@@ -1011,11 +980,10 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   convention is not desired or is insufficient.
  * @param $variables
  *   An associative array of variables to merge with defaults from the theme
- *   registry, pass to preprocess and process functions for modification, and
- *   finally, pass to the function or template implementing the theme hook.
- *   Alternatively, this can be a renderable array, in which case, its
- *   properties are mapped to variables expected by the theme hook
- *   implementations.
+ *   registry, pass to preprocess functions for modification, and finally, pass
+ *   to the function or template implementing the theme hook. Alternatively,
+ *   this can be a renderable array, in which case, its properties are mapped
+ *   to variables expected by the theme hook implementations.
  *
  * @return
  *   An HTML string representing the themed output.
@@ -1024,7 +992,6 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @see themeable
  * @see hook_theme()
  * @see template_preprocess()
- * @see template_process()
  */
 function theme($hook, $variables = array()) {
   // If called before all modules are loaded, we do not necessarily have a full
@@ -1071,7 +1038,6 @@ function theme($hook, $variables = array()) {
   $info = $hooks[$hook] + array(
     'includes' => array(),
     'preprocess functions' => array(),
-    'process functions' => array(),
   );
 
   global $theme_path;
@@ -1079,7 +1045,7 @@ function theme($hook, $variables = array()) {
   // point path_to_theme() to the currently used theme path:
   $theme_path = $info['theme path'];
 
-  // Include a file if the theme function or variable processor is held
+  // Include a file if the theme function or variable preprocessor is held
   // elsewhere.
   foreach ($info['includes'] as $include_file) {
     include_once BACKDROP_ROOT . '/' . $include_file;
@@ -1110,20 +1076,19 @@ function theme($hook, $variables = array()) {
     $variables += array($info['render element'] => array());
   }
 
-  // Invoke the variable processors, if any. The processors may specify
+  // Invoke the variable preprocessors, if any. The preprocessors may specify
   // alternate suggestions for which hook's template/function to use. If the
-  // hook is a suggestion of a base hook, invoke the variable processors of
+  // hook is a suggestion of a base hook, invoke the variable preprocessors of
   // the base hook, but retain the suggestion as a high priority suggestion to
-  // be used unless overridden by a variable processor function.
+  // be used unless overridden by a variable preprocessor function.
   if (isset($info['base hook'])) {
     $base_hook = $info['base hook'];
     $base_hook_info = isset($hooks[$base_hook]) ? $hooks[$base_hook] : array();
     $base_hook_info += array(
       'includes' => array(),
       'preprocess functions' => array(),
-      'process functions' => array(),
     );
-    // Include files required by the base hook, since its variable processors
+    // Include files required by the base hook, since its variable preprocessors
     // might reside there.
     foreach ($base_hook_info['includes'] as $include_file) {
       include_once BACKDROP_ROOT . '/' . $include_file;
@@ -1131,27 +1096,22 @@ function theme($hook, $variables = array()) {
     $variables['theme_hook_suggestion'] = $hook;
     $hook = $base_hook;
 
-    // Combine the process functions to call the base hook and child functions.
+    // Combine preprocess functions to call the base hook and child functions.
     $info['preprocess functions'] = array_unique(array_merge($base_hook_info['preprocess functions'], $info['preprocess functions']));
-    $info['process functions'] = array_unique(array_merge($base_hook_info['process functions'], $info['process functions']));
   }
-  if (isset($info['preprocess functions']) || isset($info['process functions'])) {
+  if (isset($info['preprocess functions'])) {
     $variables['theme_hook_suggestions'] = array();
-    foreach (array('preprocess functions', 'process functions') as $phase) {
-      if (!empty($info[$phase])) {
-        foreach ($info[$phase] as $processor_function) {
-          if (function_exists($processor_function)) {
-            // We don't want a poorly behaved process function changing $hook.
-            $hook_clone = $hook;
-            $processor_function($variables, $hook_clone);
-          }
-        }
+    foreach ($info['preprocess functions'] as $processor_function) {
+      if (function_exists($processor_function)) {
+        // We don't want a poorly behaved preprocess function changing $hook.
+        $hook_clone = $hook;
+        $processor_function($variables, $hook_clone);
       }
     }
-    // If the preprocess/process functions specified hook suggestions, and the
+    // If the preprocess functions specified hook suggestions, and the
     // suggestion exists in the theme registry, use it instead of the hook that
-    // theme() was called with. This allows the preprocess/process step to
-    // route to a more specific theme hook. For example, a function may call
+    // theme() was called with. This allows the preprocess step to route to a
+    // more specific theme hook. For example, a function may call
     // theme('node', ...), but a preprocess function can add 'node__article' as
     // a suggestion, enabling a theme to have an alternate template file for
     // article nodes. Suggestions are checked in the following order:
@@ -2434,16 +2394,15 @@ function _theme_table_cell($cell, $header = FALSE) {
 }
 
 /**
- * Adds a default set of helper variables for variable processors and templates.
+ * Adds a default set of variables for variable preprocessors and templates.
  *
  * This function is called for theme hooks implemented as templates only, not
  * for theme hooks implemented as functions. This preprocess function is the
- * first in the sequence of preprocessing and processing functions that is
- * called when preparing variables for a template. See theme() for more details
- * about the full sequence.
+ * first in the sequence of preprocessing functions that is called when
+ * preparing variables for a template. See theme() for more details about the
+ * full sequence.
  *
  * @see theme()
- * @see template_process()
  */
 function template_preprocess(&$variables, $hook) {
   global $user;
@@ -2460,7 +2419,10 @@ function template_preprocess(&$variables, $hook) {
   $variables['directory'] = path_to_theme();
 
   // Initialize html class attribute for the current hook.
-  $variables['classes_array'] = array(backdrop_html_class($hook));
+  $variables['classes'] = array(backdrop_html_class($hook));
+
+  // Initialize additional attribute placeholder for the current hook.
+  $variables['attributes'] = array();
 
   // Merge in variables that don't depend on hook and don't change during a
   // single page request.
@@ -2487,9 +2449,8 @@ function _template_preprocess_default_variables() {
 
   // Variables that don't depend on a database connection.
   $variables = array(
-    'attributes_array' => array(),
-    'title_attributes_array' => array(),
-    'content_attributes_array' => array(),
+    'attributes' => array(),
+    'content_attributes' => array(),
     'title_prefix' => array(),
     'title_suffix' => array(),
     'user' => $user,
@@ -2521,34 +2482,6 @@ function _template_preprocess_default_variables() {
 }
 
 /**
- * Adds helper variables derived from variables defined during preprocessing.
- *
- * When preparing variables for a theme hook implementation, all 'preprocess'
- * functions run first, then all 'process' functions (see theme() for details
- * about the full sequence).
- *
- * This function serializes array variables manipulated during the preprocessing
- * phase into strings for convenient use by templates. As with
- * template_preprocess(), this function does not get called for theme hooks
- * implemented as functions.
- *
- * @see theme()
- * @see template_preprocess()
- */
-function template_process(&$variables, $hook) {
-  // Flatten out classes.
-  $variables['classes'] = implode(' ', $variables['classes_array']);
-
-  // Flatten out attributes, title_attributes, and content_attributes.
-  // Because this function can be called very often, and often with empty
-  // attributes, optimize performance by only calling backdrop_attributes() if
-  // necessary.
-  $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
-  $variables['title_attributes'] = $variables['title_attributes_array'] ? backdrop_attributes($variables['title_attributes_array']) : '';
-  $variables['content_attributes'] = $variables['content_attributes_array'] ? backdrop_attributes($variables['content_attributes_array']) : '';
-}
-
-/**
  * Preprocess variables for header.tpl.php
  */
 function template_preprocess_header(&$variables) {
@@ -2566,26 +2499,26 @@ function template_preprocess_page(&$variables) {
   // This allows advanced theming based on context (home page, node of certain type, etc.).
   // Add a class that tells us whether we're on the front page or not.
   if ($variables['is_front']) {
-    $variables['classes_array'][] = 'front';
+    $variables['classes'][] = 'front';
   }
 
   // Add a class that tells us whether the page is viewed by an authenticated user or not.
   if ($variables['logged_in']) {
-    $variables['classes_array'][] = 'logged-in';
+    $variables['classes'][] = 'logged-in';
   }
 
   // If on an individual node page, add the node type to body classes.
   if ($node = menu_get_object()) {
-    $variables['classes_array'][] = backdrop_html_class('node-type-' . $node->type);
+    $variables['classes'][] = backdrop_html_class('node-type-' . $node->type);
   }
 
   // Initializes attributes which are specific to the html and body elements.
-  $variables['html_attributes_array'] = array();
-  $variables['body_attributes_array'] = array();
+  $variables['html_attributes'] = array();
+  $variables['body_attributes'] = array();
 
   // HTML element attributes.
-  $variables['html_attributes_array']['lang'] = $GLOBALS['language_interface']->langcode;
-  $variables['html_attributes_array']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
 
   // Add favicon.
   $favicon = backdrop_get_favicon();
@@ -2610,34 +2543,10 @@ function template_preprocess_page(&$variables) {
 }
 
 /**
- * Process variables for html.tpl.php
- *
- * Perform final addition and modification of variables before passing into
- * the template. To customize these variables, call backdrop_render() on elements
- * in $variables['page'] during THEME_preprocess_page().
- *
- * @see template_preprocess_page()
- * @see page.tpl.php
- */
-function template_process_page(&$variables) {
-  // Flatten out html_attributes and body_attributes.
-  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
-  $variables['body_attributes'] = backdrop_attributes($variables['body_attributes_array']);
-
-  // Add footer JS to the page bottom.
-  $variables['page_bottom'] .= backdrop_get_js('footer');
-
-  $variables['head']    = backdrop_get_html_head();
-  $variables['css']     = backdrop_add_css();
-  $variables['styles']  = backdrop_get_css();
-  $variables['scripts'] = backdrop_get_js();
-}
-
-/**
  * Generate an array of suggestions from path arguments.
  *
  * This is typically called for adding to the 'theme_hook_suggestions' or
- * 'classes_array' variables from within preprocess functions, when wanting to
+ * 'classes' variables from within preprocess functions, when wanting to
  * base the additional suggestions on the path of the current page.
  *
  * @param $args
@@ -2653,7 +2562,7 @@ function template_process_page(&$variables) {
  * @return
  *   An array of suggestions, suitable for adding to
  *   $variables['theme_hook_suggestions'] within a preprocess function or to
- *   $variables['classes_array'] if the suggestions represent extra CSS classes.
+ *   $variables['classes'] if the suggestions represent extra CSS classes.
  */
 function theme_get_suggestions($args, $base, $delimiter = '__') {
 
@@ -2703,7 +2612,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
 }
 
 /**
- * Process variables for maintenance-page.tpl.php.
+ * Prepares variables for maintenance-page templates.
  *
  * The variables array generated here is a mirror of
  * template_preprocess_page(). This preprocessor will run its course when
@@ -2789,19 +2698,20 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['title']             = backdrop_get_title();
 
   // Compile a list of classes that are going to be applied to the body element.
-  $variables['classes_array'][] = 'in-maintenance';
+  $variables['classes'][] = 'in-maintenance';
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
-    $variables['classes_array'][] = 'db-offline';
+    $variables['classes'][] = 'db-offline';
   }
 
   if ($variables['layout'] == 'both') {
-    $variables['classes_array'][] = 'two-sidebars';
+    $variables['classes'][] = 'two-sidebars';
   }
   elseif ($variables['layout'] == 'none') {
-    $variables['classes_array'][] = 'no-sidebars';
+    $variables['classes'][] = 'no-sidebars';
   }
   else {
-    $variables['classes_array'][] = 'one-sidebar sidebar-' . $variables['layout'];
+    $variables['classes'][] = 'one-sidebar';
+    $variables['classes'][] = 'sidebar-' . $variables['layout'];
   }
 
   // Dead databases will show error messages so supplying this template will
@@ -2809,20 +2719,4 @@ function template_preprocess_maintenance_page(&$variables) {
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
     $variables['theme_hook_suggestion'] = 'maintenance_page__offline';
   }
-}
-
-/**
- * Theme process function for theme_maintenance_field().
- *
- * The variables array generated here is a mirror of template_process_html().
- * This processor will run its course when theme_maintenance_page() is invoked.
- *
- * @see maintenance-page.tpl.php
- * @see template_process_html()
- */
-function template_process_maintenance_page(&$variables) {
-  $variables['head']    = backdrop_get_html_head();
-  $variables['css']     = backdrop_add_css();
-  $variables['styles']  = backdrop_get_css();
-  $variables['scripts'] = backdrop_get_js();
 }

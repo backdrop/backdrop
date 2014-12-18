@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Process layout variables before output.
+ * Prepares variables for layout templates.
  */
-function seven_process_layout(&$variables) {
+function seven_preprocess_layout(&$variables) {
   // Move the page title and tabs into the "header" area, to fit with Seven's
   // markup requirements.
   if ($variables['title']) {
@@ -19,6 +19,8 @@ function seven_process_layout(&$variables) {
 }
 
 /**
+ * Overrides theme_node_add_list().
+ *
  * Display the list of available node types for node creation.
  */
 function seven_node_add_list($variables) {
@@ -64,7 +66,7 @@ function seven_admin_block_content($variables) {
 }
 
 /**
- * Override of theme_tablesort_indicator().
+ * Overrides theme_tablesort_indicator().
  *
  * Use our own image versions, so they show up as black and not gray on gray.
  */

@@ -1258,13 +1258,10 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
     }
     // Generate a cache ID (cid) specific for this page.
     $cid = 'links:' . $menu_name . ':page:' . $item['href'] . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
-    // If we are asked for the active trail only, and $menu_name has not been
-    // built and cached for this page yet, then this likely means that it
-    // won't be built anymore, as this function is invoked from
-    // template_process_page(). So in order to not build a giant menu tree
-    // that needs to be checked for access on all levels, we simply check
-    // whether we have the menu already in cache, or otherwise, build a minimum
-    // tree containing the breadcrumb/active trail only.
+    // In order to not build a giant menu tree that needs to be checked for
+    // access on all levels, we simply check whether we have the menu already
+    // in cache, or otherwise, build a minimum tree containing the
+    // breadcrumb/active trail only.
     // @see menu_set_active_trail()
     if (!isset($tree[$cid]) && $only_active_trail) {
       $cid .= ':trail';

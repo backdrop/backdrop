@@ -30,6 +30,6 @@
  * @ingroup themeable
  */
 ?>
-<article class="profile"<?php print $attributes; ?>>
+<article class="profile"<?php print backdrop_attributes($attributes); ?>>
   <?php print render($user_profile); ?>
 </article>

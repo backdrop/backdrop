@@ -124,36 +124,15 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Preprocess variables for layout.tpl.php files.
+ * Prepares variables for layout templates.
  */
 function template_preprocess_layout(&$variables) {
+  $settings = $variables['layout']->settings;
   $variables += array(
     'action_links' => NULL,
     'tabs' => NULL,
     'messages' => NULL,
     'title' => NULL,
-  );
-
-  if (!$variables['admin']) {
-    $variables['action_links'] = menu_local_actions();
-    $variables['tabs'] =  menu_local_tabs();
-  }
-}
-
-/**
- * Process variables for layout.tpl.php files.
- *
- * Perform final addition of variables before passing them into the template.
- * To customize these variables, simply set them in an earlier step.
- *
- * @see template_preprocess_layout()
- * @see page.tpl.php
- */
-function template_process_layout(&$variables) {
-  $settings = $variables['layout']->settings;
-  $variables += array(
-    'title' => NULL,
-    'messages' => NULL,
   );
 
   if (!$variables['admin']) {
@@ -179,17 +158,22 @@ function template_process_layout(&$variables) {
   else {
     $variables['title'] = t('Page title');
   }
+
+  if (!$variables['admin']) {
+    $variables['action_links'] = menu_local_actions();
+    $variables['tabs'] =  menu_local_tabs();
+  }
 }
 
 /**
- * Preprocess the variables for the block.tpl.php file.
+ * Prepares variables for block templates.
  */
 function template_preprocess_block(&$variables) {
   $content = $variables['content'];
   $block = $variables['block'];
   $style = $block->style;
 
-  $variables['classes_array'] = array();
+  $variables['classes'] = array();
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
@@ -224,18 +208,18 @@ function template_preprocess_block(&$variables) {
           'library' => array(array('contextual', 'contextual-links')),
         ),
       );
-      $variables['classes_array'][] = 'contextual-links-region';
+      $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
   }
 
   // Basic classes.
-  $variables['classes_array'][] = 'block';
-  $variables['classes_array'][] = backdrop_html_class('block-' . $block->module . '-' . $block->delta);
+  $variables['classes'][] = 'block';
+  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . $block->delta);
 
   // Add custom classes if sent in.
   if (!empty($style->settings['classes'])) {
-    $variables['classes_array'] = array_merge($variables['classes_array'], array_filter(explode(' ', $style->settings['classes'])));
+    $variables['classes'] = array_merge($variables['classes'], array_filter(explode(' ', $style->settings['classes'])));
   }
 
   // Set up some placeholders for constructing template file names.
@@ -250,7 +234,7 @@ function template_preprocess_block(&$variables) {
 }
 
 /**
- * Preprocess the variables for the block-dynamic.tpl.php file.
+ * Prepares variables for block-dynamic templates.
  */
 function template_preprocess_block_dynamic(&$variables) {
   // Re-use all the preprocessing provided by the default block template.
@@ -261,17 +245,17 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Classes for the wrapper set in template_preprocess_block().
   $variables['wrapper_tag'] = $style->settings['wrapper_tag'];
-  $variables['attributes_array'] = array();
+  $variables['attributes'] = array();
 
   // Title tag and classes.
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes_array'] = array(
+  $variables['title_attributes'] = array(
     'class' => array_filter(explode(' ', $style->settings['title_classes'])),
   );
 
   // Content tag and classes.
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes_array'] = array(
+  $variables['content_attributes'] = array(
     'class' => array_filter(explode(' ', $style->settings['content_classes']))
   );
 }

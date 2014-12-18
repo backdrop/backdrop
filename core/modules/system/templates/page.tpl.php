@@ -31,25 +31,25 @@
  * - $page_bottom: Final closing markup from any modules that have altered the
  *   page. This variable should always be output last, after all other dynamic
  *   content.
- * - $classes String of classes that can be used to style contextually through
+ * - $classes Array of classes that can be used to style contextually through
  *   CSS.
  *
  * @see template_preprocess()
  * @see template_preprocess_html()
- * @see template_process()
  *
  * @ingroup themeable
  */
 ?><!DOCTYPE html>
-<html<?php print $html_attributes; ?>>
+<html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
-    <?php print $head; ?>
+    <?php print backdrop_get_html_head(); ?>
     <title><?php print $head_title; ?></title>
-    <?php print $styles; ?>
-    <?php print $scripts; ?>
+    <?php print backdrop_get_css(); ?>
+    <?php print backdrop_get_js(); ?>
   </head>
-  <body class="<?php print $classes; ?>" <?php print $body_attributes;?>>
+  <body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($body_attributes);?>>
     <?php print $page; ?>
     <?php print $page_bottom; ?>
+    <?php print backdrop_get_js('footer'); ?>
   </body>
 </html>
