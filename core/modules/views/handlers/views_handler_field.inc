@@ -1244,7 +1244,12 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     if (!empty($alter['make_link']) && !empty($alter['path'])) {
       if (!isset($tokens)) {
-       $tokens = $this->get_render_tokens($alter);
+        if (strpos($value, '[') !== FALSE) {
+          $tokens = $this->get_render_tokens($alter);
+        }
+        else {
+          $tokens = array();
+        }
       }
       $value = $this->render_as_link($alter, $value, $tokens);
     }

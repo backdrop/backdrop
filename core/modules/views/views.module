@@ -1592,15 +1592,6 @@ function views_form_views_form($form, &$form_state, $view, $output) {
       $method_form_element_row_id_exists = TRUE;
     }
 
-    $form['actions'] = array(
-      '#type' => 'actions',
-      '#weight' => 100,
-    );
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    );
-
     // If the field provides a views form, allow it to modify the $form array.
     $has_form = FALSE;
     if (property_exists($field, 'views_form_callback')) {

@@ -3441,7 +3441,7 @@ function backdrop_autoload($class) {
  *
  * Example:
  * @code
- * function actions_do(...) {
+ * function actions_execute(...) {
  *   // $stack tracks the number of recursive calls.
  *   static $stack;
  *   $stack++;

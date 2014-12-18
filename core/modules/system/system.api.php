@@ -3254,18 +3254,13 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
 /**
  * Declares information about actions.
  *
- * Any module can define actions, and then call actions_do() to make those
+ * Any module can define actions, and then call actions_execute() to make those
  * actions happen in response to events.
  *
- * An action consists of two or three parts:
+ * An action consists of two parts:
  * - an action definition (returned by this hook)
  * - a function which performs the action (which by convention is named
  *   MODULE_description-of-function_action)
- * - an optional form definition function that defines a configuration form
- *   (which has the name of the action function with '_form' appended to it.)
- *
- * The action function takes two to four arguments, which come from the input
- * arguments to actions_do().
  *
  * @return
  *   An associative array of action descriptions. The keys of the array
