@@ -2,14 +2,12 @@ Description
 -----------
 
 Backdrop is a fully-featured content management system that allows non-technical
-users to manage a wide-variety of content. It can be used to create blogs,
-forums, image galleries, social networks, intranets, and more.
+users to manage a wide-variety of content. It can be used to create all kinds of
+websites including blogs, image galleries, social networks, intranets, and more.
 
 Backdrop aims to provide:
-
-- A full-featured CMS that puts editorial and end-users first.
-- A system that can be utilized out-of-the-box.
-- Code that can be learned and easily developed.
+- A CMS that can be used out-of-the-box.
+- Code that can be learned quickly.
 - Extensible APIs.
 
 Requirements
@@ -22,37 +20,39 @@ Installation
 
 1. Create a new database, username, and password for Backdrop to use in MySQL.
 
-2. Point your browser at the URL of your Backdrop installation. On Apache web
-   servers, you will be directed to the install screen. If you're not
-   redirected, visit the install URL. If Backdrop was installed at
+2. Point your browser at the URL of your Backdrop installation. You will be 
+   redirected to the install screen. If you're not redirected, visit the install
+   URL. If Backdrop was installed at
    http://example.com/backdrop, the install URL would be
    http://example.com/backdrop/core/install.php.
 
-3. Follow the instructions provided in the installer.
+3. Follow the instructions provided by the installer.
 
 Bug Reports and Feature Requests
 --------------------------------
-Please use this issue tracker for reporting all bugs and features:
-https://github.com/backdrop/backdrop-issues/issues. We use a separate issue
-tracker that is not under the main repository because of Github restrictions on
-the use of labels and issue assignment
+Please use the Github
+[issue tracker](https://github.com/backdrop/backdrop-issues/issues) for
+reporting all bugs and features. We use a separate issue tracker that is not
+part of the main Backdrop code repository because of Github's restrictions on
+the use of labels and issue management.
 
 Developers
 ----------
 Backdrop is a fork of Drupal. It preserves the legacy audience of developers who
-value ease of use and ease of learning over architectural flexibility. You can
-join Backdrop's developer community by forking Backdrop from
-https://github.com/backdrop/backdrop.
+value ease of use and speed of learning over architectural flexibility. You can
+join Backdrop's developer community by
+[forking Backdrop](https://github.com/backdrop/backdrop).
 
-If submitting a pull request, please open an issue using the
+When submitting a pull request, please make sure there is an open issue in the
 [issue tracker](https://github.com/backdrop/backdrop-issues/issues)
-first and then reference it in the title of the pull request.
+and reference it in the description on the pull request.
 
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
 
 Documentation
 -------------
-Please see the the [Backdrop Handbook](http://backdropcms.org/) on the main Backdrop CMS website.
+Please see the the [Backdrop Handbook](http://backdropcms.org/handbook) on the main
+Backdrop CMS website.
 
 License
 -------
@@ -63,7 +63,7 @@ later version of the GPL.
 
 All Backdrop code is Copyright 2001 - 2014 by the original authors.
 
-Backdrop includes works under other copyright notices and distributed
-according to the terms of the GNU General Public License or a compatible
-license. Individual works may have specific copyright information noted within
-their their source code files or directories.
+Backdrop also includes works under different copyright notices that are
+distributed according to the terms of the GNU General Public License or a
+compatible license. These individual works may have specific copyright
+information noted within their source code files or directories.
