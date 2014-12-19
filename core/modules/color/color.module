@@ -109,7 +109,7 @@ function color_get_palette($theme, $default = FALSE) {
   $palette = $info['schemes']['default']['colors'];
 
   // Load config.
-  if (!$default && ($theme_palette = theme_get_setting('color.palette'))) {
+  if (!$default && ($theme_palette = theme_get_setting('color.palette', $theme))) {
     $palette = $theme_palette;
   }
   return $palette;
@@ -140,7 +140,7 @@ function color_scheme_form($complete_form, &$form_state, $theme) {
 
   // See if we're using a predefined scheme.
   // Note: we use the original theme when the default scheme is chosen.
-  $current_scheme = theme_get_setting('color.palette');
+  $current_scheme = theme_get_setting('color.palette', $theme);
   foreach ($schemes as $key => $scheme) {
     if ($current_scheme == $scheme) {
       $scheme_name = $key;
