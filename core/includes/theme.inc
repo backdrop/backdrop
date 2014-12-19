@@ -1396,21 +1396,21 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  *   The value of the requested setting, NULL if the setting does not exist.
  */
 function theme_get_setting($setting_name, $theme = NULL) {
-  $config = &backdrop_static(__FUNCTION__, array());
+  $configs = &backdrop_static(__FUNCTION__, array());
 
   // If no key is given, use the current theme if we can determine it.
   if (!isset($theme)) {
     $theme = !empty($GLOBALS['theme_key']) ? $GLOBALS['theme_key'] : '';
   }
 
-  if (empty($config)) {
-    $config = config($theme . '.settings');
-    $config->load();
+  if (empty($configs[$theme])) {
+    $configs[$theme] = config($theme . '.settings');
+    $configs[$theme]->load();
   }
 
   // If the setting is not found in config, load the default from the theme's
   // info file.
-  $value = $config->get($setting_name);
+  $value = $configs[$theme]->get($setting_name);
   if (is_null($value)) {
     $themes = list_themes();
     $theme_info = $themes[$theme];
