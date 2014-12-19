@@ -586,9 +586,9 @@ function system_modules($form, $form_state = array()) {
     if ($module->status && user_access('administer permissions') && in_array($filename, module_implements('permission'))) {
       $extra['links']['permissions'] = array(
         'title' => t('Permissions'),
-        'href' => 'admin/people/permissions',
+        'href' => 'admin/config/people/permissions',
         'attributes' => array('class' => array('module-link', 'module-link-permissions'), 'title' => t('Configure permissions')),
-        'options' => array('fragment' => 'module-' . $filename),
+        'fragment' => 'module-' . $filename,
       );
     }
 
