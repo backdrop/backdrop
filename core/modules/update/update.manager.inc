@@ -60,7 +60,17 @@
  * @ingroup forms
  */
 function update_manager_update_form($form, $form_state = array(), $context) {
-  backdrop_set_title('Update modules');
+  switch ($context) {
+    case 'module':
+      backdrop_set_title('Update modules');
+      break;
+    case 'theme':
+      backdrop_set_title('Update themes');
+      break;
+    case 'report':
+      backdrop_set_title('Update modules & themes');
+      break;
+  }
 
   if (!_update_manager_check_backends($form, 'update')) {
     return $form;
