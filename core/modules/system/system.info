@@ -1,6 +1,6 @@
 name = System
 description = Handles general site configuration for administrators.
-package = Core
+package = System
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE

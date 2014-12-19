@@ -251,7 +251,7 @@ function update_get_project_name($file) {
   if (isset($file->info['project'])) {
     $project_name = $file->info['project'];
   }
-  elseif (isset($file->info['package']) && (strpos($file->info['package'], 'Core') === 0)) {
+  elseif (isset($file->info['package']) && (strpos($file->info['package'], 'System') === 0)) {
     $project_name = 'backdrop';
   }
   return $project_name;

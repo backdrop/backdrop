@@ -137,10 +137,10 @@ class EnableDisableTestCase extends ModuleTestCase {
    */
   function testEnableDisable() {
     // Try to enable, disable and uninstall all core modules, unless they are
-    // hidden or required.
+    // hidden or required, or testing-only modules.
     $modules = system_rebuild_module_data();
     foreach ($modules as $name => $module) {
-      if ($module->info['package'] != 'Core' || !empty($module->info['hidden']) || !empty($module->info['required'])) {
+      if ($module->info['package'] == 'Testing' || !empty($module->info['hidden']) || !empty($module->info['required'])) {
         unset($modules[$name]);
       }
     }
@@ -187,7 +187,7 @@ class EnableDisableTestCase extends ModuleTestCase {
 
         // Install and enable the module.
         $edit = array();
-        $edit['modules[Core][' . $name . '][enable]'] = $name;
+        $edit['modules[' . $module->info['package'] . '][' . $name . '][enable]'] = $name;
         $this->backdropPost('admin/modules', $edit, t('Save configuration'));
         // Handle the case where modules were installed along with this one and
         // where we therefore hit a confirmation screen.
@@ -215,7 +215,7 @@ class EnableDisableTestCase extends ModuleTestCase {
         // for the dblog module, because that is needed for the test; we'll go
         // back and do that one at the end also.
         if ($name != 'dblog') {
-          $this->assertSuccessfulDisableAndUninstall($name);
+          $this->assertSuccessfulDisableAndUninstall($module);
         }
       }
     }
@@ -228,10 +228,10 @@ class EnableDisableTestCase extends ModuleTestCase {
         // If the module can't be disabled due to dependencies, skip it and try
         // again the next time. Otherwise, try to disable it.
         $this->backdropGet('admin/modules');
-        $disabled_checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[Core][' . $name . '][enable]"]');
+        $disabled_checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[' . $modules[$name]->info['package'] . '][' . $name . '][enable]"]');
         if (empty($disabled_checkbox) && $name != 'dblog') {
           unset($automatically_enabled[$name]);
-          $this->assertSuccessfulDisableAndUninstall($name);
+          $this->assertSuccessfulDisableAndUninstall($modules[$name]);
         }
       }
       $final_count = count($automatically_enabled);
@@ -246,7 +246,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     // Disable and uninstall the dblog module last, since we needed it for
     // assertions in all the above tests.
     if (isset($modules['dblog'])) {
-      $this->assertSuccessfulDisableAndUninstall('dblog');
+      $this->assertSuccessfulDisableAndUninstall($modules['dblog']);
     }
 
     // Now that all modules have been tested, go back and try to enable them
@@ -257,7 +257,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     //   any errors.
     $edit = array();
     foreach (array_keys($modules) as $name) {
-      $edit['modules[Core][' . $name . '][enable]'] = $name;
+      $edit['modules[' . $modules[$name]->info['package'] . '][' . $name . '][enable]'] = $name;
     }
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
@@ -267,43 +267,44 @@ class EnableDisableTestCase extends ModuleTestCase {
    * Disables and uninstalls a module and asserts that it was done correctly.
    *
    * @param $module
-   *   The name of the module to disable and uninstall.
+   *   The complete object representing the module to disable and uninstall, as
+   *   retrieved with system_rebuild_module_data().
    */
   function assertSuccessfulDisableAndUninstall($module) {
     // Disable the module.
     $edit = array();
-    $edit['modules[Core][' . $module . '][enable]'] = FALSE;
+    $edit['modules[' . $module->info['package'] . '][' . $module->name . '][enable]'] = FALSE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
-    $this->assertModules(array($module), FALSE);
+    $this->assertModules(array($module->name), FALSE);
 
     // Check that the appropriate hook was fired and the appropriate log
     // message appears.
-    $this->assertText(t('hook_modules_disabled fired for @module', array('@module' => $module)));
-    $this->assertLogMessage('system', "%module module disabled.", array('%module' => $module), WATCHDOG_INFO);
+    $this->assertText(t('hook_modules_disabled fired for @module', array('@module' => $module->name)));
+    $this->assertLogMessage('system', "%module module disabled.", array('%module' => $module->name), WATCHDOG_INFO);
 
     //  Check that the module's database tables still exist.
-    $this->assertModuleTablesExist($module);
+    $this->assertModuleTablesExist($module->name);
 
     // Uninstall the module.
     $edit = array();
-    $edit['uninstall[' . $module . ']'] = $module;
+    $edit['uninstall[' . $module->name . ']'] = $module->name;
     $this->backdropPost('admin/modules/uninstall', $edit, t('Uninstall'));
     $this->backdropPost(NULL, NULL, t('Uninstall'));
     $this->assertText(t('The selected modules have been uninstalled.'), 'Modules status has been updated.');
-    $this->assertModules(array($module), FALSE);
+    $this->assertModules(array($module->name), FALSE);
 
     // Check that the appropriate hook was fired and the appropriate log
     // message appears. (But don't check for the log message if the dblog
     // module was just uninstalled, since the {watchdog} table won't be there
     // anymore.)
-    $this->assertText(t('hook_modules_uninstalled fired for @module', array('@module' => $module)));
-    if ($module != 'dblog') {
-      $this->assertLogMessage('system', "%module module uninstalled.", array('%module' => $module), WATCHDOG_INFO);
+    $this->assertText(t('hook_modules_uninstalled fired for @module', array('@module' => $module->name)));
+    if ($module->name != 'dblog') {
+      $this->assertLogMessage('system', "%module module uninstalled.", array('%module' => $module->name), WATCHDOG_INFO);
     }
 
     // Check that the module's database tables no longer exist.
-    $this->assertModuleTablesDoNotExist($module);
+    $this->assertModuleTablesDoNotExist($module->name);
   }
 }
 
@@ -338,7 +339,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   function testEnableWithoutDependency() {
     // Attempt to enable content translation without locale enabled.
     $edit = array();
-    $edit['modules[Core][translation][enable]'] = 'translation';
+    $edit['modules[Translation][translation][enable]'] = 'translation';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('Some required modules must be enabled'), 'Dependency required.');
 
@@ -471,18 +472,18 @@ class ModuleDependencyTestCase extends ModuleTestCase {
    */
   function testUninstallDependents() {
     // Enable both language and locale modules.
-    $edit = array('modules[Core][language][enable]' => 'language');
+    $edit = array('modules[Translation][language][enable]' => 'language');
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('language'), TRUE);
-    $edit = array('modules[Core][locale][enable]' => 'locale');
+    $edit = array('modules[Translation][locale][enable]' => 'locale');
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('locale'), TRUE);
 
     // Disable locale and language. Both should now be installed but disabled.
-    $edit = array('modules[Core][locale][enable]' => FALSE);
+    $edit = array('modules[Translation][locale][enable]' => FALSE);
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('locale'), FALSE);
-    $edit = array('modules[Core][language][enable]' => FALSE);
+    $edit = array('modules[Translation][language][enable]' => FALSE);
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('language'), FALSE);
 

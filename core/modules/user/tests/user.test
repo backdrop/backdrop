@@ -1190,7 +1190,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     // Enable book module and ensure the 'administer book outlines' permission
     // is assigned by default.
     $edit = array();
-    $edit['modules[Core][book][enable]'] = TRUE;
+    $edit['modules[System][book][enable]'] = TRUE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     backdrop_static_reset('user_roles');
     $this->assertTrue(user_access('administer book outlines', $this->admin_user), 'The permission was automatically assigned to the administrator role');

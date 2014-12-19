@@ -1,5 +1,5 @@
 name = Database Logging
 description = Logs and records system events to the database.
-package = Core
+package = Development
 version = BACKDROP_VERSION
 backdrop = 1.x
