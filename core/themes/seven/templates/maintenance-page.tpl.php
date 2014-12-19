@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?php print $language->langcode ?>" dir="<?php print $language->dir ?>">
+<html<?php print backdrop_attributes($html_attributes); ?>>
   <head>
     <?php print backdrop_get_html_head(); ?>
     <title><?php print $head_title; ?></title>

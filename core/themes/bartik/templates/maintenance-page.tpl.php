@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Implementation to display a single Backdrop page while offline.
@@ -12,14 +11,14 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="<?php print $language->langcode; ?>" dir="<?php print $language->dir; ?>">
+<html<?php print backdrop_attributes($html_attributes); ?>>
 <head>
   <?php print backdrop_get_html_head(); ?>
   <title><?php print $head_title; ?></title>
   <?php print backdrop_get_css(); ?>
   <?php print backdrop_get_js(); ?>
 </head>
-<body class="<?php print implode(' ', $classes); ?>" <?php print backdrop_attributes($attributes); ?>>
+<body class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
 
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
