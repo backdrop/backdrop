@@ -588,7 +588,7 @@ function system_modules($form, $form_state = array()) {
         'title' => t('Permissions'),
         'href' => 'admin/config/people/permissions',
         'attributes' => array('class' => array('module-link', 'module-link-permissions'), 'title' => t('Configure permissions')),
-        'options' => array('fragment' => 'module-' . $filename),
+        'fragment' => 'module-' . $filename,
       );
     }
 
