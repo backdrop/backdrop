@@ -87,10 +87,6 @@ function node_theme() {
       'variables' => array('content' => NULL),
       'file' => 'node.pages.inc',
     ),
-    'node_preview' => array(
-      'variables' => array('node' => NULL),
-      'file' => 'node.pages.inc',
-    ),
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
       'file' => 'content_types.inc',
@@ -1252,9 +1248,6 @@ function template_preprocess_node(&$variables) {
   }
   if ($variables['view_mode']) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
-  }
-  if (isset($variables['preview'])) {
-    $variables['classes'][] = 'preview';
   }
 
   // Clean up name so there are no underscores.

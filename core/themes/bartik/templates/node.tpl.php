@@ -28,7 +28,6 @@
  *     "Article" it would result in "node-article". Note that the machine
  *     name will often be in a short form of the human readable label.
  *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
- *   - preview: Nodes in preview mode.
  *   The following are controlled through the node publishing options.
  *   - promoted: Nodes promoted to the front page.
  *   - sticky: Nodes ordered above other non-sticky nodes in teaser

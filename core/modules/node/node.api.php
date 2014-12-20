@@ -321,7 +321,7 @@ function hook_node_access_records(Node $node) {
  *
  * The preferred use of this hook is in a module that bridges multiple node
  * access modules with a configurable behavior, as shown in the example with the
- * 'is_preview' field.
+ * 'sticky' field.
  *
  * @see hook_node_access_records()
  * @see hook_node_grants()
@@ -329,11 +329,11 @@ function hook_node_access_records(Node $node) {
  * @ingroup node_access
  */
 function hook_node_access_records_alter(&$grants, Node $node) {
-  // Our module allows editors to mark specific articles with the 'is_preview'
+  // Our module allows editors to mark specific articles with the 'sticky'
   // field. If the node being saved has a TRUE value for that field, then only
   // our grants are retained, and other grants are removed. Doing so ensures
   // that our rules are enforced no matter what priority other grants are given.
-  if ($node->is_preview) {
+  if ($node->sticky) {
     // Our module grants are set in $grants['example'].
     $temp = $grants['example'];
     // Now remove all module grants but our own.
@@ -698,9 +698,9 @@ function hook_node_update_index(Node $node) {
  * Perform node validation before a node is created or updated.
  *
  * This hook is invoked from node_validate(), after a user has has finished
- * editing the node and is previewing or submitting it. It is invoked at the
- * end of all the standard validation steps, and after the type-specific
- * hook_validate() is invoked.
+ * editing the node and is submitting it. It is invoked at the end of all the
+ * standard validation steps, and after the type-specific hook_validate() is
+ * invoked.
  *
  * To indicate a validation error, use form_set_error().
  *
@@ -729,13 +729,12 @@ function hook_node_validate(Node $node, $form, &$form_state) {
 /**
  * Act on a node after validated form values have been copied to it.
  *
- * This hook is invoked when a node form is submitted with either the "Save" or
- * "Preview" button, after form values have been copied to the form state's node
- * object, but before the node is saved or previewed. It is a chance for modules
- * to adjust the node's properties from what they are simply after a copy from
- * $form_state['values']. This hook is intended for adjusting non-field-related
- * properties. See hook_field_attach_submit() for customizing field-related
- * properties.
+ * This hook is invoked when a node form is submitted with the "Save" button,
+ * after form values have been copied to the form state's node object, but
+ * before the node is saved. It is a chance for modules to adjust the node's
+ * properties from what they are simply after a copy from $form_state['values'].
+ * This hook is intended for adjusting non-field-related properties. See
+ * hook_field_attach_submit() for customizing field-related properties.
  *
  * @param Node $node
  *   The node entity being updated in response to a form submission.
@@ -1040,11 +1039,11 @@ function hook_prepare(Node $node) {
  * that is displayed to create or edit a node. This form is displayed at path
  * node/add/[node type] or node/[node ID]/edit.
  *
- * The submit and preview buttons, administrative and display controls, and
- * sections added by other modules (such as path settings, menu settings,
- * comment settings, and fields managed by the Field UI module) are
- * displayed automatically by the node module. This hook just needs to
- * return the node title and form editing fields specific to the node type.
+ * The submit button, administrative and display controls, and sections added by
+ * other modules (such as path settings, menu settings, comment settings, and
+ * fields managed by the Field UI module) are displayed automatically by the
+ * node module. This hook just needs to return the node title and form editing
+ * fields specific to the node type.
  *
  * @param Node $node
  *   The node being added or edited.
@@ -1187,9 +1186,8 @@ function hook_update(Node $node) {
  * Use hook_node_validate() to respond to node validation of all node types.
  *
  * This hook is invoked from node_validate(), after a user has finished
- * editing the node and is previewing or submitting it. It is invoked at the end
- * of all the standard validation steps, and before hook_node_validate() is
- * invoked.
+ * editing the node and is submitting it. It is invoked at the end of all the
+ * standard validation steps, and before hook_node_validate() is invoked.
  *
  * To indicate a validation error, use form_set_error().
  *

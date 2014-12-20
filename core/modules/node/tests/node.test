@@ -434,84 +434,6 @@ class PageEditTestCase extends BackdropWebTestCase {
 }
 
 /**
- * Tests the node entity preview functionality.
- */
-class PagePreviewTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
-
-    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
-    $this->backdropLogin($web_user);
-  }
-
-  /**
-   * Checks the node preview functionality.
-   */
-  function testPagePreview() {
-    $langcode = LANGUAGE_NONE;
-    $title_key = "title";
-    $body_key = "body[$langcode][0][value]";
-
-    // Fill in node creation form and preview node.
-    $edit = array();
-    $edit[$title_key] = $this->randomName(8);
-    $edit[$body_key] = $this->randomName(16);
-    $this->backdropPost('node/add/page', $edit, t('Preview'));
-
-    // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview | Backdrop'), 'Basic page title is preview.');
-    $this->assertText($edit[$title_key], 'Title displayed.');
-    $this->assertText($edit[$body_key], 'Body displayed.');
-
-    // Check that the title and body fields are displayed with the correct values.
-    $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
-    $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
-  }
-
-  /**
-   * Checks the node preview functionality, when using revisions.
-   */
-  function testPagePreviewWithRevisions() {
-    $langcode = LANGUAGE_NONE;
-    $title_key = "title";
-    $body_key = "body[$langcode][0][value]";
-    // Force revision on "Basic page" content.
-    $node_type = node_type_load('page');
-    $node_type->settings['revision_enabled'] = TRUE;
-    $node_type->settings['revision_default'] = TRUE;
-    node_type_save($node_type);
-
-    // Fill in node creation form and preview node.
-    $edit = array();
-    $edit[$title_key] = $this->randomName(8);
-    $edit[$body_key] = $this->randomName(16);
-    $this->backdropPost('node/add/page', $edit, t('Preview'));
-
-    // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview | Backdrop'), 'Basic page title is preview.');
-    $this->assertText($edit[$title_key], 'Title displayed.');
-    $this->assertText($edit[$body_key], 'Body displayed.');
-
-    // Check that the title and body fields are displayed with the correct values.
-    $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
-    $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
-
-    // Save the node with the current values.
-    $this->backdropPost(NULL, array(), t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
-
-    // Edit the page and make sure that the preview is updated.
-    $edit = array();
-    $edit[$body_key] = $this->randomName(16);
-    $edit['log'] = $this->randomName(32);
-    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Preview'));
-
-    // Check that the log field has the correct value.
-    $this->assertFieldByName('log', $edit['log'], 'Log field displayed.');
-  }
-}
-
-/**
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {
@@ -694,9 +616,6 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
     $xss = '<script>alert("xss")</script>';
     $title = $xss . $this->randomName();
     $edit = array("title" => $title);
-
-    $this->backdropPost('node/add/page', $edit, t('Preview'));
-    $this->assertNoRaw($xss, 'Harmful tags are escaped when previewing a node.');
 
     $settings = array('title' => $title);
     $node = $this->backdropCreateNode($settings);
