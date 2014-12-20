@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables users to comment on published content.
@@ -159,7 +158,7 @@ function comment_theme() {
       'variables' => array('comment' => NULL),
     ),
     'comment' => array(
-      'template' => 'comment',
+      'template' => 'templates/comment',
       'render element' => 'elements',
     ),
     'comment_post_forbidden' => array(
@@ -1155,7 +1154,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         'class' => array('comment-node-type-settings-form'),
       ),
       '#attached' => array(
-        'js' => array(backdrop_get_path('module', 'comment') . '/comment-node-form.js'),
+        'js' => array(backdrop_get_path('module', 'comment') . '/js/comment-node-form.js'),
       ),
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
@@ -1240,7 +1239,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
       'class' => array('comment-node-settings-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'comment') . '/comment-node-form.js'),
+      'js' => array(backdrop_get_path('module', 'comment') . '/js/comment-node-form.js'),
      ),
     '#weight' => 80,
   );
