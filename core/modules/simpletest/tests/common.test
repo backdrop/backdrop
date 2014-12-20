@@ -1678,7 +1678,8 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
     // different JavaScript file using #attached.
     $parent_js = backdrop_get_path('module', 'user') . '/user.js';
     $child_js = backdrop_get_path('module', 'node') . '/node.js';
-    $subchild_js = backdrop_get_path('module', 'book') . '/book.js';
+    $subchild_js = backdrop_get_path('module', 'book') . '/js/book.js';
+
     $element = array(
       '#type' => 'fieldset',
       '#cache' => array(
