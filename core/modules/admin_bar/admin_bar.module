@@ -143,7 +143,7 @@ function admin_bar_preprocess_page(&$variables) {
   $options = array('every_page' => TRUE);
 
   backdrop_add_css($path . '/css/admin_bar.css', $options);
-  backdrop_add_js($path . '/admin_bar.js', $options);
+  backdrop_add_js($path . '/js/admin_bar.js', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
@@ -527,7 +527,7 @@ function admin_bar_form_alter(&$form, &$form_state, $form_id) {
   // auto-enable the 'access administration bar' permission along with
   // 'access administration pages'.
   if ($form_id == 'user_admin_permissions') {
-    $form['#attached']['js'][] = backdrop_get_path('module', 'admin_bar') . '/admin_bar.admin.js';
+    $form['#attached']['js'][] = backdrop_get_path('module', 'admin_bar') . '/js/admin_bar.admin.js';
   }
 }
 
