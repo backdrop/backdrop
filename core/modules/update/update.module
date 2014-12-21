@@ -14,7 +14,7 @@
 /**
  * URL to check for updates, if a given project doesn't define its own.
  */
-const UPDATE_DEFAULT_URL = 'http://updates.drupal.org/release-history';
+const UPDATE_DEFAULT_URL = 'https://updates.backdropcms.org/release-history';
 
 // These are internally used constants for this code, do not modify.
 
@@ -62,6 +62,11 @@ const UPDATE_NOT_FETCHED = -3;
  * We need to (re)fetch available update data for this project.
  */
 const UPDATE_FETCH_PENDING = -4;
+
+/**
+ * The update server is a placeholder server that has not yet been implemented.
+ */
+const UPDATE_NOT_IMPLEMENTED = -5;
 
 /**
  * Implements hook_init().
@@ -355,8 +360,6 @@ function update_get_available($refresh = FALSE) {
 
   // Grab whatever data we currently have cached in the DB.
   $available = _update_get_cached_available_releases();
-  $num_avail = count($available);
-
   $projects = update_get_projects();
   foreach ($projects as $key => $project) {
     // If there's no data at all, we clearly need to fetch some.
@@ -567,6 +570,10 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
       else {
         $text = t('There was a problem checking <a href="@update-report">available updates</a> for your modules or themes.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
       }
+      break;
+    case UPDATE_NOT_IMPLEMENTED:
+      $report_link = FALSE;
+      $text = t('The update server has not yet been implemented, so no update statuses could be retrieved. Until the update server becomes active, please check for updates manually.');
       break;
   }
 

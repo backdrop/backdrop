@@ -3,6 +3,7 @@
     "update_disabled_extensions": 0,
     "update_interval_days": 1,
     "update_url": "",
+    "update_not_implemented_url": "https://github.com/backdrop-ops/backdropcms.org/issues/22",
     "update_max_attempts": 2,
     "update_timeout": 30,
     "update_emails": [],

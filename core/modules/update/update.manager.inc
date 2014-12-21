@@ -206,7 +206,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
   if (empty($projects)) {
     $form['message'] = array(
-      '#markup' => t('All of your projects are up to date.'),
+      '#markup' => '<p>' . t('No updates are available for any of your projects.') . '</p>',
     );
     return $form;
   }
