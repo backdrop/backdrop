@@ -501,7 +501,7 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
         '#rows' => $instance['widget']['settings']['summary_rows'],
         '#description' => t('Leave blank to use trimmed value of full text as the summary.'),
         '#attached' => array(
-          'js' => array(backdrop_get_path('module', 'text') . '/text.js'),
+          'js' => array(backdrop_get_path('module', 'text') . '/js/text.js'),
         ),
         '#attributes' => array('class' => array('text-summary')),
         '#prefix' => '<div class="text-summary-wrapper">',
