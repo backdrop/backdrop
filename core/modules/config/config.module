@@ -14,7 +14,7 @@ function config_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_sync_form'),
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
   );
   $items['admin/config/development/configuration/sync'] = array(
     'title' => 'Synchronize',
@@ -25,7 +25,7 @@ function config_menu() {
     'title' => 'Configuration diff',
     'page callback' => 'config_diff_page',
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
   $items['admin/config/development/configuration/single'] = array(
@@ -33,7 +33,7 @@ function config_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_import_single_form'),
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
   );
@@ -46,7 +46,7 @@ function config_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_export_single_form'),
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
   );
@@ -55,7 +55,7 @@ function config_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_import_full_form'),
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
@@ -68,14 +68,14 @@ function config_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_export_full_form'),
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
   );
   $items['admin/config/development/configuration/full/export-download'] = array(
     'page callback' => 'config_download_full_export',
     'access arguments' => array('synchronize configuration'),
-    'file' => 'includes/config.admin.inc',
+    'file' => 'config.admin.inc',
     'type' => MENU_CALLBACK,
   );
   return $items;

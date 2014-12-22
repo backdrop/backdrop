@@ -112,7 +112,7 @@ function config_sync_form(array $form, array &$form_state) {
 function config_sync_form_submit(array &$form, array &$form_state) {
   $last_sync_time = state_get('config_sync');
   if ($last_sync_time == NULL || $last_sync_time < REQUEST_TIME - 120) {
-    module_load_include('inc', 'config', 'includes/config.sync');
+    module_load_include('inc', 'config', 'config.sync');
     $config_sync_batch = config_sync_batch($form_state['config_statuses']);
     batch_set($config_sync_batch);
   }
@@ -376,7 +376,7 @@ function config_export_single_form_update_export($form, &$form_state) {
  * Form callback; Build the form to import a single configuration file.
  */
 function config_import_single_form(array $form, array &$form_state) {
-  form_load_include($form_state, 'inc', 'config', 'includes/config.sync');
+  form_load_include($form_state, 'inc', 'config', 'config.sync');
 
   $form['description'] = array(
     '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => url('admin/config/development/configuration/single/export'))) . '</p>',

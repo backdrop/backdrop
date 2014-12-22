@@ -102,7 +102,7 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
    */
   public function testHooks() {
     $config_data = config_get('config_test.simple');
-    module_load_include('inc', 'config', 'includes/config.sync');
+    module_load_include('inc', 'config', 'config.sync');
 
     // Check validation.
     $config_data['favorite_animal'] = 'rabbits';
