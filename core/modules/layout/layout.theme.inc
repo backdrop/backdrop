@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Preprocess functions for page manager editing templates.

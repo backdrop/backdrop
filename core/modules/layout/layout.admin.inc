@@ -179,7 +179,7 @@ function layout_add_page() {
  * @ingroup forms
  */
 function layout_settings_form($form, &$form_state, Layout $layout) {
-  form_load_include($form_state, 'inc', 'layout', 'includes/layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['layout'] = &$layout;
   $form['#tree'] = TRUE;
@@ -946,7 +946,7 @@ function layout_block_configure_redirect($layout, $block_uuid) {
  * @ingroup forms
  */
 function layout_block_configure_form($form, &$form_state, Layout $layout, Block $block, $renderer_name, $region_name = NULL) {
-  form_load_include($form_state, 'inc', 'layout', 'includes/layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
@@ -1301,7 +1301,7 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
  * @ingroup forms
  */
 function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL) {
-  form_load_include($form_state, 'inc', 'layout', 'includes/layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
@@ -1423,7 +1423,7 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
  * @ingroup forms
  */
 function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $handler_id) {
-  form_load_include($form_state, 'inc', 'layout', 'includes/layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   if (is_numeric($handler_id)) {
     if ($menu_item) {
@@ -1754,7 +1754,7 @@ function layout_delete_form_submit(&$form, &$form_state) {
  * @ingroup forms
  */
 function layout_menu_item_form($form, &$form_state, $menu_item) {
-  form_load_include($form_state, 'inc', 'layout', 'includes/layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['menu_item'] = $menu_item;
 
