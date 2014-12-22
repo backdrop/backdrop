@@ -27,7 +27,7 @@ function contextual_library_info() {
     'website' => 'http://drupal.org/node/473268',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      $path . '/contextual.js' => array(),
+      $path . '/js/contextual.js' => array(),
     ),
     'css' => array(
       $path . '/css/contextual.css' => array(),
