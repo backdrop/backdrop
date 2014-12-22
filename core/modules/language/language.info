@@ -1,6 +1,6 @@
 name = Language
 description = Lets you configure a number of languages to be used on your website.
-package = Core
+package = Translation
 version = BACKDROP_VERSION
 backdrop = 1.x
 configure = admin/config/regional/language

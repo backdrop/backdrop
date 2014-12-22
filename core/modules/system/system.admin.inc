@@ -635,8 +635,6 @@ function system_modules($form, $form_state = array()) {
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
         array('data' => t('Operations')),
       ),
-      // Ensure that the "Core" package fieldset comes first.
-      '#weight' => $package == 'Core' ? -10 : NULL,
     );
   }
 

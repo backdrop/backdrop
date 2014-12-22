@@ -1,6 +1,6 @@
 name = Search
 description = Enables site-wide keyword searching.
-package = Core
+package = Search
 version = BACKDROP_VERSION
 backdrop = 1.x
 configure = admin/config/search/settings

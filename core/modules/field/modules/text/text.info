@@ -1,6 +1,6 @@
 name = Text
 description = Defines simple text field types.
-package = Core
+package = Fields
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field
