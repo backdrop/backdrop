@@ -37,7 +37,7 @@ function file_field_settings_form($field, $instance, $has_data) {
   $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/file.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/js/file.js';
 
   $form['display_field'] = array(
     '#type' => 'checkbox',
