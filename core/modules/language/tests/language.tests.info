@@ -2,4 +2,4 @@
 name = Language list configuration
 description = Adds a new language and tests changing its status and the default language.
 group = Language
-file = tests/language.test
+file = language.test
