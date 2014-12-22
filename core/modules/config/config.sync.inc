@@ -15,7 +15,7 @@ function config_sync_batch($config_statuses = NULL) {
     'title' => t('Importing configuration'),
     'init_message' => t('Starting import'),
     'error_message' => t('An error occurred while importing the configuration.'),
-    'file' => backdrop_get_path('module', 'config') . '/includes/config.sync.inc',
+    'file' => backdrop_get_path('module', 'config') . '/config.sync.inc',
     'finished' => '_config_sync_finished',
   );
   return $batch;
