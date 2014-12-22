@@ -644,7 +644,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
-  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
 
   // Add settings for the update selects behavior.
   $js_fields = array();
@@ -1230,7 +1230,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
 
   // Add tabledrag behavior.
