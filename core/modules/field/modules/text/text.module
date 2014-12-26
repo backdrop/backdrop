@@ -19,7 +19,7 @@
 function text_field_info() {
   return array(
     'text' => array(
-      'label' => t('Text'),
+      'label' => t('Text (short)'),
       'description' => t('This field stores varchar text in the database.'),
       'settings' => array('max_length' => 255),
       'instance_settings' => array('text_processing' => 0),
@@ -27,14 +27,14 @@ function text_field_info() {
       'default_formatter' => 'text_default',
     ),
     'text_long' => array(
-      'label' => t('Long text'),
+      'label' => t('Text (long)'),
       'description' => t('This field stores long text in the database.'),
       'instance_settings' => array('text_processing' => 0),
       'default_widget' => 'text_textarea',
       'default_formatter' => 'text_default',
     ),
     'text_with_summary' => array(
-      'label' => t('Long text and summary'),
+      'label' => t('Text (long with summary)'),
       'description' => t('This field stores long text in the database along with optional summary text.'),
       'instance_settings' => array('text_processing' => 1, 'display_summary' => 0),
       'default_widget' => 'text_textarea_with_summary',

@@ -11,14 +11,14 @@
 function number_field_info() {
   return array(
     'number_integer' => array(
-      'label' => t('Integer'),
+      'label' => t('Number (integer)'),
       'description' => t('This field stores a number in the database as an integer.'),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_integer',
     ),
     'number_decimal' => array(
-      'label' => t('Decimal'),
+      'label' => t('Number (decimal)'),
       'description' => t('This field stores a number in the database in a fixed decimal format.'),
       'settings' => array('precision' => 10, 'scale' => 2),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
@@ -26,7 +26,7 @@ function number_field_info() {
       'default_formatter' => 'number_decimal',
     ),
     'number_float' => array(
-      'label' => t('Float'),
+      'label' => t('Number (float)'),
       'description' => t('This field stores a number in the database in a floating point format.'),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
