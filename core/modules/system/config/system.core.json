@@ -32,7 +32,7 @@
     "maintenance_mode_message": "@site is currently under maintenance. We should be back shortly. Thank you for your patience.",
     "menu_route_handler": null,
     "node_admin_theme": "",
-    "page_cache_maximum_age": 0,
+    "page_cache_maximum_age": 300,
     "page_compression": 1,
     "preprocess_css": 0,
     "preprocess_js": 0,

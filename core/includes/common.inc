@@ -5504,7 +5504,7 @@ function backdrop_page_set_cache() {
         // because by the time it is read, the configuration might change.
         'page_compressed' => $page_compressed,
       ),
-      'expire' => CACHE_TEMPORARY,
+      'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
       'created' => REQUEST_TIME,
     );
 
@@ -5513,9 +5513,12 @@ function backdrop_page_set_cache() {
     $header_names = _backdrop_set_preferred_header_name();
     foreach (backdrop_get_http_header() as $name_lower => $value) {
       $cache->data['headers'][$header_names[$name_lower]] = $value;
-      if ($name_lower == 'expires') {
-        // Use the actual timestamp from an Expires header if available.
-        $cache->expire = strtotime($value);
+      if ($name_lower == 'cache-control') {
+        // Set page cache expiration time based on Cache-Control header.
+        $matches = array();
+        if (preg_match('/max-age=(\d+)/', $value, $matches)) {
+          $cache->expire = REQUEST_TIME + $matches[1];
+        }
       }
     }
 

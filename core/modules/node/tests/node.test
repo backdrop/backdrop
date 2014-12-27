@@ -1823,8 +1823,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Post an additional node.
     $default_settings['type'] = 'page';
     $node4 = $this->backdropCreateNode($default_settings);
-    // backdropCreateNode() does not automatically flush content caches unlike
-    // posting a node from a node form.
+    // Clear page caches.
     cache_clear_all();
 
     // Test that all four nodes are shown.
@@ -2532,10 +2531,10 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropLogin($this->admin_user);
     $this->backdropPost($node_path . '/delete', array(), t('Delete'));
 
-    // Logout and check the node is not available.
+    // Logout. The node will still be accessible due to the page cache.
     $this->backdropLogout();
     $this->backdropGet($node_path);
-    $this->assertResponse(404);
+    $this->assertResponse(200);
 
     // Create two new nodes.
     $nodes[0] = $this->backdropCreateNode();
