@@ -898,19 +898,27 @@ function user_login_block($form) {
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
-  $form['name'] = array('#type' => 'textfield',
+  $form['name'] = array(
+    '#type' => 'textfield',
     '#title' => t('Username'),
     '#maxlength' => USERNAME_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
+    '#weight' => 1,
   );
-  $form['pass'] = array('#type' => 'password',
+  $form['pass'] = array(
+    '#type' => 'password',
     '#title' => t('Password'),
     '#size' => 15,
     '#required' => TRUE,
+    '#weight' => 2,
   );
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit',
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#weight' => 3,
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
     '#value' => t('Log in'),
   );
   $items = array();
@@ -918,7 +926,11 @@ function user_login_block($form) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
   $items[] = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
-  $form['links'] = array('#theme' => 'item_list', '#items' => $items);
+  $form['links'] = array(
+    '#theme' => 'item_list',
+    '#items' => $items,
+    '#weight' => 4,
+  );
   return $form;
 }
 
