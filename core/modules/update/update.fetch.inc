@@ -144,6 +144,8 @@ function _update_process_fetch_task($project) {
   $max_fetch_attempts = $config->get('update_max_attempts');
 
   $success = FALSE;
+  $response = NULL;
+  $response_code = NULL;
   $available = array();
   $site_key = backdrop_hmac_base64($base_url, backdrop_get_private_key());
   $url = _update_build_fetch_url($project, $site_key);
@@ -151,19 +153,23 @@ function _update_process_fetch_task($project) {
   $project_name = $project['name'];
 
   if (empty($fail[$fetch_url_base]) || $fail[$fetch_url_base] < $max_fetch_attempts) {
-    $xml = backdrop_http_request($url);
-    if (!isset($xml->error) && isset($xml->data)) {
-      $data = $xml->data;
+    $response = backdrop_http_request($url);
+    $response_code = (int) $response->code;
+    if (!isset($response->error) && isset($response->data)) {
+      $data = $response->data;
     }
   }
 
-  if (!empty($data)) {
+  if ($response_code === 200 && !empty($data)) {
     $available = update_parse_xml($data);
     // @todo: Purge release data we don't need (http://drupal.org/node/238950).
     if (!empty($available)) {
       // Only if we fetched and parsed something sane do we return success.
       $success = TRUE;
     }
+  }
+  elseif ($response_code === 501) {
+    $available['project_status'] = 'not-implemented';
   }
   else {
     $available['project_status'] = 'not-fetched';

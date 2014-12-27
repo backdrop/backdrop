@@ -473,6 +473,15 @@ function update_calculate_project_update_status($project, &$project_data, $avail
         $project_data['status'] = UPDATE_NOT_FETCHED;
         $project_data['reason'] = t('Failed to get available update data.');
         break;
+      case 'not-implemented':
+        $project_data['status'] = UPDATE_NOT_IMPLEMENTED;
+        $project_data['reason'] = t('Update server is not yet implemented.');
+        $project_data['extra'][] = array(
+          'class' => array('project-not-implemented'),
+          'label' => t('Status unknown'),
+          'data' => t('The update server for this project is not yet implemented. Once completed, the update server will start reporting available updates here. Until then, please check for updates manually.'),
+        );
+        break;
 
       default:
         // Assume anything else (e.g. 'published') is valid and we should
