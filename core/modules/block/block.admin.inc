@@ -46,38 +46,6 @@ function block_admin_list() {
 }
 
 /**
- * Form submission handler for block_admin_display_form().
- *
- * @see block_admin_display_form()
- */
-function block_admin_display_form_submit($form, &$form_state) {
-  $transaction = db_transaction();
-  try {
-    foreach ($form_state['values']['blocks'] as $block) {
-      $block['status'] = (int) ($block['region'] != BLOCK_REGION_NONE);
-      $block['region'] = $block['status'] ? $block['region'] : '';
-      db_update('block')
-        ->fields(array(
-          'status' => $block['status'],
-          'weight' => $block['weight'],
-          'region' => $block['region'],
-        ))
-        ->condition('module', $block['module'])
-        ->condition('delta', $block['delta'])
-        ->condition('theme', $block['theme'])
-        ->execute();
-    }
-  }
-  catch (Exception $e) {
-    $transaction->rollback();
-    watchdog_exception('block', $e);
-    throw $e;
-  }
-  backdrop_set_message(t('The block settings have been updated.'));
-  cache_clear_all();
-}
-
-/**
  * Form constructor for the block configuration form.
  *
  * Also used by block_add_block_form() for adding a new custom block.
@@ -269,52 +237,5 @@ function block_custom_block_delete_submit($form, &$form_state) {
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
   cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
-}
-
-/**
- * Processes variables for block-admin-display-form.tpl.php.
- *
- * The $variables array contains the following arguments:
- * - $form
- *
- * @see block-admin-display.tpl.php
- * @see theme_block_admin_display()
- */
-function template_preprocess_block_admin_display_form(&$variables) {
-  $variables['block_regions'] = $variables['form']['block_regions']['#value'];
-  if (isset($variables['block_regions'][BLOCK_REGION_NONE])) {
-    $variables['block_regions'][BLOCK_REGION_NONE] = t('Disabled');
-  }
-
-  foreach ($variables['block_regions'] as $key => $value) {
-    // Initialize an empty array for the region.
-    $variables['block_listing'][$key] = array();
-  }
-
-  // Initialize disabled blocks array.
-  $variables['block_listing'][BLOCK_REGION_NONE] = array();
-
-  // Add each block in the form to the appropriate place in the block listing.
-  foreach (element_children($variables['form']['blocks']) as $i) {
-    $block = &$variables['form']['blocks'][$i];
-
-    // Fetch the region for the current block.
-    $region = (isset($block['region']['#default_value']) ? $block['region']['#default_value'] : BLOCK_REGION_NONE);
-
-    // Set special classes needed for table drag and drop.
-    $block['region']['#attributes']['class'] = array('block-region-select', 'block-region-' . $region);
-    $block['weight']['#attributes']['class'] = array('block-weight', 'block-weight-' . $region);
-
-    $variables['block_listing'][$region][$i] = new stdClass();
-    $variables['block_listing'][$region][$i]->row_class = !empty($block['#attributes']['class']) ? implode(' ', $block['#attributes']['class']) : '';
-    $variables['block_listing'][$region][$i]->block_modified = !empty($block['#attributes']['class']) && in_array('block-modified', $block['#attributes']['class']);
-    $variables['block_listing'][$region][$i]->block_title = backdrop_render($block['info']);
-    $variables['block_listing'][$region][$i]->region_select = backdrop_render($block['region']) . backdrop_render($block['theme']);
-    $variables['block_listing'][$region][$i]->weight_select = backdrop_render($block['weight']);
-    $variables['block_listing'][$region][$i]->operations = backdrop_render($block['operations']);
-    $variables['block_listing'][$region][$i]->printed = FALSE;
-  }
-
-  $variables['form_submit'] = backdrop_render_children($variables['form']);
 }
 
