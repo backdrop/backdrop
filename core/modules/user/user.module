@@ -964,15 +964,12 @@ function user_preprocess_block(&$variables) {
       case 'login':
         $variables['attributes']['role'] = 'form';
         break;
-<<<<<<< HEAD
       case 'new':
         $variables['attributes']['role'] = 'complementary';
         break;
       case 'online':
         $variables['attributes']['role'] = 'complementary';
         break;
-=======
->>>>>>> Issues #147 & #148: Removed Who's Online & Who's New blocks.
     }
   }
 }
