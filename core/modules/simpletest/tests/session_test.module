@@ -1,5 +1,9 @@
 <?php
 
+// Set this header as soon as this module is included. We need this header
+// to be set on all page requests, even those served by the internal page cache.
+header('X-Session-Empty: ' . intval(empty($_SESSION)));
+
 /**
  * Implements hook_menu().
  */
@@ -62,6 +66,8 @@ function session_test_menu() {
  * Implements hook_boot().
  */
 function session_test_boot() {
+  // Although set at the top of this module for cached pages, replace this
+  // header during hook_boot() in the event that the session has been destroyed.
   header('X-Session-Empty: ' . intval(empty($_SESSION)));
 
   // Enable HTTPS for this request if set in state.

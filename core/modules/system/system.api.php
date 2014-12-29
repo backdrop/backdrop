@@ -267,12 +267,9 @@ function hook_element_info_alter(&$type) {
  * anything because by the time it runs the response is already sent to
  * the browser.
  *
- * Only use this hook if your code must run even for cached page views.
- * If you have code which must run once on all non-cached pages, use
- * hook_init() instead. That is the usual case. If you implement this hook
- * and see an error like 'Call to undefined function', it is likely that
- * you are depending on the presence of a module which has not been loaded yet.
- * It is not loaded because Backdrop is still in bootstrap mode.
+ * This hook by default is not called on pages served by the default page cache,
+ * but can be enabled through the $settings['invoke_page_cache_hooks'] option in
+ * settings.php.
  *
  * @param $destination
  *   If this hook is invoked as part of a backdrop_goto() call, then this argument
@@ -1313,9 +1310,11 @@ function hook_forms($form_id, $args) {
  * This hook is run at the beginning of the page request. It is typically
  * used to set up global parameters that are needed later in the request.
  *
- * Only use this hook if your code must run even for cached page views. This
- * hook is called before the theme, modules, or most include files are loaded
- * into memory. It happens while Backdrop is still in bootstrap mode.
+ * If needing to execute code early in the page request, consider using
+ * hook_init() instead. In hook_boot(), only the most basic APIs are available
+ * and not all modules have been loaded. This hook by default is not called on
+ * pages served by the default page cache, but can be enabled through the
+ * $settings['invoke_page_cache_hooks'] option in settings.php.
  *
  * @see hook_init()
  */

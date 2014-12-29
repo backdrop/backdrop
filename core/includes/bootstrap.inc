@@ -2632,15 +2632,15 @@ function _backdrop_bootstrap_page_cache() {
       $_GET['q'] = $cache->data['path'];
       backdrop_set_title($cache->data['title'], PASS_THROUGH);
       date_default_timezone_set(backdrop_get_user_timezone());
-      // If the skipping of the bootstrap hooks is not enforced, call
-      // hook_boot.
-      if (settings_get('page_cache_invoke_hooks', TRUE)) {
+      // Calls to hook_boot() on page cache requests is deprecated, though they
+      // can still be enabled via settings.php
+      if (settings_get('page_cache_invoke_hooks', FALSE)) {
         bootstrap_invoke_all('boot');
       }
       backdrop_serve_page_from_cache($cache);
-      // If the skipping of the bootstrap hooks is not enforced, call
-      // hook_exit.
-      if (settings_get('page_cache_invoke_hooks', TRUE)) {
+      // Like hook_boot(), hook_exit() is no longer called on page cache
+      // requests unless enabled via settings.php.
+      if (settings_get('page_cache_invoke_hooks', FALSE)) {
         bootstrap_invoke_all('exit');
       }
       // We are done.
