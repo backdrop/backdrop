@@ -1584,14 +1584,13 @@ function system_performance_settings($form, &$form_state) {
     '#default_value' => $config->get('cache'),
     '#weight' => -2,
   );
-  $period = backdrop_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
-  $period[0] = '<' . t('none') . '>';
+  $period = backdrop_map_assoc(array(60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
   $form['caching']['page_cache_maximum_age'] = array(
     '#type' => 'select',
     '#title' => t('Expiration of cached pages'),
     '#default_value' => $config->get('page_cache_maximum_age'),
     '#options' => $period,
-    '#description' => t('The maximum time an external cache can use an old version of a page.'),
+    '#description' => t('The maximum time the page cache can use an old version of a page.'),
   );
 
   $directory = 'public://';

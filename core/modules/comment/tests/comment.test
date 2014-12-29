@@ -1676,8 +1676,7 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
     // block.
     $this->backdropLogout();
     user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array('access comments'));
-    // backdropCreateNode() does not automatically flush content caches unlike
-    // posting a node from a node form.
+    // Clear the page cache.
     cache_clear_all();
     $this->backdropGet('');
     $this->assertNoText($block_title, 'Block was not found.');

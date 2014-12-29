@@ -103,6 +103,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testConditionalRequests() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Fill the cache.
     $this->backdropGet('');
@@ -141,12 +142,13 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCache() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Fill the cache.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=0', 'Cache-Control header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
 
@@ -154,7 +156,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=0', 'Cache-Control header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
 
@@ -185,6 +187,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCompression() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Fill the cache and verify that output is compressed.
     $this->backdropGet('', array(), array('Accept-Encoding: gzip,deflate'));
@@ -273,6 +276,7 @@ class HookBootExitTestCase extends BackdropWebTestCase {
   function testHookBootExit() {
     // Test with cache disabled. Boot and exit should always fire.
     config_set('system.core', 'cache', 0);
+
     $this->backdropGet('');
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
@@ -280,6 +284,8 @@ class HookBootExitTestCase extends BackdropWebTestCase {
 
     // Test with normal cache. Boot and exit should be called.
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
+
     $this->backdropGet('');
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));

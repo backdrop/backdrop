@@ -336,8 +336,6 @@ function user_profile_form_submit($form, &$form_state) {
     // Remove the password reset tag since a new password was saved.
     unset($_SESSION['pass_reset_'. $account->uid]);
   }
-  // Clear the page cache because pages can contain usernames and/or profile information:
-  cache_clear_all();
 
   backdrop_set_message(t('The changes have been saved.'));
 }

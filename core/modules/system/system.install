@@ -2414,6 +2414,17 @@ function system_update_1032() {
 }
 
 /**
+ * Set the minimum page cache lifetime to 5 minutes by default.
+ */
+function system_update_1033() {
+  $config = config('system.core');
+  if ($config->get('page_cache_maximum_age') == 0) {
+    $config->set('page_cache_maximum_age', 300);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

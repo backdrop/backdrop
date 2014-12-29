@@ -157,7 +157,6 @@ function block_admin_configure_validate($form, &$form_state) {
 function block_admin_configure_submit($form, &$form_state) {
   block_custom_block_save($form_state['values'], $form_state['values']['delta']);
   backdrop_set_message(t('The block configuration has been saved.'));
-  cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
 }
 
@@ -201,7 +200,6 @@ function block_add_block_form_submit($form, &$form_state) {
   $form_state['values']['delta'] = $delta;
 
   backdrop_set_message(t('The block has been created.'));
-  cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
 }
 
@@ -235,7 +233,6 @@ function block_custom_block_delete_submit($form, &$form_state) {
     ->condition('bid', $form_state['values']['bid'])
     ->execute();
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
-  cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
 }
 

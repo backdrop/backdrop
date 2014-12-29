@@ -1276,10 +1276,10 @@ function backdrop_page_get_cache($check_only = FALSE) {
 
   if (backdrop_page_is_cacheable()) {
     $cache = cache('page')->get($base_root . request_uri());
-    if ($cache !== FALSE) {
+    if ($cache !== FALSE && $cache->expire >= REQUEST_TIME) {
       $cache_hit = TRUE;
+      return $cache;
     }
-    return $cache;
   }
 }
 

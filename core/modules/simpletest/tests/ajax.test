@@ -468,7 +468,8 @@ class AJAXFormPageCacheTestCase extends AJAXTestCase {
   public function setUp() {
     parent::setUp();
 
-    config_set('system.core', 'cache', TRUE);
+    config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_maximum_age', 300);
   }
 
   /**

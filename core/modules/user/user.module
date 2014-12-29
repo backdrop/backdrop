@@ -2110,9 +2110,6 @@ function _user_cancel($edit, $account, $method) {
   if ($account->uid == $user->uid) {
     $user = backdrop_anonymous_user();
   }
-
-  // Clear the cache for anonymous users.
-  cache_clear_all();
 }
 
 /**

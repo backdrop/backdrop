@@ -2159,9 +2159,6 @@ function comment_form_submit($form, &$form_state) {
     $redirect = 'node/' . $node->nid;
   }
   $form_state['redirect'] = $redirect;
-  // Clear the block and page caches so that anonymous users see the comment
-  // they have posted.
-  cache_clear_all();
 }
 
 /**

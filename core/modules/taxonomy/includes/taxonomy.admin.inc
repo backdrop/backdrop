@@ -839,8 +839,6 @@ function taxonomy_form_term_submit($form, &$form_state) {
     case SAVED_UPDATED:
       backdrop_set_message(t('Updated term %term.', array('%term' => $term->name)));
       watchdog('taxonomy', 'Updated term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
-      // Clear the page and block caches to avoid stale data.
-      cache_clear_all();
       break;
   }
 
@@ -938,8 +936,6 @@ function taxonomy_term_confirm_delete_submit($form, &$form_state) {
   if (!isset($_GET['destination'])) {
     $form_state['redirect'] = 'admin/structure/taxonomy';
   }
-  cache_clear_all();
-  return;
 }
 
 /**
@@ -973,7 +969,6 @@ function taxonomy_vocabulary_confirm_delete_submit($form, &$form_state) {
   backdrop_set_message(t('Deleted vocabulary %name.', array('%name' => $form_state['values']['name'])));
   watchdog('taxonomy', 'Deleted vocabulary %name.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/taxonomy';
-  cache_clear_all();
 }
 
 /**
