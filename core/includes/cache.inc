@@ -40,18 +40,165 @@ function cache($bin = 'cache') {
 }
 
 /**
- * Expires data from the layout and page caches.
+ * Returns data from the persistent cache.
+ *
+ * Data may be stored as either plain text or as serialized data. cache_get()
+ * will automatically return unserialized objects and arrays.
+ *
+ * @param string $cid
+ *   The cache ID of the data to retrieve.
+ * @param string $bin
+ *   The cache bin from which data should be retrieved. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution.
+ *
+ * @return
+ *   The cache or FALSE on failure.
  */
-function cache_clear_all() {
-  // @todo: remove before release.
-  if (func_get_args()) {
-    throw new Exception(t('cache_clear_all() no longer takes arguments, use cache() instead.'));
+function cache_get($cid, $bin) {
+  return cache($bin)->get($cid);
+}
+
+/**
+ * Returns data from the persistent cache when given an array of cache IDs.
+ *
+ * @param $cids
+ *   An array of cache IDs for the data to retrieve. This is passed by
+ *   reference, and will have the IDs successfully returned from cache
+ *   removed.
+ * @param $bin
+ *   The cache bin from which data should be retrieved. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution
+ *
+ * @return
+ *   An array of the items successfully returned from cache indexed by cid.
+ */
+function cache_get_multiple(array &$cids, $bin = 'cache') {
+  return cache($bin)->getMultiple($cids);
+}
+
+/**
+ * Stores data in the persistent cache.
+ *
+ * The persistent cache is split up into several cache bins. In the default
+ * cache implementation, each cache bin corresponds to a database table by the
+ * same name. Other implementations might want to store several bins in data
+ * structures that get flushed together. While it is not a problem for most
+ * cache bins if the entries in them are flushed before their expire time, some
+ * might break functionality or are extremely expensive to recalculate. The
+ * other bins are expired automatically by core. Contributed modules can add
+ * additional bins and get them expired automatically by implementing
+ * hook_flush_caches().
+ *
+ * The reasons for having several bins are as follows:
+ * - Smaller bins mean smaller database tables and allow for faster selects and
+ *   inserts.
+ * - We try to put fast changing cache items and rather static ones into
+ *   different bins. The effect is that only the fast changing bins will need a
+ *   lot of writes to disk. The more static bins will also be better cacheable
+ *   with MySQL's query cache.
+ *
+ * @param string $cid
+ *   The cache ID of the data to store.
+ * @param mixed $data
+ *   The data to store in the cache. Complex data types will be automatically
+ *   serialized before insertion. Strings will be stored as plain text and are
+ *   not serialized.
+ * @param string $bin
+ *   The cache bin in which data should be stored. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution
+ * @param int $expire
+ *   One of the following values:
+ *   - CACHE_PERMANENT: Indicates that the item should never be removed unless
+ *     explicitly told to using cache_clear_all() with a cache ID.
+ *   - CACHE_TEMPORARY: Indicates that the item should be removed at the next
+ *     general cache wipe.
+ *   - A Unix timestamp: Indicates that the item should be kept at least until
+ *     the given time, after which it behaves like CACHE_TEMPORARY.
+ *
+ * @see cache_get()
+ */
+function cache_set($cid, $data, $bin = 'cache', $expire = CACHE_PERMANENT) {
+  return cache($bin)->set($cid, $data, $expire);
+}
+
+/**
+ * Flushes all cache items in a bin.
+ *
+ * @param string $bin
+ *   The bin whose data should be emptied.
+ */
+function cache_flush($bin) {
+  return cache($bin)->flush();
+}
+
+/**
+ * Clears data from the cache.
+ *
+ * If called with the arguments $cid and $bin set to NULL or omitted, then
+ * expirable entries will be cleared from the page and layout bins, and the
+ * $wildcard argument is ignored.
+ *
+ * @param string $cid
+ *   The cache ID or an array of cache IDs. Otherwise, all cache entries that
+ *   can expire are deleted.
+ * @param string $bin
+ *   The cache bin whose data should be cleared. Mandatory argument if $cid is
+ *   set.
+ * @param bool $wildcard
+ *   If TRUE, the $cid argument must contain a string value and cache IDs
+ *   starting with $cid are deleted in addition to the exact cache ID specified
+ *   by $cid. If $wildcard is TRUE and $cid is '*', the entire cache is emptied.
+ *
+ *   The wildcard parameter is a legacy argument. If needing to do a full bin
+ *   flush, use cache_flush() instead. Prefix-based flushes are also
+ *   discouraged, as not all cache backends natively support wildcard
+ *   functionality.
+ *
+ * @see cache_flush()
+ */
+function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
+  // Default value cache flush.
+  if (!isset($cid) && !isset($bin)) {
+    if (module_exists('layout')) {
+      cache('layout_path')->flush();
+    }
+    cache('page')->flush();
+    return;
   }
 
-  if (module_exists('layout')) {
-    cache('layout_path')->flush();
+  if (!$wildcard) {
+    cache($bin)->delete($cid);
   }
-  cache('page')->flush();
+  else {
+    if ($cid === '*') {
+      cache($bin)->flush();
+    }
+    else {
+      cache($bin)->deletePrefix($cid);
+    }
+  }
+}
+
+/**
+ * Checks if a cache bin is empty.
+ *
+ * A cache bin is considered empty if it does not contain any valid data for any
+ * cache ID.
+ *
+ * @param string $bin
+ *   The cache bin to check.
+ *
+ * @return
+ *   TRUE if the cache bin specified is empty.
+ */
+function cache_is_empty($bin) {
+  return cache($bin)->isEmpty();
 }
 
 /**
@@ -99,7 +246,7 @@ interface BackdropCacheInterface {
    * Data may be stored as either plain text or as serialized data.
    * cache()->get() will automatically return unserialized objects and arrays.
    *
-   * @param $cid
+   * @param string $cid
    *   The cache ID of the data to retrieve.
    *
    * @return
@@ -110,7 +257,7 @@ interface BackdropCacheInterface {
   /**
    * Returns data from the persistent cache when given an array of cache IDs.
    *
-   * @param $cids
+   * @param array $cids
    *   An array of cache IDs for the data to retrieve. This is passed by
    *   reference, and will have the IDs successfully returned from cache
    *   removed.
@@ -118,20 +265,20 @@ interface BackdropCacheInterface {
    * @return
    *   An array of the items successfully returned from cache indexed by cid.
    */
-   function getMultiple(&$cids);
+   function getMultiple(array &$cids);
 
   /**
    * Stores data in the persistent cache.
    *
-   * @param $cid
+   * @param string $cid
    *   The cache ID of the data to store.
-   * @param $data
+   * @param mixed $data
    *   The data to store in the cache. Complex data types will be automatically
    *   serialized before insertion. Strings will be stored as plain text and not
    *   serialized. Some storage engines only allow objects up to a maximum of
    *   1MB in size to be stored by default. When caching large arrays or
    *   similar, take care to ensure $data does not exceed this size.
-   * @param $expire
+   * @param int $expire
    *   (optional) One of the following values:
    *   - CACHE_PERMANENT: Indicates that the item should never be removed unless
    *     explicitly told to using cache_clear_all() with a cache ID.
@@ -145,7 +292,7 @@ interface BackdropCacheInterface {
   /**
    * Deletes an item from the cache.
    *
-   * @param $cid
+   * @param string $cid
    *    The cache ID to delete.
    */
   function delete($cid);
@@ -161,7 +308,7 @@ interface BackdropCacheInterface {
   /**
    * Deletes items from the cache using a wildcard prefix.
    *
-   * @param $prefix
+   * @param string $prefix
    *   A wildcard prefix.
    */
   function deletePrefix($prefix);
@@ -219,7 +366,7 @@ class BackdropNullCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(&$cids) {
+  function getMultiple(array &$cids) {
     return array();
   }
 
@@ -299,7 +446,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(&$cids) {
+  function getMultiple(array &$cids) {
     try {
       // When serving cached pages, the overhead of using db_select() was found
       // to add around 30% overhead to the request. Since $this->bin is a
@@ -392,9 +539,9 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   }
 
   /**
-   * Implements BackdropCacheInterface::deleteMultiple().
-   */
-  function deleteMultiple(Array $cids) {
+ * Implements BackdropCacheInterface::deleteMultiple().
+ */
+  function deleteMultiple(array $cids) {
     // Delete in chunks when a large array is passed.
     do {
       db_delete($this->bin)
