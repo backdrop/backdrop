@@ -316,7 +316,7 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Active'),
-      'type' => 'yes-no',
+      'type' => 'active-blocked',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -358,6 +358,16 @@ function user_views_data() {
     'help' => t('Provide serialized data of the user'),
     'field' => array(
       'handler' => 'views_handler_field_serialized',
+    ),
+  );
+
+  $data['users']['bulk_form'] = array(
+    'title' => t('Bulk operations'),
+    'help' => t('Provides a checkbox on each row and a form for executing bulk actions on users.'),
+    'real field' => 'uid',
+    'field' => array(
+      'handler' => 'views_handler_field_bulk_form',
+      'click sortable' => FALSE,
     ),
   );
 

@@ -500,10 +500,10 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer users'));
     $this->backdropLogin($this->admin_user);
     $edit = array(
-      'operation' => 'cancel',
-      'accounts[1]' => TRUE,
+      'action' => 'user_cancel_user_action',
+      'bulk_form[0]' => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Update'));
+    $this->backdropPost('admin/people', $edit, t('Execute'));
 
     // Verify that uid 1's account was not cancelled.
     $user1 = user_load(1, TRUE);
@@ -790,14 +790,15 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Cancel user accounts, including own one.
     $edit = array();
-    $edit['operation'] = 'cancel';
-    foreach ($users as $uid => $account) {
-      $edit['accounts[' . $uid . ']'] = TRUE;
+    $edit['action'] = 'user_cancel_user_action';
+    $edit['bulk_form[0]'] = TRUE; // Try to cancel uid 1.
+    $edit['bulk_form[1]'] = TRUE; // Cancel the created admin user.
+    $position = 1;
+    foreach ($users as $account) {
+      $position++;
+      $edit['bulk_form[' . $position . ']'] = TRUE;
     }
-    $edit['accounts[' . $admin_user->uid . ']'] = TRUE;
-    // Also try to cancel uid 1.
-    $edit['accounts[1]'] = TRUE;
-    $this->backdropPost('admin/people', $edit, t('Update'));
+    $this->backdropPost('admin/people', $edit, t('Execute'));
     $this->assertText(t('Are you sure you want to cancel these user accounts?'), 'Confirmation form to cancel accounts displayed.');
     $this->assertText(t('When cancelling these accounts'), 'Allows to select account cancellation method.');
     $this->assertText(t('Require e-mail confirmation to cancel account.'), 'Allows to send confirmation mail.');
@@ -1249,7 +1250,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $user_c = $this->backdropCreateUser(array('administer taxonomy'));
 
     // Create admin user to delete registered user.
-    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
     $this->backdropLogin($admin_user);
     $this->backdropGet('admin/people');
     $this->assertText($user_a->name, 'Found user A on admin users page');
@@ -1261,20 +1262,10 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $link = l(t('Edit'), "user/$user_a->uid/edit", array('query' => array('destination' => 'admin/people')));
     $this->assertRaw($link, 'Found user A edit link on admin users page');
 
-    // Filter the users by permission 'administer taxonomy'.
-    $edit = array();
-    $edit['permission'] = 'administer taxonomy';
-    $this->backdropPost('admin/people', $edit, t('Filter'));
-
-    // Check if the correct users show up.
-    $this->assertNoText($user_a->name, 'User A not on filtered by perm admin users page');
-    $this->assertText($user_b->name, 'Found user B on filtered by perm admin users page');
-    $this->assertText($user_c->name, 'Found user C on filtered by perm admin users page');
-
     // Filter the users by role. Grab the system-generated role name for User C.
     $c_roles = array_diff($user_c->roles, array(BACKDROP_AUTHENTICATED_ROLE));
-    $edit['role'] = reset($c_roles);
-    $this->backdropPost('admin/people', $edit, t('Refine'));
+    $role_id = reset($c_roles);
+    $this->backdropGet('admin/people', array('query' => array('role' => $role_id)));
 
     // Check if the correct users show up when filtered by role.
     $this->assertNoText($user_a->name, 'User A not on filtered by role on admin users page');
@@ -1282,22 +1273,25 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertText($user_c->name, 'User C on filtered by role on admin users page');
 
     // Test blocking of a user.
-    $account = user_load($user_c->uid);
+    $this->backdropGet('admin/people');
+    $name_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=2]/a');
+    $account = user_load_by_name(trim($name_result[0]));
+
     $this->assertEqual($account->status, 1, 'User C not blocked');
     $edit = array();
-    $edit['operation'] = 'block';
-    $edit['accounts[' . $account->uid . ']'] = TRUE;
-    $this->backdropPost('admin/people', $edit, t('Update'));
-    $account = user_load($user_c->uid, TRUE);
-    $this->assertEqual($account->status, 0, 'User C blocked');
+    $edit['action'] = 'user_block_user_action';
+    $edit['bulk_form[3]'] = TRUE;
+    $this->backdropPost('admin/people', $edit, t('Execute'));
+    $status_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=3]');
+    $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
     $editunblock = array();
-    $editunblock['operation'] = 'unblock';
-    $editunblock['accounts[' . $account->uid . ']'] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Update'));
-    $account = user_load($user_c->uid, TRUE);
-    $this->assertEqual($account->status, 1, 'User C unblocked');
+    $editunblock['action'] = 'user_unblock_user_action';
+    $editunblock['bulk_form[3]'] = TRUE;
+    $this->backdropPost('admin/people', $editunblock, t('Execute'));
+    $status_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=3]');
+    $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $account->mail, "Activation mail sent to user C");
 
     // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail

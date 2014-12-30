@@ -6,259 +6,111 @@
  */
 
 /**
- * Page callback: Generates the appropriate user administration form.
- *
- * This function generates the user registration, multiple user cancellation,
- * or filtered user list admin form, depending on the argument and the POST
- * form values.
- *
- * @return string
- *   A renderable form array for the respective request.
- */
-function user_admin() {
-  if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'cancel')) {
-    $build['user_multiple_cancel_confirm'] = backdrop_get_form('user_multiple_cancel_confirm');
-  }
-  else {
-    $build['user_filter_form'] = backdrop_get_form('user_filter_form');
-    $build['user_admin_account'] = backdrop_get_form('user_admin_account');
-  }
-
-  return $build;
-}
-
-/**
- * Form builder; Return form for user administration filters.
+ * Form builder; Cancel multiple accounts at the same time.
  *
  * @ingroup forms
- * @see user_filter_form_submit()
+ * @see user_cancel_user_action()
  */
-function user_filter_form() {
-  $session = isset($_SESSION['user_overview_filter']) ? $_SESSION['user_overview_filter'] : array();
-  $filters = user_filters();
+function user_multiple_cancel_confirm($form, &$form_state) {
+  if (isset($_SESSION['user_cancel_action']['timestamp']) && (REQUEST_TIME - $_SESSION['user_cancel_action']['timestamp'] < 6000)) {
+    $uids = $_SESSION['user_cancel_action']['uids'];
+  }
+  else {
+    $uids = array();
+  }
 
-  $i = 0;
-  $form['filters'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Show only users where'),
-    '#theme' => 'exposed_filters__user',
-  );
-  foreach ($session as $filter) {
-    list($type, $value) = $filter;
-    if ($type == 'permission') {
-      // Merge arrays of module permissions into one.
-      // Slice past the first element '[any]' whose value is not an array.
-      $options = call_user_func_array('array_merge', array_slice($filters[$type]['options'], 1));
-      $value = $options[$value];
-    }
-    else {
-      $value = $filters[$type]['options'][$value];
-    }
-    $t_args = array('%property' => $filters[$type]['title'], '%value' => $value);
-    if ($i++) {
-      $form['filters']['current'][] = array('#markup' => t('and where %property is %value', $t_args));
-    }
-    else {
-      $form['filters']['current'][] = array('#markup' => t('%property is %value', $t_args));
+  $accounts = user_load_multiple($uids);
+
+  // Output a notice that user 1 cannot be canceled.
+  if (isset($accounts[1])) {
+    $redirect = (count($accounts) == 1);
+    $message = t('The user account %name cannot be cancelled.', array('%name' => $accounts[1]->name));
+    backdrop_set_message($message, $redirect ? 'error' : 'warning');
+    unset($accounts[1]);
+    // If only user 1 was selected, redirect to the overview.
+    if ($redirect) {
+      backdrop_goto('admin/people');
     }
   }
 
-  $form['filters']['status'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('clearfix')),
-    '#prefix' => ($i ? '<div class="additional-filters">' . t('and where') . '</div>' : ''),
-  );
-  $form['filters']['status']['filters'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('filters')),
-  );
-  foreach ($filters as $key => $filter) {
-    $form['filters']['status']['filters'][$key] = array(
-      '#type' => 'select',
-      '#options' => $filter['options'],
-      '#title' => $filter['title'],
-      '#default_value' => '[any]',
-    );
+  if (empty($accounts)) {
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/people';
+    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', array('!url' => url($destination))) . '</p>';
+    backdrop_set_message(t('No user accounts have been selected for cancellation.'), 'error');
+    return $form;
   }
 
-  $form['filters']['status']['actions'] = array(
-    '#type' => 'actions',
-    '#attributes' => array('class' => array('container-inline')),
+  $form_state['accounts'] = $accounts;
+
+  $form['user_list'] = array(
+    '#theme' => 'item_list',
+    '#items' => array(),
   );
-  $form['filters']['status']['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => (count($session) ? t('Refine') : t('Filter')),
-  );
-  if (count($session)) {
-    $form['filters']['status']['actions']['undo'] = array(
-      '#type' => 'submit',
-      '#value' => t('Undo'),
-    );
-    $form['filters']['status']['actions']['reset'] = array(
-      '#type' => 'submit',
-      '#value' => t('Reset'),
-    );
+  foreach ($accounts as $account) {
+    $form['user_list']['#items'][] = check_plain($account->name);
   }
 
-  backdrop_add_library('system', 'backdrop.form');
+  module_load_include('inc', 'user', 'user.pages');
+  $form['user_cancel_method'] = array(
+    '#type' => 'item',
+    '#title' => t('When cancelling these accounts'),
+  );
+  $form['user_cancel_method'] += user_cancel_methods();
 
-  return $form;
+  // Remove method descriptions.
+  foreach (element_children($form['user_cancel_method']) as $element) {
+    unset($form['user_cancel_method'][$element]['#description']);
+  }
+
+  // Allow to send the account cancellation confirmation mail.
+  $form['user_cancel_confirm'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Require e-mail confirmation to cancel account.'),
+    '#default_value' => FALSE,
+    '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
+  );
+  // Also allow to send account canceled notification mail, if enabled.
+  $form['user_cancel_notify'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Notify user when account is canceled.'),
+    '#default_value' => FALSE,
+    '#access' => config_get('system.core', 'user_mail_status_canceled_notify'),
+    '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
+  );
+
+  $confirm_question = format_plural(count($accounts), 'Are you sure you want to cancel this user account?', 'Are you sure you want to cancel these user accounts?');
+  return confirm_form($form, $confirm_question, 'admin/people', NULL, t('Cancel accounts'), t('Cancel'));
 }
 
 /**
- * Process result from user administration filter form.
+ * Submit handler for mass-account cancellation form.
+ *
+ * @see user_multiple_cancel_confirm()
+ * @see user_cancel_confirm_form_submit()
  */
-function user_filter_form_submit($form, &$form_state) {
-  $op = $form_state['values']['op'];
-  $filters = user_filters();
-  switch ($op) {
-    case t('Filter'):
-    case t('Refine'):
-      // Apply every filter that has a choice selected other than 'any'.
-      foreach ($filters as $filter => $options) {
-        if (isset($form_state['values'][$filter]) && $form_state['values'][$filter] != '[any]') {
-          $_SESSION['user_overview_filter'][] = array($filter, $form_state['values'][$filter]);
-        }
-      }
-      break;
-    case t('Undo'):
-      array_pop($_SESSION['user_overview_filter']);
-      break;
-    case t('Reset'):
-      $_SESSION['user_overview_filter'] = array();
-      break;
-    case t('Update'):
-      return;
+function user_multiple_cancel_confirm_submit($form, &$form_state) {
+  global $user;
+
+  foreach ($form_state['accounts'] as $uid => $account) {
+    // Prevent programmatic form submissions from cancelling user 1.
+    if ($uid <= 1) {
+      continue;
+    }
+    // Prevent user administrators from deleting themselves without confirmation.
+    if ($uid == $user->uid) {
+      $admin_form_state = $form_state;
+      unset($admin_form_state['values']['user_cancel_confirm']);
+      // The $user global is not a complete user entity, so load the full
+      // entity.
+      $admin_form_state['values']['_account'] = user_load($user->uid);
+      user_cancel_confirm_form_submit(array(), $admin_form_state);
+    }
+    else {
+      user_cancel($form_state['values'], $uid, $form_state['values']['user_cancel_method']);
+    }
   }
 
   $form_state['redirect'] = 'admin/people';
-  return;
-}
-
-/**
- * Form builder; User administration page.
- *
- * @ingroup forms
- * @see user_admin_account_validate()
- * @see user_admin_account_submit()
- */
-function user_admin_account() {
-
-  $header = array(
-    'username' => array('data' => t('Username'), 'field' => 'u.name'),
-    'status' => array('data' => t('Status'), 'field' => 'u.status', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'roles' => array('data' => t('Roles'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'member_for' => array('data' => t('Member for'), 'field' => 'u.created', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'access' => array('data' => t('Last access'), 'field' => 'u.access', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'operations' => t('Operations'),
-  );
-
-  $query = db_select('users', 'u');
-  $query->condition('u.uid', 0, '<>');
-  user_build_filter_query($query);
-
-  $count_query = clone $query;
-  $count_query->addExpression('COUNT(u.uid)');
-
-  $query = $query->extend('PagerDefault')->extend('TableSort');
-  $query
-    ->fields('u', array('uid', 'name', 'status', 'created', 'access'))
-    ->limit(50)
-    ->orderByHeader($header)
-    ->setCountQuery($count_query);
-  $result = $query->execute();
-
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#attributes' => array('class' => array('container-inline')),
-  );
-  $options = array();
-  foreach (module_invoke_all('user_operations') as $operation => $array) {
-    $options[$operation] = $array['label'];
-  }
-  $form['options']['operation'] = array(
-    '#type' => 'select',
-    '#title' => t('Operation'),
-    '#title_display' => 'invisible',
-    '#options' => $options,
-    '#default_value' => 'unblock',
-  );
-  $options = array();
-  $form['options']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-  );
-
-  $destination = backdrop_get_destination();
-
-  $status = array(t('blocked'), t('active'));
-  $roles = user_roles(TRUE);
-  foreach ($result as $account) {
-    $users_roles = array();
-    $roles_result = db_query('SELECT role FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
-    foreach ($roles_result as $user_role) {
-      $users_roles[] = check_plain($roles[$user_role->role]);
-    }
-    asort($users_roles);
-
-    $options[$account->uid] = array(
-      'username' => theme('username', array('account' => $account)),
-      'status' =>  $status[$account->status],
-      'roles' => theme('item_list', array('items' => $users_roles)),
-      'member_for' => format_interval(REQUEST_TIME - $account->created),
-      'access' =>  $account->access ? t('@time ago', array('@time' => format_interval(REQUEST_TIME - $account->access))) : t('never'),
-    );
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => "user/$account->uid/edit",
-      'query' => $destination,
-    );
-    $options[$account->uid]['operations']['data'] = array(
-      '#type' => 'operations',
-      '#links' => $links,
-    );
-  }
-
-  $form['accounts'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $options,
-    '#empty' => t('No people available.'),
-  );
-  $form['pager'] = array('#markup' => theme('pager'));
-
-  return $form;
-}
-
-/**
- * Submit the user administration update form.
- */
-function user_admin_account_submit($form, &$form_state) {
-  $operations = module_invoke_all('user_operations', $form, $form_state);
-  $operation = $operations[$form_state['values']['operation']];
-  // Filter out unchecked accounts.
-  $accounts = array_filter($form_state['values']['accounts']);
-  if ($function = $operation['callback']) {
-    // Add in callback arguments if present.
-    if (isset($operation['callback arguments'])) {
-      $args = array_merge(array($accounts), $operation['callback arguments']);
-    }
-    else {
-      $args = array($accounts);
-    }
-    call_user_func_array($function, $args);
-
-    backdrop_set_message(t('The update has been performed.'));
-  }
-}
-
-function user_admin_account_validate($form, &$form_state) {
-  $form_state['values']['accounts'] = array_filter($form_state['values']['accounts']);
-  if (count($form_state['values']['accounts']) == 0) {
-    form_set_error('', t('No users selected.'));
-  }
 }
 
 /**
