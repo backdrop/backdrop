@@ -13,26 +13,6 @@
 // Note that the search block is already positioned in the sidebar_first.
 db_update('block')
   ->fields(array(
-    'region' => 'sidebar_second',
-    'status' => '1',
-  ))
-  ->condition('module', 'user')
-  ->condition('delta', 'online')
-  ->condition('theme', 'bartik')
-  ->execute();
-
-db_update('block')
-  ->fields(array(
-    'region' => 'triptych_first',
-    'status' => '1',
-  ))
-  ->condition('module', 'user')
-  ->condition('delta', 'new')
-  ->condition('theme', 'bartik')
-  ->execute();
-
-db_update('block')
-  ->fields(array(
     'region' => 'triptych_middle',
     'status' => '1',
   ))
@@ -127,8 +107,8 @@ db_insert('block_role')
     'rid',
   ))
   ->values(array(
-    'module' => 'user',
-    'delta' => 'new',
+    'module' => 'system',
+    'delta' => 'user-menu',
     'rid' => 2,
   ))
   ->execute();

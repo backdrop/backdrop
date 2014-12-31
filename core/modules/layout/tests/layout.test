@@ -1096,6 +1096,16 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($path_blocks);
     $this->backdropGet('user/1');
     $this->assertNoBlocks($path_blocks);
+
+    // Logout, and check the homepage for the Account menu block, which should
+    // only be visible to authenticated users.
+    $this->backdropLogout();
+    $this->backdropGet('<front>');
+    $this->assertNoBlocks(array(
+      '.region-footer-thirdcolumn' => array(
+        'block-system-user-menu',
+      ),
+    ));
   }
 
   protected function assertBlocks($blocks, $negate = FALSE) {
