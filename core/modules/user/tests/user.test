@@ -1990,10 +1990,10 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
    * Creates a user, then tests the tokens generated from it.
    */
   function testUserTokenReplacement() {
-    global $language_interface;
+    global $language;
     $url_options = array(
       'absolute' => TRUE,
-      'language' => $language_interface,
+      'language' => $language,
     );
 
     // Create two users and log them in one after another.
@@ -2013,17 +2013,17 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[user:mail]'] = check_plain($account->mail);
     $tests['[user:url]'] = url("user/$account->uid", $url_options);
     $tests['[user:edit-url]'] = url("user/$account->uid/edit", $url_options);
-    $tests['[user:last-login]'] = format_date($account->login, 'medium', '', NULL, $language_interface->langcode);
-    $tests['[user:last-login:short]'] = format_date($account->login, 'short', '', NULL, $language_interface->langcode);
-    $tests['[user:created]'] = format_date($account->created, 'medium', '', NULL, $language_interface->langcode);
-    $tests['[user:created:short]'] = format_date($account->created, 'short', '', NULL, $language_interface->langcode);
+    $tests['[user:last-login]'] = format_date($account->login, 'medium', '', NULL, $language->langcode);
+    $tests['[user:last-login:short]'] = format_date($account->login, 'short', '', NULL, $language->langcode);
+    $tests['[user:created]'] = format_date($account->created, 'medium', '', NULL, $language->langcode);
+    $tests['[user:created:short]'] = format_date($account->created, 'short', '', NULL, $language->langcode);
     $tests['[current-user:name]'] = check_plain(user_format_name($global_account));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('user' => $account), array('language' => $language_interface));
+      $output = token_replace($input, array('user' => $account), array('language' => $language));
       $this->assertEqual($output, $expected, format_string('Sanitized user token %token replaced.', array('%token' => $input)));
     }
 
@@ -2033,7 +2033,7 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[current-user:name]'] = user_format_name($global_account);
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('user' => $account), array('language' => $language_interface, 'sanitize' => FALSE));
+      $output = token_replace($input, array('user' => $account), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized user token %token replaced.', array('%token' => $input)));
     }
   }

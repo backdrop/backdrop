@@ -129,7 +129,7 @@ function contact_site_form_validate($form, &$form_state) {
  * @see contact_site_form_validate()
  */
 function contact_site_form_submit($form, &$form_state) {
-  global $user, $language_interface;
+  global $user, $language;
 
   $values = $form_state['values'];
   $values['sender'] = $user;
@@ -151,12 +151,12 @@ function contact_site_form_submit($form, &$form_state) {
 
   // If the user requests it, send a copy using the current language.
   if ($values['copy']) {
-    backdrop_mail('contact', 'page_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'page_copy', $from, $language, $values, $from);
   }
 
   // Send an auto-reply if necessary using the current language.
   if ($values['category']['reply']) {
-    backdrop_mail('contact', 'page_autoreply', $from, $language_interface, $values, $to);
+    backdrop_mail('contact', 'page_autoreply', $from, $language, $values, $to);
   }
 
   $config = config('contact.settings');
@@ -257,7 +257,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
  * @see contact_personal_form_validate()
  */
 function contact_personal_form_submit($form, &$form_state) {
-  global $user, $language_interface;
+  global $user, $language;
 
   $values = $form_state['values'];
   $values['sender'] = $user;
@@ -278,7 +278,7 @@ function contact_personal_form_submit($form, &$form_state) {
 
   // Send a copy if requested, using current page language.
   if ($values['copy']) {
-    backdrop_mail('contact', 'user_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'user_copy', $from, $language, $values, $from);
   }
 
   $config = config('contact.settings');

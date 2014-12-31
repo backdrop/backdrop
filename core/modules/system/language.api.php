@@ -24,9 +24,9 @@
  * did not happen yet and thus they cannot rely on translated variables.
  */
 function hook_language_init() {
-  global $language_interface, $settings;
+  global $language, $settings;
 
-  switch ($language_interface->language) {
+  switch ($language->language) {
     case 'it':
       $settings['locale_custom_strings_en']['site_name'] = 'Il mio sito Backdrop';
       break;

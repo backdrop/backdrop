@@ -137,7 +137,7 @@ function language_update_1001() {
   // hook_language_negotiation_info() as a cache, now we just store the order.
   $negotiation = array(
     'language_content' => array(),
-    'language_interface' => array(),
+    'language' => array(),
     'language_url' => array(),
   );
   foreach ($negotiation as $language_type => $negotiation_data) {
@@ -153,7 +153,7 @@ function language_update_1001() {
   update_variable_del('language_default');
   update_variable_del('language_count');
   update_variable_del('language_negotiation_language_content');
-  update_variable_del('language_negotiation_language_interface');
+  update_variable_del('language_negotiation_language');
   update_variable_del('language_negotiation_language_url');
 
   // The language_types variable is no longer used in Backdrop.

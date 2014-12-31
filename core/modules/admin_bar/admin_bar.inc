@@ -14,11 +14,11 @@
  *   page.
  */
 function admin_bar_output($complete = FALSE) {
-  global $user, $language_interface;
+  global $user, $language;
   $config = config('admin_bar.settings');
 
   $cache_server_enabled = !$complete;
-  $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
+  $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language->langcode;
 
   // Try to load and output administration bar from server-side cache. The
   // cache is only valid if a hash key exists, otherwise it needs to be

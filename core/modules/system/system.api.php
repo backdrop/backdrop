@@ -1799,7 +1799,7 @@ function hook_custom_theme() {
  *     the message is not possible to translate.
  */
 function hook_watchdog(array $log_entry) {
-  global $base_url, $language_interface;
+  global $base_url, $language;
 
   $severity_list = array(
     WATCHDOG_EMERGENCY     => t('Emergency'),
@@ -1845,7 +1845,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language_interface, $params);
+  backdrop_mail('emaillog', 'entry', $to, $language, $params);
 }
 
 /**

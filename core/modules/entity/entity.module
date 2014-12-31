@@ -30,7 +30,7 @@ function entity_modules_disabled() {
  * @see hook_entity_info_alter()
  */
 function entity_get_info($entity_type = NULL) {
-  global $language_interface;
+  global $language;
 
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
@@ -41,7 +41,7 @@ function entity_get_info($entity_type = NULL) {
 
   // hook_entity_info() includes translated strings, so each language is cached
   // separately.
-  $langcode = $language_interface->langcode;
+  $langcode = $language->langcode;
 
   if (empty($entity_info)) {
     if ($cache = cache()->get("entity_info:$langcode")) {

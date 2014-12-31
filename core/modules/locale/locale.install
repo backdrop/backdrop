@@ -222,44 +222,7 @@ function locale_update_1000() {
  * Language type 'language' renamed to 'language_interface'.
  */
 function locale_update_1001() {
-  // Rename language_negotiation_language setting if exists.
-  $setting = update_variable_get('language_negotiation_language', NULL);
-  if ($setting !== NULL) {
-    update_variable_set('language_negotiation_language_interface', $setting);
-    update_variable_del('language_negotiation_language');
-  }
-
-  // Rename locale_language_providers_weight_language setting if exists.
-  $weight = update_variable_get('locale_language_providers_weight_language', NULL);
-  if ($weight !== NULL) {
-    update_variable_set('locale_language_providers_weight_language_interface', $weight);
-    update_variable_del('locale_language_providers_weight_language');
-  }
-
-  // Update block data in all core block related tables. Contributed modules
-  // storing data for blocks will need to update for themselves.
-  $block_tables = array('block', 'block_node_type', 'block_role');
-  foreach ($block_tables as $table) {
-    // Perform the update only if the language switcher block data is available.
-    $block_data = db_query_range('SELECT 1 FROM {' . $table . '} WHERE delta = :delta AND module = :module', 0, 1, array(':delta' => 'language', ':module' => 'locale'))
-      ->fetchField();
-    if ($block_data) {
-      // If block information is rebuilt before performing the update, we might
-      // already have data for the new delta. In this case we need to remove it
-      // to avoid integrity constraint violation errors.
-      db_delete($table)
-        ->condition('delta', 'language_interface')
-        ->condition('module', 'locale')
-        ->execute();
-      db_update($table)
-        ->fields(array(
-          'delta' => 'language_interface',
-        ))
-        ->condition('delta', 'language')
-        ->condition('module', 'locale')
-        ->execute();
-    }
-  }
+  // Update removed. See https://github.com/backdrop/backdrop-issues/issues/445.
 }
 
 /**
@@ -351,8 +314,8 @@ function locale_update_1004() {
     $old_config->delete();
   }
 
-  $config->set('language_negotiation_url_type', update_variable_get('locale_language_negotiation_url_type', 'language_interface'));
-  $config->set('language_providers_weight_language_interface', update_variable_get('locale_language_providers_weight_language_interface'));
+  $config->set('language_negotiation_url_type', update_variable_get('locale_language_negotiation_url_type', 'language'));
+  $config->set('language_providers_weight_language', update_variable_get('locale_language_providers_weight_language'));
   $config->set('cache_length', update_variable_get('locale_cache_length', 75));
   $config->set('field_language_fallback', update_variable_get('locale_field_language_fallback', TRUE));
   $config->set('translate_english', update_variable_get('locale_translate_english', FALSE));
@@ -363,7 +326,7 @@ function locale_update_1004() {
 
   // Moved to config:
   update_variable_del('locale_language_negotiation_url_type');
-  update_variable_del('locale_language_providers_weight_language_interface');
+  update_variable_del('locale_language_providers_weight_language');
   update_variable_del('locale_cache_length');
   update_variable_del('locale_field_language_fallback');
   update_variable_del('locale_translate_english');

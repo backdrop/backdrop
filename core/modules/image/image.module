@@ -912,11 +912,11 @@ function image_default_style_revert($style) {
  * @see image_effect_definition_load()
  */
 function image_effect_definitions() {
-  global $language_interface;
+  global $language;
 
   // hook_image_effect_info() includes translated strings, so each language is
   // cached separately.
-  $langcode = $language_interface->langcode;
+  $langcode = $language->langcode;
 
   $effects = &backdrop_static(__FUNCTION__);
 

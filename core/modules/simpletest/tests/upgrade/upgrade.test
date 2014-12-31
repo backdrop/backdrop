@@ -47,7 +47,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
    * @see BackdropWebTestCase::prepareEnvironment()
    */
   protected function setUp() {
-    global $user, $language_interface, $conf;
+    global $user, $language, $conf;
 
     // Load the Update API.
     require_once BACKDROP_ROOT . '/core/includes/update.inc';

@@ -137,7 +137,7 @@ function admin_bar_preprocess_page(&$variables) {
     return;
   }
 
-  global $user, $language_interface;
+  global $user, $language;
   $path = backdrop_get_path('module', 'admin_bar');
 
   $options = array('every_page' => TRUE);
@@ -165,7 +165,7 @@ function admin_bar_preprocess_page(&$variables) {
 
   // If we have a cached menu for the current user, only output the hash for the
   // client-side HTTP cache callback URL.
-  $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
+  $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language->langcode;
   if (!$complete && ($hash = admin_bar_cache_get($cid))) {
     $settings['hash'] = $hash;
 
@@ -325,8 +325,8 @@ function admin_bar_deliver($page_callback_result) {
   backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
 
   // Send appropriate language header for browsers.
-  global $language_interface;
-  backdrop_add_http_header('Content-Language', $language_interface->langcode);
+  global $language;
+  backdrop_add_http_header('Content-Language', $language->langcode);
 
   // The page callback is always admin_bar_js_cache(), which always returns a
   // string, and is only accessed when the user actually has access to it.

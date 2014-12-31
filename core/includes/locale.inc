@@ -112,8 +112,8 @@ const LANGUAGE_NEGOTIATION_URL_DOMAIN = 'domain';
  *   The current interface language code.
  */
 function locale_language_from_interface() {
-  global $language_interface;
-  return isset($language_interface->langcode) ? $language_interface->langcode : FALSE;
+  global $language;
+  return isset($language->langcode) ? $language->langcode : FALSE;
 }
 
 /**
@@ -717,8 +717,8 @@ function _locale_invalidate_js($langcode = NULL) {
  */
 function _locale_rebuild_js($langcode = NULL) {
   if (!isset($langcode)) {
-    global $language_interface;
-    $language = $language_interface;
+    global $language;
+    $language = $language;
   }
   else {
     // Get information about the locale.

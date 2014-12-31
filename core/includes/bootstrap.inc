@@ -195,7 +195,7 @@ const LANGUAGE_TYPE_CONTENT = 'language_content';
 /**
  * The type of language used to select the user interface.
  */
-const LANGUAGE_TYPE_INTERFACE = 'language_interface';
+const LANGUAGE_TYPE_INTERFACE = 'language';
 
 /**
  * The type of language used for URLs.
@@ -1704,7 +1704,7 @@ function backdrop_unpack($obj, $field = 'data') {
  * @ingroup sanitization
  */
 function t($string, array $args = array(), array $options = array()) {
-  global $language_interface;
+  global $language;
 
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
@@ -1716,7 +1716,7 @@ function t($string, array $args = array(), array $options = array()) {
 
   // Merge in default.
   if (empty($options['langcode'])) {
-    $options['langcode'] = isset($language_interface->langcode) ? $language_interface->langcode : LANGUAGE_SYSTEM;
+    $options['langcode'] = isset($language->langcode) ? $language->langcode : LANGUAGE_SYSTEM;
   }
   if (empty($options['context'])) {
     $options['context'] = '';
