@@ -66,11 +66,11 @@ td.active {
   margin: 0 0 0.75em 0;
   padding: 0;
 }
-.item-list ul li {
+.item-list li {
   margin: 0 0 0.25em 1.5em; /* LTR */
   padding: 0;
 }
-[dir="rtl"] .item-list ul li {
+[dir="rtl"] .item-list li {
   margin: 0 1.5em 0.25em 0;
 }
 

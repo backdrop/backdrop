@@ -26,37 +26,33 @@
 
   <div id="page-wrapper"><div id="page">
 
-    <header id="header" role="banner"><div class="section clearfix">
+    <header id="header" role="banner">
       <?php if ($site_name || $site_slogan): ?>
         <div id="name-and-slogan">
           <?php if ($site_name): ?>
-            <div id="site-name">>
-              <strong>
-                <?php print $site_name; ?>
-              </strong>
+            <div class="site-name">
+              <?php print $site_name; ?>
             </div>
           <?php endif; ?>
           <?php if ($site_slogan): ?>
-            <div id="site-slogan">
+            <div class="site-slogan">
               <?php print $site_slogan; ?>
             </div>
           <?php endif; ?>
         </div> <!-- /#name-and-slogan -->
       <?php endif; ?>
-    </div></header> <!-- /.section, /#header -->
+    </header>
 
-    <div id="main-wrapper"><div id="main" class="clearfix">
-      <main id="content" class="column" role="main"><section class="section">
-        <a id="main-content"></a>
-        <?php if ($title): ?><h1 class="title" id="page-title"><?php print $title; ?></h1><?php endif; ?>
-        <?php print $content; ?>
-        <?php if ($messages): ?>
-          <div id="messages"><div class="section clearfix">
-            <?php print $messages; ?>
-          </div></div> <!-- /.section, /#messages -->
-        <?php endif; ?>
-      </section></main> <!-- /.section, /#content -->
-    </div></div> <!-- /#main, /#main-wrapper -->
+    <main id="content" class="column" role="main">
+      <a id="main-content"></a>
+      <?php if ($title): ?><h1 class="title" id="page-title"><?php print $title; ?></h1><?php endif; ?>
+      <?php print $content; ?>
+      <?php if ($messages): ?>
+        <div id="messages">
+          <?php print $messages; ?>
+        </div>
+      <?php endif; ?>
+    </main>
 
   </div></div> <!-- /#page, /#page-wrapper -->
 

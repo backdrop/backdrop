@@ -76,8 +76,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Add block'));
 
     // Record the UUID for the newly added block.
-    $last_block = $this->xpath('(//*[@id=:region]//*[@data-block-id])[last()]', array(
-      ':region' => 'sidebar',
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
     ));
     $block_uuid = (string) $last_block[0]['data-block-id'];
     $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
@@ -94,8 +94,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet($layout_url);
     $this->assertText('Foo subject');
     $this->assertText(format_string('The setting of count is @setting.', array('@setting' => 5)));
-    $elements = $this->xpath('//*[@id=:region]//*[contains(@class,:block)]', array(
-      ':region' => 'sidebar',
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($elements), 1, 'The sample block was found in the sidebar.');
@@ -133,8 +133,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet($layout_url);
     $this->assertText('Foo subject');
     $this->assertNoText($block_new_title);
-    $block_element = $this->xpath('(//*[@id=:region]//*[contains(@class,:block)])[contains(@class,:custom-class)]', array(
-      ':region' => 'sidebar',
+    $block_element = $this->xpath('(//*[contains(@class,:region)]//*[contains(@class,:block)])[contains(@class,:custom-class)]', array(
+      ':region' => 'l-sidebar',
       ':block' => 'block-layout-test-foo',
       ':custom-class' => $custom_class,
     ));
@@ -159,8 +159,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
-    $block_element = $this->xpath('(//*[@id=:region]//aside[contains(@class,:block)])[contains(@class,:custom-class)]', array(
-      ':region' => 'sidebar',
+    $block_element = $this->xpath('(//*[contains(@class,:region)]//aside[contains(@class,:block)])[contains(@class,:custom-class)]', array(
+      ':region' => 'l-sidebar',
       ':block' => 'block-layout-test-foo',
       ':custom-class' => $custom_class,
     ));
@@ -181,8 +181,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, $edit, t('Save layout'));
     $this->backdropGet($layout_url);
-    $block_element = $this->xpath('//*[@id=:region]//*[contains(@class,:block)]', array(
-      ':region' => 'content',
+    $block_element = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-content',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($block_element), 1, 'The sample block was found in the content area after moving it from the sidebar.');
@@ -195,8 +195,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
-    $block_element = $this->xpath('(//*[@id=:region]//*[contains(@class,:block)])', array(
-      ':region' => 'footer',
+    $block_element = $this->xpath('(//*[contains(@class,:region)]//*[contains(@class,:block)])', array(
+      ':region' => 'l-footer',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($block_element), 1, 'The sample block was found in the footer after moving via block form.');
@@ -208,8 +208,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $layout->save();
 
     $this->backdropGet($layout_url);
-    $block_element = $this->xpath('(//*[@id=:region]//*[contains(@class,:block)])', array(
-      ':region' => 'sidebar',
+    $block_element = $this->xpath('(//*[contains(@class,:region)]//*[contains(@class,:block)])', array(
+      ':region' => 'l-sidebar',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($block_element), 1, 'The sample block was found in the sidebar after moving via the API.');
@@ -218,7 +218,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // still only shown once, and did not end up in multiple regions on the page
     // by accident.
     $block_element = $this->xpath('//*[contains(@class,:block)]', array(
-      ':region' => 'content',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($block_element), 1, 'The sample block is only displayed once after moving it.');
@@ -235,7 +234,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet($layout_url);
     $this->assertNoText('Foo subject');
     $block_element = $this->xpath('//*[contains(@class,:block)]', array(
-      ':region' => 'content',
       ':block' => 'block-layout-test-foo',
     ));
     $this->assertEqual(count($block_element), 0, 'The sample block has been removed.');
@@ -350,8 +348,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Add block'));
 
     // Record the UUID for the newly added block.
-    $last_block = $this->xpath('(//*[@id="layout-content-form"]//*[@id=:region]//*[@data-block-id])[last()]', array(
-      ':region' => 'content',
+    $last_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-content',
     ));
     $block_uuid = (string) $last_block[0]['data-block-id'];
     $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
@@ -429,8 +427,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Add block'));
 
     // Record the UUID for the newly added block.
-    $last_block = $this->xpath('(//*[@id=:region]//*[@data-block-id])[last()]', array(
-      ':region' => 'sidebar',
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
     ));
     $block_uuid = (string) $last_block[0]['data-block-id'];
 
@@ -443,8 +441,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Visit the sample node page and check that the block is visible.
     $this->backdropGet('node/1');
-    $block_element = $this->xpath('//*[@id=:region]//*[contains(@class,:block)]', array(
-      ':region' => 'sidebar',
+    $block_element = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
       ':block' => 'block-layout-test-test-node-title',
     ));
     $this->assertEqual(count($block_element), 1, 'The block is shown on the overridden path.');
@@ -531,8 +529,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Add block'));
 
     // Record the UUID for the newly added block.
-    $last_block = $this->xpath('(//*[@id="layout-edit-main"]//*[@id=:region]//*[@data-block-id])[last()]', array(
-      ':region' => 'sidebar',
+    $last_block = $this->xpath('(//*[@id="layout-edit-main"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
     ));
     $new_content_block_uuid = (string) $last_block[0]['data-block-id'];
 
@@ -547,8 +545,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->assertText(t('The "@block" block may only be added once to this layout.', array('@block' => t('Main page content'))));
 
     // Delete the previous content block.
-    $old_content_block = $this->xpath('//*[@id="layout-edit-main"]//*[@id=:region]//*[@data-block-id]', array(
-      ':region' => 'content',
+    $old_content_block = $this->xpath('//*[@id="layout-edit-main"]//*[contains(@class,:region)]//*[@data-block-id]', array(
+      ':region' => 'l-content',
     ));
     $old_content_block_uuid = (string) $old_content_block[0]['data-block-id'];
     $remove_link = $this->xpath('//*[@id="layout-edit-main"]//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
@@ -564,8 +562,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // the main content block does *not* have any wrappers, so we check directly
     // for the content we expect at /node, which is a list of article tags.
     $this->backdropGet($layout_path);
-    $front_end_content = $this->xpath('//*[@id=:region]/div[@class="section"]/div[@id=:page-content]', array(
-      ':region' => 'sidebar',
+    $front_end_content = $this->xpath('//*[contains(@class,:region)]/div[@id=:page-content]', array(
+      ':region' => 'l-sidebar',
       ':page-content' => 'layout-test-page-content',
     ));
     $this->assertEqual(count($front_end_content), 1, 'Main content shown in sidebar after moving main content block.');
@@ -592,8 +590,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Edit the default layout and ensure that the main content block cannot be
     // removed.
     $this->backdropGet('admin/structure/layouts/manage/default');
-    $default_content_block = $this->xpath('//*[@id="layout-edit-main"]//*[@id=:region]//*[@data-block-id]', array(
-      ':region' => 'content',
+    $default_content_block = $this->xpath('//*[@id="layout-edit-main"]//*[contains(@class,:region)]//*[@data-block-id]', array(
+      ':region' => 'l-content',
     ));
     $default_content_block_uuid = (string) $default_content_block[0]['data-block-id'];
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
@@ -956,6 +954,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'access administration pages',
       'administer content types',
       'view the administration theme',
+      'administer filters',
     ));
     $this->backdropLogin($admin_user);
 
@@ -988,12 +987,12 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   }
 
   private function assertIsDefaultLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout-two-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--two-column")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
   }
 
   private function assertIsAdminLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout-one-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--one-column")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
   }
 }
@@ -1019,37 +1018,37 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
 
     $this->backdropGet('<front>');
     $blocks = array(
-      '#header' => array(
+      'l-header' => array(
         'block-system-header',
         'block-system-main-menu',
       ),
-      '#sidebar-first' => array(
+      'l-sidebar-first' => array(
         'block-search-form',
       ),
-      '.region-triptych-middle' => array(
+      'l-triptych-middle' => array(
         'block-node-syndicate',
       ),
-      '.region-footer-firstcolumn' => array(
+      'l-footer-first-column' => array(
         'block-system-main-menu',
       ),
-      '.region-footer-secondcolumn' => array(
+      'l-footer-second-column' => array(
         'block-system-management',
       ),
-      '.region-footer-thirdcolumn' => array(
+      'l-footer-third-column' => array(
         'block-system-user-menu',
       ),
-      '.region-footer-fourthcolumn' => array(
+      'l-footer-fourth-column' => array(
         // No blocks in forth column. The "navigation" block had been here in
         // the D7 dump, but the navigation menu was removed in Backdrop.
       ),
-      '#footer' => array(
+      'l-footer' => array(
         'block-system-powered-by'
       ),
     );
 
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
-      '.region-footer-fourthcolumn' => array(
+      'l-footer-fourth-column' => array(
         'block', // No blocks at all should be in the fourth column
       ),
     ));
@@ -1061,7 +1060,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     ));
     $this->backdropGet('node/' . $article_node->nid);
     $article_blocks = $blocks;
-    $article_blocks['#sidebar-second'][] = 'block-node-recent';
+    $article_blocks['sidebar-second'][] = 'block-node-recent';
     $this->assertBlocks($article_blocks);
 
     // Check that the blocks are NOT available on page content.
@@ -1073,7 +1072,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->backdropGet('node/' . $page_node->nid);
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
-      '#sidebar_second' => array(
+      'l-sidebar-section' => array(
         'block-node-recent'
       ),
     ));
@@ -1086,7 +1085,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     // The Recent Comments block should still be shown on the homepage, but not
     // on paths other than node*.
     $path_blocks = array(
-      '.region-triptych-last' => array(
+      'l-triptych-last' => array(
         'block-comment-recent',
       ),
     );
@@ -1110,14 +1109,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
 
   protected function assertBlocks($blocks, $negate = FALSE) {
     foreach ($blocks as $region => $block_classes) {
-      if (substr($region, 0, 1) === '#') {
-        $selector = '//*[@id=:region]';
-      }
-      else {
-        $selector = '//*[contains(@class,:region)]';
-      }
-      $region = substr($region, 1);
-      $selector .= '//*[contains(@class,:block)]';
+      $selector = '//*[contains(@class,:region)]//*[contains(@class,:block)]';
       foreach ($block_classes as $block_class) {
         $elements = $this->xpath($selector, array(
           ':region' => $region,

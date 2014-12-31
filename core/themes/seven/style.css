@@ -134,20 +134,20 @@ ul.menu li.expanded {
   background: #999;
 }
 
-#header ul.menu {
+.l-header ul.menu {
   list-style: none;
   margin: 0;
   padding: 0;
   display: inline;
 }
-#header ul.menu li {
+.l-header ul.menu li {
   padding-right: 1em; /* LTR */
 }
-[dir="rtl"] #header ul.menu li {
+[dir="rtl"] .l-header ul.menu li {
   padding-left: 1em;
   padding-right: 0;
 }
-#header ul.menu li {
+.l-header ul.menu li {
   display: inline;
 }
 .header-menu ul.links li.active-trail a,
@@ -281,14 +281,17 @@ ul.secondary li.active a.active {
   /* Add a margin to all layouts. */
   margin: 0 20px;
 }
-#header {
+.l-header {
   /* Then add a negative margin the header the same amount. */
   padding: 20px 20px 0;
-  margin: 0 -20px 20px;
+  margin: 0 -20px 20px !important;
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
   background-color: #e0e0d8;
 }
-.layout-one-column #messages,
-.layout-one-column #content .section {
+.layout--one-column #messages,
+.layout--one-column #content .section {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
@@ -830,7 +833,7 @@ div.admin-panel h3 {
 #layout-edit-main .layout {
   margin: 0;
 }
-#layout-edit-main #header {
+#layout-edit-main .l-header {
   padding: 0;
   margin: 0;
   background: none;
@@ -884,6 +887,7 @@ body.maintenance-page #page {
   min-width: 255px;
   margin: 0 auto;
   background: white;
+  position: relative;
 }
 body.maintenance-page #page:after {
   left: 100%; /* LTR */
@@ -1112,9 +1116,9 @@ div.add-or-remove-shortcuts {
 }
 
 @media all and (min-width: 768px) {
-  html, body {
-    height: 100%;
+  html {
     margin: 0;
+    height: 100%;
     width: 100%;
     display: table;
   }

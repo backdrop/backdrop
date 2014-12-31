@@ -20,52 +20,54 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-one-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout--one-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
 
   <?php if ($content['header']): ?>
-    <header id="header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
+    <header class="l-header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
       <?php print $content['header']; ?>
-    </div></header>
+    </header>
   <?php endif; ?>
 
   <?php if ($content['top']): ?>
-    <div id="top"><div class="section clearfix">
+    <div class="l-top">
       <?php print $content['top']; ?>
-    </div></div> <!-- /.section, /#top -->
+    </div>
   <?php endif; ?>
 
   <?php if ($messages): ?>
-    <div id="messages"><div class="section clearfix">
+    <section class="l-messages">
       <?php print $messages; ?>
-    </div></div> <!-- /.section, /#messages -->
+    </section>
   <?php endif; ?>
 
-  <main id="content" class="column" role="main"><div class="section">
-    <a id="main-content"></a>
-    <?php print render($title_prefix); ?>
-    <?php if ($title): ?>
-      <h1 class="title" id="page-title">
-        <?php print $title; ?>
-      </h1>
-    <?php endif; ?>
-    <?php print render($title_suffix); ?>
+  <div class="l-container">
+    <main class="l-content" role="main">
+      <a id="main-content"></a>
+      <?php print render($title_prefix); ?>
+      <?php if ($title): ?>
+        <h1 class="title" id="page-title">
+          <?php print $title; ?>
+        </h1>
+      <?php endif; ?>
+      <?php print render($title_suffix); ?>
 
-    <?php if ($tabs): ?>
-      <div class="tabs">
-        <?php print $tabs; ?>
-      </div>
-    <?php endif; ?>
+      <?php if ($tabs): ?>
+        <div class="tabs">
+          <?php print $tabs; ?>
+        </div>
+      <?php endif; ?>
 
-    <?php print $action_links; ?>
-    <?php print $content['content']; ?>
-  </div></main> <!-- /.section, /#content -->
+      <?php print $action_links; ?>
+      <?php print $content['content']; ?>
+    </main>
+  </div>
 
   <?php if ($content['footer']): ?>
-    <div id="footer" class="clearfix"><div class="section">
+    <div class="l-footer">
       <?php print $content['footer']; ?>
-    </div></div><!-- /.section, /#footer -->
+    </div>
   <?php endif; ?>
 </div>

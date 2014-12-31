@@ -7,10 +7,9 @@ body {
 .comment .comment-arrow {
   border-color: #ffffff;
 }
-#page,
-#main-wrapper,
-#header ul.menu li a.active,
-#header ul.menu li.active-trail a {
+.l-container,
+.l-header ul.menu li a.active,
+.l-header ul.menu li.active-trail a {
   background: #ffffff;
 }
 .tabs ul.primary li a.active {
@@ -20,7 +19,7 @@ body {
   background-color: #ffffff;
   border-bottom: 1px solid #ffffff;
 }
-#header {
+.l-header {
   color: #fffeff;
   background-color: #48a9e4;
   background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
@@ -40,17 +39,16 @@ a:focus {
 a:active {
   color: #23aeff;
 }
-.sidebar .block {
+.l-sidebar .block {
   background-color: #f6f6f2;
   border-color: #f9f9f9;
 }
-#page-wrapper,
-#footer-columns,
-#footer {
+.l-footer-wrapper,
+.l-footer {
   background: #292929;
 }
-#header a,
-#footer-columns,
-#footer-wrapper {
+.l-header a,
+.l-footer-wrapper,
+.l-footer {
   color: #fffeff;
 }
