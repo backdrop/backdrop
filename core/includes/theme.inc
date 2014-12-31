@@ -2513,8 +2513,8 @@ function template_preprocess_page(&$variables) {
 
   // Initialize attributes which are specific to the html and body elements.
   $variables['html_attributes'] = array();
-  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
-  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $GLOBALS['language']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language']->direction ? 'rtl' : 'ltr';
   $variables['body_attributes'] = array();
 
   // Add favicon.
@@ -2674,12 +2674,12 @@ function template_preprocess_maintenance_page(&$variables) {
   }
 
   // set the default language if necessary
-  $language = isset($GLOBALS['language_interface']) ? $GLOBALS['language_interface'] : language_default();
+  $language = isset($GLOBALS['language']) ? $GLOBALS['language'] : language_default();
 
   // Initialize attributes which are specific to the html element.
   $variables['html_attributes'] = array();
-  $variables['html_attributes']['lang'] = $GLOBALS['language_interface']->langcode;
-  $variables['html_attributes']['dir'] = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $GLOBALS['language']->langcode;
+  $variables['html_attributes']['dir'] = $GLOBALS['language']->direction ? 'rtl' : 'ltr';
 
   $variables['head_title_array']  = $head_title;
   $variables['head_title']        = implode(' | ', $head_title);

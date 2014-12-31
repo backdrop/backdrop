@@ -24,10 +24,10 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
    * Assert that the pluggable mail system is functional.
    */
   function testPluggableFramework() {
-    global $language_interface;
+    global $language;
 
     // Use MailTestCase for sending a message.
-    $message = backdrop_mail('simpletest', 'mail_test', 'testing@example.com', $language_interface);
+    $message = backdrop_mail('simpletest', 'mail_test', 'testing@example.com', $language);
 
     // Assert whether the message was sent through the send function.
     $this->assertEqual(self::$sent_message['to'], 'testing@example.com', 'Pluggable mail system is extendable.');

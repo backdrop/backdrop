@@ -259,7 +259,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[locale-url][enabled]' => 1);
+    $edit = array('language[locale-url][enabled]' => 1);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
   }
 
@@ -319,10 +319,10 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // Confirm that the alias works even when changing language negotiation
     // options. Enable User language detection and selection over URL one.
     $edit = array(
-      'language_interface[locale-user][enabled]' => 1,
-      'language_interface[locale-user][weight]' => -9,
-      'language_interface[locale-url][enabled]' => 1,
-      'language_interface[locale-url][weight]' => -8,
+      'language[locale-user][enabled]' => 1,
+      'language[locale-user][weight]' => -9,
+      'language[locale-url][enabled]' => 1,
+      'language[locale-url][weight]' => -8,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -346,7 +346,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     $this->assertText($french_node->title, 'Alias for French translation works.');
 
     // Disable URL language negotiation.
-    $edit = array('language_interface[locale-url][enabled]' => FALSE);
+    $edit = array('language[locale-url][enabled]' => FALSE);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Check that the English alias still works.
@@ -396,7 +396,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[locale-url][enabled]' => 1);
+    $edit = array('language[locale-url][enabled]' => 1);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
   }
 
@@ -477,7 +477,7 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
     $this->assertEqual(language_default()->langcode, 'fr', 'French is the default language');
 
     // Set language detection to URL.
-    $edit = array('language_interface[locale-url][enabled]' => TRUE);
+    $edit = array('language[locale-url][enabled]' => TRUE);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Force languages to be initialized.

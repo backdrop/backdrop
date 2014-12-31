@@ -1243,7 +1243,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
 
     // Check the UI language.
     backdrop_language_initialize();
-    $this->assertEqual($GLOBALS['language_interface']->langcode, $this->langcode, format_string('Current language: %lang', array('%lang' => $GLOBALS['language_interface']->langcode)));
+    $this->assertEqual($GLOBALS['language']->langcode, $this->langcode, format_string('Current language: %lang', array('%lang' => $GLOBALS['language']->langcode)));
 
     // Enable multilingual workflow option for articles.
     $node_type = node_type_load('article');
@@ -1290,7 +1290,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
 
     // Check the init language logic.
     backdrop_language_initialize();
-    $this->assertEqual($GLOBALS['language_interface']->langcode, 'en', format_string('Language after uninstall: %lang', array('%lang' => $GLOBALS['language_interface']->langcode)));
+    $this->assertEqual($GLOBALS['language']->langcode, 'en', format_string('Language after uninstall: %lang', array('%lang' => $GLOBALS['language']->langcode)));
 
     // Check JavaScript files deletion.
     $this->assertTrue($result = !file_exists($js_file), format_string('JavaScript file deleted: %file', array('%file' => $result ? $js_file : 'found')));
@@ -1370,7 +1370,7 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[locale-url][enabled]' => '1');
+    $edit = array('language[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Assert that the language switching block is displayed on the frontpage.
@@ -1625,7 +1625,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
 
     // Set language negotiation.
     $edit = array(
-      'language_interface[locale-url][enabled]' => TRUE,
+      'language[locale-url][enabled]' => TRUE,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->assertText(t('Language negotiation configuration saved.'), 'Set language negotiation.');
@@ -2258,17 +2258,17 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Enable browser and URL language detection.
     $edit = array(
-      'language_interface[locale-browser][enabled]' => TRUE,
-      'language_interface[locale-browser][weight]' => -8,
-      'language_interface[locale-url][enabled]' => TRUE,
-      'language_interface[locale-url][weight]' => -10,
+      'language[locale-browser][enabled]' => TRUE,
+      'language[locale-browser][weight]' => -8,
+      'language[locale-url][enabled]' => TRUE,
+      'language[locale-url][weight]' => -10,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->backdropGet('admin/config/regional/language/detection');
 
     // Enable the language switcher block.
     $layout = layout_load('default');
-    $layout->addBlock('locale', 'language_interface', 'sidebar');
+    $layout->addBlock('locale', 'language', 'sidebar');
     $layout->save();
 
     // Access the front page without specifying any valid URL language prefix
@@ -2280,7 +2280,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     // Check that the language switcher active link matches the given browser
     // language.
     $args = array(':url' => base_path() . (config_get('system.core', 'clean_url') ? $langcode_browser_fallback : "?q=$langcode_browser_fallback"));
-    $fields = $this->xpath('//*[contains(@class,"block-locale-language-interface")]//a[@class="language-link active" and @href=:url]', $args);
+    $fields = $this->xpath('//*[contains(@class,"block-locale-language")]//a[@class="language-link active" and @href=:url]', $args);
     $this->assertTrue($fields[0] == $languages[$langcode_browser_fallback]->name, 'The browser language is the URL active language');
 
     // Check that URLs are rewritten using the given browser language.
@@ -2302,8 +2302,8 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Enable browser and URL language detection.
     $edit = array(
-      'language_interface[locale-url][enabled]' => TRUE,
-      'language_interface[locale-url][weight]' => -10,
+      'language[locale-url][enabled]' => TRUE,
+      'language[locale-url][weight]' => -10,
     );
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
@@ -2369,7 +2369,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language', $edit, t('Save configuration'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[locale-url][enabled]' => 1);
+    $edit = array('language[locale-url][enabled]' => 1);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Reset static caching.
@@ -2446,7 +2446,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
     language_save($language);
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[locale-url][enabled]' => '1');
+    $edit = array('language[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Set "Basic page" content type to use multilingual support.
@@ -2567,7 +2567,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     // language will fall back to the default language if no URL language can be
     // detected.
     $edit = array(
-      'language_interface[locale-user][enabled]' => TRUE,
+      'language[locale-user][enabled]' => TRUE,
       'language_content[locale-url][enabled]' => TRUE,
       'language_content[locale-interface][enabled]' => FALSE,
     );

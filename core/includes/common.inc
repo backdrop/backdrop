@@ -2189,9 +2189,9 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   }
 
   // Use the interface langcode if none is set.
-  global $language_interface;
+  global $language;
   if (empty($langcode)) {
-    $langcode = isset($language_interface->langcode) ? $language_interface->langcode : LANGUAGE_SYSTEM;
+    $langcode = isset($language->langcode) ? $language->langcode : LANGUAGE_SYSTEM;
   }
 
   // Create a DateTime object from the timestamp.
@@ -2745,8 +2745,8 @@ function backdrop_deliver_html_page($page_callback_result) {
   }
 
   // Send appropriate HTTP-Header for browsers and search engines.
-  global $language_interface;
-  backdrop_add_http_header('Content-Language', $language_interface->langcode);
+  global $language;
+  backdrop_add_http_header('Content-Language', $language->langcode);
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {

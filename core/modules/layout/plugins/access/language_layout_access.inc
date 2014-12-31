@@ -39,18 +39,18 @@ class LanguageLayoutAccess extends LayoutAccess {
    * {@inheritdoc}
    */
   function checkAccess() {
-    global $language_interface;
+    global $language;
 
     // Specialcase: If 'default' is checked, return TRUE if the default site
     // language matches the current interface language.
     if (in_array('default', $this->settings['language'])) {
       $default = language_default();
-      if ($language_interface->langcode == $default->langcode) {
+      if ($language->langcode == $default->langcode) {
         return TRUE;
       }
     }
 
-    return in_array($language_interface->langcode, $this->settings['language']);
+    return in_array($language->langcode, $this->settings['language']);
   }
 
   /**

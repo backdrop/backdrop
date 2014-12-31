@@ -1023,10 +1023,10 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
    * Creates a file, then tests the tokens generated from it.
    */
   function testFileTokenReplacement() {
-    global $language_interface;
+    global $language;
     $url_options = array(
       'absolute' => TRUE,
-      'language' => $language_interface,
+      'language' => $language,
     );
 
     // Create file field.
@@ -1056,8 +1056,8 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
     $tests['[file:mime]'] = check_plain($file->filemime);
     $tests['[file:size]'] = format_size($file->filesize);
     $tests['[file:url]'] = check_plain(file_create_url($file->uri));
-    $tests['[file:timestamp]'] = format_date($file->timestamp, 'medium', '', NULL, $language_interface->langcode);
-    $tests['[file:timestamp:short]'] = format_date($file->timestamp, 'short', '', NULL, $language_interface->langcode);
+    $tests['[file:timestamp]'] = format_date($file->timestamp, 'medium', '', NULL, $language->langcode);
+    $tests['[file:timestamp:short]'] = format_date($file->timestamp, 'short', '', NULL, $language->langcode);
     $tests['[file:owner]'] = check_plain(user_format_name($this->admin_user));
     $tests['[file:owner:uid]'] = $file->uid;
 
@@ -1065,7 +1065,7 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('file' => $file), array('language' => $language_interface));
+      $output = token_replace($input, array('file' => $file), array('language' => $language));
       $this->assertEqual($output, $expected, format_string('Sanitized file token %token replaced.', array('%token' => $input)));
     }
 
@@ -1076,7 +1076,7 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
     $tests['[file:size]'] = format_size($file->filesize);
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('file' => $file), array('language' => $language_interface, 'sanitize' => FALSE));
+      $output = token_replace($input, array('file' => $file), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized file token %token replaced.', array('%token' => $input)));
     }
   }

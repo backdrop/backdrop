@@ -2342,7 +2342,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
    * Tests for the format_date() function.
    */
   function testFormatDate() {
-    global $user, $language_interface;
+    global $user, $language;
 
     $timestamp = strtotime('2007-03-26T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'America/Los_Angeles', 'en'), 'Sunday, 25-Mar-07 17:00:00 PDT', 'Test all parameters.');
@@ -2378,8 +2378,8 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     // Save the original user and language and then replace it with the test user and language.
     $real_user = $user;
     $user = user_load($test_user->uid, TRUE);
-    $real_language = $language_interface->langcode;
-    $language_interface->langcode = $user->language;
+    $real_language = $language->langcode;
+    $language->langcode = $user->language;
     // Simulate a Backdrop bootstrap with the logged-in user.
     date_default_timezone_set(backdrop_get_user_timezone());
 
@@ -2401,7 +2401,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
 
     // Restore the original user and language, and enable session saving.
     $user = $real_user;
-    $language_interface->langcode = $real_language;
+    $language->langcode = $real_language;
     // Restore default time zone.
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);

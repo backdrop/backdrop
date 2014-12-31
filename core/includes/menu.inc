@@ -1143,7 +1143,7 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
   // Use $mlid as a flag for whether the data being loaded is for the whole tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
   // Generate a cache ID (cid) specific for this $menu_name, $link, $language, and depth.
-  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $max_depth;
+  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $GLOBALS['language']->langcode . ':' . (int) $max_depth;
 
   if (!isset($tree[$cid])) {
     // If the static variable doesn't have the data, check {cache_menu}.
@@ -1257,7 +1257,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
       $max_depth = min($max_depth, MENU_MAX_DEPTH);
     }
     // Generate a cache ID (cid) specific for this page.
-    $cid = 'links:' . $menu_name . ':page:' . $item['href'] . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
+    $cid = 'links:' . $menu_name . ':page:' . $item['href'] . ':' . $GLOBALS['language']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
     // In order to not build a giant menu tree that needs to be checked for
     // access on all levels, we simply check whether we have the menu already
     // in cache, or otherwise, build a minimum tree containing the
@@ -1406,7 +1406,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
   if (isset($parameters['expanded'])) {
     sort($parameters['expanded']);
   }
-  $tree_cid = 'links:' . $menu_name . ':tree-data:' . $GLOBALS['language_interface']->langcode . ':' . hash('sha256', serialize($parameters));
+  $tree_cid = 'links:' . $menu_name . ':tree-data:' . $GLOBALS['language']->langcode . ':' . hash('sha256', serialize($parameters));
 
   // If we do not have this tree in the static cache, check {cache_menu}.
   if (!isset($trees[$tree_cid])) {

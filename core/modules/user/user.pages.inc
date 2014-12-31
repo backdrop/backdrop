@@ -80,11 +80,11 @@ function user_pass_validate($form, &$form_state) {
  * Submit handler for user_pass().
  */
 function user_pass_submit($form, &$form_state) {
-  global $language_interface;
+  global $language;
 
   $account = $form_state['values']['account'];
   // Mail one time login URL and instructions using current language.
-  $mail = _user_mail_notify('password_reset', $account, $language_interface);
+  $mail = _user_mail_notify('password_reset', $account, $language);
   if (!empty($mail)) {
     watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
     backdrop_set_message(t('Further instructions have been sent to your e-mail address.'));

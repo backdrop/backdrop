@@ -15,7 +15,7 @@
 function translation_update_1000() {
   // Create the new config file.
   $config = config('translation.settings');
-  $config->set('language_type', update_variable_get('translation_language_type', 'language_interface'));
+  $config->set('language_type', update_variable_get('translation_language_type', 'language'));
   $config->save();
 
   update_variable_del('translation_language_type');

@@ -105,7 +105,7 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  *   The type of language to retrieve as provided by hook_language_types_info().
  *   In Backdrop core, the available language types will be one of the
  *   following:
- *   - language_interface
+ *   - language
  *   - language_content
  *   - language_url
  *

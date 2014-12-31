@@ -173,7 +173,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Check that content translation links are shown even when no language
     // negotiation is configured.
     $this->backdropLogin($this->admin_user);
-    $edit = array('language_interface[locale-url][enabled]' => FALSE);
+    $edit = array('language[locale-url][enabled]' => FALSE);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->resetCaches();
     $edit = array('status' => TRUE);

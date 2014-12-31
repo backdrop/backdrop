@@ -641,7 +641,7 @@ function node_type_update_nodes($old_type, $type) {
  *   type object by $type->disabled being set to TRUE.
  */
 function _node_types_build() {
-  $cid = 'node_types:' . $GLOBALS['language_interface']->langcode;
+  $cid = 'node_types:' . $GLOBALS['language']->langcode;
 
   $_node_types = &backdrop_static(__FUNCTION__);
   if (isset($_node_types)) {
