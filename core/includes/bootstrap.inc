@@ -3499,11 +3499,9 @@ function backdrop_autoload($class) {
  * @param $default_value
  *   Optional default value.
  * @param $reset
- *   TRUE to reset a specific named variable, or all variables if $name is NULL.
- *   Resetting every variable should only be used, for example, for running
- *   unit tests with a clean environment. Should be used only though via
- *   function backdrop_static_reset() and the return value should not be used in
- *   this case.
+ *   TRUE to reset one or all variables(s). This parameter is only used
+ *   internally and should not be passed in; use drupal_static_reset() instead.
+ *   (This function's return value should not be used when TRUE is passed in.)
  *
  * @return
  *   Returns a variable by reference.
@@ -3548,6 +3546,8 @@ function &backdrop_static($name, $default_value = NULL, $reset = FALSE) {
  *
  * @param $name
  *   Name of the static variable to reset. Omit to reset all variables.
+ *   Resetting all variables should only be used, for example, for running unit
+ *   tests with a clean environment.
  */
 function backdrop_static_reset($name = NULL) {
   backdrop_static($name, NULL, TRUE);
