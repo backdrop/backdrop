@@ -1,9 +1,9 @@
 <?php
 /**
  * @file
- * Template for a 2 column layout.
+ * Template for a 2 column flipped layout.
  *
- * This template provides a two column layout with the sidebar on the right and a roughly
+ * This template provides a two column layout with the sidebar on the left and a roughly
  * 60/40 split.
  *
  * Variables:
@@ -21,11 +21,11 @@
  *   - $content['header']
  *   - $content['top']
  *   - $content['content']
- *   - $content['sidebar']
+ *   - $content['sidebar-flipped']
  *   - $content['footer']
  */
 ?>
-<div class="layout-two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout-two-column-flipped <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
@@ -68,9 +68,9 @@
       <?php print $content['content']; ?>
     </div></main> <!-- /.section, /#content -->
 
-    <?php if ($content['sidebar']): ?>
-    <div id="sidebar" class="column sidebar"><div class="section">
-      <?php print $content['sidebar']; ?>
+    <?php if ($content['sidebar_flipped']): ?>
+    <div id="sidebar-flipped" class="column sidebar"><div class="section">
+      <?php print $content['sidebar_flipped']; ?>
     </div></div> <!-- /.section, /#sidebar-first -->
     <?php endif; ?>
 
