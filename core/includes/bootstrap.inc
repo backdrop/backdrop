@@ -3500,7 +3500,7 @@ function backdrop_autoload($class) {
  *   Optional default value.
  * @param $reset
  *   TRUE to reset one or all variables(s). This parameter is only used
- *   internally and should not be passed in; use drupal_static_reset() instead.
+ *   internally and shouldn't be passed in; use backdrop_static_reset() instead.
  *   (This function's return value should not be used when TRUE is passed in.)
  *
  * @return
