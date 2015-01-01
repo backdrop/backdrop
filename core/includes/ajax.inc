@@ -288,7 +288,7 @@ function ajax_render($commands = array()) {
   $scripts = backdrop_add_js();
   if (!empty($scripts['settings'])) {
     $settings = $scripts['settings'];
-    array_unshift($commands, ajax_command_settings(call_user_func_array('array_merge_recursive', $settings['data']), TRUE));
+    array_unshift($commands, ajax_command_settings(backdrop_array_merge_deep_array($settings['data']), TRUE));
   }
 
   // Allow modules to alter any Ajax response.
