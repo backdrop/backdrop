@@ -9,7 +9,7 @@
  */
 
 #admin-bar {
-  font: normal 11px "Lucida Grande", Verdana, sans-serif;
+  font-family: "Lucida Grande", Verdana, sans-serif;
   left: 0;
   position: absolute;
   text-align: left; /* LTR */
@@ -40,7 +40,7 @@
 }
 
 body.admin-bar {
-  margin-top: 30px !important;
+  padding-top: 2.55em; /* 2.6, but rather 1 less than more */
 }
 
 /* Top level items. */
@@ -80,7 +80,7 @@ body.admin-bar {
 
 /* Dropdown lists */
 #admin-bar .dropdown {
-  line-height: 1.4em;
+  line-height: 1.4;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -106,7 +106,7 @@ body.admin-bar {
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 9px 12px;
+  padding: .6em 12px;
 }
 
 #admin-bar a.expanded-trail,
@@ -209,7 +209,7 @@ body.admin-bar {
   background: transparent;
 }
 #admin-bar-icon li.admin-bar-icon > a {
-  padding: 7px 8px 11px;
+  padding: .4em 8px .8em;
 }
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: bottom;
