@@ -759,7 +759,6 @@ article .link-wrapper ul.links {
 }
 .comment .submitted .comment-permalink {
   font-size: 0.786em;
-  text-transform: lowercase;
 }
 .comment .content {
   font-size: 0.929em;
