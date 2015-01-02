@@ -8,6 +8,15 @@ function bartik_preprocess_maintenance_page(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_layout().
+ */
+function bartik_preprocess_layout(&$variables) {
+  if ($variables['content']['header']) {
+    $variables['content']['header'] = '<div class="l-header-inner">' . $variables['content']['header'] . '</div>';
+  }
+}
+
+/**
  * Implements theme_menu_tree().
  */
 function bartik_menu_tree($variables) {

@@ -2,42 +2,63 @@
  * @file
  * CSS for the three-three-four layout.
  */
-.layout-two-column #header div.section,
-.layout-two-column #main,
-.layout-two-column #footer {
+
+/* Clearfix for all regions. */
+.layout--two-column .l-header:after,
+.layout--two-column .l-main-wrapper:after,
+.layout--two-column .l-footer:after,
+.layout--two-column .l-content:after,
+.layout--two-column .l-sidebar:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.layout--two-column .l-header,
+.layout--two-column .l-top,
+.layout--two-column .l-messages,
+.layout--two-column .l-container,
+.layout--two-column .l-footer {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  clear: both;
 }
-.layout-two-column #content .section,
-.layout-two-column .sidebar .section {
+.layout--two-column .l-content,
+.layout--two-column .l-sidebar {
   padding: 0 15px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 @media all and (min-width: 851px) {
-  .layout-two-column #content,
-  .layout-two-column #sidebar {
+  .layout--two-column .l-content,
+  .layout--two-column .l-sidebar {
     display: inline;
     float: left; /* LTR */
     position: relative;
   }
-  [dir="rtl"] .layout-two-column #content,
-  [dir="rtl"] .layout-two-column #sidebar {
+  [dir="rtl"] .layout--two-column .l-content,
+  [dir="rtl"] .layout--two-column .l-sidebar {
     float: right;
   }
-  .layout-two-column #content {
+  .layout--two-column .l-content {
     margin-right: 30%;
     width: 70%;
   }
-  [dir="rtl"] .layout-two-column #content {
+  [dir="rtl"] .layout--two-column .l-content {
     margin-left: 30%;
     margin-right: 0;
   }
-  .layout-two-column #sidebar {
+  .layout--two-column .l-sidebar {
     width: 30%;
     margin-left: -30%; /* LTR */
   }
-  [dir="rtl"] .layout-two-column #sidebar {
+  [dir="rtl"] .layout--two-column .l-sidebar {
     margin-right: -30%;
   }
 }

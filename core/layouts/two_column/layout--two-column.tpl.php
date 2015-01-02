@@ -24,30 +24,31 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout--two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
+
   <?php if ($content['header']): ?>
-    <header id="header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
+    <header class="l-header" role="banner" aria-label="<?php print t('Site header'); ?>">
       <?php print $content['header']; ?>
-    </div></header>
+    </header>
   <?php endif; ?>
 
   <?php if ($content['top']): ?>
-    <div id="top"><div class="section clearfix">
+    <div class="l-top">
       <?php print $content['top']; ?>
-    </div></div> <!-- /.section, /#top -->
+    </div>
   <?php endif; ?>
 
   <?php if ($messages): ?>
-    <div id="messages"><div class="section clearfix">
+    <section class="l-messages">
       <?php print $messages; ?>
-    </div></div> <!-- /.section, /#messages -->
+    </section>
   <?php endif; ?>
 
-  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
-    <main id="content" class="column" role="main"><div class="section">
+  <div class="l-container">
+    <main class="l-content" role="main">
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
@@ -65,19 +66,18 @@
 
       <?php print $action_links; ?>
       <?php print $content['content']; ?>
-    </div></main> <!-- /.section, /#content -->
+    </main>
 
     <?php if ($content['sidebar']): ?>
-    <div id="sidebar" class="column sidebar"><div class="section">
+    <div class="l-sidebar">
       <?php print $content['sidebar']; ?>
-    </div></div> <!-- /.section, /#sidebar-first -->
+    </div>
     <?php endif; ?>
-
-  </div></div><!-- /#main, /#main-wrapper -->
+  </div>
 
   <?php if ($content['footer']): ?>
-    <div id="footer" class="clearfix"><div class="section">
+    <div class="l-footer">
       <?php print $content['footer']; ?>
-    </div></div><!-- /.section, /#footer -->
+    </div>
   <?php endif; ?>
 </div>
