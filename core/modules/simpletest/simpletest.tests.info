@@ -1102,6 +1102,12 @@ description = Tests theme_head_tag() built-in theme function.
 group = Theme
 file = tests/theme.test
 
+[RenderElementTypesTestCase]
+name = Render element types
+description = Tests the markup of core render element types passed to drupal_render().
+group = Theme
+file = tests/theme.test
+
 [ThemeHtmlTplPhpAttributesTestCase]
 name = html.tpl.php html and body attributes
 description = Tests attributes inserted in the html and body elements of html.tpl.php.

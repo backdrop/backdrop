@@ -533,6 +533,96 @@ class ThemeHeadTag extends BackdropUnitTestCase {
 }
 
 /**
+ * Tests the markup of core render element types passed to backdrop_render().
+ */
+class RenderElementTypesTestCase extends BackdropWebTestCase {
+  /**
+   * Asserts that an array of elements is rendered properly.
+   *
+   * @param array $elements
+   *   An array of associative arrays describing render elements and their
+   *   expected markup. Each item in $elements must contain the following:
+   *   - 'name': This human readable description will be displayed on the test
+   *     results page.
+   *   - 'value': This is the render element to test.
+   *   - 'expected': This is the expected markup for the element in 'value'.
+   */
+  function assertElements($elements) {
+    foreach($elements as $element) {
+      $this->assertIdentical(backdrop_render($element['value']), $element['expected'], '"' . $element['name'] . '" input rendered correctly by backdrop_render().');
+    }
+  }
+
+  /**
+   * Tests system #type 'container'.
+   */
+  function testContainer() {
+    $elements = array(
+      // Basic container with no attributes.
+      array(
+        'name' => "#type 'container' with no HTML attributes",
+        'value' => array(
+          '#type' => 'container',
+          'child' => array(
+            '#markup' => 'foo',
+          ),
+        ),
+        'expected' => '<div>foo</div>',
+      ),
+      // Container with a class.
+      array(
+        'name' => "#type 'container' with a class HTML attribute",
+        'value' => array(
+          '#type' => 'container',
+          'child' => array(
+            '#markup' => 'foo',
+          ),
+          '#attributes' => array(
+            'class' => 'bar',
+          ),
+        ),
+        'expected' => '<div class="bar">foo</div>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
+   * Tests system #type 'head_tag'.
+   */
+  function testHeadTag() {
+    $elements = array(
+      // Test auto-closure meta tag generation.
+      array(
+        'name' => "#type 'head_tag' auto-closure meta tag generation",
+        'value' => array(
+          '#type' => 'head_tag',
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'description',
+            'content' => 'Backdrop test',
+          ),
+        ),
+        'expected' => '<meta name="description" content="Backdrop test" />' . "\n",
+      ),
+      // Test title tag generation.
+      array(
+        'name' => "#type 'head_tag' title tag generation",
+        'value' => array(
+          '#type' => 'head_tag',
+          '#tag' => 'title',
+          '#value' => 'title test',
+        ),
+        'expected' => '<title>title test</title>' . "\n",
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+}
+
+/**
  * Functional test for attributes of html.tpl.php.
  */
 class ThemeHtmlTplPhpAttributesTestCase extends BackdropWebTestCase {
