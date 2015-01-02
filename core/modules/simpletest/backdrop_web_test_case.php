@@ -2364,6 +2364,8 @@ class BackdropWebTestCase extends BackdropTestCase {
             break;
           case 'restripe':
             break;
+          case 'addCss':
+            break;
         }
       }
       $content = $dom->saveHTML();
