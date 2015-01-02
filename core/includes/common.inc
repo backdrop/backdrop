@@ -1066,9 +1066,10 @@ function backdrop_http_request($url, array $options = array()) {
   $response = preg_split("/\r\n|\n|\r/", $response);
 
   // Parse the response status line.
-  list($protocol, $code, $status_message) = explode(' ', trim(array_shift($response)), 3);
-  $result->protocol = $protocol;
-  $result->status_message = $status_message;
+  $response_status_array = _backdrop_parse_response_status(trim(array_shift($response)));
+  $result->protocol = $response_status_array['http_version'];
+  $result->status_message = $response_status_array['reason_phrase'];
+  $code = $response_status_array['response_code'];
 
   $result->headers = array();
 
@@ -1159,9 +1160,41 @@ function backdrop_http_request($url, array $options = array()) {
       }
       break;
     default:
-      $result->error = $status_message;
+      $result->error = $result->status_message;
   }
 
+  return $result;
+}
+
+/**
+ * Split an HTTP response status line into components.
+ *
+ * Refactored out of backdrop_http_request() so it can be unit tested.
+ *
+ * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
+ *
+ * @param string $respone
+ *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
+ *
+ * @return array
+ *   Keyed array containing the component parts. If the response is malformed,
+ *   all possible parts will be extracted. 'reason_phrase' could be empty.
+ *   Possible keys:
+ *   - 'http_version'
+ *   - 'response_code'
+ *   - 'reason_phrase'
+ */
+function _backdrop_parse_response_status($response) {
+  $response_array = explode(' ', trim($response), 3);
+  // Set up empty values.
+  $result = array(
+    'reason_phrase' => '',
+  );
+  $result['http_version'] = $response_array[0];
+  $result['response_code'] = $response_array[1];
+  if (isset($response_array[2])) {
+    $result['reason_phrase'] = $response_array[2];
+  }
   return $result;
 }
 

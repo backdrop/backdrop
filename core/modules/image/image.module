@@ -696,6 +696,7 @@ function image_style_deliver($style, $scheme) {
       // Tell client to retry again in 3 seconds. Currently no browsers are known
       // to support Retry-After.
       backdrop_add_http_header('Status', '503 Service Unavailable');
+      backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
       backdrop_add_http_header('Retry-After', 3);
       print t('Image generation in progress. Try again shortly.');
       backdrop_exit();
@@ -717,6 +718,7 @@ function image_style_deliver($style, $scheme) {
   else {
     watchdog('image', 'Unable to generate the derived image located at %path.', array('%path' => $derivative_uri));
     backdrop_add_http_header('Status', '500 Internal Server Error');
+    backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
     print t('Error generating image.');
     backdrop_exit();
   }
