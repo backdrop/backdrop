@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Generic theme-independent base styles.
@@ -31,15 +30,16 @@
 }
 /* Animated throbber */
 .js input.form-autocomplete {
-  background-image: url(../../../misc/throbber.gif);
-  background-position: 100% 2px; /* LTR */
+  background-image: url(../../../misc/throbber-inactive.png);
+  background-position: 100% center; /* LTR */
   background-repeat: no-repeat;
 }
 [dir="rtl"] .js input.form-autocomplete {
   background-position: 0% 2px;
 }
 .js input.throbbing {
-  background-position: 100% -18px; /* LTR */
+  background-image: url(../../../misc/throbber-active.gif);
+  background-position: 100% center; /* LTR */
 }
 [dir="rtl"] .js input.throbbing {
   background-position: 0% -18px;
@@ -207,7 +207,7 @@ table.sticky-header {
   padding: 1px 5px 2px 5px;
 }
 .ajax-progress-throbber .throbber {
-  background: transparent url(../../../misc/throbber.gif) no-repeat 0px -18px;
+  background: transparent url(../../../misc/throbber-active.gif) no-repeat 0px center;
   display: inline;
   padding: 1px 5px 2px;
 }
