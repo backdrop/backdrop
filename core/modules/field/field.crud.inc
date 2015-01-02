@@ -222,15 +222,15 @@ function field_update_field($field) {
 function field_validate_field($field, $update = FALSE) {
   // Field name is required.
   if (empty($field['field_name'])) {
-    throw new FieldException(t('A field was attempted to be created, but no name was specified.'));
+    throw new FieldException(format_string('Attempt to create field @field_name with no type.', array('@field_name' => $field['field_name'])));
   }
   // Field type is required.
   if (empty($field['type'])) {
-    throw new FieldException(t('The field "@name" did not specify a field type.', array('@name' => $field['field_name'])));
+    throw new FieldException(format_string('The field "@name" did not specify a field type.', array('@name' => $field['field_name'])));
   }
   // Field name cannot contain invalid characters.
   if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $field['field_name'])) {
-    throw new FieldException(t('The field "@name" contains invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character.', array('@name' => $field['field_name'])));
+    throw new FieldException(format_string('Attempt to create a field @field_name with invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character', array('@field_name' => $field['field_name'])));
   }
 
   // Validations that only apply to newly created fields.
