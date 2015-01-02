@@ -34,7 +34,7 @@ function block_schema() {
       ),
       'title' => array(
         'type' => 'varchar',
-        'length' => 128,
+        'length' => 255,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Custom title for the block. (Empty string will use block default title, <none> will remove the title, text will cause block to use specified title.)',
@@ -124,6 +124,22 @@ function block_update_1002() {
     ->fields(array('weight' => 0))
     ->condition('name', 'block')
     ->execute();
+}
+
+/**
+ * Increase {block_custom}.title length to 255 characters.
+ */
+function block_update_1003() {
+  db_change_field('block_custom', 'title', 'title',
+    array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Custom title for the block. (Empty string will use block default title, <none> will remove the title, text will cause block to use specified title.)',
+      'translatable' => TRUE,
+    )
+  );
 }
 
 /**
