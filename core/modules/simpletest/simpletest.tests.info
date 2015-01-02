@@ -262,6 +262,12 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = tests/common.test
 
+[CommonBackdropHTTPResponseStatusLineTest]
+name = Backdrop HTTP Response Status
+description = Performs unit tests on Backdrop's HTTP Response Status.
+group = Common
+file = tests/common.test
+
 [CommonBackdropGotoTestCase]
 name = Redirect functionality
 description = Tests the backdrop_goto() and hook_backdrop_goto_alter() functionality.
