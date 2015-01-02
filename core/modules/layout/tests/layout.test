@@ -1026,12 +1026,6 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
       '#sidebar-first' => array(
         'block-search-form',
       ),
-      '#sidebar-second' => array(
-        'block-user-online',
-      ),
-      '.region-triptych-first' => array(
-        'block-user-new',
-      ),
       '.region-triptych-middle' => array(
         'block-node-syndicate',
       ),
@@ -1103,13 +1097,13 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->backdropGet('user/1');
     $this->assertNoBlocks($path_blocks);
 
-    // Logout, and check the homepage for the Who's new blocks, which should
+    // Logout, and check the homepage for the Account menu block, which should
     // only be visible to authenticated users.
     $this->backdropLogout();
     $this->backdropGet('<front>');
     $this->assertNoBlocks(array(
-      '.region-triptych-first' => array(
-        'block-user-new',
+      '.region-footer-thirdcolumn' => array(
+        'block-system-user-menu',
       ),
     ));
   }
