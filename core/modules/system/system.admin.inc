@@ -1313,13 +1313,13 @@ function system_site_information_settings_validate($form, &$form_state) {
 
   // If the user provided a path for a logo or favicon file, make sure a file
   // exists at that path.
-  if ($form_state['values']['site_logo_path']) {
+  if (!empty($form_state['values']['site_logo_path'])) {
     $path = _system_site_information_settings_validate_path($form_state['values']['site_logo_path']);
     if (!$path) {
       form_set_error('site_logo_path', t('The custom logo path is invalid.'));
     }
   }
-  if ($form_state['values']['site_favicon_path']) {
+  if (!empty($form_state['values']['site_favicon_path'])) {
     $path = _system_site_information_settings_validate_path($form_state['values']['site_favicon_path']);
     if (!$path) {
       form_set_error('site_favicon_path', t('The custom favicon path is invalid.'));
@@ -1395,13 +1395,15 @@ function _system_site_information_settings_validate_path($path) {
 function system_site_information_settings_submit($form, &$form_state) {
   // If the user uploaded a new logo or favicon, save it to a permanent location
   // and use it in place of the default theme-provided file.
-  if ($file = $form_state['values']['site_logo_upload']) {
+  if (!empty($form_state['values']['site_logo_upload'])) {
+    $file = $form_state['values']['site_logo_upload'];
     unset($form_state['values']['site_logo_upload']);
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
   }
-  if ($file = $form_state['values']['site_favicon_upload']) {
+  if (!empty($form_state['values']['site_favicon_upload'])) {
+    $file = $form_state['values']['site_favicon_upload'];
     unset($form_state['values']['site_favicon_upload']);
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_favicon_theme'] = 0;

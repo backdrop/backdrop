@@ -2397,7 +2397,7 @@ function backdrop_anonymous_user() {
  *   backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
  * @endcode
  *
- * @param $phase
+ * @param int $phase
  *   A constant telling which phase to bootstrap to. When you bootstrap to a
  *   particular phase, all earlier phases are run automatically. Possible
  *   values:
@@ -2410,11 +2410,11 @@ function backdrop_anonymous_user() {
  *   - BACKDROP_BOOTSTRAP_LANGUAGE: Finds out the language of the page.
  *   - BACKDROP_BOOTSTRAP_FULL: Fully loads Backdrop. Validates and fixes input
  *     data.
- * @param $new_phase
+ * @param boolean $new_phase
  *   A boolean, set to FALSE if calling backdrop_bootstrap from inside a
  *   function called from backdrop_bootstrap (recursion).
  *
- * @return
+ * @return int
  *   The most recently completed phase.
  */
 function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
@@ -2436,12 +2436,13 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
   // bootstrap state.
   static $stored_phase = -1;
 
-  // When not recursing, store the phase name so it's not forgotten while
-  // recursing.
-  if ($new_phase) {
-    $final_phase = $phase;
-  }
   if (isset($phase)) {
+    // When not recursing, store the phase name so it's not forgotten while
+    // recursing but take care of not going backwards.
+    if ($new_phase && $phase >= $stored_phase) {
+      $final_phase = $phase;
+    }
+
     // Call a phase if it has not been called before and is below the requested
     // phase.
     while ($phases && $phase > $stored_phase && $final_phase > $stored_phase) {
@@ -2742,7 +2743,7 @@ function _backdrop_bootstrap_page_header() {
  * @see backdrop_bootstrap()
  */
 function backdrop_get_bootstrap_phase() {
-  return backdrop_bootstrap();
+  return backdrop_bootstrap(NULL, FALSE);
 }
 
 /**
@@ -3499,11 +3500,9 @@ function backdrop_autoload($class) {
  * @param $default_value
  *   Optional default value.
  * @param $reset
- *   TRUE to reset a specific named variable, or all variables if $name is NULL.
- *   Resetting every variable should only be used, for example, for running
- *   unit tests with a clean environment. Should be used only though via
- *   function backdrop_static_reset() and the return value should not be used in
- *   this case.
+ *   TRUE to reset one or all variables(s). This parameter is only used
+ *   internally and shouldn't be passed in; use backdrop_static_reset() instead.
+ *   (This function's return value should not be used when TRUE is passed in.)
  *
  * @return
  *   Returns a variable by reference.
@@ -3548,6 +3547,8 @@ function &backdrop_static($name, $default_value = NULL, $reset = FALSE) {
  *
  * @param $name
  *   Name of the static variable to reset. Omit to reset all variables.
+ *   Resetting all variables should only be used, for example, for running unit
+ *   tests with a clean environment.
  */
 function backdrop_static_reset($name = NULL) {
   backdrop_static($name, NULL, TRUE);
