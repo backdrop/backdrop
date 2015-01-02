@@ -346,6 +346,14 @@ class AJAXCommandsTestCase extends AJAXTestCase {
       'settings' => array('ajax_forms_test' => array('foo' => 42)),
     );
     $this->assertCommand($commands, $expected, "'settings' AJAX command issued with correct data");
+
+    // Tests the 'addCss' command.
+    $commands = $this->backdropPostAJAX($form_path, $edit, array('op' => t("AJAX 'addCss' command")));
+    $expected = array(
+      'command' => 'addCss',
+      'data' => 'my/file.css',
+    );
+    $this->assertCommand($commands, $expected, "'addCss' AJAX command issued with correct data");
   }
 }
 
