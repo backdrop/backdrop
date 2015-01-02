@@ -745,12 +745,6 @@ select.form-select:focus {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(220, 220, 220, 0.4);
   outline-color: rgba(0, 116, 189, 0.5);
 }
-.js input.form-autocomplete {
-  background-position: 100% 4px;
-}
-.js input.throbbing {
-  background-position: 100% -16px;
-}
 ul.action-links {
   margin: 1em 0;
   padding: 0 20px 0 20px; /* LTR */
