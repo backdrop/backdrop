@@ -1167,3 +1167,9 @@ name = Language upgrade test
 description = Upgrade tests with language data.
 group = Upgrade path
 file = tests/upgrade/upgrade.language.test
+
+[ThemeDebugMarkupTestCase]
+name = Theme debug markup
+description = Tests theme debug markup output.
+group = Theme
+file = tests/theme.test
