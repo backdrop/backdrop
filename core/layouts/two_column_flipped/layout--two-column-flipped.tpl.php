@@ -1,9 +1,9 @@
 <?php
 /**
  * @file
- * Template for a 2 column layout.
+ * Template for a 2 column flipped layout.
  *
- * This template provides a two column layout with the sidebar on the right and a roughly
+ * This template provides a two column layout with the sidebar on the left and a roughly
  * 60/40 split.
  *
  * Variables:
@@ -21,35 +21,34 @@
  *   - $content['header']
  *   - $content['top']
  *   - $content['content']
- *   - $content['sidebar']
+ *   - $content['sidebar-flipped']
  *   - $content['footer']
  */
 ?>
-<div class="layout--two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout-two-column-flipped <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
-
   <?php if ($content['header']): ?>
-    <header class="l-header" role="banner" aria-label="<?php print t('Site header'); ?>">
+    <header id="header" role="banner" aria-label="<?php print t('Site header'); ?>"><div class="section clearfix">
       <?php print $content['header']; ?>
-    </header>
+    </div></header>
   <?php endif; ?>
 
   <?php if ($content['top']): ?>
-    <div class="l-top">
+    <div id="top"><div class="section clearfix">
       <?php print $content['top']; ?>
-    </div>
+    </div></div> <!-- /.section, /#top -->
   <?php endif; ?>
 
   <?php if ($messages): ?>
-    <section class="l-messages">
+    <div id="messages"><div class="section clearfix">
       <?php print $messages; ?>
-    </section>
+    </div></div> <!-- /.section, /#messages -->
   <?php endif; ?>
 
-  <div class="l-container">
-    <main class="l-content" role="main">
+  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
+    <main id="content" class="column" role="main"><div class="section">
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
@@ -67,18 +66,19 @@
 
       <?php print $action_links; ?>
       <?php print $content['content']; ?>
-    </main>
+    </div></main> <!-- /.section, /#content -->
 
-    <?php if ($content['sidebar']): ?>
-    <div class="l-sidebar">
-      <?php print $content['sidebar']; ?>
-    </div>
+    <?php if ($content['sidebar_flipped']): ?>
+    <div id="sidebar-flipped" class="column sidebar"><div class="section">
+      <?php print $content['sidebar_flipped']; ?>
+    </div></div> <!-- /.section, /#sidebar-first -->
     <?php endif; ?>
-  </div>
+
+  </div></div><!-- /#main, /#main-wrapper -->
 
   <?php if ($content['footer']): ?>
-    <div class="l-footer">
+    <div id="footer" class="clearfix"><div class="section">
       <?php print $content['footer']; ?>
-    </div>
+    </div></div><!-- /.section, /#footer -->
   <?php endif; ?>
 </div>
