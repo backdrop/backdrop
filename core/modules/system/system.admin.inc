@@ -40,7 +40,7 @@ function system_admin_config_page() {
 
       // Prepare for sorting as in function _menu_tree_check_access().
       // The weight is offset so it is always positive, with a uniform 5-digits.
-      $blocks[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $block;
+      $blocks[$item['title'] . ' ' . $item['mlid']] = $block;
     }
   }
   if ($blocks) {
@@ -2283,26 +2283,14 @@ function theme_admin_page($variables) {
   $stripe = 0;
   $container = array();
 
+  $output = '<div class="admin clearfix">';
+
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (empty($block['position'])) {
-        // perform automatic striping.
-        $block['position'] = ++$stripe % 2 ? 'left' : 'right';
-      }
-      if (!isset($container[$block['position']])) {
-        $container[$block['position']] = '';
-      }
-      $container[$block['position']] .= $block_output;
+      $output .= $block_output;
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
-  }
   $output .= '</div>';
   return $output;
 }
