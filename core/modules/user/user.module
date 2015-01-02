@@ -1311,30 +1311,20 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
 
-  // User listing pages.
-  $items['admin/people'] = array(
-    'title' => 'People',
-    'description' => 'Manage user accounts, roles, and permissions.',
-    'page callback' => 'user_admin',
-    'access arguments' => array('administer users'),
-    'position' => 'left',
-    'weight' => -7,
-    'file' => 'user.admin.inc',
-  );
-  $items['admin/people/list'] = array(
-    'title' => 'Find user accounts',
-    'description' => 'Find and manage people interacting with your site.',
-    'access arguments' => array('administer users'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-    'file' => 'user.admin.inc',
-  );
   $items['admin/people/create'] = array(
     'title' => 'Add user account',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_register_form'),
     'access arguments' => array('administer users'),
     'type' => MENU_LOCAL_ACTION,
+  );
+  $items['admin/people/cancel'] = array(
+    'title' => 'Cancel user accounts',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_multiple_cancel_confirm'),
+    'access arguments' => array('administer users'),
+    'file' => 'user.admin.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Administration pages.
@@ -2648,102 +2638,6 @@ function user_multiple_role_edit($accounts, $operation, $role_name) {
   }
 }
 
-function user_multiple_cancel_confirm($form, &$form_state) {
-  $edit = $form_state['input'];
-
-  $form['accounts'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  $accounts = user_load_multiple(array_keys(array_filter($edit['accounts'])));
-  foreach ($accounts as $uid => $account) {
-    // Prevent user 1 from being canceled.
-    if ($uid <= 1) {
-      continue;
-    }
-    $form['accounts'][$uid] = array(
-      '#type' => 'hidden',
-      '#value' => $uid,
-      '#prefix' => '<li>',
-      '#suffix' => check_plain($account->name) . "</li>\n",
-    );
-  }
-
-  // Output a notice that user 1 cannot be canceled.
-  if (isset($accounts[1])) {
-    $redirect = (count($accounts) == 1);
-    $message = t('The user account %name cannot be cancelled.', array('%name' => $accounts[1]->name));
-    backdrop_set_message($message, $redirect ? 'error' : 'warning');
-    // If only user 1 was selected, redirect to the overview.
-    if ($redirect) {
-      backdrop_goto('admin/people');
-    }
-  }
-
-  $form['operation'] = array('#type' => 'hidden', '#value' => 'cancel');
-
-  module_load_include('inc', 'user', 'user.pages');
-  $form['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling these accounts'),
-  );
-  $form['user_cancel_method'] += user_cancel_methods();
-  // Remove method descriptions.
-  foreach (element_children($form['user_cancel_method']) as $element) {
-    unset($form['user_cancel_method'][$element]['#description']);
-  }
-
-  // Allow to send the account cancellation confirmation mail.
-  $form['user_cancel_confirm'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Require e-mail confirmation to cancel account.'),
-    '#default_value' => FALSE,
-    '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
-  );
-  // Also allow to send account canceled notification mail, if enabled.
-  $form['user_cancel_notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user when account is canceled.'),
-    '#default_value' => FALSE,
-    '#access' => config_get('system.core', 'user_mail_status_canceled_notify'),
-    '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
-  );
-
-  return confirm_form($form,
-                      t('Are you sure you want to cancel these user accounts?'),
-                      'admin/people', t('This action cannot be undone.'),
-                      t('Cancel accounts'), t('Cancel'));
-}
-
-/**
- * Submit handler for mass-account cancellation form.
- *
- * @see user_multiple_cancel_confirm()
- * @see user_cancel_confirm_form_submit()
- */
-function user_multiple_cancel_confirm_submit($form, &$form_state) {
-  global $user;
-
-  if ($form_state['values']['confirm']) {
-    foreach ($form_state['values']['accounts'] as $uid => $value) {
-      // Prevent programmatic form submissions from cancelling user 1.
-      if ($uid <= 1) {
-        continue;
-      }
-      // Prevent user administrators from deleting themselves without confirmation.
-      if ($uid == $user->uid) {
-        $admin_form_state = $form_state;
-        unset($admin_form_state['values']['user_cancel_confirm']);
-        // The $user global is not a complete user entity, so load the full
-        // entity.
-        $admin_form_state['values']['_account'] = user_load($user->uid);
-        user_cancel_confirm_form_submit(array(), $admin_form_state);
-      }
-      else {
-        user_cancel($form_state['values'], $uid, $form_state['values']['user_cancel_method']);
-      }
-    }
-  }
-  $form_state['redirect'] = 'admin/people';
-}
-
 /**
  * List user administration filters that can be applied.
  */
@@ -3032,25 +2926,55 @@ function user_image_style_save($style) {
  * Implements hook_action_info().
  */
 function user_action_info() {
-  return array(
-    'user_block_user_action' => array(
-      'label' => t('Block user(s)'),
-      'type' => 'user',
-    ),
+  $actions['user_block_user_action'] = array(
+    'label' => t('Block user(s)'),
+    'type' => 'user',
+    'callback' => 'user_block_user_action',
+    'file' => 'user.actions.inc',
+    'weight' => -2,
   );
-}
+  $actions['user_unblock_user_action'] = array(
+    'label' => t('Unblock user(s)'),
+    'type' => 'user',
+    'callback' => 'user_unblock_user_action',
+    'file' => 'user.actions.inc',
+    'weight' => -1,
+  );
+  $actions['user_cancel_user_action'] = array(
+    'label' => t('Cancel user account(s)'),
+    'type' => 'user',
+    'callback' => 'user_cancel_user_action',
+    'file' => 'user.actions.inc',
+    'weight' => 10,
+  );
 
-/**
- * Blocks a specific user or the current user, if one is not specified.
- *
- * @param User $account
- *   The user entity whose account will be blocked.
- *
- * @ingroup actions
- */
-function user_block_user_action(User $account, $context = array()) {
-  $account->status = 0;
-  $account->save();
+  $roles = user_roles(TRUE);
+  $index = 0;
+  foreach ($roles as $role_name => $role_label) {
+    if ($role_name === BACKDROP_AUTHENTICATED_ROLE) {
+      continue;
+    }
+    $index++;
+
+    $actions['user_add_role_' . $role_name] = array(
+      'label' => t('Add role "@label"', array('@label' => $role_label)),
+      'type' => 'user',
+      'callback' => 'user_add_role_action',
+      'file' => 'user.actions.inc',
+      'weight' => 120 + $index,
+      'role_name' => $role_name,
+    );
+    $actions['user_remove_role_' . $role_name] = array(
+      'label' => t('Remove role "@label"', array('@label' => $role_label)),
+      'type' => 'user',
+      'callback' => 'user_remove_role_action',
+      'file' => 'user.actions.inc',
+      'weight' => 150 + $index,
+      'role_name' => $role_name,
+    );
+  }
+
+  return $actions;
 }
 
 /**

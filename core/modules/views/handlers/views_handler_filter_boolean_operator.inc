@@ -67,6 +67,9 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       if ($this->definition['type'] == 'enabled-disabled') {
         $this->value_options = array(1 => t('Enabled'), 0 => t('Disabled'));
       }
+      if ($this->definition['type'] == 'active-blocked') {
+        $this->value_options = array(1 => t('Active'), 0 => t('Blocked'));
+      }
     }
 
     // Provide a fallback if the above didn't set anything.

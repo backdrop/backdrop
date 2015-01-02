@@ -16,13 +16,13 @@ class views_handler_field_user_link_cancel extends views_handler_field_user_link
     $uid = $values->{$this->aliases['uid']};
 
     // Build a pseudo account object to be able to check the access.
-    $account = new stdClass();
+    $account = new User();
     $account->uid = $uid;
 
     if ($uid && user_cancel_access($account)) {
       $this->options['alter']['make_link'] = TRUE;
 
-      $text = !empty($this->options['text']) ? $this->options['text'] : t('Cancel account');
+      $text = !empty($this->options['text']) ? $this->options['text'] : t('Cancel');
 
       $this->options['alter']['path'] = "user/$uid/cancel";
       $this->options['alter']['query'] = backdrop_get_destination();

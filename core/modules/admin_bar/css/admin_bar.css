@@ -34,6 +34,10 @@
 #admin-bar-wrapper {
   overflow: hidden;
 }
+/* When body is a contextual links region. */
+.contextual-links-region #admin-menu {
+  top: -30px;
+}
 
 body.admin-bar {
   margin-top: 30px !important;
