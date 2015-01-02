@@ -564,6 +564,16 @@ function drupal_get_updaters() {
 function drupal_get_filetransfer_info() {
   return backdrop_get_filetransfer_info();
 }
+
+/**
+ * Format a username.
+ *
+ * @deprecated since 1.0
+ */
+function format_username($account) {
+  return user_format_name($account);
+}
+
 // Functions from errors.inc.
 function drupal_error_levels() {
   return backdrop_error_levels();
