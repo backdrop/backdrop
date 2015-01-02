@@ -219,7 +219,7 @@ function image_views_api() {
  * Implements hook_config_info().
  */
 function image_config_info() {
-  $prefixes['image.styles'] = array(
+  $prefixes['image.style'] = array(
     'name_key' => 'name',
     'label_key' => 'name',
     'group' => t('Image styles'),
@@ -469,7 +469,7 @@ function image_styles() {
       $styles = array();
 
       // Select the styles we have configured.
-      foreach (config_get_names_with_prefix('image.styles') as $config_name) {
+      foreach (config_get_names_with_prefix('image.style') as $config_name) {
         $style = array();
         $config = config($config_name);
         $style['label'] = $config->get('label');
@@ -554,7 +554,7 @@ function image_style_save($style) {
   // Add in the effects key if missing.
   $style += array('effects' => array());
 
-  $config = config('image.styles.' . $style['name']);
+  $config = config('image.style.' . $style['name']);
   if (is_null($config->get('name'))) {
     $style['is_new'] = TRUE;
   }
@@ -572,7 +572,7 @@ function image_style_save($style) {
   if (isset($style['old_name']) && $style['old_name'] !== $style['name']) {
     if ($old_style = image_style_load($style['old_name'])) {
       image_style_flush($old_style);
-      config('image.styles.' . $old_style['name'])->delete();
+      config('image.style.' . $old_style['name'])->delete();
     }
   }
 
@@ -599,7 +599,7 @@ function image_style_save($style) {
 function image_style_delete($style, $replacement_style_name = '') {
   image_style_flush($style);
 
-  $config = config('image.styles.' . $style['name']);
+  $config = config('image.style.' . $style['name']);
   $config->delete();
 
   // Let other modules update as necessary on save.
@@ -898,8 +898,8 @@ function image_style_path($style_name, $uri) {
  */
 function image_default_style_revert($style) {
   image_style_flush($style);
-  config('image.styles.' . $style['name'])->delete();
-  config_install_default_config($style['module'], 'image.styles.' . $style['name']);
+  config('image.style.' . $style['name'])->delete();
+  config_install_default_config($style['module'], 'image.style.' . $style['name']);
   return TRUE;
 }
 
@@ -1012,7 +1012,7 @@ function image_effect_load($ieid, $style_name, $include = NULL) {
  *   An image effect array. In the case of a new effect, 'ieid' will be set.
  */
 function image_effect_save($style_name, $effect) {
-  $config = config('image.styles.' . $style_name);
+  $config = config('image.style.' . $style_name);
 
   $effects = $config->get('effects');
   $filtered_effect = array(
@@ -1050,7 +1050,7 @@ function image_effect_save($style_name, $effect) {
  *   An image effect array.
  */
 function image_effect_delete($style_name, $effect) {
-  $config = config('image.styles.' . $style_name);
+  $config = config('image.style.' . $style_name);
   $config->clear('effects.' . $effect['ieid']);
   $config->save();
   $style = image_style_load($style_name);

@@ -1,5 +1,5 @@
 {
-    "_config_name": "image.styles.large.json",
+    "_config_name": "image.style.large.json",
     "storage": 4,
     "module": "image",
     "label": "Large (480x480)",
