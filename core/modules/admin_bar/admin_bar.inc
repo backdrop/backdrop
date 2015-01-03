@@ -686,6 +686,10 @@ function admin_bar_theme_settings() {
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
 
+  $process = element_info_property('checkboxes', '#process', array());
+  $form['components']['#process'] = array_merge(array('admin_bar_settings_process_components'), $process);
+  $form['#attached']['js'][] = backdrop_get_path('module', 'admin_bar') . '/admin_bar.admin.js';
+
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -695,6 +699,22 @@ function admin_bar_theme_settings() {
   );
 
   return $form;
+}
+
+/**
+ * #process callback for component plugin form element in admin_bar_theme_settings().
+ */
+function admin_bar_settings_process_components($element) {
+  // Assign 'rel' attributes to all options to achieve a live preview.
+  // Unfortunately, #states relies on wrapping .form-wrapper classes, so it
+  // cannot be used here.
+  foreach ($element['#options'] as $key => $label) {
+    if (!isset($element[$key]['#attributes']['rel'])) {
+      $id = preg_replace('/[^a-z]/', '-', $key);
+      $element[$key]['#attributes']['rel'] = '#' . $id;
+    }
+  }
+  return $element;
 }
 
 /**

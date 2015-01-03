@@ -1,6 +1,20 @@
 (function($) {
 
 /**
+ * Live preview of Administration bar components.
+ */
+Backdrop.behaviors.adminBarLivePreview = {
+  attach: function (context, settings) {
+    $('input[name^="components"]', context).once('admin-bar-live-preview')
+      .change(function () {
+        var target = $(this).attr('rel');
+        $(target).toggle(this.checked);
+      })
+      .trigger('change');
+  }
+};
+
+/**
  * Automatically enables required permissions on demand.
  *
  * Many users do not understand that two permissions are required for the
