@@ -159,9 +159,6 @@ function admin_bar_preprocess_page(&$variables) {
 
   // Determine whether we need to show all components and disable all caches.
   $complete = FALSE;
-  if (current_path() == 'admin/config/administration/admin_bar' && $_SERVER['REQUEST_METHOD'] == 'GET') {
-    $complete = TRUE;
-  }
 
   // If we have a cached menu for the current user, only output the hash for the
   // client-side HTTP cache callback URL.
