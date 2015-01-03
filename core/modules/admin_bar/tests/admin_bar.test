@@ -267,7 +267,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     // Verify that dynamic links are displayed.
     $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language_interface->langcode;
-    $hash = admin_bar_cache_get($cid)
+    $hash = admin_bar_cache_get($cid);
     $this->backdropGet('js/admin_bar/cache/' . $hash);
     $this->assertElementByXPath('//div[@id="admin-bar"]', array(), t('Administration bar found.'));
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
