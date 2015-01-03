@@ -899,5 +899,39 @@ function system_settings_form_submit($form, &$form_state) {
 }
 
 /**
+ * Alters Backdrop's list of defined date formats and attributes to return the
+ * expected date types and attributes for Drupal's system_get_date_types()
+ * function.
+ *
+ * @deprecated since 1.0
+ */
+function system_get_date_types($type = NULL) {
+  $formats = system_get_date_formats($type);
+
+  if ($type) {
+    foreach ($formats as &$format) {
+      $format['type'] = $format['name'];
+      $format['title'] = $format['label'];
+      $format['locked'] = isset($format['hidden']) ? $format['hidden'] : '0';
+      if (!isset($format['module'])) {
+        $format['module'] = '';
+      }
+      $format['is_new'] = FALSE;
+    }
+  }
+  else {
+    $formats['type'] = $formats['name'];
+    $formats['title'] = $formats['label'];
+    $formats['locked'] = isset($formats['hidden']) ? $formats['hidden'] : '0';
+    if (!isset($formats['module'])) {
+      $formats['module'] = '';
+    }
+    $formats['is_new'] = FALSE;
+  }
+
+  return $formats;
+}
+
+/**
  * @} End of "defgroup drupal_compatibility".
  */
