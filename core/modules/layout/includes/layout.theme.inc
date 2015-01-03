@@ -103,7 +103,7 @@ function theme_layout_settings_context_table($variables) {
   $path = $element['#layout_path'];
   $parts = explode('/', $path);
   $header = array(
-    t('Conext'),
+    t('Context'),
     t('Type'),
   );
   $rows = array();
