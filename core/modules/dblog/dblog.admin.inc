@@ -62,13 +62,14 @@ function dblog_overview() {
     else {
       $user_info = theme('username', array('account' => $dblog));
     }
+
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
         t($dblog->type),
         format_date($dblog->timestamp, 'short'),
-        theme('dblog_message', array('event' => $dblog, 'link' => TRUE)),
+        dblog_format_message($dblog, TRUE),
         $user_info,
         filter_xss($dblog->link),
       ),
@@ -127,7 +128,7 @@ function dblog_top($type) {
 
   $rows = array();
   foreach ($result as $dblog) {
-    $rows[] = array($dblog->count, theme('dblog_message', array('event' => $dblog)));
+    $rows[] = array($dblog->count, dblog_format_message($dblog));
   }
 
   $build['dblog_top_table']  = array(
@@ -165,6 +166,7 @@ function dblog_event($id) {
       $user_label = t('User');
       $user_info = theme('username', array('account' => $dblog));
     }
+
     $rows = array(
       array(
         array('data' => t('Type'), 'header' => TRUE),
@@ -188,7 +190,7 @@ function dblog_event($id) {
       ),
       array(
         array('data' => t('Message'), 'header' => TRUE),
-        theme('dblog_message', array('event' => $dblog)),
+        dblog_format_message($dblog),
       ),
       array(
         array('data' => t('Severity'), 'header' => TRUE),
@@ -286,16 +288,16 @@ function dblog_filters() {
 /**
  * Returns HTML for a log message.
  *
- * @param array $variables
- *   An associative array containing:
- *   - event: An object with at least the message and variables properties.
- *   - link: (optional) Format message as link, event->wid is required.
+ * @param array $event
+ *   An object containing at least the message and variables properties.
+ * @param array $is_link
+ *   (optional) Format message as link, event->wid is required.
  *
- * @ingroup themeable
+ * @return
+ *   HTML containing a link to the full report.
  */
-function theme_dblog_message($variables) {
+function dblog_format_message($event, $is_link = FALSE) {
   $output = '';
-  $event = $variables['event'];
   // Check for required properties.
   if (isset($event->message) && isset($event->variables)) {
     // Messages without variables or user specified text.
@@ -306,12 +308,13 @@ function theme_dblog_message($variables) {
     else {
       $output = t($event->message, unserialize($event->variables));
     }
-    if ($variables['link'] && isset($event->wid)) {
+    if ($is_link && isset($event->wid)) {
       // Truncate message to 56 chars.
       $output = truncate_utf8(filter_xss($output, array()), 56, TRUE, TRUE);
       $output = l($output, 'admin/reports/event/' . $event->wid, array('html' => TRUE));
     }
   }
+
   return $output;
 }
 
