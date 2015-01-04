@@ -256,8 +256,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
  * properly passing parameters to the image toolkit.
  */
 class ImageEffectsUnitTest extends ImageToolkitTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
-    parent::setUp('image_module_test');
+    parent::setUp(array('image', 'image_module_test'));
     module_load_include('inc', 'image', 'image.effects');
   }
 
@@ -973,8 +975,10 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
  * Tests that images have correct dimensions when styled.
  */
 class ImageDimensionsUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
-    parent::setUp('image_module_test');
+    parent::setUp(array('image', 'image_module_test'));
   }
 
   /**
@@ -1582,6 +1586,147 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
 
     // Post flush, expected no image in the 'private' wrapper.
     $this->assertEqual($this->getImageCount($style, 'private'), 0, format_string('Image style %style flushed correctly for %wrapper wrapper.', array('%style' => $style['name'], '%wrapper' => 'private')));
+  }
+}
+
+/**
+ * Tests the functions for generating paths and URLs for image styles.
+ */
+class ImageStyleFloodProtection extends BackdropWebTestCase {
+  protected $style_name;
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('image', 'image_module_test'));
+
+    $this->style_name = 'style_foo';
+
+    $style = array(
+      'name' => $this->style_name,
+      'label' => $this->randomString(),
+      'effects' => array(),
+    );
+    $style['effects'][] = array(
+      'name' => 'image_module_test_wait',
+      'data' => array(),
+    );
+    image_style_save($style);
+  }
+
+  /**
+   * Check the number of images that can be generated simultaneously.
+   */
+  function testFloodProtection() {
+    // Copy sample images.
+    $files = $this->backdropGetTestFiles('image');
+    $file = reset($files);
+    $image1 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+    $image2 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+    $image3 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+    $image4 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+    $image5 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+    $image6 = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
+
+    // Check that the default value of 5 max images is respected.
+    for ($n = 0; $n < 6; $n++) {
+      $flood_lock_name = image_style_flood_lock_name();
+      if ($n < 5) {
+        $this->assertTrue(!empty($flood_lock_name), 'Lock ' . ($n + 1) . ' acquired for generating images.');
+      }
+      else {
+        $this->assertFalse($flood_lock_name, 'Lock ' . ($n + 1) . ' correctly not acquired');
+      }
+    }
+
+    // Release all locks created in the calls to image_style_flood_lock_name().
+    lock_release_all();
+
+    // Reduce the threshold down to 2 unauthorized images at a time.
+    config_set('system.core', 'image_style_flood_limit', 2);
+
+    // The image_module_test_null effect has a 2 second delay on it. Make 3
+    // simultaneous requests and check that the 3rd one returns a 403.
+    $images = array(
+      image_style_url($this->style_name, $image1),
+      image_style_url($this->style_name, $image2),
+      image_style_url($this->style_name, $image3),
+    );
+
+    // Remove the whitelist to test unauthorized requests.
+    $added_uris = &image_style_add_allowed_uri();
+    $added_uris = array();
+
+    // Without the whitelist, only 2 unauthorized requests should be allowed.
+    $this->assertMultiStyleGenerated($images, 2);
+
+    // Make the list again, this time saving the whitelist immediately.
+    $images = array(
+      image_style_url($this->style_name, $image1),
+      image_style_url($this->style_name, $image2),
+      image_style_url($this->style_name, $image3),
+      image_style_url($this->style_name, $image4),
+      image_style_url($this->style_name, $image5),
+      image_style_url($this->style_name, $image6),
+    );
+    // Save the whitelist.
+    image_style_save_allowed_uris();
+
+    // Now all of these images should be allowed.
+    $this->assertMultiStyleGenerated($images, 6);
+  }
+
+  private function assertMultiStyleGenerated($urls, $expected_count) {
+    $count = count($urls);
+    $multi_handle = curl_multi_init();
+
+    for ($n = 0; $n < $count; $n++) {
+      ${'handle' . $n} = curl_init();
+      $curl_options = array(
+        CURLOPT_URL => $urls[$n],
+        CURLOPT_FOLLOWLOCATION => FALSE,
+        CURLOPT_RETURNTRANSFER => TRUE,
+        CURLOPT_HEADER => TRUE,
+        CURLOPT_SSL_VERIFYPEER => FALSE,
+        CURLOPT_SSL_VERIFYHOST => FALSE,
+        CURLOPT_USERAGENT => backdrop_generate_test_ua($this->databasePrefix),
+      );
+      if (isset($this->httpauth_credentials)) {
+        $curl_options[CURLOPT_HTTPAUTH] = $this->httpauth_method;
+        $curl_options[CURLOPT_USERPWD] = $this->httpauth_credentials;
+      }
+      curl_setopt_array(${'handle' . $n}, $curl_options);
+      curl_multi_add_handle($multi_handle, ${'handle' . $n});
+    }
+
+    $running = NULL;
+    do {
+      curl_multi_exec($multi_handle, $running);
+      curl_multi_select($multi_handle);
+    } while ($running > 0);
+
+    // Because we do all requests simultaneously, we don't know which will be
+    // served and which will return a 403 when the max is hit.
+    $http_200_count = 0;
+    $http_403_count = 0;
+    for ($n = 0; $n < $count; $n++) {
+      $response_code = curl_getinfo(${'handle' . $n}, CURLINFO_HTTP_CODE);
+      if ($response_code == 200) {
+        $http_200_count++;
+      }
+      elseif ($response_code == 403) {
+        $http_403_count++;
+      }
+    }
+
+    $this->assertEqual($http_200_count, $expected_count, 'Correct number of images (' . $expected_count . ') generated.');
+    $this->assertEqual($http_403_count, $count - $expected_count, 'Correct number of images (' . ($count - $expected_count) . ') return 403 access denied.');
+
+    // Close the handles
+    for ($n = 0; $n < $count; $n++) {
+      curl_close(${'handle' . $n});
+      curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+    }
+    curl_multi_close($multi_handle);
   }
 }
 

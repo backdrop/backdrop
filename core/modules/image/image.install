@@ -331,6 +331,13 @@ function image_update_1005() {
 }
 
 /**
+ * Add the configuration option for image_style_flood_limit.
+ */
+function image_update_1006() {
+  config_set('system.core', 'image_style_flood_limit', 5);
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
