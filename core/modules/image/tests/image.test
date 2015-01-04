@@ -1013,7 +1013,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="120" height="60" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1033,7 +1033,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="60" height="120" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1054,7 +1054,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1075,7 +1075,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1092,7 +1092,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . $url . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1112,7 +1112,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1131,7 +1131,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . $url . '" width="30" height="30" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1151,7 +1151,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     $effect = image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" />', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
@@ -1168,7 +1168,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     );
 
     image_effect_save('test', $effect);
-    $img_tag = theme_image_style($variables);
+    $img_tag = theme('image_style', array('variables' => $variables));
     $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" />', 'Expected img tag was found.');
   }
 }

@@ -277,23 +277,6 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 }
 
 /**
- * Returns HTML for the first page in the process of updating projects.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_update_manager_update_form($variables) {
-  $form = $variables['form'];
-  $last = state_get('update_last_check', 0);
-  $output = theme('update_last_check', array('last' => $last));
-  $output .= backdrop_render_children($form);
-  return $output;
-}
-
-/**
  * Form validation handler for update_manager_update_form().
  *
  * Ensures that at least one project is selected.
