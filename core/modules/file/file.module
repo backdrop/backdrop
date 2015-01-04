@@ -64,31 +64,32 @@ function file_element_info() {
  * Implements hook_theme().
  */
 function file_theme() {
+  $base = array(
+    'file' => 'file.theme.inc',
+  );
+
   return array(
-    // file.module.
     'file_link' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
-    ),
+    ) + $base,
     'file_icon' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
-    ),
+    ) + $base,
     'file_managed_file' => array(
       'render element' => 'element',
-    ),
-
-    // file.field.inc.
+    ) + $base,
     'file_widget' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'file_widget_multiple' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'file_formatter_table' => array(
       'variables' => array('items' => NULL),
-    ),
+    ) + $base,
     'file_upload_help' => array(
       'variables' => array('description' => NULL, 'upload_validators' => NULL),
-    ),
+    ) + $base,
   );
 }
 
@@ -645,35 +646,6 @@ function file_managed_file_save_upload($element) {
 }
 
 /**
- * Returns HTML for a managed file element.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the file.
- *
- * @ingroup themeable
- */
-function theme_file_managed_file($variables) {
-  $element = $variables['element'];
-
-  $attributes = array();
-  if (isset($element['#id'])) {
-    $attributes['id'] = $element['#id'];
-  }
-  if (!empty($element['#attributes']['class'])) {
-    $attributes['class'] = (array) $element['#attributes']['class'];
-  }
-  $attributes['class'][] = 'form-managed-file';
-
-  // This wrapper is required to apply JS behaviors and CSS styling.
-  $output = '';
-  $output .= '<div' . backdrop_attributes($attributes) . '>';
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-  return $output;
-}
-
-/**
  * Render API callback: Hides display of the upload or remove controls.
  *
  * Upload controls are hidden when a file is already uploaded. Remove controls
@@ -705,65 +677,6 @@ function file_managed_file_pre_render($element) {
     $element['remove_button']['#access'] = FALSE;
   }
   return $element;
-}
-
-/**
- * Returns HTML for a link to a file.
- *
- * @param $variables
- *   An associative array containing:
- *   - file: A file object to which the link will be created.
- *   - icon_directory: (optional) A path to a directory of icons to be used for
- *     files. Defaults to the value of the "file_icon_directory" variable.
- *
- * @ingroup themeable
- */
-function theme_file_link($variables) {
-  $file = $variables['file'];
-  $icon_directory = $variables['icon_directory'];
-
-  $url = file_create_url($file->uri);
-  // theme_file_icon() requires a file entity, make sure it gets one.
-  $icon = theme('file_icon', array('file' => ($file instanceof File) ? $file : file_load($file->fid), 'icon_directory' => $icon_directory));
-
-  // Set options as per anchor format described at
-  // http://microformats.org/wiki/file-format-examples
-  $options = array(
-    'attributes' => array(
-      'type' => $file->filemime . '; length=' . $file->filesize,
-    ),
-  );
-
-  // Use the description as the link text if available.
-  if (empty($file->description)) {
-    $link_text = $file->filename;
-  }
-  else {
-    $link_text = $file->description;
-    $options['attributes']['title'] = check_plain($file->filename);
-  }
-
-  return '<span class="file">' . $icon . ' ' . l($link_text, $url, $options) . '</span>';
-}
-
-/**
- * Returns HTML for an image with an appropriate icon for the given file.
- *
- * @param $variables
- *   An associative array containing:
- *   - file: A file entity for which to make an icon.
- *   - icon_directory: (optional) A path to a directory of icons to be used for
- *     files. Defaults to the value of the "file_icon_directory" variable.
- *
- * @ingroup themeable
- */
-function theme_file_icon($variables) {
-  $file = $variables['file'];
-  $icon_directory = $variables['icon_directory'];
-
-  $mime = check_plain($file->filemime);
-  $icon_url = file_icon_url($file, $icon_directory);
-  return '<img class="file-icon" alt="" title="' . $mime . '" src="' . $icon_url . '" />';
 }
 
 /**

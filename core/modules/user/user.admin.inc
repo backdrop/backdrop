@@ -646,76 +646,6 @@ function user_admin_permissions_submit($form, &$form_state) {
 }
 
 /**
- * Returns HTML for the administer permissions page.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_user_admin_permissions($variables) {
-  $form = $variables['form'];
-
-  $roles = user_roles();
-  foreach (element_children($form['permission']) as $key) {
-    $row = array();
-    // Module name
-    if (is_numeric($key)) {
-      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['roles']['#value']) + 1);
-    }
-    else {
-      // Permission row.
-      $row[] = array(
-        'data' => backdrop_render($form['permission'][$key]),
-        'class' => array('permission'),
-      );
-      foreach (element_children($form['checkboxes']) as $role_name) {
-        $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
-        $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
-        $row[] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
-      }
-    }
-    $rows[] = $row;
-  }
-  $header[] = (t('Permission'));
-  foreach (element_children($form['role_names']) as $role_name) {
-    $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
-  }
-  $output = '';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
-  $output .= backdrop_render_children($form);
-  return $output;
-}
-
-/**
- * Returns HTML for an individual permission description.
- *
- * @param $variables
- *   An associative array containing:
- *   - permission_item: An associative array representing the permission whose
- *     description is being themed. Useful keys include:
- *     - description: The text of the permission description.
- *     - warning: A security-related warning message about the permission (if
- *       there is one).
- *
- * @ingroup themeable
- */
-function theme_user_permission_description($variables) {
-  $description = array();
-  $permission_item = $variables['permission_item'];
-  if (!empty($permission_item['description'])) {
-    $description[] = $permission_item['description'];
-  }
-  if (!empty($permission_item['warning'])) {
-    $description[] = '<em class="permission-warning">' . $permission_item['warning'] . '</em>';
-  }
-  if (!empty($description)) {
-    return implode(' ', $description);
-  }
-}
-
-/**
  * Form to re-order roles or add a new one.
  *
  * @ingroup forms
@@ -824,46 +754,6 @@ function user_admin_roles_add_submit($form, &$form_state) {
   user_role_save($role);
   backdrop_set_message(t('The role has been added.'));
   $form_state['redirect'] = 'admin/config/people/roles';
-}
-
-/**
- * Returns HTML for the role order and new role form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_user_admin_roles($variables) {
-  $form = $variables['form'];
-
-  $header = array(t('Name'), t('Weight'), t('Operations'));
-  foreach (element_children($form['roles']) as $role_name) {
-    $label = $form['roles'][$role_name]['#role']->label;
-    $row = array();
-    if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $row[] = t('@name <em>(required)</em>', array('@name' => $label));
-    }
-    else {
-      $row[] = check_plain($label);
-    }
-    $row[] = backdrop_render($form['roles'][$role_name]['weight']);
-    $row[] = backdrop_render($form['roles'][$role_name]['operations']);
-    $rows[] = array('data' => $row, 'class' => array('draggable'));
-  }
-  $row = array();
-  $row[] = array('data' => backdrop_render($form['label']) . backdrop_render($form['name']), 'class' => 'edit-name');
-  $row[] = '';
-  $row[] = backdrop_render($form['add']);
-  $rows[] = $row;
-
-  backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
-
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
-  $output .= backdrop_render_children($form);
-
-  return $output;
 }
 
 /**
