@@ -73,8 +73,17 @@ small .admin-link:after {
 #system-modules div.incompatible {
   font-weight: bold;
 }
+#system-modules td.checkbox {
+  width: 20px;
+}
+#system-modules td.module {
+  width: 180px;
+}
+#system-modules td.version {
+  width: 70px;
+}
 #system-modules td.operations {
-  min-width: 110px;
+  width: 105px;
 }
 div.admin-requirements,
 div.admin-required {
