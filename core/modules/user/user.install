@@ -480,13 +480,6 @@ function user_update_1008() {
   }
 }
 
-/*
- * Set default option for login method to use accounts only.
- */
-function user_update_1009() {
-  config_set('user.settings', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
-}
-
 /**
  * Create the default view for user administration.
  */
@@ -1104,6 +1097,13 @@ function user_update_1010() {
     $config->setData($view_config);
     $config->save();
   }
+}
+
+/*
+ * Set default option for login method to use accounts only.
+ */
+function user_update_1011() {
+  config_set('user.settings', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
 }
 
 /**

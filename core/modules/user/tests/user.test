@@ -1634,6 +1634,9 @@ class UserSignatureTestCase extends BackdropWebTestCase {
  * Test that a user, having editing their own account, can still log in.
  */
 class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
+  /**
+   * Tests a user editing their own account.
+   */
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
@@ -1654,6 +1657,29 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
     // Set the new name on the user account and attempt to log back in.
     $account->name = $edit['name'];
     $this->backdropLogin($account);
+
+    // Attempt to change username to an email other than my own.
+    $edit['name'] = $this->randomName() . '@example.com';
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.', array('%name' => $edit['name'])), 'Error message found when an email username does not match user email.');
+    $this->assertNoText(t('The changes have been saved.'), 'The user account was not saved.');
+
+    // Lookup user by name to make sure we didn't actually change the name.
+    $changed = user_load_by_name($edit['name']);
+    $this->assertFalse($changed, 'Username was not changed to email address other than my own.');
+
+    // Change username to my email address.
+    $edit['name'] = $account->mail;
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->assertText(t('The changes have been saved.'), 'The user account was saved.');
+
+    // Test that 'verify_email_match' turned off allows emails that don't match.
+    config_set('system.core', 'user_email_match', FALSE);
+
+    // Change username to random, non-matching email address.
+    $edit['name'] = $this->randomName() . '@example.com';
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->assertText(t('The changes have been saved.'), 'The user account was saved.');
   }
 }
 
@@ -2151,7 +2177,6 @@ class UserRegistrationTestCase extends UserLoginTestCase {
     $this->assertEqual($new_user->init, $mail, 'Correct init field.');
   }
 
-
   /**
    * Test that login credentials work.
    */
@@ -2261,5 +2286,66 @@ class UserRegistrationTestCase extends UserLoginTestCase {
       $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
       $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
     }
+  }
+
+  /**
+   * Tests new users username matches their email if username is an email.
+   */
+  function testRegistrationEmailAsUsername() {
+    // Don't require email verification.
+    // Allow registration by site visitors without administrator approval.
+    config('system.core')
+      ->set('user_email_verification', FALSE)
+      ->set('user_register', USER_REGISTER_VISITORS)
+      ->save();
+
+    $mail = $this->randomName() . '@example.com';
+    $different = $this->randomName() . $mail;
+
+    // Set up edit array.
+    $edit = array();
+    $edit['mail'] = $mail;
+    $edit['name'] = $different;
+    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+
+    // Attempt to create an account using an email that doesn't match the name.
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.'), 'Email username does not match user email - error message found.');
+    $this->assertNoText(t('Registration successful. You are now logged in.'), 'The user was not created and logged in.');
+
+    // Attempt to create new account using matching email address.
+    $edit['name'] = $edit['mail'] = $this->randomName() . '@example.com';
+
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('Registration successful. You are now logged in.'), 'The user was created and logged in with matching email.');
+
+    $new_user = user_load_by_name($edit['name']);
+    $this->assertTrue(($new_user->name === $edit['name']) && ($new_user->mail === $edit['mail']), 'Created user with matching username and email address.');
+  }
+
+  /**
+   * Tests new users username not matching their email if username is an email.
+   */
+  function testRegistrationEmailAsUsernameDisabled() {
+    // Test that 'user_email_match' turned off allows emails that don't match.
+    config('system.core')
+      ->set('user_email_match', FALSE)
+      ->set('user_email_verification', FALSE)
+      ->set('user_register', USER_REGISTER_VISITORS)
+      ->save();
+
+    $mail = $this->randomName() . '@example.com';
+    $different = $this->randomName() . $mail;
+
+    $edit = array();
+    $edit['mail'] = $mail;
+    $edit['name'] = $different;
+    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+
+    // Attempt to create an account using an email that doesn't match the name.
+    // This should be OK, as 'vuser_email_match' is disabled.
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertNoText(t('An email address was provided as a username, but does not match the account email address.'), 'Email username does not match user email - error message found.');
+    $this->assertText(t('Registration successful. You are now logged in.'), 'The user was not created and logged in.');
   }
 }

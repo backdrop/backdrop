@@ -194,6 +194,11 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_email_verification'),
     '#description' => t('New users will be required to validate their e-mail address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
   );
+  $form['registration_cancellation']['user_email_match'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#default_value' => $config->get('user_email_match'),
+  );
   module_load_include('inc', 'user', 'user.pages');
   $form['registration_cancellation']['user_cancel_method'] = array(
     '#type' => 'item',
@@ -539,6 +544,7 @@ function user_admin_settings_submit($form, &$form_state) {
     ->set('user_login_method', $form_state['values']['user_login_method'])
     ->set('user_register', $form_state['values']['user_register'])
     ->set('user_email_verification', $form_state['values']['user_email_verification'])
+    ->set('user_email_match', $form_state['values']['user_email_match'])
     ->set('user_signatures', $form_state['values']['user_signatures'])
     ->set('user_mail_status_activated_notify', $form_state['values']['user_mail_status_activated_notify'])
     ->set('user_mail_status_blocked_notify', $form_state['values']['user_mail_status_blocked_notify'])
