@@ -311,10 +311,19 @@ body.admin-bar .layout {
   padding-top: 30px;
   margin-top: -30px;
 }
-.l-container {
+.l-container,
+.l-triptych {
   -webkit-flex: 1 0 auto;
   -ms-flex: 1 0 auto;
   flex: 1 0 auto;
+}
+.l-header,
+.l-messages,
+.l-footer-wrapper,
+.l-footer {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 /* ------------------ Header ------------------ */
