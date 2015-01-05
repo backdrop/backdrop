@@ -629,7 +629,7 @@ function system_modules($form, $form_state = array()) {
       '#collapsible' => TRUE,
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
-        array('data' => t('Enabled'), 'class' => array('checkbox')),
+        array('class' => array('checkbox')),
         t('Name'),
         array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
