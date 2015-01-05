@@ -12,22 +12,22 @@ define('USERNAME_MAX_LENGTH', 60);
 /**
  * Maximum length of user email text field.
  */
-const EMAIL_MAX_LENGTH = 254;
+define('USERMAIL_MAX_LENGTH', 254);
 
 /**
  * Users can login with username only.
  */
-const USER_LOGIN_USERNAME_ONLY = 'username_only';
+define('USER_LOGIN_USERNAME_ONLY', 'username_only');
 
 /**
  * Users can login with email address only.
  */
-const USER_LOGIN_EMAIL_ONLY = 'email_only';
+define('USER_LOGIN_EMAIL_ONLY', 'email_only');
 
 /**
  * Users can login using either username or email address.
  */
-const USER_LOGIN_USERNAME_OR_EMAIL = 'username_or_email';
+define('USER_LOGIN_USERNAME_OR_EMAIL', 'username_or_email');
 
 /**
  * Only administrators can create user accounts.
@@ -869,9 +869,12 @@ function user_validate_current_pass(&$form, &$form_state) {
  */
 function user_account_form_validate($form, &$form_state) {
   $account = $form['#user'];
+  $mail = $form_state['values']['mail'];
+
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
-    if ($error = user_validate_name($form_state['values']['name'])) {
+    $name = $form_state['values']['name'];
+    if ($error = user_validate_name($name)) {
       form_set_error('name', $error);
     }
     // Cast the user ID as an integer. It might have been set to NULL, which
@@ -880,18 +883,23 @@ function user_account_form_validate($form, &$form_state) {
       $name_taken = (bool) db_select('users')
         ->fields('users', array('uid'))
         ->condition('uid', (int) $account->uid, '<>')
-        ->condition('name', db_like($form_state['values']['name']), 'LIKE')
+        ->condition('name', db_like($name), 'LIKE')
         ->range(0, 1)
         ->execute()
         ->fetchField();
 
       if ($name_taken) {
-        form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
+        form_set_error('name', t('The name %name is already taken.', array('%name' => $name)));
+      }
+      // Check whether the user name provided is an email address. If so, make
+      // sure it matches the mail value.
+      if (config('system.core')->get('user_email_match') && (valid_email_address($name))) {
+        if ($name !== $mail) {
+          form_set_error('name', t('An email address was provided as a username, but does not match the account email address.'));
+        }
       }
     }
   }
-
-  $mail = $form_state['values']['mail'];
 
   if (!empty($mail)) {
     $mail_taken = (bool) db_select('users')
@@ -905,7 +913,7 @@ function user_account_form_validate($form, &$form_state) {
     if ($mail_taken) {
       // Format error message dependent on whether the user is logged in or not.
       if ($GLOBALS['user']->uid) {
-        form_set_error('mail', t('The e-mail address %email is already taken.', array('%email' => $mail)));
+        form_set_error('mail', t('The email address %email is already taken.', array('%email' => $mail)));
       }
       else {
         form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
@@ -938,7 +946,7 @@ function user_login_block($form) {
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => $credentials == USER_LOGIN_USERNAME_ONLY ? t('Username') : ($credentials == USER_LOGIN_EMAIL_ONLY ? t('E-mail address') : t('Username or e-mail')),
-    '#maxlength' => $credentials == USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
+    '#maxlength' => $credentials == USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : USERMAIL_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
@@ -1498,7 +1506,7 @@ function user_login($form, &$form_state) {
   $credentials = config_get('user.settings', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
     '#title' => $credentials == USER_LOGIN_USERNAME_ONLY ? t('Username') : ($credentials == USER_LOGIN_EMAIL_ONLY ? t('E-mail address') : t('Username or e-mail')),
-    '#maxlength' => $credentials == USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
+    '#maxlength' => $credentials == USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : USERMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,
   );
@@ -1555,7 +1563,7 @@ function user_login_name_validate($form, &$form_state) {
     }
     // If can find account, check if user is blocked.
     if ($name && user_is_blocked($name)) {
-      form_set_error('name', t('The username %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+      form_set_error('name', t('The account for %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
     }
   }
 }
@@ -1615,9 +1623,6 @@ function user_login_authenticate_validate($form, &$form_state) {
     else {
       $form_state['account_found'] = FALSE;
     }
-    // We are not limited by flood control, so try to authenticate.
-    // Set $form_state['uid'] as a flag for user_login_final_validate().
-    $form_state['uid'] = user_authenticate($form_state['values']['name'], $password);
   }
 }
 
@@ -1649,7 +1654,7 @@ function user_login_final_validate($form, &$form_state) {
     }
     elseif (empty($form_state['account_found'])) {
       form_set_error('name', t('Sorry, unrecognized username.'));
-      watchdog('user', 'The user account %name could not be found.', array('%name' => $form_state['values']['name']));
+      watchdog('user', 'The user account for %name could not be found.', array('%name' => $form_state['values']['name']));
     }
     else {
       switch (config_get('user.settings', 'user_login_method')) {
