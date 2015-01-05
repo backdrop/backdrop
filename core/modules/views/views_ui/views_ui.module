@@ -661,40 +661,42 @@ function views_ui_get_wizards() {
  * Implements hook_views_ui_wizards().
  */
 function views_ui_views_ui_wizards() {
-  $plugins['comment'] = array(
-    'name' => 'comment',
-    'base_table' => 'comment',
-    'created_column' => 'created',
-    'form_wizard_class' => array(
-      'file' => 'views_ui_comment_views_wizard.php',
-      'class' => 'ViewsUiCommentViewsWizard',
-    ),
-    'title' => t('Comments'),
-    'filters' => array(
-      'status' => array(
-        'value' => COMMENT_PUBLISHED,
+  if (module_exists('comment')) {
+    $plugins['comment'] = array(
+      'name' => 'comment',
+      'base_table' => 'comment',
+      'created_column' => 'created',
+      'form_wizard_class' => array(
+        'file' => 'views_ui_comment_views_wizard.php',
+        'class' => 'ViewsUiCommentViewsWizard',
+      ),
+      'title' => t('Comments'),
+      'filters' => array(
+        'status' => array(
+          'value' => COMMENT_PUBLISHED,
+          'table' => 'comment',
+          'field' => 'status',
+        ),
+        'status_node' => array(
+          'value' => NODE_PUBLISHED,
+          'table' => 'node',
+          'field' => 'status',
+          'relationship' => 'nid',
+        ),
+      ),
+      'path_field' => array(
+        'id' => 'cid',
         'table' => 'comment',
-        'field' => 'status',
+        'field' => 'cid',
+        'exclude' => TRUE,
+        'link_to_comment' => FALSE,
+        'alter' => array(
+          'alter_text' => 1,
+          'text' => 'comment/[cid]#comment-[cid]',
+        ),
       ),
-      'status_node' => array(
-        'value' => NODE_PUBLISHED,
-        'table' => 'node',
-        'field' => 'status',
-        'relationship' => 'nid',
-      ),
-    ),
-    'path_field' => array(
-      'id' => 'cid',
-      'table' => 'comment',
-      'field' => 'cid',
-      'exclude' => TRUE,
-      'link_to_comment' => FALSE,
-      'alter' => array(
-        'alter_text' => 1,
-        'text' => 'comment/[cid]#comment-[cid]',
-      ),
-    ),
-  );
+    );
+  }
   $plugins['file_managed'] = array(
     'name' => 'file_managed',
     'base_table' => 'file_managed',
@@ -781,27 +783,29 @@ function views_ui_views_ui_wizards() {
       ),
     ),
   );
-  $plugins['taxonomy_term'] = array(
-    'name' => 'taxonomy_term',
-    'base_table' => 'taxonomy_term_data',
-    'form_wizard_class' => array(
-      'file' => 'views_ui_taxonomy_term_views_wizard.php',
-      'class' => 'ViewsUiTaxonomyTermViewsWizard',
-    ),
-    'title' => t('Taxonomy terms'),
-    'filters' => array(
-    ),
-    'path_field' => array(
-      'id' => 'tid',
-      'table' => 'taxonomy_term_data',
-      'field' => 'tid',
-      'exclude' => TRUE,
-      'alter' => array(
-        'alter_text' => 1,
-        'text' => 'taxonomy/term/[tid]',
+  if (module_exists('taxonomy')) {
+    $plugins['taxonomy_term'] = array(
+      'name' => 'taxonomy_term',
+      'base_table' => 'taxonomy_term_data',
+      'form_wizard_class' => array(
+        'file' => 'views_ui_taxonomy_term_views_wizard.php',
+        'class' => 'ViewsUiTaxonomyTermViewsWizard',
       ),
-    ),
-  );
+      'title' => t('Taxonomy terms'),
+      'filters' => array(
+      ),
+      'path_field' => array(
+        'id' => 'tid',
+        'table' => 'taxonomy_term_data',
+        'field' => 'tid',
+        'exclude' => TRUE,
+        'alter' => array(
+          'alter_text' => 1,
+          'text' => 'taxonomy/term/[tid]',
+        ),
+      ),
+    );
+  }
   $plugins['users'] = array(
     'name' => 'users',
     'base_table' => 'users',
