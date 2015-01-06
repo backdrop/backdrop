@@ -57,3 +57,9 @@ name = Image theme functions
 description = Test that the image theme functions work correctly.
 group = Image
 file = tests/image.test
+
+[ImageStyleFloodProtection]
+name = Image style flood protection
+description = Test prevention of unauthorized image style generation.
+group = Image
+file = tests/image.test

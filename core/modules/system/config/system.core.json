@@ -22,6 +22,7 @@
     "filter_fallback_format": "plain_text",
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
+    "image_style_flood_limit": 5,
     "install_profile": "",
     "language_count": 1,
     "language_default": "en",
