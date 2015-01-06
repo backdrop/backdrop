@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration page callbacks for the Book module.

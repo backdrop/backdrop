@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Allows users to create and organize related content in an outline.
@@ -9,25 +8,16 @@
  * Implements hook_theme().
  */
 function book_theme() {
-  $base = array(
-    'file' => 'book.theme.inc',
-  );
-
   return array(
     'book_navigation' => array(
       'variables' => array('book_link' => NULL),
       'template' => 'templates/book-navigation',
-    ) + $base,
+      'file' => 'book.theme.inc',
+    ),
     'book_admin_table' => array(
       'render element' => 'form',
-    ) + $base,
-    'book_title_link' => array(
-      'variables' => array('link' => NULL),
-    ) + $base,
-    'book_all_books_block' => array(
-      'render element' => 'book_menus',
-      'template' => 'templates/book-all-books-block',
-    ) + $base,
+      'file' => 'book.admin.inc',
+    ),
   );
 }
 
@@ -1023,15 +1013,6 @@ function book_form_node_delete_confirm_alter(&$form, $form_state) {
  */
 function _book_link_defaults($nid) {
   return array('original_bid' => 0, 'menu_name' => '', 'nid' => $nid, 'bid' => 0, 'router_path' => 'node/%', 'plid' => 0, 'mlid' => 0, 'has_children' => 0, 'weight' => 0, 'module' => 'book', 'options' => array());
-}
-
- /**
- * Implements hook_preprocess_block().
- */
-function book_preprocess_block(&$variables) {
-  if ($variables['block']->module == 'book') {
-    $variables['attributes']['role'] = 'navigation';
-  }
 }
 
 /**
