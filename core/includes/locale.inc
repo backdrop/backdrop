@@ -9,38 +9,38 @@
  * The language is determined using a URL language indicator:
  * path prefix or domain according to the configuration.
  */
-const LANGUAGE_NEGOTIATION_URL = 'locale-url';
+define('LANGUAGE_NEGOTIATION_URL', 'locale-url');
 
 /**
  * The language is set based on the browser language settings.
  */
-const LANGUAGE_NEGOTIATION_BROWSER = 'locale-browser';
+define('LANGUAGE_NEGOTIATION_BROWSER', 'locale-browser');
 
 /**
  * The language is determined using the current interface language.
  */
-const LANGUAGE_NEGOTIATION_INTERFACE = 'locale-interface';
+define('LANGUAGE_NEGOTIATION_INTERFACE', 'locale-interface');
 
 /**
  * If no URL language is available language is determined using an already
  * detected one.
  */
-const LANGUAGE_NEGOTIATION_URL_FALLBACK = 'locale-url-fallback';
+define('LANGUAGE_NEGOTIATION_URL_FALLBACK', 'locale-url-fallback');
 
 /**
  * The language is set based on the user language settings.
  */
-const LANGUAGE_NEGOTIATION_USER = 'locale-user';
+define('LANGUAGE_NEGOTIATION_USER', 'locale-user');
 
 /**
  * The language is set based on the request/session parameters.
  */
-const LANGUAGE_NEGOTIATION_SESSION = 'locale-session';
+define('LANGUAGE_NEGOTIATION_SESSION', 'locale-session');
 
 /**
  * Regular expression pattern used to localize JavaScript strings.
  */
-const LOCALE_JS_STRING = '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+\s*)?)+';
+define('LOCALE_JS_STRING', '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+\s*)?)+');
 
 /**
  * Regular expression pattern used to match simple JS object literal.
@@ -48,7 +48,7 @@ const LOCALE_JS_STRING = '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+
  * This pattern matches a basic JS object, but will fail on an object with
  * nested objects. Used in JS file parsing for string arg processing.
  */
-const LOCALE_JS_OBJECT = '\{.*?\}';
+define('LOCALE_JS_OBJECT', '\{.*?\}');
 
 /**
  * Regular expression to match an object containing a key 'context'.
@@ -76,25 +76,25 @@ define('LOCALE_JS_OBJECT_CONTEXT', '
  * Translation import mode overwriting all existing translations
  * if new translated version available.
  */
-const LOCALE_IMPORT_OVERWRITE = 0;
+define('LOCALE_IMPORT_OVERWRITE', 0);
 
 /**
  * Translation import mode keeping existing translations and only
  * inserting new strings.
  */
-const LOCALE_IMPORT_KEEP = 1;
+define('LOCALE_IMPORT_KEEP', 1);
 
 /**
  * URL language negotiation: use the path prefix as URL language
  * indicator.
  */
-const LANGUAGE_NEGOTIATION_URL_PREFIX = 'path_prefix';
+define('LANGUAGE_NEGOTIATION_URL_PREFIX', 'path_prefix');
 
 /**
  * URL language negotiation: use the domain as URL language
  * indicator.
  */
-const LANGUAGE_NEGOTIATION_URL_DOMAIN = 'domain';
+define('LANGUAGE_NEGOTIATION_URL_DOMAIN', 'domain');
 
 /**
  * @defgroup locale-languages-negotiation Language negotiation options

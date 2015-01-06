@@ -222,14 +222,14 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
 /**
  * Value for field API indicating a field accepts an unlimited number of values.
  */
-const FIELD_CARDINALITY_UNLIMITED = -1;
+define('FIELD_CARDINALITY_UNLIMITED', -1);
 
 /**
  * Value for field API indicating a widget doesn't accept default values.
  *
  * @see hook_field_widget_info()
  */
-const FIELD_BEHAVIOR_NONE = 0x0001;
+define('FIELD_BEHAVIOR_NONE', 0x0001);
 
 /**
  * Value for field API concerning widget default and multiple value settings.
@@ -241,26 +241,26 @@ const FIELD_BEHAVIOR_NONE = 0x0001;
  * input of one single field value, indicates that the widget will be repeated
  * for each value input.
  */
-const FIELD_BEHAVIOR_DEFAULT = 0x0002;
+define('FIELD_BEHAVIOR_DEFAULT', 0x0002);
 
 /**
  * Value for field API indicating a widget can receive several field values.
  *
  * @see hook_field_widget_info()
  */
-const FIELD_BEHAVIOR_CUSTOM = 0x0004;
+define('FIELD_BEHAVIOR_CUSTOM', 0x0004);
 
 /**
  * Age argument for loading the most recent version of an entity's
  * field data with field_attach_load().
  */
-const FIELD_LOAD_CURRENT = 'FIELD_LOAD_CURRENT';
+define('FIELD_LOAD_CURRENT', 'FIELD_LOAD_CURRENT');
 
 /**
  * Age argument for loading the version of an entity's field data
  * specified in the entity with field_attach_load().
  */
-const FIELD_LOAD_REVISION = 'FIELD_LOAD_REVISION';
+define('FIELD_LOAD_REVISION', 'FIELD_LOAD_REVISION');
 
 /**
  * Implements hook_theme().

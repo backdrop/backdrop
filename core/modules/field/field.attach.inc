@@ -32,14 +32,14 @@
  * This is used in hook_field_storage_write when updating an
  * existing entity.
  */
-const FIELD_STORAGE_UPDATE = 'update';
+define('FIELD_STORAGE_UPDATE', 'update');
 
 /**
  * Argument for an insert operation.
  *
  * This is used in hook_field_storage_write when inserting a new entity.
  */
-const FIELD_STORAGE_INSERT = 'insert';
+define('FIELD_STORAGE_INSERT', 'insert');
 
 /**
  * @} End of "defgroup field_storage".

@@ -16,14 +16,14 @@
  * also uses this flag to skip language import tasks when the installation is
  * being performed in English.
  */
-const INSTALL_TASK_SKIP = 1;
+define('INSTALL_TASK_SKIP', 1);
 
 /**
  * Run the task on each installation request until the database is set up.
  *
  * This is primarily used by the Backdrop installer for bootstrap-related tasks.
  */
-const INSTALL_TASK_RUN_IF_REACHED = 2;
+define('INSTALL_TASK_RUN_IF_REACHED', 2);
 
 /**
  * Global flag to indicate that a task should be run on each installation
@@ -37,7 +37,7 @@ const INSTALL_TASK_RUN_IF_REACHED = 2;
  * modules on the new site, and also for the configuration form that collects
  * basic site information and sets up the site maintenance account.
  */
-const INSTALL_TASK_RUN_IF_NOT_COMPLETED = 3;
+define('INSTALL_TASK_RUN_IF_NOT_COMPLETED', 3);
 
 /**
  * Installs Backdrop either interactively or via an array of passed-in settings.

@@ -12,17 +12,17 @@
 /**
  * Views constant for user-defined views.
  */
-const VIEWS_STORAGE_NORMAL = 1;
+define('VIEWS_STORAGE_NORMAL', 1);
 
 /**
  * Views constant for views that override module-defined presets.
  */
-const VIEWS_STORAGE_OVERRIDE = 2;
+define('VIEWS_STORAGE_OVERRIDE', 2);
 
 /**
  * Views constant for module-defined views.
  */
-const VIEWS_STORAGE_DEFAULT = 4;
+define('VIEWS_STORAGE_DEFAULT', 4);
 
 /**
  * Advertise the current views api version

@@ -8,17 +8,17 @@
 /**
  * Image style constant for user presets.
  */
-const IMAGE_STORAGE_NORMAL = 1;
+define('IMAGE_STORAGE_NORMAL', 1);
 
 /**
  * Image style constant for user presets that override module-defined presets.
  */
-const IMAGE_STORAGE_OVERRIDE = 2;
+define('IMAGE_STORAGE_OVERRIDE', 2);
 
 /**
  * Image style constant for module-defined presets.
  */
-const IMAGE_STORAGE_DEFAULT = 4;
+define('IMAGE_STORAGE_DEFAULT', 4);
 
 /**
  * Image style constant to represent any module-based preset.
