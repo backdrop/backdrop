@@ -99,6 +99,11 @@ span.admin-enabled {
 span.admin-missing {
   color: #f00;
 }
+@media screen and (max-width: 800px) {
+  #system-modules td.module {
+    width: 110px;
+  }
+}
 
 /**
  * Status report.
