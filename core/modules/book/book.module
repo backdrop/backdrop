@@ -21,8 +21,7 @@ function book_theme() {
       'variables' => array('link' => NULL),
     ),
     'book_all_books_block' => array(
-      'render element' => 'book_menus',
-      'template' => 'book-all-books-block',
+      'variables' => array('book_menus' => array()),
     ),
   );
 }
@@ -1040,16 +1039,21 @@ function book_preprocess_block(&$variables) {
  * @param $variables
  *   An associative array containing the following key:
  *   - book_menus
- *
- * @see book-all-books-block.tpl.php
  */
-function template_preprocess_book_all_books_block(&$variables) {
+function theme_book_all_books_block(&$variables) {
   // Remove all non-renderable elements.
   $elements = $variables['book_menus'];
-  $variables['book_menus'] = array();
-  foreach (element_children($elements) as $index) {
-    $variables['book_menus'][$index] = $elements[$index];
+
+  $output = '';
+  foreach (element_children($elements) as $book_id) {
+    $menu = $elements[$book_id];
+
+    $output .= '<nav id="book-block-menu-' . $book_id . '" class="book-block-menu">';
+    $output .= render($menu);
+    $output .= '</nav>';
   }
+
+  return $output;
 }
 
 /**
