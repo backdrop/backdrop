@@ -255,9 +255,12 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     ),
     '#ajax' => array(
       'callback' => 'layout_settings_form_path_ajax',
+      'disable' => FALSE,
+      'progress' => 'none',
     ),
     '#attributes' => array(
       'data-layout-path-update' => 'true',
+      'class' => array('js-hide'),
     ),
     '#access' => !$layout->isDefault(),
   );
@@ -308,6 +311,21 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     else {
       // @todo: Support adding and removing custom contexts not based on path.
       // e.g. Adding a Node context based on a hard-coded ID.
+    }
+  }
+
+  // Display a notice if overriding a system path that normally contains
+  // wildcards e.g. node/1 instead of node/%. This is usually (but not always)
+  // a misconfiguration of the layout.
+  $layout_path = $layout->getPath();
+  $router_item = menu_get_item($layout_path);
+  if ($router_item && $router_item['path'] !== $layout_path && substr_count($router_item['path'], '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item['path'])) {
+    $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
+    if (backdrop_is_ajax()) {
+      backdrop_set_message($message, 'warning');
+    }
+    else {
+      $form['messages']['#messages']['warning'][] = $message;
     }
   }
 
@@ -440,10 +458,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
 
   // Ensure that all conditions have context requirements met.
   $context_plugins = array();
-  if (!empty($form_state['values']['context']['required'])) {
-    foreach ($form_state['values']['context']['required'] as $context_values) {
-      $context_plugins[] = $context_values['plugin'];
-    }
+  $contexts = layout_context_required_by_path($path);
+  foreach ($contexts as $context) {
+    $context_plugins[] = $context->plugin;
   }
   foreach ($layout->conditions as $key => $condition) {
     $required_contexts = $condition->getRequiredContexts();
@@ -464,7 +481,7 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
  * AJAX handler for layout_settings_form() the returns updated contexts.
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
-  $commands[] = ajax_command_remove('#messages');
+  $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
   return array(
@@ -2133,7 +2150,7 @@ function layout_ajax_form_save_dialog($form, $form_state) {
 
   // If errors occurred in the dialog, show messages and re-display.
   if (form_get_errors()) {
-    $html = backdrop_render($form);
+    $html = '';
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();

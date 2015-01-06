@@ -125,7 +125,8 @@ Backdrop.ajax = function (base, element, element_settings) {
     },
     submit: {
       'js': true
-    }
+    },
+    currentRequests: []
   };
 
   $.extend(this, defaults, element_settings);
@@ -168,6 +169,7 @@ Backdrop.ajax = function (base, element, element_settings) {
 
   // Set the options for the ajaxSubmit function.
   // The 'this' variable will not persist inside of the options object.
+  var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
     url: ajax.url,
@@ -176,25 +178,28 @@ Backdrop.ajax = function (base, element, element_settings) {
       return ajax.beforeSerialize(element_settings, options);
     },
     beforeSubmit: function (form_values, element_settings, options) {
-      ajax.ajaxing = true;
       return ajax.beforeSubmit(form_values, element_settings, options);
     },
-    beforeSend: function (xmlhttprequest, options) {
-      ajax.ajaxing = true;
-      return ajax.beforeSend(xmlhttprequest, options);
+    beforeSend: function (jqXHR, options) {
+      jqXHR.ajaxRequestNumber = ++currentAjaxRequestNumber;
+      return ajax.beforeSend(jqXHR, options);
     },
-    success: function (response, status) {
+    success: function (response, status, jqXHR) {
+      // Skip success if this request has been superseded by a later request.
+      if (jqXHR.ajaxRequestNumber < currentAjaxRequestNumber) {
+        return false;
+      }
       // Sanity check for browser support (object expected).
       // When using iFrame uploads, responses must be returned as a string.
       if (typeof response == 'string') {
         response = $.parseJSON(response);
       }
-      return ajax.success(response, status);
+      return ajax.success(response, status, jqXHR);
     },
-    complete: function (response, status) {
-      ajax.ajaxing = false;
+    complete: function (jqXHR, status) {
+      ajax.cleanUp(jqXHR);
       if (status == 'error' || status == 'parsererror') {
-        return ajax.error(response, ajax.url);
+        return ajax.error(jqXHR, ajax.url);
       }
     },
     dataType: 'json',
@@ -265,11 +270,6 @@ Backdrop.ajax.prototype.eventResponse = function (element, event) {
   // Create a synonym for this to reduce code confusion.
   var ajax = this;
 
-  // Do not perform another ajax command if one is already in progress.
-  if (ajax.ajaxing) {
-    return false;
-  }
-
   try {
     if (ajax.form) {
       // If setClick is set, we must set this to ensure that the button's
@@ -290,10 +290,7 @@ Backdrop.ajax.prototype.eventResponse = function (element, event) {
     }
   }
   catch (e) {
-    // Unset the ajax.ajaxing flag here because it won't be unset during
-    // the complete response.
-    ajax.ajaxing = false;
-    window.alert("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
+    $.error("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
   }
 
   // For radio/checkbox, allow the default event. On IE, this means letting
@@ -367,7 +364,7 @@ Backdrop.ajax.prototype.beforeSubmit = function (form_values, element, options) 
 /**
  * Prepare the Ajax request before it is sent.
  */
-Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
+Backdrop.ajax.prototype.beforeSend = function (jqXHR, options) {
   // For forms without file inputs, the jQuery Form plugin serializes the form
   // values, and then calls jQuery's $.ajax() function, which invokes this
   // handler. In this circumstance, options.extraData is never used. For forms
@@ -397,10 +394,8 @@ Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
   }
 
   // Disable the element that received the change to prevent user interface
-  // interaction while the Ajax request is in progress. ajax.ajaxing prevents
-  // the element from triggering a new request, but does not prevent the user
-  // from changing its value.
-  if (options.disable === false) {
+  // interaction while the Ajax request is in progress.
+  if (options.disable !== false) {
     $(this.element).addClass('progress-disabled').prop('disabled', true);
   }
 
@@ -413,34 +408,31 @@ Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
     if (this.progress.url) {
       progressBar.startMonitoring(this.progress.url, this.progress.interval || 1500);
     }
-    this.progress.element = $(progressBar.element).addClass('ajax-progress ajax-progress-bar');
-    this.progress.object = progressBar;
-    $(this.element).after(this.progress.element);
+    jqXHR.progressElement = $(progressBar.element).addClass('ajax-progress ajax-progress-bar');
+    jqXHR.progressBar = progressBar;
+    $(this.element).after(jqXHR.progressElement);
   }
   else if (this.progress.type == 'throbber') {
-    this.progress.element = $('<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>');
+    jqXHR.progressElement = $('<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>');
     if (this.progress.message) {
-      $('.throbber', this.progress.element).after('<div class="message">' + this.progress.message + '</div>');
+      $('.throbber', jqXHR.progressElement).after('<div class="message">' + this.progress.message + '</div>');
     }
-    $(this.element).after(this.progress.element);
+    $(this.element).after(jqXHR.progressElement);
   }
+
+  // Register the AJAX request so it can be cancelled if needed.
+  this.currentRequests.push(jqXHR);
 };
 
 /**
  * Handler for the form redirection completion.
  */
-Backdrop.ajax.prototype.success = function (response, status) {
-  // Remove the progress element.
-  if (this.progress.element) {
-    $(this.progress.element).remove();
-  }
-  if (this.progress.object) {
-    this.progress.object.stopMonitoring();
-  }
-  $(this.element).removeClass('progress-disabled').prop('disabled', false);
+Backdrop.ajax.prototype.success = function (response, status, jqXHR) {
+  // Remove the throbber and progress elements.
+  this.cleanUp(jqXHR);
 
+  // Process the response.
   Backdrop.freezeHeight();
-
   for (var i in response) {
     if (response.hasOwnProperty(i) && response[i].command && this.commands[response[i].command]) {
        this.commands[response[i].command](this, response[i], status);
@@ -462,6 +454,28 @@ Backdrop.ajax.prototype.success = function (response, status) {
   // call by mistake.
   this.settings = null;
 };
+
+/**
+ * Clean up after an AJAX response, success or failure.
+ */
+Backdrop.ajax.prototype.cleanUp = function (jqXHR) {
+  // Remove the AJAX request from the current list.
+  var index = this.currentRequests.indexOf(jqXHR);
+  if (index > -1) {
+    this.currentRequests.splice(index, 1);
+  }
+
+  // Remove the progress element.
+  if (jqXHR.progressElement) {
+    $(jqXHR.progressElement).remove();
+  }
+  if (jqXHR.progressBar) {
+    jqXHR.progressBar.stopMonitoring();
+  }
+
+  // Reactivate the triggering element.
+  $(this.element).removeClass('progress-disabled').prop('disabled', false);
+}
 
 /**
  * Build an effect object which tells us how to apply the effect when adding new HTML.
@@ -493,22 +507,12 @@ Backdrop.ajax.prototype.getEffect = function (response) {
 /**
  * Handler for the form redirection error.
  */
-Backdrop.ajax.prototype.error = function (response, uri) {
-  window.alert(Backdrop.ajaxError(response, uri));
-  // Remove the progress element.
-  if (this.progress.element) {
-    $(this.progress.element).remove();
-  }
-  if (this.progress.object) {
-    this.progress.object.stopMonitoring();
-  }
-  // Undo hide.
-  $(this.wrapper).show();
-  // Re-enable the element.
-  $(this.element).removeClass('progress-disabled').removeAttr('disabled');
+Backdrop.ajax.prototype.error = function (jqXHR, uri) {
+  this.cleanUp(jqXHR);
+
   // Reattach behaviors, if they were detached in beforeSerialize().
   if (this.form) {
-    var settings = response.settings || this.settings || Backdrop.settings;
+    var settings = this.settings || Backdrop.settings;
     Backdrop.attachBehaviors(this.form, settings);
   }
 };
