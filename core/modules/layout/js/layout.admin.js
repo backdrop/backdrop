@@ -15,11 +15,20 @@ Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
     var $form = $('.layout-settings-form').once('layout-settings');
     if ($form.length) {
-      $('input[data-layout-path-update]').addClass('js-hide');
-      $('input[name="path"]').on('change', function() {
-        if (this.value) {
-          $('input[data-layout-path-update]').triggerHandler('mousedown');
+      var ajax = Backdrop.ajax['edit-path-update'];
+      var updateContexts = function() {
+        // Cancel existing AJAX requests and start a new one.
+        for (var n = 0; n < ajax.currentRequests.lenth; n++) {
+          ajax.currentRequests[n].abort();
+          ajax.cleanUp(ajax.currentRequests[n]);
         }
+        $('input[data-layout-path-update]').triggerHandler('mousedown');
+      };
+      // Update contexts after a slight typing delay.
+      var timer = 0;
+      $('input[name="path"]').on('keyup', function(e) {
+        clearTimeout(timer);
+        timer = setTimeout(updateContexts, 200);
       });
     }
 
