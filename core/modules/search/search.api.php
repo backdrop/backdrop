@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Search module.
@@ -235,7 +234,6 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  *   A renderable array, which will render the formatted search results with a
  *   pager included.
  *
- * @see search-result.tpl.php
  * @see search-results.tpl.php
  */
 function hook_search_page($results) {
