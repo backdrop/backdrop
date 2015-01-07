@@ -1451,7 +1451,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   function testAlter() {
     // Add both tableselect.js and simpletest.js, with a larger weight on SimpleTest.
     backdrop_add_js('core/misc/tableselect.js');
-    backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/simpletest.js', array('weight' => 9999));
+    backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/js/simpletest.js', array('weight' => 9999));
 
     // Render the JavaScript, testing if simpletest.js was altered to be before
     // tableselect.js. See simpletest_js_alter() to see where this alteration
