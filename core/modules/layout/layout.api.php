@@ -20,7 +20,7 @@
  *
  * @return array
  *   Each item in the returned array of info should have the following keys:
- *   - name: The human-readable name of the layout.
+ *   - title: The human-readable name of the layout.
  *   - path: A local path within the providing module to files needed by this
  *     layout, such as associated CSS, the icon image, and template file.
  *   - regions: A list of regions this layout provides, keyed by a machine name
