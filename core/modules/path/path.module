@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables users to rename URLs.
@@ -95,7 +94,7 @@ function path_form_node_form_alter(&$form, $form_state) {
       'class' => array('path-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'path') . '/path.js'),
+      'js' => array(backdrop_get_path('module', 'path') . '/js/path.js'),
     ),
     '#access' => user_access('create url aliases') || user_access('administer url aliases'),
     '#weight' => 30,
