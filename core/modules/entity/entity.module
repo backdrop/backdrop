@@ -207,8 +207,6 @@ function entity_create_stub_entity($entity_type, $ids) {
  * @return EntityControllerInterface
  *   The entity controller object for the specified entity type.
  *
- * @todo Remove $conditions in Drupal 8.
- *
  * @see hook_entity_info()
  * @see EntityControllerInterface
  * @see DefaultEntityController
