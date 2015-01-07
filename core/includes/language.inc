@@ -10,7 +10,7 @@
 /**
  * No language negotiation. The default language is used.
  */
-const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
+define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
 
 /**
  * @defgroup language_negotiation Language Negotiation API functionality

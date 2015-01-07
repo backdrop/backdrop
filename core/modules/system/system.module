@@ -8,49 +8,49 @@
 /**
  * Maximum age of temporary files in seconds.
  */
-const BACKDROP_MAXIMUM_TEMP_FILE_AGE = 21600;
+define('BACKDROP_MAXIMUM_TEMP_FILE_AGE', 21600);
 
 /**
  * New users will be set to the default time zone at registration.
  */
-const BACKDROP_USER_TIMEZONE_DEFAULT = 0;
+define('BACKDROP_USER_TIMEZONE_DEFAULT', 0);
 
 /**
  * New users will get an empty time zone at registration.
  */
-const BACKDROP_USER_TIMEZONE_EMPTY = 1;
+define('BACKDROP_USER_TIMEZONE_EMPTY', 1);
 
 /**
  * New users will select their own timezone at registration.
  */
-const BACKDROP_USER_TIMEZONE_SELECT = 2;
+define('BACKDROP_USER_TIMEZONE_SELECT', 2);
 
  /**
  * Disabled option on forms and settings
  */
-const BACKDROP_DISABLED = 0;
+define('BACKDROP_DISABLED', 0);
 
 /**
  * Optional option on forms and settings
  */
-const BACKDROP_OPTIONAL = 1;
+define('BACKDROP_OPTIONAL', 1);
 
 /**
  * Required option on forms and settings
  */
-const BACKDROP_REQUIRED = 2;
+define('BACKDROP_REQUIRED', 2);
 
 /**
  * Maximum number of values in a weight select element.
  *
  * If the number of values is over the maximum, a text field is used instead.
  */
-const BACKDROP_WEIGHT_SELECT_MAX = 100;
+define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
  * Maximum length of e-mail fields.
  */
-const EMAIL_MAX_LENGTH = 254;
+define('EMAIL_MAX_LENGTH', 254);
 
 /**
  * Implements hook_theme().

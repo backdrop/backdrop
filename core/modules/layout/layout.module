@@ -25,37 +25,37 @@
 /**
  * Layouts constant for user-defined layouts.
  */
-const LAYOUT_STORAGE_NORMAL = 1;
+define('LAYOUT_STORAGE_NORMAL', 1);
 
 /**
  * Layout constant for layouts that override module-defined presets.
  */
-const LAYOUT_STORAGE_OVERRIDE = 2;
+define('LAYOUT_STORAGE_OVERRIDE', 2);
 
 /**
  * Layout constant for module-defined layouts.
  */
-const LAYOUT_STORAGE_DEFAULT = 4;
+define('LAYOUT_STORAGE_DEFAULT', 4);
 
 /**
  * Layout constant indicating the title of the layout is the default.
  */
-const LAYOUT_TITLE_DEFAULT = 'default';
+define('LAYOUT_TITLE_DEFAULT', 'default');
 
 /**
  * Layout constant indicating the title of the layout is not shown.
  */
-const LAYOUT_TITLE_NONE = 'none';
+define('LAYOUT_TITLE_NONE', 'none');
 
 /**
  * Layout constant indicating the title of the layout is manually specified.
  */
-const LAYOUT_TITLE_CUSTOM = 'custom';
+define('LAYOUT_TITLE_CUSTOM', 'custom');
 
 /**
  * Layout constant indicating the title of the layout comes from a block.
  */
-const LAYOUT_TITLE_BLOCK = 'block';
+define('LAYOUT_TITLE_BLOCK', 'block');
 
 /**
  * Implements hook_menu().

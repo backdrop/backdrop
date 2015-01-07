@@ -36,7 +36,7 @@ define('BACKDROP_ROOT', getcwd());
  * translation, and solves some theming issues. The flag is checked in other
  * places in Backdrop code (not just authorize.php).
  */
-const MAINTENANCE_MODE = 'update';
+define('MAINTENANCE_MODE', 'update');
 
 /**
  * Renders a 403 access denied page for authorize.php.

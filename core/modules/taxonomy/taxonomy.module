@@ -8,17 +8,17 @@
 /**
  * Denotes that no term in the vocabulary has a parent.
  */
-const TAXONOMY_HIERARCHY_DISABLED = 0;
+define('TAXONOMY_HIERARCHY_DISABLED', 0);
 
 /**
  * Denotes that one or more terms in the vocabulary has a single parent.
  */
-const TAXONOMY_HIERARCHY_SINGLE = 1;
+define('TAXONOMY_HIERARCHY_SINGLE', 1);
 
 /**
  * Denotes that one or more terms in the vocabulary have multiple parents.
  */
-const TAXONOMY_HIERARCHY_MULTIPLE = 2;
+define('TAXONOMY_HIERARCHY_MULTIPLE', 2);
 
 /**
  * Users can create new terms in a free-tagging vocabulary when

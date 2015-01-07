@@ -14,59 +14,59 @@
 /**
  * URL to check for updates, if a given project doesn't define its own.
  */
-const UPDATE_DEFAULT_URL = 'https://updates.backdropcms.org/release-history';
+define('UPDATE_DEFAULT_URL', 'https://updates.backdropcms.org/release-history');
 
 // These are internally used constants for this code, do not modify.
 
 /**
  * Project is missing security update(s).
  */
-const UPDATE_NOT_SECURE = 1;
+define('UPDATE_NOT_SECURE', 1);
 
 /**
  * Current release has been unpublished and is no longer available.
  */
-const UPDATE_REVOKED = 2;
+define('UPDATE_REVOKED', 2);
 
 /**
  * Current release is no longer supported by the project maintainer.
  */
-const UPDATE_NOT_SUPPORTED = 3;
+define('UPDATE_NOT_SUPPORTED', 3);
 
 /**
  * Project has a new release available, but it is not a security release.
  */
-const UPDATE_NOT_CURRENT = 4;
+define('UPDATE_NOT_CURRENT', 4);
 
 /**
  * Project is up to date.
  */
-const UPDATE_CURRENT = 5;
+define('UPDATE_CURRENT', 5);
 
 /**
  * Project's status cannot be checked.
  */
-const UPDATE_NOT_CHECKED = -1;
+define('UPDATE_NOT_CHECKED', -1);
 
 /**
  * No available update data was found for project.
  */
-const UPDATE_UNKNOWN = -2;
+define('UPDATE_UNKNOWN', -2);
 
 /**
  * There was a failure fetching available update data for this project.
  */
-const UPDATE_NOT_FETCHED = -3;
+define('UPDATE_NOT_FETCHED', -3);
 
 /**
  * We need to (re)fetch available update data for this project.
  */
-const UPDATE_FETCH_PENDING = -4;
+define('UPDATE_FETCH_PENDING', -4);
 
 /**
  * The update server is a placeholder server that has not yet been implemented.
  */
-const UPDATE_NOT_IMPLEMENTED = -5;
+define('UPDATE_NOT_IMPLEMENTED', -5);
 
 /**
  * Implements hook_init().
