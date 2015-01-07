@@ -1549,7 +1549,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   function testAddJsFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
-    $this->assertRaw(backdrop_get_path('module', 'node') . '/node.js?' . $query_string, 'Query string was appended correctly to js.');
+    $this->assertRaw(backdrop_get_path('module', 'node') . '/js/node.js?' . $query_string, 'Query string was appended correctly to js.');
   }
 }
 
@@ -1677,7 +1677,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
     // Create an element with a child and subchild.  Each element loads a
     // different JavaScript file using #attached.
     $parent_js = backdrop_get_path('module', 'user') . '/user.js';
-    $child_js = backdrop_get_path('module', 'node') . '/node.js';
+    $child_js = backdrop_get_path('module', 'node') . '/js/node.js';
     $subchild_js = backdrop_get_path('module', 'book') . '/js/book.js';
 
     $element = array(
