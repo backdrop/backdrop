@@ -221,7 +221,7 @@ function node_form($form, &$form_state, Node $node) {
       'class' => array('node-form-revision-information'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
+      'js' => array(backdrop_get_path('module', 'node') . '/js/node.js'),
     ),
     '#weight' => 20,
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
@@ -263,7 +263,7 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#attached' => array(
       'js' => array(
-        backdrop_get_path('module', 'node') . '/node.js',
+        backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
           'data' => array('anonymous' => $config->get('anonymous')),
@@ -310,7 +310,7 @@ function node_form($form, &$form_state, Node $node) {
       'class' => array('node-form-options'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'node') . '/node.js'),
+      'js' => array(backdrop_get_path('module', 'node') . '/js/node.js'),
     ),
     '#weight' => -10,
   );
