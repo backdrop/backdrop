@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Allows administrators to customize the site's menus.
@@ -642,7 +641,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#collapsed' => !$link['link_title'],
     '#group' => 'additional_settings',
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'menu') . '/menu.js'),
+      'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.js'),
     ),
     '#tree' => TRUE,
     '#weight' => 40,
@@ -734,7 +733,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'menu') . '/menu.admin.js'),
+      'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
     ),
     '#group' => 'additional_settings',
   );
