@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only for the update status settings form.
