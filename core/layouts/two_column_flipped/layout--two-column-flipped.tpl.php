@@ -1,9 +1,9 @@
 <?php
 /**
  * @file
- * Template for a 2 column layout.
+ * Template for a 2 column flipped layout.
  *
- * This template provides a two column layout with the sidebar on the right and a roughly
+ * This template provides a two column layout with the sidebar on the left and a roughly
  * 60/40 split.
  *
  * Variables:
@@ -25,7 +25,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout--two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout--two-column-flipped <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
