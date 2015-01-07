@@ -40,7 +40,7 @@
 }
 
 body.admin-bar {
-  margin-top: 30px !important;
+  padding-top: 2.2em;
 }
 
 /* Top level items. */
@@ -80,7 +80,7 @@ body.admin-bar {
 
 /* Dropdown lists */
 #admin-bar .dropdown {
-  line-height: 1.4em;
+  line-height: 1.35;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -106,7 +106,7 @@ body.admin-bar {
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 9px 12px;
+  padding: .75em 12px;
 }
 
 #admin-bar a.expanded-trail,
@@ -161,7 +161,7 @@ body.admin-bar {
 #admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
-  line-height: 1.2em;
+  line-height: 1.2;
   margin: 0;
   position: absolute;
   width: 160px;
@@ -173,7 +173,7 @@ body.admin-bar {
 
 /* Third-and-above-level lists */
 #admin-bar .dropdown li li.expandable ul {
-  margin: -32px 0 0 160px; /* LTR */
+  margin: -2.75em 0 0 160px; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
   margin-left: 160px;
@@ -209,7 +209,8 @@ body.admin-bar {
   background: transparent;
 }
 #admin-bar-icon li.admin-bar-icon > a {
-  padding: 7px 8px 11px;
+  padding: .5em 8px .9em;
+  line-height: 1.5;
 }
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: bottom;
@@ -264,7 +265,8 @@ body.admin-bar {
   width: 140px;
 }
 #admin-bar .top-level .admin-bar-search .form-item {
-  padding: 6px 0 0;
+  padding: .5em 0 0;
+  line-height: 2;
 }
 #admin-bar .admin-bar-search input {
   background: #fff none center right no-repeat;
