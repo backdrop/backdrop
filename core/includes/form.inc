@@ -970,7 +970,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
     // identical form without an error for the user to correct, so we also
     // rebuild error-free non-executed forms, regardless of
     // $form_state['rebuild'].
-    // @todo D8: Simplify this logic; considering Ajax and non-HTML front-ends,
+    // @todo Simplify this logic; considering Ajax and non-HTML front-ends,
     //   along with element-level #submit properties, it makes no sense to have
     //   divergent form execution based on whether the triggering element has
     //   #executes_submit_callback set to TRUE.

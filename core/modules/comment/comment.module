@@ -1548,8 +1548,6 @@ function comment_delete_multiple($cids) {
  * @return
  *   An array of comment objects, indexed by comment ID.
  *
- * @todo Remove $conditions in Drupal 8.
- *
  * @see entity_load()
  * @see EntityFieldQuery
  */

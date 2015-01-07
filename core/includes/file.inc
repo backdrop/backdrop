@@ -560,8 +560,6 @@ EOF;
  * @return
  *   An array of file entities, indexed by fid.
  *
- * @todo Remove $conditions in Drupal 8.
- *
  * @see hook_file_load()
  * @see file_load()
  * @see entity_load()

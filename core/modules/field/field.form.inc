@@ -540,7 +540,7 @@ function _field_form_state_parents($parents, $field_name, $langcode) {
   // - Other fields are placed under
   //   $form_state['field']['#parents'][...$parents...]['#fields'][$field_name]
   //   to avoid clashes between field names and $parents parts.
-  // @todo Remove backwards compatibility in Drupal 8, and use a unique
+  // @todo Remove backwards compatibility and use a unique
   // $form_state['field'][...$parents...]['#fields'][$field_name] structure.
   if (!empty($parents)) {
     $form_state_parents = array_merge(array('#parents'), $parents, array('#fields'));

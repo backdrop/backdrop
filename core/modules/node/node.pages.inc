@@ -189,7 +189,6 @@ function node_form($form, &$form_state, Node $node) {
   if (isset($form['title']) && !isset($form['title']['#weight'])) {
     $form['title']['#weight'] = -5;
   }
-  // @todo D8: Remove. Modules should access the node using $form_state['node'].
   $form['#node'] = $node;
 
   if ($node_type->settings['node_type_language'] && module_exists('language')) {

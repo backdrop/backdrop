@@ -1032,8 +1032,6 @@ function taxonomy_autoload_info() {
  * @return
  *   An array of taxonomy term entities, indexed by tid. When no results are
  *   found, an empty array is returned.
- *
- * @todo Remove $conditions in Drupal 8.
  */
 function taxonomy_term_load_multiple($tids = array(), $conditions = array()) {
   return entity_load('taxonomy_term', $tids, $conditions);

@@ -685,8 +685,8 @@ function update_manager_install_form_submit($form, &$form_state) {
   $archive_errors = update_manager_archive_verify($project, $local_cache, $directory);
   if (!empty($archive_errors)) {
     form_set_error($field, array_shift($archive_errors));
-    // @todo: Fix me in D8: We need a way to set multiple errors on the same
-    // form element and have all of them appear!
+    // @todo: We need a way to set multiple errors on the same form element and
+    // have all of them appear!
     if (!empty($archive_errors)) {
       foreach ($archive_errors as $error) {
         backdrop_set_message($error, 'error');
