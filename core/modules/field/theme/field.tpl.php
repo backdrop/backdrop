@@ -1,11 +1,19 @@
 <?php
-
 /**
  * @file field.tpl.php
  * Default template implementation to display the value of a field.
  *
  * This file is not used and is here as a starting point for customization only.
  * @see theme_field()
+ *
+ * Copy this file and place it inside your theme. You'll likely want to rename
+ * the file so that it only affects the field you are trying to override.
+ * Possible file names for template suggestions include:
+ * - field.tpl.php
+ * - field--field-type.tpl.php
+ * - field--field-name.tpl.php
+ * - field--content-type.tpl.php
+ * - field--field-name--content-type.tpl.php
  *
  * Available variables:
  * - $items: An array of field values. Use render() to output them.
@@ -40,12 +48,6 @@
  * @ingroup themeable
  */
 ?>
-<!--
-THIS FILE IS NOT USED AND IS HERE AS A STARTING POINT FOR CUSTOMIZATION ONLY.
-See http://api.drupal.org/api/function/theme_field/7 for details.
-After copying this file to your theme's folder and customizing it, remove this
-HTML comment.
--->
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php if (!$label_hidden): ?>
     <div class="field-label"><?php print $label ?>:&nbsp;</div>
