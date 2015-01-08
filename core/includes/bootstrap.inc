@@ -245,6 +245,12 @@ define('PASS_THROUGH', -1);
  */
 define('BACKDROP_PHP_FUNCTION_PATTERN', '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*');
 
+// Exit early if running an incompatible PHP version to avoid fatal errors.
+if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="http://backdropcms.org/guide/requirements">system requirements</a> page for more information.';
+  exit;
+}
+
 /**
  * Provides a caching wrapper to be used in place of large array structures.
  *
