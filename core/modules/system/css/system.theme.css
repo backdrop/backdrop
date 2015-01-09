@@ -440,11 +440,11 @@ div.status {
   border-color: #be7;
 }
 div.status,
-.ok {
+.status {
   color: #234600;
 }
 div.status,
-table tr.ok {
+table tr.status {
   background-color: #f8fff0;
 }
 

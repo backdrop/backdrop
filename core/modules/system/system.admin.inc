@@ -2378,7 +2378,7 @@ function theme_status_report($variables) {
     ),
     REQUIREMENT_OK => array(
       'title' => t('OK'),
-      'class' => 'ok',
+      'class' => 'status',
     ),
     REQUIREMENT_WARNING => array(
       'title' => t('Warning'),

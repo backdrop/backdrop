@@ -58,7 +58,7 @@ function theme_update_report($variables) {
   foreach ($data as $project) {
     switch ($project['status']) {
       case UPDATE_CURRENT:
-        $class = 'ok';
+        $class = 'status';
         $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
         break;
       case UPDATE_UNKNOWN:
