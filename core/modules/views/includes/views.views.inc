@@ -65,6 +65,14 @@ function views_views_data() {
     ),
   );
 
+  $data['views']['title'] = array(
+    'title' => t('Title override'),
+    'help' => t('Override the default view title for this view. This is useful to display an alternative title when a view is empty.'),
+    'area' => array(
+      'handler' => 'views_handler_area_title',
+    ),
+  );
+
   $data['views']['view'] = array(
     'title' => t('View area'),
     'help' => t('Insert a view inside an area.'),

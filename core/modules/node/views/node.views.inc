@@ -662,6 +662,14 @@ function node_views_data() {
       'handler' => 'views_handler_filter_history_user_timestamp',
     ),
   );
+
+  $data['node']['empty_node'] = array(
+    'title' => t('Empty Node Frontpage behavior'),
+    'help' => t('Provides a link to the node add overview page.'),
+    'area' => array(
+      'handler' => 'views_handler_area_node_empty',
+    ),
+  );
   return $data;
 }
 

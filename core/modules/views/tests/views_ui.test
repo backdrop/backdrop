@@ -140,6 +140,9 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
    * Tests default views.
    */
   function testDefaultViews() {
+    // Create a node to populate the frontpage.
+    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+	
     // Make sure the front page view starts off as disabled (does not appear on
     // the listing page).
     $edit_href = 'admin/structure/views/view/frontpage';
@@ -148,10 +151,9 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // behavior with templates instead.
     // $this->assertNoLinkByHref($edit_href);
 
-    // Enable the front page view, and make sure it is now visible on the main
-    // listing page.
-    $this->backdropGet('admin/structure/views/templates');
-    $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
+    // The front page view is enabled by default. Make sure it is visible on
+    // the main listing page.
+    $this->backdropGet('admin/structure/views');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
 
@@ -161,7 +163,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     $edit = array('title' => $new_title);
     $this->backdropPost('admin/structure/views/nojs/display/frontpage/page/title', $edit, t('Apply'));
     $this->backdropPost('admin/structure/views/view/frontpage/edit/page', array(), t('Save'));
-    $this->backdropGet('frontpage');
+    $this->backdropGet('node');
     $this->assertText($new_title);
 
     // It should now be possible to revert the view. Do that, and make sure the
@@ -171,11 +173,17 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     $revert_href = 'admin/structure/views/view/frontpage/revert';
     $this->assertLinkByHref($revert_href);
     $this->backdropPost($revert_href, array(), t('Revert'));
-    $this->backdropGet('frontpage');
+    $this->backdropGet('node');
     $this->assertNoText($new_title);
 
-    // After reverting, the view will be disabled again. Try to click the
-    // "enable" link from there again.
+    // After reverting, the view remains enabled. Try to click the "disable"
+    // link from there again.
+    $this->backdropGet('admin/structure/views/templates');
+    $this->clickViewsOperationLink(t('Disable'), '/frontpage/');
+    $this->assertUrl('admin/structure/views');
+    $this->assertLinkByHref($edit_href);
+
+    // Anable the view by clicking the "enable" link.
     $this->backdropGet('admin/structure/views/templates');
     $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
     $this->assertUrl('admin/structure/views');
