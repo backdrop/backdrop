@@ -37,6 +37,15 @@ reporting all bugs and features. We use a separate issue tracker that is not
 part of the main Backdrop code repository because of GitHub's restrictions on
 the use of labels and issue management.
 
+Security Issues
+---------------
+If you have discovered a security issue with Backdrop CMS or any of its
+[contributed modules](https://github.com/backdrop-contrib/), please contact the
+Backdrop Security Team directly at [security@backdropcms.org](mailto:security@backdropcms.org).
+We manage security issues separately in a private repository until the issue
+has been resolved. Even if you're not sure if it's a security problem, please
+contact the security team before filing an issue.
+
 Developers
 ----------
 Backdrop is a fork of Drupal. It preserves the legacy audience of developers who
