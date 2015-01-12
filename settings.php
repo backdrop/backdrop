@@ -305,27 +305,6 @@ ini_set('session.cookie_lifetime', 2000000);
 // $cookie_domain = '.example.com';
 
 /**
- * Variable overrides:
- *
- * To override specific entries in the 'variable' table for this site,
- * set them here. You usually don't need to use this feature. This is
- * useful in a configuration file for a vhost or directory, rather than
- * the default settings.php. Any configuration setting from the 'variable'
- * table can be given a new value. Note that any values you provide in
- * these variable overrides will not be modifiable from the Backdrop
- * administration interface.
- *
- * The following overrides are examples:
- * - site_name: Defines the site's name.
- * - theme_default: Defines the default theme for this site.
- * - anonymous: Defines the human-readable name of anonymous users.
- * Uncomment the examples below or set your own to enable overriding variables.
- */
-// $conf['site_name'] = 'My Backdrop site';
-// $conf['theme_default'] = 'stark';
-// $conf['anonymous'] = 'Visitor';
-
-/**
  * A custom theme can be set for the offline page. This applies when the site
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
@@ -399,22 +378,6 @@ ini_set('session.cookie_lifetime', 2000000);
 // $settings['omit_vary_cookie'] = TRUE;
 
 /**
- * CSS/JS aggregated file gzip compression:
- *
- * By default, when CSS or JS aggregation and clean URLs are enabled Backdrop
- * will store a gzip compressed (.gz) copy of the aggregated files. If this file
- * is available then rewrite rules in the default .htaccess file will serve
- * these files to browsers that accept gzip encoded content. This allows pages
- * to load faster for these users and has minimal impact on server load. If you
- * are using a webserver other than Apache httpd, or a caching reverse proxy
- * that is configured to cache and compress these files itself you may want to
- * uncomment one or both of the below lines, which will prevent gzip files being
- * generated.
- */
-// $conf['css_gzip_compression'] = FALSE;
-// $conf['js_gzip_compression'] = FALSE;
-
-/**
  * String overrides:
  *
  * To override specific strings on your site with or without enabling locale
@@ -449,9 +412,9 @@ $settings['locale_custom_strings_en'][''] = array(
  *
  * Comment out this code if you would like to disable this functionality.
  */
-$conf['404_fast_paths_exclude'] = '/\/(?:styles)\//';
-$conf['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
-$conf['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
+$settings['404_fast_paths_exclude'] = '/\/(?:styles)\//';
+$settings['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
+$settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
 /**
  * By default, fast 404s are returned as part of the normal page request
