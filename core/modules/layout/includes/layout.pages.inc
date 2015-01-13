@@ -45,13 +45,16 @@ function _layout_page_access() {
   $menu_item_name = array_shift($args);
   $menu_item = layout_menu_item_load($menu_item_name);
 
-  // Populate the contexts from the menu system.
-  $contexts = $menu_item->getContexts();
-  foreach ($contexts as $context) {
-    if (isset($context->position) && isset($args[$context->position])) {
-      $context->setData($args[$context->position]);
+  if ($menu_item) {
+    // Populate the contexts from the menu system.
+    $contexts = $menu_item->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->position) && isset($args[$context->position])) {
+        $context->setData($args[$context->position]);
+      }
     }
+    return $menu_item->checkAccess();
   }
 
-  return $menu_item->checkAccess();
+  return false;
 }
