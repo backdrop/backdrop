@@ -1096,9 +1096,9 @@ description = Test that autocompletion does not load the registry.
 group = Theme
 file = tests/theme.test
 
-[ThemeHtmlTag]
-name = Theme HTML Tag
-description = Tests theme_html_tag() built-in theme functions.
+[ThemeHeadTag]
+name = Theme Head Tag
+description = Tests theme_head_tag() built-in theme function.
 group = Theme
 file = tests/theme.test
 

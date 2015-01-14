@@ -352,7 +352,7 @@ function backdrop_get_favicon() {
  * arguments (or NULL for both) to retrieve the currently stored elements.
  *
  * @param $data
- *   A renderable array. If the '#type' key is not set then 'html_tag' will be
+ *   A renderable array. If the '#type' key is not set then 'head_tag' will be
  *   added as the default '#type'.
  * @param $key
  *   A unique string key to allow implementations of hook_html_head_alter() to
@@ -361,7 +361,7 @@ function backdrop_get_favicon() {
  * @return
  *   An array of all stored HEAD elements.
  *
- * @see theme_html_tag()
+ * @see theme_head_tag()
  */
 function backdrop_add_html_head($data = NULL, $key = NULL) {
   $stored_head = &backdrop_static(__FUNCTION__);
@@ -373,7 +373,7 @@ function backdrop_add_html_head($data = NULL, $key = NULL) {
 
   if (isset($data) && isset($key)) {
     if (!isset($data['#type'])) {
-      $data['#type'] = 'html_tag';
+      $data['#type'] = 'head_tag';
     }
     $stored_head[$key] = $data;
   }
@@ -388,7 +388,7 @@ function _backdrop_default_html_head() {
   // IE browser may be vulnerable to XSS via encoding attacks from any content
   // that comes before this META tag, such as a TITLE tag.
   $elements['system_meta_content_type'] = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'meta',
     '#attributes' => array(
       'charset' => 'utf-8',
@@ -400,7 +400,7 @@ function _backdrop_default_html_head() {
   // Get the major version.
   list($version, ) = explode('.', BACKDROP_VERSION);
   $elements['system_meta_generator'] = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
@@ -420,7 +420,7 @@ function backdrop_get_html_head() {
 
   // Always add the default mobile meta tags.
   $elements['viewport'] = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'viewport',
@@ -3484,14 +3484,14 @@ function backdrop_pre_render_styles($elements) {
 
   // Defaults for LINK and STYLE elements.
   $link_element_defaults = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'link',
     '#attributes' => array(
       'rel' => 'stylesheet',
     ),
   );
   $style_element_defaults = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'style',
   );
 
@@ -4483,7 +4483,7 @@ function backdrop_pre_render_scripts($elements) {
 
   // Defaults for each SCRIPT element.
   $element_defaults = array(
-    '#type' => 'html_tag',
+    '#type' => 'head_tag',
     '#tag' => 'script',
     '#value' => '',
     '#attributes' => array(
@@ -7211,7 +7211,7 @@ function backdrop_common_theme() {
     'indentation' => array(
       'variables' => array('size' => 1),
     ),
-    'html_tag' => array(
+    'head_tag' => array(
       'render element' => 'element',
     ),
     // From theme.maintenance.inc.

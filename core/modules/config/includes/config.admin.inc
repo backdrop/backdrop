@@ -65,24 +65,24 @@ function config_sync_form(array $form, array &$form_state) {
       continue;
     }
 
-    $form[$config_change_type]['heading'] = array(
-      '#type' => 'html_tag',
-      '#tag' => 'h3',
-      '#weight' => -1,
-    );
     switch ($config_change_type) {
       case 'create':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count new configuration', '@count new configuration');
+        $heading = format_plural(count($form[$config_change_type]['list']['#rows']), '@count new configuration', '@count new configuration');
         break;
 
       case 'update':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration changed', '@count configurations changed');
+        $heading = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration changed', '@count configurations changed');
         break;
 
       case 'delete':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration removed', '@count configurations removed');
+        $heading = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration removed', '@count configurations removed');
         break;
     }
+
+    $form[$config_change_type]['heading'] = array(
+      '#markup' => '<h3>' . $heading . '</h3>',
+      '#weight' => -1,
+    );
     $header = ($config_change_type === 'delete') ? array(t('Name'), t('Operations')) : array(t('Name'), t('Modified time'), t('Operations'));
     $form[$config_change_type]['list'] += array(
       '#theme' => 'table',
