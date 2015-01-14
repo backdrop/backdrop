@@ -230,12 +230,17 @@ function backdrop_get_profile() {
     $profile = $install_state['parameters']['profile'];
   }
   else {
-    $profile = config_get('system.core', 'install_profile');
+    try {
+      $profile = config_get('system.core', 'install_profile');
+    }
+    catch (ConfigException $e) {}
+  }
+  if (empty($profile)) {
+    $profile = 'standard';
   }
 
   return $profile;
 }
-
 
 /**
  * Sets the breadcrumb trail for the current page.
@@ -2462,7 +2467,12 @@ function url($path = NULL, array $options = array()) {
   }
   $clean_url = &$backdrop_static_fast['clean_url'];
   if (!isset($clean_url)) {
-    $clean_url = config_get('system.core', 'clean_url');
+    try {
+      $clean_url = config_get('system.core', 'clean_url') ? TRUE : FALSE;
+    }
+    catch (ConfigException $e) {
+      $clean_url = FALSE;
+    }
   }
 
   // With Clean URLs.

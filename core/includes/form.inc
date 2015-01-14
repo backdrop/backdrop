@@ -914,7 +914,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
       // We'll clear out the cached copies of the form and its stored data
       // here, as we've finished with them. The in-memory copies are still
       // here, though.
-      if (!config_get('system.core', 'cache') && !empty($form_state['values']['form_build_id'])) {
+      if (empty($form_state['no_cache']) && !empty($form_state['values']['form_build_id']) && !config_get('system.core', 'cache')) {
         tempstore_clear('form', $form_state['values']['form_build_id']);
         tempstore_clear('form_state', $form_state['values']['form_build_id']);
       }

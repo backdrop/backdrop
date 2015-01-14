@@ -47,6 +47,8 @@ function file_test_file_scan_callback_reset() {
  * assertions and helper functions.
  */
 class FileTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Check that two files have the same values for all fields other than the
    * timestamp.
@@ -851,6 +853,9 @@ class RemoteFileSaveUploadTest extends FileSaveUploadTest {
  * Directory related tests.
  */
 class FileDirectoryTest extends FileTestCase {
+  // @todo: Figure out why this requires standard instead of testing.
+  protected $profile = 'standard';
+
   /**
    * Test directory handling functions.
    */
@@ -957,7 +962,11 @@ class FileDirectoryTest extends FileTestCase {
     config_set('system.core', 'file_temporary_path', '');
     $tmp_directory = file_directory_temp();
     $this->assertEqual(empty($tmp_directory), FALSE, 'file_directory_temp() returned a non-empty value.');
-    $setting = config_get('system.core', 'file_temporary_path', '');
+
+    // Set to a specific value.
+    $setting = '/tmp';
+    config_set('system.core', 'file_temporary_path', $setting);
+    $tmp_directory = file_directory_temp();
     $this->assertEqual($setting, $tmp_directory, "The 'file_temporary_path' config setting has the same value that file_directory_temp() returned.");
   }
 }
@@ -1107,6 +1116,9 @@ class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
  * Deletion related tests.
  */
 class FileUnmanagedDeleteTest extends FileTestCase {
+  // @todo: Figure out why this requires standard instead of testing.
+  protected $profile = 'standard';
+
   /**
    * Delete a normal file.
    */
@@ -1154,6 +1166,9 @@ class RemoteFileUnmanagedDeleteTest extends FileUnmanagedDeleteTest {
  * Deletion related tests.
  */
 class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
+  // @todo: Figure out why this requires standard instead of testing.
+  protected $profile = 'standard';
+
   /**
    * Delete a normal file.
    */
@@ -1232,6 +1247,9 @@ class RemoteFileUnmanagedDeleteRecursiveTest extends FileUnmanagedDeleteRecursiv
  * Unmanaged move related tests.
  */
 class FileUnmanagedMoveTest extends FileTestCase {
+  // @todo: Figure out why this requires standard instead of testing.
+  protected $profile = 'standard';
+
   /**
    * Move a normal file.
    */
@@ -1306,6 +1324,9 @@ class RemoteFileUnmanagedMoveTest extends FileUnmanagedMoveTest {
  * Unmanaged copy related tests.
  */
 class FileUnmanagedCopyTest extends FileTestCase {
+  // @todo: Figure out why this requires standard instead of testing.
+  protected $profile = 'standard';
+
   /**
    * Copy a normal file.
    */

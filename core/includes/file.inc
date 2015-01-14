@@ -254,7 +254,14 @@ function file_uri_target($uri) {
  *   'public', 'private' or any other file scheme defined as the default.
  */
 function file_default_scheme() {
-  return config_get('system.core', 'file_default_scheme');
+  try {
+    $scheme = config_get('system.core', 'file_default_scheme');
+  }
+  catch (ConfigException $e) {}
+  if (empty($scheme)) {
+    $scheme = 'public';
+  }
+  return $scheme;
 }
 
 /**
@@ -2483,8 +2490,6 @@ function file_directory_temp() {
       // everything to use slash which is supported on all platforms.
       $temporary_directory = str_replace('\\', '/', $temporary_directory);
     }
-    // Save the path of the discovered directory.
-    config_set('system.core', 'file_temporary_path', $temporary_directory);
   }
 
   return $temporary_directory;

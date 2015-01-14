@@ -401,11 +401,11 @@ abstract class DatabaseTasks {
     $message = '';
     foreach ($this->results as $result => $success) {
       if (!$success) {
-        $message .= '<p class="error">' . $result  . '</p>';
+        $message .= '<p>' . $result  . '</p>';
       }
     }
     if (!empty($message)) {
-      $message = '<p>In order for Backdrop CMS to continue installation process, you must resolve all issues reported below. For more help with configuring your database server, see the <a href="http://backdropcms.org/guide/installation">installation handbook</a>. If you are unsure what any of this means you should probably contact your hosting provider.</p>' . $message;
+      $message .= '<p>For more help with configuring your database server, see the <a href="http://backdropcms.org/guide/installation">installation handbook</a>.</p>';
       throw new DatabaseTaskException($message);
     }
   }
@@ -421,8 +421,9 @@ abstract class DatabaseTasks {
       Database::getConnection();
       $this->pass('Backdrop can CONNECT to the database ok.');
     }
-    catch (Exception $e) {
-      $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.<ul><li>Is the database server running?</li><li>Does the database exist, and have you entered the correct database name?</li><li>Have you entered the correct username and password?</li><li>Have you entered the correct database hostname?</li></ul>', array('%error' => $e->getMessage())));
+    catch (PDOException $e) {
+      $message = preg_replace('/SQLSTATE\[(\w+)\] \[(\w+)\] (.*)/', '$3', $e->getMessage());
+      $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.', array('%error' => $message)));
       return FALSE;
     }
     return TRUE;
@@ -517,12 +518,11 @@ abstract class DatabaseTasks {
     );
 
     $form['advanced_options']['port'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => st('Database port'),
       '#default_value' => empty($database['port']) ? '' : $database['port'],
-      '#size' => 45,
-      // The maximum port number is 65536, 5 digits.
-      '#maxlength' => 5,
+      '#min' => 1,
+      '#max' => 65535,
       '#description' => st('If your database server is listening to a non-standard port, enter its number.'),
     );
 
@@ -578,20 +578,6 @@ function backdrop_rewrite_settings($settings = array()) {
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additions = '';
 
-  // Assign each variable into the global namespace.
-  foreach ($settings as $setting => $data) {
-    $matches = array();
-    preg_match('!^([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
-    $variable = $matches[1];
-    $nesting = isset($matches[3]) ? explode('\'][\'', $matches[3]) : array();
-
-    $global_array = &$GLOBALS[$variable];
-    foreach ($nesting as $nested_key) {
-      $global_array = &$global_array[$nested_key];
-    }
-    $global_array = $data['value'];
-  }
-
   $buffer = NULL;
   $first = TRUE;
   if ($fp = fopen($settings_file, 'r')) {
@@ -612,7 +598,6 @@ function backdrop_rewrite_settings($settings = array()) {
           $new_line = '$' . $variable[1] . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
           $buffer .= $new_line;
           $additions .= $new_line;
-          unset($settings[$variable[1]]);
         }
         else {
           $buffer .= $line;
@@ -626,7 +611,7 @@ function backdrop_rewrite_settings($settings = array()) {
 
     // Add required settings that were missing from settings.php.
     foreach ($settings as $setting => $data) {
-      if ($data['required']) {
+      if (!empty($data['required'])) {
         $new_line = "\$$setting = " . var_export($data['value'], TRUE) . ";\n";
         $buffer .= $new_line;
         $additions .= $new_line;
@@ -634,12 +619,27 @@ function backdrop_rewrite_settings($settings = array()) {
     }
 
     $fp = @fopen(BACKDROP_ROOT . '/' . $settings_file, 'w');
+
     if (!$fp || fwrite($fp, $buffer) === FALSE) {
       throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
     }
   }
   else {
     throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
+  }
+
+  // Assign each variable into the global namespace.
+  foreach ($settings as $setting => $data) {
+    $matches = array();
+    preg_match('!^([^\[]+)(\[\'(.*)\'\]+)?$!', $setting, $matches);
+    $variable = $matches[1];
+    $nesting = isset($matches[3]) ? explode('\'][\'', $matches[3]) : array();
+
+    $global_array = &$GLOBALS[$variable];
+    foreach ($nesting as $nested_key) {
+      $global_array = &$global_array[$nested_key];
+    }
+    $global_array = $data['value'];
   }
 }
 
@@ -650,29 +650,42 @@ function backdrop_rewrite_settings($settings = array()) {
  * @see update_prepare_bootstrap()
  */
 function backdrop_install_config_directories() {
-  global $config_directories;
+  // Default values for variables coming from settings.php.
+  $database = NULL;
+  $config_directories = array();
+
+  // Include the current settings file to check the current database string.
+  $settings_file = conf_path(FALSE) . '/settings.php';
+  include $settings_file;
+
+  $is_empty = empty($config_directories['active']);
+  $is_default = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
 
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.
-  if (empty($config_directories)) {
+  if ($is_empty || $is_default) {
     $config_directories_hash = md5(backdrop_random_bytes(55));
-    $settings["config_directories['active']"] = array(
+    $update_settings["config_directories['active']"] = array(
       'value' => 'files/config_' . $config_directories_hash . '/active',
       'required' => TRUE,
     );
-    $settings["config_directories['staging']"] = array(
+    $update_settings["config_directories['staging']"] = array(
       'value' => 'files/config_' . $config_directories_hash . '/staging',
       'required' => TRUE,
     );
 
     // Rewrite settings.php.
-    backdrop_rewrite_settings($settings);
+    try {
+      backdrop_rewrite_settings($update_settings);
+    }
+    catch (Exception $e) {
+      // If the config directory is empty and we can't write one, error out.
+      // Proceed anyway if using the default directory based on database string.
+      if ($is_empty) {
+        throw $e;
+      }
+    }
   }
-
-  // Reload the settings.php file from scratch to update the config directories
-  // global variable.
-  $settings_file = conf_path(FALSE) . '/settings.php';
-  include $settings_file;
 
   // Ensure the config directories exist or can be created, and are writable.
   foreach (array('active', 'staging') as $config_type) {
@@ -685,8 +698,16 @@ function backdrop_install_config_directories() {
     $config_directory = config_get_config_directory($config_type);
     if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
-        '%directory' => config_get_config_directory($config_type),
+        '%directory' => $config_directory,
         '@handbook_url' => 'http://backdropcms.org/guide/installation',
+      )));
+    }
+
+    // Check that the directories are entirely empty. Disallowing installation
+    // over existing config directories.
+    if (count(file_scan_directory($config_directory, '/.*/')) > 0) {
+      throw new Exception(format_string('The directory %directory must be completely empty to proceed with installation.', array(
+        '%directory' => $config_directory,
       )));
     }
 
@@ -695,30 +716,22 @@ function backdrop_install_config_directories() {
     // created, we have to write out the README rather than just adding it
     // to the Backdrop core repository. These strings are formatted to wrap at
     // 80 characters.
-    switch ($config_type) {
-      case 'active':
-        $text = ltrim('
+    if ($config_type === 'active') {
+      $text = ltrim('
 This directory contains the active configuration for your Backdrop site. To move
 this configuration between environments, contents from this directory should be
 placed in the staging directory on the target server. To make this configuration
 active, see admin/config/development/configuration/sync on the target server.
-
 ');
-        break;
-      case 'staging':
-        $text = ltrim('
+    }
+    elseif ($config_type === 'staging') {
+      $text = ltrim('
 This directory contains configuration to be imported into your Backdrop site. To
 make this configuration active, see admin/config/development/configuration/sync.
-
 ');
-        break;
     }
-    $text .= ltrim('
-For information about deploying configuration between servers, see
-http://drupal.org/documentation/administer/config
-');
 
-    file_put_contents(config_get_config_directory($config_type) . '/README.txt', $text);
+    file_put_contents($config_directory . '/README.txt', $text);
   }
 }
 
@@ -752,7 +765,7 @@ function backdrop_verify_profile($install_state) {
 
   // The installation profile is also a module, which needs to be installed
   // after all the other dependencies have been installed.
-  $present_modules[] = backdrop_get_profile();
+  $present_modules[] = $profile;
 
   // Verify that all of the profile's required modules are present.
   $missing_modules = array_diff($info['dependencies'], $present_modules);
