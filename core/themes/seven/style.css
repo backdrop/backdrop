@@ -445,7 +445,7 @@ tr.selected td {
 .system-status-report tr {
   border-bottom: 1px solid #ccc;
 }
-.system-status-report tr.ok {
+.system-status-report tr.status {
   color: #255b1e;
   background-color: #e5ffe2;
 }
