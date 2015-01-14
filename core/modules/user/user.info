@@ -1,6 +1,6 @@
 name = User
 description = Manages the user registration and login system.
-package = Core
+package = System
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE

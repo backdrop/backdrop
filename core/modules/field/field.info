@@ -1,6 +1,6 @@
 name = Field
 description = Field API to add fields to entities like nodes and users.
-package = Core
+package = System
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field_sql_storage

@@ -1,6 +1,5 @@
 name = Seven
 description = The default administration theme for Backdrop CMS.
-package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 stylesheets[screen][] = style.css

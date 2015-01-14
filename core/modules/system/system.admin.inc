@@ -538,6 +538,11 @@ function system_modules($form, $form_state = array()) {
     $extra['enabled'] = (bool) $module->status;
     $extra['disabled'] = (array_key_exists('disabled', $module->info)) ? $module->info['disabled'] : FALSE;
 
+    // Check to see if this is a core module.
+    if (strstr($module->uri, 'core/modules')) {
+      $extra['core'] = TRUE;
+    }
+
     // Some modules are always required by core and cannot be disabled, for
     // example: entity, node, system, and user.
     $extra['required_by_distribution'] = FALSE;
@@ -635,8 +640,6 @@ function system_modules($form, $form_state = array()) {
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
         array('data' => t('Operations')),
       ),
-      // Ensure that the "Core" package fieldset comes first.
-      '#weight' => $package == 'Core' ? -10 : NULL,
     );
   }
 
@@ -684,6 +687,7 @@ function _system_modules_build_row($info, $extra) {
     'disabled' => FALSE,
     'enabled' => FALSE,
     'links' => array(),
+    'core' => FALSE,
   );
   $form = array(
     '#tree' => TRUE,

@@ -1,6 +1,5 @@
 name = Bartik
 description = The default front-end theme for Backdrop CMS.
-package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 
