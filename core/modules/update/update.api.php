@@ -47,8 +47,8 @@ function hook_update_projects_alter(&$projects) {
     'info' => array(
       'name' => 'Some disabled module',
       'description' => 'A module not enabled on the site that you want to see in the available updates report.',
-      'version' => '8.x-1.0',
-      'backdrop' => '8.x',
+      'version' => '1.x-1.0',
+      'backdrop' => '1.x',
       // The maximum file change time (the "ctime" returned by the filectime()
       // PHP method) for all of the .info files included in this project.
       '_info_file_ctime' => 1243888165,
