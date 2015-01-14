@@ -700,7 +700,7 @@ function _system_modules_build_row($info, $extra) {
     '#markup' => t($info['description']),
   );
   $form['version'] = array(
-    '#markup' => $info['version'],
+    '#markup' => ($extra['core']) ? 'core-' . $info['version'] : $info['version'],
   );
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
