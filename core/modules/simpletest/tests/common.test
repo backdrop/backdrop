@@ -615,6 +615,10 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     backdrop_add_css($css);
     $styles = backdrop_get_css();
     $this->assertTrue(strpos($styles, $css) > 0, 'Rendered CSS includes the added stylesheet.');
+    // Verify that newlines are properly added inside style tags.
+    $query_string = state_get('css_js_query_string', '0');
+    $css_processed = "<style media=\"all\">\n@import url(\"" . check_plain(file_create_url($css)) . "?" . $query_string ."\");\n</style>";
+    $this->assertEqual(trim($styles), $css_processed, t('Rendered CSS includes newlines inside style tags for JavaScript use.'));
   }
 
   /**
@@ -818,9 +822,10 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * Tests basic CSS loading with and without optimization via backdrop_load_stylesheet().
    *
    * Known tests:
-   * - Retain white-space in selectors. (http://drupal.org/node/472820)
-   * - Proper URLs in imported files. (http://drupal.org/node/265719)
-   * - Retain pseudo-selectors. (http://drupal.org/node/460448)
+   * - Retain white-space in selectors. (https://drupal.org/node/472820)
+   * - Proper URLs in imported files. (https://drupal.org/node/265719)
+   * - Retain pseudo-selectors. (https://drupal.org/node/460448)
+   * - Don't adjust data URIs. (https://drupal.org/node/2142441)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.

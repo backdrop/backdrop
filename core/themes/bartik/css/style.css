@@ -759,7 +759,6 @@ article .link-wrapper ul.links {
 }
 .comment .submitted .comment-permalink {
   font-size: 0.786em;
-  text-transform: lowercase;
 }
 .comment .content {
   font-size: 0.929em;
@@ -1382,19 +1381,6 @@ input.form-button-disabled:active,
   color: #717171;
 }
 
-/* Animated throbber */
-.js input.form-autocomplete {
-  background-position: 100% 4px; /* LTR */
-}
-[dir="rtl"] .js input.form-autocomplete {
-  background-position: 1% 4px;
-}
-.js input.throbbing {
-  background-position: 100% -16px; /* LTR */
-}
-[dir="rtl"] .js input.throbbing {
-  background-position: 1% -16px;
-}
 /* Comment form */
 .comment-form label {
   float: left; /* LTR */

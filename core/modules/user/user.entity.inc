@@ -159,6 +159,20 @@ class User extends Entity {
     }
     return $uri;
   }
+
+  /**
+   * Implements EntityInterface::save().
+   */
+  public function save() {
+    // Since pictures are not yet fields Save the picture object, if it is set.
+    $picture = empty($this->picture) ? NULL : $this->picture;
+    // Save the user.
+    $return = parent::save();
+    // Restore the picture object.
+    $this->picture = $picture;
+
+    return $return;
+  }
 }
 
 
