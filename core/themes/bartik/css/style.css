@@ -894,6 +894,10 @@ article .link-wrapper ul.links {
 .block-system-powered-by {
   text-align: center;
 }
+.block-system-powered-by img {
+  margin-left: 0.3em;
+  vertical-align: bottom;
+}
 
 /* ------------------ Footer ------------------ */
 
