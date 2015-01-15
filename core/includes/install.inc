@@ -623,6 +623,13 @@ function backdrop_rewrite_settings($settings = array()) {
     if (!$fp || fwrite($fp, $buffer) === FALSE) {
       throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
     }
+    else {
+      // The existing settings.php file might have been included already. In
+      // case an opcode cache is enabled, the rewritten contents of the file
+      // will not be reflected in this process. Ensure to invalidate the file
+      // in case an opcode cache is enabled.
+      backdrop_clear_opcode_cache(BACKDROP_ROOT . '/' . $settings_file);
+    }
   }
   else {
     throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));

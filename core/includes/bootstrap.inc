@@ -3775,3 +3775,28 @@ function backdrop_check_memory_limit($required, $memory_limit = NULL) {
   // - The memory limit is greater than the memory required for the operation.
   return ((!$memory_limit) || ($memory_limit == -1) || (parse_size($memory_limit) >= parse_size($required)));
 }
+
+/**
+ * Invalidates a PHP file from any active opcode caches.
+ *
+ * If the opcode cache does not support the invalidation of individual files,
+ * the entire cache will be flushed.
+ *
+ * @param string $filepath
+ *   The absolute path of the PHP file to invalidate.
+ */
+function backdrop_clear_opcode_cache($filepath) {
+  clearstatcache(TRUE, $filepath);
+
+  // Zend OPcache.
+  if (function_exists('opcache_invalidate')) {
+    opcache_invalidate($filepath, TRUE);
+  }
+  // APC.
+  if (function_exists('apc_delete_file')) {
+    // apc_delete_file() throws a PHP warning in case the specified file was
+    // not compiled yet.
+    // @see http://php.net/apc-delete-file
+    @apc_delete_file($filepath);
+  }
+}
