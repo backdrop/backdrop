@@ -432,6 +432,11 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
       $bin = 'cache_' . $bin;
     }
     $this->bin = $bin;
+
+    // Bootstrap the database if it is not yet available.
+    if (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
+      backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+    }
   }
 
   /**

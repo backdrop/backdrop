@@ -1,9 +1,4 @@
 <?php
-
-// Set this header as soon as this module is included. We need this header
-// to be set on all page requests, even those served by the internal page cache.
-header('X-Session-Empty: ' . intval(empty($_SESSION)));
-
 /**
  * Implements hook_menu().
  */

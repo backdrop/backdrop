@@ -244,6 +244,7 @@ function install_begin_request(&$install_state) {
   // Load module basics (needed for hook invokes).
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
+  require_once BACKDROP_ROOT . '/core/includes/theme.inc';
 
   // Set up $language, so t() caller functions will still work.
   backdrop_language_initialize();
@@ -278,7 +279,6 @@ function install_begin_request(&$install_state) {
   backdrop_maintenance_theme();
 
   // Check existing settings.php.
-  $install_state['config_verified'] = install_verify_config();
   $install_state['settings_verified'] = install_verify_settings();
 
   if ($install_state['settings_verified']) {
@@ -542,13 +542,15 @@ function install_tasks($install_state) {
     'install_verify_requirements' => array(
       'display_name' => st('Verify requirements'),
     ),
+    'install_hash_salt' => array(
+      'run' => INSTALL_TASK_RUN_IF_REACHED,
+    ),
     'install_settings_form' => array(
       'display_name' => st('Set up database'),
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
     'install_config_directories' => array(
-      'run' => $install_state['config_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_system_module' => array(
     ),
@@ -805,7 +807,7 @@ function install_system_module(&$install_state) {
 
   // The installation profile is also a module, which needs to be installed
   // after all the dependencies have been installed.
-  $modules[] = backdrop_get_profile();
+  $modules[] = $install_state['parameters']['profile'];
 
   state_set('install_profile_modules', array_diff($modules, array('system')));
   $install_state['database_tables_exist'] = TRUE;
@@ -834,24 +836,6 @@ function install_verify_completed_task() {
     }
     return $task;
   }
-}
-
-/**
- * Verifies the existing settings in settings.php.
- */
-function install_verify_config() {
-  global $config_directories;
-
-  // Verify existing settings (if any).
-  if (!empty($config_directories)) {
-    try {
-     if (is_dir(config_get_config_directory('active')) && is_dir(config_get_config_directory('staging'))) {
-       return TRUE;
-     }
-    }
-    catch (ConfigException $e) {}
-  }
-  return FALSE;
 }
 
 /**
@@ -886,11 +870,30 @@ function install_verify_pdo() {
 }
 
 /**
+ * Installation task; Rewrite settings.php to include hash salt.
+ */
+function install_hash_salt() {
+  global $settings;
+
+  if (empty($settings['hash_salt'])) {
+    $update_settings["settings['hash_salt']"] = array(
+      'value' => backdrop_random_key(),
+      'required' => TRUE,
+    );
+
+    // Hash salt is optional, so allow installation even if it can't be written.
+    try {
+      backdrop_rewrite_settings($update_settings);
+    }
+    catch (Exception $e) {}
+  }
+}
+
+/**
  * Installation task; Rewrite settings.php to include config directories.
  */
 function install_config_directories(&$install_state) {
   backdrop_install_config_directories();
-  $install_state['config_verified'] = TRUE;
 }
 
 /**
@@ -905,6 +908,10 @@ function install_config_directories(&$install_state) {
  */
 function install_settings_form($form, &$form_state, &$install_state) {
   global $databases;
+
+  // Do not let Backdrop attempt to save this form to tempstore, since the
+  // table itself won't exist yet.
+  $form_state['no_cache'] = TRUE;
 
   backdrop_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
@@ -1020,10 +1027,6 @@ function install_settings_form_submit($form, &$form_state) {
   );
   $settings['database_prefix'] = array(
     'value' => $db_settings['db_prefix'],
-  );
-  $settings["settings['hash_salt']"] = array(
-    'value' => backdrop_random_key(),
-    'required' => TRUE,
   );
   backdrop_rewrite_settings($settings);
   // Indicate that the settings file has been verified, and check the database
@@ -1575,13 +1578,13 @@ function install_finished(&$install_state) {
   backdrop_flush_all_caches();
 
   // Remember the profile which was used.
-  config_set('system.core', 'install_profile', backdrop_get_profile());
+  config_set('system.core', 'install_profile', $install_state['parameters']['profile']);
 
   // Installation profiles are always loaded last
   db_update('system')
     ->fields(array('weight' => 1000))
     ->condition('type', 'module')
-    ->condition('name', backdrop_get_profile())
+    ->condition('name', $install_state['parameters']['profile'])
     ->execute();
 
   // Cache a fully-built schema.
@@ -1592,7 +1595,7 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = '<strong>' . st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name())) . '</strong>';
+  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
 
   backdrop_set_message($message);
   backdrop_goto('<front>');
@@ -1626,8 +1629,7 @@ function _install_profile_modules_finished($success, $results, $operations) {
 function install_check_requirements($install_state) {
   $profile = $install_state['parameters']['profile'];
 
-  // Check the profile requirements.
-  $requirements = backdrop_check_profile($profile);
+  $requirements = array();
 
   // If Backdrop is not set up already, we need to update the settings file.
   if (!$install_state['settings_verified']) {
@@ -1653,6 +1655,7 @@ function install_check_requirements($install_state) {
         'severity'    => REQUIREMENT_ERROR,
         'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array('@profile' => backdrop_install_profile_distribution_name(), '@file' => $settings_file)),
       );
+      return $requirements;
     }
     else {
       $requirements['settings file exists'] = array(
@@ -1676,6 +1679,10 @@ function install_check_requirements($install_state) {
       );
     }
   }
+
+  // Check the profile requirements.
+  $requirements += backdrop_check_profile($profile);
+
   return $requirements;
 }
 

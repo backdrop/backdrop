@@ -264,9 +264,18 @@ function lock_release_all($lock_id = NULL) {
   if (empty($lock_id)) {
     $lock_id = _lock_id();
   }
-  db_delete('semaphore')
-    ->condition('value', $lock_id)
-    ->execute();
+  try {
+    db_delete('semaphore')
+      ->condition('value', $lock_id)
+      ->execute();
+  }
+  catch (PDOException $e) {
+    // PDOException 42S02 is the internal error code for table does not exist.
+    // In the event that the table does not exist, suppress the exception.
+    if ($e->getCode() !== '42S02') {
+      throw $e;
+    }
+  }
 }
 
 /**

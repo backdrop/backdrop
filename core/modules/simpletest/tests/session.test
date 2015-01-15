@@ -273,7 +273,8 @@ class SessionTestCase extends BackdropWebTestCase {
    */
   function assertSessionEmpty($empty) {
     if ($empty) {
-      $this->assertIdentical($this->backdropGetHeader('X-Session-Empty'), '1', 'Session was empty.');
+      $empty = $this->backdropGetHeader('X-Session-Empty');
+      $this->assertTrue($empty === FALSE || $empty === '1', 'Session was empty.');
     }
     else {
       $this->assertIdentical($this->backdropGetHeader('X-Session-Empty'), '0', 'Session was not empty.');

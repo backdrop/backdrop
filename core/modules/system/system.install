@@ -288,21 +288,14 @@ function system_requirements($phase) {
   }
 
   // Test files directories.
-  $directories = array(
-    config_get('system.core', 'file_public_path'),
-    // By default no private files directory is configured. For private files
-    // to be secure the admin needs to provide a path outside the webroot.
-    config_get('system.core', 'file_private_path'),
-  );
-
-  // Do not check for the temporary files directory during installation
-  // unless it has been set in settings.php. In this case the user has
-  // no alternative but to fix the directory if it is not writable.
-  if ($phase == 'install') {
-    $directories[] = config_get('system.core', 'file_temporary_path');
+  $directories = array();
+  if ($phase == 'runtime') {
+    $directories[] = config_get('system.core', 'file_public_path');
+    $directories[] = config_get('system.core', 'file_private_path');
+    $directories[] = file_directory_temp();
   }
   else {
-    $directories[] = file_directory_temp();
+    $directories[] = 'files';
   }
 
   $requirements['file system'] = array(
@@ -315,12 +308,10 @@ function system_requirements($phase) {
     if (!$directory) {
       continue;
     }
-    if ($phase == 'install') {
-      file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    }
+    $prepared = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $is_writable = is_writable($directory);
     $is_directory = is_dir($directory);
-    if (!$is_writable || !$is_directory) {
+    if (!$prepared || !$is_writable || !$is_directory) {
       $description = '';
       $requirements['file system']['value'] = $t('Not writable');
       if (!$is_directory) {

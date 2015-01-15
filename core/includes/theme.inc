@@ -98,7 +98,7 @@ function backdrop_theme_initialize() {
 
   // Allow modules to override the theme. Validation has already been performed
   // inside menu_get_custom_theme(), so we do not need to check it again here.
-  $custom_theme = menu_get_custom_theme();
+  $custom_theme = function_exists('menu_get_custom_theme') ? menu_get_custom_theme() : NULL;
   $theme = !empty($custom_theme) ? $custom_theme : $theme;
 
   // Store the identifier for retrieving theme settings with.
@@ -2673,13 +2673,13 @@ function template_preprocess_maintenance_page(&$variables) {
     }
   }
 
-  // set the default language if necessary
+  // Set the default language if necessary.
   $language = isset($GLOBALS['language']) ? $GLOBALS['language'] : language_default();
 
   // Initialize attributes which are specific to the html element.
   $variables['html_attributes'] = array();
-  $variables['html_attributes']['lang'] = $GLOBALS['language']->langcode;
-  $variables['html_attributes']['dir'] = $GLOBALS['language']->direction ? 'rtl' : 'ltr';
+  $variables['html_attributes']['lang'] = $language->langcode;
+  $variables['html_attributes']['dir'] = $language->direction ? 'rtl' : 'ltr';
 
   $variables['head_title_array']  = $head_title;
   $variables['head_title']        = implode(' | ', $head_title);
