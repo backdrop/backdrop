@@ -159,9 +159,6 @@ function admin_bar_preprocess_page(&$variables) {
 
   // Determine whether we need to show all components and disable all caches.
   $complete = FALSE;
-  if (current_path() == 'admin/config/administration/admin_bar' && $_SERVER['REQUEST_METHOD'] == 'GET') {
-    $complete = TRUE;
-  }
 
   // If we have a cached menu for the current user, only output the hash for the
   // client-side HTTP cache callback URL.
@@ -452,10 +449,12 @@ function admin_bar_admin_bar_output_build(&$content) {
  * Implements hook_admin_bar_output_alter().
  */
 function admin_bar_admin_bar_output_alter(&$content) {
-  foreach ($content['menu']['menu'] as $key => $link) {
-    // Move local tasks on 'admin' into icon menu.
-    if ($key == 'admin/tasks' || $key == 'admin/index') {
-      unset($content['menu']['menu'][$key]);
+  if (isset($content['menu']['menu'])) {
+    foreach ($content['menu']['menu'] as $key => $link) {
+      // Move local tasks on 'admin' into icon menu.
+      if ($key == 'admin/tasks' || $key == 'admin/index') {
+        unset($content['menu']['menu'][$key]);
+      }
     }
   }
 }
