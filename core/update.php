@@ -276,6 +276,8 @@ function update_results_page() {
  *   Rendered HTML form.
  */
 function update_info_page() {
+  global $databases;
+
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -283,17 +285,26 @@ function update_info_page() {
     cache('update')->flush();
   }
 
+  // Get database name
+  $db_name = $databases['default']['default']['database'];
+
+  // Get the config path
+  $config_dir = config_get_config_directory('active');
+
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever a new release of Backdrop or a module is installed.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
   $output .= "<ol>\n";
-  $output .= "<li><strong>Back up your database</strong>. This process will change your database values and in case of emergency you may need to revert to a backup.</li>\n";
-  $output .= "<li><strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Backdrop's auto-discovery mechanism.</li>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files in the appropriate location, as described in the handbook.</li>\n";
+  $output .= "<li><strong>Make any necessary backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
+  $output .= "<ul>\n";
+  $output .= "<li><strong>Database:</strong> Back up a dump of the '" . $db_name . "' database.</li>\n";
+  $output .= "<li><strong>Config files:</strong> Back up the entire '" . $config_dir . "' directory.</li>\n";
+  $output .= "</ul>\n";
+  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a> (optional but recommended).</li>' . "\n";
+  $output .= "<li>Install your new files into the appropriate location, as described in the handbook.</li>\n";
   $output .= "</ol>\n";
-  $output .= "<p>When you have performed the steps above, you may proceed.</p>\n";
+  $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
   $output .= "\n";
