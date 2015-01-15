@@ -2551,14 +2551,14 @@ function backdrop_bootstrap_is_installed() {
   }
 
   if (!empty($databases) && function_exists('db_query')) {
-    $database = $databases['default']['default'];
-    $query = "SHOW TABLES";
-    if ($prefix = $database['prefix']) {
-      $query .= " LIKE '$prefix%'";
+    try {
+      db_query('SELECT name FROM {system} WHERE name = :name', array(':name' => 'system'));
     }
-    $table_count = db_query($query)->rowCount();
-    if ($table_count === 0) {
-      return FALSE;
+    catch (PDOException $e) {
+      // System table not found.
+      if ($e->getCode() == '42S02') {
+        return FALSE;
+      }
     }
   }
 
