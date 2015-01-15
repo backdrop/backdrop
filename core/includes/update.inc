@@ -322,6 +322,10 @@ function update_fix_requirements() {
       update_module_enable(array('views'));
     }
 
+    // Empty a few basic caches.
+    db_query('TRUNCATE {cache}');
+    db_query('TRUNCATE {cache_bootstrap}');
+
     state_set('update_backdrop_requirements', TRUE);
   }
 }
