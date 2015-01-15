@@ -51,7 +51,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
     }
     elseif ($file->name == 'dependency_test1') {
       // Set dependency_test1 module to a version compatible with the above.
-      $info['version'] = '8.x-1.0';
+      $info['version'] = '1.x-1.0';
     }
   }
   if ($file->name == 'seven' && $type == 'theme') {
