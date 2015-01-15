@@ -163,16 +163,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $form['submission']['title_label']['#description'] = t('This content type does not have a title field.');
     $form['submission']['title_label']['#required'] = FALSE;
   }
-  $form['submission']['node_preview'] = array(
-    '#type' => 'radios',
-    '#title' => t('Preview before submitting'),
-    '#default_value' => $type->settings['node_preview'],
-    '#options' => array(
-      BACKDROP_DISABLED => t('Disabled'),
-      BACKDROP_OPTIONAL => t('Optional'),
-      BACKDROP_REQUIRED => t('Required'),
-    ),
-  );
   $form['submission']['help']  = array(
     '#type' => 'textarea',
     '#title' => t('Explanation or submission guidelines'),
@@ -436,9 +426,6 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
-
-      // Preview of nodes.
-      'node_preview' => BACKDROP_OPTIONAL,
 
       // Submitted information.
       'node_submitted' => TRUE,

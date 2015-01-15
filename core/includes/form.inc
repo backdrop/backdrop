@@ -3728,8 +3728,7 @@ function form_process_vertical_tabs($element, &$form_state) {
 
   // The JavaScript stores the currently selected tab in this hidden
   // field so that the active tab can be restored the next time the
-  // form is rendered, e.g. on preview pages or when form validation
-  // fails.
+  // form is rendered, e.g. when form validation fails.
   $name = implode('__', $element['#parents']);
   if (isset($form_state['values'][$name . '__active_tab'])) {
     $element['#default_tab'] = $form_state['values'][$name . '__active_tab'];
