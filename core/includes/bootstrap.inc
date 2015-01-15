@@ -2772,7 +2772,7 @@ function _backdrop_bootstrap_database() {
         exit();
       }
       elseif ($e->getCode() == '42S02') {
-        include_once DRUPAL_ROOT . '/core/includes/install.inc';
+        include_once BACKDROP_ROOT . '/core/includes/install.inc';
         install_goto('core/install.php');
       }
     }
