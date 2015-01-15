@@ -56,5 +56,5 @@ function _layout_page_access() {
     return $menu_item->checkAccess();
   }
 
-  return false;
+  return FALSE;
 }

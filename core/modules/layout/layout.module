@@ -954,6 +954,10 @@ function layout_get_path_layout_names($path) {
  *   specified the path, or NULL if a path does not exist in the system.
  */
 function layout_provides_path($path) {
+  if (empty($path)) {
+    return FALSE;
+  }
+
   $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
   $return = NULL;
 
