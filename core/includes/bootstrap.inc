@@ -2762,6 +2762,22 @@ function _backdrop_bootstrap_database() {
   // won't be initialized until it is actually requested.
   require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
 
+  // Backdrop Smart Start
+  if (!empty($GLOBALS['databases'])) {
+    try {
+      $result = db_query('SELECT s.name FROM {system} s WHERE s.name = :name', array(':name' => 'system'));
+    } catch (PDOException $e) {
+      if ($e->getCode() == '2003') {
+        header('Status: 550 Database Offline');
+        exit();
+      }
+      elseif ($e->getCode() == '42S02') {
+        include_once DRUPAL_ROOT . '/core/includes/install.inc';
+        install_goto('core/install.php');
+      }
+    }
+  }
+
   // Register autoload functions so that we can access classes and interfaces.
   // The database autoload routine comes first so that we can load the database
   // system without hitting the database. That is especially important during
