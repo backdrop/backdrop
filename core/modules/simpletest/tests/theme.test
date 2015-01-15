@@ -533,6 +533,96 @@ class ThemeHeadTag extends BackdropUnitTestCase {
 }
 
 /**
+ * Tests the markup of core render element types passed to backdrop_render().
+ */
+class RenderElementTypesTestCase extends BackdropWebTestCase {
+  /**
+   * Asserts that an array of elements is rendered properly.
+   *
+   * @param array $elements
+   *   An array of associative arrays describing render elements and their
+   *   expected markup. Each item in $elements must contain the following:
+   *   - 'name': This human readable description will be displayed on the test
+   *     results page.
+   *   - 'value': This is the render element to test.
+   *   - 'expected': This is the expected markup for the element in 'value'.
+   */
+  function assertElements($elements) {
+    foreach($elements as $element) {
+      $this->assertIdentical(backdrop_render($element['value']), $element['expected'], '"' . $element['name'] . '" input rendered correctly by backdrop_render().');
+    }
+  }
+
+  /**
+   * Tests system #type 'container'.
+   */
+  function testContainer() {
+    $elements = array(
+      // Basic container with no attributes.
+      array(
+        'name' => "#type 'container' with no HTML attributes",
+        'value' => array(
+          '#type' => 'container',
+          'child' => array(
+            '#markup' => 'foo',
+          ),
+        ),
+        'expected' => '<div>foo</div>',
+      ),
+      // Container with a class.
+      array(
+        'name' => "#type 'container' with a class HTML attribute",
+        'value' => array(
+          '#type' => 'container',
+          'child' => array(
+            '#markup' => 'foo',
+          ),
+          '#attributes' => array(
+            'class' => 'bar',
+          ),
+        ),
+        'expected' => '<div class="bar">foo</div>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
+   * Tests system #type 'head_tag'.
+   */
+  function testHeadTag() {
+    $elements = array(
+      // Test auto-closure meta tag generation.
+      array(
+        'name' => "#type 'head_tag' auto-closure meta tag generation",
+        'value' => array(
+          '#type' => 'head_tag',
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'description',
+            'content' => 'Backdrop test',
+          ),
+        ),
+        'expected' => '<meta name="description" content="Backdrop test" />' . "\n",
+      ),
+      // Test title tag generation.
+      array(
+        'name' => "#type 'head_tag' title tag generation",
+        'value' => array(
+          '#type' => 'head_tag',
+          '#tag' => 'title',
+          '#value' => 'title test',
+        ),
+        'expected' => '<title>title test</title>' . "\n",
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+}
+
+/**
  * Functional test for attributes of html.tpl.php.
  */
 class ThemeHtmlTplPhpAttributesTestCase extends BackdropWebTestCase {
@@ -648,4 +738,61 @@ class ThemeDatetime extends BackdropWebTestCase {
     );
     $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000"><span>Dries\' birthday</span></time>', theme('datetime', $variables));
   }
+}
+
+/**
+ * Tests for theme debug markup.
+ */
+class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('theme_test', 'node');
+    theme_enable(array('test_theme'));
+  }
+
+  /**
+   * Tests debug markup added to template output.
+   */
+  function testDebugOutput() {
+    config_set('system.core', 'theme_default', 'test_theme');
+    // Enable the debug output.
+    config_set('system.core', 'theme_debug', TRUE);
+
+    $registry = theme_get_registry();
+    $extension = '.tpl.php';
+    // Populate array of templates.
+    $templates = backdrop_find_theme_templates($registry, $extension, backdrop_get_path('theme', 'test_theme'));
+    $templates += backdrop_find_theme_templates($registry, $extension, backdrop_get_path('module', 'node'));
+
+    // Create a node and test different features of the debug markup.
+    $node = $this->backdropCreateNode();
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
+    $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
+    $this->assertRaw('x node--1' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
+    $template_filename = $templates['node__1']['path'] . '/' . $templates['node__1']['template'] . $extension;
+    $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
+
+    // Create another node and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $node2 = $this->backdropCreateNode();
+    $this->backdropGet('node/' . $node2->nid);
+    $this->assertRaw('* node--2' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
+
+    // Create another node and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $node3 = $this->backdropCreateNode();
+    $build = array('#theme' => 'node__foo__bar');
+    $build += node_view($node3);
+    $output = backdrop_render($build);
+    $this->assertTrue(strpos($output, "CALL: theme('node__foo__bar')") !== FALSE, 'Theme call information found.');
+    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--3' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+
+    // Disable theme debug.
+    config_set('system.core', 'theme_debug', FALSE);
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertNoRaw('<!-- THEME DEBUG -->', 'Theme debug markup not found in theme output when debug is disabled.');
+  }
+
 }

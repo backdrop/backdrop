@@ -2416,6 +2416,13 @@ function system_update_1033() {
 }
 
 /**
+ * Set the theme_debug flag to FALSE.
+ */
+function system_update_1034() {
+  config_set('system.core', 'theme_debug', FALSE);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
