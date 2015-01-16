@@ -453,16 +453,18 @@ function views_discover_plugins() {
       continue;
     }
 
-    $module_dir = isset($result['module']) ? $result['module'] : $module;
     // Setup automatic path/file finding for theme registration
+    $module_dir = isset($result['module']) ? $result['module'] : $module;
+    // Assume the plugin path includes a 'plugins' directory.
+    $path = backdrop_get_path('module', $module_dir) . '/plugins';
+    // Assume the theme path includes a 'templates' directory.
+    $theme_path = backdrop_get_path('module', $module_dir) . '/templates';
+    // Assume the *.views.inc file for theme implementations.
+    $theme_file = "$module.views.inc";
+
+    // Add some special casing for the views module itself.
     if ($module_dir == 'views') {
-      $theme_path = backdrop_get_path('module', $module_dir) . '/theme';
-      $theme_file = 'theme.inc';
-      $path = backdrop_get_path('module', $module_dir) . '/plugins';
-    }
-    else {
-      $theme_path = $path = backdrop_get_path('module', $module_dir);
-      $theme_file = "$module.views.inc";
+      $theme_file = 'views.theme.inc';
     }
 
     foreach ($result as $type => $info) {
