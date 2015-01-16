@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the view analyze tool code.

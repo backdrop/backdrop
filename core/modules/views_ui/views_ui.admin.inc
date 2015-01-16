@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides the Views' administrative interface.
@@ -3123,7 +3122,7 @@ function views_ui_analyze_view_form($form, &$form_state) {
   $form['#title'] = t('View analysis');
   $form['#section'] = 'analyze';
 
-  module_load_include('inc', 'views_ui', 'includes/analyze');
+  module_load_include('inc', 'views_ui', 'views_ui.analyze');
   $messages = views_ui_analyze_view($view);
 
   $form['analysis'] = array(
