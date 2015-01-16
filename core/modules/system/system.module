@@ -1210,7 +1210,7 @@ function system_library_info() {
     'title' => 'Jump Menu',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/system.jump-menu.js' => array('group' => JS_DEFAULT),
+      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
     ),
   );
 

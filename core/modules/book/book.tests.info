@@ -1,5 +1,0 @@
-[BookTestCase]
-name = Book functionality
-description = Create a book, add pages, and test book interface.
-file = tests/book.test
-group = Book

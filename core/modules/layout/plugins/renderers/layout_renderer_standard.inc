@@ -337,7 +337,7 @@ class LayoutRendererStandard {
 
     $this->renderRegions();
 
-    module_load_include('inc', 'layout', 'includes/layout.theme');
+    module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
       $theme = 'layout__' . $this->layout->layout;
     }

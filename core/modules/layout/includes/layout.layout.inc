@@ -147,7 +147,7 @@ function layout_layout_style_info() {
     'block theme' => 'block',
     'class' => 'LayoutStyle',
     'template' => 'templates/block',
-    'file' => 'includes/layout.theme.inc',
+    'file' => 'layout.theme.inc',
   );
   $info['dynamic'] = array(
     'title' => t('Dynamic'),
@@ -156,7 +156,7 @@ function layout_layout_style_info() {
     'block theme' => 'block_dynamic',
     'class' => 'LayoutStyleDynamic',
     'template' => 'templates/block-dynamic',
-    'file' => 'includes/layout.theme.inc',
+    'file' => 'layout.theme.inc',
   );
   return $info;
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callback file for the user module.
@@ -222,7 +221,7 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Enable user pictures.'),
     '#default_value' => $picture_support,
   );
-  backdrop_add_js(backdrop_get_path('module', 'user') . '/user.js');
+  backdrop_add_js(backdrop_get_path('module', 'user') . '/js/user.js');
   $form['personalization']['pictures'] = array(
     '#type' => 'container',
     '#states' => array(
@@ -627,7 +626,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/user.permissions.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
   return $form;
 }

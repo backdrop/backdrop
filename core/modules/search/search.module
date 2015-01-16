@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables site-wide keyword searching.
@@ -71,7 +70,7 @@ function search_theme() {
     'search_results' => array(
       'variables' => array('results' => NULL, 'module' => NULL),
       'file' => 'search.pages.inc',
-      'template' => 'search-results',
+      'template' => 'templates/search-results',
     ),
   );
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the system module.
@@ -1565,7 +1564,7 @@ function system_logging_settings_submit($form, &$form_state) {
  * @see system_performance_settings_submit().
  */
 function system_performance_settings($form, &$form_state) {
-  backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
+  backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
   $config = config('system.core');
 
   $form['clear_cache'] = array(
@@ -2101,7 +2100,7 @@ function system_clean_url_settings($form, &$form_state) {
   }
   // Show the clean URLs test form.
   else {
-    backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
+    backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
 
     $form_state['redirect'] = url('admin/config/search/clean-urls');
     $form['clean_url_description'] = array(

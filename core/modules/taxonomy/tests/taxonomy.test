@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for taxonomy.module.
@@ -1221,6 +1220,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
     // View the term and ensure that hook_taxonomy_term_view() and
     // hook_entity_view() are invoked.
     $term = taxonomy_term_load($term->tid);
+    module_load_include('inc', 'taxonomy', 'taxonomy.pages');
     $term_build = taxonomy_term_page($term);
     $this->assertFalse(empty($term_build['term_heading']['term']['taxonomy_test_term_view_check']), 'hook_taxonomy_term_view() was invoked when viewing the term.');
     $this->assertFalse(empty($term_build['term_heading']['term']['taxonomy_test_entity_view_check']), 'hook_entity_view() was invoked when viewing the term.');

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Menu builder functions for Administration bar.

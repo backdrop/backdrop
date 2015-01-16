@@ -1,5 +1,0 @@
-[ColorTestCase]
-name = Color functionality
-description = Modify the Bartik theme colors and make sure the changes are reflected on the frontend.
-group = Color
-file = tests/color.test
