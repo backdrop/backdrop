@@ -1388,7 +1388,7 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   at all).
  * @param $destination
  *   A string containing the URI that the file should be copied to. This must
- *   be a stream wrapper URI. If this value is omitted, Drupal's temporary
+ *   be a stream wrapper URI. If this value is omitted, Backdrop's temporary
  *   files scheme will be used ("temporary://").
  * @param $replace
  *   Replace behavior when the destination file already exists:

@@ -1378,7 +1378,7 @@ function comment_node_update_index(Node $node) {
     // not view comments.
     $index_comments = TRUE;
     foreach ($perms['search content'] as $role_name) {
-      if (!isset($perms['access comments'][$role_name]) && ($role_name === DRUPAL_AUTHENTICATED_RID || $role_name === DRUPAL_ANONYMOUS_RID || !isset($perms['access comments'][DRUPAL_AUTHENTICATED_RID]))) {
+      if (!isset($perms['access comments'][$role_name]) && ($role_name === BACKDROP_ANONYMOUS_ROLE || $role_name === BACKDROP_AUTHENTICATED_ROLE || !isset($perms['access comments'][BACKDROP_AUTHENTICATED_ROLE]))) {
         $index_comments = FALSE;
         break;
       }
