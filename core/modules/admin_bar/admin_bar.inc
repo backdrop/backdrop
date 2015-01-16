@@ -685,10 +685,6 @@ function admin_bar_theme_settings() {
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
 
-  $process = element_info_property('checkboxes', '#process', array());
-  $form['components']['#process'] = array_merge(array('admin_bar_settings_process_components'), $process);
-  $form['#attached']['js'][] = backdrop_get_path('module', 'admin_bar') . '/js/admin_bar.admin.js';
-
   $form['actions'] = array(
     '#type' => 'actions',
   );
