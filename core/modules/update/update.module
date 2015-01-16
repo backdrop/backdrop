@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handles updates of Backdrop core and contributed projects.
@@ -146,7 +145,7 @@ function update_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('update_settings'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'update.settings.inc',
+    'file' => 'update.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 50,
   );

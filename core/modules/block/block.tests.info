@@ -1,5 +1,0 @@
-[BlockTestCase]
-name = Block functionality
-description = Add, edit and delete custom block. Configure and move a module-defined block.
-group = Block
-file = tests/block.test

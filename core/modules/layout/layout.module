@@ -64,7 +64,7 @@ function layout_menu() {
   $items = array();
   $base = array(
     'access arguments' => array('administer layouts'),
-    'file' => 'includes/layout.admin.inc',
+    'file' => 'layout.admin.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
@@ -320,7 +320,7 @@ function layout_page_menu_item(array $menu, array $access_arguments, array $page
     'page callback' => 'layout_page_callback',
     'page arguments' => $page_arguments,
     'load arguments' => $load_arguments,
-    'file' => 'includes/layout.pages.inc',
+    'file' => 'layout.pages.inc',
   );
 
   if (isset($menu['title'])) {
@@ -375,7 +375,7 @@ function layout_page_title(Layout $layout) {
  * Menu access callback; Check access for any Layout-provided page.
  */
 function layout_page_access() {
-  module_load_include('inc', 'layout', 'includes/layout.pages');
+  module_load_include('inc', 'layout', 'layout.pages');
   $args = func_get_args();
   return call_user_func_array('_layout_page_access', $args);
 }
@@ -453,12 +453,12 @@ function layout_route_handler($router_item) {
  * Implements hook_theme()
  */
 function layout_theme() {
-  // Include the theme file so that the base process/preprocess functions are
-  // in the global namespace.
-  module_load_include('inc', 'layout', 'includes/layout.theme');
+  // Include the theme file so that the base preprocess functions are in the
+  // global namespace.
+  module_load_include('inc', 'layout', 'layout.theme');
 
   $base = array(
-    'file' => 'includes/layout.theme.inc',
+    'file' => 'layout.theme.inc',
   );
 
   $items = array(

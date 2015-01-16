@@ -12,7 +12,7 @@ function book_theme() {
   return array(
     'book_navigation' => array(
       'variables' => array('book_link' => NULL),
-      'template' => 'book-navigation',
+      'template' => 'templates/book-navigation',
     ),
     'book_admin_table' => array(
       'render element' => 'form',
@@ -22,7 +22,7 @@ function book_theme() {
     ),
     'book_all_books_block' => array(
       'render element' => 'book_menus',
-      'template' => 'book-all-books-block',
+      'template' => 'templates/book-all-books-block',
     ),
   );
 }
@@ -496,7 +496,7 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
       'class' => array('book-outline-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'book') . '/book.js'),
+      'js' => array(backdrop_get_path('module', 'book') . '/js/book.js'),
     ),
     '#tree' => TRUE,
   );

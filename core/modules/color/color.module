@@ -173,7 +173,7 @@ function color_scheme_form($complete_form, &$form_state, $theme) {
       ),
       // Add custom JavaScript.
       'js' => array(
-        $base . '/color.js',
+        $base . '/js/color.js',
         array(
           'data' => array(
             'color' => array(
@@ -226,7 +226,7 @@ function theme_color_scheme_form($variables) {
   $path = backdrop_get_path('theme', $theme) . '/';
   backdrop_add_css($path . $info['preview_css']);
 
-  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : backdrop_get_path('module', 'color') . '/' . 'preview.js';
+  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : backdrop_get_path('module', 'color') . '/js/' . 'color.preview.js';
   // Add the JS at a weight below color.js.
   backdrop_add_js($preview_js_path, array('weight' => -1));
 

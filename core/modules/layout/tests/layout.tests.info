@@ -1,0 +1,17 @@
+[LayoutInterfaceTest]
+name = Layout Interface Test
+description = Tests the interface for adding, removing, and moving blocks.
+group = Layout
+file = layout.test
+
+[LayoutSelectionTest]
+name = Layout Selection Test
+description = Tests that the correct layout is used in various situations.
+group = Layout
+file = layout.test
+
+[LayoutUpgradePathTest]
+name = Layout Upgrade Test
+description = Tests the upgrade path from block-based regions to layouts.
+group = Layout
+file = layout.test

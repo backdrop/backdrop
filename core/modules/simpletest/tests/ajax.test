@@ -111,7 +111,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
       'setting_name' => 'ajax_forms_test_lazy_load_form_submit',
       'setting_value' => 'executed',
       'css' => backdrop_get_path('module', 'system') . '/css/system.admin.css',
-      'js' => backdrop_get_path('module', 'system') . '/system.js',
+      'js' => backdrop_get_path('module', 'system') . '/js/system.admin.js',
     );
     // @todo: Add a backdrop_css_defaults() helper function.
     $expected_css_html = backdrop_get_css(array($expected['css'] => array(

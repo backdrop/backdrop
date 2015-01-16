@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * The core module that allows content to be submitted to the site.
@@ -78,7 +77,7 @@ function node_theme() {
   return array(
     'node' => array(
       'render element' => 'elements',
-      'template' => 'node',
+      'template' => 'templates/node',
     ),
     'node_search_admin' => array(
       'render element' => 'form',
@@ -89,7 +88,7 @@ function node_theme() {
     ),
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
-      'file' => 'content_types.inc',
+      'file' => 'node.types.inc',
     ),
     'node_recent_block' => array(
       'variables' => array('nodes' => NULL),
@@ -649,7 +648,7 @@ function _node_types_build() {
   }
 
   $_node_types = (object) array('types' => array(), 'names' => array());
-  module_load_include('inc', 'node', 'content_types');
+  module_load_include('inc', 'node', 'node.types');
 
   $config_names = config_get_names_with_prefix('node.type.');
   foreach ($config_names as $config_name) {
@@ -728,7 +727,7 @@ function node_type_set_defaults($info = array()) {
   $types = array(
     '_new' => $new_type
   );
-  module_load_include('inc', 'node', 'content_types');
+  module_load_include('inc', 'node', 'node.types');
   foreach (module_implements('node_type_load') as $module) {
     $function = $module . '_node_type_load';
     $function($types);
@@ -1701,7 +1700,7 @@ function node_menu() {
     'description' => 'Manage content types, including default status, front page promotion, comment settings, etc.',
     'page callback' => 'node_overview_types',
     'access arguments' => array('administer content types'),
-    'file' => 'content_types.inc',
+    'file' => 'node.types.inc',
   );
   $items['admin/structure/types/list'] = array(
     'title' => 'List',
@@ -1714,7 +1713,7 @@ function node_menu() {
     'page arguments' => array('node_type_form'),
     'access arguments' => array('administer content types'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'content_types.inc',
+    'file' => 'node.types.inc',
   );
   $items['admin/structure/types/manage/%node_type'] = array(
     'title' => 'Edit content type',
@@ -1723,7 +1722,7 @@ function node_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_type_form', 4),
     'access arguments' => array('administer content types'),
-    'file' => 'content_types.inc',
+    'file' => 'node.types.inc',
   );
   $items['admin/structure/types/manage/%node_type/edit'] = array(
     'title' => 'Edit',
@@ -1733,7 +1732,7 @@ function node_menu() {
     'title' => 'Delete',
     'page arguments' => array('node_type_delete_confirm', 4),
     'access arguments' => array('administer content types'),
-    'file' => 'content_types.inc',
+    'file' => 'node.types.inc',
   );
 
   $items['node'] = array(

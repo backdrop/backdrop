@@ -1519,7 +1519,7 @@ function install_import_translations(&$install_state) {
 function install_configure_form($form, &$form_state, &$install_state) {
   backdrop_set_title(st('Configure site'));
 
-  backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
+  backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
   // Add JavaScript time zone detection.
   backdrop_add_js('core/misc/timezone.js');
   // We add these strings as settings because JavaScript translation does not

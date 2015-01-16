@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables the user registration and login system.
@@ -56,11 +55,11 @@ function user_theme() {
   return array(
     'user_picture' => array(
       'variables' => array('account' => NULL),
-      'template' => 'user-picture',
+      'template' => 'templates/user-picture',
     ),
     'user_profile' => array(
       'render element' => 'elements',
-      'template' => 'user-profile',
+      'template' => 'templates/user-profile',
       'file' => 'user.pages.inc',
     ),
     'user_list' => array(
@@ -2855,7 +2854,7 @@ function user_form_process_password_confirm($element) {
     ),
   );
 
-  $element['#attached']['js'][] = backdrop_get_path('module', 'user') . '/user.js';
+  $element['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.js';
   // Ensure settings are only added once per page.
   static $already_added = FALSE;
   if (!$already_added) {
@@ -2989,7 +2988,7 @@ function user_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id
       // a custom behavior, since the #states system would also synchronize on
       // uncheck.
       '#attached' => array(
-        'js' => array(backdrop_get_path('module', 'user') . '/user.js'),
+        'js' => array(backdrop_get_path('module', 'user') . '/js/user.js'),
       ),
     );
 

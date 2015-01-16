@@ -1,5 +1,0 @@
-[ContextualDynamicContextTestCase]
-name = Contextual links on node lists
-description = Tests if contextual links are showing on the front page depending on permissions.
-group = Contextual
-file = tests/contextual.test

@@ -221,7 +221,7 @@ function taxonomy_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_vocabularies'),
     'access arguments' => array('administer taxonomy'),
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
     'title' => 'List',
@@ -234,7 +234,7 @@ function taxonomy_menu() {
     'page arguments' => array('taxonomy_form_vocabulary'),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
 
   $items['taxonomy/term/%taxonomy_term'] = array(
@@ -244,7 +244,7 @@ function taxonomy_menu() {
     'page callback' => 'taxonomy_term_page',
     'page arguments' => array(2),
     'access arguments' => array('access content'),
-    'file' => 'includes/taxonomy.pages.inc',
+    'file' => 'taxonomy.pages.inc',
   );
   $items['taxonomy/term/%taxonomy_term/view'] = array(
     'title' => 'View',
@@ -260,7 +260,7 @@ function taxonomy_menu() {
     'access arguments' => array('edit', 2),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
   $items['taxonomy/term/%taxonomy_term/delete'] = array(
     'title' => 'Delete',
@@ -270,7 +270,7 @@ function taxonomy_menu() {
     'access arguments' => array('delete', 2),
     'type' => MENU_LOCAL_TASK,
     'weight' => 11,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
   $items['taxonomy/term/%taxonomy_term/feed'] = array(
     'title' => 'Taxonomy term',
@@ -280,14 +280,14 @@ function taxonomy_menu() {
     'page arguments' => array(2),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
-    'file' => 'includes/taxonomy.pages.inc',
+    'file' => 'taxonomy.pages.inc',
   );
   $items['taxonomy/autocomplete'] = array(
     'title' => 'Autocomplete taxonomy',
     'page callback' => 'taxonomy_autocomplete',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
-    'file' => 'includes/taxonomy.pages.inc',
+    'file' => 'taxonomy.pages.inc',
   );
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary'] = array(
@@ -296,7 +296,7 @@ function taxonomy_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_terms', 3),
     'access arguments' => array('administer taxonomy'),
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
     'title' => 'List',
@@ -310,7 +310,7 @@ function taxonomy_menu() {
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_TASK,
     'weight' => -10,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/add'] = array(
@@ -319,7 +319,7 @@ function taxonomy_menu() {
     'page arguments' => array('taxonomy_form_term', NULL, 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/delete'] = array(
@@ -328,7 +328,7 @@ function taxonomy_menu() {
     'page arguments' => array('taxonomy_vocabulary_confirm_delete', 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_CALLBACK,
-    'file' => 'includes/taxonomy.admin.inc',
+    'file' => 'taxonomy.admin.inc',
   );
 
   return $items;
@@ -994,9 +994,9 @@ function taxonomy_term_load_multiple_by_name($name, $vocabulary_name = NULL) {
  */
 function taxonomy_autoload_info() {
   return array(
-    'TaxonomyTerm' => 'includes/taxonomy.entity.inc',
-    'TaxonomyTermController' => 'includes/taxonomy.entity.inc',
-    'TaxonomyVocabulary' => 'includes/taxonomy_vocabulary.class.inc',
+    'TaxonomyTerm' => 'taxonomy.entity.inc',
+    'TaxonomyTermController' => 'taxonomy.entity.inc',
+    'TaxonomyVocabulary' => 'taxonomy_vocabulary.class.inc',
     // Views handlers.
     'views_handler_argument_taxonomy' => 'views/views_handler_argument_taxonomy.inc',
     'views_handler_argument_term_node_tid' => 'views/views_handler_argument_term_node_tid.inc',
