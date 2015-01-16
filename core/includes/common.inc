@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Common functions that many Backdrop modules will need to reference.

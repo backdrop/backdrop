@@ -23,23 +23,28 @@ Backdrop.behaviors.textSummary = {
         }
 
         // Setup the edit/hide summary link.
-        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Backdrop.t('Hide summary') + '</a>)</span>').bind('click', function(e) {
-          if ($summary.css('display') !== 'none') {
+        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Backdrop.t('Hide summary') + '</a>)</span>');
+        var $a = $link.find('a');
+        var toggleClick = true;
+        $link.bind('click', function (e) {
+          if (toggleClick) {
             $summary.hide();
-            $(this).find('a').html(Backdrop.t('Edit summary')).end().appendTo($fullLabel);
+            $a.html(Backdrop.t('Edit summary'));
+            $link.appendTo($fullLabel);
           }
           else {
             $summary.show();
-            $(this).find('a').html(Backdrop.t('Hide summary')).end().appendTo($summaryLabel);
+            $a.html(Backdrop.t('Hide summary'));
+            $link.appendTo($summaryLabel);
           }
-          e.preventDefault();
+          toggleClick = !toggleClick;
+          return false;
         }).appendTo($summaryLabel);
 
         // If no summary is set, hide the summary field.
         if ($(this).find('.text-summary').val() == '') {
           $link.click();
         }
-        return;
       });
     });
   }

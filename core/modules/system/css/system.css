@@ -35,14 +35,14 @@
   background-repeat: no-repeat;
 }
 [dir="rtl"] .js input.form-autocomplete {
-  background-position: 0% 2px;
+  background-position: 1% center;
 }
 .js input.throbbing {
   background-image: url(../../../misc/throbber-active.gif);
   background-position: 100% center; /* LTR */
 }
 [dir="rtl"] .js input.throbbing {
-  background-position: 0% -18px;
+  background-position: 1% center;
 }
 
 /**
