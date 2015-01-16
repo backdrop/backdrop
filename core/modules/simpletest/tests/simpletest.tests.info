@@ -1106,7 +1106,7 @@ file = theme.test
 name = Render element types
 description = Tests the markup of core render element types passed to drupal_render().
 group = Theme
-file = tests/theme.test
+file = theme.test
 
 [ThemeHtmlTplPhpAttributesTestCase]
 name = html.tpl.php html and body attributes
@@ -1178,4 +1178,4 @@ file = upgrade/upgrade.language.test
 name = Theme debug markup
 description = Tests theme debug markup output.
 group = Theme
-file = tests/theme.test
+file = theme.test

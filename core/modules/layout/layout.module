@@ -453,10 +453,6 @@ function layout_route_handler($router_item) {
  * Implements hook_theme()
  */
 function layout_theme() {
-  // Include the theme file so that the base preprocess functions are in the
-  // global namespace.
-  module_load_include('inc', 'layout', 'layout.theme');
-
   $base = array(
     'file' => 'layout.theme.inc',
   );

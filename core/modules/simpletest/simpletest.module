@@ -56,15 +56,17 @@ function simpletest_permission() {
  * Implements hook_theme().
  */
 function simpletest_theme() {
+  $base = array(
+    'file' => 'simpletest.theme.inc',
+  );
+
   return array(
     'simpletest_test_table' => array(
       'render element' => 'table',
-      'file' => 'simpletest.pages.inc',
-    ),
+    ) + $base,
     'simpletest_result_summary' => array(
       'render element' => 'form',
-      'file' => 'simpletest.pages.inc',
-    ),
+    ) + $base,
   );
 }
 

@@ -230,23 +230,26 @@ function update_manager_access() {
  * Implements hook_theme().
  */
 function update_theme() {
+  $base = array(
+    'file' => 'update.theme.inc',
+  );
+
   return array(
     'update_manager_update_form' => array(
       'render element' => 'form',
-      'file' => 'update.manager.inc',
-    ),
+    ) + $base,
     'update_last_check' => array(
       'variables' => array('last' => NULL),
-    ),
+    ) + $base,
     'update_report' => array(
       'variables' => array('data' => NULL),
-    ),
+    ) + $base,
     'update_version' => array(
       'variables' => array('version' => NULL, 'tag' => NULL, 'class' => array()),
-    ),
+    ) + $base,
     'update_status_label' => array(
       'variables' => array('status' => NULL),
-    ),
+    ) + $base,
   );
 }
 
@@ -601,30 +604,6 @@ function _update_project_status_sort($a, $b) {
   $a_status = $a['status'] > 0 ? $a['status'] : (-10 * $a['status']);
   $b_status = $b['status'] > 0 ? $b['status'] : (-10 * $b['status']);
   return $a_status - $b_status;
-}
-
-/**
- * Returns HTML for the last time we checked for update data.
- *
- * In addition to properly formatting the given timestamp, this function also
- * provides a "Check manually" link that refreshes the available update and
- * redirects back to the same page.
- *
- * @param $variables
- *   An associative array containing:
- *   - last: The timestamp when the site last checked for available updates.
- *
- * @see theme_update_report()
- * @see theme_update_available_updates_form()
- * @ingroup themeable
- */
-function theme_update_last_check($variables) {
-  $last = $variables['last'];
-  $output = '<div class="update checked">';
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never');
-  $output .= ' <span class="check-manually">(' . l(t('Check manually'), 'admin/reports/updates/check', array('query' => backdrop_get_destination())) . ')</span>';
-  $output .= "</div>\n";
-  return $output;
 }
 
 /**

@@ -487,37 +487,6 @@ function image_field_widget_process($element, &$form_state, $form) {
 }
 
 /**
- * Returns HTML for an image field widget.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the image field widget.
- *
- * @ingroup themeable
- */
-function theme_image_widget($variables) {
-  $element = $variables['element'];
-  $output = '';
-  $output .= '<div class="image-widget form-managed-file clearfix">';
-
-  if (isset($element['preview'])) {
-    $output .= '<div class="image-preview">';
-    $output .= backdrop_render($element['preview']);
-    $output .= '</div>';
-  }
-
-  $output .= '<div class="image-widget-data">';
-  if ($element['fid']['#value'] != 0) {
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
@@ -654,42 +623,3 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   return $element;
 }
 
-/**
- * Returns HTML for an image field formatter.
- *
- * @param $variables
- *   An associative array containing:
- *   - item: An array of image data.
- *   - image_style: An optional image style.
- *   - path: An optional array containing the link 'path' and link 'options'.
- *
- * @ingroup themeable
- */
-function theme_image_formatter($variables) {
-  $item = $variables['item'];
-
-  // Do not output an empty 'title' attribute.
-  if (isset($item['title']) && backdrop_strlen($item['title']) == 0) {
-    unset($item['title']);
-  }
-
-  if ($variables['image_style']) {
-    $item['style_name'] = $variables['image_style'];
-    $output = theme('image_style', $item);
-  }
-  else {
-    $output = theme('image', $item);
-  }
-
-  // The link path and link options are both optional, but for the options to be
-  // processed, the link path must at least be an empty string.
-  if (isset($variables['path']['path'])) {
-    $path = $variables['path']['path'];
-    $options = isset($variables['path']['options']) ? $variables['path']['options'] : array();
-    // When displaying an image inside a link, the html option must be TRUE.
-    $options['html'] = TRUE;
-    $output = l($output, $path, $options);
-  }
-
-  return $output;
-}

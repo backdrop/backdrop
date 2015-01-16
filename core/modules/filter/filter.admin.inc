@@ -78,41 +78,6 @@ function filter_admin_overview_submit($form, &$form_state) {
 }
 
 /**
- * Returns HTML for the text format administration overview form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_filter_admin_overview($variables) {
-  $form = $variables['form'];
-
-  $rows = array();
-  foreach (element_children($form['formats']) as $id) {
-    $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
-    $row = array(
-      'data' => array(
-        backdrop_render($form['formats'][$id]['name']),
-        backdrop_render($form['formats'][$id]['roles']),
-        backdrop_render($form['formats'][$id]['weight']),
-        backdrop_render($form['formats'][$id]['operations']),
-      ),
-      'class' => array('draggable'),
-    );
-    $rows[] = $row;
-  }
-  $header = array(t('Name'), t('Roles'), t('Weight'), t('Operations'));
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
-  $output .= backdrop_render_children($form);
-
-  backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
-
-  return $output;
-}
-
-/**
  * Page callback: Displays the text format add/edit form.
  *
  * @param object|null $format
@@ -308,37 +273,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
   );
 
   return $form;
-}
-
-/**
- * Returns HTML for a text format's filter order form.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_filter_admin_format_filter_order($variables) {
-  $element = $variables['element'];
-
-  // Filter order (tabledrag).
-  $rows = array();
-  foreach (element_children($element, TRUE) as $name) {
-    $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
-    $rows[] = array(
-      'data' => array(
-        backdrop_render($element[$name]['filter']),
-        backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array('draggable'),
-    );
-  }
-  $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
-
-  return $output;
 }
 
 /**
