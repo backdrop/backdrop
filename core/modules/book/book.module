@@ -496,7 +496,7 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
       'class' => array('book-outline-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'book') . '/book.js'),
+      'js' => array(backdrop_get_path('module', 'book') . '/js/book.js'),
     ),
     '#tree' => TRUE,
   );

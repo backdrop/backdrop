@@ -173,7 +173,7 @@ function color_scheme_form($complete_form, &$form_state, $theme) {
       ),
       // Add custom JavaScript.
       'js' => array(
-        $base . '/color.js',
+        $base . '/js/color.js',
         array(
           'data' => array(
             'color' => array(

@@ -4679,7 +4679,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * are the attached data. For example:
  * @code
  * $build['#attached'] = array(
- *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js'),
+ *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.admin.js'),
  *   'css' => array(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css'),
  * );
  * @endcode
