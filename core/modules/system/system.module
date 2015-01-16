@@ -583,7 +583,7 @@ function system_menu() {
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
     'position' => 'left',
-    'weight' => -3,
+    'weight' => -4,
     'file' => 'system.admin.inc',
   );
   $items['admin/appearance/list'] = array(
@@ -637,7 +637,7 @@ function system_menu() {
     'page arguments' => array('system_modules'),
     'access arguments' => array('administer modules'),
     'file' => 'system.admin.inc',
-    'weight' => -4,
+    'weight' => -3,
   );
   $items['admin/modules/list'] = array(
     'title' => 'Modules',
