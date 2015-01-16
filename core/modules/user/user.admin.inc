@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callback file for the user module.
