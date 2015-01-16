@@ -421,8 +421,9 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
     return;
   }
 
-  // Sort term order based on weight.
-  backdrop_sort($form_state['values']);
+  // Sort term order based on weight of values submitted.
+  form_state_values_clean($form_state);
+  backdrop_sort($form_state['values'], array('weight' => SORT_NUMERIC));
 
   $vocabulary = $form['#vocabulary'];
   // Update the current hierarchy type as we go.
