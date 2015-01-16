@@ -64,13 +64,11 @@ define('PREG_CLASS_CJK', '\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
  */
 function search_theme() {
   return array(
-    'search_result' => array(
-      'variables' => array('result' => NULL, 'module' => NULL),
-    ),
     'search_results' => array(
       'variables' => array('results' => NULL, 'module' => NULL),
       'file' => 'search.pages.inc',
       'template' => 'templates/search-results',
+      'file' => 'search.theme.inc',
     ),
   );
 }
