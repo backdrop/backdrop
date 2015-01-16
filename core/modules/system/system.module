@@ -3273,7 +3273,16 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
  * @ingroup themeable
  */
 function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'https://backdropcms.org')) . '</span>';
+  $image_variables = array(
+    'uri' => 'core/misc/backdrop-logo.png',
+    'width' => '89',
+    'height' => '20',
+    'alt' => 'Backdrop CMS logo',
+    'title' => 'Backdrop CMS',
+  );
+  $backdrop_logo = theme('image', $image_variables);
+
+  return '<span>' . t('Powered by <a href="@poweredby">!logo</a>', array('@poweredby' => 'https://backdropcms.org', '!logo' => $backdrop_logo)) . '</span>';
 }
 
 /**
