@@ -176,7 +176,7 @@ function node_multiple_delete_confirm($form, &$form_state) {
   if (empty($nids)) {
     $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/node';
     $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', array('!url' => url($destination))) . '</p>';
-    drupal_set_message(t('No content has been selected for deletion.'), 'error');
+    backdrop_set_message(t('No content has been selected for deletion.'), 'error');
     return $form;
   }
 

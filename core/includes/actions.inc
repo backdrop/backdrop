@@ -97,7 +97,7 @@ function actions_execute($action_name, Entity $entity = NULL, &$context) {
   $action_info = actions_get_info($action_name);
   $callback = $action_info['callback'];
   if (isset($action_info['file'])) {
-    include_once DRUPAL_ROOT . '/' . backdrop_get_path('module', $action_info['module']) . '/' . $action_info['file'];
+    include_once BACKDROP_ROOT . '/' . backdrop_get_path('module', $action_info['module']) . '/' . $action_info['file'];
   }
   $context['action_name'] = $action_name;
   $context['action_info'] = $action_info;

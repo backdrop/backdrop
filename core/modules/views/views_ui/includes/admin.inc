@@ -2122,8 +2122,7 @@ function views_ui_import_validate($form, &$form_state) {
   }
 
   if (empty($view->api_version) || $view->api_version < 2) {
-    form_error($form['view'], t('That view is not compatible with this version of Views.
-      If you have a view from views1 you have to go to a drupal6 installation and import it there.'));
+    form_error($form['view'], t('That view is not compatible with this version of Views.'));
   }
   elseif (version_compare($view->api_version, views_api_version(), '>')) {
     form_error($form['view'], t('That view is created for the version @import_version of views, but you only have @api_version', array(

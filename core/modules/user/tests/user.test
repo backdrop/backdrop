@@ -1922,9 +1922,9 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Make sure that the system-defined roles can still be edited, to adjust
     // their labels.
-    $this->backdropGet('admin/config/people/roles/edit/' . DRUPAL_ANONYMOUS_RID);
+    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
-    $this->backdropGet('admin/config/people/roles/edit/' . DRUPAL_AUTHENTICATED_RID);
+    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_AUTHENTICATED_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
   }
 

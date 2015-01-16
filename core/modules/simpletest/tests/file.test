@@ -504,7 +504,7 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
     // No filename.
     $filepath = file_unmanaged_save_data($contents);
     $this->assertTrue($filepath, 'Unnamed file saved correctly.');
-    $this->assertEqual(file_uri_scheme($filepath), file_default_scheme(), "File was placed in Drupal's files directory.");
+    $this->assertEqual(file_uri_scheme($filepath), file_default_scheme(), "File was placed in Backdrop's files directory.");
     $this->assertEqual($contents, file_get_contents($filepath), 'Contents of the file are correct.');
 
     // Provide a filename.
@@ -2089,7 +2089,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents, $existing->uri, FILE_EXISTS_RENAME);
     $this->assertTrue($result, "File saved successfully.");
 
-    $this->assertEqual('public', file_uri_scheme($result->uri), "File was placed in Drupal's files directory.");
+    $this->assertEqual('public', file_uri_scheme($result->uri), "File was placed in Backdrop's files directory.");
     $this->assertEqual($result->filename, $existing->filename, "Filename was set to the basename of the source, rather than that of the renamed file.");
     $this->assertEqual($contents, file_get_contents($result->uri), "Contents of the file are correct.");
     $this->assertEqual($result->filemime, 'application/octet-stream', "A MIME type was set.");
@@ -2117,7 +2117,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents, $existing->uri, FILE_EXISTS_REPLACE);
     $this->assertTrue($result, 'File saved successfully.');
 
-    $this->assertEqual('public', file_uri_scheme($result->uri), "File was placed in Drupal's files directory.");
+    $this->assertEqual('public', file_uri_scheme($result->uri), "File was placed in Backdrop's files directory.");
     $this->assertEqual($result->filename, $existing->filename, 'Filename was set to the basename of the existing file, rather than preserving the original name.');
     $this->assertEqual($contents, file_get_contents($result->uri), 'Contents of the file are correct.');
     $this->assertEqual($result->filemime, 'application/octet-stream', 'A MIME type was set.');
