@@ -134,15 +134,17 @@ function menu_menu() {
  * Implements hook_theme().
  */
 function menu_theme() {
+  $base = array(
+    'file' => 'menu.theme.inc',
+  );
+
   return array(
     'menu_overview_form' => array(
-      'file' => 'menu.admin.inc',
       'render element' => 'form',
-    ),
+    ) + $base,
     'menu_admin_overview' => array(
-      'file' => 'menu.admin.inc',
       'variables' => array('title' => NULL, 'name' => NULL, 'description' => NULL),
-    ),
+    ) + $base,
   );
 }
 
