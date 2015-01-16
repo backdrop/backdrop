@@ -55,15 +55,17 @@ function admin_bar_permission() {
  * Implements hook_theme().
  */
 function admin_bar_theme() {
+  $base = array(
+    'file' => 'admin_bar.theme.inc',
+  );
+
   return array(
     'admin_bar_links' => array(
       'render element' => 'elements',
-      'file' => 'admin_bar.inc',
-    ),
+    ) + $base,
     'admin_bar_icon' => array(
       'variables' => array('src' => NULL, 'alt' => NULL),
-      'file' => 'admin_bar.inc',
-    ),
+    ) + $base,
   );
 }
 

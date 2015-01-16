@@ -244,6 +244,7 @@ function field_ui_theme() {
   return array(
     'field_ui_table' => array(
       'render element' => 'elements',
+      'file' => 'field_ui.theme.inc',
     ),
   );
 }

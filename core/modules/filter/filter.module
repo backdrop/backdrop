@@ -9,28 +9,29 @@
  * Implements hook_theme().
  */
 function filter_theme() {
+  $base = array(
+    'file' => 'filter.theme.inc',
+  );
+
   return array(
     'filter_admin_overview' => array(
       'render element' => 'form',
-      'file' => 'filter.admin.inc',
-    ),
+    ) + $base,
     'filter_admin_format_filter_order' => array(
       'render element' => 'element',
-      'file' => 'filter.admin.inc',
-    ),
+    ) + $base,
     'filter_tips' => array(
       'variables' => array('tips' => NULL, 'long' => FALSE),
-      'file' => 'filter.pages.inc',
-    ),
+    ) + $base,
     'text_format_wrapper' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'filter_tips_more_info' => array(
       'variables' => array(),
-    ),
+    ) + $base,
     'filter_guidelines' => array(
       'variables' => array('format' => NULL),
-    ),
+    ) + $base,
   );
 }
 
@@ -977,27 +978,6 @@ function filter_form_access_denied($element) {
 }
 
 /**
- * Returns HTML for a text format-enabled form element.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element containing #children and #description.
- *
- * @ingroup themeable
- */
-function theme_text_format_wrapper($variables) {
-  $element = $variables['element'];
-  $output = '<div class="text-format-wrapper">';
-  $output .= $element['#children'];
-  if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . '</div>';
-  }
-  $output .= "</div>\n";
-
-  return $output;
-}
-
-/**
  * Checks if a user has access to a particular text format.
  *
  * @param $format
@@ -1163,35 +1143,6 @@ function filter_dom_serialize_escape_cdata_element($dom_document, $dom_element, 
       $dom_element->removeChild($node);
     }
   }
-}
-
-/**
- * Returns HTML for a link to the more extensive filter tips.
- *
- * @ingroup themeable
- */
-function theme_filter_tips_more_info() {
-  return '<p>' . l(t('More information about text formats'), 'filter/tips', array('attributes' => array('target' => '_blank'))) . '</p>';
-}
-
-/**
- * Returns HTML for guidelines for a text format.
- *
- * @param $variables
- *   An associative array containing:
- *   - format: An object representing a text format.
- *
- * @ingroup themeable
- */
-function theme_filter_guidelines($variables) {
-  $format = $variables['format'];
-  $attributes['class'][] = 'filter-guidelines-item';
-  $attributes['class'][] = 'filter-guidelines-' . $format->format;
-  $output = '<div' . backdrop_attributes($attributes) . '>';
-  $output .= '<h3>' . check_plain($format->name) . '</h3>';
-  $output .= theme('filter_tips', array('tips' => _filter_tips($format->format, FALSE)));
-  $output .= '</div>';
-  return $output;
 }
 
 /**

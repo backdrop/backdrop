@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Preprocess functions for page manager editing templates.
+ * Theme functions for the Layout module.
  */
 
 /**
