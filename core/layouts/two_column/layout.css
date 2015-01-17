@@ -46,6 +46,11 @@
   [dir="rtl"] .layout--two-column .l-sidebar {
     float: right;
   }
+  .layout--two-column.layout-no-sidebar .l-content {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
   .layout--two-column .l-content {
     margin-right: 30%;
     width: 70%;
@@ -57,6 +62,10 @@
   .layout--two-column .l-sidebar {
     width: 30%;
     margin-left: -30%; /* LTR */
+  }
+  .layout--two-column.layout-no-sidebar .l-content {
+    width: 100%;
+    margin-right: 0;
   }
   [dir="rtl"] .layout--two-column .l-sidebar {
     margin-right: -30%;
