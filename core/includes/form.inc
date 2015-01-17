@@ -2894,14 +2894,14 @@ function theme_radio($variables) {
 function form_process_password_confirm($element) {
   $element['pass1'] =  array(
     '#type' => 'password',
-    '#title' => t('Password'),
+    '#title' => t('New password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-field')),
   );
   $element['pass2'] =  array(
     '#type' => 'password',
-    '#title' => t('Confirm password'),
+    '#title' => t('Confirm new password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-confirm')),
