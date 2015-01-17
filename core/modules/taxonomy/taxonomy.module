@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables the organization of content into categories.
@@ -40,12 +39,12 @@ function taxonomy_permission() {
   foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
     $permissions += array(
       'edit terms in ' . $vocabulary->machine_name => array(
-        'title' => t('Edit terms in %vocabulary', array('%vocabulary' => $vocabulary->name)),
+        'title' => t('%vocabulary: Edit terms', array('%vocabulary' => $vocabulary->name)),
       ),
     );
     $permissions += array(
        'delete terms in ' . $vocabulary->machine_name => array(
-         'title' => t('Delete terms from %vocabulary', array('%vocabulary' => $vocabulary->name)),
+         'title' => t('%vocabulary: Delete terms', array('%vocabulary' => $vocabulary->name)),
       ),
     );
   }
