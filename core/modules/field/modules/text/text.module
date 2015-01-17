@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines simple text field types.
@@ -313,6 +312,10 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  * place such as the end of a paragraph, a line break, or the end of a
  * sentence (in that order of preference).
  *
+ * @note
+ *   This function uses strlen(), strpos(), etc. rather than their multibyte
+ *   equivalents where doing so increases speed without affecting output.
+ *
  * @param $text
  *   The content for which a summary will be generated.
  * @param $format_id
@@ -327,10 +330,11 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  *   The desired character length of the summary. If omitted, the default
  *   value will be used. Ignored if the special delimiter is present
  *   in $text.
+ * @param $summary_length
  * @return
  *   The generated summary.
  */
-function text_summary($text, $format_id = NULL, $size = 600) {
+function text_summary($text, $format_id = NULL, $size = 600, &$summary_length = NULL) {
   // Find where the delimiter is in the body
   $delimiter = strpos($text, '<!--break-->');
 
@@ -349,6 +353,7 @@ function text_summary($text, $format_id = NULL, $size = 600) {
   // We check for the presence of the PHP evaluator filter in the current
   // format. If the body contains PHP code, we do not split it up to prevent
   // parse errors.
+  $filters = array();
   if (isset($format->filters['php_code']) && $format->filters['php_code']->status && strpos($text, '<?') !== FALSE) {
     return $text;
   }
@@ -358,65 +363,132 @@ function text_summary($text, $format_id = NULL, $size = 600) {
     return $text;
   }
 
-  // If the delimiter has not been specified, try to split at paragraph or
-  // sentence boundaries.
+  $filter_newline = isset($filters['filter/1']);
+  $text_length = strlen($text);
 
-  // The summary may not be longer than maximum length specified. Initial slice.
-  $summary = truncate_utf8($text, $size);
-
-  // Store the actual length of the UTF8 string -- which might not be the same
-  // as $size.
-  $max_rpos = strlen($summary);
-
-  // How much to cut off the end of the summary so that it doesn't end in the
-  // middle of a paragraph, sentence, or word.
-  // Initialize it to maximum in order to find the minimum.
-  $min_rpos = $max_rpos;
-
-  // Store the reverse of the summary. We use strpos on the reversed needle and
-  // haystack for speed and convenience.
-  $reversed = strrev($summary);
-
-  // Build an array of arrays of break points grouped by preference.
-  $break_points = array();
-
-  // A paragraph near the end of sliced summary is most preferable.
-  $break_points[] = array('</p>' => 0);
-
-  // If no complete paragraph then treat line breaks as paragraphs.
-  $line_breaks = array('<br />' => 6, '<br>' => 4);
-  // Newline only indicates a line break if line break converter
-  // filter is present.
-  if (isset($format->filters['filter_autop'])) {
-    $line_breaks["\n"] = 1;
-  }
-  $break_points[] = $line_breaks;
-
-  // If the first paragraph is too long, split at the end of a sentence.
-  $break_points[] = array('. ' => 1, '! ' => 1, '? ' => 1, '。' => 0, '؟ ' => 1);
-
-  // Iterate over the groups of break points until a break point is found.
-  foreach ($break_points as $points) {
-    // Look for each break point, starting at the end of the summary.
-    foreach ($points as $point => $offset) {
-      // The summary is already reversed, but the break point isn't.
-      $rpos = strpos($reversed, strrev($point));
-      if ($rpos !== FALSE) {
-        $min_rpos = min($rpos + $offset, $min_rpos);
+  $position = 0;
+  $length = 0;
+  $stack = array();
+  while ($position < $text_length && $length < $size) {
+    $last_tag = FALSE;
+    $offset = strpos($text, '<', $position);
+    if ($offset === FALSE) {
+      // There are no more tags, so find the UTF-8 string length.
+      $additional = backdrop_strlen(substr($text, $position, $text_length - $position));
+      $num_chars = $text_length;
+    }
+    else {
+      // Count UTF-8 characters between the previous position and the next tag.
+      $additional = backdrop_strlen(substr($text, $position, $offset - $position));
+      ++$offset; // Skip the '<' character.
+      $num_chars = strpos($text, '>', $offset);
+      if ($text[$offset] == '/') {
+        // Found a closing tag, so pop the opening tag too.
+        array_pop($stack);
+      }
+      elseif ($text[$num_chars - 1] != '/') { // Skip empty tags.
+        // Found an opening tag; save it on the stack.
+        $end_name = strpos($text, ' ', $offset);
+        if ($end_name === FALSE || $end_name > $num_chars) {
+          $end_name = $num_chars;
+        }
+        $tag_name = substr($text, $offset, $end_name - $offset);
+        switch ($tag_name) { // Ignore empty tags that were not properly closed.
+        case 'br':
+        case 'hr':
+        case 'img':
+        case 'input':
+          break;
+        default:
+          $stack[] = $tag_name;
+          $last_tag = TRUE;
+          break;
+        }
+      }
+      // For now, we assume properly opening/closing tag boundaries.
+      if ($num_chars === FALSE) {
+        // Either the last tag was not closed or it wasn't a tag.
+        $num_chars = $text_length;
+      }
+      else {
+        ++$num_chars;  // Skip the '>' character.
       }
     }
-
-    // If a break point was found in this group, slice and stop searching.
-    if ($min_rpos !== $max_rpos) {
-      // Don't slice with length 0. Length must be <0 to slice from RHS.
-      $summary = ($min_rpos === 0) ? $summary : substr($summary, 0, 0 - $min_rpos);
-      break;
+    // Are there any characters to add the to result?
+    if ($additional) {
+      if ($length + $additional >= $size) {
+        // The last tag did not make it in.
+        if ($last_tag) {
+          array_pop($stack);
+        }
+        // There are too many characters, so search for a break-point.
+        $offset = $position + $size - $length;
+        if (isset($text[$offset]) && $text[$offset] != ' ') {
+          while ($offset > $position) {
+            switch ($text[$offset - 1]) {
+              case "\xD8":
+                // Is this the Arabic equivalent of the ascii '?' character?
+                if (!isset($text[$offset]) || $text[$offset] != "\x9F") {
+                  // No; this is not the right sequence.
+                  break;
+                }
+                if ($offset + 1 == $text_length || $text[$offset + 1] == ' ') {
+                  // Found a break-point.
+                  break 2;
+                }
+                if ($text[$offset + 1] == '"') {
+                  $offset += 2;
+                  break 2;
+                }
+                break;
+              case '.':
+              case '!':
+              case '?':
+                if ($offset == $text_length || $text[$offset] == ' ') {
+                  // Found a break-point.
+                  break 2;
+                }
+              if ($text[$offset] == '"') {
+                ++$offset;
+                break 2;
+              }
+              break;
+              case "\n":
+                if (!$filter_newline) {
+                  --$offset;
+                  break 2;
+                }
+              case ' ':
+                // Found the (breaking) space; remove and break there.
+                --$offset;
+                break 2;
+                // @todo Add support for other UTF-8 spaces?
+              case "\xE3":
+                // Found the CJK ideographic full stop?
+                if (isset($text[$offset + 1]) && $text[$offset] == "\x80" && $text[$offset + 1] == "\x82") {
+                  // keep this character in full
+                  $offset += 2;
+                  break 2;
+                }
+                break;
+            }
+            --$offset;
+          }
+        }
+        $position = $offset;
+        break;
+      }
+      $length += $additional;
     }
+    $position = $num_chars;
   }
-
-  // If the htmlcorrector filter is present, apply it to the generated summary.
-  if (isset($format->filters['filter_htmlcorrector'])) {
-    $summary = _filter_htmlcorrector($summary);
+  $summary = substr($text, 0, $position);
+  if (!empty($stack)) {
+    // If closing tags are missing, we add an ellipsis and closing tags.
+    $summary .= t('...');
+    do {
+      $summary .= '</' . array_pop($stack) . '>';
+    } while (!empty($stack));
   }
 
   return $summary;
