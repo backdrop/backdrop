@@ -17,7 +17,7 @@ function admin_bar_menu() {
     'type' => MENU_CALLBACK,
   );
   // Module settings.
-  $items['admin/config/administration/admin_bar'] = array(
+  $items['admin/config/administration/admin-bar'] = array(
     'title' => 'Administration bar',
     'description' => 'Adjust administration bar settings.',
     'page callback' => 'backdrop_get_form',
