@@ -159,8 +159,8 @@ function image_update_1000() {
       array(
         'name' => 'image_scale',
         'data' => array(
-          'width' => 220,
-          'height' => 220,
+          'width' => 350,
+          'height' => 350,
           'upscale' => 1,
         ),
         'weight' => 1,
@@ -180,8 +180,8 @@ function image_update_1000() {
       array(
         'name' => 'image_scale',
         'data' => array(
-          'width' => 480,
-          'height' => 480,
+          'width' => 1230,
+          'height' => 1230,
           'upscale' => 1,
         ),
         'weight' => 1,
