@@ -133,7 +133,7 @@ class views_plugin_display_block extends views_plugin_display {
         $form['#title'] .= t('Block admin description');
         $form['block_description'] = array(
           '#type' => 'textfield',
-          '#description' => t('This will appear as the name of this block in administer >> structure >> blocks.'),
+          '#description' => t('This will appear as the name of this block when adding it to a layout at administer >> structure >> layouts.'),
           '#default_value' => $this->get_option('block_description'),
         );
         break;
