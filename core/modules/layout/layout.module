@@ -1072,7 +1072,7 @@ function layout_get_layout_info($layout_name = NULL) {
       $info[$name] += array(
         'preview' => 'preview.png',
         'stylesheets' => array(
-          'all' => array('layout.css'),
+          'all' => array(str_replace('_', '-', $name) . '.css'),
         ),
       );
       if (!isset($info[$name]['template'])) {
