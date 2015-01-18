@@ -2,14 +2,14 @@
     "_config_name": "image.style.medium.json",
     "overridden": false,
     "module": "image",
-    "label": "Medium (220x220)",
+    "label": "Medium (350x350)",
     "name": "medium",
     "effects": [
         {
             "name": "image_scale",
             "data": {
-                "width": "220",
-                "height": "220",
+                "width": "350",
+                "height": "350",
                 "upscale": 1
             },
             "weight": 1
