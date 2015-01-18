@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the block display plugin.
@@ -29,7 +28,7 @@ class views_plugin_display_block extends views_plugin_display {
     $delta = $this->view->name . '-' . $this->display->id;
     $info = $this->get_option('block_description');
 
-    if (empty($desc)) {
+    if (empty($info)) {
       if ($this->display->display_title == $this->definition['title']) {
         $info = t('View: !view', array('!view' => $this->view->get_human_name()));
       }
