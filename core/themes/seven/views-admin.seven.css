@@ -69,15 +69,6 @@ fieldset.fieldset-no-legend {
   margin-top: 3px;
 }
 
-.views-admin input.form-submit,
-.views-ui-dialog input.form-submit,
-.views-admin a.button,
-.views-ui-dialog a.button {
-  margin-bottom: 0;
-  margin-right: 0; /* LTR */
-  margin-top: 0;
-}
-
 /* Override for a button on the edit display screen */
 #edit-displays-preview-controls .form-submit {
   display: inline-block;

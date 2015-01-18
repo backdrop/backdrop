@@ -175,11 +175,6 @@ input.form-radio {
   vertical-align: baseline;
 }
 
-.form-submit:not(.js-hide) + .form-submit,
-.views-admin a.button:not(.js-hide) + a.button {
-  margin-left: 1em; /* LTR */
-}
-
 .container-inline {
   padding-top: 15px;
 }
