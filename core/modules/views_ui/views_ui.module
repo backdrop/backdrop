@@ -32,7 +32,7 @@ function views_ui_menu() {
     );
 
   $items['admin/structure/views/add'] = array(
-    'title' => 'Add new view',
+    'title' => 'Add view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;

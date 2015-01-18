@@ -88,7 +88,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/add'] = array(
-    'title' => 'Add new layout',
+    'title' => 'Add layout',
     'page callback' => 'layout_add_page',
     'page arguments' => array(),
     'type' => MENU_LOCAL_ACTION,

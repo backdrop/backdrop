@@ -45,7 +45,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testBlockBasics() {
     $this->backdropGet('admin/structure/layouts');
-    $this->clickLink(t('Add new layout'));
+    $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
     $layout_name = strtolower($this->randomName());
