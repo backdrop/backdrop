@@ -28,7 +28,7 @@
  *   - preview: Optional. An image representing the appearance of this layout.
  *     If left empty, "preview.png" will be used.
  *   - stylesheets: An array of CSS file used whenever this layout is presented.
- *     If left empty, "layout.css" will be used for all media types.
+ *     If left empty, "one-column.css" will be used for all media types.
  *   - template: The name of the template file (without the extension) used for
  *     this layout. All layouts should always be named with a "layout--" prefix,
  *     so that the default variables may be provided in
@@ -51,7 +51,7 @@ function hook_layout_info() {
 
     // Optional information that populates using defaults.
     // 'preview' => 'preview.png',
-    // 'stylesheets' => array('all' => array('layout.css')),
+    // 'stylesheets' => array('all' => array('one-column.css')),
     // 'template' => 'layout--my-layout',
 
     // Specify a file containing preprocess functions if needed.
