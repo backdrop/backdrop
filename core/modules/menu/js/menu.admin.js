@@ -51,13 +51,22 @@ Backdrop.menu_update_parent_list = function () {
       // Save key of last selected element.
       var selected = $('fieldset#edit-menu #edit-menu-parent :selected').val();
       // Remove all exisiting options from dropdown.
-      $('fieldset#edit-menu #edit-menu-parent').children().remove();
+      var selectForm = $('fieldset#edit-menu #edit-menu-parent');
+      selectForm.children().remove();
       // Add new options to dropdown.
       jQuery.each(options, function(index, value) {
         $('fieldset#edit-menu #edit-menu-parent').append(
           $('<option ' + (index == selected ? ' selected="selected"' : '') + '></option>').val(index).text(value)
         );
       });
+      // Hide Default parent item form if empty.
+      var menuParent = selectForm.parents('.form-item-menu-parent');
+      if (selectForm.children().length === 0) {
+        menuParent.hide();
+      }
+      else {
+        menuParent.show();
+      }
     }
   });
 };
