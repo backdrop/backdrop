@@ -262,7 +262,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     theme_enable(array('stark'));
     $this->backdropGet('menu-test/theme-callback/use-stark-theme');
     $this->assertText('Custom theme: stark. Actual theme: stark.', 'The theme callback system uses an optional theme once it has been enabled.');
-    $this->assertRaw('stark/one-column.css', "The optional theme's CSS appears on the page.");
+    $this->assertRaw('stark/layout.css', "The optional theme's CSS appears on the page.");
   }
 
   /**
@@ -296,7 +296,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // should be honored.
     $this->backdropGet('menu-test/no-theme-callback');
     $this->assertText('Custom theme: stark. Actual theme: stark.', 'The result of hook_custom_theme() is used as the theme for the current page.');
-    $this->assertRaw('stark/one-column.css', "The Stark theme's CSS appears on the page.");
+    $this->assertRaw('stark/layout.css', "The Stark theme's CSS appears on the page.");
   }
 
   /**
