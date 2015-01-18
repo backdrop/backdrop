@@ -32,4 +32,6 @@
 ?>
 <article class="profile"<?php print backdrop_attributes($attributes); ?>>
   <?php print render($user_profile); ?>
+  <?php print render($user_picture); ?>
 </article>
+

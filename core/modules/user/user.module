@@ -59,7 +59,7 @@ function user_theme() {
   return array(
     'user_picture' => array(
       'variables' => array('account' => NULL),
-      'template' => 'templates/user-picture',
+      'template' => 'templates/user-profile',
     ) + $base,
     'user_profile' => array(
       'render element' => 'elements',
@@ -621,8 +621,10 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
  */
 function user_user_view($account) {
   $account->content['user_picture'] = array(
+    '#prefix' => '<div class="user-picture">',
     '#markup' => theme('user_picture', array('account' => $account)),
     '#weight' => -10,
+    '#suffix' => '</div>',
   );
   $account->content['member_for'] = array(
     '#type' => 'item',
