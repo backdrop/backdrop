@@ -402,12 +402,10 @@ ul.secondary {
   margin: 5px;
 }
 ul.secondary li {
-  border-right: 1px solid #ccc; /* LTR */
   display: inline;
   padding: 0 1em;
 }
 [dir="rtl"] ul.secondary li {
-  border-left: 1px solid #ccc;
   border-right: none;
   display: inline;
   padding: 0 1em;
