@@ -37,14 +37,6 @@ function views_ui_menu() {
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
 
-  $items['admin/structure/views/import'] = array(
-    'title' => 'Import',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('views_ui_import_page'),
-    'access callback' => 'views_import_access',
-    'type' => MENU_LOCAL_ACTION,
-  ) + $base;
-
   $items['admin/structure/views/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'backdrop_get_form',
