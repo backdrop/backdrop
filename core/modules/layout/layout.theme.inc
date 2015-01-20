@@ -124,8 +124,13 @@ function theme_layout_settings_context_table($variables) {
 
 /**
  * Prepares variables for layout templates.
+ *
+ * This uses [module_name]_preprocess_layout() instead of
+ * template_preprocess_layout() so that it can run last. Layout module is given
+ * a weight of 60 in hook_install(), so it should run last compared to other
+ * modules.
  */
-function template_preprocess_layout(&$variables) {
+function layout_preprocess_layout(&$variables) {
   $settings = $variables['layout']->settings;
   $variables += array(
     'action_links' => NULL,
