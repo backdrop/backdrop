@@ -318,6 +318,7 @@ body.admin-bar .layout {
   flex: 1 0 auto;
 }
 .l-header,
+.l-top,
 .l-messages,
 .l-footer-wrapper,
 .l-footer {
