@@ -983,6 +983,7 @@ function layout_flush_caches() {
 function layout_reset_caches() {
   cache()->delete('layout:layout:config');
   cache()->delete('layout:menu_item:config');
+  cache()->delete('layout_info');
   cache('layout_path')->flush();
 
   backdrop_static_reset('layout_load_multiple');
@@ -1057,6 +1058,15 @@ function _layout_get_all_info($data_type, $init = array()) {
 function layout_get_layout_info($layout_name = NULL) {
   $info = &backdrop_static(__FUNCTION__);
 
+  // Try getting a cached list of layout info.
+  if (!isset($info)) {
+    $cache = cache('cache')->get('layout_info');
+    if ($cache && $cache->data) {
+      $info = $cache->data;
+    }
+  }
+
+  // Rebuild the list.
   if (!isset($info)) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     foreach ($files as $name => $file) {
@@ -1085,6 +1095,8 @@ function layout_get_layout_info($layout_name = NULL) {
 
     // Sort the available layouts by display name.
     backdrop_sort($info, array('title' => SORT_STRING));
+
+    cache('cache')->set('layout_info', $info);
   }
 
   if ($layout_name) {
