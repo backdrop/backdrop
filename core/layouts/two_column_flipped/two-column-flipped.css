@@ -7,6 +7,7 @@
 .layout--two-column-flipped .l-header:after,
 .layout--two-column-flipped .l-main-wrapper:after,
 .layout--two-column-flipped .l-footer:after,
+.layout--two-column-flipped .l-container:after,
 .layout--two-column-flipped .l-content:after,
 .layout--two-column-flipped .l-sidebar:after {
   content: "";
