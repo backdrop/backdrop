@@ -560,7 +560,7 @@ function admin_bar_links_icon() {
     '#weight' => 50,
     // @see update_access_allowed()
     '#access' => $GLOBALS['user']->uid == 1 || settings_get('update_free_access') || user_access('administer software updates'),
-    '#href' => base_path() . 'update.php',
+    '#href' => base_path() . 'core/update.php',
     '#options' => array(
       'external' => TRUE,
     ),
