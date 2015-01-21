@@ -712,21 +712,21 @@ function node_views_plugins() {
 /**
  * Implements hook_preprocess_node().
  */
-function node_row_node_view_preprocess_node(&$vars) {
-  $node = $vars['node'];
-  $options = $vars['view']->style_plugin->row_plugin->options;
+function node_row_node_view_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  $options = $variables['view']->style_plugin->row_plugin->options;
 
   // Prevent the comment form from showing up if this is not a page display.
-  if ($vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
+  if ($variables['view_mode'] == 'full' && !$variables['view']->display_handler->has_path()) {
     $node->comment = FALSE;
   }
 
   if (!$options['links']) {
-    unset($vars['content']['links']);
+    unset($variables['content']['links']);
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $vars['content']['comments'] = comment_node_page_additions($node);
+    $variables['content']['comments'] = comment_node_page_additions($node);
   }
 }
 
