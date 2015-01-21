@@ -313,25 +313,25 @@ function views_plugin_list() {
  * we haven't got a chance to load that file before Backdrop builds the
  * node portion of the theme registry.
  */
-function views_preprocess_node(&$vars) {
+function views_preprocess_node(&$variables) {
   // The 'view' attribute of the node is added in views_preprocess_node()
-  if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
-    $vars['view'] = $vars['node']->view;
-    $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
-    if (!empty($vars['node']->view->current_display)) {
-      $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
+  if (!empty($variables['node']->view) && !empty($variables['node']->view->name)) {
+    $variables['view'] = $variables['node']->view;
+    $variables['theme_hook_suggestions'][] = 'node__view__' . $variables['node']->view->name;
+    if (!empty($variables['node']->view->current_display)) {
+      $variables['theme_hook_suggestions'][] = 'node__view__' . $variables['node']->view->name . '__' . $variables['node']->view->current_display;
 
       // If a node is being rendered in a view, and the view does not have a path,
       // prevent Backdrop from accidentally setting the $page variable:
-      if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
-        $vars['page'] = FALSE;
+      if ($variables['page'] && $variables['view_mode'] == 'full' && !$variables['view']->display_handler->has_path()) {
+        $variables['page'] = FALSE;
       }
     }
   }
 
   // Allow to alter comments and links based on the settings in the row plugin.
-  if (!empty($vars['view']->style_plugin->row_plugin) && get_class($vars['view']->style_plugin->row_plugin) == 'views_plugin_row_node_view') {
-    node_row_node_view_preprocess_node($vars);
+  if (!empty($variables['view']->style_plugin->row_plugin) && get_class($variables['view']->style_plugin->row_plugin) == 'views_plugin_row_node_view') {
+    node_row_node_view_preprocess_node($variables);
   }
 }
 
@@ -339,13 +339,13 @@ function views_preprocess_node(&$vars) {
  * A theme preprocess function to automatically allow view-based node
  * templates if called from a view.
  */
-function views_preprocess_comment(&$vars) {
+function views_preprocess_comment(&$variables) {
   // The 'view' attribute of the node is added in template_preprocess_views_view_row_comment()
-  if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
-    $vars['view'] = &$vars['node']->view;
-    $vars['theme_hook_suggestions'][] = 'comment__view__' . $vars['node']->view->name;
-    if (!empty($vars['node']->view->current_display)) {
-      $vars['theme_hook_suggestions'][] = 'comment__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
+  if (!empty($variables['node']->view) && !empty($variables['node']->view->name)) {
+    $variables['view'] = &$variables['node']->view;
+    $variables['theme_hook_suggestions'][] = 'comment__view__' . $variables['node']->view->name;
+    if (!empty($variables['node']->view->current_display)) {
+      $variables['theme_hook_suggestions'][] = 'comment__view__' . $variables['node']->view->name . '__' . $variables['node']->view->current_display;
     }
   }
 }

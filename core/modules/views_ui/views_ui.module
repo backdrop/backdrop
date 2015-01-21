@@ -416,21 +416,21 @@ function views_ui_default_load($name) {
 /**
  * Theme preprocess for views-view.tpl.php.
  */
-function views_ui_preprocess_views_view(&$vars) {
-  $view = $vars['view'];
+function views_ui_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
   if (!empty($view->views_ui_context) && module_exists('contextual')) {
     $view->hide_admin_links = TRUE;
     foreach (array('title', 'header', 'exposed', 'rows', 'pager', 'more', 'footer', 'empty', 'attachment_after', 'attachment_before') as $section) {
-      if (!empty($vars[$section])) {
-        $vars[$section] = array(
+      if (!empty($variables[$section])) {
+        $variables[$section] = array(
           '#theme' => 'views_ui_view_preview_section',
           '#view' => $view,
           '#section' => $section,
-          '#content' => is_array($vars[$section]) ? backdrop_render($vars[$section]) : $vars[$section],
+          '#content' => is_array($variables[$section]) ? backdrop_render($variables[$section]) : $variables[$section],
           '#theme_wrappers' => array('views_container'),
           '#attributes' => array('class' => 'contextual-links-region'),
         );
-        $vars[$section] = backdrop_render($vars[$section]);
+        $variables[$section] = backdrop_render($variables[$section]);
       }
     }
   }

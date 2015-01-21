@@ -157,9 +157,9 @@ function search_views_plugins() {
 /**
  * Template helper for theme_views_view_row_search
  */
-function template_preprocess_views_view_row_search(&$vars) {
-  $vars['node'] = ''; // make sure var is defined.
-  $nid = $vars['row']->nid;
+function template_preprocess_views_view_row_search(&$variables) {
+  $variables['node'] = ''; // make sure var is defined.
+  $nid = $variables['row']->nid;
   if (!is_numeric($nid)) {
     return;
   }
@@ -181,8 +181,8 @@ function template_preprocess_views_view_row_search(&$vars) {
   // Fetch terms for snippet
   $node->body .= module_invoke('taxonomy', 'nodeapi', $node, 'update index');
 
-  $vars['url'] = url('node/' . $nid);
-  $vars['title'] = check_plain($node->title);
+  $variables['url'] = url('node/' . $nid);
+  $variables['title'] = check_plain($node->title);
 
   $info = array();
   $info['type'] = node_type_get_name($node);
@@ -192,11 +192,11 @@ function template_preprocess_views_view_row_search(&$vars) {
   if (isset($extra) && is_array($extra)) {
     $info = array_merge($info, $extra);
   }
-  $vars['info_split'] = $info;
-  $vars['info'] = implode(' - ', $info);
+  $variables['info_split'] = $info;
+  $variables['info'] = implode(' - ', $info);
 
-  $vars['node'] = $node;
+  $variables['node'] = $node;
   // @todo: get score from ???
-//$vars['score'] = $item->score;
-  $vars['snippet'] = search_excerpt($vars['view']->value, $node->body);
+//$variables['score'] = $item->score;
+  $variables['snippet'] = search_excerpt($variables['view']->value, $node->body);
 }

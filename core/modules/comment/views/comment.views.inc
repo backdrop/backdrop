@@ -647,11 +647,11 @@ function comment_views_plugins() {
 /**
  * Template helper for theme_views_view_row_comment
  */
-function template_preprocess_views_view_row_comment(&$vars) {
-  $options = $vars['options'];
-  $view = &$vars['view'];
+function template_preprocess_views_view_row_comment(&$variables) {
+  $options = $variables['options'];
+  $view = &$variables['view'];
   $plugin = &$view->style_plugin->row_plugin;
-  $comment = $plugin->comments[$vars['row']->{$vars['field_alias']}];
+  $comment = $plugin->comments[$variables['row']->{$variables['field_alias']}];
   $node = $plugin->nodes[$comment->nid];
   // Put the view on the node so we can retrieve it in the preprocess.
   $node->view = &$view;
@@ -667,5 +667,5 @@ function template_preprocess_views_view_row_comment(&$vars) {
       }
     }
   }
-  $vars['comment'] = backdrop_render($build);
+  $variables['comment'] = backdrop_render($build);
 }

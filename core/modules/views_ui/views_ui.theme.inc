@@ -39,8 +39,8 @@ function theme_views_ui_view_info($variables) {
 /**
  * Turn the reorder form into a proper table
  */
-function theme_views_ui_reorder_displays_form($vars) {
-  $form = $vars['form'];
+function theme_views_ui_reorder_displays_form($variables) {
+  $form = $variables['form'];
   $rows = array();
   foreach (element_children($form) as $key) {
     if (isset($form[$key]['#display'])) {
@@ -239,8 +239,8 @@ function theme_views_ui_build_group_filter_form($variables) {
 /**
  * Turn the rearrange form into a proper table
  */
-function theme_views_ui_rearrange_filter_form(&$vars) {
-  $form = $vars['form'];
+function theme_views_ui_rearrange_filter_form(&$variables) {
+  $form = $variables['form'];
   $rows = $ungroupable_rows = array();
   // Enable grouping only if > 1 group.
   $grouping = count(array_keys($form['#group_options'])) > 1;
@@ -406,10 +406,10 @@ function theme_views_ui_style_plugin_table($variables) {
 /**
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
-function theme_views_ui_view_preview_section($vars) {
-  return '<h1 class="section-title">' . $vars['title'] . '</h1>'
-  . $vars['links']
-  . '<div class="preview-section">'. $vars['content'] . '</div>';
+function theme_views_ui_view_preview_section($variables) {
+  return '<h1 class="section-title">' . $variables['title'] . '</h1>'
+  . $variables['links']
+  . '<div class="preview-section">'. $variables['content'] . '</div>';
 }
 
 function template_preprocess_views_ui_display_tab_setting(&$variables) {
@@ -468,49 +468,49 @@ function template_preprocess_views_ui_display_tab_column(&$variables) {
 /**
  * Theme preprocess for theme_views_ui_view_preview_section().
  */
-function template_preprocess_views_ui_view_preview_section(&$vars) {
-  switch ($vars['section']) {
+function template_preprocess_views_ui_view_preview_section(&$variables) {
+  switch ($variables['section']) {
     case 'title':
-      $vars['title'] = t('Title');
-      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'title', $vars['title']);
+      $variables['title'] = t('Title');
+      $links = views_ui_view_preview_section_display_category_links($variables['view'], 'title', $variables['title']);
       break;
     case 'header':
-      $vars['title'] = t('Header');
-      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      $variables['title'] = t('Header');
+      $links = views_ui_view_preview_section_handler_links($variables['view'], $variables['section']);
       break;
     case 'empty':
-      $vars['title'] = t('No results behavior');
-      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      $variables['title'] = t('No results behavior');
+      $links = views_ui_view_preview_section_handler_links($variables['view'], $variables['section']);
       break;
     case 'exposed':
       // @todo Sorts can be exposed too, so we may need a better title.
-      $vars['title'] = t('Exposed Filters');
-      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'exposed_form_options', $vars['title']);
+      $variables['title'] = t('Exposed Filters');
+      $links = views_ui_view_preview_section_display_category_links($variables['view'], 'exposed_form_options', $variables['title']);
       break;
     case 'rows':
       // @todo The title needs to depend on what is being viewed.
-      $vars['title'] = t('Content');
-      $links = views_ui_view_preview_section_rows_links($vars['view']);
+      $variables['title'] = t('Content');
+      $links = views_ui_view_preview_section_rows_links($variables['view']);
       break;
     case 'pager':
-      $vars['title'] = t('Pager');
-      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'pager_options', $vars['title']);
+      $variables['title'] = t('Pager');
+      $links = views_ui_view_preview_section_display_category_links($variables['view'], 'pager_options', $variables['title']);
       break;
     case 'more':
-      $vars['title'] = t('More');
-      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'use_more', $vars['title']);
+      $variables['title'] = t('More');
+      $links = views_ui_view_preview_section_display_category_links($variables['view'], 'use_more', $variables['title']);
       break;
     case 'footer':
-      $vars['title'] = t('Footer');
-      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      $variables['title'] = t('Footer');
+      $links = views_ui_view_preview_section_handler_links($variables['view'], $variables['section']);
       break;
     case 'attachment_before':
       // @todo: Add links to the attachment configuration page.
-      $vars['title'] = t('Attachment before');
+      $variables['title'] = t('Attachment before');
       break;
     case 'attachment_after':
       // @todo: Add links to the attachment configuration page.
-      $vars['title'] = t('Attachment after');
+      $variables['title'] = t('Attachment after');
       break;
   }
 
@@ -525,8 +525,8 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
         'library' => array(array('contextual', 'contextual-links')),
       ),
     );
-    $vars['links'] = backdrop_render($build);
+    $variables['links'] = backdrop_render($build);
   }
-  $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
+  $variables['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $variables['section'];
 }
 
