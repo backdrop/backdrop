@@ -747,15 +747,26 @@ function _field_sort_items_value_helper($a, $b) {
 function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
   if (isset($settings)) {
     $config = config('field.bundle.' . $entity_type . '.' . $bundle);
-    $config->setData($settings);
+    $data = array(
+      'bundle' => $bundle,
+      'entity_type' => $entity_type,
+    ) + $settings;
+    $config->setData($data);
     $config->save();
     field_info_cache_clear();
   }
   else {
     $config = config('field.bundle.' . $entity_type . '.' . $bundle);
-    $settings = $config->get();
-    if (empty($settings)) {
+    $data = $config->get();
+    if (empty($data)) {
       $settings = array();
+    }
+    else {
+      // Remove bundle and entity type from settings, as they are already known.
+      $settings = array_diff_key($data, array(
+        'bundle' => $bundle,
+        'entity_type' => $entity_type,
+      ));
     }
     $settings += array(
       'view_modes' => array(),
