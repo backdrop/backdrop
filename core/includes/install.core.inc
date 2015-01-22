@@ -524,6 +524,14 @@ function install_tasks($install_state) {
   // Determine whether translation import tasks will need to be performed.
   $needs_translations = count($install_state['translations']) > 1 && !empty($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en';
 
+  // Display profile task only when there is more than one non-hidden profile.
+  $hidden_profile_count = 0;
+  foreach ($install_state['profiles'] as $profile) {
+    $profile_info = install_profile_info($profile->name);
+    $hidden_profile_count += empty($profile_info['hidden']);
+  }
+  $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1;
+
   // Start with the core installation tasks that run before handing control
   // to the installation profile.
   $tasks = array(
@@ -533,7 +541,7 @@ function install_tasks($install_state) {
     ),
     'install_select_profile' => array(
       'display_name' => st('Choose profile'),
-      'display' => count($install_state['profiles']) != 1,
+      'display' => $display_select_profile,
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_load_profile' => array(
