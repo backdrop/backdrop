@@ -507,7 +507,7 @@ function update_manager_install_form($form, &$form_state, $context) {
   $form['project_url'] = array(
     '#type' => 'url',
     '#title' => t('Install from a URL'),
-    '#description' => t('For example: %url', array('%url' => 'http://ftp.drupal.org/files/projects/name.tar.gz')),
+    '#description' => t('For example: %url', array('%url' => 'https://github.com/backdrop-contrib/module/archive/1.x-1.2.3.zip')),
   );
 
   $form['information'] = array(
