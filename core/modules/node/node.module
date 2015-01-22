@@ -628,6 +628,9 @@ function node_type_update_nodes($old_type, $type) {
  *     change the machine name of this type. FALSE = changeable (not locked),
  *     TRUE = unchangeable (locked).
  *
+ * @param $include_disabled
+ *   (optional) Include disabled content types if set to TRUE.
+ *
  * @return
  *   An object with two properties:
  *   - names: Associative array of the names of node types, keyed by the type.
@@ -637,12 +640,17 @@ function node_type_update_nodes($old_type, $type) {
  *   provided a node type and then was disabled. These are indicated in the
  *   type object by $type->disabled being set to TRUE.
  */
-function _node_types_build() {
+function _node_types_build($include_disabled = TRUE) {
   $cid = 'node_types:' . $GLOBALS['language']->langcode;
 
   $_node_types = &backdrop_static(__FUNCTION__);
   if (isset($_node_types)) {
     return $_node_types;
+  }
+  // If disabled content types are not included, clear the config cache in
+  // order to rebuild them.
+  if (!$include_disabled) {
+     cache()->delete($cid);
   }
   if ($cache = cache()->get($cid)) {
     $_node_types = $cache->data;
@@ -654,10 +662,21 @@ function _node_types_build() {
 
   $config_names = config_get_names_with_prefix('node.type.');
   foreach ($config_names as $config_name) {
-    $node_type_data = config($config_name)->get();
-    $type = str_replace('node.type.', '', $config_name);
-    $_node_types->types[$type] = node_type_set_defaults($node_type_data);
-    $_node_types->names[$type] = $node_type_data['name'];
+    // Check if the node type is disabled or the module is enabled.
+    $module = config($config_name)->get('module');
+    $module_disabled = true;
+    if (module_exists($module)) {
+        $module_disabled = false;
+    }
+    // If the module is enabled, $disabled is forced to TRUE.
+    $disabled = config($config_name)->get('disabled') && $module_disabled;
+
+    if (!$disabled || ($disabled && $include_disabled)) {
+      $node_type_data = config($config_name)->get();
+      $type = str_replace('node.type.', '', $config_name);
+      $_node_types->types[$type] = node_type_set_defaults($node_type_data);
+      $_node_types->names[$type] = $node_type_data['name'];
+    }
   }
 
   // Allow modules to load their defaults into the node type info.
