@@ -75,3 +75,21 @@ function field_update_1000() {
   // Update purge size variable to config.
   config_set('system.core', 'field_purge_batch_size', update_variable_get('field_purge_batch_size', 200));
 }
+
+/**
+ * Add missing entity type and bundle information to Field config files.
+ */
+function field_update_1001() {
+  $names = config_get_names_with_prefix('field.bundle.');
+  foreach ($names as $name) {
+    $config = config($name);
+    list(, , $entity_type, $bundle) = explode('.', $name);
+    $settings = $config->get();
+    $data = array(
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+    ) + $settings;
+    $config->setData($data);
+    $config->save();
+  }
+}
