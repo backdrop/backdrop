@@ -124,6 +124,25 @@ function standard_install() {
     node_add_body_field($type);
   }
 
+  // Create an initial Hello World node to welcome users on install.
+  $node = new Node(
+    array(
+      'title' => st('Your first article!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first article, edit it or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'article',
+    )
+  );
+  $node->save();
+
   // Enable user picture support and set the default to a square thumbnail option.
   config('system.core')
     ->set('user_pictures', '1')

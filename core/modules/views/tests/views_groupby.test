@@ -11,6 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
+  protected $profile = 'minimal';
   /**
    * Tests aggregate count feature.
    */
