@@ -683,6 +683,14 @@ function user_account_form(&$form, &$form_state) {
       '#type' => 'password',//_confirm',
       '#description' => t('To change the current user password, enter the new password in both fields.'),
     );
+    $form['account']['show-password'] = array(
+      '#type' => 'checkbox',
+      '#description' => t('check to display password.'),
+    );
+    // add the javascript to show/hide the password.
+    $form['#attached']['js'] = array(
+      backdrop_get_path('module', 'user') . '/js/user-register-show-pass.js',
+    );
     // To skip the current password field, the user must have logged in via a
     // one-time link and have the token in the URL.
     $pass_reset = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);

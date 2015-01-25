@@ -57,14 +57,14 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
 
     // Try entering a mismatching password.
-    $edit['pass[pass1]'] = '99999.0';
+    /*$edit['pass[pass1]'] = '99999.0';
     $edit['pass[pass2]'] = '99999';
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');
+    $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');*/
 
     // Enter a correct password.
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();//[pass1]'] = $new_pass = $this->randomName();
+    //$edit['pass[pass2]'] = $new_pass;
     $this->backdropPost('user/register', $edit, t('Create new account'));
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
@@ -76,8 +76,8 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $pass = $this->randomName();
-    $edit['pass[pass2]'] = $pass;
+    $edit['pass'] = $pass = $this->randomName();//[pass1]'] = $pass = $this->randomName();
+    //$edit['pass[pass2]'] = $pass;
     $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'), 'Users are notified of pending approval');
 
@@ -155,8 +155,8 @@ class UserRegistrationTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();//[pass1]'] = $new_pass = $this->randomName();
+    //$edit['pass[pass2]'] = $new_pass;
     $this->backdropPost(NULL, $edit, t('Create new account'));
 
     // Check user fields.
@@ -1679,8 +1679,8 @@ class UserCreateTestCase extends BackdropWebTestCase {
       $edit = array(
         'name' => $name,
         'mail' => $this->randomName() . '@example.com',
-        'pass[pass1]' => $pass = $this->randomString(),
-        'pass[pass2]' => $pass,
+        'pass' => $pass = $this->randomString(),//[pass1]' => $pass = $this->randomString(),
+        //'pass[pass2]' => $pass,
         'notify' => $notify,
       );
       $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -1729,7 +1729,7 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 
     // Check that filling out a single password field does not validate.
-    $edit = array();
+    /*$edit = array();
     $edit['pass[pass1]'] = '';
     $edit['pass[pass2]'] = $this->randomName();
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
@@ -1738,7 +1738,7 @@ class UserEditTestCase extends BackdropWebTestCase {
     $edit['pass[pass1]'] = $this->randomName();
     $edit['pass[pass2]'] = '';
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
+    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');*/
 
     // Test that the error message appears when attempting to change the mail or
     // pass without the current password.
@@ -1753,8 +1753,8 @@ class UserEditTestCase extends BackdropWebTestCase {
 
     // Test that the user must enter current password before changing passwords.
     $edit = array();
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();//[pass1]'] = $new_pass = $this->randomName();
+    //$edit['pass[pass2]'] = $new_pass;
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Password'))));
 
@@ -2094,8 +2094,8 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
     $edit = array(
       'name' => $this->randomName(),
       'mail' => $this->randomName() . '@example.com',
-      'pass[pass1]' => $pass = $this->randomString(),
-      'pass[pass2]' => $pass,
+      'pass' => $pass = $this->randomString(),//[pass1]' => $pass = $this->randomString(),
+      //'pass[pass2]' => $pass,
       "roles[$role_name]" => $role_name,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
