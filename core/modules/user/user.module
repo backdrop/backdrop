@@ -680,7 +680,7 @@ function user_account_form(&$form, &$form_state) {
   // assign a password during registration.
   if (!$register) {
     $form['account']['pass'] = array(
-      '#type' => 'password_confirm',
+      '#type' => 'password',//_confirm',
       '#description' => t('To change the current user password, enter the new password in both fields.'),
     );
     // To skip the current password field, the user must have logged in via a
@@ -718,9 +718,17 @@ function user_account_form(&$form, &$form_state) {
   }
   elseif (!config_get('system.core', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
-      '#type' => 'password_confirm',
+      '#type' => 'password',//_confirm',
       '#description' => t('Provide a password for the new account in both fields.'),
       '#required' => TRUE,
+    );
+    $form['account']['show-password'] = array(
+      '#type' => 'checkbox',
+      '#description' => t('check to display password.'),
+    );
+    // add the javascript to show/hide the password.
+    $form['#attached']['js'] = array(
+      backdrop_get_path('module', 'user') . '/js/user-register-show-pass.js',
     );
   }
 
