@@ -536,10 +536,6 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     if (!isset($term)) {
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
-        // Default the new vocabulary to the site's default language. This is
-        // the most likely default value until we have better flexible settings.
-        // @todo See http://drupal.org/node/258785 and followups.
-        'langcode' => language_default()->langcode,
       ));
     }
     if (!isset($vocabulary) && isset($term->vocabulary)) {
