@@ -1834,20 +1834,20 @@ function system_image_toolkit_settings_submit($form, &$form_state) {
  */
 function system_rss_feeds_settings() {
   $rss_config = config('system.core');
-  $form['feed_description'] = array(
+  $form['rss_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Feed description'),
     '#default_value' => $rss_config->get('rss_description'),
     '#description' => t('Description of your site, included in each feed.')
   );
-  $form['feed_default_items'] = array(
+  $form['rss_limit'] = array(
     '#type' => 'select',
     '#title' => t('Number of items in each feed'),
     '#default_value' => $rss_config->get('rss_limit'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('Default number of items to include in each feed.')
   );
-  $form['feed_item_length'] = array(
+  $form['rss_viewmode'] = array(
     '#type' => 'select',
     '#title' => t('Feed content'),
     '#default_value' => $rss_config->get('rss_viewmode'),
@@ -1873,9 +1873,9 @@ function system_rss_feeds_settings() {
  */
 function system_rss_feeds_settings_submit($form, &$form_state) {
   $config = config('system.core');
-  $config->set('feed_description', $form_state['values']['feed_description']);
-  $config->set('feed_default_items', $form_state['values']['feed_default_items']);
-  $config->set('feed_item_length', $form_state['values']['feed_item_length']);
+  $config->set('rss_description', $form_state['values']['rss_description']);
+  $config->set('rss_limit', $form_state['values']['rss_limit']);
+  $config->set('rss_viewmode', $form_state['values']['rss_viewmode']);
   $config->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }
