@@ -155,6 +155,22 @@ function user_admin_settings($form, &$form_state) {
     '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
   );
 
+  // User login settings.
+  $form['user_login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User log in'),
+  );
+  $form['user_login']['user_login_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Users may log in using'),
+    '#options' => array(
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or e-mail address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username'),
+      USER_LOGIN_EMAIL_ONLY => t('E-mail address'),
+    ),
+    '#default_value' => $config->get('user_login_method'),
+  );
+
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -176,6 +192,11 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Require e-mail verification when a visitor creates an account.'),
     '#default_value' => $config->get('user_email_verification'),
     '#description' => t('New users will be required to validate their e-mail address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+  );
+  $form['registration_cancellation']['user_email_match'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
   $form['registration_cancellation']['user_cancel_method'] = array(
@@ -519,8 +540,10 @@ function user_admin_settings_submit($form, &$form_state) {
     ->set('anonymous', $form_state['values']['anonymous'])
     ->set('user_admin_role', $form_state['values']['user_admin_role'])
     ->set('user_cancel_method', $form_state['values']['user_cancel_method'])
+    ->set('user_login_method', $form_state['values']['user_login_method'])
     ->set('user_register', $form_state['values']['user_register'])
     ->set('user_email_verification', $form_state['values']['user_email_verification'])
+    ->set('user_email_match', $form_state['values']['user_email_match'])
     ->set('user_signatures', $form_state['values']['user_signatures'])
     ->set('user_pictures', $form_state['values']['user_pictures'])
     ->set('user_picture_path', $form_state['values']['user_picture_path'])

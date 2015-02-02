@@ -40,18 +40,18 @@ define('BACKDROP_OPTIONAL', 1);
 define('BACKDROP_REQUIRED', 2);
 
 /**
+ * Maximum length of e-mail fields.
+ */
+define('EMAIL_MAX_LENGTH', 254);
+
+/**
  * Maximum number of values in a weight select element.
  *
  * If the number of values is over the maximum, a text field is used instead.
  */
 define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
-/**
- * Maximum length of e-mail fields.
- */
-define('EMAIL_MAX_LENGTH', 254);
-
-/**
+/**gi
  * Implements hook_theme().
  */
 function system_theme() {

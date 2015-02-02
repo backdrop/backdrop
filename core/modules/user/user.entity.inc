@@ -263,6 +263,14 @@ class UserStorageController extends EntityDatabaseStorageController {
       }
     }
 
+    if (valid_email_address($entity->name)) {
+      // Check to see if matching is required.
+      $user_email_match = config_get('system.core', 'user_email_match');
+      if ($user_email_match && ($entity->name != $entity->mail)) {
+        throw new EntityMalformedException('The username and email are both addresses that do not match.');
+      }
+    }
+
     if (!empty($entity->picture_upload)) {
       $entity->picture = $entity->picture_upload;
     }
