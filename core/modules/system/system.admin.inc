@@ -1873,9 +1873,9 @@ function system_rss_feeds_settings() {
  */
 function system_rss_feeds_settings_submit($form, &$form_state) {
   $config = config('system.core');
-  $config->set('feed_description', $form_state['values']['feed_description']);
-  $config->set('feed_default_items', $form_state['values']['feed_default_items']);
-  $config->set('feed_item_length', $form_state['values']['feed_item_length']);
+  $config->set('rss_description', $form_state['values']['feed_description']);
+  $config->set('rss_limit', $form_state['values']['feed_default_items']);
+  $config->set('rss_viewmode', $form_state['values']['feed_item_length']);
   $config->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }
