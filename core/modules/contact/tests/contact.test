@@ -166,7 +166,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $bar_autoreply = $this->randomName(40);
     $this->addCategory('foo', 'foo@example.com', $foo_autoreply, FALSE);
     $this->addCategory('bar', 'bar@example.com', $bar_autoreply, FALSE);
-    $this->addCategory('no_autoreply', 'bar@example.com', '', FALSE);
+    $this->addCategory('no_autoreply', 'no_autoreply@example.com', '', FALSE);
 
     // Test the auto-reply for category 'foo'.
     $email = $this->randomName(32) . '@example.com';
@@ -174,7 +174,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->submitContact($this->randomName(16), $email, $subject, 2, $this->randomString(128));
 
     // We are testing the auto-reply, so there should be one e-mail going to the sender.
-    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'foo@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'foo@example.com'));
     $this->assertEqual(count($captured_emails), 1, 'Auto-reply e-mail was sent to the sender for category "foo".', 'Contact');
     $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($foo_autoreply), 'Auto-reply e-mail body is correct for category "foo".', 'Contact');
 
@@ -183,14 +183,14 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 3, $this->randomString(128));
 
     // Auto-reply for category 'bar' should result in one auto-reply e-mail to the sender.
-    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'bar@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'bar@example.com'));
     $this->assertEqual(count($captured_emails), 1, 'Auto-reply e-mail was sent to the sender for category "bar".', 'Contact');
     $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($bar_autoreply), 'Auto-reply e-mail body is correct for category "bar".', 'Contact');
 
     // Verify that no auto-reply is sent when the auto-reply field is left blank.
     $email = $this->randomName(32) . '@example.com';
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 4, $this->randomString(128));
-    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'from' => 'no_autoreply@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'no_autoreply@example.com'));
     $this->assertEqual(count($captured_emails), 0, 'No auto-reply e-mail was sent to the sender for category "no-autoreply".', 'Contact');
   }
 
