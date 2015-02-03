@@ -245,7 +245,7 @@ function hook_user_insert($account) {
  * @see hook_user_presave()
  * @see hook_user_insert()
  */
-function hook_user_update(&$edit, $account) {
+function hook_user_update($account) {
   db_insert('user_changes')
     ->fields(array(
       'uid' => $account->uid,
