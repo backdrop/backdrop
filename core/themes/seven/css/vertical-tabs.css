@@ -3,13 +3,13 @@
  * Override of misc/vertical-tabs.css.
  */
 .vertical-tabs {
-  background: #fff url(images/fc.png) repeat-y 0 0; /* LTR */
+  background: #fff url(../images/fc.png) repeat-y 0 0; /* LTR */
   border: 1px solid #ccc;
   margin: 10px 0;
   position: relative;
 }
 [dir="rtl"] .vertical-tabs {
-  background: #fff url(images/fc-rtl.png) repeat-y right 0;
+  background: #fff url(../images/fc-rtl.png) repeat-y right 0;
 }
 fieldset.vertical-tabs-pane {
   border: 0;
