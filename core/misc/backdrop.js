@@ -416,10 +416,7 @@ Backdrop.theme.prototype = {
     return '<em class="placeholder">' + Backdrop.checkPlain(str) + '</em>';
   }
 };
-
-  /**
-   * move jquery.once.js lib to backdrop.js
-   */
+  
   /**
    * jQuery Once Plugin v1.2
    * http://plugins.jquery.com/project/once
