@@ -2137,6 +2137,7 @@ function views_autoload_info() {
     'views_handler_area_result' => 'handlers/views_handler_area_result.inc',
     'views_handler_area_text' => 'handlers/views_handler_area_text.inc',
     'views_handler_area_text_custom' => 'handlers/views_handler_area_text_custom.inc',
+    'views_handler_area_title' => 'handlers/views_handler_area_title.inc',
     'views_handler_area_view' => 'handlers/views_handler_area_view.inc',
     'views_handler_argument' => 'handlers/views_handler_argument.inc',
     'views_handler_argument_broken' => 'handlers/views_handler_argument.inc',

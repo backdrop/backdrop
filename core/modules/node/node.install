@@ -1145,6 +1145,173 @@ function node_update_1008() {
 }
 
 /**
+ * Create the view replacement for the frontpage.
+ */
+function node_update_1009() {
+  $data = array(
+  'name' => 'frontpage',
+  'description' => 'Emulates the default Backdrop front page; you may set the default home page path to this view to make it your front page.',
+  'module' => 'node',
+  'storage' => 4,
+  'tag' => 'default',
+  'disabled' => FALSE,
+  'base_table' => 'node',
+  'human_name' => 'Front page',
+  'core' => 0,
+  'display' => array(
+      'default' => array(
+          'display_title' => 'Master',
+          'display_plugin' => 'default',
+          'display_options' => array(
+              'query' => array(
+                  'type' => 'views_query',
+                  'options' => array(
+                      'query_comment' => FALSE,
+                    ),
+                ),
+              'access' => array(
+                  'type' => 'none',
+                ),
+              'cache' => array(
+                  'type' => 'none',
+                ),
+              'exposed_form' => array(
+                  'type' => 'basic',
+                ),
+              'pager' => array(
+                  'type' => 'full',
+                ),
+              'style_plugin' => 'default',
+              'row_plugin' => 'node',
+              'row_options' => array(
+                  'links' => 1,
+                ),
+              'sorts' => array(
+                  'sticky' => array(
+                      'id' => 'sticky',
+                      'table' => 'node',
+                      'field' => 'sticky',
+                      'order' => 'DESC',
+                    ),
+                  'created' => array(
+                      'id' => 'created',
+                      'table' => 'node',
+                      'field' => 'created',
+                      'order' => 'DESC',
+                    ),
+                ),
+              'filters' => array(
+                  'promote' => array(
+                      'id' => 'promote',
+                      'table' => 'node',
+                      'field' => 'promote',
+                      'value' => '1',
+                      'group' => 0,
+                      'expose' => array(
+                          'operator' => FALSE,
+                        ),
+                    ),
+                  'status' => array(
+                      'id' => 'status',
+                      'table' => 'node',
+                      'field' => 'status',
+                      'value' => '1',
+                      'group' => 0,
+                      'expose' => array(
+                          'operator' => FALSE,
+                        ),
+                    ),
+                ),
+              'empty' => array(
+                  'title' => array(
+                      'id' => 'title',
+                      'table' => 'views',
+                      'field' => 'title',
+                      'relationship' => 'none',
+                      'group_type' => 'group',
+                      'ui_name' => '',
+                      'label' => '',
+                      'empty' => TRUE,
+                      'content' => 'Welcome to @site_name',
+                    ),
+                  'area_text_custom' => array(
+                      'id' => 'area_text_custom',
+                      'table' => 'views',
+                      'field' => 'area_text_custom',
+                      'relationship' => 'none',
+                      'group_type' => 'group',
+                      'ui_name' => '',
+                      'label' => '',
+                      'empty' => TRUE,
+                      'content' => 'No front page content has been created yet.',
+                      'tokenize' => 0,
+                    ),
+                  'empty_node' => array(
+                      'id' => 'empty_node',
+                      'table' => 'node',
+                      'field' => 'empty_node',
+                      'relationship' => 'none',
+                      'group_type' => 'group',
+                      'ui_name' => '',
+                      'label' => '',
+                      'empty' => TRUE,
+                    ),
+                ),
+              'title' => '',
+            ),
+        ),
+      'page' => array(
+          'display_title' => 'Page',
+          'display_plugin' => 'page',
+          'display_options' => array(
+              'query' => array(
+                  'type' => 'views_query',
+                  'options' => array(),
+                ),
+              'path' => 'node',
+            ),
+        ),
+      'feed' => array(
+          'display_title' => 'Feed',
+          'display_plugin' => 'feed',
+          'display_options' => array(
+              'query' => array(
+                  'type' => 'views_query',
+                  'options' => array(),
+                ),
+              'defaults' => array(
+                  'title' => FALSE,
+                ),
+              'title' => 'Front page feed',
+              'pager' => array(
+                  'type' => 'some',
+                ),
+              'style_plugin' => 'rss',
+              'row_plugin' => 'node_rss',
+              'path' => 'rss.xml',
+              'displays' => array(
+                  'default' => 'default',
+                  'page' => 'page',
+                ),
+              'sitename_title' => '1',
+              'row_options' => array(
+                  'relationship' => 'none',
+                  'item_length' => 'rss',
+                  'links' => 0,
+                ),
+            ),
+        ),
+    ),
+);
+  $config = config('views.view.frontpage');
+  if ($config->isNew()) {
+    $config->setData($data);
+    $config->save();
+  }
+  update_variable_del('default_nodes_main');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

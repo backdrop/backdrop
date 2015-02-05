@@ -1,10 +1,11 @@
 {
     "_config_name": "views.view.frontpage",
     "name": "frontpage",
-    "module": "views",
     "description": "Emulates the default Backdrop front page; you may set the default home page path to this view to make it your front page.",
+    "module": "node",
+    "storage": 4,
     "tag": "default",
-    "disabled": true,
+    "disabled": false,
     "base_table": "node",
     "human_name": "Front page",
     "core": 0,
@@ -71,7 +72,43 @@
                             "operator": false
                         }
                     }
-                }
+                },
+                "empty": {
+                    "title": {
+                        "id": "title",
+                        "table": "views",
+                        "field": "title",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true,
+                        "content": "Welcome to @site_name"
+                    },
+                    "area_text_custom": {
+                        "id": "area_text_custom",
+                        "table": "views",
+                        "field": "area_text_custom",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true,
+                        "content": "No front page content has been created yet.",
+                        "tokenize": 0
+                    },
+                    "empty_node": {
+                        "id": "empty_node",
+                        "table": "node",
+                        "field": "empty_node",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true
+                    }
+                },
+                "title": ""
             }
         },
         "page": {
@@ -82,7 +119,7 @@
                     "type": "views_query",
                     "options": []
                 },
-                "path": "frontpage"
+                "path": "node"
             }
         },
         "feed": {
@@ -107,7 +144,12 @@
                     "default": "default",
                     "page": "page"
                 },
-                "sitename_title": "1"
+                "sitename_title": "1",
+                "row_options": {
+                    "relationship": "none",
+                    "item_length": "rss",
+                    "links": 0
+                }
             }
         }
     }
