@@ -63,7 +63,6 @@ function path_admin_overview($keys = NULL) {
       'data' => array(
         '#type' => 'operations',
         '#links' => $operations,
-        '#attributes' => array('class' => array('links', 'inline', 'nowrap')),
       ),
     );
 
