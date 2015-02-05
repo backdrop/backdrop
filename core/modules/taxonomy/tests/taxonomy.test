@@ -1618,7 +1618,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
     // should use the administrative theme.
     $vocabulary = $this->createVocabulary();
     $this->backdropGet('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add');
-    $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page for adding a taxonomy term.");
+    $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page for adding a taxonomy term.");
 
     // Viewing a taxonomy term should use the default theme.
     $term = $this->createTerm($vocabulary);
@@ -1627,7 +1627,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
 
     // Editing a taxonomy term should use the same theme as adding one.
     $this->backdropGet('taxonomy/term/' . $term->tid . '/edit');
-    $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page for editing a taxonomy term.");
+    $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page for editing a taxonomy term.");
   }
 
 }
