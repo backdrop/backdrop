@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines simple text field types.
@@ -432,12 +431,12 @@ function text_field_widget_info() {
   return array(
     'text_textfield' => array(
       'label' => t('Text field'),
-      'field types' => array('text'),
+      'field types' => array('text_long', 'text'),
       'settings' => array('size' => 60),
     ),
     'text_textarea' => array(
       'label' => t('Text area (multiple rows)'),
-      'field types' => array('text_long'),
+      'field types' => array('text', 'text_long'),
       'settings' => array('rows' => 5),
     ),
     'text_textarea_with_summary' => array(
@@ -491,9 +490,12 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
         '#type' => 'textfield',
         '#default_value' => isset($items[$delta]['value']) ? $items[$delta]['value'] : NULL,
         '#size' => $instance['widget']['settings']['size'],
-        '#maxlength' => $field['settings']['max_length'],
         '#attributes' => array('class' => array('text-full')),
       );
+      // If the field itself has a maxlength include that on the widget.
+      if (isset($field['settings']['max_length'])) {
+        $main_widget['#maxlength'] = $field['settings']['max_length'];
+      }
       break;
 
     case 'text_textarea_with_summary':
