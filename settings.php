@@ -11,7 +11,7 @@
  * below. If using master/slave or multiple connections, see the advanced
  * database settings.
  */
-$database = 'mysql://user:pass@localhost/database_name';
+$database = 'mysql://root:root@localhost/backdrop';
 $database_prefix = '';
 
 /**
@@ -191,8 +191,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/active';
  * @endcode
  */
-$config_directories['active'] = 'files/config_' . md5($database) . '/active';
-$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
+$config_directories['active'] = 'files/config_3beb91deb0d9e97370adbf642bf74e75/active';
+$config_directories['staging'] = 'files/config_3beb91deb0d9e97370adbf642bf74e75/staging';
 
 /**
  * Access control for update.php script.
@@ -224,7 +224,7 @@ $settings['update_free_access'] = FALSE;
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  *
  */
-$settings['hash_salt'] = '';
+$settings['hash_salt'] = 'JmKY-n6KxZPUYauC9LofZeB2C3CO9gbrfYQK4JZq87M';
 
 /**
  * Base URL (optional).
@@ -486,3 +486,7 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+$settings['hash_salt'] = 'JmKY-n6KxZPUYauC9LofZeB2C3CO9gbrfYQK4JZq87M';
+$database = 'mysql://root:root@localhost/backdrop';
+$config_directories['active'] = 'files/config_3beb91deb0d9e97370adbf642bf74e75/active';
+$config_directories['staging'] = 'files/config_3beb91deb0d9e97370adbf642bf74e75/staging';

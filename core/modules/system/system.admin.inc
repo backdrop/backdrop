@@ -607,6 +607,24 @@ function system_modules($form, $form_state = array()) {
         );
       }
     }
+  
+    // Generate link for module's support page, if provided.
+    if ($module->status && isset($module->info['support']) && valid_url($module->info['support'])) {
+      $extra['links']['support'] = array(
+        'title' => t('Support'),
+        'href' => $module->info['support'],
+        'attributes' => array('class' => array('module-link', 'module-link-support'), 'title' => t('Go to Support')),
+      );
+    }
+    
+    // Generate link for module's documentation page, if provided.
+    if ($module->status && isset($module->info['documentation']) && valid_url($module->info['documentation'])) {
+      $extra['links']['documentation'] = array(
+        'title' => t('Documentation'),
+        'href' => $module->info['documentation'],
+        'attributes' => array('class' => array('module-link', 'module-link-documentation'), 'title' => t('Go to Documentation')),
+      );
+    }
 
     // If this module is required by other modules, list those, and then make it
     // impossible to disable this one.
@@ -749,7 +767,7 @@ function _system_modules_build_row($info, $extra) {
 
   // Build dropbutton links.
   $links = array();
-  foreach (array('configure', 'permissions') as $key) {
+  foreach (array('configure', 'permissions', 'support', 'documentation') as $key) {
     if (isset($extra['links'][$key])) {
       $links[$key] =  $extra['links'][$key];
     }
