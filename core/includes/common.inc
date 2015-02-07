@@ -7786,7 +7786,6 @@ function backdrop_parse_info_file($filename, $process_sections = FALSE) {
  */
 function backdrop_parse_info_format($data, $process_sections = FALSE) {
   $info = array();
-  $constants = get_defined_constants();
 
   // Separate by sections and parse individually if requested.
   if ($process_sections) {
@@ -7846,8 +7845,8 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
       }
 
       // Handle PHP constants.
-      if (isset($constants[$value])) {
-        $value = $constants[$value];
+      if (preg_match('/^\w+$/', $value) && defined($value)) {
+        $value = constant($value);
       }
 
       // Insert actual value.
