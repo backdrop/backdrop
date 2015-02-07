@@ -986,6 +986,67 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $this->assertIsDefaultLayout();
   }
 
+  /**
+   * Test role-based selection of layouts.
+   */
+  function testRoleSelection() {
+    // Create and login admin user.
+    $admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer modules',
+      'administer layouts',
+      'administer nodes',
+    ));
+    $this->backdropLogin($admin_user);
+
+    // Create a web user.
+    $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
+
+    // Create a layout at a custom path.
+    $layout_name = strtolower($this->randomName());
+    $layout_path = $layout_name;
+    $edit = array(
+      'name' => $layout_name,
+      'title' => $layout_name,
+      'path' => $layout_path,
+      'layout' => 'two_column',
+    );
+
+    // Note that this adds a condition, not saving the layout yet.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add condition'));
+
+    // Select the condition to add.
+    $edit = array(
+      'condition' => 'user_role',
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+
+    // Allow authenticated users to see the layout only.
+    $edit = array(
+      'roles[authenticated]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Create layout'));
+
+    // View as an administrator.
+    $this->backdropGet($layout_path);
+    $this->assertResponse(200);
+    $this->backdropLogout();
+
+    // View as a basic user.
+    $this->backdropLogin($web_user);
+    $this->backdropGet($layout_path);
+    $this->assertResponse(200);
+    $this->backdropLogout();
+
+    // View as anonymous, where they should get a 404.
+    $this->backdropGet($layout_path);
+    $this->assertResponse(404);
+  }
+
   private function assertIsDefaultLayout($message = '') {
     $result = $this->xpath('//div[contains(@class, "layout--two-column")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
