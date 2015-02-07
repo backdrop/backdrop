@@ -20,7 +20,7 @@ Backdrop.fieldUIFieldOverview = {
   attachUpdateSelects: function(table, settings) {
     var widgetTypes = settings.fieldWidgetTypes;
     var fields = settings.fields;
-
+    var fieldInfo = settings.fieldInfo;
     // Store the default text of widget selects.
     $('.widget-type-select', table).each(function () {
       this.initialValue = this.options[0].text;
@@ -33,7 +33,11 @@ Backdrop.fieldUIFieldOverview = {
       $(this).bind('change keyup', function () {
         var selectedFieldType = this.options[this.selectedIndex].value;
         var options = (selectedFieldType in widgetTypes ? widgetTypes[selectedFieldType] : []);
-        this.targetSelect.fieldUIPopulateOptions(options);
+        var widgetDefault = null;
+        if (typeof selectedFieldType !== 'undefined' && selectedFieldType !== '' && selectedFieldType !== null ) {
+          widgetDefault = fieldInfo[selectedFieldType]['defaultWidget'];
+        }
+        this.targetSelect.fieldUIPopulateOptions(options, null, widgetDefault);
       });
 
       // Trigger change on initial pageload to get the right widget options
@@ -57,7 +61,12 @@ Backdrop.fieldUIFieldOverview = {
         var selectedFieldType = (selectedField in fields ? fields[selectedField].type : null);
         var selectedFieldWidget = (selectedField in fields ? fields[selectedField].widget : null);
         var options = (selectedFieldType && (selectedFieldType in widgetTypes) ? widgetTypes[selectedFieldType] : []);
-        this.targetSelect.fieldUIPopulateOptions(options, selectedFieldWidget);
+        var widgetDefault = null;
+        if (typeof selectedFieldType !== 'undefined' && selectedFieldType !== '' && selectedFieldType !== null ) {
+          widgetDefault = fieldInfo[selectedFieldType]['defaultWidget'];
+        }
+
+        this.targetSelect.fieldUIPopulateOptions(options, selectedFieldWidget, widgetDefault);
 
         // Only overwrite the "Label" input if it has not been manually
         // changed, or if it is empty.
@@ -76,14 +85,13 @@ Backdrop.fieldUIFieldOverview = {
 /**
  * Populates options in a select input.
  */
-jQuery.fn.fieldUIPopulateOptions = function (options, selected) {
+jQuery.fn.fieldUIPopulateOptions = function (options, selected, widgetDefault) {
   return this.each(function () {
     var disabled = false;
     if (options.length == 0) {
       options = [this.initialValue];
       disabled = true;
     }
-
     // If possible, keep the same widget selected when changing field type.
     // This is based on textual value, since the internal value might be
     // different (options_buttons vs. node_reference_buttons).
@@ -93,7 +101,11 @@ jQuery.fn.fieldUIPopulateOptions = function (options, selected) {
     jQuery.each(options, function (value, text) {
       // Figure out which value should be selected. The 'selected' param
       // takes precedence.
-      var is_selected = ((typeof selected != 'undefined' && value == selected) || (typeof selected == 'undefined' && text == previousSelectedText));
+      var is_selected = (
+        (typeof selected != 'undefined' && value == selected) ||
+        (typeof selected == 'undefined' && text == previousSelectedText) ||
+        (typeof selected == 'undefined' && value == widgetDefault)
+      );
       html += '<option value="' + value + '"' + (is_selected ? ' selected="selected"' : '') + '>' + text + '</option>';
     });
 
