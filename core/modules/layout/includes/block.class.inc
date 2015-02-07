@@ -183,8 +183,7 @@ class Block extends LayoutHandler {
     $form['title_display']['title'] = array(
       '#type' => 'textfield',
       '#default_value' => $this->settings['title'],
-      '#title' => t('Title'),
-      '#description' => t('The title of this layout. If left blank, a default title may be used.'),
+      '#title' => t('Custom title'),
       '#states' => array(
         'visible' => array(
           'form.layout-block-configure-form :input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
