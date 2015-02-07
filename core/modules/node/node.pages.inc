@@ -152,7 +152,7 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['#node'] = $node;
 
-  if ($node_type->settings['node_type_language'] && module_exists('language')) {
+  if ($node_type->settings['language'] && module_exists('language')) {
     $languages = language_list(TRUE);
     $language_options = array();
     foreach ($languages as $langcode => $language) {

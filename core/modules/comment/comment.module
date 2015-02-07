@@ -1867,7 +1867,7 @@ function comment_form($form, &$form_state, $comment) {
   // If a content type has multilingual support we set the comment to inherit the
   // content language. Otherwise mark the comment as language neutral.
   $comment_langcode = $comment->langcode;
-  if (($comment_langcode == LANGUAGE_NONE) && $node_type->settings['node_type_language']) {
+  if (($comment_langcode == LANGUAGE_NONE) && $node_type->settings['language']) {
     $comment_langcode = $language_content->langcode;
   }
   $form['langcode'] = array(

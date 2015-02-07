@@ -167,10 +167,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
 
   if (module_exists('language')) {
-    $form['workflow']['node_type_language'] = array(
+    $form['workflow']['language'] = array(
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
-      '#default_value' => $type->settings['node_type_language'],
+      '#default_value' => $type->settings['language'],
       '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
@@ -412,7 +412,7 @@ function node_node_type_load(&$types) {
 
       // Though Language module is required to change this setting, all node
       // types have a language setting, even if it is disabled by default.
-      'node_type_language' => 0,
+      'language' => 0,
 
       // Enable permissions for this node type.
       // See node_permissions_get_configured_types().
