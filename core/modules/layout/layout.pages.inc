@@ -16,10 +16,20 @@ function layout_page_callback() {
   $layouts = layout_load_multiple_by_path($menu_item->path);
   $match_found = FALSE;
   foreach ($layouts as $layout) {
-    // Note that because all layouts share the same menu_item, and that has
-    // already been loaded and had its contexts set, the layout also has those
-    // contexts available when checking access.
-    if (!$layout->disabled && $layout->checkAccess()) {
+    if ($layout->disabled) {
+      continue;
+    }
+
+    // Populate the contexts from the menu system.
+    $contexts = $layout->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->position) && isset($args[$context->position])) {
+        $context->setData($args[$context->position]);
+      }
+    }
+
+    // Check access to this layout.
+    if ($layout->checkAccess()) {
       $match_found = TRUE;
       break;
     }

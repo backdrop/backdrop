@@ -457,7 +457,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
   }
 
   // Ensure that all conditions have context requirements met.
-  $context_plugins = array();
+  $context_plugins = array(
+    'user', // The user plugin is always available for the current user.
+  );
   $contexts = layout_context_required_by_path($path);
   foreach ($contexts as $context) {
     $context_plugins[] = $context->plugin;

@@ -775,6 +775,9 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
+    foreach ($layouts as $layout) {
+      $layout->resetContexts();
+    }
     cache('layout_path')->set($path, $layouts);
   }
   return $layouts;
