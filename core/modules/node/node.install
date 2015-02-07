@@ -566,7 +566,7 @@ function node_update_1005() {
       'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
       'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
       'node_user_picture' => update_variable_get('node_user_picture_' . $node_type->type, TRUE),
-      'node_type_language' => update_variable_get('node_type_language_' . $node_type->type),
+      'language' => update_variable_get('node_type_language_' . $node_type->type),
     );
     node_type_save($node_type);
 
@@ -1141,6 +1141,22 @@ function node_update_1008() {
   if ($config->isNew()) {
     $config->setData($data);
     $config->save();
+  }
+}
+
+/**
+ * Update the language setting for all node types.
+ */
+function node_update_1009() {
+  $types = config_get_names_with_prefix('node.type');
+  foreach ($types as $config_name) {
+    $config = config($config_name);
+    $language_setting = $config->get('settings.node_type_language');
+    if (isset($language_setting)) {
+      $config->set('settings.language', $language_setting);
+      $config->clear('settings.node_type_language');
+      $config->save();
+    }
   }
 }
 

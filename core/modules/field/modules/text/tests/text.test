@@ -410,7 +410,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Set "Article" content type to use multilingual support with translation.
-    $edit = array('node_type_language' => TRANSLATION_ENABLED);
+    $edit = array('language' => TRANSLATION_ENABLED);
     $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
     $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Article')), 'Article content type has been updated.');
   }

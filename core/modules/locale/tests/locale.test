@@ -1247,7 +1247,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
 
     // Enable multilingual workflow option for articles.
     $node_type = node_type_load('article');
-    $node_type->settings['node_type_language'] = 1;
+    $node_type->settings['language'] = 1;
     node_type_save($node_type);
 
     // Change JavaScript translations directory.
@@ -1902,7 +1902,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/types/manage/page');
     $this->assertText(t('Multilingual support'), 'Multilingual support fieldset present on content type configuration form.');
     $edit = array(
-      'node_type_language' => 1,
+      'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
     $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
@@ -1972,7 +1972,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     // Set "Article" content type to use multilingual support.
     $this->backdropGet('admin/structure/types/manage/article');
     $edit = array(
-      'node_type_language' => 1,
+      'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
     $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Article')), 'Article content type has been updated.');
@@ -2451,7 +2451,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
 
     // Set "Basic page" content type to use multilingual support.
     $edit = array(
-      'node_type_language' => 1,
+      'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
     $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
@@ -2556,7 +2556,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
     // Set "Article" content type to use multilingual support.
-    $edit = array('node_type_language' => 1);
+    $edit = array('language' => 1);
     $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
 
     // Enable content language negotiation UI.

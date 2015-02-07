@@ -269,7 +269,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
   function testAliasTranslation() {
     // Set 'page' content type to enable translation.
     $node_type = node_type_load('page');
-    $node_type->settings['node_type_language'] = TRANSLATION_ENABLED;
+    $node_type->settings['language'] = TRANSLATION_ENABLED;
     node_type_save($node_type);
 
     $english_node = $this->backdropCreateNode(array('type' => 'page'));
