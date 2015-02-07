@@ -655,6 +655,17 @@ function _node_types_build() {
   $config_names = config_get_names_with_prefix('node.type.');
   foreach ($config_names as $config_name) {
     $node_type_data = config($config_name)->get();
+
+    // Check if the node type is disabled or the module is enabled.
+    $module = $node_type_data['module'];
+    $module_disabled = TRUE;
+    if ($module === 'node' || module_exists($module)) {
+      $module_disabled = FALSE;
+    }
+
+    // If the module is enabled, $disabled is forced to TRUE.
+    $node_type_data['disabled'] = !empty($node_type_data['disabled']) || $module_disabled;
+
     $type = str_replace('node.type.', '', $config_name);
     $_node_types->types[$type] = node_type_set_defaults($node_type_data);
     $_node_types->names[$type] = $node_type_data['name'];

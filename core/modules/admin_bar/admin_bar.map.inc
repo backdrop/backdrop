@@ -47,10 +47,16 @@ function node_admin_bar_map() {
   if (!user_access('administer content types')) {
     return;
   }
+  $types = node_type_get_types();
+  foreach ($types as $type_name => $type) {
+    if ($type->disabled) {
+      unset($types[$type_name]);
+    }
+  }
   $map['admin/structure/types/manage/%node_type'] = array(
     'parent' => 'admin/structure/types',
     'arguments' => array(
-      array('%node_type' => array_keys(node_type_get_types())),
+      array('%node_type' => array_keys($types)),
     ),
   );
   return $map;
