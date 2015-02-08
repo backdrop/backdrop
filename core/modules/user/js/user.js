@@ -7,7 +7,7 @@
 Backdrop.behaviors.password = {
   attach: function (context, settings) {
     var translate = settings.password;
-    $('input.password-field', context).once('password', function () {
+    $('input#edit-pass', context).once('password', function () {
       var $passwordInput = $(this);
       var $innerWrapper = $(this).parent();
       var $outerWrapper = $(this).parent().parent();
@@ -16,10 +16,24 @@ Backdrop.behaviors.password = {
       $innerWrapper.addClass('password-parent');
 
       // Add the password confirmation layer.
-      $outerWrapper.find('input.password-confirm').wrap('<span class="password-confirm-wrapper"></span>').after('<span class="password-match"><span class="password-match-title">' + translate.confirmTitle + '</span><span class="password-match-text"></span></span>').addClass('confirm-parent');
-      var $confirmInput = $outerWrapper.find('input.password-confirm');
-      var $matchResult = $outerWrapper.find('span.password-match');
-      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + translate.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
+      $outerWrapper.find('input.password-field').wrap(
+          '<span class="password-confirm-wrapper"></span>').after(
+          '<span class="password-match"><span class="password-match-title">' +
+            translate.confirmTitle +
+            '</span>' +
+          '  <span class="password-match-text"></span>' +
+          '</span>').addClass('confirm-parent');
+      //var $confirmInput = $outerWrapper.find('input.password-confirm');
+      //var $matchResult = $outerWrapper.find('span.password-match');
+      var passwordMeter = '' +
+          '<span class="password-strength">' +
+            '<span class="password-strength-title">' +
+              translate.strengthTitle +
+            '</span>' +
+            '<span class="password-strength-text" aria-live="assertive"></span>' +
+            '<span class="password-indicator"><span class="indicator"></span>' +
+          '</span>' +
+          '</span>';
       $passwordInput.wrap('<span class="password-confirm-wrapper"></span>').after(passwordMeter);
 
       // Check the password strength.
@@ -33,15 +47,15 @@ Backdrop.behaviors.password = {
 
         // Update the strength indication text.
         $innerWrapper.find('.password-strength-text').html(translate[result.level]);
-
+        //console.log(translate[result.level]);
         // Give a class to the strength.
         $innerWrapper.find('.password-strength').attr('class', 'password-strength ' + result.level);
 
-        passwordCheckMatch();
+        //passwordCheckMatch();
       };
 
       // Check that password and confirmation inputs match.
-      var passwordCheckMatch = function () {
+      /*var passwordCheckMatch = function () {
 
         if ($confirmInput.val()) {
           var success = $passwordInput.val() === $confirmInput.val();
@@ -59,12 +73,12 @@ Backdrop.behaviors.password = {
           this.confirmClass = 'empty';
           $matchResult.addClass(this.confirmClass);
         }
-      };
+      };*/
 
       // Monitor keyup and blur events.
       // Blur must be used because a mouse paste does not trigger keyup.
       $passwordInput.bind('keyup focus blur', passwordCheck).triggerHandler('keyup');
-      $confirmInput.bind('keyup blur', passwordCheckMatch);
+      //$confirmInput.bind('keyup blur', passwordCheckMatch);
     });
   }
 };
@@ -141,5 +155,19 @@ Backdrop.behaviors.fieldUserRegistration = {
     }
   }
 };
+
+/**
+ * Show/hide password on screen.
+ */
+$(document).ready(function () {
+  $('#edit-show-password').click(function () {
+    if ($('#edit-show-password').is(':checked')) {
+      $('#edit-pass').attr('type', 'text');
+    }
+    else {
+      $('#edit-pass').attr('type', 'password');
+    }
+  });
+});
 
 })(jQuery);

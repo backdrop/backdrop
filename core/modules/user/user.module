@@ -682,6 +682,9 @@ function user_account_form(&$form, &$form_state) {
     $form['account']['pass'] = array(
       '#type' => 'password',//_confirm',
       '#description' => t('To change the current user password, enter the new password in both fields.'),
+      '#password_toggle' => TRUE,
+      '#password_shown' => TRUE,
+      '#password_strength' => TRUE,
     );
     $form['account']['show-password'] = array(
       '#type' => 'checkbox',
@@ -727,8 +730,12 @@ function user_account_form(&$form, &$form_state) {
   elseif (!config_get('system.core', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
       '#type' => 'password',//_confirm',
-      '#description' => t('Provide a password for the new account in both fields.'),
+      '#title' => t('Password'),
+      '#description' => t('Enter your password.'),
       '#required' => TRUE,
+      '#password_toggle' => TRUE,
+      '#password_shown' => TRUE,
+      '#password_strength' => TRUE,
     );
     $form['account']['show-password'] = array(
       '#type' => 'checkbox',
@@ -736,7 +743,7 @@ function user_account_form(&$form, &$form_state) {
     );
     // add the javascript to show/hide the password.
     $form['#attached']['js'] = array(
-      backdrop_get_path('module', 'user') . '/js/user-register-show-pass.js',
+      backdrop_get_path('module', 'user') . '/js/user.js',
     );
   }
 
