@@ -554,7 +554,7 @@ class LayoutRendererStandard {
 
     // Check that the page content block exists in the layout.
     foreach ($this->layout->content as $uuid => $block) {
-      if ($block->delta === 'system' && $block->delta === 'main') {
+      if ($block->module === 'system' && $block->delta === 'main') {
         $page_content_uuid = $uuid;
       }
     }
