@@ -1,10 +1,10 @@
 {
     "_config_name": "views.view.taxonomy_term",
     "name": "taxonomy_term",
-    "module": "views",
     "description": "A view to emulate Backdrop core's handling of taxonomy/term.",
+    "module": "views",
     "tag": "default",
-    "disabled": true,
+    "disabled": false,
     "base_table": "node",
     "human_name": "Taxonomy term",
     "core": 7,
@@ -20,7 +20,8 @@
                     }
                 },
                 "access": {
-                    "type": "none"
+                    "type": "perm",
+                    "perm": "access content"
                 },
                 "cache": {
                     "type": "none"

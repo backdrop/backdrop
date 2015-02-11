@@ -1,10 +1,10 @@
 {
     "_config_name": "views.view.comments_recent",
     "name": "comments_recent",
-    "module": "views",
     "description": "Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.",
+    "module": "views",
     "tag": "default",
-    "disabled": true,
+    "disabled": false,
     "base_table": "comment",
     "human_name": "Recent comments",
     "core": 0,
@@ -22,7 +22,8 @@
                 "title": "Recent comments",
                 "use_more": true,
                 "access": {
-                    "type": "none"
+                    "type": "perm",
+                    "perm": "access comments"
                 },
                 "cache": {
                     "type": "none"
