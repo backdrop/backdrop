@@ -35,7 +35,7 @@ Backdrop.dialog = function (element, options) {
       $element
         .dialog('option', {
             resizable: false,
-            draggable: false,
+            draggable: false
         })
         .dialog('widget').css('position', 'fixed');
       $(window)
