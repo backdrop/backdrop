@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative interface for custom field type creation.
@@ -570,9 +569,21 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
     $js_fields[$field_name] = array('label' => $info['label'], 'type' => $info['type'], 'widget' => $info['widget_type']);
   }
 
+  $field_info = array();
+  foreach ($field_types as $machine => $type) {
+    $field_info[$machine]['label'] = $type['label'];
+    $field_info[$machine]['defaultWidget'] = $type['default_widget'];
+    $field_info[$machine]['defaultFormatter'] = $type['default_formatter'];
+    $field_info[$machine]['module'] = $type['module'];
+  }
+
   $form['#attached']['js'][] = array(
     'type' => 'setting',
-    'data' => array('fields' => $js_fields, 'fieldWidgetTypes' => field_ui_widget_type_options()),
+    'data' => array(
+      'fields' => $js_fields,
+      'fieldWidgetTypes' => field_ui_widget_type_options(),
+      'fieldInfo' => $field_info,
+    ),
   );
 
   // Add tabledrag behavior.
@@ -1401,6 +1412,7 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
           $options[$widget_field_type][$name] = $widget_type['label'];
         }
       }
+      asort($options[$widget_field_type]);
     }
   }
 
