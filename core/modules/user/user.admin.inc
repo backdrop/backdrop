@@ -503,6 +503,32 @@ function user_admin_settings($form, &$form_state) {
     '#rows' => 3,
   );
 
+  /**
+   *  attempt to make customizable user login message
+   */
+  $form['user_login_error'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Customize login error message'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => t('Customize the error message a user sees if their login fails.') . ' ' . $email_token_help,
+    '#group' => 'email',
+  );
+//$config = config('user.mail.json');
+  $form['user_login_error']['user_login_error_customized'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#default_value' => $mail_config->get('user_login_error_customized'),
+    /*'#default_value' => variable_get(
+      'user_login_error_customized',
+      t('Sorry, unrecognized username or password.
+          <a href="@password">Have you forgotten your password?</a>',
+        array('@password' => url('user/password', array('query' => array('name' => 'my name'))))
+      )
+    ),*/
+    '#rows' => 3,
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -551,6 +577,7 @@ function user_admin_settings_submit($form, &$form_state) {
     ->set('status_blocked_subject', $form_state['values']['user_mail_status_blocked_subject'])
     ->set('status_canceled_body', $form_state['values']['user_mail_status_canceled_body'])
     ->set('status_canceled_subject', $form_state['values']['user_mail_status_canceled_subject'])
+    ->set('user_login_error_customized', $form_state['values']['user_login_error_customized'])
     ->save();
 
     backdrop_set_message(t('The configuration options have been saved.'));

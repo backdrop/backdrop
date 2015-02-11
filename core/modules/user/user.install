@@ -324,6 +324,7 @@ function user_update_1005() {
   $config->set('cancel_confirm_body', update_variable_get('cancel_confirm_body', '[user:name],\n\nA request to cancel your account has been made at [site:name].\n\nYou may now cancel your account on [site:url-brief] by clicking this link or copying and pasting it into your browser:\n\n[user:cancel-url]\n\nNOTE: The cancellation of your account is not reversible.\n\nThis link expires in one day and nothing will happen if it is not used.\n\n--  [site:name] team'));
   $config->set('status_canceled_subject', update_variable_get('status_canceled_subject', 'Account details for [user:name] at [site:name] (canceled)'));
   $config->set('status_canceled_body', update_variable_get('status_canceled_body', '[user:name],\n\nYour account on [site:name] has been canceled.\n\n--  [site:name] team'));
+  $config->set('user_login_error_customized', update_variable_get('user_login_error_customized', '[user:name],\n\nYour account on [site:name] has been canceled.\n\n--  [site:name] team'));
   $config->save();
 
   // Delete variables.
