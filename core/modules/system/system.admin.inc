@@ -571,7 +571,7 @@ function system_modules($form, $form_state = array()) {
         }
 
         // Disable this module if the dependency is incompatible with this version of Backdrop core.
-        elseif ($files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
+        elseif (isset($files[$requires]->info['backdrop']) && $files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Backdrop core)', array(
             '@module' => $requires_name,
           ));
