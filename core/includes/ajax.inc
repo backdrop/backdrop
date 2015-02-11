@@ -526,6 +526,16 @@ function ajax_deliver_dialog($page_callback_result) {
     $dialog_options['modal'] = TRUE;
   }
 
+  // Convert string values to booleans.
+  foreach ($dialog_options as $key => $value) {
+    if ($value === 'true') {
+      $dialog_options[$key] = TRUE;
+    }
+    elseif ($value === 'false') {
+      $dialog_options[$key] = FALSE;
+    }
+  }
+
   $commands = array();
   $commands[] = ajax_command_open_dialog($selector, $title, $html, $dialog_options);
   $return = array(
