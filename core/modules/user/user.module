@@ -1580,7 +1580,8 @@ function user_login_final_validate($form, &$form_state) {
       }
     }
     else {
-      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
+      $mail_config = config('user.mail');
+      form_set_error('name', $mail_config->get('user_login_error_customized'));//t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
   }
