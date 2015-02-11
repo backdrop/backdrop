@@ -4,7 +4,7 @@
     "description": "Emulates the default Backdrop front page; you may set the default home page path to this view to make it your front page.",
     "module": "views",
     "tag": "default",
-    "disabled": false,
+    "disabled": true,
     "base_table": "node",
     "human_name": "Front page",
     "core": 0,
