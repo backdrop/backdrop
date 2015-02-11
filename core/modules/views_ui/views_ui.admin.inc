@@ -869,10 +869,6 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
   }
 
   $cancel = 'admin/structure/views/view/' . $view->name . '/edit';
-  if (!empty($_REQUEST['cancel'])) {
-    $cancel = $_REQUEST['cancel'];
-  }
-
   $account = user_load($view->locked->uid);
   return confirm_form($form,
                   t('Are you sure you want to break the lock on view %name?',
