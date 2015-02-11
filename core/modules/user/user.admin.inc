@@ -515,45 +515,48 @@ function user_admin_settings($form, &$form_state) {
  * Form submission handler for user_admin_settings().
  */
 function user_admin_settings_submit($form, &$form_state) {
-  config('system.core')
-    ->set('anonymous', $form_state['values']['anonymous'])
-    ->set('user_admin_role', $form_state['values']['user_admin_role'])
-    ->set('user_cancel_method', $form_state['values']['user_cancel_method'])
-    ->set('user_register', $form_state['values']['user_register'])
-    ->set('user_email_verification', $form_state['values']['user_email_verification'])
-    ->set('user_signatures', $form_state['values']['user_signatures'])
-    ->set('user_pictures', $form_state['values']['user_pictures'])
-    ->set('user_picture_path', $form_state['values']['user_picture_path'])
-    ->set('user_picture_default', $form_state['values']['user_picture_default'])
-    ->set('user_picture_style', $form_state['values']['user_picture_style'])
-    ->set('user_picture_dimensions', $form_state['values']['user_picture_dimensions'])
-    ->set('user_picture_file_size', $form_state['values']['user_picture_file_size'])
-    ->set('user_picture_guidelines', $form_state['values']['user_picture_guidelines'])
-    ->set('user_mail_status_activated_notify', $form_state['values']['user_mail_status_activated_notify'])
-    ->set('user_mail_status_blocked_notify', $form_state['values']['user_mail_status_blocked_notify'])
-    ->set('user_mail_status_canceled_notify', $form_state['values']['user_mail_status_canceled_notify'])
-    ->save();
+  $values = $form_state['values'];
+  $config = config('system.core');
+  $config->set('anonymous', $values['anonymous']);
+  $config->set('user_admin_role', $values['user_admin_role']);
+  $config->set('user_cancel_method', $values['user_cancel_method']);
+  $config->set('user_register', $values['user_register']);
+  $config->set('user_email_verification', $values['user_email_verification']);
+  $config->set('user_signatures', $values['user_signatures']);
+  $config->set('user_pictures', $values['user_pictures']);
+  $config->set('user_picture_path', $values['user_picture_path']);
+  $config->set('user_picture_default', $values['user_picture_default']);
+  if (isset($values['user_picture_style'])) {
+    $config->set('user_picture_style', $values['user_picture_style']);
+  }
+  $config->set('user_picture_dimensions', $values['user_picture_dimensions']);
+  $config->set('user_picture_file_size', $values['user_picture_file_size']);
+  $config->set('user_picture_guidelines', $values['user_picture_guidelines']);
+  $config->set('user_mail_status_activated_notify', $values['user_mail_status_activated_notify']);
+  $config->set('user_mail_status_blocked_notify', $values['user_mail_status_blocked_notify']);
+  $config->set('user_mail_status_canceled_notify', $values['user_mail_status_canceled_notify']);
+  $config->save();
 
-  config('user.mail')
-    ->set('cancel_confirm_body', $form_state['values']['user_mail_cancel_confirm_body'])
-    ->set('cancel_confirm_subject', $form_state['values']['user_mail_cancel_confirm_subject'])
-    ->set('password_reset_body', $form_state['values']['user_mail_password_reset_body'])
-    ->set('password_reset_subject', $form_state['values']['user_mail_password_reset_subject'])
-    ->set('register_admin_body', $form_state['values']['user_mail_register_admin_created_body'])
-    ->set('register_admin_subject', $form_state['values']['user_mail_register_admin_created_subject'])
-    ->set('register_no_approval_body', $form_state['values']['user_mail_register_no_approval_required_body'])
-    ->set('register_no_approval_subject', $form_state['values']['user_mail_register_no_approval_required_subject'])
-    ->set('register_pending_body', $form_state['values']['user_mail_register_pending_approval_body'])
-    ->set('register_pending_subject', $form_state['values']['user_mail_register_pending_approval_subject'])
-    ->set('status_activated_body', $form_state['values']['user_mail_status_activated_body'])
-    ->set('status_activated_subject', $form_state['values']['user_mail_status_activated_subject'])
-    ->set('status_blocked_body', $form_state['values']['user_mail_status_blocked_body'])
-    ->set('status_blocked_subject', $form_state['values']['user_mail_status_blocked_subject'])
-    ->set('status_canceled_body', $form_state['values']['user_mail_status_canceled_body'])
-    ->set('status_canceled_subject', $form_state['values']['user_mail_status_canceled_subject'])
-    ->save();
+  $config = config('user.mail');
+  $config->set('cancel_confirm_body', $values['user_mail_cancel_confirm_body']);
+  $config->set('cancel_confirm_subject', $values['user_mail_cancel_confirm_subject']);
+  $config->set('password_reset_body', $values['user_mail_password_reset_body']);
+  $config->set('password_reset_subject', $values['user_mail_password_reset_subject']);
+  $config->set('register_admin_body', $values['user_mail_register_admin_created_body']);
+  $config->set('register_admin_subject', $values['user_mail_register_admin_created_subject']);
+  $config->set('register_no_approval_body', $values['user_mail_register_no_approval_required_body']);
+  $config->set('register_no_approval_subject', $values['user_mail_register_no_approval_required_subject']);
+  $config->set('register_pending_body', $values['user_mail_register_pending_approval_body']);
+  $config->set('register_pending_subject', $values['user_mail_register_pending_approval_subject']);
+  $config->set('status_activated_body', $values['user_mail_status_activated_body']);
+  $config->set('status_activated_subject', $values['user_mail_status_activated_subject']);
+  $config->set('status_blocked_body', $values['user_mail_status_blocked_body']);
+  $config->set('status_blocked_subject', $values['user_mail_status_blocked_subject']);
+  $config->set('status_canceled_body', $values['user_mail_status_canceled_body']);
+  $config->set('status_canceled_subject', $values['user_mail_status_canceled_subject']);
+  $config->save();
 
-    backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
