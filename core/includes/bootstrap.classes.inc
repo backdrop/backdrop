@@ -127,6 +127,8 @@ function backdrop_class_list() {
       'DrupalTestCase' => $path . 'drupal.classes.inc',
       'DrupalUnitTestCase' => $path . 'drupal.classes.inc',
       'DrupalWebTestCase' => $path . 'drupal.classes.inc',
+      'DrupalDefaultEntityController' => $path . 'drupal.classes.inc',
+      'DrupalEntityControllerInterface' => $path . 'drupal.classes.inc',
     );
   }
 
