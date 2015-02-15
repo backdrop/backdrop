@@ -2260,7 +2260,7 @@ function node_form_search_form_alter(&$form, $form_state) {
       $language_options[$langcode] = $language->name;
     }
     if (count($language_options) > 1) {
-      $form['advanced']['language'] = array(
+      $form['advanced']['langcode'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Languages'),
         '#prefix' => '<div class="criterion">',
@@ -2293,10 +2293,10 @@ function node_search_validate($form, &$form_state) {
   if (isset($form_state['values']['term']) && is_array($form_state['values']['term']) && count($form_state['values']['term'])) {
     $keys = search_expression_insert($keys, 'term', implode(',', $form_state['values']['term']));
   }
-  if (isset($form_state['values']['language']) && is_array($form_state['values']['language'])) {
-    $languages = array_filter($form_state['values']['language']);
+  if (isset($form_state['values']['langcode']) && is_array($form_state['values']['langcode'])) {
+    $languages = array_filter($form_state['values']['langcode']);
     if (count($languages)) {
-      $keys = search_expression_insert($keys, 'language', implode(',', $languages));
+      $keys = search_expression_insert($keys, 'langcode', implode(',', $languages));
     }
   }
   if ($form_state['values']['or'] != '') {
