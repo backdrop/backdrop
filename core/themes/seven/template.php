@@ -1,20 +1,29 @@
 <?php
+/**
+ * @file
+ * Preprocess functions and theme function overrides for the Seven theme.
+ */
 
 /**
  * Prepares variables for layout templates.
  */
 function seven_preprocess_layout(&$variables) {
-  // Move the page title and tabs into the "header" area, to fit with Seven's
-  // markup requirements.
-  if ($variables['title']) {
-    $title = '<h1 class="title" id="page-title">' . $variables['title'] . '</h1>';
-    $variables['content']['header'] .= $title;
-    $variables['title'] = NULL;
-  }
-  if ($variables['tabs']) {
-    $tabs = '<div class="tabs">' . $variables['tabs'] . '</div>';
-    $variables['content']['header'] .= $tabs;
-    $variables['tabs'] = NULL;
+  // Don't modify layouts that are being edited.
+  if (!$variables['admin']) {
+    // Move the page title and tabs into the "header" area, to fit with Seven's
+    // markup requirements.
+    if (isset($variables['content']['header'])) {
+      if ($variables['title']) {
+        $title = '<h1 class="title" id="page-title">' . $variables['title'] . '</h1>';
+        $variables['content']['header'] .= $title;
+        $variables['title'] = NULL;
+      }
+      if ($variables['tabs']) {
+        $tabs = '<div class="tabs">' . $variables['tabs'] . '</div>';
+        $variables['content']['header'] .= $tabs;
+        $variables['tabs'] = NULL;
+      }
+    }
   }
 }
 
