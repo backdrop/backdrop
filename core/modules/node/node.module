@@ -2296,7 +2296,7 @@ function node_search_validate($form, &$form_state) {
   if (isset($form_state['values']['language']) && is_array($form_state['values']['language'])) {
     $languages = array_filter($form_state['values']['language']);
     if (count($languages)) {
-      $keys = search_expression_insert($keys, 'language', implode(',', $languages));
+      $keys = search_expression_insert($keys, 'langcode', implode(',', $languages));
     }
   }
   if ($form_state['values']['or'] != '') {

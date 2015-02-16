@@ -1823,7 +1823,7 @@ class SearchLanguageTestCase extends BackdropWebTestCase {
     // Pick French and ensure it is selected.
     $edit = array('language[fr]' => TRUE);
     $this->backdropPost('search/node', $edit, t('Advanced search'));
-    $this->assertFieldByXPath('//input[@name="keys"]', 'language:fr', 'Language filter added to query.');
+    $this->assertFieldByXPath('//input[@name="keys"]', 'langcode:fr', 'Language filter added to query.');
 
     // Change the default language and disable English.
     $path = 'admin/config/regional/language';
