@@ -1742,11 +1742,11 @@ function _form_test_disabled_elements($form, &$form_state) {
     '#title' => 'Password',
     '#disabled' => TRUE,
   );
-  $form['password_confirm'] = array(
+  /*$form['password_confirm'] = array(
     '#type' => 'password_confirm',
     '#title' => 'Password confirm',
     '#disabled' => TRUE,
-  );
+  );*/
 
   // Files.
   $form['file'] = array(

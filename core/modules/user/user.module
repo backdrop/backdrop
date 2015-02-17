@@ -2680,9 +2680,9 @@ function user_form_process_password_confirm($element) {
   $js_settings = array(
     'password' => array(
       'strengthTitle' => t('Password strength: '),
-      'confirmTitle' => t('Passwords match: '),
-      'confirmSuccess' => t('yes'),
-      'confirmFailure' => t('no'),
+      //'confirmTitle' => t('Passwords match: '),
+      //'confirmSuccess' => t('yes'),
+      //'confirmFailure' => t('no'),
       'weak' => t('poor'),
       'fair' => t('fair'),
       'good' => t('good'),

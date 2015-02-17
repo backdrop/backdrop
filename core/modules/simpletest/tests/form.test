@@ -40,10 +40,10 @@ class FormsTestCase extends BackdropWebTestCase {
     $elements['password']['element'] = array('#title' => $this->randomName(), '#type' => 'password');
     $elements['password']['empty_values'] = $empty_strings;
 
-    $elements['password_confirm']['element'] = array('#title' => $this->randomName(), '#type' => 'password_confirm');
+    //$elements['password_confirm']['element'] = array('#title' => $this->randomName(), '#type' => 'password_confirm');
     // Provide empty values for both password fields.
     foreach ($empty_strings as $key => $value) {
-      $elements['password_confirm']['empty_values'][$key] = array('pass1' => $value, 'pass2' => $value);
+      //$elements['password_confirm']['empty_values'][$key] = array('pass1' => $value, 'pass2' => $value);
     }
 
     $elements['textarea']['element'] = array('#title' => $this->randomName(), '#type' => 'textarea');
@@ -462,8 +462,8 @@ class FormsTestCase extends BackdropWebTestCase {
     }
 
     // All the elements should be marked as disabled, including the ones below
-    // the disabled container.
-    $this->assertEqual(count($disabled_elements), 39, 'The correct elements have the disabled property in the HTML code.');
+    // the disabled container. // serundeputy changed this from 39 to 37 since two password_confirm fields were removed, but I'd like to get independent confirmation on this.
+    $this->assertEqual(count($disabled_elements), 37, 'The correct elements have the disabled property in the HTML code.');
 
     $this->backdropPost(NULL, $edit, t('Submit'));
     $returned_values['hijacked'] = backdrop_json_decode($this->content);
