@@ -295,6 +295,28 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
+#layout-access-list {
+  display: table;
+  width: 100%;
+}
+.layout-condition {
+  border-style: solid;
+  border-width: 1px 1px 0 1px;
+  border-color: #bebfb9;
+  padding: 3px;
+}
+.layout-condition:last-child  {
+  border-bottom-width: 1px;
+}
+.layout-condition:nth-child(even) {
+  background: #f3f4ee;
+}
+.layout-condition .layout-button-link{
+  float: right; /* LTR */
+}
+[dir="rtl"] .layout-condition .layout-button-link{
+  float: left;
+}
 
 /* Administration page listings. */
 ul.admin-list li {
