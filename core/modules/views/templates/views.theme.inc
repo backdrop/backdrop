@@ -832,6 +832,11 @@ function template_preprocess_views_view_unformatted(&$variables) {
     if ($row_class = $view->style_plugin->get_row_class($id)) {
       $variables['row_classes'][$id][] = $row_class;
     }
+
+    // Add an empty array here even to prevent errors from template.
+    if (!isset($variables['row_classes'][$id])) {
+      $variables['row_classes'][$id] = array();
+    }
   }
 }
 
