@@ -464,7 +464,8 @@ function text_field_widget_settings_form($field, $instance) {
   else {
     $form['rows'] = array(
       '#type' => 'number',
-      '#title' => t('Rows (The number of visible lines in the text area.)'),
+      '#title' => t('Rows'),
+      '#description' => t('The number of visible lines in the text area.'),
       '#default_value' => $settings['rows'],
       '#required' => TRUE,
       '#min' => 1,
