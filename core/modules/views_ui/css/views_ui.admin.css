@@ -260,9 +260,9 @@
 .views-ui-dialog {
   max-width: 95%;
 }
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 1200px) {
   .views-ui-dialog {
-    max-width: 600px;
+    max-width: 80%;
   }
 }
 
@@ -305,6 +305,11 @@
   padding: 20px;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+}
+@media only screen and (min-height: 750px) {
+  .views-ui-dialog .scroll {
+    max-height: 600px;
+  }
 }
 
 #views-filterable-options-controls {
