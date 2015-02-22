@@ -1625,9 +1625,7 @@ function node_menu() {
     'file' => 'node.types.inc',
   );
   $items['admin/structure/types/manage/%node_type/edit'] = array(
-    'title' => 'Content type settings',
-    'title callback' => 'node_type_settings_title',
-    'title arguments' => array(4),
+    'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/types/manage/%node_type/delete'] = array(
@@ -1782,13 +1780,6 @@ function node_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  */
 function node_type_page_title($type) {
   return $type->name;
-}
-
-/**
- * Title callback for menu_tab_settings
- */
-function node_type_settings_title($type) {
-  return $type->name . ' settings';
 }
 
 /**
