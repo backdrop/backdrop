@@ -742,7 +742,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available menus'),
-    '#default_value' => promote_page_to_menu($node_type),//$default_checked,//$node_type->settings['menu_options'],
+    '#default_value' => promote_page_to_menu($node_type),
     '#options' => $menu_options,
     '#description' => t('The menus available to place links in for this content type.'),
   );
