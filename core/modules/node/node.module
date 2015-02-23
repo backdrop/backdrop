@@ -1625,7 +1625,7 @@ function node_menu() {
     'file' => 'node.types.inc',
   );
   $items['admin/structure/types/manage/%node_type/edit'] = array(
-    'title' => 'Edit',
+    'title' => 'Configure',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/types/manage/%node_type/delete'] = array(
