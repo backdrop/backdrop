@@ -742,7 +742,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available menus'),
-    '#default_value' => $node_type->settings['menu_options'],
+    '#default_value' => promote_page_to_menu($node_type),//$default_checked,//$node_type->settings['menu_options'],
     '#options' => $menu_options,
     '#description' => t('The menus available to place links in for this content type.'),
   );
@@ -810,4 +810,20 @@ function menu_preprocess_block(&$variables) {
   if ($variables['block']->module == 'menu') {
     $variables['attributes']['role'] = 'navigation';
   }
+}
+
+/**
+ * helper function to decide default promotion to menu,
+ * currently only 'page' is promoted to menu.
+ * @param $node_type
+ * @return array
+ */
+function promote_page_to_menu($node_type) {
+  if ($node_type->type == 'page') {
+    $default_checked = $node_type->settings['menu_options'];
+  }
+  else {
+    $default_checked = array();
+  }
+  return $default_checked;
 }
