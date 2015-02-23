@@ -96,6 +96,7 @@ function standard_install() {
         'revision_default' => FALSE,
         'show_submitted_info' => FALSE,
         'comment_default' => COMMENT_NODE_CLOSED,
+        'menu_options' => array('main-menu'),
       ),
       'is_new' => TRUE,
     ),

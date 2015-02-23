@@ -774,7 +774,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
 function menu_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
-      'menu_options' => array('main-menu'),
+      'menu_options' => array(),
       'menu_parent' => 'main-menu:0',
     );
   }

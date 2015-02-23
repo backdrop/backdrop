@@ -75,7 +75,7 @@ function menu_update_1001() {
 
   $node_types = node_type_get_types();
   foreach ($node_types as $node_type) {
-    // Move the comment variables into each node type's config.
+    // Move the menu variables into each node type's config.
     $settings = array(
       'menu_options' => update_variable_get('menu_options_' . $node_type->type, array('main-menu')),
       'menu_parent' => update_variable_get('menu_parent_' . $node_type->type, 'main-menu:0'),
