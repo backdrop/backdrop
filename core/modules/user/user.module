@@ -1452,6 +1452,8 @@ function user_login($form, &$form_state) {
     backdrop_goto('user/' . $user->uid);
   }
 
+  backdrop_set_title(t('Log in'));
+
   // Display login form:
   $form['name'] = array('#type' => 'textfield',
     '#title' => t('Username'),
