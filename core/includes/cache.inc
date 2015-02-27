@@ -56,7 +56,7 @@ function cache($bin = 'cache') {
  * @return
  *   The cache or FALSE on failure.
  */
-function cache_get($cid, $bin) {
+function cache_get($cid, $bin = 'cache') {
   return cache($bin)->get($cid);
 }
 
