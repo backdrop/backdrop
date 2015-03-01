@@ -5411,9 +5411,9 @@ function backdrop_get_hash_salt() {
  *   The private key.
  */
 function backdrop_get_private_key() {
-  if (!($key = config_get('system.core', 'private_key'))) {
+  if (!($key = state_get('private_key'))) {
     $key = backdrop_random_key();
-    config_set('system.core', 'private_key', $key);
+    state_set('private_key', $key);
   }
   return $key;
 }

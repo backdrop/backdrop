@@ -300,7 +300,7 @@ function update_fix_requirements() {
     // Copy over the private key for continuity between the sites. If this is
     // not migrated, a random key will be generated when visiting update.php.
     if ($key = update_variable_get('drupal_private_key')) {
-      config_set('system.core', 'private_key', $key);
+      state_set('private_key', $key);
       update_variable_del('drupal_private_key');
     }
 
