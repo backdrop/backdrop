@@ -1246,6 +1246,7 @@ function layout_block_configure_ajax_update($form, $form_state) {
   // If a new block, add to the bottom of the region.
   elseif ($added_to_region) {
     $commands[] = ajax_command_close_modal_dialog();
+    $commands[] = ajax_command_remove('#layout-editor-block-' . $block->uuid);
     $commands[] = ajax_command_append('#layout-editor-region-' . $added_to_region . ' .layout-editor-region-content', $renderer->renderBlock($block));
   }
   // If editing a block, replace the block with its placeholder.
