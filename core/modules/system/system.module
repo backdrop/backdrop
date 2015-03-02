@@ -3534,6 +3534,19 @@ function system_config_info() {
     'label' => t('Mail systems'),
     'group' => t('Configuration'),
   );
+
+  // Register config files for all active themes.
+  $themes = list_themes();
+  foreach ($themes as $theme_name => $theme) {
+    // If the theme registers settings, it needs a config file.
+    if (isset($theme->info['settings'])) {
+      $prefixes[$theme_name . '.settings'] = array(
+        'label' => t('!theme settings', array('!theme' => $theme->info['name'])),
+        'group' => t('Configuration'),
+      );
+    }
+  }
+
   return $prefixes;
 }
 
