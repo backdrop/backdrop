@@ -64,6 +64,46 @@ function color_css_alter(&$css) {
 }
 
 /**
+ * Implements hook_config_create().
+ */
+function color_config_create(Config $staging_config) {
+  _color_config_save($staging_config);
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function color_config_update(Config $staging_config, Config $active_config) {
+  _color_config_save($staging_config);
+}
+
+/**
+ * Shared callback used by color_config_create() and hook_config_update().
+ *
+ * @param Config $staging_config
+ *   The configuration about to be imported into the site.
+ */
+function _color_config_save(Config $staging_config) {
+  // Match "[theme_name].settings" config names.
+  $config_name = $staging_config->getName();
+  list($theme_name, $settings) = explode('.', $config_name);
+  if ($settings === 'settings') {
+    $themes = list_themes();
+    if (array_key_exists($theme_name, $themes)) {
+      $new_color_config = $staging_config->get('color');
+      $color_info = color_get_info($theme_name);
+      if ($color_info) {
+        $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
+        $updated_config = color_save_configuration($theme_name, $color_info, $palette);
+        // Update the staged config with the new CSS file location. Saving is
+        // done right after this hook by config_sync_file().
+        $staging_config->set('color', $updated_config);
+      }
+    }
+  }
+}
+
+/**
  * Replaces the logo with a color-altered logo.
  *
  * A theme that supports the color module should call this function from its
@@ -92,6 +132,7 @@ function color_get_info($theme) {
     return $theme_info[$theme];
   }
 
+  $info = NULL; // The variable to be populated by the theme color.inc file.
   $path = backdrop_get_path('theme', $theme);
   $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
   if ($path && file_exists($file)) {
@@ -297,30 +338,69 @@ function color_scheme_form_submit($form, &$form_state) {
     $palette += $info['schemes']['default']['colors'];
   }
 
+  // Remove color field elements.
+  unset($form_state['values']['scheme']);
+  unset($form_state['values']['palette']);
+
+  // Check if enough memory is available before saving new values.
+  if (color_check_memory_limit($theme, $info) === FALSE) {
+    backdrop_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. Check the <a href="!url">PHP documentation</a> for more information.', array('!url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
+    return;
+  }
+
+  // Save all the values into form state for saving to config.
+  $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
+}
+
+/**
+ * Checks if enough memory is available to perform the image manipulation.
+ *
+ * @param $theme_name
+ *   The theme machine name.
+ * @param $theme_info
+ *   The theme info, as loaded by list_themes().
+ *
+ * @return bool|NULL
+ *   Returns TRUE if enough memory is available, FALSE if not enough memory is
+ *   available, or NULL if the check is not available.
+ */
+function color_check_memory_limit($theme_name, $theme_info) {
   // Make sure enough memory is available, if PHP's memory limit is compiled in.
   if (function_exists('memory_get_usage')) {
     // Fetch source image dimensions.
-    $source = backdrop_get_path('theme', $theme) . '/' . $info['base_image'];
+    $source = backdrop_get_path('theme', $theme_name) . '/' . $theme_info['base_image'];
     list($width, $height) = getimagesize($source);
 
     // We need at least a copy of the source and a target buffer of the same
     // size (both at 32bpp).
     $required = $width * $height * 8;
     // We intend to prevent color scheme changes if there isn't enough memory
-    // available.  memory_get_usage(TRUE) returns a more accurate number than
+    // available. memory_get_usage(TRUE) returns a more accurate number than
     // memory_get_usage(), therefore we won't inadvertently reject a color
     // scheme change based on a faulty memory calculation.
     $usage = memory_get_usage(TRUE);
-    $memory_limit = ini_get('memory_limit');
-    $size = parse_size($memory_limit);
-    if (!backdrop_check_memory_limit($usage + $required, $memory_limit)) {
-      backdrop_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. You need at least %size more. Check the <a href="@url">PHP documentation</a> for more information.', array('%size' => format_size($usage + $required - $size), '@url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
-      return;
-    }
+    return backdrop_check_memory_limit($usage + $required);
   }
+}
 
-  // Delete old files.
-  $files = theme_get_setting('color.files');
+/**
+ * Generates the necessary CSS and images based on a color palette.
+ *
+ * @param $theme_name
+ *   The theme machine name.
+ * @param $theme_info
+ *   The theme info, as loaded by list_themes().
+ * @param $palette
+ *   The color palette on which the images and CSS will be generated.
+ *
+ * @return array|NULL
+ *   Returns an array of values to be saved in the theme configuration. If no
+ *   color settings are necessary (such as when using the default color scheme),
+ *   NULL is returned.
+ */
+function color_save_configuration($theme_name, $theme_info, $palette) {
+  // Delete any old color files.
+  $files = theme_get_setting('color.files', $theme_name);
   if ($files) {
     foreach ($files as $file) {
       @backdrop_unlink($file);
@@ -331,15 +411,12 @@ function color_scheme_form_submit($form, &$form_state) {
   }
 
   // Don't render the default colorscheme, use the standard theme instead.
-  if (implode(',', color_get_palette($theme, TRUE)) == implode(',', $palette)) {
-    unset($form_state['values']['scheme']);
-    unset($form_state['values']['palette']);
-    $form_state['values']['color'] = NULL;
-    return;
+  if (empty($palette) || implode(',', color_get_palette($theme_name, TRUE)) == implode(',', $palette)) {
+    return NULL;
   }
 
   // Prepare target locations for generated files.
-  $id = $theme . '-' . substr(hash('sha256', serialize($palette) . microtime()), 0, 8);
+  $id = $theme_name . '-' . substr(hash('sha256', serialize($palette) . microtime()), 0, 8);
   $paths['color'] = 'public://color';
   $paths['target'] = $paths['color'] . '/' . $id;
   foreach ($paths as $path) {
@@ -347,11 +424,11 @@ function color_scheme_form_submit($form, &$form_state) {
   }
   $paths['target'] = $paths['target'] . '/';
   $paths['id'] = $id;
-  $paths['source'] = backdrop_get_path('theme', $theme) . '/';
+  $paths['source'] = backdrop_get_path('theme', $theme_name) . '/';
   $paths['files'] = $paths['map'] = array();
 
   // Copy over neutral images.
-  foreach ($info['copy'] as $file) {
+  foreach ($theme_info['copy'] as $file) {
     $base = backdrop_basename($file);
     $source = $paths['source'] . $file;
     $filepath = file_unmanaged_copy($source, $paths['target'] . $base);
@@ -360,13 +437,13 @@ function color_scheme_form_submit($form, &$form_state) {
   }
 
   // Render new images, if image has been provided.
-  if ($info['base_image']) {
-    _color_render_images($theme, $info, $paths, $palette);
+  if ($theme_info['base_image']) {
+    _color_render_images($theme_name, $theme_info, $paths, $palette);
   }
 
   // Rewrite theme stylesheets.
   $css = array();
-  foreach ($info['css'] as $stylesheet) {
+  foreach ($theme_info['css'] as $stylesheet) {
     // Build a temporary array with CSS files.
     $files = array();
     if (file_exists($paths['source'] . $stylesheet)) {
@@ -388,23 +465,18 @@ function color_scheme_form_submit($form, &$form_state) {
       $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $style);
 
       // Rewrite stylesheet with new colors.
-      $style = _color_rewrite_stylesheet($theme, $info, $paths, $palette, $style);
+      $style = _color_rewrite_stylesheet($theme_name, $info, $paths, $palette, $style);
       $base_file = backdrop_basename($file);
       $css[] = $paths['target'] . $base_file;
       _color_save_stylesheet($paths['target'] . $base_file, $style, $paths);
     }
   }
 
-  // Save all the values into form state for saving to config.
-  $form_state['values']['color'] = array(
+  return array(
     'palette' => $palette,
     'stylesheets' => $css,
     'files' => $paths['files'],
   );
-
-  // Remove color field elements.
-  unset($form_state['values']['scheme']);
-  unset($form_state['values']['palette']);
 }
 
 /**
