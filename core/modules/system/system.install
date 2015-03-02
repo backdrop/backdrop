@@ -2433,6 +2433,16 @@ function system_update_1035() {
 }
 
 /**
+ * Remove the private key from configuration.
+ */
+function system_update_1036() {
+  // A new private key is generated automatically by backdrop_get_private_key().
+  $config = config('system.core');
+  $config->clear('private_key');
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

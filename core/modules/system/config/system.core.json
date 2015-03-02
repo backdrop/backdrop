@@ -37,7 +37,6 @@
     "page_compression": 1,
     "preprocess_css": 0,
     "preprocess_js": 0,
-    "private_key": 0,
     "rss_description": "",
     "rss_limit":  10,
     "rss_viewmode": "fulltext",

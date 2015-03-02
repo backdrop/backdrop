@@ -2328,14 +2328,8 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
 /**
  * Test case for backdrop_valid_token().
  */
-class SystemValidTokenTest extends BackdropUnitTestCase {
-
-  /**
-   * Flag to indicate whether PHP error reportings should be asserted.
-   *
-   * @var bool
-   */
-  protected $assertErrors = TRUE;
+class SystemValidTokenTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
   /**
    * Tests invalid invocations of backdrop_valid_token() that must return FALSE.
