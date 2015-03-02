@@ -26,7 +26,7 @@ Backdrop.behaviors.password = {
       var passwordCheck = function () {
 
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength($passwordInput.val());
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), translate.username);
 
         // Adjust the length of the strength indicator.
         $innerWrapper.find('.indicator').css('width', result.strength + '%');
@@ -74,7 +74,7 @@ Backdrop.behaviors.password = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password) {
+Backdrop.evaluatePasswordStrength = function (password, username) {
   var strength = 0;
   var level = 'empty';
   var hasLowercase = /[a-z]+/.test(password);
@@ -85,7 +85,9 @@ Backdrop.evaluatePasswordStrength = function (password) {
   // If there is a username edit box on the page, compare password to that, otherwise
   // use value from the database.
   var usernameBox = $('input.username');
-  var username = (usernameBox.length > 0) ? usernameBox.val() : translate.username;
+  if (usernameBox.length > 0) {
+    username = usernameBox.val();
+  }
 
   // Calculate the number of unique character sets within a string.
   // Adapted from https://github.com/dropbox/zxcvbn.
