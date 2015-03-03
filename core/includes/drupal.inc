@@ -607,8 +607,9 @@ function drupal_tempnam($directory, $prefix) {
   return backdrop_tempnam($directory, $prefix);
 }
 // Functions from form.inc.
-function drupal_get_form($form_id) {
-  return backdrop_get_form($form_id);
+function drupal_get_form() {
+  $args = func_get_args(); // pass $args to form function
+  return call_user_func_array('backdrop_get_form', $args);
 }
 function drupal_build_form($form_id, &$form_state) {
   return backdrop_build_form($form_id, $form_state);
