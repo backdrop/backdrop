@@ -163,6 +163,11 @@ function theme_pager($variables) {
   $quantity = $variables['quantity'];
   global $pager_page_array, $pager_total;
 
+  // Return if there is no pager to be rendered.
+  if (!isset($pager_page_array[$element])) {
+    return;
+  }
+
   // Calculate various markers within this pager piece:
   // Middle is used to "center" pages around the current page.
   $pager_middle = ceil($quantity / 2);
