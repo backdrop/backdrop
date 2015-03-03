@@ -2138,9 +2138,9 @@ function theme_table($variables) {
         $output .= ' <tr' . backdrop_attributes($tr_attributes) . '>';
         $i = 0;
         foreach ($cells as $cell) {
-          $i++;
           // Add active class if needed for sortable tables.
           $cell = tablesort_cell($cell, $header, $ts, $i);
+          $i++;
           // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
           // class from header to cell as needed.
           if (isset($responsive_columns[$i])) {
