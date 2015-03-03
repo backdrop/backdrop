@@ -23,9 +23,6 @@
 [dir="rtl"] .item-list ul {
   margin: 0.25em 1.5em 0.25em 0;
 }
-.item-list .pager li {
-  padding: 0.5em;
-}
 .item-list ul li,
 li.leaf,
 ul.menu li {
@@ -44,6 +41,49 @@ ul.menu li.collapsed {
 ul.menu li.expanded {
   list-style-image: url(../../../misc/menu-expanded.png);
   list-style-type: circle;
+}
+
+/**
+ * Pager.
+ */
+.item-list .pager {
+  clear: both;
+  text-align: center;
+  margin: 1em 0;
+}
+.item-list .pager li {
+  background-image: none;
+  display: inline-block;
+  list-style-type: none;
+  margin: 0 3px;
+  padding: 0;
+}
+.item-list .pager li.pager-current {
+  display: inline-block;
+  background-color: #444b53;
+  font-weight: bold;
+  color: #ffffff;
+  min-width: 20px;
+  padding: 7px 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.item-list .pager a {
+  display: inline-block;
+  background-color: #e5e5e6;
+  color: #444b53;
+  min-width: 20px;
+  padding: 7px 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.item-list .pager a:hover {
+  text-decoration: none;
+  background-color: #444b53;
+  color: #ffffff;
+  transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 /**
