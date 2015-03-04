@@ -50,9 +50,9 @@
   <?php endif; ?>
 
   <?php if ($messages): ?>
-    <section class="l-messages">
+    <div class="l-messages">
       <?php print $messages; ?>
-    </section>
+    </div>
   <?php endif; ?>
 
   <div class="l-container">
@@ -123,9 +123,9 @@
       <?php endif; ?>
 
       <?php if ($content['footer']): ?>
-        <div class="l-footer">
+        <footer class="l-footer">
           <?php print $content['footer']; ?>
-        </div>
+        </footer>
       <?php endif; ?>
     </div>
   <?php endif; ?>
