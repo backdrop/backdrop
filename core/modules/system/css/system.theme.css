@@ -174,6 +174,7 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
   display: inline;
   list-style-type: none;
   padding: 0.5em;
+  margin: 0;
 }
 .pager-current {
   font-weight: bold;
