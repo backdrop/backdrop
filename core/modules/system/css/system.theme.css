@@ -421,70 +421,108 @@ ul.secondary a.active {
 /**
  * Styles for system messages.
  */
-div.messages {
-  background-position: 8px 8px; /* LTR */
-  background-repeat: no-repeat;
-  border: 1px solid;
+.messages {
+  position: relative;
   margin: 6px 0;
-  padding: 10px 10px 10px 50px; /* LTR */
+  padding: 10px 10px 10px 55px; /* LTR */
+  border-radius: 4px;
+  min-height: 32px;
+  overflow: hidden;
 }
-[dir="rtl"] div.messages {
-  background-position: 99% 8px;
-  padding: 10px 50px 10px 10px;
+[dir="rtl"] .messages {
+  padding: 10px 55px 10px 10px;
+}
+.messages:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; /* LTR */
+  width: 38px;
+  height: 100%;
+  background-position: center 10px;
+  background-repeat: no-repeat;
+  background-size: 24px;
+}
+@media only screen and (min-width: 600px) {
+  .messages {
+    padding-left: 70px;
+  }
+  [dir="rtl"] .messages {
+    padding-left: 10px;
+    padding-right: 70px;
+  }
+  .messages:before {
+    width: 48px;
+    background-size: 32px;
+  }
+}
+[dir="rtl"] .messages:before {
+  left: auto;
+  right: 0;
+}
+.messages ul,
+.messages .item-list ul {
+  margin-bottom: 0;
+  margin-left: 0;
 }
 
-div.status {
-  background-image: url(../../../misc/message-24-ok.png);
-  border-color: #be7;
-}
-div.status,
 .status {
   color: #234600;
+  background-color: #E9EEBC;
 }
-div.status,
-table tr.status {
-  background-color: #f8fff0;
+div.status:before {
+  background-image: url(../../../misc/message-24-ok.png);
+  background-color: #CFDE56;
 }
 
-div.warning {
-  background-image: url(../../../misc/message-24-warning.png);
-  border-color: #ed5;
-}
-div.warning,
 .warning {
-  color: #840;
+  color: #555;
+  background-color: #FAF5C9;
 }
-div.warning,
-table tr.warning {
-  background-color: #fffce5;
+div.warning:before {
+  background-image: url(../../../misc/message-24-warning.png);
+  background-color: #FCE400;
 }
 
-div.error {
-  background-image: url(../../../misc/message-24-error.png);
-  border-color: #ed541d;
-}
-div.error,
 .error {
-  color: #8c2e0b;
+  color: #EC351C;
+  background-color: #F9EDEC;
 }
-div.error,
-table tr.error {
-  background-color: #fef5f1;
-}
-div.error p.error {
-  color: #333;
+div.error:before {
+  background-image: url(../../../misc/message-24-error.png);
+  background-color: #EE3D23;
 }
 
-div.messages ul {
-  margin: 0 0 0 1em; /* LTR */
-  padding: 0;
+/* Desktop size icons */
+@media only screen and (min-width: 600px) {
+  div.status:before {
+    background-image: url(../../../misc/message-32-ok.png);
+  }
+  div.warning:before {
+    background-image: url(../../../misc/message-32-warning.png);
+  }
+  div.error:before {
+    background-image: url(../../../misc/message-32-error.png);
+  }
 }
-[dir="rtl"] div.messages ul {
-  margin: 0 1em 0 0;
+/* SVG overrides */
+div.status:before {
+  background-image:
+    linear-gradient(transparent, transparent),
+    url(../../../misc/message-ok.svg);
 }
-div.messages ul li {
-  list-style-image: none;
+div.warning:before {
+  background-image:
+    linear-gradient(transparent, transparent),
+    url(../../../misc/message-warning.svg);
 }
+div.error:before {
+  background-image:
+    linear-gradient(transparent, transparent),
+    url(../../../misc/message-error.svg);
+}
+
+
 
 /**
  * Floated images.
