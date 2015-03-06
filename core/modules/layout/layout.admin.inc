@@ -2246,3 +2246,31 @@ function layout_ajax_form_update($form, $form_state) {
 
   return array('#type' => 'ajax', '#commands' => $commands);
 }
+
+/**
+ * Lists all blocks and their modules.
+ */
+function layout_block_list() {
+  $rows = array();
+
+  // Get all blocks.
+  foreach (module_implements('block_info') as $module) {
+    $blocks = module_invoke($module, 'block_info');
+    if (!empty($blocks)) {
+      foreach ($blocks as $delta => $block) {
+        $rows[$block['info']] = array($block['info'], $module, $delta);
+      }
+    }
+  }
+
+  // Sort rows by block name.
+  ksort($rows);
+
+  return array(
+    '#theme' => 'table',
+    '#header' => array(t('Name'), t('Module'), t('Delta')),
+    '#rows' => $rows,
+    '#empty' => t('There are no blocks.'),
+  );
+}
+
