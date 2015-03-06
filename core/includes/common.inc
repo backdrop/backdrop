@@ -7975,7 +7975,7 @@ function backdrop_flush_all_caches() {
   menu_rebuild();
 
   // Ordered so clearing the page cache will always be the last action.
-  $core = array('cache', 'path', 'filter', 'bootstrap', 'page');
+  $core = array('cache', 'path', 'filter', 'bootstrap', 'token', 'page');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
     cache($bin)->flush();

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop placeholder/token replacement system.
