@@ -262,3 +262,86 @@ function token_info() {
   }
   return $data;
 }
+
+/**
+ * Clear token caches and static variables.
+ */
+function token_clear_cache() {
+  if (db_table_exists('cache_token')) {
+    cache_clear_all('*', 'cache_token', TRUE);
+  }
+  backdrop_static_reset('token_get_info');
+  backdrop_static_reset('token_get_global_token_types');
+  backdrop_static_reset('token_get_entity_mapping');
+  backdrop_static_reset('token_build_tree');
+  backdrop_static_reset('token_menu_link_load');
+  backdrop_static_reset('token_book_link_load');
+  backdrop_static_reset('token_node_menu_link_load');
+  backdrop_static_reset('_token_field_info');
+}
+
+/**
+ * Get token problems.
+ */
+function token_get_token_problems() {
+  $token_info = token_info();
+  $token_problems = array(
+    'not-array' => array(
+      'label' => t('The following tokens or token types are not defined as arrays:'),
+    ),
+    'missing-info' => array(
+      'label' => t('The following tokens or token types are missing required name and/or description information:'),
+    ),
+    'type-no-tokens' => array(
+      'label' => t('The following token types do not have any tokens defined:'),
+    ),
+    'tokens-no-type' => array(
+      'label' => t('The following token types are not defined but have tokens:'),
+    ),
+    'duplicate' => array(
+      'label' => t('The following token or token types are defined by multiple modules:')
+    ),
+  );
+
+  // Check token types for problems.
+  foreach ($token_info['types'] as $type => $type_info) {
+    $real_type = !empty($type_info['type']) ? $type_info['type'] : $type;
+    if (!is_array($type_info)) {
+      $token_problems['not-array']['problems'][] = "\$info['types']['$type']";
+      continue;
+    }
+    elseif (!isset($type_info['name']) || !isset($type_info['description'])) {
+      $token_problems['missing-info']['problems'][] = "\$info['types']['$type']";
+    }
+    elseif (empty($token_info['tokens'][$real_type])) {
+      $token_problems['type-no-tokens']['problems'][] = "\$info['tokens']['$real_type']";
+    }
+  }
+
+  // Check tokens for problems.
+  foreach ($token_info['tokens'] as $type => $tokens) {
+    if (!is_array($tokens)) {
+      $token_problems['not-array']['problems'][] = "\$info['tokens']['$type']";
+      continue;
+    }
+    else {
+      foreach (array_keys($tokens) as $token) {
+        if (!is_array($tokens[$token])) {
+          $token_problems['not-array']['problems'][] = "\$info['tokens']['$type']['$token']";
+          continue;
+        }
+        elseif (!isset($tokens[$token]['name']) || !isset($tokens[$token]['description'])) {
+          $token_problems['missing-info']['problems'][] = "\$info['tokens']['$type']['$token']";
+        }
+        elseif (is_array($tokens[$token]['name']) || is_array($tokens[$token]['description'])) {
+          $token_problems['duplicate']['problems'][] = "\$info['tokens']['$type']['$token']";
+        }
+      }
+    }
+    if (!isset($token_info['types'][$type])) {
+      $token_problems['tokens-no-type']['problems'][] = "\$info['types']['$type']";
+    }
+  }
+
+  return $token_problems;
+}
