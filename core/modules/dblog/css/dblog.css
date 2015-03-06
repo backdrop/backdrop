@@ -70,5 +70,5 @@
 .admin-dblog .dblog-critical .icon,
 .admin-dblog .dblog-alert .icon,
 .admin-dblog .dblog-emergency .icon {
-  background-image: url(../../misc/message-16-error.png);
+  background-image: url(../../../misc/message-16-error.png);
 }
