@@ -659,13 +659,13 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->assertText($edit['name'], 'The randomly generated term name is present.');
     $this->assertText($edit['description[value]'], 'The randomly generated term description is present.');
 
-    // Did this page request display a 'term-listing-heading'?
-    $this->assertPattern('|class="taxonomy-term-description"|', 'Term page displayed the term description element.');
+    // Did this page request display a 'view-header'?
+    $this->assertPattern('|class="views-field-description"|', 'Term page displayed the term description element.');
     // Check that it does NOT show a description when description is blank.
     $term->description = '';
     taxonomy_term_save($term);
     $this->backdropGet('taxonomy/term/' . $term->tid);
-    $this->assertNoPattern('|class="taxonomy-term-description"|', 'Term page did not display the term description when description was blank.');
+    $this->assertNoPattern('|class="views-field-description"|', 'Term page did not display the term description when description was blank.');
 
     // Check that the term feed page is working.
     $this->backdropGet('taxonomy/term/' . $term->tid . '/feed');
