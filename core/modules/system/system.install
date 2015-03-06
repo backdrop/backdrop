@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the system module.
@@ -466,6 +465,30 @@ function system_requirements($phase) {
         'value' => $t('Fails'),
         'severity' => REQUIREMENT_ERROR,
         'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$state[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+      );
+    }
+  }
+
+  if ($phase == 'runtime') {
+    // Check for various token definition problems.
+    $token_problems = token_get_token_problems();
+    // Format and display each token problem.
+    foreach ($token_problems as $problem_key => $problem) {
+      if (!empty($problem['problems'])) {
+        $problems = array_unique($problem['problems']);
+        $problems = array_map('check_plain', $problems);
+        $token_problems[$problem_key] = $problem['label'] . theme('item_list', array('items' => $problems));
+      }
+      else {
+        unset($token_problems[$problem_key]);
+      }
+    }
+    if (!empty($token_problems)) {
+      $requirements['token_problems'] = array(
+        'title' => $t('Tokens'),
+        'value' => $t('Problems detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
       );
     }
   }
