@@ -19,10 +19,16 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function option_definition() {
     $options = parent::option_definition();
+    $options['separate_buttons'] = array(
+      'default' => '0',
+    );
     $options['include_exclude'] = array(
       'default' => 'exclude',
     );
     $options['selected_actions'] = array(
+      'default' => array(),
+    );
+    $options['label_overrides'] = array(
       'default' => array(),
     );
     return $options;
@@ -33,6 +39,16 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+
+    $form['separate_buttons'] = array(
+      '#type' => 'radios',
+      '#title' => t('Actions display type'),
+      '#options' => array(
+        '0' => t('A dropdown with one submit button'),
+        '1' => t('One button per action'),
+      ),
+      '#default_value' => $this->options['separate_buttons'],
+    );
 
     $form['include_exclude'] = array(
       '#type' => 'radios',
@@ -49,6 +65,28 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#options' => $this->get_bulk_options(FALSE),
       '#default_value' => $this->options['selected_actions'],
     );
+
+    $form['label_overrides'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="options[include_exclude]"]' => array('value' => 'include'),
+        ),
+      ),
+    );
+    $labels = $this->options['label_overrides'];
+    foreach ($this->get_bulk_options(FALSE) as $name => $label) {
+      $form['label_overrides'][$name] = array(
+        '#type' => 'textfield',
+        '#title' => t('Override label for %action', array('%action' => $label)),
+        '#default_value' => isset($labels[$name]) ? $labels[$name] : '',
+        '#states' => array(
+          'visible' => array(
+            '#edit-options-selected-actions-' . backdrop_html_class($name) => array('checked' => TRUE),
+          ),
+        ),
+      );
+    }
   }
 
   /**
@@ -58,6 +96,18 @@ class views_handler_field_bulk_form extends views_handler_field {
     parent::options_validate($form, $form_state);
 
     $form_state['values']['options']['selected_actions'] = array_filter($form_state['values']['options']['selected_actions']);
+
+    // No label overrides for the exclusion type.
+    if ($form_state['values']['options']['include_exclude'] == 'exclude') {
+      $form_state['values']['options']['label_overrides'] = array();
+    }
+    else {
+      $labels = &$form_state['values']['options']['label_overrides'];
+      $labels = array_filter($labels);
+
+      // Only keep label overrides from selected actions.
+      $labels = array_intersect_key($labels, $form_state['values']['options']['selected_actions']);
+    }
   }
 
   /**
@@ -122,18 +172,34 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#attributes' => array('class' => array('views-bulk-form')),
       '#id' => NULL,
     );
-    $form['header'][$this->options['id']]['action'] = array(
-      '#type' => 'select',
-      '#options' => $this->get_bulk_options(),
-      '#empty_option' => '- ' . t('Choose an action') . ' -',
-    );
 
-    // Set the form actions container in the header.
     $actions['#type'] = 'actions';
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Execute'),
-    );
+    if ($this->options['separate_buttons']) {
+      foreach ($this->get_bulk_options() as $name => $label) {
+        $actions[$name] = array(
+          // '#markup' => '<button class="form-submit" name="action" value="' . check_plain($name) . '">' . check_plain($label) . '</button>',
+          '#type' => 'submit',
+          '#value' => $label,
+          '#name' => 'action',
+          // 'content' => array('#markup' => check_plain($label)),
+          '#action_name' => $name,
+        );
+      }
+    }
+    else {
+      $form['header'][$this->options['id']]['action'] = array(
+        '#type' => 'select',
+        '#options' => $this->get_bulk_options(),
+        '#empty_option' => '- ' . t('Choose an action') . ' -',
+      );
+
+      // Set the form actions container in the header.
+      $actions['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Execute'),
+      );
+    }
+
     $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
@@ -147,7 +213,12 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function views_form_submit(&$form, &$form_state) {
     if ($form_state['step'] == 'views_form_views_form') {
-      $action_name = $form_state['values']['action'];
+      if ($this->options['separate_buttons']) {
+        $action_name = $form_state['triggering_element']['#action_name'];
+      }
+      else {
+        $action_name = $form_state['values']['action'];
+      }
       $action_info = actions_get_info($form_state['values']['action']);
       $count = 0;
 
@@ -206,7 +277,11 @@ class views_handler_field_bulk_form extends views_handler_field {
       }
       // Only allow actions that are valid for this entity type.
       if ($action_info['type'] == $entity_type) {
-        $options[$action_name] = $action_info['label'];
+        $label = $action_info['label'];
+        if ($filtered && isset($this->options['label_overrides'][$action_name])) {
+          $label = t($this->options['label_overrides'][$action_name]);
+        }
+        $options[$action_name] = $label;
       }
     }
 
