@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Allows users to create and organize related content in an outline.
@@ -1137,28 +1136,40 @@ function book_node_type_update($type) {
 }
 
 /**
- * Gets a book menu link by its menu link ID.
+ * Get a translated book menu link by its menu link ID.
  *
  * Like menu_link_load(), but adds additional data from the {book} table.
  *
  * Do not call when loading a node, since this function may call node_load().
  *
  * @param $mlid
- *   The menu link ID of the menu item.
+ *   The menu link ID of the book menu item.
  *
  * @return
  *   A menu link, with the link translated for rendering and data added from the
- *   {book} table. FALSE if there is an error.
+ *   {book} table. EMPTY if there is no item. FALSE if there is an error.
+ *
+ * @see _menu_link_translate()
  */
-function book_link_load($mlid) {
-  if ($item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(
-      ':mlid' => $mlid,
-    ))->fetchAssoc()) {
-    _menu_link_translate($item);
-    return $item;
+function book_link_load($mlid, $skip_access_check = FALSE) {
+  $cache = &backdrop_static(__FUNCTION__, array());
+
+  if (!is_numeric($mlid)) {
+    return FALSE;
   }
 
-  return FALSE;
+  if (!isset($cache[$mlid])) {
+    $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
+    if (!empty($item)) {
+      if ($skip_access_check) {
+        $item['access'] = TRUE;
+      }
+      _menu_link_translate($item);
+    }
+    $cache[$mlid] = $item;
+  }
+
+  return $cache[$mlid];
 }
 
 /**
