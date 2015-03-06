@@ -536,6 +536,9 @@ function system_modules($form, $form_state = array()) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
     $extra['disabled'] = (array_key_exists('disabled', $module->info)) ? $module->info['disabled'] : FALSE;
+    if ($extra['disabled'] && !empty($module->info['explanation']) ) {
+      $extra['required_by'][] = $module->info['explanation'];
+    }
 
     // Check to see if this is a core module.
     if (strstr($module->uri, 'core/modules')) {
