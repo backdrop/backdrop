@@ -556,6 +556,9 @@ function user_admin_settings_submit($form, &$form_state) {
   $config->set('status_canceled_subject', $values['user_mail_status_canceled_subject']);
   $config->save();
 
+  // Clear the token cache.
+  token_clear_cache();
+
   backdrop_set_message(t('The configuration options have been saved.'));
 }
 

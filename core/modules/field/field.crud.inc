@@ -510,6 +510,7 @@ function field_create_instance($instance) {
 
   // Invoke external hooks after the cache is cleared for API consistency.
   module_invoke_all('field_create_instance', $instance);
+  token_clear_cache();
 
   return $instance;
 }
@@ -568,6 +569,7 @@ function field_update_instance($instance) {
   field_cache_clear();
 
   module_invoke_all('field_update_instance', $instance, $prior_instance);
+  token_clear_cache();
 }
 
 /**
@@ -839,6 +841,7 @@ function field_delete_instance($instance, $field_cleanup = TRUE) {
 
   // Let modules react to the deletion of the instance.
   module_invoke_all('field_delete_instance', $instance);
+  token_clear_cache();
 
   // Delete the field itself if we just deleted its last instance.
   if ($field_cleanup && count($field['bundles']) == 0) {

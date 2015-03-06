@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by Backdrop core and the System module.
