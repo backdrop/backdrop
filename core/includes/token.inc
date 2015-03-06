@@ -370,7 +370,6 @@ function token_clear_cache() {
   }
   backdrop_static_reset('token_get_info');
   backdrop_static_reset('token_get_global_token_types');
-  backdrop_static_reset('token_get_entity_mapping');
   backdrop_static_reset('token_build_tree');
   backdrop_static_reset('token_menu_link_load');
   backdrop_static_reset('token_book_link_load');
