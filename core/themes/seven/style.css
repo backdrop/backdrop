@@ -90,7 +90,11 @@ ul.menu li.expanded {
  */
 .breadcrumb {
   font-size: 0.846em;
-  padding-bottom: 5px;
+  padding: 5px 0;
+}
+.breadcrumb li a:hover{
+  text-decoration: none;
+  color: #000;
 }
 @media screen and (min-width:720px) {
   .block-system-header .name-and-slogan {
@@ -195,7 +199,10 @@ ul.primary {
 ul.primary li {
   float: left; /* LTR */
   list-style: none;
-  margin: 0 2px;
+  margin: 0;
+}
+ul.primary li a {
+  margin-right: 0;
 }
 ul.primary li a:link,
 ul.primary li a.active,
@@ -208,12 +215,12 @@ ul.primary li.active a {
   height: 2em;
   line-height: 2.6;
   padding: 0 18px 8px;
-  background-color: #a6a7a2;
-  color: #000;
-  font-weight: bold;
+  background-color: #f7f7f7;
+  color: #757575;
+  font-weight: normal;
   border-width: 1px 1px 0 1px;
   border-style: solid;
-  border-color: #a6a7a2;
+  border-color: #f7f7f7;
   -moz-border-radius: 8px 8px 0 0;
   border-radius: 8px 8px 0 0;
 }
@@ -227,10 +234,12 @@ ul.primary li.active a.active,
 ul.primary li.active a:active,
 ul.primary li.active a:visited {
   background-color: #fff;
-  border-color: #c9cac4;
+  color: #000;
+  border-color: #f7f7f7;
+  font-weight: bold;
 }
 ul.primary li a:hover {
-  color: #fff;
+  color: #000;
 }
 ul.primary li.active a:hover {
   color: #000;
@@ -294,6 +303,35 @@ ul.secondary li.active a.active {
 .layout--one-column #content .section {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
+}
+div.messages {
+  border: none;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+div.status,
+table tr.ok {
+  background-color: #eff0bf;
+}
+div.status,
+.ok {
+  color: #234600;
+}
+div.warning,
+table tr.warning {
+  background-color: #fcf1a6;
+}
+div.warning,
+.warning {
+  color: #555;
+}
+div.error,
+table tr.error {
+  background-color: #fbf1ef;
+}
+div.error,
+.error {
+  color: #ec351c;
 }
 
 /* Administration page listings. */
@@ -369,21 +407,43 @@ table {
   width: 100%;
   font-size: 0.923em;
   margin: 0 0 10px;
-  border: 1px solid #bebfb9;
+  border-collapse: separate;
 }
-td,
 th {
+  text-transform: uppercase;
+  background: #e9e8e8;
+  font-weight: bold;
+  padding: 15px 14px;
   vertical-align: middle;
-  padding: 8px 10px;
+  border: none;
+  color: #757575;
+}
+th:first-child {
+  -moz-border-radius: 4px 0 0;
+  border-radius: 4px 0 0;
+}
+th:last-child {
+  -moz-border-radius: 0 4px 0 0;
+  border-radius: 0 4px 0 0;
+}
+td {
+  vertical-align: middle;
+  padding: 20px 14px;
   border: 0;
+  color: #555;
+}
+td label{
   color: #000;
+}
+tr td:first-child {
+  border-left: 1px solid #f7f7f7;
 }
 tr.even,
 tr.odd {
   border-width: 0 1px 0 1px;
   border-style: solid;
-  border-color: #bebfb9;
-  background: #f3f4ee;
+  border-color: #f7f7f7;
+  background: #f7f7f7;
 }
 tr.odd {
   background: #fff;
@@ -393,15 +453,6 @@ tr.drag {
 }
 tr.drag-previous {
   background: #ffb;
-}
-th {
-  text-transform: uppercase;
-  background: #e1e2dc;
-  font-weight: normal;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #bebfb9;
-  padding: 3px 10px;
 }
 /**
  * Force browsers to calculate the width of a 'select all' TH element.
@@ -466,10 +517,10 @@ tr.selected td {
  * in some tables, since it's webkit only, we can use :last-child
  */
 tr td:last-child {
-  border-right: 1px solid #bebfb9; /* LTR */
+  border-right: 1px solid #f7f7f7; /* LTR */
 }
 [dir="rtl"] tr td:last-child {
-  border-left: 1px solid #bebfb9;
+  border-left: 1px solid #f7f7f7;
   border-right: none;
 }
 
@@ -662,7 +713,7 @@ a.button {
   text-align: center;
   font-weight: normal;
   font-size: 1.077em;
-  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-family: "Open Sans", "Lucida Grande", Verdana, sans-serif;
   border: 1px solid #e4e4e4;
   border-bottom: 1px solid #b4b4b4;
   border-left-color: #d2d2d2;
@@ -847,7 +898,7 @@ div.admin-options {
 }
 div.admin-options label {
   text-transform: uppercase;
-  font: 0.846em/1.875em Lucida Grande, Lucida Sans Unicode, sans-serif;
+  font: 0.846em/1.875em "Open Sans", Lucida Grande, Lucida Sans Unicode, sans-serif;
 }
 div.admin-options label,
 div.admin-options div.form-item {
@@ -1089,6 +1140,9 @@ div.add-or-remove-shortcuts {
 }
 .dropbutton-multiple.open .dropbutton-content li:first-child > * {
   text-overflow: clip;
+}
+.dropbutton-action > * {
+  text-transform: uppercase;
 }
 
 .js .form-actions .dropbutton-widget:focus,
