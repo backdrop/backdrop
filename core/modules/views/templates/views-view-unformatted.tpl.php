@@ -16,7 +16,7 @@
   <h3><?php print $title; ?></h3>
 <?php endif; ?>
 <?php foreach ($rows as $row_count => $row): ?>
-  <div <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) . '"';  } ?>>
+  <div <?php if (!empty($row_classes[$row_count])) { print 'class="' . implode(' ', $row_classes[$row_count]) . '"';  } ?>>
     <?php print $row; ?>
   </div>
 <?php endforeach; ?>

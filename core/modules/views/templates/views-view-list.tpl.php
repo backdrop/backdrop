@@ -14,7 +14,7 @@
   <?php endif; ?>
   <?php print $list_type_prefix; ?>
     <?php foreach ($rows as $id => $row): ?>
-      <li class="<?php print implode(' ', $row_classes[$id]); ?>"><?php print $row; ?></li>
+      <li class="<?php if (!empty($row_classes[$id])) { print implode(' ', $row_classes[$id]); } ?>"><?php print $row; ?></li>
     <?php endforeach; ?>
   <?php print $list_type_suffix; ?>
 <?php print $wrapper_suffix; ?>
