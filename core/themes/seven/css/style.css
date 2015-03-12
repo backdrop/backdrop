@@ -129,9 +129,32 @@ ul.menu li.expanded {
  * Header contents.
  */
 .breadcrumb {
-  font-size: 0.846em;
+  font-size: .75em;
   padding-bottom: 5px;
 }
+.breadcrumb li,
+.breadcrumb li a {
+  vertical-align: middle;
+}
+.breadcrumb li:after {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  padding: 0 3px;
+  background: url(../images/angle-right--gray.png) no-repeat center center;
+  /* SVG hack */
+  background-image:
+    linear-gradient(transparent, transparent),
+    url(../images/angle-right--gray.svg);
+  background-size: auto 100%;
+}
+
+.breadcrumb li.last:after {
+  display: none;
+}
+
 @media screen and (min-width:720px) {
   .block-system-header .name-and-slogan {
     float: left; /* LTR */
