@@ -997,3 +997,20 @@ function token_taxonomy_term_load_all_parents($tid) {
 
   return $cache[$tid];
 }
+
+/**
+ * Return the module responsible for a token.
+ *
+ * @param string $type
+ *   The token type.
+ * @param string $name
+ *   The token name.
+ *
+ * @return mixed
+ *   The value of $info['tokens'][$type][$name]['module'] from token_get_info(),
+ *   or NULL if the value does not exist.
+ */
+function _token_module($type, $name) {
+  $token_info = token_get_info($type, $name);
+  return isset($token_info['module']) ? $token_info['module'] : NULL;
+}
