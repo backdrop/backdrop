@@ -574,6 +574,7 @@ function system_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
   $items['admin'] = array(
     'title' => 'Administration',
     'access arguments' => array('access administration pages'),
@@ -701,7 +702,6 @@ function system_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
-
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
     'description' => 'Administration tools.',
@@ -997,6 +997,30 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
+
+  // Token paths.
+  $items['token/autocomplete/%token_type'] = array(
+    'page callback' => 'system_autocomplete_token',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+  );
+  /*$items['token/autocomplete/%token_type/%menu_tail'] = array(
+    'page callback' => 'system_autocomplete_token',
+    'page arguments' => array(2, 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+  );*/
+  $items['token/tree'] = array(
+    'page callback' => 'system_token_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
   return $items;
 }
 
