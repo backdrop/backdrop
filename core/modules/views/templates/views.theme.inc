@@ -815,6 +815,7 @@ function template_preprocess_views_view_unformatted(&$variables) {
   $max = count($rows);
   foreach ($rows as $id => $row) {
     $count++;
+    $variables['row_classes'][$id] = array();
     if ($default_row_class) {
       $variables['row_classes'][$id][] = 'views-row';
       $variables['row_classes'][$id][] = 'views-row-' . $count;
