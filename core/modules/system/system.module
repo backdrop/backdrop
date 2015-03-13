@@ -52,6 +52,11 @@ define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 define('EMAIL_MAX_LENGTH', 254);
 
 /**
+ * The maximum depth for token tree recursion.
+ */
+define('TOKEN_MAX_DEPTH', 9);
+
+/**
  * Implements hook_theme().
  */
 function system_theme() {
@@ -100,6 +105,37 @@ function system_theme() {
       'template' => 'templates/block--system--main',
       //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
+    ) + $base,
+    'tree_table' => array(
+      'variables' => array(
+        'header' => array(),
+        'rows' => array(),
+        'attributes' => array(),
+        'empty' => '',
+        'caption' => '',
+      ),
+    ) + $base,
+    'token_tree' => array(
+      'variables' => array(
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => FALSE,
+      ),
+    ) + $base,
+    'token_tree_link' => array(
+      'variables' => array(
+        'text' => NULL,
+        'options' => array(),
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => TRUE,
+      ),
     ) + $base,
   ));
 }
