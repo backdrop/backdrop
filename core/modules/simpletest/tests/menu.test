@@ -161,7 +161,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testThemeCallbackAdministrative() {
     $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The administrative theme can be correctly set in a theme callback.');
-    $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page.");
+    $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
   }
 
   /**
@@ -170,7 +170,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   function testThemeCallbackInheritance() {
     $this->backdropGet('menu-test/theme-callback/use-admin-theme/inheritance');
     $this->assertText('Custom theme: seven. Actual theme: seven. Theme callback inheritance is being tested.', 'Theme callback inheritance correctly uses the administrative theme.');
-    $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page.");
+    $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
   }
 
   /**
@@ -209,7 +209,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropLogin($admin_user);
     $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The theme callback system is correctly triggered for an administrator when the site is in maintenance mode.');
-    $this->assertRaw('seven/style.css', "The administrative theme's CSS appears on the page.");
+    $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
 
     config_set('system.core', 'maintenance_enabled', 0);
   }
@@ -312,7 +312,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // hook_custom_theme().
     $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The result of hook_custom_theme() does not override what was set in a theme callback.');
-    $this->assertRaw('seven/style.css', "The Seven theme's CSS appears on the page.");
+    $this->assertRaw('seven/css/style.css', "The Seven theme's CSS appears on the page.");
   }
 
   /**

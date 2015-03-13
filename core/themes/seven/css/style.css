@@ -37,12 +37,12 @@ ul.menu li {
 }
 .item-list ul li.collapsed,
 ul.menu li.collapsed {
-  list-style-image: url(../../misc/menu-collapsed.png);
+  list-style-image: url(../../../misc/menu-collapsed.png);
   list-style-type: disc;
 }
 .item-list ul li.expanded,
 ul.menu li.expanded {
-  list-style-image: url(../../misc/menu-expanded.png);
+  list-style-image: url(../../../misc/menu-expanded.png);
   list-style-type: circle;
 }
 
@@ -304,14 +304,14 @@ ul.admin-list li {
   border-top: 1px solid #ccc;
   margin-left: 0; /* LTR */
   margin-bottom: 10px;
-  background: url(images/list-item.png) no-repeat 0 11px; /* LTR */
+  background: url(../images/list-item.png) no-repeat 0 11px; /* LTR */
   list-style-type: none;
   list-style-image: none;
 }
 [dir="rtl"] ul.admin-list li {
   padding: 9px 30px 0 0;
   margin-right: 0;
-  background: url(images/list-item-rtl.png) no-repeat right 11px;
+  background: url(../images/list-item-rtl.png) no-repeat right 11px;
 }
 .admin-panel .item-list ul,
 ul.admin-list {
@@ -667,7 +667,7 @@ a.button {
   border-bottom: 1px solid #b4b4b4;
   border-left-color: #d2d2d2;
   border-right-color: #d2d2d2;
-  background: url(images/buttons.png) 0 0 repeat-x;
+  background: url(../images/buttons.png) 0 0 repeat-x;
   -moz-border-radius: 20px;
   border-radius: 20px;
 }
@@ -689,7 +689,7 @@ a.button:active {
   border-left-color: #8eB7cd;
   border-right-color: #8eB7cd;
   border-bottom-color: #7691a2;
-  background: url(images/buttons.png) 0 -40px repeat-x;
+  background: url(../images/buttons.png) 0 -40px repeat-x;
   color: #133B54;
 }
 input.form-submit:active,
@@ -761,7 +761,7 @@ ul.action-links li {
 }
 ul.action-links a {
   padding-left: 15px; /* LTR */
-  background: transparent url(images/add.png) no-repeat 0 center;
+  background: transparent url(../images/add.png) no-repeat 0 center;
   line-height: 30px;
 }
 [dir="rtl"] ul.action-links a {
@@ -1009,11 +1009,11 @@ ol.task-list li.active:after {
   border-right-color: #E8E6E5;
 }
 ol.task-list li.done {
-  background: transparent url(images/task-check.png) no-repeat 0 50%;
+  background: transparent url(../images/task-check.png) no-repeat 0 50%;
   color: green;
 }
 [dir="rtl"] ol.task-list li.done {
-  background: transparent url(images/task-check.png) no-repeat right 50%;
+  background: transparent url(../images/task-check.png) no-repeat right 50%;
 }
 
 .step-indicator {

@@ -96,7 +96,7 @@ function seven_tablesort_indicator($variables) {
 function seven_css_alter(&$css) {
   // Use Seven's vertical tabs style instead of the default one.
   if (isset($css['core/misc/vertical-tabs.css'])) {
-    $css['core/misc/vertical-tabs.css']['data'] = backdrop_get_path('theme', 'seven') . '/vertical-tabs.css';
+    $css['core/misc/vertical-tabs.css']['data'] = backdrop_get_path('theme', 'seven') . '/css/vertical-tabs.css';
     $css['core/misc/vertical-tabs.css']['type'] = 'file';
   }
   // Use Seven's jQuery UI theme style instead of the default one.
