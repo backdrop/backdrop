@@ -1726,8 +1726,39 @@ function system_library_info() {
     ),
   );
 
+  // Tokens.
+  $libraries['token'] = array(
+    'title' => 'Token behaviors',
+    'version' => '1.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.treetable'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['jquery.treetable'] = array(
+    'title' => 'jQuery treetable',
+    'website' => 'http://plugins.jquery.com/project/treetable',
+    'version' => '3.2.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+    ),
+  );
+
   return $libraries;
 }
+
 
 /**
  * Implements hook_stream_wrappers().
