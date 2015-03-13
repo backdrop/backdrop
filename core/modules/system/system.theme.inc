@@ -518,6 +518,43 @@ function theme_token_tree_link($variables) {
 }
 
 /**
+ * Page callback to output a token tree as an empty page.
+ */
+function token_page_output_tree() {
+  $options = isset($_GET['options']) ? backdrop_json_decode($_GET['options']) : array();
+
+  // Check the token against the serialized options to prevent random access to
+  // the token browser page.
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'token-tree:' . serialize($options))) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  // Return as a renderable so the Backdrop dialog system can use the title.
+  $tree = '<div>' . theme('token_tree', $options) . '</div>';
+  if (backdrop_is_ajax()) {
+    $dialog_options = array(
+      'dialogClass' => 'token-dialog',
+      'modal' => FALSE,
+      'draggable' => TRUE,
+      'resizeable' => TRUE,
+      'autoResize' => FALSE,
+      'width' => '50%',
+      'height' => '600',
+    );
+    $commands = array();
+    $commands[] = ajax_command_open_dialog('#token-dialog', t('Available tokens'), $tree, $dialog_options);
+    $return = array(
+      '#type' => 'ajax',
+      '#commands' => $commands,
+    );
+    return $return;
+  }
+  else {
+    return $tree;
+  }
+}
+
+/**
  * Theme a tree table.
  *
  * @ingroup themeable
