@@ -267,3 +267,11 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
   return $replacements;
 }
+
+/**
+ * Implements hook_token_info_alter().
+ */
+function system_token_info_alter(&$info) {
+  // Prevent deprecated tokens from being listed.
+  unset($info['tokens']['site']['url-brief']);
+}
