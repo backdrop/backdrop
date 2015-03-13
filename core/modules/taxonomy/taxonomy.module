@@ -67,6 +67,7 @@ function taxonomy_entity_info() {
         'id' => 'tid',
         'bundle' => 'vocabulary',
       ),
+      'token type' => 'term',
       'bundle keys' => array(
         'bundle' => 'machine_name',
       ),
