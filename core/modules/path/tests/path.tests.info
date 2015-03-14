@@ -27,3 +27,39 @@ name = Paths on non-English monolingual sites
 description = Confirm that paths are not changed on monolingual non-English sites
 group = Path
 file = path.test
+
+[PathautoUnitTestCase]
+name = 'Pathauto unit tests'
+description = 'Unit tests for Pathauto functions.'
+group = 'Pathauto'
+file=pathauto.test
+dependencies[] = token
+
+[PathautoFunctionalTestCase]
+name = 'Pathauto basic tests'
+description = 'Test basic pathauto functionality'
+group = 'Pathauto'
+file=pathauto.test
+dependencies[] = token
+
+[PathautoLocaleTestCase]
+name = 'Pathauto localization tests'
+description = 'Test pathauto functionality with localization and translation.'
+group = 'Pathauto'
+file=pathauto.test
+dependencies[] = token
+
+[PathautoBulkUpdateTestCase]
+name = 'Pathauto bulk updating'
+description = 'Tests bulk updating of URL aliases.'
+group = 'Pathauto'
+file=pathauto.test
+dependencies[] = token
+
+[PathautoTokenTestCase]
+name = 'Pathauto tokens'
+description = 'Tests tokens provided by Pathauto.'
+group = 'Pathauto'
+file=pathauto.test
+dependencies[] = token
+

@@ -15,6 +15,14 @@ function path_permission() {
     'create url aliases' => array(
       'title' => t('Create and edit URL aliases'),
     ),
+    'administer pathauto' => array(
+      'title' => t('Administer pathauto'),
+      'description' => t('Allows a user to configure patterns for automated aliases and bulk delete URL-aliases.'),
+    ),
+    'notify of path changes' => array(
+      'title' => t('Notify of Path Changes'),
+      'description' => t('Determines whether or not users are notified.'),
+    )
   );
 }
 
@@ -54,6 +62,51 @@ function path_menu() {
     'page callback' => 'path_admin_edit',
     'access arguments' => array('administer url aliases'),
     'type' => MENU_LOCAL_ACTION,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/search/path/patterns'] = array(
+    'title' => 'Patterns',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_patterns_form'),
+    'access arguments' => array('administer pathauto'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/search/path/patterns/list'] = array(
+    'title' => 'Pattern List',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_patterns_form'),
+    'access arguments' => array('administer pathauto'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/search/path/patterns/settings'] = array(
+    'title' => 'Pattern Settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_settings_form'),
+    'access arguments' => array('administer pathauto'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/search/path/bulk-update'] = array(
+    'title' => 'Bulk generate',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_bulk_update_form'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 30,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/search/path/delete_bulk'] = array(
+    'title' => 'Delete aliases',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_admin_delete'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 40,
     'file' => 'path.admin.inc',
   );
 
@@ -111,6 +164,11 @@ function path_form_node_form_alter(&$form, $form_state) {
   $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
   $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
   $form['path']['langcode'] = array('#type' => 'value', '#value' => $path['langcode']);
+
+  // adding this for BACKDROP_MOVE_TO_CORE
+  $node = $form_state['node'];
+  $langcode = path_entity_langcode('node', $node);
+  path_field_attach_form('node', $node, $form, $form_state, $langcode);
 }
 
 /**
@@ -165,6 +223,9 @@ function path_node_insert(Node $node) {
       path_save($path);
     }
   }
+  // @todo Remove the next line when http://drupal.org/node/1025870 is fixed.
+  unset($node->uri);
+  path_node_update_alias($node, 'insert');
 }
 
 /**
@@ -186,6 +247,7 @@ function path_node_update(Node $node) {
       path_save($path);
     }
   }
+  path_node_update_alias($node, 'update');
 }
 
 /**
@@ -229,6 +291,10 @@ function path_form_taxonomy_form_term_alter(&$form, $form_state) {
     $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
     $form['path']['langcode'] = array('#type' => 'value', '#value' => $path['langcode']);
   }
+  // BACKDROP_MOVE_TO_CORE
+  $term = $form_state['term'];
+  $langcode = path_entity_langcode('taxonomy_term', $term);
+  path_field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
 }
 
 /**
@@ -246,6 +312,7 @@ function path_taxonomy_term_insert(TaxonomyTerm $term) {
       path_save($path);
     }
   }
+  path_taxonomy_term_update_alias($term, 'insert');
 }
 
 /**
@@ -267,6 +334,7 @@ function path_taxonomy_term_update(TaxonomyTerm $term) {
       path_save($path);
     }
   }
+  path_taxonomy_term_update_alias($term, 'update', array('alias children' => TRUE));
 }
 
 /**
@@ -275,4 +343,768 @@ function path_taxonomy_term_update(TaxonomyTerm $term) {
 function path_taxonomy_term_delete(TaxonomyTerm $term) {
   // Delete all aliases associated with this term.
   path_delete(array('source' => 'taxonomy/term/' . $term->tid));
+  // moved for BACKDROP_MOVE_TO_CORE
+  path_entity_path_delete_all('taxonomy_term', $term, "taxonomy/term/{$term->tid}");
 }
+
+
+/**
+ * Moving pathauto fuctionality form pathauto.module
+ * to path.module
+ */
+/**
+ * @defgroup pathauto Pathauto: Automatically generates aliases for content
+ *
+ * The Pathauto module automatically generates path aliases for various kinds of
+ * content (nodes, categories, users) without requiring the user to manually
+ * specify the path alias. This allows you to get aliases like
+ * /category/my-node-title.html instead of /node/123. The aliases are based upon
+ * a "pattern" system which the administrator can control.
+ */
+
+/**
+ * @file
+ * Main file for the Pathauto module, which automatically generates aliases for content.
+ *
+ * @ingroup pathauto
+ */
+
+/**
+ * The default ignore word list.
+ */
+define('PATH_IGNORE_WORDS', 'a, an, as, at, before, but, by, for, from, is, in, into, like, of, off, on, onto, per, since, than, the, this, that, to, up, via, with');
+
+/**
+ * Implements hook_hook_info().
+ */
+function path_hook_info() {
+  $hooks = array(
+    'path',
+    'path_alias_types',
+    'path_pattern_alter',
+    'path_alias_alter',
+    'path_is_alias_reserved',
+  );
+  return array_fill_keys($hooks, array('group' => 'path'));
+}
+
+/**
+ * Load an URL alias pattern by entity, bundle, and language.
+ *
+ * @param $entity
+ *   An entity (e.g. node, taxonomy, user, etc.)
+ * @param $bundle
+ *   A bundle (e.g. content type, vocabulary ID, etc.)
+ * @param $langcode
+ *   A language code, defaults to the LANGUAGE_NONE constant.
+ */
+function path_pattern_load_by_entity($entity, $bundle = '', $langcode = LANGUAGE_NONE) {
+  $config = config('path.settings');
+  $patterns = &backdrop_static(__FUNCTION__, array());
+
+  $pattern_id = "$entity:$bundle:$langcode";
+
+  if (!isset($patterns[$pattern_id])) {
+    $variables = array();
+    if ($langcode != LANGUAGE_NONE) {
+      $variables[] = "{$entity}_{$bundle}_{$langcode}_pattern";
+    }
+    if ($bundle) {
+      $variables[] = "{$entity}_{$bundle}_pattern";
+    }
+    $variables[] = "{$entity}_pattern";
+
+    foreach ($variables as $variable) {
+      if ($pattern = trim($config->get($variable))) {
+        break;
+      }
+    }
+
+    $patterns[$pattern_id] = $pattern;
+  }
+
+  return $patterns[$pattern_id];
+}
+
+/**
+ * Delete multiple URL aliases.
+ *
+ * Intent of this is to abstract a potential path_delete_multiple() function
+ * for Backdrop.
+ *
+ * @param $pids
+ *   An array of path IDs to delete.
+ */
+function path_path_delete_multiple($pids) {
+  foreach ($pids as $pid) {
+    path_delete(array('pid' => $pid));
+  }
+}
+
+/**
+ * Delete an URL alias and any of its sub-paths.
+ *
+ * Given a source like 'node/1' this function will delete any alias that have
+ * that specific source or any sources that match 'node/1/%'.
+ *
+ * @param $source
+ *   An string with a source URL path.
+ */
+function path_path_delete_all($source) {
+  $sql = "SELECT pid FROM {url_alias} WHERE source = :source OR source LIKE :source_wildcard";
+  $pids = db_query($sql, array(':source' => $source, ':source_wildcard' => $source . '/%'))->fetchCol();
+  if ($pids) {
+    path_path_delete_multiple($pids);
+  }
+}
+
+/**
+ * Delete an entity URL alias and any of its sub-paths.
+ *
+ * This function also checks to see if the default entity URI is different from
+ * the current entity URI and will delete any of the default aliases.
+ *
+ * @param $entity_type
+ *   A string with the entity type.
+ * @param $entity
+ *   An entity object.
+ * @param $default_uri
+ *   The optional default uri path for the entity.
+ */
+function path_entity_path_delete_all($entity_type, $entity, $default_uri = NULL) {
+  $uri = entity_uri($entity_type, $entity);
+  path_path_delete_all($uri['path']);
+  if (isset($default_uri) && $uri['path'] != $default_uri) {
+    path_path_delete_all($default_uri);
+  }
+}
+
+/**
+ * Implements hook_field_attach_rename_bundle().
+ *
+ * Respond to machine name changes for pattern variables.
+ */
+function path_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
+  $config = config('path.settings');
+  $variables = db_select('variable', 'v')
+    ->fields('v', array('name'))
+    ->condition('name', db_like("pathauto_{$entity_type}_{$bundle_old}_") . '%', 'LIKE')
+    ->execute()
+    ->fetchCol();
+  foreach ($variables as $variable) {
+    $value = $config->get($variable);
+    $config->clear($variable);
+    $variable = strtr($variable, array("{$entity_type}_{$bundle_old}" => "{$entity_type}_{$bundle_new}"));
+    $config->set($variable, $value);
+  }
+  $config->save();
+}
+
+/**
+ * Implements hook_field_attach_delete_bundle().
+ *
+ * Respond to sub-types being deleted, their patterns can be removed.
+ */
+function path_field_attach_delete_bundle($entity_type, $bundle) {
+  $config = config('path.settings');
+  $variables = db_select('variable', 'v')
+    ->fields('v', array('name'))
+    ->condition('name', db_like("pathauto_{$entity_type}_{$bundle}_") . '%', 'LIKE')
+    ->execute()
+    ->fetchCol();
+  foreach ($variables as $variable) {
+    $config->clear($variable);
+  }
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add the automatic alias form elements to an existing path form fieldset.
+ */
+function path_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if (!isset($form['path'])) {
+    // This entity must be supported by core's path.module first.
+    // @todo Investigate removing this and supporting all fieldable entities.
+    return;
+  }
+  else {
+    // Taxonomy terms do not have an actual fieldset for path settings.
+    // Merge in the defaults.
+    $form['path'] += array(
+      '#type' => 'fieldset',
+      '#title' => t('URL path settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($form['path']['alias']),
+      '#group' => 'additional_settings',
+      '#attributes' => array(
+        'class' => array('path-form'),
+      ),
+      '#access' => user_access('create url aliases') || user_access('administer url aliases'),
+      '#weight' => 30,
+      '#tree' => TRUE,
+      '#element_validate' => array('path_form_element_validate'),
+    );
+  }
+
+  $pattern = path_pattern_load_by_entity($entity_type, $bundle, $langcode);
+  if (empty($pattern)) {
+    return;
+  }
+
+  if (!isset($entity->path['path'])) {
+    if (!empty($id)) {
+      module_load_include('inc', 'path');
+      $uri = $entity->uri();
+      $pathauto_alias = path_create_alias($entity_type, 'return', $uri['path'], array($entity_type => $entity), $bundle, $langcode);
+      if ($pathauto_alias === FALSE) {
+        // If Pathauto is not going to be able to generate an alias, then we
+        // should not bother to show the checkbox since it wouldn't do anything.
+        // Note that if a pattern does apply, but all the tokens currently
+        // evaluate to empty strings, then $pathauto_alias would equal null and
+        // not false.
+        return;
+      }
+      else {
+        $path = backdrop_get_path_alias($uri['path'], $langcode);
+        $entity->path['path'] = ($path != $uri['path'] && $path == $pathauto_alias);
+      }
+    }
+    else {
+      $entity->path['path'] = TRUE;
+    }
+  }
+
+  // Add JavaScript that will disable the path textfield when the automatic
+  // alias checkbox is checked.
+  $form['path']['alias']['#states']['!enabled']['input[name="path[pathauto]"]'] = array('checked' => TRUE);
+
+  // Override path.module's vertical tabs summary.
+  $form['path']['#attached']['js'] = array(
+    'vertical-tabs' => backdrop_get_path('module', 'path') . '/js/path.js'
+  );
+
+  $form['path']['pathauto'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Generate automatic URL alias'),
+    '#default_value' => $entity->path['path'],
+    '#description' => t('Uncheck this to create a custom alias below.'),
+    '#weight' => -1,
+  );
+
+  // Add a shortcut link to configure URL alias patterns.
+  if (backdrop_valid_path('admin/config/search/path/patterns')) {
+    $form['path']['pathauto']['#description'] .= ' ' . l(t('Configure URL alias patterns.'), 'admin/config/search/path/patterns');
+  }
+
+  if ($entity->path['path'] && !empty($entity->old_alias) && empty($entity->path['alias'])) {
+    $form['path']['alias']['#default_value'] = $entity->old_alias;
+    $entity->path['alias'] = $entity->old_alias;
+  }
+
+  // For Pathauto to remember the old alias and prevent the Path module from
+  // deleting it when Pathauto wants to preserve it.
+  if (!empty($entity->path['alias'])) {
+    $form['path']['old_alias'] = array(
+      '#type' => 'value',
+      '#value' => $entity->path['alias'],
+    );
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function path_entity_presave($entity, $type) {
+  // About to be saved (before insert/update)
+  if (!empty($entity->path['path']) && isset($entity->path['old_alias'])
+    && $entity->path['alias'] == '' && $entity->path['old_alias'] != '') {
+    /**
+     * There was an old alias, but when pathauto_perform_alias was checked
+     * the javascript disabled the textbox which led to an empty value being
+     * submitted. Restoring the old path-value here prevents the Path module
+     * from deleting any old alias before Pathauto gets control.
+     */
+    $entity->path['alias'] = $entity->path['old_alias'];
+  }
+
+  // Help prevent errors with progromatically creating entities by defining
+  // path['alias'] as an empty string.
+  // @see http://drupal.org/node/1328180
+  // @see http://drupal.org/node/1576552
+  if (isset($entity->path['path']) && !isset($entity->path['alias'])) {
+    $entity->path['alias'] = '';
+  }
+}
+
+/**
+ * Implements hook_action_info().
+ */
+function path_action_info() {
+  $info['path_node_update_action'] = array(
+    'type' => 'node',
+    'label' => t('Update node alias'),
+  );
+  $info['path_taxonomy_term_update_action'] = array(
+    'type' => 'taxonomy_term',
+    'label' => t('Update taxonomy term alias'),
+  );
+  $info['path_user_update_action'] = array(
+    'type' => 'user',
+    'label' => t('Update user alias'),
+  );
+
+  return $info;
+}
+
+/**
+ * Returns the language code of the given entity.
+ *
+ * @param string $entity_type
+ *   An entity type.
+ * @param object $entity
+ *   An entity object.
+ */
+function path_entity_langcode($entity_type, $entity) {
+  $langcode = LANGUAGE_NONE;
+  if (!empty($entity->langcode)) {
+    $langcode = $entity->langcode;
+  }
+  return $langcode;
+}
+
+function path_is_alias_reserved($alias, $source, $langcode = LANGUAGE_NONE) {
+  foreach (module_implements('path_is_alias_reserved') as $module) {
+    $result = module_invoke($module, 'path_is_alias_reserved', $alias, $source, $langcode);
+    if (!empty($result)) {
+      // As soon as the first module says that an alias is in fact reserved,
+      // then there is no point in checking the rest of the modules.
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_path_is_alias_reserved() on behalf of path.module.
+ *  BACKDROP_MOVE_TO_CORE don't need this?
+*/
+/*function path_path_is_alias_reserved($alias, $source, $langcode) {
+  return (bool) db_query_range("SELECT pid FROM {url_alias} WHERE source <> :source AND alias = :alias AND langcode IN (:language, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(
+    ':source' => $source,
+    ':alias' => $alias,
+    ':language' => $langcode,
+    ':language_none' => LANGUAGE_NONE,
+  ))->fetchField();
+}*/
+
+/**
+ * Implements hook_path_is_alias_reserved().
+ */
+function path_path_is_alias_reserved($alias, $source, $langcode) {
+  module_load_include('inc', 'path');
+  return _path_path_is_callback($alias);
+}
+
+if (!function_exists('path_field_extra_fields')) {
+  /**
+   * Implements hook_field_extra_fields() on behalf of path.module.
+   *
+   * Add support for the 'URL path settings' to be re-ordered by the user on the
+   * 'Manage Fields' tab of content types and vocabularies.
+   */
+  function path_field_extra_fields() {
+    $info = array();
+
+    foreach (node_type_get_types() as $node_type) {
+      if (!isset($info['node'][$node_type->type]['form']['path'])) {
+        $info['node'][$node_type->type]['form']['path'] = array(
+          'label' => t('URL path settings'),
+          'description' => t('Path module form elements'),
+          'weight' => 30,
+        );
+      }
+    }
+
+    if (module_exists('taxonomy')) {
+      $vocabularies = taxonomy_get_vocabularies();
+      foreach ($vocabularies as $vocabulary) {
+        if (!isset($info['taxonomy_term'][$vocabulary->machine_name]['form']['path'])) {
+          $info['taxonomy_term'][$vocabulary->machine_name]['form']['path'] = array(
+            'label' => t('URL path settings'),
+            'description' => t('Path module form elements'),
+            'weight' => 30,
+          );
+        }
+      }
+    }
+
+    return $info;
+  }
+}
+
+/**
+ * @name pathauto_node Pathauto integration for the core node module.
+ * @{
+ */
+
+/**
+ * Implements hook_node_insert().
+ * BACKDROP_MOVE_TO_CORE moved this to the body of the already defined
+ * path_node_insert  ... is that the right thing to do?
+ */
+/*function path_node_insert($node) {
+  // @todo Remove the next line when http://drupal.org/node/1025870 is fixed.
+  unset($node->uri);
+  path_node_update_alias($node, 'insert');
+}*/
+
+/**
+ * Implements hook_node_update().
+ * BACKDROP_MOVE_TO_CORE moved this to the body of the already defined
+ * path_node_update ... is that the right thing to do?
+ */
+/*function path_node_update($node) {
+  path_node_update_alias($node, 'update');
+}*/
+
+/**
+ * Implements hook_node_delete().
+ */
+function pathauto_node_delete($node) {
+  path_entity_path_delete_all('node', $node, "node/{$node->nid}");
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ *
+ * Add the Pathauto settings to the node form.
+ * BACKDROP_MOVE_TO_CORE moved this to the already defined path_form_node_form_alter
+ * ... is that the right thing to do?
+ */
+/*function path_form_node_form_alter(&$form, &$form_state) {
+  $node = $form_state['node'];
+  $langcode = path_entity_langcode('node', $node);
+  path_field_attach_form('node', $node, $form, $form_state, $langcode);
+}*/
+
+/**
+ * Implements hook_node_operations().
+ */
+function path_node_operations() {
+  $operations['pathauto_update_alias'] = array(
+    'label' => t('Update URL alias'),
+    'callback' => 'path_node_update_alias_multiple',
+    'callback arguments' => array('bulkupdate', array('message' => TRUE)),
+  );
+  return $operations;
+}
+
+/**
+ * Update the URL aliases for an individual node.
+ *
+ * @param $node
+ *   A node object.
+ * @param $op
+ *   Operation being performed on the node ('insert', 'update' or 'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_node_update_alias(Node $node, $op, array $options = array()) {
+  // Skip processing if the user has disabled pathauto for the node.
+  if (isset($node->path['path']) && empty($node->path['path']) && empty($options['force'])) {
+    return FALSE;
+  }
+
+  $options += array('langcode' => path_entity_langcode('node', $node));
+
+  // Skip processing if the node has no pattern.
+  if (!path_pattern_load_by_entity('node', $node->type, $options['langcode'])) {
+    return FALSE;
+  }
+
+  module_load_include('inc', 'path');
+  $uri = $node->uri();
+  return path_create_alias('node', $op, $uri['path'], array('node' => $node), $node->type, $options['langcode']);
+}
+
+/**
+ * Update the URL aliases for multiple nodes.
+ *
+ * @param $nids
+ *   An array of node IDs.
+ * @param $op
+ *   Operation being performed on the nodes ('insert', 'update' or
+ *   'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_node_update_alias_multiple(array $nids, $op, array $options = array()) {
+  $options += array('message' => FALSE);
+
+  $nodes = node_load_multiple($nids);
+  foreach ($nodes as $node) {
+    path_node_update_alias($node, $op, $options);
+  }
+
+  if (!empty($options['message'])) {
+    backdrop_set_message(format_plural(count($nids), 'Updated URL alias for 1 node.', 'Updated URL aliases for @count nodes.'));
+  }
+}
+
+/**
+ * Update action wrapper for path_node_update_alias().
+ */
+function path_node_update_action($node, $context = array()) {
+  path_node_update_alias($node, 'bulkupdate', array('message' => TRUE));
+}
+
+/**
+ * @} End of "name pathauto_node".
+ */
+
+/**
+ * @name pathauto_taxonomy Pathauto integration for the core taxonomy module.
+ * @{
+ */
+
+/**
+ * Implements hook_taxonomy_term_insert().
+ * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_insert
+ * ... is that the right thing to do?
+ */
+/*function path_taxonomy_term_insert($term) {
+  path_taxonomy_term_update_alias($term, 'insert');
+}*/
+
+/**
+ * Implements hook_taxonomy_term_update().
+ * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_update
+ * ... is that the right thing to do?
+ */
+/*function path_taxonomy_term_update($term) {
+  path_taxonomy_term_update_alias($term, 'update', array('alias children' => TRUE));
+}*/
+
+/**
+ * Implements hook_taxonomy_term_delete().
+ * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_delete
+ * ... is that the right thing to do?
+ */
+/*function path_taxonomy_term_delete($term) {
+  path_entity_path_delete_all('taxonomy_term', $term, "taxonomy/term/{$term->tid}");
+}*/
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add the Pathauto settings to the taxonomy term form.
+ * BACKDROP_MOVE_TO_CORE moved this to the already defined path_form_taxonomy_form_term_alter
+ * ... is that the right thing to do?
+ */
+/*function path_form_taxonomy_form_term_alter(&$form, $form_state) {
+  $term = $form_state['term'];
+  $langcode = path_entity_langcode('taxonomy_term', $term);
+  path_field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
+}*/
+
+/**
+ * Update the URL aliases for an individual taxonomy term.
+ *
+ * @param $term
+ *   A taxonomy term object.
+ * @param $op
+ *   Operation being performed on the term ('insert', 'update' or 'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_taxonomy_term_update_alias($term, $op, array $options = array()) {
+  // Skip processing if the user has disabled pathauto for the term.
+  if (isset($term->path['path']) && empty($term->path['path']) && empty($options['force'])) {
+    return FALSE;
+  }
+
+  $module = 'taxonomy_term';
+  $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
+  if (isset($vocabulary->module)) {
+    $module = $vocabulary->module;
+  }
+
+  $options += array(
+    'alias children' => FALSE,
+    'langcode' => path_entity_langcode('taxonomy_term', $term),
+  );
+
+  // Skip processing if the term has no pattern.
+  if (!path_pattern_load_by_entity($module, $term->vocabulary)) {
+    return FALSE;
+  }
+
+  module_load_include('inc', 'path');
+  $uri = $term->uri();
+  $result = path_create_alias($module, $op, $uri['path'], array('term' => $term), $term->vocabulary, $options['langcode']);
+
+  if (!empty($options['alias children'])) {
+    // For all children generate new aliases.
+    $options['alias children'] = FALSE;
+    unset($options['langcode']);
+    foreach (taxonomy_get_tree($term->vocabulary, $term->tid) as $subterm) {
+      path_taxonomy_term_update_alias($subterm, $op, $options);
+    }
+  }
+
+  return $result;
+}
+
+/**
+ * Update the URL aliases for multiple taxonomy terms.
+ *
+ * @param $tids
+ *   An array of term IDs.
+ * @param $op
+ *   Operation being performed on the nodes ('insert', 'update' or
+ *   'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_taxonomy_term_update_alias_multiple(array $tids, $op, array $options = array()) {
+  $options += array('message' => FALSE);
+
+  $terms = taxonomy_term_load_multiple($tids);
+  foreach ($terms as $term) {
+    path_taxonomy_term_update_alias($term, $op, $options);
+  }
+
+  if (!empty($options['message'])) {
+    backdrop_set_message(format_plural(count($tids), 'Updated URL alias for 1 term.', 'Updated URL aliases for @count terms.'));
+  }
+}
+
+/**
+ * Update action wrapper for path_taxonomy_term_update_alias().
+ */
+function path_taxonomy_term_update_action($term, $context = array()) {
+  path_taxonomy_term_update_alias($term, 'bulkupdate', array('message' => TRUE));
+}
+
+/**
+ * @} End of "name pathauto_taxonomy".
+ */
+
+/**
+ * @name pathauto_user Pathauto integration for the core user module.
+ * @{
+ */
+
+/**
+ * Implements hook_user_insert().
+ */
+function path_user_insert($account) {
+  path_user_update_alias($account, 'insert');
+}
+
+/**
+ * Implements hook_user_update().
+ */
+function path_user_update($account) {
+  path_user_update_alias($account, 'update');
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function path_user_delete($account) {
+  path_entity_path_delete_all('user', $account, "user/{$account->uid}");
+}
+
+/**
+ * Implements hook_user_operations().
+ */
+function path_user_operations() {
+  $operations['pathauto_update_alias'] = array(
+    'label' => t('Update URL alias'),
+    'callback' => 'path_user_update_alias_multiple',
+    'callback arguments' => array('bulkupdate', array('message' => TRUE)),
+  );
+  return $operations;
+}
+
+/**
+ * Update the URL aliases for an individual user account.
+ *
+ * @param $account
+ *   A user account object.
+ * @param $op
+ *   Operation being performed on the account ('insert', 'update' or
+ *   'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_user_update_alias(User $account, $op, array $options = array()) {
+  // Skip processing if the user has disabled pathauto for the account.
+  if (isset($account->path['path']) && empty($account->path['path']) && empty($options['force'])) {
+    return FALSE;
+  }
+
+  $options += array('langcode' => LANGUAGE_NONE);
+
+  // Skip processing if the account has no pattern.
+  if (!path_pattern_load_by_entity('user', '', $options['langcode'])) {
+    return FALSE;
+  }
+
+  module_load_include('inc', 'path');
+  $uri = $account->uri();
+  $return = path_create_alias('user', $op, $uri['path'], array('user' => $account), NULL, $options['langcode']);
+
+  return $return;
+}
+
+/**
+ * Update the URL aliases for multiple user accounts.
+ *
+ * @param $uids
+ *   An array of user account IDs.
+ * @param $op
+ *   Operation being performed on the accounts ('insert', 'update' or
+ *   'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function path_user_update_alias_multiple(array $uids, $op, array $options = array()) {
+  $options += array('message' => FALSE);
+
+  $accounts = user_load_multiple($uids);
+  foreach ($accounts as $account) {
+    path_user_update_alias($account, $op, $options);
+  }
+
+  if (!empty($options['message'])) {
+    backdrop_set_message(format_plural(count($uids), 'Updated URL alias for 1 user account.', 'Updated URL aliases for @count user accounts.'));
+  }
+}
+
+/**
+ * Update action wrapper for path_user_update_alias().
+ */
+function path_user_update_action($account, $context = array()) {
+  path_user_update_alias($account, 'bulkupdate', array('message' => TRUE));
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function pathauto_config_info() {
+  $prefixes['path.settings'] = array(
+    'label' => t('Pathauto Settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * @} End of "name pathauto_user".
+ */

@@ -1,6 +1,8 @@
 name = Path
 description = Allows users to rename URLs.
+dependencies[] = token
 package = System
 version = BACKDROP_VERSION
 backdrop = 1.x
 configure = admin/config/search/path
+recommends[] = redirect

@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for Pathauto.
+ *
+ * @ingroup pathauto
+ */
+
+/**
+ * Implements hook_install().
+ */
+function path_install() {
+  $config = config('path.settings');
+  // Set some default variables necessary for the module to perform.
+  $config->set('node_pattern', 'content/[node:title]');
+  $config->set('taxonomy_term_pattern', '[term:vocabulary]/[term:name]');
+  $config->set('user_pattern', 'users/[user:name]');
+
+  // Set the default separator character to replace instead of remove (default).
+  $config->set('punctuation_hyphen', 1);
+  $config->save();
+
+  // Set the weight to 1.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('type', 'module')
+    ->condition('name', 'pathauto')
+    ->execute();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function path_uninstall() {
+  // Delete all the pathauto variables and then clear the variable cache.
+  db_query("DELETE FROM {variable} WHERE name LIKE 'pathauto_%'");
+  cache('bootstrap')->delete('variables');
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function path_update_last_removed() {
+  return 7005;
+}
+
+/**
+ * Upgrades Pathauto settings from variables to config.
+ */
+function path_update_1000() {
+  $config = config('path.settings');
+
+  // Set defaults that previously were variables.
+  $config->set('verbose', FALSE);
+  $config->set('separator', '-');
+  $config->set('transliterate', FALSE);
+  $config->set('reduce_ascii', FALSE);
+
+  $config->set('case', 1);
+  $config->set('update_action', 2);
+  $config->set('ignore_words', 'a, an, as, at, before, but, by, for, from, is, in, into, like, of, off, on, onto, per, since, than, the, this, that, to, up, via, with');
+  $config->set('max_component_length', 100);
+  $config->set('max_length', 100);
+
+  $config->set('punctuation_ampersand', 0);
+  $config->set('punctuation_asterisk', 0);
+  $config->set('punctuation_at', 0);
+  $config->set('punctuation_backtick', 0);
+  $config->set('punctuation_back_slash', 0);
+  $config->set('punctuation_caret', 0);
+  $config->set('punctuation_colon', 0);
+  $config->set('punctuation_comma', 0);
+  $config->set('punctuation_dollar', 0);
+  $config->set('punctuation_double_quotes', 0);
+  $config->set('punctuation_equal', 0);
+  $config->set('punctuation_exclamation', 0);
+  $config->set('punctuation_greater_than', 0);
+  $config->set('punctuation_hash', 0);
+  $config->set('punctuation_hyphen', 1);
+  $config->set('punctuation_left_curly', 0);
+  $config->set('punctuation_left_parenthesis', 0);
+  $config->set('punctuation_left_square', 0);
+  $config->set('punctuation_less_than', 0);
+  $config->set('punctuation_percent', 0);
+  $config->set('punctuation_period', 0);
+  $config->set('punctuation_pipe', 0);
+  $config->set('punctuation_plus', 0);
+  $config->set('punctuation_question_mark', 0);
+  $config->set('punctuation_quotes', 0);
+  $config->set('punctuation_right_curly', 0);
+  $config->set('punctuation_right_parenthesis', 0);
+  $config->set('punctuation_right_square', 0);
+  $config->set('punctuation_semicolon', 0);
+  $config->set('punctuation_slash', 0);
+  $config->set('punctuation_tilde', 0);
+  $config->set('punctuation_underscore', 0);
+
+  $config->set('node_pattern', 'content/[node:title]');
+  $config->set('taxonomy_term_pattern', '[term:vocabulary]/[term:name]');
+  $config->set('user_pattern', 'users/[user:name]');
+
+  // Update with values from the database if present.
+  $results = db_query("SELECT * FROM {variable} WHERE name LIKE 'pathauto_%'");
+  foreach ($results as $row) {
+    $name = str_replace('pathauto_', '', $row->name);
+    $value = unserialize($row->value);
+
+    // Cast to proper data types if possible.
+    if (is_numeric($value)) {
+      $value = (int) $value;
+    }
+    if (in_array($name, array('verbose', 'transliterate', 'reduce_ascii'))) {
+      $value = (bool) $value;
+    }
+
+    // Convert old language-neutral variables to include LANGUAGE_NONE.
+    // See https://www.drupal.org/node/865356.
+    $name = str_replace('__pattern', '_und_pattern', $name);
+
+    update_variable_del($row->name);
+    $config->set($name, $value);
+  }
+  $config->save();
+}
