@@ -1,10 +1,13 @@
 /**
  * Generic elements.
  */
+
+ @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700);
+
 body {
   color: #000;
   background: #fff;
-  font: normal 81.3%/1.538em "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  font: normal 81.3%/1.538em "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
 a,
 .link {

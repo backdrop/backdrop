@@ -662,7 +662,7 @@ a.button {
   text-align: center;
   font-weight: normal;
   font-size: 1.077em;
-  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-family: "Open Sans", "Lucida Grande", Verdana, sans-serif;
   border: 1px solid #e4e4e4;
   border-bottom: 1px solid #b4b4b4;
   border-left-color: #d2d2d2;
@@ -847,7 +847,7 @@ div.admin-options {
 }
 div.admin-options label {
   text-transform: uppercase;
-  font: 0.846em/1.875em Lucida Grande, Lucida Sans Unicode, sans-serif;
+  font: 0.846em/1.875em "Open Sans", Lucida Grande, Lucida Sans Unicode, sans-serif;
 }
 div.admin-options label,
 div.admin-options div.form-item {
