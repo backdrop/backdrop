@@ -101,7 +101,7 @@ function seven_css_alter(&$css) {
   }
   // Use Seven's jQuery UI theme style instead of the default one.
   if (isset($css['core/misc/ui/jquery.ui.theme.css'])) {
-    $css['core/misc/ui/jquery.ui.theme.css']['data'] = backdrop_get_path('theme', 'seven') . '/jquery.ui.theme.css';
+    $css['core/misc/ui/jquery.ui.theme.css']['data'] = backdrop_get_path('theme', 'seven') . '/css/jquery.ui.theme.css';
     $css['core/misc/ui/jquery.ui.theme.css']['type'] = 'file';
   }
 }
