@@ -2069,10 +2069,12 @@ function user_mail_tokens(&$replacements, $data, $options) {
  * @param $permission
  *   A string containing a permission. If set, only roles containing that
  *   permission are returned.
+ * @param $full_objects
+ *   TRUE to return complete role objects; FALSE to return role labels.
  *
  * @return
- *   An associative array with the role id as the key and the role name as
- *   value.
+ *   An associative array of role objects (or role labels, depending on
+ *   $full_objects) indexed by role names.
  */
 function user_roles($members_only = FALSE, $permission = NULL, $full_objects = FALSE) {
   $user_roles = &backdrop_static(__FUNCTION__);
