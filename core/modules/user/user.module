@@ -372,9 +372,7 @@ function user_password($length = 10) {
  *   An unindexed array of role names, such as those in $user->roles.
  *
  * @return
- *   If $roles is a non-empty array, an array indexed by role ID is returned.
- *   Each value is an array whose keys are the permission strings for the given
- *   role ID. If $roles is empty nothing is returned.
+ *   An array of permission strings for all the given role names.
  */
 function user_role_permissions($role_names = array()) {
   $all_roles = user_roles(FALSE, NULL, TRUE);
