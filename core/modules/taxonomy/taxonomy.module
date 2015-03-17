@@ -571,7 +571,7 @@ function taxonomy_term_view_multiple($terms, $view_mode = 'teaser', $weight = 0,
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build['taxonomy_terms'], 'element_sort');
+  backdrop_sort($build['taxonomy_terms'], array('#weight'));
   $build['taxonomy_terms']['#sorted'] = TRUE;
 
   return $build;
