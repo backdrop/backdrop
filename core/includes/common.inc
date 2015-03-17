@@ -337,7 +337,7 @@ function backdrop_get_favicon() {
     }
     elseif ($site_config->get('site_favicon_path')) {
       $favicon['path'] = file_create_url($site_config->get('site_favicon_path'));
-      $favicon['type'] = $site_config->get('site_favicon_mime');
+      $favicon['type'] = $site_config->get('site_favicon_mimetype');
     }
   }
   catch (ConfigException $e) {
