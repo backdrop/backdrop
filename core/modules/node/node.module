@@ -2067,7 +2067,7 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build['nodes'], 'element_sort');
+  backdrop_sort($build['nodes'], array('#weight'));
   $build['nodes']['#sorted'] = TRUE;
 
   return $build;
