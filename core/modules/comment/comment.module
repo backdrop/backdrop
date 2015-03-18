@@ -1116,7 +1116,7 @@ function comment_view_multiple($comments, Node $node, $view_mode = 'full', $weig
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build, 'element_sort');
+  backdrop_sort($build, array('#weight'));
   $build['#sorted'] = TRUE;
 
   return $build;
