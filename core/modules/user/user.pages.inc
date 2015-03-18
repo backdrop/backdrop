@@ -139,7 +139,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
         backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'));
         backdrop_goto('user/password');
       }
-      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
+      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
         return backdrop_get_form('user_pass_reset_form', $account);
       }
       else {
@@ -502,7 +502,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   // Basic validation of arguments.
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
-    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
       $edit = array(
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );

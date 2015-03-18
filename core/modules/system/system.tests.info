@@ -178,6 +178,12 @@ description = Test the security token validation.
 group = System
 file = tests/system.test
 
+[ConfirmFormTest]
+name = Confirm form
+description = Tests that the confirm form does not use external destinations.
+group = System
+file = tests/system.test
+
 [UuidUnitTestCase]
 name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
