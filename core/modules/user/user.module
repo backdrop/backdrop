@@ -1163,7 +1163,7 @@ function user_menu() {
 
   // Administration pages.
   $items['admin/config/people'] = array(
-    'title' => 'People',
+    'title' => 'User accounts',
     'description' => 'Configure user accounts.',
     'position' => 'left',
     'weight' => -20,
@@ -1208,7 +1208,7 @@ function user_menu() {
 
   // Administration pages.
   $items['admin/config/people'] = array(
-    'title' => 'People',
+    'title' => 'User accounts',
     'description' => 'Configure user accounts.',
     'position' => 'left',
     'weight' => -20,
