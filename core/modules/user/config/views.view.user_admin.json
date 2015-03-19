@@ -806,7 +806,7 @@
                     "empty_table": 1
                 },
                 "header": [],
-                "title": "People",
+                "title": "User accounts",
                 "empty": {
                     "area_text_custom": {
                         "id": "area_text_custom",
@@ -849,7 +849,7 @@
                 },
                 "tab_options": {
                     "type": "normal",
-                    "title": "People",
+                    "title": "User accounts",
                     "description": "Manage user accounts, roles, and permissions.",
                     "name": "management",
                     "weight": "-6"

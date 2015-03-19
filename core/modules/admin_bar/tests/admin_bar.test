@@ -176,9 +176,9 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
 
     // Verify that only expected category links appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure')));
-    $this->assertLinkTrailByTitle(array(t('People')));
+    $this->assertLinkTrailByTitle(array(t('User accounts')));
     $this->assertLinkTrailByTitle(array(t('Configuration')));
-    $this->assertLinkTrailByTitle(array(t('Configuration'), t('People')));
+    $this->assertLinkTrailByTitle(array(t('Configuration'), t('User accounts')));
     // Random picks are sufficient.
     $this->assertNoLinkTrailByTitle(array(t('Configuration'), t('Media')));
     $this->assertNoLinkTrailByTitle(array(t('Configuration'), t('System')));
@@ -388,7 +388,7 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
 
     // Verify that MENU_LOCAL_ACTIONs appear.
     $this->assertLinkTrailByTitle(array(
-      t('People'),
+      t('User accounts'),
       t('Add user account'),
     ));
 

@@ -1102,3 +1102,17 @@ function user_update_1009() {
 /**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
+
+/**
+ * Update 'People' menus to 'User accounts'
+ */
+function user_update_1010() {
+  $config = config('views.view.user_admin');
+  if ($config->get('display.default.display_options.title') == 'People') {
+    $config->set('display.default.display_options.title', 'User accounts');
+  }
+  if ($config->get('display.page.display_options.tab_options.title') == 'People') {
+    $config->set('display.page.display_options.tab_options.title', 'User accounts');
+  }
+  $config->save();
+}
