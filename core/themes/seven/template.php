@@ -129,3 +129,79 @@ function seven_breadcrumb($variables) {
   }
   return $output;
 }
+
+/**
+ * Override theme_item_list()
+ * Removing div.item-list wrapper
+ */
+function seven_item_list($variables) {
+  $items = $variables['items'];
+  $title = $variables['title'];
+  $type = $variables['type'];
+  $list_attributes = $variables['attributes'];
+
+  $output = '';
+  if ($items) {
+    $output .= '<' . $type . backdrop_attributes($list_attributes) . '>';
+
+    $num_items = count($items);
+    $i = 0;
+    foreach ($items as $key => $item) {
+      $i++;
+      $attributes = array();
+
+      if (is_array($item)) {
+        $value = '';
+        if (isset($item['data'])) {
+          $value .= $item['data'];
+        }
+        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0));
+
+        // Append nested child list, if any.
+        if (isset($item['children'])) {
+          // HTML attributes for the outer list are defined in the 'attributes'
+          // theme variable, but not inherited by children. For nested lists,
+          // all non-numeric keys in 'children' are used as list attributes.
+          $child_list_attributes = array();
+          foreach ($item['children'] as $child_key => $child_item) {
+            if (is_string($child_key)) {
+              $child_list_attributes[$child_key] = $child_item;
+              unset($item['children'][$child_key]);
+            }
+          }
+          $value .= theme('item_list', array(
+            'items' => $item['children'],
+            'type' => $type,
+            'attributes' => $child_list_attributes,
+          ));
+        }
+      }
+      else {
+        $value = $item;
+      }
+
+      $attributes['class'][] = ($i % 2 ? 'odd' : 'even');
+      if ($i == 1) {
+        $attributes['class'][] = 'first';
+      }
+      if ($i == $num_items) {
+        $attributes['class'][] = 'last';
+      }
+
+      $output .= '<li' . backdrop_attributes($attributes) . '>' . $value . '</li>';
+    }
+    $output .= "</$type>";
+  }
+
+  // Only output the list container and title, if there are any list items.
+  // Check to see whether the block title exists before adding a header.
+  // Empty headers are not semantic and present accessibility challenges.
+  if ($output !== '') {
+    if (isset($title) && $title !== '') {
+      $title = '<h3>' . $title . '</h3>';
+    }
+    $output = $title . $output;
+  }
+
+  return $output;
+}
