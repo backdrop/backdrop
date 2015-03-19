@@ -692,14 +692,14 @@ function path_is_alias_reserved($alias, $source, $langcode = LANGUAGE_NONE) {
  * Implements hook_path_is_alias_reserved() on behalf of path.module.
  *  BACKDROP_MOVE_TO_CORE don't need this?
 */
-/*function path_path_is_alias_reserved($alias, $source, $langcode) {
+function path_pathauto_is_alias_reserved($alias, $source, $langcode) {
   return (bool) db_query_range("SELECT pid FROM {url_alias} WHERE source <> :source AND alias = :alias AND langcode IN (:language, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(
     ':source' => $source,
     ':alias' => $alias,
     ':language' => $langcode,
     ':language_none' => LANGUAGE_NONE,
   ))->fetchField();
-}*/
+}
 
 /**
  * Implements hook_path_is_alias_reserved().
