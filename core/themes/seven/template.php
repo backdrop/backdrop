@@ -105,3 +105,27 @@ function seven_css_alter(&$css) {
     $css['core/misc/ui/jquery.ui.theme.css']['type'] = 'file';
   }
 }
+
+/**
+ * Override theme function for breadcrumb trail
+ */
+function seven_breadcrumb($variables) {
+  $breadcrumb = $variables['breadcrumb'];
+  $output = '';
+  if (!empty($breadcrumb)) {
+    $output .= '<nav role="navigation" class="breadcrumb">';
+    // Provide a navigational heading to give context for breadcrumb links to
+    // screen-reader users. Make the heading invisible with .element-invisible.
+    $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
+    // Using theme functiun for it's classes, last-child isn't supported in IE8
+    $list_variables = array(
+      'title' => '',
+      'type'  => 'ol',
+      'items' => $breadcrumb,
+      'attributes' => array(),
+    );
+   $output .= theme_item_list($list_variables);
+    $output .= '</nav>';
+  }
+  return $output;
+}
