@@ -145,7 +145,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'number',
       '#default_value' => '10',
       '#size' => 5,
-      '#element_validate' => array('views_element_validate_integer'),
+      '#min' => 0,
+      '#step' => 1,
     );
     $form['displays']['page']['options']['pagerz'] = array(
       '#title' => t('Use a pager'),
@@ -284,7 +285,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'number',
       '#default_value' => '5',
       '#size' => 5,
-      '#element_validate' => array('views_element_validate_integer'),
+      '#min' => 0,
+      '#step' => 1,
     );
     $form['displays']['block']['options']['pager'] = array(
       '#title' => t('Use a pager'),
