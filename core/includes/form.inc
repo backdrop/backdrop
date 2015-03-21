@@ -3293,8 +3293,10 @@ function theme_container($variables) {
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
-    // Add the 'form-wrapper' class.
-    $element['#attributes']['class'][] = 'form-wrapper';
+    // Add the form-wrapper class.
+    if (empty($element['#attributes']['class'])) {
+      $element['#attributes']['class'][] = 'form-wrapper';
+    }
   }
 
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
