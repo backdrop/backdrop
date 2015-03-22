@@ -1632,6 +1632,7 @@ function node_menu() {
     'title' => 'Delete',
     'page arguments' => array('node_type_delete_confirm', 4),
     'access arguments' => array('administer content types'),
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'node.types.inc',
   );
 
