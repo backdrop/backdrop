@@ -1191,3 +1191,75 @@ name = Theme debug markup
 description = Tests theme debug markup output.
 group = Theme
 file = theme.test
+
+[TokenUnitTestCase]
+name = Token unit tests
+description = Test basic, low-level token functions.
+group = Token
+file = token.test
+
+[TokenURLTestCase]
+name = URL token tests
+description = Test the URL tokens.
+group = Token
+file = token.test
+
+[TokenCommentTestCase]
+name = Comment token tests
+description = Test the comment tokens.
+group = Token
+file = token.test
+
+[TokenNodeTestCase]
+name = Node and content type token tests
+description = Test the node and content type tokens.
+group = Token
+file=token.test
+
+[TokenMenuTestCase]
+name = Menu link and menu token tests
+description = Test the menu tokens.
+group = Token
+file = token.test
+
+[TokenTaxonomyTestCase]
+name = Taxonomy and vocabulary token tests
+description = Test the taxonomy tokens.
+group = Token
+file = token.test
+
+[TokenUserTestCase]
+name = User token tests
+description = Test the user tokens.
+group = Token
+file = token.test
+
+[TokenEntityTestCase]
+name = Entity token tests
+description = Test the entity tokens.
+group = Token
+file = token.test
+
+[TokenCurrentPageTestCase]
+name = Current page token tests
+description = Test the [current-page:*] tokens.
+group = Token
+file = token.test
+
+[TokenArrayTestCase]
+name = Array token tests
+description = Test the array tokens.
+group = Token
+file = token.test
+
+[TokenRandomTestCase]
+name = Random token tests
+description = Test the random tokens.
+group = Token
+file = token.test
+
+[TokenFileTestCase]
+name = File token tests
+description = Test the file tokens.
+group = Token
+file = token.test
