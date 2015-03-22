@@ -5,38 +5,44 @@
  * Builds placeholder replacement tokens for node-related data.
  */
 
-
-
 /**
  * Implements hook_token_info().
  */
 function node_token_info() {
-  $type = array(
-    'name' => t('Nodes'),
-    'description' => t('Tokens related to individual content items, or "nodes".'),
-    'needs-data' => 'node',
+  $types = array(
+    'node' => array(
+      'name' => t('Content'),
+      'description' => t('Tokens related to individual pieces of content, or "nodes".'),
+      'needs-data' => 'node',
+    ),
+    'content-type' => array(
+      'name' => t('Content types'),
+      'description' => t('Tokens related to content types.'),
+      'needs-data' => 'node_type',
+    ),
   );
 
-  // Core tokens for nodes.
+  // Node tokens.
   $node['nid'] = array(
     'name' => t("Content ID"),
     'description' => t('The unique ID of the content item, or "node".'),
   );
-  $node['vid'] = array(
-    'name' => t("Revision ID"),
-    'description' => t("The unique ID of the node's latest revision."),
+  $node['content-type'] = array(
+    'name' => t('Content type'),
+    'description' => t('The human-readable name of the content type.'),
+    'type' => 'content-type',
   );
-  $node['tnid'] = array(
-    'name' => t("Translation set ID"),
-    'description' => t("The unique ID of the original-language version of this node, if one exists."),
-  );
-  $node['type'] = array(
-    'name' => t("Content type"),
-    'description' => t("The type of the node."),
-  );
+  // Deprecated.
   $node['type-name'] = array(
     'name' => t("Content type name"),
-    'description' => t("The human-readable name of the node type."),
+    'description' => t("The human-readable name of the content type."),
+    'restricted' => TRUE,
+  );
+  // Deprecated.
+  $node['type'] = array(
+    'name' => t("Content type"),
+    'description' => t('The machine name of the content type.'),
+    'restricted' => TRUE,
   );
   $node['title'] = array(
     'name' => t("Title"),
@@ -62,6 +68,22 @@ function node_token_info() {
     'name' => t("Edit URL"),
     'description' => t("The URL of the node's edit page."),
   );
+  $node['tnid'] = array(
+    'name' => t("Translation set ID"),
+    'description' => t("The unique ID of the original-language version of this node, if one exists."),
+  );
+  $node['source'] = array(
+    'name' => t('Translation source node'),
+    'description' => t("The source node for this current node's translation set."),
+  );
+  $node['vid'] = array(
+    'name' => t("Revision ID"),
+    'description' => t("The unique ID of the node's latest revision."),
+  );
+  $node['log'] = array(
+    'name' => t('Revision log message'),
+    'description' => t('The explanation of the most recent changes made to the node.'),
+  );
 
   // Chained tokens for nodes.
   $node['created'] = array(
@@ -80,9 +102,36 @@ function node_token_info() {
     'type' => 'user',
   );
 
+  // Content type tokens.
+  $content_type['name'] = array(
+    'name' => t('Name'),
+    'description' => t('The human-readable name of the content type.'),
+  );
+  $content_type['machine-name'] = array(
+    'name' => t('Machine-readable name'),
+    'description' => t('The unique machine-readable name of the content type.'),
+  );
+  $content_type['description'] = array(
+    'name' => t('Description'),
+    'description' => t('The optional description of the content type.'),
+  );
+  $content_type['node-count'] = array(
+    'name' => t('Node count'),
+    'description' => t('The number of nodes belonging to the content type.'),
+  );
+
+  // Check to see if translation modules are enabled before showing tokens.
+  if (!module_exists('translation')) {
+    $node['tnid']['restricted'] = TRUE;
+    $node['source']['restricted'] = TRUE;
+  }
+
   return array(
-    'types' => array('node' => $type),
-    'tokens' => array('node' => $node),
+    'types' => $types,
+    'tokens' => array(
+      'node' => $node,
+      'content-type' => $content_type,
+    ),
   );
 }
 
@@ -98,6 +147,7 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
   else {
     $language_code = NULL;
   }
+
   $sanitize = !empty($options['sanitize']);
 
   $replacements = array();
@@ -116,15 +166,12 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
           $replacements[$original] = $node->vid;
           break;
 
-        case 'tnid':
-          $replacements[$original] = $node->tnid;
-          break;
-
         case 'type':
           $replacements[$original] = $sanitize ? check_plain($node->type) : $node->type;
           break;
 
-        case 'type-name':
+        case 'content-type':
+        case 'type-name': // Deprecated.
           $type_name = node_type_get_name($node);
           $replacements[$original] = $sanitize ? check_plain($type_name) : $type_name;
           break;
@@ -188,9 +235,25 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
         case 'changed':
           $replacements[$original] = format_date($node->changed, 'medium', '', NULL, $language_code);
           break;
+
+        case 'tnid':
+          $replacements[$original] = $node->tnid;
+          break;
+
+        case 'source':
+          if (!empty($node->tnid) && $source_node = node_load($node->tnid)) {
+            $title = $source_node->title;
+            $replacements[$original] = $sanitize ? filter_xss($title) : $title;
+          }
+          break;
+
+        case 'log':
+          $replacements[$original] = $sanitize ? filter_xss($node->log) : $node->log;
+          break;
       }
     }
 
+    // Chained token relationships.
     if ($author_tokens = token_find_with_prefix($tokens, 'author')) {
       $author = user_load($node->uid);
       $replacements += token_generate('user', $author_tokens, array('user' => $author), $options);
@@ -202,6 +265,48 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
 
     if ($changed_tokens = token_find_with_prefix($tokens, 'changed')) {
       $replacements += token_generate('date', $changed_tokens, array('date' => $node->changed), $options);
+    }
+
+    if (!empty($node->tnid) && ($source_tokens = token_find_with_prefix($tokens, 'source')) && $source_node = node_load($node->tnid)) {
+      $replacements += token_generate('node', $source_tokens, array('node' => $source_node), $options);
+    }
+
+    if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
+      $replacements += token_generate('url', $url_tokens, entity_uri('node', $node), $options);
+    }
+
+    if (($node_type_tokens = token_find_with_prefix($tokens, 'content-type')) && $node_type = node_type_load($node->type)) {
+      $replacements += token_generate('content-type', $node_type_tokens, array('node_type' => $node_type), $options);
+    }
+  }
+
+  // Content type tokens.
+  if ($type == 'content-type' && !empty($data['node_type'])) {
+    $node_type = $data['node_type'];
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'name':
+          $replacements[$original] = $sanitize ? check_plain($node_type->name) : $node_type->name;
+          break;
+
+        case 'machine-name':
+          // This is a machine name so does not ever need to be sanitized.
+          $replacements[$original] = $node_type->type;
+          break;
+
+        case 'description':
+          $replacements[$original] = $sanitize ? filter_xss($node_type->description) : $node_type->description;
+          break;
+
+        case 'node-count':
+          $query = db_select('node');
+          $query->condition('type', $node_type->type);
+          $query->addTag('node_type_node_count');
+          $count = $query->countQuery()->execute()->fetchField();
+          $replacements[$original] = (int) $count;
+          break;
+      }
     }
   }
 
