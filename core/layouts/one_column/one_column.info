@@ -12,5 +12,6 @@ regions[top] = Top
 regions[content] = Content
 regions[footer] = Footer
 
-; Content is the default region by default, but specify it for clarity.
+; The default region automatically receives the "Main Content" block if needed.
+; Modify this line if you would like to change the default in this layout.
 default region = content
