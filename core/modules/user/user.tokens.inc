@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Builds placeholder replacement tokens for user-related data.
@@ -63,22 +62,24 @@ function user_token_info() {
   $user['url'] = array(
     'name' => t('URL'),
     'description' => t('The URL of the account profile page.'),
+    'type' => 'url',
   );
   $user['edit-url'] = array(
     'name' => t('Edit URL'),
     'description' => t('The URL of the account edit page.'),
+    'type' => 'url',
   );
   $user['cancel-url'] = array(
     'name' => t('Account cancellation URL'),
     'description' => t('The URL of the confirm delete page for the user account.'),
     'restricted' => TRUE,
-    // 'type' => 'url',
+    'type' => 'url',
   );
   $user['one-time-login-url'] = array(
     'name' => t('One-time login URL'),
     'description' => t('The URL of the one-time login page for the user account.'),
     'restricted' => TRUE,
-    // 'type' => 'url',
+    'type' => 'url',
   );
 
   return array(

@@ -39,11 +39,12 @@ function taxonomy_token_info() {
   $term['url'] = array(
     'name' => t("URL"),
     'description' => t("The URL of the taxonomy term."),
+    'type' => 'url',
   );
   $term['edit-url'] = array(
     'name' => t('Edit URL'),
     'description' => t("The URL of the taxonomy term's edit page."),
-    // 'type' => 'url',
+    'type' => 'url',
   );
   $term['parents'] = array(
     'name' => t('Parents'),
@@ -80,7 +81,7 @@ function taxonomy_token_info() {
   $vocabulary['edit-url'] = array(
     'name' => t('Edit URL'),
     'description' => t("The URL of the vocabulary's edit page."),
-    // 'type' => 'url',
+    'type' => 'url',
   );
 
   // Chained tokens for taxonomies
