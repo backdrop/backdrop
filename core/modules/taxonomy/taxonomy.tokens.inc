@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Builds placeholder replacement tokens for taxonomy terms and vocabularies.
@@ -41,15 +40,30 @@ function taxonomy_token_info() {
     'name' => t("URL"),
     'description' => t("The URL of the taxonomy term."),
   );
+  $term['edit-url'] = array(
+    'name' => t('Edit URL'),
+    'description' => t("The URL of the taxonomy term's edit page."),
+    // 'type' => 'url',
+  );
+  $term['parents'] = array(
+    'name' => t('Parents'),
+    'description' => t("An array of all the term's parents, starting with the root."),
+    'type' => 'array',
+  );
+  $term['root'] = array(
+    'name' => t('Root term'),
+    'description' => t("The root term of the taxonomy term."),
+    'type' => 'term',
+  );
 
   // Taxonomy vocabulary related variables.
-  $vocabulary['vid'] = array(
-    'name' => t("Vocabulary ID"),
-    'description' => t("The unique ID of the taxonomy vocabulary."),
-  );
   $vocabulary['name'] = array(
     'name' => t("Name"),
-    'description' => t("The name of the taxonomy vocabulary."),
+    'description' => t("The human-readable name of the taxonomy vocabulary."),
+  );
+  $vocabulary['machine-name'] = array(
+    'name' => t('Machine-readable name'),
+    'description' => t('The unique machine-readable name of the vocabulary.'),
   );
   $vocabulary['description'] = array(
     'name' => t("Description"),
@@ -63,17 +77,22 @@ function taxonomy_token_info() {
     'name' => t("Term count"),
     'description' => t("The number of terms belonging to the taxonomy vocabulary."),
   );
+  $vocabulary['edit-url'] = array(
+    'name' => t('Edit URL'),
+    'description' => t("The URL of the vocabulary's edit page."),
+    // 'type' => 'url',
+  );
 
   // Chained tokens for taxonomies
+  $term['parent'] = array(
+    'name' => t("Parent term"),
+    'description' => t("The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent."),
+    'type' => 'term',
+  );
   $term['vocabulary'] = array(
     'name' => t("Vocabulary"),
     'description' => t("The vocabulary the taxonomy term belongs to."),
     'type' => 'vocabulary',
-  );
-  $term['parent'] = array(
-    'name' => t("Parent term"),
-    'description' => t("The parent term of the taxonomy term, if one exists."),
-    'type' => 'term',
   );
 
   return array(
@@ -114,6 +133,10 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           $replacements[$original] = url($uri['path'], array_merge($uri['options'], array('absolute' => TRUE)));
           break;
 
+        case 'edit-url':
+          $replacements[$original] = url("taxonomy/term/{$term->tid}/edit", $url_options);
+          break;
+
         case 'node-count':
           $query = db_select('taxonomy_index');
           $query->condition('tid', $term->tid);
@@ -133,9 +156,24 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
             $replacements[$original] = check_plain($parent->name);
           }
           break;
+
+        case 'parents':
+          if ($parents = token_taxonomy_term_load_all_parents($term->tid)) {
+            $replacements[$original] = token_render_array($parents, $options);
+          }
+          break;
+
+        case 'root':
+          $parents = taxonomy_term_load_parents_all($term->tid);
+          $root_term = end($parents);
+          if ($root_term->tid != $term->tid) {
+            $replacements[$original] = $sanitize ? check_plain($root_term->name) : $root_term->name;
+          }
+          break;
       }
     }
 
+    // Chained token relationships.
     if ($vocabulary_tokens = token_find_with_prefix($tokens, 'vocabulary')) {
       $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
       $replacements += token_generate('vocabulary', $vocabulary_tokens, array('vocabulary' => $vocabulary), $options);
@@ -145,6 +183,23 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
       $parent = array_pop($parents);
       $replacements += token_generate('term', $vocabulary_tokens, array('term' => $parent), $options);
     }
+
+    if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
+      $replacements += token_generate('url', $url_tokens, entity_uri('taxonomy_term', $term), $options);
+    }
+    // [term:parents:*] chained tokens.
+    if ($parents_tokens = token_find_with_prefix($tokens, 'parents')) {
+      if ($parents = token_taxonomy_term_load_all_parents($term->tid)) {
+        $replacements += token_generate('array', $parents_tokens, array('array' => $parents), $options);
+      }
+    }
+    if ($root_tokens = token_find_with_prefix($tokens, 'root')) {
+      $parents = taxonomy_term_load_parents_all($term->tid);
+      $root_term = end($parents);
+      if ($root_term->tid != $term->tid) {
+        $replacements += token_generate('term', $root_tokens, array('term' => $root_term), $options);
+      }
+    }
   }
 
   elseif ($type == 'vocabulary' && !empty($data['vocabulary'])) {
@@ -152,12 +207,12 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
 
     foreach ($tokens as $name => $original) {
       switch ($name) {
-        case 'machine-name':
-          $replacements[$original] = $vocabulary->machine_name;
-          break;
-
         case 'name':
           $replacements[$original] = $sanitize ? check_plain($vocabulary->name) : $vocabulary->name;
+          break;
+
+        case 'machine-name':
+          $replacements[$original] = $vocabulary->machine_name;
           break;
 
         case 'description':
@@ -180,6 +235,10 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           $query->addTag('vocabulary_node_count');
           $count = $query->execute()->fetchField();
           $replacements[$original] = $count;
+          break;
+
+        case 'edit-url':
+          $replacements[$original] = url("admin/structure/taxonomy/{$vocabulary->machine_name}/edit", $url_options);
           break;
       }
     }
