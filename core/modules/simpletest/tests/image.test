@@ -324,8 +324,8 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
         'rotate_5' => array(
           'function' => 'rotate',
           'arguments' => array(5, 0xFF00FF), // Fuchsia background.
-          'width' => 42,
-          'height' => 24,
+          'width' => 41,
+          'height' => 23,
           'corners' => array_fill(0, 4, $this->fuchsia),
         ),
         'rotate_90' => array(
@@ -338,8 +338,8 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
         'rotate_transparent_5' => array(
           'function' => 'rotate',
           'arguments' => array(5),
-          'width' => 42,
-          'height' => 24,
+          'width' => 41,
+          'height' => 23,
           'corners' => array_fill(0, 4, $this->transparent),
         ),
         'rotate_transparent_90' => array(
