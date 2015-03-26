@@ -3447,7 +3447,12 @@ function node_autoload_info() {
     'NodeStorageController' => 'node.entity.inc',
 
     // Views handlers.
-    'views_handler_argument_dates_various' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_fulldate' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_year' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_year_month' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_month' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_day' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_created_week' => 'views/views_handler_argument_dates_various.inc',
     'views_handler_argument_node_language' => 'views/views_handler_argument_node_language.inc',
     'views_handler_argument_node_nid' => 'views/views_handler_argument_node_nid.inc',
     'views_handler_argument_node_type' => 'views/views_handler_argument_node_type.inc',
