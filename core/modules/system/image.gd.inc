@@ -87,9 +87,9 @@ function image_gd_resize(stdClass $image, $width, $height) {
  * @param $degrees
  *   The number of (clockwise) degrees to rotate the image.
  * @param $background
- *   An hexadecimal integer specifying the background color to use for the
- *   uncovered area of the image after the rotation. E.g. 0x000000 for black,
- *   0xff00ff for magenta, and 0xffffff for white. For images that support
+ *   An decimal integer specifying the background color to use for the
+ *   uncovered area of the image after the rotation. E.g. 0 for black,
+ *   16711935 for fuchsia, and 16777215 for white. For images that support
  *   transparency, this will default to transparent. Otherwise it will
  *   be white.
  * @return
@@ -104,38 +104,62 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
     return FALSE;
   }
 
-  $width = $image->info['width'];
-  $height = $image->info['height'];
+  // PHP 5.5 GD bug: https://bugs.php.net/bug.php?id=65148: To prevent buggy
+  // behavior on negative multiples of 90 degrees we convert any negative
+  // angle to a positive one between 0 and 360 degrees.
+  $degrees -= floor($degrees / 360) * 360;
 
-  // Convert the hexadecimal background value to a color index value.
   if (isset($background)) {
-    $rgb = array();
-    for ($i = 16; $i >= 0; $i -= 8) {
-      $rgb[] = (($background >> $i) & 0xFF);
-    }
-    $background = imagecolorallocatealpha($image->resource, $rgb[0], $rgb[1], $rgb[2], 0);
+    $background = _image_dec_to_rgba($background);
   }
-  // Set the background color as transparent if $background is NULL.
+  // Set the background color as transparent white if $background is NULL.
   else {
     // Get the current transparent color.
     $background = imagecolortransparent($image->resource);
 
-    // If no transparent colors, use white.
-    if ($background == 0) {
-      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 0);
+    // If no transparent colors, use transparent white.
+    if ($background === -1) {
+      $background = array('red' => 255, 'green' => 255, 'blue' => 255, 'alpha' => 127);
+    }
+    // Otherwise apply the transparent color
+    // TODO: correctly apply this instead of just copying the use transparent white from above
+    else{
+      $background = array('red' => 255, 'green' => 255, 'blue' => 255, 'alpha' => 127);
     }
   }
+
+  // Store the color index for the background as that is what GD uses.
+  $background_idx = imagecolorallocatealpha($image->resource, $background['red'], $background['green'], $background['blue'], $background['alpha']);
 
   // Images are assigned a new color palette when rotating, removing any
   // transparency flags. For GIF images, keep a record of the transparent color.
   if ($image->info['extension'] == 'gif') {
-    $transparent_index = imagecolortransparent($image->resource);
-    if ($transparent_index != 0) {
-      $transparent_gif_color = imagecolorsforindex($image->resource, $transparent_index);
+    // GIF does not work with a transparency channel, but can define 1 color
+    // in its palette to act as transparent.
+
+    // Get the current transparent color, if any.
+    $gif_transparent_id = imagecolortransparent($image->resource);
+    if ($gif_transparent_id !== -1) {
+      // The gif already has a transparent color set: remember it to set it on
+      // the rotated image as well.
+      $arguments['gif_transparent_color'] = imagecolorsforindex($image->resource, $gif_transparent_id);
+
+      if ($background['alpha'] >= 127) {
+        // We want a transparent background: use the color already set to act
+        // as transparent, as background.
+        $background_idx = $gif_transparent_id;
+      }
+    }
+    else {
+      // The gif does not currently have a transparent color set.
+      if ($background['alpha'] >= 127) {
+        // But as the background is transparent, it should get one.
+        $transparent_gif_color = $background;
+      }
     }
   }
 
-  $image->resource = imagerotate($image->resource, 360 - $degrees, $background);
+  $image->resource = imagerotate($image->resource, 360 - $degrees, $background_idx);
 
   // GIFs need to reassign the transparent color after performing the rotate.
   if (isset($transparent_gif_color)) {
