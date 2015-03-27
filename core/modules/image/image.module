@@ -1260,3 +1260,22 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
   }
   return $value;
 }
+
+/**
+ * Converts a decimal color string to rgba.
+ *
+ * @param string $decimal
+ *   The decimal color string to convert.
+ *
+ * @return array
+ *   An array containing the values for 'red', 'green', 'blue', 'alpha'.
+ */
+function _image_dec_to_rgba($decimal) {
+
+  return array(
+    'blue' => $decimal & 0xFF,
+    'green' => $decimal >> 8 & 0xFF,
+    'red' => $decimal >> 16 & 0xFF,
+    'alpha' => $decimal >> 24 & 0xFF,
+  );
+}
