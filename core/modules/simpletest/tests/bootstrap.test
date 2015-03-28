@@ -487,3 +487,78 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
     $this->assertTrue(backdrop_check_memory_limit('30MB', '30MB'), 'backdrop_check_memory_limit() returns TRUE when requesting 30MB on a 30MB requirement.');
   }
 }
+
+/**
+ * Tests for $_GET['destination'] and $_REQUEST['destination'] validation.
+ */
+class BootstrapDestinationTestCase extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('system_test');
+  }
+
+  /**
+   * Tests that $_GET/$_REQUEST['destination'] only contain internal URLs.
+   *
+   * @see _backdrop_bootstrap_configuration()
+   * @see system_test_get_destination()
+   * @see system_test_request_destination()
+   */
+  public function testDestination() {
+    $test_cases = array(
+      array(
+        'input' => 'node',
+        'output' => 'node',
+        'message' => "Standard internal example node path is present in the 'destination' parameter.",
+      ),
+      array(
+        'input' => '/example.com',
+        'output' => '/example.com',
+        'message' => 'Internal path with one leading slash is allowed.',
+      ),
+      array(
+        'input' => '//example.com/test',
+        'output' => '',
+        'message' => 'External URL without scheme is not allowed.',
+      ),
+      array(
+        'input' => 'example:test',
+        'output' => 'example:test',
+        'message' => 'Internal URL using a colon is allowed.',
+      ),
+      array(
+        'input' => 'http://example.com',
+        'output' => '',
+        'message' => 'External URL is not allowed.',
+      ),
+      array(
+        'input' => 'javascript:alert(0)',
+        'output' => 'javascript:alert(0)',
+        'message' => 'Javascript URL is allowed because it is treated as an internal URL.',
+      ),
+    );
+    foreach ($test_cases as $test_case) {
+      // Test $_GET['destination'].
+      $this->backdropGet('system-test/get-destination', array('query' => array('destination' => $test_case['input'])));
+      $this->assertIdentical($test_case['output'], $this->backdropGetContent(), $test_case['message']);
+      // Test $_REQUEST['destination']. There's no form to submit to, so
+      // backdropPost() won't work here; this just tests a direct $_POST
+      // request instead.
+      $curl_parameters = array(
+        CURLOPT_URL => $this->getAbsoluteUrl('system-test/request-destination'),
+        CURLOPT_POST => TRUE,
+        CURLOPT_POSTFIELDS => 'destination=' . urlencode($test_case['input']),
+        CURLOPT_HTTPHEADER => array(),
+      );
+      $post_output = $this->curlExec($curl_parameters);
+      $this->assertIdentical($test_case['output'], $post_output, $test_case['message']);
+    }
+
+    // Make sure that 404 pages do not populate $_GET['destination'] with
+    // external URLs.
+    config('system.core')
+      ->set('site_404', 'system-test/get-destination')
+      ->save();
+    $this->backdropGet('http://example.com', array('external' => FALSE));
+    $this->assertIdentical('', $this->backdropGetContent(), 'External URL is not allowed on 404 pages.');
+  }
+}

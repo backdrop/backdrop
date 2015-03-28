@@ -178,6 +178,12 @@ description = Test that backdrop_override_server_variables() works correctly.
 group = Bootstrap
 file = bootstrap.test
 
+[BootstrapDestinationTestCase]
+name = URL destination validation
+description = Test that $_GET['destination'] and $_REQUEST['destination'] cannot contain external URLs.
+group = Bootstrap
+file = bootstrap.test
+
 [CacheSavingCase]
 name = Cache saving test
 description = Check our variables are saved and restored the right way.

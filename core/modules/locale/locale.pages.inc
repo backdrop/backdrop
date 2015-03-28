@@ -351,6 +351,8 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
  * Validate string editing form submissions.
  */
 function locale_translate_edit_form_validate($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+  
   foreach ($form_state['values']['translations'] as $key => $value) {
     if (!locale_string_is_safe($value)) {
       form_set_error('translations', t('The submitted string contains disallowed HTML: %string', array('%string' => $value)));

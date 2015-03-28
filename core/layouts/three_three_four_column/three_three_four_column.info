@@ -20,5 +20,6 @@ regions[footer_thirdcolumn] = Footer third
 regions[footer_fourthcolumn] = Footer fourth
 regions[footer] = Footer bottom
 
-; Content is the default region by default, but specify it for clarity.
+; The default region automatically receives the "Main Content" block if needed.
+; Modify this line if you would like to change the default in this layout.
 default region = content

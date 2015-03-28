@@ -2650,6 +2650,26 @@ function _backdrop_bootstrap_configuration() {
   // Initialize the configuration, including variables from settings.php.
   backdrop_settings_initialize();
 
+  // Sanitize the destination parameter (which is often used for redirects) to
+  // prevent open redirect attacks leading to other domains. Sanitize both
+  // $_GET['destination'] and $_REQUEST['destination'] to protect code that
+  // relies on either, but do not sanitize $_POST to avoid interfering with
+  // unrelated form submissions. The sanitization happens here because
+  // url_is_external() requires settings.php variables to be available.
+  if (isset($_GET['destination']) || isset($_REQUEST['destination'])) {
+    require_once BACKDROP_ROOT . '/core/includes/common.inc';
+    // If the destination is an external URL, remove it.
+    if (isset($_GET['destination']) && url_is_external($_GET['destination'])) {
+      unset($_GET['destination']);
+      unset($_REQUEST['destination']);
+    }
+    // If there's still something in $_REQUEST['destination'] that didn't come
+    // from $_GET, check it too.
+    if (isset($_REQUEST['destination']) && (!isset($_GET['destination']) || $_REQUEST['destination'] != $_GET['destination']) && url_is_external($_REQUEST['destination'])) {
+      unset($_REQUEST['destination']);
+    }
+  }
+
   // Load configuration classes and functions.
   require_once BACKDROP_ROOT . '/core/includes/config.inc';
 

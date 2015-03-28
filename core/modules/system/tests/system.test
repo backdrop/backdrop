@@ -2360,6 +2360,41 @@ class SystemValidTokenTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests confirm form destinations.
+ */
+class ConfirmFormTest extends BackdropWebTestCase {
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp();
+
+    $this->admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that the confirm form does not use external destinations.
+   */
+  function testConfirmForm() {
+    $this->backdropGet('user/1/cancel');
+    $this->assertCancelLinkUrl(url('user/1'));
+    $this->backdropGet('user/1/cancel', array('query' => array('destination' => 'node')));
+    $this->assertCancelLinkUrl(url('node'));
+    $this->backdropGet('user/1/cancel', array('query' => array('destination' => 'http://example.com')));
+    $this->assertCancelLinkUrl(url('user/1'));
+  }
+
+  /**
+   * Asserts that a cancel link is present pointing to the provided URL.
+   */
+  function assertCancelLinkUrl($url, $message = '', $group = 'Other') {
+    $links = $this->xpath('//a[normalize-space(text())=:label and @href=:url]', array(':label' => t('Cancel'), ':url' => $url));
+    $message = ($message ? $message : format_string('Cancel link with url %url found.', array('%url' => $url)));
+    return $this->assertTrue(isset($links[0]), $message, $group);
+  }
+}
+
+/**
  * Tests uuid.inc and related functions.
  */
 class UuidUnitTestCase extends BackdropUnitTestCase {
