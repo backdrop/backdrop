@@ -1156,7 +1156,10 @@ function layout_get_style_info($plugin_name) {
  *   The key of the block within that module.
  */
 function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
-  $block_info = &backdrop_static(__FUNCTION__, array());
+  $block_info = &backdrop_static(__FUNCTION__, array(
+    'all' => NULL, // Set TRUE when block info for all modules has been loaded.
+    'modules' => array(), // The actual list of stored block info, per module.
+  ));
 
   if (isset($block_module)) {
     $modules = array($block_module);
@@ -1170,10 +1173,17 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
   }
 
   // Load each module's block info that is required.
+  $new_block_info = array();
   foreach ($modules as $module) {
     if (!isset($block_info['modules'][$module])) {
-      $block_info['modules'][$module] = module_invoke($module, 'block_info');
+      $new_block_info[$module] = module_invoke($module, 'block_info');
     }
+  }
+
+  // Alter and merge the collection of new blocks.
+  if (!empty($new_block_info)) {
+    backdrop_alter('block_info', $new_block_info);
+    $block_info['modules'] = array_merge($block_info['modules'], $new_block_info);
   }
 
   // Return partial or full results based on the requested properties.

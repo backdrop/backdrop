@@ -106,4 +106,30 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('node');
     $this->assertRaw('<h1>Full HTML</h1>', 'Custom block successfully being displayed using Full HTML.');
   }
+
+  /**
+   * Tests the various block hooks get called when needed.
+   */
+  function testBlockHooks() {
+    // Test hook_block_info_alter().
+    $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/content');
+    $this->assertText(t('Original description.'), 'Original description found with no alterations.');
+    state_set('block_test_info_alter', TRUE);
+    $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/content');
+    $this->assertText(t('Altered description.'), 'Altered description found as modified by hook_block_info_alter().');
+
+    // Add blocks for checking hook_block_view_MODULE_DELTA_alter().
+    $this->clickLink(t('Test underscore'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/content');
+    $this->clickLink(t('Test hyphen'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Visit the front page to see that the new blocks are in place and altered.
+    $this->backdropGet('node');
+    $this->assertText('underscore: hook_block_view_MODULE_DELTA_alter', 'hook_block_view_MODULE_DELTA_alter called for a block based on its delta.');
+    $this->assertText('hyphen: hook_block_view_MODULE_DELTA_alter', 'hook_block_view_MODULE_DELTA_alter called for a block with a delta that contains a hyphen.');
+  }
 }

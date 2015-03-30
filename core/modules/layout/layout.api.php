@@ -278,24 +278,20 @@ function hook_block_info() {
 }
 
 /**
- * Change block definition before saving to the database.
+ * Modify block definitions after loading form code.
  *
  * @param $blocks
  *   A multidimensional array of blocks keyed by the defining module and delta;
- *   the values are blocks returned by hook_block_info(). This hook is fired
- *   after the blocks are collected from hook_block_info() and the database,
- *   right before saving back to the database.
- * @param $theme
- *   The theme these blocks belong to.
- * @param $code_blocks
- *   The blocks as defined in hook_block_info() before being overwritten by the
- *   database data.
+ *   the values are blocks returned by hook_block_info().
  *
  * @see hook_block_info()
  */
-function hook_block_info_alter(&$blocks, $theme, $code_blocks) {
-  // Disable the login block.
-  $blocks['user']['login']['status'] = 0;
+function hook_block_info_alter(&$blocks) {
+  // Always check that the block is in the list before attempting to alter it.
+  if (isset($blocks['user']['login'])) {
+    // Change the administrative title the user login block.
+    $blocks['user']['login']['info'] = t('Login form');
+  }
 }
 
 /**

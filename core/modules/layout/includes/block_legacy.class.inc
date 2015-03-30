@@ -28,7 +28,7 @@ class BlockLegacy extends Block {
         $context_data[$context_name] = $context->data;
       }
       $this->content = module_invoke($this->module, 'block_view', $this->delta, $this->settings['block_settings'], $context_data);
-      backdrop_alter(array('block_view', 'block_view_' . $this->module . '_' . $this->delta), $this->content, $legacy_block, $this->settings['block_settings']);
+      backdrop_alter(array('block_view', 'block_view_' . $this->module . '_' . str_replace('-', '_', $this->delta)), $this->content, $legacy_block, $this->settings['block_settings']);
     }
     return $this->content;
   }
