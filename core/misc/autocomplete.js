@@ -115,6 +115,7 @@ Backdrop.jsAC.prototype.onkeyup = function (input, e) {
  */
 Backdrop.jsAC.prototype.select = function (node) {
   this.input.value = $(node).data('autocompleteValue');
+  $(this.input).trigger('autocompleteSelect', [node]);
 };
 
 /**
@@ -169,7 +170,7 @@ Backdrop.jsAC.prototype.unhighlight = function (node) {
 Backdrop.jsAC.prototype.hidePopup = function (keycode) {
   // Select item if the right key or mouse button was pressed.
   if (this.selected && ((keycode && keycode !== 46 && keycode !== 8 && keycode !== 27) || !keycode)) {
-    this.input.value = $(this.selected).data('autocompleteValue');
+    this.select(this.selected);
   }
   // Hide popup.
   var popup = this.popup;
@@ -240,7 +241,7 @@ Backdrop.jsAC.prototype.found = function (matches) {
   // Prepare matches.
   var ac = this;
   var ul = $('<ul></ul>')
-    .on('mousedown', 'li', function (e) { ac.select(this); })
+    .on('mousedown', 'li', function (e) { ac.hidePopup(this); })
     .on('mouseover', 'li', function (e) { ac.highlight(this); })
     .on('mouseout', 'li', function (e) { ac.unhighlight(this); });
   for (var key in matches) {
@@ -354,3 +355,4 @@ Backdrop.ACDB.prototype.cancel = function () {
 };
 
 })(jQuery);
+
