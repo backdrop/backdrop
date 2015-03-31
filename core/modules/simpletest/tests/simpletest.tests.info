@@ -562,6 +562,12 @@ description = Test the transaction abstraction system.
 group = Database
 file = database_test.test
 
+[DatabaseExtraTypesTestCase]
+name = Extra Types tests
+description = Test the Extra Types.
+group = Database
+file = database_test.test
+
 [DatabaseNextIdCase]
 name = Sequences API
 description = Test the secondary sequences API.
