@@ -242,6 +242,8 @@ class DatabaseSchema_mysql extends DatabaseSchema {
 
       'blob:big'        => 'LONGBLOB',
       'blob:normal'     => 'BLOB',
+
+      'datetime:normal' => 'DATETIME',
     );
     return $map;
   }
