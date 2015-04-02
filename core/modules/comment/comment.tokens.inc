@@ -34,10 +34,6 @@ function comment_token_info() {
     'name' => t('IP Address'),
     'description' => t('The IP address of the computer the comment was posted from.'),
   );
-  $comment['name'] = array(
-    'name' => t('Name'),
-    'description' => t('The name left by the comment author.'),
-  );
   $comment['mail'] = array(
     'name' => t('Email address'),
     'description' => t('The email address left by the comment author.'),
@@ -62,6 +58,7 @@ function comment_token_info() {
   $comment['edit-url'] = array(
     'name' => t("Edit URL"),
     'description' => t("The URL of the comment's edit page."),
+    'type' => 'url',
   );
 
   // Chained tokens for comments
@@ -132,7 +129,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           break;
 
         case 'name':
-          $name = ($comment->uid == 0) ? config_get('system.core', 'anonymous') : $comment->name;
+          $name = ($comment->uid == 0) ? variable_get('anonymous', t('Anonymous')) : $comment->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 
