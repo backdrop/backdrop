@@ -104,7 +104,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
         '#field_parents' => $parents,
         '#columns' => array_keys($field['columns']),
         '#title' => check_plain($instance['label']),
-        '#description' => field_filter_xss($instance['description']),
+        '#description' => field_filter_xss(token_replace($instance['description'])),
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
