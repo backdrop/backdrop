@@ -11,6 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/styles/views_plugin_styl
  * Tests some general style plugin related functionality.
  */
 class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
+
   /**
    * Tests the grouping legacy features of styles.
    */

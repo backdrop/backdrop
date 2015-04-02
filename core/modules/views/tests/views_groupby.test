@@ -282,6 +282,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
  * Tests UI of aggregate functionality..
  */
 class viewsUiGroupbyTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui', 'views_test');

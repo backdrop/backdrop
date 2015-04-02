@@ -9,6 +9,7 @@
  * Views UI wizard tests.
  */
 class ViewsUIWizardHelper extends BackdropWebTestCase {
+  protected $profile = 'minimal';
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui');
@@ -23,6 +24,7 @@ class ViewsUIWizardHelper extends BackdropWebTestCase {
  * Tests creating views with the wizard and viewing them on the listing page.
  */
 class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
@@ -136,6 +138,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
  * Tests enabling, disabling, and reverting default views via the listing page.
  */
 class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests default views.
    */
@@ -224,6 +227,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views filtered by taxonomy.
  */
 class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   protected $node_type_with_tags;
   protected $node_type_without_tags;
   protected $tag_vocabulary;
@@ -385,6 +389,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with sorts.
  */
 class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests the sorting functionality.
    */
@@ -447,6 +452,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to specify the number of items per page.
  */
 class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests the number of items per page.
    */
@@ -524,6 +530,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to put views in a menu.
  */
 class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests the menu functionality.
    */
@@ -564,6 +571,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with a jump menu style plugin.
  */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests the jump menu style plugin.
    */
@@ -720,6 +728,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
  * Tests that displays can be correctly overridden via the user interface.
  */
 class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
+  protected $profile = 'minimal';
   /**
    * Tests that displays can be overridden via the UI.
    */
