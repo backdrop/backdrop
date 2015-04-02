@@ -1205,3 +1205,27 @@ function field_extract_bundle($entity_type, $bundle) {
  * @} End of "defgroup field".
  */
 
+/**
+ * Implements hook_field_display_alter().
+ */
+function field_field_display_alter(&$display, $context) {
+  if ($context['view_mode'] == 'token') {
+    $view_mode_settings = field_view_mode_settings($context['instance']['entity_type'], $context['instance']['bundle']);
+    // If the token view mode fell back to the 'default' view mode, then
+    // use the default token formatter.
+    if (empty($view_mode_settings[$context['view_mode']]['custom_settings'])) {
+      $field_type_info = field_info_field_types($context['field']['type']);
+
+      // If the field has specified a specific formatter to be used by default
+      // with tokens, use that, otherwise use the default formatter.
+      $formatter = !empty($field_type_info['default_token_formatter']) ? $field_type_info['default_token_formatter'] : $field_type_info['default_formatter'];
+
+      // Now that we have a formatter, fill in all the settings.
+      $display['type'] = $formatter;
+      $formatter_info = field_info_formatter_types($formatter);
+      $display['settings'] = isset($formatter_info['settings']) ? $formatter_info['settings'] : array();
+      $display['settings']['label'] = 'hidden';
+      $display['module'] = $formatter_info['module'];
+    }
+  }
+}
