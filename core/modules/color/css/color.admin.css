@@ -9,13 +9,11 @@
   position: relative;
 }
 #placeholder {
-  position: absolute;
-  top: 0;
-  right: 0; /* LTR */
+  margin: 0 20px 0 65px;
+  float:left;
 }
-[dir="rtl"] #placeholder {
-  left: 0;
-  right: auto;
+#placeholder + *{
+  clear: both;
 }
 
 /* Palette */
@@ -54,6 +52,9 @@
 [dir="rtl"] .color-form .form-text {
   margin-right: 0;
   margin-left: 5px;
+}
+#palette{
+  float: left;
 }
 #palette .hook {
   float: left; /* LTR */
