@@ -16,6 +16,7 @@ function list_field_info() {
       'settings' => array('allowed_values' => array(), 'allowed_values_function' => ''),
       'default_widget' => 'options_select',
       'default_formatter' => 'list_default',
+      'default_token_formatter' => 'list_default',
     ),
     'list_float' => array(
       'label' => t('List (float)'),
@@ -23,6 +24,7 @@ function list_field_info() {
       'settings' => array('allowed_values' => array(), 'allowed_values_function' => ''),
       'default_widget' => 'options_select',
       'default_formatter' => 'list_default',
+      'default_token_formatter' => 'list_default',
     ),
     'list_text' => array(
       'label' => t('List (text)'),
@@ -30,6 +32,7 @@ function list_field_info() {
       'settings' => array('allowed_values' => array(), 'allowed_values_function' => ''),
       'default_widget' => 'options_select',
       'default_formatter' => 'list_default',
+      'default_token_formatter' => 'list_default',
     ),
     'list_boolean' => array(
       'label' => t('Boolean'),
@@ -37,6 +40,7 @@ function list_field_info() {
       'settings' => array('allowed_values' => array(), 'allowed_values_function' => ''),
       'default_widget' => 'options_buttons',
       'default_formatter' => 'list_default',
+      'default_token_formatter' => 'list_default',
     ),
   );
 }
