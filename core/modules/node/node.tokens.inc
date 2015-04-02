@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Builds placeholder replacement tokens for node-related data.
@@ -24,7 +23,7 @@ function node_token_info() {
 
   // Node tokens.
   $node['nid'] = array(
-    'name' => t("Content ID"),
+    'name' => t('Content ID'),
     'description' => t('The unique ID of the content item, or "node".'),
   );
   $node['content-type'] = array(
@@ -32,28 +31,26 @@ function node_token_info() {
     'description' => t('The human-readable name of the content type.'),
     'type' => 'content-type',
   );
-  // Deprecated.
+  // Deprecated, see node_token_info_alter() below.
   $node['type-name'] = array(
-    'name' => t("Content type name"),
-    'description' => t("The human-readable name of the content type."),
-    'restricted' => TRUE,
+    'name' => t('Content type name'),
+    'description' => t('The human-readable name of the content type.'),
   );
-  // Deprecated.
+  // Deprecated, see node_token_info_alter() below.
   $node['type'] = array(
-    'name' => t("Content type"),
+    'name' => t('Content type'),
     'description' => t('The machine name of the content type.'),
-    'restricted' => TRUE,
   );
   $node['title'] = array(
-    'name' => t("Title"),
-    'description' => t("The title of the node."),
+    'name' => t('Title'),
+    'description' => t('The title of the node.'),
   );
   $node['body'] = array(
-    'name' => t("Body"),
-    'description' => t("The main body text of the node."),
+    'name' => t('Body'),
+    'description' => t('The main body text of the node.'),
   );
   $node['summary'] = array(
-    'name' => t("Summary"),
+    'name' => t('Summary'),
     'description' => t("The summary of the node's main body text."),
   );
   $node['langcode'] = array(
@@ -61,23 +58,25 @@ function node_token_info() {
     'description' => t('The language code of the language the node is written in.'),
   );
   $node['url'] = array(
-    'name' => t("URL"),
-    'description' => t("The URL of the node."),
+    'name' => t('URL'),
+    'description' => t('The URL of the node.'),
+    'type' => 'url',
   );
   $node['edit-url'] = array(
-    'name' => t("Edit URL"),
+    'name' => t('Edit URL'),
     'description' => t("The URL of the node's edit page."),
+    'type' => 'url',
   );
   $node['tnid'] = array(
-    'name' => t("Translation set ID"),
-    'description' => t("The unique ID of the original-language version of this node, if one exists."),
+    'name' => t('Translation set ID'),
+    'description' => t('The unique ID of the original-language version of this node, if one exists.'),
   );
   $node['source'] = array(
     'name' => t('Translation source node'),
     'description' => t("The source node for this current node's translation set."),
   );
   $node['vid'] = array(
-    'name' => t("Revision ID"),
+    'name' => t('Revision ID'),
     'description' => t("The unique ID of the node's latest revision."),
   );
   $node['log'] = array(
@@ -87,18 +86,18 @@ function node_token_info() {
 
   // Chained tokens for nodes.
   $node['created'] = array(
-    'name' => t("Date created"),
-    'description' => t("The date the node was posted."),
+    'name' => t('Date created'),
+    'description' => t('The date the node was posted.'),
     'type' => 'date',
   );
   $node['changed'] = array(
-    'name' => t("Date changed"),
-    'description' => t("The date the node was most recently updated."),
+    'name' => t('Date changed'),
+    'description' => t('The date the node was most recently updated.'),
     'type' => 'date',
   );
   $node['author'] = array(
-    'name' => t("Author"),
-    'description' => t("The author of the node."),
+    'name' => t('Author'),
+    'description' => t('The author of the node.'),
     'type' => 'user',
   );
 
@@ -311,4 +310,13 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
   }
 
   return $replacements;
+}
+
+/**
+ * Implements hook_token_info_alter().
+ */
+function node_token_info_alter(&$info) {
+  // Prevent deprecated tokens from being listed.
+  unset($info['tokens']['node']['type']);
+  unset($info['tokens']['node']['type-name']);
 }
