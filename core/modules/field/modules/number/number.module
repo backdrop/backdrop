@@ -16,6 +16,7 @@ function number_field_info() {
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_integer',
+      'default_token_formatter' => 'number_unformatted',
     ),
     'number_decimal' => array(
       'label' => t('Number (decimal)'),
@@ -24,6 +25,7 @@ function number_field_info() {
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_decimal',
+      'default_token_formatter' => 'number_unformatted',
     ),
     'number_float' => array(
       'label' => t('Number (float)'),
@@ -31,6 +33,7 @@ function number_field_info() {
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_decimal',
+      'default_token_formatter' => 'number_unformatted',
     ),
   );
 }

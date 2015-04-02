@@ -25,6 +25,7 @@ function text_field_info() {
       'instance_settings' => array('text_processing' => 0),
       'default_widget' => 'text_textfield',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
     'text_long' => array(
       'label' => t('Text (long)'),
@@ -32,6 +33,7 @@ function text_field_info() {
       'instance_settings' => array('text_processing' => 0),
       'default_widget' => 'text_textarea',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
     'text_with_summary' => array(
       'label' => t('Text (long with summary)'),
@@ -39,6 +41,7 @@ function text_field_info() {
       'instance_settings' => array('text_processing' => 1, 'display_summary' => 0),
       'default_widget' => 'text_textarea_with_summary',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
   );
 }
