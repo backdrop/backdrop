@@ -9,8 +9,8 @@
  */
 function system_token_info() {
   $types['site'] = array(
-    'name' => t("Site information"),
-    'description' => t("Tokens for site-wide settings and other global information."),
+    'name' => t('Site information'),
+    'description' => t('Tokens for site-wide settings and other global information.'),
   );
   $types['current-page'] = array(
     'name' => t('Current page'),
@@ -27,8 +27,8 @@ function system_token_info() {
     'needs-data' => 'date',
   );
   $types['file'] = array(
-    'name' => t("Files"),
-    'description' => t("Tokens related to uploaded files."),
+    'name' => t('Files'),
+    'description' => t('Tokens related to uploaded files.'),
     'needs-data' => 'file',
   );
   $types['url'] = array(
@@ -49,29 +49,32 @@ function system_token_info() {
 
   // Site-wide global tokens.
   $site['name'] = array(
-    'name' => t("Name"),
-    'description' => t("The name of the site."),
+    'name' => t('Name'),
+    'description' => t('The name of the site.'),
   );
   $site['slogan'] = array(
-    'name' => t("Slogan"),
-    'description' => t("The slogan of the site."),
+    'name' => t('Slogan'),
+    'description' => t('The slogan of the site.'),
   );
   $site['mail'] = array(
-    'name' => t("Email"),
-    'description' => t("The administrative email address for the site."),
+    'name' => t('Email'),
+    'description' => t('The administrative email address for the site.'),
   );
   $site['url'] = array(
-    'name' => t("URL"),
+    'name' => t('URL'),
     'description' => t("The URL of the site's front page."),
+    'type' => 'url',
   );
   // Deprecated
   $site['url-brief'] = array(
-    'name' => t("URL (brief)"),
+    'name' => t('URL (brief)'),
     'description' => t("The URL of the site's front page without the protocol."),
+    'type' => 'url',
   );
   $site['login-url'] = array(
     'name' => t("Login page"),
     'description' => t("The URL of the site's login page."),
+    'type' => 'url',
   );
 
   // Current page tokens.
@@ -122,6 +125,7 @@ function system_token_info() {
     'type' => 'array',
   );
 
+  // Menu link tokens.
   $menu_link['mlid'] = array(
     'name' => t('Link ID'),
     'description' => t('The unique ID of the menu link.'),
@@ -201,64 +205,64 @@ function system_token_info() {
     }
   }
   $date['custom'] = array(
-    'name' => t("Custom format"),
+    'name' => t('Custom format'),
     'description' => t("A date in a custom format. See !php-date for details.", array('!php-date' => l(t('the PHP documentation'), 'http://php.net/manual/en/function.date.php'))),
     'dynamic' => TRUE,
   );
   $date['since'] = array(
-    'name' => t("Time-since"),
+    'name' => t('Time-since'),
     'description' => t("A date in 'time-since' format. (%date)", array('%date' => format_interval(REQUEST_TIME - 360, 2))),
   );
   $date['raw'] = array(
-    'name' => t("Raw timestamp"),
+    'name' => t('Raw timestamp'),
     'description' => t("A date in UNIX timestamp format (%date)", array('%date' => REQUEST_TIME)),
   );
 
   // File related tokens.
   $file['fid'] = array(
-    'name' => t("File ID"),
-    'description' => t("The unique ID of the uploaded file."),
+    'name' => t('File ID'),
+    'description' => t('The unique ID of the uploaded file.'),
   );
   $file['name'] = array(
-    'name' => t("File name"),
-    'description' => t("The name of the file on disk."),
+    'name' => t('File name'),
+    'description' => t('The name of the file on disk.'),
   );
   $file['basename'] = array(
     'name' => t('Base name'),
     'description' => t('The base name of the file.'),
   );
   $file['path'] = array(
-    'name' => t("Path"),
-    'description' => t("The location of the file relative to the Backdrop root."),
+    'name' => t('Path'),
+    'description' => t('The location of the file relative to the Backdrop root.'),
   );
   $file['url'] = array(
-    'name' => t("URL"),
-    'description' => t("The web-accessible URL for the file."),
+    'name' => t('URL'),
+    'description' => t('The web-accessible URL for the file.'),
   );
   $file['mime'] = array(
-    'name' => t("MIME type"),
-    'description' => t("The MIME type of the file."),
+    'name' => t('MIME type'),
+    'description' => t('The MIME type of the file.'),
   );
   $file['extension'] = array(
     'name' => t('Extension'),
     'description' => t('The extension of the file.'),
   );
   $file['size'] = array(
-    'name' => t("File size"),
-    'description' => t("The size of the file."),
+    'name' => t('File size'),
+    'description' => t('The size of the file.'),
   );
   $file['size-raw'] = array(
     'name' => t('File byte size'),
     'description' => t('The size of the file, in bytes.'),
   );
   $file['timestamp'] = array(
-    'name' => t("Timestamp"),
-    'description' => t("The date the file was most recently changed."),
+    'name' => t('Timestamp'),
+    'description' => t('The date the file was most recently changed.'),
     'type' => 'date',
   );
   $file['owner'] = array(
-    'name' => t("Owner"),
-    'description' => t("The user who originally uploaded the file."),
+    'name' => t('Owner'),
+    'description' => t('The user who originally uploaded the file.'),
     'type' => 'user',
   );
 

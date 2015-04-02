@@ -9,36 +9,36 @@
  */
 function taxonomy_token_info() {
   $types['term'] = array(
-    'name' => t("Taxonomy terms"),
-    'description' => t("Tokens related to taxonomy terms."),
+    'name' => t('Taxonomy terms'),
+    'description' => t('Tokens related to taxonomy terms.'),
     'needs-data' => 'term',
   );
   $types['vocabulary'] = array(
-    'name' => t("Vocabularies"),
-    'description' => t("Tokens related to taxonomy vocabularies."),
+    'name' => t('Vocabularies'),
+    'description' => t('Tokens related to taxonomy vocabularies.'),
     'needs-data' => 'vocabulary',
   );
 
   // Taxonomy term related variables.
   $term['tid'] = array(
-    'name' => t("Term ID"),
-    'description' => t("The unique ID of the taxonomy term."),
+    'name' => t('Term ID'),
+    'description' => t('The unique ID of the taxonomy term.'),
   );
   $term['name'] = array(
-    'name' => t("Name"),
-    'description' => t("The name of the taxonomy term."),
+    'name' => t('Name'),
+    'description' => t('The name of the taxonomy term.'),
   );
   $term['description'] = array(
-    'name' => t("Description"),
-    'description' => t("The optional description of the taxonomy term."),
+    'name' => t('Description'),
+    'description' => t('The optional description of the taxonomy term.'),
   );
   $term['node-count'] = array(
-    'name' => t("Node count"),
-    'description' => t("The number of nodes tagged with the taxonomy term."),
+    'name' => t('Node count'),
+    'description' => t('The number of nodes tagged with the taxonomy term.'),
   );
   $term['url'] = array(
-    'name' => t("URL"),
-    'description' => t("The URL of the taxonomy term."),
+    'name' => t('URL'),
+    'description' => t('The URL of the taxonomy term.'),
     'type' => 'url',
   );
   $term['edit-url'] = array(
@@ -53,30 +53,30 @@ function taxonomy_token_info() {
   );
   $term['root'] = array(
     'name' => t('Root term'),
-    'description' => t("The root term of the taxonomy term."),
+    'description' => t('The root term of the taxonomy term.'),
     'type' => 'term',
   );
 
   // Taxonomy vocabulary related variables.
   $vocabulary['name'] = array(
-    'name' => t("Name"),
-    'description' => t("The human-readable name of the taxonomy vocabulary."),
+    'name' => t('Name'),
+    'description' => t('The human-readable name of the taxonomy vocabulary.'),
   );
   $vocabulary['machine-name'] = array(
     'name' => t('Machine-readable name'),
     'description' => t('The unique machine-readable name of the vocabulary.'),
   );
   $vocabulary['description'] = array(
-    'name' => t("Description"),
-    'description' => t("The optional description of the taxonomy vocabulary."),
+    'name' => t('Description'),
+    'description' => t('The optional description of the taxonomy vocabulary.'),
   );
   $vocabulary['node-count'] = array(
-    'name' => t("Node count"),
-    'description' => t("The number of nodes tagged with terms belonging to the taxonomy vocabulary."),
+    'name' => t('Node count'),
+    'description' => t('The number of nodes tagged with terms belonging to the taxonomy vocabulary.'),
   );
   $vocabulary['term-count'] = array(
-    'name' => t("Term count"),
-    'description' => t("The number of terms belonging to the taxonomy vocabulary."),
+    'name' => t('Term count'),
+    'description' => t('The number of terms belonging to the taxonomy vocabulary.'),
   );
   $vocabulary['edit-url'] = array(
     'name' => t('Edit URL'),
@@ -86,13 +86,13 @@ function taxonomy_token_info() {
 
   // Chained tokens for taxonomies
   $term['parent'] = array(
-    'name' => t("Parent term"),
-    'description' => t("The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent."),
+    'name' => t('Parent term'),
+    'description' => t('The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent.'),
     'type' => 'term',
   );
   $term['vocabulary'] = array(
-    'name' => t("Vocabulary"),
-    'description' => t("The vocabulary the taxonomy term belongs to."),
+    'name' => t('Vocabulary'),
+    'description' => t('The vocabulary the taxonomy term belongs to.'),
     'type' => 'vocabulary',
   );
 
