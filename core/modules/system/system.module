@@ -2162,8 +2162,11 @@ function system_block_view($delta = '', $settings = array()) {
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
       if (isset($system_menus[$delta])) {
-        $block['subject'] = t($system_menus[$delta]);
-        $block['content'] = menu_tree($delta);
+        module_load_include('inc', 'system', 'system.menu');
+        $settings += system_menu_default_config($delta);
+        $data = system_menu_tree_build($settings);
+        $block['subject'] = $data['subject'];
+        $block['content'] = $data['content'];
         return $block;
       }
       break;
@@ -2176,6 +2179,13 @@ function system_block_view($delta = '', $settings = array()) {
 function system_block_configure($delta, $settings) {
   if ($delta === 'header') {
     return system_header_block_form($settings);
+  }
+  // System-defined menu blocks.
+  foreach (menu_list_system_menus() as $menu_name => $title) {
+    if ($delta === $menu_name) {
+      module_load_include('inc', 'system', 'system.menu');
+      return _system_block_configure($delta, $settings);
+    }
   }
 }
 
