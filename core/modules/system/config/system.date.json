@@ -8,17 +8,17 @@
     "user_timezone_warn": 0,
     "formats": {
         "long": {
-            "label": "Default Long Date",
+            "label": "Long Date",
             "pattern": "l, F j, Y - H:i",
             "module": "system"
         },
         "medium": {
-            "label": "Default Medium Date",
+            "label": "Medium Date",
             "pattern": "D, m/d/Y - H:i",
             "module": "system"
         },
         "short":{
-            "label": "Default Short Date",
+            "label": "Short Date",
             "pattern": "m/d/Y - H:i",
             "module": "system"
         },
