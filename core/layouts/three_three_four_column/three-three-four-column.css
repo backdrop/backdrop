@@ -82,14 +82,14 @@
   [dir="rtl"] .layout--three-three-four-column .l-footer-fourth-column {
     float: right;
   }
-  .layout--three-three-four-column .l-sidebar-first {
+  .layout--three-three-four-column.layout-two-sidebars .l-sidebar-first {
     width: 49%;
   }
-  .layout--three-three-four-column .l-sidebar-second {
+  .layout--three-three-four-column.layout-two-sidebars .l-sidebar-second {
     width: 49%;
     margin-left: 51%; /* LTR */
   }
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-second {
+  [dir="rtl"] .layout--three-three-four-column.layout-two-sidebars .l-sidebar-second {
     margin-right: 51%;
   }
   .layout--three-three-four-column .l-triptych-first,
