@@ -6,7 +6,8 @@
 /**
  * Contextual links regions.
  */
-.contextual-links-region {
+.contextual-links-region,
+.layout.contextual-links-region main {
   outline: none;
   position: relative;
 }
