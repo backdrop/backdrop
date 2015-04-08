@@ -9,8 +9,12 @@
   position: relative;
 }
 #placeholder {
-  margin: 0 20px 0 65px;
-  float:left;
+  float: left; /* LTR */
+  margin: 0 20px 0 65px; /* LTR */
+}
+[dir="rtl"] #placeholder {
+  float: right;
+  margin: 0 65px 0 20px;
 }
 #placeholder + *{
   clear: both;
@@ -54,7 +58,10 @@
   margin-left: 5px;
 }
 #palette{
-  float: left;
+  float: left; /* LTR */
+}
+[dir="rtl"] #palette {
+  float: right;
 }
 #palette .hook {
   float: left; /* LTR */
