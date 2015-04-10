@@ -2153,6 +2153,7 @@ function views_autoload_info() {
     'views_handler_field_contextual_links' => 'handlers/views_handler_field_contextual_links.inc',
     'views_handler_field_custom' => 'handlers/views_handler_field_custom.inc',
     'views_handler_field_date' => 'handlers/views_handler_field_date.inc',
+    'views_handler_field_broken' => 'handlers/views_handler_field.inc',
     'views_handler_field_bulk_form' => 'handlers/views_handler_field_bulk_form.inc',
     'views_handler_field_dropbutton' => 'handlers/views_handler_field_dropbutton.inc',
     'views_handler_field_entity' => 'handlers/views_handler_field_entity.inc',
