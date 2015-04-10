@@ -19,7 +19,7 @@ Backdrop.behaviors.color = {
     var focused = null;
 
     // Add Farbtastic.
-    $(form).prepend('<div id="placeholder"></div>').addClass('color-processed');
+    $(form).find('#palette').after('<div id="placeholder"></div>').addClass('color-processed');
     var farb = $.farbtastic('#placeholder');
 
     // Decode reference colors to HSL.
