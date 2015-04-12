@@ -24,7 +24,7 @@ function path_path_alias_types() {
 /**
  * Implements hook_path().
  */
-function path_pathauto($op) {
+function path_path($op) {
   $return = array();
   $modules = array('node', 'taxonomy', 'user');
   foreach ($modules as $module) {
@@ -39,7 +39,7 @@ function path_pathauto($op) {
 /**
  * Implements hook_path().
  */
-function node_pathauto($op) {
+function node_path($op) {
   switch ($op) {
     case 'settings':
       $settings = array();
@@ -121,7 +121,8 @@ function node_path_bulk_update_batch_process(&$context) {
 /**
  * Implements hook_path().
  */
-function taxonomy_pathauto($op) {
+// gff changed this. 11 April 2014.
+function taxonomy_path($op) {
   switch ($op) {
     case 'settings':
       $settings = array();
@@ -191,7 +192,8 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
 /**
  * Implements hook_path().
  */
-function user_pathauto($op) {
+// gff changed this 11 April 2015.
+function user_path($op) {
   switch ($op) {
     case 'settings':
       $settings = array();

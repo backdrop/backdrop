@@ -164,8 +164,7 @@ function path_form_node_form_alter(&$form, $form_state) {
   $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
   $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
   $form['path']['langcode'] = array('#type' => 'value', '#value' => $path['langcode']);
-
-  // adding this for BACKDROP_MOVE_TO_CORE
+  //BACKDROP_MOVE_TO_CORE add the pathauto form to the node.
   $node = $form_state['node'];
   $langcode = path_entity_langcode('node', $node);
   path_field_attach_form('node', $node, $form, $form_state, $langcode);
@@ -290,11 +289,11 @@ function path_form_taxonomy_form_term_alter(&$form, $form_state) {
     $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
     $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
     $form['path']['langcode'] = array('#type' => 'value', '#value' => $path['langcode']);
+    // BACKDROP_MOVE_TO_CORE; pathauto options form.
+    $term = $form_state['term'];
+    $langcode = path_entity_langcode('taxonomy_term', $term);
+    path_field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
   }
-  // BACKDROP_MOVE_TO_CORE
-  $term = $form_state['term'];
-  $langcode = path_entity_langcode('taxonomy_term', $term);
-  path_field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
 }
 
 /**
@@ -703,6 +702,7 @@ function path_pathauto_is_alias_reserved($alias, $source, $langcode) {
 
 /**
  * Implements hook_path_is_alias_reserved().
+ * ****** GFF removed in favour of the pathauto one. BACKDROP_MOVE_TO_CORE
  */
 function path_path_is_alias_reserved($alias, $source, $langcode) {
   module_load_include('inc', 'path');
@@ -756,7 +756,7 @@ if (!function_exists('path_field_extra_fields')) {
  * BACKDROP_MOVE_TO_CORE moved this to the body of the already defined
  * path_node_insert  ... is that the right thing to do?
  */
-/*function path_node_insert($node) {
+/*function pathauto_node_insert($node) {
   // @todo Remove the next line when http://drupal.org/node/1025870 is fixed.
   unset($node->uri);
   path_node_update_alias($node, 'insert');
@@ -767,14 +767,14 @@ if (!function_exists('path_field_extra_fields')) {
  * BACKDROP_MOVE_TO_CORE moved this to the body of the already defined
  * path_node_update ... is that the right thing to do?
  */
-/*function path_node_update($node) {
+/*function pathauto_node_update($node) {
   path_node_update_alias($node, 'update');
 }*/
 
 /**
  * Implements hook_node_delete().
  */
-function pathauto_node_delete($node) {
+function path_node_delete($node) {
   path_entity_path_delete_all('node', $node, "node/{$node->nid}");
 }
 
@@ -785,7 +785,7 @@ function pathauto_node_delete($node) {
  * BACKDROP_MOVE_TO_CORE moved this to the already defined path_form_node_form_alter
  * ... is that the right thing to do?
  */
-/*function path_form_node_form_alter(&$form, &$form_state) {
+/*function pathauto_form_node_form_alter(&$form, &$form_state) {
   $node = $form_state['node'];
   $langcode = path_entity_langcode('node', $node);
   path_field_attach_form('node', $node, $form, $form_state, $langcode);
@@ -876,7 +876,7 @@ function path_node_update_action($node, $context = array()) {
  * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_insert
  * ... is that the right thing to do?
  */
-/*function path_taxonomy_term_insert($term) {
+/*function pathauto_taxonomy_term_insert($term) {
   path_taxonomy_term_update_alias($term, 'insert');
 }*/
 
@@ -885,7 +885,7 @@ function path_node_update_action($node, $context = array()) {
  * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_update
  * ... is that the right thing to do?
  */
-/*function path_taxonomy_term_update($term) {
+/*function pathauto_taxonomy_term_update($term) {
   path_taxonomy_term_update_alias($term, 'update', array('alias children' => TRUE));
 }*/
 
@@ -894,7 +894,7 @@ function path_node_update_action($node, $context = array()) {
  * BACKDROP_MOVE_TO_CORE moved this to the already defined path_taxonomy_term_delete
  * ... is that the right thing to do?
  */
-/*function path_taxonomy_term_delete($term) {
+/*function pathauto_taxonomy_term_delete($term) {
   path_entity_path_delete_all('taxonomy_term', $term, "taxonomy/term/{$term->tid}");
 }*/
 
@@ -905,7 +905,7 @@ function path_node_update_action($node, $context = array()) {
  * BACKDROP_MOVE_TO_CORE moved this to the already defined path_form_taxonomy_form_term_alter
  * ... is that the right thing to do?
  */
-/*function path_form_taxonomy_form_term_alter(&$form, $form_state) {
+/*function pathauto_form_taxonomy_form_term_alter(&$form, $form_state) {
   $term = $form_state['term'];
   $langcode = path_entity_langcode('taxonomy_term', $term);
   path_field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
@@ -1097,7 +1097,7 @@ function path_user_update_action($account, $context = array()) {
 /**
  * Implements hook_config_info().
  */
-function pathauto_config_info() {
+function path_config_info() {
   $prefixes['path.settings'] = array(
     'label' => t('Pathauto Settings'),
     'group' => t('Configuration'),

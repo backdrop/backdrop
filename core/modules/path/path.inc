@@ -393,7 +393,7 @@ function path_create_alias($module, $op, $source, $data, $type = NULL, $langcode
     'callback' => 'path_clean_token_values',
     'langcode' => $langcode,
     // BACKDROP_MOVE_TO_CORE :: should this be path?
-    'pathauto' => TRUE,
+    'path' => TRUE,
   ));
 
   // Check if the token replacement has not actually replaced any values. If

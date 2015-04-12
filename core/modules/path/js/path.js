@@ -11,8 +11,8 @@ Geoff commented this out when adding pathauto to path in favour of the below beh
 from pathauto.
 
 If this was the correct thing to do we should completely remove this.
-
-Backdrop.behaviors.pathFieldsetSummaries = {
+*/
+/*Backdrop.behaviors.pathFieldsetSummaries = {
   attach: function (context) {
     $('fieldset.path-form', context).backdropSetSummary(function (context) {
       var path = $('.form-item-path-alias input').val();
