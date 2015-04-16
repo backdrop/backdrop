@@ -189,8 +189,9 @@ ul.menu li.expanded {
     clear: none;
   }
 }
+
 ul.primary {
-  height: 2.534em;
+  height: 39px;
   border: none;
   float: right; /* LTR */
   margin: 0;
@@ -217,7 +218,7 @@ ul.primary li a:visited,
 ul.primary li a:hover,
 ul.primary li.active a {
   display: block;
-  height: 2.8em;
+  height: 45px;
   padding: 1px 20px 2px;
   border: none;
   overflow: visible;
