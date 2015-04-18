@@ -24,6 +24,7 @@ function block_test_block_info() {
 
   $blocks['test_html_id'] = array(
     'info' => t('Test block html id'),
+    'description' => t('Original description.'),
   );
   return $blocks;
 }
@@ -32,15 +33,15 @@ function block_test_block_info() {
  * Implements hook_block_view().
  */
 function block_test_block_view($delta = 0) {
-  return array('content' => state_get('block_test_content', ''));
+  return array('content' => state_get('block_test_content', 'Original content.'));
 }
 
 /**
  * Implements hook_block_info_alter().
  */
 function block_test_block_info_alter(&$blocks) {
-  if (state_get('block_test_info_alter')) {
-    $blocks['block_test']['test_html_id']['weight'] = 10000;
+  if (state_get('block_test_info_alter') && isset($blocks['block_test'])) {
+    $blocks['block_test']['test_html_id']['description'] = 'Altered description.';
   }
 }
 
@@ -48,12 +49,12 @@ function block_test_block_info_alter(&$blocks) {
  * Implements hook_block_view_MODULE_DELTA_alter().
  */
 function block_test_block_view_block_test_test_underscore_alter(&$data, $block) {
-  $data['content'] = 'hook_block_view_MODULE_DELTA_alter';
+  $data['content'] = 'underscore: hook_block_view_MODULE_DELTA_alter';
 }
 
 /**
  * Implements hook_block_view_MODULE_DELTA_alter().
  */
 function block_test_block_view_block_test_test_hyphen_alter(&$data, $block) {
-  $data['content'] = 'hook_block_view_MODULE_DELTA_alter';
+  $data['content'] = 'hyphen: hook_block_view_MODULE_DELTA_alter';
 }
