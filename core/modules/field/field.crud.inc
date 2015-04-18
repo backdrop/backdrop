@@ -88,6 +88,9 @@ function field_create_field($field) {
   // Fields have a large amount of data that is generated on load, so trim down
   // the entire structure to just that which is not replaced on load.
   $field_data = array_intersect_key($field, field_defaults_field());
+  if (isset($field_data['storage']['details'])) {
+    unset($field_data['storage']['details']);
+  }
 
   // Store the field in config.
   $config = config('field.field.' . $field['field_name']);
@@ -177,6 +180,9 @@ function field_update_field($field) {
   // Fields have a large amount of data that is generated on load, so trim down
   // the entire structure to just that which is not replaced on load.
   $field_data = array_intersect_key($field, field_defaults_field());
+  if (isset($field_data['storage']['details'])) {
+    unset($field_data['storage']['details']);
+  }
 
   // Store the field in config.
   $config = config('field.field.' . $field['field_name']);
@@ -1042,7 +1048,7 @@ function field_purge_instance($instance) {
 }
 
 /**
- * Purges a field record from the database.
+ * Purges a field configuration.
  *
  * This function assumes all instances for the field has already been purged,
  * and should only be called by field_purge_batch().
