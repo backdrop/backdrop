@@ -1252,12 +1252,6 @@ description = Test the array tokens.
 group = Token
 file = token.test
 
-[TokenRandomTestCase]
-name = Random token tests
-description = Test the random tokens.
-group = Token
-file = token.test
-
 [TokenFileTestCase]
 name = File token tests
 description = Test the file tokens.

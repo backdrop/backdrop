@@ -46,8 +46,9 @@ function entity_token_info_alter(&$info) {
  * Implements hook_tokens().
  */
 function entity_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $sanitize = !empty($options['sanitize']);
   $replacements = array();
-  if (!empty($data[$type])) {
+  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
 
     foreach ($tokens as $name => $original) {
@@ -69,7 +70,7 @@ function entity_tokens($type, $tokens, array $data = array(), array $options = a
     }
 
     // [entity:url:*] chained tokens.
-    if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
+    if (_token_module($type, 'url') == 'entity' && $url_tokens = token_find_with_prefix($tokens, 'url')) {
       $replacements += token_generate('url', $url_tokens, $entity->uri(), $options);
     }
 

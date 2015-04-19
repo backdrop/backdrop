@@ -171,7 +171,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
     }
 
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
-      $replacements += token_generate('url', $url_tokens, entity_uri('user', $account), $options);
+      $replacements += token_generate('url', $url_tokens, $account->uri(), $options);
     }
 
     if ($role_tokens = token_find_with_prefix($tokens, 'roles')) {

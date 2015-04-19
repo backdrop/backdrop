@@ -2484,6 +2484,22 @@ function system_update_1037() {
 }
 
 /**
+ * Upgrade or prepare for token module in core.
+ */
+function system_update_1037() {
+  // Manually install schema, as update_module_enable() does not do this for us.
+  if (!db_table_exists('cache_token')) {
+    $cache_token = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_token['description'] = 'Cache table for token information.';
+    db_create_table('cache_token', $cache_token);
+  }
+
+  // Remove the entry for the token module in the system table. This will
+  // "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'token' AND type = 'module'");
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

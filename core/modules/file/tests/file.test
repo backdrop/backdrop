@@ -1024,10 +1024,6 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
    */
   function testFileTokenReplacement() {
     global $language;
-    $url_options = array(
-      'absolute' => TRUE,
-      'language' => $language,
-    );
 
     // Create file field.
     $type_name = 'article';

@@ -111,6 +111,7 @@ function taxonomy_token_info() {
 function taxonomy_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
   $sanitize = !empty($options['sanitize']);
+  $url_options = array('absolute' => TRUE);
 
   if ($type == 'term' && !empty($data['term'])) {
     $term = $data['term'];
@@ -130,7 +131,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           break;
 
         case 'url':
-          $uri = entity_uri('taxonomy_term', $term);
+          $uri = $term->uri();
           $replacements[$original] = url($uri['path'], array_merge($uri['options'], array('absolute' => TRUE)));
           break;
 
@@ -186,7 +187,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
-      $replacements += token_generate('url', $url_tokens, entity_uri('taxonomy_term', $term), $options);
+      $replacements += token_generate('url', $url_tokens, $term->uri(), $options);
     }
     // [term:parents:*] chained tokens.
     if ($parents_tokens = token_find_with_prefix($tokens, 'parents')) {

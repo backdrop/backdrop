@@ -271,7 +271,7 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
-      $replacements += token_generate('url', $url_tokens, entity_uri('node', $node), $options);
+      $replacements += token_generate('url', $url_tokens, $node->uri(), $options);
     }
 
     if (($node_type_tokens = token_find_with_prefix($tokens, 'content-type')) && $node_type = node_type_load($node->type)) {
@@ -304,6 +304,10 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
           $query->addTag('node_type_node_count');
           $count = $query->countQuery()->execute()->fetchField();
           $replacements[$original] = (int) $count;
+          break;
+
+        case 'edit-url':
+          $replacements[$original] = url("admin/structure/types/manage/{$node_type->type}", $url_options);
           break;
       }
     }

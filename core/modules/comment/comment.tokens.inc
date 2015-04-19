@@ -213,6 +213,10 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
       $replacements += token_generate('date', $date_tokens, array('date' => $comment->changed), $options);
     }
 
+    if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
+      $replacements += token_generate('url', $url_tokens, $comment->uri(), $options);
+    }
+
     if (($parent_tokens = token_find_with_prefix($tokens, 'parent')) && $parent = comment_load($comment->pid)) {
       $replacements += token_generate('comment', $parent_tokens, array('comment' => $parent), $options);
     }

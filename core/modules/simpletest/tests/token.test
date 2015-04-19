@@ -277,7 +277,10 @@ class TokenNodeTestCase extends TokenTestHelper {
   protected $profile = 'standard';
 
   function testNodeTokens() {
-    $source_node = $this->backdropCreateNode(array('log' => $this->randomName(), 'path' => array('alias' => 'content/source-node')));
+    $source_node = $this->backdropCreateNode(array(
+      'log' => $this->randomName(),
+      'path' => array('alias' => 'content/source-node'),
+    ));
     $tokens = array(
       'source' => NULL,
       'source:nid' => NULL,
@@ -300,7 +303,10 @@ class TokenNodeTestCase extends TokenTestHelper {
     );
     $this->assertTokens('node', array('node' => $source_node), $tokens);
 
-    $translated_node = $this->backdropCreateNode(array('tnid' => $source_node->nid, 'type' => 'article'));
+    $translated_node = $this->backdropCreateNode(array(
+      'tnid' => $source_node->nid,
+      'type' => 'article',
+    ));
     $tokens = array(
       'source' => $source_node->title,
       'source:nid' => $source_node->nid,
@@ -527,14 +533,12 @@ class TokenUserTestCase extends TokenTestHelper {
 
   public function setUp($modules = array()) {
     parent::setUp($modules);
-    $this->config = config('token.settings');
-
     // Enable user pictures.
-    $this->config->set('user_pictures', 1);
-    $this->config->set('user_picture_file_size', '');
+    config_set('system.core', 'user_pictures', 1);
+    config_set('system.core', 'user_picture_file_size', '');
 
     // Set up the pictures directory.
-    $picture_path = file_default_scheme() . '://' . $this->config->get('user_picture_path', 'pictures');
+    $picture_path = file_default_scheme() . '://' . config_get('system.core', 'user_picture_path');
     if (!file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY)) {
       $this->fail('Could not create directory ' . $picture_path . '.');
     }
@@ -658,10 +662,8 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
   protected $config;
 
   function testCurrentPageTokens() {
-    $this->config = config('token.settings');
-
     $tokens = array(
-      '[current-page:title]' => t('Welcome to @site-name', array('@site-name' => $this->config->get('site_name'))),
+      '[current-page:title]' => t('Welcome to @site-name', array('@site-name' => config_get('system.core', 'site_name'))),
       '[current-page:url]' => url('node', array('absolute' => TRUE)),
       '[current-page:url:absolute]' => url('node', array('absolute' => TRUE)),
       '[current-page:url:relative]' => url('node', array('absolute' => FALSE)),

@@ -1670,13 +1670,13 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     $target .= format_date(REQUEST_TIME, 'short', '', NULL, $language->langcode);
 
     // Test that the clear parameter cleans out non-existent tokens.
-    $result = token_replace($source, array('node' => $node), array('language' => $language, 'clear' => TRUE));
-    $result = $this->assertEqual($target, $result, 'Valid tokens replaced while invalid tokens cleared out.');
+    $result = @token_replace($source, array('node' => $node), array('language' => $language, 'clear' => TRUE));
+    $this->assertEqual($target, $result, 'Valid tokens replaced while invalid tokens cleared out.');
 
     // Test without using the clear parameter (non-existent token untouched).
     $target .= '[user:name]';
     $target .= '[bogus:token]';
-    $result = token_replace($source, array('node' => $node), array('language' => $language));
+    $result = @token_replace($source, array('node' => $node), array('language' => $language));
     $this->assertEqual($target, $result, 'Valid tokens replaced while invalid tokens ignored.');
 
     // Check that the results of token_generate are sanitized properly. This does NOT
@@ -1745,7 +1745,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[site:slogan]'] = check_plain(config_get('system.core', 'site_slogan'));
     $tests['[site:mail]'] = 'simpletest@example.com';
     $tests['[site:url]'] = url('<front>', $url_options);
-    $tests['[site:url:brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
+    $tests['[site:url-brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
     $tests['[site:login-url]'] = url('user', $url_options);
 
     // Test to make sure that we generated something for each token.

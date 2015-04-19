@@ -660,6 +660,10 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     if (($owner_tokens = token_find_with_prefix($tokens, 'owner')) && $account = user_load($file->uid)) {
       $replacements += token_generate('user', $owner_tokens, array('user' => $account), $options);
     }
+
+    if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
+      $replacements += token_generate('url', $url_tokens, $file->uri(), $options);
+    }
   }
 
   // If the token type specifics a 'needs-data' value, and the value is not
