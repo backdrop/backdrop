@@ -49,7 +49,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
     $pass = ($pass && empty($parts));
 
     $this->assertTrue($pass, format_string('Breadcrumb %parts found on @path.', array(
-      '%parts' => implode(' » ', $trail),
+      '%parts' => implode(' ', $trail),
       '@path' => $this->getUrl(),
     )));
 
@@ -97,7 +97,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
       $elements = $this->xpath($xpath, $args);
       $this->assertTrue(!empty($elements), format_string('Active link %title was found in menu tree, including active trail links %tree.', array(
         '%title' => $active_link_title,
-        '%tree' => implode(' » ', $tree),
+        '%tree' => implode(' ', $tree),
       )));
     }
   }
