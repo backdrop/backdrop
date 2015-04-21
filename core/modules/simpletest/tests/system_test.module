@@ -78,6 +78,13 @@ function system_test_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['system-test/backdrop-set-message'] = array(
+    'title' => 'Set messages with backdrop_set_message()',
+    'page callback' => 'system_test_backdrop_set_message',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+   );
+
   $items['system-test/main-content-fallback'] = array(
     'title' => 'Test main content fallback',
     'page callback' => 'system_test_main_content_fallback',
@@ -399,6 +406,20 @@ function system_test_authorize_init_page($page_title) {
   $authorize_url = $GLOBALS['base_url'] . '/core/authorize.php';
   system_authorized_init('system_test_authorize_run', backdrop_get_path('module', 'system_test') . '/system_test.module', array(), $page_title);
   backdrop_goto($authorize_url);
+}
+
+/**
+ * Sets two messages and removes the first one before the messages are displayed.
+ */
+function system_test_backdrop_set_message() {
+  // Set two messages.
+  backdrop_set_message('First message (removed).');
+  backdrop_set_message('Second message (not removed).');
+
+  // Remove the first.
+  unset($_SESSION['messages']['status'][0]);
+
+  return '';
 }
 
 /**

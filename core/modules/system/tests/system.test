@@ -2360,6 +2360,27 @@ class SystemValidTokenTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests backdrop_set_message() and related functions.
+ */
+class BackdropSetMessageTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  function setUp() {
+    parent::setUp('system_test');
+  }
+
+  /**
+   * Tests setting messages and removing one before it is displayed.
+   */
+  function testSetRemoveMessages() {
+    // The page at system-test/backdrop-set-message sets two messages and then
+    // removes the first before it is displayed.
+    $this->backdropGet('system-test/backdrop-set-message');
+    $this->assertNoText('First message (removed).');
+    $this->assertText('Second message (not removed).');
+  }
+}
+
+/**
  * Tests confirm form destinations.
  */
 class ConfirmFormTest extends BackdropWebTestCase {
