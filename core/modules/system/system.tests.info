@@ -195,3 +195,9 @@ name = Token scanning
 description = Scan token-like patterns in a dummy text to check token scanning.
 group = System
 file = tests/system.test
+
+[BackdropSetMessageTest]
+name = Messages
+description = Tests that messages can be displayed using backdrop_set_message().
+group = System
+file = tests/system.test
