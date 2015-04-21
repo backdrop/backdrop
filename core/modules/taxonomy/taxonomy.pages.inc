@@ -35,10 +35,10 @@ function taxonomy_term_page(TaxonomyTerm $term) {
 
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
-  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
-  // Set the non-aliased path as a default shortlink.
-  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
-
+  $canonical_secure = config_get('system.core', 'canonical_secure') == 1 ? TRUE : FALSE;
+  $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
+  
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
   // data structures and HTML markup than what Drupal 7 released with). Calling

@@ -2144,11 +2144,12 @@ function node_page_view(Node $node) {
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.
   backdrop_set_title($node->title);
-  $uri = entity_uri('node', $node);
   // Set the node path as the canonical URL to prevent duplicate content.
-  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
-  // Set the non-aliased path as a default shortlink.
-  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+  $uri = entity_uri('node', $node);
+  $canonical_secure = config_get('system.core', 'canonical_secure') ? TRUE : FALSE;
+  $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
+
   return node_show($node);
 }
 
