@@ -113,8 +113,8 @@ input.form-radio {
   vertical-align: middle;
 }
 .marker,
-.form-required {
-  color: #f00;
+ .form-required {
+   color: #f00;
 }
 abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
   border-bottom: none;
