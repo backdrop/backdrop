@@ -6,6 +6,7 @@
     "admin_theme": "",
     "anonymous": "Anonymous",
     "cache": 0,
+    "canonical_secure": 0,
     "clean_url": 0,
     "config_sync_batch_size": 20,
     "cron_threshold_warning": 172800,

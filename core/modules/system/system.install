@@ -2443,6 +2443,22 @@ function system_update_1036() {
 }
 
 /**
+ * Set the default value for canonical_secure option.
+ * Check if old menu item exists and remove it.
+ */
+function system_update_1037() {
+  config_set('system.core', 'canonical_secure', 0);
+  
+  $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
+  if ($res->rowCount()) {
+    $mlid = $res->fetch()->mlid;
+    db_delete('menu_links')
+      ->condition('mlid', $mlid, '=')
+      ->execute();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
