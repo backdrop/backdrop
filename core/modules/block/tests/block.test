@@ -43,7 +43,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $bid = db_query("SELECT bid FROM {block_custom} WHERE info = :info", array(':info' => $custom_block['info']))->fetchField();
 
     // Check to see if the custom block was created by checking that it's in the database.
-    $this->assertNotNull($bid, 'Custom block found in database');
+    $this->assertTrue($bid, 'Custom block found in database');
 
     // Check that block_block_view() returns the correct title and content.
     $data = block_block_view($bid);
