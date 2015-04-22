@@ -505,8 +505,10 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
       }
       // Load file and check access if the FID has changed, to confirm it
       // exists and that the current user has access to it.
-      if (isset($input['fid']) && ($file = file_load($input['fid'])) && file_download_access($file->uri)) {
-        $fid = $file->fid;
+      if (isset($input['fid']) && ($file = file_load($input['fid']))) {
+        if (file_uri_scheme($file->uri) == 'public' || file_download_access($file->uri)) {
+          $fid = $file->fid;
+        }
       }
     }
   }
