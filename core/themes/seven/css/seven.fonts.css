@@ -14,12 +14,12 @@
   font-family: 'Open Sans';
   font-style: italic;
   font-weight: 400;
-  src: url('../fonts/OpenSans-Light-webfont.eot'); /* Old IE */
+  src: url('../fonts/OpenSans-Italic-webfont.eot'); /* Old IE */
   src:
-    url('../fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/OpenSans-Light-webfont.woff') format('woff'),
-    url('../fonts/OpenSans-Light-webfont.ttf') format('truetype'),
-    url('../fonts/OpenSans-Light-webfont.svg#open_sanslight') format('svg');
+    url('../fonts/OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/OpenSans-Italic-webfont.woff') format('woff'),
+    url('../fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
+    url('../fonts/OpenSans-Italic-webfont.svg#open_sanslight') format('svg');
 }
 
 @font-face {
