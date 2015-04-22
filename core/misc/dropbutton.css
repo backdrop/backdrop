@@ -50,6 +50,7 @@
 .js .dropbutton li,
 .js .dropbutton a {
   display: block;
+  text-transform: uppercase;
 }
 
 /**
@@ -111,13 +112,13 @@
   border-left-color: transparent;
   border-right-color: transparent;
   border-style: solid;
-  border-width: 0.3333em 0.3333em 0;
+  border-width: 0.6em 0.6em 0;
   display: block;
   height: 0;
   line-height: 0;
   position: absolute;
-  right: 40%; /* 0.6667em; */ /* LTR */
-  top: 50%;
+  right: 25%; /* 0.6667em; */ /* LTR */
+  top: 45%;
   margin-top: -0.1666em;
   width: 0;
   overflow: hidden;
@@ -127,7 +128,7 @@
   right: auto;
 }
 .dropbutton-multiple.open .dropbutton-arrow {
-  border-bottom: 0.3333em solid;
+  border-bottom: 0.7em solid;
   border-top-color: transparent;
   top: 0.6667em;
 }
