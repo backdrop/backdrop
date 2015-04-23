@@ -977,7 +977,7 @@ body.maintenance-page #page-title {
 }
 body.maintenance-page .sidebar {
   float: left; /* LTR */
-  width: 180px;
+  width: 190px;
   text-align: center;
 }
 [dir="rtl"] body.maintenance-page .sidebar {
@@ -986,7 +986,7 @@ body.maintenance-page .sidebar {
 body.maintenance-page main {
   max-width: 590px;
   padding-right: 20px; /* LTR */
-  margin-left: 200px; /* LTR */
+  margin-left: 210px; /* LTR */
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -1031,13 +1031,14 @@ body.maintenance-page #logo {
 }
 ol.task-list {
   margin-top: 20px;
-  text-align: left; /* LTR */
   margin-left: 0; /* LTR */
-  list-style-type: none;
-  list-style-image: none;
   padding-right: 17px;
   padding-bottom: 1em;
   padding-left: 0; /* LTR */
+  font-size: .9em;
+  text-align: left; /* LTR */
+  list-style-type: none;
+  list-style-image: none;
 }
 [dir="rtl"] ol.task-list {
   text-align: right;
@@ -1242,7 +1243,7 @@ div.add-or-remove-shortcuts {
   }
   body.maintenance-page .step-indicator {
     display: block;
-    font-size: 1.385em;
+    font-size: 1em;
     position: absolute;
     top: .5em;
     right: 0;
