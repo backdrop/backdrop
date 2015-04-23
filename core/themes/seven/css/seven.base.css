@@ -117,13 +117,15 @@ acronym {
 }
 ul,
 .block ul,
-.item-list ul{
+.item-list ul {
   list-style-type: disc;
   list-style-image: none;
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
   line-height: 160%;
 }
-[dir="rtl"] ul {
+[dir="rtl"] ul,
+[dir="rtl"] .block ul,
+[dir="rtl"] .item-list ul {
   margin: 0.25em 1.5em 0.25em 0;
 }
 .item-list ul li,
