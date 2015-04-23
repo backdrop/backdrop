@@ -116,9 +116,10 @@ input.form-radio {
   color: #f00;
 }
 .marker{
-  font-size:0.9em;
-  background-color:#DDD;
-  padding:0 0.4em;
+  font-size: 0.9em;
+  color: #234600;
+  background-color: #e6f2ba;
+  padding: 0 0.4em;
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
