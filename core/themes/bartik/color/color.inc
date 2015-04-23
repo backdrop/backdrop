@@ -6,8 +6,7 @@ backdrop_add_js(array('color' => array('logo' => theme_get_setting('logo', 'bart
 $info = array(
   // Available colors and color labels used in theme.
   'fields' => array(
-    'top' => t('Header background top'),
-    'bottom' => t('Header background bottom'),
+    'top' => t('Header'),
     'bg' => t('Main background'),
     'sidebar' => t('Sidebar background'),
     'sidebarborders' => t('Sidebar borders'),
@@ -15,14 +14,14 @@ $info = array(
     'titleslogan' => t('Title and slogan'),
     'text' => t('Text color'),
     'link' => t('Link color'),
+    'activemenu' => t('Active menu link color'),
   ),
   // Pre-defined color schemes.
   'schemes' => array(
     'default' => array(
-      'title' => t('Blue Lagoon (default)'),
+      'title' => t('Blue Drop (default)'),
       'colors' => array(
-        'top' => '#0779bf',
-        'bottom' => '#48a9e4',
+        'top' => '#27ace2',
         'bg' => '#ffffff',
         'sidebar' => '#f6f6f2',
         'sidebarborders' => '#f9f9f9',
@@ -30,13 +29,27 @@ $info = array(
         'titleslogan' => '#fffeff',
         'text' => '#3b3b3b',
         'link' => '#0071B3',
+        'activemenu' => '#e3e3e3',
+      ),
+    ),
+    'blue_lagoon' => array(
+      'title' => t('Blue Lagoon'),
+      'colors' => array(
+        'top' => '#0779bf',
+        'bg' => '#ffffff',
+        'sidebar' => '#f6f6f2',
+        'sidebarborders' => '#f9f9f9',
+        'footer' => '#292929',
+        'titleslogan' => '#fffeff',
+        'text' => '#3b3b3b',
+        'link' => '#0071B3',
+        'activemenu' => '#e3e3e3',
       ),
     ),
     'firehouse' => array(
       'title' => t('Firehouse'),
       'colors' => array(
         'top' => '#cd2d2d',
-        'bottom' => '#cf3535',
         'bg' => '#ffffff',
         'sidebar' => '#f1f4f0',
         'sidebarborders' => '#ededed',
@@ -44,13 +57,13 @@ $info = array(
         'titleslogan' => '#fffeff',
         'text' => '#3b3b3b',
         'link' => '#d6121f',
+        'activemenu' => '#e3e3e3',
       ),
     ),
     'ice' => array(
       'title' => t('Ice'),
       'colors' => array(
         'top' => '#d0d0d0',
-        'bottom' => '#c2c4c5',
         'bg' => '#ffffff',
         'sidebar' => '#ffffff',
         'sidebarborders' => '#cccccc',
@@ -58,13 +71,13 @@ $info = array(
         'titleslogan' => '#000000',
         'text' => '#4a4a4a',
         'link' => '#019dbf',
+        'activemenu' => '#4a4a4a',
       ),
     ),
     'plum' => array(
       'title' => t('Plum'),
       'colors' => array(
         'top' => '#4c1c58',
-        'bottom' => '#593662',
         'bg' => '#fffdf7',
         'sidebar' => '#edede7',
         'sidebarborders' => '#e7e7e7',
@@ -72,13 +85,13 @@ $info = array(
         'titleslogan' => '#ffffff',
         'text' => '#301313',
         'link' => '#9d408d',
+        'activemenu' => '#e3e3e3',
       ),
     ),
     'slate' => array(
       'title' => t('Slate'),
       'colors' => array(
         'top' => '#4a4a4a',
-        'bottom' => '#4e4e4e',
         'bg' => '#ffffff',
         'sidebar' => '#ffffff',
         'sidebarborders' => '#d0d0d0',
@@ -86,6 +99,7 @@ $info = array(
         'titleslogan' => '#ffffff',
         'text' => '#3b3b3b',
         'link' => '#0073b6',
+        'activemenu' => '#e3e3e3',
       ),
     ),
   ),
@@ -99,16 +113,7 @@ $info = array(
   'copy' => array(),
 
   // Gradient definitions.
-  'gradients' => array(
-    array(
-      // (x, y, width, height).
-      'dimension' => array(0, 0, 0, 0),
-      // Direction of gradient ('vertical' or 'horizontal').
-      'direction' => 'vertical',
-      // Keys of colors to use for the gradient.
-      'colors' => array('top', 'bottom'),
-    ),
-  ),
+  'gradients' => array(),
 
   // Color areas to fill (x, y, width, height).
   'fill' => array(),

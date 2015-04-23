@@ -545,44 +545,35 @@ body.admin-bar .layout {
 }
 .l-header ul.menu {
   font-size: 0.929em;
-  margin: 0;
+  margin-top: 2em;
   padding: 0;
 }
 .l-header ul.menu li {
   float: left; /* LTR */
   list-style: none;
-  padding: 0 1px;
-  margin: 0 1px;
 }
 [dir="rtl"] .l-header ul.menu li {
   float: right;
 }
 .l-header ul.menu a {
-  color: #333;
-  background: #ccc;
-  background: rgba(255, 255, 255, 0.7);
-  float: left; /* LTR */
+  color: #fff;
+  float: left;
+  font-size: 1.1em;
+  font-weight: bold;
   height: 2.4em;
   line-height: 2.4em;
-  padding: 0 0.8em;
+  padding: 1em 2em 1em 0;
   text-decoration: none;
-  text-shadow: 0 1px #eee;
-  -moz-border-radius-topleft: 8px;
-  -moz-border-radius-topright: 8px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
 }
 [dir="rtl"] .l-header ul.menu a {
   float: right;
 }
 .l-header ul.menu a:hover,
 .l-header ul.menu a:focus {
-  background: #f6f6f2;
-  background: rgba(255, 255, 255, 0.95);
+  color: #f6f6f2;
 }
 .l-header ul.menu a:active {
-  background: #b3b3b3;
-  background: rgba(255, 255, 255, 1);
+  color: #b3b3b3;
 }
 .l-header ul.menu li a.active {
   border-bottom: none;
