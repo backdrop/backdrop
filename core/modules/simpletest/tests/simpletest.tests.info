@@ -1192,6 +1192,18 @@ description = Tests theme debug markup output.
 group = Theme
 file = theme.test
 
+[TokenReplaceTestCase]
+name = Token replacement
+description = Generates text using placeholders for dummy content to check token replacement.
+group = Token
+file = token.test
+
+[TokenScanTest]
+name = Token scanning
+description = Scan token-like patterns in a dummy text to check token scanning.
+group = Token
+file = token.test
+
 [TokenUnitTestCase]
 name = Token unit tests
 description = Test basic, low-level token functions.

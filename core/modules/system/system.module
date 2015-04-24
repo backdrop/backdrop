@@ -3650,6 +3650,22 @@ function system_config_info() {
 }
 
 /**
+ * Implements hook_system_info_alter().
+ *
+ * @deprecated since 1.1
+ *   This function should not be necessary in Backdrop 2.0, where modules
+ *   built-into core no longer need to be prevented from enabling.
+ */
+function system_system_info_alter(&$info, $file, $type) {
+  if (in_array($file->name, array('token'))) {
+    // Set a special flag indicating this module is now in core.
+    $info['merged_into_core'] = TRUE;
+    // Remove Backdrop core version as a fallback, ensuring it won't be enabled.
+    $info['backdrop'] = NULL;
+  }
+}
+
+/**
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_404() {

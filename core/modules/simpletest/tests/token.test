@@ -6,6 +6,183 @@
  */
 
 /**
+ * Test token replacement in strings.
+ */
+class TokenReplaceTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Creates a user and a node, then tests the tokens generated from them.
+   */
+  function testTokenReplacement() {
+    // Create the initial objects.
+    $account = $this->backdropCreateUser();
+    $node = $this->backdropCreateNode(array('uid' => $account->uid));
+    $node->title = '<blink>Blinking Text</blink>';
+    global $user, $language;
+
+    $source  = '[node:title]';         // Title of the node we passed in
+    $source .= '[node:author:name]';   // Node author's name
+    $source .= '[node:created:since]'; // Time since the node was created
+    $source .= '[current-user:name]';  // Current user's name
+    $source .= '[date:short]';         // Short date format of REQUEST_TIME
+    $source .= '[user:name]';          // No user passed in, should be untouched
+    $source .= '[bogus:token]';        // Non-existent token
+
+    $target  = check_plain($node->title);
+    $target .= check_plain($account->name);
+    $target .= format_interval(REQUEST_TIME - $node->created, 2, $language->langcode);
+    $target .= check_plain($user->name);
+    $target .= format_date(REQUEST_TIME, 'short', '', NULL, $language->langcode);
+
+    // Test that the clear parameter cleans out non-existent tokens.
+    $result = @token_replace($source, array('node' => $node), array('language' => $language, 'clear' => TRUE));
+    $this->assertEqual($target, $result, 'Valid tokens replaced while invalid tokens cleared out.');
+
+    // Test without using the clear parameter (non-existent token untouched).
+    $target .= '[user:name]';
+    $target .= '[bogus:token]';
+    $result = @token_replace($source, array('node' => $node), array('language' => $language));
+    $this->assertEqual($target, $result, 'Valid tokens replaced while invalid tokens ignored.');
+
+    // Check that the results of token_generate are sanitized properly. This does NOT
+    // test the cleanliness of every token -- just that the $sanitize flag is being
+    // passed properly through the call stack and being handled correctly by a 'known'
+    // token, [node:title].
+    $raw_tokens = array('title' => '[node:title]');
+    $generated = token_generate('node', $raw_tokens, array('node' => $node));
+    $this->assertEqual($generated['[node:title]'], check_plain($node->title), 'Token sanitized.');
+
+    $generated = token_generate('node', $raw_tokens, array('node' => $node), array('sanitize' => FALSE));
+    $this->assertEqual($generated['[node:title]'], $node->title, 'Unsanitized token generated properly.');
+
+    // Test token replacement when the string contains no tokens.
+    $this->assertEqual(token_replace('No tokens here.'), 'No tokens here.');
+  }
+
+  /**
+   * Test whether token-replacement works in various contexts.
+   */
+  function testSystemTokenRecognition() {
+    global $language;
+
+    // Generate prefixes and suffixes for the token context.
+    $tests = array(
+      array('prefix' => 'this is the ', 'suffix' => ' site'),
+      array('prefix' => 'this is the', 'suffix' => 'site'),
+      array('prefix' => '[', 'suffix' => ']'),
+      array('prefix' => '', 'suffix' => ']]]'),
+      array('prefix' => '[[[', 'suffix' => ''),
+      array('prefix' => ':[:', 'suffix' => '--]'),
+      array('prefix' => '-[-', 'suffix' => ':]:'),
+      array('prefix' => '[:', 'suffix' => ']'),
+      array('prefix' => '[site:', 'suffix' => ':name]'),
+      array('prefix' => '[site:', 'suffix' => ']'),
+    );
+
+    // Check if the token is recognized in each of the contexts.
+    foreach ($tests as $test) {
+      $input = $test['prefix'] . '[site:name]' . $test['suffix'];
+      $expected = $test['prefix'] . 'Backdrop' . $test['suffix'];
+      $output = token_replace($input, array(), array('language' => $language));
+      $this->assertTrue($output == $expected, format_string('Token recognized in string %string', array('%string' => $input)));
+    }
+  }
+
+  /**
+   * Tests the generation of all system site information tokens.
+   */
+  function testSystemSiteTokenReplacement() {
+    global $language;
+    $url_options = array(
+      'absolute' => TRUE,
+      'language' => $language,
+    );
+
+    // Set a few site variables.
+    config('system.core')
+      ->set('site_name', '<strong>Backdrop<strong>')
+      ->set('site_slogan', '<blink>Slogan</blink>')
+      ->save();
+
+    // Generate and test sanitized tokens.
+    $tests = array();
+    $tests['[site:name]'] = check_plain(config_get('system.core', 'site_name'));
+    $tests['[site:slogan]'] = check_plain(config_get('system.core', 'site_slogan'));
+    $tests['[site:mail]'] = 'simpletest@example.com';
+    $tests['[site:url]'] = url('<front>', $url_options);
+    $tests['[site:url-brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
+    $tests['[site:login-url]'] = url('user', $url_options);
+
+    // Test to make sure that we generated something for each token.
+    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
+
+    foreach ($tests as $input => $expected) {
+      $output = token_replace($input, array(), array('language' => $language));
+      $this->assertEqual($output, $expected, format_string('Sanitized system site information token %token replaced.', array('%token' => $input)));
+    }
+
+    // Generate and test unsanitized tokens.
+    $tests['[site:name]'] = config_get('system.core', 'site_name');
+    $tests['[site:slogan]'] = config_get('system.core', 'site_slogan');
+
+    foreach ($tests as $input => $expected) {
+      $output = token_replace($input, array(), array('language' => $language, 'sanitize' => FALSE));
+      $this->assertEqual($output, $expected, format_string('Unsanitized system site information token %token replaced.', array('%token' => $input)));
+    }
+  }
+
+  /**
+   * Tests the generation of all system date tokens.
+   */
+  function testSystemDateTokenReplacement() {
+    global $language;
+
+    // Set time to one hour before request.
+    $date = REQUEST_TIME - 3600;
+
+    // Generate and test tokens.
+    $tests = array();
+    $tests['[date:short]'] = format_date($date, 'short', '', NULL, $language->langcode);
+    $tests['[date:medium]'] = format_date($date, 'medium', '', NULL, $language->langcode);
+    $tests['[date:long]'] = format_date($date, 'long', '', NULL, $language->langcode);
+    $tests['[date:custom:m/j/Y]'] = format_date($date, 'custom', 'm/j/Y', NULL, $language->langcode);
+    $tests['[date:since]'] = format_interval((REQUEST_TIME - $date), 2, $language->langcode);
+    $tests['[date:raw]'] = filter_xss($date);
+
+    // Test to make sure that we generated something for each token.
+    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
+
+    foreach ($tests as $input => $expected) {
+      $output = token_replace($input, array('date' => $date), array('language' => $language));
+      $this->assertEqual($output, $expected, format_string('Date token %token replaced.', array('%token' => $input)));
+    }
+  }
+}
+
+/**
+ * Test token replacement in strings.
+ */
+class TokenScanTest extends BackdropUnitTestCase {
+  /**
+   * Scans dummy text, then tests the output.
+   */
+  function testTokenScan() {
+    // Define text with valid and not valid, fake and existing token-like
+    // strings.
+    $text = 'First a [valid:simple], but dummy token, and a dummy [valid:token with: spaces].';
+    $text .= 'Then a [not valid:token].';
+    $text .= 'Last an existing token: [node:author:name].';
+    $token_wannabes = token_scan($text);
+
+    $this->assertTrue(isset($token_wannabes['valid']['simple']), 'A simple valid token has been matched.');
+    $this->assertTrue(isset($token_wannabes['valid']['token with: spaces']), 'A valid token with space characters in the token name has been matched.');
+    $this->assertFalse(isset($token_wannabes['not valid']), 'An invalid token with spaces in the token type has not been matched.');
+    $this->assertTrue(isset($token_wannabes['node']), 'An existing valid token has been matched.');
+  }
+}
+
+/**
  * Helper test class with some added functions for testing.
  */
 class TokenTestHelper extends BackdropWebTestCase {
