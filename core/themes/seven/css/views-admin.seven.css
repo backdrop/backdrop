@@ -65,8 +65,17 @@ fieldset.fieldset-no-legend {
   font-size: 1em;
 }
 
+#views-ui-preview-form .form-item {
+  margin-top: 0;
+  line-height: 36px;
+}
+#views-ui-preview-form #preview-args {
+  width: 100%;
+  max-width: 300px;
+  padding: 5px;
+}
 #views-ui-preview-form .form-submit {
-  margin-top: 3px;
+  line-height: 36px;
 }
 
 /* Override for a button on the edit display screen */
@@ -115,6 +124,7 @@ fieldset.fieldset-no-legend {
 .views-displays ul.secondary li.active a,
 .views-displays ul.secondary li.active a.active {
   padding: 2px 7px 3px;
+  border-radius: 7px;
 }
 
 .views-displays ul.secondary li.active a,
@@ -304,6 +314,10 @@ table th {
  *
  * The contents of the popup dialog on the views edit form.
  */
+
+.views-ui-dialog {
+  font-size: normal;
+}
 
 .views-ui-dialog fieldset.collapsible {
   padding-top: 1.5em;
