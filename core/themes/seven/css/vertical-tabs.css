@@ -19,8 +19,8 @@ fieldset.vertical-tabs-pane {
 .vertical-tabs .vertical-tabs-list {
   border-bottom: 1px solid #ccc;
   float: left; /* LTR */
-  font-size: 1em;
-  line-height: 1;
+  font-size: 0.923em;
+  line-height: 1.385em;
   margin: 0 -100% -1px 0; /* LTR */
   padding: 0;
   width: 240px;
