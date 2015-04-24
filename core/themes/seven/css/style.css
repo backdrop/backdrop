@@ -643,7 +643,7 @@ div.teaser-checkbox .form-item,
 }
 .form-item label {
   margin: 0;
-  padding: 0;
+  padding: 0px 0px 10px;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -789,16 +789,11 @@ input.form-search,
 input.form-file,
 textarea.form-textarea,
 select.form-select {
-  padding: 2px;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-top-color: #999;
-  background: #fff;
-  color: #333;
-  -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
-  -moz-transition: border linear 0.2s, box-shadow linear 0.2s;
-  transition: border linear 0.2s, box-shadow linear 0.2s;
+  color: #000;
+  background: none repeat scroll 0% 0% transparent;
+  border-radius: 4px;
+  border: 3px solid rgba(255, 255, 255, 0);
+  box-shadow: 0px 0px 0px 2px #D0D0D0;
 }
 input.form-text:focus,
 input.form-tel:focus,
