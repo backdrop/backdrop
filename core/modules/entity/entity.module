@@ -59,6 +59,7 @@ function entity_get_info($entity_type = NULL) {
           'load hook' => $name . '_load',
           'bundles' => array(),
           'view modes' => array(),
+          'token type' => $name,
           'entity keys' => array(),
           'translation' => array(),
         );

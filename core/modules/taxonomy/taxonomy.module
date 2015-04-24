@@ -67,6 +67,7 @@ function taxonomy_entity_info() {
         'id' => 'tid',
         'bundle' => 'vocabulary',
       ),
+      'token type' => 'term',
       'bundle keys' => array(
         'bundle' => 'machine_name',
       ),
@@ -1192,6 +1193,7 @@ function taxonomy_field_info() {
       'description' => t('This field stores a reference to a taxonomy term.'),
       'default_widget' => 'options_select',
       'default_formatter' => 'taxonomy_term_reference_link',
+      'default_token_formatter' => 'taxonomy_term_reference_plain',
       'settings' => array(
         'allowed_values' => array(
           array(

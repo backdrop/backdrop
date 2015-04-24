@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the system module.
@@ -470,6 +469,30 @@ function system_requirements($phase) {
     }
   }
 
+  if ($phase == 'runtime') {
+    // Check for various token definition problems.
+    $token_problems = token_get_token_problems();
+    // Format and display each token problem.
+    foreach ($token_problems as $problem_key => $problem) {
+      if (!empty($problem['problems'])) {
+        $problems = array_unique($problem['problems']);
+        $problems = array_map('check_plain', $problems);
+        $token_problems[$problem_key] = $problem['label'] . theme('item_list', array('items' => $problems));
+      }
+      else {
+        unset($token_problems[$problem_key]);
+      }
+    }
+    if (!empty($token_problems)) {
+      $requirements['token_problems'] = array(
+        'title' => $t('Tokens'),
+        'value' => $t('Problems detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
+      );
+    }
+  }
+
   return $requirements;
 }
 
@@ -612,6 +635,8 @@ function system_schema() {
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
   $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
+  $schema['cache_token'] = $schema['cache'];
+  $schema['cache_token']['description'] = 'Cache table for token information.';
 
   $schema['file_managed'] = array(
     'description' => 'Stores information for uploaded files.',

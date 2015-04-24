@@ -52,6 +52,11 @@ define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 define('EMAIL_MAX_LENGTH', 254);
 
 /**
+ * The maximum depth for token tree recursion.
+ */
+define('TOKEN_MAX_DEPTH', 9);
+
+/**
  * Implements hook_theme().
  */
 function system_theme() {
@@ -100,6 +105,37 @@ function system_theme() {
       'template' => 'templates/block--system--main',
       //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
+    ) + $base,
+    'tree_table' => array(
+      'variables' => array(
+        'header' => array(),
+        'rows' => array(),
+        'attributes' => array(),
+        'empty' => '',
+        'caption' => '',
+      ),
+    ) + $base,
+    'token_tree' => array(
+      'variables' => array(
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => FALSE,
+      ),
+    ) + $base,
+    'token_tree_link' => array(
+      'variables' => array(
+        'text' => NULL,
+        'options' => array(),
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => TRUE,
+      ),
     ) + $base,
   ));
 }
@@ -538,6 +574,7 @@ function system_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
   $items['admin'] = array(
     'title' => 'Administration',
     'access arguments' => array('access administration pages'),
@@ -665,7 +702,6 @@ function system_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
-
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
     'description' => 'Administration tools.',
@@ -953,6 +989,30 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
+
+  // Token paths.
+  $items['token/autocomplete/%token_type'] = array(
+    'page callback' => 'system_autocomplete_token',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+  );
+  /*$items['token/autocomplete/%token_type/%menu_tail'] = array(
+    'page callback' => 'system_autocomplete_token',
+    'page arguments' => array(2, 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+  );*/
+  $items['token/tree'] = array(
+    'page callback' => 'system_token_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
   return $items;
 }
 
@@ -1718,8 +1778,39 @@ function system_library_info() {
     ),
   );
 
+  // Tokens.
+  $libraries['token'] = array(
+    'title' => 'Token behaviors',
+    'version' => '1.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.treetable'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['jquery.treetable'] = array(
+    'title' => 'jQuery treetable',
+    'website' => 'http://plugins.jquery.com/project/treetable',
+    'version' => '3.2.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+    ),
+  );
+
   return $libraries;
 }
+
 
 /**
  * Implements hook_stream_wrappers().

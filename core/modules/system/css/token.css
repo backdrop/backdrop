@@ -1,0 +1,34 @@
+/**
+ * Styles for displaying the token tree and dialog.
+ */
+.token-dialog {
+  max-width: none !important;
+}
+
+.token-tree {
+  font-size: 0.85em;
+}
+.token-tree td,
+.token-tree th {
+  padding-top: 0;
+  padding-bottom: 0;
+  vertical-align: top;
+}
+.token-tree .token-name {
+  width: 30%;
+  white-space: nowrap;
+}
+.token-tree .token-token {
+  white-space: nowrap;
+}
+.token-tree .token-key {
+  float: left;
+}
+.token-tree .token-more {
+  float: right;
+}
+.token-tree .token-description {
+  color: #666;
+  white-space: normal;
+  clear: both;
+}

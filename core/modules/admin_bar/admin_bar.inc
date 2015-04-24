@@ -753,7 +753,7 @@ function admin_bar_admin_bar_cache_info() {
 }
 
 /**
- * Implements hook_admin_bar_cache_info() on behalf of System module.
+ * Implements hook_admin_bar_cache_info().
  */
 function system_admin_bar_cache_info() {
   $caches = array(
@@ -761,6 +761,7 @@ function system_admin_bar_cache_info() {
     'cache' => t('Page and else'),
     'menu' => t('Menu'),
     'theme' => t('Theme registry'),
+    'token' => t('Token registry'),
   );
   foreach ($caches as $name => $cache) {
     $caches[$name] = array(
@@ -804,10 +805,10 @@ function _admin_bar_flush_cache($name = NULL) {
       // Don't clear cache_form - in-progress form submissions may break.
       // Ordered so clearing the page cache will always be the last action.
       // @see backdrop_flush_all_caches()
-      $core = array('cache', 'cache_bootstrap', 'cache_filter', 'cache_page');
-      $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
-      foreach ($cache_tables as $table) {
-        cache_clear_all('*', $table, TRUE);
+      $core = array('cache', 'path', 'filter', 'bootstrap', 'token', 'page');
+      $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
+      foreach ($cache_bins as $bin) {
+        cache($bin)->flush();
       }
       break;
 
@@ -827,6 +828,9 @@ function _admin_bar_flush_cache($name = NULL) {
       system_rebuild_theme_data();
       backdrop_theme_rebuild();
       break;
+
+    case 'token':
+      token_clear_cache();
+      break;
   }
 }
-

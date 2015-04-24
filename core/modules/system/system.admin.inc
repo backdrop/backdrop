@@ -2237,6 +2237,7 @@ function system_date_delete_format_form($form, &$form_state, $format) {
 function system_date_delete_format_form_submit($form, &$form_state) {
   $format = $form_state['format'];
   system_date_format_delete($format['name']);
+  token_clear_cache();
   backdrop_set_message(t('Removed date format %format.', array('%format' => $format['label'])));
   $form_state['redirect'] = 'admin/config/regional/date-time/formats';
 }
@@ -2372,6 +2373,7 @@ function system_configure_date_formats_form_submit($form, &$form_state) {
   $format = (array) $form_state['format'];
   $format = array_merge($format, $form_state['values']);
   system_date_format_save($format);
+  token_clear_cache();
   if (!empty($form_state['values']['name'])) {
     backdrop_set_message(t('Date format updated.'));
   }

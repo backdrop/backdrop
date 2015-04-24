@@ -26,6 +26,7 @@ function file_field_info() {
       ),
       'default_widget' => 'file_generic',
       'default_formatter' => 'file_default',
+      'default_token_formatter' => 'file_url_plain',
     ),
   );
 }
