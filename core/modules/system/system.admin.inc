@@ -2044,7 +2044,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function system_clean_url_settings($form, &$form_state) {
+function system_urls_settings($form, &$form_state) {
   $available = FALSE;
   $conflict = FALSE;
 
@@ -2054,7 +2054,7 @@ function system_clean_url_settings($form, &$form_state) {
     $available = TRUE;
   }
   else {
-    $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/search/clean-urls/check');
+    $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/search/urls/check');
     // If the request returns HTTP 200, clean URLs are available.
     if (isset($request->code) && $request->code == 200) {
       $available = TRUE;
@@ -2126,16 +2126,26 @@ function system_clean_url_settings($form, &$form_state) {
       '#value' => 1,
     );
   }
+  
+  $form['canonical_secure'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use HTTPS for canonical URLs'),
+    '#default_value' => config_get('system.core', 'canonical_secure'),
+    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable "https" should be set to TRUE in your file <code>settings.php</code>' ),
+  );
 
   return $form;
 }
 
 /**
- * Submit handler for system_clean_url_settings().
+ * Submit handler for system_urls_settings().
  */
-function system_clean_url_settings_submit($form, $form_state) {
+function system_urls_settings_submit($form, $form_state) {
+  $config = config('system.core');
+  $config->set('clean_url', $form_state['values']['clean_url']);
+  $config->set('canonical_secure', $form_state['values']['canonical_secure']);
+  $config->save();
   backdrop_set_message(t('The configuration options have been saved.'));
-  config_set('system.core', 'clean_url', $form_state['values']['clean_url']);
 }
 
 /**
