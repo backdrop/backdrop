@@ -112,9 +112,16 @@ input.form-checkbox,
 input.form-radio {
   vertical-align: middle;
 }
-.marker,
 .form-required {
   color: #f00;
+}
+.marker{
+  font-size: 0.9em;
+  color: #234600;
+  background-color: #e6f2ba;
+  padding: 0 0.4em;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
 }
 abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
   border-bottom: none;
