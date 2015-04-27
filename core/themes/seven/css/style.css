@@ -367,13 +367,14 @@ ul.secondary li.active a.active {
   /* Add a margin to all layouts. */
   margin: 0 20px;
 }
-.l-header {
-  /* Then add a negative margin the header the same amount. */
+body > .layout > .l-header {
+  /* High specificity so we don't mess up layouts in edit layout page */
+  /* Adds a negative margin the header the same amount. */
   padding: 20px 20px 0;
-  margin: 0 -20px 20px !important;
-  -webkit-box-sizing: content-box !important;
-  -moz-box-sizing: content-box !important;
-  box-sizing: content-box !important;
+  margin: 0 -20px 20px;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
   background-color: #f0f0f0;
 }
 .layout--one-column #messages,
