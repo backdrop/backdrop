@@ -5,6 +5,14 @@
  */
 
 /**
+ * Set width of dropbuttons where extra width is needed
+ */
+#system-modules .dropbutton-wrapper div,
+#layout-edit .dropbutton-multiple div,
+#layout-list .dropbutton-wrapper div {
+  min-width: 140px;
+}
+/**
  * When a dropbutton has only one option, it is simply a button.
  */
 .dropbutton-wrapper,
@@ -112,13 +120,13 @@
   border-left-color: transparent;
   border-right-color: transparent;
   border-style: solid;
-  border-width: 0.6em 0.6em 0;
+  border-width: 0.3333em 0.3333em 0;
   display: block;
   height: 0;
   line-height: 0;
   position: absolute;
-  right: 25%; /* 0.6667em; */ /* LTR */
-  top: 45%;
+  right: 40%; /* 0.6667em; */ /* LTR */
+  top: 50%;
   margin-top: -0.1666em;
   width: 0;
   overflow: hidden;
@@ -128,7 +136,7 @@
   right: auto;
 }
 .dropbutton-multiple.open .dropbutton-arrow {
-  border-bottom: 0.7em solid;
+  border-bottom: 0.3333em solid;
   border-top-color: transparent;
   top: 0.6667em;
 }
