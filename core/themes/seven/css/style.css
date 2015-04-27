@@ -465,7 +465,9 @@ th {
 }
 tr.even,
 tr.odd {
-  border: 0;
+  border: 1px solid #f7f7f7;
+  border-top: 0;
+  border-bottom: 0;
   background: #f7f7f7;
 }
 tr.odd {
