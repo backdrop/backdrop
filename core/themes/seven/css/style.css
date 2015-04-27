@@ -367,13 +367,29 @@ ul.secondary li.active a.active {
   margin: 0 20px;
 }
 .l-header {
-  /* Then add a negative margin the header the same amount. */
-  padding: 20px 20px 0;
-  margin: 0 -20px 20px !important;
-  -webkit-box-sizing: content-box !important;
-  -moz-box-sizing: content-box !important;
-  box-sizing: content-box !important;
+  position: relative;
+  padding: 20px 0 0;
+  margin: 0 0 20px;
+}
+.l-header:before {
+  /* Gray bar background */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  margin: 0 -20px;
+  z-index: 0;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
   background-color: #f0f0f0;
+}
+.l-header > * {
+  /* Makes sure gray bar is behind header content */
+  position: relative;
+  z-index: 1;
 }
 .layout--one-column #messages,
 .layout--one-column #content .section {
@@ -1015,6 +1031,10 @@ div.admin-panel h3 {
   padding: 0;
   margin: 0;
   background: none;
+}
+#layout-edit-main .l-header:before {
+  /* Make sure the page gray bg isn't showing inside layout edit area */
+  background: transparent;
 }
 #layout-edit-main #page-title {
   float: none;

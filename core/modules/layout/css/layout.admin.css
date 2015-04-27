@@ -56,19 +56,25 @@
 }
 
 /* Layout editor. */
-.layout-editor-region-content {
+.layout-editor-region {
   min-height: 70px;
+  margin: 0 0 15px;
+  padding: 8px;
   border: 1px dashed #CCC;
-  padding: 5px;
   background: white;
 }
 .layout-editor-region-title .label {
   float: left;
-  vertical-align: middle;
-  margin: 10px 12px 10px 0; /* LTR */
+  margin: 0 12px 0 0; /* LTR */
+  padding: 4px 0;
+  line-height: 1.2;
+}
+.layout-editor-region-content {
+  min-height: 40px;
 }
 [dir="rtl"] .layout-editor-region-title .label {
-  margin: 10px 0 10px 12px;
+  margin-right: 0;
+  margin-left: 12px;
 }
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
@@ -79,7 +85,7 @@
   cursor: move;
 }
 .layout-editor-block {
-  margin: -1px -1px 1em -1px;
+  margin: -1px -1px 10px -1px;
   background: #FFF;
 }
 .layout-editor-block:last-child {
@@ -91,7 +97,7 @@
   padding: 0.4em 1em;
 }
 .layout-editor-block-title .text {
-  font-size: 120%;
+  font-size: 1.1em;
   line-height: 1.5;
   font-weight: bold;
 }
@@ -105,6 +111,7 @@
 .layout-editor-block-content {
   border: 1px solid #CCC;
   border-top: none;
+  border-bottom-width: 2px;
   padding: 0.4em 1em;
   min-height: 20px;
   font-size: 90%;
@@ -142,4 +149,9 @@
 }
 .layout-editor-placeholder {
   background-color: #EFEFEF;
+}
+
+/* Layout Misc */
+#layout-edit h1 {
+  margin: 1em 0 .6em;
 }
