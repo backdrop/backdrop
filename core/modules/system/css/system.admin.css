@@ -106,6 +106,13 @@ span.admin-missing {
 }
 
 /**
+ * Set width of dropbuttons where extra width is needed
+ */
+#system-modules .dropbutton-wrapper div {
+  min-width: 140px;
+}
+
+/**
  * Status report.
  */
 table.system-status-report td {
