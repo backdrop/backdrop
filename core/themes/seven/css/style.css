@@ -477,6 +477,9 @@ tr.drag {
 tr.drag-previous {
   background: #ffb;
 }
+tr:hover {
+  background: #ffff99;
+}
 th {
   text-transform: uppercase;
   background: #e9e8e8;
