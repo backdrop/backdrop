@@ -44,14 +44,14 @@ function user_schema() {
       ),
       'signature' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
         'description' => "User's signature.",
       ),
       'signature_format' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => FALSE,
         'description' => 'The {filter_format}.format of the signature.',
       ),

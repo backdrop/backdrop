@@ -250,7 +250,7 @@ function hook_field_schema($field) {
   $columns += array(
     'format' => array(
       'type' => 'varchar',
-      'length' => 255,
+      'length' => 191,
       'not null' => FALSE,
     ),
   );

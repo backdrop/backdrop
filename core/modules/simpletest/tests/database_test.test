@@ -3984,7 +3984,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
       'fields' => array(
         'name' => array(
           'type' => 'varchar',
-          'length' => 255,
+          'length' => 191,
         ),
       ),
     ));

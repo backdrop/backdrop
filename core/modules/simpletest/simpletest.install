@@ -91,7 +91,7 @@ function simpletest_schema() {
       ),
       'test_class' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The name of the class that created this message.',
@@ -110,14 +110,14 @@ function simpletest_schema() {
       ),
       'message_group' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The message group this message belongs to. For example: warning, browser, user.',
       ),
       'function' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Name of the assertion function or method that created this message.',
@@ -130,7 +130,7 @@ function simpletest_schema() {
       ),
       'file' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Name of the file where the function is called.',
