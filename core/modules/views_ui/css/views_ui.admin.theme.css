@@ -1069,7 +1069,7 @@ div.messages {
 .dropbutton-multiple .dropbutton-widget {
   padding-right: 1.75em;
 }
-.dropbutton-wrapper {
+#views-ui-edit-form .dropbutton-wrapper {
   font-size: 11px;
   line-height: 1.4555;
 }
