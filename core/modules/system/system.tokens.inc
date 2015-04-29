@@ -60,12 +60,6 @@ function system_token_info() {
     'description' => t("The URL of the site's front page."),
     'type' => 'url',
   );
-  // Deprecated
-  $site['url-brief'] = array(
-    'name' => t('URL (brief)'),
-    'description' => t("The URL of the site's front page without the protocol."),
-    'type' => 'url',
-  );
   $site['login-url'] = array(
     'name' => t("Login page"),
     'description' => t("The URL of the site's login page."),
@@ -312,6 +306,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $replacements[$original] = url('<front>', $url_options);
           break;
 
+        // Deprecated, use url:brief instead.
         case 'url-brief':
           $replacements[$original] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
           break;
@@ -320,6 +315,11 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $replacements[$original] = url('user', $url_options);
           break;
       }
+    }
+
+    // Chained token relationships.
+    if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
+      $replacements += token_generate('url', $url_tokens, array('path' => '<front>'), $options);
     }
   }
 
@@ -606,12 +606,4 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
   }
 
   return $replacements;
-}
-
-/**
- * Implements hook_token_info_alter().
- */
-function system_token_info_alter(&$info) {
-  // Prevent deprecated tokens from being listed.
-  unset($info['tokens']['site']['url-brief']);
 }
