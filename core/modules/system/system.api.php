@@ -3632,6 +3632,9 @@ function hook_tokens_alter(array &$replacements, array $context) {
  *       the node author token provides a user object, which can then be used
  *       for token replacement data in token_replace() without having to supply
  *       a separate user object.
+ *     - deprecated (optional): If set to TRUE, the token will not be displayed
+ *       in token listings, but will still be replaced if encountered and pass
+ *       form validation by token_element_validate().
  *
  * @see hook_token_info_alter()
  * @see hook_tokens()
@@ -3645,27 +3648,27 @@ function hook_token_info() {
 
   // Core tokens for nodes.
   $node['nid'] = array(
-    'name' => t("Node ID"),
-    'description' => t("The unique ID of the node."),
+    'name' => t('Node ID'),
+    'description' => t('The unique ID of the node.'),
   );
   $node['title'] = array(
-    'name' => t("Title"),
-    'description' => t("The title of the node."),
+    'name' => t('Title'),
+    'description' => t('The title of the node.'),
   );
   $node['edit-url'] = array(
-    'name' => t("Edit URL"),
+    'name' => t('Edit URL'),
     'description' => t("The URL of the node's edit page."),
   );
 
   // Chained tokens for nodes.
   $node['created'] = array(
-    'name' => t("Date created"),
-    'description' => t("The date the node was posted."),
+    'name' => t('Date created'),
+    'description' => t('The date the node was posted.'),
     'type' => 'date',
   );
   $node['author'] = array(
-    'name' => t("Author"),
-    'description' => t("The author of the node."),
+    'name' => t('Author'),
+    'description' => t('The author of the node.'),
     'type' => 'user',
   );
 

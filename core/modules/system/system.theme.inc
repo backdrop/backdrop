@@ -486,7 +486,7 @@ function theme_token_tree_link($variables) {
   }
 
   if (!empty($variables['dialog'])) {
-    backdrop_add_library('system', 'backdrop.ajax');
+    backdrop_add_library('system', 'token');
     $variables['options']['attributes']['class'][] = 'use-ajax';
   }
 
@@ -581,6 +581,9 @@ function theme_token_tree($variables) {
     $tree = token_build_tree($type, $options);
     foreach ($tree as $token => $token_info) {
       if (!empty($token_info['restricted']) && empty($variables['show_restricted'])) {
+        continue;
+      }
+      if (!empty($token_info['deprecated'])) {
         continue;
       }
       if ($multiple_token_types && !isset($token_info['parent'])) {

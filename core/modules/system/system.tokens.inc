@@ -60,6 +60,12 @@ function system_token_info() {
     'description' => t("The URL of the site's front page."),
     'type' => 'url',
   );
+  // @deprecated: Replaced by url:brief.
+  $site['url-brief'] = array(
+    'name' => t('URL (brief)'),
+    'description' => t("The URL of the site's front page without the protocol."),
+    'deprecated' => TRUE,
+  );
   $site['login-url'] = array(
     'name' => t("Login page"),
     'description' => t("The URL of the site's login page."),
@@ -177,11 +183,6 @@ function system_token_info() {
     'description' => t('The specific value of the array.'),
     'dynamic' => TRUE,
   );
-
-  // Current date tokens.
-  if ($type == 'current-date') {
-    $replacements += token_generate('date', $tokens, array('date' => REQUEST_TIME), $options);
-  }
 
   // Date related tokens.
   $date_format_types = system_get_date_formats();
@@ -306,7 +307,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $replacements[$original] = url('<front>', $url_options);
           break;
 
-        // Deprecated, use url:brief instead.
+        // @deprecated: Use url:brief instead.
         case 'url-brief':
           $replacements[$original] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
           break;
@@ -371,6 +372,11 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
       $replacements += token_generate('url', $url_tokens, array('path' => $current_path), $options);
     }
+  }
+
+  // Current date tokens.
+  elseif ($type == 'current-date') {
+    $replacements += token_generate('date', $tokens, array('date' => REQUEST_TIME), $options);
   }
 
   // URL tokens.
