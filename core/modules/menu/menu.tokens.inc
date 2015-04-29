@@ -201,10 +201,10 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
  *
  * Access checks are always skipped when loading a menu item for a token.
  *
- * @param $mlid
+ * @param int $mlid
  *   The menu link ID of the menu item.
  *
- * @return
+ * @return array
  *   A menu link translated for rendering.
  *
  * @see menu_link_load()
@@ -226,10 +226,10 @@ function _menu_token_link_load($mlid) {
 /**
  * Load all menu parents given a Menu Link ID.
  *
- * @param $mlid
+ * @param int $mlid
  *   Menu Link ID.
  *
- * @return
+ * @return array
  *   Array of link titles keyed by menu link ID.
  */
 function _menu_token_link_load_all_parents($mlid) {
@@ -257,7 +257,7 @@ function _menu_token_link_load_all_parents($mlid) {
  * @param Node $node
  *   A node object for which a menu link should be loaded.
  *
- * @return
+ * @return array|FALSE
  *   A menu link array from _menu_token_link_load() or FALSE if a menu link was
  *   not found.
  *

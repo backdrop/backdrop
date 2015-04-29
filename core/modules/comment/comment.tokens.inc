@@ -34,6 +34,11 @@ function comment_token_info() {
     'name' => t('IP Address'),
     'description' => t('The IP address of the computer the comment was posted from.'),
   );
+  $comment['name'] = array(
+    'name' => t('Name'),
+    'description' => t('The name left by the comment author.'),
+    'deprecated' => TRUE,
+  );
   $comment['mail'] = array(
     'name' => t('Email address'),
     'description' => t('The email address left by the comment author.'),

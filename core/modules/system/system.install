@@ -2487,7 +2487,7 @@ function system_update_1037() {
  * Upgrade or prepare for token module in core.
  */
 function system_update_1038() {
-  // Manually install schema, as update_module_enable() does not do this for us.
+  // Manually install the schema for token's cache table.
   if (!db_table_exists('cache_token')) {
     $cache_token = backdrop_get_schema_unprocessed('system', 'cache');
     $cache_token['description'] = 'Cache table for token information.';

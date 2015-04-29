@@ -5,7 +5,7 @@
  */
 
 /**
- * Implements hook_token_info_alter() on behalf of field.module.
+ * Implements hook_token_info_alter().
  *
  * We use hook_token_info_alter() rather than hook_token_info() as other
  * modules may already have defined some field tokens.
@@ -13,7 +13,7 @@
 function field_token_info_alter(&$info) {
   $fields = _field_token_info();
 
-  // Attach field tokens to their respecitve entity tokens.
+  // Attach field tokens to their respective entity tokens.
   foreach ($fields as $field_name => $field) {
     foreach (array_keys($field['bundles']) as $token_type) {
       // If a token already exists for this field, then don't add it.
@@ -42,7 +42,7 @@ function field_token_info_alter(&$info) {
 }
 
 /**
- * Implements hook_tokens() on behalf of field.module.
+ * Implements hook_tokens().
  */
 function field_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test integration for the token module.
@@ -311,6 +310,9 @@ class TokenUnitTestCase extends TokenTestHelper {
         '[date:short]',
         '[current-user:uid]',
         '[current-user:ip-address]',
+        // Deprecated tokens:
+        '[node:type]',
+        '[node:type-name]',
       ),
       'invalid tokens' => array(
         '[node:title:invalid]',
@@ -321,8 +323,6 @@ class TokenUnitTestCase extends TokenTestHelper {
         '[user:ip-address]',
         '[user:uid]',
         '[comment:cid]',
-        '[node:type]',
-        '[node:type-name]',
         '[date:short]',
       ),
       'types' => array('node'),
@@ -339,6 +339,9 @@ class TokenUnitTestCase extends TokenTestHelper {
         '[user:ip-address]',
         '[date:short]',
         '[current-user:uid]',
+        // Deprecated tokens:
+        '[node:type]',
+        '[node:type-name]',
       ),
       'invalid tokens' => array(
         '[node:title:invalid]',
@@ -347,8 +350,6 @@ class TokenUnitTestCase extends TokenTestHelper {
         '[invalid:title]',
         '[site:invalid]',
         '[comment:cid]',
-        '[node:type]',
-        '[node:type-name]',
       ),
       'types' => array('all'),
     );

@@ -1820,6 +1820,7 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests = array();
     $tests['[comment:cid]'] = $comment->cid;
     $tests['[comment:hostname]'] = check_plain($comment->hostname);
+    $tests['[comment:name]'] = filter_xss($comment->name);
     $tests['[comment:mail]'] = check_plain($this->admin_user->mail);
     $tests['[comment:homepage]'] = check_url($comment->homepage);
     $tests['[comment:title]'] = filter_xss($comment->subject);
@@ -1846,6 +1847,7 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
 
     // Generate and test unsanitized tokens.
     $tests['[comment:hostname]'] = $comment->hostname;
+    $tests['[comment:name]'] = $comment->name;
     $tests['[comment:mail]'] = $this->admin_user->mail;
     $tests['[comment:homepage]'] = $comment->homepage;
     $tests['[comment:title]'] = $comment->subject;

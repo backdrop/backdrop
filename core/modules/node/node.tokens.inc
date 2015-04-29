@@ -31,15 +31,17 @@ function node_token_info() {
     'description' => t('The human-readable name of the content type.'),
     'type' => 'content-type',
   );
-  // Deprecated, see node_token_info_alter() below.
+  // @deprecated: Use node:content-type:name
   $node['type-name'] = array(
     'name' => t('Content type name'),
     'description' => t('The human-readable name of the content type.'),
+    'deprecated' => TRUE,
   );
-  // Deprecated, see node_token_info_alter() below.
+  // @deprecated: Use node:content-type
   $node['type'] = array(
     'name' => t('Content type'),
     'description' => t('The machine name of the content type.'),
+    'deprecated' => TRUE,
   );
   $node['title'] = array(
     'name' => t('Title'),
@@ -314,13 +316,4 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
   }
 
   return $replacements;
-}
-
-/**
- * Implements hook_token_info_alter().
- */
-function node_token_info_alter(&$info) {
-  // Prevent deprecated tokens from being listed.
-  unset($info['tokens']['node']['type']);
-  unset($info['tokens']['node']['type-name']);
 }
