@@ -12,6 +12,14 @@
   color: #999;
 }
 
+/**
+ * Set width of dropbuttons where extra width is needed
+ */
+#layout-list .dropbutton-multiple div,
+#layout-edit .dropbutton-wrapper div {
+  min-width: 140px;
+}
+
 /* Individual layout settings form. */
 .layout-settings-form .layout-options {
   width: 100%;
