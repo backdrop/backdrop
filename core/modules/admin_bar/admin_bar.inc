@@ -830,7 +830,7 @@ function _admin_bar_flush_cache($name = NULL) {
       break;
 
     case 'token':
-      token_clear_cache();
+      token_cache_clear();
       break;
   }
 }

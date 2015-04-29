@@ -592,7 +592,7 @@ function user_admin_settings_submit($form, &$form_state) {
   $config->save();
 
   // Clear the token cache.
-  token_clear_cache();
+  token_cache_clear();
 
   backdrop_set_message(t('The configuration options have been saved.'));
 }

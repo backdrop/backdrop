@@ -378,7 +378,7 @@ function token_get_global_token_types() {
 /**
  * Clear token caches and static variables.
  */
-function token_clear_cache() {
+function token_cache_clear() {
   if (db_table_exists('cache_token')) {
     cache_clear_all('*', 'cache_token', TRUE);
   }
