@@ -47,15 +47,15 @@
 /**
  * Replaces all tokens in a given string with appropriate values.
  *
- * @param $text
+ * @param string $text
  *   A string potentially containing replaceable tokens.
- * @param $data
+ * @param array $data
  *   (optional) An array of keyed objects. For simple replacement scenarios
  *   'node', 'user', and others are common keys, with an accompanying node or
  *   user object being the value. Some token types, like 'site', do not require
  *   any explicit information from $data and can be replaced even if it is
  *   empty.
- * @param $options
+ * @param array $options
  *   (optional) A keyed array of settings and flags to control the token
  *   replacement process. Supported options are:
  *   - language: A language object to be used when generating locale-sensitive
@@ -104,10 +104,10 @@ function token_replace($text, array $data = array(), array $options = array()) {
 /**
  * Builds a list of all token-like patterns that appear in the text.
  *
- * @param $text
+ * @param string $text
  *   The text to be scanned for possible tokens.
  *
- * @return
+ * @return array
  *   An associative array of discovered tokens, grouped by type.
  */
 function token_scan($text) {
@@ -139,18 +139,18 @@ function token_scan($text) {
 /**
  * Generates replacement values for a list of tokens.
  *
- * @param $type
+ * @param string $type
  *   The type of token being replaced. 'node', 'user', and 'date' are common.
- * @param $tokens
+ * @param array $tokens
  *   An array of tokens to be replaced, keyed by the literal text of the token
  *   as it appeared in the source text.
- * @param $data
+ * @param array $data
  *   (optional) An array of keyed objects. For simple replacement scenarios
  *   'node', 'user', and others are common keys, with an accompanying node or
  *   user object being the value. Some token types, like 'site', do not require
  *   any explicit information from $data and can be replaced even if it is
  *   empty.
- * @param $options
+ * @param array $options
  *   (optional) A keyed array of settings and flags to control the token
  *   replacement process. Supported options are:
  *   - language: A language object to be used when generating locale-sensitive
@@ -164,7 +164,7 @@ function token_scan($text) {
  *     responsibility for running filter_xss(), check_plain() or other
  *     appropriate scrubbing functions before displaying data to users.
  *
- * @return
+ * @return array
  *   An associative array of replacement values, keyed by the original 'raw'
  *   tokens that were found in the source text. For example:
  *   $results['[node:title]'] = 'My new node';
@@ -203,15 +203,15 @@ function token_generate($type, array $tokens, array $data = array(), array $opti
  *   $results == array('name' => '[node:author:name]');
  * @endcode
  *
- * @param $tokens
+ * @param array $tokens
  *   A keyed array of tokens, and their original raw form in the source text.
- * @param $prefix
+ * @param string $prefix
  *   A textual string to be matched at the beginning of the token.
- * @param $delimiter
+ * @param string $delimiter
  *   An optional string containing the character that separates the prefix from
  *   the rest of the token. Defaults to ':'.
  *
- * @return
+ * @return array
  *   An associative array of discovered tokens, with the prefix and delimiter
  *   stripped from the key.
  */
@@ -250,7 +250,7 @@ function token_find_with_prefix(array $tokens, $prefix, $delimiter = ':') {
  *   );
  * @endcode
  *
- * @return
+ * @return array
  *   An associative array of token information, grouped by token type.
  */
 function token_info() {
@@ -265,14 +265,14 @@ function token_info() {
 /**
  * Retrieve, sort, store token info from the cache.
  *
- * @param $token_type
+ * @param string|NULL $token_type
  *   The optional token type that if specified will return
  *   $info['types'][$token_type].
- * @param $token_name
+ * @param string|NULL $token_name
  *   The optional token name if specified will return
  *   $info['tokens'][$token_type][$token_name].
  *
- * @return
+ * @return array
  *   An array of all token information from hook_token_info(), or the array
  *   of a token type or specific token.
  *
@@ -344,8 +344,8 @@ function token_get_info($token_type = NULL, $token_name = NULL) {
  *   The token name.
  *
  * @return mixed
- *   The value of $info['tokens'][$type][$name]['module'] from token_get_info(),
- *   or NULL if the value does not exist.
+ *   The module name that provides the token or NULL if the value does not
+ *   exist.
  */
 function token_get_module($token_type, $token_name) {
   $token_info = token_get_info($token_type, $token_name);
@@ -355,7 +355,7 @@ function token_get_module($token_type, $token_name) {
 /**
  * Get a list of token types that can be used without any context (global).
  *
- * @return
+ * @return array
  *   An array of global token types.
  */
 function token_get_global_token_types() {
@@ -380,7 +380,7 @@ function token_get_global_token_types() {
  */
 function token_cache_clear() {
   if (db_table_exists('cache_token')) {
-    cache_clear_all('*', 'cache_token', TRUE);
+    cache('token')->flush();
   }
   backdrop_static_reset('token_get_info');
   backdrop_static_reset('token_get_global_token_types');
@@ -391,7 +391,15 @@ function token_cache_clear() {
 }
 
 /**
- * Get token problems.
+ * Retrieves the current list of all site tokens and checks for common problems.
+ *
+ * @return array
+ *   An array with problems detected. Each item is keyed by a machine name for
+ *   the error and includes:
+ *   - label: A description of the problem.
+ *   - problems: An array of the problematic tokens.
+ *
+ * @see system_requirements()
  */
 function token_get_token_problems() {
   $token_info = token_info();
@@ -459,10 +467,10 @@ function token_get_token_problems() {
 /**
  * Loads a token type.
  *
- * @param $token_type
+ * @param string $token_type
  *   A token type name.
  *
- * @return
+ * @return array
  *  An array representing the token type. FALSE if no type found.
  */
 function token_type_load($token_type) {
@@ -473,19 +481,28 @@ function token_type_load($token_type) {
 /**
  * Build a tree array of tokens used for theming or information.
  *
- * @param $token_type
+ * @param string $token_type
  *   The token type.
+ * @param array $options
+ *   An array of options including the following keys:
+ *   - flat: A boolean if TRUE will only make a flat array of tokens, otherwise
+ *     child tokens will be inside the 'children' parameter of a token.
+ *   - restricted: A boolean if TRUE will show restricted tokens. Otherwise they
+ *     will be hidden. Default is FALSE.
+ *   - depth: An integer with the maximum number of token levels to recurse.
+ *   - parents: An optional array with the current parents of the tokens.
  *
- * @param $flat_tree
- *   A boolean if TRUE will only make a flat array of tokens, otherwise
- *   child tokens will be inside the 'children' parameter of a token.
- * @param $show_restricted
- *   A boolean if TRUE will show restricted tokens. Otherwise they will be
- *   hidden. Default is FALSE.
- * @param $recursion_limit
- *   An integer with the maximum number of token levels to recurse.
- * @param $parents
- *   An optional array with the current parents of the tokens.
+ * @return array
+ *   An array of token information, keyed by the full token and each containing:
+ *   - name: The translated human-readable name of the token.
+ *   - description: The translated description of the token.
+ *   - raw token: The full token (same as the key of this entry).
+ *   - restricted: Optionally present if the token is should only be available
+ *     in trusted environments.
+ *   - deprecated: Optionally present if the token will be removed from a future
+ *     version of Backdrop and should not be used.
+ *   - token: The last portion of the token. e.g. in [node:nid], the value would
+ *     be nid.
  */
 function token_build_tree($token_type, array $options = array()) {
   global $language_content;
@@ -552,6 +569,11 @@ function token_build_tree($token_type, array $options = array()) {
 
 /**
  * Flatten a token tree.
+ *
+ * @param array $tree
+ *   An array of tokens as returned by token_build_tree().
+ * @return array
+ *   The array of tokens as flat array.
  */
 function token_flatten_tree($tree) {
   $result = array();
@@ -559,14 +581,13 @@ function token_flatten_tree($tree) {
     $result[$token] = $token_info;
     if (isset($token_info['children']) && is_array($token_info['children'])) {
       $result += token_flatten_tree($token_info['children']);
-      // unset($result[$token]['children']);
+      unset($result[$token]['children']);
     }
   }
   return $result;
 }
-
 /**
- * Generate a token tree.
+ * Recursive helper for token_build_tree().
  */
 function _token_build_tree($token_type, array $options) {
   $options += array(
@@ -683,9 +704,9 @@ function token_element_validate(&$element, &$form_state) {
 /**
  * Prepare a string for use as a valid token name.
  *
- * @param $name
+ * @param string $name
  *   The token name to clean.
- * @return
+ * @return string
  *   The cleaned token name.
  */
 function token_clean_token_name($name) {
@@ -704,16 +725,16 @@ function token_clean_token_name($name) {
 /**
  * Validate an tokens in raw text based on possible contexts.
  *
- * @param $value
+ * @param string $value
  *   A string with the raw text containing the raw tokens, or an array of
  *   tokens from token_scan().
- * @param $tokens
+ * @param array $valid_types
  *   An array of token types that will be used when token replacement is
  *   performed.
- * @return
+ * @return array
  *   An array with the invalid tokens in their original raw forms.
  */
-function token_get_invalid_tokens_by_context($value, $valid_types = array()) {
+function token_get_invalid_tokens_by_context($value, array $valid_types = array()) {
   if (in_array('all', $valid_types)) {
     $info = token_get_info();
     $valid_types = array_keys($info['types']);
@@ -744,14 +765,14 @@ function token_get_invalid_tokens_by_context($value, $valid_types = array()) {
 /**
  * Validate an array of tokens based on their token type.
  *
- * @param $type
+ * @param string $type
  *   The type of tokens to validate (e.g. 'node', etc.)
- * @param $tokens
+ * @param array $tokens
  *   A keyed array of tokens, and their original raw form in the source text.
- * @return
+ * @return array
  *   An array with the invalid tokens in their original raw forms.
  */
-function token_get_invalid_tokens($type, $tokens) {
+function token_get_invalid_tokens($type, array $tokens) {
   $token_info = token_get_info();
   $invalid_tokens = array();
 
@@ -787,14 +808,14 @@ function token_get_invalid_tokens($type, $tokens) {
 /**
  * Renders a render array for display as a token.
  *
- * @param $array
- *   Render array.
- * @param $options
+ * @param array $array
+ *   The render array to be converted to HTML.
+ * @param array $options
  *   Array of options for rendering.  Values can include:
  *   - sanitize: Runs check_plain() on the rendered output.
  *   - join: Joins rendered items together with a comma.
  *
- * @return
+ * @return string
  *   HTML of rendered item.
  *
  * @see token_render_array_value()
@@ -817,9 +838,9 @@ function token_render_array(array $array, array $options = array()) {
 /**
  * Renders a render array for display as a token.
  *
- * @param $value
+ * @param string $value
  *   Value OR Render array.
- * @param $options
+ * @param array $options
  *   Array of options for rendering.  Values can include:
  *   - sanitize: Runs check_plain() on the rendered output.
  *
