@@ -289,9 +289,6 @@ function user_admin_settings($form, &$form_state) {
     '#type' => 'vertical_tabs',
   );
 
-  // Add token JavaScript to the form.
-  $form['#attached']['js'][] = backdrop_get_path('module', 'system') . '/js/token.js';
-
   // Add a link to browse available tokens.
   $email_token_link = theme('token_tree_link', array(
     'token_types' => array('user'),

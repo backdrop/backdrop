@@ -160,7 +160,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           break;
 
         case 'parents':
-          if ($parents = token_taxonomy_term_load_all_parents($term->tid)) {
+          if ($parents = _taxonomy_token_term_parent_list($term->tid)) {
             $replacements[$original] = token_render_array($parents, $options);
           }
           break;
@@ -191,7 +191,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
     }
     // [term:parents:*] chained tokens.
     if ($parents_tokens = token_find_with_prefix($tokens, 'parents')) {
-      if ($parents = token_taxonomy_term_load_all_parents($term->tid)) {
+      if ($parents = _taxonomy_token_term_parent_list($term->tid)) {
         $replacements += token_generate('array', $parents_tokens, array('array' => $parents), $options);
       }
     }
@@ -247,4 +247,31 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
   }
 
   return $replacements;
+}
+
+/**
+ * Get a list of a term's parents as a term ID to label map.
+ *
+ * This function is intended for use exclusively for tokens.
+ *
+ * @param $tid
+ *   Taxonomy term ID.
+ *
+ * @return
+ *   Array of taxonomy term names keyed by term ID.
+ */
+function _taxonomy_token_term_parent_list($tid) {
+  if (!is_numeric($tid)) {
+    return array();
+  }
+
+  $parent_list = array();
+  $parents = taxonomy_term_load_parents_all($tid);
+  array_shift($parents); // Remove this term from the array.
+  $parents = array_reverse($parents);
+  foreach ($parents as $term) {
+    $parent_list[$term->tid] = $term->label();
+  }
+
+  return $parent_list;
 }

@@ -129,7 +129,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           break;
 
         case 'name':
-          $name = ($comment->uid == 0) ? variable_get('anonymous', t('Anonymous')) : $comment->name;
+          $name = ($comment->uid == 0) ? config_get('system.core', 'anonymous') : $comment->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 

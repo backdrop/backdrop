@@ -42,6 +42,76 @@ function field_token_info_alter(&$info) {
 }
 
 /**
+ * Implements hook_tokens() on behalf of field.module.
+ */
+function field_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  $sanitize = !empty($options['sanitize']);
+  $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
+
+  // Entity tokens.
+  if ($type == 'entity' && !empty($data['entity_type']) && !empty($data['entity']) && !empty($data['token_type'])) {
+    $entity_type = $data['entity_type'];
+
+    // The field API does weird stuff to the entity, so let's clone it.
+    $entity = clone $data['entity'];
+
+    // Reset the prepared view flag in case token generation is called from
+    // inside field_attach_view().
+    unset($entity->_field_view_prepared);
+
+    list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+    $fields = field_info_instances($entity_type, $bundle);
+
+    foreach (array_keys($fields) as $field_name) {
+      // Do not continue if the field is empty.
+      if (empty($entity->{$field_name})) {
+        continue;
+      }
+
+      if (isset($tokens[$field_name])) {
+        $original = $tokens[$field_name];
+
+        $field_output = field_view_field($entity_type, $entity, $field_name, 'token', $langcode);
+        $field_output['#token_options'] = $options;
+        $field_output['#pre_render'][] = 'field_pre_render_token';
+        $replacements[$original] = backdrop_render($field_output);
+      }
+    }
+
+    // Remove the cloned object from memory.
+    unset($entity);
+  }
+
+  return $replacements;
+}
+
+/**
+ * Pre-render callback for field output used with tokens.
+ */
+function field_pre_render_token(&$elements) {
+  // Remove the field theme hook, attachments, and JavaScript states.
+  unset($elements['#theme']);
+  unset($elements['#states']);
+  unset($elements['#attached']);
+
+  // Prevent multi-value fields from appearing smooshed together by appending
+  // a join suffix to all but the last value.
+  $deltas = element_get_visible_children($elements);
+  $count = count($deltas);
+  if ($count > 1) {
+    $join = isset($elements['#token_options']['join']) ? $elements['#token_options']['join'] : ", ";
+    foreach ($deltas as $index => $delta) {
+      // Do not add a suffix to the last item.
+      if ($index < ($count - 1)) {
+        $elements[$delta] += array('#suffix' => $join);
+      }
+    }
+  }
+  return $elements;
+}
+
+/**
  * Fetch an array of field data used for tokens.
  */
 function _field_token_info($field_name = NULL) {
@@ -114,76 +184,4 @@ function _field_token_info($field_name = NULL) {
   }
 
   return $info;
-}
-
-/**
- * Implements hook_tokens() on behalf of field.module.
- */
-function field_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
-  $sanitize = !empty($options['sanitize']);
-  $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
-
-  // Entity tokens.
-  if ($type == 'entity' && !empty($data['entity_type']) && !empty($data['entity']) && !empty($data['token_type'])) {
-    $entity_type = $data['entity_type'];
-
-    // The field API does weird stuff to the entity, so let's clone it.
-    $entity = clone $data['entity'];
-
-    // Reset the prepared view flag in case token generation is called from
-    // inside field_attach_view().
-    unset($entity->_field_view_prepared);
-
-    list(, , $bundle) = entity_extract_ids($entity_type, $entity);
-    $fields = field_info_instances($entity_type, $bundle);
-
-    foreach (array_keys($fields) as $field_name) {
-      // Do not continue if the field is empty.
-      if (empty($entity->{$field_name})) {
-        continue;
-      }
-
-      // Replace the [entity:field-name] token only if token module added this
-      // token.
-      if (isset($tokens[$field_name]) && _token_module($data['token_type'], $field_name) == 'token') {
-        $original = $tokens[$field_name];
-
-        $field_output = field_view_field($entity_type, $entity, $field_name, 'token', $langcode);
-        $field_output['#token_options'] = $options;
-        $field_output['#pre_render'][] = 'field_pre_render_token';
-        $replacements[$original] = backdrop_render($field_output);
-      }
-    }
-
-    // Remove the cloned object from memory.
-    unset($entity);
-  }
-
-  return $replacements;
-}
-
-/**
- * Pre-render callback for field output used with tokens.
- */
-function field_pre_render_token(&$elements) {
-  // Remove the field theme hook, attachments, and JavaScript states.
-  unset($elements['#theme']);
-  unset($elements['#states']);
-  unset($elements['#attached']);
-
-  // Prevent multi-value fields from appearing smooshed together by appending
-  // a join suffix to all but the last value.
-  $deltas = element_get_visible_children($elements);
-  $count = count($deltas);
-  if ($count > 1) {
-    $join = isset($elements['#token_options']['join']) ? $elements['#token_options']['join'] : ", ";
-    foreach ($deltas as $index => $delta) {
-      // Do not add a suffix to the last item.
-      if ($index < ($count - 1)) {
-        $elements[$delta] += array('#suffix' => $join);
-      }
-    }
-  }
-  return $elements;
 }

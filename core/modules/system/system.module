@@ -999,20 +999,6 @@ function system_menu() {
   );
 
   // Token paths.
-  $items['token/autocomplete/%token_type'] = array(
-    'page callback' => 'system_autocomplete_token',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-    'file' => 'system.pages.inc',
-  );
-  /*$items['token/autocomplete/%token_type/%menu_tail'] = array(
-    'page callback' => 'system_autocomplete_token',
-    'page arguments' => array(2, 3),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-    'file' => 'system.pages.inc',
-  );*/
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,

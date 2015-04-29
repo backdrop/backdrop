@@ -268,9 +268,9 @@ function token_info() {
  * @param $token_type
  *   The optional token type that if specified will return
  *   $info['types'][$token_type].
- * @param $token
+ * @param $token_name
  *   The optional token name if specified will return
- *   $info['tokens'][$token_type][$token].
+ *   $info['tokens'][$token_type][$token_name].
  *
  * @return
  *   An array of all token information from hook_token_info(), or the array
@@ -279,7 +279,7 @@ function token_info() {
  * @see hook_token_info()
  * @see hook_token_info_alter()
  */
-function token_get_info($token_type = NULL, $token = NULL) {
+function token_get_info($token_type = NULL, $token_name = NULL) {
   global $language_content;
 
   $cache_token = cache('token');
@@ -318,17 +318,14 @@ function token_get_info($token_type = NULL, $token = NULL) {
 
       // Pre-sort tokens.
       backdrop_sort($token_info['types'], array('name' => SORT_STRING));
-      foreach (array_keys($token_info['tokens']) as $type) {
-        backdrop_sort($token_info['types'], array('name' => SORT_STRING));
-      }
 
       // Store info in cache for future use.
       $cache_token->set($cid, $token_info);
     }
   }
 
-  if (isset($token_type) && isset($token)) {
-    return isset($token_info['tokens'][$token_type][$token]) ? $token_info['tokens'][$token_type][$token] : NULL;
+  if (isset($token_type) && isset($token_name)) {
+    return isset($token_info['tokens'][$token_type][$token_name]) ? $token_info['tokens'][$token_type][$token_name] : NULL;
   }
   elseif (isset($token_type)) {
     return isset($token_info['types'][$token_type]) ? $token_info['types'][$token_type] : NULL;
@@ -336,6 +333,23 @@ function token_get_info($token_type = NULL, $token = NULL) {
   else {
     return $token_info;
   }
+}
+
+/**
+ * Return the module responsible for a token.
+ *
+ * @param string $token_type
+ *   The token type.
+ * @param string $token_name
+ *   The token name.
+ *
+ * @return mixed
+ *   The value of $info['tokens'][$type][$name]['module'] from token_get_info(),
+ *   or NULL if the value does not exist.
+ */
+function token_get_module($token_type, $token_name) {
+  $token_info = token_get_info($token_type, $token_name);
+  return isset($token_info['module']) ? $token_info['module'] : NULL;
 }
 
 /**
@@ -371,10 +385,9 @@ function token_clear_cache() {
   backdrop_static_reset('token_get_info');
   backdrop_static_reset('token_get_global_token_types');
   backdrop_static_reset('token_build_tree');
-  backdrop_static_reset('token_menu_link_load');
-  backdrop_static_reset('token_book_link_load');
-  backdrop_static_reset('token_node_menu_link_load');
-  backdrop_static_reset('_token_field_info');
+  backdrop_static_reset('_menu_token_link_load');
+  backdrop_static_reset('_menu_token_node_link_load');
+  backdrop_static_reset('_field_token_info');
 }
 
 /**
@@ -772,122 +785,6 @@ function token_get_invalid_tokens($type, $tokens) {
 }
 
 /**
- * Get a translated menu link by its mlid, without access checking.
- *
- * This function is a copy of menu_link_load() but with its own cache and a
- * simpler query to load the link. This also skips normal menu link access
- * checking by using _token_menu_link_translate().
- *
- * @param $mlid
- *   The mlid of the menu item.
- *
- * @return
- *   A menu link translated for rendering.
- *
- * @see menu_link_load()
- * @see _token_menu_link_translate()
- */
-function token_menu_link_load($mlid) {
-  $cache = &backdrop_static(__FUNCTION__, array());
-
-  if (!is_numeric($mlid)) {
-    return FALSE;
-  }
-
-  if (!isset($cache[$mlid])) {
-    $item = db_query("SELECT * FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
-    if (!empty($item)) {
-      _token_menu_link_translate($item);
-    }
-    $cache[$mlid] = $item;
-  }
-
-  return $cache[$mlid];
-}
-
-function _token_menu_link_translate(&$item) {
-  $map = array();
-
-  if (!is_array($item['options'])) {
-    $item['options'] = unserialize($item['options']);
-  }
-
-  if ($item['external']) {
-    $item['access'] = 1;
-    $item['href'] = $item['link_path'];
-    $item['title'] = $item['link_title'];
-    $item['localized_options'] = $item['options'];
-  }
-  else {
-    // Complete the path of the menu link with elements from the current path,
-    // if it contains dynamic placeholders (%).
-    $map = explode('/', $item['link_path']);
-    if (strpos($item['link_path'], '%') !== FALSE) {
-      // Invoke registered to_arg callbacks.
-      if (!empty($item['to_arg_functions'])) {
-        _menu_link_map_translate($map, $item['to_arg_functions']);
-      }
-    }
-    $item['href'] = implode('/', $map);
-
-    // Skip links containing untranslated arguments.
-    if (strpos($item['href'], '%') !== FALSE) {
-      $item['access'] = FALSE;
-      return FALSE;
-    }
-
-    $item['access'] = TRUE;
-    _menu_item_localize($item, $map, TRUE);
-  }
-
-  // Allow other customizations - e.g. adding a page-specific query string to the
-  // options array. For performance reasons we only invoke this hook if the link
-  // has the 'alter' flag set in the options array.
-  if (!empty($item['options']['alter'])) {
-    backdrop_alter('translated_menu_link', $item, $map);
-  }
-
-  return $map;
-}
-
-/**
- * Load the preferred menu link associated with a node.
- *
- * @param $node
- *   A node object.
- *
- * @return
- *   A menu link array from token_menu_link_load() or FALSE if a menu link was
- *   not found.
- *
- * @see menu_node_prepare()
- * @see token_menu_link_load()
- */
-function token_node_menu_link_load($node) {
-  $cache = &backdrop_static(__FUNCTIon__, array());
-
-  if (!isset($cache[$node->nid])) {
-    $mlid = FALSE;
-
-    // Nodes do not have their menu links loaded via menu_node_load().
-    if (!isset($node->menu)) {
-      // We need to clone the node as menu_node_prepare() may cause data loss.
-      // @see http://drupal.org/node/1317926
-      $menu_node = clone $node;
-      menu_node_prepare($menu_node);
-      $mlid = !empty($menu_node->menu['mlid']) ? $menu_node->menu['mlid'] : FALSE;
-    }
-    else {
-      $mlid = !empty($node->menu['mlid']) ? $node->menu['mlid'] : FALSE;
-    }
-
-    $cache[$node->nid] = $mlid;
-  }
-
-  return $cache[$node->nid] ? token_menu_link_load($cache[$node->nid]) : FALSE;
-}
-
-/**
  * Renders a render array for display as a token.
  *
  * @param $array
@@ -937,78 +834,4 @@ function token_render_array_value($value, array $options = array()) {
     $rendered = check_plain($rendered);
   }
   return $rendered;
-}
-
-/**
- * Load all menu parents given a Menu Link ID.
- *
- * @param $mlid
- *   Menu Link ID.
- *
- * @return
- *   Array of link titles keyed by menu link ID.
- */
-function token_menu_link_load_all_parents($mlid) {
-  $cache = &backdrop_static(__FUNCTION__, array());
-
-  if (!is_numeric($mlid)) {
-    return array();
-  }
-
-  if (!isset($cache[$mlid])) {
-    $cache[$mlid] = array();
-    $plid = db_query("SELECT plid FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $mlid))->fetchField();
-    while ($plid && $parent = token_menu_link_load($plid)) {
-      $cache[$mlid] = array($plid => $parent['title']) + $cache[$mlid];
-      $plid = $parent['plid'];
-    }
-  }
-
-  return $cache[$mlid];
-}
-
-/**
- * Load all term parents given a Taxonomy term ID.
- *
- * @param $tid
- *   Taxonomy term ID.
- *
- * @return
- *   Array of taxonomy term names keyed by term ID.
- */
-function token_taxonomy_term_load_all_parents($tid) {
-  $cache = &backdrop_static(__FUNCTION__, array());
-
-  if (!is_numeric($tid)) {
-    return array();
-  }
-
-  if (!isset($cache[$tid])) {
-    $cache[$tid] = array();
-    $parents = taxonomy_term_load_parents_all($tid);
-    array_shift($parents); // Remove this term from the array.
-    $parents = array_reverse($parents);
-    foreach ($parents as $term) {
-      $cache[$tid][$term->tid] = entity_label('taxonomy_term', $term);
-    }
-  }
-
-  return $cache[$tid];
-}
-
-/**
- * Return the module responsible for a token.
- *
- * @param string $type
- *   The token type.
- * @param string $name
- *   The token name.
- *
- * @return mixed
- *   The value of $info['tokens'][$type][$name]['module'] from token_get_info(),
- *   or NULL if the value does not exist.
- */
-function _token_module($type, $name) {
-  $token_info = token_get_info($type, $name);
-  return isset($token_info['module']) ? $token_info['module'] : NULL;
 }

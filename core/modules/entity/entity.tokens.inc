@@ -54,7 +54,7 @@ function entity_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'url':
-          if (_token_module($type, 'url') == 'entity' && $uri = $entity->uri()) {
+          if (token_get_module($type, 'url') == 'entity' && $uri = $entity->uri()) {
             $uri['options']['absolute'] = TRUE;
             $replacements[$original] = url($uri['path'], $uri['options']);
           }
@@ -70,7 +70,7 @@ function entity_tokens($type, $tokens, array $data = array(), array $options = a
     }
 
     // [entity:url:*] chained tokens.
-    if (_token_module($type, 'url') == 'entity' && $url_tokens = token_find_with_prefix($tokens, 'url')) {
+    if (token_get_module($type, 'url') == 'entity' && $url_tokens = token_find_with_prefix($tokens, 'url')) {
       $replacements += token_generate('url', $url_tokens, $entity->uri(), $options);
     }
 
