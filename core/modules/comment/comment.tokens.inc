@@ -17,76 +17,79 @@ function comment_token_info() {
 
   // Comment-related tokens for nodes
   $node['comment-count'] = array(
-    'name' => t("Comment count"),
-    'description' => t("The number of comments posted on a node."),
+    'name' => t('Comment count'),
+    'description' => t('The number of comments posted on a node.'),
   );
   $node['comment-count-new'] = array(
-    'name' => t("New comment count"),
-    'description' => t("The number of comments posted on a node since the reader last viewed it."),
+    'name' => t('New comment count'),
+    'description' => t('The number of comments posted on a node since the reader last viewed it.'),
   );
 
   // Core comment tokens
   $comment['cid'] = array(
-    'name' => t("Comment ID"),
-    'description' => t("The unique ID of the comment."),
+    'name' => t('Comment ID'),
+    'description' => t('The unique ID of the comment.'),
   );
   $comment['hostname'] = array(
-    'name' => t("IP Address"),
-    'description' => t("The IP address of the computer the comment was posted from."),
+    'name' => t('IP Address'),
+    'description' => t('The IP address of the computer the comment was posted from.'),
   );
   $comment['name'] = array(
-    'name' => t("Name"),
-    'description' => t("The name left by the comment author."),
+    'name' => t('Name'),
+    'description' => t('The name left by the comment author.'),
+    'deprecated' => TRUE,
   );
   $comment['mail'] = array(
-    'name' => t("Email address"),
-    'description' => t("The email address left by the comment author."),
+    'name' => t('Email address'),
+    'description' => t('The email address left by the comment author.'),
   );
   $comment['homepage'] = array(
-    'name' => t("Home page"),
-    'description' => t("The home page URL left by the comment author."),
+    'name' => t('Home page'),
+    'description' => t('The home page URL left by the comment author.'),
   );
   $comment['title'] = array(
-    'name' => t("Title"),
-    'description' => t("The title of the comment."),
+    'name' => t('Title'),
+    'description' => t('The title of the comment.'),
   );
   $comment['body'] = array(
-    'name' => t("Content"),
-    'description' => t("The formatted content of the comment itself."),
+    'name' => t('Content'),
+    'description' => t('The formatted content of the comment itself.'),
   );
   $comment['url'] = array(
-    'name' => t("URL"),
-    'description' => t("The URL of the comment."),
+    'name' => t('URL'),
+    'description' => t('The URL of the comment.'),
+    'type' => 'url',
   );
   $comment['edit-url'] = array(
     'name' => t("Edit URL"),
     'description' => t("The URL of the comment's edit page."),
+    'type' => 'url',
   );
 
   // Chained tokens for comments
   $comment['created'] = array(
-    'name' => t("Date created"),
-    'description' => t("The date the comment was posted."),
+    'name' => t('Date created'),
+    'description' => t('The date the comment was posted.'),
     'type' => 'date',
   );
   $comment['changed'] = array(
-    'name' => t("Date changed"),
-    'description' => t("The date the comment was most recently updated."),
+    'name' => t('Date changed'),
+    'description' => t('The date the comment was most recently updated.'),
     'type' => 'date',
   );
   $comment['parent'] = array(
-    'name' => t("Parent"),
+    'name' => t('Parent'),
     'description' => t("The comment's parent, if comment threading is active."),
     'type' => 'comment',
   );
   $comment['node'] = array(
-    'name' => t("Node"),
-    'description' => t("The node the comment was posted to."),
+    'name' => t('Node'),
+    'description' => t('The node the comment was posted to.'),
     'type' => 'node',
   );
   $comment['author'] = array(
-    'name' => t("Author"),
-    'description' => t("The author of the comment, if they were logged in."),
+    'name' => t('Author'),
+    'description' => t('The author of the comment, if they were logged in.'),
     'type' => 'user',
   );
 
@@ -213,6 +216,10 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
 
     if ($date_tokens = token_find_with_prefix($tokens, 'changed')) {
       $replacements += token_generate('date', $date_tokens, array('date' => $comment->changed), $options);
+    }
+
+    if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
+      $replacements += token_generate('url', $url_tokens, $comment->uri(), $options);
     }
 
     if (($parent_tokens = token_find_with_prefix($tokens, 'parent')) && $parent = comment_load($comment->pid)) {

@@ -713,8 +713,14 @@ function _system_modules_build_row($info, $extra) {
   $status_short = '';
   $status_long = '';
 
+  // Check if this module was once a contributed module but is now in core.
+  if (isset($info['merged_into_core'])) {
+    $compatible = FALSE;
+    $status_short .= t('No longer needed.') . ' ';
+    $status_long .= t('This module is now built-into Backdrop CMS core and is no longer necessary.') . ' ';
+  }
   // Check the core compatibility.
-  if (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
+  elseif (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
     $status_short .= t('Incompatible with this version of Backdrop CMS.') . ' ';
     $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
@@ -2247,6 +2253,7 @@ function system_date_delete_format_form($form, &$form_state, $format) {
 function system_date_delete_format_form_submit($form, &$form_state) {
   $format = $form_state['format'];
   system_date_format_delete($format['name']);
+  token_cache_clear();
   backdrop_set_message(t('Removed date format %format.', array('%format' => $format['label'])));
   $form_state['redirect'] = 'admin/config/regional/date-time/formats';
 }
@@ -2382,6 +2389,7 @@ function system_configure_date_formats_form_submit($form, &$form_state) {
   $format = (array) $form_state['format'];
   $format = array_merge($format, $form_state['values']);
   system_date_format_save($format);
+  token_cache_clear();
   if (!empty($form_state['values']['name'])) {
     backdrop_set_message(t('Date format updated.'));
   }

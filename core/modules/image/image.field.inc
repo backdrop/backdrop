@@ -29,6 +29,7 @@ function image_field_info() {
       ),
       'default_widget' => 'image_image',
       'default_formatter' => 'image',
+      'default_token_formatter' => 'file_url_plain',
     ),
   );
 }
