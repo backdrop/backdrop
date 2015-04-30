@@ -5,6 +5,14 @@
  */
 
 /**
+ * Set width of dropbuttons where extra width is needed
+ */
+#system-modules .dropbutton-wrapper div,
+#layout-edit .dropbutton-multiple div,
+#layout-list .dropbutton-wrapper div {
+  min-width: 140px;
+}
+/**
  * When a dropbutton has only one option, it is simply a button.
  */
 .dropbutton-wrapper,
@@ -50,6 +58,7 @@
 .js .dropbutton li,
 .js .dropbutton a {
   display: block;
+  text-transform: uppercase;
 }
 
 /**
