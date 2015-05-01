@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page callbacks for the path module.
@@ -335,16 +334,6 @@ function path_admin_filter_form_submit_reset($form, &$form_state) {
 
 
 /**
- * port pathauto to core/modules/path
- */
-/**
- * @file
- * Admin page callbacks for the Pathauto module.
- *
- * @ingroup pathauto
- */
-
-/**
  * Form builder; Configure the URL alias patterns.
  *
  * @ingroup forms
@@ -357,14 +346,12 @@ function path_patterns_form($form, $form_state) {
     '#markup' => '<p>' . t('Path patterns automatically alias new content based on wildcards called "tokens". For example the URL "node/10" might be automatically aliased to "blog/my-first-post" using the pattern "blog/[node:title]".') . '</p>',
   );
 
-  // Call the hook on all modules - an array of 'settings' objects is returned
-  $all_settings = module_invoke_all('path', 'settings');
-  foreach ($all_settings as $settings) {
-    $module = $settings->module;
-    $pattern_description = $settings->pattern_description;
-    $group_header = $settings->group_header;
+  $all_path_info = path_get_info();
+  foreach ($all_path_info as $path_type => $path_info) {
+    $pattern_description = $path_info['pattern_description'];
+    $group_header = $path_info['group_header'];
 
-    $form[$module] = array(
+    $form[$path_type] = array(
       '#type' => 'fieldset',
       '#title' => $group_header,
       '#collapsible' => TRUE,
@@ -372,8 +359,8 @@ function path_patterns_form($form, $form_state) {
     );
 
     // Prompt for the default pattern for this module
-    $variable = $module . '_pattern';
-    $form[$module][$variable] = array(
+    $variable = $path_type . '_pattern';
+    $form[$path_type][$variable] = array(
       '#type' => 'textfield',
       '#title' => $pattern_description,
       '#default_value' => $config->get($variable),
@@ -381,17 +368,17 @@ function path_patterns_form($form, $form_state) {
       '#maxlength' => 1280,
       '#element_validate' => array('token_element_validate'),
       '#after_build' => array('token_element_validate'),
-      '#token_types' => array($settings->token_type),
+      '#token_types' => array($path_info['token_type']),
       '#min_tokens' => 1,
       '#parents' => array($variable),
     );
 
     // If the module supports a set of specialized patterns, set
     // them up here
-    if (isset($settings->pattern_items)) {
-      foreach ($settings->pattern_items as $item_name => $item_label) {
-        $variable = $module . '_' . $item_name . '_pattern';
-        $form[$module][$variable] = array(
+    if (isset($path_info['pattern_items'])) {
+      foreach ($path_info['pattern_items'] as $item_name => $item_label) {
+        $variable = $path_type . '_' . $item_name . '_pattern';
+        $form[$path_type][$variable] = array(
           '#type' => 'textfield',
           '#title' => $item_label,
           '#default_value' => $config->get($variable),
@@ -399,7 +386,7 @@ function path_patterns_form($form, $form_state) {
           '#maxlength' => 1280,
           '#element_validate' => array('token_element_validate'),
           '#after_build' => array('token_element_validate'),
-          '#token_types' => array($settings->token_type),
+          '#token_types' => array($path_info['token_type']),
           '#min_tokens' => 1,
           '#parents' => array($variable),
         );
@@ -409,10 +396,10 @@ function path_patterns_form($form, $form_state) {
     // Display the user documentation of placeholders supported by
     // this module, as a description on the last pattern
     $variables = array(
-      'token_types' => array($settings->token_type),
+      'token_types' => array($path_info['token_type']),
       'text' => t('Browse available tokens for @type.', array('@type' => $group_header)),
     );
-    $form[$module]['#description'] = '<p>' . t('Each of the fields below support tokens.') . ' ' . theme('token_tree_link', $variables) . '</p>';
+    $form[$path_type]['#description'] = '<p>' . t('Each of the fields below support tokens.') . ' ' . theme('token_tree_link', $variables) . '</p>';
   }
 
   $form['actions']['#type'] = 'actions';
@@ -428,17 +415,16 @@ function path_patterns_form_submit($form, &$form_state) {
   $config = config('path.settings');
   $values = $form_state['values'];
 
-  $all_settings = module_invoke_all('path', 'settings');
-  foreach ($all_settings as $settings) {
-    $module = $settings->module;
+  $all_path_info = path_get_info();
+  foreach ($all_path_info as $path_type => $path_info) {
     // Save default pattern per module
-    $variable = $module . '_pattern';
+    $variable = $path_type . '_pattern';
     $config->set($variable, $values[$variable]);
 
     // Save specialized patterns per module
-    if (isset($settings->pattern_items)) {
-      foreach ($settings->pattern_items as $item_name => $item_label) {
-        $variable = $module . '_' . $item_name . '_pattern';
+    if (isset($path_info['pattern_items'])) {
+      foreach ($path_info['pattern_items'] as $item_name => $item_label) {
+        $variable = $path_type . '_' . $item_name . '_pattern';
         $config->set($variable, $values[$variable]);
       }
     }
@@ -493,7 +479,7 @@ function path_settings_form($form) {
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum length of aliases to generate. 100 is the recommended length. @max is the maximum possible length. See <a href="@pathauto-help">Pathauto help</a> for details.', array('@pathauto-help' => url('admin/help/pathauto'), '@max' => $max_length)),
+    '#description' => t('Maximum length of aliases to generate. 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
   $form['max_component_length'] = array(
     '#type' => 'number',
@@ -502,7 +488,7 @@ function path_settings_form($form) {
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum text length of any component in the alias (e.g., [title]). 100 is the recommended length. @max is the maximum possible length. See <a href="@pathauto-help">Pathauto help</a> for details.', array('@pathauto-help' => url('admin/help/pathauto'), '@max' => $max_length)),
+    '#description' => t('Maximum text length of any component in the alias (e.g., [title]). 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
 
   $description = t('What should Pathauto do when updating an existing content item which already has an alias?');
@@ -557,7 +543,7 @@ function path_settings_form($form) {
   $punctuation = path_punctuation_chars();
   foreach ($punctuation as $name => $details) {
     $details['default'] = PATH_PUNCTUATION_REMOVE;
-    if ($details['value'] == $config->get('pathauto_separator')) {
+    if ($details['value'] == $config->get('separator')) {
       $details['default'] = PATH_PUNCTUATION_REPLACE;
     }
     $form['punctuation']['punctuation_' . $name] = array(
@@ -604,7 +590,7 @@ function path_settings_form_submit($form, &$form_state) {
 }
 
 /**
- * Validate pathauto_settings_form form submissions.
+ * Submit handler for path_settings_form().
  */
 function path_settings_form_validate($form, &$form_state) {
   module_load_include('inc', 'path');
@@ -638,7 +624,7 @@ function path_bulk_update_form() {
   $form['#update_callbacks'] = array();
 
   $form['help'] = array(
-    '#markup' => '<p>' . t('Bulk generation will only generate URL aliases for items that currently have no aliases. This is typically used when installing Pathauto on a site that has existing un-aliased content that needs to be aliased in bulk.') . '</p>',
+    '#markup' => '<p>' . t('Bulk generation will only generate URL aliases for items that currently have no aliases.') . '</p>',
   );
 
   $form['update'] = array(
@@ -648,11 +634,11 @@ function path_bulk_update_form() {
     '#default_value' => array(),
   );
 
-  $pathauto_settings = module_invoke_all('path', 'settings');
-  foreach ($pathauto_settings as $settings) {
-    if (!empty($settings->batch_update_callback)) {
-      $form['#update_callbacks'][$settings->batch_update_callback] = $settings;
-      $form['update']['#options'][$settings->batch_update_callback] = $settings->group_header;
+  $all_path_info = path_get_info();
+  foreach ($all_path_info as $path_info) {
+    if (!empty($path_info['batch_update_callback'])) {
+      $form['#update_callbacks'][$path_info['batch_update_callback']] = $path_info;
+      $form['update']['#options'][$path_info['batch_update_callback']] = $path_info['group_header'];
     }
   }
 
@@ -668,7 +654,7 @@ function path_bulk_update_form() {
 /**
  * Form submit handler for path alias bulk update form.
  *
- * @see pathauto_batch_update_form()
+ * @see path_bulk_update_form()
  * @see path_bulk_update_batch_finished()
  */
 function path_bulk_update_form_submit($form, &$form_state) {
@@ -683,9 +669,9 @@ function path_bulk_update_form_submit($form, &$form_state) {
 
   foreach ($form_state['values']['update'] as $callback) {
     if (!empty($callback)) {
-      $settings = $form['#update_callbacks'][$callback];
-      if (!empty($settings->batch_file)) {
-        $batch['operations'][] = array('path_bulk_update_batch_process', array($callback, $settings));
+      $path_info = $form['#update_callbacks'][$callback];
+      if (!empty($path_info['batch_file'])) {
+        $batch['operations'][] = array('path_bulk_update_batch_process', array($callback, $path_info));
       }
       else {
         $batch['operations'][] = array($callback, array());
@@ -697,13 +683,20 @@ function path_bulk_update_form_submit($form, &$form_state) {
 }
 
 /**
+ * Batch callback; count the current number of URL aliases for comparison later.
+ */
+function path_bulk_update_batch_start(&$context) {
+  $context['results']['count_before'] = db_select('url_alias')->countQuery()->execute()->fetchField();
+}
+
+/**
  * Common batch processing callback for all operations.
  *
  * Required to load our include the proper batch file.
  */
-function path_bulk_update_batch_process($callback, $settings, &$context) {
-  if (!empty($settings->batch_file)) {
-    require_once BACKDROP_ROOT . '/' . $settings->batch_file;
+function path_bulk_update_batch_process($callback, $path_info, &$context) {
+  if (!empty($path_info['batch_file'])) {
+    require_once BACKDROP_ROOT . '/' . $path_info['batch_file'];
   }
   return $callback($context);
 }
@@ -741,7 +734,7 @@ function path_admin_delete() {
    5) all taxonomy aliases - DONE
    6) by node type
    7) by taxonomy vocabulary
-   8) no longer existing aliases (see http://drupal.org/node/128366 )
+   8) no longer existing aliases (see http://drupal.org/node/128366)
    9) where src like 'pattern' - DON'T DO
    10) where dst like 'pattern' - DON'T DO
   */
@@ -762,15 +755,15 @@ function path_admin_delete() {
     '#description' => t('Delete all aliases. Number of aliases which will be deleted: %count.', array('%count' => $total_count)),
   );
 
-  // Next, iterate over an array of objects/alias types which can be deleted and provide checkboxes
-  $objects = module_invoke_all('path_alias_types');
-  foreach ($objects as $internal_name => $label) {
+  // Next, provide checkboxes for each alias type.
+  $all_path_info = path_get_info();
+  foreach ($all_path_info as $internal_name => $path_info) {
     $count = db_query("SELECT count(1) FROM {url_alias} WHERE source LIKE :src", array(':src' => "$internal_name%"))->fetchField();
     $form['delete'][$internal_name] = array(
       '#type' => 'checkbox',
-      '#title' => $label, // This label is sent through t() in the hard coded function where it is defined
+      '#title' => $path_info['group_header'],
       '#default_value' => FALSE,
-      '#description' => t('Delete aliases for all @label. Number of aliases which will be deleted: %count.', array('@label' => $label, '%count' => $count)),
+      '#description' => t('Delete aliases for all @label. Number of aliases which will be deleted: %count.', array('@label' => $path_info['group_header'], '%count' => $count)),
     );
   }
 
@@ -795,12 +788,12 @@ function path_admin_delete_submit($form, &$form_state) {
           ->execute();
         backdrop_set_message(t('All of your path aliases have been deleted.'));
       }
-      $objects = module_invoke_all('path_alias_types');
-      if (array_key_exists($key, $objects)) {
+      $all_path_info = path_get_info();
+      if (array_key_exists($key, $all_path_info)) {
         db_delete('url_alias')
           ->condition('source', db_like($key) . '%', 'LIKE')
           ->execute();
-        backdrop_set_message(t('All of your %type path aliases have been deleted.', array('%type' => $objects[$key])));
+        backdrop_set_message(t('All aliases for %type have been deleted.', array('%type' => $all_path_info[$key]['group_header'])));
       }
     }
   }

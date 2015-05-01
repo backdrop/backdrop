@@ -34,7 +34,7 @@ function path_tokens($type, $tokens, array $data = array(), array $options = arr
           module_load_include('inc', 'path');
           $values = array();
           foreach ($array as $key => $value) {
-            $value = path_cleanstring((string) $array[$key], $options);
+            $value = path_clean_string((string) $array[$key], $options);
             $values[] = $value;
           }
           $replacements[$original] = implode('/', $values);

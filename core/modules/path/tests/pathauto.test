@@ -13,8 +13,6 @@
 class PathautoTestHelper extends BackdropWebTestCase {
   function setUp(array $modules = array()) {
     $modules[] = 'path';
-    $modules[] = 'token';
-    $modules[] = 'pathauto';
     $modules[] = 'taxonomy';
     parent::setUp($modules);
   }
@@ -106,9 +104,9 @@ class PathautoTestHelper extends BackdropWebTestCase {
   }
 
   function assertEntityPattern($entity_type, $bundle, $language = LANGUAGE_NONE, $expected) {
-    backdrop_static_reset('path_pattern_load_by_entity');
+    backdrop_static_reset('path_get_pattern_by_entity_type');
     $this->refreshVariables();
-    $pattern = path_pattern_load_by_entity($entity_type, $bundle, $language);
+    $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $language);
     $this->assertIdentical($expected, $pattern);
   }
 
@@ -135,7 +133,7 @@ class PathautoUnitTestCase extends PathautoTestHelper {
   }
 
   /**
-   * Test path_pattern_load_by_entity().
+   * Test path_get_pattern_by_entity_type().
    */
   function testPatternLoadByEntity() {
     $config = config('path.settings');
@@ -154,13 +152,13 @@ class PathautoUnitTestCase extends PathautoTestHelper {
       array('entity' => 'invalid-entity', 'bundle' => '', 'langcode' => LANGUAGE_NONE, 'expected' => ''),
     );
     foreach ($tests as $test) {
-      $actual = path_pattern_load_by_entity($test['entity'], $test['bundle'], $test['langcode']);
-      $this->assertIdentical($actual, $test['expected'], t("path_pattern_load_by_entity('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
+      $actual = path_get_pattern_by_entity_type($test['entity'], $test['bundle'], $test['langcode']);
+      $this->assertIdentical($actual, $test['expected'], t("path_get_pattern_by_entity_type('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
     }
   }
 
   /**
-   * Test path_cleanstring().
+   * Test path_clean_string().
    */
   function testCleanString() {
     $config = config('path.settings');
@@ -182,8 +180,8 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     $tests[check_plain('This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.')] = 'text-has-html-tags';
 
     foreach ($tests as $input => $expected) {
-      $output = path_cleanstring($input);
-      $this->assertEqual($output, $expected, t("path_cleanstring('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+      $output = path_clean_string($input);
+      $this->assertEqual($output, $expected, t("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
   }
 
@@ -205,7 +203,7 @@ class PathautoUnitTestCase extends PathautoTestHelper {
   }
 
   /**
-   * Test path_path_delete_multiple().
+   * Test path_delete_multiple().
    */
   function testPathDeleteMultiple() {
     $this->saveAlias('node/1', 'node-1-alias');
@@ -214,14 +212,14 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     $this->saveAlias('node/1', 'node-1-alias-fr', 'fr');
     $this->saveAlias('node/2', 'node-2-alias');
 
-    path_path_delete_all('node/1');
+    path_delete_all_by_source('node/1');
     $this->assertNoAliasExists(array('source' => "node/1"));
     $this->assertNoAliasExists(array('source' => "node/1/view"));
     $this->assertAliasExists(array('source' => "node/2"));
   }
 
   /**
-   * Test the different update actions in path_create_alias().
+   * Test the different update actions in path_save_automatic_alias().
    */
   function testUpdateActions() {
     $config = config('path.settings');
@@ -277,8 +275,8 @@ class PathautoUnitTestCase extends PathautoTestHelper {
   }
 
   /**
-   * Test that path_create_alias() will not create an alias for a pattern
-   * that does not get any tokens replaced.
+   * Test that path_save_automatic_alias() will not create an alias for a
+   * pattern that does not get any tokens replaced.
    */
   function testNoTokensNoAlias() {
     $node = $this->backdropCreateNode(array('title' => ''));

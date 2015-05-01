@@ -354,6 +354,7 @@ function current_path() {
  *   - alias: The URL alias.
  *   - pid: Unique path alias identifier.
  *   - langcode: The language code of the alias.
+ *   - auto: Boolean indicating if this alias was created from a pattern.
  */
 function path_load($conditions) {
   if (is_numeric($conditions)) {
@@ -369,10 +370,13 @@ function path_load($conditions) {
   foreach ($conditions as $field => $value) {
     $select->condition($field, $value);
   }
-  return $select
+  $path = $select
     ->fields('url_alias')
     ->execute()
     ->fetchAssoc();
+  // Cast the auto column to boolean or NULL if unknown.
+  $path['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  return $path;
 }
 
 /**

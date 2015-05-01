@@ -1,15 +1,12 @@
 <?php
-
 /**
  * @file
- * Miscellaneous functions for Pathauto.
+ * Miscellaneous functions for Path module.
  *
  * This also contains some constants giving human readable names to some numeric
  * settings; they're included here as they're only rarely used outside this file
- * anyway. Use module_load_include('inc', 'pathauto') if the constants need to
+ * anyway. Use module_load_include('inc', 'path') if the constants need to
  * be available.
- *
- * @ingroup pathauto
  */
 
 /**
@@ -53,24 +50,6 @@ define('PATH_PUNCTUATION_REPLACE', 1);
 define('PATH_PUNCTUATION_DO_NOTHING', 2);
 
 /**
- * Check to see if there is already an alias pointing to a different item.
- *
- * @param $alias
- *   A string alias.
- * @param $source
- *   A string that is the internal path.
- * @param $langcode
- *   A string indicating the path's language.
- * @return
- *   TRUE if an alias exists, FALSE if not.
- *
- * @deprecated Use path_path_is_alias_reserved() instead.
- */
-function _path_alias_exists($alias, $source, $langcode = LANGUAGE_NONE) {
-  return path_path_is_alias_reserved();
-}
-
-/**
  * Fetches an existing URL alias given a path and optional language.
  *
  * @param $source
@@ -83,7 +62,7 @@ function _path_alias_exists($alias, $source, $langcode = LANGUAGE_NONE) {
  *   - pid: Unique path alias identifier.
  *   - alias: The URL alias.
  */
-function _path_existing_alias_data($source, $langcode = LANGUAGE_NONE) {
+function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
   $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND langcode IN (:langcode, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(':source' => $source, ':langcode' => $langcode, ':language_none' => LANGUAGE_NONE))->fetchField();
   return path_load(array('pid' => $pid));
 }
@@ -116,7 +95,7 @@ function _path_existing_alias_data($source, $langcode = LANGUAGE_NONE) {
  * @return
  *   The cleaned string.
  */
-function path_cleanstring($string, array $options = array()) {
+function path_clean_string($string, array $options = array()) {
   $config = config('path.settings');
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
@@ -126,7 +105,7 @@ function path_cleanstring($string, array $options = array()) {
   $cache = &$backdrop_static_fast['cache'];
 
   // Generate and cache variables used in this function so that on the second
-  // call to path_cleanstring() we focus on processing.
+  // call to path_clean_string() we focus on processing.
   if (!isset($cache)) {
     $cache = array(
       'separator' => $config->get('separator'),
@@ -247,7 +226,7 @@ function path_cleanstring($string, array $options = array()) {
  * @return
  *   The cleaned version of the string.
  *
- * @see path_cleanstring()
+ * @see path_clean_string()
  * @see path_clean_alias()
  */
 function _path_clean_separators($string, $separator = NULL) {
@@ -323,126 +302,6 @@ function path_clean_alias($alias) {
 }
 
 /**
- * Apply patterns to create an alias.
- *
- * @param $module
- *   The name of your module (e.g., 'node').
- * @param $op
- *   Operation being performed on the content being aliased
- *   ('insert', 'update', 'return', or 'bulkupdate').
- * @param $source
- *   An internal Backdrop path to be aliased.
- * @param $data
- *   An array of keyed objects to pass to token_replace(). For simple
- *   replacement scenarios 'node', 'user', and others are common keys, with an
- *   accompanying node or user object being the value. Some token types, like
- *   'site', do not require any explicit information from $data and can be
- *   replaced even if it is empty.
- * @param $type
- *   For modules which provided pattern items in hook_path(),
- *   the relevant identifier for the specific item to be aliased
- *   (e.g., $node->type).
- * @param $langcode
- *   A string specify the path's language.
- *
- * @return array|null|false
- *   The alias array that was created, NULL if an empty alias was generated, or
- *   FALSE if the alias generation was not possible.
- *
- * @see _path_set_alias()
- * @see token_replace()
- */
-function path_create_alias($module, $op, $source, $data, $type = NULL, $langcode = LANGUAGE_NONE) {
-  $config = config('path.settings');
-  // Retrieve and apply the pattern for this content type.
-  $pattern = path_pattern_load_by_entity($module, $type, $langcode);
-
-  // Allow other modules to alter the pattern.
-  $context = array(
-    'module' => $module,
-    'op' => $op,
-    'source' => $source,
-    'data' => $data,
-    'type' => $type,
-    'langcode' => $langcode,
-  );
-  backdrop_alter('path_pattern', $pattern, $context);
-
-  if (empty($pattern)) {
-    // No pattern? Do nothing (otherwise we may blow away existing aliases...)
-    return FALSE;
-  }
-
-  // Special handling when updating an item which is already aliased.
-  $existing_alias = NULL;
-  if ($op != 'insert') {
-    if ($existing_alias = _path_existing_alias_data($source, $langcode)) {
-      switch ($config->get('update_action')) {
-        case PATH_UPDATE_ACTION_NO_NEW:
-          // If an alias already exists, and the update action is set to do nothing,
-          // then gosh-darn it, do nothing.
-          return FALSE;
-      }
-    }
-  }
-
-  // Replace any tokens in the pattern. Uses callback option to clean replacements. No sanitization.
-  $alias = token_replace($pattern, $data, array(
-    'sanitize' => FALSE,
-    'clear' => TRUE,
-    'callback' => 'path_clean_token_values',
-    'langcode' => $langcode,
-    // BACKDROP_MOVE_TO_CORE :: should this be path?
-    'path' => TRUE,
-  ));
-
-  // Check if the token replacement has not actually replaced any values. If
-  // that is the case, then stop because we should not generate an alias.
-  // @see token_scan()
-  $pattern_tokens_removed = preg_replace('/\[[^\s\]:]*:[^\s\]]*\]/', '', $pattern);
-  if ($alias === $pattern_tokens_removed) {
-    return;
-  }
-
-  $alias = path_clean_alias($alias);
-
-  // Allow other modules to alter the alias.
-  $context['source'] = &$source;
-  $context['pattern'] = $pattern;
-  backdrop_alter('pathauto_alias', $alias, $context);
-
-  // If we have arrived at an empty string, discontinue.
-  if (!backdrop_strlen($alias)) {
-    return;
-  }
-
-  // If the alias already exists, generate a new, hopefully unique, variant.
-  $original_alias = $alias;
-  path_alias_uniquify($alias, $source, $langcode);
-  if ($original_alias != $alias) {
-    // Alert the user why this happened.
-    _path_verbose(t('The automatically generated alias %original_alias conflicted with an existing alias. Alias changed to %alias.', array(
-      '%original_alias' => $original_alias,
-      '%alias' => $alias,
-    )), $op);
-  }
-
-  // Return the generated alias if requested.
-  if ($op == 'return') {
-    return $alias;
-  }
-
-  // Build the new path alias array and send it off to be created.
-  $path = array(
-    'source' => $source,
-    'alias' => $alias,
-    'langcode' => $langcode,
-  );
-  $path = _path_set_alias($path, $existing_alias, $op);
-  return $path;
-}
-
-/**
  * Check to ensure a path alias is unique and add suffix variants if necessary.
  *
  * Given an alias 'content/test' if a path alias with the exact alias already
@@ -486,17 +345,8 @@ function path_alias_uniquify(&$alias, $source, $langcode) {
  * @return
  *   TRUE if the path already exists.
  */
-function _path_path_is_callback($path) {
-  // We need to use a try/catch here because of a core bug which will throw an
-  // exception if $path is something like 'node/foo/bar'.
-  // @todo Remove when http://drupal.org/node/1003788 is fixed in core.
-  try {
-    $menu = menu_get_item($path);
-  }
-  catch (Exception $e) {
-    return FALSE;
-  }
-
+function _path_is_callback($path) {
+  $menu = menu_get_item($path);
   if (isset($menu['path']) && $menu['path'] == $path) {
     return TRUE;
   }
@@ -510,6 +360,131 @@ function _path_path_is_callback($path) {
 }
 
 /**
+ * Apply patterns to create an alias for an entity.
+ *
+ * @param Entity $entity
+ *   A node, user, taxonomy term, or other entity for which patterns exist.
+ * @param $source
+ *   An internal Backdrop path to be aliased. If not specified, the path of the
+ *   provided entity will be used, e.g. node/1.
+ * @param string $langcode
+ *   A string specify the path's language. If not specified, the language of
+ *   the given entity will be used.
+ *
+ * @return string|FALSE
+ *   The automatically generated alias or FALSE if no automatically generated
+ *   alias should be created.
+ *
+ * @see token_replace()
+ */
+function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = NULL) {
+  $config = config('path.settings');
+  $entity_type = $entity->entityType();
+  $bundle = $entity->bundle();
+
+  if (!isset($source)) {
+    $uri = $entity->uri();
+    $source = $uri['path'];
+  }
+  if (!isset($langcode)) {
+    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  }
+
+  // Retrieve and apply the pattern for this content type.
+  $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
+
+  // Allow other modules to alter the pattern.
+  $context = array(
+    'entity' => $entity,
+    'source' => $source,
+    'langcode' => $langcode,
+  );
+  backdrop_alter('path_pattern', $pattern, $context);
+
+  if (empty($pattern)) {
+    // No pattern? Do nothing (otherwise we may blow away existing aliases...)
+    return FALSE;
+  }
+
+  // Special handling when updating an item which is already aliased.
+  $existing_path = NULL;
+  if (!$entity->isNew()) {
+    if ($existing_path = _path_load_loosely_by_source($source, $langcode)) {
+      switch ($config->get('update_action')) {
+        case PATH_UPDATE_ACTION_NO_NEW:
+          // If an alias already exists, and the update action is set to do
+          // nothing, then return.
+          return FALSE;
+      }
+    }
+  }
+
+  // Replace any tokens in the pattern. Uses callback option to clean
+  // replacements. No sanitization.
+  $data = array(
+    $entity_type => $entity,
+  );
+  $alias = token_replace($pattern, $data, array(
+    'sanitize' => FALSE,
+    'clear' => TRUE,
+    'callback' => 'path_clean_token_values',
+    'langcode' => $langcode,
+  ));
+
+  // Check if the token replacement has not actually replaced any values. If
+  // that is the case, then stop because we should not generate an alias.
+  // @see token_scan()
+  $pattern_tokens_removed = preg_replace('/\[[^\s\]:]*:[^\s\]]*\]/', '', $pattern);
+  if ($alias === $pattern_tokens_removed) {
+    return FALSE;
+  }
+
+  $alias = path_clean_alias($alias);
+
+  // Allow other modules to alter the alias.
+  $context['source'] = &$source;
+  $context['pattern'] = $pattern;
+  backdrop_alter('path_alias', $alias, $context);
+
+  // If we have arrived at an empty string, discontinue.
+  if (!backdrop_strlen($alias)) {
+    return FALSE;
+  }
+
+  // If the alias already exists, generate a new, hopefully unique, variant.
+  $original_alias = $alias;
+  path_alias_uniquify($alias, $source, $langcode);
+  if ($original_alias != $alias) {
+    // Alert the user why this happened.
+    path_verbose_message(t('The automatically generated alias %original_alias conflicted with an existing alias. Alias changed to %alias.', array(
+      '%original_alias' => $original_alias,
+      '%alias' => $alias,
+    )), $entity->isNew() ? 'insert' : 'update');
+  }
+
+  return $alias;
+}
+
+/**
+ * Update the URL aliases for an individual taxonomy term.
+ *
+ * @param Entity $entity
+ *   An entity (node/user/term/etc.) object.
+ * @return array
+ *   The path array saved into the database or FALSE if the path was not saved.
+ */
+function path_save_automatic_entity_alias(Entity $entity) {
+  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $uri = $entity->uri();
+  $path = FALSE;
+  if ($alias = path_generate_entity_alias($entity, $uri['path'], $langcode)) {
+    $path = path_save_automatic_alias($uri['path'], $alias, $langcode);
+  }
+
+  return $path;
+}
+
+/**
  * Private function for Pathauto to create an alias.
  *
  * @param $path
@@ -518,8 +493,6 @@ function _path_path_is_callback($path) {
  *   - alias: The URL alias.
  *   - pid: (optional) Unique path alias identifier.
  *   - langcode: (optional) The language code of the alias.
- * @param $existing_alias
- *   (optional) An associative array of the existing path alias.
  * @param $op
  *   An optional string with the operation being performed.
  *
@@ -528,25 +501,33 @@ function _path_path_is_callback($path) {
  *
  * @see path_save()
  */
-function _path_set_alias(array $path, $existing_alias = NULL, $op = NULL) {
-  $config = config('path.settings');
-  $verbose = _path_verbose(NULL, $op);
+function path_save_automatic_alias($source, $alias, $langcode) {
+  $verbose = path_verbose_message();
+  $existing_path = _path_load_loosely_by_source($source, $langcode);
 
-  // Alert users if they are trying to create an alias that is the same as the internal path
-  if ($path['source'] == $path['alias']) {
+  // Alert users if they are trying to create an alias that is the same as the
+  // internal path.
+  if ($source == $alias) {
     if ($verbose) {
-      _path_verbose(t('Ignoring alias %alias because it is the same as the internal path.', array('%alias' => $path['alias'])));
+      path_verbose_message(t('Ignoring alias %alias because it is the same as the internal path.', array('%alias' => $alias)));
     }
     return FALSE;
   }
 
-  // Skip replacing the current alias with an identical alias
-  if (empty($existing_alias) || $existing_alias['alias'] != $path['alias']) {
-    $path += array('pathauto' => TRUE, 'original' => $existing_alias);
+  // Assemble a path array to be saved.
+  $path = array(
+    'source' => $source,
+    'alias' => $alias,
+    'langcode' => $langcode,
+    'auto' => TRUE,
+    'original' => $existing_path,
+  );
 
+  // Skip replacing the current alias with an identical alias.
+  if (empty($existing_path) || $existing_path['alias'] != $path['alias'] || empty($existing_path['auto'])) {
     // If there is already an alias, respect some update actions.
-    if (!empty($existing_alias)) {
-      switch ($config->get('update_action')) {
+    if (!empty($existing_path)) {
+      switch (config_get('path.settings', 'update_action')) {
         case PATH_UPDATE_ACTION_NO_NEW:
           // Do not create the alias.
           return FALSE;
@@ -556,7 +537,7 @@ function _path_set_alias(array $path, $existing_alias = NULL, $op = NULL) {
           break;
         case PATH_UPDATE_ACTION_DELETE:
           // The delete actions should overwrite the existing alias.
-          $path['pid'] = $existing_alias['pid'];
+          $path['pid'] = $existing_path['pid'];
           break;
       }
     }
@@ -565,51 +546,18 @@ function _path_set_alias(array $path, $existing_alias = NULL, $op = NULL) {
     path_save($path);
 
     if ($verbose) {
-      if (!empty($existing_alias['pid'])) {
-        _path_verbose(t('Created new alias %alias for %source, replacing %old_alias.', array('%alias' => $path['alias'], '%source' => $path['source'], '%old_alias' => $existing_alias['alias'])));
+      if (!empty($existing_path['pid'])) {
+        path_verbose_message(t('Created new alias %alias for %source, replacing %old_alias.', array('%alias' => $path['alias'], '%source' => $path['source'], '%old_alias' => $existing_path['alias'])));
       }
       else {
-        _path_verbose(t('Created new alias %alias for %source.', array('%alias' => $path['alias'], '%source' => $path['source'])));
+        path_verbose_message(t('Created new alias %alias for %source.', array('%alias' => $path['alias'], '%source' => $path['source'])));
       }
     }
 
     return $path;
   }
-}
 
-/**
- * Output a helpful message if verbose output is enabled.
- *
- * Verbose output is only enabled when:
- * - The 'pathauto_verbose' setting is enabled.
- * - The current user has the 'notify of path changes' permission.
- * - The $op parameter is anything but 'bulkupdate' or 'return'.
- *
- * @param $message
- *   An optional string of the verbose message to display. This string should
- *   already be run through t().
- * @param $op
- *   An optional string with the operation being performed.
- * @return
- *   TRUE if verbose output is enabled, or FALSE otherwise.
- */
-function _path_verbose($message = NULL, $op = NULL) {
-  $config = config('path.settings');
-  static $verbose;
-
-  if (!isset($verbose)) {
-    $verbose = $config->get('verbose') && user_access('notify of path changes');
-  }
-
-  if (!$verbose || (isset($op) && in_array($op, array('bulkupdate', 'return')))) {
-    return FALSE;
-  }
-
-  if ($message) {
-    backdrop_set_message($message);
-  }
-
-  return $verbose;
+  return FALSE;
 }
 
 /**
@@ -626,7 +574,7 @@ function path_clean_token_values(&$replacements, $data = array(), $options = arr
   foreach ($replacements as $token => $value) {
     // Only clean non-path tokens.
     if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
-      $replacements[$token] = path_cleanstring($value, $options);
+      $replacements[$token] = path_clean_string($value, $options);
     }
   }
 }
@@ -645,12 +593,11 @@ function path_clean_token_values(&$replacements, $data = array(), $options = arr
 function path_punctuation_chars() {
   global $language_content;
   $punctuation = &backdrop_static(__FUNCTION__);
-  $cache_pathauto = cache('pathauto');
-
+  $cache_bin = cache();
 
   if (!isset($punctuation)) {
-    $cid = 'pathauto:punctuation:' . $language_content->langcode;
-    if ($cache = $cache_pathauto->get($cid)) {
+    $cid = 'path:punctuation:' . $language_content->langcode;
+    if ($cache = $cache_bin->get($cid)) {
       $punctuation = $cache->data;
     }
     else {
@@ -690,7 +637,7 @@ function path_punctuation_chars() {
 
       // Allow modules to alter the punctuation list and cache the result.
       backdrop_alter('path_punctuation_chars', $punctuation);
-      $cache_pathauto->set($cid, $punctuation);
+      $cache_bin->set($cid, $punctuation);
     }
   }
 

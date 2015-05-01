@@ -1,52 +1,11 @@
 <?php
-
 /**
  * @file
- * Install, update, and uninstall functions for Pathauto.
- *
- * @ingroup pathauto
+ * Install, update, and uninstall functions for Path module.
  */
 
 /**
- * Implements hook_install().
- */
-function path_install() {
-  $config = config('path.settings');
-  // Set some default variables necessary for the module to perform.
-  $config->set('node_pattern', 'content/[node:title]');
-  $config->set('taxonomy_term_pattern', '[term:vocabulary]/[term:name]');
-  $config->set('user_pattern', 'users/[user:name]');
-
-  // Set the default separator character to replace instead of remove (default).
-  $config->set('punctuation_hyphen', 1);
-  $config->save();
-
-  // Set the weight to 1.
-  db_update('system')
-    ->fields(array('weight' => 1))
-    ->condition('type', 'module')
-    ->condition('name', 'pathauto')
-    ->execute();
-}
-
-/**
- * Implements hook_uninstall().
- */
-function path_uninstall() {
-  // Delete all the pathauto variables and then clear the variable cache.
-  db_query("DELETE FROM {variable} WHERE name LIKE 'pathauto_%'");
-  cache('bootstrap')->delete('variables');
-}
-
-/**
- * Implements hook_update_last_removed().
- */
-function path_update_last_removed() {
-  return 7005;
-}
-
-/**
- * Upgrades Pathauto settings from variables to config.
+ * Upgrades Drupal 7 Pathauto variables to Path config.
  */
 function path_update_1000() {
   $config = config('path.settings');
@@ -122,4 +81,26 @@ function path_update_1000() {
     $config->set($name, $value);
   }
   $config->save();
+}
+
+/**
+ * Moves Backdrop Pathauto configuration to Path module configuration.
+ */
+function path_update_1001() {
+  $pathauto_config = config('pathauto.settings');
+  if ($pathauto_config->isNew()) {
+    return;
+  }
+
+  $path_config = config('path.settings');
+  $pathauto_data = $pathauto_config->get();
+  $path_data = $path_config->get();
+  $path_data = array_merge($path_data, $pathauto_data);
+  $path_config->setData($path_data);
+  $path_config->save();
+  $pathauto_config->delete();
+
+  // Remove the entry for the token module in the system table. This will
+  // "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'pathauto' AND type = 'module'");
 }
