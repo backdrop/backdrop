@@ -198,6 +198,9 @@ function path_node_delete(Node $node) {
 function path_form_taxonomy_form_term_alter(&$form, $form_state) {
   // Make sure this does not show up on the delete confirmation form.
   $term = $form['#term'];
+  if (is_array($term)) {
+    $term = new TaxonomyTerm($term);
+  }
   $form['path'] = path_form_element($term);
   $form['path']['alias']['#description'] = t("Optionally specify an alternative URL by which this term can be accessed. Use a relative path and don't add a trailing slash or the URL alias won't work.");
 }

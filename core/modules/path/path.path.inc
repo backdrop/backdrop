@@ -73,6 +73,7 @@ function node_path_bulk_update_batch_process(&$context) {
   $query->range(0, 25);
   $nids = $query->execute()->fetchCol();
 
+  module_load_include('inc', 'path');
   path_verbose_suspend();
   $nodes = node_load_multiple($nids);
   foreach ($nodes as $node) {
@@ -145,6 +146,7 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   $query->range(0, 25);
   $tids = $query->execute()->fetchCol();
 
+  module_load_include('inc', 'path');
   path_verbose_suspend();
   $terms = taxonomy_term_load_multiple($tids);
   foreach ($terms as $term) {
@@ -170,7 +172,7 @@ function user_path_info() {
     'group_header' => t('User paths'),
     'pattern_description' => t('Pattern for user account page paths'),
     'pattern_default' => 'users/[user:name]',
-    'user_path_bulk_update_batch_process' => 'user_path_bulk_update_batch_process',
+    'batch_update_callback' => 'user_path_bulk_update_batch_process',
     'batch_file' => backdrop_get_path('module', 'path') . '/path.path.inc',
     'source_prefix' => 'user/',
   );
@@ -210,6 +212,7 @@ function user_path_bulk_update_batch_process(&$context) {
   $query->range(0, 25);
   $uids = $query->execute()->fetchCol();
 
+  module_load_include('inc', 'path');
   path_verbose_suspend();
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {

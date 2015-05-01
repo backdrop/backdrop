@@ -1,10 +1,7 @@
 <?php
-
 /**
  * @file
  * Functionality tests for Pathauto.
- *
- * @ingroup pathauto
  */
 
 /**
@@ -122,7 +119,7 @@ class PathautoTestHelper extends BackdropWebTestCase {
 class PathautoUnitTestCase extends PathautoTestHelper {
   function setUp(array $modules = array()) {
     parent::setUp($modules);
-    module_load_include('inc', 'pathauto');
+    module_load_include('inc', 'path');
   }
 
   /**
@@ -139,8 +136,8 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     $config = config('path.settings');
     $config->set('node_story_en_pattern', 'story/en/[node:title] ');
     $config->set('node_story_pattern', 'story/[node:title]');
-    $config->set('pathauto_node_pattern', 'content/[node:title]');
-    $config->set('pathauto_user_pattern', 'users/[user:name]');
+    $config->set('node_pattern', 'content/[node:title]');
+    $config->set('user_pattern', 'users/[user:name]');
     $config->save();
 
     $tests = array(
@@ -223,29 +220,29 @@ class PathautoUnitTestCase extends PathautoTestHelper {
    */
   function testUpdateActions() {
     $config = config('path.settings');
-    // Test PATHAUTO_UPDATE_ACTION_NO_NEW with unaliased node and 'insert'.
-    $config->set('update_action', PATHAUTO_UPDATE_ACTION_NO_NEW);
+    // Test PATH_UPDATE_ACTION_NO_NEW with unaliased node and 'insert'.
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
     $config->save();
     $node = $this->backdropCreateNode(array('title' => 'First title'));
     $this->assertEntityAlias('node', $node, 'content/first-title');
 
-    // Default action is PATHAUTO_UPDATE_ACTION_DELETE.
-    $config->set('update_action', PATHAUTO_UPDATE_ACTION_DELETE);
+    // Default action is PATH_UPDATE_ACTION_DELETE.
+    $config->set('update_action', PATH_UPDATE_ACTION_DELETE);
     $config->save();
     $node->title = 'Second title';
     path_node_update($node);
     $this->assertEntityAlias('node', $node, 'content/second-title');
     $this->assertNoAliasExists(array('alias' => 'content/first-title'));
 
-    // Test PATHAUTO_UPDATE_ACTION_LEAVE
-    $config->set('update_action', PATHAUTO_UPDATE_ACTION_LEAVE);
+    // Test PATH_UPDATE_ACTION_LEAVE
+    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
     $config->save();
     $node->title = 'Third title';
     path_node_update($node);
     $this->assertEntityAlias('node', $node, 'content/third-title');
     $this->assertAliasExists(array('source' => "node/{$node->nid}", 'alias' => 'content/second-title'));
 
-    $config->set('update_action', PATHAUTO_UPDATE_ACTION_DELETE);
+    $config->set('update_action', PATH_UPDATE_ACTION_DELETE);
     $config->save();
     $node->title = 'Fourth title';
     path_node_update($node);
@@ -255,22 +252,22 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     $older_path = $this->assertAliasExists(array('source' => "node/{$node->nid}", 'alias' => 'content/second-title'));
     path_delete($older_path);
 
-    $config->set('update_action', PATHAUTO_UPDATE_ACTION_NO_NEW);
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
     $config->save();
     $node->title = 'Fifth title';
     path_node_update($node);
     $this->assertEntityAlias('node', $node, 'content/fourth-title');
     $this->assertNoAliasExists(array('alias' => 'content/fifth-title'));
 
-    // Test PATHAUTO_UPDATE_ACTION_NO_NEW with unaliased node and 'update'.
+    // Test PATH_UPDATE_ACTION_NO_NEW with unaliased node and 'update'.
     $this->deleteAllAliases();
     path_node_update($node);
     $this->assertEntityAlias('node', $node, 'content/fifth-title');
 
-    // Test PATHAUTO_UPDATE_ACTION_NO_NEW with unaliased node and 'bulkupdate'.
+    // Test PATH_UPDATE_ACTION_NO_NEW with unaliased node and 'bulkupdate'.
     $this->deleteAllAliases();
     $node->title = 'Sixth title';
-    path_node_update_alias($node, 'bulkupdate');
+    path_save_automatic_entity_alias($node);
     $this->assertEntityAlias('node', $node, 'content/sixth-title');
   }
 
@@ -333,7 +330,7 @@ class PathautoUnitTestCase extends PathautoTestHelper {
   function testNoExistingPathAliases() {
     $config = config('path.settings');
     $config->set('node_page_pattern', '[node:title]');
-    $config->set('punctuation_period', PATHAUTO_PUNCTUATION_DO_NOTHING);
+    $config->set('punctuation_period', PATH_PUNCTUATION_DO_NOTHING);
     $config->save();
 
     // Check that Pathauto does not create an alias of '/admin'.
@@ -369,13 +366,13 @@ class PathautoFunctionalTestHelper extends PathautoTestHelper {
     parent::setUp($modules);
     $this->config = config('path.settings');
 
-    // Set pathauto settings we assume to be as-is in this test.
-    $this->config->set('pathauto_node_page_pattern', 'content/[node:title]');
+    // Set Path settings we assume to be as-is in this test.
+    $this->config->set('node_page_pattern', 'content/[node:title]');
     $this->config->save();
 
     // Allow other modules to add additional permissions for the admin user.
     $permissions = array(
-      'administer pathauto',
+      'administer path patterns',
       'administer url aliases',
       'create url aliases',
       'administer nodes',
@@ -395,7 +392,7 @@ class PathautoFunctionalTestHelper extends PathautoTestHelper {
 }
 
 /**
- * Test basic pathauto functionality.
+ * Test basic Pathauto functionality.
  */
 class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
@@ -407,12 +404,12 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
   function testNodeEditing() {
     $this->config = config('path.settings');
     // Delete the default node pattern. Only the page content type will have a pattern.
-    $this->config->set('pathauto_node_pattern', '');
+    $this->config->set('node_pattern', '');
     $this->config->save();
 
     // Ensure that the Pathauto checkbox is checked by default on the node add form.
     $this->backdropGet('node/add/page');
-    $this->assertFieldChecked('edit-path-pathauto');
+    $this->assertFieldChecked('edit-path-auto');
 
     // Create node for testing by previewing and saving the node form.
     $title = ' Testing: node title [';
@@ -422,7 +419,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     // Look for alias generated in the form.
     $this->backdropGet("node/{$node->nid}/edit");
-    $this->assertFieldChecked('edit-path-pathauto');
+    $this->assertFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $automatic_alias, 'Generated alias visible in the path alias field.');
 
     // Check whether the alias actually works.
@@ -430,21 +427,21 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $this->assertText($title, 'Node accessible through automatic alias.');
 
     // Disable the update action. The checkbox should not be visible.
-    $this->config->set('update_action', PATHAUTO_UPDATE_ACTION_NO_NEW);
+    $this->config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
     $this->config->save();
     $this->backdropGet("node/{$node->nid}/edit");
-    $this->assertNoFieldById('edit-path-pathauto');
+    $this->assertNoFieldById('edit-path-auto');
 
     // Reset the update action back to default. The checkbox should be visible.
-    $this->config->set('update_action', PATHAUTO_UPDATE_ACTION_LEAVE);
+    $this->config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
     $this->config->save();
     $this->backdropGet("node/{$node->nid}/edit");
-    $this->assertFieldChecked('edit-path-pathauto');
+    $this->assertFieldChecked('edit-path-auto');
 
     // Manually set the node's alias.
     $manual_alias = 'content/' . $node->nid;
     $edit = array(
-      'path[pathauto]' => FALSE,
+      'path[auto]' => FALSE,
       'path[alias]' => $manual_alias,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
@@ -452,7 +449,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     // Check that the automatic alias checkbox is now unchecked by default.
     $this->backdropGet("node/{$node->nid}/edit");
-    $this->assertNoFieldChecked('edit-path-pathauto');
+    $this->assertNoFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $manual_alias);
 
     // Submit the node form with the default values.
@@ -469,7 +466,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     // Now attempt to create a node that has no pattern (article content type).
     // The Pathauto checkbox should not exist.
     $this->backdropGet('node/add/article');
-    $this->assertNoFieldById('edit-path-pathauto');
+    $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
 
     $edit = array();
@@ -479,7 +476,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     // Pathauto checkbox should still not exist.
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertNoFieldById('edit-path-pathauto');
+    $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
     $this->assertNoEntityAlias('node', $node);
 
@@ -492,16 +489,16 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     // visible but unchecked.
     $node = $this->backdropCreateNode(array('type' => 'page', 'title' => ''));
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertNoFieldChecked('edit-path-pathauto');
+    $this->assertNoFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
     $this->assertNoEntityAlias('node', $node);
 
     $edit = array();
     $edit['title'] = 'Valid title';
-    $edit['path[pathauto]'] = TRUE;
+    $edit['path[auto]'] = TRUE;
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertFieldChecked('edit-path-pathauto');
+    $this->assertFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', 'valid-title');
   }
 
@@ -543,7 +540,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     // Look for alias generated in the form.
     $this->backdropGet("taxonomy/term/{$term->tid}/edit");
-    $this->assertFieldChecked('edit-path-pathauto');
+    $this->assertFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $automatic_alias, 'Generated alias visible in the path alias field.');
 
     // Check whether the alias actually works.
@@ -553,7 +550,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     // Manually set the term's alias.
     $manual_alias = 'tags/' . $term->tid;
     $edit = array(
-      'path[pathauto]' => FALSE,
+      'path[auto]' => FALSE,
       'path[alias]' => $manual_alias,
     );
     $this->backdropPost("taxonomy/term/{$term->tid}/edit", $edit, t('Save'));
@@ -561,7 +558,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     // Check that the automatic alias checkbox is now unchecked by default.
     $this->backdropGet("taxonomy/term/{$term->tid}/edit");
-    $this->assertNoFieldChecked('edit-path-pathauto');
+    $this->assertNoFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $manual_alias);
 
     // Submit the term form with the default values.
@@ -582,7 +579,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
   function testUserEditing() {
     // There should be no Pathauto checkbox on user forms.
     $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
-    $this->assertNoFieldById('edit-path-pathauto');
+    $this->assertNoFieldById('edit-path-auto');
   }
 
   /**
@@ -654,17 +651,17 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
    * Test programmatic entity creation for aliases.
    */
   function testProgrammaticEntityCreation() {
-    $node = $this->backdropCreateNode(array('title' => 'Test node', 'path' => array('pathauto' => TRUE)));
+    $node = $this->backdropCreateNode(array('title' => 'Test node', 'path' => array('auto' => TRUE)));
     $this->assertEntityAlias('node', $node, 'content/test-node');
 
     $vocabulary = $this->addVocabulary(array('name' => 'Tags'));
-    $term = $this->addTerm($vocabulary, array('name' => 'Test term', 'path' => array('pathauto' => TRUE)));
+    $term = $this->addTerm($vocabulary, array('name' => 'Test term', 'path' => array('auto' => TRUE)));
     $this->assertEntityAlias('taxonomy_term', $term, 'tags/test-term');
 
     $edit['name'] = 'Test user';
     $edit['mail'] = 'test-user@example.com';
     $edit['pass']   = user_password();
-    $edit['path'] = array('pathauto' => TRUE);
+    $edit['path'] = array('auto' => TRUE);
     $edit['status'] = 1;
     $account = new User($edit);
     $account->save();
@@ -701,7 +698,7 @@ class PathautoLocaleTestCase extends PathautoFunctionalTestHelper {
       'body' => array('en' => array(array())),
       'path' => array(
         'alias' => 'english-node',
-        'pathauto' => FALSE,
+        'auto' => FALSE,
       ),
     );
     $node = $this->backdropCreateNode($node);
@@ -759,7 +756,7 @@ class PathautoBulkUpdateTestCase extends PathautoFunctionalTestHelper {
     $this->assertEntityAliasExists('user', $this->admin_user);
 
     // Add a new node.
-    $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'pathauto' => FALSE)));
+    $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
 
     // Run the update again which should only run against the new node.
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
@@ -788,7 +785,7 @@ class PathautoTokenTestCase extends PathautoFunctionalTestHelper {
 
     // Ensure that the path_clean_token_values() function does not alter
     // this token value.
-    module_load_include('inc', 'pathauto');
+    module_load_include('inc', 'path');
     path_clean_token_values($replacements, $data, array());
     $this->assertEqual($replacements['[array:join-path]'], 'test-first-arg/array-value');
   }

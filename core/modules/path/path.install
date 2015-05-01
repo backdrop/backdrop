@@ -100,7 +100,7 @@ function path_update_1001() {
   $path_config->save();
   $pathauto_config->delete();
 
-  // Remove the entry for the token module in the system table. This will
+  // Remove the entry for the pathauto module in the system table. This will
   // "disable" the module if present.
   db_query("DELETE FROM {system} WHERE name = 'pathauto' AND type = 'module'");
 }

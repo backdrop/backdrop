@@ -375,7 +375,9 @@ function path_load($conditions) {
     ->execute()
     ->fetchAssoc();
   // Cast the auto column to boolean or NULL if unknown.
-  $path['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  if ($path) {
+    $path['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  }
   return $path;
 }
 
