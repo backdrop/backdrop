@@ -72,8 +72,8 @@
 }
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
-  width: 94px;
-  margin: 7px 0;
+  width: 105px;
+  margin: 10px 0;
 }
 .ui-sortable .layout-editor-block {
   cursor: move;
