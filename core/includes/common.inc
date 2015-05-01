@@ -6060,10 +6060,6 @@ function backdrop_pre_render_markup($elements) {
 function backdrop_pre_render_dropbutton($element) {
   $element['#attached']['library'][] = array('system', 'backdrop.dropbutton');
   $element['#attributes']['class'][] = 'dropbutton';
-  if (!isset($element['#theme_wrappers'])) {
-    $element['#theme_wrappers'] = array();
-  }
-  array_unshift($element['#theme_wrappers'], 'dropbutton_wrapper');
 
   // Enable targeted theming of specific dropbuttons (e.g., 'operations' or
   // 'operations__node').
@@ -7196,8 +7192,8 @@ function backdrop_common_theme() {
     'links' => array(
       'variables' => array('links' => array(), 'attributes' => array('class' => array('links')), 'heading' => array()),
     ),
-    'dropbutton_wrapper' => array(
-      'variables' => array('children' => NULL),
+    'dropbutton' => array(
+      'variables' => array('links' => array(), 'attributes' => array('class' => array('dropbutton'))),
     ),
     'image' => array(
       // HTML 4 and XHTML 1.0 always require an alt attribute. The HTML 5 draft

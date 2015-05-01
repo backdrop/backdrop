@@ -502,11 +502,11 @@ function system_element_info() {
   );
   $types['dropbutton'] = array(
     '#pre_render' => array('backdrop_pre_render_dropbutton'),
-    '#theme' => 'links__dropbutton',
+    '#theme' => 'dropbutton',
   );
   $types['operations'] = array(
     '#pre_render' => array('backdrop_pre_render_dropbutton'),
-    '#theme' => 'links__dropbutton__operations',
+    '#theme' => 'dropbutton__operations',
   );
 
   $types['container'] = array(

@@ -1535,12 +1535,15 @@ function views_ui_get_display_tab_details($view, $display) {
 
     // The Delete, Duplicate and Undo Delete buttons.
     $build['top']['actions'] = array(
-      '#theme_wrappers' => array('dropbutton_wrapper'),
+      '#pre_render' => array('backdrop_pre_render_dropbutton'),
     );
 
     // Because some of the 'links' are actually submit buttons, we have to
     // manually wrap each item in <li> and the whole list in <ul>.
-    $build['top']['actions']['prefix']['#markup'] = '<ul class="dropbutton">';
+    // Simulate actual dropbutton markup.
+    $build['top']['actions']['prefix']['#markup']  = '<div class="dropbutton-wrapper">';
+    $build['top']['actions']['prefix']['#markup'] .= '<div class="dropbutton-widget">';
+    $build['top']['actions']['prefix']['#markup'] .= '<ul class="dropbutton">';
 
     if (!$is_display_deleted) {
       if (!$is_enabled) {
@@ -1608,7 +1611,11 @@ function views_ui_get_display_tab_details($view, $display) {
         '#suffix' => '</li>',
       );
     }
-    $build['top']['actions']['suffix']['#markup'] = '</ul>';
+
+    // Simulate actual dropbutton markup.
+    $build['top']['actions']['suffix']['#markup']  = '</ul>';
+    $build['top']['actions']['suffix']['#markup'] .= '</div>';
+    $build['top']['actions']['suffix']['#markup'] .= '</div>';
 
     // The area above the three columns.
     $build['top']['display_title'] = array(

@@ -1852,19 +1852,61 @@ function theme_links($variables) {
 }
 
 /**
- * Provide wrapper HTML around dropbutton lists.
+ * Returns HTML for a dropbutton.
  *
  * @param $variables
  *   An associative array containing:
- *     - children: Contains the rendered children of the dropbutton menu.
+ *   - links: An associative array of links to be themed. The key for each link
+ *     is used as its CSS class. Each link should be itself an array, with the
+ *     following elements:
+ *     - title: The link text.
+ *     - href: The link URL. If omitted, the 'title' is shown as a plain text
+ *       item in the links list.
  */
-function theme_dropbutton_wrapper($variables) {
-  $output = '';
-  $output .= '<div class="dropbutton-wrapper">';
-  $output .= '<div class="dropbutton-widget">';
-  $output .= $variables['children'];
+function theme_dropbutton($variables) {
+  global $language_url;
+
+  $links = $variables['links'];
+  $attributes = $variables['attributes'];
+  $list = '';
+
+  if (!empty($links)) {
+    $list .= '<ul' . backdrop_attributes($attributes) . '>';
+
+    $num_links = count($links);
+    $i = 0;
+    foreach ($links as $key => $link) {
+      $i++;
+
+      // Add classes.
+      $class = array();
+      // Use the array key as class name.
+      $class[] = backdrop_html_class($key);
+      // Add odd/even, first, and last classes.
+      $class[] = ($i % 2 ? 'odd' : 'even');
+      if ($i == 1) {
+        $class[] = 'first';
+      }
+      if ($i == $num_links) {
+        $class[] = 'last';
+      }
+
+      $item = l($link['title'], $link['href']);
+
+      $list .= '<li' . backdrop_attributes(array('class' => $class)) . '>';
+      $list .= $item;
+      $list .= '</li>';
+    }
+
+    $list .= '</ul>';
+  }
+
+  $output  = '<div class="dropbutton-wrapper">';
+  $output .= '  <div class="dropbutton-widget">';
+  $output .=      $list;
+  $output .= '  </div>';
   $output .= '</div>';
-  $output .= '</div>';
+
   return $output;
 }
 
