@@ -7,7 +7,7 @@
 /**
  * Helper test class with some added functions for testing.
  */
-class PathautoTestHelper extends BackdropWebTestCase {
+class PathPatternTestHelper extends BackdropWebTestCase {
   function setUp(array $modules = array()) {
     $modules[] = 'path';
     $modules[] = 'taxonomy';
@@ -116,7 +116,7 @@ class PathautoTestHelper extends BackdropWebTestCase {
 /**
  * Unit tests for Path pattern functions.
  */
-class PathautoUnitTestCase extends PathautoTestHelper {
+class PathPatternUnitTestCase extends PathPatternTestHelper {
   function setUp(array $modules = array()) {
     parent::setUp($modules);
     module_load_include('inc', 'path');
@@ -170,7 +170,7 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     $tests['this thing with that thing'] = 'thing-thing';
 
     // Test length truncation and duplicate separator removal.
-    $tests[' - Pathauto is the greatest - module ever in Backdrop history - '] = 'pathauto-greatest-module-ever';
+    $tests[' - Dave - Greg - Freso - Mike'] = 'dave-greg-freso-mike';
 
     // Test that HTML tags are removed.
     $tests['This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.'] = 'text-has-html-tags';
@@ -372,7 +372,7 @@ class PathautoUnitTestCase extends PathautoTestHelper {
 /**
  * Helper test class with some added functions for testing.
  */
-class PathautoFunctionalTestHelper extends PathautoTestHelper {
+class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
   protected $admin_user;
   protected $config;
 
@@ -408,7 +408,7 @@ class PathautoFunctionalTestHelper extends PathautoTestHelper {
 /**
  * Test basic Path automatic alias functionality.
  */
-class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
+class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
   protected $config;
 
@@ -480,7 +480,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $this->assertText($title, 'Node accessible through manual alias.');
 
     // Now attempt to create a node that has no pattern (article content type).
-    // The Pathauto checkbox should not exist.
+    // The automatic alias checkbox should not exist.
     $this->backdropGet('node/add/article');
     $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
@@ -490,7 +490,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $this->backdropPost(NULL, $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
-    // Pathauto checkbox should still not exist.
+    // Automatic alias checkbox should still not exist.
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
@@ -501,7 +501,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $this->config->set('node_page_pattern', '[node:title]');
     $this->config->save();
 
-    // Create a node with an empty title. The Pathauto checkbox should still be
+    // Create a node with an empty title. The auto checkbox should still be
     // visible but unchecked.
     $node = $this->backdropCreateNode(array('type' => 'page', 'title' => ''));
     $this->backdropGet('node/' . $node->nid . '/edit');
@@ -540,7 +540,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
   }
 
   /**
-   * Basic functional testing of Pathauto with taxonomy terms.
+   * Basic functional testing of Path automatic aliases with taxonomy terms.
    */
   function testTermEditing() {
     $this->backdropGet('admin/structure');
@@ -590,10 +590,10 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
   }
 
   /**
-   * Basic functional testing of Pathauto with users.
+   * Basic functional testing of Path automatic aliases with users.
    */
   function testUserEditing() {
-    // There should be no Pathauto checkbox on user forms.
+    // There should be no auto checkbox on user forms.
     $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
     $this->assertNoFieldById('edit-path-auto');
   }
@@ -685,7 +685,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
   }
 }
 
-class PathautoLocaleTestCase extends PathautoFunctionalTestHelper {
+class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
 
   function setUp(array $modules = array()) {
     $modules[] = 'language';
@@ -743,7 +743,7 @@ class PathautoLocaleTestCase extends PathautoFunctionalTestHelper {
 /**
  * Bulk update functionality tests.
  */
-class PathautoBulkUpdateTestCase extends PathautoFunctionalTestHelper {
+class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
   private $nodes;
 
   function testBulkUpdate() {
@@ -785,9 +785,9 @@ class PathautoBulkUpdateTestCase extends PathautoFunctionalTestHelper {
 /**
  * Token functionality tests.
  */
-class PathautoTokenTestCase extends PathautoFunctionalTestHelper {
+class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
 
-  function testPathautoTokens() {
+  function testPathPatternTokens() {
     $array = array(
       'test first arg',
       'The Array / value',

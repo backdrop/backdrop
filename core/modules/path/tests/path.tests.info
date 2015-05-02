@@ -28,32 +28,32 @@ description = Confirm that paths are not changed on monolingual non-English site
 group = Path
 file = path.test
 
-[PathautoUnitTestCase]
-name = Pathauto unit tests
-description = Unit tests for Pathauto functions.
-group = Pathauto
-file = pathauto.test
+[PathPatternUnitTestCase]
+name = Path pattern unit tests
+description = Unit tests for Path automatic alias functions.
+group = Path
+file = path_pattern.test
 
-[PathautoFunctionalTestCase]
-name = Pathauto basic tests
-description = Test basic pathauto functionality
-group = Pathauto
-file = pathauto.test
+[PathPatternFunctionalTestCase]
+name = Path pattern basic tests
+description = Test basic automatic aliasing functionality.
+group = Path
+file = path_pattern.test
 
-[PathautoLocaleTestCase]
-name = Pathauto localization tests
-description = Test pathauto functionality with localization and translation.
-group = Pathauto
-file = pathauto.test
+[PathPatternLocaleTestCase]
+name = Path pattern localization tests
+description = Test automatic path aliasing functionality with localization and translation.
+group = Path
+file = path_pattern.test
 
-[PathautoBulkUpdateTestCase]
-name = Pathauto bulk updating
+[PathPatternBulkUpdateTestCase]
+name = Path pattern bulk updating
 description = Tests bulk updating of URL aliases.
-group = Pathauto
-file = pathauto.test
+group = Path
+file = path_pattern.test
 
-[PathautoTokenTestCase]
-name = Pathauto tokens
-description = Tests tokens provided by Pathauto.
-group = Pathauto
-file = pathauto.test
+[PathPatternTokenTestCase]
+name = Path tokens
+description = Tests tokens provided by Path.
+group = Path
+file = path_pattern.test
