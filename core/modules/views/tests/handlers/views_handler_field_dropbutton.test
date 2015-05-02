@@ -18,9 +18,9 @@ class ViewsHandlerFieldDropbuttonTest extends ViewsSqlTest {
     // Create a node to test the listing.
     $node = $this->backdropCreateNode();
     $this->backdropGet('views_test/dropbutton');
-    $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => 'node/' . $node->nid, ':title' => 'view'));
+    $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => url('node/' . $node->nid), ':title' => 'view'));
     $this->assertEqual(count($result), 1, 'Node node view link found in dropbutton.');
-    $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => 'node/' . $node->nid, ':title' => 'custom'));
+    $result = $this->xpath('//ul[contains(@class, dropbutton)]/li/a[contains(@href, :path) and text()=:title]', array(':path' => url('node/' . $node->nid), ':title' => 'custom'));
     $this->assertEqual(count($result), 1, 'Custom link to node found in dropbutton.');
   }
 }

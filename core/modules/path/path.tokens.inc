@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Token integration for the Pathauto module.
+ * Token integration for the Path module.
  */
 
 /**
@@ -13,7 +12,7 @@ function path_token_info() {
 
   $info['tokens']['array']['join-path'] = array(
     'name' => t('Joined path'),
-    'description' => t('The array values each cleaned by Pathauto and then joined with the slash into a string that resembles an URL.'),
+    'description' => t('The array values each cleaned according to the current Path module settings and then joined with the slash into a string that resembles an URL.'),
   );
 
   return $info;

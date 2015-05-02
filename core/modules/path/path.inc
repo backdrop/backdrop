@@ -88,8 +88,8 @@ function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
  * @param $string
  *   A string to clean.
  * @param array $options
- *   (optional) A keyed array of settings and flags to control the Pathauto
- *   clean string replacement process. Supported options are:
+ *   (optional) A keyed array of settings and flags to control the path pattern
+ *   string replacement process. Supported options are:
  *   - langcode: A language code to be used when translating strings.
  *
  * @return
@@ -379,7 +379,9 @@ function _path_is_callback($path) {
  */
 function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = NULL) {
   $config = config('path.settings');
-  $entity_type = $entity->entityType();
+  $entity_type_name = $entity->entityType();
+  $entity_type = entity_get_info($entity_type_name);
+  $token_type = isset($entity_type['token type']) ? $entity_type['token type'] : NULL;
   $bundle = $entity->bundle();
 
   if (!isset($source)) {
@@ -391,7 +393,7 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
   }
 
   // Retrieve and apply the pattern for this content type.
-  $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
+  $pattern = path_get_pattern_by_entity_type($entity_type_name, $bundle, $langcode);
 
   // Allow other modules to alter the pattern.
   $context = array(
@@ -421,9 +423,10 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
 
   // Replace any tokens in the pattern. Uses callback option to clean
   // replacements. No sanitization.
-  $data = array(
-    $entity_type => $entity,
-  );
+  $data = array();
+  if ($token_type) {
+    $data[$token_type] = $entity;
+  }
   $alias = token_replace($pattern, $data, array(
     'sanitize' => FALSE,
     'clear' => TRUE,
@@ -485,16 +488,14 @@ function path_save_automatic_entity_alias(Entity $entity) {
 }
 
 /**
- * Private function for Pathauto to create an alias.
+ * Save an automatic alias; replacing or adding aliases based on site settings.
  *
- * @param $path
- *   An associative array containing the following keys:
- *   - source: The internal system path.
- *   - alias: The URL alias.
- *   - pid: (optional) Unique path alias identifier.
- *   - langcode: (optional) The language code of the alias.
- * @param $op
- *   An optional string with the operation being performed.
+ * @param string $source
+ *   The internal system path.
+ * @param string $alias
+ *   The URL alias to be saved.
+ * @param string $langcode
+ *   The language code for the alias being saved.
  *
  * @return
  *   The saved path from path_save() or FALSE if the path was not saved.

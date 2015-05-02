@@ -41,7 +41,7 @@
     "punctuation_greater_than": 0,
     "punctuation_slash": 0,
     "punctuation_back_slash": 0,
-    "node_pattern": "content/[node:title]",
-    "taxonomy_term_pattern": "vocabulary]/[term:name]",
-    "user_pattern": "users/[user:name]"
+    "node_pattern": "",
+    "taxonomy_term_pattern": "[term:vocabulary]/[term:name]",
+    "user_pattern": "accounts/[user:name]"
 }

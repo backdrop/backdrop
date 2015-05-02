@@ -55,9 +55,9 @@ function path_update_1000() {
   $config->set('punctuation_tilde', 0);
   $config->set('punctuation_underscore', 0);
 
-  $config->set('node_pattern', 'content/[node:title]');
-  $config->set('taxonomy_term_pattern', '[term:vocabulary]/[term:name]');
-  $config->set('user_pattern', 'users/[user:name]');
+  $config->set('node_pattern', '');
+  $config->set('taxonomy_term_pattern', '');
+  $config->set('user_pattern', '');
 
   // Update with values from the database if present.
   $results = db_query("SELECT * FROM {variable} WHERE name LIKE 'pathauto_%'");
