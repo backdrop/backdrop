@@ -270,14 +270,58 @@ th.checkbox {
   font-weight: bold;
 }
 .progress .bar {
-  background: #ccc;
-  border-color: #666;
-  margin: 0 0.2em;
-  -moz-border-radius: 3px;
+  margin: 0 0.2em .5em 0;
+  border: 2px solid #e5e5e6;
   border-radius: 3px;
+  overflow: hidden;
+  background: #e5e5e6;
 }
 .progress .filled {
-  background: #0072b9 url(../../../misc/progress.gif);
+  position: relative;
+  overflow: hidden;
+  background: #CFDE56;
+  -webkit-transition: width .1s;
+  transition: width .1s;
+  will-change: width;
+}
+/* Progress Bar Animation */
+.progress .filled:after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 15%;
+  height: 100%;
+  background: -webkit-linear-gradient(0deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
+  background: linear-gradient(90deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
+  background-color: #CFDE56;
+  border-radius: 3px;
+  background-size: auto 200%;
+  background-position: 0 100%;
+  -webkit-animation: progress-gradient 3s infinite;
+  animation: progress-gradient 3s infinite;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  will-change: left, width;
+}
+
+@-webkit-keyframes progress-gradient {
+  0% {
+    left: -15%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes progress-gradient {
+  0% {
+    left: -15%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /**
