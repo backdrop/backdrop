@@ -266,18 +266,10 @@ th.checkbox {
  *
  * @see progress.js
  */
-.progress {
-  font-weight: bold;
-}
-.progress .bar {
-  background: #ccc;
-  border-color: #666;
-  margin: 0 0.2em;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-}
 .progress .filled {
-  background: #0072b9 url(../../../misc/progress.gif);
+  -webkit-transition: width .4s;
+  transition: width .4s;
+  will-change: width;
 }
 
 /**
