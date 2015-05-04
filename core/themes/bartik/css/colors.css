@@ -7,10 +7,12 @@ body {
 .comment .comment-arrow {
   border-color: #ffffff;
 }
-.l-container,
+.l-container, .layout {
+  background: #ffffff;
+}
 .l-header ul.menu li a.active,
 .l-header ul.menu li.active-trail a {
-  background: #ffffff;
+  color: #fefeff;
 }
 .tabs ul.primary li a.active {
   background-color: #ffffff;
@@ -19,15 +21,27 @@ body {
   background-color: #ffffff;
   border-bottom: 1px solid #ffffff;
 }
+.l-header ul.menu a {
+  color: #f3f7fa;
+}
+.no-tabs .l-header ul.menu a {
+  color: #f3f7fa;
+}
+.no-tabs .l-header ul.menu a:active {
+  color: #fefeff;
+}
+.no-tabs .l-header ul.menu li a.active {
+  color: #fefeff;
+}
 .l-header {
   color: #fffeff;
-  background-color: #48a9e4;
-  background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -ms-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -o-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0779bf), color-stop(1, #48a9e4));
-  background-image: -webkit-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-color: #27ace1;
+  background-image: -moz-linear-gradient(top, #27ace2 0%, #27ace1 100%);
+  background-image: -ms-linear-gradient(top, #27ace2 0%, #27ace1 100%);
+  background-image: -o-linear-gradient(top, #27ace2 0%, #27ace1 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #27ace2), color-stop(1, #27ace1));
+  background-image: -webkit-linear-gradient(top, #27ace2 0%, #27ace1 100%);
+  background-image: linear-gradient(top, #27ace2 0%, #27ace1 100%);
 }
 a {
   color: #0071b3;
@@ -37,7 +51,7 @@ a:focus {
   color: #018fe2;
 }
 a:active {
-  color: #23aeff;
+  color: #feffff;
 }
 .l-sidebar .block {
   background-color: #f6f6f2;
