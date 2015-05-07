@@ -196,9 +196,7 @@ function path_entity_load($entities, $type) {
 
   // Modify the entity if supported to include canonical path information.
   if (in_array($type, $path_entity_types)) {
-    foreach ($entities as $entity) {
-      $entity->path = path_load_by_entity($entity);
-    }
+    path_load_multiple_by_entities($entities);
   }
 }
 
@@ -445,7 +443,7 @@ function path_get_pattern_by_entity_type($entity_type, $bundle = '', $langcode =
 }
 
 /**
- * Load the canonical path for an entity.
+ * Populate the canonical path property for an entity.
  *
  * @param Entity $entity
  *   An entity (node/user/term/etc.) object for which the path should be loaded.
@@ -470,6 +468,44 @@ function path_load_by_entity(Entity $entity) {
     );
   }
   return $path;
+}
+
+/**
+ * Populate the path properties for multiple entities.
+ *
+ * @param array $entities
+ *   An array of entities (nodes/users/terms/etc.) keyed by the entity ID, for
+ *   which each path should be loaded.
+ */
+function path_load_multiple_by_entities(array $entities) {
+  $sources = array();
+  $map = array();
+
+  // Each entity may have a different language, so group them by langcode.
+  foreach ($entities as $entity) {
+    $uri = $entity->uri();
+    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+    $sources[$langcode][] = $uri['path'];
+    $map[$langcode][$uri['path']] = $entity->id();
+
+    // Provide a default path in the event no path is found.
+    $entity->path = array(
+      'pid' => NULL,
+      'source' => $uri['path'],
+      'alias' => NULL,
+      'langcode' => $langcode,
+      'auto' => FALSE,
+    );
+  }
+
+  // Load each set of paths by langcode, and update each entity's path property.
+  foreach ($sources as $langcode => $entity_ids) {
+    $paths = path_load_multiple($entity_ids, 'source', $langcode);
+    foreach ($paths as $source => $path) {
+      $entity_id = $map[$langcode][$source];
+      $entities[$entity_id]->path = $path;
+    }
+  }
 }
 
 /**

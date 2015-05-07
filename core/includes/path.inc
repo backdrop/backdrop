@@ -372,6 +372,7 @@ function path_load($conditions) {
   }
   $path = $select
     ->fields('url_alias')
+    ->orderBy('pid', 'DESC')
     ->execute()
     ->fetchAssoc();
   // Cast the auto column to boolean or NULL if unknown.
@@ -379,6 +380,40 @@ function path_load($conditions) {
     $path['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
   }
   return $path;
+}
+
+/**
+ * Load a collection of URL aliases from the database all at once.
+ *
+ * @param array $keys
+ *   An array of keys by which the aliases should be loaded. This array may
+ *   contain a list of PIDs, sources, or aliases. The type of content within
+ *   this array is determined by the $key parameter.
+ * @param string $field
+ *   The type of data used within the $keys array. May be either "pid",
+ *   "source", or "alias".
+ * @param string $langcode
+ *   The langcode of the paths to be loaded.
+ *
+ * @return array
+ *   An array of the loaded paths, keyed by the $field parameter values.
+ */
+function path_load_multiple(array $keys, $field, $langcode) {
+  $paths = db_select('url_alias')
+    ->fields('url_alias')
+    ->condition($field, $keys, 'IN')
+    ->condition('langcode', $langcode)
+    ->orderBy('pid', 'DESC')
+    ->groupBy($field)
+    ->execute()
+    ->fetchAllAssoc($field, PDO::FETCH_ASSOC);
+
+  // Cast the auto column to boolean or NULL if unknown.
+  foreach ($paths as $key => $path) {
+    $paths[$key]['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  }
+
+  return $paths;
 }
 
 /**
