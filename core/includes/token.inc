@@ -589,7 +589,7 @@ function token_flatten_tree($tree) {
 /**
  * Recursive helper for token_build_tree().
  */
-function _token_build_tree($token_type, array $options) {
+function _token_build_tree($token_type, array $options, $parent_restricted = FALSE) {
   $options += array(
     'parents' => array(),
   );
@@ -632,12 +632,18 @@ function _token_build_tree($token_type, array $options) {
       $tree[$raw_token]['parent'] = '[' . implode(':', $options['parents']) . ']';
     }
 
+    // Inherit the parent token's restricted access flag.
+    if ($parent_restricted) {
+      $tree[$raw_token]['restricted'] = TRUE;
+    }
+
     // Fetch the child tokens.
     if (!empty($token_info['type'])) {
       $child_options = $options;
       $child_options['depth']--;
       $child_options['parents'] = $token_parents;
-      $tree[$raw_token]['children'] = _token_build_tree($token_info['type'], $child_options);
+      $parent_restricted = $parent_restricted || !empty($tree[$raw_token]['restricted']) || !empty($token_info['restricted']);
+      $tree[$raw_token]['children'] = _token_build_tree($token_info['type'], $child_options, $parent_restricted);
     }
   }
 
