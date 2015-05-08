@@ -32,13 +32,16 @@ Backdrop.behaviors.adminBar = {
     if (!$adminBar.length && settings.admin_bar.hash) {
       Backdrop.adminBar.getCache(settings.admin_bar.hash, function (response) {
         if (typeof response == 'string' && response.length > 0) {
-          $('body', context).append(response);
+          $adminBar = $(response);
+          // Temporarily hide the admin bar while adjustments are made.
+          $adminBar.css({visibility: 'hidden'}).appendTo('body', context);
+          // Apply our behaviors.
+          Backdrop.adminBar.attachBehaviors(context, settings, $adminBar);
+          // Display the admin bar as soon as everything is done.
+          setTimeout(function () {
+            $adminBar.css({visibility: ''});
+          }, 0);
         }
-        var $adminBar = $('#admin-bar:not(.admin-bar-processed)', context);
-        // Apply our behaviors.
-        Backdrop.adminBar.attachBehaviors(context, settings, $adminBar);
-        // Allow resize event handlers to recalculate sizes/positions.
-        $(window).triggerHandler('resize');
       });
     }
     // If the menu is in the output already, this means there is a new version.
@@ -158,33 +161,41 @@ Backdrop.adminBar.behaviors.destination = function (context, settings, $adminBar
 Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminBar) {
   var $menu = $adminBar.find('#admin-bar-menu');
   var $extra = $adminBar.find('#admin-bar-extra');
+  var menuWidth;
+  var extraWidth;
+  var availableWidth;
   var resizeTimeout;
 
-  $(window).on('resize.adminBar', function(event) {
+  var adjustItems = function () {
+    // Expand the menu items to their full width to check their size.
+    $menu.removeClass('dropdown').addClass('top-level');
+    $extra.removeClass('dropdown').addClass('top-level');
+
+    $adminBar.trigger('beforeResize');
+
+    menuWidth = $menu.width();
+    extraWidth = $extra.width();
+    availableWidth = $adminBar.width() - $adminBar.find('#admin-bar-icon').width();
+
+    // Collapse the extra items first if needed.
+    if (availableWidth - menuWidth - extraWidth < 20) {
+      $extra.addClass('dropdown').removeClass('top-level');
+      extraWidth = $extra.width();
+    }
+    // See if the menu also needs to be collapsed.
+    if (availableWidth - menuWidth - extraWidth < 20) {
+      $menu.addClass('dropdown').removeClass('top-level');
+    }
+    $adminBar.trigger('afterResize');
+  };
+
+  // Adjust items once now.
+  adjustItems();
+  // Re-adjust items when window is resized.
+  $(window).on('resize.adminBar', function (event) {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-      // Expand the menu items to their full width to check their size.
-      $menu.removeClass('dropdown').addClass('top-level');
-      $extra.removeClass('dropdown').addClass('top-level');
-
-      $adminBar.trigger('beforeResize');
-
-      var menuWidth = $menu.width();
-      var extraWidth = $extra.width();
-      var availableWidth = $adminBar.width() - $adminBar.find('#admin-bar-icon').width();
-
-      // Collapse the extra items first if needed.
-      if (availableWidth - menuWidth - extraWidth < 20) {
-        $extra.addClass('dropdown').removeClass('top-level');
-        extraWidth = $extra.width();
-      }
-      // See if the menu also needs to be collapsed.
-      if (availableWidth - menuWidth - extraWidth < 20) {
-        $menu.addClass('dropdown').removeClass('top-level');
-      }
-      $adminBar.trigger('afterResize');
-    }, 50);
-  }).triggerHandler('resize.adminBar');
+    resizeTimeout = setTimeout(adjustItems, 50);
+  });
 }
 
 /**
