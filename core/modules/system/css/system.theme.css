@@ -429,37 +429,46 @@ ul.secondary a.active {
  */
 .messages {
   position: relative;
+  box-sizing: border-box;
   margin: 6px 0;
-  padding: 10px 10px 10px 55px; /* LTR */
+  padding: .9em .625em 1em 3.438em; /* LTR */
   border-radius: 4px;
-  min-height: 32px;
+  min-height: 3.2em;
   overflow: hidden;
 }
 [dir="rtl"] .messages {
-  padding: 10px 55px 10px 10px;
+  padding: .625em 3.438em .625em .625em;
 }
 .messages:before {
   content: '';
   position: absolute;
   top: 0;
   left: 0; /* LTR */
-  width: 38px;
+  width: 2.375em;
   height: 100%;
-  background-position: center 10px;
+  background-position: center .625em;
   background-repeat: no-repeat;
-  background-size: 24px;
+  background-size: 1.5em;
+}
+.messages :nth-child(2) {
+  margin-top: 0;
+  padding-top: 0;
+}
+.messages :last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 @media only screen and (min-width: 600px) {
   .messages {
-    padding-left: 70px;
+    padding-left: 4.375em;
   }
   [dir="rtl"] .messages {
-    padding-left: 10px;
-    padding-right: 70px;
+    padding-left: .625em;
+    padding-right: 4.375em;
   }
   .messages:before {
-    width: 48px;
-    background-size: 32px;
+    width: 3em;
+    background-size: 2em;
   }
 }
 [dir="rtl"] .messages:before {
