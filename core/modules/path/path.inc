@@ -172,7 +172,7 @@ function path_clean_string($string, array $options = array()) {
   // Remove all HTML tags from the string.
   $output = strip_tags(decode_entities($string));
 
-  // Optionally transliterate (by running through the Transliteration module)
+  // Optionally transliterate (by running through the Transliteration module).
   if ($cache['transliterate']) {
     // If the reduce strings to letters and numbers is enabled, don't bother
     // replacing unknown characters with a question mark. Use an empty string
@@ -180,15 +180,15 @@ function path_clean_string($string, array $options = array()) {
     $output = transliteration_get($output, $cache['reduce_ascii'] ? '' : '?', $langcode);
   }
 
-  // Replace or drop punctuation based on user settings
+  // Replace or drop punctuation based on user settings.
   $output = strtr($output, $cache['punctuation']);
 
-  // Reduce strings to letters and numbers
+  // Reduce strings to letters and numbers.
   if ($cache['reduce_ascii']) {
     $output = preg_replace('/[^a-zA-Z0-9\/]+/', $cache['separator'], $output);
   }
 
-  // Get rid of words that are on the ignore list
+  // Get rid of words that are on the ignore list.
   if ($cache['ignore_words_regex']) {
     $words_removed = $cache['ignore_words_callback']($cache['ignore_words_regex'], '', $output);
     if (backdrop_strlen(trim($words_removed)) > 0) {
@@ -262,16 +262,16 @@ function _path_clean_separators($string, $separator = NULL) {
 }
 
 /**
- * Clean up an URL alias.
+ * Clean up a URL alias.
  *
  * Performs the following alterations:
  * - Trim duplicate, leading, and trailing back-slashes.
  * - Trim duplicate, leading, and trailing separators.
  * - Shorten to a desired length and logical position based on word boundaries.
  *
- * @param $alias
+ * @param string $alias
  *   A string with the URL alias to clean up.
- * @return
+ * @return string
  *   The cleaned URL alias.
  */
 function path_clean_alias($alias) {
@@ -308,11 +308,11 @@ function path_clean_alias($alias) {
  * exists, the function will change the alias to 'content/test-0' and will
  * increase the number suffix until it finds a unique alias.
  *
- * @param $alias
+ * @param string $alias
  *   A string with the alias. Can be altered by reference.
- * @param $source
+ * @param string $source
  *   A string with the path source.
- * @param $langcode
+ * @param string $langcode
  *   A string with a language code.
  */
 function path_alias_uniquify(&$alias, $source, $langcode) {
@@ -321,12 +321,12 @@ function path_alias_uniquify(&$alias, $source, $langcode) {
     return;
   }
 
-  // If the alias already exists, generate a new, hopefully unique, variant
+  // If the alias already exists, generate a new, hopefully unique, variant.
   $maxlength = min($config->get('max_length'), _path_get_schema_alias_maxlength());
   $separator = $config->get('separator');
   $original_alias = $alias;
 
-  $i = 0;
+  $i = 1;
   do {
     // Append an incrementing numeric suffix until we find a unique alias.
     $unique_suffix = $separator . $i;
@@ -340,9 +340,9 @@ function path_alias_uniquify(&$alias, $source, $langcode) {
  *
  * Taken from menu_execute_active_handler().
  *
- * @param $path
+ * @param string $path
  *   A string containing a relative path.
- * @return
+ * @return bool
  *   TRUE if the path already exists.
  */
 function _path_is_callback($path) {
@@ -364,7 +364,7 @@ function _path_is_callback($path) {
  *
  * @param Entity $entity
  *   A node, user, taxonomy term, or other entity for which patterns exist.
- * @param $source
+ * @param string $source
  *   An internal Backdrop path to be aliased. If not specified, the path of the
  *   provided entity will be used, e.g. node/1.
  * @param string $langcode
@@ -564,14 +564,20 @@ function path_save_automatic_alias($source, $alias, $langcode) {
 /**
  * Clean tokens so they are URL friendly.
  *
- * @param $replacements
+ * This function is a token_replace() callback, hence why $data is passed in
+ * but is not used for any reason.
+ *
+ * @param array $replacements
  *   An array of token replacements that need to be "cleaned" for use in the URL.
- * @param $data
+ * @param array $data
  *   An array of objects used to generate the replacements.
- * @param $options
+ * @param array $options
  *   An array of options used to generate the replacements.
+ *
+ * @see path_generate_entity_alias()
+ * @see token_replace()
  */
-function path_clean_token_values(&$replacements, $data = array(), $options = array()) {
+function path_clean_token_values(array &$replacements, array $data = array(), array $options = array()) {
   foreach ($replacements as $token => $value) {
     // Only clean non-path tokens.
     if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
@@ -587,7 +593,7 @@ function path_clean_token_values(&$replacements, $data = array(), $options = arr
  * the value and a textual description.
  * Can and should be expanded to include "all" non text punctuation values.
  *
- * @return
+ * @return array
  *   An array of arrays for punctuation values keyed by a name, including the
  *   value and a textual description.
  */
@@ -648,7 +654,7 @@ function path_punctuation_chars() {
 /**
  * Fetch the maximum length of the {url_alias}.alias field from the schema.
  *
- * @return
+ * @return int
  *   An integer of the maximum URL alias length allowed by the database.
  */
 function _path_get_schema_alias_maxlength() {

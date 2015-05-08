@@ -1,5 +1,6 @@
 {
     "_config_name": "path.settings",
+    "_config_static": true,
     "verbose": false,
     "separator": "-",
     "case": 1,

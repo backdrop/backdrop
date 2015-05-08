@@ -113,10 +113,10 @@ function hook_path_delete($path) {
  *   - entity type: The type of entity on which patterns will be created. All
  *       entities of this type will have a "path" property added to their
  *       objects upon loading.
- *   - label: Translated label for the settings group
+ *   - label: Translated label for the settings group.
  *   - pattern description: The translated label for the default pattern (e.g.,
  *       t('Default path pattern (applies to all content types with blank
- *       patterns below)')
+ *       patterns)')
  *   - pattern default: Default pattern  (e.g. 'content/[node:title]')
  *   - batch update callback: The name of function that should be ran for
  *       bulk update. See node_path_bulk_update_batch_process() for an example.
@@ -181,18 +181,15 @@ function hook_path_is_alias_reserved($alias, $source, $langcode) {
  * @param string $pattern
  *   The alias pattern to pass to token_replace() to generate the URL alias.
  * @param array $context
- *   An associative array of additional options, with the following elements:
- *   - 'module': The module or entity type being aliased.
- *   - 'op': A string with the operation being performed on the object being
- *     aliased. Can be either 'insert', 'update', 'return', or 'bulkupdate'.
- *   - 'source': A string of the source path for the alias (e.g. 'node/1').
- *   - 'data': An array of keyed objects to pass to token_replace().
- *   - 'type': The sub-type or bundle of the object being aliased.
- *   - 'langcode': A string of the language code for the alias (e.g. 'en').
+ *   An associative array with additional information, containing:
+ *   - entity: The entity for which a pattern is being created.
+ *   - source: A string of the source path for the alias (e.g. 'node/1').
+ *   - langcode: A string of the language code for the alias (e.g. 'en').
  */
 function hook_path_pattern_alter(&$pattern, array &$context) {
   // Switch out any [node:created:*] tokens with [node:updated:*] on update.
-  if ($context['module'] == 'node' && ($context['op'] == 'update')) {
+  $entity = $context['entity'];
+  if ($entity->entityType() == 'node' && !$entity->isNew()) {
     $pattern = preg_replace('/\[node:created(\:[^]]*)?\]/', '[node:updated$1]', $pattern);
   }
 }
@@ -203,16 +200,10 @@ function hook_path_pattern_alter(&$pattern, array &$context) {
  * @param string $alias
  *   The automatic alias after token replacement and strings cleaned.
  * @param array $context
- *   An associative array of additional options, with the following elements:
- *   - 'module': The module or entity type being aliased.
- *   - 'op': A string with the operation being performed on the object being
- *     aliased. Can be either 'insert', 'update', 'return', or 'bulkupdate'.
- *   - 'source': A string of the source path for the alias (e.g. 'node/1').
- *     This can be altered by reference.
- *   - 'data': An array of keyed objects to pass to token_replace().
- *   - 'type': The sub-type or bundle of the object being aliased.
- *   - 'langcode': A string of the language code for the alias (e.g. 'en').
- *   - 'pattern': A string of the pattern used for aliasing the object.
+ *   An associative array with additional information, containing:
+ *   - entity: The entity for which a pattern is being created.
+ *   - source: A string of the source path for the alias (e.g. 'node/1').
+ *   - langcode: A string of the language code for the alias (e.g. 'en').
  */
 function hook_path_alias_alter(&$alias, array &$context) {
   // Add a suffix so that all aliases get saved as 'content/my-title.html'

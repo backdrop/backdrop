@@ -85,7 +85,7 @@ function path_menu() {
   $items['admin/config/search/path/patterns/settings'] = array(
     'title' => 'Pattern Settings',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('path_settings_form'),
+    'page arguments' => array('path_patterns_settings_form'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 5,

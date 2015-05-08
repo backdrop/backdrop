@@ -109,7 +109,7 @@ function path_admin_edit($path = array()) {
 }
 
 /**
- * Form constructor for the path administration form.
+ * Form builder; Main path pattern administration form.
  *
  * @param $path
  *   An array containing the path ID, source, alias, and language code.
@@ -332,12 +332,11 @@ function path_admin_filter_form_submit_reset($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/search/path/list';
 }
 
-
 /**
  * Form builder; Configure the URL alias patterns.
  *
+ * @see path_patterns_form_submit()
  * @ingroup forms
- * @see system_settings_form()
  */
 function path_patterns_form($form, $form_state) {
   $config = config('path.settings');
@@ -365,7 +364,7 @@ function path_patterns_form($form, $form_state) {
       '#collapsed' => FALSE,
     );
 
-    // Prompt for the default pattern for this module
+    // Prompt for the default pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
@@ -380,8 +379,7 @@ function path_patterns_form($form, $form_state) {
       '#parents' => array($variable),
     );
 
-    // If the module supports a set of specialized patterns, set
-    // them up here
+    // Set up specialized patterns for this path type (e.g. node types).
     if (isset($path_info['pattern items'])) {
       foreach ($path_info['pattern items'] as $item_name => $item_label) {
         $variable = $path_type . '_' . $item_name . '_pattern';
@@ -400,8 +398,8 @@ function path_patterns_form($form, $form_state) {
       }
     }
 
-    // Display the user documentation of placeholders supported by
-    // this module, as a description on the last pattern
+    // Display the user documentation of placeholders supported by this path
+    // type as a description on the last pattern.
     $variables = array(
       'token_types' => $token_types,
       'text' => t('Browse available tokens for @type.', array('@type' => $group_header)),
@@ -418,17 +416,20 @@ function path_patterns_form($form, $form_state) {
   return $form;
 }
 
+/**
+ * Submit handler for path_patterns_form().
+ */
 function path_patterns_form_submit($form, &$form_state) {
   $config = config('path.settings');
   $values = $form_state['values'];
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    // Save default pattern per module
+    // Save default pattern per path type.
     $variable = $path_type . '_pattern';
     $config->set($variable, $values[$variable]);
 
-    // Save specialized patterns per module
+    // Save specialized patterns per path type.
     if (isset($path_info['pattern items'])) {
       foreach ($path_info['pattern items'] as $item_name => $item_label) {
         $variable = $path_type . '_' . $item_name . '_pattern';
@@ -444,9 +445,11 @@ function path_patterns_form_submit($form, &$form_state) {
 /**
  * Form builder; Configure the Path pattern settings.
  *
+ * @see path_patterns_settings_form_validate()
+ * @see path_patterns_settings_form_submit()
  * @ingroup forms
  */
-function path_settings_form($form) {
+function path_patterns_settings_form($form) {
   module_load_include('inc', 'path');
   $config = config('path.settings');
 
@@ -573,32 +576,10 @@ function path_settings_form($form) {
   return $form;
 }
 
-function path_settings_form_submit($form, &$form_state) {
-  $config = config('path.settings');
-  $values = $form_state['values'];
-  $config->set('verbose', $values['verbose']);
-  $config->set('separator', $values['separator']);
-  $config->set('case', $values['case']);
-  $config->set('max_length', $values['max_length']);
-  $config->set('max_component_length', $values['max_component_length']);
-  $config->set('update_action', $values['update_action']);
-  $config->set('transliterate', $values['transliterate']);
-  $config->set('reduce_ascii', $values['reduce_ascii']);
-  $config->set('ignore_words', $values['ignore_words']);
-
-  $punctuation = path_punctuation_chars();
-  foreach ($punctuation as $name => $details) {
-    $config->set('punctuation_' . $name, $values['punctuation_' . $name]);
-  }
-
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
-}
-
 /**
- * Submit handler for path_settings_form().
+ * Validate handler for path_patterns_settings_form().
  */
-function path_settings_form_validate($form, &$form_state) {
+function path_patterns_settings_form_validate($form, &$form_state) {
   module_load_include('inc', 'path');
 
   // Perform a basic check for HTML characters in the strings to remove field.
@@ -621,7 +602,32 @@ function path_settings_form_validate($form, &$form_state) {
 }
 
 /**
- * Form contructor for path alias bulk update form.
+ * Submit handler for path_patterns_settings_form().
+ */
+function path_patterns_settings_form_submit($form, &$form_state) {
+  $config = config('path.settings');
+  $values = $form_state['values'];
+  $config->set('verbose', $values['verbose']);
+  $config->set('separator', $values['separator']);
+  $config->set('case', $values['case']);
+  $config->set('max_length', $values['max_length']);
+  $config->set('max_component_length', $values['max_component_length']);
+  $config->set('update_action', $values['update_action']);
+  $config->set('transliterate', $values['transliterate']);
+  $config->set('reduce_ascii', $values['reduce_ascii']);
+  $config->set('ignore_words', $values['ignore_words']);
+
+  $punctuation = path_punctuation_chars();
+  foreach ($punctuation as $name => $details) {
+    $config->set('punctuation_' . $name, $values['punctuation_' . $name]);
+  }
+
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Form builder; Bulk path alias update form.
  *
  * @see path_bulk_update_form_submit()
  * @ingroup forms
@@ -752,7 +758,7 @@ function path_admin_bulk_delete() {
     '#collapsed' => FALSE,
   );
 
-  // First we do the "all" case
+  // First we do the "all" case.
   $total_count = db_query('SELECT count(1) FROM {url_alias}')->fetchField();
   $form['delete']['all_aliases'] = array(
     '#type' => 'checkbox',
@@ -773,18 +779,19 @@ function path_admin_bulk_delete() {
     );
   }
 
-  // Warn them and give a button that shows we mean business
+  // Warn them and give a button that shows we mean business.
   $form['warning'] = array('#value' => '<p>' . t('<strong>Note:</strong> there is no confirmation. Be sure of your action before clicking the "Delete aliases now!" button.<br />You may want to make a backup of the database and/or the url_alias table prior to using this feature.') . '</p>');
-  $form['buttons']['submit'] = array(
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Delete aliases now!'),
+    '#value' => t('Delete all checked aliases'),
   );
 
   return $form;
 }
 
 /**
- * Process path_admin_bulk_delete form submissions.
+ * Submit handler for path_admin_bulk_delete().
  */
 function path_admin_bulk_delete_submit($form, &$form_state) {
   foreach ($form_state['values'] as $key => $value) {
@@ -806,4 +813,3 @@ function path_admin_bulk_delete_submit($form, &$form_state) {
   }
   $form_state['redirect'] = 'admin/config/search/path/bulk-delete';
 }
-

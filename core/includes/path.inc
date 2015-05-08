@@ -388,7 +388,7 @@ function path_load($conditions) {
  * @param array $keys
  *   An array of keys by which the aliases should be loaded. This array may
  *   contain a list of PIDs, sources, or aliases. The type of content within
- *   this array is determined by the $key parameter.
+ *   this array is determined by the $field parameter.
  * @param string $field
  *   The type of data used within the $keys array. May be either "pid",
  *   "source", or "alias".
