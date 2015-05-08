@@ -1202,16 +1202,6 @@ function system_library_info() {
     ),
   );
 
-  // jQuery Once.
-  $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
-    'js' => array(
-      'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-    ),
-  );
-
   // jQuery Form Plugin.
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
