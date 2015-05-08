@@ -26,9 +26,10 @@
 .js .dropbutton-widget {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 0; /* LTR */
 }
-.js td .dropbutton-widget {
+[dir="rtl"].js .dropbutton-widget {
+  left: 0;
   right: auto;
 }
 /* UL styles are over-scoped in core, so this selector needs weight parity. */
@@ -42,6 +43,11 @@
 .js .dropbutton li,
 .js .dropbutton a {
   display: block;
+  text-align: right; /* LTR */
+}
+[dir="rtl"].js .dropbutton li,
+[dir="rtl"].js .dropbutton a {
+  text-align: left;
 }
 
 /**
@@ -62,7 +68,7 @@
 .js .dropbutton-multiple .dropbutton-widget {
   padding-right: 2em; /* LTR */
 }
-.js[dir="rtl"] .dropbutton-multiple .dropbutton-widget {
+[dir="rtl"].js .dropbutton-multiple .dropbutton-widget {
   padding-left: 2em;
   padding-right: 0;
 }

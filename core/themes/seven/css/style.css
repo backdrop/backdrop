@@ -105,7 +105,6 @@ ul.menu li.expanded {
 #skip-link a,
 #skip-link a:link,
 #skip-link a:visited {
-  display: block;
   background: #444;
   color: #fff;
   font-size: 0.94em;
@@ -381,6 +380,9 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
+main {
+  margin-bottom: 20px;
+}
 
 /* Administration page listings. */
 ul.admin-list li {
@@ -398,6 +400,9 @@ ul.admin-list li {
   padding: 9px 30px 0 0;
   margin-right: 0;
   background: url(../images/list-item-rtl.png) no-repeat right 11px;
+}
+ul.admin-list li:first-child {
+  border-top: none;
 }
 .admin-panel .item-list ul,
 ul.admin-list {
@@ -444,6 +449,9 @@ ul.admin-list li div.description a {
 [dir="rtl"] ul.admin-list li div.description a {
   margin-right: 0;
 }
+.admin-panel .description {
+  line-height: inherit;
+}
 div.submitted {
   color: #898989;
 }
@@ -455,12 +463,6 @@ table {
   width: 100%;
   font-size: 0.923em;
   margin: 0 0 10px;
-  border: 0;
-}
-td,
-th {
-  vertical-align: middle;
-  padding: 5px 20px;
   border: 0;
 }
 tr.even,
@@ -483,6 +485,9 @@ tr:hover {
   background: #ffff99;
 }
 th {
+  vertical-align: middle;
+  padding: 10px 20px;
+  border: 0;
   text-transform: uppercase;
   background: #e9e8e8;
   color: #000;
@@ -528,6 +533,12 @@ th.active img {
 [dir="rtl"] th.active img {
   left: 3px;
   right: auto;
+}
+td {
+  vertical-align: middle;
+  padding: 10px 20px;
+  border: 0;
+  min-height: 14px;
 }
 td.active {
   background: #e9e8e8;
@@ -664,7 +675,7 @@ div.teaser-checkbox .form-item,
 }
 .form-item label {
   margin: 0;
-  padding: 0px 0px 10px;
+  padding: 0 0 10px;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -688,6 +699,9 @@ div.teaser-checkbox .form-item,
 .form-disabled select.form-select {
   background-color: #eee;
   color: #777;
+}
+td.checkbox .form-item input {
+  margin: 0;
 }
 
 /* Filter */
@@ -777,7 +791,9 @@ a.button {
   margin-right: .5em;
 }
 a.button:hover,
-input.form-submit:hover {
+input.form-submit:hover,
+a.button:focus,
+input.form-submit:focus {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
@@ -812,6 +828,8 @@ textarea.form-textarea {
   font-weight: 400;
   border: 0;
   padding: 10px;
+  box-sizing: border-box;
+  max-width: 100%;
   color: #444b53;
   background: #fff;
   -webkit-border-radius: 4px;
@@ -829,6 +847,7 @@ select.form-select {
   font-weight: 400;
   border: 2px solid rgba(208,208,208,1);
   padding: 10px;
+  box-sizing: border-box;
   color: #444b53;
   background: #fff;
   -webkit-border-radius: 4px;

@@ -269,6 +269,8 @@ body.admin-bar {
 #admin-bar .admin-bar-search input {
   background: #fff none center right no-repeat;
   border: none;
+  border-radius: 0;
+  box-shadow: none;
   font-size: 12px;
   margin: 0;
   outline: none;

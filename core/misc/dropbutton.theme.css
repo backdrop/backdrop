@@ -26,6 +26,8 @@
 }
 
 .js .dropbutton button:hover,
-.js .dropbutton a:hover {
+.js .dropbutton a:hover,
+.js .dropbutton button:focus,
+.js .dropbutton a:focus {
   background-color: #f7f7f7;
 }
