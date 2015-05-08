@@ -760,6 +760,7 @@ body div.form-type-checkbox div.description {
   margin-right: 1.5em;
 }
 input.form-submit,
+button.form-submit,
 a.button {
   text-align: center;
   text-transform: uppercase;
@@ -814,6 +815,49 @@ input.form-button-disabled:active {
   border-color: #eee;
   text-shadow: none;
   color: #999;
+}
+input.button-primary,
+button.button-primary {
+  color: white;
+  border-color: #1766ae;
+  background-color: #1766ae;
+}
+input.button-primary:hover,
+input.button-primary:focus,
+button.button-primary:hover,
+button.button-primary:focus {
+  border-color: #114a75;
+  background-color: #114a75;
+}
+input.button-secondary,
+button.button-secondary {
+  color: #828188;
+  background-color: transparent;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
+  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
+  box-shadow: inset 0px 0px 0px 2px #97979e;
+}
+input.button-secondary:hover,
+input.button-secondary:focus,
+button.button-secondary:hover,
+button.button-secondary:focus {
+  color: white;
+  background-color: #97979e;
+}
+input.button-danger,
+button.button-danger {
+  color: #e7251b;
+  background-color: transparent;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #e7251b;
+  -moz-box-shadow: inset 0px 0px 0px 2px #e7251b;
+  box-shadow: inset 0px 0px 0px 2px #e7251b;
+}
+input.button-danger:hover,
+input.button-danger:focus,
+button.button-danger:hover,
+button.button-danger:focus {
+  color: white;
+  background-color: #e7251b;
 }
 input.form-autocomplete,
 input.form-text,
