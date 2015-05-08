@@ -64,17 +64,17 @@ Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $
 /**
  * Apply margin to page.
  *
- * Note that directly applying marginTop does not work in IE. To prevent
- * flickering/jumping page content with client-side caching, this is a regular
- * Backdrop behavior.
+ * We apply the class to the HTML element, since it’s the only element that’s
+ * guaranteed to exist at execution time.
  */
-Backdrop.behaviors.adminBarMarginTop = {
-  attach: function (context, settings) {
-    if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
-      $('body:not(.admin-bar)', context).addClass('admin-bar');
-    }
+Backdrop.adminBar.behaviors.adminBarMarginTop = function (context, settings) {
+  if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
+    $('html:not(.admin-bar)', context).addClass('admin-bar');
   }
 };
+// Don’t wait until the DOM is ready, run this immediately to prevent flickering
+// or jumping page content.
+Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
 
 /**
  * Retrieve content from client-side cache.
