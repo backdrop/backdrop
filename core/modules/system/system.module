@@ -2886,6 +2886,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => $yes ? $yes : t('Confirm'),
+    '#attributes' => array('class' => array('button-danger')),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',

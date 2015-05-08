@@ -37,6 +37,7 @@
 }
 .ui-dialog .ui-dialog-buttonpane .ui-button-text-only .ui-button-text {
   padding: 0;
+  line-height: inherit;
 }
 
 /* Form action buttons are moved in dialogs. Remove empty space. */

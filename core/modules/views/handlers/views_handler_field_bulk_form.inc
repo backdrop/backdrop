@@ -129,7 +129,6 @@ class views_handler_field_bulk_form extends views_handler_field {
     );
 
     // Set the form actions container in the header.
-    $actions['#type'] = 'actions';
     $actions['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Execute'),
