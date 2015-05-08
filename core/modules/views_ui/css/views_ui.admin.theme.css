@@ -687,10 +687,6 @@ ul#views-display-menu-tabs li.add ul.action-list li{
   padding-bottom: 2px;
 }
 
-.views-ui-display-tab-bucket .even {
-  background-color: #f9f9f9;
-}
-
 .views-ui-display-tab-bucket .views-group-text {
   margin-top: 6px;
   margin-bottom: 6px;
@@ -1058,34 +1054,13 @@ div.messages {
 
 /* @end */
 
-/* @group Buttons */
-
-.dropbutton-multiple {
-  position: absolute;
-}
-.dropbutton-widget {
-  position: relative;
-}
-.dropbutton-multiple .dropbutton-widget {
-  padding-right: 1.75em;
-}
-.dropbutton-wrapper {
-  font-size: 11px;
-  line-height: 1.4555;
-}
-.dropbutton li > * {
-  margin: 0;
-  padding: 0.2em 0.75em;
-}
+/* @group Drop buttons */
 
 .views-display-top .dropbutton-wrapper {
-  position: absolute;
-  right: 12px; /* RTL */
-  top: 7px;
+  float: right;
 }
 [dir="rtl"] .views-display-top .dropbutton-wrapper {
-  left: 12px;
-  right: auto;
+  float: left;
 }
 .views-display-top .dropbutton-wrapper a {
   font-size: 12px;
@@ -1093,27 +1068,64 @@ div.messages {
 
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 5px; /* RTL */
+  right: 5px; /* LTR */
   top: 4px;
 }
 [dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
-  right: auto;
   left: 5px;
+  right: auto;
+}
+.views-ui-display-tab-bucket .dropbutton-wrapper,
+.views-ui-display-tab-bucket .dropbutton-wrapper * {
+  font-size: 11px;
+}
+.views-ui-display-tab-bucket .dropbutton li > * {
+  padding: 0.2em 0.75em;
 }
 
 .views-ui-display-tab-actions .dropbutton-wrapper li a,
-.views-ui-display-tab-actions .dropbutton-wrapper input {
+.views-ui-display-tab-actions .dropbutton-wrapper li button,
+.views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
+  display: block;
   background: none;
   border: medium;
   font-family: inherit;
   font-size: 12px;
   padding-left: 12px;
   margin-bottom: 0;
+  line-height: normal;
 }
-
-.views-ui-display-tab-actions .dropbutton-wrapper input:hover {
-  background: none;
-  border: none;
+.views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
+  text-align: left;
+  min-width: 100%;
+  margin: 0;
+  /* LTR */
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-right-radius: 0;
+  -moz-border-radius-topright: 0;
+  -moz-border-radius-bottomright: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-topleft: 0;
+  -moz-border-radius-bottomleft: 5px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 5px;
+}
+[dir="rtl"] .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-right-radius: 5px;
+  -moz-border-radius-topright: 0;
+  -moz-border-radius-bottomright: 5px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 5px;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -moz-border-radius-topleft: 0;
+  -moz-border-radius-bottomleft: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 /* @end */
