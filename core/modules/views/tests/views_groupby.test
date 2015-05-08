@@ -11,6 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
+  protected $profile = 'minimal';
   /**
    * Tests aggregate count feature.
    */
@@ -281,6 +282,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
  * Tests UI of aggregate functionality..
  */
 class viewsUiGroupbyTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui', 'views_test');

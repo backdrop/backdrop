@@ -11,7 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests jump menu style functionality.
  */
 class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
-
+  protected $profile = 'minimal';
   /**
    * Stores all created nodes.
    *
