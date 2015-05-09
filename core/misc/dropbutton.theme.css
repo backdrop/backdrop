@@ -1,4 +1,3 @@
-
 /**
  * @file
  * General styles for dropbuttons.
@@ -25,10 +24,10 @@
   border-left: 1px solid #e8e8e8;
   border-right: 0 none;
 }
-.dropbutton-multiple .dropbutton .dropbutton-action > * {
-  margin-right: 0.25em; /* LTR */
-}
-[dir="rtl"] .dropbutton-multiple .dropbutton .dropbutton-action > * {
-  margin-left: 0.25em;
-  margin-right: 0;
+
+.js .dropbutton button:hover,
+.js .dropbutton a:hover,
+.js .dropbutton button:focus,
+.js .dropbutton a:focus {
+  background-color: #f7f7f7;
 }

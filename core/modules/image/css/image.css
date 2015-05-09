@@ -12,6 +12,7 @@
 }
 div.image-widget-data {
   float: left; /* LTR */
+  max-width: 100%;
 }
 [dir="rtl"] .image-widget-data {
   float: right;
