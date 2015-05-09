@@ -136,8 +136,8 @@ function _field_token_info($field_name = NULL) {
         if (!empty($field['bundles'])) {
           foreach (array_keys($field['bundles']) as $entity) {
             // Make sure a token type exists for this entity.
-            $entity_into = entity_get_info($entity);
-            $token_type = $entity_into['token type'];
+            $entity_info = entity_get_info($entity);
+            $token_type = $entity_info['token type'];
             if (empty($token_type)) {
               continue;
             }
