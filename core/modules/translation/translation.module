@@ -130,7 +130,7 @@ function translation_form_node_type_form_alter(&$form, &$form_state) {
   $form['workflow']['language']['#type'] = 'radios';
   $form['workflow']['language']['#options'] = array(t('Disabled'), t('Enabled'), TRANSLATION_ENABLED => t('Enabled, with translation'));
   // Description based on text from node.module.
-  $form['workflow']['language']['#description'] = t('Add a language selection field to the editing form, allowing you to select from one of the <a href="@languages">enabled languages</a>. You can also turn on translation for this content type, which lets you have content translated to any of the installed languages. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('@languages' => url('admin/config/regional/language')));
+  $form['workflow']['language']['#description'] = t('Add a language selection field to the editing form, allowing you to select from one of the <a href="@languages">enabled languages</a>. You can also turn on translation for this content type, which lets you have content translated to any of the installed languages. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('@languages' => url('admin/config/regional/language')));
 }
 
 /**

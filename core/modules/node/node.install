@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the node module.
@@ -1157,6 +1156,22 @@ function node_update_1009() {
       $config->clear('settings.node_type_language');
       $config->save();
     }
+  }
+}
+
+/**
+ * Set all nodes to be language agnostic on mono-lingual sites.
+ */
+function node_update_1010() {
+  // Because this update may adversely affect sites that once were multilingual
+  // but are now mono-lingual, we only apply if we're absolutely sure only a
+  // single language is used, both in the configuration and in the node table.
+  $language_count = config_get('system.core', 'language_count');
+  $default_langcode = config_get('system.core', 'language_default');
+  $other_languages = db_query("SELECT COUNT(langcode) FROM {node} WHERE langcode NOT IN (:list)", array(':list' => array('und', $default_langcode)))->fetchField();
+  if ($language_count == 1 && $other_languages == 0) {
+    db_query("UPDATE {node} SET langcode = 'und' WHERE langcode = :default", array('default' => $default_langcode));
+    db_query("UPDATE {url_alias} SET langcode = 'und' WHERE source LIKE 'node/%' AND langcode = :default", array('default' => $default_langcode));
   }
 }
 

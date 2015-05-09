@@ -171,7 +171,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
       '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
 
