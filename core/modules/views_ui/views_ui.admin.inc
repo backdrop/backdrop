@@ -428,20 +428,21 @@ function views_ui_add_form($form, &$form_state) {
   $wizard_instance = $get_instance($wizard_plugins[$wizard_key]);
   $form = $wizard_instance->build_form($form, $form_state);
 
-  $form['save'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save & exit'),
-    '#validate' => array('views_ui_wizard_form_validate'),
-    '#submit' => array('views_ui_add_form_save_submit'),
-  );
-  $form['continue'] = array(
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['continue'] = array(
     '#type' => 'submit',
     '#value' => t('Continue & edit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
   );
-  $form['cancel'] = array(
+  $form['actions']['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save & exit'),
+    '#validate' => array('views_ui_wizard_form_validate'),
+    '#submit' => array('views_ui_add_form_save_submit'),
+  );
+  $form['actions']['cancel'] = array(
     '#markup' => l(t('Cancel'), 'admin/structure/views'),
   );
 

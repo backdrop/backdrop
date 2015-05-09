@@ -65,10 +65,12 @@
 }
 .admin-dblog .dblog-warning .icon {
   background-image: url(../../../misc/message-16-warning.png);
+  background-color: #FCE400;
 }
 .admin-dblog .dblog-error .icon,
 .admin-dblog .dblog-critical .icon,
 .admin-dblog .dblog-alert .icon,
 .admin-dblog .dblog-emergency .icon {
   background-image: url(../../../misc/message-16-error.png);
+  background-color: #EE3D23;
 }
