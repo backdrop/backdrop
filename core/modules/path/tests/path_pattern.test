@@ -349,17 +349,17 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
 
     // Check that Path does not create an alias of '/admin'.
     $node = $this->backdropCreateNode(array('title' => 'Admin', 'type' => 'page'));
-    $this->assertEntityAlias('node', $node, 'admin-0');
+    $this->assertEntityAlias('node', $node, 'admin-1');
 
     // Check that Path does not create an alias of '/modules'.
     $node->title = 'Modules';
     node_save($node);
-    $this->assertEntityAlias('node', $node, 'modules-0');
+    $this->assertEntityAlias('node', $node, 'modules-1');
 
     // Check that Path does not create an alias of '/index.php'.
     $node->title = 'index.php';
     node_save($node);
-    $this->assertEntityAlias('node', $node, 'index.php-0');
+    $this->assertEntityAlias('node', $node, 'index.php-1');
 
     // Check that a safe value gets an automatic alias. This is also a control
     // to ensure the above tests work properly.
@@ -734,9 +734,9 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $node->save();
 
     // Check that the new English alias replaced the old one.
-    $this->assertEntityAlias('node', $node, 'content/english-node-0', 'en');
+    $this->assertEntityAlias('node', $node, 'content/english-node-1', 'en');
     $this->assertEntityAlias('node', $node, 'french-node', 'fr');
-    $this->assertAliasExists(array('pid' => $english_alias['pid'], 'alias' => 'content/english-node-0'));
+    $this->assertAliasExists(array('pid' => $english_alias['pid'], 'alias' => 'content/english-node-1'));
   }
 }
 
