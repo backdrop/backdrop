@@ -14,7 +14,7 @@ function menu_token_info() {
     'description' => t('Tokens related to menus.'),
     'needs-data' => 'menu',
   );
-  $types['types']['menu-link'] = array(
+  $info['types']['menu-link'] = array(
     'name' => t('Menu links'),
     'description' => t('Tokens related to menu links.'),
     'needs-data' => 'menu-link',
