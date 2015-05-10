@@ -1500,6 +1500,10 @@ class NodeAdminTestCase extends BackdropWebTestCase {
    * @see TaxonomyNodeFilterTestCase
    */
   function testContentAdminPages() {
+    // Do not use any patterns for nodes in this test.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_page_pattern', '');
+
     $this->backdropLogin($this->admin_user);
 
     $nodes['published_page'] = $this->backdropCreateNode(array('type' => 'page'));

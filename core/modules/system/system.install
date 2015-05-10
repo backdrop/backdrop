@@ -1449,6 +1449,13 @@ function system_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'auto' => array(
+        'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('pid'),
     'indexes' => array(
@@ -2497,6 +2504,25 @@ function system_update_1038() {
   // Remove the entry for the token module in the system table. This will
   // "disable" the module if present.
   db_query("DELETE FROM {system} WHERE name = 'token' AND type = 'module'");
+}
+
+/**
+ * Add the "auto" column to the url_alias table.
+ */
+function system_update_1039() {
+  if (!db_field_exists('url_alias', 'auto')) {
+    $spec = array(
+      'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => FALSE,
+      'default' => 0,
+    );
+    db_add_field('url_alias', 'auto', $spec);
+    // Set all initial values to NULL, as we do not know at this point whether
+    // aliases are automatic or not.
+    db_query("UPDATE {url_alias} SET auto = NULL");
+  }
 }
 
 /**

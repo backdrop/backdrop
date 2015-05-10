@@ -92,6 +92,10 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
         // Not using backdrop_map_assoc() here as that requires common.inc.
         $list = array_keys(system_list('module_enabled'));
         $list = (!empty($list) ? array_combine($list, $list) : array());
+        // Remove modules that have been moved into core. This prevents loading
+        // these .module files, which may otherwise cause duplicate function
+        // fatal errors.
+        $list = array_diff($list, backdrop_merged_modules());
       }
     }
   }
@@ -897,6 +901,16 @@ function module_invoke_all($hook) {
 /**
  * @} End of "defgroup hooks".
  */
+
+/**
+ * Returns an array of modules that have been merged into Backdrop core.
+ */
+function backdrop_merged_modules() {
+  return array(
+    'token', // Backdrop 1.1.0.
+    'pathauto', // Backdrop 1.1.0.
+  );
+}
 
 /**
  * Returns an array of modules required by core.

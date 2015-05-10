@@ -80,7 +80,7 @@ define('FILE_NOT_EXECUTABLE', 128);
  */
 function backdrop_load_updates() {
   foreach (backdrop_get_installed_schema_version(NULL, FALSE, TRUE) as $module => $schema_version) {
-    if ($schema_version > -1) {
+    if ($schema_version > -1 && !in_array($module, backdrop_merged_modules())) {
       module_load_install($module);
     }
   }

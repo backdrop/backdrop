@@ -458,7 +458,10 @@ class TokenNodeTestCase extends TokenTestHelper {
   function testNodeTokens() {
     $source_node = $this->backdropCreateNode(array(
       'log' => $this->randomName(),
-      'path' => array('alias' => 'content/source-node'),
+      'path' => array(
+        'auto' => FALSE,
+        'alias' => 'content/source-node',
+      ),
     ));
     $tokens = array(
       'source' => NULL,
@@ -627,7 +630,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
    * Test the additional taxonomy term tokens.
    */
   function testTaxonomyTokens() {
-    $root_term = $this->addTerm($this->vocab, array('name' => 'Root term', 'path' => array('alias' => 'root-term')));
+    $root_term = $this->addTerm($this->vocab, array('name' => 'Root term', 'path' => array('alias' => 'root-term', 'auto' => FALSE)));
     $tokens = array(
       'url' => url("taxonomy/term/{$root_term->tid}", array('absolute' => TRUE)),
       'url:absolute' => url("taxonomy/term/{$root_term->tid}", array('absolute' => TRUE)),
@@ -644,7 +647,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
     );
     $this->assertTokens('term', array('term' => $root_term), $tokens);
 
-    $parent_term = $this->addTerm($this->vocab, array('name' => 'Parent term', 'parent' => array($root_term->tid)));
+    $parent_term = $this->addTerm($this->vocab, array('name' => 'Parent term', 'parent' => array($root_term->tid), 'path' => array('auto' => FALSE)));
     $tokens = array(
       'url' => url("taxonomy/term/{$parent_term->tid}", array('absolute' => TRUE)),
       'url:absolute' => url("taxonomy/term/{$parent_term->tid}", array('absolute' => TRUE)),
@@ -860,7 +863,13 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
     );
     $this->assertPageTokens('', $tokens);
 
-    $node = $this->backdropCreateNode(array('title' => 'Node title', 'path' => array('alias' => 'node-alias')));
+    $node = $this->backdropCreateNode(array(
+      'title' => 'Node title',
+      'path' => array(
+        'auto' => FALSE,
+        'alias' => 'node-alias',
+      ),
+    ));
     $tokens = array(
       '[current-page:title]' => 'Node title',
       '[current-page:url]' => url("node/{$node->nid}", array('absolute' => TRUE)),

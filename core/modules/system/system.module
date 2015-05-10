@@ -3643,7 +3643,7 @@ function system_config_info() {
  *   built-into core no longer need to be prevented from enabling.
  */
 function system_system_info_alter(&$info, $file, $type) {
-  if (in_array($file->name, array('token'))) {
+  if (in_array($file->name, backdrop_merged_modules())) {
     // Set a special flag indicating this module is now in core.
     $info['merged_into_core'] = TRUE;
     // Remove Backdrop core version as a fallback, ensuring it won't be enabled.
