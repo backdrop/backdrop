@@ -15,19 +15,6 @@
 }
 
 /**
- * Interaction states
- */
-.ui-state-default,
-.ui-state-hover,
-.ui-state-focus,
-.ui-state-active {
-  outline: 0;
-}
-.ui-state-active {
-  font-weight: bold;
-}
-
-/**
  * Interaction cues
  */
 .ui-state-highlight,
