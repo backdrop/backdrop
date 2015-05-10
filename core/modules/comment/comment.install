@@ -331,7 +331,6 @@ function comment_update_1001() {
     update_variable_del('comment_default_mode_' . $node_type->type);
     update_variable_del('comment_anonymous_' . $node_type->type);
     update_variable_del('comment_subject_field_' . $node_type->type);
-    update_variable_del('comment_subject_field_' . $node_type->type);
     update_variable_del('comment_user_picture_' . $node_type->type);
     update_variable_del('comment_form_location_' . $node_type->type);
     update_variable_del('comment_preview_' . $node_type->type);

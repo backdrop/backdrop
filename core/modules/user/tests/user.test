@@ -694,6 +694,11 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Load real user object.
     $account = user_load($account->uid, TRUE);
 
+    // Enable comment subjects on 'page' nodes
+    $node_type = node_type_get_type('page');
+    $node_type->settings['comment_subject_field'] = TRUE;
+    node_type_save($node_type);
+    
     // Create a simple node.
     $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
@@ -1803,6 +1808,11 @@ class UserSignatureTestCase extends BackdropWebTestCase {
    * upon display.
    */
   function testUserSignature() {
+    // Enable comment subjects on 'page' nodes
+    $node_type = node_type_get_type('page');
+    $node_type->settings['comment_subject_field'] = TRUE;
+    node_type_save($node_type);
+    
     // Create a new node with comments on.
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
