@@ -76,6 +76,7 @@ function node_token_info() {
   $node['source'] = array(
     'name' => t('Translation source node'),
     'description' => t("The source node for this current node's translation set."),
+    'type' => 'node',
   );
   $node['vid'] = array(
     'name' => t('Revision ID'),
