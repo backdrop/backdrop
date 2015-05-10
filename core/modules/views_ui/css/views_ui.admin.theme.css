@@ -1096,7 +1096,7 @@ div.messages {
   line-height: normal;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  text-align: left;
+  text-align: right;
   min-width: 100%;
   margin: 0;
   /* LTR */
@@ -1114,6 +1114,7 @@ div.messages {
   border-bottom-left-radius: 5px;
 }
 [dir="rtl"] .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
+  text-align: left;
   -webkit-border-top-right-radius: 0;
   -webkit-border-bottom-right-radius: 5px;
   -moz-border-radius-topright: 0;
