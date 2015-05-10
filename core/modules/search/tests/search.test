@@ -408,7 +408,6 @@ class SearchRankingTestCase extends BackdropWebTestCase {
 
     // Add a comment to one of the nodes.
     $edit = array();
-    $edit['subject'] = 'my comment title';
     $edit['comment_body[' . LANGUAGE_NONE . '][0][value]'] = 'some random comment';
     $this->backdropGet('comment/reply/' . $nodes['comments'][1]->nid);
     $this->backdropPost(NULL, $edit, t('Preview'));
@@ -693,6 +692,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     $node_type = node_type_get_type('article');
     $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
+    $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
 
     // Enable check_plain() for 'Filtered HTML' text format.
@@ -768,6 +768,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     $node_type = node_type_get_type('article');
     $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
+    $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
 
     // Create a node.
@@ -970,7 +971,6 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
 
     // Create a comment array
     $edit_comment = array();
-    $edit_comment['subject'] = $this->randomName();
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = $this->randomName();
     $filtered_html_format_id = 'filtered_html';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][format]'] = $filtered_html_format_id;
