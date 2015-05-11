@@ -1347,13 +1347,6 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   $form['actions'] = array(
     '#type' => 'actions',
   );
-  $form['actions']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
-  );
   $form['actions']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add condition'),
@@ -1363,6 +1356,13 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     '#ajax' => array(
       'callback' => 'layout_ajax_form_save_dialog',
     ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#attributes' => array('class' => array('dialog-cancel')),
+    '#validate' => array(),
+    '#submit' => array(),
   );
 
   return $form;
@@ -1455,13 +1455,6 @@ function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, 
     '#type' => 'actions',
     '#weight' => 1000,
   );
-  $form['actions']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
-  );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => $handler->is_new ? t('Add condition') : t('Save condition'),
@@ -1474,6 +1467,13 @@ function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, 
     '#ajax' => array(
       'callback' => 'layout_ajax_form_save_dialog',
     ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#attributes' => array('class' => array('dialog-cancel')),
+    '#validate' => array(),
+    '#submit' => array(),
   );
   return $form;
 }
