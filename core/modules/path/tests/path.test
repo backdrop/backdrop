@@ -387,8 +387,16 @@ class PathLanguageTestCase extends BackdropWebTestCase {
  * Tests the user interface for creating path aliases, with languages.
  */
 class PathLanguageUITestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('path', 'locale');
+
+    // Create the content type.
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'page',
+    ));
 
     // Create and login user.
     $web_user = $this->backdropCreateUser(array('edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'access administration pages'));
@@ -455,6 +463,8 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
  * Tests that paths are not prefixed on a monolingual site.
  */
 class PathMonolingualTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('path', 'locale', 'translation');
 
