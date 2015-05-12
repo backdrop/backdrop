@@ -1,6 +1,8 @@
 name = Link
 description = Defines simple link field types.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 type = module
