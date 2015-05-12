@@ -169,9 +169,9 @@ function node_form($form, &$form_state, Node $node) {
   else {
     $form['langcode'] = array(
       '#type' => 'value',
-      // New nodes without multilingual support get the default language, old
+      // New nodes without multilingual support have undefined language, old
       // nodes keep their language if language.module is not available.
-      '#value' => !isset($form['#node']->nid) ? language_default()->langcode : $node->langcode,
+      '#value' => !isset($form['#node']->nid) ? LANGUAGE_NONE : $node->langcode,
     );
   }
 

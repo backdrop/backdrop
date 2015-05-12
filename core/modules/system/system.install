@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the system module.
@@ -470,6 +469,30 @@ function system_requirements($phase) {
     }
   }
 
+  if ($phase == 'runtime') {
+    // Check for various token definition problems.
+    $token_problems = token_get_token_problems();
+    // Format and display each token problem.
+    foreach ($token_problems as $problem_key => $problem) {
+      if (!empty($problem['problems'])) {
+        $problems = array_unique($problem['problems']);
+        $problems = array_map('check_plain', $problems);
+        $token_problems[$problem_key] = $problem['label'] . theme('item_list', array('items' => $problems));
+      }
+      else {
+        unset($token_problems[$problem_key]);
+      }
+    }
+    if (!empty($token_problems)) {
+      $requirements['token_problems'] = array(
+        'title' => $t('Tokens'),
+        'value' => $t('Problems detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
+      );
+    }
+  }
+
   return $requirements;
 }
 
@@ -612,6 +635,8 @@ function system_schema() {
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
   $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
+  $schema['cache_token'] = $schema['cache'];
+  $schema['cache_token']['description'] = 'Cache table for token information.';
 
   $schema['file_managed'] = array(
     'description' => 'Stores information for uploaded files.',
@@ -1423,6 +1448,13 @@ function system_schema() {
         'length' => 12,
         'not null' => TRUE,
         'default' => '',
+      ),
+      'auto' => array(
+        'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
       ),
     ),
     'primary key' => array('pid'),
@@ -2440,6 +2472,57 @@ function system_update_1036() {
   $config = config('system.core');
   $config->clear('private_key');
   $config->save();
+}
+
+/**
+ * Set the default value for canonical_secure option.
+ * Check if old menu item exists and remove it.
+ */
+function system_update_1037() {
+  config_set('system.core', 'canonical_secure', 0);
+  
+  $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
+  if ($res->rowCount()) {
+    $mlid = $res->fetch()->mlid;
+    db_delete('menu_links')
+      ->condition('mlid', $mlid, '=')
+      ->execute();
+  }
+}
+
+/**
+ * Upgrade or prepare for token module in core.
+ */
+function system_update_1038() {
+  // Manually install the schema for token's cache table.
+  if (!db_table_exists('cache_token')) {
+    $cache_token = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_token['description'] = 'Cache table for token information.';
+    db_create_table('cache_token', $cache_token);
+  }
+
+  // Remove the entry for the token module in the system table. This will
+  // "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'token' AND type = 'module'");
+}
+
+/**
+ * Add the "auto" column to the url_alias table.
+ */
+function system_update_1039() {
+  if (!db_field_exists('url_alias', 'auto')) {
+    $spec = array(
+      'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => FALSE,
+      'default' => 0,
+    );
+    db_add_field('url_alias', 'auto', $spec);
+    // Set all initial values to NULL, as we do not know at this point whether
+    // aliases are automatic or not.
+    db_query("UPDATE {url_alias} SET auto = NULL");
+  }
 }
 
 /**

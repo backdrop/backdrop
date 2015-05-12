@@ -80,7 +80,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 
     // Get comment.
     if ($contact !== TRUE) { // If true then attempting to find error message.
-      if ($subject) {
+      if ($subject && $subject_mode) {
         $this->assertText($subject, 'Comment subject posted.');
       }
       $this->assertText($comment, 'Comment body posted.');
@@ -1020,7 +1020,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $raw_date = strtotime($edit['date']);
     $expected_text_date = format_date($raw_date);
     $expected_form_date = format_date($raw_date, 'custom', 'Y-m-d H:i O');
-    $comment = $this->postComment($this->node, $edit['subject'], $edit['comment_body[' . $langcode . '][0][value]'], TRUE);
+    $comment = $this->postComment($this->node, $edit['comment_body[' . $langcode . '][0][value]'], '', TRUE);
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Preview'));
 
     // Check that the preview is displaying the subject, comment, author and date correctly.
@@ -1089,7 +1089,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropLogout();
 
     // Post anonymous comment without contact info.
-    $anonymous_comment1 = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $anonymous_comment1 = $this->postComment($this->node, $this->randomName());
     $this->assertTrue($this->commentExists($anonymous_comment1), 'Anonymous comment without contact info found.');
 
     // Allow contact info.
@@ -1098,7 +1098,7 @@ class CommentAnonymous extends CommentHelperCase {
 
     // Attempt to edit anonymous comment.
     $this->backdropGet('comment/' . $anonymous_comment1->id . '/edit');
-    $edited_comment = $this->postComment(NULL, $this->randomName(), $this->randomName());
+    $edited_comment = $this->postComment(NULL, $this->randomName());
     $this->assertTrue($this->commentExists($edited_comment, FALSE), 'Modified reply found.');
     $this->backdropLogout();
 
@@ -1106,7 +1106,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertTrue($this->commentContactInfoAvailable(), 'Contact information available.');
 
-    $anonymous_comment2 = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $anonymous_comment2 = $this->postComment($this->node, $this->randomName());
     $this->assertTrue($this->commentExists($anonymous_comment2), 'Anonymous comment with contact info (optional) found.');
 
     // Ensure anonymous users cannot post in the name of registered users.
@@ -1117,6 +1117,8 @@ class CommentAnonymous extends CommentHelperCase {
       'subject' => $this->randomName(),
       "comment_body[$langcode][0][value]" => $this->randomName(),
     );
+    $this->setCommentSubject(TRUE);
+
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
     $this->assertText(t('The name you used belongs to a registered user.'));
 
@@ -1129,7 +1131,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertTrue($this->commentContactInfoAvailable(), 'Contact information available.');
 
-    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), $this->randomName(), TRUE);
+    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), '', TRUE);
     // Name should have 'Anonymous' for value by default.
     $this->assertText(t('E-mail field is required.'), 'E-mail required.');
     $this->assertFalse($this->commentExists($anonymous_comment3), 'Anonymous comment with contact info (required) not found.');
@@ -1137,7 +1139,7 @@ class CommentAnonymous extends CommentHelperCase {
     // Post comment with contact info (required).
     $author_name = $this->randomName();
     $author_mail = $this->randomName() . '@example.com';
-    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), $this->randomName(), array('name' => $author_name, 'mail' => $author_mail));
+    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), '', array('name' => $author_name, 'mail' => $author_mail));
     $this->assertTrue($this->commentExists($anonymous_comment3), 'Anonymous comment with contact info (required) found.');
 
     // Make sure the user data appears correctly when editing the comment.
@@ -1229,9 +1231,9 @@ class CommentPagerTest extends CommentHelperCase {
     // Create a node and three comments.
     $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
     $comments = array();
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
 
     $this->setCommentSettings('comment_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
@@ -1263,7 +1265,7 @@ class CommentPagerTest extends CommentHelperCase {
     $replies = array();
     $oldest_comment = reset($comments);
     $this->backdropGet('comment/reply/' . $node->nid . '/' . $oldest_comment->id);
-    $reply = $this->postComment(NULL, $this->randomName(), $this->randomName(), TRUE);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
 
     $this->setCommentsPerPage(2);
     // We are still in flat view - the replies should not be on the first page,
@@ -1546,6 +1548,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->assertText(t('No comments available.'));
 
     $this->backdropLogout();
+    $this->setCommentSubject(TRUE);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1610,6 +1613,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentAnonymous('0'); // Ensure that doesn't require contact info.
     $this->backdropLogout();
+    $this->setCommentSubject(TRUE);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1649,6 +1653,7 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
    */
   function testRecentCommentBlock() {
     $this->backdropLogin($this->admin_user);
+    $this->setCommentSubject(TRUE);
 
     // Add the block to the sidebar region in the default layout.
     $layout_name = 'default';
@@ -1833,8 +1838,9 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
     $tests['[comment:node:title]'] = check_plain($node->title);
+    $tests['[comment:author]'] = check_plain(format_username($this->admin_user));
     $tests['[comment:author:uid]'] = $comment->uid;
-    $tests['[comment:author:name]'] = check_plain($this->admin_user->name);
+    $tests['[comment:author:name]'] = check_plain(format_username($this->admin_user));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
@@ -1853,7 +1859,8 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = $comment->comment_body[LANGUAGE_NONE][0]['value'];
     $tests['[comment:parent:title]'] = $parent_comment->subject;
     $tests['[comment:node:title]'] = $node->title;
-    $tests['[comment:author:name]'] = $this->admin_user->name;
+    $tests['[comment:author]'] = format_username($this->admin_user);
+    $tests['[comment:author:name]'] = format_username($this->admin_user);
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('comment' => $comment), array('language' => $language, 'sanitize' => FALSE));
@@ -1886,7 +1893,7 @@ class CommentActionsTestCase extends CommentHelperCase {
     $this->backdropLogin($this->web_user);
     $comment_text = $this->randomName();
     $subject = $this->randomName();
-    $comment = $this->postComment($this->node, $comment_text, $subject);
+    $comment = $this->postComment($this->node, $comment_text, '');
     $comment = comment_load($comment->id);
 
     comment_unpublish_action($comment);
@@ -1994,7 +2001,7 @@ class CommentFieldsTest extends CommentHelperCase {
     // asserting that the body is actually posted correctly.
     $this->web_user = $this->backdropCreateUser(array('access content', 'access comments', 'post comments', 'skip comment approval'));
     $this->backdropLogin($this->web_user);
-    $this->postComment($book_node, $this->randomName(), $this->randomName());
+    $this->postComment($book_node, $this->randomName(), '');
   }
 
   /**
@@ -2110,7 +2117,7 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
    */
   function testNodeDeletion() {
     $this->backdropLogin($this->web_user);
-    $comment = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $comment = $this->postComment($this->node, $this->randomName(), '');
     $this->assertTrue(comment_load($comment->id), 'The comment could be loaded.');
     node_delete($this->node->nid);
     $this->assertFalse(comment_load($comment->id), 'The comment could not be loaded after the node was deleted.');

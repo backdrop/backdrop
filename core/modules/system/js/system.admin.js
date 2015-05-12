@@ -18,7 +18,7 @@ Backdrop.behaviors.cleanURLsSettingsCheck = {
     if (!($('#edit-clean-url').length) || $('#edit-clean-url.install').once('clean-url').length) {
       return;
     }
-    var url = settings.basePath + 'admin/config/search/clean-urls/check';
+    var url = settings.basePath + 'admin/config/search/urls/check';
     $.ajax({
       url: location.protocol + '//' + location.host + url,
       dataType: 'json',
@@ -38,7 +38,7 @@ Backdrop.behaviors.cleanURLsSettingsCheck = {
  * are currently enabled.
  */
 Backdrop.cleanURLsInstallCheck = function () {
-  var url = location.protocol + '//' + location.host + Backdrop.settings.basePath + 'admin/config/search/clean-urls/check';
+  var url = location.protocol + '//' + location.host + Backdrop.settings.basePath + 'admin/config/search/urls/check';
   // Submit a synchronous request to avoid database errors associated with
   // concurrent requests during install.
   $.ajax({

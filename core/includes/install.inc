@@ -80,7 +80,7 @@ define('FILE_NOT_EXECUTABLE', 128);
  */
 function backdrop_load_updates() {
   foreach (backdrop_get_installed_schema_version(NULL, FALSE, TRUE) as $module => $schema_version) {
-    if ($schema_version > -1) {
+    if ($schema_version > -1 && !in_array($module, backdrop_merged_modules())) {
       module_load_install($module);
     }
   }
@@ -576,6 +576,7 @@ class DatabaseTaskException extends Exception {
 function backdrop_rewrite_settings($settings = array()) {
   backdrop_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
+  $additional_settings = $settings;
   $additions = '';
 
   $buffer = NULL;
@@ -591,13 +592,16 @@ function backdrop_rewrite_settings($settings = array()) {
       // Check for variables.
       if (substr($line, 0, 1) == '$') {
         preg_match('/\$([^ =]*) /', $line, $variable);
-        if (array_key_exists($variable[1], $settings)) {
+        $variable_name = $variable[1];
+        if (array_key_exists($variable_name, $settings)) {
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
-          $setting = $settings[$variable[1]];
-          $new_line = '$' . $variable[1] . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
+          $setting = $settings[$variable_name];
+          $new_line = '$' . $variable_name . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
           $buffer .= $new_line;
           $additions .= $new_line;
+          // Remove this variable from being added to the bottom of the file.
+          unset($additional_settings[$variable_name]);
         }
         else {
           $buffer .= $line;
@@ -610,7 +614,7 @@ function backdrop_rewrite_settings($settings = array()) {
     fclose($fp);
 
     // Add required settings that were missing from settings.php.
-    foreach ($settings as $setting => $data) {
+    foreach ($additional_settings as $setting => $data) {
       if (!empty($data['required'])) {
         $new_line = "\$$setting = " . var_export($data['value'], TRUE) . ";\n";
         $buffer .= $new_line;

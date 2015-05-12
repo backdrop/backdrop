@@ -20,9 +20,10 @@ class FileFieldTestCase extends BackdropWebTestCase {
       $modules = $modules[0];
     }
     $modules[] = 'file';
+    $modules[] = 'path';
     $modules[] = 'file_module_test';
     parent::setUp($modules);
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'create url aliases'));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -483,7 +484,11 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       $this->assertNoFieldByXPath('//input[@type="submit"]', t('Remove'), format_string('After removing all files, there is no "Remove" button displayed (JSMode=%type).', array('%type' => $type)));
 
       // Save the node and ensure it does not have any files.
-      $this->backdropPost(NULL, array('title' => $this->randomName()), t('Save'));
+      $this->backdropPost(NULL, array(
+        'title' => $this->randomName(),
+        'path[auto]' => FALSE,
+        'path[alias]' => '',
+      ), t('Save'));
       $matches = array();
       preg_match('/node\/([0-9]+)/', $this->getUrl(), $matches);
       $nid = $matches[1];
@@ -1024,10 +1029,6 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
    */
   function testFileTokenReplacement() {
     global $language;
-    $url_options = array(
-      'absolute' => TRUE,
-      'language' => $language,
-    );
 
     // Create file field.
     $type_name = 'article';

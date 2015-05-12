@@ -22,31 +22,21 @@
 
 /* Palette */
 .color-form .form-item {
-  height: 2em;
-  line-height: 2em;
-  padding-left: 1em; /* LTR */
-  margin: 0.5em 0;
+  display: inline-block;
 }
-[dir="rtl"] .color-form .form-item {
-  padding-left: 0;
-  padding-right: 1em;
-}
-.color-form label {
-  float: left; /* LTR */
-  clear: left; /* LTR */
+.color-form .form-item label {
   width: 10em;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
 }
 [dir="rtl"] .color-form label {
-  float: right;
   clear: right;
 }
 .color-form .form-text,
 .color-form .form-select {
-  float: left; /* LTR */
-}
-[dir="rtl"] .color-form .form-text,
-[dir="rtl"] .color-form .form-select {
-  float: right;
+  vertical-align: middle;
 }
 .color-form .form-text {
   text-align: center;
@@ -64,13 +54,10 @@
   float: right;
 }
 #palette .hook {
-  float: left; /* LTR */
+  display: inline-block;
   margin-top: 3px;
   width: 16px;
   height: 16px;
-}
-[dir="rtl"] #palette .hook {
-  float: right;
 }
 #palette .down,
 #palette .up,
@@ -95,28 +82,27 @@
   background-position: 0 -54px;
 }
 #palette .lock {
-  float: left; /* LTR */
+  float: right; /* LTR */
   position: relative;
-  top: -1.4em;
-  left: -10px; /* LTR */
+  top: -1.2em;
+  left: -15px; /* LTR */
   width: 20px;
   height: 25px;
   background: url(../images/lock.png) no-repeat 50% 2px;
   cursor: pointer;
 }
 [dir="rtl"] #palette .lock {
-  float: right;
+  float: left;
   left: auto;
-  right: -10px;
+  right: -15px;
 }
 #palette .unlocked {
   background-position: 50% -22px;
 }
 #palette .form-item {
   width: 20em;
-}
-#palette .item-selected {
-  background: #eee;
+  margin-top: .2em;
+  margin-bottom: .2em;
 }
 
 /* Preview */

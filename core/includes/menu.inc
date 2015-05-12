@@ -2624,20 +2624,24 @@ function menu_get_active_title() {
 }
 
 /**
- * Gets a translated, access-checked menu link that is ready for rendering.
+ * Gets a translated menu link that is ready for rendering.
  *
  * This function should never be called from within node_load() or any other
  * function used as a menu object load function since an infinite recursion may
  * occur.
  *
- * @param $mlid
+ * @param int $mlid
  *   The mlid of the menu item.
+ * @param bool $skip_access_check
+ *   If set to TRUE, the menu link access checks will not be performed. If set
+ *   to FALSE, access checks are performed and $item['access'] will be populated
+ *   with the current user's access to the menu item.
  *
  * @return
  *   A menu link, with $item['access'] filled and link translated for
  *   rendering.
  */
-function menu_link_load($mlid) {
+function menu_link_load($mlid, $skip_access_check = FALSE) {
   if (is_numeric($mlid)) {
     $query = db_select('menu_links', 'ml');
     $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
@@ -2648,6 +2652,9 @@ function menu_link_load($mlid) {
     $query->condition('ml.mlid', $mlid);
     if ($item = $query->execute()->fetchAssoc()) {
       $item['weight'] = $item['link_weight'];
+      if ($skip_access_check) {
+        $item['access'] = TRUE;
+      }
       _menu_link_translate($item);
       return $item;
     }

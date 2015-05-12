@@ -27,3 +27,33 @@ name = Paths on non-English monolingual sites
 description = Confirm that paths are not changed on monolingual non-English sites
 group = Path
 file = path.test
+
+[PathPatternUnitTestCase]
+name = Path pattern unit tests
+description = Unit tests for Path automatic alias functions.
+group = Path
+file = path_pattern.test
+
+[PathPatternFunctionalTestCase]
+name = Path pattern basic tests
+description = Test basic automatic aliasing functionality.
+group = Path
+file = path_pattern.test
+
+[PathPatternLocaleTestCase]
+name = Path pattern localization tests
+description = Test automatic path aliasing functionality with localization and translation.
+group = Path
+file = path_pattern.test
+
+[PathPatternBulkUpdateTestCase]
+name = Path pattern bulk updating
+description = Tests bulk updating of URL aliases.
+group = Path
+file = path_pattern.test
+
+[PathPatternTokenTestCase]
+name = Path tokens
+description = Tests tokens provided by Path.
+group = Path
+file = path_pattern.test

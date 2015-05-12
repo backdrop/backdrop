@@ -553,6 +553,9 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    * choose a new format before saving the page.
    */
   function testFormatWidgetPermissions() {
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_page_pattern', '');
+
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $body_value_key = "body[$langcode][0][value]";

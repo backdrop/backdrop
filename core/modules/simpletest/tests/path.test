@@ -131,6 +131,10 @@ class UrlAlterFunctionalTest extends BackdropWebTestCase {
    */
   function testUrlAlter() {
     $account = $this->backdropCreateUser(array('administer url aliases'));
+    // Remove the default alias if set.
+    $account->path['auto'] = FALSE;
+    $account->path['alias'] = '';
+    $account->save();
     $this->backdropLogin($account);
 
     $uid = $account->uid;

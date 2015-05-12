@@ -1184,7 +1184,13 @@ function theme($hook, $variables = array()) {
     if (isset($info['path'])) {
       $template_file = $info['path'] . '/' . $template_file;
     }
-    if (config_get('system.core', 'theme_debug')) {
+    try {
+      $theme_debug = config_get('system.core', 'theme_debug');
+    }
+    catch (ConfigException $e) {
+      $theme_debug = FALSE;
+    }
+    if ($theme_debug) {
       $output = _theme_render_template_debug($render_function, $template_file, $variables, $extension);
     }
     else {

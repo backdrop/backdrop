@@ -3,8 +3,8 @@
  */
 body {
   color: #000;
-  background: #fff;
-  font: normal 81.3%/1.538em "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  background: #fafafa;
+  font: normal 16px/1.538 "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
 a,
 .link {
@@ -54,6 +54,7 @@ h6 {
 }
 p {
   margin: 1em 0;
+  line-height: 155%;
 }
 dl {
   margin: 0 0 20px;
@@ -68,7 +69,15 @@ dl dl {
   margin-right: 20px;
 }
 blockquote {
-  margin: 1em 40px;
+  padding: 5px 30px;
+  width: 85%;
+  background-color: #fff;
+  margin: 20px auto;
+  border-left: 2px solid #BDBDBD;
+}
+blockquote * {
+  font-size: 95%;
+  line-height: 175%;
 }
 address {
   font-style: italic;
@@ -105,17 +114,33 @@ abbr,
 acronym {
   border-bottom: dotted 1px;
 }
-ul {
+ul,
+.block ul,
+.item-list ul {
   list-style-type: disc;
   list-style-image: none;
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
+  line-height: 160%;
 }
-[dir="rtl"] ul {
+[dir="rtl"] ul,
+[dir="rtl"] .block ul,
+[dir="rtl"] .item-list ul {
   margin: 0.25em 1.5em 0.25em 0;
+}
+.item-list ul li,
+li.leaf,
+ul.menu li {
+  list-style-type: disc;
+  list-style-image: none;
+}
+
+ul.menu li {
+  margin: 0;
 }
 ol {
   list-style-type: decimal;
   margin: 0.25em 0 0.25em 2em; /* LTR */
+  line-height: 160%;
 }
 [dir="rtl"] ol {
   margin: 0.25em 2em 0.25em 0;
@@ -127,7 +152,7 @@ code {
 code,
 pre,
 kbd {
-  font-size: 1.231em;
+  font-size: 1em;
 }
 pre {
   margin: 0.5em 0;

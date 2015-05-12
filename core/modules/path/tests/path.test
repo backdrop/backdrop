@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the Path module.
@@ -111,6 +110,7 @@ class PathTestCase extends BackdropWebTestCase {
     // Create alias.
     $edit = array();
     $edit['path[alias]'] = $this->randomName(8);
+    $edit['path[auto]'] = FALSE;
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
     // Confirm that the alias works.
@@ -175,6 +175,7 @@ class PathTestCase extends BackdropWebTestCase {
     $node_one = $this->backdropCreateNode();
     $edit = array();
     $edit['path[alias]'] = $this->randomName();
+    $edit['path[auto]'] = FALSE;
     $this->backdropPost('node/' . $node_one->nid . '/edit', $edit, t('Save'));
 
     // Now create another node and try to set the same alias.
@@ -208,6 +209,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
     $edit['name'] = $this->randomName();
     $edit['description[value]'] = $description;
     $edit['path[alias]'] = $this->randomName();
+    $edit['path[auto]'] = FALSE;
     $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
 
     // Confirm that the alias works.
@@ -218,6 +220,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
     $tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name", array(':name' => $edit['name']))->fetchField();
     $edit2 = array();
     $edit2['path[alias]'] = $this->randomName();
+    $edit2['path[auto]'] = FALSE;
     $this->backdropPost('taxonomy/term/' . $tid . '/edit', $edit2, t('Save'));
 
     // Confirm that the changed alias works.
@@ -278,6 +281,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // Edit the node to set language and path.
     $edit = array();
     $edit['langcode'] = 'en';
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $english_alias;
     $this->backdropPost('node/' . $english_node->nid . '/edit', $edit, t('Save'));
 
@@ -293,6 +297,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $french_alias = $this->randomName();
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $french_alias;
     $this->backdropPost(NULL, $edit, t('Save'));
 
