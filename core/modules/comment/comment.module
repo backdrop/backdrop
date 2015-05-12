@@ -304,7 +304,7 @@ function comment_node_type_load(&$types) {
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
-      'comment_subject_field' => TRUE,
+      'comment_subject_field' => FALSE,
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
