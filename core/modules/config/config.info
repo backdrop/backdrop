@@ -5,3 +5,5 @@ type = module
 backdrop = 1.x
 configure = admin/config/development/configuration
 package = Development
+tags[] = Development
+tags[] = Core

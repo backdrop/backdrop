@@ -1,6 +1,9 @@
 name = Path
 description = Allows users to rename URLs.
 package = System
+tags[] = System
+tags[] = Path Management
+tags[] = Core
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
