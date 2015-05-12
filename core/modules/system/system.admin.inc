@@ -625,14 +625,16 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
-    $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
+    $form['modules'][$filename] = _system_modules_build_row($module->info, $extra);
   }
-
+dpm($form['modules']);
+  // Lastly, sort all fieldsets by title.
+  backdrop_sort($form['modules']);
+  
   // Add basic information to the fieldsets.
-  foreach (element_children($form['modules']) as $package) {
-    $form['modules'][$package] += array(
+    $form['modules'] += array(
       '#type' => 'fieldset',
-      '#title' => t($package),
+      '#title' => t('mods'),
       '#collapsible' => TRUE,
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
@@ -643,10 +645,7 @@ function system_modules($form, $form_state = array()) {
         array('data' => t('Operations')),
       ),
     );
-  }
 
-  // Lastly, sort all fieldsets by title.
-  backdrop_sort($form['modules'], array('#title' => SORT_STRING));
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
