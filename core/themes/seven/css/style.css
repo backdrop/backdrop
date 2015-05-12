@@ -1237,6 +1237,12 @@ div.add-or-remove-shortcuts {
 #field-display-overview .field-formatter-settings-edit-form .form-submit {
   margin-bottom: 0;
 }
+#field-display-overview .field-formatter-summary {
+    float: right;
+}
+#field-display-overview .field-formatter-settings-edit-wrapper {
+    float: left;
+}
 
 /* Recent content block */
 #dashboard div#block-node-recent div.content {
