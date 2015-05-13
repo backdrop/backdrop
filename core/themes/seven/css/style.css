@@ -1238,10 +1238,10 @@ div.add-or-remove-shortcuts {
   margin-bottom: 0;
 }
 #field-display-overview .field-formatter-summary {
-    float: right;
+  float: right;
 }
 #field-display-overview .field-formatter-settings-edit-wrapper {
-    float: left;
+  float: left;
 }
 
 /* Recent content block */
