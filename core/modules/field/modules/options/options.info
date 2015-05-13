@@ -1,6 +1,8 @@
 name = Options
 description = Defines selection, check box and radio button widgets for text and numeric fields.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field

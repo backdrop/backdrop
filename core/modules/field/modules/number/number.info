@@ -1,6 +1,8 @@
 name = Number
 description = Defines numeric field types.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field

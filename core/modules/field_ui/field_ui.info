@@ -1,6 +1,8 @@
 name = Field UI
 description = User interface for the Field API.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field

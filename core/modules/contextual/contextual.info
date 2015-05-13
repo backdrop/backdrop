@@ -1,5 +1,7 @@
 name = Contextual Links
 description = Provides contextual links to perform actions related to elements on a page.
 package = Administration
+tags[] = Administration
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x

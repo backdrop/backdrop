@@ -1,6 +1,8 @@
 name = List
 description = Defines list field types. Use with Options to create selection lists.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field

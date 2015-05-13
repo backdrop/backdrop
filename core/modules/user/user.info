@@ -1,6 +1,8 @@
 name = User
 description = Manages the user registration and login system.
 package = System
+tags[] = System
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE

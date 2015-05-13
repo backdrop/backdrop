@@ -1,6 +1,8 @@
 name = Taxonomy
 description = Enables the organization of content by category.
 package = Categorization
+tags[] = Categorization
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = options

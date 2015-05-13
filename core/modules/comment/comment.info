@@ -1,6 +1,8 @@
 name = Comment
 description = Allows users to comment on and discuss published content.
 package = Comments
+tags[] = Comments
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = node

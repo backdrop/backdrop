@@ -1,6 +1,8 @@
 name = System
 description = Handles general site configuration for administrators.
 package = System
+tags[] = System
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE

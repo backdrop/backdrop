@@ -1,6 +1,8 @@
 name = File
 description = Defines a file field type.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = field

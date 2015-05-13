@@ -1,6 +1,8 @@
 name = Entity
 description = API for managing entities like nodes and users.
 package = System
+tags[] = System
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE

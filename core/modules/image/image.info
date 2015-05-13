@@ -1,6 +1,8 @@
 name = Image
 description = Provides image manipulation tools and image field type.
 package = Fields
+tags[] = Fields
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 dependencies[] = file

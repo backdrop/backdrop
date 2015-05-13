@@ -1,6 +1,8 @@
 name = Views
 description = Create customized lists and queries from your database.
 package = Views
+tags[] = Views
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 stylesheets[all][] = css/views.css

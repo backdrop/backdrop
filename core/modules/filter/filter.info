@@ -1,6 +1,8 @@
 name = Filter
 description = Filters content in preparation for display.
 package = System
+tags[] = System
+tags[] = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE
