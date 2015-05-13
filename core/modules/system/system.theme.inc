@@ -171,19 +171,18 @@ function theme_system_modules_fieldset($variables) {
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
 
-    if ($requires || $required_by) {
-      $requirements .= ' <div class="requirements">';
-      if ($requires) {
-        $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
-      }
-      if ($required_by) {
-        $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
-      }
-      $requirements .= '</div>';
-
-      // Build a requirements toggle.
-      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+    $requirements .= ' <div class="requirements">';
+    if ($requires) {
+      $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
     }
+    if ($required_by) {
+      $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
+    }
+    $requirements .= '<div class="admin-requirements">' . t('Tags: !tags', array('!tags' => backdrop_render($module['tags']))) . '</div>';
+    $requirements .= '</div>';
+
+    // Build a requirements toggle.
+    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
 
     // Add the description, along with any modules it requires.
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
