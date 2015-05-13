@@ -627,9 +627,8 @@ function system_modules($form, $form_state = array()) {
     }
     $form['modules'][$filename] = _system_modules_build_row($module->info, $extra);
   }
-dpm($form['modules']);
   // Lastly, sort all fieldsets by title.
-  backdrop_sort($form['modules']);
+  backdrop_sort($form['modules'], array($filename => SORT_STRING));
   
   // Add basic information to the fieldsets.
     $form['modules'] += array(
@@ -645,6 +644,7 @@ dpm($form['modules']);
         array('data' => t('Operations')),
       ),
     );
+dpm($form['modules']);
 
 
   $form['actions'] = array('#type' => 'actions');
@@ -702,6 +702,19 @@ function _system_modules_build_row($info, $extra) {
   );
   $form['version'] = array(
     '#markup' => $info['version'],
+  );
+  $tags = array();
+  if(isset($info['tags'])) {
+    $tags = $info['tags'];
+  }
+  elseif(isset($info['package'])) {
+    $tags[] = $info['package'];
+  }
+  else {
+    $tags[] = 'Other'; 
+  }
+  $form['tags'] = array(
+    '#markup' => implode(', ', $tags),
   );
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
