@@ -1,6 +1,6 @@
 /* Layout listing form. */
 #layout-list .layout-group td {
-  background: #E1E2DC;
+  background: #dddddd;
 }
 #layout-list .layout-group td:first-child {
   font-weight: bold;
