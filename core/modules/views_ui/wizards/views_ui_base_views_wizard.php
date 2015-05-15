@@ -99,14 +99,19 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     // All options for the page display are included in this container so they
     // can be hidden en masse when the "Create a page" checkbox is unchecked.
+    $page_states = array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    );
     $form['displays']['page']['options'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('options-set'),),
-      '#states' => array(
+      /*'#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
         ),
-      ),
+      ),*/
       '#prefix' => '<div><div id="edit-page-wrapper">',
       '#suffix' => '</div></div>',
       '#parents' => array('page'),
@@ -115,15 +120,18 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['options']['title'] = array(
       '#title' => t('Page title'),
       '#type' => 'textfield',
+      '#states' => $page_states,
     );
     $form['displays']['page']['options']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
       '#field_prefix' => $path_prefix,
+      '#states' => $page_states,
     );
     $form['displays']['page']['options']['style'] = array(
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('container-inline', 'fieldset-no-legend')),
+      '#states' => $page_states,
     );
 
     // Create the dropdown for choosing the display format.
@@ -132,6 +140,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
+      '#states' => $page_states,
     );
     $style_form = &$form['displays']['page']['options']['style'];
     $style_form['style_plugin']['#default_value'] = views_ui_get_selected($form_state, array('page', 'style', 'style_plugin'), 'default', $style_form['style_plugin']);
@@ -147,16 +156,19 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#size' => 5,
       '#min' => 0,
       '#step' => 1,
+      '#states' => $page_states,
     );
     $form['displays']['page']['options']['pagerz'] = array(
       '#title' => t('Use a pager'),
       '#type' => 'checkbox',
       '#default_value' => TRUE,
+      '#states' => $page_states,
     );
     $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
       '#type' => 'checkbox',
       '#id' => 'edit-page-link',
+      '#states' => $page_states,
     );
     $form['displays']['page']['options']['link_properties'] = array(
       '#type' => 'container',
@@ -197,6 +209,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
         '#id' => 'edit-page-feed',
+        '#states' => $page_states,
       );
       $form['displays']['page']['options']['feed_properties'] = array(
         '#type' => 'container',
