@@ -1220,7 +1220,8 @@ div.add-or-remove-shortcuts {
 /* Field UI */
 #field-display-overview input.field-formatter-settings-edit {
   margin: 0;
-  padding: 1px 8px;
+  padding: .4em 1em;
+  line-height: 1.2;
 }
 #field-display-overview tr.field-formatter-settings-changed {
   background: #ffffbb;
