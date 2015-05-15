@@ -247,19 +247,28 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['block']['options'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('options-set'),),
-      '#states' => array(
+      /*'#states' => array(
         'visible' => array(
           ':input[name="block[create]"]' => array('checked' => TRUE),
         ),
-      ),
+      ),*/
       '#prefix' => '<div id="edit-block-wrapper">',
       '#suffix' => '</div>',
       '#parents' => array('block'),
     );
+    /**
+     * helper var to apply to different form elements.
+     */
+    $states = array(
+        'visible' => array(
+          ':input[name="block[create]"]' => array('checked' => TRUE),
+        ),
+      );
 
     $form['displays']['block']['options']['title'] = array(
       '#title' => t('Block title'),
       '#type' => 'textfield',
+      '#states' => $states,
     );
     $form['displays']['block']['options']['style'] = array(
       '#type' => 'fieldset',
