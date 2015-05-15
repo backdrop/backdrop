@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Exposes global functionality for creating image styles.
