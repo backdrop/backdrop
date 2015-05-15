@@ -3041,11 +3041,14 @@ function language_multilingual() {
  * @param $only_enabled
  *   (optional) Whether to return only enabled languages.
  *
+ * @param $option_list
+ *   (optional) Whether to return a list of options instead of objects
+ *
  * @return
  *   An associative array of languages, keyed by the language code, ordered by
  *   weight ascending and name ascending.
  */
-function language_list($only_enabled = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3094,6 +3097,15 @@ function language_list($only_enabled = FALSE) {
         $languages['enabled'][$langcode] = $languages['all'][$langcode];
       }
     }
+  }
+
+  if ($option_list) {
+    $list = array();
+    $this_list = $only_enabled ? $languages['enabled'] : $languages['all'];
+    foreach ($this_list as $language) {
+      $list[$language->langcode] = $language->$field;
+    }
+    return $list;
   }
 
   return $only_enabled ? $languages['enabled'] : $languages['all'];
