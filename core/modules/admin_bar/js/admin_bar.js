@@ -52,30 +52,6 @@ Backdrop.behaviors.adminBar = {
 };
 
 /**
- * Apply active trail highlighting based on current path.
- */
-Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $adminBar) {
-  if (settings.admin_bar.activeTrail) {
-    $adminBar.find('#admin-bar-menu > li > ul > li > a[href="' + settings.admin_bar.activeTrail + '"]').addClass('active-trail');
-  }
-};
-
-/**
- * Apply margin to page.
- *
- * We apply the class to the HTML element, since it’s the only element that’s
- * guaranteed to exist at execution time.
- */
-Backdrop.adminBar.behaviors.adminBarMarginTop = function (context, settings) {
-  if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
-    $('html:not(.admin-bar)', context).addClass('admin-bar');
-  }
-};
-// Don’t wait until the DOM is ready, run this immediately to prevent flickering
-// or jumping page content.
-Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
-
-/**
  * Retrieve content from client-side cache.
  *
  * @param hash
@@ -129,6 +105,30 @@ Backdrop.adminBar.attachBehaviors = function (context, settings, $adminBar) {
     });
   }
 };
+
+/**
+ * Apply active trail highlighting based on current path.
+ */
+Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $adminBar) {
+  if (settings.admin_bar.activeTrail) {
+    $adminBar.find('#admin-bar-menu > li > ul > li > a[href="' + settings.admin_bar.activeTrail + '"]').addClass('active-trail');
+  }
+};
+
+/**
+ * Apply margin to page.
+ *
+ * We apply the class to the HTML element, since it’s the only element that’s
+ * guaranteed to exist at execution time.
+ */
+Backdrop.adminBar.behaviors.adminBarMarginTop = function (context, settings) {
+  if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
+    $('html:not(.admin-bar)', context).addClass('admin-bar');
+  }
+};
+// Don’t wait until the DOM is ready, run this immediately to prevent flickering
+// or jumping page content.
+Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
 
 /**
  * Apply 'position: fixed'.
