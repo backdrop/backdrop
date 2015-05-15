@@ -1033,10 +1033,15 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
           '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
         );
         $table[$name]['settings_edit'] = $base_button + array(
-          '#type' => 'image_button',
+          '#type' => 'submit',
           '#name' => $name . '_formatter_settings_edit',
-          '#src' => 'core/misc/configure.png',
-          '#attributes' => array('class' => array('field-formatter-settings-edit'), 'alt' => t('Edit')),
+          '#value' => t('Configure'),
+          '#attributes' => array(
+            'class' => array(
+              'field-formatter-settings-edit',
+              'button-secondary',
+            ),
+          ),
           '#op' => 'edit',
           // Do not check errors for the 'Edit' button, but make sure we get
           // the value of the 'formatter type' select.
