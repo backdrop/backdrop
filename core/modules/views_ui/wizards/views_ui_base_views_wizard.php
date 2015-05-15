@@ -273,6 +273,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['block']['options']['style'] = array(
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('container-inline', 'fieldset-no-legend')),
+      '#states' => $states,
     );
 
     // Create the dropdown for choosing the display format.
@@ -281,6 +282,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
+      '#states' => $states,
     );
     $style_form = &$form['displays']['block']['options']['style'];
     $style_form['style_plugin']['#default_value'] = views_ui_get_selected($form_state, array('block', 'style', 'style_plugin'), 'default', $style_form['style_plugin']);
@@ -296,11 +298,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#size' => 5,
       '#min' => 0,
       '#step' => 1,
+      '#states' => $states,
     );
     $form['displays']['block']['options']['pager'] = array(
       '#title' => t('Use a pager'),
       '#type' => 'checkbox',
       '#default_value' => FALSE,
+      '#states' => $states,
     );
 
     return $form;
