@@ -1525,6 +1525,7 @@ function user_login_authenticate_validate($form, &$form_state) {
     }
     $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
     if ($account) {
+      $form_state['account_found'] = TRUE;
       if ($flood_config->get('flood_uid_only')) {
         // Register flood events based on the uid only, so they apply for any
         // IP address. This is the most secure option.
@@ -1545,6 +1546,9 @@ function user_login_authenticate_validate($form, &$form_state) {
         return;
       }
     }
+    else {
+      $form_state['account_found'] = FALSE;
+    }
     // We are not limited by flood control, so try to authenticate.
     // Set $form_state['uid'] as a flag for user_login_final_validate().
     $form_state['uid'] = user_authenticate($form_state['values']['name'], $password);
@@ -1559,6 +1563,10 @@ function user_login_authenticate_validate($form, &$form_state) {
  * be the last one.
  */
 function user_login_final_validate($form, &$form_state) {
+  if(!$form_state['account_found']) {
+    form_set_error('name', t('Sorry, unrecognized username.'));
+    watchdog('user', 'Login attempt failed. Username %user not in database.', array('%user' => $form_state['values']['name']));
+  }
   $flood_config = config('user.flood');
   if (empty($form_state['uid'])) {
     // Always register an IP-based failed login event.
@@ -1578,7 +1586,7 @@ function user_login_final_validate($form, &$form_state) {
       }
     }
     else {
-      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
+      form_set_error('pass', t('Sorry, incorrect password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
   }
