@@ -1525,6 +1525,7 @@ function user_login_authenticate_validate($form, &$form_state) {
     }
     $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
     if ($account) {
+      $form_state['account_found'] = TRUE;
       if ($flood_config->get('flood_uid_only')) {
         // Register flood events based on the uid only, so they apply for any
         // IP address. This is the most secure option.
@@ -1544,6 +1545,9 @@ function user_login_authenticate_validate($form, &$form_state) {
         $form_state['flood_control_triggered'] = 'user';
         return;
       }
+    }
+    else {
+      $form_state['account_found'] = FALSE;
     }
     // We are not limited by flood control, so try to authenticate.
     // Set $form_state['uid'] as a flag for user_login_final_validate().
@@ -1577,8 +1581,12 @@ function user_login_final_validate($form, &$form_state) {
         form_set_error('name', t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
       }
     }
+    elseif (empty($form_state['account_found'])) {
+      form_set_error('name', t('Sorry, unrecognized username.'));
+      watchdog('user', 'The user account %name could not be found.', array('%name' => $form_state['values']['name']));
+    }
     else {
-      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
+      form_set_error('pass', t('Sorry, incorrect password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
   }

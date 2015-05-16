@@ -402,6 +402,18 @@ class UserLoginTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Attempt to login with an unregistered username.
+   */
+  function testAccountNotFound() {
+    $edit = array(
+      'name' => $this->randomName(8),
+      'pass' => $this->randomName(8),
+    );
+    $this->backdropPost('user', $edit, t('Log in'));
+    $this->assertText(t('Sorry, unrecognized username.'));
+  }
+
+  /**
    * Make an unsuccessful login attempt.
    *
    * @param $account
@@ -427,7 +439,7 @@ class UserLoginTestCase extends BackdropWebTestCase {
       }
     }
     else {
-      $this->assertText(t('Sorry, unrecognized username or password. Have you forgotten your password?'));
+      $this->assertText(t('Sorry, incorrect password. Have you forgotten your password?'));
     }
   }
 }
