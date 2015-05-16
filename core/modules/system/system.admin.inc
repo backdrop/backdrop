@@ -840,17 +840,14 @@ function system_modules_confirm_form($modules, $storage) {
  */
 function system_modules_submit($form, &$form_state) {
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
-dpm($form_state);
 
   // Builds list of modules.
   $modules = array();
   // If we're not coming from the confirmation form, build the list of modules.
   if (empty($form_state['storage'])) {
     // If we're not coming from the confirmation form, build the module list.
-    foreach ($form_state['values']['modules'] as $group_name => $group) {
-      foreach ($group as $module => $enabled) {
-        $modules[$module] = array('group' => $group_name, 'enabled' => $enabled['enable']);
-      }
+    foreach ($form_state['values']['modules'] as $module => $enabled) {
+        $modules[$module] = array('enabled' => $enabled['enable']);
     }
   }
   else {
