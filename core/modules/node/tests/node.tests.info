@@ -124,12 +124,6 @@ description = Ensures that node_feed() functions correctly.
 group = Node
 file = node.test
 
-[NodeBlockFunctionalTest]
-name = Node blocks
-description = Test node block functionality.
-group = Node
-file = node.test
-
 [NodeBuildContent]
 name = Rebuild content
 description = Test the rebuilding of content for different build modes.
