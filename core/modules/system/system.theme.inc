@@ -178,7 +178,7 @@ function theme_system_modules_fieldset($variables) {
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
     }
-    $requirements .= '<div class="admin-requirements">' . t('Tags: !tags', array('!tags' => backdrop_render($module['tags']))) . '</div>';
+    $requirements .= '<div class="admin-requirements module-tags">' . t('Tags: !tags', array('!tags' => backdrop_render($module['tags']))) . '</div>';
     $requirements .= '</div>';
 
     // Build a requirements toggle.

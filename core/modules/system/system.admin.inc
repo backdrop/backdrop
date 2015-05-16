@@ -509,6 +509,10 @@ function system_modules($form, $form_state = array()) {
       'title' => t('Enter a part of the module name or description to filter.'),
     ),
   );
+  $form['filter']['target'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Search by tags'),
+  );
 
   // Get current list of modules.
   $files = system_rebuild_module_data();
@@ -635,13 +639,13 @@ function system_modules($form, $form_state = array()) {
     $form['modules'][$filename] = _system_modules_build_row($module->info, $extra);
   }
   // Lastly, sort all fieldsets by title.
-  backdrop_sort($form['modules'], array($filename => SORT_STRING));
+  // backdrop_sort($form['modules'], array($filename => SORT_STRING));
   
   // Add basic information to the fieldsets.
     $form['modules'] += array(
-      '#type' => 'fieldset',
-      '#title' => t('mods'),
-      '#collapsible' => TRUE,
+      '#type' => 'container',
+      // '#title' => t('mods'),
+      // '#collapsible' => TRUE,
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
         array('class' => array('checkbox')),
@@ -651,8 +655,6 @@ function system_modules($form, $form_state = array()) {
         array('data' => t('Operations')),
       ),
     );
-dpm($form['modules']);
-
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -847,6 +849,7 @@ function system_modules_confirm_form($modules, $storage) {
  */
 function system_modules_submit($form, &$form_state) {
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
+dpm($form_state);
 
   // Builds list of modules.
   $modules = array();
@@ -864,7 +867,6 @@ function system_modules_submit($form, &$form_state) {
     // the modules out of $form_state.
     $modules = $form_state['storage']['modules'];
   }
-
   // Collect data for all modules to be able to determine dependencies.
   $files = system_rebuild_module_data();
 

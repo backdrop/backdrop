@@ -38,10 +38,20 @@ Backdrop.behaviors.moduleFilterByText = {
     // Fliter the list of modules by provided search string.
     function filterModuleList() {
       var query = $input.val().toLowerCase();
+      
+      // Todo add magic search:
+        // 'ddd' for disabled and 'eee' for enabled
+        // '-' + '<search-term>' to negate search
 
       function showModuleRow(index, row) {
+        if($('#edit-target').is(':checked')) {
+          var searchTarget = '.module-tags';        
+        }
+        else {
+          var searchTarget = '.table-filter-text-source';
+        }
         var $row = $(row);
-        var $sources = $row.find('.table-filter-text-source');
+        var $sources = $row.find(searchTarget);
         var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
         $row.closest('tr').toggle(textMatch);
       }
@@ -49,6 +59,10 @@ Backdrop.behaviors.moduleFilterByText = {
       // Filter only if the length of the query is at least 2 characters.
       if (query.length >= 2) {
         $rows.each(showModuleRow);
+
+        $('#edit-target').on('change', function() {
+          $rows.each(showModuleRow);
+        });
 
         // We first show() all <fieldset>s to be able to use ':visible'.
         $fieldset.show().each(hidePackageFieldset);
