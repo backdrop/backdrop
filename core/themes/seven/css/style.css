@@ -246,11 +246,14 @@ ul.menu li.expanded {
  * Tabs.
  */
 .tabs {
-  clear: both;
+  clear: none; /* For IE8 */
+}
+.tabs:nth-child(2) {
+  clear: both; /* For small screens */
 }
 @media only screen and (min-width: 600px) {
-  .tabs {
-    clear: none;
+  .tabs:nth-child(2) {
+    clear: none; /* For large screens */
   }
 }
 ul.primary {
@@ -376,6 +379,7 @@ ul.secondary li.active a.active {
   content: '';
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 100%;
@@ -385,6 +389,12 @@ ul.secondary li.active a.active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   background-color: #f0f0f0;
+}
+.l-header:after {
+  /* Clearfix for IE8 issue */
+  content: '';
+  display: table;
+  clear: both;
 }
 .l-header > * {
   /* Makes sure gray bar is behind header content */
