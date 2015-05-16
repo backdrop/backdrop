@@ -147,8 +147,8 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->field_name_input =  strtolower($this->randomName(8));
     $this->field_name = 'field_'. $this->field_name_input;
 
-    // Create Basic page and Article node types.
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    // Create Page and Article node types.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
     $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
 
     // Create a vocabulary named "Tags".

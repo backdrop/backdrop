@@ -547,7 +547,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
     // Save, creating the terms.
     $this->backdropPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('@type %title has been created.', array('@type' => t('Basic page'), '%title' => $edit["title"])), 'The node was created successfully.');
+    $this->assertRaw(t('@type %title has been created.', array('@type' => t('Page'), '%title' => $edit["title"])), 'The node was created successfully.');
     foreach ($terms as $term) {
       $this->assertText($term, 'The term was saved and appears on the node page.');
     }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for locale.module.
@@ -1898,14 +1897,14 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save configuration'));
 
-    // Set "Basic page" content type to use multilingual support.
+    // Set "Page" content type to use multilingual support.
     $this->backdropGet('admin/structure/types/manage/page');
     $this->assertText(t('Multilingual support'), 'Multilingual support fieldset present on content type configuration form.');
     $edit = array(
       'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
     $this->backdropLogout();
 
     // Verify language selection is not present on add article form.
@@ -1914,16 +1913,16 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     // Verify language select list is not present.
     $this->assertNoFieldByName('language', NULL, 'Language select not present on add article form.');
 
-    // Verify language selection appears on add "Basic page" form.
+    // Verify language selection appears on add "Page" form.
     $this->backdropGet('node/add/page');
     // Verify language select list is present.
-    $this->assertFieldByName('langcode', NULL, 'Language select present on add Basic page form.');
+    $this->assertFieldByName('langcode', NULL, 'Language select present on add Page form.');
     // Ensure enabled language appears.
     $this->assertText($name, 'Enabled language present.');
     // Ensure disabled language doesn't appear.
     $this->assertNoText($name_disabled, 'Disabled language not present.');
 
-    // Create "Basic page" content.
+    // Create "Page" content.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
     $edit = array(
@@ -1942,7 +1941,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'en',
     );
     $this->backdropPost($path, $edit, t('Save'));
-    $this->assertRaw(t('%title has been updated.', array('%title' => $node_title)), 'Basic page content updated.');
+    $this->assertRaw(t('%title has been updated.', array('%title' => $node_title)), 'Page content updated.');
 
     $this->backdropLogout();
   }
@@ -2449,12 +2448,12 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
     $edit = array('language[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
-    // Set "Basic page" content type to use multilingual support.
+    // Set "Page" content type to use multilingual support.
     $edit = array(
       'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
 
     // Make node body translatable.
     $field = field_info_field('body');
@@ -2466,7 +2465,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
    * Test if field languages are correctly set through the node form.
    */
   function testMultilingualNodeForm() {
-    // Create "Basic page" content.
+    // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $title_value = $this->randomName(8);
@@ -2515,7 +2514,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
    * Test multilingual field display settings.
    */
   function testMultilingualDisplaySettings() {
-    // Create "Basic page" content.
+    // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $title_value = $this->randomName(8);
