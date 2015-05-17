@@ -817,6 +817,8 @@ function system_modules_confirm_form($modules, $storage) {
       t('Would you like to continue with the above?'),
       t('Continue'),
       t('Cancel'));
+    // Removing the button-danger class so that button-primary will be added automatically for us.
+    unset($form['actions']['submit']['#attributes']['class']);
     return $form;
   }
 }
