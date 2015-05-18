@@ -471,16 +471,16 @@ class TokenNodeTestCase extends TokenTestHelper {
       'url:absolute' => url("node/{$source_node->nid}", array('absolute' => TRUE)),
       'url:relative' => url("node/{$source_node->nid}", array('absolute' => FALSE)),
       'url:unaliased:path' => "node/{$source_node->nid}",
-      'content-type' => 'Basic page',
-      'content-type:name' => 'Basic page',
+      'content-type' => 'Page',
+      'content-type:name' => 'Page',
       'content-type:machine-name' => 'page',
-      'content-type:description' => "Use <em>basic pages</em> for your static content, such as an 'About us' page.",
+      'content-type:description' => "Use <em>Pages</em> for your static content, such as an 'About us' page.",
       'content-type:node-count' => 1,
       'content-type:edit-url' => url('admin/structure/types/manage/page', array('absolute' => TRUE)),
       // Deprecated tokens.
       //'tnid' => 0,
       'type' => 'page',
-      'type-name' => 'Basic page',
+      'type-name' => 'Page',
       'url:alias' => 'content/source-node',
     );
     $this->assertTokens('node', array('node' => $source_node), $tokens);

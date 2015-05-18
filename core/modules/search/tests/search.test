@@ -321,10 +321,10 @@ class SearchAdvancedSearchForm extends BackdropWebTestCase {
 
   /**
    * Test using the search form with GET and POST queries.
-   * Test using the advanced search form to limit search to nodes of type "Basic page".
+   * Test using the advanced search form to limit search to nodes of type "Page".
    */
   function testNodeType() {
-    $this->assertTrue($this->node->type == 'page', 'Node type is Basic page.');
+    $this->assertTrue($this->node->type == 'page', 'Node type is Page.');
 
     // Assert that the dummy title doesn't equal the real title.
     $dummy_title = 'Lorem ipsum';
@@ -332,20 +332,20 @@ class SearchAdvancedSearchForm extends BackdropWebTestCase {
 
     // Search for the dummy title with a GET query.
     $this->backdropGet('search/node/' . $dummy_title);
-    $this->assertNoText($this->node->title, 'Basic page node is not found with dummy title.');
+    $this->assertNoText($this->node->title, 'Page node is not found with dummy title.');
 
     // Search for the title of the node with a GET query.
     $this->backdropGet('search/node/' . $this->node->title);
-    $this->assertText($this->node->title, 'Basic page node is found with GET query.');
+    $this->assertText($this->node->title, 'Page node is found with GET query.');
 
     // Search for the title of the node with a POST query.
     $edit = array('or' => $this->node->title);
     $this->backdropPost('search/node', $edit, t('Advanced search'));
-    $this->assertText($this->node->title, 'Basic page node is found with POST query.');
+    $this->assertText($this->node->title, 'Page node is found with POST query.');
 
     // Advanced search type option.
     $this->backdropPost('search/node', array_merge($edit, array('type[page]' => 'page')), t('Advanced search'));
-    $this->assertText($this->node->title, 'Basic page node is found with POST query and type:page.');
+    $this->assertText($this->node->title, 'Page node is found with POST query and type:page.');
 
     $this->backdropPost('search/node', array_merge($edit, array('type[article]' => 'article')), t('Advanced search'));
     $this->assertText('bike shed', 'Article node is not found with POST query and type:article.');

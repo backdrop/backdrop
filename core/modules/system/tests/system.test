@@ -1472,7 +1472,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('node', 'block'));
 
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
 
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'view the administration theme', 'administer themes', 'bypass node access', 'administer blocks'));
     $this->backdropLogin($this->admin_user);

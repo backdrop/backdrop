@@ -13,7 +13,7 @@ class ContextualDynamicContextTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp(array('contextual', 'node'));
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
     $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
     $web_user = $this->backdropCreateUser(array('access content', 'access contextual links', 'edit any article content'));
     $this->backdropLogin($web_user);
