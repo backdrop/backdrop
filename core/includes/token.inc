@@ -497,7 +497,7 @@ function token_type_load($token_type) {
  *   - name: The translated human-readable name of the token.
  *   - description: The translated description of the token.
  *   - raw token: The full token (same as the key of this entry).
- *   - restricted: Optionally present if the token is should only be available
+ *   - restricted: Optionally present if the token should only be available
  *     in trusted environments.
  *   - deprecated: Optionally present if the token will be removed from a future
  *     version of Backdrop and should not be used.
@@ -586,6 +586,7 @@ function token_flatten_tree($tree) {
   }
   return $result;
 }
+
 /**
  * Recursive helper for token_build_tree().
  */
@@ -615,6 +616,10 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
       // [comment:parent:root:parent]
       continue;
     }
+    elseif (!empty($token_info['restricted']) && !$options['restricted']) {
+      // Do not include restricted tokens if the restricted option is FALSE.
+      continue;
+    }
 
     $token_parents[] = $token;
     if (!empty($token_info['dynamic'])) {
@@ -642,8 +647,8 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
       $child_options = $options;
       $child_options['depth']--;
       $child_options['parents'] = $token_parents;
-      $parent_restricted = $parent_restricted || !empty($tree[$raw_token]['restricted']) || !empty($token_info['restricted']);
-      $tree[$raw_token]['children'] = _token_build_tree($token_info['type'], $child_options, $parent_restricted);
+      $child_parent_restricted = $parent_restricted || !empty($tree[$raw_token]['restricted']) || !empty($token_info['restricted']);
+      $tree[$raw_token]['children'] = _token_build_tree($token_info['type'], $child_options, $child_parent_restricted);
     }
   }
 
