@@ -2128,6 +2128,7 @@ function system_urls_settings($form, &$form_state) {
     $form['actions']['clean_url_test'] = array(
       '#type' => 'submit',
       '#value' => t('Run the clean URL test'),
+      '#submit' => array(),
     );
     $form['clean_url_test_execute'] = array(
       '#type' => 'hidden',
