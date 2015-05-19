@@ -12,7 +12,7 @@ class PathTestCase extends BackdropWebTestCase {
     parent::setUp('path');
 
     // Create test user and login.
-    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content', 'administer url aliases', 'create url aliases'));
+    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content', 'create article content', 'edit own article content', 'administer url aliases', 'create url aliases'));
     $this->backdropLogin($web_user);
   }
 
@@ -105,12 +105,13 @@ class PathTestCase extends BackdropWebTestCase {
    */
   function testNodeAlias() {
     // Create test node.
-    $node1 = $this->backdropCreateNode();
+    $node1 = $this->backdropCreateNode(array(
+      'type' => 'article',
+    ));
 
     // Create alias.
     $edit = array();
     $edit['path[alias]'] = $this->randomName(8);
-    $edit['path[auto]'] = FALSE;
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
     // Confirm that the alias works.
