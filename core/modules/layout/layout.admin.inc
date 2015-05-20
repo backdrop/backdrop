@@ -1360,9 +1360,13 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
+    '#limit_validation_errors' => array(array('actions')),
+    '#submit' => array(
+      'layout_condition_cancel_form_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
   );
 
   return $form;
@@ -1471,9 +1475,13 @@ function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, 
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
+    '#limit_validation_errors' => array(array('actions')),
+    '#submit' => array(
+      'layout_condition_cancel_form_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
   );
   return $form;
 }
@@ -1536,6 +1544,22 @@ function layout_condition_edit_form_submit($form, &$form_state) {
     $form_state['ajax_rebuild_args'] = array($layout);
     $form_state['ajax_update'] = array('conditions');
     $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+  }
+}
+
+/**
+ * Submit handler for layout_condition_edit_form().
+ *
+ * This submit handler cancels the current action and returns the user back to
+ * previous dialog (if any).
+ */
+function layout_condition_cancel_form_submit($form, &$form_state) {
+  if ($form_state['block']) {
+    $layout = $form_state['layout'];
+    $block = $form_state['block'];
+    $renderer_name = isset($layout->in_progress['renderer_name']) ? $layout->in_progress['renderer_name'] : 'editor';
+    $renderer = layout_create_renderer($renderer_name, $layout);
+    $form_state['redirect'] = $renderer->getUrl('configure-block', $block->uuid);
   }
 }
 
