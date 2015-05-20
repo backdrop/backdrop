@@ -2255,10 +2255,7 @@ function node_form_search_form_alter(&$form, $form_state) {
     );
 
     // Languages:
-    $language_options = array();
-    foreach (language_list(TRUE) as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
-    }
+    $language_options = language_list(TRUE, TRUE);
     if (count($language_options) > 1) {
       $form['advanced']['language'] = array(
         '#type' => 'checkboxes',

@@ -3040,9 +3040,9 @@ function language_multilingual() {
  *
  * @param $only_enabled
  *   (optional) Whether to return only enabled languages.
- *
  * @param $option_list
- *   (optional) Whether to return a list of options instead of objects
+ *   (optional) Whether to return a list of options instead of objects. This
+ *   list is suitable for use in a select list #options array.
  *
  * @return
  *   An associative array of languages, keyed by the language code, ordered by
@@ -3103,7 +3103,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
     $list = array();
     $this_list = $only_enabled ? $languages['enabled'] : $languages['all'];
     foreach ($this_list as $language) {
-      $list[$language->langcode] = $language->$field;
+      $list[$language->langcode] = $language->name;
     }
     return $list;
   }
