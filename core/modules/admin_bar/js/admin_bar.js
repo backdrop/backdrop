@@ -2,6 +2,7 @@
 
 Backdrop.adminBar = Backdrop.adminBar || {};
 Backdrop.adminBar.behaviors = Backdrop.adminBar.behaviors || {};
+Backdrop.adminBar.cache = Backdrop.adminBar.cache || {};
 
 /**
  * Core behavior for Administration bar.
@@ -60,6 +61,13 @@ Backdrop.behaviors.adminBar = {
  *   A callback function invoked when the cache request was successful.
  */
 Backdrop.adminBar.getCache = function (hash, onSuccess) {
+  // Check for locally cached content.
+  if (Backdrop.adminBar.cache.hash) {
+    if (typeof onSuccess === 'function') {
+      onSuccess(Backdrop.adminBar.cache.hash);
+    }
+    return;
+  }
   // Send an AJAX request for the admin bar content, only if we’re not already
   // waiting on a response from a previous request.
   if (!Backdrop.adminBar.ajaxRequest) {
@@ -69,7 +77,10 @@ Backdrop.adminBar.getCache = function (hash, onSuccess) {
       dataType: 'text', // Prevent auto-evaluation of response.
       global: false, // Do not trigger global AJAX events.
       url: Backdrop.settings.admin_bar.basePath.replace(/admin_bar/, 'js/admin_bar/cache/' + hash),
-      success: onSuccess,
+      success: [function (response) {
+        // Cache the response data in a variable.
+        Backdrop.adminBar.cache.hash = response;
+      }, onSuccess],
       complete: function () {
         Backdrop.adminBar.ajaxRequest = false;
       }
