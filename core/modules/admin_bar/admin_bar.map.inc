@@ -120,10 +120,10 @@ function taxonomy_admin_bar_map() {
   if (!user_access('administer taxonomy')) {
     return;
   }
-  $map['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name'] = array(
+  $map['admin/structure/taxonomy/%taxonomy_vocabulary'] = array(
     'parent' => 'admin/structure/taxonomy',
     'arguments' => array(
-      array('%taxonomy_vocabulary_machine_name' => array_keys(taxonomy_vocabulary_get_names())),
+      array('%taxonomy_vocabulary' => array_keys(taxonomy_vocabulary_load_multiple(FALSE))),
     ),
   );
   return $map;
