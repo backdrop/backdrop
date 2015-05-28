@@ -14,6 +14,15 @@ installations of Backdrop CMS in different directories.
 If you don't plan on using the multisite functionality of Backdrop CMS (most
 don't), you can safely delete the entire /sites directory.
 
+If you DO plan on using the multisite functionality, you will need to do the
+following:
+
+- Configure sites.php (see below)
+- Create a new sub-directory of /sites with the name as specified in sites.php
+  (e.g. /sites/example-a)
+- Copy the default settings.php file (i.e. /settings.php) into the new
+  sub-directory (i.e. /sites/example-a/settings.php).
+
 Configuring sites.php
 ---------------------
 
