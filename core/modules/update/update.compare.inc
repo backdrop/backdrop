@@ -9,7 +9,7 @@
  * Fetches an array of installed and enabled projects.
  *
  * This is only responsible for generating an array of projects (taking into
- * account projects that include more than one module, theme or layout). Other
+ * account projects that include more than one module or theme). Other
  * information like the specific version and install type (official release,
  * dev snapshot, etc) is handled later in update_process_project_info() since
  * that logic is only required when preparing the status report, not for
@@ -21,7 +21,7 @@
  * available updates fetched from the network, it is acceptable to invalidate it
  * somewhat quickly. If we keep this data for very long, site administrators are
  * more likely to see incorrect results if they upgrade to a newer version of a
- * module, theme or layout but do not visit certain pages that automatically clear this
+ * module or theme but do not visit certain pages that automatically clear this
  * cache.
  *
  * @return
@@ -62,11 +62,14 @@ function update_get_projects() {
       // Still empty, so we have to rebuild the cache.
       $module_data = system_rebuild_module_data();
       $theme_data = system_rebuild_theme_data();
+      $layout_data = layout_get_layout_info();
       _update_process_info_list($projects, $module_data, 'module', TRUE);
       _update_process_info_list($projects, $theme_data, 'theme', TRUE);
+      _update_process_info_list($projects, $layout_data, 'layout', TRUE);
       if (config_get('update.settings', 'update_disabled_extensions')) {
         _update_process_info_list($projects, $module_data, 'module', FALSE);
         _update_process_info_list($projects, $theme_data, 'theme', FALSE);
+        _update_process_info_list($projects, $layout_data, 'layout', FALSE); //todo
       }
       // Allow other modules to alter projects before fetching and comparing.
       backdrop_alter('update_projects', $projects);
@@ -96,7 +99,7 @@ function update_get_projects() {
  * @param $list
  *   Array of data to process to add the relevant info to the $projects array.
  * @param $project_type
- *   The kind of data in the list. Can be 'module' or 'theme'.
+ *   The kind of data in the list. Can be 'module' or 'theme' or 'layout'.
  * @param $status
  *   Boolean that controls what status (enabled or disabled) to process out of
  *   the $list and add to the $projects array.
@@ -794,6 +797,7 @@ function update_project_cache($cid) {
     'admin/modules/update',
     'admin/appearance',
     'admin/appearance/update',
+    'admin/structure/layouts',
     'admin/reports',
     'admin/reports/updates',
     'admin/reports/updates/update',
