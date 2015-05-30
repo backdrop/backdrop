@@ -477,7 +477,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
  * Form constructor for the install form of the Update Manager module.
  *
  * This presents a place to enter a URL or upload an archive file to use to
- * install a new module or theme.
+ * install a new module, theme or layout.
  *
  * @param $context
  *   String representing the context from which we're trying to install.
@@ -497,7 +497,7 @@ function update_manager_install_form($form, &$form_state, $context) {
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
-    '#markup' => t('You can find modules and themes on <a href="@url">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
+    '#markup' => t('You can find modules, themes and layouts on <a href="@url">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
       '@url' => 'http://backdropcms.org',
       '%extensions' => archiver_get_extensions(),
     )),
@@ -518,7 +518,7 @@ function update_manager_install_form($form, &$form_state, $context) {
 
   $form['project_upload'] = array(
     '#type' => 'file',
-    '#title' => t('Upload a module or theme archive to install'),
+    '#title' => t('Upload a module, theme or layout archive to install'),
     '#description' => t('For example: %filename from your local computer', array('%filename' => 'name.tar.gz')),
   );
 
@@ -563,10 +563,10 @@ function _update_manager_check_backends(&$form, $operation) {
   $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules and themes from this interface. Instead, update modules and themes by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes and layouts from this interface. Instead, update modules, themes and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules and themes from this interface. Instead, install modules and themes by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes and layouts from this interface. Instead, install modules, themes and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
     }
     return FALSE;
   }
@@ -578,8 +578,8 @@ function _update_manager_check_backends(&$form, $operation) {
   if ($operation == 'update') {
     $form['available_backends']['#markup'] = format_plural(
       count($available_backends),
-      'Updating modules and themes requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other update methods.',
-      'Updating modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
+      'Updating modules, themes and layouts requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other update methods.',
+      'Updating modules, themes and layouts requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
       array(
         '@backends' => implode(', ', $backend_names),
         '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
@@ -588,8 +588,8 @@ function _update_manager_check_backends(&$form, $operation) {
   else {
     $form['available_backends']['#markup'] = format_plural(
       count($available_backends),
-      'Installing modules and themes requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other installation methods.',
-      'Installing modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
+      'Installing modules, themes and layouts requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other installation methods.',
+      'Installing modules, themes and layouts requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
       array(
         '@backends' => implode(', ', $backend_names),
         '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',

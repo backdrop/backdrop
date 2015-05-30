@@ -9,7 +9,7 @@
  * Fetches an array of installed and enabled projects.
  *
  * This is only responsible for generating an array of projects (taking into
- * account projects that include more than one module or theme). Other
+ * account projects that include more than one module, theme or layout). Other
  * information like the specific version and install type (official release,
  * dev snapshot, etc) is handled later in update_process_project_info() since
  * that logic is only required when preparing the status report, not for
@@ -21,7 +21,7 @@
  * available updates fetched from the network, it is acceptable to invalidate it
  * somewhat quickly. If we keep this data for very long, site administrators are
  * more likely to see incorrect results if they upgrade to a newer version of a
- * module or theme but do not visit certain pages that automatically clear this
+ * module, theme or layout but do not visit certain pages that automatically clear this
  * cache.
  *
  * @return
@@ -82,13 +82,13 @@ function update_get_projects() {
  *
  * This iterates over a list of the installed modules or themes and groups them
  * by project and status. A few parts of this function assume that enabled
- * modules and themes are always processed first, and if disabled modules or
+ * modules, themes and layouts are always processed first, and if disabled modules or
  * themes are being processed (there is a setting to control if disabled code
  * should be included or not in the 'Available updates' report), those are only
  * processed after $projects has been populated with information about the
- * enabled code. Modules and themes set as hidden are always ignored. This
+ * enabled code. modules, themes and layouts set as hidden are always ignored. This
  * function also records the latest change time on the .info files for each
- * module or theme, which is important data which is used when deciding if the
+ * module, theme or layout, which is important data which is used when deciding if the
  * cached available update data should be invalidated.
  *
  * @param $projects
@@ -131,7 +131,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
       continue;
     }
 
-    // Skip if it's a hidden module or theme.
+    // Skip if it's a hidden module, theme or layout.
     if (!empty($file->info['hidden'])) {
       continue;
     }
@@ -227,7 +227,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     }
     elseif (empty($status)) {
       // If we have a project_name that matches, but the project_display_type
-      // does not, it means we're processing a disabled module or theme that
+      // does not, it means we're processing a disabled module, theme or layout that
       // belongs to a project that has some enabled code. In this case, we add
       // the disabled thing into a separate array for separate display.
       $projects[$project_name]['disabled'][$file->name] = $file->info['name'];
@@ -318,7 +318,7 @@ function update_process_project_info(&$projects) {
  * the data about available updates fetched from the network, it is ok to
  * invalidate it somewhat quickly. If we keep this data for very long, site
  * administrators are more likely to see incorrect results if they upgrade to a
- * newer version of a module or theme but do not visit certain pages that
+ * newer version of a module, theme or layout but do not visit certain pages that
  * automatically clear this cache.
  *
  * @param array $available
@@ -759,11 +759,11 @@ function update_calculate_project_update_status(&$project_data, $available) {
  * Retrieves data from {cache_update} or empties the cache when necessary.
  *
  * Two very expensive arrays computed by this module are the list of all
- * installed modules and themes (and .info data, project associations, etc), and
+ * installed modules, themes and layouts (and .info data, project associations, etc), and
  * the current status of the site relative to the currently available releases.
  * These two arrays are cached in the {cache_update} table and used whenever
  * possible. The cache is cleared whenever the administrator visits the status
- * report, available updates report, or the module or theme administration
+ * report, available updates report, or the module, theme or layout administration
  * pages, since we should always recompute the most current values on any of
  * those pages.
  *
