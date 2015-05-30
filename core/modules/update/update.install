@@ -110,7 +110,7 @@ function _update_requirement_check($project, $type) {
     $requirement['title'] = t('Backdrop CMS update status');
   }
   else {
-    $requirement['title'] = t('Module and theme update status');
+    $requirement['title'] = t('Module, theme and layout update status');
   }
   $status = $project['status'];
   if ($status != UPDATE_CURRENT) {
