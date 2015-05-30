@@ -62,7 +62,7 @@ function update_get_projects() {
       // Still empty, so we have to rebuild the cache.
       $module_data = system_rebuild_module_data();
       $theme_data = system_rebuild_theme_data();
-      $layout_data = layout_get_layout_info();
+      $layout_data = _system_rebuild_layout_data();
       _update_process_info_list($projects, $module_data, 'module', TRUE);
       _update_process_info_list($projects, $theme_data, 'theme', TRUE);
       _update_process_info_list($projects, $layout_data, 'layout', TRUE);
@@ -78,6 +78,22 @@ function update_get_projects() {
     }
   }
   return $projects;
+}
+
+//temp todo
+function _system_rebuild_layout_data() {
+  // Find modules
+  $layout_data = layout_get_layout_info();
+  foreach($layout_data as $layout) {
+    $name = $layout['name'];
+    $layouts[$name] = new stdClass();
+    $layouts[$name]->name = $name;
+    $layouts[$name]->uri = $layout['path'] . '/' . $name . '.info';
+    $layouts[$name]->info = $layout;
+    $layouts[$name]->status = 1;
+  }
+
+  return $layouts;
 }
 
 /**
@@ -128,7 +144,6 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     elseif ($file->status != $status) {
       continue;
     }
-
     // Skip if the .info file is broken.
     if (empty($file->info)) {
       continue;

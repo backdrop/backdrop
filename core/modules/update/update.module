@@ -90,6 +90,7 @@ function update_init() {
       // of the update status.
       case 'admin/appearance':
       case 'admin/modules':
+      case 'admin/structure/layouts':
         $verbose = TRUE;
         break;
 
@@ -167,6 +168,7 @@ function update_menu() {
     'report' => 'admin/reports/updates',
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
+    'layout' => 'admin/structure/layouts',
   );
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
@@ -194,6 +196,7 @@ function update_menu() {
   $items['admin/reports/updates/install'] += array('title' => 'Install module, theme or layout');
   $items['admin/modules/install'] += array('title' => 'Install module');
   $items['admin/appearance/install'] += array('title' => 'Install theme');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install layout');
 
   // Menu callback used for the confirmation page after all the releases
   // have been downloaded, asking you to backup before installing updates.

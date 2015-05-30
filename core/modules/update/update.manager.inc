@@ -67,8 +67,11 @@ function update_manager_update_form($form, $form_state = array(), $context) {
     case 'theme':
       backdrop_set_title('Update themes');
       break;
+    case 'layout':
+      backdrop_set_title('Update layouts');
+      break;
     case 'report':
-      backdrop_set_title('Update modules & themes');
+      backdrop_set_title('Update projects');
       break;
   }
 
@@ -204,11 +207,13 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
       case 'module':
       case 'theme':
+      case 'layout':
         $projects['enabled'][$name] = $entry;
         break;
 
       case 'module-disabled':
       case 'theme-disabled':
+      case 'layout-disabled':
         $projects['disabled'][$name] = $entry;
         break;
     }
@@ -481,7 +486,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
  *
  * @param $context
  *   String representing the context from which we're trying to install.
- *   Allowed values are 'module', 'theme', and 'report'.
+ *   Allowed values are 'module', 'theme', 'layout', and 'report'.
  *
  * @see update_manager_install_form_validate()
  * @see update_manager_install_form_submit()
@@ -493,7 +498,7 @@ function update_manager_install_form($form, &$form_state, $context) {
     return $form;
   }
 
-  backdrop_set_title('Install a module');
+  backdrop_set_title('Install a project');
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
@@ -706,7 +711,6 @@ function update_manager_install_form_submit($form, &$form_state) {
     form_set_error($field, t('%project is already installed.', array('%project' => $project_title)));
     return;
   }
-
   $project_real_location = backdrop_realpath($project_location);
   $arguments = array(
     'project' => $project,

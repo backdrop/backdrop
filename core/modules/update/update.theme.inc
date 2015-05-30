@@ -261,8 +261,10 @@ function theme_update_report($variables) {
     'core' => t('Backdrop CMS'),
     'module' => t('Modules'),
     'theme' => t('Themes'),
+    'layout' => t('Layouts'),
     'module-disabled' => t('Disabled modules'),
     'theme-disabled' => t('Disabled themes'),
+    'layout-disabled' => t('Disabled layouts'),
   );
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {
