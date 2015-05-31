@@ -283,18 +283,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#global_types' => FALSE,
     '#click_insert' => TRUE,
   );
-  // Display the user documentation of placeholders supported by this path
-  // type as a description on the last pattern.
-  /*$variables = array(
-    'token_types' => 'node',
-    'text' => t('Browse available tokens for @type.', array('@type' => 'Content paths')),
-  );
-  $form['path']['path-settings']['#prefix'] =
-    '<p>' .
-      t('This field supports tokens.') . ' ' .
-      theme('token_tree_link', $variables) .
-    '</p>';*/
-  ///********************************* junk tries;
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
