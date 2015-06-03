@@ -1,0 +1,4 @@
+name = CKEditor
+description = WYSIWYG editing for rich text fields using CKEditor.
+package = User interface
+backdrop = 1.x
