@@ -1,0 +1,12 @@
+/**
+ * RTL styles used by CKEditor. Added to front-end theme and iframe editors.
+ */
+.indent1 {
+  margin: 0 40px 0 0;
+}
+.indent2 {
+  margin: 0 80px 0 0;
+}
+.indent3 {
+  margin: 0 120px 0 0;
+}
