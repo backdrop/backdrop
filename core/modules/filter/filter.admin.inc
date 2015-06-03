@@ -101,10 +101,11 @@ function filter_admin_overview_submit($form, &$form_state) {
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    backdrop_set_title(t('Add text format'));
+    backdrop_set_title(t('Add text editor'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
+      'editor' => '',
       'cache' => 1,
       'status' => 1,
       'is_new' => TRUE,
@@ -136,8 +137,18 @@ function filter_admin_format_page($format = NULL) {
  */
 function filter_admin_format_form($form, &$form_state, $format) {
   $is_fallback = ($format->format == filter_fallback_format());
+  $editors = filter_editors();
+  if (isset($form_state['editor_info'])) {
+    $editor_info = $form_state['editor_info'];
+  }
+  else {
+    $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
+  }
 
   $form_state['format'] = $format;
+  $form_state['editor_info'] = $editor_info;
+  $form['#validate'] = array();
+  $form['#submit'] = array();
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
@@ -147,6 +158,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#title' => t('Name'),
     '#default_value' => $format->name,
     '#required' => TRUE,
+    '#weight' => -20,
   );
   $form['format'] = array(
     '#type' => 'machine_name',
@@ -157,7 +169,83 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#machine_name' => array(
       'exists' => 'filter_format_exists',
     ),
+    '#weight' => -19,
   );
+
+  // Build the list of all available editors.
+  $editor_options = array('' => t('None'));
+  foreach ($editors as $editor_name => $editor) {
+    $editor_options[$editor_name] = $editor['label'];
+  }
+
+  // Associate an editor with this format.
+  $editor_info = $form_state['editor_info'];
+  if ($editor_info) {
+    // Load the associated editor callbacks file, if any.
+    if (!empty($editor_info['file'])) {
+      $filepath = $editor_info['file'];
+      $extension = substr($filepath, strrpos($filepath, '.') + 1);
+      $filepath = substr($filepath, 0, strrpos($filepath, '.'));
+      form_load_include($form_state, $extension, $editor_info['module'], $filepath);
+    }
+  }
+
+  $form['editor'] = array(
+    '#weight' => -9,
+  );
+  $form['editor']['editor'] = array(
+    '#type' => 'select',
+    '#title' => t('Text editor'),
+    '#options' => $editor_options,
+    '#empty_option' => t('None'),
+    '#default_value' => $format->editor ? $format->editor : '',
+    '#ajax' => array(
+      'trigger_as' => array('name' => 'editor_configure'),
+      'callback' => 'filter_admin_format_editor_ajax',
+      'wrapper' => 'editor-settings-wrapper',
+    ),
+    '#weight' => -10,
+    '#parents' => array('editor'),
+  );
+  $form['editor']['configure'] = array(
+    '#type' => 'submit',
+    '#name' => 'editor_configure',
+    '#value' => t('Configure'),
+    '#limit_validation_errors' => array(array('editor')),
+    '#submit' => array('filter_admin_format_editor_submit'),
+    '#ajax' => array(
+      'callback' => 'filter_admin_format_editor_ajax',
+      'wrapper' => 'editor-settings-wrapper',
+    ),
+    '#weight' => -10,
+    '#attributes' => array('class' => array('js-hide')),
+    '#parents' => array('editor_configure'),
+  );
+
+  // If there aren't any options (other than "None"), disable the select list.
+  if (empty($editor_options)) {
+    $form['editor']['editor']['#disabled'] = TRUE;
+    $form['editor']['editor']['#description'] = t('This option is disabled because no modules that provide a text editor are currently enabled.');
+  }
+
+  $form['editor_settings'] = array(
+    '#tree' => TRUE,
+    '#weight' => -8,
+    '#type' => 'container',
+    '#id' => 'editor-settings-wrapper',
+  );
+
+  // Populate editor defaults.
+  if (!empty($editor_info['default settings'])) {
+    $format->editor_settings += $editor_info['default settings'];
+  }
+
+  // Add editor-specific validation and submit handlers.
+  if (!empty($editor_info['settings callback'])) {
+    $function = $editor_info['settings callback'];
+    $form['editor_settings'] = array_merge($function($form, $form_state, $format), $form['editor_settings']);
+    $form['editor_settings']['#parents'] = array('editor_settings');
+  }
 
   // Add user role access selection.
   $form['roles'] = array(
@@ -266,6 +354,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     }
   }
 
+  $form['#validate'][] = 'filter_admin_format_form_validate';
+  $form['#submit'][] = 'filter_admin_format_form_submit';
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -294,6 +385,35 @@ function filter_admin_format_form_validate($form, &$form_state) {
       form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
     }
   }
+}
+
+/**
+ * AJAX callback for filter_admin_format_form().
+ */
+function filter_admin_format_editor_ajax($form, $form_state) {
+  $commands = array();
+  $commands[] = ajax_command_replace('#editor-settings-wrapper', backdrop_render($form['editor_settings']));
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
+ * Form submission handler for filter_admin_format_form().
+ *
+ * Sets the editor_info property so that the form can be AJAX-updated.
+ */
+function filter_admin_format_editor_submit($form, &$form_state) {
+  $editor_name = $form_state['values']['editor'];
+  $editors = filter_editors();
+  if ($editor_name && isset($editors[$editor_name])) {
+    $form_state['editor_info'] = $editors[$editor_name];
+  }
+  else {
+    $form_state['editor_info'] = array();
+  }
+  $form_state['rebuild'] = TRUE;
 }
 
 /**

@@ -62,8 +62,8 @@ function filter_menu() {
     'file' => 'filter.pages.inc',
   );
   $items['admin/config/content/formats'] = array(
-    'title' => 'Text formats',
-    'description' => 'Configure how content input by users is filtered, including allowed HTML tags. Also allows enabling of module-provided filters.',
+    'title' => 'Text editors and formats',
+    'description' => 'Configure WYSIWYG and text editors on the site. Restrict or allow certain HTML tags to be used in content.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_admin_overview'),
     'access arguments' => array('administer filters'),
@@ -74,7 +74,7 @@ function filter_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
-    'title' => 'Add text format',
+    'title' => 'Add text editor',
     'page callback' => 'filter_admin_format_page',
     'access arguments' => array('administer filters'),
     'type' => MENU_LOCAL_ACTION,
@@ -201,6 +201,9 @@ function filter_format_save($format) {
   }
   if (!isset($format->weight)) {
     $format->weight = 0;
+  }
+  if (!isset($format->editor)) {
+    $format->editor = NULL;
   }
 
   // Programmatic saves may not contain any filters.
@@ -329,6 +332,150 @@ function filter_format_exists($format_id) {
 }
 
 /**
+ * Get a complete list of allowed and forbidden tags for a text format.
+ *
+ * @param $format
+ *   The text format object for which the list will be generated.
+ *
+ * @return array|TRUE
+ *   An array of allowed HTML with the following keys:
+ *   - allowed: A list of allowed tags keyed by tag name. The value is an array
+ *     of attributes.
+ *   - forbidden: An unindexed array of tags that are not allowed.
+ *   For the full documentation on the return values of these two properties,
+ *   see callback_filter_allowed_html().
+ *   If TRUE is returned, then there are no restrictions on this format's HTML
+ *   content.
+ *
+ * @see callback_filter_allowed_html()
+ */
+function filter_format_allowed_html($format) {
+  $all_filter_info = filter_get_filters();
+  $all_html_allowed = TRUE;
+  $restrictions = array(
+    'allowed' => array(),
+    'forbidden' => array(),
+  );
+
+  foreach ($format->filters as $filter_name => $filter) {
+    // Skip disabled filters.
+    if (!$filter->status) {
+      continue;
+    }
+    // Skip non-existent filters.
+    if (!isset($all_filter_info[$filter_name])) {
+      continue;
+    }
+    // We're only concerned with filters that specify an allowed HTML callback.
+    $filter_info = $all_filter_info[$filter_name];
+    if (!isset($filter_info['allowed html callback'])) {
+      continue;
+    }
+
+    $allowed_html_callback = $filter_info['allowed html callback'];
+    $filter_restrictions = $allowed_html_callback($filter, $format);
+
+    if ($filter_restrictions) {
+      $all_html_allowed = FALSE;
+    }
+    else {
+      continue;
+    }
+
+    // Forbidden tags are simple in that they have no attributes to track, it's
+    // just a list of tags that are not allowed.
+    if (isset($filter_restrictions['forbidden'])) {
+      $restrictions['forbidden'] = array_unique(array_merge($restrictions['forbidden'], $filter_restrictions['forbidden']));
+    }
+
+    // Add any allowed tags that have not yet been specified and build a list
+    // of any that need to be intersected.
+    $intersected_tags = array();
+    foreach ($filter_restrictions['allowed'] as $tag => $attributes) {
+      if (!isset($restrictions['allowed'][$tag])) {
+        $restrictions['allowed'][$tag] = $attributes;
+      }
+      else {
+        $intersected_tags[$tag] = $attributes;
+      }
+    }
+
+    // Allowed tags are more complicated as different filters may allow
+    // different individual attributes. Track the intersection of all allowed
+    // attributes for each tag.
+    foreach ($intersected_tags as $tag => $attributes) {
+      $intersection = NULL;
+      $current_attributes = isset($restrictions['allowed'][$tag]) ? $restrictions['allowed'][$tag] : array();
+      $new_attributes = $filter_restrictions['allowed'][$tag];
+      // The current intersection does not allow any attributes, never allow.
+      if (!is_array($current_attributes) && $current_attributes == FALSE) {
+        continue;
+      }
+      // The new filter allows fewer attributes (all -> list or none).
+      elseif (!is_array($current_attributes) && $current_attributes == TRUE && ($new_attributes == FALSE || is_array($new_attributes))) {
+        $intersection = $new_attributes;
+      }
+      // The new filter allows fewer attributes (list -> none).
+      elseif (is_array($current_attributes) && $new_attributes == FALSE) {
+        $intersection = $new_attributes;
+      }
+      // The new filter allows more attributes; retain current.
+      elseif (is_array($current_attributes) && $new_attributes == TRUE) {
+        continue;
+      }
+      // The new filter allows the same attributes; retain current.
+      elseif ($current_attributes == $new_attributes) {
+        continue;
+      }
+      // Both list an array of attribute values; do an intersection,
+      // where we take into account that a value of:
+      //  - TRUE means the attribute value is allowed;
+      //  - FALSE means the attribute value is forbidden;
+      // hence we keep the ANDed result.
+      else {
+        $intersection = array_intersect_key($current_attributes, $new_attributes);
+        foreach (array_keys($intersection) as $attribute_value) {
+          $intersection[$attribute_value] = $intersection[$attribute_value] && $new_attributes[$attribute_value];
+        }
+      }
+      if (isset($intersection)) {
+        $restrictions['allowed'][$tag] = $intersection;
+      }
+    }
+  }
+
+  // Simplification: if we have both a (intersected) whitelist and a (unioned)
+  // blacklist, then remove any tags from the whitelist that also exist in the
+  // blacklist. Now the whitelist alone expresses all tag-level restrictions,
+  // and we can delete the blacklist.
+  if (isset($restrictions['allowed']) && isset($restrictions['forbidden'])) {
+    foreach ($restrictions['forbidden'] as $tag) {
+      if (isset($restrictions['allowed'][$tag])) {
+        unset($restrictions['allowed'][$tag]);
+      }
+    }
+    $restrictions['forbidden'] = array();
+  }
+
+  // Simplification: if the only remaining allowed tag is the asterisk (which
+  // contains attribute restrictions that apply to all tags), and only
+  // whitelisting filters were used, then effectively nothing is allowed.
+  if (isset($restrictions['allowed'])) {
+    if (count($restrictions['allowed']) === 1 && array_key_exists('*', $restrictions['allowed']) && !isset($restrictions['forbidden'])) {
+      $restrictions['allowed'] = array();
+    }
+  }
+
+  // If no filters specified restrictions, change the allowed values to be
+  // a Boolean.
+  if ($all_html_allowed) {
+    $restrictions['allowed'] = TRUE;
+  }
+
+  return $restrictions;
+}
+
+/**
  * Displays a text format form title.
  *
  * @param object $format
@@ -387,6 +534,23 @@ function filter_permission_name($format) {
 }
 
 /**
+ * Implements hook_library_info().
+ */
+function filter_library_info() {
+  $module_path = backdrop_get_path('module', 'filter');
+  $libraries['filter'] = array(
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/filter.js' => array('group' => JS_LIBRARY),
+    ),
+    'css' => array(
+      $module_path . '/css/filter.css' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+/**
  * Implements hook_modules_enabled().
  */
 function filter_modules_enabled($modules) {
@@ -438,6 +602,8 @@ function filter_formats($account = NULL) {
         $filter_format += array(
           'status' => 1,
           'weight' => 0,
+          'editor' => NULL,
+          'editor_settings' => array(),
         );
         $filter_format = (object) $filter_format;
 
@@ -491,6 +657,35 @@ function filter_formats($account = NULL) {
 function filter_formats_reset() {
   cache()->deletePrefix('filter_formats');
   backdrop_static_reset('filter_formats');
+}
+
+/**
+ * Returns a list of text editors that are used with 'text_format' elements.
+ */
+function filter_editors() {
+  $editors = &backdrop_static(__FUNCTION__, NULL);
+
+  if (!isset($editors)) {
+    $modules = module_implements('editor_info');
+    foreach ($modules as $module) {
+      $module_editors = module_invoke($module, 'editor_info');
+      foreach ($module_editors as $editor_name => $editor) {
+        $editor['module'] = $module;
+        $editors[$editor_name] = $editor;
+      }
+    }
+    backdrop_alter('editor_info', $editors);
+  }
+
+  return $editors;
+}
+
+/**
+ * Loads an individual editor's information.
+ */
+function filter_editor_load($editor_name) {
+  $editors = filter_editors();
+  return isset($editors[$editor_name]) ? $editors[$editor_name] : FALSE;
 }
 
 /**
@@ -865,10 +1060,11 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
+  // Get a list of formats to which the current user has access.
+  $formats = filter_formats($user);
+
   // Turn original element into a text format wrapper.
-  $path = backdrop_get_path('module', 'filter');
-  $element['#attached']['js'][] = $path . '/js/filter.js';
-  $element['#attached']['css'][] = $path . '/css/filter.css';
+  $element['#attached'] = filter_get_attached($formats);
 
   // Setup child container for the text format widget.
   $element['format'] = array(
@@ -882,8 +1078,6 @@ function filter_process_format($element) {
     '#attributes' => array('class' => array('filter-guidelines')),
     '#weight' => 20,
   );
-  // Get a list of formats that the current user has access to.
-  $formats = filter_formats($user);
   foreach ($formats as $format) {
     $options[$format->format] = $format->name;
     $element['format']['guidelines'][$format->format] = array(
@@ -899,7 +1093,7 @@ function filter_process_format($element) {
 
   $element['format']['format'] = array(
     '#type' => 'select',
-    '#title' => t('Text format'),
+    '#title' => t('Editor'),
     '#options' => $options,
     '#default_value' => $element['#format'],
     '#access' => count($formats) > 1,
@@ -959,6 +1153,88 @@ function filter_process_format($element) {
   }
 
   return $element;
+}
+
+/**
+ * Adds filter configuration information to the page for access by JavaScript.
+ *
+ * @param array $formats
+ *   An array of formats as returned by filter_formats(), whose settings should
+ *   be added to the page.
+ * @return array
+ *   An array of attached libraries, CSS, and JS that can be set to an element's
+ *   #attached property.
+ */
+function filter_get_attached($formats) {
+  $attached = array();
+  $attached['library'][] = array('filter', 'filter');
+
+  foreach ($formats as $format_name => $format_info) {
+    if (isset($added[$format_name])) {
+      unset($formats[$format_name]);
+    }
+    else {
+      // Add the library associated with a format's editor if needed.
+      if ($format_info->editor && ($editor = filter_editor_load($format_info->editor))) {
+        $attached['library'][] = $editor['library'];
+      }
+    }
+  }
+
+  if (!empty($formats)) {
+    $settings = filter_get_js_settings($formats);
+    $attached['js'][] = array(
+      'type' => 'setting',
+      'data' => array('filter' => array('formats' => $settings)),
+    );
+  }
+
+  return $attached;
+}
+
+/**
+ * Retrieve JavaScript settings that should be added by each filter.
+ *
+ * @param array $formats
+ *   An array of formats as returned by filter_formats().
+ *
+ * @return array
+ *   An array of JavaScript settings representing the configuration of the
+ *   filters.
+ */
+function filter_get_js_settings($formats) {
+  $settings = array();
+  $filter_info = filter_get_filters();
+  $editor_info = filter_editors();
+
+  foreach ($formats as $format_name => $format) {
+    // Don't add settings for formats that don't have associated editors.
+    if (!$format->editor) {
+      continue;
+    }
+
+    $filter_settings = array();
+    foreach ($format->filters as $filter_name => $filter) {
+      if ($filter->status && isset($filter_info[$filter_name]['js settings callback'])) {
+        $function = $filter_info[$filter_name]['js settings callback'];
+        $filter_settings += $function($filter, $format);
+      }
+    }
+    $settings[$format_name] = array(
+      'filterSettings' => $filter_settings,
+      'editor' => $format->editor,
+      'editorSettings' => array(),
+    );
+
+    if ($format->editor && isset($editor_info[$format->editor]['js settings callback'])) {
+      $function = $editor_info[$format->editor]['js settings callback'];
+      $settings[$format_name]['editorSettings'] = $function($format, $settings);
+    }
+  }
+
+  backdrop_alter('filter_js_settings', $settings, $formats);
+
+  return $settings;
 }
 
 /**
@@ -1159,6 +1435,7 @@ function filter_filter_info() {
     'title' => t('Limit allowed HTML tags'),
     'process callback' => '_filter_html',
     'settings callback' => '_filter_html_settings',
+    'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
       'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd>',
       'filter_html_help' => 1,
@@ -1176,6 +1453,7 @@ function filter_filter_info() {
     'title' => t('Convert URLs into links'),
     'process callback' => '_filter_url',
     'settings callback' => '_filter_url_settings',
+    'js settings callback' => '_filter_url_js_settings',
     'default settings' => array(
       'filter_url_length' => 72,
     ),
@@ -1219,6 +1497,22 @@ function _filter_html_settings($form, &$form_state, $filter, $format) {
     '#default_value' => $filter->settings['filter_html_nofollow'],
   );
   return $settings;
+}
+
+/**
+ * Implements callback_filter_allowed_html().
+ */
+function _filter_html_allowed_html($filter, $format) {
+  // This example is pulled from "filter_html" filter provided by core.
+  $restrictions = array('allowed' => array());
+  $tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
+  // List the allowed HTML tags.
+  foreach ($tags as $tag) {
+    $restrictions['allowed'][$tag] = TRUE;
+  }
+  // The 'style' and 'on*' ('onClick' etc.) attributes are always forbidden.
+  $restrictions['allowed']['*'] = array('style' => FALSE, 'on*' => FALSE);
+  return $restrictions;
 }
 
 /**
@@ -1362,6 +1656,17 @@ function _filter_url_settings($form, &$form_state, $filter, $format) {
     '#description' => t('URLs longer than this number of characters will be truncated to prevent long strings that break formatting. The link itself will be retained; just the text portion of the link will be truncated.'),
   );
   return $settings;
+}
+
+/**
+ * Implements callback_filter_js_settings().
+ *
+ * Filter URL JS settings callback: return settings for JavaScript.
+ */
+function _filter_url_js_settings($filter, $format) {
+  return array(
+    'filterUrlLength' => $filter->settings['filter_url_length'],
+  );
 }
 
 /**
