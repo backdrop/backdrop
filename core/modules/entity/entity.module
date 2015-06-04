@@ -389,9 +389,6 @@ function entity_view_mode_prepare($entity_type, $entities, $view_mode, $langcode
  *   An array containing the 'path' and 'options' keys used to build the URI of
  *   the entity, and matching the signature of url(). NULL if the entity has no
  *   URI of its own.
- *
- * @deprecated
- *   Deprecated since 1.0.
  */
 function entity_uri($entity_type, $entity) {
   return $entity->uri();
@@ -410,9 +407,6 @@ function entity_uri($entity_type, $entity) {
  *
  * @return
  *   The entity label, or FALSE if not found.
- *
- * @deprecated
- *   Deprecated since 1.0.
  */
 function entity_label($entity_type, $entity) {
   return $entity->label();
