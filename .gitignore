@@ -1,6 +1,6 @@
-# Ignore this file so it can be changed 
+# Ignore this file so it can be changed
 .gitignore
-
+.vagrant
 # Ignore configuration files that may contain sensitive information.
 settings.php
 sites/*/settings*.php
