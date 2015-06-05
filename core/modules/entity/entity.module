@@ -195,7 +195,9 @@ function entity_create_stub_entity($entity_type, $ids) {
  * @param $entity_type
  *   The entity type to load, e.g. node or user.
  * @param $ids
- *   An array of entity IDs, or FALSE to load all entities.
+ *   An array of entity IDs, FALSE with no conditions to load all entities of
+ *   the requested entity type, or NULL with conditions to load all entities of
+ *   the requested entity type that meet the given conditions.
  * @param $conditions
  *   (deprecated) An associative array of conditions on the base table, where
  *   the keys are the database fields and the values are the values those
@@ -212,11 +214,44 @@ function entity_create_stub_entity($entity_type, $ids) {
  * @see DefaultEntityController
  * @see EntityFieldQuery
  */
-function entity_load($entity_type, $ids = FALSE, $conditions = array(), $reset = FALSE) {
+function entity_load_multiple($entity_type, $ids = FALSE, $conditions = array(), $reset = FALSE) {
   if ($reset) {
     entity_get_controller($entity_type)->resetCache();
   }
   return entity_get_controller($entity_type)->load($ids, $conditions);
+}
+
+/**
+ * Loads a single entity from the database.
+ *
+ * Prior to Backdrop 1.2.0, this function was actually used to load multiple
+ * entities and no convenience function for loading a single entity existed.
+ * The previous version of this function was renamed to entity_load_multiple()
+ * and this function was written to preserve compatibility for modules
+ * depending on the previous behavior.
+ *
+ * If this function is called with either an array of IDs or FALSE as the $id
+ * parameter, the parameters are passed through to entity_load_multiple() and
+ * its return value will be returned instead of a single entity.
+ *
+ * @param string $entity_type
+ *   The entity type to load, e.g. node or user.
+ * @param int $id
+ *   The ID of the entity to load.
+ *
+ * @return EntityInterface|bool
+ *   The fully loaded entity or FALSE if not found.
+ *
+ * @see entity_load_multiple()
+ */
+function entity_load($entity_type, $id) {
+  if (is_array($id) || $id === FALSE || $id === NULL) {
+    return call_user_func_array('entity_load_multiple', func_get_args());
+  }
+  else {
+    $result = entity_load_multiple($entity_type, array($id));
+    return reset($result);
+  }
 }
 
 /**
