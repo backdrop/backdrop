@@ -220,13 +220,15 @@ function entityreference_field_validate($entity_type, $entity, $field, $instance
   if ($ids) {
     $valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities(array_keys($ids));
 
-    $invalid_entities = array_diff_key($ids, array_flip($valid_ids));
-    if ($invalid_entities) {
-      foreach ($invalid_entities as $id => $delta) {
-        $errors[$field['field_name']][$langcode][$delta][] = array(
-          'error' => 'entityreference_invalid_entity',
-          'message' => t('The referenced entity (@type: @id) is invalid.', array('@type' => $field['settings']['target_type'], '@id' => $id)),
-        );
+    if (!empty($valid_ids)) {
+      $invalid_entities = array_diff_key($ids, array_flip($valid_ids));
+      if ($invalid_entities) {
+        foreach ($invalid_entities as $id => $delta) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'entityreference_invalid_entity',
+            'message' => t('The referenced entity (@type: @id) is invalid.', array('@type' => $field['settings']['target_type'], '@id' => $id)),
+          );
+        }
       }
     }
   }
