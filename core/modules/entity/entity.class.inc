@@ -101,6 +101,11 @@ interface EntityInterface {
    *   it inserts a new entity into the storage system.
    */
   public function createDuplicate();
+
+  /**
+   * Returns an instance of the entity's controller.
+   */
+  public function getController();
 }
 
 /**
@@ -163,6 +168,13 @@ abstract class Entity implements EntityInterface {
       $duplicate->{$entity_info['entity keys']['revision']} = NULL;
     }
     return $duplicate;
+  }
+
+  /**
+   * Implements EntityInterface::getController().
+   */
+  public function getController() {
+    return entity_get_controller($this->entityType());
   }
 }
 
