@@ -126,56 +126,46 @@ function ckeditor_ckeditor_plugins() {
   $buttons = array(
     'Bold' => array(
       'label' => t('Bold'),
-      'required_html' => array('strong'),
+      'required_html' => array(array('tags' => array('strong'))),
     ),
     'Italic' => array(
       'label' => t('Italic'),
-      'required_html' => array('em'),
+      'required_html' => array(array('tags' => array('em'))),
     ),
     'Underline' => array(
       'label' => t('Underline'),
       // A class is used on spans for underline.
-      'required_html' => array('span'),
+      'required_html' => array(array('tags' => array('span'))),
     ),
     'Strike' => array(
       'label' => t('Strike-through'),
-      'required_html' => array('del'),
+      'required_html' => array(array('tags' => array('del'))),
     ),
     'JustifyLeft' => array(
       'label' => t('Align left'),
-      'required_html' => array('p'),
+      'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-left'))),
     ),
     'JustifyCenter' => array(
       'label' => t('Align center'),
-      'required_html' => array('p'),
+      'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-center'))),
     ),
     'JustifyRight' => array(
       'label' => t('Align right'),
-      'required_html' => array('p'),
+      'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-right'))),
     ),
     'JustifyBlock' => array(
       'label' => t('Justify'),
-      'required_html' => array('p'),
+      'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-justify'))),
     ),
     'BulletedList' => array(
       'label' => t('Bullet list'),
       'image_rtl' => $image_prefix . '/bulletedlist-rtl.png',
-      'required_html' => array('ul', 'li'),
+      'required_html' => array(array('tags' => array('ul', 'li'))),
     ),
     'NumberedList' => array(
       'label' => t('Numbered list'),
       'image_rtl' => $image_prefix . '/numberedlist-rtl.png',
-      'required_html' => array('ol', 'li'),
-    ),
-    'Outdent' => array(
-      'label' => t('Outdent'),
-      'image_rtl' => $image_prefix . '/outdent-rtl.png',
-      'required_html' => array('p'),
-    ),
-    'Indent' => array(
-      'label' => t('Indent'),
-      'image_rtl' => $image_prefix . '/indent-rtl.png',
-      'required_html' => array('p'),
+      'required_html' => array(array('tags' => array('ol', 'li'))),
     ),
     'Undo' => array(
       'label' => t('Undo'),
@@ -187,35 +177,45 @@ function ckeditor_ckeditor_plugins() {
     ),
     'Link' => array(
       'label' => t('Link'),
-      'required_html' => array('a'),
+      'required_html' => array(array(
+        'tags' => array('a'),
+        'attributes' => array('href', 'title'),
+      )),
+      'optional_html' => array(array(
+        'tags' => array('a'),
+        'attributes' => array('target', 'download', 'hreflang', 'media', 'rel', 'type'),
+      )),
     ),
     'Unlink' => array(
       'label' => t('Unlink'),
-      'required_html' => array('a'),
+      'required_html' => array(array('tags' => array('a'))),
     ),
     'Anchor' => array(
       'image_rtl' => $image_prefix . '/anchor-rtl.png',
       'label' => t('Anchor'),
-      'required_html' => array('a'),
+      'required_html' => array(array(
+        'tags' => array('a'),
+        'attributes' => array('href', 'title', 'name', 'id'),
+      )),
     ),
     'Superscript' => array(
       'label' => t('Superscript'),
-      'required_html' => array('sub'),
+      'required_html' => array(array('tags' => array('sup'))),
     ),
     'Subscript' => array(
       'label' => t('Subscript'),
-      'required_html' => array('sup'),
+      'required_html' => array(array('tags' => array('sub'))),
     ),
     'Blockquote' => array(
       'label' => t('Blockquote'),
-      'required_html' => array('blockquote'),
+      'required_html' => array(array('tags' => array('blockquote'))),
     ),
     'Source' => array(
       'label' => t('Source code'),
     ),
     'HorizontalRule' => array(
       'label' => t('Horizontal rule'),
-      'required_html' => array('hr'),
+      'required_html' => array(array('tags' => array('hr'))),
     ),
     'Cut' => array(
       'label' => t('Cut'),
@@ -254,7 +254,7 @@ function ckeditor_ckeditor_plugins() {
     ),
     'Table' => array(
       'label' => t('Table'),
-      'required_html' => array('table', 'thead', 'tbody', 'tr', 'td', 'th'),
+      'required_html' => array(array('tags' => array('table', 'thead', 'tbody', 'tr', 'td', 'th'))),
     ),
     'Maximize' => array(
       'label' => t('Maximize'),

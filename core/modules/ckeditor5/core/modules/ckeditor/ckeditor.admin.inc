@@ -28,11 +28,15 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
   );
 
   // @todo: Have this settings form be provided via a plugin hook.
+  $style_list = '';
+  if (isset($format->editor_settings['plugins']['style']['style_list'])) {
+    $style_list = _ckeditor_settings_stringify_style_list($format->editor_settings['plugins']['style']['style_list']);
+  }
   $elements['plugins']['style']['style_list'] = array(
     '#title' => t('CKEditor style list'),
     '#type' => 'textarea',
     '#rows' => 4,
-    '#default_value' => _ckeditor_settings_stringify_style_list($format->editor_settings['plugins']['style']['style_list']),
+    '#default_value' => $style_list,
     '#description' => t('A list of classes that will be provided in the "Styles" dropdown. Enter one class on each line in the format: element.class|Label. Example: h1.title|Title.') . '<br />' . t('Each style should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
   );
 

@@ -23,11 +23,19 @@
       // that case, for the CKEditor instance that's about to be created.
       format.editorSettings.readOnly = element.hasAttribute('readonly');
 
+      // Try to match the textarea height on which we're replacing.
+      format.editorSettings.height = $(element).height();
+
+      // Hide the resizable grippie while CKEditor is active.
+      $(element).siblings('.grippie').hide();
+
       return !!CKEDITOR.replace(element, format.editorSettings);
     },
 
     detach: function (element, format, trigger) {
       var editor = CKEDITOR.dom.element.get(element).getEditor();
+      var height = $(editor.container.$).find('iframe').height();
+
       if (editor) {
         if (trigger === 'serialize') {
           editor.updateElement();
@@ -37,6 +45,14 @@
           element.removeAttribute('contentEditable');
         }
       }
+
+      // Set the textarea height to match the potentially resized CKEditor.
+      if (height) {
+        $(element).height(height);
+      }
+
+      // Restore the resize grippie.
+      $(element).siblings('.grippie').show();
       return !!editor;
     },
 

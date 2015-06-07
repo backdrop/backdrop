@@ -50,8 +50,28 @@
  *   - multiple: Boolean value indicating if this button may be added multiple
  *     times to the toolbar. This typically is only applicable for dividers and
  *     group indicators.
- *   - required_html: If this button requires certain HTML tags to be allowed,
- *     specify an array of tags.
+ *   - required_html: If this button requires certain HTML tags or attributes
+ *     to be allowed, specify an nested array for each set of tags that should
+ *     be allowed. For example:
+ *
+ *     @code
+ *     array(
+ *       array(
+ *         'tags' => array('a'),
+ *         'attributes' => array('href', 'alt'),
+ *         'styles' => array('color', 'text-decoration'),
+ *         'classes' => array('external', 'internal'),
+ *       ),
+ *     );
+ *     @endcode
+ *
+ *     Note that this must be a nested array, to allow for the button to require
+ *     different attributes on different tags.
+ *   - optional_html: If this button can work with or without certain tags or
+ *     attributes in a reduced manner, then specify additional values that can
+ *     be used to provide the full functionality. This should match the same
+ *     format as the "required_html" return value.
+ *
  * @return array
  *   An array of plugin definitions, keyed by the plugin name.
  *
@@ -64,6 +84,14 @@ function hook_ckeditor_plugins() {
     'file' => 'plugin.js',
     'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
     'enabled callback' => 'mymodule_myplugin_plugin_check',
+    'required_html' => array(
+      array(
+        'tags' => array('a'),
+        'attributes' => array('href', 'alt'),
+        'styles' => array('color', 'text-decoration'),
+        'classes' => array('external', 'internal'),
+      ),
+    ),
   );
 
   return $plugins;
