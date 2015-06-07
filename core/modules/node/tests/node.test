@@ -1671,7 +1671,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests the recent comments block.
+   * Tests the recent content block.
    */
   function testRecentNodeBlock() {
     $this->backdropLogin($this->admin_user);
@@ -1683,15 +1683,12 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Set the block to a region to confirm block is available.
     $layout = layout_load('default');
-    $block = $layout->addBlock('node', 'recent', 'sidebar');
+    $block = $layout->addBlock('views', 'content_recent-block', 'sidebar');
 
     // Set block title and variables.
     $block_title = $this->randomName();
     $block->settings['title'] = $block_title;
     $block->settings['title_display'] = LAYOUT_TITLE_CUSTOM;
-    $block->settings['block_settings'] = array(
-      'node_count' => 2,
-    );
     $layout->save();
 
     // Test that block is not visible without nodes
@@ -1724,14 +1721,14 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoText($block_title, t('Block was not found.'));
 
-    // Test that only the 2 latest nodes are shown.
+    // Test that only the nodes are shown.
     $this->backdropLogin($this->web_user);
-    $this->assertNoText($node1->title, t('Node not found in block.'));
+    $this->assertText($node1->title, t('Node found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//*[contains(@class,"block-node-recent")]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-content-recent-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
