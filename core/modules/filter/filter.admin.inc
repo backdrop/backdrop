@@ -150,8 +150,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#validate'] = array();
   $form['#submit'] = array();
   $form['#tree'] = TRUE;
-  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
+  $form['#attached']['library'][] = array('filter', 'filter.admin');
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -432,6 +431,12 @@ function filter_admin_format_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
+
+  // If not saving an editor, do not save any settings.
+  if (!$format->editor) {
+    $format->editor_settings = array();
+  }
+
   $status = filter_format_save($format);
 
   // Save user permissions.

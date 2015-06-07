@@ -1162,7 +1162,7 @@ function system_library_info() {
     'title' => 'Backdrop resizable textarea',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_DEFAULT),
+      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
     ),
   );
 

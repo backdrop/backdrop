@@ -27,6 +27,7 @@ Backdrop.behaviors.ckeditorAdmin = {
         stop: adminToolbarStopDrag
       };
       $toolbarAdmin.insertAfter($textareaWrapper);
+      adminToolbarRemoveInvalidButtons($toolbarAdmin);
 
       // Add draggable/sortable behaviors.
       $toolbarAdmin.find('.ckeditor-buttons').sortable(sortableSettings);
@@ -99,13 +100,20 @@ Backdrop.behaviors.ckeditorAdmin = {
        */
       function adminToolbarRenameGroup(event) {
         var $label = $(this);
+        var $group = $label.closest('.ckeditor-toolbar-group');
         var currentText = $label.text();
         var newText = window.prompt(Backdrop.t('Enter a label for this group. This will be used by screenreaders and other accessibility software.'), currentText);
         if (newText) {
           $label.text(newText);
-          $label.parent().data('group-name', newText);
+          $group.data('groupName', newText).attr('data-group-name', newText);
+          adminToolbarUpdateValue();
         }
-      };
+        // Remove the entire group if the label and contents are empty.
+        else if ($group.find('.ckeditor-button').length === 0) {
+          $group.remove();
+          adminToolbarUpdateValue();
+        }
+      }
 
       /**
        * Add a new group of buttons to the current row.
@@ -156,7 +164,7 @@ Backdrop.behaviors.ckeditorAdmin = {
           $lastRow.find('.ckeditor-toolbar-groups').sortable('destroy');
           $lastRow.remove();
           redrawToolbarGradient();
-          adminToolbarValue();
+          adminToolbarUpdateValue();
         }
         event.preventDefault();
       }
@@ -180,13 +188,75 @@ Backdrop.behaviors.ckeditorAdmin = {
         if ($element.is('.ckeditor-button-separator') && $element.closest('.ckeditor-active-toolbar-configuration').length === 0) {
           $element.remove();
         }
-        adminToolbarValue();
+        // Notify the filter system of updated or removed features.
+        adminToolbarButtonMoved($element);
+        adminToolbarUpdateValue();
+      }
+
+      /**
+       * Notify the filter system of any button changes.
+       */
+      function adminToolbarButtonMoved($element) {
+        var buttonFeature = adminToolbarButtonCreateFeature($element);
+        var buttonAdded = $element.closest('.ckeditor-active-toolbar-configuration').length !== 0;
+        if (buttonFeature) {
+          if (buttonAdded) {
+            Backdrop.editorConfiguration.addedFeature(buttonFeature);
+          }
+          else {
+            Backdrop.editorConfiguration.removedFeature(buttonFeature);
+          }
+        }
+      }
+
+      /**
+       * Create a Backdrop.EditorFeatureHTMLRule instance based on a button DOM element.
+       */
+      function adminToolbarButtonCreateFeature($element) {
+        var requiredHtml = $element.data('required-html');
+        var optionalHtml = $element.data('optional-html');
+        var buttonName = $element.data('button-name');
+        var buttonFeature, buttonRule, buttonRuleDefinition;
+        if (buttonName) {
+          buttonFeature = new Backdrop.EditorFeature(buttonName);
+          if (requiredHtml) {
+            for (var n = 0; n < requiredHtml.length; n++) {
+              buttonRuleDefinition = requiredHtml[n];
+              buttonRuleDefinition.required = true;
+
+              // If there are any styles or classes, that means that an
+              // attribute for "style" or "class" must be added.
+              buttonRuleDefinition.attributes = buttonRuleDefinition.attributes || [];
+              if (buttonRuleDefinition.styles && buttonRuleDefinition.styles.length) {
+                buttonRuleDefinition.attributes.push('style');
+              }
+              if (buttonRuleDefinition.classes && buttonRuleDefinition.classes.length) {
+                buttonRuleDefinition.attributes.push('class');
+              }
+              buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
+              buttonFeature.addHTMLRule(buttonRule);
+            }
+          }
+          if (optionalHtml) {
+            for (var n = 0; n < optionalHtml.length; n++) {
+              buttonRuleDefinition = optionalHtml[n];
+              buttonRuleDefinition.required = false;
+              buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
+              buttonFeature.addHTMLRule(buttonRule);
+            }
+          }
+        }
+        else {
+          buttonFeature = false;
+        }
+
+        return buttonFeature;
       }
 
       /**
        * Update the toolbar value textarea.
        */
-      function adminToolbarValue() {
+      function adminToolbarUpdateValue() {
         // Update the toolbar config after updating a sortable.
         var toolbarConfig = [];
         var $group, rowGroups, groupButtons;
@@ -208,6 +278,37 @@ Backdrop.behaviors.ckeditorAdmin = {
         $textarea.val(JSON.stringify(toolbarConfig));
       }
 
+      /**
+       * Remove a single button from the toolbar.
+       */
+      function adminToolbarRemoveButton($button) {
+        var $buttonGroup = $button.closest('.ckeditor-toolbar-group-buttons');
+        $button.remove();
+
+        // Remove the entire group if this is the last button.
+        if ($buttonGroup.children().length === 0) {
+          $buttonGroup.closest('.ckeditor-toolbar-group').remove();
+        }
+
+        // Put the button back into the disabled list if it's not a separator.
+        if ($button.is('.ckeditor-button')) {
+          $wrapper.find('.ckeditor-toolbar-disabled .ckeditor-buttons').prepend($button);
+        }
+      }
+
+      /**
+       * Ensure the configuration of the toolbar is allowed by the filters.
+       */
+      function adminToolbarRemoveInvalidButtons() {
+        var rules = Backdrop.filterConfiguration.getCombinedFilterRules();
+        $wrapper.find('.ckeditor-toolbar-active .ckeditor-button').each(function() {
+          var $button = $(this);
+          var feature = adminToolbarButtonCreateFeature($button);
+          if (feature && !Backdrop.editorConfiguration.featureIsAllowed(feature, rules)) {
+            adminToolbarRemoveButton($button);
+          }
+        });
+      }
     });
   }
 };

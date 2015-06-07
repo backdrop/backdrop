@@ -335,6 +335,13 @@ tr .ajax-progress-throbber .throbber {
 }
 
 /**
+ * Underline content.
+ */
+.underline {
+  text-decoration: underline;
+}
+
+/**
  * Block-level HTML5 display definition.
  *
  * Provides display values for browsers that don't recognize the new elements

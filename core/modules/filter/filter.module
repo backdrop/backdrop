@@ -547,6 +547,25 @@ function filter_library_info() {
       $module_path . '/css/filter.css' => array(),
     ),
   );
+  // Filter admin is put in the JS_THEME group to force it after tabledrag.js.
+  $libraries['filter.admin'] = array(
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/filter.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
+    ),
+    'css' => array(
+      $module_path . '/css/filter.css' => array(),
+    ),
+  );
+  $libraries['filter.filtered_html.admin'] = array(
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/filter.filtered_html.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
+    ),
+    'dependencies' => array(
+      array('filter', 'filter.admin'),
+    ),
+  );
   return $libraries;
 }
 
@@ -1479,6 +1498,7 @@ function filter_filter_info() {
  * Filter settings callback for the HTML content filter.
  */
 function _filter_html_settings($form, &$form_state, $filter, $format) {
+  $settings['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
   $settings['allowed_html'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed HTML tags'),

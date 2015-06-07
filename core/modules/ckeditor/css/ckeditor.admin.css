@@ -83,6 +83,7 @@
 }
 .ckeditor-group-add-wrapper {
   float: left; /* LTR */
+  margin: 0px 0.3333em;
 }
 [dir="rtl"] .ckeditor-group-add-wrapper {
   float: right;
