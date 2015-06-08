@@ -28,28 +28,13 @@ Backdrop.behaviors.moduleFilterByText = {
       e.stopPropagation();
     });
 
-    // Hide the package <fieldset> if it doesn't have any visible rows within.
-    function hidePackageFieldset(index, element) {
-      var $fieldset = $(element);
-      var $visibleRows = $fieldset.find('table:not(.sticky-header)').find('tbody tr:visible');
-      $fieldset.toggle($visibleRows.length > 0);
-    }
-
     // Fliter the list of modules by provided search string.
     function filterModuleList() {
+      $('#edit-tags').val('All');
       var query = $input.val().toLowerCase();
-      
-      // Todo add magic search:
-        // 'ddd' for disabled and 'eee' for enabled
-        // '-' + '<search-term>' to negate search
 
       function showModuleRow(index, row) {
-        if($('#edit-target').is(':checked')) {
-          var searchTarget = '.module-tags';        
-        }
-        else {
-          var searchTarget = '.table-filter-text-source';
-        }
+        var searchTarget = '.table-filter-text-source';
         var $row = $(row);
         var $sources = $row.find(searchTarget);
         var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
@@ -60,35 +45,52 @@ Backdrop.behaviors.moduleFilterByText = {
       if (query.length >= 2) {
         $rows.each(showModuleRow);
 
-        $('#edit-target').on('change', function() {
-          $rows.each(showModuleRow);
-        });
+        if ($fieldset.filter(':visible').length === 0) {
+          if ($('.filter-empty').length === 0) {
+            $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
+          }
+        }
+      }
+    }
 
-        // We first show() all <fieldset>s to be able to use ':visible'.
-        $fieldset.show().each(hidePackageFieldset);
+    // Fliter the list of modules by provided search string.
+    function filterModuleListByTag() {
+      $input.val('');
+
+      function showModuleRowByTag(index, row) {
+        var searchTarget = '.module-tags';
+        var $row = $(row);
+        var $sources = $row.find(searchTarget);
+        var textMatch = $sources.text().toLowerCase().indexOf($selecTag) !== -1;
+        $row.closest('tr').toggle(textMatch);
+      }
+
+      var $selecTag = $('#edit-tags').val().toLowerCase();
+      if ($selecTag == 'all') {
+        $rows.each(function( index ) {
+          $(this).closest('tr').show();
+        console.log($selecTag);
+        });
+      }
+      else {
+        $rows.each(showModuleRowByTag);
+      }
 
         if ($fieldset.filter(':visible').length === 0) {
           if ($('.filter-empty').length === 0) {
             $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
           }
         }
-        else {
-          $('.filter-empty').remove();
-        }
-      }
-      else {
-        $rowsAndFieldsets.show();
-        $('.filter-empty').remove();
-      }
     }
 
     if ($form.length) {
       $rowsAndFieldsets = $form.find('tr, fieldset');
       $rows = $form.find('tbody tr');
-      $fieldset = $form.find('fieldset');
+      $fieldset = $form.find('#edit-modules');
 
       // @todo Use autofocus attribute when possible.
       $input.focus().on('keyup', filterModuleList);
+      $('#edit-tags').on('change', filterModuleListByTag);
     }
   }
 };
