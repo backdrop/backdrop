@@ -502,21 +502,36 @@ function system_modules($form, $form_state = array()) {
       'title' => t('Enter a part of the module name or description to filter.'),
     ),
   );
-  $form['filter']['target'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Search by tags'),
-  );
 
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
   // Remove hidden modules from display list.
+  //Build tag list
   $visible_files = $files;
+  $all_tags = array();
   foreach ($visible_files as $filename => $file) {
     if (!empty($file->info['hidden'])) {
       unset($visible_files[$filename]);
     }
+    if (isset($file->info['tags'])) {
+      $all_tags = array_merge($all_tags, $file->info['tags']);
+    }
   }
+  
+  // Add list of available tags to js
+  $tags = array();
+  foreach ($all_tags as $tag) {
+    $tags[$tag] = $tag;
+  }
+  asort($tags);
+  $tags = array('All' => 'All tags') + $tags;
+
+  $form['filter']['tags'] = array(
+    '#type' => 'select',
+    '#title' => t('Search by tags'),
+    '#options' => $tags,
+  );
 
   uasort($visible_files, 'system_sort_modules_by_info_name');
 
@@ -655,7 +670,7 @@ function system_modules($form, $form_state = array()) {
     '#value' => t('Save configuration'),
   );
   $form['#action'] = url('admin/modules/list/confirm');
-
+  
   return $form;
 }
 
