@@ -2480,7 +2480,7 @@ function system_update_1036() {
  */
 function system_update_1037() {
   config_set('system.core', 'canonical_secure', 0);
-  
+
   $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
   if ($res->rowCount()) {
     $mlid = $res->fetch()->mlid;
@@ -2523,6 +2523,17 @@ function system_update_1039() {
     // aliases are automatic or not.
     db_query("UPDATE {url_alias} SET auto = NULL");
   }
+}
+
+/**
+ * Change the site front page to the front page view if it is set to /node (deprecated).
+ */
+function system_update_1040() {
+  $config = config('system.core');
+  if ($config->get('site_frontpage') == 'node') {
+    $config->set('site_frontpage', 'frontpage');
+  }
+  $config->save();
 }
 
 /**
