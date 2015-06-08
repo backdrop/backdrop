@@ -1,10 +1,10 @@
 {
     "_config_name": "views.view.frontpage",
     "name": "frontpage",
-    "description": "Emulates the default Backdrop front page; you may set the default home page path to this view to make it your front page.",
+    "description": "This is the default Backdrop front page.",
     "module": "views",
     "tag": "default",
-    "disabled": true,
+    "disabled": false,
     "base_table": "node",
     "human_name": "Front page",
     "core": 0,
@@ -71,6 +71,20 @@
                         "expose": {
                             "operator": false
                         }
+                    }
+                },
+                "empty": {
+                    "area_text_custom": {
+                        "id": "area_text_custom",
+                        "table": "views",
+                        "field": "area_text_custom",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true,
+                        "content": "<h1>Welcome to Backdrop</h1>\n\n<p>No front page content has been created yet.</p>\n\n<ul>\n<li><a href=\"node/add\">Add new content</a></li>\n</ul>",
+                        "tokenize": 0
                     }
                 }
             }

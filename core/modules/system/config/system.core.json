@@ -46,7 +46,7 @@
     "site_favicon_theme": 0,
     "site_favicon_path": "core/misc/favicon.ico",
     "site_favicon_mimetype": "image/vnd.microsoft.icon",
-    "site_frontpage": "node",
+    "site_frontpage": "frontpage",
     "site_name": "Backdrop",
     "site_logo_theme": 0,
     "site_logo_path": "",
