@@ -44,7 +44,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     $node4 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0));
 
     // Confirm that promoted nodes appear in the default node listing.
-    $this->backdropGet('node');
+    $this->backdropGet('frontpage');
     $this->assertText($node1->title, 'Node title appears on the default listing.');
     $this->assertText($node2->title, 'Node title appears on the default listing.');
     $this->assertNoText($node3->title, 'Node title does not appear in the default listing.');
@@ -515,8 +515,8 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $node_type->settings['status_default'] = 0;
     node_type_save($node_type);
 
-    // Set the front page to the default "node" page.
-    config_set('system.core', 'site_frontpage', 'node');
+    // Set the front page to the default "frontpage" page.
+    config_set('system.core', 'site_frontpage', 'frontpage');
 
     // Create a node.
     $edit = array();
@@ -650,9 +650,9 @@ class NodeBlockTestCase extends BackdropWebTestCase {
     $layout->save();
 
     $syndicate_selector = '//*[contains(@class,"block-node-syndicate")]//a[contains(@class,"feed-icon")]';
-    $this->backdropGet('node');
+    $this->backdropGet('frontpage');
     $elements = $this->xpath($syndicate_selector);
-    $this->assertEqual(count($elements), 1, 'Syndicate block found on /node.');
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on /frontpage.');
 
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
@@ -766,7 +766,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // viewing node.
     $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, "Node content designed for RSS doesn't appear when viewing node.");
-    
+
     // Check that the node feed page does not try to interpret additional path
     // components as arguments for node_feed() and returns default content.
     $this->backdropGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
@@ -1636,8 +1636,8 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test node title in comment preview.
     $this->assertEqual(current($this->xpath('//article[@id=:id]/header/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
 
-    // Test node title is clickable on teaser list (/node).
-    $this->backdropGet('node');
+    // Test node title is clickable on the front page view (/frontpage).
+    $this->backdropGet('frontpage');
     $this->clickLink($node->title);
   }
 }
@@ -2158,7 +2158,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('node' => $node), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized node token %token replaced for node without a summary.', array('%token' => $input)));
-    }    
+    }
   }
 }
 
