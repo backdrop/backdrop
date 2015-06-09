@@ -46,54 +46,23 @@ function template_preprocess_book_navigation(&$variables) {
   $variables['tree'] = '';
 
   if ($book_link['mlid']) {
-    // use book_link to see if we can obtain info about it from cache
-    $data = FALSE;
-    // generate a unique call signature for bid and mlid
-    $cid = $book_link['bid'] . ':' . $book_link['mlid'];
-    // statically cache future calls
-    $data = &backdrop_static(__FUNCTION__ . $cid);
-    // @ignore druplart_conditional_assignment
-    if (!$data && $cache = cache_get($cid, 'cache_book')) {
-      $data = $cache->data;
-    }
-    // we got data from a previous source so use that instead
-    if ($data) {
-      $prev = $data['prev'];
-      $next = $data['next'];
-      $tree = $data['tree'];
-      $parent = $data['parent'];
-    }
-    else {
-      // cache miss, rebuild manually
-      $prev = book_prev($book_link);
-      $next = book_next($book_link);
-      $tree = book_children($book_link);
-      $parent = book_link_load($book_link['plid']);
-      $data = array(
-        'prev' => $prev,
-        'next' => $next,
-        'tree' => $tree,
-        'parent' => $parent,
-      );
-      cache_set($cid, $data, 'cache_book');
-    }
-    $variables['tree'] = $tree;
-    $variables['book_id'] = $book_link['bid'];
-    // check for prev link
-    if ($prev) {
+    $variables['tree'] = book_children($book_link);
+
+    if ($prev = book_prev($book_link)) {
       $prev_href = url($prev['href']);
       backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
       $variables['prev_url'] = $prev_href;
       $variables['prev_title'] = check_plain($prev['title']);
     }
-    if ($book_link['plid'] && $parent) {
+
+    if ($book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
       $parent_href = url($parent['href']);
       backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
       $variables['parent_url'] = $parent_href;
       $variables['parent_title'] = check_plain($parent['title']);
     }
-    // check for a next link
-    if ($next) {
+
+    if ($next = book_next($book_link)) {
       $next_href = url($next['href']);
       backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
       $variables['next_url'] = $next_href;
