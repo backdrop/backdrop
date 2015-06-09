@@ -19,9 +19,6 @@ function minimal_install() {
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "node".
-  config_set('system.core', 'site_frontpage', 'node');
-
   // Allow visitor account creation, but with administrative approval.
   config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 
