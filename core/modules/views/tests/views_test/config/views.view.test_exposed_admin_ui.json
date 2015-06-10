@@ -62,7 +62,7 @@
                         "operator": "in",
                         "value": {
                             "all": "all",
-                            "article": "article",
+                            "post": "post",
                             "page": "page"
                         },
                         "group": "1",

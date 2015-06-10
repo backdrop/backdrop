@@ -2161,7 +2161,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   $build['fields'] = array();
 
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
-    // Build the option link for this handler ("Node: ID = article").
+    // Build the option link for this handler ("Node: ID = post").
     $build['fields'][$id] = array();
     $build['fields'][$id]['#theme'] = 'views_ui_display_tab_setting';
 

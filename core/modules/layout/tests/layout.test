@@ -31,7 +31,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
 
     $this->test_node1 = $this->backdropCreateNode(array(
-      'type' => 'article',
+      'type' => 'post',
       'title' => $this->randomString(),
     ));
     $this->test_node2 = $this->backdropCreateNode(array(
@@ -258,7 +258,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Add a testing block, shown only on article nodes.
+    // Add a testing block, shown only on post nodes.
     $this->clickLink(t('Add block'), 3);
     $this->clickLink(t('Layout foo block'));
     $block_title = $this->randomString();
@@ -272,14 +272,14 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
-      'bundles[article]' => TRUE,
+      'bundles[post]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(Null, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(check_plain($block_title), 'Block shown on article content.');
+    $this->assertText(check_plain($block_title), 'Block shown on post content.');
 
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on page content.');
@@ -303,16 +303,16 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
-    // Create another article node and check the combination of conditions work.
-    $second_article = $this->backdropCreateNode(array(
-      'type' => 'article',
+    // Create another post node and check the combination of conditions work.
+    $second_post = $this->backdropCreateNode(array(
+      'type' => 'post',
       'title' => $this->randomString(),
     ));
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(check_plain($block_title), 'Block shown on article content and path matches.');
+    $this->assertText(check_plain($block_title), 'Block shown on post content and path matches.');
 
-    $this->backdropGet('node/' . $second_article->nid);
-    $this->assertNoText(check_plain($block_title), 'Block not shown on article content when path does not match.');
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown on post content when path does not match.');
   }
 
   /**
@@ -449,10 +449,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->assertText($this->test_node1->body[LANGUAGE_NONE][0]['value'], 'Current page content is still shown on the overridden path.');
 
     // Clone the layout and make a second overriding item at the same path.
-    $clone_layout_name = 'node_article';
+    $clone_layout_name = 'node_post';
     $edit = array(
       'name' => $clone_layout_name,
-      'title' => 'Article node',
+      'title' => 'Post node',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/clone', $edit, t('Clone layout'));
     $this->assertText('You may now update the cloned settings.', 'Layout cloned and landed on settings page.');
@@ -462,37 +462,37 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
-      'bundles[article]' => TRUE,
+      'bundles[post]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $edit = array(
       'title_display' => LAYOUT_TITLE_CUSTOM,
-      'title' => 'Article node title',
+      'title' => 'Post node title',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, $edit, t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText('Article node title', 'The node-type specific layout is used over the generic layout.');
+    $this->assertText('Post node title', 'The node-type specific layout is used over the generic layout.');
 
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertText('Generic node title', 'The generic layout is used when there is not a more specific layout.');
 
     // Check the weights of the layout to ensure they have the correct defaults,
     // then rearrange and check the paths again.
-    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('layouts' => array('node_article', 'node'))));
+    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('layouts' => array('node_post', 'node'))));
     $this->assertFieldByXPath('//select[@name="layouts[' . $clone_layout_name . '][weight]"]', '-1');
     $this->assertFieldByXPath('//select[@name="layouts[' . $layout_name . '][weight]"]', '0');
 
     $edit = array(
-      'layouts[node_article][weight]' => 1,
+      'layouts[node_post][weight]' => 1,
     );
     $this->backdropPost(NULL, $edit, t('Save order'));
 
     // Now both layouts should use the generic layout.
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText('Generic node title', 'The generic layout is used on article content.');
+    $this->assertText('Generic node title', 'The generic layout is used on post content.');
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertText('Generic node title', 'The generic layout is used on generic content.');
 
@@ -502,7 +502,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertNoText('Generic node title', 'The generic node layout has been deleted.');
-    $this->assertNoText('Article node title', 'The article node layout has been deleted.');
+    $this->assertNoText('Post node title', 'The post node layout has been deleted.');
     $this->assertRaw(check_markup($this->test_node1->body[LANGUAGE_NONE][0]['value'], $this->test_node1->body[LANGUAGE_NONE][0]['format']), 'The default layout is now displaying the node.');
   }
 
@@ -560,7 +560,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check the front-end that the content is shown in the sidebar. Note that
     // the main content block does *not* have any wrappers, so we check directly
-    // for the content we expect at /node, which is a list of article tags.
+    // for the content we expect at /node, which is a list of post tags.
     $this->backdropGet($layout_path);
     $front_end_content = $this->xpath('//*[contains(@class,:region)]/div[@id=:page-content]', array(
       ':region' => 'l-sidebar',
@@ -1125,7 +1125,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($article_blocks);
 
     // Check that the blocks are NOT available on page content.
-    // Check a node article, which should have the recent nodes block.
+    // Check a node post, which should have the recent nodes block.
     $page_node = $this->backdropCreateNode(array(
       'type' => 'page',
       'title' => $this->randomString(),

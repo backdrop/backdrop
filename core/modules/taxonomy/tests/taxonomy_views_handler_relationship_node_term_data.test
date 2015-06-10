@@ -28,7 +28,7 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
   function setUp() {
     parent::setUp();
 
-    //$web_user = $this->backdropCreateUser(array('create article content'));
+    //$web_user = $this->backdropCreateUser(array('create post content'));
     //$this->backdropLogin($web_user);
 
     $vocabulary = taxonomy_vocabulary_load('tags');
@@ -36,7 +36,7 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     $this->term_2 = $this->createTerm($vocabulary);
 
     $node = array();
-    $node['type'] = 'article';
+    $node['type'] = 'post';
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->term_1->tid;
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->term_2->tid;
     $this->node = $this->backdropCreateNode($node);

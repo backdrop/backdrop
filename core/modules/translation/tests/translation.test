@@ -29,13 +29,13 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit = array('languages[it][enabled]' => FALSE);
     $this->backdropPost('admin/config/regional/language', $edit, t('Save configuration'));
 
-    // Set "Basic page" content type to use multilingual support with
+    // Set "Page" content type to use multilingual support with
     // translation.
     $this->backdropGet('admin/structure/types/manage/page');
     $edit = array();
     $edit['language'] = TRANSLATION_ENABLED;
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
 
     // Enable the language switcher block.
     $language_type = LANGUAGE_TYPE_INTERFACE;
@@ -50,10 +50,10 @@ class TranslationTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Creates, modifies, and updates a basic page with a translation.
+   * Creates, modifies, and updates a page with a translation.
    */
   function testContentTranslation() {
-    // Create Basic page in English.
+    // Create Page in English.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
     $node = $this->createPage($node_title, $node_body, 'en');
@@ -104,7 +104,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit["body[$langcode][0][value]"] = $node_body;
     $edit['translation[retranslate]'] = TRUE;
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been updated.', array('%title' => $node_title)), 'Original node updated.');
+    $this->assertRaw(t('Page %title has been updated.', array('%title' => $node_title)), 'Original node updated.');
 
     // Check to make sure that interface shows translation as outdated.
     $this->backdropGet('node/' . $node->nid . '/translate');
@@ -115,7 +115,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit['translation[status]'] = FALSE;
     $this->backdropPost('node/' . $node_translation->nid . '/edit', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been updated.', array('%title' => $node_translation_title)), 'Translated node updated.');
+    $this->assertRaw(t('Page %title has been updated.', array('%title' => $node_translation_title)), 'Translated node updated.');
 
     // Confirm that disabled languages are an option for translators when
     // creating nodes.
@@ -145,7 +145,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * Checks that the language switch links behave properly.
    */
   function testLanguageSwitchLinks() {
-    // Create a Basic page in English and its translations in Spanish and
+    // Create a Page in English and its translations in Spanish and
     // Italian.
     $node = $this->createPage($this->randomName(), $this->randomName(), 'en');
     $translation_es = $this->createTranslation($node, $this->randomName(), $this->randomName(), 'es');
@@ -193,7 +193,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $this->resetCaches();
     $this->backdropLogin($this->translator);
 
-    // Create a Basic page in English.
+    // Create a Page in English.
     $type = 'block-locale';
     $node = $this->createPage($this->randomName(), $this->randomName(), 'en');
     $this->assertLanguageSwitchLinks($node, $node, TRUE, $type);
@@ -305,12 +305,12 @@ class TranslationTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Creates a "Basic page" in the specified language.
+   * Creates a "Page" in the specified language.
    *
    * @param $title
-   *   The title of a basic page in the specified language.
+   *   The title of a page in the specified language.
    * @param $body
-   *   The body of a basic page in the specified language.
+   *   The body of a page in the specified language.
    * @param $language
    *   (optional) Language code.
    *
@@ -326,7 +326,7 @@ class TranslationTestCase extends BackdropWebTestCase {
       $edit['langcode'] = $langcode;
     }
     $this->backdropPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), 'Basic page created.');
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $title)), 'Page created.');
 
     // Check to make sure the node was created.
     $node = $this->backdropGetNodeByTitle($title);
@@ -336,14 +336,14 @@ class TranslationTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Creates a translation for a basic page in the specified language.
+   * Creates a translation for a page in the specified language.
    *
    * @param Node $node
-   *   The basic page to create the translation for.
+   *   The page to create the translation for.
    * @param $title
-   *   The title of a basic page in the specified language.
+   *   The title of a page in the specified language.
    * @param $body
-   *   The body of a basic page in the specified language.
+   *   The body of a page in the specified language.
    * @param $langcode
    *   Language code.
    *
@@ -362,7 +362,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit["title"] = $title;
     $edit[$body_key] = $body;
     $this->backdropPost(NULL, $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), 'Translation created.');
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $title)), 'Translation created.');
 
     // Check to make sure that translation was successful.
     $translation = $this->backdropGetNodeByTitle($title);
@@ -439,7 +439,7 @@ class TranslationTestCase extends BackdropWebTestCase {
       }
 
       if ($type == 'node') {
-        // Nodes use article tags, so need a different xpath expression.
+        // Nodes use post tags, so need a different xpath expression.
         if (!empty($translation->nid)) {
           $xpath = '//article[contains(@class, :type)]//a[@href=:url]';
         }

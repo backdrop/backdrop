@@ -340,7 +340,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit["body[$langcode][0][value]"] = $text;
     $edit["body[$langcode][0][format]"] = $filtered;
     $this->backdropPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $edit["title"])), 'Filtered node created.');
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $edit["title"])), 'Filtered node created.');
 
     $node = $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertTrue($node, 'Node found in database.');

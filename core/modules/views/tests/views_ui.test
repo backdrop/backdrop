@@ -48,7 +48,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // Create two nodes.
     $node1 = $this->backdropCreateNode(array('type' => 'page'));
-    $node2 = $this->backdropCreateNode(array('type' => 'article'));
+    $node2 = $this->backdropCreateNode(array('type' => 'post'));
 
     // Now create a page with simple node listing and an attached feed.
     $view2 = array();
@@ -451,13 +451,13 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
    * Tests the number of items per page.
    */
   function testItemsPerPage() {
-    // Create articles, each with a different creation time so that we can do a
+    // Create posts, each with a different creation time so that we can do a
     // meaningful sort.
-    $node1 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME));
-    $node2 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 1));
-    $node3 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 2));
-    $node4 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 3));
-    $node5 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 4));
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME));
+    $node2 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 2));
+    $node4 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 3));
+    $node5 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 4));
 
     // Create a page. This should never appear in the view created below.
     $page_node = $this->backdropCreateNode(array('type' => 'page', 'created' => REQUEST_TIME + 2));
@@ -469,7 +469,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $view['name'] = strtolower($this->randomName(16));
     $view['description'] = $this->randomName(16);
     $view['show[wizard_key]'] = 'node';
-    $view['show[type]'] = 'article';
+    $view['show[type]'] = 'post';
     $view['show[sort]'] = 'created:DESC';
     $view['page[create]'] = 1;
     $view['page[title]'] = $this->randomName(16);

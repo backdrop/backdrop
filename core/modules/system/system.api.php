@@ -117,8 +117,8 @@ function hook_admin_paths_alter(&$paths) {
   // Treat all user pages as administrative.
   $paths['user'] = TRUE;
   $paths['user/*'] = TRUE;
-  // Treat the article node form as a non-administrative page.
-  $paths['node/add/article'] = FALSE;
+  // Treat the post node form as a non-administrative page.
+  $paths['node/add/post'] = FALSE;
 }
 
 /**
@@ -3742,17 +3742,17 @@ function hook_token_info_alter(&$data) {
   // Modify description of node tokens for our site.
   $data['tokens']['node']['nid'] = array(
     'name' => t("Node ID"),
-    'description' => t("The unique ID of the article."),
+    'description' => t("The unique ID of the post."),
   );
   $data['tokens']['node']['title'] = array(
     'name' => t("Title"),
-    'description' => t("The title of the article."),
+    'description' => t("The title of the post."),
   );
 
   // Chained tokens for nodes.
   $data['tokens']['node']['created'] = array(
     'name' => t("Date created"),
-    'description' => t("The date the article was posted."),
+    'description' => t("The date the post was posted."),
     'type' => 'date',
   );
 }
