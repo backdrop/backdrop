@@ -185,12 +185,11 @@ function entity_create_stub_entity($entity_type, $ids) {
  * database access if loaded again during the same page request.
  *
  * The actual loading is done through a class that has to implement the
- * EntityControllerInterface interface. By default,
- * DefaultEntityController is used. Entity types can specify that a
- * different class should be used by setting the 'controller class' key in
- * hook_entity_info(). These classes can either implement the
- * EntityControllerInterface interface, or, most commonly, extend the
- * DefaultEntityController class. See node_entity_info() and the
+ * EntityControllerInterface interface. By default, DefaultEntityController is
+ * used. Entity types can specify that a different class should be used by
+ * setting the 'controller class' key in hook_entity_info(). These classes can
+ * either implement the EntityControllerInterface interface, or, most commonly,
+ * extend the DefaultEntityController class. See node_entity_info() and the
  * NodeController in node.module as an example.
  *
  * @param $entity_type
@@ -205,8 +204,8 @@ function entity_create_stub_entity($entity_type, $ids) {
  * @param $reset
  *   Whether to reset the internal cache for the requested entity type.
  *
- * @return EntityControllerInterface
- *   The entity controller object for the specified entity type.
+ * @return array
+ *   An array of entity objects indexed by their ids.
  *
  * @see hook_entity_info()
  * @see EntityControllerInterface
