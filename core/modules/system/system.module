@@ -1056,7 +1056,7 @@ function system_library_info() {
     'title' => 'Backdrop AJAX',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/ajax.js' => array('group' => JS_LIBRARY, 'weight' => 2),
+      'core/misc/ajax.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'backdrop.progress'),

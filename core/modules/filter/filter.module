@@ -61,6 +61,24 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['editor/dialog/link/%filter_format'] = array(
+    'title' => 'Edit image',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_format_editor_link_form', 3),
+    'access callback' => 'filter_format_access',
+    'access arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
+  $items['editor/dialog/image/%filter_format'] = array(
+    'title' => 'Edit image',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_format_editor_image_form', 3),
+    'access callback' => 'filter_format_access',
+    'access arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
   $items['admin/config/content/formats'] = array(
     'title' => 'Text editors and formats',
     'description' => 'Configure WYSIWYG and text editors on the site. Restrict or allow certain HTML tags to be used in content.',
@@ -98,6 +116,22 @@ function filter_menu() {
     'file' => 'filter.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Access callback: Checks a user's access to a particular text format.
+ *
+ * @param $format
+ *   A text format object.
+ *
+ * @return
+ *   TRUE if the text format can be used by the current user, FALSE otherwise.
+ *
+ * @see filter_menu()
+ */
+function filter_format_access($format) {
+  $permission = filter_permission_name($format);
+  return ($format->format === filter_fallback_format()) || user_access($permission);
 }
 
 /**
@@ -541,10 +575,13 @@ function filter_library_info() {
   $libraries['filter'] = array(
     'version' => BACKDROP_VERSION,
     'js' => array(
-      $module_path . '/js/filter.js' => array('group' => JS_LIBRARY),
+      $module_path . '/js/filter.js' => array(),
     ),
     'css' => array(
       $module_path . '/css/filter.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'backdrop.ajax'),
     ),
   );
   // Filter admin is put in the JS_THEME group to force it after tabledrag.js.
@@ -1489,6 +1526,14 @@ function filter_filter_info() {
     'tips callback' => '_filter_html_escape_tips',
     'weight' => -10,
   );
+  $filters['filter_image_caption'] = array(
+    'title' => t('Convert image captions to figure and figcaption elements'),
+    'process callback' => '_filter_image_caption',
+  );
+  $filters['filter_image_align'] = array(
+    'title' => t('Float images left and right using the data-align attribute'),
+    'process callback' => '_filter_image_align',
+  );
   return $filters;
 }
 
@@ -2039,6 +2084,24 @@ function _filter_html_escape($text) {
  */
 function _filter_html_escape_tips($filter, $format, $long = FALSE) {
   return t('No HTML tags allowed.');
+}
+
+/**
+ * Implements callback_filter_process().
+ *
+ * Replace img data-caption attributes with figure and figcaption elements.
+ */
+function _filter_image_caption($text) {
+
+}
+
+/**
+ * Implements callback_filter_process().
+ *
+ * Replaces img data-align attributes with figure and figcaption elements.
+ */
+function _filter_image_align($text) {
+
 }
 
 /**

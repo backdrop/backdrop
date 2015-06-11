@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Documentation for CKEditor module APIs.
@@ -132,17 +131,42 @@ function hook_ckeditor_plugins_alter(array &$plugins) {
  * @param $css
  *   An array of CSS files, passed by reference. This is a flat list of file
  *   paths relative to the Backdrop root.
- * @param $editor
- *   The editor object as returned by editor_load(), for which these files are
- *   being loaded.
  * @param $format
  *   The corresponding text format object as returned by filter_format_load()
  *   for which the current text editor is being displayed.
  *
  * @see _ckeditor_theme_css()
  */
-function hook_ckeditor_css_alter(array &$css, $editor, $format) {
+function hook_ckeditor_css_alter(array &$css, $format) {
   $css[] = backdrop_get_path('module', 'mymodule') . '/css/mymodule-ckeditor.css';
+}
+
+/**
+ * Modify the raw CKEditor settings passed to the editor.
+ *
+ * This hook can be useful if you have created a CKEditor plugin that needs
+ * additional settings passed to it from Backdrop. In particular, because
+ * CKEditor loads JavaScript files directly, use of Backdrop.t() in these
+ * plugins will not work. You may use this hook to provide translated strings
+ * for your plugin.
+ *
+ * @param array $settings
+ *   The array of settings that will be passed to CKEditor.
+ * @param $format
+ *   The filter format object containing this editor's settings.
+ */
+function hook_ckeditor_settings_alter(array &$settings, $format) {
+  foreach ($format->editor_settings['toolbar'] as $row) {
+    foreach ($row as $button_group) {
+      // If a particular button is enabled, then add extra settings.
+      if (array_key_exists('MyPlugin', $button_group)) {
+        // Pull settings from the format and pass to the JavaScript settings.
+        $settings['backdrop']['myplugin_settings'] = $format->editor_settings['myplugin_settings'];
+        // Translate a string for use by CKEditor.
+        $settings['backdrop']['myplugin_help'] = t('A translated string example that will be used by CKEditor.');
+      }
+    }
+  }
 }
 
 /**
@@ -172,6 +196,8 @@ function hook_ckeditor_css_alter(array &$css, $editor, $format) {
  *
  * @see hook_ckeditor_plugins()
  * @see ckeditor_add_settings()
+ *
+ * @ingroup callbacks
  */
 function hook_ckeditor_PLUGIN_plugin_check($format, $plugin_name) {
   // Automatically enable this plugin if the Underline button is enabled.
