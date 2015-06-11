@@ -47,7 +47,7 @@ function ckeditor_editor_info() {
     ),
     'file' => 'ckeditor.admin.inc',
     'settings callback' => 'ckeditor_settings_form',
-    'js settings callback' => 'ckeditor_add_settings',
+    'js settings callback' => 'ckeditor_get_settings',
   );
 
   return $editors;
@@ -81,6 +81,7 @@ function ckeditor_library_info() {
     ),
     'dependencies' => array(
       array('filter', 'filter'),
+      array('system', 'backdrop.ajax'),
       array('ckeditor', 'ckeditor'),
     ),
   );
@@ -175,21 +176,6 @@ function ckeditor_ckeditor_plugins() {
       'label' => t('Redo'),
       'image_rtl' => $image_prefix . '/redo-rtl.png',
     ),
-    'Link' => array(
-      'label' => t('Link'),
-      'required_html' => array(array(
-        'tags' => array('a'),
-        'attributes' => array('href', 'title'),
-      )),
-      'optional_html' => array(array(
-        'tags' => array('a'),
-        'attributes' => array('target', 'download', 'hreflang', 'media', 'rel', 'type'),
-      )),
-    ),
-    'Unlink' => array(
-      'label' => t('Unlink'),
-      'required_html' => array(array('tags' => array('a'))),
-    ),
     'Anchor' => array(
       'image_rtl' => $image_prefix . '/anchor-rtl.png',
       'label' => t('Anchor'),
@@ -282,51 +268,63 @@ function ckeditor_ckeditor_plugins() {
   );
 
   // The backdropimage plugin replaces normal image functionality.
-  /*
   $plugins['backdropimage'] = array(
     'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropimage',
     'file' => 'plugin.js',
     'buttons' => array(
       'BackdropImage' => array(
         'label' => t('Image'),
-        'required_html' => array('img'),
+        'required_html' => array(
+          array(
+            'tags' => array('img'),
+            'attributes' => array('src', 'alt', 'data-file-id'),
+          ),
+        ),
         'image' => $image_prefix . '/image.png',
       ),
     ),
   );
-  */
 
   // The backdropcaption plugin provides consistent behaviors for image captions.
-  /*
-  $plugins['backdropcaption'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropcaption',
+  $plugins['backdropimagecaption'] = array(
+    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropimagecaption',
     'file' => 'plugin.js',
     'css' => array(backdrop_get_path('module', 'ckeditor') . '/css/ckeditor-caption.css'),
     'enabled callback' => 'ckeditor_image_plugin_check',
+    'required_html' => array(
+      array(
+        'tags' => array('img'),
+        'attributes' => array('data-caption', 'data-placeholder'),
+      ),
+      array(
+        'tags' => array('figure', 'figcaption'),
+        'attributes' => array('src', 'alt'),
+      ),
+    )
   );
-  */
 
-  // The backdropbreak plugin provides support for Backdrop's <!--break--> comment.
-  /*
-  $plugins['backdropbreak'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropbreak',
+  // The backdroplink plugin replaces normal link funcitonality.
+  $plugins['backdroplink'] = array(
+    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdroplink',
     'file' => 'plugin.js',
     'buttons' => array(
-      'BackdropBreak' => array(
-        'label' => t('Teaser break'),
-        'image' => $image_prefix . '/pagebreak.png',
-        'image_rtl' => $image_prefix . '/pagebreak-rtl.png',
+      'BackdropLink' => array(
+        'label' => t('Link'),
+        'required_html' => array(array(
+          'tags' => array('a'),
+          'attributes' => array('href'),
+        )),
+        'image' => $image_prefix . '/link.png',
+      ),
+      'BackdropUnlink' => array(
+        'label' => t('Link'),
+        'required_html' => array(array(
+          'tags' => array('a'),
+          'attributes' => array('href'),
+        )),
+        'image' => $image_prefix . '/unlink.png',
       ),
     ),
-  );
-  */
-
-  // Webkit support for resizing images.
-  $plugins['dragresize'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/dragresize',
-    'file' => 'plugin.js',
-    'enabled callback' => 'ckeditor_image_plugin_check',
-    //'css' => array(backdrop_get_path('module', 'ckeditor') . '/js/plugins/dragresize/_source.css'),
   );
 
   return $plugins;
@@ -357,7 +355,7 @@ function ckeditor_image_plugin_check($format) {
  * @param $existing_settings
  *   Settings that have already been added to the page by filters.
  */
-function ckeditor_add_settings($format, $existing_settings) {
+function ckeditor_get_settings($format, $existing_settings) {
   global $language;
 
   // Loop through all available plugins and check to see if it has been
@@ -454,7 +452,7 @@ function ckeditor_add_settings($format, $existing_settings) {
     'extraPlugins' => implode(',', array_keys($external_plugins)),
     'removePlugins' => 'image',
     'removeButtons' => '',
-    // Empty custom config must be an array.
+    // Empty custom config must be a string.
     // See http://docs.ckeditor.com/#!/guide/dev_configuration.
     'customConfig' => '',
     // Empty styles must be an array.
@@ -476,7 +474,21 @@ function ckeditor_add_settings($format, $existing_settings) {
   list($settings['allowedContent'], $settings['disallowedContent']) = ckeditor_get_acf_settings($format);
 
   // These settings are used specifically by Backdrop.
-  $settings['externalPlugins'] = $external_plugins;
+  $settings['backdrop'] = array(
+    'externalPlugins' => $external_plugins,
+    'format' => $format->format,
+  );
+  if (isset($external_plugins['backdroplink'])) {
+    $settings['backdrop']['linkDialogUrl'] = url('editor/dialog/link');
+  }
+  if (isset($external_plugins['backdropimage'])) {
+    $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image');
+  }
+  if (isset($external_plugins['backdropimagecaption'])) {
+    $settings['backdrop']['captionFilterEnabled'] = array_key_exists('filter_image_caption', $format->filters);
+    $settings['backdrop']['alignFilterEnabled'] = array_key_exists('filter_image_align', $format->filters);
+  }
+  backdrop_alter('ckeditor_settings', $settings, $format);
 
   return $settings;
 }

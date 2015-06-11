@@ -6,11 +6,6 @@
 
     attach: function (element, format) {
       this._loadExternalPlugins(format);
-      // Also pass settings that are Backdrop-specific.
-      format.editorSettings.drupal = {
-        format: format.format
-      };
-
       // Set a title on the CKEditor instance that includes the text field's
       // label so that screen readers say something that is understandable
       // for end users.
@@ -71,15 +66,14 @@
     },
 
     _loadExternalPlugins: function (format) {
-      var externalPlugins = format.editorSettings.drupalExternalPlugins;
+      var externalPlugins = format.editorSettings.backdrop.externalPlugins;
       // Register and load additional CKEditor plugins as necessary.
       if (externalPlugins) {
         for (var pluginName in externalPlugins) {
           if (externalPlugins.hasOwnProperty(pluginName)) {
-            CKEDITOR.plugins.addExternal(pluginName, externalPlugins[pluginName], '');
+            CKEDITOR.plugins.addExternal(pluginName, Backdrop.settings.basePath + externalPlugins[pluginName]['path'] + '/', externalPlugins[pluginName]['file']);
           }
         }
-        delete format.editorSettings.drupalExternalPlugins;
       }
     }
 
@@ -123,14 +117,14 @@
       var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
       classes.push('editor-dialog');
       dialogSettings.dialogClass = classes.join(' ');
-      dialogSettings.autoResize = Backdrop.checkWidthBreakpoint(600);
+      dialogSettings.autoResize = true;
 
       // Add a "Loading…" message, hide it underneath the CKEditor toolbar, create
       // a Backdrop.ajax instance to load the dialog and trigger it.
       var $content = $('<div class="ckeditor-dialog-loading"><span style="top: -40px;" class="ckeditor-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div>');
       $content.appendTo($target);
       new Backdrop.ajax('ckeditor-dialog', $content.find('a').get(0), {
-        accepts: 'application/vnd.drupal-modal',
+        accepts: 'application/vnd.backdrop-dialog',
         dialog: dialogSettings,
         selector: '.ckeditor-dialog-loading-link',
         url: url,
