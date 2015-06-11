@@ -759,6 +759,7 @@ function system_admin_bar_cache_info() {
   $caches = array(
     'assets' => t('CSS and JavaScript'),
     'cache' => t('Page and else'),
+    'layout' => t('Layout'),
     'menu' => t('Menu'),
     'theme' => t('Theme registry'),
     'token' => t('Token registry'),
@@ -831,6 +832,10 @@ function _admin_bar_flush_cache($name = NULL) {
 
     case 'token':
       token_cache_clear();
+      break;
+
+    case 'layout':
+      layout_reset_caches();
       break;
   }
 }
