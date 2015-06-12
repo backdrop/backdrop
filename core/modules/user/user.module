@@ -451,6 +451,25 @@ function user_is_blocked($name) {
 }
 
 /**
+ * Checks if a user has a role.
+ *
+ * @param int $rid
+ *   A role ID.
+ * @param User $account
+ *   (optional) A user account. Defaults to the current user.
+ *
+ * @return bool
+ *   TRUE or FALSE.
+ */
+function user_has_role($rid, $account = NULL) {
+  if (!$account) {
+    $account = $GLOBALS['user'];
+  }
+
+  return isset($account->roles[$rid]);
+}
+
+/**
  * Implements hook_permission().
  */
 function user_permission() {
