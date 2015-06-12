@@ -8,8 +8,14 @@
  * HTML elements.
  */
 fieldset {
+  min-width: 0; /* Webkit/Blink fix for mobile */
   margin-bottom: 1em;
   padding: 0.5em;
+}
+@-moz-document url-prefix() {
+  fieldset {
+    display: table-cell; /* Firefox mobile fix */
+  }
 }
 form {
   margin: 0;
@@ -203,20 +209,20 @@ abbr.form-required, abbr.tabledrag-changed, abbr.ajax-changed {
  *
  * @see collapse.js
  */
-.js fieldset.collapsible .fieldset-legend a {
+.js fieldset.collapsible .fieldset-title {
   background: url(../../../misc/menu-expanded.png) 5px 65% no-repeat; /* LTR */
   padding-left: 15px; /* LTR */
 }
-.js[dir="rtl"] fieldset.collapsible .fieldset-legend a {
+.js[dir="rtl"] fieldset.collapsible .fieldset-title {
   background-position: 98% 75%;
   padding-left: 0;
   padding-right: 15px;
 }
-.js fieldset.collapsed .fieldset-legend a {
+.js fieldset.collapsed .fieldset-title {
   background-image: url(../../../misc/menu-collapsed.png); /* LTR */
   background-position: 5px 50%; /* LTR */
 }
-.js[dir="rtl"] fieldset.collapsed .fieldset-legend a {
+.js[dir="rtl"] fieldset.collapsed .fieldset-title {
   background-image: url(../../../misc/menu-collapsed-rtl.png);
   background-position: 98% 50%;
 }
