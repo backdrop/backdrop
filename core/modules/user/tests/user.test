@@ -5,260 +5,6 @@
  * Tests for user.module.
  */
 
-class UserRegistrationTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('field_test');
-  }
-
-  function testRegistrationWithEmailVerification() {
-    $config = config('system.core');
-
-    // Require e-mail verification.
-    $config->set('user_email_verification', TRUE);
-    // Set registration to administrator only.
-    $config->set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
-    $config->save();
-
-    $this->backdropGet('user/register');
-    $this->assertResponse(403, 'Registration page is inaccessible when only administrators can create accounts.');
-
-    // Allow registration by site visitors without administrator approval.
-    $config->set('user_register', USER_REGISTER_VISITORS)->save();
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('A welcome message with further instructions has been sent to your e-mail address.'), 'User registered successfully.');
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $this->assertTrue($new_user->status, 'New account is active after registration.');
-
-    // Allow registration by site visitors, but require administrator approval.
-    $config->set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save();
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $this->assertFalse($new_user->status, 'New account is blocked until approved by an administrator.');
-  }
-
-  function testRegistrationWithoutEmailVerification() {
-    $config = config('system.core');
-
-    // Don't require e-mail verification.
-    $config->set('user_email_verification', FALSE)->save();
-
-    // Allow registration by site visitors without administrator approval.
-    $config->set('user_register', USER_REGISTER_VISITORS)->save();
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-
-    // Try entering a mismatching password.
-    $edit['pass[pass1]'] = '99999.0';
-    $edit['pass[pass2]'] = '99999';
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');
-
-    // Enter a correct password.
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $this->assertText(t('Registration successful. You are now logged in.'), 'Users are logged in after registering.');
-    $this->backdropLogout();
-
-    // Allow registration by site visitors, but require administrator approval.
-    $config->set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save();
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $pass = $this->randomName();
-    $edit['pass[pass2]'] = $pass;
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'), 'Users are notified of pending approval');
-
-    // Try to login before administrator approval.
-    $auth = array(
-      'name' => $name,
-      'pass' => $pass,
-    );
-    $this->backdropPost('user/login', $auth, t('Log in'));
-    $this->assertText(t('The username @name has not been activated or is blocked.', array('@name' => $name)), 'User cannot login yet.');
-
-    // Activate the new account.
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $admin_user = $this->backdropCreateUser(array('administer users'));
-    $this->backdropLogin($admin_user);
-    $edit = array(
-      'status' => 1,
-    );
-    $this->backdropPost('user/' . $new_user->uid . '/edit', $edit, t('Save'));
-    $this->backdropLogout();
-
-    // Login after administrator approval.
-    $this->backdropPost('user/login', $auth, t('Log in'));
-    $this->assertText(t('Member for'), 'User can log in after administrator approval.');
-  }
-
-  function testRegistrationEmailDuplicates() {
-    $config = config('system.core');
-
-    // Don't require e-mail verification.
-    $config->set('user_email_verification', FALSE)->save();
-
-    // Allow registration by site visitors without administrator approval.
-    $config->set('user_register', USER_REGISTER_VISITORS)->save();
-
-    // Set up a user to check for duplicates.
-    $duplicate_user = $this->backdropCreateUser();
-
-    $edit = array();
-    $edit['name'] = $this->randomName();
-    $edit['mail'] = $duplicate_user->mail;
-
-    // Attempt to create a new account using an existing e-mail address.
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
-
-    // Attempt to bypass duplicate email registration validation by adding spaces.
-    $edit['mail'] = '   ' . $duplicate_user->mail . '   ';
-
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
-  }
-
-  function testRegistrationDefaultValues() {
-    $config_user_settings = config('system.core');
-
-    // Allow registration by site visitors without administrator approval.
-    $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
-
-    // Don't require e-mail verification.
-    $config_user_settings->set('user_email_verification', FALSE)->save();
-
-    // Set the default timezone to Brussels.
-    $config_system_date = config('system.date')
-      ->set('user_configurable_timezones', 1)
-      ->set('default_timezone', 'Europe/Brussels')
-      ->save();
-
-    // Check that the account information fieldset's options are not displayed
-    // is a fieldset if there is not more than one fieldset in the form.
-    $this->backdropGet('user/register');
-    $this->assertNoRaw('<fieldset id="edit-account"><legend>Account information</legend>', 'Account settings fieldset was hidden.');
-
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
-    $this->backdropPost(NULL, $edit, t('Create new account'));
-
-    // Check user fields.
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $this->assertEqual($new_user->name, $name, 'Username matches.');
-    $this->assertEqual($new_user->mail, $mail, 'E-mail address matches.');
-    $this->assertEqual($new_user->signature, '', 'Correct signature field.');
-    $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
-    $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
-    $this->assertEqual($new_user->timezone, $config_system_date->get('default_timezone'), 'Correct time zone field.');
-    $this->assertEqual($new_user->language, '', 'Correct language field.');
-    $this->assertEqual($new_user->picture, 0, 'Correct picture field.');
-    $this->assertEqual($new_user->init, $mail, 'Correct init field.');
-  }
-
-  /**
-   * Tests Field API fields on user registration forms.
-   */
-  function testRegistrationWithUserFields() {
-    // Create a field, and an instance on 'user' entity type.
-    $field = array(
-      'type' => 'test_field',
-      'field_name' => 'test_user_field',
-      'cardinality' => 1,
-    );
-    field_create_field($field);
-    $instance = array(
-      'field_name' => 'test_user_field',
-      'entity_type' => 'user',
-      'label' => 'Some user field',
-      'bundle' => 'user',
-      'required' => TRUE,
-      'settings' => array('user_register_form' => FALSE),
-    );
-    field_create_instance($instance);
-
-    // Check that the field does not appear on the registration form.
-    $this->backdropGet('user/register');
-    $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
-
-    // Have the field appear on the registration form.
-    $instance['settings']['user_register_form'] = TRUE;
-    field_update_instance($instance);
-    $this->backdropGet('user/register');
-    $this->assertText($instance['label'], 'The field appears on user registration form');
-
-    // Check that validation errors are correctly reported.
-    $edit = array();
-    $edit['name'] = $name = $this->randomName();
-    $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    // Missing input in required field.
-    $edit['test_user_field[und][0][value]'] = '';
-    $this->backdropPost(NULL, $edit, t('Create new account'));
-    $this->assertRaw(t('@name field is required.', array('@name' => $instance['label'])), 'Field validation error was correctly reported.');
-    // Invalid input.
-    $edit['test_user_field[und][0][value]'] = '-1';
-    $this->backdropPost(NULL, $edit, t('Create new account'));
-    $this->assertRaw(t('%name does not accept the value -1.', array('%name' => $instance['label'])), 'Field validation error was correctly reported.');
-
-    // Submit with valid data.
-    $value = rand(1, 255);
-    $edit['test_user_field[und][0][value]'] = $value;
-    $this->backdropPost(NULL, $edit, t('Create new account'));
-    // Check user fields.
-    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-    $new_user = reset($accounts);
-    $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, 'The field value was correctly saved.');
-
-    // Check that the 'add more' button works.
-    $field['cardinality'] = FIELD_CARDINALITY_UNLIMITED;
-    field_update_field($field);
-    foreach (array('js', 'nojs') as $js) {
-      $this->backdropGet('user/register');
-      // Add two inputs.
-      $value = rand(1, 255);
-      $edit = array();
-      $edit['test_user_field[und][0][value]'] = $value;
-      if ($js == 'js') {
-        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
-        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
-      }
-      else {
-        $this->backdropPost(NULL, $edit, t('Add another item'));
-        $this->backdropPost(NULL, $edit, t('Add another item'));
-      }
-      // Submit with three values.
-      $edit['test_user_field[und][1][value]'] = $value + 1;
-      $edit['test_user_field[und][2][value]'] = $value + 2;
-      $edit['name'] = $name = $this->randomName();
-      $edit['mail'] = $mail = $edit['name'] . '@example.com';
-      $this->backdropPost(NULL, $edit, t('Create new account'));
-      // Check user fields.
-      $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
-      $new_user = reset($accounts);
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-    }
-  }
-}
-
 class UserValidationTestCase extends BackdropWebTestCase {
   // Username validation.
   function testUsernames() {
@@ -292,6 +38,34 @@ class UserValidationTestCase extends BackdropWebTestCase {
  * Functional tests for user logins, including rate limiting of login attempts.
  */
 class UserLoginTestCase extends BackdropWebTestCase {
+  /**
+   * Test that login credentials work.
+   */
+  function testLoginByEmail() {
+    $account = $this->backdropCreateUser(array());
+
+    // Test logging in with email address.
+    $this->backdropLogin($account, TRUE);
+
+    // Default login method allowed both email and username, set to email only.
+    config('system.core')
+      ->set('user_login_method', USER_LOGIN_EMAIL_ONLY)
+      ->save();
+
+    // Test logging in with username. (This should fail.)
+    $this->backdropLogout();
+    $this->backdropLogin($account, TRUE);
+    $this->assertFailedLogin($account);
+
+    // Set to username only and test email address. (This should also fail.)
+    config('system.core')
+      ->set('user_login_method', USER_LOGIN_USERNAME_ONLY)
+      ->save();
+    $this->backdropLogout();
+    $this->backdropLogin($account);
+    $this->assertFailedLogin($account, NULL, TRUE);
+  }
+
   /**
    * Test the global login flood control.
    */
@@ -335,7 +109,7 @@ class UserLoginTestCase extends BackdropWebTestCase {
   function testPerUserLoginFloodControl() {
     config('user.flood')
       // Set a high global limit out so that it is not relevant in the test.
-      ->set('floo_ip_limit', 4000)
+      ->set('flood_ip_limit', 4000)
       ->set('flood_user_limit', 3)
       ->save();
 
@@ -421,10 +195,15 @@ class UserLoginTestCase extends BackdropWebTestCase {
    * @param $flood_trigger
    *   Whether or not to expect that the flood control mechanism will be
    *   triggered.
+   * @param $by_email
+   *   Authenticate with email instead of username.
    */
-  function assertFailedLogin($account, $flood_trigger = NULL) {
+  function assertFailedLogin($account, $flood_trigger = NULL, $by_email = FALSE) {
+    if ($this->loggedInUser) {
+      $this->backdropLogout();
+    }
     $edit = array(
-      'name' => $account->name,
+      'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw,
     );
     $this->backdropPost('user', $edit, t('Log in'));
@@ -439,7 +218,22 @@ class UserLoginTestCase extends BackdropWebTestCase {
       }
     }
     else {
-      $this->assertText(t('Sorry, incorrect password. Have you forgotten your password?'));
+      switch (config_get('system.core', 'user_login_method')) {
+        case USER_LOGIN_USERNAME_ONLY:
+          $this->assertText(t('Sorry, unrecognized username.'));
+          break;
+        case USER_LOGIN_EMAIL_ONLY:
+          if (!$by_email) {
+            $this->assertText(t('The e-mail address @email is not valid.', array('@email' => $account->name)));
+          }
+          else {
+            $this->assertText(t('Sorry, unrecognized e-mail address or password. Have you forgotten your password?'));
+          }
+          break;
+        case USER_LOGIN_USERNAME_OR_EMAIL:
+          $this->assertText(t('Sorry, unrecognized username, e-mail address, or password. Have you forgotten your password?'));
+        break;
+      }
     }
   }
 }
@@ -1875,6 +1669,9 @@ class UserSignatureTestCase extends BackdropWebTestCase {
  * Test that a user, having editing their own account, can still log in.
  */
 class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
+  /**
+   * Tests a user editing their own account.
+   */
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
@@ -1895,6 +1692,21 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
     // Set the new name on the user account and attempt to log back in.
     $account->name = $edit['name'];
     $this->backdropLogin($account);
+
+    // Attempt to change username to an email other than my own.
+    $edit['name'] = $this->randomName() . '@example.com';
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.', array('%name' => $edit['name'])), 'Error message found when an email username does not match user email.');
+    $this->assertNoText(t('The changes have been saved.'), 'The user account was not saved.');
+
+    // Lookup user by name to make sure we didn't actually change the name.
+    $changed = user_load_by_name($edit['name']);
+    $this->assertFalse($changed, 'Username was not changed to email address other than my own.');
+
+    // Change username to my email address.
+    $edit['name'] = $account->mail;
+    $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
+    $this->assertText(t('The changes have been saved.'), 'The user account was saved.');
   }
 }
 
@@ -2223,3 +2035,343 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
     $this->assertEqual('user/' . $this->account->uid, $uri['path'], t('Correct user URI.'));
   }
 }
+
+class UserRegistrationTestCase extends UserLoginTestCase {
+  function setUp() {
+    parent::setUp('field_test');
+  }
+
+  function testRegistrationWithEmailVerification() {
+    $config = config('system.core');
+
+    // Require e-mail verification.
+    $config->set('user_email_verification', TRUE);
+    // Set registration to administrator only.
+    $config->set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
+    $config->save();
+
+    $this->backdropGet('user/register');
+    $this->assertResponse(403, 'Registration page is inaccessible when only administrators can create accounts.');
+
+    // Allow registration by site visitors without administrator approval.
+    $config->set('user_register', USER_REGISTER_VISITORS)->save();
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('A welcome message with further instructions has been sent to your e-mail address.'), 'User registered successfully.');
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $this->assertTrue($new_user->status, 'New account is active after registration.');
+
+    // Allow registration by site visitors, but require administrator approval.
+    $config->set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save();
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $this->assertFalse($new_user->status, 'New account is blocked until approved by an administrator.');
+  }
+
+  function testRegistrationWithoutEmailVerification() {
+    $config = config('system.core');
+
+    // Don't require e-mail verification.
+    $config->set('user_email_verification', FALSE)->save();
+
+    // Allow registration by site visitors without administrator approval.
+    $config->set('user_register', USER_REGISTER_VISITORS)->save();
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+
+    // Try entering a mismatching password.
+    $edit['pass[pass1]'] = '99999.0';
+    $edit['pass[pass2]'] = '99999';
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');
+
+    // Enter a correct password.
+    $edit['pass[pass1]'] = $new_pass = $this->randomName();
+    $edit['pass[pass2]'] = $new_pass;
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $this->assertText(t('Registration successful. You are now logged in.'), 'Users are logged in after registering.');
+    $this->backdropLogout();
+
+    // Allow registration by site visitors, but require administrator approval.
+    $config->set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save();
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+    $edit['pass[pass1]'] = $pass = $this->randomName();
+    $edit['pass[pass2]'] = $pass;
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'), 'Users are notified of pending approval');
+
+    // Try to login before administrator approval.
+    $auth = array(
+      'name' => $name,
+      'pass' => $pass,
+    );
+    $this->backdropPost('user/login', $auth, t('Log in'));
+    $this->assertText(t('The username @name has not been activated or is blocked.', array('@name' => $name)), 'User cannot login yet.');
+
+    // Activate the new account.
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $admin_user = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin_user);
+    $edit = array(
+      'status' => 1,
+    );
+    $this->backdropPost('user/' . $new_user->uid . '/edit', $edit, t('Save'));
+    $this->backdropLogout();
+
+    // Login after administrator approval.
+    $this->backdropPost('user/login', $auth, t('Log in'));
+    $this->assertText(t('Member for'), 'User can log in after administrator approval.');
+  }
+
+  function testRegistrationEmailDuplicates() {
+    $config = config('system.core');
+
+    // Don't require e-mail verification.
+    $config->set('user_email_verification', FALSE)->save();
+
+    // Allow registration by site visitors without administrator approval.
+    $config->set('user_register', USER_REGISTER_VISITORS)->save();
+
+    // Set up a user to check for duplicates.
+    $duplicate_user = $this->backdropCreateUser();
+
+    $edit = array();
+    $edit['name'] = $this->randomName();
+    $edit['mail'] = $duplicate_user->mail;
+
+    // Attempt to create a new account using an existing e-mail address.
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
+
+    // Attempt to bypass duplicate email registration validation by adding spaces.
+    $edit['mail'] = '   ' . $duplicate_user->mail . '   ';
+
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('The e-mail address @email is already registered.', array('@email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
+  }
+
+  function testRegistrationDefaultValues() {
+    $config_user_settings = config('system.core');
+
+    // Allow registration by site visitors without administrator approval.
+    $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
+
+    // Don't require e-mail verification.
+    $config_user_settings->set('user_email_verification', FALSE)->save();
+
+    // Set the default timezone to Brussels.
+    $config_system_date = config('system.date')
+      ->set('user_configurable_timezones', 1)
+      ->set('default_timezone', 'Europe/Brussels')
+      ->save();
+
+    // Check that the account information fieldset's options are not displayed
+    // is a fieldset if there is not more than one fieldset in the form.
+    $this->backdropGet('user/register');
+    $this->assertNoRaw('<fieldset id="edit-account"><legend>Account information</legend>', 'Account settings fieldset was hidden.');
+
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+    $edit['pass[pass1]'] = $new_pass = $this->randomName();
+    $edit['pass[pass2]'] = $new_pass;
+    $this->backdropPost(NULL, $edit, t('Create new account'));
+
+    // Check user fields.
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $this->assertEqual($new_user->name, $name, 'Username matches.');
+    $this->assertEqual($new_user->mail, $mail, 'E-mail address matches.');
+    $this->assertEqual($new_user->signature, '', 'Correct signature field.');
+    $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
+    $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
+    $this->assertEqual($new_user->timezone, $config_system_date->get('default_timezone'), 'Correct time zone field.');
+    $this->assertEqual($new_user->language, '', 'Correct language field.');
+    $this->assertEqual($new_user->picture, 0, 'Correct picture field.');
+    $this->assertEqual($new_user->init, $mail, 'Correct init field.');
+  }
+
+  /**
+   * Test that login credentials work.
+   */
+  function testLoginByEmail() {
+    $account = $this->backdropCreateUser(array());
+
+    // Login via name.
+    $this->backdropLogin($account);
+    $this->assertFailedLogin($account, NULL, TRUE);
+
+    // Login via email only.
+    config('system.core')
+      ->set('user_login_method', USER_LOGIN_EMAIL_ONLY)
+      ->save();
+    $this->backdropLogin($account, TRUE);
+    $this->assertFailedLogin($account);
+
+    // Login via name or email.
+    config('system.core')
+      ->set('user_login_method', USER_LOGIN_USERNAME_OR_EMAIL)
+      ->save();
+    $this->backdropLogin($account, TRUE);
+    $this->backdropLogin($account);
+  }
+
+  /**
+   * Tests Field API fields on user registration forms.
+   */
+  function testRegistrationWithUserFields() {
+    // Create a field, and an instance on 'user' entity type.
+    $field = array(
+      'type' => 'test_field',
+      'field_name' => 'test_user_field',
+      'cardinality' => 1,
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => 'test_user_field',
+      'entity_type' => 'user',
+      'label' => 'Some user field',
+      'bundle' => 'user',
+      'required' => TRUE,
+      'settings' => array('user_register_form' => FALSE),
+    );
+    field_create_instance($instance);
+
+    // Check that the field does not appear on the registration form.
+    $this->backdropGet('user/register');
+    $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
+
+    // Have the field appear on the registration form.
+    $instance['settings']['user_register_form'] = TRUE;
+    field_update_instance($instance);
+    $this->backdropGet('user/register');
+    $this->assertText($instance['label'], 'The field appears on user registration form');
+
+    // Check that validation errors are correctly reported.
+    $edit = array();
+    $edit['name'] = $name = $this->randomName();
+    $edit['mail'] = $mail = $edit['name'] . '@example.com';
+    // Missing input in required field.
+    $edit['test_user_field[und][0][value]'] = '';
+    $this->backdropPost(NULL, $edit, t('Create new account'));
+    $this->assertRaw(t('@name field is required.', array('@name' => $instance['label'])), 'Field validation error was correctly reported.');
+    // Invalid input.
+    $edit['test_user_field[und][0][value]'] = '-1';
+    $this->backdropPost(NULL, $edit, t('Create new account'));
+    $this->assertRaw(t('%name does not accept the value -1.', array('%name' => $instance['label'])), 'Field validation error was correctly reported.');
+
+    // Submit with valid data.
+    $value = rand(1, 255);
+    $edit['test_user_field[und][0][value]'] = $value;
+    $this->backdropPost(NULL, $edit, t('Create new account'));
+    // Check user fields.
+    $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+    $new_user = reset($accounts);
+    $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, 'The field value was correctly saved.');
+
+    // Check that the 'add more' button works.
+    $field['cardinality'] = FIELD_CARDINALITY_UNLIMITED;
+    field_update_field($field);
+    foreach (array('js', 'nojs') as $js) {
+      $this->backdropGet('user/register');
+      // Add two inputs.
+      $value = rand(1, 255);
+      $edit = array();
+      $edit['test_user_field[und][0][value]'] = $value;
+      if ($js == 'js') {
+        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
+        $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
+      }
+      else {
+        $this->backdropPost(NULL, $edit, t('Add another item'));
+        $this->backdropPost(NULL, $edit, t('Add another item'));
+      }
+      // Submit with three values.
+      $edit['test_user_field[und][1][value]'] = $value + 1;
+      $edit['test_user_field[und][2][value]'] = $value + 2;
+      $edit['name'] = $name = $this->randomName();
+      $edit['mail'] = $mail = $edit['name'] . '@example.com';
+      $this->backdropPost(NULL, $edit, t('Create new account'));
+      // Check user fields.
+      $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
+      $new_user = reset($accounts);
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
+    }
+  }
+
+  /**
+   * Tests new users username matches their email if username is an email.
+   */
+  function testRegistrationEmailAsUsername() {
+    // Don't require email verification.
+    // Allow registration by site visitors without administrator approval.
+    config('system.core')
+      ->set('user_email_verification', FALSE)
+      ->set('user_register', USER_REGISTER_VISITORS)
+      ->save();
+
+    $mail = $this->randomName() . '@example.com';
+    $different = $this->randomName() . $mail;
+
+    // Set up edit array.
+    $edit = array();
+    $edit['mail'] = $mail;
+    $edit['name'] = $different;
+    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+
+    // Attempt to create an account using an email that doesn't match the name.
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.'), 'Email username does not match user email - error message found.');
+    $this->assertNoText(t('Registration successful. You are now logged in.'), 'The user was not created and logged in.');
+
+    // Attempt to create new account using matching email address.
+    $edit['name'] = $edit['mail'] = $this->randomName() . '@example.com';
+
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('Registration successful. You are now logged in.'), 'The user was created and logged in with matching email.');
+
+    $new_user = user_load_by_name($edit['name']);
+    $this->assertTrue(($new_user->name === $edit['name']) && ($new_user->mail === $edit['mail']), 'Created user with matching username and email address.');
+  }
+
+  /**
+   * Tests new users username not matching their email if username is an email.
+   */
+  function testRegistrationEmailAsUsernameDisabled() {
+    config('system.core')
+      ->set('user_email_verification', FALSE)
+      ->set('user_register', USER_REGISTER_VISITORS)
+      ->save();
+
+    $mail = $this->randomName() . '@example.com';
+    $different = $this->randomName() . $mail;
+
+    $edit = array();
+    $edit['mail'] = $mail;
+    $edit['name'] = $different;
+    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+
+    // Attempt to create an account using an email that doesn't match the name.
+    // This should fail, as the email address and name must match if the name
+    // is an email address.
+    $this->backdropPost('user/register', $edit, t('Create new account'));
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.'), 'Email username does not match user email - error message found.');
+    $this->assertNoText(t('Registration successful. You are now logged in.'), 'The user was not created and logged in.');
+  }
+}
+
