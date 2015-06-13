@@ -13,16 +13,83 @@
 }
 
 /* Individual layout settings form. */
-.layout-settings-form .layout-options {
+.layout-settings-form .form-type-radios {
   width: 100%;
 }
+.layout-settings-form .layout-options .form-radios {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  line-height: 1.3;
+  max-width: calc(100vw - 60px); /* Fix flex-wrap issue in some browsers */
+}
+.layout-settings-form .layout-options.no-flexbox .form-radios {
+  display: block;
+}
 .layout-settings-form .layout-options .form-type-radio {
-  float: left;
+  width: 100px;
+  margin: 0 5px 5px 0;
+  padding: 0;
   text-align: center;
 }
+.layout-settings-form .layout-options.no-flexbox .form-type-radio {
+  float: left;
+}
+/**
+ * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
+ */
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+  /* Hide radios from visuals but not screen-readers */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.layout-settings-form .layout-options .form-type-radio label {
+  position: relative;
+  z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
+  display: block;
+  padding: .6em;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  min-height: 145px;
+  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+     -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+      -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+       -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+          transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  will-change: border-color, background-color;
+}
+
+.layout-settings-form .layout-options.no-flexbox .form-type-radio label {
+  min-height: 150px;
+}
+
+.layout-settings-form .layout-options .form-type-radio:focus label,
+.layout-settings-form .layout-options .form-type-radio:active label,
+.layout-settings-form .layout-options .form-type-radio:hover label {
+  border-color: #d0d0d0;
+}
+.layout-settings-form .layout-options .form-type-radio input:checked + label {
+  border-color: #CFDE56;
+  background: #E9EEBC;
+}
 .layout-settings-form .layout-icon .caption {
-  width: 90px;
-  margin-bottom: 1em;
+}
+.layout-settings-form .layout-options .form-type-radio img {
+  position: relative;
+  z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
+  padding: 4px;
+  border-radius: 4px;
+  background: #ffffff;
 }
 
 /* Menu item argument settings. */
