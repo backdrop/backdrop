@@ -35,12 +35,12 @@
   overflow: hidden;
 }
 /* When body is a contextual links region. */
-.contextual-links-region #admin-menu {
-  top: -30px;
+.contextual-links-region #admin-bar {
+  top: -33px;
 }
 
-body.admin-bar {
-  margin-top: 30px !important;
+.admin-bar body {
+  border-top: 33px solid #2D2D2D !important;
 }
 
 /* Top level items. */

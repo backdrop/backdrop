@@ -2,7 +2,7 @@
 
 Backdrop.adminBar = Backdrop.adminBar || {};
 Backdrop.adminBar.behaviors = Backdrop.adminBar.behaviors || {};
-Backdrop.adminBar.hashes = Backdrop.adminBar.hashes || {};
+Backdrop.adminBar.cache = Backdrop.adminBar.cache || {};
 
 /**
  * Core behavior for Administration bar.
@@ -26,7 +26,7 @@ Backdrop.behaviors.adminBar = {
     if (settings.admin_bar.suppress) {
       return;
     }
-    var $adminBar = $('#admin-bar:not(.admin-bar-processed)', context);
+    var $adminBar = $('#admin-bar', context);
     // Client-side caching; if administration bar is not in the output, it is
     // fetched from the server and cached in the browser.
     if (!$adminBar.length && settings.admin_bar.hash) {
@@ -45,33 +45,9 @@ Backdrop.behaviors.adminBar = {
       });
     }
     // If the menu is in the output already, this means there is a new version.
-    else {
+    else if (!$adminBar.hasClass('admin-bar-processed')) {
       // Apply our behaviors.
       Backdrop.adminBar.attachBehaviors(context, settings, $adminBar);
-    }
-  }
-};
-
-/**
- * Apply active trail highlighting based on current path.
- */
-Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $adminBar) {
-  if (settings.admin_bar.activeTrail) {
-    $adminBar.find('#admin-bar-menu > li > ul > li > a[href="' + settings.admin_bar.activeTrail + '"]').addClass('active-trail');
-  }
-};
-
-/**
- * Apply margin to page.
- *
- * Note that directly applying marginTop does not work in IE. To prevent
- * flickering/jumping page content with client-side caching, this is a regular
- * Backdrop behavior.
- */
-Backdrop.behaviors.adminBarMarginTop = {
-  attach: function (context, settings) {
-    if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
-      $('body:not(.admin-bar)', context).addClass('admin-bar');
     }
   }
 };
@@ -85,21 +61,44 @@ Backdrop.behaviors.adminBarMarginTop = {
  *   A callback function invoked when the cache request was successful.
  */
 Backdrop.adminBar.getCache = function (hash, onSuccess) {
-  if (Backdrop.adminBar.hashes.hash !== undefined) {
-    return Backdrop.adminBar.hashes.hash;
-  }
-  $.ajax({
-    cache: true,
-    type: 'GET',
-    dataType: 'text', // Prevent auto-evaluation of response.
-    global: false, // Do not trigger global AJAX events.
-    url: Backdrop.settings.admin_bar.basePath.replace(/admin_bar/, 'js/admin_bar/cache/' + hash),
-    success: onSuccess,
-    complete: function (XMLHttpRequest, status) {
-      Backdrop.adminBar.hashes.hash = status;
+  // Check for locally cached content.
+  if (Backdrop.adminBar.cache.hash) {
+    if (typeof onSuccess === 'function') {
+      onSuccess(Backdrop.adminBar.cache.hash);
     }
-  });
+    return;
+  }
+  // Send an AJAX request for the admin bar content, only if we’re not already
+  // waiting on a response from a previous request.
+  if (!Backdrop.adminBar.ajaxRequest) {
+    Backdrop.adminBar.ajaxRequest = $.ajax({
+      cache: true,
+      type: 'GET',
+      dataType: 'text', // Prevent auto-evaluation of response.
+      global: false, // Do not trigger global AJAX events.
+      url: Backdrop.settings.admin_bar.basePath.replace(/admin_bar/, 'js/admin_bar/cache/' + hash),
+      success: [function (response) {
+        // Cache the response data in a variable.
+        Backdrop.adminBar.cache.hash = response;
+      }, onSuccess],
+      complete: function () {
+        Backdrop.adminBar.ajaxRequest = false;
+      }
+    });
+  }
+  else {
+    // Invoke our callback when the AJAX request is complete.
+    Backdrop.adminBar.ajaxRequest.done(onSuccess);
+  }
 };
+
+/**
+ * If we have a hash, send the AJAX request right away, in an effort to have it
+ * complete as early as possible.
+ */
+if (Backdrop.settings.admin_bar.hash && Backdrop.settings.admin_bar.basePath) {
+  Backdrop.adminBar.getCache(Backdrop.settings.admin_bar.hash);
+}
 
 /**
  * @defgroup admin_behaviors Administration behaviors.
@@ -117,6 +116,30 @@ Backdrop.adminBar.attachBehaviors = function (context, settings, $adminBar) {
     });
   }
 };
+
+/**
+ * Apply active trail highlighting based on current path.
+ */
+Backdrop.adminBar.behaviors.adminBarActiveTrail = function (context, settings, $adminBar) {
+  if (settings.admin_bar.activeTrail) {
+    $adminBar.find('#admin-bar-menu > li > ul > li > a[href="' + settings.admin_bar.activeTrail + '"]').addClass('active-trail');
+  }
+};
+
+/**
+ * Apply margin to page.
+ *
+ * We apply the class to the HTML element, since it’s the only element that’s
+ * guaranteed to exist at execution time.
+ */
+Backdrop.adminBar.behaviors.adminBarMarginTop = function (context, settings) {
+  if (!settings.admin_bar.suppress && settings.admin_bar.margin_top) {
+    $('html:not(.admin-bar)', context).addClass('admin-bar');
+  }
+};
+// Don’t wait until the DOM is ready, run this immediately to prevent flickering
+// or jumping page content.
+Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
 
 /**
  * Apply 'position: fixed'.
