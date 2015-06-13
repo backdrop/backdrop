@@ -1485,13 +1485,16 @@ function comment_access($op, $comment) {
 }
 
 /**
- * Accepts a submission of new or changed comment content.
+ * Saves a new or updated comment.
  *
  * @param Comment $comment
  *   A comment entity.
+ *
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function comment_save(Comment $comment) {
-  $comment->save();
+  return $comment->save();
 }
 
 /**
