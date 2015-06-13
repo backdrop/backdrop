@@ -307,9 +307,9 @@ ul.tips {
   -ms-flex-direction: column;
   flex-direction: column;
 }
-body.admin-bar .layout {
-  padding-top: 30px;
-  margin-top: -30px;
+.admin-bar body .layout {
+  padding-top: 33px;
+  margin-top: -33px;
 }
 .l-container,
 .l-triptych {
