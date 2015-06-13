@@ -136,3 +136,7 @@ function seven_breadcrumb($variables) {
   }
   return $output;
 }
+
+function seven_preprocess_maintenance_page(&$variables) {
+  $variables['html_attributes']['class'][] = 'maintenance-page-wrapper';
+}
