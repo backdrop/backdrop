@@ -940,14 +940,17 @@ function node_submit($node) {
 }
 
 /**
- * Saves changes to a node or adds a new node.
+ * Saves a new or updated node.
  *
  * @param Node $node
- *   The $node entity to be saved. If $node->nid is
- *   omitted (or $node->is_new is TRUE), a new node will be added.
+ *   The $node entity to be saved. If $node->nid is omitted (or $node->is_new
+ *   is TRUE), a new node will be added.
+ *
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function node_save(Node $node) {
-  $node->save();
+  return $node->save();
 }
 
 /**

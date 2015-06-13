@@ -604,15 +604,14 @@ function file_load($fid) {
 }
 
 /**
- * Saves a file entity to the database.
- *
- * If the $file->fid is not set a new record will be added.
+ * Saves a new or updated file.
  *
  * @param File $file
- *   A file object returned by file_load().
+ *   A file object returned by file_load(). If the $file->fid is not set a new
+ *   record will be added.
  *
- * @return
- *   Either SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  *
  * @see hook_file_insert()
  * @see hook_file_update()
