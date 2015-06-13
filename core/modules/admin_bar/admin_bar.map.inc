@@ -9,6 +9,28 @@
  */
 
 /**
+ * Implements hook_admin_bar_map() on behalf of Layout module.
+ */
+function layout_admin_bar_map() {
+  if (!user_access('administer layouts')) {
+    return;
+  }
+  $layouts = layout_get_all_configs('layout');
+  foreach ($layouts as $layout_name => $layout) {
+    if (isset($layout['disabled']) && $layout['disabled']) {
+      unset($layouts[$layout_name]);
+    }
+  }
+  $map['admin/structure/layouts/manage/%layout_tempstore'] = array(
+    'parent' => 'admin/structure/layouts',
+    'arguments' => array(
+      array('%layout_tempstore' => array_keys($layouts)),
+    ),
+  );
+  return $map;
+}
+
+/**
  * Implements hook_admin_bar_map() on behalf of Filter module.
  */
 function filter_admin_bar_map() {
