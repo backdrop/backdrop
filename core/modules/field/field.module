@@ -1118,6 +1118,49 @@ function field_get_items($entity_type, $entity, $field_name, $langcode = NULL) {
 }
 
 /**
+ * Returns field values in the language they currently would be displayed.
+ *
+ * Fields with a 'value' key are supported, such as text and number fields. 
+ * Fields which do not have a 'value' key such as terms (which store term IDs
+ * with a 'tid' key), or files (an 'fid' key), will return an empty array.
+ *
+ * @param $entity_type
+ *   The type of $entity; e.g., 'node' or 'user'.
+ * @param $entity
+ *   The entity containing the data to be displayed.
+ * @param $field_name
+ *   The field to be displayed.
+ * @param $single_value
+ *   (optional) Boolean specifying whether all values of a multi-value field or 
+ *   only the first value should be returned. Defaults to return the first 
+ *   value only.
+ * @param $langcode
+ *   (optional) The language code $entity->{$field_name} has to be displayed in.
+ *   Defaults to the current language.
+ *
+ * @return
+ *   An empty array if the field does not contain a 'value' key or if the 
+ *   entity does not contain the field requested;;
+ *   An array of field values if  $single_value parameter is FALSE;
+ *   The first field value  if the $single_value parameter is TRUE.
+ */
+function field_get_value($entity_type, $entity, $field_name, $single_value = TRUE, $langcode = NULL) {
+  if ($field_items = field_get_items($entity_type, $entity, $field_name, $langcode)) {
+    $values = array();
+    foreach ($field_items as $item) {
+      if (isset($item['value'])) {
+        $values[] = $item['value'];
+      }
+    }
+    if ($single_value) {
+      return reset($values);
+    }
+    return $values;
+  }
+  return array();
+}
+
+/**
  * Determine whether a field has any data.
  *
  * @param $field
