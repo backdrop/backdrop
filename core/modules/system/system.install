@@ -118,7 +118,7 @@ function system_requirements($phase) {
 
   if (!empty($missing_extensions)) {
     $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
-      '@system_requirements' => 'http://drupal.org/requirements',
+      '@system_requirements' => 'https://backdropcms.org/requirements',
     ));
 
     $description .= theme('item_list', array('items' => $missing_extensions));
@@ -141,7 +141,7 @@ function system_requirements($phase) {
     $database_ok = extension_loaded('pdo');
     if (!$database_ok) {
       $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
-        '@link' => 'http://drupal.org/requirements/pdo',
+        '@link' => 'https://backdropcms.org/requirements',
       ));
     }
     else {
@@ -205,7 +205,7 @@ function system_requirements($phase) {
         $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
       }
 
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'http://drupal.org/requirements'));
+      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
       $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
     }
   }

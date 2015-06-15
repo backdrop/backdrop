@@ -223,7 +223,7 @@ function callback_queue_worker($queue_item_data) {
  * Callback for hook_queue_info().
  *
  * @param $queue_item_data
- *   The data that was passed to DrupalQueue::createItem() when the item was
+ *   The data that was passed to BackdropQueue::createItem() when the item was
  *   queued.
  *
  * @throws \Exception
@@ -231,7 +231,7 @@ function callback_queue_worker($queue_item_data) {
  *   The cron process will log the exception, and leave the item in the queue to
  *   be processed again later.
  *
- * @see drupal_cron_run()
+ * @see backdrop_cron_run()
  */
 function callback_queue_worker($queue_item_data) {
   $node = node_load($queue_item_data);
