@@ -32,6 +32,7 @@
     "log_facility": "",
     "log_format": "!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message",
     "maintenance_mode_message": "@site is currently under maintenance. We should be back shortly. Thank you for your patience.",
+    "maintenance_page_lifetime": "10",
     "menu_route_handler": null,
     "node_admin_theme": "",
     "page_cache_maximum_age": 300,

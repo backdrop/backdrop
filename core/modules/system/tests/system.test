@@ -1043,14 +1043,24 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
 
-    // Logout and verify that offline message is displayed.
+    // Logout and verify that offline message is displayed and maintenance page
+    // will not be cached by external caches like varnish.
     $this->backdropLogout();
+
     $this->backdropGet('');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
+
     $this->backdropGet('node');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
+
     $this->backdropGet('user/register');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
 
     // Verify that user is able to log in.
     $this->backdropGet('user');
