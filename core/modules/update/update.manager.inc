@@ -582,7 +582,7 @@ function _update_manager_check_backends(&$form, $operation) {
       'Updating modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'https://backdropcms.org/guide/modules',
       ));
   }
   else {
@@ -592,7 +592,7 @@ function _update_manager_check_backends(&$form, $operation) {
       'Installing modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'https://backdropcms.org/guide/modules',
       ));
   }
   return TRUE;
