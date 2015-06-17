@@ -228,7 +228,7 @@ function taxonomy_menu() {
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
-    'title' => 'List',
+    'title' => 'List vocabularies',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -303,7 +303,7 @@ function taxonomy_menu() {
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
-    'title' => 'List',
+    'title' => 'List terms',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20,
   );
