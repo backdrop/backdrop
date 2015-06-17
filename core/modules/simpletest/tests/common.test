@@ -1930,7 +1930,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
     $user1 = user_load(1);
     $first_authenticated_user = $this->backdropCreateUser();
     $second_authenticated_user = $this->backdropCreateUser();
-    $user1->roles = array_intersect_key($user1->roles, array(BACKDROP_AUTHENTICATED_RID => TRUE));
+    $user1->roles = array_intersect($user1->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     user_save($user1);
     // Load all the accounts again, to make sure we have complete account
     // objects.
