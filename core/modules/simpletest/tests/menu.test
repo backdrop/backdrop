@@ -992,7 +992,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $home = array('<front>' => 'Home');
     $admin = $home + array('admin' => t('Administration'));
     $config = $admin + array('admin/config' => t('Configuration'));
-    $type = 'article';
+    $type = 'post';
     $langcode = LANGUAGE_NONE;
 
     // Verify breadcrumbs for default local tasks.
@@ -1059,7 +1059,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('admin/structure/types/add', $trail);
     $this->assertBreadcrumb("admin/structure/types/manage/$type", $trail);
     $trail += array(
-      "admin/structure/types/manage/$type" => t('Article'),
+      "admin/structure/types/manage/$type" => t('Post'),
     );
     $this->assertBreadcrumb("admin/structure/types/manage/$type/fields", $trail);
     $this->assertBreadcrumb("admin/structure/types/manage/$type/display", $trail);

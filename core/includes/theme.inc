@@ -1114,9 +1114,9 @@ function theme($hook, $variables = array()) {
     // suggestion exists in the theme registry, use it instead of the hook that
     // theme() was called with. This allows the preprocess step to route to a
     // more specific theme hook. For example, a function may call
-    // theme('node', ...), but a preprocess function can add 'node__article' as
+    // theme('node', ...), but a preprocess function can add 'node__post' as
     // a suggestion, enabling a theme to have an alternate template file for
-    // article nodes. Suggestions are checked in the following order:
+    // post nodes. Suggestions are checked in the following order:
     // - The 'theme_hook_suggestion' variable is checked first. It overrides
     //   all others.
     // - The 'theme_hook_suggestions' variable is checked in FILO order, so the
@@ -1518,7 +1518,7 @@ function _theme_render_template_debug($template_function, $template_file, $varia
     $variables['theme_hook_suggestions'] = array_reverse($variables['theme_hook_suggestions']);
   }
   // Add debug output for directly called suggestions like
-  // '#theme' => 'comment__node__article'.
+  // '#theme' => 'comment__node__post'.
   if (strpos($variables['theme_hook_original'], '__') !== FALSE) {
     $derived_suggestions[] = $hook = $variables['theme_hook_original'];
     while ($pos = strrpos($hook, '__')) {

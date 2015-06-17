@@ -16,10 +16,10 @@ class NodeWebTestCase extends BackdropWebTestCase {
     $modules[] = 'node';
     parent::setUp($modules);
 
-    // Create Basic page and Article node types.
+    // Create Page and Post node types.
     if ($this->profile != 'standard') {
-      $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-      $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+      $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+      $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     }
   }
 }
@@ -30,7 +30,7 @@ class NodeWebTestCase extends BackdropWebTestCase {
 class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
-    $web_user = $this->backdropCreateUser(array('create article content', 'create page content'));
+    $web_user = $this->backdropCreateUser(array('create post content', 'create page content'));
     $this->backdropLogin($web_user);
   }
 
@@ -38,9 +38,9 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
    * Creates four nodes and ensures that they are loaded correctly.
    */
   function testNodeMultipleLoad() {
-    $node1 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
-    $node2 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
-    $node3 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 0));
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
+    $node2 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 0));
     $node4 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0));
 
     // Confirm that promoted nodes appear in the default node listing.
@@ -68,8 +68,8 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
       $this->assertTrue(is_object($node), 'Node is an object');
     }
 
-    // Load nodes by nid, where type = article. Nodes 1, 2 and 3 will be loaded.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'article'));
+    // Load nodes by nid, where type = post. Nodes 1, 2 and 3 will be loaded.
+    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post'));
     $count = count($nodes);
     $this->assertTrue($count == 3, format_string('@count nodes loaded', array('@count' => $count)));
     $this->assertEqual($nodes[$node1->nid]->title, $node1->title, 'Node successfully loaded.');
@@ -79,7 +79,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
 
     // Now that all nodes have been loaded into the static cache, ensure that
     // they are loaded correctly again when a condition is passed.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'article'));
+    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post'));
     $count = count($nodes);
     $this->assertTrue($count == 3, format_string('@count nodes loaded.', array('@count' => $count)));
     $this->assertEqual($nodes[$node1->nid]->title, $node1->title, 'Node successfully loaded');
@@ -87,8 +87,8 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     $this->assertEqual($nodes[$node3->nid]->title, $node3->title, 'Node successfully loaded');
     $this->assertFalse(isset($nodes[$node4->nid]), 'Node was not loaded');
 
-    // Load nodes by nid, where type = article and promote = 0.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'article', 'promote' => 0));
+    // Load nodes by nid, where type = post and promote = 0.
+    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post', 'promote' => 0));
     $count = count($nodes);
     $this->assertTrue($count == 1, format_string('@count node loaded', array('@count' => $count)));
     $this->assertEqual($nodes[$node3->nid]->title, $node3->title, 'Node successfully loaded.');
@@ -107,27 +107,27 @@ class NodeLoadHooksTestCase extends BackdropWebTestCase {
    * Tests that hook_node_load() is invoked correctly.
    */
   function testHookNodeLoad() {
-    // Create some sample articles and pages.
-    $node1 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
-    $node2 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_PUBLISHED));
-    $node3 = $this->backdropCreateNode(array('type' => 'article', 'status' => NODE_NOT_PUBLISHED));
+    // Create some sample posts and pages.
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_PUBLISHED));
+    $node2 = $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_PUBLISHED));
+    $node3 = $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_NOT_PUBLISHED));
     $node4 = $this->backdropCreateNode(array('type' => 'page', 'status' => NODE_NOT_PUBLISHED));
 
-    // Check that when a set of nodes that only contains articles is loaded,
-    // the properties added to the node by node_test_load_node() correctly
+    // Check that when a set of nodes that only contains posts is loaded,
+    // the properties added to the node by node_test_node_load() correctly
     // reflect the expected values.
     $nodes = node_load_multiple(array(), array('status' => NODE_PUBLISHED));
     $loaded_node = end($nodes);
     $this->assertEqual($loaded_node->node_test_loaded_nids, array($node1->nid, $node2->nid), 'hook_node_load() received the correct list of node IDs the first time it was called.');
-    $this->assertEqual($loaded_node->node_test_loaded_types, array('article'), 'hook_node_load() received the correct list of node types the first time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_types, array('post'), 'hook_node_load() received the correct list of node types the first time it was called.');
 
     // Now, as part of the same page request, load a set of nodes that contain
-    // both articles and pages, and make sure the parameters passed to
+    // both posts and pages, and make sure the parameters passed to
     // node_test_node_load() are correctly updated.
     $nodes = node_load_multiple(array(), array('status' => NODE_NOT_PUBLISHED));
     $loaded_node = end($nodes);
-    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node3->nid, $node4->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
-    $this->assertEqual($loaded_node->node_test_loaded_types, array('article', 'page'), 'hook_node_load() received the correct list of node types the second time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node4->nid, $node3->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_types, array('page', 'post'), 'hook_node_load() received the correct list of node types the second time it was called.');
   }
 }
 
@@ -215,7 +215,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     // Confirm that revisions revert properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
     $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.', array(
-      '@type' => 'Basic page',
+      '@type' => 'Page',
       '%title' => $nodes[1]->title,
       '%revision-date' => format_date($nodes[1]->revision_timestamp),
     )), 'Revision reverted.');
@@ -226,7 +226,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
     $this->assertRaw(t('Revision from %revision-date of @type %title has been deleted.', array(
       '%revision-date' => format_date($nodes[1]->revision_timestamp),
-      '@type' => 'Basic page',
+      '@type' => 'Page',
       '%title' => $nodes[1]->title,
     )), 'Revision deleted.');
     $this->assertTrue(db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid and vid = :vid', array(':nid' => $node->nid, ':vid' => $nodes[1]->vid))->fetchField() == 0, 'Revision not found.');
@@ -242,7 +242,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       ->execute();
     $this->backdropPost("node/$node->nid/revisions/{$nodes[2]->vid}/revert", array(), t('Revert'));
     $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.', array(
-      '@type' => 'Basic page',
+      '@type' => 'Page',
       '%title' => $nodes[2]->title,
       '%revision-date' => format_date($old_revision_date),
     )));
@@ -445,7 +445,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Creates a "Basic page" node and verifies its consistency in the database.
+   * Creates a "Page" node and verifies its consistency in the database.
    */
   function testNodeCreation() {
     // Create a node.
@@ -455,8 +455,8 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $edit["body[$langcode][0][value]"] = $this->randomName(16);
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
-    // Check that the Basic page has been created.
-    $this->assertRaw(t('!post %title has been created.', array('!post' => 'Basic page', '%title' => $edit["title"])), 'Basic page created.');
+    // Check that the Page has been created.
+    $this->assertRaw(t('!post %title has been created.', array('!post' => 'Page', '%title' => $edit["title"])), 'Page created.');
 
     // Check that the node exists in the database.
     $node = $this->backdropGetNodeByTitle($edit["title"]);
@@ -510,7 +510,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
    * Create an unpublished node and confirm correct redirect behavior.
    */
   function testUnpublishedNodeCreation() {
-    // Set "Basic page" content type to be unpublished by default.
+    // Set "Page" content type to be unpublished by default.
     $node_type = node_type_get_type('page');
     $node_type->settings['status_default'] = 0;
     node_type_save($node_type);
@@ -589,7 +589,7 @@ class SummaryLengthTestCase extends BackdropWebTestCase {
     $expected = 'What is a foobar?';
     $this->assertRaw($expected, 'Check that the summary is 600 characters in length', 'Node');
 
-    // Change the teaser length for "Basic page" content type.
+    // Change the teaser length for "Page" content type.
     $instance = field_info_instance('node', 'body', $node->type);
     $instance['display']['teaser']['settings']['trim_length'] = 200;
     field_update_instance($instance);
@@ -672,11 +672,11 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Confirms "Basic page" content type and post information is on a new node.
+   * Confirms "Page" content type and post information is on a new node.
    */
   function testPagePostInfo() {
 
-    // Set "Basic page" content type to display post information.
+    // Set "Page" content type to display post information.
     $edit = array();
     $edit['node_submitted'] = TRUE;
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
@@ -698,7 +698,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
    */
   function testPageNotPostInfo() {
 
-    // Set "Basic page" content type to display post information.
+    // Set "Page" content type to display post information.
     $edit = array();
     $edit['node_submitted'] = FALSE;
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
@@ -731,7 +731,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // Use bypass node access permission here, because the test class uses
     // hook_grants_alter() to deny access to everyone on node_access
     // queries.
-    $user = $this->backdropCreateUser(array('bypass node access', 'access content', 'create article content'));
+    $user = $this->backdropCreateUser(array('bypass node access', 'access content', 'create post content'));
     $this->backdropLogin($user);
   }
 
@@ -740,7 +740,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
    */
   function testNodeRSSContent() {
     // Create a node.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
     $this->backdropGet('rss.xml');
 
@@ -852,19 +852,19 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
    * Creates a node and tests the creation of node access rules.
    */
   function testNodeAccessRecords() {
-    // Create an article node.
-    $node1 = $this->backdropCreateNode(array('type' => 'article'));
-    $this->assertTrue(node_load($node1->nid), 'Article node created.');
+    // Create an post node.
+    $node1 = $this->backdropCreateNode(array('type' => 'post'));
+    $this->assertTrue(node_load($node1->nid), 'Post node created.');
 
     // Check to see if grants added by node_test_node_access_records made it in.
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node1->nid))->fetchAll();
     $this->assertEqual(count($records), 1, 'Returned the correct number of rows.');
-    $this->assertEqual($records[0]->realm, 'test_article_realm', 'Grant with article_realm acquired for node without alteration.');
+    $this->assertEqual($records[0]->realm, 'test_post_realm', 'Grant with post_realm acquired for node without alteration.');
     $this->assertEqual($records[0]->gid, 1, 'Grant with gid = 1 acquired for node without alteration.');
 
-    // Create an unpromoted "Basic page" node.
+    // Create an unpromoted "Page" node.
     $node2 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0));
-    $this->assertTrue(node_load($node2->nid), 'Unpromoted basic page node created.');
+    $this->assertTrue(node_load($node2->nid), 'Unpromoted page node created.');
 
     // Check to see if grants added by node_test_node_access_records made it in.
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node2->nid))->fetchAll();
@@ -872,9 +872,9 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
     $this->assertEqual($records[0]->realm, 'test_page_realm', 'Grant with page_realm acquired for node without alteration.');
     $this->assertEqual($records[0]->gid, 1, 'Grant with gid = 1 acquired for node without alteration.');
 
-    // Create an unpromoted, unpublished "Basic page" node.
+    // Create an unpromoted, unpublished "Page" node.
     $node3 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 0, 'status' => 0));
-    $this->assertTrue(node_load($node3->nid), 'Unpromoted, unpublished basic page node created.');
+    $this->assertTrue(node_load($node3->nid), 'Unpromoted, unpublished page node created.');
 
     // Check to see if grants added by node_test_node_access_records made it in.
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node3->nid))->fetchAll();
@@ -882,9 +882,9 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
     $this->assertEqual($records[0]->realm, 'test_page_realm', 'Grant with page_realm acquired for node without alteration.');
     $this->assertEqual($records[0]->gid, 1, 'Grant with gid = 1 acquired for node without alteration.');
 
-    // Create a promoted "Basic page" node.
+    // Create a promoted "Page" node.
     $node4 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 1));
-    $this->assertTrue(node_load($node4->nid), 'Promoted basic page node created.');
+    $this->assertTrue(node_load($node4->nid), 'Promoted page node created.');
 
     // Check to see if grant added by node_test_node_access_records was altered
     // by node_test_node_access_records_alter.
@@ -925,10 +925,10 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   /**
    * Tests the "private" node access functionality.
    *
-   * - Create 2 users with "access content" and "create article" permissions.
-   * - Each user creates one private and one not private article.
-   * - Test that each user can view the other user's non-private article.
-   * - Test that each user cannot view the other user's private article.
+   * - Create 2 users with "access content" and "create post" permissions.
+   * - Each user creates one private and one not private post.
+   * - Test that each user can view the other user's non-private post.
+   * - Test that each user cannot view the other user's private post.
    * - Test that each user finds only appropriate (non-private + own private)
    *   in taxonomy listing.
    * - Create another user with 'view any private content'.
@@ -944,13 +944,13 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     $titles = array(); // Titles keyed by nid
     $private_nodes = array(); // Array of nids marked private.
     for ($i = 0; $i < $num_simple_users; $i++) {
-      $simple_users[$i] = $this->backdropCreateUser(array('access content', 'create article content'));
+      $simple_users[$i] = $this->backdropCreateUser(array('access content', 'create post content'));
     }
     foreach ($simple_users as $this->webUser) {
       $this->backdropLogin($this->webUser);
       foreach (array(0 => 'Public', 1 => 'Private') as $is_private => $type) {
         $edit = array(
-          'title' => t('@private_public Article created by @user', array('@private_public' => $type, '@user' => $this->webUser->name)),
+          'title' => t('@private_public Post created by @user', array('@private_public' => $type, '@user' => $this->webUser->name)),
         );
         if ($is_private) {
           $edit['private'] = TRUE;
@@ -962,7 +962,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
           $edit['field_tags[und]'] = 'public';
         }
 
-        $this->backdropPost('node/add/article', $edit, t('Save'));
+        $this->backdropPost('node/add/post', $edit, t('Save'));
         $nid = db_query('SELECT nid FROM {node} WHERE title = :title', array(':title' => $edit['title']))->fetchField();
         $private_status = db_query('SELECT private FROM {node_access_test} where nid = :nid', array(':nid' => $nid))->fetchField();
         $this->assertTrue($is_private == $private_status, 'The private status of the node was properly set in the node_access_test table.');
@@ -1004,7 +1004,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     }
 
     // Now test that a user with 'access any private content' can view content.
-    $access_user = $this->backdropCreateUser(array('access content', 'create article content', 'node test view', 'search content'));
+    $access_user = $this->backdropCreateUser(array('access content', 'create post content', 'node test view', 'search content'));
     $this->backdropLogin($access_user);
 
     foreach ($this->nodesByUser as $uid => $private_status) {
@@ -1065,7 +1065,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node_test');
     // Create a user that is allowed to post; we'll use this to test the submission.
-    $web_user = $this->backdropCreateUser(array('create article content'));
+    $web_user = $this->backdropCreateUser(array('create post content'));
     $this->backdropLogin($web_user);
     $this->web_user = $web_user;
   }
@@ -1087,7 +1087,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
       'title' => $title,
       'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(32)))),
       'uid' => $this->web_user->uid,
-      'type' => 'article',
+      'type' => 'post',
       'nid' => $test_nid,
       'is_new' => TRUE,
     );
@@ -1112,7 +1112,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
     // Use the default timestamps.
     $edit = array(
       'uid' => $this->web_user->uid,
-      'type' => 'article',
+      'type' => 'post',
       'title' => $this->randomName(8),
     );
 
@@ -1140,7 +1140,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
     // Programmatically set the timestamps on the node.
     $edit = array(
       'uid' => $this->web_user->uid,
-      'type' => 'article',
+      'type' => 'post',
       'title' => $this->randomName(8),
       'created' => 280299600, // Sun, 19 Nov 1978 05:00:00 GMT
       'changed' => 979534800, // Drupal 1.0 release.
@@ -1169,7 +1169,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
     // Initial creation.
     $node = entity_create('node', array(
       'uid' => $this->web_user->uid,
-      'type' => 'article',
+      'type' => 'post',
       'title' => 'test_changes',
     ));
     $node->save();
@@ -1221,13 +1221,13 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $node_types = node_type_get_types();
     $node_names = node_type_get_names();
 
-    $this->assertTrue(isset($node_types['article']), 'Node type article is available.');
-    $this->assertTrue(isset($node_types['page']), 'Node type basic page is available.');
+    $this->assertTrue(isset($node_types['post']), 'Node type post is available.');
+    $this->assertTrue(isset($node_types['page']), 'Node type page is available.');
 
-    $this->assertEqual($node_types['article']->name, $node_names['article'], 'Correct node type base has been returned.');
+    $this->assertEqual($node_types['post']->name, $node_names['post'], 'Correct node type base has been returned.');
 
-    $this->assertEqual($node_types['article'], node_type_get_type('article'), 'Correct node type has been returned.');
-    $this->assertEqual($node_types['article']->name, node_type_get_name('article'), 'Correct node type name has been returned.');
+    $this->assertEqual($node_types['post'], node_type_get_type('post'), 'Correct node type has been returned.');
+    $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
   }
 
@@ -1321,7 +1321,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Enable all core node modules, and all types should be active.
     module_enable(array('book'), FALSE);
     $types = node_type_get_types();
-    foreach (array('book', 'article', 'page') as $type) {
+    foreach (array('book', 'post', 'page') as $type) {
       $this->assertTrue(isset($types[$type]), format_string('%type is found in node types.', array('%type' => $type)));
       $this->assertTrue(isset($types[$type]->disabled) && empty($types[$type]->disabled), format_string('%type type is enabled.', array('%type' => $type)));
     }
@@ -1331,13 +1331,13 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     module_disable(array('book'), FALSE);
     $types = node_type_get_types();
     $this->assertTrue(isset($types['book']) && empty($types['book']->disabled), "Book module's node type still active.");
-    $this->assertTrue(isset($types['article']) && empty($types['article']->disabled), "Article node type still active.");
-    $this->assertTrue(isset($types['page']) && empty($types['page']->disabled), "Basic page node type still active.");
+    $this->assertTrue(isset($types['post']) && empty($types['post']->disabled), "Post node type still active.");
+    $this->assertTrue(isset($types['page']) && empty($types['page']->disabled), "Page node type still active.");
 
     // Re-enable the modules and verify that the types are active again.
     module_enable(array('book'), FALSE);
     $types = node_type_get_types();
-    foreach (array('book', 'article', 'page') as $type) {
+    foreach (array('book', 'post', 'page') as $type) {
       $this->assertTrue(isset($types[$type]), format_string('%type is found in node types.', array('%type' => $type)));
       $this->assertTrue(isset($types[$type]->disabled) && empty($types[$type]->disabled), format_string('%type type is enabled.', array('%type' => $type)));
     }
@@ -1507,7 +1507,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     $nodes['published_page'] = $this->backdropCreateNode(array('type' => 'page'));
-    $nodes['published_article'] = $this->backdropCreateNode(array('type' => 'article'));
+    $nodes['published_post'] = $this->backdropCreateNode(array('type' => 'post'));
     $nodes['unpublished_page_1'] = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->base_user_1->uid, 'status' => 0));
     $nodes['unpublished_page_2'] = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->base_user_2->uid, 'status' => 0));
 
@@ -1530,7 +1530,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByXPath('//select[@name="status"]', '1', 'Content list is filtered by status.');
 
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid . '/edit');
-    $this->assertLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
+    $this->assertLinkByHref('node/' . $nodes['published_post']->nid . '/edit');
     $this->assertNoLinkByHref('node/' . $nodes['unpublished_page_1']->nid . '/edit');
 
     // Verify filtering by status and content type.
@@ -1540,7 +1540,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByXPath('//select[@name="type"]', 'page', 'Content list is filtered by content type.');
 
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid . '/edit');
-    $this->assertNoLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
+    $this->assertNoLinkByHref('node/' . $nodes['published_post']->nid . '/edit');
 
     // Verify no operation links are displayed for regular users.
     $this->backdropLogout();
@@ -1548,11 +1548,11 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/content');
     $this->assertResponse(200);
     $this->assertLinkByHref('node/' . $nodes['published_page']->nid);
-    $this->assertLinkByHref('node/' . $nodes['published_article']->nid);
+    $this->assertLinkByHref('node/' . $nodes['published_post']->nid);
     $this->assertNoLinkByHref('node/' . $nodes['published_page']->nid . '/edit');
     $this->assertNoLinkByHref('node/' . $nodes['published_page']->nid . '/delete');
-    $this->assertNoLinkByHref('node/' . $nodes['published_article']->nid . '/edit');
-    $this->assertNoLinkByHref('node/' . $nodes['published_article']->nid . '/delete');
+    $this->assertNoLinkByHref('node/' . $nodes['published_post']->nid . '/edit');
+    $this->assertNoLinkByHref('node/' . $nodes['published_post']->nid . '/delete');
 
     // Verify no unpublished content is displayed without permission.
     $this->assertNoLinkByHref('node/' . $nodes['unpublished_page_1']->nid);
@@ -1607,7 +1607,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create article content', 'create page content'));
+    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -1615,7 +1615,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
    *  Creates one node and tests if the node title has the correct value.
    */
   function testNodeTitle() {
-    // Create "Basic page" content with title.
+    // Create "Page" content with title.
     // Add the node to the frontpage so we can test if teaser links are clickable.
     $settings = array(
       'title' => $this->randomName(8),
@@ -1667,7 +1667,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
-    $this->web_user = $this->backdropCreateUser(array('access content', 'create article content'));
+    $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
   }
 
   /**
@@ -1699,7 +1699,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText(t('No content available.'), 'Block with "No content available." found.');
 
     // Add some test nodes.
-    $default_settings = array('uid' => $this->web_user->uid, 'type' => 'article');
+    $default_settings = array('uid' => $this->web_user->uid, 'type' => 'post');
     $node1 = $this->backdropCreateNode($default_settings);
     $node2 = $this->backdropCreateNode($default_settings);
     $node3 = $this->backdropCreateNode($default_settings);
@@ -1764,21 +1764,21 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Add a new layout with the node/% path.
     $edit = array(
-      'title' => 'Article layout',
-      'name' => 'article_layout',
+      'title' => 'Post layout',
+      'name' => 'post_layout',
       'layout' => 'two_column',
       'path' => 'node/%',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Add a condition to specify only the article type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/article_layout/settings', array(), t('Add condition'));
+    // Add a condition to specify only the post type should have this layout.
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/settings', array(), t('Add condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Add condition'));
-    $this->backdropPost(NULL, array('bundles[article]' => 1), t('Add condition'));
+    $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Add the custom block to the layout.
-    $layout = layout_load('article_layout');
+    $layout = layout_load('post_layout');
     $layout->addBlock('block', 1, 'sidebar');
     $layout->save();
 
@@ -1786,7 +1786,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoText($custom_block['title'], 'Block was not displayed the front page.');
     $this->backdropGet('node/' . $node1->nid);
-    $this->assertText($custom_block['title'], 'Block was displayed on the article node.');
+    $this->assertText($custom_block['title'], 'Block was displayed on the post node.');
     $this->backdropGet('node/' . $node4->nid);
     $this->assertNoText($custom_block['title'], 'Block was not displayed on the page node.');
   }
@@ -2081,7 +2081,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     // Create a user and a node.
     $account = $this->backdropCreateUser();
     $settings = array(
-      'type' => 'article',
+      'type' => 'post',
       'uid' => $account->uid,
       'title' => '<blink>Blinking Text</blink>',
       'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(32), 'summary' => $this->randomName(16)))),
@@ -2097,8 +2097,8 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[node:nid]'] = $node->nid;
     $tests['[node:vid]'] = $node->vid;
     $tests['[node:tnid]'] = $node->tnid;
-    $tests['[node:type]'] = 'article';
-    $tests['[node:type-name]'] = 'Article';
+    $tests['[node:type]'] = 'post';
+    $tests['[node:type-name]'] = 'Post';
     $tests['[node:title]'] = check_plain($node->title);
     $tests['[node:body]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'value');
     $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'summary');
@@ -2386,7 +2386,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
   }
 
   /**
-   * Create a "Basic page" node and verify its consistency in the database.
+   * Create a "Page" node and verify its consistency in the database.
    */
   function testNodeViewModeChange() {
     $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
@@ -2421,11 +2421,11 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
    */
   function testNodeViewModeChangeHiddenField() {
     // Hide the tags field on the default display
-    $instance = field_info_instance('node', 'field_tags', 'article');
+    $instance = field_info_instance('node', 'field_tags', 'post');
     $instance['display']['default']['type'] = 'hidden';
     field_update_instance($instance);
 
-    $web_user = $this->backdropCreateUser(array('create article content', 'edit own article content'));
+    $web_user = $this->backdropCreateUser(array('create post content', 'edit own post content'));
     $this->backdropLogin($web_user);
 
     // Create a node.
@@ -2435,7 +2435,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
     $edit["body[$langcode][0][value]"] = 'Data that should appear only in the body for the node.';
     $edit["body[$langcode][0][summary]"] = 'Extra data that should appear only in the teaser for the node.';
     $edit["field_tags[$langcode]"] = 'Extra tag';
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
 
     $node = $this->backdropGetNodeByTitle($edit["title"]);
 

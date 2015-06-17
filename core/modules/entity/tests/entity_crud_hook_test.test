@@ -56,7 +56,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
   public function testCommentHooks() {
     $node = entity_create('node', array(
       'uid' => 1,
-      'type' => 'article',
+      'type' => 'post',
       'title' => 'Test node',
       'status' => 1,
       'comment' => 2,
@@ -183,7 +183,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
   public function testNodeHooks() {
     $node = entity_create('node', array(
       'uid' => 1,
-      'type' => 'article',
+      'type' => 'post',
       'title' => 'Test node',
       'status' => 1,
       'comment' => 2,

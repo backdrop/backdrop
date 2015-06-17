@@ -25,7 +25,7 @@
  *   CSS. The default values can be one or more of the following:
  *   - node: The current template type; for example, "theming hook".
  *   - node-[type]: The current node type. For example, if the node is a
- *     "Article" it would result in "node-article". Note that the machine
+ *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
  *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
  *   The following are controlled through the node publishing options.
@@ -44,7 +44,7 @@
  *
  * Other variables:
  * - $node: Full node entity. Contains data that may not be safe.
- * - $type: Node type; for example, article, basic page, blog, etc.
+ * - $type: Node type; for example, post, page, blog, etc.
  * - $comment_count: Number of comments attached to the node.
  * - $uid: User ID of the node author.
  * - $created: Time the node was published formatted in Unix timestamp.
@@ -77,7 +77,7 @@
  * @see template_preprocess_node()
  */
 ?>
-<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">
+<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="post">
 
   <header>
     <?php print render($title_prefix); ?>

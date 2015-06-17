@@ -329,7 +329,7 @@ function hook_node_access_records(Node $node) {
  * @ingroup node_access
  */
 function hook_node_access_records_alter(&$grants, Node $node) {
-  // Our module allows editors to mark specific articles with the 'sticky'
+  // Our module allows editors to mark specific posts with the 'sticky'
   // field. If the node being saved has a TRUE value for that field, then only
   // our grants are retained, and other grants are removed. Doing so ensures
   // that our rules are enforced no matter what priority other grants are given.
