@@ -475,7 +475,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $options = array(
       'query' => array('destinations' => array('http://example.com')),
     );
-    $this->drupalPost($path, NULL, t('Save field settings'), $options);
+    $this->backdropPost($path, NULL, t('Save field settings'), $options);
 
     $this->assertUrl('admin/structure/types/manage/article/fields', array(), 'Stayed on the same site.');
   }
