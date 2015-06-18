@@ -54,7 +54,7 @@ Backdrop.behaviors.verticalTabs = {
           tab_focus = $(this).find(window.location.hash).closest('.vertical-tabs-pane');
         }
         else {
-          tab_focus = $('> .vertical-tabs-pane:first', this);
+          tab_focus = $fieldsets.first();
         }
       }
       if (tab_focus.length) {
@@ -141,8 +141,6 @@ Backdrop.verticalTab.prototype = {
       .filter(':visible:first').addClass('first');
     // Display the fieldset.
     this.fieldset.removeClass('vertical-tab-hidden').show();
-    // Focus this tab.
-    this.focus();
     return this;
   },
 

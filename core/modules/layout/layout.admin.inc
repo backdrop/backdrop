@@ -674,6 +674,8 @@ function layout_settings_form_save_submit($form, &$form_state) {
  * @ingroup forms
  */
 function layout_content_form($form, &$form_state, Layout $layout, $renderer_name = NULL) {
+  $path = isset($layout->menu_item->path) ? '(' . $layout->menu_item->path . ')' : NULL;
+  backdrop_set_title(t('!layout !path', array('!layout' => $layout->title, '!path' => $path)));
   if (!isset($form_state['layout'])) {
     $form_state['layout'] = $layout;
   }

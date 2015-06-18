@@ -246,11 +246,14 @@ ul.menu li.expanded {
  * Tabs.
  */
 .tabs {
-  clear: both;
+  clear: none; /* For IE8 */
+}
+.tabs:nth-child(2) {
+  clear: both; /* For small screens */
 }
 @media only screen and (min-width: 600px) {
-  .tabs {
-    clear: none;
+  .tabs:nth-child(2) {
+    clear: none; /* For large screens */
   }
 }
 ul.primary {
@@ -376,6 +379,7 @@ ul.secondary li.active a.active {
   content: '';
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 100%;
@@ -385,6 +389,12 @@ ul.secondary li.active a.active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   background-color: #f0f0f0;
+}
+.l-header:after {
+  /* Clearfix for IE8 issue */
+  content: '';
+  display: table;
+  clear: both;
 }
 .l-header > * {
   /* Makes sure gray bar is behind header content */
@@ -823,7 +833,9 @@ input.form-submit:active {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
+  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
+  box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.form-button-disabled,
 input.form-button-disabled:active {
@@ -885,27 +897,25 @@ input.form-number,
 input.form-search,
 input.form-file,
 textarea.form-textarea {
-  font-weight: 400;
-  border: 0;
-  padding: 10px;
   box-sizing: border-box;
+  padding: 10px;
+  border: 2px solid #d0d0d0;
   max-width: 100%;
+  font-weight: 400;
   color: #444b53;
   background: #fff;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -moz-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -webkit-transition: all 0.25s ease-in-out;
-  -moz-transition: all 0.25s ease-in-out;
-  -ms-transition: all 0.25s ease-in-out;
-  -o-transition: all 0.25s ease-in-out;
+  -webkit-transition: border-color 0.25s ease-in-out;
+  -moz-transition: border-color 0.25s ease-in-out;
+  -ms-transition: border-color 0.25s ease-in-out;
+  -o-transition: border-color 0.25s ease-in-out;
+  will-change: border-color;
 }
 select.form-select {
   font-weight: 400;
-  border: 2px solid rgba(208,208,208,1);
+  border: 2px solid #d0d0d0;
   padding: 10px;
   box-sizing: border-box;
   color: #444b53;
@@ -913,13 +923,11 @@ select.form-select {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+  will-change: border-color;
 }
 select.form-select:focus {
   color: #000;
-  border-color: rgba(4, 148, 219, 0.75);
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  border-color: #43afe4;
 }
 /* de-emphasize the text format */
 select.filter-list {
@@ -941,9 +949,7 @@ input.form-file:focus,
 textarea.form-textarea:focus {
   outline: 0;
   color: #000;
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
+  border-color: #43afe4;
 }
 ul.action-links {
   margin: 1em 0;
@@ -1341,6 +1347,8 @@ div.add-or-remove-shortcuts {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }

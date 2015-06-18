@@ -91,7 +91,7 @@ function hook_filter_info() {
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     ),
