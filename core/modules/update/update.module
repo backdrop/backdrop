@@ -936,6 +936,17 @@ function update_delete_file_if_stale($path) {
 }
 
 /**
+ * Implements hook_admin_bar_cache_info() on behalf of Update module.
+ */
+function update_admin_bar_cache_info() {
+  $caches['update'] = array(
+    'title' => t('Update data'),
+    'callback' => '_update_cache_clear',
+  );
+  return $caches;
+}
+
+/**
  * Implements hook_config_info().
  */
 function update_config_info() {
