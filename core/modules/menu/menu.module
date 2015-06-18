@@ -174,22 +174,24 @@ function menu_enable() {
   $base_link['router_path'] = 'admin/structure/menu/manage/%';
   $base_link['module'] = 'menu';
   $menus = menu_load_all();
-  foreach ($menus as $menu) {
-    // $link is passed by reference to menu_link_save(), so we make a copy of $base_link.
-    $link = $base_link;
-    $link['mlid'] = 0;
-    $link['link_title'] = $menu['title'];
-    $link['link_path'] = 'admin/structure/menu/manage/' . $menu['menu_name'];
-    $menu_link = db_query("SELECT mlid FROM {menu_links} WHERE link_path = :path AND plid = :plid", array(
-      ':path' => $link['link_path'],
-      ':plid' => $link['plid']
-    ))
-    ->fetchField();
-    if (!$menu_link) {
-      menu_link_save($link);
+  if (is_array($menus)) {
+    foreach ($menus as $menu) {
+      // $link is passed by reference to menu_link_save(), so we make a copy of $base_link.
+      $link = $base_link;
+      $link['mlid'] = 0;
+      $link['link_title'] = $menu['title'];
+      $link['link_path'] = 'admin/structure/menu/manage/' . $menu['menu_name'];
+      $menu_link = db_query("SELECT mlid FROM {menu_links} WHERE link_path = :path AND plid = :plid", array(
+        ':path' => $link['link_path'],
+        ':plid' => $link['plid']
+      ))
+      ->fetchField();
+      if (!$menu_link) {
+        menu_link_save($link);
+      }
     }
+    menu_cache_clear_all();
   }
-  menu_cache_clear_all();
 }
 
 /**
@@ -401,11 +403,13 @@ function _menu_get_options($menus, $available_menus, $item) {
   }
 
   $options = array();
-  foreach ($menus as $menu_name => $title) {
-    if (isset($available_menus[$menu_name])) {
-      $tree = menu_tree_all_data($menu_name, NULL);
-      $options[$menu_name . ':0'] = '<' . $title . '>';
-      _menu_parents_recurse($tree, $menu_name, '--', $options, $item['mlid'], $limit);
+  if (is_array($menus)) {
+    foreach ($menus as $menu_name => $title) {
+      if (isset($available_menus[$menu_name])) {
+        $tree = menu_tree_all_data($menu_name, NULL);
+        $options[$menu_name . ':0'] = '<' . $title . '>';
+        _menu_parents_recurse($tree, $menu_name, '--', $options, $item['mlid'], $limit);
+      }
     }
   }
   return $options;
@@ -460,14 +464,16 @@ function menu_block_info() {
   $menus = menu_get_menus(FALSE);
 
   $blocks = array();
-  foreach ($menus as $name => $title) {
-    $blocks[$name] = array(
-      'info' => check_plain($title),
-      'description' => t('The hierarchical list of links for the @title menu.', array('@title' => $title)),
-      // Menu blocks can't be cached because each menu item can have
-      // a custom access callback. menu.inc manages its own caching.
-      'cache' => BACKDROP_NO_CACHE,
-    );
+  if (is_array($menus)) {
+    foreach ($menus as $name => $title) {
+      $blocks[$name] = array(
+        'info' => check_plain($title),
+        'description' => t('The hierarchical list of links for the @title menu.', array('@title' => $title)),
+        // Menu blocks can't be cached because each menu item can have
+        // a custom access callback. menu.inc manages its own caching.
+        'cache' => BACKDROP_NO_CACHE,
+      );
+    }
   }
   return $blocks;
 }

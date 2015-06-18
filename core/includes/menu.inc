@@ -1786,11 +1786,16 @@ function menu_set_custom_theme() {
  * Returns an array containing the names of system-defined (default) menus.
  */
 function menu_list_system_menus() {
-  return array(
-    'main-menu' => 'Primary navigation',
-    'management' => 'Administration menu',
-    'user-menu' => 'Account menu',
-  );
+  $menus = array();
+  $all = menu_load_all(); // Pulled from cache.
+  if (is_array($all)) {
+    foreach (array('main-menu', 'management', 'user-menu') as $machine) {
+      if (array_key_exists($machine, $all)) {
+        $menus[$machine] = $all[$machine]['title'];
+      }
+    }
+  }
+  return $menus;
 }
 
 /**
