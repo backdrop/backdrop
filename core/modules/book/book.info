@@ -2,6 +2,7 @@ name = Book
 description = Allows users to create and organize related content in an outline.
 package = System
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 dependencies[] = node
 configure = admin/content/book/settings

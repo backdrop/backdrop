@@ -3,3 +3,4 @@ description = Support module for update module testing.
 package = Testing
 backdrop = 1.x
 hidden = TRUE
+type = module

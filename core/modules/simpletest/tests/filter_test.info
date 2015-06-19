@@ -2,5 +2,6 @@ name = Filter test module
 description = Tests filter hooks and functions.
 package = Testing
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 hidden = TRUE

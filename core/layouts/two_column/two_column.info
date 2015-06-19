@@ -1,5 +1,6 @@
 name = 2 columns
 version = BACKDROP_VERSION
+type = layout
 backdrop = 1.x
 
 ; Specify regions for this layout.

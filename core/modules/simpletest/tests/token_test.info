@@ -4,3 +4,4 @@ package = Testing
 core = 7.x
 files[] = token_test.module
 hidden = TRUE
+type = module
