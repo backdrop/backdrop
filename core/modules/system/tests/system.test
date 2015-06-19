@@ -186,7 +186,7 @@ class EnableDisableTestCase extends ModuleTestCase {
 
         // Install and enable the module.
         $edit = array();
-        $edit['modules[' . $module->info['package'] . '][' . $name . '][enable]'] = $name;
+        $edit['modules[' . $name . '][enable]'] = $name;
         $this->backdropPost('admin/modules', $edit, t('Save configuration'));
         // Handle the case where modules were installed along with this one and
         // where we therefore hit a confirmation screen.
@@ -227,7 +227,7 @@ class EnableDisableTestCase extends ModuleTestCase {
         // If the module can't be disabled due to dependencies, skip it and try
         // again the next time. Otherwise, try to disable it.
         $this->backdropGet('admin/modules');
-        $disabled_checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[' . $modules[$name]->info['package'] . '][' . $name . '][enable]"]');
+        $disabled_checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[' . $name . '][enable]"]');
         if (empty($disabled_checkbox) && $name != 'dblog') {
           unset($automatically_enabled[$name]);
           $this->assertSuccessfulDisableAndUninstall($modules[$name]);
@@ -256,7 +256,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     //   any errors.
     $edit = array();
     foreach (array_keys($modules) as $name) {
-      $edit['modules[' . $modules[$name]->info['package'] . '][' . $name . '][enable]'] = $name;
+      $edit['modules[' . $name . '][enable]'] = $name;
     }
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
@@ -272,7 +272,7 @@ class EnableDisableTestCase extends ModuleTestCase {
   function assertSuccessfulDisableAndUninstall($module) {
     // Disable the module.
     $edit = array();
-    $edit['modules[' . $module->info['package'] . '][' . $module->name . '][enable]'] = FALSE;
+    $edit['modules[' . $module->name . '][enable]'] = FALSE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
     $this->assertModules(array($module->name), FALSE);
@@ -319,7 +319,7 @@ class HookRequirementsTestCase extends ModuleTestCase {
 
     // Attempt to install the requirements1_test module.
     $edit = array();
-    $edit['modules[Testing][requirements1_test][enable]'] = 'requirements1_test';
+    $edit['modules[requirements1_test][enable]'] = 'requirements1_test';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the module was NOT installed.
@@ -338,7 +338,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   function testEnableWithoutDependency() {
     // Attempt to enable content translation without locale enabled.
     $edit = array();
-    $edit['modules[Translation][translation][enable]'] = 'translation';
+    $edit['modules[translation][enable]'] = 'translation';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('Some required modules must be enabled'), 'Dependency required.');
 
@@ -366,7 +366,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     // as missing a dependency.
     $this->backdropGet('admin/modules');
     $this->assertRaw(t('@module (<span class="admin-missing">missing</span>)', array('@module' => backdrop_ucfirst('_missing_dependency'))), 'A module with missing dependencies is marked as such.');
-    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[Testing][system_dependencies_test][enable]"]');
+    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[system_dependencies_test][enable]"]');
     $this->assert(count($checkbox) == 1, 'Checkbox for the module is disabled.');
 
     // Force enable the system_dependencies_test module.
@@ -395,7 +395,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
       '@module' => 'System incompatible module version test (>2.0)',
       '@version' => '1.0',
     )), 'A module that depends on an incompatible version of a module is marked as such.');
-    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[Testing][system_incompatible_module_version_dependencies_test][enable]"]');
+    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[system_incompatible_module_version_dependencies_test][enable]"]');
     $this->assert(count($checkbox) == 1, 'Checkbox for the module is disabled.');
   }
 
@@ -409,7 +409,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->assertRaw(t('@module (<span class="admin-missing">incompatible with</span> this version of Backdrop core)', array(
       '@module' => 'System incompatible core version test',
     )), 'A module that depends on a module with an incompatible core version is marked as such.');
-    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[Testing][system_incompatible_core_version_dependencies_test][enable]"]');
+    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="modules[system_incompatible_core_version_dependencies_test][enable]"]');
     $this->assert(count($checkbox) == 1, 'Checkbox for the module is disabled.');
   }
 
@@ -422,8 +422,8 @@ class ModuleDependencyTestCase extends ModuleTestCase {
 
     // Attempt to install both modules at the same time.
     $edit = array();
-    $edit['modules[Testing][requirements1_test][enable]'] = 'requirements1_test';
-    $edit['modules[Testing][requirements2_test][enable]'] = 'requirements2_test';
+    $edit['modules[requirements1_test][enable]'] = 'requirements1_test';
+    $edit['modules[requirements2_test][enable]'] = 'requirements2_test';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the modules were NOT installed.
@@ -453,12 +453,12 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     // Enable the modules through the UI, verifying that the dependency chain
     // is correct.
     $edit = array();
-    $edit['modules[Testing][dependency_test3][enable]'] = 'dependency_test3';
+    $edit['modules[dependency_test3][enable]'] = 'dependency_test3';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('dependency_test3'), FALSE);
     $this->assertText(t('You must enable the Dependency test 2, Dependency test 1 modules to install Dependency test 3.'), 'Dependency chain created.');
-    $edit['modules[Testing][dependency_test2][enable]'] = 'dependency_test2';
-    $edit['modules[Testing][dependency_test1][enable]'] = 'dependency_test1';
+    $edit['modules[dependency_test2][enable]'] = 'dependency_test2';
+    $edit['modules[dependency_test1][enable]'] = 'dependency_test1';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('dependency_test3', 'dependency_test2', 'dependency_test1'), TRUE);
 
@@ -471,18 +471,18 @@ class ModuleDependencyTestCase extends ModuleTestCase {
    */
   function testUninstallDependents() {
     // Enable both language and locale modules.
-    $edit = array('modules[Translation][language][enable]' => 'language');
+    $edit = array('modules[language][enable]' => 'language');
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('language'), TRUE);
-    $edit = array('modules[Translation][locale][enable]' => 'locale');
+    $edit = array('modules[locale][enable]' => 'locale');
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('locale'), TRUE);
 
     // Disable locale and language. Both should now be installed but disabled.
-    $edit = array('modules[Translation][locale][enable]' => FALSE);
+    $edit = array('modules[locale][enable]' => FALSE);
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('locale'), FALSE);
-    $edit = array('modules[Translation][language][enable]' => FALSE);
+    $edit = array('modules[language][enable]' => FALSE);
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('language'), FALSE);
 
@@ -578,7 +578,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
     $n = count($dependencies);
     for ($i = 0; $i < $n; $i++) {
       $this->backdropGet('admin/modules');
-      $checkbox = $this->xpath('//input[@id="edit-modules-testing-module-test-enable"]');
+      $checkbox = $this->xpath('//input[@id="edit-modules-module-test-enable"]');
       $this->assertEqual(!empty($checkbox[0]['disabled']), $i % 2, $dependencies[$i]);
     }
   }

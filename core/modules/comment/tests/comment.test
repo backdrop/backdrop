@@ -1968,20 +1968,20 @@ class CommentFieldsTest extends CommentHelperCase {
 
     // Disable the comment module.
     $edit = array();
-    $edit['modules[Comments][comment][enable]'] = FALSE;
+    $edit['modules[comment][enable]'] = FALSE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
     $this->assertFalse(module_exists('comment'), 'Comment module disabled.');
 
     // Enable core content type module: book.
     $edit = array();
-    $edit['modules[System][book][enable]'] = 'book';
+    $edit['modules[book][enable]'] = 'book';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
 
     // Now enable the comment module.
     $edit = array();
-    $edit['modules[Comments][comment][enable]'] = 'comment';
+    $edit['modules[comment][enable]'] = 'comment';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
     $this->assertTrue(module_exists('comment'), 'Comment module enabled.');
