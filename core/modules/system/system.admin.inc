@@ -533,6 +533,12 @@ function system_modules($form, $form_state = array()) {
     '#options' => $tags,
   );
 
+  $form['filter']['core_switch'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Exclude core modules'),
+    '#default_value' => 0,
+  );
+
   uasort($visible_files, 'system_sort_modules_by_info_name');
 
   // If the modules form was submitted, then system_modules_submit() runs first
