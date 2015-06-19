@@ -12,6 +12,7 @@ Backdrop.behaviors.moduleFilterByText = {
     var $form = $('#system-modules');
     var $rowsAndFieldsets, $rows, $fieldset;
 
+    var tagRows = [];
     // Hide the module requirements.
     $form.find('.requirements').hide();
 
@@ -28,69 +29,103 @@ Backdrop.behaviors.moduleFilterByText = {
       e.stopPropagation();
     });
 
-    // Fliter the list of modules by provided search string.
-    function filterModuleList() {
-      $('#edit-tags').val('All');
+    // Filter the list of modules by provided search string.
+    function filterModuleListBySearch() {
       var query = $input.val().toLowerCase();
-
-      function showModuleRow(index, row) {
-        var searchTarget = '.table-filter-text-source';
-        var $row = $(row);
-        var $sources = $row.find(searchTarget);
-        var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
-        $row.closest('tr').toggle(textMatch);
-      }
 
       // Filter only if the length of the query is at least 2 characters.
       if (query.length >= 2) {
-        $rows.each(showModuleRow);
+        $(tagRows).each(function( index ) {
+          showModuleRow(query, this, '.table-filter-text-source');
+        });
 
-        if ($fieldset.filter(':visible').length === 0) {
+        // Toggle no results string
+        if ($rows.filter(':visible').length === 0) {
           if ($('.filter-empty').length === 0) {
             $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
           }
         }
+        else {
+          $('.filter-empty').remove();
+        }
+      }
+      else {
+        $.each(tagRows, function() {
+          $(this).show();
+        });
       }
     }
 
-    // Fliter the list of modules by provided search string.
+    // Filter the list of modules by tags.
+    // Creates an array ('tagRows')of modules matching the selected tags, as a 
+    // subset of the $rows object, which is used by filterModuleListBySearch() 
+    // instead of $rows to do further filtering. 
     function filterModuleListByTag() {
-      $input.val('');
-
-      function showModuleRowByTag(index, row) {
-        var searchTarget = '.module-tags';
-        var $row = $(row);
-        var $sources = $row.find(searchTarget);
-        var textMatch = $sources.text().toLowerCase().indexOf($selecTag) !== -1;
-        $row.closest('tr').toggle(textMatch);
-      }
-
       var $selecTag = $('#edit-tags').val().toLowerCase();
+      // If 'All tags' selected, show all tags and add all to tagRows.
       if ($selecTag == 'all') {
         $rows.each(function( index ) {
           $(this).closest('tr').show();
-        console.log($selecTag);
+          tagRows.push(this);
         });
       }
       else {
-        $rows.each(showModuleRowByTag);
+        tagRows = [];
+        $rows.each(function( index ) {
+          // Filter by tag and add matches to tagRows.
+          row = showModuleRow($selecTag, this, '.module-tags');
+          tagRows.push(row);
+        });
       }
-
-        if ($fieldset.filter(':visible').length === 0) {
-          if ($('.filter-empty').length === 0) {
-            $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
-          }
+      
+      // Toggle no results string
+      if ($rows.filter(':visible').length === 0) {
+        if ($('.filter-empty').length === 0) {
+          $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
         }
+      }
+      else {
+        $('.filter-empty').remove();
+      }
+    }
+    
+    // Filters each module row based either on tag or search string and returns
+    // the row if it matches.
+    function showModuleRow(selecTag, row, searchTarget) {
+      var $row = $(row);
+      var $sources = $row.find(searchTarget);
+      var coreHidden = $('#edit-core-switch').prop("checked");
+      var textMatch = $sources.text().toLowerCase().indexOf(selecTag) !== -1;
+      var coreMatch = $sources.text().toLowerCase().indexOf("core") !== -1;
+      if (coreHidden && coreMatch) {
+        $row.closest('tr').hide();
+      }
+      else {
+        $row.closest('tr').toggle(textMatch);
+      }
+      if(textMatch) {
+        return row;
+      }
+    }
+    
+    // Toggles rows when the 'Hide core' checkbox is toggled.
+    function filterCore() {
+      filterModuleListByTag();
+      if ($input.val().toLowerCase().length >= 2) {
+        filterModuleListBySearch();
+      }
     }
 
     if ($form.length) {
       $rowsAndFieldsets = $form.find('tr, fieldset');
       $rows = $form.find('tbody tr');
       $fieldset = $form.find('#edit-modules');
+      // Filter all rows by tag.
+      filterModuleListByTag();
 
-      // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterModuleList);
+      $input.focus().on('keyup', filterModuleListBySearch);
       $('#edit-tags').on('change', filterModuleListByTag);
+      $('#edit-core-switch').on('change', filterCore);
     }
   }
 };
