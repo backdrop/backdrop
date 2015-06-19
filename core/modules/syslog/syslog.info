@@ -2,5 +2,6 @@ name = Syslog
 description = Logs and records system events to syslog.
 package = Development
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 configure = admin/config/development/logging
