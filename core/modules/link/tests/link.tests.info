@@ -1,0 +1,65 @@
+[LinkBaseTestClass]
+name = Link tests
+description = Link tests.
+group = Link
+file = link.test
+
+[LinkAttributeCrudTest]
+name = Link Attribute Tests
+description = Tests the field attributes, making sure they appear in various displayed situations.
+group = Link
+file = link.attribute.test
+
+[LinkContentCrudTest]
+name = Link CRUD - Basic API tests
+description = Tests the field CRUD (create, read, update, delete) API.
+group = Link
+file = link.crud.test
+
+[LinkUITest]
+name = Link CRUD - browser test
+description = Tests the field CRUD (create, read, update, delete) API 2.
+group = Link
+file = link.crud_browser.test
+
+[LinkTokenTest]
+name = Link tokens - browser test
+description = Tests including tokens in link titles, making sure they appear in node views.
+group = Link
+file = link.token.test
+
+[LinkEntityTokenTest]
+name = Link entity tokens test
+description = Tests that a link field appears properly in entity tokens
+group = Link
+file = link.entity_token.test
+
+[LinkValidateTestCase]
+name = Link validate
+description = Tests validation.
+group = Link
+file = link.validate.test
+
+[LinkValidateTest]
+name = Link Validation Tests
+description = Tests the field validation.
+group = Link
+file = link.validate.test
+
+[LinkValidateTestNews]
+name = Link News Validation Tests
+description = Tests the field validation for usenet urls.
+group = Link
+file = link.validate.test
+
+[LinkValidateSpecificURL]
+name = Link Specific URL Validation Tests
+description = LinkValidateSpecificURL
+group = Link
+file = link.validate.test
+
+[LinkValidateUrlLight]
+name = Link Light Validation Tests
+description = Tests the link_validate_url() function by itself, without invoking the full backdrop/cck lifecycle.
+group = Link
+file = link.validate.test

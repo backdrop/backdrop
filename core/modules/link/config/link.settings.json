@@ -1,0 +1,18 @@
+{
+    "_config_name": "link.settings",
+    "filter_allowed_protocols": [
+        "http",
+        "https",
+        "ftp",
+        "news",
+        "nntp",
+        "telnet",
+        "mailto",
+        "irc",
+        "ssh",
+        "sftp",
+        "webcal"
+    ],
+    "extra_domains": [
+    ]
+}
