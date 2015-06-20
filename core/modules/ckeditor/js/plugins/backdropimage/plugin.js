@@ -26,8 +26,8 @@ CKEDITOR.plugins.add('backdropimage', {
       }
 
       // Override requiredContent & allowedContent.
-      widgetDefinition.requiredContent = 'img[alt,src,width,height,data-file-id]';
-      widgetDefinition.allowedContent.img.attributes += ',!data-file-id';
+      widgetDefinition.requiredContent = 'img[alt,src,width,height]';
+      widgetDefinition.allowedContent.img.attributes += ',data-file-id';
       // We don't allow <figure>, <figcaption>, <div> or <p>  in our downcast.
       delete widgetDefinition.allowedContent.figure;
       delete widgetDefinition.allowedContent.figcaption;
@@ -40,9 +40,14 @@ CKEDITOR.plugins.add('backdropimage', {
 
       // Override downcast(): since we only accept <img> in our upcast method,
       // the element is already correct. We only need to update the element's
-      // data-entity-uuid attribute.
+      // data-file-id attribute.
       widgetDefinition.downcast = function (element) {
-        element.attributes['data-entity-uuid'] = this.data['data-entity-uuid'];
+        if (this.data['data-file-id']) {
+          element.attributes['data-file-id'] = this.data['data-file-id'];
+        }
+        else if (element.attributes['data-file-id']) {
+          delete element.attributes['data-file-id'];
+        }
       };
 
       // We want to upcast <img> elements to a DOM structure required by the

@@ -79,6 +79,9 @@ function ckeditor_library_info() {
     'js' => array(
       $module_path . '/js/ckeditor.js' => array(),
     ),
+    'css' => array(
+      $module_path . '/css/ckeditor.css' => array(),
+    ),
     'dependencies' => array(
       array('filter', 'filter'),
       array('system', 'backdrop.ajax'),
@@ -277,7 +280,7 @@ function ckeditor_ckeditor_plugins() {
         'required_html' => array(
           array(
             'tags' => array('img'),
-            'attributes' => array('src', 'alt', 'data-file-id'),
+            'attributes' => array('src', 'alt', 'data-file-id', 'data-align'),
           ),
         ),
         'image' => $image_prefix . '/image.png',
@@ -294,11 +297,11 @@ function ckeditor_ckeditor_plugins() {
     'required_html' => array(
       array(
         'tags' => array('img'),
-        'attributes' => array('data-caption', 'data-placeholder'),
+        'attributes' => array('data-caption'),
       ),
       array(
         'tags' => array('figure', 'figcaption'),
-        'attributes' => array('src', 'alt'),
+        'attributes' => array('src', 'alt', 'class', 'data-placeholder'),
       ),
     )
   );
@@ -328,6 +331,18 @@ function ckeditor_ckeditor_plugins() {
   );
 
   return $plugins;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Manipulate the image insert form to describe CKEditor-integration.
+ */
+function ckeditor_form_filter_format_editor_image_form_alter(&$form, $form_state) {
+  $format = $form_state['format'];
+  if ($format->editor === 'ckeditor') {
+    $form['caption']['#description'] = t('If checked, a caption area will appear in the editor.');
+  }
 }
 
 /**
@@ -485,8 +500,11 @@ function ckeditor_get_settings($format, $existing_settings) {
     $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image');
   }
   if (isset($external_plugins['backdropimagecaption'])) {
-    $settings['backdrop']['captionFilterEnabled'] = array_key_exists('filter_image_caption', $format->filters);
-    $settings['backdrop']['alignFilterEnabled'] = array_key_exists('filter_image_align', $format->filters);
+    $settings['backdrop']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
+    $settings['backdrop']['alignFilterEnabled'] = !empty($format->filters['filter_image_align']->status);
+    $settings['backdrop']['imageCaptionPlaceholderText'] = t('Enter caption text here.');
+    $settings['image2_captionedClass'] = 'caption caption-img';
+    $settings['image2_alignClasses'] = array('align-left', 'align-center', 'align-right');
   }
   backdrop_alter('ckeditor_settings', $settings, $format);
 

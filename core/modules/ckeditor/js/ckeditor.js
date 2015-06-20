@@ -141,7 +141,7 @@
       // After a short delay, show "Loading…" message.
       window.setTimeout(function () {
         $content.find('span').animate({top: '0px'});
-      }, 1000);
+      }, 500);
 
       // Store the save callback to be executed when this dialog is closed.
       Backdrop.ckeditor.saveCallback = saveCallback;

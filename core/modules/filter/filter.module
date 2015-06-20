@@ -26,6 +26,9 @@ function filter_theme() {
     'text_format_wrapper' => array(
       'render element' => 'element',
     ) + $base,
+    'filter_caption' => array(
+      'variables' => array('item' => NULL, 'caption' => '', 'attributes' => array()),
+    ) + $base,
     'filter_tips_more_info' => array(
       'variables' => array(),
     ) + $base,
@@ -67,6 +70,7 @@ function filter_menu() {
     'page arguments' => array('filter_format_editor_link_form', 3),
     'access callback' => 'filter_format_access',
     'access arguments' => array(3),
+    'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
@@ -76,6 +80,7 @@ function filter_menu() {
     'page arguments' => array('filter_format_editor_image_form', 3),
     'access callback' => 'filter_format_access',
     'access arguments' => array(3),
+    'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
@@ -2093,7 +2098,62 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
  * Replace img data-caption attributes with figure and figcaption elements.
  */
 function _filter_image_caption($text) {
+  // If no captions, immediately return.
+  if (stristr($text, 'data-caption') === FALSE) {
+    return $text;
+  }
 
+  // Load the text as a DOM object for manipulation.
+  $dom = filter_dom_load($text);
+  $xpath = new DOMXPath($dom);
+
+  foreach ($xpath->query('//*[@data-caption]') as $node) {
+    // Read the data-caption attribute's value, then delete it.
+    $caption = $node->getAttribute('data-caption');
+    $node->removeAttribute('data-caption');
+
+    // Sanitize caption: decode HTML encoding, limit allowed HTML tags; only
+    // allow inline tags that are allowed by default, plus <br>.
+    $caption = filter_xss($caption, array('a', 'em', 'strong', 'cite', 'code', 'br'));
+
+    // The caption must be non-empty.
+    if (backdrop_strlen($caption) === 0) {
+      continue;
+    }
+
+    // Given the updated node and caption: re-render it with a caption, but
+    // bubble up the value of the class attribute of the captioned element,
+    // this allows it to collaborate with e.g. the filter_align filter.
+    $attributes = array();
+    $classes = $node->getAttribute('class');
+    if ($classes) {
+      $attributes['class'] = explode(' ', $classes);
+    }
+    $attributes['class'][] = 'caption';
+    $attributes['class'][] = 'caption-' . $node->tagName;
+    $node->removeAttribute('class');
+
+    $filter_caption = theme('filter_caption', array(
+      'item' => $node->ownerDocument->saveHTML($node),
+      'tag' => $node->tagName,
+      'caption' => $caption,
+      'attributes' => $attributes,
+    ));
+
+    // Load the altered HTML into a new DOMDocument and retrieve the element.
+    $updated_node = filter_dom_load($filter_caption)
+      ->getElementsByTagName('body')
+      ->item(0);
+
+    // Import the updated node from the new DOMDocument into the original
+    // one, importing also the child nodes of the updated node.
+    $updated_node = $dom->importNode($updated_node, TRUE);
+
+    // Finally, replace the original image node with the new image node.
+    $node->parentNode->replaceChild($updated_node, $node);
+  }
+
+  return filter_dom_serialize($dom);
 }
 
 /**
@@ -2102,7 +2162,29 @@ function _filter_image_caption($text) {
  * Replaces img data-align attributes with figure and figcaption elements.
  */
 function _filter_image_align($text) {
+  if (stristr($text, 'data-align') === FALSE) {
+    return $text;
+  }
 
+  // Load the text as a DOM object for manipulation.
+  $dom = filter_dom_load($text);
+  $xpath = new DOMXPath($dom);
+
+  foreach ($xpath->query('//*[@data-align]') as $node) {
+    // Read the data-align attribute's value, then delete it.
+    $align = $node->getAttribute('data-align');
+    $node->removeAttribute('data-align');
+
+    // If one of the allowed alignments, add the corresponding class.
+    if (in_array($align, array('left', 'center', 'right'))) {
+      $classes = $node->getAttribute('class');
+      $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
+      $classes[] = 'align-' . $align;
+      $node->setAttribute('class', implode(' ', $classes));
+    }
+  }
+
+  return filter_dom_serialize($dom);
 }
 
 /**

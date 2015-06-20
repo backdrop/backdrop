@@ -15,15 +15,15 @@ CKEDITOR.plugins.add('backdropimagecaption', {
   requires: 'backdropimage',
 
   beforeInit: function (editor) {
+    // Backdrop.t() will not work inside CKEditor plugins because CKEditor loads
+    // the JavaScript file instead of Backdrop. Pull translated strings from the
+    // plugin settings that are translated server-side.
+    var placeholderText = editor.config.backdrop.imageCaptionPlaceholderText;
+
     // Disable default placeholder text that comes with CKEditor's image2
     // plugin: it has an inferior UX (it requires the user to manually delete
     // the place holder text).
     editor.lang.image2.captionPlaceholder = '';
-
-    // Backdrop.t() will not work inside CKEditor plugins because CKEditor loads
-    // the JavaScript file instead of Backdrop. Pull translated strings from the
-    // plugin settings that are translated server-side.
-    var placeholderText = editor.config.backdropImageCaption_captionPlaceholderText;
 
     // Override the image2 widget definition to handle the additional
     // data-align and data-caption attributes.
@@ -48,13 +48,11 @@ CKEDITOR.plugins.add('backdropimagecaption', {
       }, true);
 
       // Override requiredContent & allowedContent.
-      widgetDefinition.requiredContent = 'img[alt,src,width,height,data-file-id,data-align,data-caption]';
+      widgetDefinition.requiredContent = 'img[alt,src,width,height,data-align,data-caption]';
       widgetDefinition.allowedContent.img.attributes += ',data-align,data-caption';
 
       // Override allowedContent setting for the 'caption' nested editable.
       // This must match what caption_filter enforces.
-      // @see \Backdrop\filter\Plugin\Filter\FilterCaption::process()
-      // @see \Backdrop\Component\Utility\Xss::filter()
       widgetDefinition.editables.caption.allowedContent = 'a[!href]; em strong cite code br';
 
       // Override downcast(): ensure we *only* output <img>, but also ensure
@@ -65,8 +63,7 @@ CKEDITOR.plugins.add('backdropimagecaption', {
         var caption = this.editables.caption;
         var captionHtml = caption && caption.getData();
         var attrs = img.attributes;
-        console.log(img);
-console.log(captionFilterEnabled);
+
         if (captionFilterEnabled) {
           // If image contains a non-empty caption, serialize caption to the
           // data-caption attribute.
@@ -79,7 +76,17 @@ console.log(captionFilterEnabled);
             attrs['data-align'] = this.data.align;
           }
         }
-        attrs['data-file-id'] = this.data['data-file-id'];
+        if (this.data['data-file-id']) {
+          attrs['data-file-id'] = this.data['data-file-id'];
+        }
+        else if (attrs['data-file-id']) {
+          delete attrs['data-file-id'];
+        }
+
+        // CKEditor seems to apply the caption class to downcast elements, which
+        // we do not want. Make sure that the caption class doesn't end up in
+        // the raw source.
+        img.removeClass(editor.config.image2_captionedClass);
 
         return img;
       };
@@ -91,13 +98,16 @@ console.log(captionFilterEnabled);
       //   - <figure> tag (captioned image).
       // We take the same attributes into account as downcast() does.
       widgetDefinition.upcast = function (element, data) {
-        if (element.name !== 'img' || !element.attributes['data-file-id']) {
+        if (element.name !== 'img') {
           return;
         }
         // Don't initialize on pasted fake objects.
         else if (element.attributes['data-cke-realelement']) {
           return;
         }
+
+        // Remove any caption classes from the raw element itself.
+        element.removeClass(editor.config.image2_captionedClass);
 
         var attrs = element.attributes;
         var retElement = element;
@@ -180,7 +190,7 @@ console.log(captionFilterEnabled);
       CKEDITOR.tools.extend(widgetDefinition._mapDataToDialog, {
         'align': 'data-align',
         'data-caption': 'data-caption',
-        'hasCaption': 'has-caption'
+        'hasCaption': 'data-has-caption'
       });
 
       // Override Backdrop dialog save callback.
@@ -195,15 +205,24 @@ console.log(captionFilterEnabled);
           // widget.data.hasCaption as "changed" (e.g. when hasCaption === 0
           // instead of hasCaption === false). This causes image2's "state
           // shifter" to enter the wrong branch of the algorithm and blow up.
-          dialogReturnValues['has-caption'] = !!dialogReturnValues['has-caption'];
+          dialogReturnValues.attributes['data-has-caption'] = !!dialogReturnValues.attributes['data-has-caption'];
 
           var actualWidget = saveCallback(dialogReturnValues);
 
           // By default, the template of captioned widget has no
           // data-placeholder attribute. Note that it also must be done when
           // upcasting existing elements (see widgetDefinition.upcast).
-          if (dialogReturnValues['has-caption']) {
+          if (dialogReturnValues.attributes['data-has-caption']) {
             actualWidget.editables.caption.setAttribute('data-placeholder', placeholderText);
+
+            // Firefox will add a <br> tag to a newly created DOM element with
+            // no content. Remove this <br> if it is the only thing in the
+            // caption. Our placeholder support requires the element be entirely
+            // empty. See ckeditor-caption.css.
+            var captionElement = actualWidget.editables.caption.$;
+            if (captionElement.childNodes.length === 1 && captionElement.childNodes.item(0).nodeName === 'BR') {
+              captionElement.removeChild(captionElement.childNodes.item(0));
+            }
           }
         };
       };

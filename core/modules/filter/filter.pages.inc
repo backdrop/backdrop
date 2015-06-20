@@ -28,6 +28,8 @@ function filter_tips_long() {
  * Form callback: Display a form for inserting/editing a link.
  */
 function filter_format_editor_link_form($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
   // Pull in any default values set by the editor.
   $values = array();
   if (isset($form_state['input']['editor_object'])) {
@@ -42,9 +44,11 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     backdrop_set_title(t('Insert link'));
   }
 
+  // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
     '#title' => t('URL'),
-    '#type' => 'url',
+    '#type' => 'textfield',
+    '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#default_value' => isset($values['href']) ? $values['href'] : FALSE,
     '#parents' => array('attributes', 'href'),
   );
@@ -61,6 +65,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#value' => t('Save'),
     '#ajax' => array(
       'callback' => 'filter_format_editor_dialog_save',
+      'event' => 'click',
     ),
   );
 
@@ -71,6 +76,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
  * Form callback: Display a form for inserting/editing a link.
  */
 function filter_format_editor_image_form($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
   // Pull in any default values set by the editor.
   $values = array();
   if (isset($form_state['input']['editor_object'])) {
@@ -136,14 +143,14 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     ),
     '#wrapper_attributes' => array('class' => array('editor-image-align')),
     '#parents' => array('attributes', 'data-align'),
-    '#access' => array_key_exists('filter_image_align', $format->filters),
+    '#access' => !empty($format->filters['filter_image_align']->status),
   );
   $form['caption'] = array(
-    '#title' => t('Caption'),
+    '#title' => t('Add a caption'),
     '#type' => 'checkbox',
-    '#default_value' => (isset($values['has-caption']) && strcmp($values['has-caption'], 'false') !== 0) ? (bool) $values['has-caption'] : FALSE,
-    '#parents' => array('has-caption'),
-    '#access' => array_key_exists('filter_image_caption', $format->filters),
+    '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
+    '#parents' => array('attributes', 'data-has-caption'),
+    '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -152,6 +159,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#value' => t('Save'),
     '#ajax' => array(
       'callback' => 'filter_format_editor_dialog_save',
+      'event' => 'click',
     ),
   );
 
@@ -185,4 +193,17 @@ function filter_format_editor_dialog_save($form, &$form_state) {
     '#type' => 'ajax',
     '#commands' => $commands,
   );
+}
+
+/**
+ * Element validation function.
+ */
+function _filter_format_editor_link_url_validate(&$element, &$form_state) {
+  $value = trim($element['#value']);
+  form_set_value($element, $value, $form_state);
+
+  // Unlike
+  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
+    form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+  }
 }

@@ -26,6 +26,18 @@ function theme_text_format_wrapper($variables) {
 }
 
 /**
+ * Returns HTML for a captioned item, usually an image.
+ */
+function theme_filter_caption($variables) {
+  $output = '';
+  $output .= '<figure' . backdrop_attributes($variables['attributes']) . '>';
+  $output .= $variables['item'];
+  $output .= '<figcaption>' . $variables['caption'] . '</figcaption>';
+  $output .= '</figure>';
+  return $output;
+}
+
+/**
  * Returns HTML for a link to the more extensive filter tips.
  *
  * @ingroup themeable
