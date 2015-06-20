@@ -32,3 +32,14 @@ ol, ul, dl {
   cursor: move;
   margin: 10px 0;
 }
+
+/**
+ * CKEditor Image2 widgets wrap images in a <span> tag that requires center
+ * alignment. As normally the image itself has the "align-center" class that
+ * sets margin left/right to auto, on the front-end it will center. However,
+ * with the <span> wrapper, we need to center-align the entire wrapping
+ * paragraph tag while within CKEditor.
+ */
+p.align-center {
+  text-align: center;
+}

@@ -2,45 +2,41 @@
  * @file
  * Caption: default styling for displaying image captions.
  */
-div.caption {
-  display: inline-block;
-}
 
-div.caption-inner {
-  border: 1px solid #CCC;
-  padding: 4px;
-  background: #F3F3F3;
-  font-size: 0.857em; /* assuming you have a base font size of 14px, this is 12px */
-  text-align: center;
-  display: inline-block;
+/**
+ * Figure and Figure Captions.
+ *
+ * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
+ */
+.caption {
+  display: table;
+  margin: 0 12px 10px;
+  border: 1px solid #ccc;
 }
-
-div.caption p {
-  margin: .25em 0;
+.align-center .caption {
+  margin-left: auto;
+  margin-right: auto;
 }
-
-div.caption img,
-div.caption object {
-  margin-bottom: 5px;
+.caption > * {
   display: block;
+  max-width: 100%;
+}
+.caption > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
+  padding: 3px 6px;
+  border: 1px solid #ccc;
+  border-top: none;
+  background-color: #eee;
 }
 
-/** aligned captions **/
-div.caption-left {
-  float: left;
-  margin: 10px 10px 10px 0;
-}
-
-div.caption-right {
-  float: right;
-  margin: 10px 0 10px 10px;
-}
-
-div.caption-center {
-  display: block;
-  text-align: center;
-}
-
-div.caption-center .caption-inner {
-  display: inline-block;
+/**
+ * While editing and whenever the caption is empty, show a placeholder.
+ *
+ * Based on http://codepen.io/flesler/pen/AEIFc.
+ */
+.caption > figcaption[contenteditable=true]:empty:before {
+  content: attr(data-placeholder);
+  font-style: italic;
 }
