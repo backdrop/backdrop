@@ -37,27 +37,27 @@ function theme_options($variables) {
   }
 
   $options = '';
-  $options .= drupal_render($element['options_field']);
+  $options .= backdrop_render($element['options_field']);
   if (isset($element['default_value_field'])) {
-    $options .= drupal_render($element['default_value_field']);
+    $options .= backdrop_render($element['default_value_field']);
   }
   if (isset($element['default_value_pattern'])) {
-    $options .= drupal_render($element['default_value_pattern']);
+    $options .= backdrop_render($element['default_value_pattern']);
   }
 
   $settings = '';
   if (isset($element['custom_keys'])) {
-    $settings .= drupal_render($element['custom_keys']);
+    $settings .= backdrop_render($element['custom_keys']);
   }
   if (isset($element['multiple'])) {
-    $settings .= drupal_render($element['multiple']);
+    $settings .= backdrop_render($element['multiple']);
   }
   if (isset($element['option_settings'])) {
-    $settings .= drupal_render($element['option_settings']);
+    $settings .= backdrop_render($element['option_settings']);
   }
 
   $output = '';
-  $output .= '<div' . drupal_attributes($element['#attributes']) . '>';
+  $output .= '<div' . backdrop_attributes($element['#attributes']) . '>';
   $output .= theme('container', array('element' => array(
     '#title' => t('Options'),
     '#collapsible' => FALSE,
@@ -90,10 +90,10 @@ function _form_options_expand($element) {
   $element['#tree'] = TRUE;
   $element['#theme'] = 'options';
 
-  $path = drupal_get_path('module', 'options_element');
+  $path = backdrop_get_path('module', 'options_element');
   $element['#attached']['js'] = array(
-    'misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
-    'misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
+    'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
+    'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
     $path . '/options_element.js',
   );
   $element['#attached']['css'] = array(
@@ -215,7 +215,7 @@ function _form_options_validate($element, &$form_state) {
 
   // Add the list of duplicates to the page so that we can highlight the fields.
   if (!empty($duplicates)) {
-    drupal_add_js(array('optionsElement' => array('errors' => drupal_map_assoc($duplicates))), 'setting');
+    backdrop_add_js(array('optionsElement' => array('errors' => backdrop_map_assoc($duplicates))), 'setting');
   }
 
   // Check if no options are specified.
