@@ -88,7 +88,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
- if (!isset($form_state['vocabulary'])) {
+  if (!isset($form_state['vocabulary'])) {
     // Create a new TaxonomyVocabulary entity for the add form.
     if (!isset($vocabulary)) {
       $vocabulary = new TaxonomyVocabulary();
@@ -128,11 +128,21 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
     '#type' => 'value',
     '#value' => '0',
   );
-
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  if ($vocabulary->machine_name == NULL)  {
+    // Only show 'Save and add terms' button when creating new vocabulary.
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and add terms'),
+      '#validate' => array('taxonomy_form_vocabulary_validate'),
+      '#submit' => array('taxonomy_form_vocabulary_store_edit_submit'),
+    );
+  }
+  $form['actions']['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save vocabulary'),
+    '#validate' => array('taxonomy_form_vocabulary_validate'),
+    '#submit' => array('taxonomy_form_vocabulary_submit'),
   );
 
   return $form;
@@ -161,7 +171,42 @@ function taxonomy_form_vocabulary_validate($form, &$form_state) {
 }
 
 /**
- * Form submission handler for taxonomy_form_vocabulary().
+ * Process the add vocabulary form, 'continue'.
+ *
+ * @see taxonomy_form_vocabulary()
+ * @see taxonomy_form_vocabulary_validate()
+ */
+function taxonomy_form_vocabulary_store_edit_submit($form, &$form_state) {
+  if ($form_state['triggering_element']['#value'] == t('Delete')) {
+    // Rebuild the form to confirm vocabulary deletion.
+    $form_state['rebuild'] = TRUE;
+    $form_state['confirm_delete'] = TRUE;
+    return;
+  }
+
+  $vocabulary = $form_state['vocabulary'];
+  entity_form_submit_build_entity('taxonomy_vocabulary', $vocabulary, $form, $form_state);
+
+  // Prevent leading and trailing spaces in vocabulary names.
+  $vocabulary->name = trim($vocabulary->name);
+
+  switch (taxonomy_vocabulary_save($vocabulary)) {
+    case SAVED_NEW:
+      backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
+      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add';
+      break;
+
+    case SAVED_UPDATED:
+      backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
+      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add';
+      break;
+  }
+}
+
+/**
+ * Process the add view form, 'save'.
  *
  * @see taxonomy_form_vocabulary()
  * @see taxonomy_form_vocabulary_validate()
@@ -639,6 +684,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     $path = '<front>';
   }
   $options = backdrop_parse_url($path);
+  $options['path'] = !strpos($options['path'], 'taxonomy/add') ? $options['path'] : 'admin/structure/taxonomy/';
   $options['attributes']['class'][] = 'form-cancel';
 
   $form['actions'] = array('#type' => 'actions');

@@ -59,14 +59,25 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     // Visit the main taxonomy administration page.
     $this->backdropGet('admin/structure/taxonomy');
 
-    // Create a new vocabulary.
+    // Create a new vocabulary and then add terms.
     $this->clickLink(t('Add vocabulary'));
     $edit = array();
     $machine_name = backdrop_strtolower($this->randomName());
     $edit['name'] = $this->randomName();
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = $machine_name;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save and add terms'));
+    $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])));
+
+    // Create a new vocabulary.
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->clickLink(t('Add vocabulary'));
+    $edit = array();
+    $machine_name = backdrop_strtolower($this->randomName());
+    $edit['name'] = $this->randomName();
+    $edit['description'] = $this->randomName();
+    $edit['machine_name'] = $machine_name;
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
 
     // Edit the vocabulary.
@@ -75,18 +86,18 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Edit vocabulary'));
     $edit = array();
     $edit['name'] = $this->randomName();
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
     $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
 
     // Try to submit a vocabulary with a duplicate machine name.
     $edit['machine_name'] = $machine_name;
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('The machine-readable name is already in use. It must be unique.'));
 
     // Try to submit an invalid machine name.
     $edit['machine_name'] = '!&^%';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
 
     // Ensure that vocabulary titles are escaped properly.
@@ -94,7 +105,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit['name'] = 'Don\'t Panic';
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = 'don_t_panic';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
 
     $site_name = config_get('system.core', 'site_name');
     $this->backdropGet('admin/structure/taxonomy/don_t_panic');
@@ -155,7 +166,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'machine_name' => $vocabulary_name,
     );
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('Created new vocabulary'), 'New vocabulary was created.');
 
     // Check the created vocabulary.
