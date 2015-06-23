@@ -123,6 +123,20 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
+ * Output the list of visiblity conditions for layouts.
+ */
+function theme_layout_conditions($variables) {
+  $element = $variables['element'];
+
+  $output = '<ul>';
+  foreach (element_children($element) as $key) {
+    $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+/**
  * Prepares variables for layout templates.
  *
  * This uses [module_name]_preprocess_layout() instead of
