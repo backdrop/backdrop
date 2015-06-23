@@ -1050,6 +1050,21 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#description' => t('Conditions allow this block to be shown only in certain situations, such as for certain roles or types of content.'),
     '#id' => 'block-access',
   );
+  $form['conditions']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#submit' => array(
+      'layout_block_configure_form_submit',
+      'layout_block_configure_form_condition_add',
+    ),
+    '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
+    '#prefix' => '<ul class="action-links"><li>',
+    '#suffix' => '</li></ul>',
+  );
   $form['conditions']['active'] = array(
     '#type' => 'container',
     '#id' => 'layout-access-list',
@@ -1090,21 +1105,6 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
       '#name' => 'conditions[' . $access_key . '][configure]',
     );
   }
-  $form['conditions']['add'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add condition'),
-    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-    '#submit' => array(
-      'layout_block_configure_form_submit',
-      'layout_block_configure_form_condition_add',
-    ),
-    '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
-    '#ajax' => array(
-      'callback' => 'layout_ajax_form_open_dialog',
-    ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
-  );
   /* End conditions. */
 
   // Note that we specifically use backdrop_is_ajax() in addition to
