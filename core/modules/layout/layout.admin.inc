@@ -337,8 +337,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
   $form['conditions']['active'] = array(
-    '#type' => 'container',
-    '#id' => 'layout-access-list',
+    '#theme' => 'layout_conditions',
+    '#attributes' => array('class' => array('layout-access-list')),
   );
   foreach ($layout->conditions as $access_key => $layout_access) {
     $form['conditions']['active'][$access_key] = array(
@@ -1085,7 +1085,8 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
-    '#id' => 'layout-access-list',
+    '#theme' => 'layout_conditions',
+    '#attributes' => array('class' => array('layout-access-list')),
   );
   foreach ($block->conditions as $access_key => $block_access) {
     $form['conditions']['active'][$access_key] = array(
@@ -1933,7 +1934,8 @@ function layout_menu_item_form($form, &$form_state, $menu_item) {
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
-    '#id' => 'layout-access-list',
+    '#theme' => 'layout_conditions',
+    '#attributes' => array('class' => array('layout-access-list')),
   );
   foreach ($menu_item->conditions as $access_key => $menu_access) {
     $form['conditions']['active'][$access_key] = array(
