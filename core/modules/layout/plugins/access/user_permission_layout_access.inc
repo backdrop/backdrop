@@ -23,8 +23,7 @@ class UserPermissionLayoutAccess extends LayoutAccess {
     }
 
     $permissions = module_invoke_all('permission');
-    return t('User has "@permission"', array('@permission' => $permissions[$this->settings['permission']]['title']));
-
+    return t('User has "@permission" permission.', array('@permission' => $permissions[$this->settings['permission']]['title']));
   }
 
   /**
