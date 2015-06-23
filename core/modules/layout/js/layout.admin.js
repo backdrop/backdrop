@@ -58,6 +58,15 @@ Backdrop.behaviors.layoutConfigure = {
  */
 Backdrop.behaviors.layoutDisplayEditor = {
   attach: function(context) {
+    $('.layout-conditions').find('.layout-conditions-list').hide();
+    // Toggle the conditions info on layout list page.
+    $('.conditions-toggle').click(function(e) {
+      var $conditions = $(this).parent().find('.layout-conditions-list').toggle();
+      $(this).toggleClass('more');
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    
     // Apply drag and drop to regions.
     var $regions = $('.layout-editor-region-content').once('layout-sortable');
     if ($regions.length) {
