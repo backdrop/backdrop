@@ -222,7 +222,7 @@ ul.menu li.expanded {
 /**
  * Page title.
  */
-#page-title {
+.page-title {
   color: #000;
   margin: 0 0 10px;
   padding: 0;
@@ -231,7 +231,7 @@ ul.menu li.expanded {
   font-weight: normal;
   float: left; /* LTR */
 }
-[dir="rtl"] #page-title {
+[dir="rtl"] .page-title {
   float: right;
 }
 
@@ -1099,7 +1099,7 @@ div.admin-panel h3 {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
-#layout-edit-main #page-title {
+#layout-edit-main .page-title {
   float: none;
 }
 
@@ -1166,7 +1166,7 @@ body.maintenance-page #page:after {
   margin-top: -16px;
   margin-left: -34px;
 }
-body.maintenance-page #page-title {
+body.maintenance-page .page-title {
   background: transparent;
   padding-top: 0;
 }
