@@ -1088,7 +1088,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('admin/config/content/formats', $trail);
 
     $trail += array(
-      'admin/config/content/formats' => t('Text formats'),
+      'admin/config/content/formats' => t('Text editors and formats'),
     );
     $this->assertBreadcrumb('admin/config/content/formats/add', $trail);
     $this->assertBreadcrumb("admin/config/content/formats/$format_id", $trail);

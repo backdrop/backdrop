@@ -137,7 +137,7 @@ function filter_admin_format_page($format = NULL) {
  */
 function filter_admin_format_form($form, &$form_state, $format) {
   $is_fallback = ($format->format == filter_fallback_format());
-  $editors = filter_editors();
+  $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
     $editor_info = $form_state['editor_info'];
   }
@@ -405,7 +405,7 @@ function filter_admin_format_editor_ajax($form, $form_state) {
  */
 function filter_admin_format_editor_submit($form, &$form_state) {
   $editor_name = $form_state['values']['editor'];
-  $editors = filter_editors();
+  $editors = filter_get_editors();
   if ($editor_name && isset($editors[$editor_name])) {
     $form_state['editor_info'] = $editors[$editor_name];
   }

@@ -166,7 +166,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink('Add text format');
+    $this->clickLink('Add text editor');
     $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(
@@ -619,7 +619,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');
@@ -653,7 +653,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');

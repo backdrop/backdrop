@@ -508,7 +508,7 @@ function filter_format_allowed_html($format) {
   // If no filters specified restrictions, change the allowed values to be
   // a Boolean.
   if ($all_html_allowed) {
-    $restrictions['allowed'] = TRUE;
+    $restrictions = TRUE;
   }
 
   return $restrictions;
@@ -657,6 +657,7 @@ function filter_formats($account = NULL) {
       $formats['all'] = array();
 
       $all_filter_info = filter_get_filters();
+      $all_editor_info = filter_get_editors();
       $config_names = config_get_names_with_prefix('filter.format.');
       $filter_formats = config_load_multiple($config_names);
       backdrop_sort($filter_formats, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
@@ -689,6 +690,10 @@ function filter_formats($account = NULL) {
             $filter['settings'] += $all_filter_info[$filter_name]['default settings'];
           }
           $filter_format->filters[$filter_name] = (object) $filter;
+        }
+        // Populate defaults for the editor associated with this format.
+        if (isset($all_editor_info[$filter_format->editor]['default settings'])) {
+          $filter_format->editor_settings += $all_editor_info[$filter_format->editor]['default settings'];
         }
 
         $formats['all'][$filter_format->format] = $filter_format;
@@ -724,10 +729,11 @@ function filter_formats_reset() {
 /**
  * Returns a list of text editors that are used with 'text_format' elements.
  */
-function filter_editors() {
+function filter_get_editors() {
   $editors = &backdrop_static(__FUNCTION__, NULL);
 
   if (!isset($editors)) {
+    $editors = array();
     $modules = module_implements('editor_info');
     foreach ($modules as $module) {
       $module_editors = module_invoke($module, 'editor_info');
@@ -746,7 +752,7 @@ function filter_editors() {
  * Loads an individual editor's information.
  */
 function filter_editor_load($editor_name) {
-  $editors = filter_editors();
+  $editors = filter_get_editors();
   return isset($editors[$editor_name]) ? $editors[$editor_name] : FALSE;
 }
 
@@ -1267,7 +1273,7 @@ function filter_get_attached($formats) {
 function filter_get_js_settings($formats) {
   $settings = array();
   $filter_info = filter_get_filters();
-  $editor_info = filter_editors();
+  $editor_info = filter_get_editors();
 
   foreach ($formats as $format_name => $format) {
     // Don't add settings for formats that don't have associated editors.
@@ -1535,10 +1541,12 @@ function filter_filter_info() {
   $filters['filter_image_caption'] = array(
     'title' => t('Convert image captions to figure and figcaption elements'),
     'process callback' => '_filter_image_caption',
+    'weight' => 4,
   );
   $filters['filter_image_align'] = array(
     'title' => t('Float images left and right using the data-align attribute'),
     'process callback' => '_filter_image_align',
+    'weight' => 4,
   );
   return $filters;
 }
