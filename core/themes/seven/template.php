@@ -14,7 +14,7 @@ function seven_preprocess_layout(&$variables) {
     // markup requirements.
     if (isset($variables['content']['header'])) {
       if ($variables['title']) {
-        $title = '<h1 class="title" id="page-title">' . $variables['title'] . '</h1>';
+        $title = '<h1 class="page-title">' . $variables['title'] . '</h1>';
         $variables['content']['header'] .= $title;
         $variables['title'] = NULL;
       }
