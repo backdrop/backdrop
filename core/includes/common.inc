@@ -7248,7 +7248,7 @@ function backdrop_common_theme() {
       'variables' => array('url' => NULL, 'title' => NULL),
     ),
     'more_link' => array(
-      'variables' => array('url' => NULL, 'title' => NULL)
+      'variables' => array('url' => NULL, 'text' => NULL)
     ),
     'progress_bar' => array(
       'variables' => array('percent' => NULL, 'message' => NULL),
