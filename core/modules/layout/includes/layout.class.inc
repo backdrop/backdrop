@@ -584,8 +584,8 @@ class Layout {
       return;
     }
 
-    $old_layout_info = layout_get_layout_info($this->layout);
-    $new_layout_info = layout_get_layout_info($layout_name);
+    $old_layout_info = layout_get_layout_template_info($this->layout);
+    $new_layout_info = layout_get_layout_template_info($layout_name);
     $new_positions = array();
 
     // Do the mapping in the order provided (if any).

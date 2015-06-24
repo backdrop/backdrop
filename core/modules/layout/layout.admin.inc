@@ -230,7 +230,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
   );
   // Get the list of layout options.
-  $all_layout_info = layout_get_layout_info();
+  $all_layout_info = layout_get_layout_template_info();
   foreach ($all_layout_info as $layout_name => $layout_info) {
     $form['layout']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
   }
@@ -632,7 +632,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   if (!empty($layout->is_new)) {
     $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
     $default_layout = layout_load($default_layout_name);
-    $layout_info = layout_get_layout_info($layout->layout);
+    $layout_info = layout_get_layout_template_info($layout->layout);
     foreach ($default_layout->positions as $region => $region_block_list) {
       if (array_key_exists($region, $layout_info['regions'])) {
         foreach ($region_block_list as $uuid) {
@@ -870,7 +870,7 @@ function layout_content_form_submit($form, &$form_state) {
  */
 function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
-  $layout_info = layout_get_layout_info($layout->layout);
+  $layout_info = layout_get_layout_template_info($layout->layout);
   if (!array_key_exists($region_name, $layout_info['regions'])) {
     return MENU_NOT_FOUND;
   }
@@ -968,7 +968,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     $form['#title'] = t('Configure block "!title"', array('!title' => $block->getAdminTitle()));
   }
 
-  $layout_info = layout_get_layout_info($layout->layout);
+  $layout_info = layout_get_layout_template_info($layout->layout);
   $form['region'] = array(
     '#type' => 'select',
     '#title' => t('Region'),

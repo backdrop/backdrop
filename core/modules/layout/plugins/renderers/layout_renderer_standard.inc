@@ -129,7 +129,7 @@ class LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_info($layout->layout);
+    $layout_info = layout_get_layout_template_info($layout->layout);
     $this->layout = &$layout;
 
     if (empty($layout_info)) {
