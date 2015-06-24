@@ -17,6 +17,7 @@ function standard_install() {
     'format' => 'filtered_html',
     'name' => 'Filtered HTML',
     'weight' => 0,
+    'editor' => 'ckeditor',
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -57,6 +58,7 @@ function standard_install() {
     'format' => 'full_html',
     'name' => 'Full HTML',
     'weight' => 1,
+    'editor' => NULL,
     'filters' => array(
       // URL filter.
       'filter_url' => array(
