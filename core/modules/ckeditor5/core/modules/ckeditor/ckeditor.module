@@ -444,7 +444,7 @@ function ckeditor_get_settings($format, $existing_settings) {
 
   // Add the style list if configured.
   $style_list = array();
-  if ($format->editor_settings['plugins']['style']['style_list']) {
+  if (!empty($format->editor_settings['plugins']['style']['style_list'])) {
     $style_list = $format->editor_settings['plugins']['style']['style_list'];
   }
 
