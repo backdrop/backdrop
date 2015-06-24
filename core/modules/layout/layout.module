@@ -451,8 +451,8 @@ function layout_theme() {
     'layout_info' => array(
       'variables' => array('layout' => NULL),
     ) + $base,
-    'layout_option' => array(
-      'variables' => array('layout_info' => NULL),
+    'layout_template_options' => array(
+      'variables' => array('template_info' => NULL),
     ) + $base,
     'layout_menu_item_arguments_table' => array(
       'render element' => 'element',
@@ -468,19 +468,19 @@ function layout_theme() {
     ) + $base,
   );
 
-  // Register all layouts.
-  $layouts = layout_get_layout_info();
-  foreach ($layouts as $layout) {
-    if (!empty($layout['template'])) {
-      $theme_key = str_replace('-', '_', $layout['template']);
+  // Register all layout templates.
+  $layout_templates = layout_get_layout_template_info();
+  foreach ($layout_templates as $template) {
+    if (!empty($template['template'])) {
+      $theme_key = str_replace('-', '_', $template['template']);
       $items[$theme_key] = array(
         'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
-        'template' => $layout['template'],
-        'path' => $layout['path'],
+        'template' => $template['template'],
+        'path' => $template['path'],
         'base hook' => 'layout',
       );
-      if (isset($layout['file'])) {
-        $items[$theme_key]['file'] = $layout['file'];
+      if (isset($template['file'])) {
+        $items[$theme_key]['file'] = $template['file'];
       }
     }
   }
@@ -1035,7 +1035,7 @@ function layout_reset_caches() {
   backdrop_static_reset('layout_load_multiple');
   backdrop_static_reset('layout_menu_item_load_multiple');
   backdrop_static_reset('layout_get_path_layout_names');
-  backdrop_static_reset('layout_get_layout_info');
+  backdrop_static_reset('layout_get_layout_template_info');
   backdrop_static_reset('layout_get_block_info');
   backdrop_static_reset('layout_get_layout_tempstore');
   backdrop_static_reset('_layout_include_files');
@@ -1089,19 +1089,19 @@ function _layout_get_all_info($data_type, $init = array()) {
 }
 
 /**
- * Load the layout information for a single layout name.
+ * Load the layout template information for a single layout template name.
  *
- * @param string $layout_name
- *   The name of the layout plugin, e.g. "one_column" or
- *   "three_three_four_column". If no layout name is specified, all layout info
- *   will be returned.
+ * @param string $template_name
+ *   The name of the layout template, e.g. "one_column" or
+ *   "three_three_four_column". If no layout template is specified, all layout 
+ *  info will be returned.
  * @return array|boolean
- *   The layout information, as returned by either a stand-alone layout .info
- *   file, or through a module's hook_layout_info().
+ *   The layout template information, as returned by either a stand-alone 
+ *   template .info file, or through a module's hook_layout_info().
  *
  * @see hook_layout_info()
  */
-function layout_get_layout_info($layout_name = NULL) {
+function layout_get_layout_template_info($template_name = NULL) {
   $info = &backdrop_static(__FUNCTION__);
 
   // Try getting a cached list of layout info.
@@ -1146,9 +1146,9 @@ function layout_get_layout_info($layout_name = NULL) {
     cache('cache')->set('layout_info', $info);
   }
 
-  if ($layout_name) {
-    if (isset($info[$layout_name])) {
-      return $info[$layout_name];
+  if ($template_name) {
+    if (isset($info[$template_name])) {
+      return $info[$template_name];
     }
     else {
       return FALSE;
@@ -1157,6 +1157,27 @@ function layout_get_layout_info($layout_name = NULL) {
   else {
     return $info;
   }
+}
+
+/**
+ * Load the layout template information for a single layout template name.
+ *
+ * Duplicates the function layout_get_layout_template_info() to maintain
+ * compatibility. Should not be used in new code.
+ *
+ * @param string $layout_name
+ *   The name of the layout template, e.g. "one_column" or
+ *   "three_three_four_column". If no layout template is specified, all layout 
+ *  info will be returned.
+ * @return array|boolean
+ *   The layout template information, as returned by either a stand-alone 
+ *   template .info file, or through a module's hook_layout_info().
+ *
+ * @deprecated since 1.4.0
+ * @see layout_get_layout_template_info()
+ */
+function layout_get_layout_info($layout_name = NULL) {
+  return layout_get_layout_template_info($layout_name);
 }
 
 /**
