@@ -34,3 +34,21 @@ function layout_disable() {
 function layout_install() {
   db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
 }
+
+/**
+ * Changes the layout template key in layout config files from 'layout'
+ * to 'layout_template'.
+ */
+function layout_update_1000() {
+  $layouts= config_get_names_with_prefix('layout');
+  foreach ($layouts as $layout_name) {
+    $config = config($layout_name);
+    $configs = $config->get();
+    if (isset($configs['layout'])) {
+      $configs['layout_template'] = $configs['layout'];
+      unset($configs['layout']);
+    }
+  $config->setData($configs);
+  $config->save();
+  }
+}

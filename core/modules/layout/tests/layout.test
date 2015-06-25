@@ -932,10 +932,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
             $blocks_match = FALSE;
           }
         }
-        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout, '@layout2' => $layout->layout, '@region' => $region_name)));
+        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout_template, '@layout2' => $layout->layout_template, '@region' => $region_name)));
       }
       else {
-        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout, '@region' => $region_name)));
+        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout_template, '@region' => $region_name)));
       }
     }
   }

@@ -64,7 +64,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $content = $block->getAdminPreview();
 
     $class = 'layout-editor-block';
-    if (isset($this->layout->title_block) && $this->layout->title_block == $block->uuid) {
+    if (isset($this->layout_template->title_block) && $this->layout_template->title_block == $block->uuid) {
       $class .= ' layout-editor-block-is-title';
     }
     $class .= ' clearfix';
@@ -106,7 +106,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   function getUrl($command) {
     $args = func_get_args();
     $command = array_shift($args);
-    $url = 'admin/structure/layouts/manage/' . $this->layout->name . '/' . $command . '/' . $this->plugin['name'];
+    $url = 'admin/structure/layouts/manage/' . $this->layout_template->name . '/' . $command . '/' . $this->plugin['name'];
     if ($args) {
       $url .= '/' . implode('/', $args);
     }
@@ -154,7 +154,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $links['remove'] = array(
       'title' => t('Remove'),
       'href' => $this->getUrl('remove-block', $block->uuid),
-      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+      'query' => array('token' => backdrop_get_token('layout-' . $this->layout_template->name)),
       'attributes' => array(
         'class' => array('remove-block', 'use-ajax'),
       ),

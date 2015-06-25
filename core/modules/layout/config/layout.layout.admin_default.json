@@ -7,7 +7,7 @@
   "module": "layout",
   "weight": 1,
   "storage": 4,
-  "layout": "one_column",
+  "layout_template": "one_column",
   "disabled": false,
   "settings": {
     "title": "",
