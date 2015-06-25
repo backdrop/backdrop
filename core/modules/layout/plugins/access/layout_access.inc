@@ -144,7 +144,7 @@ class LayoutAccessNegatable extends LayoutAccess {
     parent::__construct($plugin_name, $data);
     // Ensure a setting always exists for negation.
     $this->settings += array(
-      'negate' => FALSE,
+      'front_page' => FALSE,
     );
   }
 
@@ -153,11 +153,17 @@ class LayoutAccessNegatable extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['negate'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Reverse (NOT)'),
+    $options = array(
+      TRUE => t('Is NOT front page'),
+      FALSE => t('Is front page'),
+    );
+    $form['front_page'] = array(
+      '#type' => 'radios',
+      '#title' => t('Front page'),
       '#weight' => 100,
-      '#default_value' => $this->settings['negate'],
+      '#options' => $options,
+      '#default_value' => $this->settings['front_page'],
+      '#required' => TRUE,
     );
   }
 
@@ -166,7 +172,7 @@ class LayoutAccessNegatable extends LayoutAccess {
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
-    $this->settings['negate'] = !empty($form_state['values']['negate']);
+    $this->settings['front_page'] = !empty($form_state['values']['front_page']);
   }
 }
 
