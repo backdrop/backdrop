@@ -470,8 +470,8 @@ function layout_theme() {
     'layout_info' => array(
       'variables' => array('layout' => NULL),
     ) + $base,
-    'layout_option' => array(
-      'variables' => array('layout_info' => NULL),
+    'layout_template_options' => array(
+      'variables' => array('template_info' => NULL),
     ) + $base,
     'layout_menu_item_arguments_table' => array(
       'render element' => 'element',

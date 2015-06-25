@@ -211,7 +211,7 @@ class Layout {
       'module' => $this->module,
       'weight' => $this->weight,
       'storage' => $this->storage,
-      'layout' => $this->layout,
+      'layout_template' => $this->layout_template,
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
@@ -575,16 +575,16 @@ class Layout {
    */
   function setLayout($layout_name, $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout && empty($region_mapping)) {
+    if ($layout_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
-    if (!isset($this->layout)) {
-      $this->layout = $layout_name;
+    if (!isset($this->layout_template)) {
+      $this->layout_template = $layout_name;
       return;
     }
 
-    $old_layout_info = layout_get_layout_template_info($this->layout);
+    $old_layout_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_info = layout_get_layout_template_info($layout_name);
     $new_positions = array();
 
@@ -622,7 +622,7 @@ class Layout {
       }
     }
 
-    $this->layout = $layout_name;
+    $this->layout_template = $layout_name;
     $this->positions = $new_positions;
   }
 
