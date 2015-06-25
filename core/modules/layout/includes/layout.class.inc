@@ -71,7 +71,7 @@ class Layout {
    *
    * @var string
    */
-  var $layout;
+  var $layout_template;
 
   /**
    * Whether this layout is disabled.
