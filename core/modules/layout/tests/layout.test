@@ -266,15 +266,15 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $edit = array(
       'bundles[article]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(Null, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
@@ -291,15 +291,15 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add another condition to show this block only on a single node path.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
-    $this->backdropPost(NULL, array(), t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $edit = array(
       'paths' => 'node/' . $this->test_node1->nid,
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
@@ -456,15 +456,15 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/clone', $edit, t('Clone layout'));
     $this->assertText('You may now update the cloned settings.', 'Layout cloned and landed on settings page.');
-    $this->backdropPost(NULL, array(), t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $edit = array(
       'bundles[article]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $edit = array(
@@ -655,11 +655,11 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link shown on the homepage.');
 
-    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add condition'));
+    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
 
     // This condition will make the menu item available on the front page, and
     // on the layout path itself. Note that the "layout_name" is the first part
@@ -667,7 +667,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'paths' => "<front>\n$layout_name*\n",
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
 
     $this->backdropGet('<front>');
@@ -1014,19 +1014,19 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     );
 
     // Note that this adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add condition'));
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
 
     // Select the condition to add.
     $edit = array(
       'condition' => 'user_role',
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
 
     // Allow authenticated users to see the layout only.
     $edit = array(
       'roles[authenticated]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
 
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Create layout'));
