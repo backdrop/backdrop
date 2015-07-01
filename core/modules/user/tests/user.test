@@ -710,7 +710,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $node_type = node_type_get_type('page');
     $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
-    
+
     // Create a simple node.
     $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
@@ -1824,7 +1824,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     $node_type = node_type_get_type('page');
     $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
-    
+
     // Create a new node with comments on.
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
@@ -2092,7 +2092,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * again.
    */
   function testAssignAndRemoveRole()  {
-    $role_name = $this->backdropCreateRole(array('administer content types'));
+    $role_name = $this->backdropCreateRole(array('administer content types', 'assign all roles'));
     $account = $this->backdropCreateUser();
 
     // Assign the role to the user.
@@ -2113,7 +2113,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * be removed again.
    */
   function testCreateUserWithRole() {
-    $role_name = $this->backdropCreateRole(array('administer content types'));
+    $role_name = $this->backdropCreateRole(array('administer content types', 'assign all roles'));
     // Create a new user and add the role at the same time.
     $edit = array(
       'name' => $this->randomName(),
