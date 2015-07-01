@@ -21,9 +21,9 @@ function block_admin_list() {
     $row = array();
     $row[] = check_plain($block_info['info']);
     $links = array();
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => 'admin/structure/block/manage/' . $delta . '/configure',
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => 'admin/structure/block/manage/' . $delta . '/edit',
     );
     $links['delete'] = array(
       'title' => t('Delete'),

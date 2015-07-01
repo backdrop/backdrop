@@ -555,7 +555,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $term = $this->backdropGetTermByName($name);
 
     // Look for alias generated in the form.
-    $this->backdropGet("taxonomy/term/{$term->tid}/edit");
+    $this->backdropGet("taxonomy/term/{$term->tid}/configure");
     $this->assertFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $automatic_alias, 'Generated alias visible in the path alias field.');
 
@@ -569,11 +569,11 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'path[auto]' => FALSE,
       'path[alias]' => $manual_alias,
     );
-    $this->backdropPost("taxonomy/term/{$term->tid}/edit", $edit, t('Save'));
+    $this->backdropPost("taxonomy/term/{$term->tid}/configure", $edit, t('Save'));
     $this->assertText("Updated term $name.");
 
     // Check that the automatic alias checkbox is now unchecked by default.
-    $this->backdropGet("taxonomy/term/{$term->tid}/edit");
+    $this->backdropGet("taxonomy/term/{$term->tid}/configure");
     $this->assertNoFieldChecked('edit-path-auto');
     $this->assertFieldByName('path[alias]', $manual_alias);
 

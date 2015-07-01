@@ -107,14 +107,14 @@ class MenuTestCase extends BackdropWebTestCase {
     menu_save($menu);
 
     // Assert the new menu.
-    $this->backdropGet('admin/structure/menu/manage/' . $menu_name . '/edit');
+    $this->backdropGet('admin/structure/menu/manage/' . $menu_name . '/configure');
     $this->assertRaw($title, 'Custom menu was added.');
 
     // Edit the menu.
     $new_title = $this->randomName(16);
     $menu['title'] = $new_title;
     menu_save($menu);
-    $this->backdropGet('admin/structure/menu/manage/' . $menu_name . '/edit');
+    $this->backdropGet('admin/structure/menu/manage/' . $menu_name . '/configure');
     $this->assertRaw($new_title, 'Custom menu was edited.');
   }
 

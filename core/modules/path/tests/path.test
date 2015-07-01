@@ -222,7 +222,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
     $edit2 = array();
     $edit2['path[alias]'] = $this->randomName();
     $edit2['path[auto]'] = FALSE;
-    $this->backdropPost('taxonomy/term/' . $tid . '/edit', $edit2, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $tid . '/configure', $edit2, t('Save'));
 
     // Confirm that the changed alias works.
     $this->backdropGet($edit2['path[alias]']);
@@ -236,7 +236,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
     // Remove the term's URL alias.
     $edit3 = array();
     $edit3['path[alias]'] = '';
-    $this->backdropPost('taxonomy/term/' . $tid . '/edit', $edit3, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $tid . '/configure', $edit3, t('Save'));
 
     // Confirm that the alias no longer works.
     $this->backdropGet($edit2['path[alias]']);
