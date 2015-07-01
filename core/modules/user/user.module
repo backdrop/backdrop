@@ -473,7 +473,7 @@ function user_has_role($rid, $account = NULL) {
  * Implements hook_permission().
  */
 function user_permission() {
-  return array(
+  $perms = array(
     'administer permissions' =>  array(
       'title' => t('Administer permissions'),
       'restrict access' => TRUE,
@@ -501,7 +501,23 @@ function user_permission() {
       'title' => t('Select method for cancelling own account'),
       'restrict access' => TRUE,
     ),
+    'assign all roles' => array(
+      'title' => t('Assign any role to users'),
+      'restrict access' => TRUE,
+    ),
   );
+
+  // Generate role assign permissions for all applicable roles.
+  foreach (user_roles(TRUE) as $role_name => $label) {
+    if ($role_name != BACKDROP_AUTHENTICATED_ROLE) {
+      $perms["assign $role_name role"] = array(
+        'title' => t('Assign %label role to users', array('%label' => $label)),
+        'restrict access' => ($role_name == config_get('system.core', 'user_admin_role')),
+      );
+    }
+  }
+
+  return $perms;
 }
 
 /**
@@ -755,13 +771,19 @@ function user_account_form(&$form, &$form_state) {
     '#access' => $admin,
   );
 
-  $roles = array_map('check_plain', user_roles(TRUE));
+  $roles = array();
+  $current_roles = !$register && isset($account->roles) ? $account->roles : array();
+  foreach (user_roles(TRUE) as $role_name => $label) {
+    if (user_access('assign all roles') || user_access("assign $role_name role")) {
+      $roles[$role_name] = check_plain($label);
+    }
+  }
   $form['account']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
-    '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
+    '#default_value' => array_intersect($current_roles, array_keys($roles)),
     '#options' => $roles,
-    '#access' => $roles && user_access('administer permissions'),
+    '#access' => !empty($roles),
   );
   $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
@@ -905,6 +927,16 @@ function user_account_form_validate($form, &$form_state) {
     $user_schema = backdrop_get_schema('users');
     if (backdrop_strlen($form_state['values']['signature']) > $user_schema['fields']['signature']['length']) {
       form_set_error('signature', t('The signature is too long: it must be %max characters or less.', array('%max' => $user_schema['fields']['signature']['length'])));
+    }
+  }
+
+  // Add all previous roles the account had before saving if he has no right to
+  // assign them.
+  if (isset($form_state['values']['roles'])) {
+    foreach ($account->roles as $role_name) {
+      if (!user_access('assign all roles') && !user_access("assign $role_name role")) {
+        $form_state['values']['roles'][$role_name] = $role_name;
+      }
     }
   }
 }
@@ -2796,7 +2828,7 @@ function user_action_info() {
   $roles = user_roles(TRUE);
   $index = 0;
   foreach ($roles as $role_name => $role_label) {
-    if ($role_name === BACKDROP_AUTHENTICATED_ROLE) {
+    if ($role_name === BACKDROP_AUTHENTICATED_ROLE || (!user_access("assign all roles") && !user_access("assign $role_name role"))) {
       continue;
     }
     $index++;
