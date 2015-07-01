@@ -606,6 +606,9 @@ function drupal_rmdir($uri, $context = NULL) {
 function drupal_tempnam($directory, $prefix) {
   return backdrop_tempnam($directory, $prefix);
 }
+function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
+  return file_save_htaccess($directory, $private, $force_overwrite);
+}
 // Functions from form.inc.
 function drupal_get_form() {
   $args = func_get_args(); // pass $args to form function
