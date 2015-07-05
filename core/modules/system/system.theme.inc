@@ -84,6 +84,9 @@ function theme_exposed_filters($variables) {
  * @ingroup themeable
  */
 function theme_system_themes_page($variables) {
+  $module_path = backdrop_get_path('module', 'system');
+  backdrop_add_js($module_path . '/js/system.admin.themes.js');
+
   $theme_groups = $variables['theme_groups'];
 
   $output = '<div id="system-themes-page">';
@@ -94,7 +97,7 @@ function theme_system_themes_page($variables) {
       continue;
     }
     // Start new theme group.
-    $output .= '<div class="system-themes-list system-themes-list-'. $state .' clearfix"><h2>'. $title .'</h2>';
+    $output .= '<div class="system-themes-list system-themes-list-'. $state .' clearfix"><h2>'. $title .'</h2><div class="system-themes-list-'. $state .'-wrapper">';
 
     foreach ($theme_groups[$state] as $theme) {
 
@@ -125,7 +128,7 @@ function theme_system_themes_page($variables) {
       }
       $output .= '</div></div>';
     }
-    $output .= '</div>';
+    $output .= '</div></div>';
   }
   $output .= '</div>';
 
