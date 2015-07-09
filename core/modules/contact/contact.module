@@ -119,7 +119,7 @@ function _contact_personal_tab_access($account) {
   }
 
   // User administrators should always have access to personal contact forms.
-  if (user_access('administer users')) {
+  if (user_access('manage user accounts')) {
     return TRUE;
   }
 

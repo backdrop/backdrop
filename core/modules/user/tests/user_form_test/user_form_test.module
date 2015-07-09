@@ -16,7 +16,7 @@ function user_form_test_menu() {
     'title' => 'User form test for current password validation',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_form_test_current_password',1),
-    'access arguments' => array('administer users'),
+    'access arguments' => array('manage user accounts'),
     'type' => MENU_SUGGESTED_ITEM,
   );
   return $items;

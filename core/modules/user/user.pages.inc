@@ -270,7 +270,7 @@ function user_profile_form($form, &$form_state, $account) {
     '#type' => 'submit',
     '#value' => t('Cancel account'),
     '#submit' => array('user_edit_cancel_submit'),
-    '#access' => $account->uid > 1 && (($account->uid == $user->uid && user_access('cancel account')) || user_access('administer users')),
+    '#access' => $account->uid > 1 && (($account->uid == $user->uid && user_access('cancel account')) || user_access('manage user accounts')),
   );
   $form['actions']['cancel_form'] = array(
     '#type' => 'link',
@@ -343,7 +343,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   $form['_account'] = array('#type' => 'value', '#value' => $account);
 
   // Display account cancellation method selection, if allowed.
-  $admin_access = user_access('administer users');
+  $admin_access = user_access('manage user accounts');
   $can_select_method = $admin_access || user_access('select account cancellation method');
   $form['user_cancel_method'] = array(
     '#type' => 'item',
@@ -419,7 +419,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
   // Cancel account immediately, if the current user has administrative
   // privileges, no confirmation mail shall be sent, and the user does not
   // attempt to cancel the own account.
-  if (user_access('administer users') && empty($form_state['values']['user_cancel_confirm']) && $account->uid != $user->uid) {
+  if (user_access('manage user accounts') && empty($form_state['values']['user_cancel_confirm']) && $account->uid != $user->uid) {
     user_cancel($form_state['values'], $account->uid, $form_state['values']['user_cancel_method']);
 
     $form_state['redirect'] = 'admin/people';
@@ -467,7 +467,7 @@ function user_cancel_methods() {
     'user_cancel_delete' => array(
       'title' => t('Delete the account and its content.'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
-      'access' => user_access('administer users'),
+      'access' => user_access('manage user accounts'),
     ),
   );
   // Allow modules to customize account cancellation methods.

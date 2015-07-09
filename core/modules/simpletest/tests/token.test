@@ -736,7 +736,7 @@ class TokenUserTestCase extends TokenTestHelper {
       $this->fail('Could not create directory ' . $picture_path . '.');
     }
 
-    $this->account = $this->backdropCreateUser(array('administer users', 'administer account settings'));
+    $this->account = $this->backdropCreateUser(array('manage user accounts', 'administer account settings'));
     $this->backdropLogin($this->account);
   }
 

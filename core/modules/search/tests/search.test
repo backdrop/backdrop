@@ -1311,7 +1311,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
+    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'manage user accounts', 'administer blocks'));
     $this->backdropLogin($this->search_user);
 
     // Add a single piece of content and index it.

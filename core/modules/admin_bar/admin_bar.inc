@@ -622,7 +622,7 @@ function admin_bar_links_users() {
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
-    '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
+    '#href' => (user_access('manage user accounts') ? 'admin/people/list' : 'user'),
   );
   return $links;
 }

@@ -393,7 +393,7 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
       'bypass node access',
       'access content overview',
       'administer taxonomy',
-      'administer users',
+      'manage user accounts',
     );
     $args = func_get_args();
     if (isset($args[1]) && is_array($args[1])) {

@@ -1611,7 +1611,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
    */
   function testLocalUserCreation() {
     // User to add and remove language and create new users.
-    $admin_user = $this->backdropCreateUser(array('administer languages', 'access administration pages', 'administer users'));
+    $admin_user = $this->backdropCreateUser(array('administer languages', 'access administration pages', 'manage user accounts'));
     $this->backdropLogin($admin_user);
 
     // Add predefined language.

@@ -168,7 +168,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
 
     // Create a user with access to one configuration category.
     $permissions = $this->basePermissions + array(
-      'administer users',
+      'manage user accounts',
       'administer account settings',
     );
     $admin_user = $this->backdropCreateUser($permissions);
