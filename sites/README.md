@@ -36,7 +36,7 @@ the `$sites` array:
 
 ```php
 $sites['example-a.com'] = 'example-a';
-$sites['example-a.com'] = 'example-b';
+$sites['example-b.com'] = 'example-b';
 ```
 
 Then you could place site-specific settings in `sites/example-a/settings.php`,
