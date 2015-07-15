@@ -31,6 +31,8 @@ function user_autocomplete($string = '') {
 function user_pass() {
   global $user;
 
+  backdrop_set_title(t('Reset password'));
+
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username or e-mail address'),

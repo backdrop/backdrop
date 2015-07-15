@@ -1314,7 +1314,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify breadcrumb on user pages (without menu link) for anonymous user.
     $trail = $home;
-    $this->assertBreadcrumb('user', $trail, t('User account'));
+    $this->assertBreadcrumb('user', $trail, t('Log in'));
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
 
     // Verify breadcrumb on user pages (without menu link) for registered users.
@@ -1357,7 +1357,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     // functions, there's a lot that can go wrong in doing so.
     $this->backdropLogin($this->admin_user);
     $edit = array(
-      'link_title' => 'User',
+      'link_title' => 'Log in',
       'link_path' => 'user',
     );
     $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
