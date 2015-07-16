@@ -577,12 +577,12 @@ function user_admin_settings_submit($form, &$form_state) {
   $config->set('cancel_confirm_subject', $values['user_mail_cancel_confirm_subject']);
   $config->set('password_reset_body', $values['user_mail_password_reset_body']);
   $config->set('password_reset_subject', $values['user_mail_password_reset_subject']);
-  $config->set('register_admin_body', $values['user_mail_register_admin_created_body']);
-  $config->set('register_admin_subject', $values['user_mail_register_admin_created_subject']);
-  $config->set('register_no_approval_body', $values['user_mail_register_no_approval_required_body']);
-  $config->set('register_no_approval_subject', $values['user_mail_register_no_approval_required_subject']);
-  $config->set('register_pending_body', $values['user_mail_register_pending_approval_body']);
-  $config->set('register_pending_subject', $values['user_mail_register_pending_approval_subject']);
+  $config->set('register_admin_created_body', $values['user_mail_register_admin_created_body']);
+  $config->set('register_admin_created_subject', $values['user_mail_register_admin_created_subject']);
+  $config->set('register_no_approval_required_body', $values['user_mail_register_no_approval_required_body']);
+  $config->set('register_no_approval_required_subject', $values['user_mail_register_no_approval_required_subject']);
+  $config->set('register_pending_approval_body', $values['user_mail_register_pending_approval_body']);
+  $config->set('register_pending_approval_subject', $values['user_mail_register_pending_approval_subject']);
   $config->set('status_activated_body', $values['user_mail_status_activated_body']);
   $config->set('status_activated_subject', $values['user_mail_status_activated_subject']);
   $config->set('status_blocked_body', $values['user_mail_status_blocked_body']);
