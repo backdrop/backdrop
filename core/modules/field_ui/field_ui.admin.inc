@@ -247,8 +247,8 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       t('Weight'),
       t('Parent'),
       t('Machine name'),
-      t('Field type'),
       t('Widget'),
+      t('Data type'),
       t('Operations'),
     ),
     '#parent_options' => array(),
@@ -300,17 +300,17 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'field_name' => array(
         '#markup' => $instance['field_name'],
       ),
-      'type' => array(
-        '#type' => 'link',
-        '#title' => t($field_types[$field['type']]['label']),
-        '#href' => $admin_field_path . '/field-settings',
-        '#options' => array('attributes' => array('title' => t('Edit field settings.'))),
-      ),
       'widget_type' => array(
         '#type' => 'link',
         '#title' => t($widget_types[$instance['widget']['type']]['label']),
         '#href' => $admin_field_path . '/widget-type',
         '#options' => array('attributes' => array('title' => t('Change widget type.'))),
+      ),
+      'type' => array(
+        '#type' => 'link',
+        '#title' => t($field_types[$field['type']]['label']),
+        '#href' => $admin_field_path . '/field-settings',
+        '#options' => array('attributes' => array('title' => t('Edit field settings.'))),
       ),
     );
     $links = array();
@@ -370,10 +370,10 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       ),
       'field_name' => array(
         '#markup' => $name,
+        '#cell_attributes' => array('colspan' => 2),
       ),
       'type' => array(
         '#markup' => isset($extra_field['description']) ? $extra_field['description'] : '',
-        '#cell_attributes' => array('colspan' => 2),
       ),
       'operations' => array(
         '#markup' => '',
@@ -385,6 +385,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   $max_weight = field_info_max_weight($entity_type, $bundle, 'form');
   $field_type_options = field_ui_field_type_options();
   $widget_type_options = field_ui_widget_type_options(NULL, TRUE);
+  $widget_options = array_combine(array_column(field_info_widget_types(), 'label'), array_keys(field_info_widget_types()));
   if ($field_type_options && $widget_type_options) {
     $name = '_add_new_field';
     $table[$name] = array(
@@ -446,25 +447,26 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         ),
         '#required' => FALSE,
       ),
+      'widget_type' => array(
+        '#type' => 'select',
+        '#title' => t('Widget for new field'),
+        '#title_display' => 'invisible',
+        '#options' => array_keys($widget_options),
+        '#empty_option' => t('- Select a widget -'),
+        '#description' => t('Form element to edit the data.'),
+        '#attributes' => array('class' => array('widget-type-select')),
+        '#cell_attributes' => array('colspan' => 1),
+        '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
+      ),
       'type' => array(
         '#type' => 'select',
         '#title' => t('Type of new field'),
         '#title_display' => 'invisible',
         '#options' => $field_type_options,
-        '#empty_option' => t('- Select a field type -'),
+        '#empty_option' => t('- Select a data type -'),
         '#description' => t('Type of data to store.'),
         '#attributes' => array('class' => array('field-type-select')),
-        '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-      'widget_type' => array(
-        '#type' => 'select',
-        '#title' => t('Widget for new field'),
-        '#title_display' => 'invisible',
-        '#options' => $widget_type_options,
-        '#empty_option' => t('- Select a widget -'),
-        '#description' => t('Form element to edit the data.'),
-        '#attributes' => array('class' => array('widget-type-select')),
-        '#cell_attributes' => array('colspan' => 3),
+        '#cell_attributes' => array('colspan' => 2),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
       // Place the 'translatable' property as an explicit value so that contrib
@@ -546,7 +548,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#type' => 'select',
         '#title' => t('Widget for existing field'),
         '#title_display' => 'invisible',
-        '#options' => $widget_type_options,
+        '#options' => array_keys($widget_options),
         '#empty_option' => t('- Select a widget -'),
         '#description' => t('Form element to edit the data.'),
         '#attributes' => array('class' => array('widget-type-select')),
@@ -583,6 +585,8 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'fields' => $js_fields,
       'fieldWidgetTypes' => field_ui_widget_type_options(),
       'fieldInfo' => $field_info,
+      'widgetDataTypes' => field_info_widget_types(),
+      'widgetNames' => $widget_options,
     ),
   );
 

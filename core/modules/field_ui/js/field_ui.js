@@ -18,26 +18,28 @@ Backdrop.fieldUIFieldOverview = {
    * Implements dependent select dropdowns on the 'Manage fields' screen.
    */
   attachUpdateSelects: function(table, settings) {
-    var widgetTypes = settings.fieldWidgetTypes;
+    var fieldTypes = settings.fieldWidgetTypes;
+    var widgetTypes = settings.widgetDataTypes;
     var fields = settings.fields;
     var fieldInfo = settings.fieldInfo;
-    // Store the default text of widget selects.
-    $('.widget-type-select', table).each(function () {
+    var widgets = settings.widgetNames;
+    // Store the default text of data type selects.
+    $('.field-type-select', table).each(function () {
       this.initialValue = this.options[0].text;
     });
 
-    // 'Field type' select updates its 'Widget' select.
-    $('.field-type-select', table).each(function () {
-      this.targetSelect = $('.widget-type-select', $(this).closest('tr'));
+    // 'Widget' select updates its 'Data type' select.
+    $('.widget-type-select', table).each(function () {
+      this.targetSelect = $('.field-type-select', $(this).closest('tr'));
 
       $(this).bind('change keyup', function () {
-        var selectedFieldType = this.options[this.selectedIndex].value;
-        var options = (selectedFieldType in widgetTypes ? widgetTypes[selectedFieldType] : []);
-        var widgetDefault = null;
-        if (typeof selectedFieldType !== 'undefined' && selectedFieldType !== '' && selectedFieldType !== null ) {
-          widgetDefault = fieldInfo[selectedFieldType]['defaultWidget'];
+        var selectedWidgetType = widgets[this.options[this.selectedIndex].value];
+        var options = widgetTypes[selectedWidgetType]['field types'];
+        var typeDefault = null;
+        if (typeof selectedWidgetType !== 'undefined' && selectedWidgetType !== '' && selectedWidgetType !== null ) {
+          typeDefault = widgetTypes[selectedWidgetType]['field types'][0];
         }
-        this.targetSelect.fieldUIPopulateOptions(options, null, widgetDefault);
+        this.targetSelect.fieldUIPopulateOptions(options, null, typeDefault);
       });
 
       // Trigger change on initial pageload to get the right widget options
