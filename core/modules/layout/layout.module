@@ -78,6 +78,7 @@ function layout_menu() {
   $items['admin/structure/layouts/list'] = array(
     'title' => 'List layouts',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
   ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(
@@ -92,6 +93,7 @@ function layout_menu() {
     'page callback' => 'layout_add_page',
     'page arguments' => array(),
     'type' => MENU_LOCAL_ACTION,
+    'weight' => -10,
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore'] = array(
@@ -104,7 +106,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'title' => 'Layout',
+    'title' => 'Edit layout',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
 
@@ -180,7 +182,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
-    'title' => 'Add condition',
+    'title' => 'Add visibility condition',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4),
     'type' => MENU_CALLBACK,
@@ -197,7 +199,7 @@ function layout_menu() {
 
   // Add/configure conditions for a block uses the same callback as layout.
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add/%layout_tempstore_block'] = array(
-    'title' => 'Add condition',
+    'title' => 'Add visibility condition',
     'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4, 7),
@@ -234,7 +236,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/condition/add'] = array(
-    'title' => 'Add condition',
+    'title' => 'Add visibility condition',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', NULL, NULL, 4),
     'type' => MENU_CALLBACK,
@@ -364,11 +366,7 @@ function layout_page_menu_item(array $menu, array $access_arguments, array $page
 function layout_page_title(Layout $layout) {
   // Page titles are run through check_plain() before output, so no escaping
   // here is intentional. See backdrop_get_title().
-  $path = $layout->getPath();
-  if ($path) {
-    return t('Edit "!layout" at !path', array('!layout' => $layout->title, '!path' => $path));
-  }
-  return t('Edit "!layout"', array('!layout' => $layout->title));
+  return $layout->title;
 }
 
 /**

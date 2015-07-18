@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for image.module.
@@ -827,11 +826,12 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // style.
     $node = node_load($nid, NULL, TRUE);
     $image_info = array(
-      'uri' => image_style_url('medium', $node->{$field_name}[LANGUAGE_NONE][0]['uri']),
-      'width' => 220,
-      'height' => 110,
+      'style_name' => 'medium',
+      'uri' => $node->{$field_name}[LANGUAGE_NONE][0]['uri'],
+      'width' => '300',
+      'height' => '150',
     );
-    $default_output = theme('image', $image_info);
+    $default_output = theme('image_style', $image_info);
     $this->assertRaw($default_output, "Preview image is displayed using 'medium' style.");
 
     // Add alt/title fields to the image and verify that they are displayed.

@@ -35,7 +35,6 @@ function field_token_info_alter(&$info) {
         // Note that label and description have already been sanitized by _field_token_info().
         'name' => $field['label'],
         'description' => $field['description'],
-        'module' => 'token',
       );
     }
   }
@@ -50,22 +49,27 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
   $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
 
   // Entity tokens.
-  if ($type == 'entity' && !empty($data['entity_type']) && !empty($data['entity']) && !empty($data['token_type'])) {
-    $entity_type = $data['entity_type'];
-
+  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     // The field API does weird stuff to the entity, so let's clone it.
-    $entity = clone $data['entity'];
+    $entity = clone $data[$type];
+    $entity_type = $entity->entityType();
+    $bundle = $entity->bundle();
 
     // Reset the prepared view flag in case token generation is called from
     // inside field_attach_view().
-    unset($entity->_field_view_prepared);
+    if (isset($entity->_field_view_prepared)) {
+      unset($entity->_field_view_prepared);
+    }
 
-    list(, , $bundle) = entity_extract_ids($entity_type, $entity);
     $fields = field_info_instances($entity_type, $bundle);
-
     foreach (array_keys($fields) as $field_name) {
       // Do not continue if the field is empty.
       if (empty($entity->{$field_name})) {
+        continue;
+      }
+
+      // Node module already replaces the body field as [node:body].
+      if ($entity_type == 'node' && $field_name == 'body') {
         continue;
       }
 
@@ -134,10 +138,9 @@ function _field_token_info($field_name = NULL) {
       foreach ($fields as $field) {
         $key = $field['field_name'];
         if (!empty($field['bundles'])) {
-          foreach (array_keys($field['bundles']) as $entity) {
+          foreach (array_keys($field['bundles']) as $entity_type) {
             // Make sure a token type exists for this entity.
-            $entity_info = entity_get_info($entity);
-            $token_type = $entity_info['token type'];
+            $token_type = $entity_info[$entity_type]['token type'];
             if (empty($token_type)) {
               continue;
             }
@@ -146,17 +149,17 @@ function _field_token_info($field_name = NULL) {
             $info[$key] += array('labels' => array(), 'bundles' => array());
 
             // Find which label is most commonly used.
-            foreach ($field['bundles'][$entity] as $bundle) {
+            foreach ($field['bundles'][$entity_type] as $bundle) {
               // Field information will included fields attached to disabled
               // bundles, so check that the bundle exists before provided a
               // token for it.
               // @see http://drupal.org/node/1252566
-              if (!isset($entity_info[$entity]['bundles'][$bundle])) {
+              if (!isset($entity_info[$entity_type]['bundles'][$bundle])) {
                 continue;
               }
 
-              $info[$key]['labels'][] = $instances[$entity][$bundle][$key]['label'];
-              $info[$key]['bundles'][$token_type][$bundle] = $entity_info[$entity]['bundles'][$bundle]['label'];
+              $info[$key]['labels'][] = $instances[$entity_type][$bundle][$key]['label'];
+              $info[$key]['bundles'][$token_type][$bundle] = $entity_info[$entity_type]['bundles'][$bundle]['label'];
             }
           }
         }

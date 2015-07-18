@@ -246,11 +246,14 @@ ul.menu li.expanded {
  * Tabs.
  */
 .tabs {
-  clear: both;
+  clear: none; /* For IE8 */
+}
+.tabs:nth-child(2) {
+  clear: both; /* For small screens */
 }
 @media only screen and (min-width: 600px) {
-  .tabs {
-    clear: none;
+  .tabs:nth-child(2) {
+    clear: none; /* For large screens */
   }
 }
 ul.primary {
@@ -367,13 +370,36 @@ ul.secondary li.active a.active {
   margin: 0 20px;
 }
 .l-header {
-  /* Then add a negative margin the header the same amount. */
-  padding: 20px 20px 0;
-  margin: 0 -20px 20px !important;
-  -webkit-box-sizing: content-box !important;
-  -moz-box-sizing: content-box !important;
-  box-sizing: content-box !important;
+  position: relative;
+  padding: 20px 0 0;
+  margin: 0 0 20px;
+}
+.l-header:before {
+  /* Gray bar background */
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  margin: 0 -20px;
+  z-index: 0;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
   background-color: #f0f0f0;
+}
+.l-header:after {
+  /* Clearfix for IE8 issue */
+  content: '';
+  display: table;
+  clear: both;
+}
+.l-header > * {
+  /* Makes sure gray bar is behind header content */
+  position: relative;
+  z-index: 1;
 }
 .layout--one-column #messages,
 .layout--one-column #content .section {
@@ -607,25 +633,47 @@ tr.selected td {
  *   to apply all padding to the inner .fieldset-wrapper instead.
  */
 fieldset {
-  border: 1px solid #ccc;
-  padding: 2.5em 0 0 0; /* LTR */
   position: relative;
+  max-width: 100%;
   margin: 1em 0;
+  padding: 3em 0 0 0; /* LTR */
+  border-radius: 4px;
+  background-color:#fff;
+  border:solid 2px #EAEAEA;
+  min-width: 0;
 }
 [dir="rtl"] fieldset {
-  padding: 2.5em 0 0 0;
+  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
-  margin-top: 0.5em;
-  padding-left: 15px; /* LTR */
+  position: absolute;
   left: 0; /* LTR */
   top: 0;
-  position: absolute;
+  width: 100%;
+  margin-top: .35em;
+  padding-left: 15px; /* LTR */
   text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
-  padding-right: 15px;
   right: 0;
+  padding-right: 15px;
+  padding-left: 0;
+}
+legend {
+  font-size: 120%;
+  font-weight: normal;
+}
+fieldset fieldset {
+  background-color: #fff;
+}
+fieldset fieldset fieldset {
+  background-color: #f8f8f8;
+}
+/**
+ * Collapsible Fieldsets
+ */
+.js fieldset.collapsible {
+  position: relative;
 }
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
@@ -633,18 +681,49 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
 }
-fieldset.collapsed {
-  background-color: transparent;
+.js fieldset.collapsible .fieldset-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 94%; /* IE8 fallback */
+  width: calc(100% - 4em);
+  padding: .3em .3em .3em 1.8em;
+  margin: 0 -.5em;
+  border-radius: 4px;
+  background: transparent;
 }
+.js fieldset.collapsible .fieldset-legend a:before {
+  content: "";
+  position: absolute;
+  left: .6em;
+  top: .8em;
+  width: 0;
+  height: 0;
+  border: .32em solid transparent;
+  border-top-color: #000;
+  border-bottom: 0;
+}
+
+.fieldset-legend span.summary {
+  position: absolute;
+  top: .4em;
+  right: 2em;
+  display: none;
+}
+@media (min-width: 450px) {
+  .fieldset-legend span.summary {
+    display: block;
+  }
+}
+/* Collapsed state styles */
 .js fieldset.collapsed {
-  border-width: 1px;
-  height: auto;
+  padding: 1.6em 0;
 }
-fieldset fieldset {
-  background-color: #fff;
-}
-fieldset fieldset fieldset {
-  background-color: #f8f8f8;
+.js fieldset.collapsed .fieldset-legend a:before {
+  left: .8em;
+  top: .7em;
+  border: .32em solid transparent;
+  border-left-color: black;
 }
 
 /**
@@ -676,6 +755,9 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0;
   padding: 0 0 10px;
+}
+fieldset label {
+  font-weight: normal;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -807,7 +889,9 @@ input.form-submit:active {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
+  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
+  box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.form-button-disabled,
 input.form-button-disabled:active {
@@ -869,27 +953,32 @@ input.form-number,
 input.form-search,
 input.form-file,
 textarea.form-textarea {
-  font-weight: 400;
-  border: 0;
-  padding: 10px;
   box-sizing: border-box;
+  padding: 10px;
+  border: 2px solid #d0d0d0;
   max-width: 100%;
+  font-weight: 400;
   color: #444b53;
   background: #fff;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -moz-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -webkit-transition: all 0.25s ease-in-out;
-  -moz-transition: all 0.25s ease-in-out;
-  -ms-transition: all 0.25s ease-in-out;
-  -o-transition: all 0.25s ease-in-out;
+  -webkit-transition: border-color 0.25s ease-in-out;
+  -moz-transition: border-color 0.25s ease-in-out;
+  -ms-transition: border-color 0.25s ease-in-out;
+  -o-transition: border-color 0.25s ease-in-out;
+  will-change: border-color;
+}
+input.form-text,
+input.form-email,
+input.form-url,
+input.form-search,
+textarea.form-textarea {
+  max-width: 100%;
 }
 select.form-select {
   font-weight: 400;
-  border: 2px solid rgba(208,208,208,1);
+  border: 2px solid #d0d0d0;
   padding: 10px;
   box-sizing: border-box;
   color: #444b53;
@@ -897,13 +986,11 @@ select.form-select {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+  will-change: border-color;
 }
 select.form-select:focus {
   color: #000;
-  border-color: rgba(4, 148, 219, 0.75);
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  border-color: #43afe4;
 }
 /* de-emphasize the text format */
 select.filter-list {
@@ -925,9 +1012,7 @@ input.form-file:focus,
 textarea.form-textarea:focus {
   outline: 0;
   color: #000;
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
+  border-color: #43afe4;
 }
 ul.action-links {
   margin: 1em 0;
@@ -1015,6 +1100,10 @@ div.admin-panel h3 {
   padding: 0;
   margin: 0;
   background: none;
+}
+#layout-edit-main .l-header:before {
+  /* Make sure the page gray bg isn't showing inside layout edit area */
+  background: transparent;
 }
 #layout-edit-main #page-title {
   float: none;
@@ -1220,7 +1309,8 @@ div.add-or-remove-shortcuts {
 /* Field UI */
 #field-display-overview input.field-formatter-settings-edit {
   margin: 0;
-  padding: 1px 8px;
+  padding: .4em 1em;
+  line-height: 1.2;
 }
 #field-display-overview tr.field-formatter-settings-changed {
   background: #ffffbb;
@@ -1320,6 +1410,8 @@ div.add-or-remove-shortcuts {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
@@ -1372,5 +1464,69 @@ div.add-or-remove-shortcuts {
   [dir="rtl"] body.maintenance-page .step-indicator {
     left: 0;
     right: auto;
+  }
+}
+
+/**
+ * Progress Bar
+ * See system module
+ */
+.progress {
+  font-weight: bold;
+}
+.progress .bar {
+  margin: 0 0.2em .5em 0;
+  border: 2px solid #e5e5e6;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #e5e5e6;
+}
+.progress .filled {
+  position: relative;
+  overflow: hidden;
+  background: #CFDE56;
+  -webkit-transition: width .4s;
+  transition: width .4s;
+  will-change: width;
+}
+/* Progress Bar Animation */
+.progress .filled:after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 15%;
+  height: 100%;
+  background: -webkit-linear-gradient(0deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
+  background: linear-gradient(90deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
+  background-color: #CFDE56;
+  border-radius: 3px;
+  background-size: auto 200%;
+  background-position: 0 100%;
+  -webkit-animation: progressGradient 3s infinite;
+  animation: progressGradient 3s infinite;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-transition: width .4s;
+  transition: width .4s;
+  will-change: left, width;
+}
+
+@-webkit-keyframes progressGradient {
+  0% {
+    left: -15%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes progressGradient {
+  0% {
+    left: -15%;
+  }
+  100% {
+    left: 100%;
   }
 }

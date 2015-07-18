@@ -738,7 +738,33 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
 /**
  * Menu callback; select certain alias types to delete.
  */
-function path_admin_bulk_delete() {
+function path_admin_bulk_delete($form, $form_state) {
+  $all_path_info = path_get_info();
+
+  // Confirmation form action.
+  if (isset($form_state['values']['delete'])) {
+    $delete_list = array();
+    foreach ($form_state['values']['delete'] as $key => $value) {
+      if ($value) {
+        $label = $key === 'all_aliases' ? t('All aliases') : $all_path_info[$key]['label'];
+        $delete_list[] = $label;
+      }
+    }
+    $form['delete'] = array(
+      '#type' => 'value',
+      '#value' => $form_state['values']['delete'],
+    );
+    $form['delete_list'] = array(
+      '#markup' => theme('item_list', array('items' => $delete_list)),
+    );
+
+    $question = t('Delete all the following aliases?');
+    $path = 'admin/config/search/path/bulk-delete';
+    $description = t('Deleting these aliases cannot be undone.');
+    $yes = t('Delete aliases');
+    return confirm_form($form, $question, $path, $description, $yes);
+  }
+
   /* TODO:
    1) all - DONE
    2) all node aliases - DONE
@@ -756,6 +782,7 @@ function path_admin_bulk_delete() {
     '#title' => t('Choose aliases to delete'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
+    '#tree' => TRUE,
   );
 
   // First we do the "all" case.
@@ -768,7 +795,6 @@ function path_admin_bulk_delete() {
   );
 
   // Next, provide checkboxes for each alias type.
-  $all_path_info = path_get_info();
   foreach ($all_path_info as $internal_name => $path_info) {
     $count = db_query("SELECT count(1) FROM {url_alias} WHERE source LIKE :src", array(':src' => "$internal_name%"))->fetchField();
     $form['delete'][$internal_name] = array(
@@ -779,12 +805,11 @@ function path_admin_bulk_delete() {
     );
   }
 
-  // Warn them and give a button that shows we mean business.
-  $form['warning'] = array('#value' => '<p>' . t('<strong>Note:</strong> there is no confirmation. Be sure of your action before clicking the "Delete aliases now!" button.<br />You may want to make a backup of the database and/or the url_alias table prior to using this feature.') . '</p>');
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Delete all checked aliases'),
+    '#submit' => array('path_admin_bulk_delete_confirm_submit'),
   );
 
   return $form;
@@ -793,8 +818,15 @@ function path_admin_bulk_delete() {
 /**
  * Submit handler for path_admin_bulk_delete().
  */
+function path_admin_bulk_delete_confirm_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit handler for path_admin_bulk_delete().
+ */
 function path_admin_bulk_delete_submit($form, &$form_state) {
-  foreach ($form_state['values'] as $key => $value) {
+  foreach ($form_state['values']['delete'] as $key => $value) {
     if ($value) {
       if ($key === 'all_aliases') {
         db_delete('url_alias')

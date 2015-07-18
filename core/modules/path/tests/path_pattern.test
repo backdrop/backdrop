@@ -427,7 +427,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropGet('node/add/page');
     $this->assertFieldChecked('edit-path-auto');
 
-    // Create node for testing by previewing and saving the node form.
+    // Create node for testing by saving the node form.
     $title = ' Testing: node title [';
     $automatic_alias = 'content/testing-node-title';
     $this->backdropPost(NULL, array('title' => $title), 'Save');

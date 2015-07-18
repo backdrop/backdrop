@@ -227,7 +227,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   );
   foreach ($all_filter_info as $name => $filter_info) {
     $form['filters']['order'][$name]['filter'] = array(
-      '#markup' => check_plain($filter_info['title']),
+      '#markup' => $filter_info['title'],
     );
     $form['filters']['order'][$name]['weight'] = array(
       '#type' => 'weight',

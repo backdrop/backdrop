@@ -456,13 +456,22 @@ class TokenNodeTestCase extends TokenTestHelper {
   protected $profile = 'standard';
 
   function testNodeTokens() {
-    $source_node = $this->backdropCreateNode(array(
-      'log' => $this->randomName(),
-      'path' => array(
-        'auto' => FALSE,
-        'alias' => 'content/source-node',
-      ),
-    ));
+    $admin_user = $this->backdropCreateUser(array('create article content', 'create url aliases'));
+    $this->backdropLogin($admin_user);
+
+    $files = $this->backdropGetTestFiles('image');
+    $file = new File((array) $files[0]);
+    $file->save();
+    $node_title = $this->randomName();
+    $node_edit = array(
+      'title' => $node_title,
+      'path[alias]' => 'content/source-node',
+      'field_tags[und]' => 'foo, bar',
+      'field_image[und][0][fid]' => $file->fid,
+    );
+    $this->backdropPost('node/add/article', $node_edit, t('Save'));
+    $source_node = $this->backdropGetNodeByTitle($node_title);
+
     $tokens = array(
       'source' => NULL,
       'source:nid' => NULL,
@@ -471,16 +480,18 @@ class TokenNodeTestCase extends TokenTestHelper {
       'url:absolute' => url("node/{$source_node->nid}", array('absolute' => TRUE)),
       'url:relative' => url("node/{$source_node->nid}", array('absolute' => FALSE)),
       'url:unaliased:path' => "node/{$source_node->nid}",
-      'content-type' => 'Basic page',
-      'content-type:name' => 'Basic page',
-      'content-type:machine-name' => 'page',
-      'content-type:description' => "Use <em>basic pages</em> for your static content, such as an 'About us' page.",
+      'content-type' => 'Article',
+      'content-type:name' => 'Article',
+      'content-type:machine-name' => 'article',
+      'content-type:description' => "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
       'content-type:node-count' => 1,
-      'content-type:edit-url' => url('admin/structure/types/manage/page', array('absolute' => TRUE)),
+      'content-type:edit-url' => url('admin/structure/types/manage/article', array('absolute' => TRUE)),
+      'field_image' => file_create_url($file->uri),
+      'field_tags' => 'foo, bar',
       // Deprecated tokens.
       //'tnid' => 0,
-      'type' => 'page',
-      'type-name' => 'Basic page',
+      'type' => 'article',
+      'type-name' => 'Article',
       'url:alias' => 'content/source-node',
     );
     $this->assertTokens('node', array('node' => $source_node), $tokens);
@@ -501,7 +512,7 @@ class TokenNodeTestCase extends TokenTestHelper {
       'content-type:name' => 'Article',
       'content-type:machine-name' => 'article',
       'content-type:description' => "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
-      'content-type:node-count' => 1,
+      'content-type:node-count' => 2,
       'content-type:edit-url' => url('admin/structure/types/manage/article', array('absolute' => TRUE)),
       // Deprecated tokens.
       'type' => 'article',

@@ -768,7 +768,7 @@ function hook_field_widget_info() {
     'text_textarea_with_summary' => array(
       'label' => t('Text area with a summary'),
       'field types' => array('text_with_summary'),
-      'settings' => array('rows' => 20, 'summary_rows' => 5),
+      'settings' => array('rows' => 10, 'summary_rows' => 5),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -1872,7 +1872,7 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
       $items = (array) $entity->{$field_name}[$langcode];
       $delta_count = 0;
       foreach ($items as $delta => $item) {
-        // We now know we have someting to insert.
+        // We now know we have something to insert.
         $do_insert = TRUE;
         $record = array(
           'entity_type' => $entity_type,

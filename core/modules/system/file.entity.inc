@@ -98,7 +98,7 @@ class File extends Entity {
    * Implements EntityInterface::label().
    */
   public function label() {
-    return $this->name;
+    return $this->filename;
   }
 
   /**
