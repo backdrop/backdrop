@@ -6662,12 +6662,21 @@ function element_info_property($type, $property_name, $default = NULL) {
  * @param array $array
  *   The input array to be sorted.
  * @param array $keys
- *   An array of keys on which to be sort. Each key of the $keys array is the
- *   key by which sorting will be done. Each value of the $keys array must be
- *   one of the PHP constants sorting, either SORT_NUMERIC or SORT_STRING.
- *   If an unindexed array is passed in, each value will be assumed to be the
- *   key by which sorting will be done, and all comparisons will be done as
- *   though SORT_NUMERIC were passed in for each key.
+ *   An array of keys to sort by. Values must be PHP sorting type flags,
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
+ *   unindexed array is passed in. 
+ *
+ * Example usage:
+ * @code
+ * // Sort by a single numeric key:
+ * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
+ * 
+ * // Short-hand sort by a numeric key:
+ * backdrop_sort($my_array, array('weight'));
+ * 
+ * // Sort by numeric and string keys.
+ * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
+ * @endcode
  */
 function backdrop_sort(array &$array, array $keys = array('weight')) {
   // Ensure all keys have a sort value.
