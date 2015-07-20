@@ -8,7 +8,7 @@
 /**
  * Testing that users can not input bad URLs or labels
  */
-class LinkUITest extends BackdropWebTestcase {
+class LinkUITest extends BackdropWebTestCase {
 
   /**
    * Link supposed to be good
@@ -50,7 +50,7 @@ class LinkUITest extends BackdropWebTestcase {
       'create page content',
       'access administration pages'
     ));
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -60,9 +60,9 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->drupalPost(NULL, array(), t('Save field settings'));
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
@@ -74,7 +74,7 @@ class LinkUITest extends BackdropWebTestcase {
 
     // create page form
     //$this->drupalGet('node/add');
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField('edit-field-' . $name . '-und-0-title', 'Title found');
     $this->assertField('edit-field-' . $name . '-und-0-url', 'URL found');
@@ -133,15 +133,15 @@ class LinkUITest extends BackdropWebTestcase {
     $input_test_cases[] = $test_case;
 
     foreach ($input_test_cases as $input) {
-      $this->drupalLogin($this->web_user);
-      $this->drupalGet('node/add/page');
+      $this->backdropLogin($this->web_user);
+      $this->backdropGet('node/add/page');
 
       $edit = array(
         'title' => $input['label'],
         $field_name . '[und][0][title]' => $input['label'],
         $field_name . '[und][0][url]' => $input['href'],
       );
-      $this->drupalPost(NULL, $edit, t('Save'));
+      $this->backdropPost(NULL, $edit, t('Save'));
       if ($input['type'] == self::LINK_INPUT_TYPE_BAD_URL) {
         $this->assertRaw(t('The value %value provided for %field is not a valid URL.', array('%field' => $name, '%value' => trim($input['href']))), 'Not a valid URL: ' . $input['href']);
         continue;
@@ -154,9 +154,9 @@ class LinkUITest extends BackdropWebTestcase {
       $url = $this->getUrl();
 
       // change to Anonymous user.
-      $this->drupalLogout();
+      $this->backdropLogout();
 
-      $this->drupalGet($url);
+      $this->backdropGet($url);
       //debug($this);
       // If simpletest starts using something to override the error system, this will flag
       // us and let us know it's broken.
@@ -179,8 +179,8 @@ class LinkUITest extends BackdropWebTestcase {
    * title actually displays <strong>.
    */
   function testStaticLinkCreate() {
-    $this->web_user = $this->drupalCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -191,9 +191,9 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->drupalPost(NULL, array(), t('Save field settings'));
-    $this->drupalPost(NULL, array(
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(
       'instance[settings][title]' => 'value',
       'instance[settings][title_value]' => '<strong>' . $name . '</strong>'), t('Save settings'));
 
@@ -201,7 +201,7 @@ class LinkUITest extends BackdropWebTestcase {
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
 
     // create page form
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
     $input = array(
@@ -212,13 +212,13 @@ class LinkUITest extends BackdropWebTestcase {
       'title' => $name,
       $field_name . '[und][0][url]' => $input['href'],
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     $url = $this->getUrl();
 
     // change to anonymous user
-    $this->drupalLogout();
-    $this->drupalGet($url);
+    $this->backdropLogout();
+    $this->backdropGet($url);
 
     $this->assertRaw(l('<strong>' . $name . '</strong>', $input['href'], array('html' => TRUE)));
   }
@@ -227,8 +227,8 @@ class LinkUITest extends BackdropWebTestcase {
    * Testing that if you have the title but no url, the title is not sanitized twice.
    */
   function testCRUDTitleOnlyTitleNoLink() {
-    $this->web_user = $this->drupalCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -239,9 +239,9 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->drupalPost(NULL, array(), t('Save field settings'));
-    $this->drupalPost(NULL, array(
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(
       'instance[settings][url]' => 1,
     ), t('Save settings'));
 
@@ -249,7 +249,7 @@ class LinkUITest extends BackdropWebTestcase {
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
 
     // create page form
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
     $input = array(
@@ -262,13 +262,13 @@ class LinkUITest extends BackdropWebTestcase {
       $field_name . '[und][0][title]' => $input['title'],
       $field_name . '[und][0][url]' => $input['href'],
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     $url = $this->getUrl();
 
     // change to anonymous user
-    $this->drupalLogout();
-    $this->drupalGet($url);
+    $this->backdropLogout();
+    $this->backdropGet($url);
 
     $this->assertRaw('This &amp; That');
   }
@@ -278,8 +278,8 @@ class LinkUITest extends BackdropWebTestcase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldDefaults() {
-    $this->web_user = $this->drupalCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -289,16 +289,16 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->drupalPost(NULL, array(), t('Save field settings'));
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    node_types_rebuild();
+    //node_types_rebuild();
     menu_rebuild();
 
-    _field_info_collate_fields(TRUE);
+    //_field_info_collate_fields(TRUE);
     $instances = field_info_instances('node', 'page');
 
     $instance = $instances['field_' . $name];
@@ -318,8 +318,8 @@ class LinkUITest extends BackdropWebTestcase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldWithClass() {
-    $this->web_user = $this->drupalCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -329,14 +329,14 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
 
-    $this->drupalPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
     $link_class_name = 'basic-link-' . strtolower($this->randomName());
     $edit = array(
       'instance[settings][attributes][class]' => $link_class_name,
     );
-    $this->drupalPost(NULL, $edit, t('Save settings'));
+    $this->backdropPost(NULL, $edit, t('Save settings'));
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
@@ -360,7 +360,7 @@ class LinkUITest extends BackdropWebTestcase {
     // Now, let's create a node with this field and make sure the link shows up:
     // create page form
     $field_name = 'field_' . $name;
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
     $input = array(
@@ -373,13 +373,13 @@ class LinkUITest extends BackdropWebTestcase {
       $field_name . '[und][0][title]' => $input['title'],
       $field_name . '[und][0][url]' => $input['href'],
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     $url = $this->getUrl();
 
     // change to anonymous user
-    $this->drupalLogout();
-    $this->drupalGet($url);
+    $this->backdropLogout();
+    $this->backdropGet($url);
 
     $this->assertRaw('This &amp; That');
     $this->assertPattern('|class\s?=\s?"' . $link_class_name . '"|', "Class $link_class_name exists on page.");
@@ -390,8 +390,8 @@ class LinkUITest extends BackdropWebTestcase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldWithTwoClasses() {
-    $this->web_user = $this->drupalCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
+    $this->backdropLogin($this->web_user);
 
     // create field
     $name = strtolower($this->randomName());
@@ -401,14 +401,14 @@ class LinkUITest extends BackdropWebTestcase {
       'fields[_add_new_field][type]' => 'link_field',
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
-    $this->drupalPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
+    $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
 
-    $this->drupalPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
     $link_class_name = 'basic-link ' . strtoupper($this->randomName());
     $edit = array(
       'instance[settings][attributes][class]' => $link_class_name,
     );
-    $this->drupalPost(NULL, $edit, t('Save settings'));
+    $this->backdropPost(NULL, $edit, t('Save settings'));
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
@@ -432,7 +432,7 @@ class LinkUITest extends BackdropWebTestcase {
     // Now, let's create a node with this field and make sure the link shows up:
     // create page form
     $field_name = 'field_' . $name;
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
     $input = array(
@@ -445,13 +445,13 @@ class LinkUITest extends BackdropWebTestcase {
       $field_name . '[und][0][title]' => $input['title'],
       $field_name . '[und][0][url]' => $input['href'],
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     $url = $this->getUrl();
 
     // change to anonymous user
-    $this->drupalLogout();
-    $this->drupalGet($url);
+    $this->backdropLogout();
+    $this->backdropGet($url);
 
     $this->assertRaw('This &amp; That');
     $this->assertPattern('|class\s?=\s?"' . $link_class_name . '"|', "Classes $link_class_name exist on page.");

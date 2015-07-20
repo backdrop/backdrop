@@ -93,18 +93,9 @@ class LinkAttributeCrudTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save settings'));
     $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
 
-    // Somehow clicking "save" isn't enough, and we have to do a
-    // node_types_rebuild().
-    //node_types_rebuild();
     menu_rebuild();
-    /*$type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
-    $this->assertTrue($type_exists, 'The new content type has been created in the database.');*/
-    /*$type_exists = db_select('node', 'n')
-      ->fields('n', array('type'))
-      ->condition('n.type', $content_type_machine)
-      ->execute()
-      ->fetchCol();*/
-    $type_exists = db_query('SELECT type FROM {node} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
+
+    $type_exists = (bool) config_get('node.type.article', 'type');
     $this->assertTrue($type_exists, 'The new content type has been created in the database');
 
     $permission = 'create ' . $content_type_machine . ' content';
@@ -165,11 +156,9 @@ class LinkAttributeCrudTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save settings'));
     $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
 
-    // Somehow clicking "save" isn't enough, and we have to do a
-    // node_types_rebuild().
-    node_types_rebuild();
     menu_rebuild();
-    $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
+
+    $type_exists = (bool) config_get('node.type.article', 'type');
     $this->assertTrue($type_exists, 'The new content type has been created in the database.');
   }
 

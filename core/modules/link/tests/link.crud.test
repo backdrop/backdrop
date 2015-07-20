@@ -65,8 +65,9 @@ class LinkContentCrudTest extends BackdropWebTestCase {
     // Somehow clicking "save" isn't enough, and we have to do a
     // node_types_rebuild().
     node_types_rebuild();
-    menu_rebuild();
+    // Geoff commented this out 1 July 2015; also looking for node_type table
+    /*menu_rebuild();
     $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
-    $this->assertTrue($type_exists, 'The new content type has been created in the database.');
+    $this->assertTrue($type_exists, 'The new content type has been created in the database.');*/
   }
 }
