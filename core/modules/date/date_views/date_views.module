@@ -1,0 +1,593 @@
+<?php
+
+/**
+ * @file
+ * Date Views module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function date_views_menu() {
+  // Used to import files from a local filesystem into Backdrop.
+  $items['admin/config/regional/date-time/date-views'] = array(
+    'title' => 'Date views',
+    'description' => 'Configure settings for date views.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('date_views_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Form callback for date views settings.
+ */
+function date_views_settings($form, &$form_state) {
+
+  $form['date_views_month_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views month format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_month_format_with_year'),
+    '#description' => t('Date views month format with year, default value : F Y'),
+  );
+
+  $form['date_views_month_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views month format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_month_format_without_year'),
+    '#description' => t('Date views month format without year, default value : F'),
+  );
+
+  $form['date_views_day_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views day format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_day_format_with_year'),
+    '#description' => t('Date views day format with year, default value : l, F j, Y'),
+  );
+
+  $form['date_views_day_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views day format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_day_format_without_year'),
+    '#description' => t('Date views day format without year, default value : l, F j'),
+  );
+
+  $form['date_views_week_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views week format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_week_format_with_year'),
+    '#description' => t('Date views week format with year, default value : F j, Y'),
+  );
+
+  $form['date_views_week_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views week format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings','date_views_week_format_without_year'),
+    '#description' => t('Date views week format without year, default value : F j'),
+  );
+
+  // Add a submit button
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for module_settings_form().
+ */
+function date_views_settings_form_submit($form, &$form_state) {
+  $config = config('date_views.settings');
+  $config->set('date_views_month_format_with_year', $form_state['values']['date_views_month_format_with_year']);
+  $config->set('date_views_month_format_without_year', $form_state['values']['date_views_month_format_without_year']);
+  $config->set('date_views_week_format_with_year', $form_state['values']['date_views_month_format_with_year']);
+  $config->set('date_views_week_format_without_year', $form_state['values']['date_views_week_format_without_year']);
+  $config->set('date_views_day_format_with_year', $form_state['values']['date_views_day_format_with_year']);
+  $config->set('date_views_day_format_without_year', $form_state['values']['date_views_day_format_without_year']);
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Implements hook_views_api().
+ *
+ * This one is used as the base to reduce errors when updating.
+ */
+function date_views_theme() {
+  $path = backdrop_get_path('module', 'date_views');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => "$path/theme",
+  );
+
+  return array(
+    'date_nav_title' => $base + array(
+      'variables' => array(
+        'granularity' => NULL,
+        'view' => NULL,
+        'link' => NULL,
+        'format' => NULL,
+      ),
+    ),
+    'date_views_filter_form' => $base + array(
+      'template' => 'date-views-filter-form',
+      'render element' => 'form',
+    ),
+    'date_calendar_day' => $base + array(
+      'variables' => array(
+        'date' => NULL,
+      ),
+    ),
+    'date_views_pager' => $base + array(
+      'variables' => array(
+        'plugin' => NULL,
+        'input' => NULL,
+      ),
+      // Register a pattern so that it can work like all views templates.
+      'pattern' => 'date_views_pager__',
+      'template' => 'date-views-pager',
+    ),
+  );
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function date_views_views_api() {
+  return array(
+    'api' => 3,
+    'path' => backdrop_get_path('module', 'date_views') . '/includes',
+  );
+}
+
+/**
+ * Wrapper function to make sure this function will always work.
+ */
+function date_views_views_fetch_fields($base, $type) {
+  if (!module_exists('views')) {
+    return array();
+  }
+  module_load_include('inc', 'views', 'includes/admin');
+  return views_fetch_fields($base, $type);
+}
+
+/**
+ * Identify all potential date/timestamp fields and cache the data.
+ */
+function date_views_fields($base = 'node', $reset = FALSE) {
+  static $fields = array();
+  $empty = array('name' => array(), 'alias' => array());
+  module_load_include('inc', 'date_views', 'includes/date_views_fields');
+
+  if (empty($fields[$base]) || $reset) {
+    $cid = 'date_views_fields_' . $base;
+    if (!$reset && $cached = cache_get($cid, 'cache_views')) {
+      $fields[$base] = $cached->data;
+    }
+    else {
+      $fields[$base] = _date_views_fields($base);
+    }
+  }
+  // Make sure that empty values will be arrays in he expected format.
+  return !empty($fields) && !empty($fields[$base]) ? $fields[$base] : $empty;
+}
+
+/**
+ * Implements hook_date_views_entities().
+ *
+ * Map extra Views tables to the entity that holds its date fields, needed for Views tables other than the primary tables identified in entity_info().
+ */
+function date_views_date_views_extra_tables() {
+  return array(
+    'node_revision' => 'node',
+  );
+}
+
+/**
+ * Helper function to map entity types to the Views base table they use, to make it easier to infer the entity type from a base table.
+ *
+ * Views has a new handler called views_handler_field_entity() that loads entities.
+ *
+ * And you can use something like the following to get the entity type from a view, but not all our base tables contain the entity information we need, (i.e. revisions).
+ *
+ * So it won't work here and we resort to creating information from entity_get_info().
+ *
+ *   // A method to get the entity type for a base table.
+ *   $table_data = views_fetch_data($base_table);
+ *   if (!isset($table_data['table']['base']['entity type'])) {
+ *     return FALSE;
+ *   }
+ *   $entity_type = $table_data['table']['base']['entity type'];
+ */
+function date_views_base_tables() {
+  $base_tables = &backdrop_static(__FILE__, array());
+
+  if (empty($base_tables)) {
+
+    // First we get the base tables we can learn about from entity_info.
+    $entity_info = entity_get_info();
+    foreach ($entity_info as $entity_type => $info) {
+      if (!empty($info['base table'])) {
+        $base_tables[$info['base table']] = $entity_type;
+      }
+      if (!empty($info['revision table'])) {
+        $base_tables[$info['revision table']] = $entity_type;
+      }
+    }
+
+    // Then we let other modules tell us about other entity tables that hold date fields.
+    $base_tables += module_invoke_all('date_views_extra_tables');
+  }
+
+  return $base_tables;
+}
+
+/**
+ * Implements hook_date_views_fields().
+ *
+ * All modules that create custom fields that use the 'views_handler_field_date' handler can provide additional information here about the type of date they create so the date can be used by the Date API views date argument and date filter.
+ */
+function date_views_date_views_fields($field) {
+  $values = array(
+    // The type of date: DATE_UNIX, DATE_ISO, DATE_DATETIME.
+    'sql_type' => DATE_UNIX,
+    // Timezone handling options: 'none', 'site', 'date', 'utc' .
+    'tz_handling' => 'site',
+    // Needed only for dates that use 'date' tz_handling.
+    'timezone_field' => '',
+    // Needed only for dates that use 'date' tz_handling.
+    'offset_field' => '',
+    // Array of "table.field" values for related fields that should be
+    // loaded automatically in the Views SQL.
+    'related_fields' => array(),
+    // Granularity of this date field's db data.
+    'granularity' => array('year', 'month', 'day', 'hour', 'minute', 'second'),
+  );
+
+  switch ($field) {
+    case 'users.created':
+    case 'users.access':
+    case 'users.login':
+    case 'node.created':
+    case 'node.changed':
+    case 'node_revision.timestamp':
+    case 'file_managed.timestamp':
+    case 'comment.timestamp':
+      return $values;
+  }
+}
+
+/**
+ * A version of date_real_url that formats links correctly for the new Date pager.
+ */
+function date_pager_url($view, $date_type = NULL, $date_arg = NULL, $force_view_url = FALSE, $absolute = TRUE) {
+
+  // If someone adds a pager without a matching argument, there is not date information to work with.
+  if (empty($view->date_info) || !isset($view->date_info->date_arg_pos)) {
+    return '';
+  }
+
+  $args = $view->args;
+  $pos = $view->date_info->date_arg_pos;
+
+  // The View arguments array is indexed numerically but is not necessarily
+  // in numerical order. Sort the arguments to ensure the correct order.
+  ksort($args);
+
+  // If there are empty arguments before the date argument,
+  // pad them with the wildcard so the date argument will be in
+  // the right position.
+  if (count($args) < $pos) {
+    foreach ($view->argument as $name => $argument) {
+      if ($argument->position == $pos) {
+        break;
+      }
+      $args[] = $argument->options['exception']['value'];
+    }
+  }
+
+  if (!empty($date_type)) {
+    switch ($date_type) {
+      case 'year':
+        $args[$pos] = date_pad($view->date_info->year, 4);
+        break;
+
+      case 'week':
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-W' . date_pad($view->date_info->week);
+        break;
+
+      case 'day':
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-' . date_pad($view->date_info->month) . '-' . date_pad($view->date_info->day);
+        break;
+
+      default:
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-' . date_pad($view->date_info->month);
+        break;
+    }
+  }
+  elseif (!empty($date_arg)) {
+    $args[$pos] = $date_arg;
+  }
+  else {
+    $args = $view->args;
+  }
+  // Is this an embedded or a block view?
+  // Return the pager query value.
+  if (!$force_view_url &&
+  (!empty($view->preview) || !empty($view->date_info->block_identifier))) {
+
+    $url = $args[$pos];
+    $key = date_block_identifier($view);
+    if (!empty($key)) {
+      return url($_GET['q'], array(
+        'query' => date_views_querystring($view, array($key => $url)),
+        'absolute' => $absolute));
+    }
+  }
+
+  // Normal views may need querystrings appended to them
+  // if they use exposed filters.
+  return url($view->get_url($args), array(
+    'query' => date_views_querystring($view),
+    'absolute' => $absolute,
+    )
+  );
+}
+
+/**
+ * Identifier of a date block.
+ */
+function date_block_identifier($view) {
+  if (!empty($view->block_identifier)) {
+    return $view->block_identifier;
+  }
+  return isset($view->date_info->block_identifier) ? $view->date_info->block_identifier : NULL;
+}
+
+/**
+ * Implements hook_field_views_data_alter().
+ *
+ * Create a Views field for each date column we care about to supplement the generic 'entity_id' and 'revision_id' fields that are automatically created.
+ *
+ * Also use friendlier labels to distinguish the start date and end date in listings (for fields that use both).
+ */
+function date_views_field_views_data_alter(&$result, $field, $module) {
+  if ($module == 'date') {
+    $has_end_date = !empty($field['settings']['todate']);
+    if ($has_end_date) {
+      $labels = field_views_field_label($field['field_name']);
+      $label = array_shift($labels);
+    }
+    foreach ($result as $table => $data) {
+      $additional = array();
+      $field_name = $field['field_name'];
+      foreach ($data as $column => $value) {
+
+        // The old 'entity_id' and 'revision_id' values got rewritten in Views.
+        // The old values are still there with a 'moved to' key, so ignore them.
+        if (array_key_exists('field', $value) && !array_key_exists('moved to', $value['field'])) {
+          $result[$table][$column]['field']['is date'] = TRUE;
+          // Not sure yet if we still need a custom field handler in D7 now that custom formatters are available.
+          // Might still need it to handle grouping of multiple value dates.
+          // $result[$table][$column]['field']['handler'] = 'date_handler_field_date';
+          // $result[$table][$column]['field']['add fields to query'] = TRUE;
+        }
+
+        // For filters, arguments, and sorts, determine if this column is for
+        // the start date ('value') or the end date ('value2').
+        $this_column = NULL;
+        foreach (array_keys($field['columns']) as $candidate_column) {
+          if ($column == $field['field_name'] . '_' . $candidate_column) {
+            $this_column = $candidate_column;
+            break;
+          }
+        }
+
+        // Only alter the date fields, not timezone, rrule, offset, etc.
+        if ($this_column != 'value' && $this_column != 'value2') {
+          continue;
+        }
+
+        // We will replace the label with a friendlier name in the case of
+        // arguments, filters, and sorts (but only if this field uses an end
+        // date).
+        $replace_label = FALSE;
+        if (array_key_exists('argument', $value)) {
+          $result[$table][$column]['argument']['handler'] = 'date_views_argument_handler_simple';
+          $result[$table][$column]['argument']['empty field name'] = t('Undated');
+          $result[$table][$column]['argument']['is date'] = TRUE;
+          $replace_label = $has_end_date;
+        }
+        if (array_key_exists('filter', $value)) {
+          $result[$table][$column]['filter']['handler'] = 'date_views_filter_handler_simple';
+          $result[$table][$column]['filter']['empty field name'] = t('Undated');
+          $result[$table][$column]['filter']['is date'] = TRUE;
+          $replace_label = $has_end_date;
+        }
+        if (array_key_exists('sort', $value)) {
+          $result[$table][$column]['sort']['is date'] = TRUE;
+          $replace_label = $has_end_date;
+        }
+        if ($replace_label) {
+          // Determine if this column is for the start date ('value') or the
+          // end date ('value2').
+          $this_column = NULL;
+          foreach (array_keys($field['columns']) as $candidate_column) {
+            if ($column == $field['field_name'] . '_' . $candidate_column) {
+              $this_column = $candidate_column;
+              break;
+            }
+          }
+          // Insert the phrase "start date" or "end date" after the label, so
+          // users can distinguish them in listings (compared to the default
+          // behavior of field_views_field_default_views_data(), which only
+          // uses the 'value2' column name to distinguish them).
+          switch ($this_column) {
+            case 'value':
+              // Insert a deliberate double space before 'start date' in the
+              // translatable string. This is a hack to get it to appear right
+              // before 'end date' in the listing (i.e., in a non-alphabetical,
+              // but more user friendly, order).
+              $result[$table][$column]['title'] = t('@label -  start date (!name)', array(
+                '@label' => $label,
+                '!name' => $field['field_name'],
+              ));
+              $result[$table][$column]['title short'] = t('@label -  start date', array(
+                '@label' => $label,
+              ));
+              break;
+
+            case 'value2':
+              $result[$table][$column]['title'] = t('@label - end date (!name:!column)', array(
+                '@label' => $label,
+                '!name' => $field['field_name'],
+                '!column' => $this_column,
+              ));
+              $result[$table][$column]['title short'] = t('@label - end date:!column', array(
+                '@label' => $label,
+                '!column' => $this_column,
+              ));
+              break;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for views_ui_edit_form().
+ */
+function date_views_form_views_ui_edit_form_alter(&$form, &$form_state, $form_id) {
+  // This CSS is needed for the configuration form provided by the Date filter
+  // (date_views_filter_handler_simple), but we have to add it here so that
+  // it's already on the edit form the first time a Date filter is being added
+  // to the View. See http://drupal.org/node/1239228#comment-4885288.
+  $form['#attached']['css'][] = backdrop_get_path('module', 'date_views') . '/css/date_views.css';
+}
+
+/**
+ * The instanceof function makes this work for any handler that was derived from 'views_handler_filter_date' or 'views_handler_argument_date', which includes core date fields like the node updated field.
+ *
+ * The test for $handler->min_date tells us that this is an argument that not only is derived from the views date handler but also has been processed by the Date Views filter or argument code.
+ */
+function date_views_handler_is_date($handler, $type = 'argument') {
+  switch ($type) {
+    case 'filter':
+      return $handler instanceof views_handler_filter_date && !empty($handler->min_date);
+
+    case 'argument':
+      return $handler instanceof views_handler_argument_date && !empty($handler->min_date);
+  }
+  return FALSE;
+}
+
+/**
+ * Validation hook for exposed filters that use the select widget.
+ *
+ * This is to ensure the the user completes all parts of the date not just some parts. Only needed for the select widget.
+ */
+function date_views_select_validate(&$form, &$form_state) {
+  // If there are no values just return.
+  if (empty($form['value']) && empty($form['min'])) {
+    return;
+  }
+  $granularity = (!empty($form['min']['#date_format'])) ? date_format_order($form['min']['#date_format']) : date_format_order($form['value']['#date_format']);
+  $filled = array();
+  $value = backdrop_array_get_nested_value($form_state['input'], $form['#parents']);
+  foreach ($granularity as $part) {
+    if (isset($value['value']) && is_numeric($value['value'][$part])) {
+      $filled[] = $part;
+    }
+  }
+  if (!empty($filled) && count($filled) != count($granularity)) {
+    $unfilled = array_diff($granularity, $filled);
+    foreach ($unfilled as $part) {
+      switch ($part) {
+        case 'year':
+          form_error($form['value'][$part], t('Please choose a year.'), $form_state);
+          break;
+
+        case 'month':
+          form_error($form['value'][$part], t('Please choose a month.'), $form_state);
+          break;
+
+        case 'day':
+          form_error($form['value'][$part], t('Please choose a day.'), $form_state);
+          break;
+
+        case 'hour':
+          form_error($form['value'][$part], t('Please choose an hour.'), $form_state);
+          break;
+
+        case 'minute':
+          form_error($form['value'][$part], t('Please choose a minute.'), $form_state);
+          break;
+
+        case 'second':
+          form_error($form['value'][$part], t('Please choose a second.'), $form_state);
+          break;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_date_formatter_view_alter().
+ *
+ * If we are displaying a date from a view, see if we have information about which multiple value to display. If so, set the date_id in the entity.
+ */
+function date_views_date_formatter_pre_view_alter(&$entity, &$variables) {
+  // Some views have no row index.
+  if (!empty($entity->view) && isset($entity->view->row_index)) {
+    $field = $variables['field'];
+    $date_id = 'date_id_' . $field['field_name'];
+    $date_delta = 'date_delta_' . $field['field_name'];
+    $date_item = $entity->view->result[$entity->view->row_index];
+    if (!empty($date_item->$date_id)) {
+      $entity->date_id = 'date.' . $date_item->$date_id . '.' . $field['field_name'] . '.' . $date_item->$date_delta . '.0';
+    }
+  }
+}
+
+
+/**
+ * Implements hook_config_info().
+ */
+function date_views_config_info()
+{
+  $prefixes['date_views.settings'] = array(
+    'label' => t('Date Views settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+
+
+/**
+ * Implements hook_autoload_info().
+ */
+function date_views_autoload_info()
+{
+  return array(
+    'date_views_argument_handler' => 'includes/date_views_argument_handler.inc',
+    'date_views_argument_handler_simple' => 'includes/date_views_argument_handler_simple.inc',
+    'date_views_filter_handler' => 'includes/date_views_filter_handler.inc',
+    'date_views_filter_handler_simple' => 'includes/date_views_filter_handler_simple.inc',
+    'date_views_plugin_pager' => 'includes/date_views_plugin_pager.inc'
+  );
+}
+

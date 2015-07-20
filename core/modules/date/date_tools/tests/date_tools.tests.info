@@ -1,0 +1,5 @@
+[DateToolsTestCase]
+name = Date Tools
+description = Test Date Wizard and other Date Tools
+group = Date
+file = date_tools.test

@@ -1,0 +1,9 @@
+name = Date Views
+description = Views integration for date fields and date functionality.
+package = Date/Time
+dependencies[] = date_api
+dependencies[] = views
+backdrop = 1.x
+type = module
+php = 5.2
+

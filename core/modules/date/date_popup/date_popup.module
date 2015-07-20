@@ -1,0 +1,856 @@
+<?php
+/**
+ * @file
+ * A module to enable jquery calendar and time entry popups.
+ * Requires the Date API.
+ *
+ * Add a type of #date_popup to any date, time, or datetime field that will
+ * use this popup. Set #date_format to the way the date should be presented
+ * to the user in the form. Set #default_value to be a date in the local
+ * timezone, and note the timezone name in #date_timezone.
+ *
+ * The element will create two textfields, one for the date and one for the
+ * time. The date textfield will include a jQuery popup calendar date picker,
+ * and the time textfield uses a jQuery timepicker.
+ *
+ * If no time elements are included in the format string, only the date
+ * textfield will be created. If no date elements are included in the format
+ * string, only the time textfield, will be created.
+ */
+
+/**
+ * Load needed files.
+ *
+ * Play nice with jQuery UI.
+ */
+function date_popup_add() {
+  static $loaded = FALSE;
+  if ($loaded) {
+    return;
+  }
+  backdrop_add_library('system', 'ui.datepicker');
+  backdrop_add_library('date_popup', 'timeentry');
+
+  // Add the wvega-timepicker library if it's available.
+  $wvega_path = date_popup_get_wvega_path();
+  if ($wvega_path) {
+    backdrop_add_js($wvega_path . '/jquery.timepicker.js');
+    backdrop_add_css($wvega_path . '/jquery.timepicker.css');
+  }
+  $loaded = TRUE;
+}
+
+/**
+ * Get the location of the Willington Vega timepicker library.
+ *
+ * @return string
+ *   The location of the library, or FALSE if the library isn't installed.
+ */
+function date_popup_get_wvega_path() {
+  $path = FALSE;
+  if (function_exists('libraries_get_path')) {
+    $path = libraries_get_path('wvega-timepicker');
+    if (!file_exists($path)) {
+      $path = FALSE;
+    }
+  }
+  elseif (file_exists('libraries/wvega-timepicker/jquery.timepicker.js')) {
+    $path = 'libraries/wvega-timepicker';
+  }
+  return $path;
+}
+
+/**
+ * Get the name of the preferred default timepicker.
+ *
+ * If the wvega timepicker is available on the system, default to using that,
+ * unless the administrator has specifically chosen otherwise.
+ */
+function date_popup_get_preferred_timepicker() {
+  $wvega_available = date_popup_get_wvega_path();
+  return $wvega_available ? 'wvega' : 'default';
+}
+
+/**
+ * Implements hook_library().
+ */
+function date_popup_library() {
+  $libraries = array();
+
+  $path = backdrop_get_path('module', 'date_popup');
+  $libraries['timeentry'] = array(
+    'title' => 'Time Entry',
+    'website' => 'http://plugins.jquery.com/project/timeEntry',
+    'version' => '1.4.7',
+    'js' => array(
+      $path . '/jquery.timeentry.pack.js' => array(),
+    ),
+    'css' => array(
+      $path . '/themes/jquery.timeentry.css' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Create a unique CSS id name and output a single inline JS block.
+ *
+ * For each startup function to call and settings array to pass it.
+ *
+ * This used to create a unique CSS class for each unique combination of
+ * function and settings, but using classes requires a DOM traversal
+ * and is much slower than an id lookup.  The new approach returns to
+ * requiring a duplicate copy of the settings/code for every element
+ * that uses them, but is much faster.  We could combine the logic by
+ * putting the ids for each unique function/settings combo into
+ * Backdrop.settings and searching for each listed id.
+ *
+ * @param string $id
+ *   The CSS class prefix to search the DOM for.
+ *   TODO : unused ?
+ *
+ * @param string $func
+ *   The jQuery function to invoke on each DOM element
+ *   containing the returned CSS class.
+ *
+ * @param array $settings
+ *   The settings array to pass to the jQuery function.
+ *
+ * @returns
+ *   The CSS id to assign to the element that should have $func($settings)
+ *   invoked on it.
+ */
+function date_popup_js_settings_id($id, $func, $settings) {
+  static $js_added = FALSE;
+  static $id_count = array();
+
+  // Make sure popup date selector grid is in correct year.
+  if (!empty($settings['yearRange'])) {
+    $parts = explode(':', $settings['yearRange']);
+    // Set the default date to 0 or the lowest bound if
+    // the date ranges do not include the current year.
+    // Necessary for the datepicker to render and select dates correctly.
+    $default_date = ($parts[0] > 0 || 0 > $parts[1]) ? $parts[0] : 0;
+    $settings += array('defaultDate' => (string) $default_date . 'y');
+  }
+
+  if (!$js_added) {
+    backdrop_add_js(backdrop_get_path('module', 'date_popup') . '/date_popup.js');
+    $js_added = TRUE;
+  }
+
+  // We use a static array to account for possible multiple form_builder()
+  // calls in the same request (form instance on 'Preview').
+  if (!isset($id_count[$id])) {
+    $id_count[$id] = 0;
+  }
+
+  // It looks like we need the additional id_count for this to
+  // work correctly when there are multiple values.
+  // $return_id = "$id-$func-popup";
+  $return_id = "$id-$func-popup-" . $id_count[$id]++;
+  $js_settings['datePopup'][$return_id] = array(
+    'func' => $func,
+    'settings' => $settings,
+  );
+  backdrop_add_js($js_settings, 'setting');
+  return $return_id;
+}
+
+/**
+ * Date popup theme handler.
+ */
+function date_popup_theme() {
+  return array(
+    'date_popup' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+/**
+ * Implements hook_element_info().
+ *
+ * Set the #type to date_popup and fill the element #default_value with
+ * a date adjusted to the proper local timezone in datetime format
+ * (YYYY-MM-DD HH:MM:SS).
+ *
+ * The element will create two textfields, one for the date and one for the
+ * time. The date textfield will include a jQuery popup calendar date picker,
+ * and the time textfield uses a jQuery timepicker.
+ *
+ * NOTE - Converting a date stored in the database from UTC to the local zone
+ * and converting it back to UTC before storing it is not handled by this
+ * element and must be done in pre-form and post-form processing!!
+ *
+ * #date_timezone
+ *   The local timezone to be used to create this date.
+ *
+ * #date_format
+ *   Unlike earlier versions of this popup, most formats will work.
+ *
+ * #date_increment
+ *   Increment minutes and seconds by this amount, default is 1.
+ *
+ * #date_year_range
+ *   The number of years to go back and forward in a year selector,
+ *   default is -3:+3 (3 back and 3 forward).
+ *
+ * #datepicker_options
+ *   An associative array representing the jQuery datepicker options you want
+ *   to set for this element. Use the jQuery datepicker option names as keys.
+ *   Hard coded defaults are:
+ *   - changeMonth => TRUE
+ *   - changeYear => TRUE
+ *   - autoPopUp => 'focus'
+ *   - closeAtTop => FALSE
+ *   - speed => 'immediate'
+ */
+function date_popup_element_info() {
+  $timepicker = date_popup_get_preferred_timepicker();
+  $type['date_popup'] = array(
+    '#input' => TRUE,
+    '#tree' => TRUE,
+    '#date_timezone' => date_default_timezone(),
+    '#date_flexible' => 0,
+    '#date_format' => system_date_format_load('short'),
+    '#datepicker_options' => array(),
+    '#timepicker' => config_get('date.settings','date_popup_timepicker'),
+    '#date_increment' => 1,
+    '#date_year_range' => '-3:+3',
+    '#date_label_position' => 'above',
+    '#process' => array('date_popup_element_process'),
+    '#value_callback' => 'date_popup_element_value_callback',
+    '#theme_wrappers' => array('date_popup'),
+  );
+  if (module_exists('ctools')) {
+    $type['date_popup']['#pre_render'] = array('ctools_dependent_pre_render');
+  }
+  return $type;
+}
+
+/**
+ * Date popup date granularity.
+ */
+function date_popup_date_granularity($element) {
+  $granularity = date_format_order($element['#date_format']);
+  return array_intersect($granularity, array('month', 'day', 'year'));
+}
+
+/**
+ * Date popup time granularity.
+ */
+function date_popup_time_granularity($element) {
+  $granularity = date_format_order($element['#date_format']);
+  return array_intersect($granularity, array('hour', 'minute', 'second'));
+}
+
+/**
+ * Date popup date format.
+ */
+function date_popup_date_format($element) {
+  return (date_limit_format($element['#date_format'], date_popup_date_granularity($element)));
+}
+
+/**
+ * Date popup time format.
+ */
+function date_popup_time_format($element) {
+  return date_popup_format_to_popup_time(date_limit_format($element['#date_format'], date_popup_time_granularity($element)), $element['#timepicker']);
+}
+
+/**
+ * Element value callback for date_popup element.
+ */
+// @codingStandardsIgnoreStart
+function date_popup_element_value_callback($element, $input = FALSE, &$form_state) {
+  $granularity = date_format_order($element['#date_format']);
+  $has_time = date_has_time($granularity);
+  $date = NULL;
+  $return = $has_time ? array('date' => '', 'time' => '') : array('date' => '');
+  // Normal input from submitting the form element.
+  // Check is_array() to skip the string input values created by Views pagers.
+  // Those string values, if present, should be interpreted as empty input.
+  if ($input !== FALSE && is_array($input)) {
+    $return = $input;
+    $date = date_popup_input_date($element, $input);
+  }
+  // No input? Try the default value.
+  elseif (!empty($element['#default_value'])) {
+    $date = date_default_date($element);
+  }
+  // Date with errors won't re-display.
+  if (date_is_date($date)) {
+    $return['date'] = !$date->timeOnly ? date_format_date($date, 'custom', date_popup_date_format($element)) : '';
+    $return['time'] = $has_time ? date_format_date($date, 'custom', date_popup_time_format($element)) : '';
+  }
+  elseif (!empty($input)) {
+    $return = $input;
+  }
+  return $return;
+
+}
+// @codingStandardsIgnoreEnd
+
+/**
+ * Javascript popup element processing.
+ *
+ * Add popup attributes to $element.
+ */
+function date_popup_element_process($element, &$form_state, $form) {
+  if (date_hidden_element($element)) {
+    return $element;
+  }
+
+  date_popup_add();
+  module_load_include('inc', 'date_api', 'date_api_elements');
+
+  $element['#tree'] = TRUE;
+  $element['#theme_wrappers'] = array('date_popup');
+
+  if (!empty($element['#ajax'])) {
+    $element['#ajax'] += array(
+      'trigger_as' => array(
+        'name' => $element['#name'],
+      ),
+      'event' => 'change',
+    );
+  }
+
+  $element['date'] = date_popup_process_date_part($element);
+  $element['time'] = date_popup_process_time_part($element);
+
+  // Make changes if instance is set to be rendered as a regular field.
+  if (!empty($element['#instance']['widget']['settings']['no_fieldset']) && $element['#field']['cardinality'] == 1) {
+    if (!empty($element['date']) && empty($element['time'])) {
+      $element['date']['#title'] = check_plain($element['#instance']['label']);
+      $element['date']['#required'] = $element['#required'];
+    }
+    elseif (empty($element['date']) && !empty($element['time'])) {
+      $element['time']['#title'] = check_plain($element['#instance']['label']);
+      $element['time']['#required'] = $element['#required'];
+    }
+  }
+
+  if (isset($element['#element_validate'])) {
+    array_push($element['#element_validate'], 'date_popup_validate');
+  }
+  else {
+    $element['#element_validate'] = array('date_popup_validate');
+  }
+
+  $context = array(
+    'form' => $form,
+  );
+  backdrop_alter('date_popup_process', $element, $form_state, $context);
+
+  return $element;
+}
+
+/**
+ * Process the date portion of the element.
+ */
+function date_popup_process_date_part(&$element) {
+  $granularity = date_format_order($element['#date_format']);
+  $date_granularity = date_popup_date_granularity($element);
+  if (empty($date_granularity)) {
+    return array();
+  }
+
+  // The datepicker can't handle zero or negative values like 0:+1
+  // even though the Date API can handle them, so rework the value
+  // we pass to the datepicker to use defaults it can accept (such as +0:+1)
+  // date_range_string() adds the necessary +/- signs to the range string.
+  $this_year = date_format(date_now(), 'Y');
+  // When used as a Views exposed filter widget, $element['#value'] contains an array instead an string.
+  // Fill the 'date' string in this case.
+  $mock = NULL;
+  $callback_values = date_popup_element_value_callback($element, FALSE, $mock);
+  if (!isset($element['#value']['date']) && isset($callback_values['date'])) {
+    $element['#value']['date'] = $callback_values['date'];
+  }
+  $date = '';
+  if (!empty($element['#value']['date'])) {
+    $date = new DateObject($element['#value']['date'], $element['#date_timezone'], date_popup_date_format($element));
+  }
+  $range = date_range_years($element['#date_year_range'], $date);
+  $year_range = date_range_string($range);
+
+  // Add the dynamic datepicker options. Allow element-specific datepicker
+  // preferences to override these options for whatever reason they see fit.
+  $settings = $element['#datepicker_options'] + array(
+    'changeMonth' => TRUE,
+    'changeYear' => TRUE,
+    'autoPopUp' => 'focus',
+    'closeAtTop' => FALSE,
+    'speed' => 'immediate',
+    'firstDay' => intval(config_get('system.date','first_day')),
+    // 'buttonImage' => base_path()
+    // . backdrop_get_path('module', 'date_api') ."/images/calendar.png",
+    // 'buttonImageOnly' => TRUE,
+    'dateFormat' => date_popup_format_to_popup(date_popup_date_format($element), 'datepicker'),
+    'yearRange' => $year_range,
+    // Custom setting, will be expanded in Backdrop.behaviors.date_popup()
+    'fromTo' => isset($fromto),
+  );
+
+  // Create a unique id for each set of custom settings.
+  $id = date_popup_js_settings_id($element['#id'], 'datepicker', $settings);
+
+  // Manually build this element and set the value -
+  // this will prevent corrupting the parent value.
+  $parents = array_merge($element['#parents'], array('date'));
+  $sub_element = array(
+    '#type' => 'textfield',
+    '#title' => theme('date_part_label_date', array('part_type' => 'date', 'element' => $element)),
+    '#title_display' => $element['#date_label_position'] == 'above' ? 'before' : 'invisible',
+    '#default_value' => date_format_date($date, 'custom', date_popup_date_format($element)),
+    '#id' => $id,
+    '#input' => FALSE,
+    '#size' => !empty($element['#size']) ? $element['#size'] : 20,
+    '#maxlength' => !empty($element['#maxlength']) ? $element['#maxlength'] : 30,
+    '#attributes' => $element['#attributes'],
+    '#parents' => $parents,
+    '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
+    '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
+  );
+  $sub_element['#value'] = $sub_element['#default_value'];
+  // TODO, figure out exactly when we want this description.
+  // In many places it is not desired.
+  $sub_element['#description'] = ' ' . t('E.g., @date ['.date_popup_date_format($element).']', array(
+      '@date' => date_format_date(
+        date_example_date(),
+        'custom',
+        date_popup_date_format($element)
+        ),
+      ));
+
+  return $sub_element;
+}
+
+/**
+ * Process the time portion of the element.
+ */
+function date_popup_process_time_part(&$element) {
+  $granularity = date_format_order($element['#date_format']);
+  $has_time = date_has_time($granularity);
+  if (empty($has_time)) {
+    return array();
+  }
+
+  // When used as a Views exposed filter widget, $element['#value'] contains an array instead an string.
+  // Fill the 'time' string in this case.
+  $mock = NULL;
+  $callback_values = date_popup_element_value_callback($element, FALSE, $mock);
+  if (!isset($element['#value']['time']) && isset($callback_values['time'])) {
+    $element['#value']['time'] = $callback_values['time'];
+  }
+
+  switch ($element['#timepicker']) {
+    case 'default':
+      $func = 'timeEntry';
+      $settings = array(
+        'show24Hours' => strpos($element['#date_format'], 'H') !== FALSE ? TRUE : FALSE,
+        'showSeconds' => (in_array('second', $granularity) ? TRUE : FALSE),
+        'timeSteps' => array(
+          1,
+          intval($element['#date_increment']),
+          (in_array('second', $granularity) ? $element['#date_increment'] : 0),
+        ),
+        'spinnerImage' => '',
+        'fromTo' => isset($fromto),
+      );
+      if (strpos($element['#date_format'], 'a') !== FALSE) {
+        // Then we are using lowercase am/pm.
+        $settings['ampmNames'] = array('am', 'pm');
+      }
+      if (strpos($element['#date_format'], ' A') !== FALSE || strpos($element['#date_format'], ' a') !== FALSE) {
+        $settings['ampmPrefix'] = ' ';
+      }
+      break;
+
+    case 'wvega':
+      $func = 'timepicker';
+      $grans = array('hour', 'minute', 'second');
+      $time_granularity = array_intersect($granularity, $grans);
+      $format = date_popup_format_to_popup_time(date_limit_format($element['#date_format'], $time_granularity), 'wvega');
+      // The first value in the dropdown list should be the same as the element
+      // default_value, but it needs to be in JS format (i.e. milliseconds since
+      // the epoch).
+      $start_time = new DateObject($element['#default_value'], $element['#date_timezone'], DATE_FORMAT_DATETIME);
+      date_increment_round($start_time, $element['#date_increment']);
+      $start_time = $start_time->format(DATE_FORMAT_UNIX) * 1000;
+      $settings = array(
+        'timeFormat' => $format,
+        'interval' => $element['#date_increment'],
+        'startTime' => $start_time,
+        'scrollbar' => TRUE,
+      );
+      break;
+
+    default:
+      $func = '';
+      $settings = array();
+      break;
+  }
+
+  // Create a unique id for each set of custom settings.
+  $id = date_popup_js_settings_id($element['#id'], $func, $settings);
+
+  // Manually build this element and set the value -
+  // this will prevent corrupting the parent value.
+  $parents = array_merge($element['#parents'], array('time'));
+  $sub_element = array(
+    '#type' => 'textfield',
+    '#title' => theme('date_part_label_time', array('part_type' => 'time', 'element' => $element)),
+    '#title_display' => $element['#date_label_position'] == 'above' ? 'before' : 'invisible',
+    '#default_value' => $element['#value']['time'],
+    '#id' => $id,
+    '#size' => 15,
+    '#maxlength' => 10,
+    '#attributes' => $element['#attributes'],
+    '#parents' => $parents,
+    '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
+    '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
+  );
+
+  $sub_element['#value'] = $sub_element['#default_value'];
+
+  // TODO, figure out exactly when we want this description.
+  // In many places it is not desired.
+  $example_date = date_now();
+  date_increment_round($example_date, $element['#date_increment']);
+  $sub_element['#description'] = t('E.g.,  @date ['.date_popup_time_format($element).']', array(
+    '@date' => date_format_date(
+      $example_date,
+      'custom',
+      date_popup_time_format($element)
+    )));
+
+  return ($sub_element);
+}
+
+/**
+ * Massage the input values back into a single date.
+ *
+ * When used as a Views widget, the validation step always gets triggered,
+ * even with no form submission. Before form submission $element['#value']
+ * contains a string, after submission it contains an array.
+ */
+function date_popup_validate($element, &$form_state) {
+
+  if (date_hidden_element($element)) {
+    return;
+  }
+
+  if (is_string($element['#value'])) {
+    return;
+  }
+
+  module_load_include('inc', 'date_api', 'date_api_elements');
+  date_popup_add();
+
+  $input_exists = NULL;
+  $input = backdrop_array_get_nested_value($form_state['values'], $element['#parents'], $input_exists);
+  // If the date is a string, it is not considered valid and can cause problems
+  // later on, so just exit out now.
+  if (is_string($input)) {
+    return;
+  }
+
+  backdrop_alter('date_popup_pre_validate', $element, $form_state, $input);
+
+  $granularity = date_format_order($element['#date_format']);
+  $date_granularity = date_popup_date_granularity($element);
+  $time_granularity = date_popup_time_granularity($element);
+  $has_time = date_has_time($granularity);
+
+  // @codingStandardsIgnoreStart
+  $label = '';
+  if (!empty($element['#date_title'])) {
+    $label = t($element['#date_title']);
+  }
+  elseif (!empty($element['#title'])) {
+    $label = t($element['#title']);
+  }
+  // @codingStandardsIgnoreEnd
+  $date = date_popup_input_date($element, $input);
+
+  // If the date has errors, display them.
+  // If something was input but there is no date, the date is invalid.
+  // If the field is empty and required, set error message and return.
+  $error_field = implode('][', $element['#parents']);
+  if (empty($date) || !empty($date->errors)) {
+    if (is_object($date) && !empty($date->errors)) {
+      $message = t('The value input for field %field is invalid:', array('%field' => $label));
+      $message .= '<br />' . implode('<br />', $date->errors);
+      form_set_error($error_field, $message);
+      return;
+    }
+    if (!empty($input['date'])) {
+      $message = t('The value input for field %field is invalid.', array('%field' => $label));
+      form_set_error($error_field, $message);
+      return;
+    }
+    if ($element['#required']) {
+      $message = t('A valid date is required for %title.', array('%title' => $label));
+      form_set_error($error_field, $message);
+      return;
+    }
+  }
+
+  // If the created date is valid, set it.
+  $value = !empty($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
+  form_set_value($element, $value, $form_state);
+}
+
+/**
+ * Helper function for extracting a date value out of user input.
+ *
+ * @param bool $auto_complete
+ *   Should we add a time value to complete the date if there is no time?
+ *   Useful anytime the time value is optional.
+ */
+function date_popup_input_date($element, $input, $auto_complete = FALSE) {
+  if (empty($input) || !is_array($input) || !array_key_exists('date', $input) || empty($input['date'])) {
+    return NULL;
+  }
+  date_popup_add();
+  $granularity = date_format_order($element['#date_format']);
+  $has_time = date_has_time($granularity);
+  $flexible = !empty($element['#date_flexible']) ? $element['#date_flexible'] : 0;
+
+  $format = date_popup_date_format($element);
+  $format .= $has_time ? ' ' . date_popup_time_format($element) : '';
+  $datetime = trim($input['date']);
+  $datetime .= $has_time ? ' ' . trim($input['time']) : '';
+  $date = new DateObject($datetime, $element['#date_timezone'], $format);
+  if (is_object($date)) {
+    $date->limitGranularity($granularity);
+    if ($date->validGranularity($granularity, $flexible)) {
+      date_increment_round($date, $element['#date_increment']);
+    }
+    return $date;
+  }
+  return NULL;
+}
+
+/**
+ * Allowable time formats.
+ */
+function date_popup_time_formats($with_seconds = FALSE) {
+  return array(
+    'H:i:s',
+    'h:i:sA',
+  );
+}
+
+/**
+ * Format options array.
+ *
+ * TODO Remove any formats not supported by the widget, if any.
+ */
+function date_popup_formats() {
+  // Load short date formats.
+  $formats = system_get_date_formats('short');
+
+  // Load custom date formats.
+  if ($formats_custom = system_get_date_formats('custom')) {
+    $formats = array_merge($formats, $formats_custom);
+  }
+
+  $formats = str_replace('i', 'i:s', array_keys($formats));
+  $formats = backdrop_map_assoc($formats);
+
+  return $formats;
+}
+
+/**
+ * Recreate a date format string so it has the values popup expects.
+ *
+ * @param string $format
+ *   A normal date format string, like Y-m-d
+ *
+ * @return string
+ *   A format string in popup format, like YMD-, for the
+ *   earlier 'calendar' version, or m/d/Y for the later 'datepicker'
+ *   version.
+ */
+function date_popup_format_to_popup($format) {
+  if (empty($format)) {
+    $format = 'Y-m-d';
+  }
+  $replace = date_popup_datepicker_format_replacements();
+  return strtr($format, $replace);
+}
+
+/**
+ * Recreate a time format string so it has the values popup expects.
+ *
+ * @param string $format
+ *   A normal time format string, like h:i (a)
+ *
+ * @return string
+ *   A format string that the popup can accept like h:i a
+ */
+function date_popup_format_to_popup_time($format, $timepicker = NULL) {
+  if (empty($format)) {
+    $format = 'H:i';
+  }
+  $symbols = array(
+    '/',
+    '-',
+    ' .',
+    ',',
+    'F',
+    'M',
+    'l',
+    'z',
+    'w',
+    'W',
+    'd',
+    'j',
+    'm',
+    'n',
+    'y',
+    'Y',
+  );
+  $format = str_replace($symbols, '', $format);
+  $format = strtr($format, date_popup_timepicker_format_replacements($timepicker));
+  return $format;
+}
+
+/**
+ * Reconstruct popup format string into normal format string.
+ *
+ * @param string $format
+ *   A string in popup format, like YMD-
+ *
+ * @return string
+ *   A normal date format string, like Y-m-d
+ */
+function date_popup_popup_to_format($format) {
+  $replace = array_flip(date_popup_datepicker_format_replacements());
+  return strtr($format, $replace);
+}
+
+/**
+ * Return a map of format replacements required for a given timepicker.
+ *
+ * Client-side time entry plugins don't support all possible date formats.
+ * This function returns a map of format replacements required to change any
+ * input format into one that the given timepicker can support.
+ *
+ * @param string $timepicker
+ *   The time entry plugin being used: either 'wvega' or 'default'.
+ *
+ * @return array
+ *   A map of replacements.
+ */
+function date_popup_timepicker_format_replacements($timepicker = 'default') {
+  switch ($timepicker) {
+    case 'wvega':
+      // The wvega timepicker only supports uppercase AM/PM.
+      return array('a' => 'A');
+
+    default:
+      // The default timeEntry plugin requires leading zeros.
+      return array('G' => 'H', 'g' => 'h');
+  }
+}
+
+/**
+ * The format replacement patterns for the new datepicker.
+ */
+function date_popup_datepicker_format_replacements() {
+  return array(
+    'd' => 'dd',
+    'j' => 'd',
+    'l' => 'DD',
+    'D' => 'D',
+    'm' => 'mm',
+    'n' => 'm',
+    'F' => 'MM',
+    'M' => 'M',
+    'Y' => 'yy',
+    'y' => 'y',
+  );
+}
+
+/**
+ * Format a date popup element.
+ *
+ * Use a class that will float date and time next to each other.
+ */
+function theme_date_popup($vars) {
+  $element = $vars['element'];
+  $attributes = !empty($element['#wrapper_attributes']) ? $element['#wrapper_attributes'] : array('class' => array());
+  $attributes['class'][] = 'container-inline-date';
+  // If there is no description, the floating date
+  // elements need some extra padding below them.
+  $wrapper_attributes = array('class' => array('date-padding'));
+  if (empty($element['date']['#description'])) {
+    $wrapper_attributes['class'][] = 'clearfix';
+  }
+  // Add an wrapper to mimic the way a single value field works,
+  // for ease in using #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" ' . backdrop_attributes($wrapper_attributes) . '>' . $element['#children'] . '</div>';
+  }
+  return '<div ' . backdrop_attributes($attributes) . '>' . theme('form_element', $element) . '</div>';
+}
+
+/**
+ * Implements hook_menu().
+ */
+function date_popup_menu() {
+  $items = array();
+  // TODO Fix this later.
+  $items['admin/config/date/date_popup'] = array(
+    'title' => 'Date Popup',
+    'description' => 'Configure the Date Popup settings.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('date_popup_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  );
+  return $items;
+}
+/**
+ * General configuration form for controlling the Date Popup behaviour.
+ */
+function date_popup_settings() {
+  $wvega_available = date_popup_get_wvega_path();
+  $preferred_timepicker = date_popup_get_preferred_timepicker();
+
+  $form['#prefix'] = t('<p>The Date Popup module allows for manual time entry or use of a jQuery timepicker plugin. The Date module comes with a default jQuery timepicker which is already installed. The module also supports a dropdown timepicker that must be downloaded separately. The dropdown timepicker will not appear as an option until the code is available in the libraries folder. If you do not want to use a jQuery timepicker, you can choose the "Manual time entry" option below and users will get a regular textfield instead.</p>');
+  $form['date_popup_timepicker'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      'default' => t('Use default jQuery timepicker'),
+	  'wvega' => t('Use dropdown timepicker'),
+      'none'    => t('Manual time entry, no jQuery timepicker'),
+    ),
+    '#title' => t('Timepicker'),
+    '#default_value' => config_get('date.settings','date_popup_timepicker'),
+  );
+
+  // Add a submit button
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+  return $form;
+}
+
+/**
+ * Submit handler for module_settings_form().
+ */
+function date_popup_settings_submit($form, &$form_state) {
+  $config = config('date.settings');
+  $config->set('date_popup_timepicker', $form_state['values']['date_popup_timepicker']);
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
