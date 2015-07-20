@@ -909,7 +909,7 @@ function backdrop_settings_initialize() {
  * the above, depending on where the module is located.
  *
  * @param $type
- *   The type of the item (theme, theme_engine, module, profile).
+ *   The type of the item (theme, layout, theme_engine, module, profile).
  * @param $name
  *   The name of the item for which the filename is requested.
  * @param $filename
@@ -968,6 +968,12 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
       }
       elseif ($type == 'theme') {
         $extension = 'info';
+      }
+      // get layout path
+      elseif ($type === 'layout' && function_exists('layout_get_layout_info')) {
+        if ($layout_info = layout_get_layout_info($name)) {
+          $extension = 'info';
+        }
       }
       else {
         $extension = $type;
