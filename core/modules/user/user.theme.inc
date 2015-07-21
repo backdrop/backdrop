@@ -52,6 +52,31 @@ function theme_user_signature($variables) {
 }
 
 /**
+ * Returns HTML for a user picture.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - account: The user's account.
+ *
+ * @ingroup themeable
+ */
+function theme_user_picture($variables) {
+  $account = $variables['account'];
+  $alt = t("@user's picture", array('@user' => user_format_name($account)));
+  $output = '';
+
+  if ($account && array_key_exists('picture', $account) && $account->picture != '0' && array_key_exists('path', $account)) {
+    $output .= '<div class="user-picture">';
+    $output .= '<a href="/' . $account->path['source'] . '" title="View user profile." class="active">';
+    $output .= theme('image', array('uri' => image_style_url(config_get('system.core', 'user_picture_style'), $account->picture->uri), 'alt' => $alt, 'title' => $alt));
+    $output .= '</a>';
+    $output .= '</div>';
+  }
+
+  return $output;
+}
+
+/**
  * Returns HTML for a username, potentially linked to the user's page.
  *
  * @param $variables
