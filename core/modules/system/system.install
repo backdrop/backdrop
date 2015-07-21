@@ -2526,6 +2526,13 @@ function system_update_1039() {
 }
 
 /**
+ * Provide a default value for maintenance_page_lifetime.
+ */
+function system_update_1040() {
+  config_set('system.core', 'maintenance_page_lifetime', 10);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

@@ -5591,6 +5591,11 @@ function backdrop_page_set_cache() {
       }
     }
 
+    if (state_get('maintenance_mode', FALSE)) {
+      // Cache maintenance pages for 10 seconds.
+      $cache->expire = REQUEST_TIME + config_get('system.core', 'maintenance_page_lifetime');
+    }
+
     if ($cache->data['body']) {
       if ($page_compressed) {
         $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
