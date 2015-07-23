@@ -123,6 +123,8 @@ function book_outline_form_submit($form, &$form_state) {
     else {
       backdrop_set_message(t('The book outline has been updated.'));
     }
+    // Clear book_cache when book link is updated outside of node ops.
+    _book_cache_clear($node->book['bid'], TRUE);
   }
   else {
     backdrop_set_message(t('There was an error adding the post to the book.'), 'error');
