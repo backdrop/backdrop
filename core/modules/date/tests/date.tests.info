@@ -1,3 +1,9 @@
+[DateFieldBasic]
+name = Date Field Basic
+description = Test basic date fields.
+group = Date
+file = date_field.test
+
 [DateUITestCase]
 name = Date Field UI
 description = Test creation of various date fields and widgets using Field UI
