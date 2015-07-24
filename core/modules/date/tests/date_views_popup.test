@@ -4,6 +4,8 @@
  * @file
  * Tests date popup in Views
  */
+ 
+require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateViewsPopupTestCase extends DateFieldBasic {
 

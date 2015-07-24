@@ -3,6 +3,9 @@
  * @file
  * Timezone tests.
  */
+ 
+require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
+
 class DateTimezoneTestCase extends DateFieldBasic {
 
   /**
