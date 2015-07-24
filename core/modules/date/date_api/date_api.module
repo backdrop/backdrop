@@ -1729,11 +1729,13 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
   if (empty($date)) {
     return '';
   }
-  //check that we have an entry in system.date.json
-  if(is_array(system_date_format_load($type))){
-    $format = system_date_format_load($type)['pattern'];
-  }else{
-    $format = system_date_format_load('medium')['pattern'];
+  if($type != 'custom'){
+    //check that we have an entry in system.date.json
+    if(is_array(system_date_format_load($type))){
+      $format = system_date_format_load($type)['pattern'];
+    }else{
+      $format = system_date_format_load('medium')['pattern'];
+    }
   }
   $format = date_limit_format($format, $date->granularity);
   $max = strlen($format);
