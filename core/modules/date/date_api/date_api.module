@@ -1731,7 +1731,7 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
   }
   if($type != 'custom'){
     //check that we have an entry in system.date.json
-    if(is_array(system_date_format_load($type))){
+    if(array_key_exists('pattern', system_date_format_load($type))){
       $format = system_date_format_load($type)['pattern'];
     }else{
       $format = system_date_format_load('medium')['pattern'];
