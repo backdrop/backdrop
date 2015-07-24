@@ -1,7 +1,0 @@
-name = Date Tools
-description = Tools to import and auto-create dates and calendars.
-dependencies[] = date
-package = Date/Time
-backdrop = 1.x
-type = module
-configure = admin/config/date/tools
