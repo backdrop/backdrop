@@ -1735,7 +1735,8 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
     if ($thisformat){
       $format = $thisformat[‘pattern’];
     }else{
-      $format = system_date_format_load('medium')['pattern'];
+      $thisformat = system_date_format_load('medium');
+      $format = $thisformat['pattern'];
     }
   }
   $format = date_limit_format($format, $date->granularity);
