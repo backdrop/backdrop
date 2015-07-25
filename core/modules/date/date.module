@@ -35,7 +35,8 @@ function date_get_entity_bundle($entity_type, $entity) {
  */
 function date_default_format($type) {
   // Example input formats must show all possible date parts, so add seconds.
-  $default_format = str_replace('i', 'i:s', system_date_format_load('short')['pattern']);
+  $shortformat = system_date_format_load('short');
+  $default_format = str_replace('i', 'i:s', $shortformat['pattern']);
   return $default_format;
 }
 

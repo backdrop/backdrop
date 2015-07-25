@@ -644,7 +644,8 @@ function date_input_format($element, $field, $instance) {
   elseif (!empty($instance['widget']['settings']['input_format']) && $instance['widget']['settings']['input_format'] != 'site-wide') {
     return $instance['widget']['settings']['input_format'];
   }
-  return system_date_format_load('short')['pattern'];
+  $shortformat = system_date_format_load('short');
+  return $shortformat['pattern'];
 }
 
 
