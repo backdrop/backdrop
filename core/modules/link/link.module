@@ -117,7 +117,7 @@ function link_field_instance_settings_form($field, $instance) {
     '#title' => t('Link Title'),
     '#default_value' => isset($instance['settings']['title']) ? $instance['settings']['title'] : 'optional',
     '#options' => $title_options,
-    '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title. If <a href="http://drupal.org/project/token">token module</a> is installed, the static title value may use any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.'),
+    '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.'),
   );
 
   $form['title_value'] = array(

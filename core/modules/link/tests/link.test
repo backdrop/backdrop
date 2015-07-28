@@ -19,7 +19,7 @@ class LinkBaseTestClass extends BackdropWebTestCase {
 
   function setUp() {
     $modules = func_get_args();
-    $modules = (isset($modules[0]) && is_array($modules[0]) ? $modules[0] : $modules);
+    //$modules = (isset($modules[0]) && is_array($modules[0]) ? $modules[0] : $modules);
     $modules[] = 'field_ui';
     $modules[] = 'link';
     parent::setUp($modules);
@@ -43,7 +43,7 @@ class LinkBaseTestClass extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    node_types_rebuild();
+    //node_types_rebuild();
     menu_rebuild();
 
     return $field_name;

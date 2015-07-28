@@ -1,5 +1,6 @@
 <?php
 
+require_once('link.test');
 /**
  * @file
  * Contains simpletests making sure entity_token integration works.
@@ -15,13 +16,13 @@ class LinkEntityTokenTest extends LinkBaseTestClass {
       'name' => 'Link entity tokens test',
       'description' => 'Tests that a link field appears properly in entity tokens',
       'group' => 'Link',
-      'dependencies' => array('token', 'entity', 'entity_token'),
+      //'dependencies' => array('token', 'entity', 'entity_token'),
     );
   }
 
-  function setUp($modules = array()) {
+  /*function setUp($modules = array()) {
     parent::setUp(array('token', 'entity', 'entity_token'));
-  }
+  }*/
 
   /**
    * Creates a link field, fills it, then uses a loaded node to test tokens.
@@ -31,8 +32,7 @@ class LinkEntityTokenTest extends LinkBaseTestClass {
     $settings = array(
       'instance[settings][enable_tokens]' => 0,
     );
-    $field_name = $this->createLinkField('page',
-                                        $settings);
+    $field_name = $this->createLinkField('page', $settings);
 
     // create page form
     $this->backdropGet('node/add/page');
