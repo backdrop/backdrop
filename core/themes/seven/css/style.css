@@ -633,25 +633,47 @@ tr.selected td {
  *   to apply all padding to the inner .fieldset-wrapper instead.
  */
 fieldset {
-  border: 1px solid #ccc;
-  padding: 2.5em 0 0 0; /* LTR */
   position: relative;
+  max-width: 100%;
   margin: 1em 0;
+  padding: 3em 0 0 0; /* LTR */
+  border-radius: 4px;
+  background-color:#fff;
+  border:solid 2px #EAEAEA;
+  min-width: 0;
 }
 [dir="rtl"] fieldset {
-  padding: 2.5em 0 0 0;
+  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
-  margin-top: 0.5em;
-  padding-left: 15px; /* LTR */
+  position: absolute;
   left: 0; /* LTR */
   top: 0;
-  position: absolute;
+  width: 100%;
+  margin-top: .35em;
+  padding-left: 15px; /* LTR */
   text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
-  padding-right: 15px;
   right: 0;
+  padding-right: 15px;
+  padding-left: 0;
+}
+legend {
+  font-size: 120%;
+  font-weight: normal;
+}
+fieldset fieldset {
+  background-color: #fff;
+}
+fieldset fieldset fieldset {
+  background-color: #f8f8f8;
+}
+/**
+ * Collapsible Fieldsets
+ */
+.js fieldset.collapsible {
+  position: relative;
 }
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
@@ -659,18 +681,49 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
 }
-fieldset.collapsed {
-  background-color: transparent;
+.js fieldset.collapsible .fieldset-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 94%; /* IE8 fallback */
+  width: calc(100% - 4em);
+  padding: .3em .3em .3em 1.8em;
+  margin: 0 -.5em;
+  border-radius: 4px;
+  background: transparent;
 }
+.js fieldset.collapsible .fieldset-legend a:before {
+  content: "";
+  position: absolute;
+  left: .6em;
+  top: .8em;
+  width: 0;
+  height: 0;
+  border: .32em solid transparent;
+  border-top-color: #000;
+  border-bottom: 0;
+}
+
+.fieldset-legend span.summary {
+  position: absolute;
+  top: .4em;
+  right: 2em;
+  display: none;
+}
+@media (min-width: 450px) {
+  .fieldset-legend span.summary {
+    display: block;
+  }
+}
+/* Collapsed state styles */
 .js fieldset.collapsed {
-  border-width: 1px;
-  height: auto;
+  padding: 1.6em 0;
 }
-fieldset fieldset {
-  background-color: #fff;
-}
-fieldset fieldset fieldset {
-  background-color: #f8f8f8;
+.js fieldset.collapsed .fieldset-legend a:before {
+  left: .8em;
+  top: .7em;
+  border: .32em solid transparent;
+  border-left-color: black;
 }
 
 /**
@@ -702,6 +755,9 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0;
   padding: 0 0 10px;
+}
+fieldset label {
+  font-weight: normal;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -912,6 +968,13 @@ textarea.form-textarea {
   -ms-transition: border-color 0.25s ease-in-out;
   -o-transition: border-color 0.25s ease-in-out;
   will-change: border-color;
+}
+input.form-text,
+input.form-email,
+input.form-url,
+input.form-search,
+textarea.form-textarea {
+  max-width: 100%;
 }
 select.form-select {
   font-weight: 400;

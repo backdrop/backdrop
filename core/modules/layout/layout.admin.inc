@@ -330,9 +330,9 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   $form['conditions'] = array(
-    '#title' => t('Conditions'),
+    '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Conditions allow this layout to selectively apply to different situations, such as different types of content at the same wildcard path.'),
+    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same wildcard path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
@@ -381,7 +381,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
   $form['conditions']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add condition'),
+    '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#validate' => array(),
     '#submit' => array(
@@ -1041,14 +1041,29 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   $block->style->form($form['style']['style_settings'], $form_state);
   /* End style settings. */
 
-  /* Conditions: */
+  /* Visibility conditions: */
   $form['conditions'] = array(
-    '#title' => t('Conditions'),
+    '#title' => t('Visibility conditions'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => $layout->in_progress['section'] !== 'conditions',
-    '#description' => t('Conditions allow this block to be shown only in certain situations, such as for certain roles or types of content.'),
+    '#description' => t('Visibility conditions allow this block to be shown only in certain situations, such as for certain roles or types of content.'),
     '#id' => 'block-access',
+  );
+  $form['conditions']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add visibility condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#submit' => array(
+      'layout_block_configure_form_submit',
+      'layout_block_configure_form_condition_add',
+    ),
+    '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
+    '#prefix' => '<ul class="action-links"><li>',
+    '#suffix' => '</li></ul>',
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
@@ -1090,22 +1105,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
       '#name' => 'conditions[' . $access_key . '][configure]',
     );
   }
-  $form['conditions']['add'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add condition'),
-    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-    '#submit' => array(
-      'layout_block_configure_form_submit',
-      'layout_block_configure_form_condition_add',
-    ),
-    '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
-    '#ajax' => array(
-      'callback' => 'layout_ajax_form_open_dialog',
-    ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
-  );
-  /* End conditions. */
+  /* End visibility conditions. */
 
   // Note that we specifically use backdrop_is_ajax() in addition to
   // backdrop_is_dialog() to ensure the #ajax callback is specified when the
@@ -1313,19 +1313,19 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   $form_state['menu_item'] = $menu_item;
 
   if (isset($menu_item)) {
-    $form['#title'] = t('Add condition');
+    $form['#title'] = t('Add visibility condition');
     $form['#redirect'] = 'admin/structure/layouts/menu/' . $menu_item->name . '/access';
-    $help = t('Add a new condition to restrict access to all layouts at this path.');
+    $help = t('Add a new visibility condition to restrict access to all layouts at this path.');
   }
   elseif (isset($block)) {
-    $form['#title'] = t('Add condition for "!title" block', array('!title' => $block->getAdminTitle()));
+    $form['#title'] = t('Add visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
-    $help = t('Add a new condition to limit the situations in which this block will be shown.');
+    $help = t('Add a new visibility condition to limit the situations in which this block will be shown.');
   }
   else {
-    $form['#title'] = t('Add condition for "@title" layout', array('@title' => $layout->title));
+    $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
-    $help = t('Add a new condition to limit the situations in which this layout will apply.');
+    $help = t('Add a new visibility condition to limit the situations in which this layout will apply.');
   }
   $form['help'] = array(
     '#markup' => '<p>' . $help . '</p>',
@@ -1334,7 +1334,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   $all_access_info = _layout_get_all_info('layout_access');
   $form['condition'] = array(
     '#type' => 'select',
-    '#title' => t('Add condition'),
+    '#title' => t('Add visibility condition'),
     '#options' => array(),
     '#required' => TRUE,
   );
@@ -1351,7 +1351,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add condition'),
+    '#value' => t('Add visibility condition'),
     '#submit' => array(
       'layout_condition_add_form_submit',
     ),
@@ -1459,7 +1459,7 @@ function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, 
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => $handler->is_new ? t('Add condition') : t('Save condition'),
+    '#value' => $handler->is_new ? t('Add visibility condition') : t('Save condition'),
     '#validate' => array(
       'layout_condition_edit_form_validate',
     ),
@@ -1953,7 +1953,7 @@ function layout_menu_item_form($form, &$form_state, $menu_item) {
   }
   $form['conditions']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add condition'),
+    '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
       'layout_menu_item_form_condition_add'

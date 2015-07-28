@@ -60,12 +60,6 @@
  *
  * @see collapse.js
  */
-.js fieldset.collapsed {
-  border-bottom-width: 0;
-  border-left-width: 0;
-  border-right-width: 0;
-  height: 1em;
-}
 .js fieldset.collapsed .fieldset-wrapper {
   display: none;
 }
