@@ -5,6 +5,8 @@
  * Contains simpletests making sure entity_token integration works.
  */
 
+require_once BACKDROP_ROOT . '/core/modules/link/tests/link.test';
+
 /**
  * Testing that tokens can be used in link titles
  */
@@ -15,12 +17,12 @@ class LinkEntityTokenTest extends LinkBaseTestClass {
       'name' => 'Link entity tokens test',
       'description' => 'Tests that a link field appears properly in entity tokens',
       'group' => 'Link',
-      'dependencies' => array('token', 'entity', 'entity_token'),
+      'dependencies' => array('entity'),
     );
   }
 
   function setUp($modules = array()) {
-    parent::setUp(array('token', 'entity', 'entity_token'));
+    parent::setUp(array('entity'));
   }
 
   /**

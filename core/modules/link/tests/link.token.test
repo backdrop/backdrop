@@ -5,6 +5,8 @@
  * Contains simpletests making sure token integration works.
  */
 
+require_once BACKDROP_ROOT . '/core/modules/link/tests/link.test';
+
 /**
  * Testing that tokens can be used in link titles
  */

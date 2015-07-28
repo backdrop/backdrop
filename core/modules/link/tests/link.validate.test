@@ -5,6 +5,8 @@
  * Tests that exercise the validation functions in the link module.
  */
 
+require_once BACKDROP_ROOT . '/core/modules/link/tests/link.test';
+
 class LinkValidateTestCase extends LinkBaseTestClass {
 
   protected function createLink($url, $title, $attributes = array()) {
