@@ -22,12 +22,6 @@ description = Test date validation
 group = Date
 file = date_validation.test
 
-[DateViewsPagerSkippingTestCase]
-name = Date views pager skipping test
-description = Views date pager, option to skip empty pages test
-group = Date
-file = date_views_pager.test
-
 [DateViewsPopupTestCase]
 name = Date Views - Popup Test
 description = Tests date popup in Views
