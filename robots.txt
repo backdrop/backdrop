@@ -22,7 +22,7 @@ Crawl-delay: 10
 Disallow: /core/
 Disallow: /profiles/
 # Files
-Disallow: /README.txt
+Disallow: /README.md
 Disallow: /web.config
 # Paths (clean URLs)
 Disallow: /admin/

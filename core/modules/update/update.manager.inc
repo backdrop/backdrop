@@ -662,7 +662,7 @@ function update_manager_install_form_submit($form, &$form_state) {
 
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.TXT).
+  // and others list an actual file (i.e., MODULE/README.MD).
   $project = strtok($files[0], '/\\');
 
   $archive_errors = update_manager_archive_verify($project, $local_cache, $directory);
@@ -772,7 +772,7 @@ function update_manager_archive_extract($file, $directory) {
 
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.TXT).
+  // and others list an actual file (i.e., MODULE/README.MD).
   $project = strtok($files[0], '/\\');
 
   $extract_location = $directory . '/' . $project;
