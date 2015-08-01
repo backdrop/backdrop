@@ -2151,7 +2151,8 @@ function _filter_image_caption($text) {
     // Load the altered HTML into a new DOMDocument and retrieve the element.
     $updated_node = filter_dom_load($filter_caption)
       ->getElementsByTagName('body')
-      ->item(0);
+      ->item(0)
+      ->firstChild;
 
     // Import the updated node from the new DOMDocument into the original
     // one, importing also the child nodes of the updated node.

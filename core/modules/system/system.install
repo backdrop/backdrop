@@ -2526,6 +2526,16 @@ function system_update_1039() {
 }
 
 /**
+ * Notify administrators if a non-core version of CKEditor module is present.
+ */
+function system_update_1040() {
+  $path = backdrop_get_path('module', 'ckeditor');
+  if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

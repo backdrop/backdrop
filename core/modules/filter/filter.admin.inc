@@ -106,6 +106,7 @@ function filter_admin_format_page($format = NULL) {
       'format' => NULL,
       'name' => '',
       'editor' => '',
+      'editor_settings' => array(),
       'cache' => 1,
       'status' => 1,
       'is_new' => TRUE,
@@ -203,20 +204,18 @@ function filter_admin_format_form($form, &$form_state, $format) {
       'callback' => 'filter_admin_format_editor_ajax',
       'wrapper' => 'editor-settings-wrapper',
     ),
-    '#weight' => -10,
     '#parents' => array('editor'),
   );
   $form['editor']['configure'] = array(
     '#type' => 'submit',
     '#name' => 'editor_configure',
-    '#value' => t('Configure'),
+    '#value' => t('Configure editor'),
     '#limit_validation_errors' => array(array('editor')),
     '#submit' => array('filter_admin_format_editor_submit'),
     '#ajax' => array(
       'callback' => 'filter_admin_format_editor_ajax',
       'wrapper' => 'editor-settings-wrapper',
     ),
-    '#weight' => -10,
     '#attributes' => array('class' => array('js-hide')),
     '#parents' => array('editor_configure'),
   );
