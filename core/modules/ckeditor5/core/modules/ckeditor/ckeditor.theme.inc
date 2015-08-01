@@ -203,5 +203,12 @@ function theme_ckeditor_settings_toolbar($variables) {
   $output .= '</ul>';
   $output .= '</div>';
 
-  return $output;
+  // Wrap the whole thing in a fieldset.
+  $fieldset = array(
+    '#type' => 'fieldset',
+    '#children' => $output,
+    '#title' => t('CKEditor Toolbar'),
+  );
+
+  return backdrop_render($fieldset);
 }

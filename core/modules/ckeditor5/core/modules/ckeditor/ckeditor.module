@@ -250,7 +250,7 @@ function ckeditor_ckeditor_plugins() {
     ),
     '-' => array(
       'label' => t('Separator'),
-      'image_alternative' => '<span class="ckeditor-separator">&nbsp;</span>',
+      'image_alternative' => '<span class="ckeditor-separator" title="' . t('Button separator') . '" aria-label="' . t('Button separator') . '">&nbsp;</span>',
       'attributes' => array('class' => array('ckeditor-button-separator')),
       'multiple' => TRUE,
     ),
