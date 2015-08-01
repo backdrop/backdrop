@@ -1126,6 +1126,8 @@ function user_menu() {
 
   $items['user/login'] = array(
     'title' => 'Log in',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_login'),
     'access callback' => 'user_is_anonymous',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
@@ -2881,6 +2883,8 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
  */
 function user_register_form($form, &$form_state) {
   global $user;
+  // We need to set the page title bc this menu entry is a local task.
+  backdrop_set_title('Create new account');
 
   $admin = user_access('administer users');
 
