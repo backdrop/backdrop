@@ -201,31 +201,21 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
   $form['#filters'] = $filters;
 
-  // Filter status.
-  $form['filters']['status'] = array(
-    '#type' => 'item',
-    '#title' => t('Enabled filters'),
-    '#prefix' => '<div id="filters-status-wrapper">',
-    '#suffix' => '</div>',
-  );
-  foreach ($all_filter_info as $name => $filter_info) {
-    $form['filters']['status'][$name] = array(
-      '#type' => 'checkbox',
-      '#title' => $filter_info['title'],
-      '#default_value' => $filters[$name]->status,
-      '#parents' => array('filters', $name, 'status'),
-      '#description' => $filter_info['description'],
-      '#weight' => $filter_info['weight'],
-    );
-  }
-
   // Filter order (tabledrag).
   $form['filters']['order'] = array(
     '#type' => 'item',
-    '#title' => t('Filter processing order'),
+    '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
+  $form['filters']['order']['filters'] = array(
+    '#type' => 'value',
+    '#value' => $filters,
+  );
   foreach ($all_filter_info as $name => $filter_info) {
+    $form['filters']['order'][$name]['enable'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => $filters[$name]->status,
+    );
     $form['filters']['order'][$name]['filter'] = array(
       '#markup' => $filter_info['title'],
     );
@@ -238,32 +228,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#parents' => array('filters', $name, 'weight'),
     );
     $form['filters']['order'][$name]['#weight'] = $filters[$name]->weight;
-  }
-
-  // Filter settings.
-  $form['filter_settings_title'] = array(
-    '#type' => 'item',
-    '#title' => t('Filter settings'),
-  );
-  $form['filter_settings'] = array(
-    '#type' => 'vertical_tabs',
-  );
-
-  foreach ($all_filter_info as $name => $filter_info) {
-    if (isset($filter_info['settings callback'])) {
-      $function = $filter_info['settings callback'];
-      $settings_form = $function($form, $form_state, $filters[$name], $format);
-      if (!empty($settings_form)) {
-        $form['filters']['settings'][$name] = array(
-          '#type' => 'fieldset',
-          '#title' => $filter_info['title'],
-          '#parents' => array('filters', $name, 'settings'),
-          '#weight' => $filter_info['weight'],
-          '#group' => 'filter_settings',
-        );
-        $form['filters']['settings'][$name] += $settings_form;
-      }
-    }
   }
 
   $form['actions'] = array('#type' => 'actions');

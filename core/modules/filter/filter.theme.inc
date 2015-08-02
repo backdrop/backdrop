@@ -100,22 +100,41 @@ function theme_filter_admin_overview($variables) {
  */
 function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
-
+  $filters = $element['filters']['#value'];
+  unset($element['filters']);
+dpm($filters);
   // Filter order (tabledrag).
   $rows = array();
+  $disabled = array();
   foreach (element_children($element, TRUE) as $name) {
-    $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
-    $rows[] = array(
-      'data' => array(
-        backdrop_render($element[$name]['filter']),
-        backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array('draggable'),
-    );
+    if($filters[$name]->status) {
+      $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
+      $rows[] = array(
+        'data' => array(
+          backdrop_render($element[$name]['enable']),
+          backdrop_render($element[$name]['filter']),
+          backdrop_render($element[$name]['weight']),
+        ),
+        'class' => array('draggable', 'enabled'),
+      );
+    }
+    else {
+      $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
+      $disabled[] = array(
+        'data' => array(
+          backdrop_render($element[$name]['enable']),
+          backdrop_render($element[$name]['filter']),
+          backdrop_render($element[$name]['weight']),
+        ),
+        'class' => array('draggable', 'disabled'),
+      );
+    }
   }
   $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  $spacer = array(array('data' => array(array('data' => 'Disabled', 'colspan' => 3)), 'class' => array('disable-label')));
+  $rows = array_merge($rows, $spacer, $disabled);
+  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filterorder')));
+  backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;
 }
