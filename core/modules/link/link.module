@@ -42,7 +42,10 @@ function link_field_info() {
       'label' => t('Link'),
       'description' => t('Store a title, href, and attributes in the database to assemble a link.'),
       'settings' => array(
-        'attributes' => _link_default_attributes(),
+        // PORT_TO_BACKDROP_CORE
+        //TODO:  working hypothesis is that
+        // all link field are instance settings and we don't need these.
+        /*'attributes' => _link_default_attributes(),
         'url' => 0,
         'title' => 'optional',
         'title_value' => '',
@@ -50,7 +53,7 @@ function link_field_info() {
         'enable_tokens' => 1,
         'display' => array(
           'url_cutoff' => 80,
-        ),
+        ),*/
       ),
       'instance_settings' => array(
         'attributes' => _link_default_attributes(),
@@ -86,21 +89,21 @@ function link_field_instance_settings_form($field, $instance) {
   $form['absolute_url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Absolute URL'),
-    '#default_value' => isset($instance['settings']['absolute_url']) && ($instance['settings']['absolute_url'] !== '') ? $instance['settings']['absolute_url'] : TRUE,
+    '#default_value' => $instance['settings']['absolute_url'] !== '' ? $instance['settings']['absolute_url'] : TRUE,
     '#description' => t('If checked, the URL will always render as an absolute URL.'),
   );
 
   $form['validate_url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Validate URL'),
-    '#default_value' => isset($instance['settings']['validate_url']) && ($instance['settings']['validate_url'] !== '') ? $instance['settings']['validate_url'] : TRUE,
+    '#default_value' => $instance['settings']['validate_url'] !== '' ? $instance['settings']['validate_url'] : TRUE,
     '#description' => t('If checked, the URL field will be verified as a valid URL during validation.'),
   );
 
   $form['url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Optional URL'),
-    '#default_value' => isset($instance['settings']['url']) ? $instance['settings']['url'] : '',
+    '#default_value' => $instance['settings']['url'],
     '#return_value' => 'optional',
     '#description' => t('If checked, the URL field is optional and submitting a title alone will be acceptable. If the URL is omitted, the title will be displayed as plain text.'),
   );
@@ -115,7 +118,7 @@ function link_field_instance_settings_form($field, $instance) {
   $form['title'] = array(
     '#type' => 'radios',
     '#title' => t('Link Title'),
-    '#default_value' => isset($instance['settings']['title']) ? $instance['settings']['title'] : 'optional',
+    '#default_value' => $instance['settings']['title'],
     '#options' => $title_options,
     '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.'),
   );
@@ -123,44 +126,46 @@ function link_field_instance_settings_form($field, $instance) {
   $form['title_value'] = array(
     '#type' => 'textfield',
     '#title' => t('Static title'),
-    '#default_value' => isset($instance['settings']['title_value']) ? $instance['settings']['title_value'] : '',
+    '#default_value' => $instance['settings']['title_value'],
     '#description' => t('This title will always be used if &ldquo;Static Title&rdquo; is selected above.'),
   );
 
   $form['title_label_use_field_label'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use field label as the label for the title field'),
-    '#default_value' => isset($instance['settings']['title_label_use_field_label']) ? $instance['settings']['title_label_use_field_label'] : FALSE,
+    '#default_value' => $instance['settings']['title_label_use_field_label'],
     '#description' => t('If this is checked the field label will be hidden.'),
   );
 
   $form['title_maxlength'] = array(
     '#type' => 'textfield',
     '#title' => t('Max length of title field'),
-    '#default_value' => isset($instance['settings']['title_maxlength']) ? $instance['settings']['title_maxlength'] : '128',
+    '#default_value' => $instance['settings']['title_maxlength'],
     '#description' => t('Set a maximum length on the title field (applies only if Link Title is optional or required).  The maximum limit is 255 characters.'),
     '#maxlength' => 3,
     '#size' => 3,
   );
 
-  if (module_exists('token')) {
-    // Add token module replacements fields.
-    $form['enable_tokens'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Allow user-entered tokens'),
-      '#default_value' => isset($instance['settings']['enable_tokens']) ? $instance['settings']['enable_tokens'] : 1,
-      '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the entity edit form. This does not affect the field settings on this page.'),
-    );
+  // Add token module replacements fields.
+  $form['enable_tokens'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow user-entered tokens'),
+    '#default_value' => $instance['settings']['enable_tokens'],
+    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the entity edit form. This does not affect the field settings on this page.'),
+  );
 
-    $entity_info = entity_get_info($instance['entity_type']);
-    $form['tokens_help'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array($entity_info['token type']),
-      '#global_types' => TRUE,
-      '#click_insert' => TRUE,
-      '#dialog' => TRUE,
-    );
-  }
+  $entity_info = entity_get_info($instance['entity_type']);
+  $token_link = theme('token_tree_link', array(
+      'token_types' => array($entity_info['token type']),
+    )
+  );
+  $form['tokens_help'] = array(
+    '#theme' => $token_link,
+    '#token_types' => array($entity_info['token type']),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#dialog' => TRUE,
+  );
 
   $form['display'] = array(
     '#tree' => TRUE,
@@ -372,11 +377,8 @@ function _link_load($field, $item, $instance) {
     }
     return $item['attributes'];
   }
-  elseif (isset($instance['settings']['attributes'])) {
-    return $instance['settings']['attributes'];
-  }
   else {
-    return $field['settings']['attributes'];
+    return $instance['settings']['attributes'];
   }
 }
 
@@ -838,7 +840,6 @@ function link_field_process($element, $form_state, $complete_form) {
       '#type' => 'textfield',
       '#maxlength' => $settings['title_maxlength'],
       '#title' => $title_label,
-      '#description' => t('The link title is limited to @maxlength characters maximum.', array('@maxlength' => $settings['title_maxlength'])),
       '#required' => ($settings['title'] == 'required' && (($element['#delta'] == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
       '#default_value' => isset($element['#value']['title']) ? $element['#value']['title'] : NULL,
     );
@@ -1325,20 +1326,6 @@ function link_validate_url($text) {
 function _link_domains() {
   $link_extra_domains = config_get('link.settings', 'extra_domains');
   return empty($link_extra_domains) ? LINK_DOMAINS : LINK_DOMAINS . '|' . implode('|', $link_extra_domains);
-}
-
-/**
- * Implements hook_migrate_field_alter().
- */
-function link_content_migrate_field_alter(&$field_value, $instance_value) {
-  if ($field_value['type'] == 'link') {
-    // Adjust the field type.
-    $field_value['type'] = 'link_field';
-    // Remove settings that are now on the instance.
-    foreach (array('attributes', 'display', 'url', 'title', 'title_value', 'enable_tokens', 'validate_url') as $setting) {
-      unset($field_value['settings'][$setting]);
-    }
-  }
 }
 
 /**
