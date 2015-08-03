@@ -1471,6 +1471,8 @@ function user_login($form, &$form_state) {
     backdrop_goto('user/' . $user->uid);
   }
 
+  backdrop_set_title(t('Log in'));
+
   // Display login form:
   $form['name'] = array('#type' => 'textfield',
     '#title' => t('Username'),
@@ -1479,10 +1481,8 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']['#description'] = t('Enter your @s username.', array('@s' => config_get('system.core', 'site_name')));
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
-    '#description' => t('Enter the password that accompanies your username.'),
     '#required' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();
