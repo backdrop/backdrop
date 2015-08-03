@@ -493,6 +493,19 @@ function system_requirements($phase) {
     }
   }
 
+  // Check for a duplicate CKEditor project.
+  if ($phase == 'runtime') {
+    $path = backdrop_get_path('module', 'ckeditor');
+    if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+      $requirements['ckeditor_replaced'] = array(
+        'title' => $t('CKEditor'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+  }
+
   return $requirements;
 }
 

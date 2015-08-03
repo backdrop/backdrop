@@ -2141,12 +2141,22 @@ function _filter_image_caption($text) {
     $attributes['class'][] = 'caption-' . $node->tagName;
     $node->removeAttribute('class');
 
-    $filter_caption = theme('filter_caption', array(
+    $theme_parameters = array(
       'item' => $node->ownerDocument->saveHTML($node),
       'tag' => $node->tagName,
       'caption' => $caption,
       'attributes' => $attributes,
-    ));
+    );
+
+    // In order to test this filter without a database connection, we
+    // may directly call theme_filter_caption() to generate output.
+    if (Database::isActiveConnection()) {
+      $filter_caption = theme('filter_caption', $theme_parameters);
+    }
+    else {
+      module_load_include('inc', 'filter', 'filter.theme');
+      $filter_caption = theme_filter_caption($theme_parameters);
+    }
 
     // Load the altered HTML into a new DOMDocument and retrieve the element.
     $updated_node = filter_dom_load($filter_caption)
