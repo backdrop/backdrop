@@ -543,19 +543,22 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php5.c>
   php_flag engine off
 </IfModule>
+
 EOF;
 
   if ($private) {
-    $lines = <<<EOF
-    # Deny all requests from Apache 2.4+.
-    <IfModule mod_authz_core.c>
-      Require all denied
-    </IfModule>
+    $lines .= <<<EOF
 
-    # Deny all requests from Apache 2.0-2.2.
-    <IfModule !mod_authz_core.c>
-      Deny from all
-    </IfModule>
+# Deny all requests from Apache 2.4+.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+# Deny all requests from Apache 2.0-2.2.
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>
+
 EOF;
   }
 
