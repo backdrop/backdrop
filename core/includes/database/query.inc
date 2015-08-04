@@ -1843,6 +1843,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
 
             $placeholders = array();
             if ($condition['value'] instanceof SelectQueryInterface) {
+              $operator = $this->ensureBrackets($operator);
               $condition['value']->compile($connection, $queryPlaceholder);
               $placeholders[] = (string) $condition['value'];
               $arguments += $condition['value']->arguments();
@@ -1961,6 +1962,30 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
     $return += array('operator' => $operator);
 
     return $return;
+  }
+
+  /**
+   * Ensures that the value being tested against is bracketed.
+   *
+   * Some operators don't usually need brackets around the value being tested,
+   * but when the value being tested is a SelectQueryInterface it needs to be
+   * bracketed. This function adds those necessary brackets.
+   *
+   * @param array $operator
+   *   The extra handling directives for the operator
+   *
+   * @return array
+   *   The updated extra handling directives for the operator with brackets
+   *   added if necessary.
+   */
+  protected function ensureBrackets($operator) {
+    if (strpos($operator['prefix'], '(') === FALSE) {
+      $operator['prefix'] .= ' (';
+    }
+    if (strpos($operator['postfix'], ')') === FALSE) {
+      $operator['postfix'] = ')' . $operator['postfix'];
+    }
+    return $operator;
   }
 
 }

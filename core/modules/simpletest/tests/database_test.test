@@ -1678,6 +1678,19 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
     // WHERE tt2.pid IN (SELECT tt.pid AS pid FROM test_task tt WHERE tt.priority=1)
     $people = $select->execute()->fetchCol();
     $this->assertEqual(count($people), 5, 'Returned the correct number of rows.');
+
+    // Create a subquery that only returns one value
+    $subquery2 = db_select('test_task', 'tt');
+    $subquery2->addField('tt', 'priority');
+    $subquery2->condition('tt.task', 'eat'); // Gives 3
+
+    // Create another query that tests against the value returned by the subquery
+    $select2 = db_select('test_task', 'tt2');
+    $select2->addField('tt2', 'task');
+    $select2->condition('tt2.priority', $subquery2, '<');
+
+    $tasks = $select2->execute()->fetchCol();
+    $this->assertEqual(count($tasks), 4, 'Returned the correct number of rows.');
   }
 
   /**
