@@ -86,7 +86,10 @@ CKEDITOR.plugins.add('backdropimagecaption', {
         // CKEditor seems to apply the caption class to downcast elements, which
         // we do not want. Make sure that the caption class doesn't end up in
         // the raw source.
-        img.removeClass(editor.config.image2_captionedClass);
+        var classes = editor.config.image2_captionedClass.split(' ');
+        for (var i = 0; i < classes.length; i++) {
+          element.removeClass(classes[i]);
+        }
 
         return img;
       };
@@ -107,7 +110,10 @@ CKEDITOR.plugins.add('backdropimagecaption', {
         }
 
         // Remove any caption classes from the raw element itself.
-        element.removeClass(editor.config.image2_captionedClass);
+        var classes = editor.config.image2_captionedClass.split(' ');
+        for (var i = 0; i < classes.length; i++) {
+          element.removeClass(classes[i]);
+        }
 
         var attrs = element.attributes;
         var retElement = element;
