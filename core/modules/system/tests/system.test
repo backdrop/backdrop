@@ -1031,7 +1031,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
   function testSiteMaintenance() {
     // Turn on maintenance mode.
     $edit = array(
-      'maintenance_mode' => 1,
+      'maintenance_mode' => TRUE,
     );
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
     $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
