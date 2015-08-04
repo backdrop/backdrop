@@ -2015,7 +2015,7 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
-    '#default_value' => state_get('maintenance_mode', 0),
+    '#default_value' => state_get('maintenance_mode', FALSE),
     '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))),
   );
   $form['maintenance_mode_message'] = array(
@@ -2036,7 +2036,7 @@ function system_site_maintenance_mode($form, &$form_state) {
  * Submit handler for the system_site_maintenance_mode() form.
  */
 function system_site_maintenance_mode_submit($form, &$form_state) {
-  state_set('maintenance_mode', (int) $form_state['values']['maintenance_mode']);
+  state_set('maintenance_mode', (bool) $form_state['values']['maintenance_mode']);
   config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
 
   // Give specific messages on the primary action for this form.
