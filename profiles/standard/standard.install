@@ -17,6 +17,7 @@ function standard_install() {
     'format' => 'filtered_html',
     'name' => 'Filtered HTML',
     'weight' => 0,
+    'editor' => 'ckeditor',
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -33,6 +34,16 @@ function standard_install() {
         'weight' => 2,
         'status' => 1,
       ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
       // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
@@ -47,6 +58,7 @@ function standard_install() {
     'format' => 'full_html',
     'name' => 'Full HTML',
     'weight' => 1,
+    'editor' => NULL,
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -56,6 +68,16 @@ function standard_install() {
       // Line break filter.
       'filter_autop' => array(
         'weight' => 1,
+        'status' => 1,
+      ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
         'status' => 1,
       ),
       // HTML corrector filter.

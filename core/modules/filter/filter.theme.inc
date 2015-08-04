@@ -26,12 +26,24 @@ function theme_text_format_wrapper($variables) {
 }
 
 /**
+ * Returns HTML for a captioned item, usually an image.
+ */
+function theme_filter_caption($variables) {
+  $output = '';
+  $output .= '<figure' . backdrop_attributes($variables['attributes']) . '>';
+  $output .= $variables['item'];
+  $output .= '<figcaption>' . $variables['caption'] . '</figcaption>';
+  $output .= '</figure>';
+  return $output;
+}
+
+/**
  * Returns HTML for a link to the more extensive filter tips.
  *
  * @ingroup themeable
  */
 function theme_filter_tips_more_info() {
-  return '<p>' . l(t('More information about text formats'), 'filter/tips', array('attributes' => array('target' => '_blank'))) . '</p>';
+  return '<p>' . l(t('More information about text editors'), 'filter/tips', array('attributes' => array('target' => '_blank'))) . '</p>';
 }
 
 /**

@@ -2970,7 +2970,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
     $this->backdropSettings = array();
-    if (preg_match('/window.Backdrop = {settings: (.*)}/', $content, $matches)) {
+    if (preg_match('/window.Backdrop[ ]?=[ ]?{settings:[ ]?(.*)}/', $content, $matches)) {
       $this->backdropSettings = backdrop_json_decode($matches[1]);
     }
   }

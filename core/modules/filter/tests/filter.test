@@ -166,7 +166,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink('Add text format');
+    $this->clickLink('Add text editor');
     $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(
@@ -619,7 +619,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');
@@ -653,7 +653,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');
@@ -803,7 +803,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * Tests the line break filter.
    */
   function testLineBreakFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_autop';
 
@@ -1074,7 +1074,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *   or better a whitelist approach should be used for that too.
    */
   function testHtmlFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
       'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <test-element>',
@@ -1123,7 +1123,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * Tests the spam deterrent.
    */
   function testNoFollowFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
       'allowed_html' => '<a>',
@@ -1171,7 +1171,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * check_plain() is not tested here.
    */
   function testHtmlEscapeFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_html_escape';
 
@@ -1189,7 +1189,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * Tests the URL filter.
    */
   function testUrlFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_url';
     $filter->settings = array(
@@ -1531,7 +1531,7 @@ www.example.com with a newline in comments -->
    * - Mix of absolute and partial URLs, and e-mail addresses in one content.
    */
   function testUrlFilterContent() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
       'filter_url_length' => 496,
@@ -1542,6 +1542,81 @@ www.example.com with a newline in comments -->
     $expected = file_get_contents($path . '/filter.url-output.txt');
     $result = _filter_url($input, $filter);
     $this->assertIdentical($result, $expected, 'Complex HTML document was correctly processed.');
+  }
+
+  /**
+   * Tests the Image alignment filter (data-align).
+   */
+  function testImageAlignFilter() {
+    // Set up dummy filter object.
+    $filter = new stdClass();
+    $filter->callback = '_filter_image_align';
+
+    $input = <<<EOF
+<p><img src="foo.png" width="100" height="100" data-align="right" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="left" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="center" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="bottom" /></p>
+
+<p><img src="foo.png" class="foo" data-align="right" /></p>
+
+<blockquote data-align="left">
+  A quote
+</blockquote>
+
+<p class="foo" data-align="center">
+  Centered paragraph.
+</p>
+EOF;
+
+    $tests = array(
+      $input => array(
+        '<img src="foo.png" width="100" height="100" class="align-right" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-left" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-center" />' => TRUE,
+        // An unknown alignment (bottom) should be removed.
+        '<img src="foo.png" width="100" height="100" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-bottom" />' => FALSE,
+
+        // The align class should be added to existing classes.
+        '<img src="foo.png" class="foo align-right" />' => TRUE,
+
+        // Align class also works on other elements, despite the filter name.
+        '<blockquote class="align-left">' => TRUE,
+        '<p class="foo align-center">' => TRUE,
+
+        // Ensure the temporarily wrapped body tag is stripped before output.
+        '<body>' => FALSE,
+      ),
+    );
+    $this->assertFilteredString($filter, $tests);
+  }
+
+  /**
+   * Tests the Image caption filter (data-caption).
+   */
+  function testImageAlignCaption() {
+    // Set up dummy filter object.
+    $filter = new stdClass();
+    $filter->callback = '_filter_image_caption';
+
+    $input = <<<EOF
+<img data-caption="Simple caption" src="foo.png" />
+<img data-caption="The caption with a &lt;a href=&quot;/foo&quot;&gt; link&lt;/a&gt;.&lt;strong&gt; Bold tag.&lt;/strong&gt;" src="foo.png" />
+<img data-caption="The caption with a &lt;div&gt;not allowed tag&lt;/div&gt;." src="foo.png" />
+EOF;
+
+    $tests = array(
+      $input => array(
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>Simple caption</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <a href="/foo"> link</a>.<strong> Bold tag.</strong></figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a not allowed tag.</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <div>not allowed tag</div>.</figcaption></figure>' => FALSE,
+        // Ensure the temporarily wrapped body tag is stripped before output.
+        '<body>' => FALSE,
+      ),
+    );
+    $this->assertFilteredString($filter, $tests);
   }
 
   /**

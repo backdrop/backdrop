@@ -534,8 +534,6 @@ div.error:before {
     url(../../../misc/message-error.svg);
 }
 
-
-
 /**
  * Floated images.
  */
@@ -546,4 +544,32 @@ img.align-left {
 img.align-right {
   margin-left: 2em;
   margin-bottom: 1em;
+}
+
+/**
+ * Figure and Figure Captions.
+ *
+ * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
+ */
+.caption {
+  display: table;
+  margin: 0 12px 10px;
+  border: 1px solid #ccc;
+}
+.caption.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.caption > * {
+  display: block;
+  max-width: 100%;
+}
+.caption > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
+  padding: 3px 6px;
+  border: 1px solid #ccc;
+  border-top: none;
+  background-color: #eee;
 }

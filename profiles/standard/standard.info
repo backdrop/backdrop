@@ -5,6 +5,7 @@ backdrop = 1.x
 dependencies[] = node
 dependencies[] = admin_bar
 dependencies[] = block
+dependencies[] = ckeditor
 dependencies[] = color
 dependencies[] = comment
 dependencies[] = config

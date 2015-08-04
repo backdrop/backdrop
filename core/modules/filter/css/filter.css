@@ -51,3 +51,25 @@ input#edit-filters-filter-html-settings-allowed-html {
   padding-bottom: 0;
   font-size: 0.9em;
 }
+
+.editor-dialog {
+  width: 100%;
+  max-width: 500px;
+}
+.editor-image-size div {
+  display: inline;
+}
+.editor-image-size .form-number {
+  width: 30%;
+  max-width: 120px;
+}
+.editor-image-align div {
+  display: inline;
+}
+.editor-image-align .option {
+  margin-right: 20px; /* LTR */
+}
+[dir="rtl"] .editor-image-align .option {
+  margin-right: 0;
+  margin-left: 20px;
+}
