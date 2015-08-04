@@ -43,3 +43,13 @@ ol, ul, dl {
 p.align-center {
   text-align: center;
 }
+span.align-left,
+img.align-left {
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+span.align-right,
+img.align-right {
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
