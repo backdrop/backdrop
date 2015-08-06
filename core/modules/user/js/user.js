@@ -28,6 +28,9 @@ Backdrop.behaviors.password = {
         // Evaluate the password strength.
         var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), translate.username);
 
+        // Adjust the indicator color to match password strength.
+        $innerWrapper.find('.indicator').css('background-color', result.indicatorColor);
+
         // Adjust the length of the strength indicator.
         $innerWrapper.find('.indicator').css('width', result.strength + '%');
 
@@ -105,22 +108,26 @@ Backdrop.evaluatePasswordStrength = function (password, username) {
   // Based on the strength, work out what text should be shown by the password strength meter.
   if (strength >= 90) {
     level = 'strong';
+    indicatorColor = '#4CA64C';
   }
   else if (strength > 70) {
     level = 'good';
+    indicatorColor = '#008000';
   }
   else if (strength > 50) {
     level = 'fair';
+    indicatorColor = '#FFA00F';
   }
   else if (strength > 0) {
     level = 'weak';
+    indicatorColor = '#FF2E0B';
   }
 
   // Cap at 100 and round to the nearest integer.
   strength = parseInt(Math.min(strength, 100));
 
   // Assemble the final message.
-  return { strength: strength, level: level };
+  return { strength: strength, level: level, indicatorColor: indicatorColor};
 };
 
 /**
