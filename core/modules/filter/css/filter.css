@@ -51,3 +51,15 @@ input#edit-filters-filter-html-settings-allowed-html {
   padding-bottom: 0;
   font-size: 0.9em;
 }
+
+.filter-td {
+  float: left;
+}
+
+.filter-configure .description {
+  white-space: normal;
+}
+
+#filterorder td:first-child {
+  max-width:300px;
+}

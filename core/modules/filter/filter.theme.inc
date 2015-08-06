@@ -111,8 +111,9 @@ dpm($filters);
       $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
       $rows[] = array(
         'data' => array(
-          backdrop_render($element[$name]['enable']),
           backdrop_render($element[$name]['filter']),
+          backdrop_render($element[$name]['configure']),
+          backdrop_render($element[$name]['enable']),
           backdrop_render($element[$name]['weight']),
         ),
         'class' => array('draggable', 'enabled'),
@@ -122,8 +123,9 @@ dpm($filters);
       $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
       $disabled[] = array(
         'data' => array(
-          backdrop_render($element[$name]['enable']),
           backdrop_render($element[$name]['filter']),
+          backdrop_render($element[$name]['configure']),
+          backdrop_render($element[$name]['enable']),
           backdrop_render($element[$name]['weight']),
         ),
         'class' => array('draggable', 'disabled'),
@@ -131,13 +133,23 @@ dpm($filters);
     }
   }
   $output = backdrop_render_children($element);
-  $spacer = array(array('data' => array(array('data' => 'Disabled', 'colspan' => 3)), 'class' => array('disable-label')));
+  $spacer = array(array('data' => array(array('data' => 'Disabled', 'colspan' => 4)), 'class' => array('disable-label')));
   $rows = array_merge($rows, $spacer, $disabled);
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filterorder')));
   backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;
 }
+
+function theme_filter_admin_format_filter_display($variables) {
+  $element = $variables['element'];
+  $output = '<div class="filter-title">' . backdrop_render($element['title']) . '</div>';
+  $output .= '<div class="filter-details description">' . backdrop_render($element['details']) . '</div>';
+  $output .= '<div class="filter-configure">' . backdrop_render($element['configure']) . '</div>';
+  $output .= backdrop_render_children($element);
+  return $output;
+}
+
 
 /**
  * Returns HTML for a set of filter tips.

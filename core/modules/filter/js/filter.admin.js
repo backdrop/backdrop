@@ -31,7 +31,7 @@ Backdrop.behaviors.filterStatus = {
       // Use "region-message" row instead of "region" row because
       // "region-{region_name}-message" is less prone to regexp match errors.
       dropIndex = dragObject.rowObject.element.rowIndex;
-      if(dragObject.oldRowElement.rowIndex != dropIndex) {
+      if(dragObject.changed == true) {
         disableIndex = $('#filterorder tr.disable-label').index();
         enabling = dropIndex < disableIndex;
         dropRow = dragObject.rowObject.element;
@@ -76,6 +76,12 @@ Backdrop.behaviors.filterStatus = {
           $('.disable-label').prevAll('.region-empty').remove();
         }
     };
+    
+    $('.filter-configure').hide();
+    $('.configure-link').on('click', function(event){
+      event.preventDefault();
+      $(this).closest('tr').find('.filter-configure').toggle();
+    });
   }
 };
 

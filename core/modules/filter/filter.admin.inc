@@ -141,7 +141,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
+  //backdrop_add_library('system', 'ui.dialog');
 
+dpm($format);
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
@@ -184,7 +186,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // text formats.
   $all_filter_info = filter_get_filters();
   $filters = $format->filters;
-
+dpm($all_filter_info);
   // Prepare filters for form sections.
   foreach ($all_filter_info as $name => $filter_info) {
     // Create an empty filter object for new/unconfigured filters.
@@ -216,9 +218,22 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#type' => 'checkbox',
       '#default_value' => $filters[$name]->status,
     );
+    $form['filters']['order'][$name]['configure'] = array(
+      '#markup' =>   l(t('Configure'), '#', array('attributes' => array('class' => 'configure-link'), 'fragment' => 'configure')),
+    );
     $form['filters']['order'][$name]['filter'] = array(
+      '#theme' => 'filter_admin_format_filter_display',
+      '#type' => 'item',
+      '#prefix' => '<div class="filter-td">',
+      '#suffix' => '</div>',
+    );
+    $form['filters']['order'][$name]['filter']['title'] = array(
       '#markup' => $filter_info['title'],
     );
+    $form['filters']['order'][$name]['filter']['details'] = array(
+      '#markup' => $filter_info['title'],
+    );
+    $form['filters']['order'][$name]['filter']['configure'] = _filter_build_configure_form($form, $form_state, $name, $format);
     $form['filters']['order'][$name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
@@ -237,6 +252,17 @@ function filter_admin_format_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+function _filter_build_configure_form($form, $form_state, $filter, $format) {
+  $all_filter_info = filter_get_filters();
+  $filters = $format->filters;
+  if(isset($all_filter_info[$filter]['settings callback'])) {
+    $function = $all_filter_info[$filter]['settings callback'];
+    $filter = $filters[$filter];
+    $settings_form = $function($form, $form_state, $filter, $format);
+    return $settings_form;
+  }
+  return array();
 }
 
 /**
@@ -276,9 +302,9 @@ function filter_admin_format_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
-  $status = filter_format_save($format);
-
-  // Save user permissions.
+  //$status = filter_format_save($format);
+dpm($format);
+/*   // Save user permissions.
   if ($permission = filter_permission_name($format)) {
     foreach ($format->roles as $rid => $enabled) {
       user_role_change_permissions($rid, array($permission => $enabled));
@@ -296,6 +322,10 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'admin/config/content/formats';
+ */}
+
+function _filter_build_filter_display($name, $format) {
+  return theme('filter_display', array('filter' => $name, 'format' => $format));
 }
 
 /**

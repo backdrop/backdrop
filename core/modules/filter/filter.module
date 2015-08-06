@@ -32,6 +32,9 @@ function filter_theme() {
     'filter_guidelines' => array(
       'variables' => array('format' => NULL),
     ) + $base,
+    'filter_admin_format_filter_display' => array(
+      'render element' => 'element',
+    ) + $base,
   );
 }
 
