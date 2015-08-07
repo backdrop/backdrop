@@ -143,7 +143,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
   backdrop_add_library('system', 'ui.dialog');
 
-dpm($format);
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
@@ -188,7 +187,7 @@ dpm($format);
   $filters = $format->filters;
   $tips = _filter_tips($format->format);
   $format_tips = reset($tips);
-dpm($format_tips);
+
   // Prepare filters for form sections.
   foreach ($all_filter_info as $name => $filter_info) {
     // Create an empty filter object for new/unconfigured filters.

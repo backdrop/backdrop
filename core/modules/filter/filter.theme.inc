@@ -102,7 +102,7 @@ function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
   $filters = $element['filters']['#value'];
   unset($element['filters']);
-dpm($variables);
+
   // Filter order (tabledrag).
   $rows = array();
   $disabled = array();
@@ -133,9 +133,10 @@ dpm($variables);
     }
   }
   $output = backdrop_render_children($element);
-  $spacer = array(array('data' => array(array('data' => 'Disabled', 'colspan' => 4)), 'class' => array('disable-label')));
+  $header = array(t('Filter'), t('Configure'), t('Status'), '');
+  $spacer = array(array('data' => array(array('data' => 'Disabled filters', 'colspan' => 4)), 'class' => array('disable-label')));
   $rows = array_merge($rows, $spacer, $disabled);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filterorder')));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filterorder')));
   backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;
@@ -179,7 +180,6 @@ function theme_filter_admin_format_filter_display($variables) {
  */
 function theme_filter_tips($variables) {
   $tips = $variables['tips'];
-  dpm($tips);
   $long = $variables['long'];
   $output = '';
 

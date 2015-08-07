@@ -8,8 +8,7 @@
 Backdrop.behaviors.filterStatus = {
   attach: function (context, settings) {
     // tableDrag is required and we should be on the filters admin page.
-    // if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag.filters == 'undefined') {
-    if (typeof Backdrop.tableDrag == 'undefined') {
+    if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag.filterorder == 'undefined') {
       return;
     }
     var table = $('table#filterorder');
@@ -25,11 +24,9 @@ Backdrop.behaviors.filterStatus = {
       return '<div class="messages warning">' + Backdrop.theme('tableDragChangedMarker') + ' ' + Backdrop.t('The changes to these filters will not be saved until the <em>Save filters</em> button is clicked.') + '</div>';
     };
 
-    // Add a handler so when a row is dropped, update fields dropped into new regions.
+    // Add a handler so when a row is dropped, update the status checkbox.
     tableDrag.onDrop = function () {
       dragObject = this;
-      // Use "region-message" row instead of "region" row because
-      // "region-{region_name}-message" is less prone to regexp match errors.
       dropIndex = dragObject.rowObject.element.rowIndex;
       if(dragObject.changed == true) {
         disableIndex = $('#filterorder tr.disable-label').index();
@@ -39,7 +36,8 @@ Backdrop.behaviors.filterStatus = {
       }
     };
 
-    // Add the behavior to each region select list.
+    // Add the behavior to move rows to the appropriate section if the status
+    // checkbox is checked.
     $('#filterorder input:checkbox', context).change(function (event) {
         // Make our new row and select field.
         var row = $(this).closest('tr');
@@ -55,26 +53,30 @@ Backdrop.behaviors.filterStatus = {
        }
         
 
-        // Modify empty regions with added or removed fields.
+        // Modify empty regions.
         checkEmptyRegions(table, row);
         // Remove focus from selectbox.
         $(this).get(0).blur();
     });
 
+    // If a region becomes empty, add empty text.
     var checkEmptyRegions = function (table, rowObject) {
-        // This region has become empty.
-        if ($('.disable-label').next('tr').length == 0) {
-          $('table#filterorder tr:last').after('<tr class="region-empty"><td colspan=3>Empty</td></tr>');
-        }
-        else {
-          $('.disable-label').nextAll('.region-empty').remove();
-        }
-        if ($('.disable-label').prev('tr').length == 0) {
-          $('table#filterorder tr:first').before('<tr class="region-empty"><td colspan=3>Empty</td></tr>');
-        }
-        else {
-          $('.disable-label').prevAll('.region-empty').remove();
-        }
+      // If the "Disabled filters" section has become empty, add empty text. 
+      // Remove the text if the region is not empty.
+      if ($('.disable-label').next('tr').length == 0) {
+        $('table#filterorder tr:last').after('<tr class="region-empty description"><td colspan=3>No disabled filters.</td></tr>');
+      }
+      else {
+        $('.disable-label').nextAll('.region-empty').remove();
+      }
+      // If the "Enabled filters" section has become empty, add empty text. 
+      // Remove the text if the region is not empty.
+      if ($('.disable-label').prev('tr').length == 0) {
+        $('table#filterorder tr:first').before('<tr class="region-empty description"><td colspan=3>No enabled filters.</td></tr>');
+      }
+      else {
+        $('.disable-label').prevAll('.region-empty').remove();
+      }
     };
     
     // Add modal for configure link

@@ -52,15 +52,19 @@ input#edit-filters-filter-html-settings-allowed-html {
   font-size: 0.9em;
 }
 
-.filter-td {
+#filterorder .filter-td {
   float: left;
   max-width: 95%;
 }
 
-.filter-configure .description, .filter-details.description {
+#filterorder .filter-configure .description, .filter-details.description {
   white-space: normal;
 }
 
 #filterorder td:first-child {
   max-width:300px;
+}
+
+#filterorder .disable-label {
+  font-weight: bold;
 }
