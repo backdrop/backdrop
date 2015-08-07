@@ -102,7 +102,7 @@ function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
   $filters = $element['filters']['#value'];
   unset($element['filters']);
-dpm($filters);
+dpm($variables);
   // Filter order (tabledrag).
   $rows = array();
   $disabled = array();
@@ -112,8 +112,8 @@ dpm($filters);
       $rows[] = array(
         'data' => array(
           backdrop_render($element[$name]['filter']),
-          backdrop_render($element[$name]['configure']),
-          backdrop_render($element[$name]['enable']),
+          backdrop_render($element[$name]['configure_link']),
+          backdrop_render($element[$name]['status']),
           backdrop_render($element[$name]['weight']),
         ),
         'class' => array('draggable', 'enabled'),
@@ -124,8 +124,8 @@ dpm($filters);
       $disabled[] = array(
         'data' => array(
           backdrop_render($element[$name]['filter']),
-          backdrop_render($element[$name]['configure']),
-          backdrop_render($element[$name]['enable']),
+          backdrop_render($element[$name]['configure_link']),
+          backdrop_render($element[$name]['status']),
           backdrop_render($element[$name]['weight']),
         ),
         'class' => array('draggable', 'disabled'),

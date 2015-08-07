@@ -141,7 +141,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
-  //backdrop_add_library('system', 'ui.dialog');
+  backdrop_add_library('system', 'ui.dialog');
 
 dpm($format);
   $form['name'] = array(
@@ -204,37 +204,37 @@ dpm($all_filter_info);
   $form['#filters'] = $filters;
 
   // Filter order (tabledrag).
-  $form['filters']['order'] = array(
+  $form['filters'] = array(
     '#type' => 'item',
     '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
-  $form['filters']['order']['filters'] = array(
+  $form['filters']['filters'] = array(
     '#type' => 'value',
     '#value' => $filters,
   );
   foreach ($all_filter_info as $name => $filter_info) {
-    $form['filters']['order'][$name]['enable'] = array(
+    $form['filters'][$name]['status'] = array(
       '#type' => 'checkbox',
       '#default_value' => $filters[$name]->status,
     );
-    $form['filters']['order'][$name]['configure'] = array(
+    $form['filters'][$name]['configure_link'] = array(
       '#markup' =>   l(t('Configure'), '#', array('attributes' => array('class' => 'configure-link'), 'fragment' => 'configure')),
     );
-    $form['filters']['order'][$name]['filter'] = array(
+    $form['filters'][$name]['filter'] = array(
       '#theme' => 'filter_admin_format_filter_display',
       '#type' => 'item',
       '#prefix' => '<div class="filter-td">',
       '#suffix' => '</div>',
     );
-    $form['filters']['order'][$name]['filter']['title'] = array(
+    $form['filters'][$name]['filter']['title'] = array(
       '#markup' => $filter_info['title'],
     );
-    $form['filters']['order'][$name]['filter']['details'] = array(
+    $form['filters'][$name]['filter']['details'] = array(
       '#markup' => $filter_info['title'],
     );
-    $form['filters']['order'][$name]['filter']['configure'] = _filter_build_configure_form($form, $form_state, $name, $format);
-    $form['filters']['order'][$name]['weight'] = array(
+    $form['filters'][$name]['filter']['configure'] = _filter_build_configure_form($form, $form_state, $name, $format);
+    $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
       '#title_display' => 'invisible',
@@ -242,7 +242,7 @@ dpm($all_filter_info);
       '#default_value' => $filters[$name]->weight,
       '#parents' => array('filters', $name, 'weight'),
     );
-    $form['filters']['order'][$name]['#weight'] = $filters[$name]->weight;
+    $form['filters'][$name]['#weight'] = $filters[$name]->weight;
   }
 
   $form['actions'] = array('#type' => 'actions');
@@ -296,15 +296,23 @@ function filter_admin_format_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
   unset($form_state['values']['filter_settings']);
   unset($form_state['values']['actions']);
+  unset($form_state['values']['filters']['filters']);
 
+  // Add settings to $form_state.
+  foreach ($form_state['values']['filters'] as $key => $value) {
+    if(isset($value['filter'])) {
+      $form_state['values']['filters'][$key]['settings'] = $value['filter']['configure'];
+      unset($form_state['values']['filters'][$key]['filter']);
+    }
+  }
+  
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
-  //$status = filter_format_save($format);
-dpm($format);
-/*   // Save user permissions.
+  $status = filter_format_save($format);
+  // Save user permissions.
   if ($permission = filter_permission_name($format)) {
     foreach ($format->roles as $rid => $enabled) {
       user_role_change_permissions($rid, array($permission => $enabled));
@@ -322,7 +330,7 @@ dpm($format);
   }
 
   $form_state['redirect'] = 'admin/config/content/formats';
- */}
+}
 
 function _filter_build_filter_display($name, $format) {
   return theme('filter_display', array('filter' => $name, 'format' => $format));

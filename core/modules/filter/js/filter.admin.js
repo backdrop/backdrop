@@ -77,10 +77,23 @@ Backdrop.behaviors.filterStatus = {
         }
     };
     
+    // Add modal for configure link
     $('.filter-configure').hide();
-    $('.configure-link').on('click', function(event){
+
+    $(".configure-link").click(function (event) {
       event.preventDefault();
-      $(this).closest('tr').find('.filter-configure').toggle();
+      $(this).closest('tr').find('.filter-configure').dialog({
+        draggable: false,
+        width: "300px",
+        modal: true,
+        title: "",
+        buttons: {
+          "Update settings": function () {
+            $(this).dialog("close");
+            $(this).dialog( "destroy");
+          }
+        }
+      });
     });
   }
 };
