@@ -2239,3 +2239,37 @@ function _field_group_get_default_formatter_settings($format_type, $mode) {
   );
 }
 
+/**
+ * Callback to bulk export field groups.
+ */
+function field_group_field_group_to_hook_code($data, $module) {
+  ctools_include('export');
+  $schema = ctools_export_get_schema('field_group');
+  $export = $schema['export'];
+
+  $translatables = array();
+  $objects = ctools_export_load_object('field_group', 'names', array_values($data));
+  $code = "/**\n";
+  $code .= " * Implements hook_{$export['default hook']}()\n";
+  $code .= " */\n";
+  $code .= "function " . $module . "_{$export['default hook']}() {\n";
+  $code .= "  \${$export['identifier']}s = array();\n\n";
+  foreach ($objects as $object) {
+    $code .= ctools_export_object('field_group', $object, '  ');
+    $code .= "  \${$export['identifier']}s['" . check_plain($object->$export['key']) . "'] = \${$export['identifier']};\n\n";
+    if (!empty($object->data['label'])) {
+      $translatables[] =  $object->data['label'];
+    }
+    if (!empty($object->data['description'])) {
+      $translatables[] =  $object->data['description'];
+    }
+  }
+
+  if (!empty($translatables)) {
+    $code .= features_translatables_export($translatables, '  ') . "\n";
+  }
+
+  $code .= "  return \${$export['identifier']}s;";
+  $code .= "}\n";
+  return $code;
+}
