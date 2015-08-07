@@ -54,9 +54,10 @@ input#edit-filters-filter-html-settings-allowed-html {
 
 .filter-td {
   float: left;
+  max-width: 95%;
 }
 
-.filter-configure .description {
+.filter-configure .description, .filter-details.description {
   white-space: normal;
 }
 

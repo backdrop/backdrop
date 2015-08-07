@@ -186,7 +186,9 @@ dpm($format);
   // text formats.
   $all_filter_info = filter_get_filters();
   $filters = $format->filters;
-dpm($all_filter_info);
+  $tips = _filter_tips($format->format);
+  $format_tips = reset($tips);
+dpm($format_tips);
   // Prepare filters for form sections.
   foreach ($all_filter_info as $name => $filter_info) {
     // Create an empty filter object for new/unconfigured filters.
@@ -231,7 +233,7 @@ dpm($all_filter_info);
       '#markup' => $filter_info['title'],
     );
     $form['filters'][$name]['filter']['details'] = array(
-      '#markup' => $filter_info['title'],
+      '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
     $form['filters'][$name]['filter']['configure'] = _filter_build_configure_form($form, $form_state, $name, $format);
     $form['filters'][$name]['weight'] = array(

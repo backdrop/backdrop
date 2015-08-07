@@ -179,6 +179,7 @@ function theme_filter_admin_format_filter_display($variables) {
  */
 function theme_filter_tips($variables) {
   $tips = $variables['tips'];
+  dpm($tips);
   $long = $variables['long'];
   $output = '';
 
