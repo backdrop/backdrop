@@ -215,12 +215,16 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#value' => $filters,
   );
   foreach ($all_filter_info as $name => $filter_info) {
+    $configure_form = _filter_build_configure_form($form, $form_state, $name, $format);
+    $configure_link = !empty($configure_form) ? l(t('Configure'), '#', array('attributes' => array('class' => 'configure-link'), 'fragment' => 'configure')) : '';
+    
     $form['filters'][$name]['status'] = array(
       '#type' => 'checkbox',
       '#default_value' => $filters[$name]->status,
+      '#attributes' => array('class' => array('filter-status')),
     );
     $form['filters'][$name]['configure_link'] = array(
-      '#markup' =>   l(t('Configure'), '#', array('attributes' => array('class' => 'configure-link'), 'fragment' => 'configure')),
+      '#markup' => $configure_link,
     );
     $form['filters'][$name]['filter'] = array(
       '#theme' => 'filter_admin_format_filter_display',
@@ -234,7 +238,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['filter']['details'] = array(
       '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
-    $form['filters'][$name]['filter']['configure'] = _filter_build_configure_form($form, $form_state, $name, $format);
+    $form['filters'][$name]['filter']['configure'] = $configure_form;
     $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),

@@ -27,12 +27,10 @@ Backdrop.behaviors.filterStatus = {
     // Add a handler so when a row is dropped, update the status checkbox.
     tableDrag.onDrop = function () {
       dragObject = this;
-      dropIndex = dragObject.rowObject.element.rowIndex;
       if(dragObject.changed == true) {
-        disableIndex = $('#filterorder tr.disable-label').index();
-        enabling = dropIndex < disableIndex;
         dropRow = dragObject.rowObject.element;
-        $(dropRow).find('input:checkbox:first').prop('checked', enabling);
+        enabling = $(dropRow).nextAll('.disable-label').length;
+        $(dropRow).find('input.filter-status:checkbox').prop('checked', enabling);
       }
     };
 
@@ -42,7 +40,6 @@ Backdrop.behaviors.filterStatus = {
         // Make our new row and select field.
         var row = $(this).closest('tr');
         tableDrag.rowObject = new tableDrag.row(row);
-
         // Find the correct region and insert the row as the last in the region.
         var labelRow = $('.disable-label');
         if ($(this).prop('checked')) {
@@ -63,19 +60,24 @@ Backdrop.behaviors.filterStatus = {
     var checkEmptyRegions = function (table, rowObject) {
       // If the "Disabled filters" section has become empty, add empty text. 
       // Remove the text if the region is not empty.
-      if ($('.disable-label').next('tr').length == 0) {
-        $('table#filterorder tr:last').after('<tr class="region-empty description"><td colspan=3>No disabled filters.</td></tr>');
+      var disableRegion = $('.disable-label');
+      if (disableRegion.next('tr.draggable').length == 0) {
+        if (disableRegion.next('tr.region-empty').length == 0) {
+          $('table#filterorder tr:last').after('<tr class="region-empty description"><td colspan=3>No disabled filters.</td></tr>');
+        }
       }
       else {
-        $('.disable-label').nextAll('.region-empty').remove();
+        disableRegion.nextAll('.region-empty').remove();
       }
       // If the "Enabled filters" section has become empty, add empty text. 
       // Remove the text if the region is not empty.
-      if ($('.disable-label').prev('tr').length == 0) {
-        $('table#filterorder tr:first').before('<tr class="region-empty description"><td colspan=3>No enabled filters.</td></tr>');
+      if (disableRegion.prev('tr.draggable').length == 0) {
+        if (disableRegion.prev('tr.region-empty').length == 0) {
+          $('table#filterorder').prepend('<tr class="region-empty description"><td colspan=3>No enabled filters.</td></tr>');
+        }
       }
       else {
-        $('.disable-label').prevAll('.region-empty').remove();
+        disableRegion.prevAll('.region-empty').remove();
       }
     };
     
@@ -88,6 +90,9 @@ Backdrop.behaviors.filterStatus = {
         draggable: false,
         width: "300px",
         modal: true,
+        close: function( event, ui ) {
+          $(this).dialog( "destroy");
+        },
         title: "",
         buttons: {
           "Update settings": function () {
