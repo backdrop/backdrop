@@ -806,7 +806,6 @@ function date_autoload_info()
     'DateFieldTestCase' => 'tests/date_field.test',
     'DateTimezoneTestCase' => 'tests/date_timezone.test',
     'DateValidationTestCase' => 'tests/date_validation.test',
-    'ViewsPagerSkippingTestCase' => 'tests/date_views_pager.test',
-    'DateViewsPopupTestCase' => 'tests/date_views_popup.test'
+    'DateViewsPopupTestCase' => 'tests/date_views_popup.test',
     );
 }
