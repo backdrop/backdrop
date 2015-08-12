@@ -2100,6 +2100,22 @@ function views_object_types() {
 }
 
 /**
+ * Set default options.
+ */
+function views_grid_get_options($array) {
+  $options = array();
+  foreach ($array as $key => $value) {
+    if (!is_array($value)) {
+      $options[$key] = $value;
+    }
+    else {
+      $options = array_merge($options, views_grid_get_options($value));
+    }
+  }
+  return $options;
+}
+
+/**
  * Implements hook_views_api().
  */
 function views_views_api() {

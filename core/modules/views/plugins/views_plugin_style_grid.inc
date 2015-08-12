@@ -12,17 +12,20 @@
  */
 class views_plugin_style_grid extends views_plugin_style {
   /**
-   * Set default options
+   * Set default options.
    */
   function option_definition() {
     $options = parent::option_definition();
-
     $options['columns'] = array('default' => '4');
     $options['alignment'] = array('default' => 'horizontal');
-    $options['fill_single_line'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['summary'] = array('default' => '');
-    $options['caption'] = array('default' => '');
-
+    $options['wrapper_classes'] = array('default' => '');
+    $options['column_classes'] = array('default' => 'views-column');
+    $options['first_column_classes'] = array('default' => 'views-column-first');
+    $options['last_column_classes'] = array('default' => 'views-column-last');
+    $options['row_classes'] = array('default' => 'views-row');
+    $options['first_row_classes'] = array('default' => 'views-row-first');
+    $options['last_row_classes'] = array('default' => 'views-row-last');
+    $options['default_classes'] = array('default' => 0);
     return $options;
   }
 
@@ -31,41 +34,105 @@ class views_plugin_style_grid extends views_plugin_style {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+    
+    // Flatten options to deal with the various hierarchy changes.
+    $options = views_grid_get_options($this->options);
+
     $form['columns'] = array(
-      '#type' => 'number',
+      '#type' => 'textfield',
       '#title' => t('Number of columns'),
-      '#default_value' => $this->options['columns'],
+      '#default_value' => $options['columns'],
       '#required' => TRUE,
-      '#min' => 1,
-      '#step' => 1,
+      '#element_validate' => array('views_element_validate_integer'),
     );
     $form['alignment'] = array(
       '#type' => 'radios',
       '#title' => t('Alignment'),
       '#options' => array('horizontal' => t('Horizontal'), 'vertical' => t('Vertical')),
-      '#default_value' => $this->options['alignment'],
+      '#default_value' => $options['alignment'],
       '#description' => t('Horizontal alignment will place items starting in the upper left and moving right. Vertical alignment will place items starting in the upper left and moving down.'),
     );
-
-    $form['fill_single_line'] = array(
+    $form['default_classes'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Fill up single line'),
-      '#description' => t('If you disable this option, a grid with only one row will have the same number of table cells (<TD>) as items. Disabling it can cause problems with your CSS.'),
-      '#default_value' => !empty($this->options['fill_single_line']),
+      '#title' => t('Remove default views classes'),
+      '#default_value' => $options['default_classes'],
     );
-
-    $form['caption'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Short description of table'),
-      '#description' => t('Include a caption for better accessibility of your table.'),
-      '#default_value' => $this->options['caption'],
+    $form['grid']= array(
+      '#type' => 'fieldset',
+      '#title' => t('Grid Classes'),
+      '#weight' => 70,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
-
-    $form['summary'] = array(
+    $form['wrapper_classes'] = array(
       '#type' => 'textfield',
-      '#title' => t('Table summary'),
-      '#description' => t('This value will be displayed as table-summary attribute in the html. Use this to give a summary of complex tables.'),
-      '#default_value' => $this->options['summary'],
+      '#title' => t('Wrapper'),
+      '#default_value' => $options['wrapper_classes'],
+      '#fieldset' => 'grid',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['column_class_wrapper']= array(
+      '#type' => 'fieldset',
+      '#title' => t('Column Classes'),
+      '#weight' => 80,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['column_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Every Column'),
+      '#default_value' => $options['column_classes'],
+      '#fieldset' => 'column_class_wrapper',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['first_column_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('First Column'),
+      '#default_value' => $options['first_column_classes'],
+      '#fieldset' => 'column_class_wrapper',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['last_column_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last Column'),
+      '#default_value' => $options['last_column_classes'],
+      '#fieldset' => 'column_class_wrapper',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['rows']= array(
+      '#type' => 'fieldset',
+      '#title' => t('Row Classes'),
+      '#weight' => 90,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['row_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Every Row'),
+      '#default_value' => $options['row_classes'],
+      '#fieldset' => 'rows',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['first_row_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('First Row'),
+      '#default_value' => $options['first_row_classes'],
+      '#fieldset' => 'rows',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
+    );
+    $form['last_row_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last Row'),
+      '#default_value' => $options['last_row_classes'],
+      '#fieldset' => 'rows',
+      '#prefix' => '<div class="views-left-30">',
+      '#suffix' => '</div>',
     );
   }
 }

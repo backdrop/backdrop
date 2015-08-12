@@ -16,23 +16,29 @@
  * @ingroup views_templates
  */
 ?>
-<?php if (!empty($title)) : ?>
-  <h3><?php print $title; ?></h3>
+<?php dpm($classes); if (!empty($title)) : ?>
+  <h3><?php print $title . "IKNKN"; ?></h3>
 <?php endif; ?>
-<table class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
-  <?php if (!empty($caption)) : ?>
-    <caption><?php print $caption; ?></caption>
-  <?php endif; ?>
-
-  <tbody>
-    <?php foreach ($rows as $row_number => $columns): ?>
-      <tr <?php if (!empty($row_classes[$row_number])) { print 'class="' . implode(' ', $row_classes[$row_number]) .'"';  } ?>>
-        <?php foreach ($columns as $column_number => $item): ?>
-          <td <?php if ($column_classes[$row_number][$column_number]) { print 'class="' . implode(' ', $column_classes[$row_number][$column_number]) .'"';  } ?>>
-            <?php print $item; ?>
-          </td>
-        <?php endforeach; ?>
-      </tr>
-    <?php endforeach; ?>
-  </tbody>
-</table>
+  <div class="<?php print $classes; ?>">
+<?php if ($options['alignment'] == 'vertical') : ?>
+<?php foreach ($columns as $column_id => $column) : ?>
+  <div class="testerclass <?php print trim($column_classes[$column_id]); ?>">
+  <?php foreach ($column as $item_id => $item) : ?>
+    <div class="<?php print trim($item['classes']); ?>">
+      <?php print $item['content']; ?>
+    </div>
+  <?php endforeach; ?>
+  </div>
+<?php endforeach; ?>
+<?php else : ?>
+  <?php foreach ($rows as $row_id => $row) : ?>
+    <div class="<?php print trim($row_classes[$row_id]); ?>">
+  <?php foreach ($row as $item_id => $item) : ?>
+    <div class="<?php print trim($item['classes']); ?>">
+      <?php print $item['content']; ?>
+    </div>
+  <?php endforeach; ?>
+  </div>
+  <?php endforeach; ?>
+<?php endif; ?>
+  </div>
