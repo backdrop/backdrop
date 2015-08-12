@@ -86,19 +86,25 @@ Backdrop.behaviors.filterStatus = {
 
     $(".configure-link").click(function (event) {
       event.preventDefault();
-      $(this).closest('tr').find('.filter-configure').dialog({
+      row = $(this).closest('tr');
+      row.find('.filter-configure').dialog({
         draggable: false,
-        width: "300px",
+        width: "500px",
         modal: true,
         close: function( event, ui ) {
           $(this).dialog( "destroy");
         },
-        title: "",
+        title: "Configure settings",
         buttons: {
           "Update settings": function () {
             $(this).dialog("close");
-            $(this).dialog( "destroy");
-          }
+            row = new tableDrag.row(row);
+            row.markChanged();
+            if (tableDrag.changed === false) {
+              $(Backdrop.theme('tableDragChangedWarning')).insertBefore(table).hide().fadeIn('slow');
+              tableDrag.changed = true;
+            }
+         }
         }
       });
     });
