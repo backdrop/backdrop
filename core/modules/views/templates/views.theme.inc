@@ -676,126 +676,113 @@ function template_preprocess_views_view_table(&$variables) {
 }
 
 /**
- * Display a view as a grid style.
+ * Display a view as a responsive grid style.
  */
-function template_preprocess_views_view_grid(&$variables) {
-  $view     = $variables['view'];
-  $result   = $view->result;
-  $options  = $view->style_plugin->options;
-  $handler  = $view->style_plugin;
-  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
-  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
-
+function template_preprocess_views_view_grid(&$vars) {
+  dpm($vars);
+  $view = $vars['view'];
+  $result = $view->result;
+  $options = views_grid_get_options($view->style_plugin->options);
+  $handler = $view->style_plugin;
   $columns  = $options['columns'];
-
-  $rows = array();
-  $row_indexes = array();
-
-  if ($options['alignment'] == 'horizontal') {
-    $row = array();
-    $col_count = 0;
-    $row_count = 0;
-    $count = 0;
-    foreach ($variables['rows'] as $row_index => $item) {
-      $count++;
-      $row[] = $item;
-      $row_indexes[$row_count][$col_count] = $row_index;
-      $col_count++;
-      if ($count % $columns == 0) {
-        $rows[] = $row;
-        $row = array();
-        $col_count = 0;
-        $row_count++;
-      }
-    }
-    if ($row) {
-      // Fill up the last line only if it's configured, but this is default.
-      if (!empty($handler->options['fill_single_line']) && count($rows)) {
-        for ($i = 0; $i < ($columns - $col_count); $i++) {
-          $row[] = '';
+  $vars['classes_array'] = array();
+  if (!$options['default_classes']) {
+    $vars['classes_array'][] = 'views-responsive-grid';
+    $vars['classes_array'][] = 'views-responsive-grid-' . $options['alignment'];
+    $vars['classes_array'][] = 'views-columns-' . $columns;
+  }
+  $vars['classes_array'] = array_merge($vars['classes_array'], explode(' ', $options['wrapper_classes']));
+  $vars['classes_array'] = array_filter($vars['classes_array']);
+  // Check if there are views results to process.
+  if (!empty($vars['rows'])) {
+    $col_id = 0;
+    $row_id = 0;
+    $keys = array_keys($vars['rows']);
+    // Determine style alignment.
+    if ($options['alignment'] == 'horizontal') {
+      $rows = array();
+      $vars['row_classes'] = array();
+      foreach ($vars['rows'] as $i => $row) {
+        $classes = explode(' ', $options['column_classes']);
+        if (!$options['default_classes']) {
+          $classes[] = 'views-column-' . ($col_id + 1);
         }
-      }
-      $rows[] = $row;
-    }
-  }
-  else {
-    $num_rows = floor(count($variables['rows']) / $columns);
-    // The remainders are the 'odd' columns that are slightly longer.
-    $remainders = count($variables['rows']) % $columns;
-    $row = 0;
-    $col = 0;
-    foreach ($variables['rows'] as $count => $item) {
-      $rows[$row][$col] = $item;
-      $row_indexes[$row][$col] = $count;
-      $row++;
-
-      if (!$remainders && $row == $num_rows) {
-        $row = 0;
-        $col++;
-      }
-      elseif ($remainders && $row == $num_rows + 1) {
-        $row = 0;
-        $col++;
-        $remainders--;
-      }
-    }
-    for ($i = 0; $i < count($rows[0]); $i++) {
-      // This should be string so that's okay :)
-      if (!isset($rows[count($rows) - 1][$i])) {
-        $rows[count($rows) - 1][$i] = '';
-      }
-    }
-  }
-
-  // Apply the row classes
-  foreach ($rows as $row_number => $row) {
-    $row_classes = array();
-    if ($default_row_class) {
-      $row_classes[] =  'row-' . ($row_number + 1);
-    }
-    if ($row_class_special) {
-      if ($row_number == 0) {
-        $row_classes[] =  'row-first';
-      }
-      if (count($rows) == ($row_number + 1)) {
-        $row_classes[] =  'row-last';
-      }
-    }
-    $variables['row_classes'][$row_number] = $row_classes;
-    foreach ($rows[$row_number] as $column_number => $item) {
-      $column_classes = array();
-      if ($default_row_class) {
-        $column_classes[] = 'col-'. ($column_number + 1);
-      }
-      if ($row_class_special) {
-        if ($column_number == 0) {
-          $column_classes[] = 'col-first';
+        $rows[$row_id][$col_id] = array(
+          'classes' => implode(' ', $classes),
+          'content' => $vars['rows'][current($keys)],
+        );
+        $classes = explode(' ', $options['row_classes']);
+        if (!$options['default_classes']) {
+          $classes[] = 'views-row-' . ($row_id + 1);
         }
-        elseif (count($rows[$row_number]) == ($column_number + 1)) {
-          $column_classes[] = 'col-last';
+        $vars['row_classes'][$row_id] = implode(' ', $classes);
+
+        if ($row_id == 0) {
+          $vars['row_classes'][$row_id] .= ' ' . $options['first_row_classes'];
         }
+        elseif ($row_id == ceil(count($vars['rows']) / $columns) - 1) {
+          $vars['row_classes'][$row_id] .= ' ' . $options['last_row_classes'];
+        }
+        if ($col_id == 0) {
+          $rows[$row_id][$col_id]['classes'] .= ' ' . $options['first_column_classes'];
+          $col_id++;
+        }
+        elseif ($col_id == $columns - 1) {
+          $rows[$row_id][$col_id]['classes'] .= ' ' . $options['last_column_classes'];
+          $col_id = 0;
+          $row_id++;
+        }
+        else {
+          $col_id++;
+        }
+        next($keys);
       }
-      if (isset($row_indexes[$row_number][$column_number]) && $column_class = $view->style_plugin->get_row_class($row_indexes[$row_number][$column_number])) {
-        $column_classes[] = $column_class;
+      $vars['rows'] = $rows;
+    }
+    else {
+      $cols = array();
+      $extra = count($vars['rows']) % $columns;
+      $per_col = floor(count($vars['rows']) / $columns);
+      $vars['column_classes'] = array();
+      for ($i = 0; $i < $columns; $i++) {
+        $classes = explode(' ', $options['column_classes']);
+        if (!$options['default_classes']) {
+          $classes[] = 'views-column-' . ($col_id + 1);
+        }
+        $vars['column_classes'][$i] = $classes;
+        if ($i == 0 && !empty($options['first_column_classes'])) {
+          $vars['column_classes'][$i] = array_merge($vars['column_classes'][$i], explode(' ', $options['first_column_classes']));
+        }
+        elseif ($i == $columns - 1 && !empty($options['last_column_classes'])) {
+          $vars['column_classes'][$i] = array_merge($vars['column_classes'][$i], explode(' ', $options['last_column_classes']));
+        }
+        $vars['column_classes'][$i] = implode(' ', $vars['column_classes'][$i]);
+        for ($n = 0; $n <= ($per_col - 1) + ($i < $extra ? 1 : 0); $n++) {
+          $classes = explode(' ', $options['row_classes']);
+          if (!$options['default_classes']) {
+            $classes[] = 'views-row-' . ($row_id + 1);
+          }
+          $cols[$i][$n] = array(
+            'classes' => $classes,
+            'content' => $vars['rows'][current($keys)],
+          );
+          if ($n == 0 && !empty($options['first_row_classes'])) {
+            $cols[$i][$n]['classes'] = array_merge($cols[$i][$n]['classes'], explode(' ', $options['first_row_classes']));
+          }
+          elseif ($n == ($per_col - 1) + ($i < $extra ? 1 : 0)  && !empty($options['last_row_classes'])) {
+            $cols[$i][$n]['classes'] = array_merge($cols[$i][$n]['classes'], explode(' ', $options['last_row_classes']));
+          }
+          $cols[$i][$n]['classes'] = implode(' ', $cols[$i][$n]['classes']);
+          next($keys);
+          $row_id++;
+        }
+        $col_id++;
+        $row_id = 0;
       }
-      $variables['column_classes'][$row_number][$column_number] = $column_classes;
+      $vars['columns'] = $cols;
     }
   }
-  $variables['rows'] = $rows;
-  $variables['classes'] = array('views-view-grid', 'cols-' . $columns);
-
-  // Add the summary to the list if set.
-  if (!empty($handler->options['summary'])) {
-    $variables['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
-  }
-
-  // Add the caption to the list if set.
-  if (!empty($handler->options['caption'])) {
-    $variables['caption'] = filter_xss_admin($handler->options['caption']);
-  }
-  else {
-    $variables['caption'] = '';
-  }
+  $vars['classes'] = implode(' ', $vars['classes_array']);
 }
 
 /**
