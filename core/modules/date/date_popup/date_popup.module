@@ -20,73 +20,27 @@
 
 /**
  * Load needed files.
- *
- * Play nice with jQuery UI.
  */
 function date_popup_add() {
-  static $loaded = FALSE;
-  if ($loaded) {
-    return;
-  }
+
   backdrop_add_library('system', 'ui.datepicker');
   backdrop_add_library('date_popup', 'timeentry');
 
-  // Add the wvega-timepicker library if it's available.
-  $wvega_path = date_popup_get_wvega_path();
-  if ($wvega_path) {
-    backdrop_add_js($wvega_path . '/jquery.timepicker.js');
-    backdrop_add_css($wvega_path . '/jquery.timepicker.css');
   }
-  $loaded = TRUE;
-}
+
 
 /**
- * Get the location of the Willington Vega timepicker library.
- *
- * @return string
- *   The location of the library, or FALSE if the library isn't installed.
+ * Implements hook_library_info().
  */
-function date_popup_get_wvega_path() {
-  $path = FALSE;
-  if (function_exists('libraries_get_path')) {
-    $path = libraries_get_path('wvega-timepicker');
-    if (!file_exists($path)) {
-      $path = FALSE;
-    }
-  }
-  elseif (file_exists('libraries/wvega-timepicker/jquery.timepicker.js')) {
-    $path = 'libraries/wvega-timepicker';
-  }
-  return $path;
-}
-
-/**
- * Get the name of the preferred default timepicker.
- *
- * If the wvega timepicker is available on the system, default to using that,
- * unless the administrator has specifically chosen otherwise.
- */
-function date_popup_get_preferred_timepicker() {
-  $wvega_available = date_popup_get_wvega_path();
-  return $wvega_available ? 'wvega' : 'default';
-}
-
-/**
- * Implements hook_library().
- */
-function date_popup_library() {
-  $libraries = array();
-
-  $path = backdrop_get_path('module', 'date_popup');
+function date_popup_library_info() {
+  $module_path = backdrop_get_path('module', 'date_popup');
   $libraries['timeentry'] = array(
     'title' => 'Time Entry',
-    'website' => 'http://plugins.jquery.com/project/timeEntry',
-    'version' => '1.4.7',
     'js' => array(
-      $path . '/jquery.timeentry.pack.js' => array(),
+      $module_path . '/jquery.timeentry.pack.js' => array(),
     ),
     'css' => array(
-      $path . '/themes/jquery.timeentry.css' => array(),
+      $module_path . '/themes/jquery.timeentry.css' => array(),
     ),
   );
   return $libraries;
@@ -207,7 +161,7 @@ function date_popup_theme() {
  *   - speed => 'immediate'
  */
 function date_popup_element_info() {
-  $timepicker = date_popup_get_preferred_timepicker();
+  $timepicker = 'default';
   $type['date_popup'] = array(
     '#input' => TRUE,
     '#tree' => TRUE,
@@ -469,25 +423,6 @@ function date_popup_process_time_part(&$element) {
       }
       break;
 
-    case 'wvega':
-      $func = 'timepicker';
-      $grans = array('hour', 'minute', 'second');
-      $time_granularity = array_intersect($granularity, $grans);
-      $format = date_popup_format_to_popup_time(date_limit_format($element['#date_format'], $time_granularity), 'wvega');
-      // The first value in the dropdown list should be the same as the element
-      // default_value, but it needs to be in JS format (i.e. milliseconds since
-      // the epoch).
-      $start_time = new DateObject($element['#default_value'], $element['#date_timezone'], DATE_FORMAT_DATETIME);
-      date_increment_round($start_time, $element['#date_increment']);
-      $start_time = $start_time->format(DATE_FORMAT_UNIX) * 1000;
-      $settings = array(
-        'timeFormat' => $format,
-        'interval' => $element['#date_increment'],
-        'startTime' => $start_time,
-        'scrollbar' => TRUE,
-      );
-      break;
-
     default:
       $func = '';
       $settings = array();
@@ -742,17 +677,13 @@ function date_popup_popup_to_format($format) {
  * input format into one that the given timepicker can support.
  *
  * @param string $timepicker
- *   The time entry plugin being used: either 'wvega' or 'default'.
+ *   The time entry plugin being used
  *
  * @return array
  *   A map of replacements.
  */
 function date_popup_timepicker_format_replacements($timepicker = 'default') {
   switch ($timepicker) {
-    case 'wvega':
-      // The wvega timepicker only supports uppercase AM/PM.
-      return array('a' => 'A');
-
     default:
       // The default timeEntry plugin requires leading zeros.
       return array('G' => 'H', 'g' => 'h');
@@ -820,15 +751,12 @@ function date_popup_menu() {
  * General configuration form for controlling the Date Popup behaviour.
  */
 function date_popup_settings() {
-  $wvega_available = date_popup_get_wvega_path();
-  $preferred_timepicker = date_popup_get_preferred_timepicker();
-
-  $form['#prefix'] = t('<p>The Date Popup module allows for manual time entry or use of a jQuery timepicker plugin. The Date module comes with a default jQuery timepicker which is already installed. The module also supports a dropdown timepicker that must be downloaded separately. The dropdown timepicker will not appear as an option until the code is available in the libraries folder. If you do not want to use a jQuery timepicker, you can choose the "Manual time entry" option below and users will get a regular textfield instead.</p>');
+  $preferred_timepicker = 'default';
+  $form['#prefix'] = t('<p>The Date Popup module allows for manual time entry or use of a jQuery timepicker plugin. The Date module comes with a default jQuery timepicker which is already installed. If you do not want to use a jQuery timepicker, you can choose the "Manual time entry" option below and users will get a regular textfield instead.</p>');
   $form['date_popup_timepicker'] = array(
     '#type' => 'select',
     '#options' => array(
       'default' => t('Use default jQuery timepicker'),
-	  'wvega' => t('Use dropdown timepicker'),
       'none'    => t('Manual time entry, no jQuery timepicker'),
     ),
     '#title' => t('Timepicker'),
