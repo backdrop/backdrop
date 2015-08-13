@@ -36,6 +36,8 @@ function date_popup_library_info() {
   $module_path = backdrop_get_path('module', 'date_popup');
   $libraries['timeentry'] = array(
     'title' => 'Time Entry',
+    'website' => 'http://plugins.jquery.com/project/timeEntry',
+    'version' => '1.4.7',
     'js' => array(
       $module_path . '/jquery.timeentry.pack.js' => array(),
     ),
