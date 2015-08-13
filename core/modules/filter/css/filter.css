@@ -51,7 +51,6 @@ input#edit-filters-filter-html-settings-allowed-html {
   padding-bottom: 0;
   font-size: 0.9em;
 }
-
 .editor-dialog {
   width: 100%;
   max-width: 500px;
@@ -72,4 +71,20 @@ input#edit-filters-filter-html-settings-allowed-html {
 [dir="rtl"] .editor-image-align .option {
   margin-right: 0;
   margin-left: 20px;
+}
+#filterorder .filter-td {
+  float: left;
+  max-width: 95%;
+}
+
+#filterorder .filter-configure .description, .filter-details.description {
+  white-space: normal;
+}
+
+#filterorder td:first-child {
+  max-width:300px;
+}
+
+#filterorder .disable-label {
+  font-weight: bold;
 }
