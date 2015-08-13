@@ -123,6 +123,24 @@ CKEDITOR.plugins.add('backdropimage', {
           // the dialog's return values.
           // Note: on widget#setData this widget instance might be destroyed.
           var data = widgetDefinition._dialogValuesToData(dialogReturnValues.attributes);
+
+          // If there is no image src, delete the widget from the editor.
+          if (!data.src) {
+            widget.destroy();
+            return widget;
+          }
+
+          // If width and height are not set, load the image and populate.
+          if (!(data.width || data.height) && !(data.width.length || data.height.length)) {
+            var imagetoSize = new Image();
+            imagetoSize.onload = function() {
+              widget.setData('width', this.width);
+              widget.setData('height', this.height);
+            };
+            imagetoSize.src = data.src;
+          }
+
+          // Save the data to internal widget.
           widget.setData(data);
 
           // Retrieve the widget once again. It could've been destroyed
@@ -168,7 +186,39 @@ CKEDITOR.plugins.add('backdropimage', {
         // Open backdropimage dialog.
         editor.execCommand('editbackdropimage', {
           existingValues: widget.definition._dataToDialogValues(widget.data),
-          saveCallback: widget.definition._createDialogSaveCallback(editor, widget),
+          saveCallback: widget.definition._createDialogSaveCallback(editor, widget)
+        });
+      });
+
+      widget.on('destroy', function (event) {
+        var editor = this.editor;
+        var element = this.element;
+        var selection = editor.getSelection();
+
+        // Remove the element on destroy. Give a delay to allow other clean
+        // up execution first.
+        window.setTimeout(function() {
+          // If container is null, then this element was never attached.
+          var container = element.getParent();
+          if (container) {
+            // When removing an element, CKEditor doesn't update the selection
+            // location, so hitting arrow keys causes an error. This moves the
+            // cursor to the area outside of the element that was deleted.
+            var range = new CKEDITOR.dom.range(editor.document);
+
+            // Remove the container around the element if it is the only child.
+            if (container.$.childNodes.length === 1) {
+              range.moveToClosestEditablePosition(container);
+              selection.selectRanges([range]);
+              container.remove();
+            }
+            // Remove the element only.
+            else {
+              range.moveToClosestEditablePosition(element);
+              selection.selectRanges([range]);
+              element.remove();
+            }
+          }
         });
       });
     });

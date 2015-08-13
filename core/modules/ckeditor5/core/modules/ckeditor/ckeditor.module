@@ -350,6 +350,12 @@ function ckeditor_form_filter_format_editor_image_form_alter(&$form, $form_state
  *
  * Checks if our Caption plugin should be enabled based on the configuration of
  * a text format and editor.
+ *
+ * @param $format
+ *   The filter format object for which CKEditor is checking settings.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
 function ckeditor_image_plugin_check($format) {
   // Automatically enable caption support if the BackdropImage button is enabled.
@@ -360,6 +366,7 @@ function ckeditor_image_plugin_check($format) {
       }
     }
   }
+  return FALSE;
 }
 
 /**
@@ -706,6 +713,14 @@ function ckeditor_get_acf_settings($format) {
  * @code
  * ckeditor_stylesheets[] = css/ckeditor-iframe.css
  * @endcode
+ *
+ * @param string $theme
+ *   The theme name from which the "ckeditor_stylesheets" property should be
+ *   read in the .info files. This theme and all its parent themes will be
+ *   checked. Defaults to the current front-end theme.
+ *
+ * @return array
+ *   An array of all CSS to be added by the theme within the CKEditor.
  */
 function _ckeditor_theme_css($theme = NULL) {
   $css = array();
