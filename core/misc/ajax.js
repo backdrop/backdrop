@@ -538,7 +538,7 @@ Backdrop.ajax.prototype.commands = {
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).
     var new_content_wrapped = $('<div></div>').html(response.data.replace(/^\s+|\s+$/g, ''));
-    var new_content = new_content_wrapped.contents();
+    var new_content = new_content_wrapped.children();
 
     // For legacy reasons, the effects processing code assumes that new_content
     // consists of a single top-level element. Also, it has not been

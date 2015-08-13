@@ -259,16 +259,8 @@ function file_ajax_upload() {
     $form = $form[$parent];
   }
 
-  // Add the special Ajax class if a new file was added.
-  if (isset($form['#file_upload_delta']) && $current_file_count < $form['#file_upload_delta']) {
-    $form[$current_file_count]['#attributes']['class'][] = 'ajax-new-content';
-  }
-  // Otherwise just add the new content class on a placeholder.
-  else {
-    $form['#suffix'] .= '<span class="ajax-new-content"></span>';
-  }
-
-  $output = theme('status_messages') . backdrop_render($form);
+  $form['#prefix'] .= theme('status_messages');
+  $output = backdrop_render($form);
   $js = backdrop_add_js();
   $settings = call_user_func_array('array_merge_recursive', $js['settings']['data']);
 
@@ -358,7 +350,7 @@ function file_managed_file_process($element, &$form_state, $form) {
   $ajax_settings = array(
     'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
     'wrapper' => $element['#id'] . '-ajax-wrapper',
-    'effect' => 'fade',
+    'effect' => 'none',
     'progress' => array(
       'type' => $element['#progress_indicator'],
       'message' => $element['#progress_message'],
@@ -381,7 +373,6 @@ function file_managed_file_process($element, &$form_state, $form) {
   // 'throbber', even if the upload button is using something else.
   $ajax_settings['progress']['type'] = ($element['#progress_indicator'] == 'none') ? 'none' : 'throbber';
   $ajax_settings['progress']['message'] = NULL;
-  $ajax_settings['effect'] = 'none';
   $element['remove_button'] = array(
     '#name' => implode('_', $element['#parents']) . '_remove_button',
     '#type' => 'submit',
