@@ -276,6 +276,11 @@ function template_preprocess_date_display_single(&$variables) {
 function theme_date_display_single($variables) {
   $date = $variables['date'];
   $timezone = $variables['timezone'];
+
+  $format = $variables['dates']['format'];
+  // If timezone is already included in format, suppress it from display
+  if ($format == 'Y-m-d\TH:iO') {$timezone = '';}
+
   $attributes = $variables['attributes'];
   $show_remaining_days = isset($variables['show_remaining_days']) ? $variables['show_remaining_days'] : '';
 
