@@ -82,6 +82,10 @@ function link_field_info() {
  * Implements hook_field_instance_settings_form().
  */
 function link_field_instance_settings_form($field, $instance) {
+  $entity_info = entity_get_info($instance['entity_type']);
+  $token_types = !empty($entity_info['token type']) ? array($entity_info['token type']) : '';
+  $token_link = ' ' . theme('token_tree_link', array('token_types' => $token_types));
+
   $form = array(
     '#element_validate' => array('link_field_settings_form_validate'),
   );
@@ -120,14 +124,19 @@ function link_field_instance_settings_form($field, $instance) {
     '#title' => t('Link Title'),
     '#default_value' => $instance['settings']['title'],
     '#options' => $title_options,
-    '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.'),
+    '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title.'),
   );
 
   $form['title_value'] = array(
     '#type' => 'textfield',
     '#title' => t('Static title'),
     '#default_value' => $instance['settings']['title_value'],
-    '#description' => t('This title will always be used if &ldquo;Static Title&rdquo; is selected above.'),
+    '#description' => t('This title will always be used if &quot;Static Title&quot; is selected above. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.') . $token_link,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][title]"]' => array('value' => 'value'),
+      ),
+    ),
   );
 
   $form['title_label_use_field_label'] = array(
@@ -154,29 +163,14 @@ function link_field_instance_settings_form($field, $instance) {
     '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the entity edit form. This does not affect the field settings on this page.'),
   );
 
-  $entity_info = entity_get_info($instance['entity_type']);
-  $token_link = theme('token_tree_link', array(
-      'token_types' => array($entity_info['token type']),
-    )
-  );
-  $form['tokens_help'] = array(
-    '#theme' => $token_link,
-    '#token_types' => array($entity_info['token type']),
-    '#global_types' => TRUE,
-    '#click_insert' => TRUE,
-    '#dialog' => TRUE,
-  );
-
-  $form['display'] = array(
-    '#tree' => TRUE,
-  );
-  $form['container'] = array(
+  $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced Options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#parents' => array('instance', 'settings'),
   );
-  $form['container']['display']['url_cutoff'] = array(
+  $form['advanced']['display']['url_cutoff'] = array(
     '#type' => 'textfield',
     '#title' => t('URL Display Cutoff'),
     '#default_value' => isset($instance['settings']['display']['url_cutoff']) ? $instance['settings']['display']['url_cutoff'] : '80',
@@ -194,13 +188,13 @@ function link_field_instance_settings_form($field, $instance) {
   $form['attributes'] = array(
     '#tree' => TRUE,
   );
-  $form['container']['attributes']['target'] = array(
+  $form['advanced']['attributes']['target'] = array(
     '#type' => 'radios',
     '#title' => t('Link Target'),
     '#default_value' => empty($instance['settings']['attributes']['target']) ? LINK_TARGET_DEFAULT : $instance['settings']['attributes']['target'],
     '#options' => $target_options,
   );
-  $form['container']['attributes']['rel'] = array(
+  $form['advanced']['attributes']['rel'] = array(
     '#type' => 'textfield',
     '#title' => t('Rel Attribute'),
     '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
@@ -214,40 +208,35 @@ function link_field_instance_settings_form($field, $instance) {
     'rel_remove_external' => t('Remove rel if given link is external'),
     'rel_remove_internal' => t('Remove rel if given link is internal'),
   );
-  $form['container']['rel_remove'] = array(
+  $form['advanced']['rel_remove'] = array(
     '#type' => 'radios',
     '#title' => t('Remove rel attribute automatically'),
     '#default_value' => !isset($instance['settings']['rel_remove']) ? 'default' : $instance['settings']['rel_remove'],
     '#description' => t('Turn on/off if rel attribute should be removed automatically, if user given link is internal/external'),
     '#options' => $rel_remove_options,
   );
-  $form['container']['attributes']['configurable_class'] = array(
+  $form['advanced']['attributes']['configurable_class'] = array(
     '#title' => t("Allow the user to enter a custom link class per link"),
     '#type' => 'checkbox',
     '#default_value' => empty($instance['settings']['attributes']['configurable_class']) ? '' : $instance['settings']['attributes']['configurable_class'],
   );
-  $form['container']['attributes']['class'] = array(
+  $form['advanced']['attributes']['class'] = array(
     '#type' => 'textfield',
-    '#title' => t('Additional CSS Class'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="instance[settings][container][attributes][configurable_class]"]' => array('checked' => TRUE),
-      ),
-    ),
-    '#description' => t('When output, this link will have this class attribute. Multiple classes should be separated by spaces.'),
+    '#title' => t('Additional CSS Classes'),
+    '#description' => t('Add these classes on output (will be added to any user-provided classes). Multiple classes should be separated by spaces.'),
     '#default_value' => empty($instance['settings']['attributes']['class']) ? '' : $instance['settings']['attributes']['class'],
   );
-  $form['container']['attributes']['configurable_title'] = array(
+  $form['advanced']['attributes']['configurable_title'] = array(
     '#title' => t("Allow the user to enter a link 'title' attribute"),
     '#type' => 'checkbox',
     '#default_value' => empty($instance['settings']['attributes']['configurable_title']) ? '' : $instance['settings']['attributes']['configurable_title'],
   );
-  $form['container']['attributes']['title'] = array(
+  $form['advanced']['attributes']['title'] = array(
     '#type' => 'textfield',
     '#title' => t("Default link 'title' Attribute"),
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][container][attributes][configurable_title]"]' => array('checked' => TRUE),
+        ':input[name="instance[settings][attributes][configurable_title]"]' => array('checked' => TRUE),
       ),
     ),
     '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
