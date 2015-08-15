@@ -56,6 +56,14 @@ input#edit-filters-filter-html-settings-allowed-html {
   width: 100%;
   max-width: 500px;
 }
+.editor-dialog .form-managed-file .form-file,
+.editor-dialog .form-managed-file .file {
+  max-width: 18em;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: middle;
+}
 .editor-image-size div {
   display: inline;
 }

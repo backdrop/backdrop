@@ -32,14 +32,20 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
   $elements['plugins']['image'] += array(
     '#type' => 'fieldset',
     '#title' => t('Image uploading'),
-    '#attributes' => array('class' => array('ckeditor-plugin-backdropimage')),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-backdropimage'),
+      'data-ckeditor-feature-dependency' => 'BackdropImage',
+    ),
     '#parents' => array('editor_settings', 'image_upload'),
   );
 
   $elements['plugins']['style'] = array(
     '#type' => 'fieldset',
     '#title' => t('Style list'),
-    '#attributes' => array('class' => array('ckeditor-plugin-style')),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-style'),
+      'data-ckeditor-feature-dependency' => 'Styles',
+    ),
   );
   $style_list = '';
   if (isset($format->editor_settings['plugins']['style']['style_list'])) {

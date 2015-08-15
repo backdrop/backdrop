@@ -76,13 +76,13 @@ Backdrop.behaviors.filterEditors = {
 };
 
 Backdrop.filterEditorAttach = function(field, format) {
-  if (format.editor) {
+  if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].attach(field, format);
   }
 };
 
 Backdrop.filterEditorDetach = function(field, format) {
-  if (format.editor) {
+  if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].detach(field, format);
   }
 };
