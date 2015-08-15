@@ -215,10 +215,13 @@ CKEDITOR.plugins.add('backdropimagecaption', {
 
           var actualWidget = saveCallback(dialogReturnValues);
 
-          // Bail out if no widget was destroyed (meaning the src was deleted).
-          // See widgetDefinition._createDialogSaveCallback() in
-          // backdropimage/plugin.js
+          // Delete the figure element if the widget was destroyed (meaning the
+          // src was deleted). See widgetDefinition._createDialogSaveCallback()
+          // in backdropimage/plugin.js
           if (!actualWidget.isInited()) {
+            if (actualWidget.element && actualWidget.element.getName() === 'figure') {
+              actualWidget.element.remove();
+            }
             return actualWidget;
           }
 
