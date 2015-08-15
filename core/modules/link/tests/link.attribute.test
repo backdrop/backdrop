@@ -1,0 +1,490 @@
+<?php
+
+/**
+ * @file
+ * Basic simpletests to test options on link module.
+ */
+
+class LinkAttributeCrudTest extends BackdropWebTestCase {
+  private $zebra;
+
+  protected $permissions = array(
+    'access content',
+    'administer content types',
+    'administer nodes',
+    'administer filters',
+    'access comments',
+    'post comments',
+    'skip comment approval',
+    'access administration pages',
+  );
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Link Attribute Tests',
+      'description' => 'Tests the field attributes, making sure they appear in various displayed situations.',
+      'group' => 'Link',
+    );
+  }
+
+  function setup() {
+    parent::setup('field_ui', 'link');
+    $this->zebra = 0;
+    // Create and login user.
+    $this->web_user = $this->backdropCreateUser(array('administer content types'));
+    $this->backdropLogin($this->web_user);
+  }
+
+  protected function createLink($url, $title, $attributes = array()) {
+    return array(
+      'url' => $url,
+      'title' => $title,
+      'attributes' => $attributes,
+    );
+  }
+
+  protected function assertLinkOnNode($field_name, $link_value, $message = '', $group = 'Other') {
+    $this->zebra++;
+    $zebra_string = ($this->zebra % 2 == 0) ? 'even' : 'odd';
+    $cssFieldLocator = 'field-' . str_replace('_', '-', $field_name);
+    $this->assertPattern('@<div class="field field-type-link ' . $cssFieldLocator . '".*<div class="field-item ' . $zebra_string . '">\s*' . $link_value . '\s*</div>@is',
+                         $message,
+                         $group);
+  }
+
+  /**
+   * A simple test that just creates a new node type, adds a link field to it, creates a new node of that type, and makes sure
+   * that the node is being displayed.
+   */
+  function testBasic() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+    $title = $this->randomName(20);
+
+    $this->backdropGet('admin/structure/types');
+
+    // Create the content type.
+    $this->clickLink(t('Add content type'));
+
+    $edit = array(
+      'name' => $content_type_friendly,
+      'type' => $content_type_machine,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and add fields'));
+    $this->assertText(t('The content type @name has been added.', array('@name' => $content_type_friendly)));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    $single_field_name = 'field_' . $single_field_name_machine;
+    $edit = array(
+      'fields[_add_new_field][label]' => $single_field_name_friendly,
+      'fields[_add_new_field][field_name]' => $single_field_name_machine,
+      'fields[_add_new_field][type]' => 'link_field',
+      'fields[_add_new_field][widget_type]' => 'link_field',
+
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // We'll go with the default settings for this run-through.
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+
+    // Using all the default settings, so press the button.
+    $this->backdropPost(NULL, array(), t('Save settings'));
+    $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
+
+    menu_rebuild();
+
+    $type_exists = (bool) config_get('node.type.article', 'type');
+    $this->assertTrue($type_exists, 'The new content type has been created in the database');
+
+    $permission = 'create ' . $content_type_machine . ' content';
+    $permission_edit = 'edit ' . $content_type_machine . ' content';
+    // Reset the permissions cache.
+    $this->checkPermissions(array($permission), TRUE);
+
+    // Now that we have a new content type, create a user that has privileges
+    // on the content type.
+    $permissions = array_merge($this->permissions, array($permission));
+    $this->web_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->web_user);
+
+    // Go to page.
+    $this->backdropGet('node/add/' . $content_type_machine);
+
+    // Add a node.
+    $edit = array(
+      'title' => $title,
+      'field_' . $single_field_name_machine . '[und][0][title]' => 'Link',
+      'field_' . $single_field_name_machine . '[und][0][url]' => 'http://www.backdrop.org/',
+    );
+
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertText(t('@content_type_friendly @title has been created', array('@content_type_friendly' => $content_type_friendly, '@title' => $title)));
+
+    $this->backdropGet('node/add/' . $content_type_machine);
+
+    // Create a node:
+    $edit = array(
+      'title' => $title,
+      'field_' . $single_field_name_machine . '[und][0][url]' => 'http://www.example.com/',
+      'field_' . $single_field_name_machine . '[und][0][title]' => 'Display',
+    );
+
+    // Now we can fill in the second item in the multivalue field and save.
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertText(t('@content_type_friendly @title has been created', array('@content_type_friendly' => $content_type_friendly, '@title' => $title)));
+
+    $this->assertText('Display');
+    $this->assertLinkByHref('http://www.example.com');
+  }
+
+  protected function createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine) {
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/fields');
+    $edit = array(
+      'fields[_add_new_field][label]' => $single_field_name_friendly,
+      'fields[_add_new_field][field_name]' => $single_field_name_machine,
+      'fields[_add_new_field][type]' => 'link_field',
+      'fields[_add_new_field][widget_type]' => 'link_field',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // We'll go with the default settings for this run-through.
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+
+    // Using all the default settings, so press the button.
+    $this->backdropPost(NULL, array(), t('Save settings'));
+    $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
+
+    menu_rebuild();
+
+    $type_exists = (bool) config_get('node.type.article', 'type');
+    $this->assertTrue($type_exists, 'The new content type has been created in the database.');
+  }
+
+  protected function createNodeTypeUser($content_type_machine) {
+    $permission = 'create ' . $content_type_machine . ' content';
+    $permission_edit = 'edit ' . $content_type_machine . ' content';
+    // Reset the permissions cache.
+    $this->checkPermissions(array($permission), TRUE);
+
+    // Now that we have a new content type, create a user that has privileges
+    // on the content type.
+    $permissions = array_merge($this->permissions, array($permission));
+    $this->web_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->web_user);
+  }
+
+  protected function createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $title, $url, $node_title = '') {
+    $this->backdropGet('node/add/' . $content_type_machine);
+
+    if (!$node_title) {
+      $node_title = $this->randomName(20);
+    }
+    $edit = array(
+      'title' => $node_title,
+    );
+    if ($url) {
+      $edit['field_' . $single_field_name_machine . '[und][0][url]'] = $url;
+    }
+    if ($title) {
+      $edit['field_' . $single_field_name_machine . '[und][0][title]'] = $title;
+    }
+
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertText(t('@content_type_friendly @title has been created', array('@content_type_friendly' => $content_type_friendly, '@title' => $node_title)));
+
+  }
+
+  /**
+   * Test the link_plain formatter and it's output.
+   */
+  function testFormatterPlain() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_plain',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $link_tests = array(
+      'plain' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/',
+      ),
+      'query' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/?q=test',
+      ),
+      'fragment' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/#test',
+      ),
+    );
+
+    foreach ($link_tests as $key => $link_test) {
+      $link_text = $link_test['text'];
+      $link_url = $link_test['url'];
+      $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+      $this->assertText($link_url);
+      $this->assertNoText($link_text);
+      $this->assertNoLinkByHref($link_url);
+    }
+  }
+
+  function testFormatterURL() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_url',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $link_tests = array(
+      'plain' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/',
+      ),
+      'query' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/?q=test',
+      ),
+      'fragment' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/#test',
+      ),
+    );
+
+    foreach ($link_tests as $key => $link_test) {
+      $link_text = $link_test['text'];
+      $link_url = $link_test['url'];
+      $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+      $this->assertNoText($link_text);
+      $this->assertLinkByHref($link_url);
+    }
+  }
+
+  function testFormatterShort() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_short',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $link_tests = array(
+      'plain' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/',
+      ),
+      'query' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/?q=test',
+      ),
+      'fragment' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/#test',
+      ),
+    );
+
+    foreach ($link_tests as $key => $link_test) {
+      $link_text = $link_test['text'];
+      $link_url = $link_test['url'];
+      $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+      $this->assertText('Link');
+      $this->assertNoText($link_text);
+      $this->assertLinkByHref($link_url);
+    }
+  }
+
+  function testFormatterLabel() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_label',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $link_tests = array(
+      'plain' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/',
+      ),
+      'query' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/?q=test',
+      ),
+      'fragment' => array(
+        'text' => 'Display',
+        'url' => 'http://www.example.com/#test',
+      ),
+    );
+
+    foreach ($link_tests as $key => $link_test) {
+      $link_text = $link_test['text'];
+      $link_url = $link_test['url'];
+      $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+      $this->assertNoText($link_text);
+      $this->assertText($single_field_name_friendly);
+      $this->assertLinkByHref($link_url);
+    }
+  }
+
+  function testFormatterSeparate() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_separate',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $plain_url = 'http://www.example.com/';
+    $link_tests = array(
+      'plain' => array(
+        'text' => $this->randomName(20),
+        'url' => $plain_url,
+      ),
+      'query' => array(
+        'text' => $this->randomName(20),
+        'url' => $plain_url . '?q=test',
+      ),
+      'fragment' => array(
+        'text' => $this->randomName(20),
+        'url' => $plain_url . '#test',
+      ),
+    );
+
+    foreach ($link_tests as $key => $link_test) {
+      $link_text = $link_test['text'];
+      $link_url = $link_test['url'];
+      $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+      $this->assertText($link_text);
+      $this->assertLink($plain_url);
+      $this->assertLinkByHref($link_url);
+    }
+  }
+
+  function testFormatterPlainTitle() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+
+    $this->backdropCreateContentType(array(
+      'type' => $content_type_machine,
+      'name' => $content_type_friendly,
+    ));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    //$single_field_name = 'field_'. $single_field_name_machine;
+    $this->createSimpleLinkField($single_field_name_machine, $single_field_name_friendly, $content_type_machine);
+
+    // Okay, now we want to make sure this display is changed:
+    $this->backdropGet('admin/structure/types/manage/' . $content_type_machine . '/display');
+    $edit = array(
+      'fields[field_' . $single_field_name_machine . '][label]' => 'above',
+      'fields[field_' . $single_field_name_machine . '][type]' => 'link_title_plain',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->createNodeTypeUser($content_type_machine);
+
+    $link_text = 'Display';
+    $link_url = 'http://www.example.com/';
+    $this->createNodeForTesting($content_type_machine, $content_type_friendly, $single_field_name_machine, $link_text, $link_url);
+
+    $this->assertText($link_text);
+    $this->assertNoText($link_url);
+    $this->assertNoLinkByHref($link_url);
+  }
+}

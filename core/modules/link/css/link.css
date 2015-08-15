@@ -1,0 +1,8 @@
+.link-field-column {
+  float: left;
+  width: 48%;
+}
+
+.link-field-column .form-text {
+  width: 95%;
+}

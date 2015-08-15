@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Basic CRUD simpletests for the link module, based off of content.crud.test in CCK.
+ */
+
+class LinkContentCrudTest extends BackdropWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Link CRUD - Basic API tests',
+      'description' => 'Tests the field CRUD (create, read, update, delete) API.',
+      'group' => 'Link',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('field_ui', 'link');
+  }
+
+  /**
+   * All we're doing here is creating a content type, creating a simple link field
+   * on that content type.
+   */
+  function testLinkCreateFieldAPI() {
+    $content_type_friendly = $this->randomName(20);
+    $content_type_machine = strtolower($this->randomName(10));
+    $title = $this->randomName(20);
+
+    // Create and login user.
+    $this->web_user = $this->backdropCreateUser(array('administer content types'));
+    $this->backdropLogin($this->web_user);
+
+    $this->backdropGet('admin/structure/types');
+
+    // Create the content type.
+    $this->clickLink(t('Add content type'));
+
+    $edit = array(
+      'name' => $content_type_friendly,
+      'type' => $content_type_machine,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and add fields'));
+    $this->assertText(t('The content type @name has been added.', array('@name' => $content_type_friendly)));
+
+    // Now add a singleton field.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    $edit = array(
+      'fields[_add_new_field][label]' => $single_field_name_friendly,
+      'fields[_add_new_field][field_name]' => $single_field_name_machine,
+      'fields[_add_new_field][type]' => 'link_field',
+      'fields[_add_new_field][widget_type]' => 'link_field',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // We'll go with the default settings for this run-through.
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+
+    // Using all the default settings, so press the button.
+    $this->backdropPost(NULL, array(), t('Save settings'));
+    $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
+
+    // Somehow clicking "save" isn't enough, and we have to do a
+    // node_types_rebuild().
+    node_types_rebuild();
+    // Geoff commented this out 1 July 2015; also looking for node_type table
+    /*menu_rebuild();
+    $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
+    $this->assertTrue($type_exists, 'The new content type has been created in the database.');*/
+  }
+}
