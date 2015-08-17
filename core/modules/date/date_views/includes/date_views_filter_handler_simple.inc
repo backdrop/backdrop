@@ -377,8 +377,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#suffix' => '</div></div>',
       );
       if ($which == 'all') {
-        $form[$prefix]['#pre_render'][] = 'ctools_dependent_pre_render';
-        $form[$prefix]['#dependency'] = array($source => $operator_values);
+		$form[$prefix]['#states']['visible'][] = array(
+		  $source => array('value' => $operator_values)
+		);
       }
       if (!isset($form_state['input'][$identifier][$prefix])) {
         // Ensure these exist.
@@ -431,8 +432,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         ),
       );
       if ($which == 'all') {
-        $form[$prefix . '_group']['#pre_render'][] = 'ctools_dependent_pre_render';
-        $form[$prefix . '_group']['#dependency'] = array($source => $operator_values);
+	    $form[$prefix . '_group']['#states']['visible'][] = array(
+		  $source => array('value' => $operator_values)
+		  );
       }
     }
     return $form;
