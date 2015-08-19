@@ -14,6 +14,8 @@
 
 Backdrop.ajax = Backdrop.ajax || {};
 
+Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
+
 /**
  * Attaches the Ajax behavior to each Ajax form element.
  */
@@ -167,6 +169,11 @@ Backdrop.ajax = function (base, element, element_settings) {
   // 4. /nojs# - Followed by a fragment (e.g.: path/nojs#myfragment).
   this.url = this.url.replace(/\/nojs(\/|$|\?|#)/g, '/ajax$1');
 
+  // If the 'nojs' version of the URL is trusted, also trust the 'ajax' version.
+  if (Backdrop.settings.urlIsAjaxTrusted[element_settings.url]) {
+    Backdrop.settings.urlIsAjaxTrusted[this.url] = true;
+  }
+
   // Set the options for the ajaxSubmit function.
   // The 'this' variable will not persist inside of the options object.
   var currentAjaxRequestNumber = 0;
@@ -193,6 +200,24 @@ Backdrop.ajax = function (base, element, element_settings) {
       // When using iFrame uploads, responses must be returned as a string.
       if (typeof response == 'string') {
         response = $.parseJSON(response);
+
+        // Prior to invoking the response's commands, verify that they can be
+        // trusted by checking for a response header. See
+        // ajax_set_verification_header() for details.
+        // - Empty responses are harmless so can bypass verification. This avoids
+        //   an alert message for server-generated no-op responses that skip Ajax
+        //   rendering.
+        // - Ajax objects with trusted URLs (e.g., ones defined server-side via
+        //   #ajax) can bypass header verification. This is especially useful for
+        //   Ajax with multipart forms. Because IFRAME transport is used, the
+        //   response headers cannot be accessed for verification.
+        if (response !== null && !Backdrop.settings.urlIsAjaxTrusted[ajax.url]) {
+          if (jqXHR.getResponseHeader('X-Backdrop-Ajax-Token') !== '1') {
+            var customMessage = Backdrop.t("The response failed verification so will not be processed.");
+            return ajax.error(jqXHR, ajax.url, customMessage);
+          }
+        }
+
       }
       return ajax.success(response, status, jqXHR);
     },
@@ -214,6 +239,9 @@ Backdrop.ajax = function (base, element, element_settings) {
 
   // Bind the ajaxSubmit function to the element event.
   $(ajax.element).bind(element_settings.event, function (event) {
+    if (!Backdrop.settings.urlIsAjaxTrusted[ajax.url] && !Backdrop.urlIsLocal(ajax.url)) {
+      throw new Error(Backdrop.t('The callback URL is not local and not trusted: !url', {'!url': ajax.url}));
+    }
     return ajax.eventResponse(this, event);
   });
 
@@ -475,7 +503,7 @@ Backdrop.ajax.prototype.cleanUp = function (jqXHR) {
 
   // Reactivate the triggering element.
   $(this.element).removeClass('progress-disabled').prop('disabled', false);
-}
+};
 
 /**
  * Build an effect object which tells us how to apply the effect when adding new HTML.
