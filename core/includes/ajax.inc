@@ -226,6 +226,10 @@
  *   functions.
  */
 function ajax_render($commands = array()) {
+  // Although ajax_deliver() does this, some contributed and custom modules
+  // render Ajax responses without using that delivery callback.
+  ajax_set_verification_header();
+
   // Ajax responses aren't rendered with html.tpl.php, so we have to call
   // backdrop_get_css() and backdrop_get_js() here, in order to have new files
   // added during this request to be loaded by the page. We only want to send
@@ -483,6 +487,9 @@ function ajax_deliver($page_callback_result) {
     }
   }
 
+  // Let ajax.js know that this response is safe to process.
+  ajax_set_verification_header();
+
   // Print the response.
   $commands = ajax_prepare_response($page_callback_result);
   $json = ajax_render($commands);
@@ -609,6 +616,29 @@ function ajax_prepare_response($page_callback_result) {
   }
 
   return $commands;
+}
+
+/**
+ * Sets a response header for ajax.js to trust the response body.
+ *
+ * It is not safe to invoke Ajax commands within user-uploaded files, so this
+ * header protects against those being invoked.
+ *
+ * @see Backdrop.ajax.options.success()
+ */
+function ajax_set_verification_header() {
+  $added = &backdrop_static(__FUNCTION__);
+
+  // User-uploaded files cannot set any response headers, so a custom header is
+  // used to indicate to ajax.js that this response is safe. Note that most
+  // Ajax requests bound using the Form API will be protected by having the URL
+  // flagged as trusted in Backdrop.settings, so this header is used only for
+  // things like custom markup that gets Ajax behaviors attached.
+  if (empty($added)) {
+    backdrop_add_http_header('X-Backdrop-Ajax-Token', '1');
+    // Avoid sending the header twice.
+    $added = TRUE;
+  }
 }
 
 /**
@@ -813,7 +843,12 @@ function ajax_pre_render_element($element) {
 
     $element['#attached']['js'][] = array(
       'type' => 'setting',
-      'data' => array('ajax' => array($element['#id'] => $settings)),
+      'data' => array(
+        'ajax' => array($element['#id'] => $settings),
+        'urlIsAjaxTrusted' => array(
+          $settings['url'] => TRUE,
+        ),
+      ),
     );
 
     // Indicate that Ajax processing was successful.
