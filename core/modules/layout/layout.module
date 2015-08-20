@@ -972,6 +972,35 @@ function layout_provides_path($path) {
 }
 
 /**
+ * Get the layout which is active on the current path.
+ *
+ * @return
+ *   The Layout object.
+ */
+function layout_get_layout_by_path($path = NULL) {
+  $router_item = menu_get_item($path);
+  
+  $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
+  $current_layout = NULL;
+  foreach ($layouts as $layout) {
+    // Contexts must be set before the layout's access may be checked.
+    $contexts = $layout->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->position) && isset($router_item['map'][$context->position])) {
+        $context->setData($router_item['map'][$context->position]);
+      }
+    }
+
+    if (!$layout->disabled && $layout->checkAccess()) {
+      $current_layout = $layout;
+      break;
+    }
+  }
+  return $current_layout;
+}
+
+
+/**
  * Implements hook_flush_caches().
  */
 function layout_flush_caches() {
