@@ -61,10 +61,10 @@ class link_views_handler_filter_protocol extends views_handler_filter_string {
         '#type' => 'select',
         '#title' => t('Protocol'),
         '#default_value' => $this->value,
-        '#options' => backdrop_map_assoc(config_get('link.settings', 'filter_allowed_protocols')),
+        '#options' => backdrop_map_assoc(settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'))),
         '#multiple' => 1,
         '#size' => 4,
-        '#description' => t('The protocols displayed here are those globally available. You may add more protocols by modifying the <em>filter_allowed_protocols</em> variable in your installation.'),
+        '#description' => t('The protocols displayed here are those globally available. You may add more protocols by specifying a <code>$settings[\'filter_allowed_protocols\']</code> value in your settings.php file.'),
       );
     }
   }
@@ -73,8 +73,6 @@ class link_views_handler_filter_protocol extends views_handler_filter_string {
    * Filter down the query to include only the selected protocols.
    */
   function op_protocol($field, $upper) {
-    $db_type = db_driver();
-
     $protocols = $this->value;
 
     $where_conditions = array();
@@ -85,18 +83,9 @@ class link_views_handler_filter_protocol extends views_handler_filter_string {
       // More complex case, no protocol specified but is automatically cleaned up
       // by link_cleanup_url(). RegEx is required for this search operation.
       if ($protocol == 'http') {
-        $LINK_DOMAINS = _link_domains();
-        if ($db_type == 'pgsql') {
-          // PostGreSQL code has NOT been tested. Please report any problems to the link issue queue.
-          // pgSQL requires all slashes to be double escaped in regular expressions.
-          // See http://www.postgresql.org/docs/8.1/static/functions-matching.html#FUNCTIONS-POSIX-REGEXP
-          $condition .= ' OR ' . $field . ' ~* \'' . '^(([a-z0-9]([a-z0-9\\-_]*\\.)+)(' . $LINK_DOMAINS . '|[a-z][a-z]))' . '\'';
-        }
-        else {
-          // mySQL requires backslashes to be double (triple?) escaped within character classes.
-          // See http://dev.mysql.com/doc/refman/5.0/en/string-comparison-functions.html#operator_regexp
-          $condition .= ' OR ' . $field . ' REGEXP \'' . '^(([a-z0-9]([a-z0-9\\\-_]*\.)+)(' . $LINK_DOMAINS . '|[a-z][a-z]))' . '\'';
-        }
+        // mySQL requires backslashes to be double (triple?) escaped within character classes.
+        // See http://dev.mysql.com/doc/refman/5.0/en/string-comparison-functions.html#operator_regexp
+        $condition .= ' OR ' . $field . ' REGEXP \'' . '^(([a-z0-9]([a-z0-9\\\-_]*\.)+)([a-z]{2,63}))' . '\'';
       }
 
       $where_conditions[] = $condition;

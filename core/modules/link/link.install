@@ -50,17 +50,14 @@ function link_update_last_removed() {
  * Move link settings from variables to config.
  */
 function link_update_1000() {
-  // Migrate variables to config.
-  $config = config('link.settings');
-  $config->set('extra_domains', update_variable_get('link_extra_domains', array()));
-  $config->set('filter_allowed_protocols', update_variable_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal')));
+  // Update has been removed. Link no longer has any config in Backdrop.
+}
 
-  $config->save();
-
-  // Delete variables.
-  update_variable_del('link_extra_domains');
-  update_variable_del('filter_allowed_protocols');
-
+/**
+ * Remove the Link config file. Link no longer has any config.
+ */
+function link_update_1001() {
+  config('link.settings')->delete();
 }
 
 /**

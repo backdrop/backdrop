@@ -461,7 +461,7 @@ class LinkValidateUrlLight extends BackdropWebTestCase {
       'http://www.example.com/blah/#this@that?',
     );
     // Test all of the protocols.
-    $allowed_protocols = variable_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
+    $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
     foreach ($allowed_protocols as $protocol) {
       if ($protocol !== 'news' && $protocol !== 'mailto') {
         $links[] = $protocol . '://www.example.com';
@@ -474,8 +474,7 @@ class LinkValidateUrlLight extends BackdropWebTestCase {
       //$valid2 = valid_url($link, TRUE);
       //$this->assertEqual(TRUE, $valid2, "Using valid_url() on $link.");
     }
-    // Test if we can make a tld valid:
-    variable_set('link_extra_domains', array('frog'));
+    // Test if we can use a fake TLD.
     $valid = link_validate_url('http://www.example.frog');
     $this->assertEqual(LINK_EXTERNAL, $valid, "Testing that http://www.example.frog is a valid external link if we've added 'frog' to the list of valid domains.");
   }
