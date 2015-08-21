@@ -900,24 +900,39 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       }
     }
   }
-  ksort($block_list);
+  backdrop_sort($block_list, array('info' => SORT_STRING));
 
-  $output = array(
+  $output['search'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Search',
+    '#attributes' => array(
+      'id' => array('layout-block-list-search'),
+    ),
+  );
+  $output['block_list'] = array(
     '#type' => 'container',
     '#attributes' => array(
       'class' => array('layout-block-list'),
     ),
   );
+  
+  $output['block_list']['block_list_inner'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('layout-block-list-wrapper'),
+    ),
+  );
+  
 
   foreach ($block_list as $key => $block_info) {
-    $output[$key] = array(
+    $output['block_list']['block_list_inner'][$key] = array(
       '#type' => 'item',
       '#markup' => l(
         $block_info['info'],
         'admin/structure/layouts/manage/' . $layout->name . '/add-block/' . $renderer_name . '/' . $region_name . '/' . $key,
         array(
           'attributes' => array(
-            'class' => array('use-ajax'),
+            'class' => array('use-ajax block-item'),
             'data-dialog' => TRUE,
             'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
           )
