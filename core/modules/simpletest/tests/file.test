@@ -1030,12 +1030,19 @@ class FileScanDirectoryTest extends FileTestCase {
    */
   function testOptionNoMask() {
     // Grab a listing of all the JavaSscript files.
-    $all_files = file_scan_directory($this->path, '/^javascript-/');
+    $all_files = file_scan_directory($this->path, '/^javascript-/', array('recurse' => FALSE));
     $this->assertEqual(2, count($all_files), 'Found two, expected javascript files.');
 
-    // Now use the nomast parameter to filter out the .script file.
-    $filtered_files = file_scan_directory($this->path, '/^javascript-/', array('nomask' => '/.script$/'));
+    // Set the nomask parameter be empty to include the .script file.
+    $filtered_files = file_scan_directory($this->path, '/^javascript-/', array('nomask' => '/.script$/', 'recurse' => FALSE));
     $this->assertEqual(1, count($filtered_files), 'Filtered correctly.');
+
+    // List all hidden files with the default nomask, and again with a custom
+    // nomask that permits hidden files.
+    $no_hidden_files = file_scan_directory($this->path, '/^\..*$/', array('recurse' => FALSE));
+    $hidden_files = file_scan_directory($this->path, '/^\..*$/', array('nomask' => '/^$/', 'recurse' => FALSE));
+    $this->assertEqual(0, count($no_hidden_files), 'Hidden files not included by default.');
+    $this->assertEqual(1, count($hidden_files), 'Hidden files included when custom nomask used.');
   }
 
   /**
