@@ -2063,7 +2063,8 @@ function file_download_access($uri) {
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'nomask': The preg_match() regular expression of the files to ignore.
- *     Defaults to '/(\.\.?|CVS)$/'.
+ *     Defaults to '/^(\..*)|(CVS)$/'. This default ignores all hidden files
+ *     (those that start with a period) and items named "CVS".
  *   - 'callback': The callback function to call for each match. There is no
  *     default callback.
  *   - 'recurse': When TRUE, the directory scan will recurse the entire tree
@@ -2085,7 +2086,7 @@ function file_download_access($uri) {
 function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
   // Merge in defaults.
   $options += array(
-    'nomask' => '/(\.\.?|CVS)$/',
+    'nomask' => '/^(\..*)|(CVS)$/',
     'callback' => 0,
     'recurse' => TRUE,
     'key' => 'uri',
@@ -2096,7 +2097,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
   $files = array();
   if (is_dir($dir) && $handle = opendir($dir)) {
     while (FALSE !== ($filename = readdir($handle))) {
-      if (!preg_match($options['nomask'], $filename) && $filename[0] != '.') {
+      if (!preg_match($options['nomask'], $filename) && $filename !== '.' && $filename !== '..') {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {
