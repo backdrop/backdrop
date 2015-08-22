@@ -1675,6 +1675,8 @@ function system_performance_settings_submit($form, &$form_state) {
   $config->set('preprocess_css', $form_state['values']['preprocess_css']);
   $config->set('preprocess_js', $form_state['values']['preprocess_js']);
   $config->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1759,14 +1761,14 @@ function system_file_system_settings() {
  * Submit handler for system_file_system_settings().
  */
 function system_file_system_settings_submit($form, &$form_state) {
-  backdrop_set_message(t('The configuration options have been saved.'));
   $config = config('system.core');
   $config->set('file_public_path', $form_state['values']['file_public_path']);
   $config->set('file_private_path', $form_state['values']['file_private_path']);
   $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
   $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
   $config->save();
-
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1998,6 +2000,8 @@ function system_regional_settings_submit($form, &$form_state) {
     ->set('user_empty_timezone_message', $form_state['values']['empty_timezone_message'])
     ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
     ->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

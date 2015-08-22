@@ -705,6 +705,8 @@ function admin_bar_theme_settings_submit($form, $form_state) {
   $config->set('position_fixed', $form_state['values']['position_fixed']);
   $config->set('components', array_values(array_filter($form_state['values']['components'])));
   $config->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
