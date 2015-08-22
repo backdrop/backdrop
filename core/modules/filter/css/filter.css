@@ -85,6 +85,6 @@ input#edit-filters-filter-html-settings-allowed-html {
   max-width:300px;
 }
 
-#filterorder .disable-label {
-  font-weight: bold;
+tr.disabled-row, tr.disabled-row div.description {
+  color: #ccc;
 }

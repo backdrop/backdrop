@@ -119,35 +119,21 @@ function theme_filter_admin_format_filter_order($variables) {
   $rows = array();
   $disabled = array();
   foreach (element_children($element, TRUE) as $name) {
-    if($filters[$name]->status) {
-      $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
-      $rows[] = array(
-        'data' => array(
-          backdrop_render($element[$name]['filter']),
-          backdrop_render($element[$name]['configure_link']),
-          backdrop_render($element[$name]['status']),
-          backdrop_render($element[$name]['weight']),
-        ),
-        'class' => array('draggable', 'enabled'),
-      );
-    }
-    else {
-      $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
-      $disabled[] = array(
-        'data' => array(
-          backdrop_render($element[$name]['filter']),
-          backdrop_render($element[$name]['configure_link']),
-          backdrop_render($element[$name]['status']),
-          backdrop_render($element[$name]['weight']),
-        ),
-        'class' => array('draggable', 'disabled'),
-      );
-    }
+    $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
+    $row_class =  $filters[$name]->status ? 'draggable' : 'draggable disabled-row';
+
+    $rows[] = array(
+      'data' => array(
+        backdrop_render($element[$name]['filter']),
+        backdrop_render($element[$name]['status']),
+        backdrop_render($element[$name]['configure_link']),
+        backdrop_render($element[$name]['weight']),
+      ),
+      'class' => array($row_class),
+    );
   }
   $output = backdrop_render_children($element);
-  $header = array(t('Filter'), t('Configure'), t('Status'), '');
-  $spacer = array(array('data' => array(array('data' => 'Disabled filters', 'colspan' => 4)), 'class' => array('disable-label')));
-  $rows = array_merge($rows, $spacer, $disabled);
+  $header = array(t('Filter'), t('Enabled'), t('Configure'), '');
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filterorder')));
   backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 

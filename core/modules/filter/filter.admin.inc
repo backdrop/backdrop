@@ -154,7 +154,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#attached']['library'][] = array('filter', 'filter.admin');
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
-  backdrop_add_library('system', 'ui.dialog');
+  $form['#attached']['library'][] = array('system', 'backdrop.dialog');
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -461,10 +461,6 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'admin/config/content/formats';
-}
-
-function _filter_build_filter_display($name, $format) {
-  return theme('filter_display', array('filter' => $name, 'format' => $format));
 }
 
 /**
