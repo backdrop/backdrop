@@ -183,7 +183,7 @@ function config_export_full_form(array $form, array $form_state) {
 /**
  * Submit handler for config_export_full_form().
  */
-function config_export_full_form_submit(array $form, array &$form_state) {
+function config_export_full_form_submit(array $form, array &$form_state) {  
   $form_state['redirect'] = 'admin/config/development/configuration/full/export-download';
 }
 

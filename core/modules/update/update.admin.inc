@@ -126,4 +126,7 @@ function update_settings_submit($form, $form_state) {
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
     ->save();
+    
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
