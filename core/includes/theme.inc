@@ -1314,8 +1314,22 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
 
   // Escape the periods in the extension.
   $regex = '/' . str_replace('.', '\.', $extension) . '$/';
+
+  // Save effort by skipping directories that should not contain templates.
+  $ignore_directories = array(
+    'assets',
+    'css',
+    'scss',
+    'js',
+    'images',
+    'config',
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Get a listing of all template files in the path to search.
-  $files = file_scan_directory($path, $regex, array('key' => 'name'));
+  $files = file_scan_directory($path, $regex, array('key' => 'name', 'nomask' => $no_mask));
 
   // Find templates that implement registered theme hooks and include that in
   // what is returned so that the registry knows that the theme has this
