@@ -1398,6 +1398,8 @@ div.add-or-remove-shortcuts {
     margin: 0;
     height: 100%;
     width: 100%;
+  }
+  .maintenance-page-wrapper {
     display: table;
   }
   body.maintenance-page {
