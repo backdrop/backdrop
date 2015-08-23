@@ -273,8 +273,16 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // text formats.
   $all_filter_info = filter_get_filters();
   $filters = $format->filters;
-  $tips = _filter_tips($format->format);
-  $format_tips = reset($tips);
+
+  // Get filter tips.
+  $format_tips = array();
+  global $user;
+  $formats = filter_formats($user);
+  // This is not always set during rebuild.
+  if(!empty($format->format) && !empty($formats[$format->format])) {
+    $tips = _filter_tips($format->format);
+    $format_tips = reset($tips);
+  }
 
   // Prepare filters for form sections.
   foreach ($all_filter_info as $name => $filter_info) {
@@ -349,14 +357,25 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
   return $form;
 }
+
+/**
+ * Returns the configuration form for configurable filters.
+ */
 function _filter_build_configure_form($form, $form_state, $filter, $format) {
   $all_filter_info = filter_get_filters();
-  $filters = $format->filters;
   if(isset($all_filter_info[$filter]['settings callback'])) {
-    $function = $all_filter_info[$filter]['settings callback'];
-    $filter = $filters[$filter];
-    $settings_form = $function($form, $form_state, $filter, $format);
-    return $settings_form;
+    // $format->filters isn't always built yet.
+    if(!empty($format->filters)) {
+      $filters = $format->filters;
+      $function = $all_filter_info[$filter]['settings callback'];
+      // This is not always set during rebuild.
+      if(empty($filters[$filter])) {
+        return array();
+      }
+      $filter = $filters[$filter];
+      $settings_form = $function($form, $form_state, $filter, $format);
+      return $settings_form;
+    }
   }
   return array();
 }
@@ -430,7 +449,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
       unset($form_state['values']['filters'][$key]['filter']);
     }
   }
-  
+
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
   foreach ($form_state['values'] as $key => $value) {
