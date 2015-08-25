@@ -22,11 +22,6 @@ function node_overview_types() {
     if (node_hook($type->type, 'form')) {
       $type_url_str = str_replace('_', '-', $type->type);
       $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
-      $links['edit'] = array(
-        'title' => t('Edit'),
-        'href' => 'admin/structure/types/manage/' . $type_url_str,
-        'weight' => 0,
-      );
       if ($field_ui) {
         $links['fields'] = array(
           'title' => t('Manage fields'),
@@ -39,6 +34,11 @@ function node_overview_types() {
           'weight' => 10,
         );
       }
+      $links['edit'] = array(
+        'title' => t('Edit'),
+        'href' => 'admin/structure/types/manage/' . $type_url_str,
+        'weight' => 0,
+      );
       if ($type->module === 'node') {
         $links['Delete'] = array(
           'title' => t('Delete'),
