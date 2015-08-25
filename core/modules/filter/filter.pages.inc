@@ -92,12 +92,65 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     backdrop_set_title(t('Insert image'));
   }
 
-  $form['src'] = array(
-    '#title' => t('URL'),
+  // Construct strings to use in the upload validators.
+  $upload_settings = isset($format->editor_settings['image_upload']) ? $format->editor_settings['image_upload'] : array();
+  $upload_settings += array(
+    'status' => 0,
+    'dimensions' => array('max_width' => '', 'max_height' => ''),
+    'max_size' => NULL,
+    'scheme' => 'public',
+    'directory' => 'inline-images',
+  );
+
+  if (!empty($upload_settings['max_dimensions']['width']) && !empty($upload_settings['max_dimensions']['height'])) {
+    $max_dimensions = $upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height'];
+  }
+  else {
+    $max_dimensions = 0;
+  }
+  $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
+  $fid = $existing_file ? $existing_file->fid : NULL;
+  $form['image']['fid'] = array(
+    '#title' => t('Image upload'),
+    '#type' => 'managed_file',
+    '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
+    '#default_value' => $fid ? $fid : NULL,
+    '#upload_validators' => array(
+      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_size' => array($max_filesize),
+      'file_validate_image_resolution' => array($max_dimensions),
+    ),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Image Upload'),
+    ),
+    '#parents' => array('fid'),
+    '#weight' => -10,
+  );
+
+  $form['image']['src'] = array(
+    '#title' => t('Image URL'),
     '#type' => 'url',
+    '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Image URL'),
+    ),
+    '#weight' => -2,
   );
+
+  // If no current value or an existing file exists, default to showing
+  // the uploading interface.
+  if ($fid || empty($form['image']['src']['#default_value'])) {
+    $form['image']['fid']['#weight'] = -10;
+    $form['image']['src']['#default_value'] = '';
+  }
+  // Otherwise if editing an unmanaged file, show the raw URL field.
+  else {
+    $form['image']['src']['#weight'] = -10;
+  }
+
   $form['alt'] = array(
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
@@ -164,6 +217,26 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Submit handler for filter_format_editor_image_form().
+ */
+function filter_format_editor_image_form_submit($form, &$form_state) {
+  // Image source overrides file uploads, as the values are emptied out when
+  // hidden by JavaScript.
+  if (!empty($form_state['values']['attributes']['src'])) {
+    $form_state['values']['fid'] = NULL;
+    $form_state['values']['attributes']['data-file-id'] = NULL;
+  }
+  // Convert any uploaded files from the FID values to the src attribute.
+  if (!empty($form_state['values']['fid'])) {
+    $fid = $form_state['values']['fid'];
+    $file = file_load($fid);
+    $form_state['values']['attributes']['src'] = file_create_url($file->uri);
+    $form_state['values']['attributes']['data-file-id'] = $fid;
+    unset($form_state['values']['fid']);
+  }
 }
 
 /**

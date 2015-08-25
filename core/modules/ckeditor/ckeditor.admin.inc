@@ -28,12 +28,30 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
   );
 
   // @todo: Have this settings form be provided via a plugin hook.
+  $elements['plugins']['image'] = filter_editor_image_upload_settings_form($format);
+  $elements['plugins']['image'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('Image uploading'),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-backdropimage'),
+      'data-ckeditor-feature-dependency' => 'BackdropImage',
+    ),
+    '#parents' => array('editor_settings', 'image_upload'),
+  );
+
+  $elements['plugins']['style'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Style list'),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-style'),
+      'data-ckeditor-feature-dependency' => 'Styles',
+    ),
+  );
   $style_list = '';
   if (isset($format->editor_settings['plugins']['style']['style_list'])) {
     $style_list = _ckeditor_settings_stringify_style_list($format->editor_settings['plugins']['style']['style_list']);
   }
   $elements['plugins']['style']['style_list'] = array(
-    '#title' => t('CKEditor style list'),
     '#type' => 'textarea',
     '#rows' => 4,
     '#default_value' => $style_list,
