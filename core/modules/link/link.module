@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines simple link field types.
@@ -29,20 +28,6 @@ function link_field_info() {
     'link_field' => array(
       'label' => t('Link'),
       'description' => t('Store a title, href, and attributes in the database to assemble a link.'),
-      'settings' => array(
-        // PORT_TO_BACKDROP_CORE
-        //TODO:  working hypothesis is that
-        // all link field are instance settings and we don't need these.
-        /*'attributes' => _link_default_attributes(),
-        'url' => 0,
-        'title' => 'optional',
-        'title_value' => '',
-        'title_maxlength' => 128,
-        'enable_tokens' => 1,
-        'display' => array(
-          'url_cutoff' => 80,
-        ),*/
-      ),
       'instance_settings' => array(
         'attributes' => _link_default_attributes(),
         'url' => 0,
@@ -55,7 +40,6 @@ function link_field_info() {
           'url_cutoff' => 80,
         ),
         'validate_url' => 1,
-        'absolute_url' => 1,
       ),
       'default_widget' => 'link_field',
       'default_formatter' => 'link_default',
@@ -76,13 +60,6 @@ function link_field_instance_settings_form($field, $instance) {
 
   $form = array(
     '#element_validate' => array('link_field_settings_form_validate'),
-  );
-
-  $form['absolute_url'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Absolute URL'),
-    '#default_value' => $instance['settings']['absolute_url'] !== '' ? $instance['settings']['absolute_url'] : TRUE,
-    '#description' => t('If checked, the URL will always render as an absolute URL.'),
   );
 
   $form['validate_url'] = array(
@@ -132,6 +109,12 @@ function link_field_instance_settings_form($field, $instance) {
     '#title' => t('Use field label as the label for the title field'),
     '#default_value' => $instance['settings']['title_label_use_field_label'],
     '#description' => t('If this is checked the field label will be hidden.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][title]"]' => array('!value' => 'value'),
+        ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
+      ),
+    ),
   );
 
   $form['title_maxlength'] = array(
@@ -161,7 +144,7 @@ function link_field_instance_settings_form($field, $instance) {
   $form['advanced']['display']['url_cutoff'] = array(
     '#type' => 'textfield',
     '#title' => t('URL Display Cutoff'),
-    '#default_value' => isset($instance['settings']['display']['url_cutoff']) ? $instance['settings']['display']['url_cutoff'] : '80',
+    '#default_value' => $instance['settings']['display']['url_cutoff'],
     '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an elipsis (&hellip;)? Leave blank for no limit.'),
     '#maxlength' => 3,
     '#size' => 3,
@@ -179,14 +162,14 @@ function link_field_instance_settings_form($field, $instance) {
   $form['advanced']['attributes']['target'] = array(
     '#type' => 'radios',
     '#title' => t('Link Target'),
-    '#default_value' => empty($instance['settings']['attributes']['target']) ? LINK_TARGET_DEFAULT : $instance['settings']['attributes']['target'],
+    '#default_value' => $instance['settings']['attributes']['target'],
     '#options' => $target_options,
   );
   $form['advanced']['attributes']['rel'] = array(
     '#type' => 'textfield',
     '#title' => t('Rel Attribute'),
     '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
-    '#default_value' => empty($instance['settings']['attributes']['rel']) ? '' : $instance['settings']['attributes']['rel'],
+    '#default_value' => $instance['settings']['attributes']['rel'],
     '#field_prefix' => 'rel = "',
     '#field_suffix' => '"',
     '#size' => 20,
@@ -199,25 +182,25 @@ function link_field_instance_settings_form($field, $instance) {
   $form['advanced']['rel_remove'] = array(
     '#type' => 'radios',
     '#title' => t('Remove rel attribute automatically'),
-    '#default_value' => !isset($instance['settings']['rel_remove']) ? 'default' : $instance['settings']['rel_remove'],
+    '#default_value' => $instance['settings']['rel_remove'],
     '#description' => t('Turn on/off if rel attribute should be removed automatically, if user given link is internal/external'),
     '#options' => $rel_remove_options,
   );
   $form['advanced']['attributes']['configurable_class'] = array(
     '#title' => t("Allow the user to enter a custom link class per link"),
     '#type' => 'checkbox',
-    '#default_value' => empty($instance['settings']['attributes']['configurable_class']) ? '' : $instance['settings']['attributes']['configurable_class'],
+    '#default_value' => $instance['settings']['attributes']['configurable_class'],
   );
   $form['advanced']['attributes']['class'] = array(
     '#type' => 'textfield',
     '#title' => t('Additional CSS Classes'),
     '#description' => t('Add these classes on output (will be added to any user-provided classes). Multiple classes should be separated by spaces.'),
-    '#default_value' => empty($instance['settings']['attributes']['class']) ? '' : $instance['settings']['attributes']['class'],
+    '#default_value' => $instance['settings']['attributes']['class'],
   );
   $form['advanced']['attributes']['configurable_title'] = array(
     '#title' => t("Allow the user to enter a link 'title' attribute"),
     '#type' => 'checkbox',
-    '#default_value' => empty($instance['settings']['attributes']['configurable_title']) ? '' : $instance['settings']['attributes']['configurable_title'],
+    '#default_value' => $instance['settings']['attributes']['configurable_title'],
   );
   $form['advanced']['attributes']['title'] = array(
     '#type' => 'textfield',
@@ -228,7 +211,7 @@ function link_field_instance_settings_form($field, $instance) {
       ),
     ),
     '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
-    '#default_value' => empty($instance['settings']['attributes']['title']) ? '' : $instance['settings']['attributes']['title'],
+    '#default_value' => $instance['settings']['attributes']['title'],
     '#field_prefix' => 'title = "',
     '#field_suffix' => '"',
     '#size' => 20,
@@ -503,10 +486,10 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
 
   if (!empty($url_parts['url'])) {
     $item['url'] = url($url_parts['url'],
-      array('query' => isset($url_parts['query']) ? $url_parts['query'] : NULL,
-      'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : NULL,
-      'absolute' => !empty($instance['settings']['absolute_url']),
-      'html' => TRUE,
+      array(
+        'query' => isset($url_parts['query']) ? $url_parts['query'] : NULL,
+        'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : NULL,
+        'html' => TRUE,
       )
     );
   }
@@ -520,7 +503,6 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
       array(
         'query' => isset($url_parts['query']) ? $url_parts['query'] : NULL,
         'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : NULL,
-        'absolute' => !empty($instance['settings']['absolute_url']),
       )
     );
   }
@@ -573,14 +555,6 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
     $item['attributes'] = (array) unserialize($item['attributes']);
   }
 
-  // Add default attributes.
-  if (!is_array($instance['settings']['attributes'])) {
-    $instance['settings']['attributes'] = _link_default_attributes();
-  }
-  else {
-    $instance['settings']['attributes'] += _link_default_attributes();
-  }
-
   // Merge item attributes with attributes defined at the field level.
   $item['attributes'] += $instance['settings']['attributes'];
 
@@ -623,13 +597,13 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
     $item['attributes']['title'] = filter_xss($item['attributes']['title'], array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
   }
   // Handle attribute classes.
-  if (!empty($item['attributes']['class'])) {
-    $classes = explode(' ', $item['attributes']['class']);
-    foreach ($classes as &$class) {
-      $class = backdrop_clean_css_identifier($class);
-    }
-    $item['attributes']['class'] = implode(' ', $classes);
+  $classes = explode(' ', $item['attributes']['class']);
+  $classes = array_merge($classes, explode(' ', $instance['settings']['attributes']['class']));
+  $classes = array_filter($classes);
+  foreach ($classes as $n => $class) {
+    $classes[$n] = backdrop_clean_css_identifier($class);
   }
+  $item['attributes']['class'] = implode(' ', $classes);
   unset($item['attributes']['configurable_class']);
 
   // Remove title attribute if it's equal to link text.
@@ -704,114 +678,71 @@ function _link_parse_str($query) {
 /**
  * Given a URL that uses UTF-8 characters, escape to use only ASCII.
  *
- * Many browsers are loose about the URLs they receive and may even un-escape
- * URLs in the browser bar. For example spaces may be displayed instead of %20,
- * or UTF-8 characters used in the path.
- *
  * Domain names can also be problematic as they use a special encoding, IDN
  * Punycode. This converts a URL into a fully escaped format so that it may be
  * validated using only ASCII characters.
  *
- * @param $text
+ * @param $url
+ *   The URL whose domain should be escaped.
  *
  * @return string
+ *   The provided URL with its domain escaped to ASCII.
  */
-function _link_escape_domain($text) {
-  // External URLs:
-  if (strpos($text, '://')) {
-    $parsed_url = parse_url($text);
-    $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
-    $host = isset($parsed_url['host']) ? idn_to_ascii($parsed_url['host']) : '';
-    $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-    $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-    $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass']  : '';
-    $pass = ($user || $pass) ? "$pass@" : '';
-    $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
-    $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
-    $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
-    $cleaned_text = "$scheme$user$pass$host$port$path$query$fragment";
+function _link_escape_domain($url) {
+  $matches = array();
+  // PHP 5.3 *sometimes* may have idn_to_ascii(), either through a PECL
+  // extension or when compiled with --enable-intl. PHP 5.4 and higher should
+  // always have idn_to_ascii().
+  if (function_exists('idn_to_ascii') && strpos($url, '://') && preg_match('!(.*://)([^/]+)(.*)!', $url, $matches)) {
+    $escaped_url = $matches['1'] . idn_to_ascii($matches['2']) . $matches['3'];
   }
-  // Internal URLs:
   else {
-    $parts = _link_parse_url($text);
-    $url = $parts['url'];
-    $query = isset($parsed_url['query']) ? '?' . $parts['query'] : '';
-    $fragment = isset($parsed_url['fragment']) ? '#' . $parts['fragment'] : '';
-    $cleaned_text = "$url$query$fragment";
+    $escaped_url = $url;
   }
 
-  return $cleaned_text;
+  return $escaped_url;
 }
 
 /**
  * Implements hook_theme().
  */
 function link_theme() {
+  $base = array(
+    'file' => 'link.theme.inc',
+  );
+
   return array(
     'link_formatter_link_default' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_plain' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_absolute' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_domain' => array(
       'variables' => array('element' => NULL, 'display' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_title_plain' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_url' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_short' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_label' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_formatter_link_separate' => array(
       'variables' => array('element' => NULL, 'field' => NULL),
-    ),
+    ) + $base,
     'link_field' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
   );
-}
-
-/**
- * Formats a link field widget.
- */
-function theme_link_field($vars) {
-  backdrop_add_css(backdrop_get_path('module', 'link') . '/css/link.css');
-  $element = $vars['element'];
-  // Prefix single value link fields with the name of the field.
-  if (empty($element['#field']['multiple'])) {
-    if (isset($element['url']) && !isset($element['title'])) {
-      $element['url']['#title_display'] = 'invisible';
-    }
-  }
-
-  $output = '';
-  $output .= '<div class="link-field-subrow clearfix">';
-  if (isset($element['title'])) {
-    $output .= '<div class="link-field-title link-field-column">' . backdrop_render($element['title']) . '</div>';
-  }
-  $output .= '<div class="link-field-url' . (isset($element['title']) ? ' link-field-column' : '') . '">' . backdrop_render($element['url']) . '</div>';
-  $output .= '</div>';
-  if (!empty($element['attributes']['target'])) {
-    $output .= '<div class="link-attributes">' . backdrop_render($element['attributes']['target']) . '</div>';
-  }
-  if (!empty($element['attributes']['title'])) {
-    $output .= '<div class="link-attributes">' . backdrop_render($element['attributes']['title']) . '</div>';
-  }
-  if (!empty($element['attributes']['class'])) {
-    $output .= '<div class="link-attributes">' . backdrop_render($element['attributes']['class']) . '</div>';
-  }
-  $output .= backdrop_render_children($element);
-  return $output;
 }
 
 /**
@@ -835,7 +766,11 @@ function _link_default_attributes() {
   return array(
     'target' => LINK_TARGET_DEFAULT,
     'class' => '',
+    'configurable_class' => 0,
     'rel' => '',
+    'title' => '',
+    'configurable_title' => 0,
+
   );
 }
 
@@ -1030,170 +965,6 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
 }
 
 /**
- * Formats a link.
- */
-function theme_link_formatter_link_default($vars) {
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-
-  if (isset($link_options['attributes']['class'])) {
-    $link_options['attributes']['class'] = array($link_options['attributes']['class']);
-  }
-  // Display a normal link if both title and URL are available.
-  if (!empty($vars['element']['title']) && !empty($vars['element']['url'])) {
-    return l($vars['element']['title'], $vars['element']['url'], $link_options);
-  }
-  // If only a title, display the title.
-  elseif (!empty($vars['element']['title'])) {
-    return $link_options['html'] ? $vars['element']['title'] : check_plain($vars['element']['title']);
-  }
-  elseif (!empty($vars['element']['url'])) {
-    return l($vars['element']['title'], $vars['element']['url'], $link_options);
-  }
-}
-
-/**
- * Formats a link (or its title) as plain text.
- */
-function theme_link_formatter_link_plain($vars) {
-  $link_options = $vars['element'];
-  if (isset($link_options['title'])) {
-    unset($link_options['title']);
-  }
-  else {
-    $vars['element']['title'] = '';
-  }
-  unset($link_options['url']);
-  return empty($vars['element']['url']) ? check_plain($vars['element']['title']) : url($vars['element']['url'], $link_options);
-}
-
-/**
- * Formats a link as an absolute URL.
- */
-function theme_link_formatter_link_absolute($vars) {
-  $absolute = array('absolute' => TRUE);
-  return empty($vars['element']['url']) ? '' : url($vars['element']['url'], $absolute + $vars['element']);
-}
-
-/**
- * Formats a link using the URL's domain for it's link text.
- */
-function theme_link_formatter_link_domain($vars) {
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-  $domain = parse_url($vars['element']['display_url'], PHP_URL_HOST);
-  if (!empty($vars['display']['settings']['strip_www'])) {
-    $domain = str_replace('www.', '', $domain);
-  }
-  return $vars['element']['url'] ? l($domain, $vars['element']['url'], $link_options) : '';
-}
-
-/**
- * Formats a link's title as plain text.
- */
-function theme_link_formatter_link_title_plain($vars) {
-  return empty($vars['element']['title']) ? '' : check_plain($vars['element']['title']);
-}
-
-/**
- * Formats a link using an alternate display URL for its link text.
- */
-function theme_link_formatter_link_url($vars) {
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-  return $vars['element']['url'] ? l($vars['element']['display_url'], $vars['element']['url'], $link_options) : '';
-}
-
-/**
- * Formats a link using "Link" as the link text.
- */
-function theme_link_formatter_link_short($vars) {
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-  return $vars['element']['url'] ? l(t('Link'), $vars['element']['url'], $link_options) : '';
-}
-
-/**
- * Formats a link using the field's label as link text.
- */
-function theme_link_formatter_link_label($vars) {
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-  return $vars['element']['url'] ? l($vars['field']['label'], $vars['element']['url'], $link_options) : '';
-}
-
-/**
- * Formats a link as separate title and URL elements.
- */
-function theme_link_formatter_link_separate($vars) {
-  $class = empty($vars['element']['attributes']['class']) ? '' : ' ' . $vars['element']['attributes']['class'];
-  unset($vars['element']['attributes']['class']);
-  $link_options = $vars['element'];
-  unset($link_options['title']);
-  unset($link_options['url']);
-  $title = empty($vars['element']['title']) ? '' : check_plain($vars['element']['title']);
-
-  // @TODO static html markup looks not very elegant
-  // needs smarter output solution and an optional title/url seperator
-  $url_parts = _link_parse_url($vars['element']['url']);
-  $output = '';
-  $output .= '<div class="link-item ' . $class . '">';
-  if (!empty($title)) {
-    $output .= '<div class="link-title">' . $title . '</div>';
-  }
-  $output .= '<div class="link-url">' . l($url_parts['url'], $vars['element']['url'], $link_options) . '</div>';
-  $output .= '</div>';
-  return $output;
-}
-
-/**
- * Implements hook_token_list().
- *
- * @TODO: hook_token_list no longer exists - this should change to hook_token_info().
- */
-function link_token_list($type = 'all') {
-  if ($type === 'field' || $type === 'all') {
-    $tokens = array();
-    $tokens['link']['url'] = t("Link URL");
-    $tokens['link']['title'] = t("Link title");
-    $tokens['link']['view'] = t("Formatted html link");
-    return $tokens;
-  }
-}
-
-/**
- * Implements hook_token_values().
- *
- * @TODO: hook_token_values no longer exists - this should change to hook_tokens().
- */
-function link_token_values($type, $object = NULL) {
-  if ($type === 'field') {
-    $item = $object[0];
-
-    $tokens['url'] = $item['url'];
-    $tokens['title'] = $item['title'];
-    $tokens['view'] = isset($item['view']) ? $item['view'] : '';
-
-    return $tokens;
-  }
-}
-
-/**
- * Implements hook_views_api().
- */
-function link_views_api() {
-  return array(
-    'api' => 2,
-    'path' => backdrop_get_path('module', 'link') . '/views',
-  );
-}
-
-/**
  * Forms a valid URL if possible from an entered address.
  *
  * Trims whitespace and automatically adds an http:// to addresses without a
@@ -1239,7 +1010,7 @@ function link_cleanup_url($url, $protocol = 'http') {
 function link_validate_url($text) {
   $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
   $cleaned_text = _link_escape_domain($text);
-dsm($cleaned_text);
+
   $protocol = '((?:' . implode("|", $allowed_protocols) . '):\/\/)';
   $authentication = '(?:(?:(?:%[0-9a-f]{2})+(?::(%[0-9a-f]{2})*)?)?@)';
   $domain = '(?:(?:[a-z0-9](?:[a-z0-9\-_])*\.)*(?:(?:[a-z0-9\-]{1,63}\.)(?:[a-z0-9\-]{2,63})))';
@@ -1250,11 +1021,12 @@ dsm($cleaned_text);
   // Pattern specific to external links.
   $external_pattern = '/^' . $protocol . '?' . $authentication . '?(?P<domain>' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $port . '?';
 
+  // idn_to_ascii() is not always supported see _link_escape_domain().
+  // If present and the domain appears to be external, escape the domain.
   $external_matches = array();
-  if (preg_match($external_pattern . '/i', $text, $external_matches)) {
+  if (function_exists('idn_to_ascii') && preg_match($external_pattern . '/i', $text, $external_matches)) {
     $escaped_domain = idn_to_ascii($external_matches['domain']);
     $text = preg_replace('/' . preg_quote($external_matches['domain'], '/') . '/', $escaped_domain, $text, 1);
-    dsm($text);
   }
 
   // The rest of the path for a standard URL.
@@ -1304,89 +1076,4 @@ dsm($cleaned_text);
  */
 function link_field_settings_form() {
   return array();
-}
-
-/**
- * Additional callback to adapt the property info of link fields.
- *
- * @see entity_metadata_field_entity_property_info()
- */
-function link_field_property_info_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
-  // Define a data structure so it's possible to deal with both the link title
-  // and URL.
-  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
-  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
-
-  // Auto-create the field item as soon as a property is set.
-  $property['auto creation'] = 'link_field_item_create';
-
-  $property['property info'] = link_field_item_property_info();
-  $property['property info']['url']['required'] = !$instance['settings']['url'];
-  $property['property info']['title']['required'] = ($instance['settings']['title'] == 'required');
-  if ($instance['settings']['title'] == 'none') {
-    unset($property['property info']['title']);
-  }
-  unset($property['query callback']);
-}
-
-/**
- * Callback for creating a new, empty link field item.
- *
- * @see link_field_property_info_callback()
- */
-function link_field_item_create() {
-  return array('title' => NULL, 'url' => NULL);
-}
-
-/**
- * Defines info for the properties of the link-field item data structure.
- */
-function link_field_item_property_info() {
-  $properties['title'] = array(
-    'type' => 'text',
-    'label' => t('The title of the link.'),
-    'setter callback' => 'entity_property_verbatim_set',
-  );
-  $properties['url'] = array(
-    'type' => 'uri',
-    'label' => t('The URL of the link.'),
-    'setter callback' => 'entity_property_verbatim_set',
-  );
-  $properties['attributes'] = array(
-    'type' => 'struct',
-    'label' => t('The attributes of the link.'),
-    'setter callback' => 'entity_property_verbatim_set',
-    'getter callback' => 'link_attribute_property_get',
-  );
-  return $properties;
-}
-
-/**
- * Entity property info getter callback for link attributes.
- */
-function link_attribute_property_get($data, array $options, $name, $type, $info) {
-  return isset($data[$name]) ? array_filter($data[$name]) : array();
-}
-
-/**
- * Implements hook_field_update_instance().
- */
-function link_field_update_instance($instance, $prior_instance) {
-  if (function_exists('i18n_string_update') && $instance['widget']['type'] == 'link_field' && $prior_instance['settings']['title_value'] != $instance['settings']['title_value']) {
-    $i18n_string_name = "field:{$instance['field_name']}:{$instance['bundle']}:title_value";
-    i18n_string_update($i18n_string_name, $instance['settings']['title_value']);
-  }
-}
-
-/**
- * Implements hook_i18n_string_list_TEXTGROUP_alter().
- */
-function link_i18n_string_list_field_alter(&$strings, $type = NULL, $object = NULL) {
-  if ($type != 'field_instance' || !is_array($object) || !isset($object['widget']['type'])) {
-    return;
-  }
-  if ($object['widget']['type'] == 'link_field' && isset($object['settings']['title_value'])) {
-    $strings['field'][$object['field_name']][$object['bundle']]['title_value']['string'] = $object['settings']['title_value'];
-  }
 }

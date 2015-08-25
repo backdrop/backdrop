@@ -5,6 +5,8 @@
  * Contains simpletests making sure token integration works.
  */
 
+require_once(__DIR__ . '/link.test');
+
 /**
  * Testing that tokens can be used in link titles
  */
@@ -28,16 +30,13 @@ class LinkTokenTest extends LinkBaseTestClass {
    * Creates a node with a token in the link title and checks the value.
    */
   function testUserTokenLinkCreate() {
-    // create field
     $settings = array(
       'instance[settings][enable_tokens]' => 1,
     );
     $field_name = $this->createLinkField('page',
                                         $settings);
 
-    // create page form
     $this->backdropGet('node/add/page');
-    //$field_name = 'field_' . $name;
     $this->assertField($field_name . '[und][0][title]', 'Title found');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
@@ -71,14 +70,12 @@ class LinkTokenTest extends LinkBaseTestClass {
    */
   function testStaticTokenLinkCreate() {
 
-    // create field
     $name = $this->randomName();
     $settings = array(
       'instance[settings][title]' => 'value',
       'instance[settings][title_value]' => $name . ' [node:content-type:machine-name]');
     $field_name = $this->createLinkField('page', $settings);
 
-    // create page form
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
@@ -114,14 +111,12 @@ class LinkTokenTest extends LinkBaseTestClass {
    */
   function testStaticTokenLinkCreate2() {
 
-    // create field
     $name = $this->randomName();
     $settings = array(
       'instance[settings][title]' => 'value',
       'instance[settings][title_value]' => $name . ' [node:title]');
     $field_name = $this->createLinkField('page', $settings);
 
-    // create page form
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
@@ -277,7 +272,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       '_add_new_field[label]' => $name,
@@ -293,7 +287,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     // Is field created?
     $this->assertRaw(t('Added field %label.', array('%label' => $name)), 'Field added');
 
-    // create page form
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField($field_name . '[0][title]', 'Title found');
@@ -330,7 +323,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       '_add_new_field[label]' => $name,
@@ -346,7 +338,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     // Is field created?
     $this->assertRaw(t('Added field %label.', array('%label' => $name)), 'Field added');
 
-    // create page form
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField($field_name . '[0][title]', 'Title found');
@@ -383,7 +374,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -402,7 +392,6 @@ class LinkTokenTest extends LinkBaseTestClass {
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
 
-    // create page form
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 

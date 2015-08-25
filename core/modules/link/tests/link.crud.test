@@ -7,14 +7,6 @@
 
 class LinkContentCrudTest extends BackdropWebTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Link CRUD - Basic API tests',
-      'description' => 'Tests the field CRUD (create, read, update, delete) API.',
-      'group' => 'Link',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_ui', 'link');
   }
@@ -62,12 +54,7 @@ class LinkContentCrudTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save settings'));
     $this->assertText(t('Saved @name configuration.', array('@name' => $single_field_name_friendly)));
 
-    // Somehow clicking "save" isn't enough, and we have to do a
-    // node_types_rebuild().
-    node_types_rebuild();
-    // Geoff commented this out 1 July 2015; also looking for node_type table
-    /*menu_rebuild();
-    $type_exists = db_query('SELECT 1 FROM {node_type} WHERE type = :type', array(':type' => $content_type_machine))->fetchField();
-    $this->assertTrue($type_exists, 'The new content type has been created in the database.');*/
+    $type_exists = (bool) config('node.type.' . $content_type_machine);
+    $this->assertTrue($type_exists, 'The new content type has been created in the database.');
   }
 }

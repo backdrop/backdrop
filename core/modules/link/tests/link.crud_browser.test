@@ -25,14 +25,6 @@ class LinkUITest extends BackdropWebTestCase {
    */
   const LINK_INPUT_TYPE_BAD_URL = 2;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Link CRUD - browser test',
-      'description' => 'Tests the field CRUD (create, read, update, delete) API 2.',
-      'group' => 'Link',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_ui', 'link');
   }
@@ -41,7 +33,6 @@ class LinkUITest extends BackdropWebTestCase {
    * Creates a link field for the "page" type and creates a page with a link.
    */
   function testLinkCreate() {
-    //libxml_use_internal_errors(true);
     $this->web_user = $this->backdropCreateUser(array(
       'administer content types',
       'administer nodes',
@@ -52,7 +43,6 @@ class LinkUITest extends BackdropWebTestCase {
     ));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -66,14 +56,11 @@ class LinkUITest extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    node_types_rebuild();
     menu_rebuild();
 
     $permission = 'create page content';
     $this->checkPermissions(array($permission), TRUE);
 
-    // create page form
-    //$this->drupalGet('node/add');
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField('edit-field-' . $name . '-und-0-title', 'Title found');
@@ -182,7 +169,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -200,7 +186,6 @@ class LinkUITest extends BackdropWebTestCase {
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
 
-    // create page form
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
@@ -230,7 +215,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -248,7 +232,6 @@ class LinkUITest extends BackdropWebTestCase {
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
 
-    // create page form
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
 
@@ -281,7 +264,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -321,7 +303,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -358,7 +339,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->assertFalse($instance['settings']['title_value'], 'By default, no title should be set.');
 
     // Now, let's create a node with this field and make sure the link shows up:
-    // create page form
     $field_name = 'field_' . $name;
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');
@@ -393,7 +373,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -430,7 +409,6 @@ class LinkUITest extends BackdropWebTestCase {
     $this->assertFalse($instance['settings']['title_value'], 'By default, no title should be set.');
 
     // Now, let's create a node with this field and make sure the link shows up:
-    // create page form
     $field_name = 'field_' . $name;
     $this->backdropGet('node/add/page');
     $this->assertField($field_name . '[und][0][url]', 'URL found');

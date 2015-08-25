@@ -19,14 +19,6 @@ class LinkAttributeCrudTest extends BackdropWebTestCase {
     'access administration pages',
   );
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Link Attribute Tests',
-      'description' => 'Tests the field attributes, making sure they appear in various displayed situations.',
-      'group' => 'Link',
-    );
-  }
-
   function setup() {
     parent::setup('field_ui', 'link');
     $this->zebra = 0;

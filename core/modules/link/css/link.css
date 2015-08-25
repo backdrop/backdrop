@@ -1,6 +1,10 @@
+/**
+ * @file
+ * Styles for Link module.
+ */
 .link-field-column {
-  float: left;
-  width: 48%;
+  display: inline-block;
+  width: 50%;
 }
 
 .link-field-column .form-text {

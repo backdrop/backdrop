@@ -5,6 +5,8 @@
  * Tests that exercise the validation functions in the link module.
  */
 
+require_once(__DIR__ . '/link.test');
+
 class LinkValidateTestCase extends LinkBaseTestClass {
 
   protected function createLink($url, $title, $attributes = array()) {
@@ -70,7 +72,6 @@ class LinkValidateTest extends LinkValidateTestCase {
                                              'access administration pages'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -87,7 +88,6 @@ class LinkValidateTest extends LinkValidateTestCase {
     node_types_rebuild();
     menu_rebuild();
 
-    // create page form
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField('edit-field-' . $name . '-und-0-title', 'Title found');
@@ -115,7 +115,6 @@ class LinkValidateTest extends LinkValidateTestCase {
                                              'access administration pages'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -132,7 +131,6 @@ class LinkValidateTest extends LinkValidateTestCase {
     node_types_rebuild();
     menu_rebuild();
 
-    // create page form
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField('edit-field-' . $name . '-und-0-title', 'Title found');
@@ -161,7 +159,6 @@ class LinkValidateTest extends LinkValidateTestCase {
                                              'access administration pages'));
     $this->backdropLogin($this->web_user);
 
-    // create field
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -182,7 +179,6 @@ class LinkValidateTest extends LinkValidateTestCase {
     node_types_rebuild();
     menu_rebuild();
 
-    // create page form
     $this->backdropGet('node/add/page');
     $field_name = 'field_' . $name;
     $this->assertField('edit-field-' . $name . '-und-0-title', 'Title found');
@@ -352,42 +348,12 @@ class LinkValidateSpecificURL extends LinkValidateTestCase {
 /**
  * A series of tests of links, only going against the link_validate_url function in link.module.
  *
- * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738 !
+ * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738!
  */
-class LinkValidateUrlLight extends BackdropWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Link Light Validation Tests',
-      'description' => 'Tests the link_validate_url() function by itself, without invoking the full backdrop/cck lifecycle.',
-      'group' => 'Link',
-    );
-  }
-
+class LinkValidateUrlLight extends BackdropUnitTestCase {
   function setUp() {
-    parent::setUp('link');
-  }
-
-  /**
-   * Translates the LINK type constants to english for display and debugging of tests
-   */
-  function name_Link_Type($type) {
-    switch ($type) {
-      case LINK_FRONT:
-        return "Front";
-      case LINK_EMAIL:
-        return "Email";
-      case LINK_NEWS:
-        return "Newsgroup";
-      case LINK_INTERNAL:
-        return "Internal Link";
-      case LINK_EXTERNAL:
-        return "External Link";
-      case FALSE:
-        return "Invalid Link";
-      default:
-        return "Bad Value:" . $type;
-    }
+    parent::setUp();
+    backdrop_load('module', 'link');
   }
 
   // Make sure that a link labelled <front> works.

@@ -571,6 +571,9 @@ function backdrop_http_build_query(array $query, $parent = '') {
   foreach ($query as $key => $value) {
     $key = ($parent ? $parent . '[' . rawurlencode($key) . ']' : rawurlencode($key));
 
+    // For better readability of paths in query strings, we decode slashes.
+    $key = str_replace('%2F', '/', $key);
+
     // Recurse into children.
     if (is_array($value)) {
       $params[] = backdrop_http_build_query($value, $key);
