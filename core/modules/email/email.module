@@ -1,0 +1,503 @@
+<?php
+/**
+ * @file
+ * Module file for the email module, which creates a email address field.
+ */
+
+/**
+ * Implements hook_field_info().
+ */
+function email_field_info() {
+  return array(
+    'email' => array(
+      'label' => 'Email',
+      'description' => t('This field stores and renders email addresses.'),
+      'default_widget' => 'email_textfield',
+      'default_formatter' => 'email_default',
+      'property_type' => 'text',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_validate().
+ *
+ * Possible error codes:
+ * - 'email_invalid': The email address is not valid
+ */
+function email_field_validate($obj_type, $object, $field, $instance, $langcode, $items, &$errors) {
+  foreach ($items as $delta => $item) {
+    if ($item['email'] != '' && !valid_email_address(trim($item['email']))) {
+      $message = t('"%mail" is not a valid email address', array('%mail' => $item['email']));
+      $errors[$field['field_name']][$langcode][$delta][] = array(
+        'error' => "email_invalid",
+        'message' => $message,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function email_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element, $error['message']);
+}
+
+/**
+ * Implements hook_content_is_empty().
+ */
+function email_field_is_empty($item, $field) {
+  if (empty($item['email'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ */
+function email_field_formatter_info() {
+  $formats = array(
+    'email_default' => array(
+      'label' => t('Default email link'),
+      'description' => t('Display the email address as a mailto link.'),
+      'field types' => array('email'),
+    ),
+    'email_contact' => array(
+      'label' => t('Email contact form'),
+      'description' => t('Display a contact form.'),
+      'field types' => array('email'),
+    ),
+    'email_plain' => array(
+      'label' => t('Email plain text'),
+      'description' => t('Display the email address as plain text.'),
+      'field types' => array('email'),
+    ),
+  );
+  return $formats;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function email_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  switch ($display['type']) {
+    case 'email_default':
+      foreach ($items as $delta => $item) {
+        $output = l($item['email'], 'mailto:' . $item['email']);
+        $element[$delta] = array('#markup' => $output);
+      }
+      break;
+
+    case 'email_contact':
+      $ids = entity_extract_ids($object_type, $object);
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array('#markup' => l(t('Contact person by email'), 'email/' . $object_type . '/' . $ids[0] . '/' . $instance['field_name']));
+        // Since email is always sent to first item's email, break after any email address found.
+        break;
+      }
+      break;
+
+    case 'email_plain':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array('#markup' => check_plain($item['email']));
+      }
+      break;
+
+  }
+  return $element;
+}
+
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function email_field_widget_info() {
+  return array(
+    'email_textfield' => array(
+      'label' => t('Text field'),
+      'field types' => array('email'),
+      'settings' => array('size' => 60),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function email_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  $form['size'] = array(
+    '#type' => 'number',
+    '#title' => t('Size of textfield'),
+    '#default_value' => $settings['size'],
+    '#required' => TRUE,
+    '#min' => 1,
+  );
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function email_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
+  $element['email'] = $base + array(
+    '#type' => 'textfield',
+    '#default_value' => isset($items[$delta]['email']) ? $items[$delta]['email'] : NULL,
+    '#size' => $instance['widget']['settings']['size'],
+    '#prefix' => '<div class="text-full-wrapper">',
+    '#suffix' => '</div>',
+  );
+  return $element;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function email_menu() {
+  $items['email/%/%/%'] = array(
+    'title' => 'Email Contact Form',
+    'page callback' => 'email_mail_page',
+    'page arguments' => array(1, 2, 3),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/content/email'] = array(
+    'title' => 'Email Contact Form Settings',
+    'description' => 'Administer flood control settings for email contact forms',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('email_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Access callback for the email contact page.
+ *
+ * Checks whether the current user has view access to the entity. Access checks
+ * are performed for the fieldable core entity types, including nodes, users,
+ * comments and taxonomy terms. Furthermore entity types using Entity API's
+ * access system are supported. For custom entity types that are not using the
+ * Entity API, at least the access content permission is checked in the menu
+ * access callback.
+ *
+ * This function is called within the email page callback, as it takes care of
+ * loading the entity itself. If the entity is found, access checks are
+ * performed with this function.
+ *
+ * @param $entity_type
+ *   The entity type
+ * @param $entity
+ *   The entity for which the access should be checked
+ * @param $field_info
+ *   The field info for the email field.
+ *
+ * @return TRUE if the current user has view access, otherwise FALSE.
+ */
+function email_mail_page_access($entity_type, $entity, $field_info) {
+  // Check for field access.
+  if (!field_access('view', $field_info, $entity_type, $entity)) {
+    return FALSE;
+  }
+
+  // Check the access for fieldable core entities, including nodes, users,
+  // comments and taxonomy terms.
+  if ($entity_type == 'node') {
+    return node_access('view', $entity);
+  }
+  elseif ($entity_type == 'user') {
+    global $user;
+    if ($entity->uid == $user->uid && $entity->uid) {
+      return TRUE;
+    }
+    if (user_access('administer users') || (user_access('access user profiles') && $entity->status)) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+  elseif ($entity_type == 'comment') {
+    return comment_access('view', $entity);
+  }
+  elseif ($entity_type == 'taxonomy_term') {
+    if (user_access('administer taxonomy') || user_access('access content')) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  // Use Entity API for checking the view access for non-core entity types, if
+  // the module is installed.
+  if (module_exists('entity')) {
+    return entity_access('view', $entity_type, $entity);
+  }
+  return TRUE;
+}
+
+/**
+ * The contact form page.
+ */
+function email_mail_page($object_type, $object_id, $field_name) {
+  if (!is_numeric($object_id)) {
+    return MENU_NOT_FOUND;
+  }
+  // Verify this is an email field.
+  $field_info = field_info_field($field_name);
+  if (!isset($field_info) || $field_info['type'] != 'email') {
+    return MENU_NOT_FOUND;
+  }
+
+  // Check that the entity exists.
+  $objects = entity_load($object_type, array($object_id));
+  if (!isset($objects[$object_id])) {
+    return MENU_NOT_FOUND;
+  }
+  $object = $objects[$object_id];
+
+  // Check that the entity has the email field.
+  if (!isset($object->$field_name)) {
+    return MENU_NOT_FOUND;
+  }
+
+  // Check if the current user has access to the entity and to the field.
+  if (!email_mail_page_access($object_type, $object, $field_info)) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  //use the first email address as receiver
+  $field = array_pop($object->$field_name);
+  foreach ($field as $delta => $item) {
+    if (!empty($item['email'])) {
+      $email = $item['email'];
+      break;
+    }
+  }
+
+  //verify that the email address is not empty
+  if (empty($email)) {
+    return MENU_NOT_FOUND;
+  }
+
+  $entity_info = entity_extract_ids($object_type, $object);
+  $settings = field_info_instance($object_type, $field_name, $entity_info[2]);
+  $found = FALSE;
+  foreach ($settings['display'] as $display_name => $display_data) {
+    if (isset($display_data['type']) && ($display_data['type'] === 'email_contact')) {
+      $found = TRUE;
+      break;
+    }
+  }
+  if (!$found) {
+    return MENU_NOT_FOUND;
+  }
+
+  $config = config('email.settings');
+  if (!flood_is_allowed('email', $config->get('hourly_threshold'))) {
+    return t("You cannot send more than %number messages per hour. Please try again later.", array('%number' => $config->get('hourly_threshold')));
+  }
+
+  return backdrop_get_form('email_mail_page_form', $object_type, $object_id, $field_name, $email);
+}
+
+/**
+ * Contact form
+ */
+function email_mail_page_form($form, $form_state, $object_type, $object_id, $field_name, $email) {
+  global $user;
+
+  $form['object_id'] = array(
+    '#type' => 'value',
+    '#value' => $object_id,
+  );
+  $form['object_type'] = array(
+    '#type' => 'value',
+    '#value' => $object_type,
+  );
+  $form['field_name'] = array(
+    '#type' => 'value',
+    '#value' => $field_name,
+  );
+  $form['email'] = array(
+    '#type' => 'value',
+    '#value' => $email,
+  );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your name'),
+    '#maxlength' => 255,
+    '#default_value' => $user->uid ? $user->name : '',
+    '#required' => TRUE,
+  );
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your e-mail address'),
+    '#maxlength' => 255,
+    '#default_value' => $user->uid ? $user->mail : '',
+    '#required' => TRUE,
+  );
+  $form['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#maxlength' => 255,
+    '#required' => TRUE,
+  );
+  $form['message'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send e-mail'),
+    '#validate' => array('email_mail_page_form_validate'),
+    '#submit' => array('email_mail_page_form_submit'),
+  );
+  return $form;
+}
+
+/**
+ * Validate the site-wide contact page form submission.
+ */
+function email_mail_page_form_validate($form, &$form_state) {
+  if (!valid_email_address($form_state['values']['mail'])) {
+    form_set_error('mail', t('You must enter a valid e-mail address.'));
+  }
+  if (preg_match("/\r|\n/", $form_state['values']['subject'])) {
+    form_set_error('subject', t('The subject cannot contain linebreaks.'));
+    watchdog('mail', 'Email injection exploit attempted in email form subject: ' . check_plain($form_state['values']['subject']), WATCHDOG_NOTICE);
+  }
+}
+
+/**
+ * Process the site-wide contact page form submission.
+ */
+function email_mail_page_form_submit($form, &$form_state) {
+  $object_type = $form_state['values']['object_type'];
+  $object_id = $form_state['values']['object_id'];
+  $field_name = $form_state['values']['field_name'];
+  $email = $form_state['values']['email'];
+
+  // Load entity
+  $objects = entity_load($object_type, array($object_id));
+  $object = $objects[$object_id];
+  $object_info = entity_get_info($object_type);
+
+  // E-mail address of the sender: as the form field is a text field,
+  // all instances of \r and \n have been automatically stripped from it.
+
+  $from = $form_state['values']['mail'];
+
+  $params['object'] = $object;
+  $params['subject'] = $form_state['values']['subject'];
+  $params['name'] = $form_state['values']['name'];
+  $params['message'] = $form_state['values']['message'];
+
+  $path = "";
+  if (isset($object_info['path callback']) && function_exists($object_info['path callback'])) {
+    $path = $object_info['path callback']($object);
+  }
+  $params['url'] = url($path, array('absolute' => TRUE));
+
+  // Send the e-mail to the recipients:
+  backdrop_mail('email', 'contact', $email, language_default(), $params, $from);
+
+  // Log the operation:
+  flood_register_event('email');
+  watchdog('mail', '%name-from sent an e-mail at %form.', array('%name-from' => $form_state['values']['name'], '%form' => url($_GET['q'], array('absolute' => TRUE))));
+
+  backdrop_set_message(t('Your message has been sent.'));
+  $form_state['redirect'] = $path;
+}
+
+/**
+ * Implements hook_mail().
+ */
+function email_mail($key, &$message, $params) {
+  $language = $message['language'];
+  switch ($key) {
+    case 'contact':
+      // Compose the body:
+      $message['body'][] = t('@name sent a message using the contact form at @url.', array('@name' => $params['name'], '@url' => $params['url']), array('langcode' => $language->langcode));
+      $message['body'][] = $params['message'];
+      $message['subject'] = "";
+
+      // Include the title of the entity, if one exists
+      $object = $params['object'];
+      if (isset($object->title) && !empty($object->title)) {
+        $message['subject'] = "[" . check_plain(preg_replace("/\r|\n/", '', $object->title)) . "]";
+      }
+      $message['subject'] .= " " . check_plain($params['subject']);
+      break;
+  }
+}
+
+/**
+* Implements hook_config_info().
+*/
+function email_config_info() {
+  $prefixes['email.settings'] = array(
+    'label' => t('Email settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_token_list().
+ */
+function email_token_list($type = 'all') {
+  if ($type == 'field' || $type == 'all') {
+    $tokens['email']['raw']       = t('Raw email address');
+    $tokens['email']['formatted'] = t('Formatted email address');
+    return $tokens;
+  }
+}
+
+/**
+ * Implements hook token_values().
+ */
+function email_token_values($type, $object = NULL, $options = array()) {
+  if ($type == 'field') {
+    $item = $object[0];
+    $tokens['raw']       = $item['email'];
+    $tokens['formatted'] = $item['view'];
+    return $tokens;
+  }
+}
+
+
+/**
+ * Settings for contact form
+ */
+function email_admin_settings() {
+  $form['email_hourly_threshold'] = array('#type' => 'select',
+    '#title' => t('Hourly threshold for a CCK Email contact form'),
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50)),
+    '#default_value' => config_get('email.settings', 'hourly_threshold'),
+    '#description' => t('The maximum number of contact form submissions a user can perform per hour.'),
+  );
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for email_admin_settings().
+ */
+function email_admin_settings_submit($form, &$form_state) {
+  $config = config('email.settings');
+  $config->set('hourly_threshold', $form_state['values']['email_hourly_threshold']);
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
