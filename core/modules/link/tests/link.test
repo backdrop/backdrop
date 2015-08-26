@@ -6,23 +6,29 @@
  */
 
 class LinkBaseTestClass extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   protected $permissions = array(
     'access content',
     'administer content types',
     'administer nodes',
     'administer filters',
-    'access comments',
-    'post comments',
     'access administration pages',
     'create page content',
   );
 
   function setUp() {
     $modules = func_get_args();
-    //$modules = (isset($modules[0]) && is_array($modules[0]) ? $modules[0] : $modules);
+    $modules[] = 'node';
     $modules[] = 'field_ui';
     $modules[] = 'link';
     parent::setUp($modules);
+
+    // Create a page content type with no fields.
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Basic page',
+    ));
 
     $this->web_user = $this->backdropCreateUser($this->permissions);
     $this->backdropLogin($this->web_user);
@@ -43,8 +49,6 @@ class LinkBaseTestClass extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    //node_types_rebuild();
-    menu_rebuild();
 
     return $field_name;
   }

@@ -1,47 +1,29 @@
 [LinkAttributeCrudTest]
-name = Link Attribute Tests
+name = Link attribute tests
 description = Tests the field attributes, making sure they appear in various displayed situations.
 group = Link
 file = link.attribute.test
 
-[LinkContentCrudTest]
-name = Link CRUD - Basic API tests
-description = Tests the field CRUD (create, read, update, delete) API.
-group = Link
-file = link.crud.test
-
 [LinkUITest]
-name = Link CRUD - browser test
+name = Link UI test
 description = Tests the field CRUD (create, read, update, delete) API 2.
 group = Link
-file = link.crud_browser.test
+file = link.ui.test
 
 [LinkTokenTest]
-name = Link tokens - browser test
+name = Link tokens test
 description = Tests including tokens in link titles, making sure they appear in node views.
 group = Link
 file = link.token.test
 
 [LinkValidateTest]
-name = Link Validation Tests
+name = Link validation UI tests
 description = Tests the field validation.
 group = Link
 file = link.validate.test
 
-[LinkValidateTestNews]
-name = Link News Validation Tests
-description = Tests the field validation for usenet urls.
-group = Link
-file = link.validate.test
-
-[LinkValidateSpecificURL]
-name = Link Specific URL Validation Tests
-description = Checks the validation of special URL patterns.
-group = Link
-file = link.validate.test
-
-[LinkValidateUrlLight]
-name = Link Light Validation Tests
+[LinkValidateUnitTest]
+name = Link validation unit tests
 description = Tests the link_validate_url() function by itself, without invoking the full Backdrop bootstrap.
 group = Link
 file = link.validate.test

@@ -56,7 +56,6 @@ class LinkUITest extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    menu_rebuild();
 
     $permission = 'create page content';
     $this->checkPermissions(array($permission), TRUE);
@@ -140,13 +139,13 @@ class LinkUITest extends BackdropWebTestCase {
       }
       $url = $this->getUrl();
 
-      // change to Anonymous user.
+      // Change to Anonymous user.
       $this->backdropLogout();
 
       $this->backdropGet($url);
-      //debug($this);
-      // If simpletest starts using something to override the error system, this will flag
-      // us and let us know it's broken.
+
+      // If simpletest starts using something to override the error system, this
+      ///will flag us and let us know it's broken.
       $this->assertFalse(libxml_use_internal_errors(TRUE));
       if (isset($input['expected_href'])) {
         $path = '//a[@href="' . $input['expected_href'] . '" and text()="' . $input['label'] . '"]';
@@ -158,7 +157,6 @@ class LinkUITest extends BackdropWebTestCase {
       libxml_use_internal_errors(FALSE);
       $this->assertIdentical(isset($elements[0]), $input['type'] == self::LINK_INPUT_TYPE_GOOD, $input['msg']);
     }
-    //libxml_use_internal_errors(FALSE);
   }
 
   /**
@@ -201,7 +199,7 @@ class LinkUITest extends BackdropWebTestCase {
 
     $url = $this->getUrl();
 
-    // change to anonymous user
+    // Change to anonymous user.
     $this->backdropLogout();
     $this->backdropGet($url);
 
@@ -249,7 +247,7 @@ class LinkUITest extends BackdropWebTestCase {
 
     $url = $this->getUrl();
 
-    // change to anonymous user
+    // Change to anonymous user.
     $this->backdropLogout();
     $this->backdropGet($url);
 
@@ -277,17 +275,15 @@ class LinkUITest extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    //node_types_rebuild();
-    menu_rebuild();
 
-    //_field_info_collate_fields(TRUE);
+    field_info_cache_clear();
     $instances = field_info_instances('node', 'page');
 
     $instance = $instances['field_' . $name];
     $this->assertFalse($instance['required'], 'Make sure field is not required.');
     $this->assertEqual($instance['settings']['title'], 'optional', 'Title should be optional by default.');
     $this->assertTrue($instance['settings']['validate_url'], 'Make sure validation is on.');
-    //$this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
+    $this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
     $this->assertEqual($instance['settings']['display']['url_cutoff'], 80, 'Url cutoff should be at 80 characters.');
     $this->assertEqual($instance['settings']['attributes']['target'], 'default', 'Target should be "default"');
     $this->assertFalse($instance['settings']['attributes']['rel'], 'Rel should be blank by default.');
@@ -321,10 +317,8 @@ class LinkUITest extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    node_types_rebuild();
-    menu_rebuild();
 
-    _field_info_collate_fields(TRUE);
+    field_info_cache_clear();
     $instances = field_info_instances('node', 'page');
 
     $instance = $instances['field_' . $name];
@@ -391,10 +385,8 @@ class LinkUITest extends BackdropWebTestCase {
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
-    node_types_rebuild();
-    menu_rebuild();
 
-    _field_info_collate_fields(TRUE);
+    field_info_cache_clear();
     $instances = field_info_instances('node', 'page');
 
     $instance = $instances['field_' . $name];
