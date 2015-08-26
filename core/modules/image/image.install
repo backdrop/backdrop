@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the image module.
@@ -335,6 +334,23 @@ function image_update_1005() {
  */
 function image_update_1006() {
   config_set('system.core', 'image_style_flood_limit', 5);
+}
+
+/**
+ * Update from Image size to more specific Image dimensions.
+ */
+function image_update_1007() {
+  $config_names = config_get_names_with_prefix('field.instance.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    if ($config->get('widget.type') == 'image_image') {
+      $config->set('settings.max_dimensions', $config->get('settings.max_resolution'));
+      $config->clear('settings.max_resolution');
+      $config->set('settings.min_dimensions', $config->get('settings.min_resolution'));
+      $config->clear('settings.min_resolution');
+      $config->save();
+    }
+  }
 }
 
 /**
