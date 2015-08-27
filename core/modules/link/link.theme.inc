@@ -40,6 +40,7 @@ function theme_link_field($vars) {
  * Formats a link.
  */
 function theme_link_formatter_link_default($vars) {
+  $output = '';
   $link_options = $vars['element'];
   unset($link_options['title']);
   unset($link_options['url']);
@@ -49,15 +50,16 @@ function theme_link_formatter_link_default($vars) {
   }
   // Display a normal link if both title and URL are available.
   if (!empty($vars['element']['title']) && !empty($vars['element']['url'])) {
-    return l($vars['element']['title'], $vars['element']['url'], $link_options);
+    $output = l($vars['element']['title'], $vars['element']['url'], $link_options);
   }
   // If only a title, display the title.
   elseif (!empty($vars['element']['title'])) {
-    return $link_options['html'] ? $vars['element']['title'] : check_plain($vars['element']['title']);
+    $output = $link_options['html'] ? $vars['element']['title'] : check_plain($vars['element']['title']);
   }
   elseif (!empty($vars['element']['url'])) {
-    return l($vars['element']['title'], $vars['element']['url'], $link_options);
+    $output = l($vars['element']['title'], $vars['element']['url'], $link_options);
   }
+  return $output;
 }
 
 /**
@@ -145,8 +147,6 @@ function theme_link_formatter_link_separate($vars) {
   unset($link_options['url']);
   $title = empty($vars['element']['title']) ? '' : check_plain($vars['element']['title']);
 
-  // @TODO static html markup looks not very elegant
-  // needs smarter output solution and an optional title/url seperator
   $url_parts = _link_parse_url($vars['element']['url']);
   $output = '';
   $output .= '<div class="link-item ' . $class . '">';

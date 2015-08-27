@@ -1,48 +1,35 @@
 <?php
-
 /**
  * @file
  * Testing CRUD API in the browser.
  */
 
+require_once(__DIR__ . '/link.test');
+
 /**
  * Testing that users can not input bad URLs or labels
  */
-class LinkUITest extends BackdropWebTestCase {
+class LinkUITest extends LinkBaseTestClass {
 
   /**
-   * Link supposed to be good
+   * Link supposed to be good.
    */
   const LINK_INPUT_TYPE_GOOD = 0;
 
   /**
-   * Link supposed to have a bad title
+   * Link supposed to have a bad title.
    */
   const LINK_INPUT_TYPE_BAD_TITLE = 1;
 
   /**
-   * Link supposed to have a bad URL
+   * Link supposed to have a bad URL.
    */
   const LINK_INPUT_TYPE_BAD_URL = 2;
-
-  function setUp() {
-    parent::setUp('field_ui', 'link');
-  }
 
   /**
    * Creates a link field for the "page" type and creates a page with a link.
    */
   function testLinkCreate() {
-    $this->web_user = $this->backdropCreateUser(array(
-      'administer content types',
-      'administer nodes',
-      'administer filters',
-      'access content',
-      'create page content',
-      'access administration pages'
-    ));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -133,16 +120,8 @@ class LinkUITest extends BackdropWebTestCase {
         continue;
       }
       else {
-        $this->assertRaw(' ' . t('has been created.',
-                           array('@type' => 'Basic Page', '%title' => $edit['title'])),
-                         'Page created: ' . $input['href']);
+        $this->assertRaw(' ' . t('has been created.', array('@type' => 'Basic Page', '%title' => $edit['title'])), 'Page created: ' . $input['href']);
       }
-      $url = $this->getUrl();
-
-      // Change to Anonymous user.
-      $this->backdropLogout();
-
-      $this->backdropGet($url);
 
       // If simpletest starts using something to override the error system, this
       ///will flag us and let us know it's broken.
@@ -164,9 +143,6 @@ class LinkUITest extends BackdropWebTestCase {
    * title actually displays <strong>.
    */
   function testStaticLinkCreate() {
-    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -197,22 +173,13 @@ class LinkUITest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    $url = $this->getUrl();
-
-    // Change to anonymous user.
-    $this->backdropLogout();
-    $this->backdropGet($url);
-
     $this->assertRaw(l('<strong>' . $name . '</strong>', $input['href'], array('html' => TRUE)));
   }
 
   /**
-   * Testing that if you have the title but no url, the title is not sanitized twice.
+   * Testing that if you have the title but no URL, the title is not sanitized twice.
    */
   function testCRUDTitleOnlyTitleNoLink() {
-    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -245,12 +212,6 @@ class LinkUITest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    $url = $this->getUrl();
-
-    // Change to anonymous user.
-    $this->backdropLogout();
-    $this->backdropGet($url);
-
     $this->assertRaw('This &amp; That');
   }
 
@@ -259,9 +220,6 @@ class LinkUITest extends BackdropWebTestCase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldDefaults() {
-    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -296,9 +254,6 @@ class LinkUITest extends BackdropWebTestCase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldWithClass() {
-    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -349,12 +304,6 @@ class LinkUITest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    $url = $this->getUrl();
-
-    // change to anonymous user
-    $this->backdropLogout();
-    $this->backdropGet($url);
-
     $this->assertRaw('This &amp; That');
     $this->assertPattern('|class\s?=\s?"' . $link_class_name . '"|', "Class $link_class_name exists on page.");
   }
@@ -364,9 +313,6 @@ class LinkUITest extends BackdropWebTestCase {
    * sure they are set to the expected results.
    */
   function testCRUDCreateFieldWithTwoClasses() {
-    $this->web_user = $this->backdropCreateUser(array('administer content types', 'access content', 'create page content'));
-    $this->backdropLogin($this->web_user);
-
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -416,12 +362,6 @@ class LinkUITest extends BackdropWebTestCase {
       $field_name . '[und][0][url]' => $input['href'],
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-
-    $url = $this->getUrl();
-
-    // change to anonymous user
-    $this->backdropLogout();
-    $this->backdropGet($url);
 
     $this->assertRaw('This &amp; That');
     $this->assertPattern('|class\s?=\s?"' . $link_class_name . '"|', "Classes $link_class_name exist on page.");

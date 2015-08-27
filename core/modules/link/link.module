@@ -112,7 +112,6 @@ function link_field_instance_settings_form($field, $instance) {
     '#description' => t('If this is checked the field label will be hidden.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][title]"]' => array('!value' => 'value'),
         ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
       ),
     ),
@@ -360,7 +359,7 @@ function _link_load($field, $item, $instance) {
 }
 
 /**
- * Prepares the item attributes and url for storage.
+ * Prepares the item attributes and URL for storage.
  */
 function _link_process(&$item, $delta, $field, $entity) {
   // Trim whitespace from URL.
@@ -447,7 +446,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
  * @param object $entity
  *   The entity containing this link.
  */
-function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
+function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) {
   // Don't try to process empty links.
   if (empty($item['url']) && empty($item['title'])) {
     return;
@@ -466,8 +465,7 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
     if (!empty($text_tokens)) {
       // Load the entity if necessary for entities in views.
       if (isset($entity->{$property_id})) {
-        $entity_loaded = entity_load($entity_type, array($entity->{$property_id}));
-        $entity_loaded = array_pop($entity_loaded);
+        $entity_loaded = entity_load($entity_type, $entity->{$property_id});
       }
       else {
         $entity_loaded = $entity;
@@ -534,8 +532,7 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
     if (!empty($text_tokens)) {
       // Load the entity if necessary for entities in views.
       if (isset($entity->{$property_id})) {
-        $entity_loaded = entity_load($entity_type, array($entity->{$property_id}));
-        $entity_loaded = array_pop($entity_loaded);
+        $entity_loaded = entity_load($entity_type, $entity->{$property_id});
       }
       else {
         $entity_loaded = $entity;
@@ -587,8 +584,7 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
       if (!empty($text_tokens)) {
       // Load the entity (necessary for entities in views).
       if (isset($entity->{$property_id})) {
-        $entity_loaded = entity_load($entity_type, array($entity->{$property_id}));
-        $entity_loaded = array_pop($entity_loaded);
+        $entity_loaded = entity_load($entity_type, $entity->{$property_id});
       }
       else {
         $entity_loaded = $entity;
@@ -617,13 +613,13 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
 }
 
 /**
- * Because parse_url doesn't work with relative urls.
+ * Because parse_url doesn't work with relative URLs.
  *
  * @param string $url
  *   URL to parse.
  *
  * @return array
- *   Array of url pieces - only 'url', 'query', and 'fragment'.
+ *   Array of URL pieces - only 'url', 'query', and 'fragment'.
  */
 function _link_parse_url($url) {
   $url_parts = array();
@@ -947,7 +943,6 @@ function link_field_formatter_settings_form($field, $instance, $view_mode, $form
  */
 function link_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
-  $settings = $display['settings'];
   if ($display['type'] == 'link_domain') {
     if ($display['settings']['strip_www']) {
       return t('Strip www. from domain');
@@ -982,9 +977,12 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
  * protocol specified
  *
  * @param string $url
- *   The url entered by the user.
+ *   The URL entered by the user.
  * @param string $protocol
- *   The protocol to be prepended to the url if one is not specified
+ *   The protocol to be prepended to the URL if one is not specified.
+ *
+ * @return string
+ *   The URL with the protocol prepended if needed.
  */
 function link_cleanup_url($url, $protocol = 'http') {
   $url = trim($url);

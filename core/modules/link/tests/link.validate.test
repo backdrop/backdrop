@@ -16,7 +16,10 @@ class LinkValidateTest extends LinkBaseTestClass {
   }
 
   /**
-   * Takes a url, and sees if it can validate that the url is valid.
+   * Checks if a URL is valid through the UI.
+   *
+   * @param string $url
+   *   The URL to validate.
    */
   protected function validateUrl($url) {
     $this->backdropGet('node/add/page');
@@ -60,7 +63,7 @@ class LinkValidateTest extends LinkBaseTestClass {
   }
 
   /**
-   * Test if we can post a bad url if the validation is expressly turned off.
+   * Test if we can post a bad URL if the validation is expressly turned off.
    */
   function testBadUrlValidationOff() {
     // Disable validation.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains simpletests making sure token integration works.
@@ -68,7 +67,7 @@ class LinkTokenTest extends LinkBaseTestClass {
   }
 
   /**
-   * Test that if you have a title and no url on a field which does not have
+   * Test that if you have a title and no URL on a field which does not have
    * tokens enabled, that the title is sanitized once.
    */
   function testTitleOnlyTitleNoLink() {

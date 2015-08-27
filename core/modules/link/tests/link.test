@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Link base test file - contains common functions for testing links.
@@ -8,6 +7,16 @@
 class LinkBaseTestClass extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   * Stores the logged-in user.
+   */
+  protected $web_user;
+
+  /**
+   * @var array
+   * The list of permissions assigned to the created web user.
+   */
   protected $permissions = array(
     'access content',
     'administer content types',
