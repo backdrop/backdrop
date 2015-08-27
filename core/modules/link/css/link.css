@@ -10,3 +10,11 @@
 .link-field-column .form-text {
   width: 95%;
 }
+@media only screen and (max-width: 500px) {
+  .link-field-column {
+    width: auto;
+  }
+  .link-field-column .form-text {
+    width: 100%;
+  }
+}

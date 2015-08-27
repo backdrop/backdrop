@@ -49,7 +49,7 @@ class LinkValidateTest extends LinkBaseTestClass {
     $this->validateUrl('http://www.example.com');
     $this->validateUrl('<front>');
     $this->validateUrl('node/32');
-    $this->validateUrl('mailto:jcfiala@gmail.com');
+    $this->validateUrl('mailto:john@example.com');
     $this->validateUrl('https://www.example.com/');
     $this->validateUrl('ftp://www.example.com/');
     $this->validateUrl('http://üÜü.exämple.com/nöde');

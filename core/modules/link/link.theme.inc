@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * Theme functions and preprocessing for Link module output.
  */
 
@@ -7,7 +8,6 @@
  * Formats a link field widget.
  */
 function theme_link_field($vars) {
-  backdrop_add_css(backdrop_get_path('module', 'link') . '/css/link.css');
   $element = $vars['element'];
   // Prefix single value link fields with the name of the field.
   if (empty($element['#field']['multiple'])) {
@@ -17,7 +17,7 @@ function theme_link_field($vars) {
   }
 
   $output = '';
-  $output .= '<div class="link-field-subrow clearfix">';
+  $output .= '<div class="link-field-subrow">';
   if (isset($element['title'])) {
     $output .= '<div class="link-field-title link-field-column">' . backdrop_render($element['title']) . '</div>';
   }

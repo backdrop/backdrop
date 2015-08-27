@@ -44,9 +44,6 @@ function link_field_info() {
       ),
       'default_widget' => 'link_field',
       'default_formatter' => 'link_default',
-      // Support hook_entity_property_info() from contrib "Entity API".
-      'property_type' => 'field_item_link',
-      'property_callbacks' => array('link_field_property_info_callback'),
     ),
   );
 }
@@ -107,9 +104,9 @@ function link_field_instance_settings_form($field, $instance) {
 
   $form['title_label_use_field_label'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use field label as the label for the title field'),
+    '#title' => t('Use field label for title label'),
     '#default_value' => $instance['settings']['title_label_use_field_label'],
-    '#description' => t('If this is checked the field label will be hidden.'),
+    '#description' => t('If checked, hides the label on the group of elements and instead uses the field label on the title element.'),
     '#states' => array(
       'visible' => array(
         ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
@@ -126,12 +123,11 @@ function link_field_instance_settings_form($field, $instance) {
     '#size' => 3,
   );
 
-  // Add token module replacements fields.
   $form['enable_tokens'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow user-entered tokens'),
     '#default_value' => $instance['settings']['enable_tokens'],
-    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the entity edit form. This does not affect the field settings on this page.'),
+    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
   );
 
   $form['advanced'] = array(
@@ -155,9 +151,6 @@ function link_field_instance_settings_form($field, $instance) {
     LINK_TARGET_TOP => t('Open link in window root'),
     LINK_TARGET_NEW_WINDOW => t('Open link in new window'),
     LINK_TARGET_USER => t('Allow the user to choose'),
-  );
-  $form['attributes'] = array(
-    '#tree' => TRUE,
   );
   $form['advanced']['attributes']['target'] = array(
     '#type' => 'radios',
@@ -262,13 +255,23 @@ function link_field_load($entity_type, $entities, $field, $instances, $langcode,
  * Implements hook_field_validate().
  */
 function link_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
-  $optional_field_found = FALSE;
-  if ($instance['settings']['validate_url'] !== 0 || is_null($instance['settings']['validate_url']) || !isset($instance['settings']['validate_url'])) {
-    foreach ($items as $delta => $value) {
-      _link_validate($items[$delta], $delta, $field, $entity, $instance, $langcode, $optional_field_found, $errors);
-    }
+  // When setting a default value on the field instance settings form, $entity
+  // will be NULL. Do not validate the default provided values, which allows
+  // for default titles to be provided but not a URL (or vice-versa). Invalid
+  // or partial URLs are also acceptable for default values.
+  if (is_null($entity)) {
+    return;
   }
 
+  // Validate each field individually. Populate the $optional_field_found
+  // variable if any "required" values have been provided.
+  $optional_field_found = FALSE;
+  foreach ($items as $delta => $value) {
+    _link_validate($items[$delta], $delta, $field, $entity, $instance, $langcode, $optional_field_found, $errors);
+  }
+
+  // If no values were provided across all values but the field itself is
+  // required, throw a validation error on the first field.
   if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && $instance['required'] && !$optional_field_found) {
     $errors[$field['field_name']][$langcode][0][] = array(
       'error' => 'link_required',
@@ -392,15 +395,18 @@ function _link_process(&$item, $delta, $field, $entity) {
 function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &$optional_field_found, &$errors) {
   if ($item['url'] && !(isset($instance['default_value'][$delta]['url']) && $item['url'] === $instance['default_value'][$delta]['url'] && !$instance['required'])) {
     // Validate the link.
-    if (link_validate_url(trim($item['url'])) == FALSE) {
-      $errors[$field['field_name']][$langcode][$delta][] = array(
-        'error' => 'link_required',
-        'message' => t('The value %value provided for %field is not a valid URL.', array(
-          '%value' => trim($item['url']),
-          '%field' => $instance['label'],
-        )),
-        'error_element' => array('url' => TRUE, 'title' => FALSE),
-      );
+    if ($instance['settings']['validate_url']) {
+      $url_valid = link_validate_url(trim($item['url']));
+      if ($url_valid === FALSE) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'link_required',
+          'message' => t('The value %value provided for %field is not a valid URL.', array(
+            '%value' => trim($item['url']),
+            '%field' => $instance['label'],
+          )),
+          'error_element' => array('url' => TRUE, 'title' => FALSE),
+        );
+      }
     }
     // Require a title for the link if necessary.
     if ($instance['settings']['title'] == 'required' && strlen(trim($item['title'])) == 0) {
@@ -419,11 +425,13 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
       'error_element' => array('url' => TRUE, 'title' => FALSE),
     );
   }
-  // In a totally bizzaro case, where URLs and titles are optional but the field is required, ensure there is at least one link.
-  if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional'
-      && (strlen(trim($item['url'])) !== 0 || strlen(trim($item['title'])) !== 0)) {
+
+  // In a totally bizzaro case, where URLs and titles are optional but the field
+  // is required, ensure there is at least one link.
+  if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && (strlen(trim($item['url'])) !== 0 || strlen(trim($item['title'])) !== 0)) {
     $optional_field_found = TRUE;
   }
+
   // Require entire field.
   if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && $instance['required'] == 1 && !$optional_field_found && isset($instance['id'])) {
     $errors[$field['field_name']][$langcode][$delta][] = array(
@@ -792,6 +800,9 @@ function _link_default_attributes() {
 function link_field_process($element, $form_state, $complete_form) {
   $instance = field_widget_instance($element, $form_state);
   $settings = $instance['settings'];
+
+  $element['#attached']['css'][] = backdrop_get_path('module', 'link') . '/css/link.css';
+
   $element['url'] = array(
     '#type' => 'textfield',
     '#maxlength' => LINK_URL_MAX_LENGTH,
