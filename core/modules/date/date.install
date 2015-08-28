@@ -1,0 +1,120 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Date module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function date_field_schema($field) {
+  $db_columns = array();
+  switch ($field['type']) {
+    case 'datestamp':
+      $db_columns['value'] = array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
+      );
+      break;
+
+    case 'datetime':
+      $db_columns['value'] = array(
+        'type' => 'datetime',
+        'mysql_type' => 'datetime',
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
+      );
+      break;
+
+    default:
+      $db_columns['value'] = array(
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
+      );
+      break;
+  }
+
+  // If a second date is needed for 'End date', make a copy of the first one.
+  if (!empty($field['settings']['todate'])) {
+    $db_columns['value2'] = $db_columns['value'];
+
+    // We don't want Field API to create additional columns, just the first.
+    // We modify them our own way in views data.
+    $db_columns['value2']['views'] = FALSE;
+  }
+  // Timezone and offset columns are used only if date-specific dates are used.
+  if (isset($field['settings']['tz_handling']) && $field['settings']['tz_handling'] == 'date') {
+    $db_columns['timezone'] = array(
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => FALSE,
+      'sortable' => TRUE,
+      'views' => FALSE,
+    );
+    $db_columns['offset'] = array(
+      'type' => 'int',
+      'not null' => FALSE,
+      'sortable' => TRUE,
+      'views' => FALSE,
+    );
+    if (!empty($field['settings']['todate'])) {
+      $db_columns['offset2'] = array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'sortable' => TRUE,
+	    'views' => FALSE);
+    }
+  }
+  if (isset($field['settings']['repeat']) && $field['settings']['repeat'] == 1) {
+    $db_columns['rrule'] = array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'sortable' => FALSE,
+      'views' => FALSE,
+    );
+  }
+  return array('columns' => $db_columns);
+}
+
+/**
+ * Move date settings from variables to config.
+ */
+function date_update_1000() {
+  // Migrate selected variables to config.
+  // Use Backdrop core for date formats (system.date.settings)
+  // Also use settings in date_api.settings.json
+  $config = config('date.settings');
+  $config->set('_show_repeat_rule', update_variable_get('_show_repeat_rule', 'show'));
+  $config->set('_multiple_number', update_variable_get('_multiple_number', ''));
+  $config->set('_multiple_from', update_variable_get('_multiple_from', ''));
+  $config->set('_multiple_to', update_variable_get('_multiple_to', ''));
+  $config->set('_fromto', update_variable_get('_fromto', ''));
+  $config->set('install_task', update_variable_get('install_task', ''));
+  $config->set('date_popup_timepicker', update_variable_get('date_popup_timepicker', '$preferred_timepicker'));
+  $config->set('teaser_length', update_variable_get('teaser_length', '600'));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('_show_repeat_rule');
+  update_variable_del('_multiple_number');
+  update_variable_del('_multiple_from');
+  update_variable_del('_multiple_to');
+  update_variable_del('_fromto');
+  update_variable_del('install_task');
+  update_variable_del('date_popup_timepicker');
+  update_variable_del('teaser_length');
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function date_update_last_removed() {
+  return 7004;
+}

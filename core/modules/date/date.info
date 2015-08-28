@@ -1,0 +1,7 @@
+name = Date
+description = Makes date/time fields available.
+dependencies[] = date_api
+package = Date/Time
+backdrop = 1.x
+type = module
+php = 5.2

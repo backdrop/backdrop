@@ -1,0 +1,9 @@
+name = Date API
+description = A Date API that can be used by other modules.
+package = Date/Time
+backdrop = 1.x
+type = module
+php = 5.2
+
+stylesheets[all][] = date.css
+
