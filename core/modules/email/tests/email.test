@@ -3,8 +3,13 @@
  * Tests e-mail field functionality.
  */
 class EmailFieldTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $web_user;
+  protected $field;
+  protected $instance;
+
   function setUp() {
-    parent::setUp();
+    parent::setUp(array('field_test', 'email'));
 
     $this->web_user = $this->backdropCreateUser(array(
       'access field_test content',
@@ -40,14 +45,13 @@ class EmailFieldTestCase extends BackdropWebTestCase {
     field_create_instance($this->instance);
 
     // Display creation form.
-    $this->backdropGet('test-entity/add/test_bundle');
-    $langcode = LANGUAGE_NOT_SPECIFIED;
-    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget found.');
+    $this->backdropGet('test-entity/add/test-bundle');
+    $this->assertFieldByName("{$this->field['field_name']}[und][0][email]", '', 'Widget found.');
 
     // Submit a valid e-mail address and ensure it is accepted.
     $value = 'test@example.com';
     $edit = array(
-      "{$this->field['field_name']}[$langcode][0][value]" => $value,
+      "{$this->field['field_name']}[und][0][email]" => $value,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
@@ -58,7 +62,25 @@ class EmailFieldTestCase extends BackdropWebTestCase {
     // Verify that a mailto link is displayed.
     $entity = field_test_entity_test_load($id);
     $entity->content = field_attach_view('test_entity', $entity, 'full');
-    $this->backdropSetContent(backdrop_render($entity->content));
+    $rendered_content = backdrop_render($entity->content);
+    $this->backdropSetContent($rendered_content);
     $this->assertLinkByHref('mailto:test@example.com');
+
+    // Change the formatter to the raw version.
+    $this->instance['display'] = array(
+      'full' => array(
+        'label' => 'above',
+        'type' => 'email_plain',
+        'settings' => array()
+      ),
+    );
+    field_update_instance($this->instance);
+
+    // Verify that the raw version is displayed.
+    $entity->content = field_attach_view('test_entity', $entity, 'full');
+    $rendered_content = backdrop_render($entity->content);
+    $this->backdropSetContent($rendered_content);
+    $this->assertNoLinkByHref('mailto:test@example.com');
+    $this->assertText('test@example.com');
   }
 }

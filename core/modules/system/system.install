@@ -493,8 +493,8 @@ function system_requirements($phase) {
     }
   }
 
-  // Check for a duplicate CKEditor project.
   if ($phase == 'runtime') {
+    // Check for a duplicate CKEditor project.
     $path = backdrop_get_path('module', 'ckeditor');
     if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
       $requirements['ckeditor_replaced'] = array(
@@ -502,6 +502,17 @@ function system_requirements($phase) {
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
         'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Email project.
+    $path = backdrop_get_path('module', 'email');
+    if ($path && strpos($path, 'core/modules/email') === FALSE) {
+      $requirements['email_replaced'] = array(
+        'title' => $t('Email'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -2545,6 +2556,16 @@ function system_update_1040() {
   $path = backdrop_get_path('module', 'ckeditor');
   if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
     backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Email module is present.
+ */
+function system_update_1041() {
+  $path = backdrop_get_path('module', 'email');
+  if ($path && strpos($path, 'core/modules/email') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

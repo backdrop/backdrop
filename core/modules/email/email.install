@@ -18,3 +18,10 @@ function email_field_schema($field) {
     ),
   );
 }
+
+/**
+ * Remove the old email module configuration file.
+ */
+function email_update_1000() {
+  config('email.settings')->delete();
+}
