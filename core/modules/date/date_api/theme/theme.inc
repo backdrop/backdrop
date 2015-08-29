@@ -86,6 +86,7 @@ function theme_date_part_hour_prefix($variables) {
   if ($element['#date_label_position'] != 'above') {
     return '<span class="form-item date-spacer">&nbsp;-&nbsp;</span>';
   }
+  return '';
 }
 
 /**
@@ -96,6 +97,7 @@ function theme_date_part_minsec_prefix($variables) {
   if ($element['#date_label_position'] != 'above') {
     return '<span class="form-item date-spacer">:</span>';
   }
+  return '';
 }
 
 /**
@@ -168,7 +170,6 @@ function theme_date_part_label_time($variables) {
   return t('Time', array(), array('context' => 'datetime'));
 }
 
-
 /**
  * Returns HTML for a date block that looks like a mini calendar day.
  *
@@ -199,7 +200,7 @@ function theme_date_time_ago($variables) {
 
   // If no date is sent, then return nothing.
   if (empty($start_date) || empty($end_date)) {
-    return;
+    return '';
   }
 
   // Time to compare dates to.
@@ -231,6 +232,7 @@ function theme_date_time_ago($variables) {
 
     case 'time span':
       return t(($time_diff < 0 ? '%time hence' : '%time ago'), array('%time' => format_interval(abs($time_diff), $interval)));
-
   }
+
+  return '';
 }

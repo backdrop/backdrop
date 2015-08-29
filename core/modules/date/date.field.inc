@@ -126,25 +126,7 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
     'display' => $display,
     'dates' => array(),
     'attributes' => array(),
-    'rdf_mapping' => array(),
-    'add_rdf' => module_exists('rdf'),
-    'microdata' => array(),
-    'add_microdata' => module_exists('microdata'),
   );
-
-  // If the microdata module is enabled, the microdata mapping will have been
-  // passed in via the entity.
-  if ($variables['add_microdata'] && isset($entity->microdata[$field['field_name']])) {
-    $variables['microdata'] = $entity->microdata[$field['field_name']];
-  }
-
-  // If there is an RDf mapping for this date field, pass it down to the theme.
-  $rdf_mapping = array();
-  if (!empty($entity->rdf_mapping) && function_exists('rdf_rdfa_attributes')) {
-    if (!empty($entity->rdf_mapping[$field['field_name']])) {
-      $variables['rdf_mapping'] = $rdf_mapping = $entity->rdf_mapping[$field['field_name']];
-    }
-  }
 
   // Give other modules a chance to prepare the entity before formatting it.
   backdrop_alter('date_formatter_pre_view', $entity, $variables);
@@ -191,7 +173,7 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
           $variables['delta'] = $delta;
           $variables['item'] = $item;
           $variables['dates'] = date_formatter_process($formatter, $entity_type, $entity, $field, $instance, $langcode, $item, $display);
-          $variables['attributes'] = !empty($rdf_mapping) ? rdf_rdfa_attributes($rdf_mapping, $item['value']) : array();
+          $variables['attributes'] = array();
           $element[$delta] = array('#markup' => theme('date_display_interval', $variables));
         }
       }
@@ -206,7 +188,7 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
           $variables['delta'] = $delta;
           $variables['item'] = $item;
           $variables['dates'] = date_formatter_process($formatter, $entity_type, $entity, $field, $instance, $langcode, $item, $display);
-          $variables['attributes'] = !empty($rdf_mapping) ? rdf_rdfa_attributes($rdf_mapping, $item['value']) : array();
+          $variables['attributes'] = array();
           $variables['show_remaining_days'] = $display['settings']['show_remaining_days'];
           $output = theme('date_display_combination', $variables);
           if (!empty($output)) {
@@ -255,9 +237,6 @@ function date_field_info() {
       'default_value2' => 'same',
       'default_value_code2' => '',
     ),
-    // Integrate with the Entity Metadata module.
-    'property_type' => 'date',
-    'property_callbacks' => array('date_entity_metadata_property_info_alter'),
   );
   return array(
     'datetime' => array(
@@ -476,81 +455,4 @@ function date_field_widget_settings_form($field, $instance) {
 function date_field_settings_form($field, $instance, $has_data) {
   module_load_include('inc', 'date', 'date_admin');
   return _date_field_settings_form($field, $instance, $has_data);
-}
-
-/**
- * Implements hook_content_migrate_field_alter().
- *
- * Use this to tweak the conversion of field settings from the D6 style to the
- * D7 style for specific situations not handled by basic conversion, as when
- * field types or settings are changed.
- *
- * $field_value['widget_type'] is available to see what widget type was
- * originally used.
- */
-function date_content_migrate_field_alter(&$field_value, $instance_value) {
-  switch ($field_value['module']) {
-    case 'date':
-      // Those settings do not exist anymore, or have been moved to the instance
-      // level.
-      unset($field_value['settings']['default_format']);
-      unset($field_value['settings']['repeat_collapsed']);
-      break;
-  }
-}
-
-/**
- * Implements hook_content_migrate_instance_alter().
- *
- * Use this to tweak the conversion of instance or widget settings from the D6
- * style to the D7 style for specific situations not handled by basic
- * conversion, as when formatter or widget names or settings are changed.
- */
-function date_content_migrate_instance_alter(&$instance_value, $field_value) {
-  switch ($instance_value['widget']['module']) {
-    case 'date':
-
-      // Some settings have been moved from field to instance.
-      $instance_value['widget']['settings']['repeat_collapsed'] = $field_value['settings']['repeat_collapsed'];
-
-      // Some settings were moved from widget settings to instance settings.
-      $instance_value['settings']['default_value'] = $instance_value['default_value'];
-      unset($instance_value['default_value']);
-      $instance_value['settings']['default_value_code'] = $instance_value['widget']['settings']['default_value_code'];
-      unset($instance_value['widget']['settings']['default_value_code']);
-      $instance_value['settings']['default_value2'] = $instance_value['widget']['settings']['default_value2'];
-      unset($instance_value['widget']['settings']['default_value2']);
-      $instance_value['settings']['default_value_code2'] = $instance_value['widget']['settings']['default_value_code2'];
-      unset($instance_value['widget']['settings']['default_value_code2']);
-
-      // We need to retrieve formatter settings from the variables and store
-      // them in the instance.
-      foreach ($instance_value['display'] as $context => &$display) {
-        if ($display['type'] != 'format_interval') {
-          $old_settings = date_old_formatter_get_settings($instance_value['field_name'], $instance_value['bundle'], $context);
-          $display['settings'] = array_merge($display['settings'], $old_settings);
-          // If the formatter was the 'default', then use the old
-          // 'default_format' field property.
-          $format = ($display['type'] == 'default') ? $field_value['settings']['default_format'] : $display['type'];
-          $display['settings']['format_type'] = $format;
-          $display['type'] = 'date_default';
-        }
-      }
-
-      break;
-  }
-}
-
-/**
- * Constructs an array of old formatter settings.
- */
-function date_old_formatter_get_settings($field_name, $type_name, $context) {
-  $options = array();
-  $value = 'date:' . $type_name . ':' . $context . ':' . $field_name;
-  $options['show_repeat_rule'] = config_get('date.settings','show_repeat_rule');
-  $options['multiple_number'] = config_get('date.settings','multiple_number');
-  $options['multiple_from'] = config_get('date.settings','multiple_from');
-  $options['multiple_to'] = config_get('date.settings','multiple_to');
-  $options['fromto'] = config_get('date.settings','fromto');
-  return $options;
 }

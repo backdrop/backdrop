@@ -33,27 +33,11 @@
  */
 function date_views_views_plugins() {
   $path = backdrop_get_path('module', 'date_views');
-  $views_path = backdrop_get_path('module', 'views');
   module_load_include('inc', 'date_views', 'theme/theme');
 
   return array(
     // This just tells our themes are elsewhere.
     'module' => 'date_views',
-    'display' => array(
-      // Display plugin for date navigation.
-      'date_nav' => array(
-        'title' => t('Date browser'),
-        'help' => t('Date back/next navigation to attach to other displays. Requires the Date argument.'),
-        'handler' => 'date_plugin_display_attachment',
-        'parent' => 'attachment',
-        'path' => "$path/includes",
-        'theme' => 'views_view',
-        'use ajax' => TRUE,
-        'admin' => t('Date browser'),
-        'help topic' => 'date-browser',
-      ),
-    ),
-
     'style' => array(
       'date_nav' => array(
         'title' => t('Date browser style'),
@@ -198,4 +182,48 @@ function date_views_querystring($view, $extra_params = array()) {
   // To prevent an empty query string from adding a "?" on to the end of a URL,
   // we return NULL.
   return !empty($query) ? $query : NULL;
+}
+
+/**
+ * Helper function to map entity types to the Views base table they use, to make
+ * it easier to infer the entity type from a base table.
+ *
+ * Views has a new handler called views_handler_field_entity() that loads
+ * entities.
+ *
+ * And you can use something like the following to get the entity type from a
+ * view, but not all our base tables contain the entity information we need,
+ * (i.e. revisions).
+ *
+ * So it won't work here and we resort to creating information from
+ * entity_get_info().
+ *
+ *   // A method to get the entity type for a base table.
+ *   $table_data = views_fetch_data($base_table);
+ *   if (!isset($table_data['table']['base']['entity type'])) {
+ *     return FALSE;
+ *   }
+ *   $entity_type = $table_data['table']['base']['entity type'];
+ */
+function date_views_base_tables() {
+  $base_tables = &backdrop_static(__FILE__, array());
+
+  if (empty($base_tables)) {
+
+    // First we get the base tables we can learn about from entity_info.
+    $entity_info = entity_get_info();
+    foreach ($entity_info as $entity_type => $info) {
+      if (!empty($info['base table'])) {
+        $base_tables[$info['base table']] = $entity_type;
+      }
+      if (!empty($info['revision table'])) {
+        $base_tables[$info['revision table']] = $entity_type;
+      }
+    }
+
+    // Then we let other modules tell us about other entity tables that hold date fields.
+    $base_tables += module_invoke_all('date_views_extra_tables');
+  }
+
+  return $base_tables;
 }

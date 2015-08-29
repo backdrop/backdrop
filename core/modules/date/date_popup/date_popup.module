@@ -218,7 +218,6 @@ function date_popup_time_format($element) {
 /**
  * Element value callback for date_popup element.
  */
-// @codingStandardsIgnoreStart
 function date_popup_element_value_callback($element, $input = FALSE, &$form_state) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
@@ -246,7 +245,6 @@ function date_popup_element_value_callback($element, $input = FALSE, &$form_stat
   return $return;
 
 }
-// @codingStandardsIgnoreEnd
 
 /**
  * Javascript popup element processing.
@@ -373,7 +371,7 @@ function date_popup_process_date_part(&$element) {
   $sub_element['#value'] = $sub_element['#default_value'];
   // TODO, figure out exactly when we want this description.
   // In many places it is not desired.
-  $sub_element['#description'] = ' ' . t('E.g., @date ['.date_popup_date_format($element).']', array(
+  $sub_element['#description'] = ' ' . t('e.g. @date', array(
       '@date' => date_format_date(
         date_example_date(),
         'custom',
@@ -457,7 +455,7 @@ function date_popup_process_time_part(&$element) {
   // In many places it is not desired.
   $example_date = date_now();
   date_increment_round($example_date, $element['#date_increment']);
-  $sub_element['#description'] = t('E.g.,  @date ['.date_popup_time_format($element).']', array(
+  $sub_element['#description'] = t('e.g. @date', array(
     '@date' => date_format_date(
       $example_date,
       'custom',

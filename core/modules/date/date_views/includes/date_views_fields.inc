@@ -9,6 +9,7 @@
  *
  * @return array
  *   An array with fieldname, type, and table.
+ *
  * @see date_views_date_views_fields()
  */
 function _date_views_fields($base = 'node') {
@@ -56,7 +57,6 @@ function _date_views_fields($base = 'node') {
       continue;
     }
     $handler = views_get_handler($table_name, $field_name, 'filter');
-    $handler_name = $handler->definition['handler'];
 
     // We don't care about anything but date handlers.
     if (empty($handler->definition['is date'])) {
@@ -158,8 +158,8 @@ function _date_views_fields($base = 'node') {
 
       // Allow the custom fields to over-write values.
       if (!empty($custom)) {
-        foreach ($custom as $key => $val) {
-          $fields['name'][$name][$key] = $val;
+        foreach ($custom as $custom_key => $custom_val) {
+          $fields['name'][$name][$custom_key] = $custom_val;
         }
       }
       $fields['name'][$name]['real_field_name'] = $field_name;

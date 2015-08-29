@@ -72,10 +72,6 @@ function theme_date_display_combination($variables) {
   $options     = $display['settings'];
   $dates       = $variables['dates'];
   $attributes  = $variables['attributes'];
-  $rdf_mapping = $variables['rdf_mapping'];
-  $add_rdf     = $variables['add_rdf'];
-  $microdata   = $variables['microdata'];
-  $add_microdata = $variables['add_microdata'];
   $precision   = date_granularity_precision($field['settings']['granularity']);
   $show_remaining_days = $variables['show_remaining_days'];
 
@@ -179,10 +175,6 @@ function theme_date_display_combination($variables) {
       'date' => $date1,
       'timezone' => $timezone,
       'attributes' => $attributes,
-      'rdf_mapping' => $rdf_mapping,
-      'add_rdf' => $add_rdf,
-      'microdata' => $microdata,
-      'add_microdata' => $add_microdata,
       'dates' => $dates,
       'show_remaining_days' => $show_remaining_days,
     ));
@@ -199,10 +191,6 @@ function theme_date_display_combination($variables) {
       'date2' => $time2,
       'timezone' => $timezone,
       'attributes' => $attributes,
-      'rdf_mapping' => $rdf_mapping,
-      'add_rdf' => $add_rdf,
-      'microdata' => $microdata,
-      'add_microdata' => $add_microdata,
       'dates' => $dates,
       'show_remaining_days' => $show_remaining_days,
     ));
@@ -211,8 +199,6 @@ function theme_date_display_combination($variables) {
       'date' => $replaced,
       'timezone' => $timezone,
       'attributes' => array(),
-      'rdf_mapping' => array(),
-      'add_rdf' => FALSE,
       'dates' => $dates,
     ));
   }
@@ -223,51 +209,12 @@ function theme_date_display_combination($variables) {
       'date2' => $date2,
       'timezone' => $timezone,
       'attributes' => $attributes,
-      'rdf_mapping' => $rdf_mapping,
-      'add_rdf' => $add_rdf,
-      'microdata' => $microdata,
-      'add_microdata' => $add_microdata,
       'dates' => $dates,
       'show_remaining_days' => $show_remaining_days,
     ));
   }
 
   return $output;
-}
-
-/**
- * Template preprocess function for displaying a single date.
- */
-function template_preprocess_date_display_single(&$variables) {
-  if ($variables['add_rdf'] || !empty($variables['add_microdata'])) {
-    // Pass along the rdf mapping for this field, if any. Add some default rdf
-    // attributes that will be used if not overridden by attributes passed in.
-    $rdf_mapping = $variables['rdf_mapping'];
-    $base_attributes = array(
-      'property' => array('dc:date'),
-      'datatype' => 'xsd:dateTime',
-      'content' => $variables['dates']['value']['formatted_iso'],
-    );
-    $variables['attributes'] = $variables['attributes'] + $base_attributes;
-  }
-
-  // Pass along microdata attributes, or set display to false if none are set.
-  if (!empty($variables['add_microdata'])) {
-    // Because the Entity API integration for Date has a variable data
-    // structure depending on whether there is an end value, the attributes
-    // could be attached to the field or to the value property.
-    if (!empty($variables['microdata']['#attributes']['itemprop'])) {
-      $variables['microdata']['value']['#attributes'] = $variables['microdata']['#attributes'];
-    }
-
-    // Add the machine readable time using the content attribute.
-    if (!empty($variables['microdata']['value']['#attributes'])) {
-      $variables['microdata']['value']['#attributes']['content'] = $variables['dates']['value']['formatted_iso'];
-    }
-    else {
-      $variables['add_microdata'] = FALSE;
-    }
-  }
 }
 
 /**
@@ -287,49 +234,8 @@ function theme_date_display_single($variables) {
   // Wrap the result with the attributes.
   $output = '<span class="date-display-single"' . backdrop_attributes($attributes) . '>' . $date . $timezone . '</span>';
 
-  if (!empty($variables['add_microdata'])) {
-    $output .= '<meta' . backdrop_attributes($variables['microdata']['value']['#attributes']) . '/>';
-  }
-
   // Add remaining message and return.
   return $output . $show_remaining_days;
-}
-
-/**
- * Template preprocess function for displaying a range of dates.
- */
-function template_preprocess_date_display_range(&$variables) {
-  // Merge in the shared attributes for themes to use.
-  $variables['attributes_start'] += $variables['attributes'];
-  $variables['attributes_end'] += $variables['attributes'];
-
-  if ($variables['add_rdf']) {
-    // Pass along the rdf mapping for this field, if any. Add some default rdf
-    // attributes that will be used if not overridden by attributes passed in.
-    $dates = $variables['dates'];
-    $base_attributes = array(
-      'property' => array('dc:date'),
-      'datatype' => 'xsd:dateTime',
-      'content' => $dates['value']['formatted_iso'],
-    );
-    $variables['attributes_start'] += $base_attributes;
-    $variables['attributes_end'] += $base_attributes;
-    $variables['attributes_end']['content'] = $dates['value2']['formatted_iso'];
-    foreach ($variables['attributes_end']['property'] as $delta => $property) {
-      $variables['attributes_end']['property'][$delta] = str_replace('start', 'end', $property);
-    }
-  }
-
-  // Pass along microdata attributes, or set display to false if none are set.
-  if ($variables['add_microdata']) {
-    if (!empty($variables['microdata']['value']['#attributes'])) {
-      $variables['microdata']['value']['#attributes']['content'] = $variables['dates']['value']['formatted_iso'];
-      $variables['microdata']['value2']['#attributes']['content'] = $variables['dates']['value2']['formatted_iso'];
-    }
-    else {
-      $variables['add_microdata'] = FALSE;
-    }
-  }
 }
 
 /**
@@ -345,13 +251,6 @@ function theme_date_display_range($variables) {
 
   $start_date = '<span class="date-display-start"' . backdrop_attributes($attributes_start) . '>' . $date1 . '</span>';
   $end_date = '<span class="date-display-end"' . backdrop_attributes($attributes_end) . '>' . $date2 . $timezone . '</span>';
-
-  // If microdata attributes for the start date property have been passed in,
-  // add the microdata in meta tags.
-  if (!empty($variables['add_microdata'])) {
-    $start_date .= '<meta' . backdrop_attributes($variables['microdata']['value']['#attributes']) . '/>';
-    $end_date .= '<meta' . backdrop_attributes($variables['microdata']['value2']['#attributes']) . '/>';
-  }
 
   // Wrap the result with the attributes.
   $output = '<div class="date-display-range">' . t('!start-date to !end-date', array(

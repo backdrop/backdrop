@@ -37,8 +37,6 @@ function hook_date_default_argument_alter(&$argument, &$value) {
  *   - display: The $display array.
  *   - dates: The processed dates array, empty at this point.
  *   - attributes: The attributes array, empty at this point.
- *   - rdf_mapping: The RDF mapping array.
- *   - add_rdf: If module_exists('rdf').
  */
 function hook_date_formatter_pre_view_alter(&$entity, &$variables) {
   if (!empty($entity->view)) {

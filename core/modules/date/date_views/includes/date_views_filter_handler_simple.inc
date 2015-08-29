@@ -4,11 +4,26 @@
  * A standard Views filter for a single date field,
  * using Date API form selectors and sql handling.
  */
-
-// @codingStandardsIgnoreStart
 class date_views_filter_handler_simple extends views_handler_filter_date {
-  var $date_handler = NULL;
-  var $offset = NULL;
+  /**
+   * @var date_sql_handler
+   */
+  protected $date_handler = NULL;
+
+  /**
+   * @var string
+   */
+  protected $format;
+
+  /**
+   * @var string
+   */
+  protected $base_table;
+
+  /**
+   * @var views_plugin_query_default
+   */
+  var $query;
 
   function init(&$view, &$options) {
     parent::init($view, $options);
@@ -22,14 +37,12 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       $this->date_handler->db_timezone = date_get_timezone_db($field['settings']['tz_handling']);
       $this->date_handler->local_timezone = date_get_timezone($field['settings']['tz_handling']);
     }
-    $this->form_submitted = FALSE;
     $this->date_handler->granularity = isset($options['granularity']) ? $options['granularity'] : 'day';
     $this->format = $this->date_handler->views_formats($this->options['granularity'], 'sql');
 
     // Identify the base table for this field.
     // It will be used to call for the right query field options.
     $this->base_table = $this->table;
-
   }
 
   // Set default values for the date filter.
@@ -59,7 +72,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    * Helper function to find a default value.
    */
   function date_default_value($prefix, $options = NULL) {
-    $default_date = '';
     if (empty($options)) {
       $options = $this->options;
     }
@@ -326,10 +338,10 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    *   Which element to provide, 'all', 'value', or 'minmax' .
    * @param array $operator_values
    *   An array of the allowed operators for this element.
-   * @param array $identifier
+   * @param string $identifier
    *   Identifier of the exposed element.
-   * @param array $relative_id
-   *   Form element id to use for the relative date field.
+   * @param string $relative_id
+   *   Form element ID to use for the relative date field.
    *
    * @return
    *   The form date part element for this instance.
@@ -377,9 +389,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#suffix' => '</div></div>',
       );
       if ($which == 'all') {
-		$form[$prefix]['#states']['visible'][] = array(
-		  $source => array('value' => $operator_values)
-		);
+        $form[$prefix]['#states']['visible'][] = array(
+          $source => array('value' => $operator_values)
+        );
       }
       if (!isset($form_state['input'][$identifier][$prefix])) {
         // Ensure these exist.
@@ -424,7 +436,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#type' => 'textfield',
         '#title' => check_plain($relative_label),
         '#default_value' => $relative_value,
-        '#description' => t("Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href=\"@relative_format\">More examples of relative date formats in the PHP documentation</a>.", array('@relative_format' => 'http://www.php.net/manual/en/datetime.formats.relative.php')),
+        '#description' => t('Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href="http://php.net/manual/en/datetime.formats.relative.php">More examples of relative date formats in the PHP documentation</a>.'),
         '#states' => array(
           'visible' => array(
             ":input.{$prefix}-choose-input-type" => array('value' => 'relative'),
@@ -537,4 +549,3 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
   }
 
 }
-// @codingStandardsIgnoreEnd

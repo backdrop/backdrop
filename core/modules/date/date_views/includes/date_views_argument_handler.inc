@@ -10,25 +10,7 @@
 /**
  * Date API argument handler.
  */
-// @codingStandardsIgnoreStart
 class date_views_argument_handler extends date_views_argument_handler_simple {
-
-  /**
-   * Get granularity and use it to create the formula and a format
-   * for the results.
-   */
-  function init(&$view, &$options) {
-    parent::init($view, $options);
-
-    if (empty($this->view->date_info)) {
-      $this->view->date_info = new stdClass();
-    }
-    if (empty($this->view->date_info->date_fields)) {
-      $this->view->date_info->date_fields = array();
-    }
-    $this->view->date_info->date_fields = array_merge($this->view->date_info->date_fields, $this->options['date_fields']);
-  }
-
   /**
    * Default value for the date_fields option.
    */
@@ -126,10 +108,8 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
     // There is no easy way to do summary queries on multiple fields, so remove that option.
     unset($defaults['summary']);
 
-    if ($which) {
-      if (!empty($defaults[$which])) {
-        return $defaults[$which];
-      }
+    if ($which && !empty($defaults[$which])) {
+      return $defaults[$which];
     }
     else {
       return $defaults;
@@ -148,17 +128,15 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
     if ($this->date_forbid()) {
       return;
     }
-    $this->get_query_fields();
+    $query_field = $this->get_query_fields();
     $this->query->set_where_group($this->options['date_method'], $this->options['date_group']);
     $this->granularity = $this->date_handler->arg_granularity($this->argument);
-    $format = $this->date_handler->views_formats($this->granularity, 'sql');
-
     $this->placeholders = array();
 
-    if (!empty($this->query_fields)) {
+    if (!empty($query_field)) {
       // Use set_where_group() with the selected date_method
       // of 'AND' or 'OR' to create the where clause.
-      foreach ($this->query_fields as $count => $query_field) {
+      foreach ($query_field as $count => $query_field) {
         $field = $query_field['field'];
         $this->date_handler = $query_field['date_handler'];
         $this->field = $field['field_name'];
@@ -186,7 +164,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
   function get_query_fields() {
     $fields = date_views_fields($this->base_table);
     $fields = $fields['name'];
-    $this->query_fields = array();
+    $query_field = array();
     foreach ($this->options['date_fields'] as $delta => $name) {
       if (array_key_exists($name, $fields) && $field = $fields[$name]) {
         $date_handler = new date_sql_handler($field['sql_type'], date_default_timezone());
@@ -194,10 +172,9 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
         $date_handler->db_timezone = date_get_timezone_db($field['tz_handling']);
         $date_handler->local_timezone = date_get_timezone($field['tz_handling']);
         date_views_set_timezone($date_handler, $this, $field);
-        $this->query_fields[] = array('field' => $field, 'date_handler' => $date_handler);
+        $query_field[] = array('field' => $field, 'date_handler' => $date_handler);
       }
     }
   }
 
 }
-// @codingStandardsIgnoreEnd

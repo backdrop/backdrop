@@ -1,72 +1,8 @@
 <?php
-
 /**
  * @file
  * SQL helper for Date API.
- *
- * @TODO
- * Add experimental support for sqlite: http://www.sqlite.org/lang_datefunc.html
- * and Oracle (http://psoug.org/reference/date_func.html and
- * http://psoug.org/reference/datatypes.html) date/time functions.
  */
-
-/**
- * A helper function to do cross-database concatation of date parts.
- *
- * @param array $array
- *   An array of values to be concatonated in sql.
- *
- * @return string
- *   Correct sql string for database type.
- */
-function date_sql_concat($array) {
-  switch (Database::getConnection()->databaseType()) {
-    case 'mysql':
-      return "CONCAT(" . implode(",", $array) . ")";
-
-    case 'pgsql':
-      return implode(" || ", $array);
-  }
-}
-
-/**
- * Helper function to do cross-database NULL replacements.
- *
- * @param array $array
- *   An array of values to test for NULL values.
- *
- * @return string
- *   SQL statement to return the first non-NULL value in the list.
- */
-function date_sql_coalesce($array) {
-  switch (Database::getConnection()->databaseType()) {
-    case 'mysql':
-    case 'pgsql':
-      return "COALESCE(" . implode(',', $array) . ")";
-  }
-}
-
-/**
- * A helper function to do cross-database padding of date parts.
- *
- * @param string $str
- *   A string to apply padding to
- * @param int $size
- *   The size the final string should be
- * @param string $pad
- *   The value to pad the string with
- * @param string $side
- *   The side of the string to pad
- */
-function date_sql_pad($str, $size = 2, $pad = '0', $side = 'l') {
-  switch ($side) {
-    case 'r':
-      return "RPAD($str, $size, '$pad')";
-
-    default:
-      return "LPAD($str, $size, '$pad')";
-  }
-}
 
 /**
  * A class to manipulate date SQL.
@@ -85,6 +21,12 @@ class date_sql_handler {
   var $local_timezone_field = NULL;
   // Use if the offset is stored in a field.
   var $offset_field = NULL;
+
+  /**
+   * @var string
+   * The granularity of the adjustment. Values: SECOND, MINUTE, DAY, HOUR.
+   */
+  var $granularity;
 
   /**
    * The object constuctor.
@@ -199,64 +141,17 @@ class date_sql_handler {
       $this->local_timezone = 'UTC';
       return $this->sql_offset('NOW()', $offset);
     }
-    switch ($this->db_type) {
-      case 'mysql':
-        switch ($this->date_type) {
-          case DATE_UNIX:
-            $field = "FROM_UNIXTIME($field)";
-            break;
-
-          case DATE_ISO:
-            $field = "STR_TO_DATE($field, '%Y-%m-%dT%T')";
-            break;
-
-          case DATE_DATETIME:
-            break;
-        }
+    switch ($this->date_type) {
+      case DATE_UNIX:
+        $field = "FROM_UNIXTIME($field)";
         break;
 
-      case 'pgsql':
-        switch ($this->date_type) {
-          case DATE_UNIX:
-            $field = "$field::ABSTIME";
-            break;
-
-          case DATE_ISO:
-            $field = "TO_DATE($field, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS')";
-            break;
-
-          case DATE_DATETIME:
-            break;
-        }
+      case DATE_ISO:
+        $field = "STR_TO_DATE($field, '%Y-%m-%dT%T')";
         break;
 
-      case 'sqlite':
-        switch ($this->date_type) {
-          case DATE_UNIX:
-            $field = "datetime($field, 'unixepoch')";
-            break;
-
-          case DATE_ISO:
-          case DATE_DATETIME:
-            $field = "datetime($field)";
-            break;
-        }
+      case DATE_DATETIME:
         break;
-
-      case 'sqlsrv':
-        switch ($this->date_type) {
-          case DATE_UNIX:
-            $field = "DATEADD(s, $field, '19700101 00:00:00:000')";
-            break;
-
-          case DATE_ISO:
-          case DATE_DATETIME:
-            $field = "CAST($field as smalldatetime)";
-            break;
-        }
-        break;
-
-      break;
     }
     // Adjust the resulting value to the right timezone/offset.
     return $this->sql_tz($field, $offset, $comp_date);
@@ -267,19 +162,7 @@ class date_sql_handler {
    */
   function sql_offset($field, $offset = NULL) {
     if (!empty($offset)) {
-      switch ($this->db_type) {
-        case 'mysql':
-          return "ADDTIME($field, SEC_TO_TIME($offset))";
-
-        case 'pgsql':
-          return "($field + INTERVAL '$offset SECONDS')";
-
-        case 'sqlite':
-          return "datetime($field, '$offset seconds')";
-
-        case 'sqlsrv':
-          return "DATEADD(second, $offset, $field)";
-      }
+      return "ADDTIME($field, SEC_TO_TIME($offset))";
     }
     return $field;
   }
@@ -299,34 +182,12 @@ class date_sql_handler {
    */
   function sql_date_math($field, $direction, $count, $granularity) {
     $granularity = strtoupper($granularity);
-    switch ($this->db_type) {
-      case 'mysql':
-        switch ($direction) {
-          case 'ADD':
-            return "DATE_ADD($field, INTERVAL $count $granularity)";
+    switch ($direction) {
+      case 'ADD':
+        return "DATE_ADD($field, INTERVAL $count $granularity)";
 
-          case 'SUB':
-            return "DATE_SUB($field, INTERVAL $count $granularity)";
-        }
-
-      case 'pgsql':
-        $granularity .= 'S';
-        switch ($direction) {
-          case 'ADD':
-            return "($field + INTERVAL '$count $granularity')";
-
-          case 'SUB':
-            return "($field - INTERVAL '$count $granularity')";
-        }
-      case 'sqlite':
-        $granularity .= 'S';
-        switch ($direction) {
-          case 'ADD':
-            return "datetime($field, '+$count $granularity')";
-
-          case 'SUB':
-            return "datetime($field, '-$count $granularity')";
-        }
+      case 'SUB':
+        return "DATE_SUB($field, INTERVAL $count $granularity)";
     }
     return $field;
   }
@@ -371,15 +232,7 @@ class date_sql_handler {
     }
     // Otherwise make a database timezone adjustment to the field.
     else {
-      switch ($this->db_type) {
-        case 'mysql':
-          return "CONVERT_TZ($field, $db_zone, $localzone)";
-
-        case 'pgsql':
-          // WITH TIME ZONE assumes the date is using the system
-          // timezone, which should have been set to UTC.
-          return "$field::timestamp with time zone AT TIME ZONE $localzone";
-      }
+      return "CONVERT_TZ($field, $db_zone, $localzone)";
     }
   }
 
@@ -395,146 +248,27 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_format($format, $field) {
-    switch ($this->db_type) {
-      case 'mysql':
-        $replace = array(
-          'Y' => '%Y',
-          'y' => '%y',
-          'M' => '%b',
-          'm' => '%m',
-          'n' => '%c',
-          'F' => '%M',
-          'D' => '%a',
-          'd' => '%d',
-          'l' => '%W',
-          'j' => '%e',
-          'W' => '%v',
-          'H' => '%H',
-          'h' => '%h',
-          'i' => '%i',
-          's' => '%s',
-          'A' => '%p',
-          '\WW' => 'W%U',
-        );
-        $format = strtr($format, $replace);
-        return "DATE_FORMAT($field, '$format')";
-
-      case 'pgsql':
-        $replace = array(
-          'Y' => 'YYYY',
-          'y' => 'YY',
-          'M' => 'Mon',
-          'm' => 'MM',
-          // No format for Numeric representation of a month, without leading
-          // zeros.
-          'n' => 'MM',
-          'F' => 'Month',
-          'D' => 'Dy',
-          'd' => 'DD',
-          'l' => 'Day',
-          // No format for Day of the month without leading zeros.
-          'j' => 'DD',
-          'W' => 'WW',
-          'H' => 'HH24',
-          'h' => 'HH12',
-          'i' => 'MI',
-          's' => 'SS',
-          'A' => 'AM',
-          '\T' => '"T"',
-          // '\W' => // TODO, what should this be?
-        );
-        $format = strtr($format, $replace);
-        return "TO_CHAR($field, '$format')";
-
-      case 'sqlite':
-        $replace = array(
-          // 4 digit year number.
-          'Y' => '%Y',
-          // No format for 2 digit year number.
-          'y' => '%Y',
-          // No format for 3 letter month name.
-          'M' => '%m',
-          // Month number with leading zeros.
-          'm' => '%m',
-          // No format for month number without leading zeros.
-          'n' => '%m',
-          // No format for full month name.
-          'F' => '%m',
-          // No format for 3 letter day name.
-          'D' => '%d',
-          // Day of month number with leading zeros.
-          'd' => '%d',
-          // No format for full day name.
-          'l' => '%d',
-          // No format for day of month number without leading zeros.
-          'j' => '%d',
-          // ISO week number.
-          'W' => '%W',
-          // 24 hour hour with leading zeros.
-          'H' => '%H',
-          // No format for 12 hour hour with leading zeros.
-          'h' => '%H',
-          // Minutes with leading zeros.
-          'i' => '%M',
-          // Seconds with leading zeros.
-          's' => '%S',
-          // No format for AM/PM.
-          'A' => '',
-          // Week number.
-          '\WW' => '',
-        );
-        $format = strtr($format, $replace);
-        return "strftime('$format', $field)";
-
-      case 'sqlsrv':
-        $replace = array(
-          // 4 digit year number.
-          'Y' => "' + CAST(DATEPART(year, $field) AS nvarchar) + '",
-          // 2 digit year number.
-          'y' => "' + RIGHT(DATEPART(year, $field), 2) + '",
-          // 3 letter month name.
-          'M' => "' + LEFT(DATENAME(month, $field), 3) + '",
-          // Month number with leading zeros.
-          'm' => "' + RIGHT('0' + CAST(DATEPART(month, $field) AS nvarchar), 2) + '",
-          // Month number without leading zeros.
-          'n' => "' + CAST(DATEPART(month, $field) AS nvarchar) + '",
-          // Full month name.
-          'F' => "' + DATENAME(month, $field) + '",
-          // 3 letter day name.
-          'D' => "' + LEFT(DATENAME(day, $field), 3) + '",
-          // Day of month number with leading zeros.
-          'd' => "' + RIGHT('0' + CAST(DATEPART(day, $field) AS nvarchar), 2) + '",
-          // Full day name.
-          'l' => "' + DATENAME(day, $field) + '",
-          // Day of month number without leading zeros.
-          'j' => "' + CAST(DATEPART(day, $field) AS nvarchar) + '",
-          // ISO week number.
-          'W' => "' + CAST(DATEPART(iso_week, $field) AS nvarchar) + '",
-          // 24 hour with leading zeros.
-          'H' => "' + RIGHT('0' + CAST(DATEPART(hour, $field) AS nvarchar), 2) + '",
-          // 12 hour with leading zeros.
-          // Conversion to 'mon dd yyyy hh:miAM/PM' format (corresponds to style
-          // 100 in MSSQL).
-          // Hour position is fixed, so we use SUBSTRING to extract it.
-          'h' => "' + RIGHT('0' + LTRIM(SUBSTRING(CONVERT(nvarchar, $field, 100), 13, 2)), 2) + '",
-          // Minutes with leading zeros.
-          'i' => "' + RIGHT('0' + CAST(DATEPART(minute, $field) AS nvarchar), 2) + '",
-          // Seconds with leading zeros.
-          's' => "' + RIGHT('0' + CAST(DATEPART(second, $field) AS nvarchar), 2) + '",
-          // AM/PM.
-          // Conversion to 'mon dd yyyy hh:miAM/PM' format (corresponds to style
-          // 100 in MSSQL).
-          'A' => "' + RIGHT(CONVERT(nvarchar, $field, 100), 2) + '",
-          // Week number.
-          '\WW' => "' + CAST(DATEPART(week, $field) AS nvarchar) + '",
-          '\T' => 'T',
-          // MS SQL uses single quote as escape symbol.
-          '\'' => '\'\'',
-        );
-        $format = strtr($format, $replace);
-        $format = "'$format'";
-        return $format;
-    }
+   $replace = array(
+      'Y' => '%Y',
+      'y' => '%y',
+      'M' => '%b',
+      'm' => '%m',
+      'n' => '%c',
+      'F' => '%M',
+      'D' => '%a',
+      'd' => '%d',
+      'l' => '%W',
+      'j' => '%e',
+      'W' => '%v',
+      'H' => '%H',
+      'h' => '%h',
+      'i' => '%i',
+      's' => '%s',
+      'A' => '%p',
+      '\WW' => 'W%U',
+    );
+    $format = strtr($format, $replace);
+    return "DATE_FORMAT($field, '$format')";
   }
 
   /**
@@ -554,55 +288,32 @@ class date_sql_handler {
     switch (strtoupper($extract_type)) {
       case 'DATE':
         return $field;
-
       case 'YEAR':
         return "EXTRACT(YEAR FROM($field))";
-
       case 'MONTH':
         return "EXTRACT(MONTH FROM($field))";
-
       case 'DAY':
         return "EXTRACT(DAY FROM($field))";
-
       case 'HOUR':
         return "EXTRACT(HOUR FROM($field))";
-
       case 'MINUTE':
         return "EXTRACT(MINUTE FROM($field))";
-
       case 'SECOND':
         return "EXTRACT(SECOND FROM($field))";
 
       // ISO week number for date.
       case 'WEEK':
-        switch ($this->db_type) {
-          case 'mysql':
-            // WEEK using arg 3 in MySQl should return the same value as
-            // Postgres EXTRACT.
-            return "WEEK($field, 3)";
-
-          case 'pgsql':
-            return "EXTRACT(WEEK FROM($field))";
-        }
+        return "WEEK($field, 3)";
       case 'DOW':
-        switch ($this->db_type) {
-          case 'mysql':
-            // MySQL returns 1 for Sunday through 7 for Saturday, PHP date
-            // functions and Postgres use 0 for Sunday and 6 for Saturday.
-            return "INTEGER(DAYOFWEEK($field) - 1)";
-
-          case 'pgsql':
-            return "EXTRACT(DOW FROM($field))";
-        }
+        // MySQL returns 1 for Sunday through 7 for Saturday, PHP date
+        // functions use 0 for Sunday and 6 for Saturday.
+        return "INTEGER(DAYOFWEEK($field) - 1)";
       case 'DOY':
-        switch ($this->db_type) {
-          case 'mysql':
-            return "DAYOFYEAR($field)";
-
-          case 'pgsql':
-            return "EXTRACT(DOY FROM($field))";
-        }
+        return "DAYOFYEAR($field)";
     }
+
+    // An unknown function.
+    return FALSE;
   }
 
   /**
@@ -836,7 +547,7 @@ class date_sql_handler {
           return date_format($dates[1], 'Y-m-d H:i:s');
 
         default:
-          return;
+          return '';
       }
     }
 

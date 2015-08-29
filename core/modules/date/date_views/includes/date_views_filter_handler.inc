@@ -6,20 +6,8 @@
  * where all fields are controlled by the same date and can be combined
  * with either AND or OR.
  */
-
-// @codingStandardsIgnoreStart
 class date_views_filter_handler extends date_views_filter_handler_simple {
-  function init(&$view, &$options) {
-    parent::init($view, $options);
-
-    if (empty($this->view->date_info)) {
-      $this->view->date_info = new stdClass();
-    }
-    if (empty($this->view->date_info->date_fields)) {
-      $this->view->date_info->date_fields = array();
-    }
-    $this->view->date_info->date_fields = array_merge($this->view->date_info->date_fields, $this->options['date_fields']);
-  }
+  protected $query_fields = array();
 
   // Set default values for the date filter.
   function option_definition() {
@@ -64,12 +52,12 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
 
       // Respect relationships when determining the table alias.
       if ($field['table_name'] != $this->table || !empty($this->relationship)) {
-        $this->related_table_alias = $this->query->ensure_table($field['table_name'], $this->relationship);
+        $related_table_alias = $this->query->ensure_table($field['table_name'], $this->relationship);
       }
       else {
-        $this->related_table_alias = null;
+        $related_table_alias = NULL;
       }
-      $table_alias = !empty($this->related_table_alias) ? $this->related_table_alias : $field['table_name'];
+      $table_alias = !empty($related_table_alias) ? $related_table_alias : $field['table_name'];
       $field_name = $table_alias . '.' . $field['field_name'];
 
       // Call the appropriate function, either 'op_between' or 'op_simple'.
@@ -141,8 +129,8 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     $handler = $this->date_handler;
 
     $fields = date_views_fields($this->view->base_table);
+    $output = array();
     if (!empty($this->options['date_fields'])) {
-      $output = array();
       foreach ($this->options['date_fields'] as $field) {
         if (array_key_exists($field, $fields['name'])) {
           $output[] = $fields['name'][$field]['label'];
@@ -184,4 +172,3 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     }
   }
 }
-// @codingStandardsIgnoreEnd

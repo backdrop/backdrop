@@ -168,12 +168,14 @@ class views_handler_filter_numeric extends views_handler_filter {
         '#default_value' => $this->value['value'],
       );
       // Setup #states for all operators with one value.
-      foreach ($this->operator_values(1) as $operator) {
-        $form['value']['value']['#states']['visible'][] = array(
-          $source => array('value' => $operator),
-        );
+      if (isset($source)) {
+        foreach ($this->operator_values(1) as $operator) {
+          $form['value']['value']['#states']['visible'][] = array(
+            $source => array('value' => $operator),
+          );
+        }
       }
-      if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['value'])) {
+      if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['value'])) {
         $form_state['input'][$identifier]['value'] = $this->value['value'];
       }
     }
@@ -186,7 +188,7 @@ class views_handler_filter_numeric extends views_handler_filter {
         '#size' => 30,
         '#default_value' => $this->value['value'],
       );
-      if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
+      if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $this->value['value'];
       }
     }
@@ -207,18 +209,20 @@ class views_handler_filter_numeric extends views_handler_filter {
       if ($which == 'all') {
         $states = array();
         // Setup #states for all operators with two values.
-        foreach ($this->operator_values(2) as $operator) {
-          $states['#states']['visible'][] = array(
-            $source => array('value' => $operator),
-          );
+        if (isset($source)) {
+          foreach ($this->operator_values(2) as $operator) {
+            $states['#states']['visible'][] = array(
+              $source => array('value' => $operator),
+            );
+          }
         }
         $form['value']['min'] += $states;
         $form['value']['max'] += $states;
       }
-      if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['min'])) {
+      if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['min'])) {
         $form_state['input'][$identifier]['min'] = $this->value['min'];
       }
-      if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['max'])) {
+      if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['max'])) {
         $form_state['input'][$identifier]['max'] = $this->value['max'];
       }
 
@@ -306,6 +310,13 @@ class views_handler_filter_numeric extends views_handler_filter {
           'value' => $value,
         );
       }
+    }
+    else {
+      $value = array(
+        'value' => NULL,
+        'min' => NULL,
+        'max' => NULL,
+      );
     }
 
     $rc = parent::accept_exposed_input($input);

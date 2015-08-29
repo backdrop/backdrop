@@ -39,40 +39,6 @@ define('DATE_REGEX_ICAL_DATE', '/(\d{4})(\d{2})(\d{2})/');
 define('DATE_REGEX_ICAL_DATETIME', '/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?/');
 
 /**
- * Core DateTime extension module used for as many date operations as possible.
- */
-
-/**
- * Implements hook_help().
- */
-function date_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#date':
-      $output = '';
-      $messages = date_api_status();
-      $output = '<h2>Date API Status</h2>';
-      if (!empty($messages['success'])) {
-        $output .= '<ul><li>' . implode('</li><li>', $messages['success']) . '</li></ul>';
-      }
-      if (!empty($messages['errors'])) {
-        $output .= '<h3>Errors</h3><ul class="error"><li>' . implode('</li><li>', $messages['errors']) . '</li></ul>';
-      }
-
-      if (module_exists('date_tools')) {
-        $output .= '<h3>Date Tools</h3>' . t('Dates and calendars can be complicated to set up. The !date_wizard makes it easy to create a simple date content type and with a date field.', array('!date_wizard' => l(t('Date wizard'), 'admin/config/date/tools/date_wizard')));
-      }
-      else {
-        $output .= '<h3>Date Tools</h3>' . t('Dates and calendars can be complicated to set up. If you enable the Date Tools module, it provides a Date Wizard that makes it easy to create a simple date content type with a date field.');
-      }
-
-      $output .= '<h2>More Information</h2><p>' . t('Complete documentation for the Date and Date API modules is available at <a href="@link">http://drupal.org/node/92460</a>.', array('@link' => 'http://drupal.org/node/262062')) . '</p>';
-
-      return $output;
-
-  }
-}
-
-/**
  * Helper function to retun the status of required date variables.
  */
 function date_api_status() {
@@ -134,11 +100,6 @@ function date_api_menu() {
 /**
  * Extend PHP DateTime class with granularity handling, merge functionality and
  * slightly more flexible initialization parameters.
- *
- * This class is a Backdrop independent extension of the >= PHP 5.2 DateTime
- * class.
- *
- * @see FeedsDateTimeElement class
  */
 class DateObject extends DateTime {
   public $granularity = array();
@@ -152,32 +113,6 @@ class DateObject extends DateTime {
     'second',
     'timezone'
   );
-  private $serializedTime;
-  private $serializedTimezone;
-
-  /**
-   * Prepares the object during serialization.
-   *
-   * We are extending a core class and core classes cannot be serialized.
-   *
-   * @return array
-   *   Returns an array with the names of the variables that were serialized.
-   *
-   * @see http://bugs.php.net/41334
-   * @see http://bugs.php.net/39821
-   */
-  public function __sleep() {
-    $this->serializedTime = $this->format('c');
-    $this->serializedTimezone = $this->getTimezone()->getName();
-    return array('serializedTime', 'serializedTimezone');
-  }
-
-  /**
-   * Re-builds the object using local variables.
-   */
-  public function __wakeup() {
-    $this->__construct($this->serializedTime, new DateTimeZone($this->serializedTimezone));
-  }
 
   /**
    * Returns the date object as a string.
@@ -305,13 +240,13 @@ class DateObject extends DateTime {
   /**
    * Merges two date objects together using the current date values as defaults.
    *
-   * @param object $other
+   * @param DateObject $other
    *   Another date object to merge with.
    *
-   * @return object
+   * @return DateObject
    *   A merged date object.
    */
-  public function merge(FeedsDateTime $other) {
+  public function merge(DateObject $other) {
     $other_tz = $other->getTimezone();
     $this_tz = $this->getTimezone();
     // Figure out which timezone to use for combination.
@@ -352,12 +287,6 @@ class DateObject extends DateTime {
    *   Whether or not to skip a date with no time. Defaults to FALSE.
    */
   public function setTimezone($tz, $force = FALSE) {
-    // PHP 5.2.6 has a fatal error when setting a date's timezone to itself.
-    // http://bugs.php.net/bug.php?id=45038
-    if (version_compare(PHP_VERSION, '5.2.7', '<') && $tz == $this->getTimezone()) {
-      $tz = new DateTimeZone($tz->getName());
-    }
-
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
       // much. We set the timezone using the method, which will change the
@@ -515,17 +444,6 @@ class DateObject extends DateTime {
    */
   public function hasTime() {
     return $this->hasGranularity('hour');
-  }
-
-  /**
-   * Returns whether the input values included a year.
-   *
-   * Useful to use pseudo date objects when we only are interested in the time.
-   *
-   * @todo $this->completeDate does not actually exist?
-   */
-  public function completeDate() {
-    return $this->completeDate;
   }
 
   /**
@@ -847,7 +765,7 @@ class DateObject extends DateTime {
   /**
    * Forces an incomplete date to be valid.
    *
-   * E.g., add a valid year, month, and day if only the time has been defined.
+   * e.g. Add a valid year, month, and day if only the time has been defined.
    *
    * @param array|string $date
    *   An array of date parts or a datetime string with values to be massaged
@@ -2462,11 +2380,6 @@ function date_api_theme($existing, $type, $theme, $path) {
     'path' => "$path/theme",
   );
   return array(
-    'date_nav_title' => $base + array(
-      'variables' => array(
-        'granularity' => NULL, 'view' => NULL, 'link' => NULL, 'format' => NULL
-      ),
-    ),
     'date_timezone' => $base + array('render element' => 'element'),
     'date_select' => $base + array('render element' => 'element'),
     'date_text' => $base + array('render element' => 'element'),
@@ -2522,7 +2435,7 @@ function date_get_timezone($handling, $timezone = '') {
 }
 
 /**
- * Function to figure out which db timezone applies to a date.
+ * Function to figure out which DB timezone applies to a date.
  *
  * @param string $handling
  *   The timezone handling.
@@ -2556,42 +2469,6 @@ function date_get_timezone_db($handling, $timezone = NULL) {
       break;
   }
   return $timezone;
-}
-
-/**
- * Helper function for converting back and forth from '+1' to 'First'.
- */
-function date_order_translated() {
-  return array(
-    '+1' => t('First', array(), array('context' => 'date_order')),
-    '+2' => t('Second', array(), array('context' => 'date_order')),
-    '+3' => t('Third', array(), array('context' => 'date_order')),
-    '+4' => t('Fourth', array(), array('context' => 'date_order')),
-    '+5' => t('Fifth', array(), array('context' => 'date_order')),
-    '-1' => t('Last', array(), array('context' => 'date_order_reverse')),
-    '-2' => t('Next to last', array(), array('context' => 'date_order_reverse')),
-    '-3' => t('Third from last', array(), array('context' => 'date_order_reverse')),
-    '-4' => t('Fourth from last', array(), array('context' => 'date_order_reverse')),
-    '-5' => t('Fifth from last', array(), array('context' => 'date_order_reverse')),
-  );
-}
-
-/**
- * Creates an array of ordered strings, using English text when possible.
- */
-function date_order() {
-  return array(
-    '+1' => 'First',
-    '+2' => 'Second',
-    '+3' => 'Third',
-    '+4' => 'Fourth',
-    '+5' => 'Fifth',
-    '-1' => 'Last',
-    '-2' => '-2',
-    '-3' => '-3',
-    '-4' => '-4',
-    '-5' => '-5',
-  );
 }
 
 /**
