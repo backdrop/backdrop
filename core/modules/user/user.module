@@ -106,7 +106,7 @@ function user_entity_info() {
           'label' => t('User'),
           'admin' => array(
             'path' => 'admin/config/people/manage',
-            'access arguments' => array('administer users'),
+            'access arguments' => array('administer account settings'),
           ),
         ),
       ),
