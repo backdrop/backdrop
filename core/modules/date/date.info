@@ -1,6 +1,7 @@
 name = Date
 description = Makes date/time fields available.
-dependencies[] = date_api
 package = Date/Time
 backdrop = 1.x
 type = module
+
+stylesheets[all][] = css/date.css

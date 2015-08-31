@@ -330,22 +330,10 @@ function hook_date_combo_process_alter(&$element, &$form_state, $context) {
 
   // Add a date repeat form element, if needed.
   // We delayed until this point so we don't bother adding it to hidden fields.
-  if (date_is_repeat_field($field, $instance)) {
-    $item = $element['#value'];
-    $element['rrule'] = array(
-      '#type' => 'date_repeat_rrule',
-      '#theme_wrappers' => array('date_repeat_rrule'),
-      '#default_value' => isset($item['rrule']) ? $item['rrule'] : '',
-      '#date_timezone' => $element['#date_timezone'],
-      '#date_format'      => date_limit_format(date_input_format($element, $field, $instance), $field['settings']['granularity']),
-      '#date_text_parts'  => (array) $instance['widget']['settings']['text_parts'],
-      '#date_increment'   => $instance['widget']['settings']['increment'],
-      '#date_year_range'  => $instance['widget']['settings']['year_range'],
-      '#date_label_position' => $instance['widget']['settings']['label_position'],
-      '#date_repeat_widget' => str_replace('_repeat', '', $instance['widget']['type']),
-      '#date_repeat_collapsed' => $instance['widget']['settings']['repeat_collapsed'],
-      '#date_flexible' => 0,
-      '#weight' => $instance['widget']['weight'] + .4,
+  if ($instance['settings']['extend']) {
+    $element['another_element'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('New option on the date field'),
     );
   }
 }
@@ -485,7 +473,7 @@ function hook_date_field_formatter_settings_form_alter(&$form, &$form_state, $co
       '#options' => array(
         'show' => t('Show repeat rule'),
         'hide' => t('Hide repeat rule')),
-      '#default_value' => $settings['show_repeat_rule'],
+      '#default_value' => $field['settings']['show_repeat_rule'],
       '#access' => $field['settings']['repeat'],
       '#weight' => 5,
     );

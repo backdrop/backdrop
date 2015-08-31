@@ -6,17 +6,6 @@
  */
 
 class DateAPITestCase extends BackdropWebTestCase {
-
-  /**
-   * @todo.
-   */
-  public function setUp() {
-    // Load the date_api module.
-    parent::setUp('date_api');
-    config_set('date_api.settings','date_api_use_iso8601', FALSE);
-    config_set('system.date','first_day', 1);
-  }
-
   /**
    * @todo.
    */
@@ -63,9 +52,9 @@ class DateAPITestCase extends BackdropWebTestCase {
       'Z',
     );
     foreach ($formatters as $formatter) {
-      $date_api_format = date_format_date(date_now(), 'custom', $formatter);
+      $date_format = date_format_date(date_now(), 'custom', $formatter);
       $php_format = date_format(date_now(), $formatter);
-      $this->assertEqual($date_api_format, $php_format, 'Test that the "' . $formatter . '" formatter is formatted correctly by date_format_date()');
+      $this->assertEqual($date_format, $php_format, 'Test that the "' . $formatter . '" formatter is formatted correctly by date_format_date()');
     }
 
     // Test the order of the weeks days for a calendar that starts on Monday and
@@ -121,7 +110,6 @@ class DateAPITestCase extends BackdropWebTestCase {
 
     // Test week range with calendar weeks.
     config_set('system.date','first_day', 0);
-    config_set('date_api.settings','date_api_use_iso8601', FALSE);
     $expected = '2008-01-27 to 2008-02-02';
     $result = date_week_range(5, 2008);
     $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
@@ -133,7 +121,6 @@ class DateAPITestCase extends BackdropWebTestCase {
 
     // And now with ISO weeks.
     config_set('system.date','first_day', 1);
-    config_set('date_api.settings','date_api_use_iso8601', TRUE);
     $expected = '2008-01-28 to 2008-02-03';
     $result = date_week_range(5, 2008);
     $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
@@ -142,7 +129,6 @@ class DateAPITestCase extends BackdropWebTestCase {
     $result = date_week_range(5, 2009);
     $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
     $this->assertEqual($expected, $value, "Test ISO date_week_range(5, 2009): should be $expected, found $value.");
-    config_set('date_api.settings','date_api_use_iso8601', FALSE);
 
     // Find calendar week for a date.
     config_set('system.date','first_day', 0);

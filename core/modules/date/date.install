@@ -69,47 +69,10 @@ function date_field_schema($field) {
         'type' => 'int',
         'not null' => FALSE,
         'sortable' => TRUE,
-	    'views' => FALSE);
+        'views' => FALSE);
     }
   }
-  if (isset($field['settings']['repeat']) && $field['settings']['repeat'] == 1) {
-    $db_columns['rrule'] = array(
-      'type' => 'text',
-      'not null' => FALSE,
-      'sortable' => FALSE,
-      'views' => FALSE,
-    );
-  }
   return array('columns' => $db_columns);
-}
-
-/**
- * Move date settings from variables to config.
- */
-function date_update_1000() {
-  // Migrate selected variables to config.
-  // Use Backdrop core for date formats (system.date.settings)
-  // Also use settings in date_api.settings.json
-  $config = config('date.settings');
-  $config->set('_show_repeat_rule', update_variable_get('_show_repeat_rule', 'show'));
-  $config->set('_multiple_number', update_variable_get('_multiple_number', ''));
-  $config->set('_multiple_from', update_variable_get('_multiple_from', ''));
-  $config->set('_multiple_to', update_variable_get('_multiple_to', ''));
-  $config->set('_fromto', update_variable_get('_fromto', ''));
-  $config->set('install_task', update_variable_get('install_task', ''));
-  $config->set('date_popup_timepicker', update_variable_get('date_popup_timepicker', '$preferred_timepicker'));
-  $config->set('teaser_length', update_variable_get('teaser_length', '600'));
-  $config->save();
-
-  // Delete variables.
-  update_variable_del('_show_repeat_rule');
-  update_variable_del('_multiple_number');
-  update_variable_del('_multiple_from');
-  update_variable_del('_multiple_to');
-  update_variable_del('_fromto');
-  update_variable_del('install_task');
-  update_variable_del('date_popup_timepicker');
-  update_variable_del('teaser_length');
 }
 
 /**

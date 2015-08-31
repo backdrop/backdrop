@@ -2553,6 +2553,30 @@ function system_update_1040() {
  */
 function system_update_1041() {
   config('date_views.settings')->delete();
+  config('date_api.settings')->delete();
+  config('date.settings')->delete();
+
+  // Remove variables from Drupal 7.
+  update_variable_del('date_min_year');
+  update_variable_del('date_max_year');
+  update_variable_del('date_php_min_year');
+  update_variable_del('date_api_use_iso8601');
+  update_variable_del('date_db_tz_support');
+  update_variable_del('date_api_version');
+  update_variable_del('date_popup_timepicker');
+  update_variable_del('date_views_month_format_with_year');
+  update_variable_del('date_views_month_format_without_year');
+  update_variable_del('date_views_day_format_with_year');
+  update_variable_del('date_views_day_format_without_year');
+  update_variable_del('date_views_week_format_with_year');
+  update_variable_del('date_views_week_format_without_year');
+
+  // A default timezone is now always required.
+  $default_timezone = config_get('system.date', 'default_timezone');
+  if (empty($default_timezone)) {
+    $default_timezone = @date_default_timezone_get();
+    config_set('system.date', 'default_timezone', $default_timezone);
+  }
 }
 
 /**

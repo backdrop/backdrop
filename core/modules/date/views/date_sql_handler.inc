@@ -7,7 +7,6 @@
 /**
  * A class to manipulate date SQL.
  */
-// @codingStandardsIgnoreStart
 class date_sql_handler {
   var $db_type = NULL;
   var $date_type = DATE_DATETIME;
@@ -43,25 +42,14 @@ class date_sql_handler {
    * See if the db has timezone name support.
    */
   public function db_tz_support($reset = FALSE) {
-    $has_support = config_get('date_api.settings','date_db_tz_support');
-    if ($has_support == -1 || $reset) {
+    $has_support = state_get('date_db_tz_support', -1);
+    if ($has_support === -1 || $reset) {
       $has_support = FALSE;
-      switch ($this->db_type) {
-        case 'mysql':
-          $test = db_query("SELECT CONVERT_TZ('2008-02-15 12:00:00', 'UTC', 'US/Central')")->fetchField();
-          if ($test == '2008-02-15 06:00:00') {
-            $has_support = TRUE;
-          }
-          break;
-
-        case 'pgsql':
-          $test = db_query("SELECT '2008-02-15 12:00:00 UTC' AT TIME ZONE 'US/Central'")->fetchField();
-          if ($test == '2008-02-15 06:00:00') {
-            $has_support = TRUE;
-          }
-          break;
+      $test = db_query("SELECT CONVERT_TZ('2008-02-15 12:00:00', 'UTC', 'US/Central')")->fetchField();
+      if ($test == '2008-02-15 06:00:00') {
+        $has_support = TRUE;
       }
-      config_set('date_api.settings','date_db_tz_support', $has_support);
+      state_set('date_db_tz_support', $has_support);
     }
     return $has_support;
   }
@@ -342,7 +330,7 @@ class date_sql_handler {
       $value = $this->sql_field($value, $adjustment);
     }
     elseif ($type == 'DATE') {
-      $date = new DateObject($value, date_default_timezone(), DATE_FORMAT_DATETIME);
+      $date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
       if (!empty($adjustment)) {
         date_modify($date, $adjustment . ' seconds');
       }
@@ -878,11 +866,11 @@ class date_sql_handler {
     }
     if (!empty($parts[0]['date'])) {
       $value = $this->complete_date($parts[0]['date'], 'min');
-      $min_date = new DateObject($value, date_default_timezone(), DATE_FORMAT_DATETIME);
+      $min_date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
       // Build a range from a single date-only argument.
       if (empty($parts[1]) || (empty($parts[1]['date']) && empty($parts[1]['period']))) {
         $value = $this->complete_date($parts[0]['date'], 'max');
-        $max_date = new DateObject($value, date_default_timezone(), DATE_FORMAT_DATETIME);
+        $max_date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
         return array($min_date, $max_date);
       }
       // Build a range from start date + period.
@@ -898,7 +886,7 @@ class date_sql_handler {
     // Build a range from start date and end date.
     if (!empty($parts[1]['date'])) {
       $value = $this->complete_date($parts[1]['date'], 'max');
-      $max_date = new DateObject($value, date_default_timezone(), DATE_FORMAT_DATETIME);
+      $max_date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
       if (isset($min_date)) {
         return array($min_date, $max_date);
       }
@@ -916,4 +904,3 @@ class date_sql_handler {
     return array($now, $now);
   }
 }
-// @codingStandardsIgnoreEnd

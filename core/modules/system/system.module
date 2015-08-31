@@ -1222,6 +1222,16 @@ function system_library_info() {
     ),
   );
 
+  // jQuery TimeEntry
+  $libraries['jquery.timeentry'] = array(
+    'title' => 'jQuery Time Entry Plugin',
+    'website' => 'http://keith-wood.name/timeEntry.html',
+    'version' => '1.5.2',
+    'js' => array(
+      'core/misc/jquery.timeentry.js' => array(),
+    ),
+  );
+
   // Dropbutton.
   $libraries['backdrop.dropbutton'] = array(
     'title' => 'Dropbutton',

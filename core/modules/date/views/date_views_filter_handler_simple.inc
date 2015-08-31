@@ -27,7 +27,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    module_load_include('inc', 'date_api', 'date_api_sql');
     $this->date_handler = new date_sql_handler(DATE_UNIX);
     if (!empty($this->definition['field_name'])) {
       $field = field_info_field($this->definition['field_name']);
@@ -154,9 +153,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     }
 
     $min_value = $this->get_filter_value('min', $this->value['min']);
-    $min_comp_date = new DateObject($min_value, date_default_timezone(), $this->format);
+    $min_comp_date = new BackdropDateTime($min_value, date_default_timezone(), $this->format);
     $max_value = $this->get_filter_value('max', $this->value['max']);
-    $max_comp_date = new DateObject($max_value, date_default_timezone(), $this->format);
+    $max_comp_date = new BackdropDateTime($max_value, date_default_timezone(), $this->format);
     $field_min = $this->date_handler->sql_field($field, NULL, $min_comp_date);
     $field_min = $this->date_handler->sql_format($this->format, $field_min);
     $field_max = $this->date_handler->sql_field($field, NULL, $max_comp_date);
@@ -184,7 +183,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     }
 
     $value = $this->get_filter_value('value', $this->value['value']);
-    $comp_date = new DateObject($value, date_default_timezone(), $this->format);
+    $comp_date = new BackdropDateTime($value, date_default_timezone(), $this->format);
     $field = $this->date_handler->sql_field($field, NULL, $comp_date);
     $field = $this->date_handler->sql_format($this->format, $field);
     $placeholder = $this->placeholder();
@@ -201,7 +200,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     }
 
     $value = $this->get_filter_value('value', $this->value['value']);
-    $comp_date = new DateObject($value, date_default_timezone(), $this->format);
+    $comp_date = new BackdropDateTime($value, date_default_timezone(), $this->format);
     $fields = date_views_fields($this->base_table);
     $fields = $fields['name'];
     $fromto = $fields[$field]['fromto'];
@@ -322,7 +321,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     // Add some extra validation for the select widget to be sure that
     // the user inputs all parts of the date.
     if ($this->options['form_type'] == 'date_select') {
-      $form['value']['#element_validate'] = array('date_views_select_validate');
+      $form['value']['#element_validate'] = array('date_views_filter_handler_simple::date_select_validate');
     }
 
   }
@@ -347,7 +346,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    *   The form date part element for this instance.
    */
   function date_parts_form(&$form_state, $prefix, $source, $which, $operator_values, $identifier, $relative_id) {
-    module_load_include('inc', 'date_api', 'date_api_elements');
+    module_load_include('inc', 'date', 'date.elements');
     switch ($prefix) {
       case 'min':
         $label = t('Start date');
@@ -548,4 +547,53 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     return $output;
   }
 
+  /**
+   * Validation hook for exposed filters that use the select widget.
+   *
+   * This is to ensure the the user completes all parts of the date not just some parts. Only needed for the select widget.
+   */
+  static function date_select_validate(&$form, &$form_state) {
+    // If there are no values just return.
+    if (empty($form['value']) && empty($form['min'])) {
+      return;
+    }
+    $granularity = (!empty($form['min']['#date_format'])) ? date_format_order($form['min']['#date_format']) : date_format_order($form['value']['#date_format']);
+    $filled = array();
+    $value = backdrop_array_get_nested_value($form_state['input'], $form['#parents']);
+    foreach ($granularity as $part) {
+      if (isset($value['value']) && is_numeric($value['value'][$part])) {
+        $filled[] = $part;
+      }
+    }
+    if (!empty($filled) && count($filled) != count($granularity)) {
+      $unfilled = array_diff($granularity, $filled);
+      foreach ($unfilled as $part) {
+        switch ($part) {
+          case 'year':
+            form_error($form['value'][$part], t('Please choose a year.'));
+            break;
+
+          case 'month':
+            form_error($form['value'][$part], t('Please choose a month.'));
+            break;
+
+          case 'day':
+            form_error($form['value'][$part], t('Please choose a day.'));
+            break;
+
+          case 'hour':
+            form_error($form['value'][$part], t('Please choose an hour.'));
+            break;
+
+          case 'minute':
+            form_error($form['value'][$part], t('Please choose a minute.'));
+            break;
+
+          case 'second':
+            form_error($form['value'][$part], t('Please choose a second.'));
+            break;
+        }
+      }
+    }
+  }
 }

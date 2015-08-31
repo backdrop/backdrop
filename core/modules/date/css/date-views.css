@@ -10,9 +10,6 @@
   margin: 9px 3px 0 3px;
   display: block;
 }
-.views-group-box fieldset.date-views-filter-fieldset .container-inline-date .date-padding {
-  padding: 0;
-}
 
 .date-views-filter-wrapper {
   min-width: 250px;

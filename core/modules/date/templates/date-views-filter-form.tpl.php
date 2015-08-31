@@ -27,29 +27,26 @@
  * $description
  */
 ?>
-<div class="date-views-filter-wrapper">
-<div class="container-inline-date date-clear">
+<div class="date-views-filter-wrapper container-inline-date">
 <?php if (!empty($date) || !empty($adjustment)) : ?>
-  <div class="date-clear">
+  <div class="date-views-filter-group">
     <div class="date-views-filter"><?php print $date; ?></div>
     <div class="date-views-filter"><?php print $adjustment ?></div>
   </div>
 <?php endif; ?>
 <?php if (!empty($mindate) || !empty($minadjustment)) : ?>
-  <div class="date-clear">
+  <div class="date-views-filter-group">
     <div class="date-views-filter"><?php print $mindate; ?></div>
     <div class="date-views-filter"><?php print $minadjustment; ?></div>
   </div>
 <?php endif; ?>
 <?php if (!empty($maxdate) || !empty($maxadjustment)) : ?>
-  <div class="date-clear">
+  <div class="date-views-filter-group">
     <div class="date-views-filter"><?php print $maxdate; ?></div>
     <div class="date-views-filter"><?php print $maxadjustment; ?></div>
   </div>
 <?php endif; ?>
 </div>
-<div class="date-clear form-item"><div class="description">
+<div class="form-item"><div class="description">
   <?php print $description; ?>
-</div>
-</div>
-</div>
+</div></div>

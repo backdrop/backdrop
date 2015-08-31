@@ -44,7 +44,7 @@ function date_field_formatter_info() {
 function date_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $formatter = $display['type'];
-  module_load_include('inc', 'date', 'date_admin');
+  module_load_include('inc', 'date', 'date.admin');
   switch ($formatter) {
     case 'format_interval':
       $form = date_interval_formatter_settings_form($field, $instance, $view_mode, $form, $form_state);
@@ -69,7 +69,7 @@ function date_field_formatter_settings_form($field, $instance, $view_mode, $form
 function date_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $formatter = $display['type'];
-  module_load_include('inc', 'date', 'date_admin');
+  module_load_include('inc', 'date', 'date.admin');
   switch ($formatter) {
     case 'format_interval':
       $summary = date_interval_formatter_settings_summary($field, $instance, $view_mode);
@@ -107,7 +107,7 @@ function date_field_formatter_settings_summary($field, $instance, $view_mode) {
  *     Used by the calendar module and available for other uses.
  *     example: 'date:217:field_date:3:test'
  *
- *   $entity->date_repeat_show
+ *   $entity->date_repeat_show_all
  *     If true, tells the theme to show all the computed values
  *     of a repeating date. If not true or not set, only the
  *     start date and the repeat rule will be displayed.
@@ -271,10 +271,11 @@ function date_field_widget_info() {
     'settings' => array(
       'input_format' => date_default_format('date_select'),
       'input_format_custom' => '',
-      'increment' => 15,
+      'increment' => 1,
       'text_parts' => array(),
       'year_range' => '-3:+3',
-      'label_position' => 'above',
+      'label_position' => 'none',
+      'no_fieldset' => FALSE,
     ),
     'behaviors' => array(
       'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -298,12 +299,121 @@ function date_field_widget_info() {
       'label' => t('Pop-up calendar'),
       'field types' => array('date', 'datestamp', 'datetime'),
     ) + $settings;
+
+    // Exclude the fieldset for the popup.
+    $info['date_popup']['settings']['no_fieldset'] = TRUE;
   }
 
-  // The date text widget should use an increment of 1.
-  $info['date_text']['increment'] = 1;
+  // Exclude the fieldset for the popup.
+  $info['date_text']['settings']['no_fieldset'] = TRUE;
 
   return $info;
+}
+
+/**
+ * Implementation of hook_field_widget_form().
+ *
+ * The widget builds out a complex date element in the following way:
+ *
+ * - A field is pulled out of the database which is comprised of one or
+ *   more collections of start/end dates.
+ *
+ * - The dates in this field are all converted from the UTC values stored
+ *   in the database back to the local time. This is done in #process
+ *   to avoid making this change to dates that are not being processed,
+ *   like those hidden with #access.
+ *
+ * - If values are empty, the field settings rules are used to determine
+ *   if the default_values should be empty, now, the same, or use strtotime.
+ *
+ * - Each start/end combination is created using the date_combo element type
+ *   defined by the date module. If the timezone is date-specific, a
+ *   timezone selector is added to the first combo element.
+ *
+ * - The date combo element creates two individual date elements, one each
+ *   for the start and end field, using the appropriate individual Date API
+ *   date elements, like selects, textfields, or popups.
+ *
+ * - In the individual element validation, the data supplied by the user is
+ *   used to update the individual date values.
+ *
+ * - In the combo date validation, the timezone is updated, if necessary,
+ *   then the user input date values are used with that timezone to create
+ *   date objects, which are used update combo date timezone and offset values.
+ *
+ * - In the field's submission processing, the new date values, which are in
+ *   the local timezone, are converted back to their UTC values and stored.
+ */
+function date_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  module_load_include('inc', 'date', 'date.elements');
+
+  $element = $base;
+
+  // If this is a new entity, populate the field with the right default values.
+  // This happens early so even fields later hidden with #access get those values.
+  // We should only add default values to new entities, to avoid over-writing
+  // a value that has already been set. This means we can't just check to see
+  // if $items is empty, because it might have been set that way on purpose.
+  // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
+
+  // We check !isset($items[$delta]['value']) because entity translation may create
+  // a new translation entity for an existing entity and we don't want to clobber
+  // values that were already set in that case.
+  // @see http://drupal.org/node/1478848.
+
+  $is_default = FALSE;
+  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
+    $items = date_default_value($field, $instance, $langcode);
+    $is_default = TRUE;
+  }
+
+  $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
+
+  // TODO see if there's a way to keep the timezone element from ever being
+  // nested as array('timezone' => 'timezone' => value)). After struggling
+  // with this a while, I can find no way to get it displayed in the form
+  // correctly and get it to use the timezone element without ending up
+  // with nesting.
+  if (is_array($timezone)) {
+    $timezone = $timezone['timezone'];
+  }
+
+  $element += array(
+    '#type' => 'date_combo',
+    '#theme_wrappers' => array('date_combo'),
+    '#weight' => $delta,
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#date_timezone' => $timezone,
+    '#element_validate' => array('date_combo_validate'),
+    '#date_is_default' => $is_default,
+
+    // Store the original values, for use with disabled and hidden fields.
+    '#date_items' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+
+  if ($field['settings']['tz_handling'] == 'date') {
+    $element['timezone'] = array(
+      '#type' => 'date_timezone',
+      '#theme_wrappers' => array('date_timezone'),
+      '#delta' => $delta,
+      '#default_value' => $timezone,
+      '#weight' => $instance['widget']['weight'] + 1,
+      '#date_label_position' => $instance['widget']['settings']['label_position'],
+    );
+  }
+
+  // Make changes if instance is set to be rendered as a regular field.
+  if ($instance['widget']['settings']['no_fieldset']) {
+    $element['#title'] = NULL;
+    $element['#theme_wrappers'] = array();
+    $element['#date_title_printed'] = FALSE;
+  }
+  else {
+    $element['#title'] = $instance['label'];
+    $element['#date_title_printed'] = TRUE;
+  }
+
+  return $element;
 }
 
 /**
@@ -324,7 +434,7 @@ function date_field_load($entity_type, $entities, $field, $instances, $langcode,
         if (!empty($field['settings']['cache_enabled']) && ($delta < $field['settings']['cache_count'] || $field['settings']['cache_count'] == 0)) {
           foreach ($process as $processed) {
             if (!empty($item[$processed])) {
-              $date = new DateObject($item[$processed], $item['timezone_db'], $db_format);
+              $date = new BackdropDateTime($item[$processed], $item['timezone_db'], $db_format);
               $date->limitGranularity($field['settings']['granularity']);
               $item['db'][$processed] = $date;
             }
@@ -342,7 +452,6 @@ function date_field_load($entity_type, $entities, $field, $instances, $langcode,
  * Implements hook_field_validate().
  */
 function date_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
-  $field_name = $field['field_name'];
   $flexible = 0;
 
   // Don't try to validate if there were any errors before this point
@@ -351,12 +460,13 @@ function date_field_validate($entity_type, $entity, $field, $instance, $langcode
     foreach ($items as $delta => $item) {
       if (is_array($item) && isset($item['value'])) {
         $process = date_process_values($field, $instance);
-        $date1 = new DateObject($item['value'], $item['timezone'], date_type_format($field['type']));
+        $timezone = !empty($item['timezone']) ? $item['timezone'] : NULL;
+        $date1 = new BackdropDateTime($item['value'], $timezone, date_type_format($field['type']));
         if (count($process) == 1 || (empty($item['value2']) && $item['value2'] !== 0)) {
           $date2 = clone($date1);
         }
         else {
-          $date2 = new DateObject($item['value2'], $item['timezone'], date_type_format($field['type']));
+          $date2 = new BackdropDateTime($item['value2'], $timezone, date_type_format($field['type']));
         }
         $valid1 = $date1->validGranularity($field['settings']['granularity'], $flexible);
         $valid2 = $date2->validGranularity($field['settings']['granularity'], $flexible);
@@ -384,8 +494,6 @@ function date_field_validate($entity_type, $entity, $field, $instance, $langcode
  * Implements hook_field_insert().
  */
 function date_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $field_name = $field['field_name'];
-
   if (empty($items)) {
     return;
   }
@@ -437,7 +545,7 @@ function date_field_update($entity_type, $entity, $field, $instance, $langcode, 
  * field settings.
  */
 function date_field_instance_settings_form($field, $instance) {
-  module_load_include('inc', 'date', 'date_admin');
+  module_load_include('inc', 'date', 'date.admin');
   return _date_field_instance_settings_form($field, $instance);
 }
 
@@ -445,7 +553,7 @@ function date_field_instance_settings_form($field, $instance) {
  * Implements hook_field_widget_settings_form().
  */
 function date_field_widget_settings_form($field, $instance) {
-  module_load_include('inc', 'date', 'date_admin');
+  module_load_include('inc', 'date', 'date.admin');
   return _date_field_widget_settings_form($field, $instance);
 }
 
@@ -453,6 +561,6 @@ function date_field_widget_settings_form($field, $instance) {
  * Implements hook_field_settings_form().
  */
 function date_field_settings_form($field, $instance, $has_data) {
-  module_load_include('inc', 'date', 'date_admin');
+  module_load_include('inc', 'date', 'date.admin');
   return _date_field_settings_form($field, $instance, $has_data);
 }

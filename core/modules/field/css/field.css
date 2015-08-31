@@ -16,12 +16,6 @@
 form .field-multiple-table {
   margin: 0;
 }
-form .field-multiple-table th.field-label {
-  padding-left: 0; /*LTR*/
-}
-[dir="rtl"] form .field-multiple-table th.field-label {
-  padding-right: 0;
-}
 form .field-multiple-table .field-multiple-drag {
   width: 30px;
   padding-right: 0; /*LTR*/

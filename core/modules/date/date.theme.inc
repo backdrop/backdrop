@@ -1,16 +1,113 @@
 <?php
-
 /**
  * @file
- * Theme functions.
+ * Theme and preprocess functions for output by Date module.
  */
 
 /**
  * @addtogroup themeable
  * @{
- *
- * Formatter themes
  */
+
+/**
+ * Returns HTML for a date timezone element.
+ */
+function theme_date_timezone($variables) {
+  $element = $variables['element'];
+  $attributes = $element['#attributes'];
+  $wrapper_attributes = array();
+  // Add an wrapper to mimic the way a single value field works, for ease in
+  // using #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" ' . backdrop_attributes($wrapper_attributes) . '>' . $element['#children'] . '</div>';
+  }
+  return '<div ' . backdrop_attributes($attributes) . '>' . theme('form_element', $element) . '</div>';
+}
+
+/**
+ * Returns HTML for a date select element.
+ */
+function theme_date_select($variables) {
+  $element = $variables['element'];
+  $element['#wrapper_attributes']['class'][] = 'container-inline-date';
+  return theme('form_element', $element);
+}
+
+/**
+ * Returns HTML for a date text element.
+ */
+function theme_date_text($variables) {
+  $element = $variables['element'];
+  return theme('form_element', $element);
+}
+
+/**
+ * Returns HTML for a date select input form element.
+ */
+function theme_date_select_element($variables) {
+  $element = $variables['element'];
+  $parents = $element['#parents'];
+  $part = array_pop($parents);
+  return '<div class="date-' . $part . '">' . theme('select', $element) . '</div>';
+}
+
+/**
+ * Returns HTML for a date textfield input form element.
+ */
+function theme_date_textfield_element($variables) {
+  $element = $variables['element'];
+  $parents = $element['#parents'];
+  $part = array_pop($parents);
+  return '<div class="date-' . $part . '">' . theme('textfield', $element) . '</div>';
+}
+
+/**
+ * Returns HTML for a date in the format 'time ago'.
+ */
+function theme_date_time_ago($variables) {
+  $start_date = $variables['start_date'];
+  $end_date = $variables['end_date'];
+  $interval = !empty($variables['interval']) ? $variables['interval'] : 2;
+  $display = isset($variables['interval_display']) ? $variables['interval_display'] : 'time ago';
+
+  // If no date is sent, then return nothing.
+  if (empty($start_date) || empty($end_date)) {
+    return '';
+  }
+
+  // Time to compare dates to.
+  $now = date_format(date_now(), DATE_FORMAT_UNIX);
+  $start = date_format($start_date, DATE_FORMAT_UNIX);
+
+  // Will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence).
+  $time_diff = $now - $start;
+
+  // Uses the same options used by Views format_interval.
+  switch ($display) {
+    case 'raw time ago':
+      return format_interval($time_diff, $interval);
+
+    case 'time ago':
+      return t('%time ago', array('%time' => format_interval($time_diff, $interval)));
+
+    case 'raw time hence':
+      return format_interval(-$time_diff, $interval);
+
+    case 'time hence':
+      return t('%time hence', array('%time' => format_interval(-$time_diff, $interval)));
+
+    case 'raw time span':
+      return ($time_diff < 0 ? '-' : '') . format_interval(abs($time_diff), $interval);
+
+    case 'inverse time span':
+      return ($time_diff > 0 ? '-' : '') . format_interval(abs($time_diff), $interval);
+
+    case 'time span':
+      return t(($time_diff < 0 ? '%time hence' : '%time ago'), array('%time' => format_interval(abs($time_diff), $interval)));
+  }
+
+  return '';
+}
 
 /**
  * Returns HTML for a date element formatted as a Start/End combination.
@@ -28,7 +125,7 @@
  *    Used by the calendar module and available for other uses.
  *    example: 'date.217.field_date.3.test'
  *
- *  $entity->date_repeat_show
+ *  $entity->date_repeat_show_all
  *    If true, tells the theme to show all the computed values of a repeating
  *    date. If not true or not set, only the start date and the repeat rule
  *    will be displayed.
@@ -57,8 +154,6 @@
  *    Only the time part of the formatted End date
  */
 function theme_date_display_combination($variables) {
-  static $repeating_ids = array();
-
   $entity_type = $variables['entity_type'];
   $entity      = $variables['entity'];
   $field       = $variables['field'];
@@ -85,20 +180,6 @@ function theme_date_display_combination($variables) {
         return $output;
       }
     }
-  }
-
-  // Check the formatter settings to see if the repeat rule should be displayed.
-  // Show it only with the first multiple value date.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if (!in_array($id, $repeating_ids) && module_exists('date_repeat_field') && !empty($item['rrule']) && $options['show_repeat_rule'] == 'show') {
-    $repeat_vars = array(
-      'field' => $field,
-      'item' => $item,
-      'entity_type' => $entity_type,
-      'entity' => $entity,
-    );
-    $output .= theme('date_repeat_display', $repeat_vars);
-    $repeating_ids[] = $id;
   }
 
   // If this is a full node or a pseudo node created by grouping multiple
@@ -297,8 +378,6 @@ function theme_date_display_interval($variables) {
  */
 function theme_date_combo($variables) {
   $element = $variables['element'];
-  $field = field_info_field($element['#field_name']);
-  $instance = field_info_instance($element['#entity_type'], $element['#field_name'], $element['#bundle']);
 
   // Group start/end items together in fieldset.
   $fieldset = array(
@@ -343,48 +422,30 @@ function theme_date_text_parts($variables) {
 }
 
 /**
- * Render a date combo as a form element.
- */
-function theme_date_form_element($variables) {
-  $element = &$variables['element'];
-
-  // Detect whether element is multiline.
-  $count = preg_match_all('`<(?:div|span)\b[^>]* class="[^"]*\b(?:date-no-float|date-clear)\b`', $element['#children'], $matches, PREG_OFFSET_CAPTURE);
-  $multiline = FALSE;
-  if ($count > 1) {
-    $multiline = TRUE;
-  }
-  elseif ($count) {
-    $before = substr($element['#children'], 0, $matches[0][0][1]);
-    if (preg_match('`<(?:div|span)\b[^>]* class="[^"]*\bdate-float\b`', $before)) {
-      $multiline = TRUE;
-    }
-  }
-
-  // Detect if there is more than one subfield.
-  $count = count(explode('<label', $element['#children'])) - 1;
-  if ($count == 1) {
-    $element['#title_display'] = 'none';
-  }
-
-  // Wrap children with a div and add an extra class if element is multiline.
-  $element['#children'] = '<div class="date-form-element-content'. ($multiline ? ' date-form-element-content-multiline' : '') .'">'. $element['#children'] .'</div>';
-
-  return theme('form_element', $variables);
-}
-
-/**
  * Returns HTML for remaining message.
  */
 function theme_date_display_remaining($variables) {
   $remaining_days = $variables['remaining_days'];
-  $output = '';
   $show_remaining_text = t('The upcoming date less then 1 day.');
   if ($remaining_days) {
     $show_remaining_text = format_plural($remaining_days, 'To event remaining 1 day', 'To event remaining @count days');
   }
 
   return '<div class="date-display-remaining"><span class="date-display-remaining">' . $show_remaining_text . '</span></div>';
+}
+
+/**
+ * Preprocessor for Date Views filter form.
+ */
+function template_preprocess_date_views_filter_form(&$vars) {
+  $form = $vars['form'];
+  $vars['date'] = backdrop_render($form['valuedate']);
+  $vars['mindate'] = backdrop_render($form['mindate']);
+  $vars['maxdate'] = backdrop_render($form['maxdate']);
+  $vars['adjustment'] = backdrop_render($form['valueadjustment']);
+  $vars['minadjustment'] = backdrop_render($form['minadjustment']);
+  $vars['maxadjustment'] = backdrop_render($form['maxadjustment']);
+  $vars['description'] = backdrop_render($form['description']) . backdrop_render($form);
 }
 
 /** @} End of addtogroup themeable */

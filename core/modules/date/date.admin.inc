@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Date administration code.
@@ -11,7 +10,6 @@
 function date_default_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $formatter = $display['type'];
   $form = array();
 
   $form['format_type'] = array(
@@ -178,14 +176,11 @@ function date_default_formatter_settings_summary($field, $instance, $view_mode) 
 
 /**
  * Settings summary for the interval formatter.
- *
- * @TODO Add settings later.
  */
 function date_interval_formatter_settings_summary($field, $instance, $view_mode) {
   $summary = array();
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $formatter = $display['type'];
   $summary[] = t('Display time ago, showing @interval units.', array('@interval' => $settings['interval']));
 
   return $summary;
@@ -197,9 +192,7 @@ function date_interval_formatter_settings_summary($field, $instance, $view_mode)
  * @see date_field_instance_settings_form_validate()
  */
 function _date_field_instance_settings_form($field, $instance) {
-  $widget = $instance['widget'];
   $settings = $instance['settings'];
-  $widget_settings = $instance['widget']['settings'];
 
   $form['default_value'] = array(
     '#type' => 'select',
@@ -317,17 +310,22 @@ function _date_field_widget_settings_form($field, $instance) {
   }
   $now = date_now();
   foreach ($formats2 as $f) {
-    $options[$f] = date_format_date($now, 'custom', $f).' - - - [ '.$f.' ]';
+    $options[$f] = date_format_date($now, 'custom', $f) . '  ('. $f .')';
   }
   $form['input_format'] = array(
     '#type' => 'select',
     '#title' => t('Date entry options'),
     '#default_value' => $settings['input_format'],
     '#options' => $options,
-    '#description' => t('Control the order and format of the options users see.'),
+    '#description' => t('Select the preferred format for inputting dates.'),
     '#weight' => 3,
     '#fieldset' => 'date_format',
   );
+
+  if ($widget['type'] === 'date_select') {
+    $form['input_format']['#description'] = t('The selected format will determine the order of the date part fields.');
+  }
+
   // Only a limited set of formats is available for the Date Popup module.
   if ($widget['type'] != 'date_popup') {
     $form['input_format']['#options']['custom'] = t('Custom format');
@@ -335,7 +333,7 @@ function _date_field_widget_settings_form($field, $instance) {
       '#type' => 'textfield',
       '#title' => t('Custom input format'),
       '#default_value' => $settings['input_format_custom'],
-      '#description' => t("Override the input format selected above. Define a php date format string like 'm-d-Y H:i' (see <a href=\"@link\">http://php.net/date</a> for more details).", array('@link' => 'http://php.net/date')),
+      '#description' => t('Override the input format selected above. Define a php date format string like "m-d-Y H:i" (see <a href="http://php.net/date">http://php.net/date</a> for more details).'),
       '#weight' => 5,
       '#fieldset' => 'date_format',
       '#attributes' => array('class' => array('indent')),
@@ -393,10 +391,6 @@ function _date_field_widget_settings_form($field, $instance) {
     '#value' => $settings['text_parts'],
   );
   $form['advanced'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Advanced settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
     '#fieldset' => 'date_format',
     '#weight' => 9,
   );
@@ -410,10 +404,10 @@ function _date_field_widget_settings_form($field, $instance) {
   }
   else {
     $options = array(
+      'none' => t('Hidden'),
       'above' => t('Above'),
-      'none' => t('None'),
     );
-    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day' . 'Above' displays the label as titles above each date part. 'None' doesn't visually label any of the date parts.");
+    $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
   }
   $form['advanced']['label_position'] = array(
     '#type' => 'radios',
@@ -444,9 +438,9 @@ function _date_field_widget_settings_form($field, $instance) {
 
   $form['advanced']['no_fieldset'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Render as a regular field'),
+    '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('Whether to render this field as a regular field instead of a fieldset. The date field elements are wrapped in a fieldset by default, and may not display well without it.'),
+    '#description' => t('If using simple inputs such a a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
   );
 
   $context = array(
@@ -550,7 +544,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#options' => date_timezone_handling_options(),
     '#description' => $description,
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'date') . '/date_admin.js'),
+      'js' => array(backdrop_get_path('module', 'date') . '/js/date_admin.js'),
     ),
   );
   // Force this value to hidden because we don't want to allow it to be changed

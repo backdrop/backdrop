@@ -24,7 +24,7 @@ function _date_views_fields($base = 'node') {
 
   // We use fields that provide filter handlers as our universe of possible
   // fields of interest.
-  $all_fields = date_views_views_fetch_fields($base, 'filter');
+  $all_fields = views_fetch_fields($base, 'filter');
 
   // Iterate over all the fields that Views knows about.
   $fields = array();
@@ -35,7 +35,6 @@ function _date_views_fields($base = 'node') {
     $related_fields = array();
     $timezone_field = '';
     $offset_field = '';
-    $rrule_field = '';
     $delta_field = '';
     $sql_type = DATE_UNIX;
     $type = '';
@@ -87,7 +86,7 @@ function _date_views_fields($base = 'node') {
       }
 
       $revision = in_array($base, array('node_revision')) ? FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;
-      $db_info = date_api_database_info($field, $revision);
+      $db_info = date_database_info($field, $revision);
       $name = $table_name . "." . $field_name;
       $grans = array('year', 'month', 'day', 'hour', 'minute', 'second');
       $granularity = !empty($field['granularity']) ? $field['granularity'] : $grans;
@@ -99,7 +98,7 @@ function _date_views_fields($base = 'node') {
 
       if (isset($field['settings']['tz_handling'])) {
         $tz_handling = $field['settings']['tz_handling'];
-        $db_info = date_api_database_info($field, $revision);
+        $db_info = date_database_info($field, $revision);
         if ($tz_handling == 'date') {
           $offset_field = $table_name . '.' . $db_info['columns'][$table_name]['offset'];
         }
@@ -112,10 +111,6 @@ function _date_views_fields($base = 'node') {
         if (isset($db_info['columns'][$table_name]['timezone'])) {
           $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['timezone']));
           $timezone_field = $table_name . '.' . $db_info['columns'][$table_name]['timezone'];
-        }
-        if (isset($db_info['columns'][$table_name]['rrule'])) {
-          $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['rrule']));
-          $rrule_field = $table_name . '.' . $db_info['columns'][$table_name]['rrule'];
         }
       }
       // Get the delta value into the query.
@@ -151,7 +146,6 @@ function _date_views_fields($base = 'node') {
         'tz_handling' => $tz_handling,
         'offset_field' => $offset_field,
         'timezone_field' => $timezone_field,
-        'rrule_field' => $rrule_field,
         'related_fields' => $related_fields,
         'delta_field' => $delta_field,
       );

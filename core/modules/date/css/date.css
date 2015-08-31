@@ -17,11 +17,16 @@
   margin-right: 0.5em; /* LTR */
   vertical-align: top;
 }
+[dir="rtl"] .container-inline-date > .form-item {
+  margin-left: 0.5em;
+  margin-right: 0;
+}
 fieldset.date-combo .container-inline-date > .form-item {
   margin-bottom: 10px;
 }
-.container-inline-date .form-item .form-item {
-  float: left; /* LTR */
+.container-inline-date .form-item {
+  display: inline-block;
+  vertical-align: baseline;
 }
 .container-inline-date .form-item,
 .container-inline-date .form-item input {
@@ -34,13 +39,15 @@ fieldset.date-combo .container-inline-date > .form-item {
 .container-inline-date .form-item input,
 .container-inline-date .form-item select,
 .container-inline-date .form-item option {
-  margin-right: 5px; /* LTR */
+  margin: 0;
 }
 
-.container-inline-date .date-spacer {
-  margin-left: -5px; /* LTR */
+.container-inline-date .date-parts-spacer {
+  margin: 0 10px;
 }
-
+.container-inline-date .date-time-spacer {
+  margin: 0 5px;
+}
 .views-right-60 .container-inline-date div {
   margin: 0;
   padding: 0;
@@ -50,17 +57,6 @@ fieldset.date-combo .container-inline-date > .form-item {
   clear: both;
   float: none;
   width: auto;
-}
-
-/* The exposed Views form doesn't need some of these styles */
-.container-inline-date .date-padding {
-  float: left;
-}
-fieldset.date-combo .container-inline-date .date-padding {
-  padding: 10px;
-}
-.views-exposed-form .container-inline-date .date-padding {
-  padding: 0;
 }
 
 /* Fixes for date popup css so it will behave in Drupal */
@@ -94,34 +90,6 @@ span.date-display-end {
 
 .date-prefix-inline {
   display: inline-block;
-}
-
-.date-clear {
-  clear: both;
-  display: block;
-  float: none;
-}
-
-.date-no-float {
-  clear: both;
-  float: none;
-  width: 98%;
-}
-
-.date-float {
-  clear: none;
-  float: left;
-  width: auto;
-}
-
-/* Add space between date option checkboxes ('All day' & 'Collect End Date') */
-.date-float .form-type-checkbox{
-  padding-right: 1em;
-}
-
-/* Add space between the date and time portions of the date_select widget. */
-.form-type-date-select .form-type-select[class*=hour] {
-  margin-left: .75em; /* LTR */
 }
 
 .date-container .date-format-delete {
@@ -177,10 +145,6 @@ div.date-calendar-day span.year {
   padding: 2px;
 }
 
-.date-form-element-content-multiline {
-  padding: 10px;
-  border: 1px solid #CCC;
-}
 /* Admin styling */
 .form-item.form-item-instance-widget-settings-input-format-custom,
 .form-item.form-item-field-settings-enddate-required {
@@ -190,7 +154,20 @@ div.date-calendar-day span.year {
 #edit-field-settings-granularity .form-type-checkbox {
   margin-right: .6em; /* LTR */
 }
+[dir="rtl"] #edit-field-settings-granularity .form-type-checkbox {
+  margin-right: 0;
+  margin-left: .6em;
+}
 
 .date-year-range-select {
   margin-right: 1em;
+}
+
+/* TimeEntry styles */
+.timeEntry_control {
+  vertical-align: middle;
+  margin-left: 2px;
+}
+* html .timeEntry_control { /* IE only */
+  margin-top: -4px;
 }

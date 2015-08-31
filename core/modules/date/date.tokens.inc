@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Token module integration.
@@ -44,7 +43,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
     // Create tokens for the field "Date" or "Start date".
     if (($date_tokens = token_find_with_prefix($tokens, 'date')) && !empty($item['value'])) {
       // Load the Start date and convert to a unix timestamp.
-      $date = new DateObject($item['value'], $item['timezone_db'], date_type_format($item['date_type']));
+      $date = new BackdropDateTime($item['value'], $item['timezone_db'], date_type_format($item['date_type']));
       if (!empty($date) && $item['timezone_db'] != $item['timezone']) {
         date_timezone_set($date, timezone_open($item['timezone']));
       }
@@ -57,7 +56,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
     // Create tokens for the field "End date".
     if (($date_tokens = token_find_with_prefix($tokens, 'end-date')) && !empty($item['value2'])) {
       // Load the to date and convert to a unix timestamp.
-      $date = new DateObject($item['value2'], $item['timezone_db'], date_type_format($item['date_type']));
+      $date = new BackdropDateTime($item['value2'], $item['timezone_db'], date_type_format($item['date_type']));
       if (!empty($date) && $item['timezone_db'] != $item['timezone']) {
         date_timezone_set($date, timezone_open($item['timezone']));
       }

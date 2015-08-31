@@ -10,17 +10,14 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
   /**
    * @todo.
    */
-  protected function setUp() {
-    // Load the date_api module.
-    parent::setUp('field', 'field_ui', 'date_api', 'date', 'date_popup');
+  protected function setUp($modules) {
+    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date', 'date_popup')));
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(
       array('administer content types', 'administer nodes', 'bypass node access')
     );
     $this->backdropLogin($this->privileged_user);
-
-    config_set('date.settings','date_popup_timepicker', 'none');
 
     module_load_include('inc', 'node', 'content_types');
     module_load_include('inc', 'node', 'node.pages');
