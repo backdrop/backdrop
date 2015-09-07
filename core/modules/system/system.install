@@ -2549,6 +2549,15 @@ function system_update_1040() {
 }
 
 /**
+ * Notify administrators if a non-core version of link module is present.
+ */
+function system_update_1041() {
+  $path = backdrop_get_path('module', 'link');
+  if ($path && strpos($path, 'core/modules/link') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled link module. A different copy of link module has been located at %path. To use the new link module, disable and then uninstall the current module, remove it from your installation, and then enable the new link module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/{42827_can_i_has_change_notice_too?}">link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
