@@ -9,7 +9,7 @@ require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 class DateValidationTestCase extends DateFieldBasic {
 
   /**
-   * @todo.
+   * Test validation on each type of date widget.
    */
    public function testValidation() {
     // Attempts to create text date field stored as a date with default settings
@@ -33,14 +33,14 @@ class DateValidationTestCase extends DateFieldBasic {
           $this->malFormedDate($field_name, $field_type, $widget_type);
         }
 
-        $this->wrongGranularity($field_name, $field_type, $widget_type);
+        $this->checkGranularity($field_name, $field_type, $widget_type);
         $this->deleteDateField($label);
       }
     }
   }
 
   /**
-   * @todo.
+   * Attempt to create a node with a malformed date and ensure it fails.
    */
   function malFormedDate($field_name, $field_type, $widget_type) {
     // Tests that date field filters improper dates.
@@ -114,9 +114,9 @@ class DateValidationTestCase extends DateFieldBasic {
   }
 
   /**
-   * @todo.
+   * Confirms that fields missing the time granularity are accepted.
    */
-  public function wrongGranularity($field_name, $field_type, $widget_type) {
+  public function checkGranularity($field_name, $field_type, $widget_type) {
     // Create a node with incorrect granularity -- missing time.
     $edit = array();
     $edit['title'] = $this->randomName(8);
@@ -136,8 +136,14 @@ class DateValidationTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value][time]'] = '';
     }
     $this->backdropPost('node/add/story', $edit, t('Save'));
-    $should_not_be = $edit['title'] . " has been created";
-    $this->assertNoText($should_not_be, "Correctly blocked creation of node with missing time for a $field_type field using the $widget_type widget.");
-    $this->assertText('invalid', "Marked form with missing time as invalid for a $field_type field using the $widget_type widget.");
+    $message = format_string('Story %title has been created.', array('%title' => $edit['title']));
+
+    if ($widget_type === 'date_select') {
+      $this->assertNoRaw($message, "Correctly blocked creation of node with missing time for a $field_type field using the $widget_type widget.");
+      $this->assertText('invalid', "Marked form with missing time as invalid for a $field_type field using the $widget_type widget.");
+    }
+    else {
+      $this->assertRaw($message, "Correctly allowed creation of node with missing time for a $field_type field using the $widget_type widget.");
+    }
   }
 }

@@ -227,10 +227,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       'date_select' => t('Select'),
       'date_text' => t('Text'),
       'date_popup' => t('Popup'),
-      );
-    if (!module_exists('date_popup')) {
-      unset($options['date_popup']);
-    }
+    );
     return $options;
   }
 
@@ -321,7 +318,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     // Add some extra validation for the select widget to be sure that
     // the user inputs all parts of the date.
     if ($this->options['form_type'] == 'date_select') {
-      $form['value']['#element_validate'] = array('date_views_filter_handler_simple::date_select_validate');
+      $form['value']['#element_validate'] = array(array($this, 'date_select_validate'));
     }
 
   }
@@ -363,10 +360,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     }
 
     $type = $this->options['form_type'];
-    if ($type == 'date_popup' && !module_exists('date_popup')) {
-      $type = 'date_text';
-    }
-
     $format = $this->date_handler->views_formats($this->options['granularity'], 'display');
     $granularity = array_keys($this->date_handler->date_parts($this->options['granularity']));
     $relative_value = ($prefix == 'max' ? $this->options['default_to_date'] : $this->options['default_date']);
@@ -552,7 +545,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    *
    * This is to ensure the the user completes all parts of the date not just some parts. Only needed for the select widget.
    */
-  static function date_select_validate(&$form, &$form_state) {
+  function date_select_validate(&$form, &$form_state) {
     // If there are no values just return.
     if (empty($form['value']) && empty($form['min'])) {
       return;

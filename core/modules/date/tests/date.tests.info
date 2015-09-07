@@ -33,4 +33,3 @@ name = Date API tests
 description = Test Date API functions
 group = Date
 file = date_api.test
-

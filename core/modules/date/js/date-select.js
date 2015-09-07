@@ -6,7 +6,7 @@ Backdrop.behaviors.dateSelect = {};
 
 Backdrop.behaviors.dateSelect.attach = function (context, settings) {
   var $context = $(context);
-  var $widgets = $context.find('.end-date-wrapper').once('date-range');
+  var $widgets = $context.find('.end-date-wrapper').once('date-select-range');
   for (var i = 0; i < $widgets.length; i++) {
     new Backdrop.date.EndDateHandler($widgets.eq(i).parent());
   }

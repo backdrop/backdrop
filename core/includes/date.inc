@@ -745,13 +745,9 @@ function date_format_interval($date, $granularity = 2, $display_ago = TRUE) {
  *   The current time as a date object.
  */
 function date_now($timezone = NULL, $reset = FALSE) {
-  if ($reset) {
-    backdrop_static_reset(__FUNCTION__ . $timezone);
-  }
-
   $now = &backdrop_static(__FUNCTION__ . $timezone);
 
-  if (!isset($now)) {
+  if (!isset($now) || $reset) {
     $now = new BackdropDateTime('now', $timezone);
   }
 

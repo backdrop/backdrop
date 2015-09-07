@@ -544,7 +544,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#options' => date_timezone_handling_options(),
     '#description' => $description,
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'date') . '/js/date_admin.js'),
+      'js' => array(backdrop_get_path('module', 'date') . '/js/date.admin.js'),
     ),
   );
   // Force this value to hidden because we don't want to allow it to be changed

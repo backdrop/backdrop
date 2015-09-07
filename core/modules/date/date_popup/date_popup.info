@@ -1,6 +1,0 @@
-name = Date Popup
-description = Enables jquery popup calendars and time entry widgets for selecting dates and times.
-package = Date/Time
-backdrop = 1.x
-type = module
-configure = admin/config/date/date_popup

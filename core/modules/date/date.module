@@ -85,6 +85,9 @@ function date_theme($existing, $type, $theme, $path) {
     'date' => array(
       'render element' => 'element',
     ) + $base,
+    'date_popup' => array(
+      'render element' => 'element',
+    ) + $base,
     'date_display_single' => array(
       'variables' => array(
         'date' => NULL,
@@ -156,6 +159,22 @@ function date_theme($existing, $type, $theme, $path) {
 function date_element_info() {
   module_load_include('inc', 'date', 'date.elements');
   return _date_element_info();
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function date_popup_library_info() {
+  $libraries['date_popup'] = array(
+    'title' => 'Date Popup Integration',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'date') . '/js/date-popup.js' => array(),
+    ),
+    // We do not specifically add ui.datepicker or jquery.timeentry here to save
+    // unnecessary library loading if only one or the other is needed.
+  );
+  return $libraries;
 }
 
 /**
@@ -549,7 +568,7 @@ function date_views_api() {
 /**
  * Implements hook_autoload_info().
  */
-function date_views_autoload_info() {
+function date_autoload_info() {
   return array(
     'date_sql_handler' => 'views/date_sql_handler.inc',
     'date_views_argument_handler' => 'views/date_views_argument_handler.inc',

@@ -244,7 +244,7 @@ function field_validate_field($field, $update = FALSE) {
     // Field module must exist when creating a field (but not updating it).
     $field_info = field_info_field_types($field['type']);
     if (!module_exists($field_info['module'])) {
-      throw new FieldException(t('The field "@name" could not be created because it requires the "@module" module.', array('@name' => $field['field_name'], 'module' => $field['module'])));
+      throw new FieldException(t('The field "@name" could not be created because it requires the "@module" module.', array('@name' => $field['field_name'], '@module' => $field_info['module'])));
     }
 
     // Ensure the table namespaces are available.

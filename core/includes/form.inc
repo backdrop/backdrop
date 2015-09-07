@@ -1471,7 +1471,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     // #value data.
     elseif (isset($elements['#element_validate'])) {
       foreach ($elements['#element_validate'] as $function) {
-        $function($elements, $form_state, $form_state['complete_form']);
+        call_user_func_array($function, array(&$elements, &$form_state, $form_state['complete_form']));
       }
     }
     $elements['#validated'] = TRUE;

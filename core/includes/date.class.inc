@@ -116,12 +116,12 @@ class BackdropDateTime extends DateTime {
       // We are going to let the parent DateTime object do a best effort attempt
       // to turn this string into a valid date. It might fail and we want to
       // control the error messages.
-      if (strtotime($time)) {
+      if (strtotime($time) !== FALSE) {
         parent::__construct($time, $tz);
       }
       else {
         $this->errors['date'] = t('The date "!date" does not match the expected format.', array('!date' => $time));
-        return $this;
+        return;
       }
       if (empty($this->granularity)) {
         $this->setGranularityFromTime($time, $tz);
@@ -736,7 +736,7 @@ class BackdropDateTime extends DateTime {
 
       case 'day':
         $fallback = $default == 'first' ? 1 : $now->format('j');
-        $max_day = isset($year) && isset($month) ? date_days_in_month($year, $month) : 31;
+        $max_day = isset($year) && isset($month) ? @date_days_in_month($year, $month) : 31;
         return !is_int($value) || empty($value) || $value <= 0 || $value > $max_day ? $fallback : $value;
 
       case 'hour':

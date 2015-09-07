@@ -142,60 +142,60 @@ class DateAPITestCase extends BackdropWebTestCase {
     // Create date object from datetime string.
     $input = '2009-03-07 10:30';
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2009-03-07T10:30:00-06:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
     // Same during daylight savings time.
     $input = '2009-06-07 10:30';
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2009-06-07T10:30:00-05:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
     // Create date object from date string.
     $input = '2009-03-07';
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2009-03-07T00:00:00-06:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
     // Same during daylight savings time.
     $input = '2009-06-07';
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2009-06-07T00:00:00-05:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
     // Create date object from date array, date only.
     $input = array('year' => 2010, 'month' => 2, 'day' => 28);
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2010-02-28T00:00:00-06:00';
-    $this->assertEqual($expected, $value, "Test new dateObject(array('year' => 2010, 'month' => 2, 'day' => 28), $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime(array('year' => 2010, 'month' => 2, 'day' => 28), $timezone): should be $expected, found $value.");
 
     // Create date object from date array with hour.
     $input = array('year' => 2010, 'month' => 2, 'day' => 28, 'hour' => 10);
     $timezone = 'America/Chicago';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '2010-02-28T10:00:00-06:00';
-    $this->assertEqual($expected, $value, "Test new dateObject(array('year' => 2010, 'month' => 2, 'day' => 28, 'hour' => 10), $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime(array('year' => 2010, 'month' => 2, 'day' => 28, 'hour' => 10), $timezone): should be $expected, found $value.");
 
     // 0 = January 1, 1970 00:00:00 (UTC);
     // 1000000000 = September 9, 2001 01:46:40 (UTC);
     // Create date object from unix timestamp and convert it to a local date.
     $input = 0;
     $timezone = 'UTC';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '1970-01-01T00:00:00+00:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
     $expected = 'UTC';
     $value = $date->getTimeZone()->getName();
@@ -220,11 +220,11 @@ class DateAPITestCase extends BackdropWebTestCase {
     // Convert the local version of a timestamp to UTC.
     $input = 0;
     $timezone = 'America/Los_Angeles';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $offset = $date->getOffset();
     $value = $date->format('c');
     $expected = '1969-12-31T16:00:00-08:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone):  should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone):  should be $expected, found $value.");
 
     $expected = 'America/Los_Angeles';
     $value = $date->getTimeZone()->getName();
@@ -249,10 +249,10 @@ class DateAPITestCase extends BackdropWebTestCase {
      // Create date object from datetime string and convert it to a local date.
     $input = '1970-01-01 00:00:00';
     $timezone = 'UTC';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $value = $date->format('c');
     $expected = '1970-01-01T00:00:00+00:00';
-    $this->assertEqual($expected, $value, "Test new dateObject('$input', '$timezone'): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime('$input', '$timezone'): should be $expected, found $value.");
 
     $expected = 'UTC';
     $value = $date->getTimeZone()->getName();
@@ -277,11 +277,11 @@ class DateAPITestCase extends BackdropWebTestCase {
     // Convert the local version of a datetime string to UTC.
     $input = '1969-12-31 16:00:00';
     $timezone = 'America/Los_Angeles';
-    $date = new dateObject($input, $timezone);
+    $date = new BackdropDateTime($input, $timezone);
     $offset = $date->getOffset();
     $value = $date->format('c');
     $expected = '1969-12-31T16:00:00-08:00';
-    $this->assertEqual($expected, $value, "Test new dateObject('$input', '$timezone'):  should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime('$input', '$timezone'):  should be $expected, found $value.");
 
     $expected = 'America/Los_Angeles';
     $value = $date->getTimeZone()->getName();
@@ -307,37 +307,37 @@ class DateAPITestCase extends BackdropWebTestCase {
     $input = '2009';
     $timezone = NULL;
     $format = 'Y';
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $value = $date->format('Y');
     $expected = '2009';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone, $format): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone, $format): should be $expected, found $value.");
 
      // Create month and year-only date.
     $input = '2009-10';
     $timezone = NULL;
     $format = 'Y-m';
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $value = $date->format('Y-m');
     $expected = '2009-10';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone, $format): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone, $format): should be $expected, found $value.");
 
      // Create time-only date.
     $input = '0000-00-00T10:30:00';
     $timezone = NULL;
     $format = 'Y-m-d\TH:i:s';
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $value = $date->format('H:i:s');
     $expected = '10:30:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone, $format): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone, $format): should be $expected, found $value.");
 
      // Create time-only date.
     $input = '10:30:00';
     $timezone = NULL;
     $format = 'H:i:s';
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $value = $date->format('H:i:s');
     $expected = '10:30:00';
-    $this->assertEqual($expected, $value, "Test new dateObject($input, $timezone, $format): should be $expected, found $value.");
+    $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone, $format): should be $expected, found $value.");
 
     // Test date ranges.
     $valid = array(
@@ -369,7 +369,7 @@ class DateAPITestCase extends BackdropWebTestCase {
     $input = '23 abc 2012';
     $timezone = NULL;
     $format = 'd M Y';
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $this->assertNotEqual(count($date->errors), 0, '23 abc 2012 should be an invalid date');
 
     // Test Granularity.
@@ -377,7 +377,7 @@ class DateAPITestCase extends BackdropWebTestCase {
     $timezone = NULL;
     $format = 'Y-m-d H:i:s';
 
-    $date = new dateObject($input, $timezone, $format);
+    $date = new BackdropDateTime($input, $timezone, $format);
     $date->removeGranularity('hour');
     $date->removeGranularity('second');
     $date->removeGranularity('minute');

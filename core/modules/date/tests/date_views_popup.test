@@ -13,10 +13,10 @@ class DateViewsPopupTestCase extends DateFieldBasic {
    * Test setup actions.
    */
   public function setUp() {
-    parent::setUp(array('date_popup', 'date_views', 'views', 'views_ui'));
+    parent::setUp(array('views', 'views_ui'));
 
     // Create a date field.
-    $field_name = "field_test_date_popup";
+    $field_name = 'field_test_date_popup';
     $options = array(
       'label' => 'Test',
       'widget_type' => 'date_popup',

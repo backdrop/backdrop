@@ -422,6 +422,17 @@ function theme_date_text_parts($variables) {
 }
 
 /**
+ * Format a date popup element.
+ *
+ * Use a class that will float date and time next to each other.
+ */
+function theme_date_popup($variables) {
+  $element = $variables['element'];
+  $element['#wrapper_attributes']['class'][] = 'container-inline-date';
+  return theme('form_element', $element);
+}
+
+/**
  * Returns HTML for remaining message.
  */
 function theme_date_display_remaining($variables) {

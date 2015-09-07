@@ -2,7 +2,7 @@
  * Attaches the calendar behavior to all required fields
  */
 (function($) {
-  Backdrop.behaviors.date_popup = {
+  Backdrop.behaviors.datePopup = {
     attach: function (context) {
       var $context = $(context);
       $context.find('[data-date-popup]').once('date-popup').each(function() {

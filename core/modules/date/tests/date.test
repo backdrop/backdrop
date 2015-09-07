@@ -9,9 +9,6 @@ require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateUITestCase extends DateFieldBasic {
 
-  /**
-   * @todo.
-   */
    public function setUp() {
     parent::setUp();
 
@@ -20,9 +17,6 @@ class DateUITestCase extends DateFieldBasic {
     system_date_format_save($format);
   }
 
-  /**
-   * @todo.
-   */
   public function testFieldUI() {
     $label = 'Test';
     $current_year = date('Y');
@@ -54,9 +48,6 @@ class DateUITestCase extends DateFieldBasic {
     $this->deleteDateField($label);
   }
 
-  /**
-   * @todo.
-   */
   function dateForm($options) {
     // Tests that date field functions properly.
     $edit = array();

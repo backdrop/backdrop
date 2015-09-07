@@ -275,7 +275,7 @@ function date_field_widget_info() {
       'text_parts' => array(),
       'year_range' => '-3:+3',
       'label_position' => 'none',
-      'no_fieldset' => FALSE,
+      'no_fieldset' => TRUE,
     ),
     'behaviors' => array(
       'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -284,6 +284,10 @@ function date_field_widget_info() {
   );
 
   $info = array(
+    'date_popup' => array(
+      'label' => t('Pop-up calendar'),
+      'field types' => array('date', 'datestamp', 'datetime'),
+    ) + $settings,
     'date_select' => array(
       'label' => t('Select list'),
       'field types' => array('date', 'datestamp', 'datetime'),
@@ -294,18 +298,8 @@ function date_field_widget_info() {
     ) + $settings,
   );
 
-  if (module_exists('date_popup')) {
-    $info['date_popup'] = array(
-      'label' => t('Pop-up calendar'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-    ) + $settings;
-
-    // Exclude the fieldset for the popup.
-    $info['date_popup']['settings']['no_fieldset'] = TRUE;
-  }
-
-  // Exclude the fieldset for the popup.
-  $info['date_text']['settings']['no_fieldset'] = TRUE;
+  // Add the fieldset option for select fields only.
+  $info['date_select']['settings']['no_fieldset'] = FALSE;
 
   return $info;
 }

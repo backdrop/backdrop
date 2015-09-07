@@ -6,12 +6,10 @@
  */
 abstract class DateFieldBasic extends BackdropWebTestCase {
   protected $privileged_user;
+  protected $profile = 'testing';
 
-  /**
-   * @todo.
-   */
-  protected function setUp($modules) {
-    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date', 'date_popup')));
+  protected function setUp($modules = array()) {
+    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date')));
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(
@@ -136,16 +134,8 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       ),
     );
 
-    $field = field_create_field($field);
-    $instance = field_create_instance($instance);
-
-    field_info_cache_clear(TRUE);
-    field_cache_clear(TRUE);
-
-    // Look at how the field got configured.
-    $this->backdropGet("admin/structure/types/manage/$bundle/fields/$field_name");
-    $this->backdropGet("admin/structure/types/manage/$bundle/display");
-
+    field_create_field($field);
+    field_create_instance($instance);
   }
 
   /**
@@ -254,15 +244,8 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       ),
     );
 
-    $field = field_create_field($field);
-    $instance = field_create_instance($instance);
-
-    field_info_cache_clear(TRUE);
-    field_cache_clear(TRUE);
-
-    // Look at how the field got configured.
-    $this->backdropGet("admin/structure/types/manage/$bundle/fields/$field_name");
-    $this->backdropGet("admin/structure/types/manage/$bundle/display");
+    field_create_field($field);
+    field_create_instance($instance);
   }
 
   /**
