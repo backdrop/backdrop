@@ -44,7 +44,7 @@ function field_test_menu() {
   foreach ($bundles as $bundle_name => $bundle_info) {
     $bundle_url_str = str_replace('_', '-', $bundle_name);
     $items['test-entity/add/' . $bundle_url_str] = array(
-      'title' => t('Add %bundle test_entity', array('%bundle' => $bundle_info['label'])),
+      'title' => t('Add @bundle test_entity', array('@bundle' => $bundle_info['label'])),
       'page callback' => 'field_test_entity_add',
       'page arguments' => array(2),
       'access arguments' => array('administer field_test content'),
