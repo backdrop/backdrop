@@ -2765,6 +2765,12 @@ function _node_query_node_access_alter($query, $type) {
     return;
   }
 
+  // Make sure the query returns nothing if the user is not permitted to view
+  // nodes.
+  if (!user_access('access content', $account)) {
+    $query->range(0, 0);
+  }
+
   $tables = $query->getTables();
   $base_table = $query->getMetaData('base_table');
   // If no base table is specified explicitly, search for one.

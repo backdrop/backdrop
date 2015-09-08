@@ -123,6 +123,25 @@ CKEDITOR.plugins.add('backdropimage', {
           // the dialog's return values.
           // Note: on widget#setData this widget instance might be destroyed.
           var data = widgetDefinition._dialogValuesToData(dialogReturnValues.attributes);
+
+          // If there is no image src, delete the widget from the editor.
+          if (!data.src) {
+            widget.destroy();
+            image.remove();
+            return widget;
+          }
+
+          // If width and height are not set, load the image and populate.
+          if (!(data.width || data.height) && !(data.width.length || data.height.length)) {
+            var imagetoSize = new Image();
+            imagetoSize.onload = function() {
+              widget.setData('width', this.width);
+              widget.setData('height', this.height);
+            };
+            imagetoSize.src = data.src;
+          }
+
+          // Save the data to internal widget.
           widget.setData(data);
 
           // Retrieve the widget once again. It could've been destroyed
@@ -168,7 +187,7 @@ CKEDITOR.plugins.add('backdropimage', {
         // Open backdropimage dialog.
         editor.execCommand('editbackdropimage', {
           existingValues: widget.definition._dataToDialogValues(widget.data),
-          saveCallback: widget.definition._createDialogSaveCallback(editor, widget),
+          saveCallback: widget.definition._createDialogSaveCallback(editor, widget)
         });
       });
     });

@@ -2,8 +2,6 @@
 
 "use strict";
 
-Backdrop.ckeditor = Backdrop.ckeditor || {};
-
 Backdrop.behaviors.ckeditorAdmin = {
   attach: function (context, settings) {
     var $context = $(context);
@@ -27,7 +25,13 @@ Backdrop.behaviors.ckeditorAdmin = {
         stop: adminToolbarStopDrag
       };
       $toolbarAdmin.insertAfter($textareaWrapper);
-      adminToolbarRemoveInvalidButtons($toolbarAdmin);
+
+      // Remove the invalid buttons after a delay to allow all behaviors to
+      // finish attaching.
+      window.setTimeout(function() {
+        adminToolbarRemoveInvalidButtons();
+        adminToolbarInitializeButtons();
+      }, 10);
 
       // Add draggable/sortable behaviors.
       $toolbarAdmin.find('.ckeditor-buttons').sortable(sortableSettings);
@@ -159,7 +163,11 @@ Backdrop.behaviors.ckeditorAdmin = {
         if ($rows.length > 1) {
           var $lastRow = $rows.last();
           var $disabledButtons = $wrapper.find('.ckeditor-toolbar-disabled .ckeditor-buttons');
-          $lastRow.find().children(':not(.ckeditor-multiple-button)').prependTo($disabledButtons);
+          var $buttonsToDisable = $lastRow.find().children(':not(.ckeditor-multiple-button)');
+          $buttonsToDisable.prependTo($disabledButtons);
+          $buttonsToDisable.each(function(n) {
+            adminToolbarButtonMoved($buttonsToDisable.eq(n));
+          });
           $lastRow.find('.ckeditor-buttons').sortable('destroy');
           $lastRow.find('.ckeditor-toolbar-groups').sortable('destroy');
           $lastRow.remove();
@@ -281,7 +289,7 @@ Backdrop.behaviors.ckeditorAdmin = {
       /**
        * Remove a single button from the toolbar.
        */
-      function adminToolbarRemoveButton($button) {
+      function adminToolbarRemoveButton($button, feature) {
         var $buttonGroup = $button.closest('.ckeditor-toolbar-group-buttons');
         $button.remove();
 
@@ -294,6 +302,17 @@ Backdrop.behaviors.ckeditorAdmin = {
         if ($button.is('.ckeditor-button')) {
           $wrapper.find('.ckeditor-toolbar-disabled .ckeditor-buttons').prepend($button);
         }
+
+        // Fire event indicating this button/feature was removed.
+        Backdrop.editorConfiguration.removedFeature(feature);
+      }
+
+      /**
+       * Notify the editor system of the initial button state.
+       */
+      function adminToolbarInitButton($button, feature, enabled) {
+        // Fire event indicating this button's initial status.
+        Backdrop.editorConfiguration.initFeature(feature, enabled);
       }
 
       /**
@@ -301,14 +320,73 @@ Backdrop.behaviors.ckeditorAdmin = {
        */
       function adminToolbarRemoveInvalidButtons() {
         var rules = Backdrop.filterConfiguration.getCombinedFilterRules();
-        $wrapper.find('.ckeditor-toolbar-active .ckeditor-button').each(function() {
+        $wrapper.find('.ckeditor-toolbar-active .ckeditor-button').each(function () {
           var $button = $(this);
           var feature = adminToolbarButtonCreateFeature($button);
           if (feature && !Backdrop.editorConfiguration.featureIsAllowed(feature, rules)) {
-            adminToolbarRemoveButton($button);
+            adminToolbarRemoveButton($button, feature);
           }
         });
       }
+
+      /**
+       * Notify listeners to the initial state of the buttons/features.
+       */
+      function adminToolbarInitializeButtons() {
+        $wrapper.find('.ckeditor-toolbar-active .ckeditor-button').each(function () {
+          var $button = $(this);
+          var feature = adminToolbarButtonCreateFeature($button);
+          adminToolbarInitButton($button, feature, true);
+        });
+        $wrapper.find('.ckeditor-toolbar-disabled .ckeditor-button').each(function() {
+          var $button = $(this);
+          var feature = adminToolbarButtonCreateFeature($button);
+          adminToolbarInitButton($button, feature, false);
+        });
+      }
+    });
+  }
+};
+
+/**
+ * Respond to the events of the editor system. 
+ *
+ * This handles hiding/showing options based on the enabling, disabling, and
+ * initial state of buttons.
+ */
+Backdrop.behaviors.ckeditorAdminToggle = {
+  'attach': function(context, settings) {
+    var ckeditorAdminToggleDependency = function(featureName, enabled) {
+      $('[data-ckeditor-feature-dependency]').each(function() {
+        var $element = $(this);
+        var dependency = $element.data('ckeditor-feature-dependency');
+        if (dependency === featureName) {
+          if (enabled) {
+            $element.show();
+          }
+          else {
+            $element.hide();
+          }
+        }
+      });
+    };
+
+    $(context).find('#filter-admin-format-form').once('ckeditor-settings-toggle', function() {
+      $(this).find('[data-ckeditor-feature-dependency]').hide();
+      $(document).on('backdropEditorFeatureInit.ckeditorAdminToggle', function(e, feature, enabled) {
+        ckeditorAdminToggleDependency(feature.name, enabled);
+      });
+      $(document).on('backdropEditorFeatureAdded.ckeditorAdminToggle', function(e, feature) {
+        ckeditorAdminToggleDependency(feature.name, true);
+      });
+      $(document).on('backdropEditorFeatureRemoved.ckeditorAdminToggle', function(e, feature) {
+        ckeditorAdminToggleDependency(feature.name, false);
+      });
+    });
+  },
+  'detach': function(context, settings) {
+    $(context).find('#filter-admin-format-form').each(function() {
+      $(document).off('.ckeditorAdminToggle');
     });
   }
 };

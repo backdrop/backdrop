@@ -94,6 +94,22 @@ Backdrop.editorConfiguration = {
   },
 
   /**
+   * Must be called by a specific text editor's configuration whenever a feature
+   * is utilized by default at page load time.
+   *
+   * Triggers the backdropEditorFeatureInit event on the document, which
+   * receives a Backdrop.EditorFeature object and the status of the feature.
+   *
+   * @param Backdrop.EditorFeature feature
+   *   A text editor feature object.
+   * @param bool enabled
+   *   The initial state of the feature at load time.
+   */
+  initFeature: function (feature, status) {
+    $(document).trigger('backdropEditorFeatureInit', [feature, status]);
+  },
+
+  /**
    * May be called by a specific text editor's configuration whenever a feature
    * is being added, to check whether it would require the filter settings to be
    * updated.

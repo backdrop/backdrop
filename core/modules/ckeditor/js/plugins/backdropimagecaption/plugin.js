@@ -215,6 +215,16 @@ CKEDITOR.plugins.add('backdropimagecaption', {
 
           var actualWidget = saveCallback(dialogReturnValues);
 
+          // Delete the figure element if the widget was destroyed (meaning the
+          // src was deleted). See widgetDefinition._createDialogSaveCallback()
+          // in backdropimage/plugin.js
+          if (!actualWidget.isInited()) {
+            if (actualWidget.element && actualWidget.element.getName() === 'figure') {
+              actualWidget.element.remove();
+            }
+            return actualWidget;
+          }
+
           // By default, the template of captioned widget has no
           // data-placeholder attribute. Note that it also must be done when
           // upcasting existing elements (see widgetDefinition.upcast).

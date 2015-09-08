@@ -766,6 +766,7 @@ function link_theme() {
  */
 function link_element_info() {
   $elements = array();
+  // We use "link_field" here to avoid conflicts with theme_link().
   $elements['link_field'] = array(
     '#input' => TRUE,
     '#process' => array('link_field_process'),

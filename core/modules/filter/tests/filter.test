@@ -1970,3 +1970,70 @@ class FilterSettingsTestCase extends BackdropWebTestCase {
     }
   }
 }
+
+/**
+ * Tests for filter.module's node/entity hooks to track file usage.
+ */
+class FilterFileUsageTest extends BackdropWebTestCase {
+  /**
+   * Tests file usages are tracked in creating, updating, and deleting content.
+   */
+  function testFilterEntityHooks() {
+    $image = entity_create('file', array());
+    $image->uri = 'core/misc/favicon.ico';
+    $image->filename = 'favicon.ico';
+    $image->save();
+    $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages.');
+
+    // Test filter_entity_insert(): increment.
+    $node = new Node(array(
+      'type' => 'page',
+      'title' => 'test',
+      'uid' => 0,
+      'body' => array(
+        'und' => array(
+          0 => array(
+            'value' => '<p>Hello, world!</p><img src="awesome-llama.jpg" data-file-id="' . $image->fid . '" />',
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'log' => 'First revision.',
+    ));
+    debug($node);
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '1'))), file_usage_list($image), 'The image has 1 usage.');
+
+    // Test filter_entity_update(): increment, twice, by creating new revisions.
+    $node->vid = NULL;
+    $node->log = 'Second revision.';
+    $node->save();
+    $second_revision_id = $node->vid;
+    $node->vid = NULL;
+    $node->log = 'Third revision.';
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+
+    // Test hook_entity_update(): decrement, by modifying the last revision:
+    // remove the data- attribute from the body field.
+    $original_value = $node->body[LANGUAGE_NONE][0]['value'];
+    $new_value = str_replace('data-file-id', 'data-file-id-modified', $original_value);
+    $node->body[LANGUAGE_NONE][0]['value'] = $new_value;
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+
+    // Test hook_entity_update(): increment, by modifying the last revision:
+    // read the data- attribute to the body field.
+    $node->body[LANGUAGE_NONE][0]['value'] = $original_value;
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+
+    // Test filter_node_revision_delete(): decrement, by deleting a revision.
+    node_revision_delete($second_revision_id);
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+
+    // Test filter_entity_delete().
+    $node->delete();
+    $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages again.');
+  }
+}

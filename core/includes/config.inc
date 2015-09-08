@@ -122,7 +122,7 @@ function config_get_config_directory($type = 'active') {
 
     // If the path starts with a slash or dot, assume a normal path. If just
     // a directory name is provided, make it relative to the settings.php file.
-    $first_character = substr($path, 0);
+    $first_character = substr($path, 0, 1);
     if (!in_array($first_character, array('.', '/', '\\'))) {
       $path = conf_path() . '/' . $path;
     }
