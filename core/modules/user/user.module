@@ -106,7 +106,7 @@ function user_entity_info() {
           'label' => t('User'),
           'admin' => array(
             'path' => 'admin/config/people/manage',
-            'access arguments' => array('administer users'),
+            'access arguments' => array('manage user accounts'),
           ),
         ),
       ),
@@ -478,8 +478,8 @@ function user_permission() {
       'title' => t('Administer permissions'),
       'restrict access' => TRUE,
     ),
-    'administer users' => array(
-      'title' => t('Administer users'),
+    'manage user accounts' => array(
+      'title' => t('Manage user accounts'),
       'restrict access' => TRUE,
     ),
     'administer account settings' => array(
@@ -598,7 +598,7 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
   $keys = preg_replace('!\*+!', '%', $keys);
   $query = db_select('users')->extend('PagerDefault');
   $query->fields('users', array('uid'));
-  if (user_access('administer users')) {
+  if (user_access('manage user accounts')) {
     // Administrators can also search in the otherwise private email field,
     // and they don't need to be restricted to only active users.
     $query->fields('users', array('mail'));
@@ -624,7 +624,7 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
       'title' => user_format_name($account),
       'link' => url('user/' . $account->uid, array('absolute' => TRUE)),
     );
-    if (user_access('administer users')) {
+    if (user_access('manage user accounts')) {
       $result['title'] .= ' (' . $account->mail . ')';
     }
     $results[] = $result;
@@ -663,7 +663,7 @@ function user_account_form(&$form, &$form_state) {
   $account = $form['#user'];
   $register = ($form['#user']->uid > 0 ? FALSE : TRUE);
 
-  $admin = user_access('administer users');
+  $admin = user_access('manage user accounts');
 
   $form['#validate'][] = 'user_account_form_validate';
 
@@ -1069,7 +1069,7 @@ function user_view_access($account) {
   // Never allow access to view the anonymous user account.
   if ($uid) {
     // Admins can view all, users can view own profiles at all times.
-    if ($GLOBALS['user']->uid == $uid || user_access('administer users')) {
+    if ($GLOBALS['user']->uid == $uid || user_access('manage user accounts')) {
       return TRUE;
     }
     elseif (user_access('access user profiles')) {
@@ -1087,7 +1087,7 @@ function user_view_access($account) {
  * Access callback for user account editing.
  */
 function user_edit_access($account) {
-  return (($GLOBALS['user']->uid == $account->uid) || user_access('administer users')) && $account->uid > 0;
+  return (($GLOBALS['user']->uid == $account->uid) || user_access('manage user accounts')) && $account->uid > 0;
 }
 
 /**
@@ -1097,7 +1097,7 @@ function user_edit_access($account) {
  * users, and prevent the anonymous user from cancelling the account.
  */
 function user_cancel_access($account) {
-  return ((($GLOBALS['user']->uid == $account->uid) && user_access('cancel account')) || user_access('administer users')) && $account->uid > 0;
+  return ((($GLOBALS['user']->uid == $account->uid) && user_access('cancel account')) || user_access('manage user accounts')) && $account->uid > 0;
 }
 
 /**
@@ -1168,14 +1168,14 @@ function user_menu() {
     'title' => 'Add user account',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_register_form'),
-    'access arguments' => array('administer users'),
+    'access arguments' => array('manage user accounts'),
     'type' => MENU_LOCAL_ACTION,
   );
   $items['admin/people/cancel'] = array(
     'title' => 'Cancel user accounts',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_multiple_cancel_confirm'),
-    'access arguments' => array('administer users'),
+    'access arguments' => array('manage user accounts'),
     'file' => 'user.admin.inc',
     'type' => MENU_CALLBACK,
   );
@@ -2882,7 +2882,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_form($form, &$form_state) {
   global $user;
 
-  $admin = user_access('administer users');
+  $admin = user_access('manage user accounts');
 
   // Pass access information to the submit handler. Running an access check
   // inside the submit function interferes with form processing and breaks
@@ -2927,7 +2927,7 @@ function user_register_form($form, &$form_state) {
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = urldecode($_SERVER['HTTP_REFERER']);
   }
-  elseif (user_access('administer users')) {
+  elseif (user_access('manage user accounts')) {
     $path = 'admin/people';
   }
   else {

@@ -30,7 +30,7 @@ class DBLogTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('dblog', 'book');
     // Create users.
-    $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
+    $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'manage user accounts'));
     $this->any_user = $this->backdropCreateUser(array());
   }
 

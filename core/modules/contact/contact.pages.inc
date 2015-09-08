@@ -189,7 +189,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $config = config('contact.settings');
   $limit = $config->get('contact_threshold_limit');
   $window = $config->get('contact_threshold_window');
-  if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('administer users')) {
+  if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('manage user accounts')) {
     backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
     return array();
   }

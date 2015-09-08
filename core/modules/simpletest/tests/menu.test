@@ -1303,7 +1303,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify breadcrumbs on user and user/%.
     // We need to log back in and out below, and cannot simply grant the
-    // 'administer users' permission, since user_page() makes your head explode.
+    // 'manage user accounts' permission, since user_page() makes your head explode.
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access user profiles',
     ));
@@ -1329,7 +1329,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Create a second user to verify breadcrumb on user pages again.
     $this->web_user = $this->backdropCreateUser(array(
-      'administer users',
+      'manage user accounts',
       'access user profiles',
     ));
     $this->backdropLogin($this->web_user);

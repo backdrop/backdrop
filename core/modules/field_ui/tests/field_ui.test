@@ -700,7 +700,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     parent::setUp(array('field_test'));
 
     // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer users', 'administer account settings'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'manage user accounts', 'administer account settings'));
     $this->backdropLogin($admin_user);
   }
 

@@ -158,7 +158,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
   */
   function testAutoReply() {
     // Create and login administrative user.
-    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer permissions', 'administer users'));
+    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer permissions', 'manage user accounts'));
     $this->backdropLogin($admin_user);
 
     // Set up three categories, 2 with an auto-reply and one without.
@@ -305,7 +305,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     parent::setUp('contact');
 
     // Create an admin user.
-    $this->admin_user = $this->backdropCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
+    $this->admin_user = $this->backdropCreateUser(array('administer contact forms', 'manage user accounts', 'administer account settings'));
 
     // Create some normal users with their contact forms enabled by default.
     $config = config('contact.settings');

@@ -23,7 +23,7 @@ class FileFieldTestCase extends BackdropWebTestCase {
     $modules[] = 'path';
     $modules[] = 'file_module_test';
     parent::setUp($modules);
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'create url aliases'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'manage user accounts', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'create url aliases'));
     $this->backdropLogin($this->admin_user);
   }
 

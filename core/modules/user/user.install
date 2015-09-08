@@ -216,10 +216,10 @@ function user_update_1000() {
 }
 
 /**
- * Grant "administer account settings" to roles with "administer users."
+ * Grant "administer account settings" to roles with "manage user accounts."
  */
 function user_update_1001() {
-  $rids = db_query("SELECT rid FROM {role_permission} WHERE permission = :perm", array(':perm' => 'administer users'))->fetchCol();
+  $rids = db_query("SELECT rid FROM {role_permission} WHERE permission = :perm", array(':perm' => 'manage user accounts'))->fetchCol();
   // None found.
   if (empty($rids)) {
     return;
@@ -492,7 +492,7 @@ function user_update_1009() {
     'tag' => 'default',
     'disabled' => FALSE,
     'base_table' => 'users',
-    'human_name' => 'Administer users',
+    'human_name' => 'Manage user accounts',
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
@@ -505,7 +505,7 @@ function user_update_1009() {
           ),
           'access' => array(
             'type' => 'perm',
-            'perm' => 'administer users',
+            'perm' => 'manage user accounts',
           ),
           'cache' => array(
             'type' => 'none',
@@ -1073,7 +1073,7 @@ function user_update_1009() {
           'path' => 'admin/people/list',
           'menu' => array(
             'type' => 'default tab',
-            'title' => 'Find user accounts',
+            'title' => 'Manage user accounts',
             'description' => '',
             'name' => 'management',
             'weight' => '0',
