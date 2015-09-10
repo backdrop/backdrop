@@ -27,6 +27,8 @@ Backdrop.dialog = function (element, options) {
 
   function openDialog (settings) {
     settings = $.extend({}, Backdrop.settings.dialog, options, settings);
+    settings.beforeClose = beforeClose;
+
     // Trigger a global event to allow scripts to bind events to the dialog.
     $(window).trigger('dialog:beforecreate', [dialog, $element, settings]);
     $element.dialog(settings);
@@ -39,7 +41,11 @@ Backdrop.dialog = function (element, options) {
         })
         .dialog('widget').css('position', 'fixed');
       $(window)
-        .on('resize.dialogResize scroll.dialogResize', settings, autoResizeCallback)
+        // We give each event multiple namespaces. Both the "dialogResize"
+        // namespace and the dialog ID, so the event may be triggered or unbound
+        // by either the generic "dialogResize" namespace or the namespace for
+        // each individual dialog created.
+        .on('resize.dialogResize.' + dialogId + ' scroll.dialogResize.' + dialogId, settings, autoResizeCallback)
         .trigger('resize.dialogResize');
     }
     dialog.open = true;
@@ -51,8 +57,18 @@ Backdrop.dialog = function (element, options) {
     $element.dialog('close');
     dialog.returnValue = value;
     dialog.open = false;
-    $(window).off('.dialogResize');
     $(window).trigger('dialog:afterclose', [dialog, $element]);
+  }
+
+  /**
+   * jQuery UI callback fired just before closing the dialog.
+   *
+   * This callback fires in all situations where the modal is closed, rather
+   * than only through the Backdrop dialog API. For example hitting the escape
+   * key or using the close button, which are triggered by jQuery UI directly.
+   */
+  function beforeClose (event, ui) {
+    $(window).off('resize.' + dialogId + ' scroll.' + dialogId);
   }
 
   /**
@@ -92,6 +108,12 @@ Backdrop.dialog = function (element, options) {
   var undef;
   var $element = $(element);
   var autoResizeTimer;
+
+  // Generate a dialog ID based on the microsecond the dialog was created.
+  // When binding and unbinding window resize events, we use this ID to track
+  // each individual dialog.
+  var dialogId = Date.now().toString();
+
   var autoResizeCallback = function(event) {
     clearTimeout(autoResizeTimer);
     autoResizeTimer = setTimeout(function() {
