@@ -5,6 +5,10 @@
   Backdrop.editors.ckeditor = {
 
     attach: function (element, format) {
+      if (!$('#ckeditor-modal').length) {
+        $('<div id="ckeditor-modal" />').hide().appendTo('body');
+      }
+
       this._loadExternalPlugins(format);
       // Set a title on the CKEditor instance that includes the text field's
       // label so that screen readers say something that is understandable
@@ -118,6 +122,8 @@
       classes.push('editor-dialog');
       dialogSettings.dialogClass = classes.join(' ');
       dialogSettings.autoResize = true;
+      dialogSettings.modal = true;
+      dialogSettings.target = '#ckeditor-modal';
 
       // Add a "Loading…" message, hide it underneath the CKEditor toolbar, create
       // a Backdrop.ajax instance to load the dialog and trigger it.
