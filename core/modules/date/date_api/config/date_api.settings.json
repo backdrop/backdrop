@@ -1,0 +1,9 @@
+{
+  "_config_name": "date_api.settings",
+  "date_min_year": 100,
+  "date_max_year": 4000,
+  "date_php_min_year": 1901,
+  "date_api_use_iso8601": false,
+  "date_db_tz_support": "-1",
+  "date_api_version" : "1.2"
+}
