@@ -228,6 +228,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     backdrop_set_breadcrumb($breadcrumb);
   }
   $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   $form['link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
@@ -314,7 +315,6 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
   );
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
   return $form;
 }
