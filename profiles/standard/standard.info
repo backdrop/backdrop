@@ -10,6 +10,7 @@ dependencies[] = color
 dependencies[] = comment
 dependencies[] = config
 dependencies[] = contextual
+dependencies[] = email
 dependencies[] = image
 dependencies[] = layout
 dependencies[] = list

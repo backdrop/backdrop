@@ -758,6 +758,10 @@ div.teaser-checkbox .form-item,
 fieldset label {
   font-weight: normal;
 }
+.field-label label {
+  margin: 0;
+  padding: 0;
+}
 .form-item label.option {
   font-size: 0.923em;
   text-transform: none;

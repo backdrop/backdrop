@@ -206,7 +206,7 @@ function date_year_range_element_process($element, &$form_state, $form) {
   );
 
   $element['#tree'] = TRUE;
-  $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date_year_range.js';
+  $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date-year-range.js';
 
   $context = array(
     'form' => $form,

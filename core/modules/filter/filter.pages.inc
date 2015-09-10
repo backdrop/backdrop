@@ -30,6 +30,11 @@ function filter_tips_long() {
 function filter_format_editor_link_form($form, &$form_state, $format) {
   $form_state['format'] = $format;
 
+  // Record the dialog selector that needs to be closed if present.
+  if (isset($form_state['input']['dialogOptions']['target'])) {
+    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
+  }
+
   // Pull in any default values set by the editor.
   $values = array();
   if (isset($form_state['input']['editor_object'])) {
@@ -77,6 +82,11 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
  */
 function filter_format_editor_image_form($form, &$form_state, $format) {
   $form_state['format'] = $format;
+
+  // Record the dialog selector that needs to be closed if present.
+  if (isset($form_state['input']['dialogOptions']['target'])) {
+    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
+  }
 
   // Pull in any default values set by the editor.
   $values = array();
@@ -246,6 +256,11 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
  * @see filter_format_editor_image_form()
  */
 function filter_format_editor_dialog_save($form, &$form_state) {
+  $dialog_selector = '#backdrop-dialog';
+  if (isset($form_state['storage']['dialog_selector'])) {
+    $dialog_selector = $form_state['storage']['dialog_selector'];
+  }
+
   $commands = array();
   $errors = form_get_errors();
   if (!empty($errors)) {
@@ -260,7 +275,7 @@ function filter_format_editor_dialog_save($form, &$form_state) {
       'command' => 'editorDialogSave',
       'values' => $form_state['values'],
     );
-    $commands[] = ajax_command_close_modal_dialog();
+    $commands[] = ajax_command_close_dialog($dialog_selector);
   }
   return array(
     '#type' => 'ajax',

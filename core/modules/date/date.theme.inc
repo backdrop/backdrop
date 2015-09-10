@@ -18,7 +18,7 @@ function theme_date_timezone($variables) {
 
   // Wrap in a div with an ID for #states.
   if (isset($element['#children'])) {
-    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
+    $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-date">' . $element['#children'] . '</div>';
   }
   return '<div ' . backdrop_attributes($attributes) . '>' . theme('form_element', $element) . '</div>';
 }
@@ -31,9 +31,8 @@ function theme_date_text($variables) {
 
   // Wrap in a div with an ID for #states.
   if (isset($element['#children'])) {
-    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
+    $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-date">' . $element['#children'] . '</div>';
   }
-
   return theme('form_element', $element);
 }
 
@@ -45,7 +44,7 @@ function theme_date_select($variables) {
 
   // Wrap in a div with an ID for #states.
   if (isset($element['#children'])) {
-    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
+    $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-date">' . $element['#children'] . '</div>';
   }
   return theme('form_element', $element);
 }
@@ -445,7 +444,6 @@ function theme_date_popup($variables) {
   if (isset($element['#children'])) {
     $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-date">' . $element['#children'] . '</div>';
   }
-
   return theme('form_element', $element);
 }
 
