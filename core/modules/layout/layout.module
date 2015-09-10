@@ -110,8 +110,8 @@ function layout_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
 
-  $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'title' => 'Settings',
+  $items['admin/structure/layouts/manage/%layout_tempstore/configure'] = array(
+    'title' => 'Configure',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_form', 4),
     'type' => MENU_LOCAL_TASK,

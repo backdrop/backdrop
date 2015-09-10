@@ -308,8 +308,8 @@ function _views_ui_get_operations(view $view) {
       'query' => array('token' => backdrop_get_token($view->name)),
     );
   }
-  $links['edit'] = array(
-    'title' => t('Edit'),
+  $links['configure'] = array(
+    'title' => t('Configure'),
     'href' => 'admin/structure/views/view/' . $view->name,
   );
   $links['clone'] = array(

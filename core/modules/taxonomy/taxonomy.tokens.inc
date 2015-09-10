@@ -136,7 +136,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           break;
 
         case 'edit-url':
-          $replacements[$original] = url("taxonomy/term/{$term->tid}/edit", $url_options);
+          $replacements[$original] = url("taxonomy/term/{$term->tid}/configure", $url_options);
           break;
 
         case 'node-count':
@@ -240,7 +240,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           break;
 
         case 'edit-url':
-          $replacements[$original] = url("admin/structure/taxonomy/{$vocabulary->machine_name}/edit", $url_options);
+          $replacements[$original] = url("admin/structure/taxonomy/{$vocabulary->machine_name}/configure", $url_options);
           break;
       }
     }

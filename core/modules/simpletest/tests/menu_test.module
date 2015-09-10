@@ -123,7 +123,7 @@ function menu_test_menu() {
     'access arguments' => array('access content'),
   );
   $items['menu-test/hidden/menu/manage/%menu/list'] = array(
-    'title' => 'List links',
+    'title' => 'Edit',
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -135,7 +135,7 @@ function menu_test_menu() {
     'type' => MENU_LOCAL_ACTION,
   );
   $items['menu-test/hidden/menu/manage/%menu/edit'] = array(
-    'title' => 'Edit menu',
+    'title' => 'Configure',
     'page callback' => 'node_page_default',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK,

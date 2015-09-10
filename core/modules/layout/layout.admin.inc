@@ -1324,7 +1324,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   }
   else {
     $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
-    $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+    $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
     $help = t('Add a new visibility condition to limit the situations in which this layout will apply.');
   }
   $form['help'] = array(
@@ -1537,7 +1537,7 @@ function layout_condition_edit_form_submit($form, &$form_state) {
     $form_state['ajax_rebuild_form'] = 'layout_settings_form';
     $form_state['ajax_rebuild_args'] = array($layout);
     $form_state['ajax_update'] = array('conditions');
-    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
   }
 }
 
@@ -1708,7 +1708,7 @@ function layout_clone_form_submit($form, &$form_state) {
 
   // Redirect to the full settings form.
   $form_state['redirect'] = array(
-    'admin/structure/layouts/manage/' . $layout->name . '/settings',
+    'admin/structure/layouts/manage/' . $layout->name . '/configure',
     array('query' => array('destination' => 'admin/structure/layouts/manage/' . $layout->name)),
   );
   backdrop_set_message(t('Cloned layout @title created. You may now update the cloned settings.', array('@title' => $layout->title)));

@@ -33,9 +33,9 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Add terms'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
     );
-    $links['edit'] = array(
-      'title' => t('Edit vocabulary'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/configure",
     );
     $links['delete'] = array(
       'title' => t('Delete vocabulary'),
@@ -183,13 +183,13 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   switch (taxonomy_vocabulary_save($vocabulary)) {
     case SAVED_NEW:
       backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
       break;
 
     case SAVED_UPDATED:
       backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
       break;
   }
@@ -355,9 +355,9 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       );
     }
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'taxonomy/term/' . $term->tid . '/edit',
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'taxonomy/term/' . $term->tid . '/configure',
       'query' => backdrop_get_destination(),
     );
     $links['delete'] = array(
@@ -698,11 +698,11 @@ function taxonomy_form_term_submit($form, &$form_state) {
   switch ($status) {
     case SAVED_NEW:
       backdrop_set_message(t('Created new term %term.', array('%term' => $term->name)));
-      watchdog('taxonomy', 'Created new term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
+      watchdog('taxonomy', 'Created new term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('configure'), 'taxonomy/term/' . $term->tid . '/configure'));
       break;
     case SAVED_UPDATED:
       backdrop_set_message(t('Updated term %term.', array('%term' => $term->name)));
-      watchdog('taxonomy', 'Updated term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
+      watchdog('taxonomy', 'Updated term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('configure'), 'taxonomy/term/' . $term->tid . '/configure'));
       break;
   }
 

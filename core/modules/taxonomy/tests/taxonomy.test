@@ -72,7 +72,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     // Edit the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
-    $this->clickLink(t('Edit vocabulary'));
+    $this->clickLink(t('Configure'));
     $edit = array();
     $edit['name'] = $this->randomName();
     $this->backdropPost(NULL, $edit, t('Save'));
@@ -465,7 +465,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Edit $term2, setting $term1 as parent.
     $edit = array();
     $edit['parent[]'] = array($term1->tid);
-    $this->backdropPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term2->tid . '/configure', $edit, t('Save'));
 
     // Check the hierarchy.
     $children = taxonomy_term_load_children($term1->tid);
@@ -567,7 +567,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     }    
 
     // Delete term 1 from the term edit page.
-    $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
+    $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/configure', array(), t('Delete'));
     $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Delete term 2 from the term delete page.
@@ -636,7 +636,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Test edit link as accessed from Taxonomy administration pages.
     // Because Simpletest creates its own database when running tests, we know
     // the first edit link found on the listing page is to our term.
-    $this->clickLink(t('Edit'), 1);
+    $this->clickLink(t('Configure'), 1);
 
     $this->assertRaw($edit['name'], 'The randomly generated term name is present.');
     $this->assertText($edit['description[value]'], 'The randomly generated term description is present.');
@@ -647,12 +647,12 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     );
 
     // Edit the term.
-    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/configure', $edit, t('Save'));
 
     // Check that the term is still present at admin UI after edit.
     $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
     $this->assertText($edit['name'], 'The randomly generated term name is present.');
-    $this->assertLink(t('Edit'));
+    $this->assertLink(t('Configure'));
 
     // View the term and check that it is correct.
     $this->backdropGet('taxonomy/term/' . $term->tid);
@@ -672,10 +672,10 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
     // Check that the term edit page does not try to interpret additional path
     // components as arguments for taxonomy_form_term().
-    $this->backdropGet('taxonomy/term/' . $term->tid . '/edit/' . $this->randomName());
+    $this->backdropGet('taxonomy/term/' . $term->tid . '/configure/' . $this->randomName());
 
     // Delete the term.
-    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', array(), t('Delete'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/configure', array(), t('Delete'));
     $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Assert that the term no longer exists.
@@ -1212,7 +1212,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'antonym' => 'Short',
     );
-    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/configure', $edit, t('Save'));
     taxonomy_terms_static_reset();
     $term = taxonomy_term_load($term->tid);
     $this->assertEqual($edit['antonym'], $term->antonym, 'Antonym was successfully edited.');
@@ -1511,7 +1511,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
     $edit = array();
     $edit['name'] = '<blink>Blinking Text</blink>';
     $edit['parent[]'] = array($term1->tid);
-    $this->backdropPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term2->tid . '/configure', $edit, t('Save'));
 
     // Create node with term2.
     $edit = array();
@@ -1626,7 +1626,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
     $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page for viewing a taxonomy term.");
 
     // Editing a taxonomy term should use the same theme as adding one.
-    $this->backdropGet('taxonomy/term/' . $term->tid . '/edit');
+    $this->backdropGet('taxonomy/term/' . $term->tid . '/configure');
     $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page for editing a taxonomy term.");
   }
 

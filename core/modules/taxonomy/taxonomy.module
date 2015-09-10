@@ -254,8 +254,8 @@ function taxonomy_menu() {
     'title' => 'View',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['taxonomy/term/%taxonomy_term/edit'] = array(
-    'title' => 'Edit',
+  $items['taxonomy/term/%taxonomy_term/configure'] = array(
+    'title' => 'Configure',
     'page callback' => 'backdrop_get_form',
     // Pass a NULL argument to ensure that additional path components are not
     // passed to taxonomy_form_term() as the vocabulary machine name argument.
@@ -307,8 +307,8 @@ function taxonomy_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20,
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary/edit'] = array(
-    'title' => 'Edit',
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/configure'] = array(
+    'title' => 'Configure',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary', 3),
     'access arguments' => array('administer taxonomy'),
@@ -343,7 +343,7 @@ function taxonomy_menu() {
  */
 function taxonomy_admin_paths() {
   $paths = array(
-    'taxonomy/term/*/edit' => TRUE,
+    'taxonomy/term/*/configure' => TRUE,
     'taxonomy/term/*/delete' => TRUE,
   );
   return $paths;

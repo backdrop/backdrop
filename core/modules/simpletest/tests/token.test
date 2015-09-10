@@ -648,7 +648,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
       'url:relative' => url("taxonomy/term/{$root_term->tid}", array('absolute' => FALSE)),
       'url:path' => 'root-term',
       'url:unaliased:path' => "taxonomy/term/{$root_term->tid}",
-      'edit-url' => url("taxonomy/term/{$root_term->tid}/edit", array('absolute' => TRUE)),
+      'edit-url' => url("taxonomy/term/{$root_term->tid}/configure", array('absolute' => TRUE)),
       'parents' => NULL,
       'parents:count' => NULL,
       'parents:keys' => NULL,
@@ -665,7 +665,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
       'url:relative' => url("taxonomy/term/{$parent_term->tid}", array('absolute' => FALSE)),
       'url:path' => "taxonomy/term/{$parent_term->tid}",
       'url:unaliased:path' => "taxonomy/term/{$parent_term->tid}",
-      'edit-url' => url("taxonomy/term/{$parent_term->tid}/edit", array('absolute' => TRUE)),
+      'edit-url' => url("taxonomy/term/{$parent_term->tid}/configure", array('absolute' => TRUE)),
       'parents' => 'Root term',
       'parents:count' => 1,
       'parents:keys' => $root_term->tid,
@@ -692,7 +692,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
     $vocabulary = $this->vocab;
     $tokens = array(
       'machine-name' => 'tags',
-      'edit-url' => url("admin/structure/taxonomy/{$vocabulary->machine_name}/edit", array('absolute' => TRUE)),
+      'edit-url' => url("admin/structure/taxonomy/{$vocabulary->machine_name}/configure", array('absolute' => TRUE)),
     );
     $this->assertTokens('vocabulary', array('vocabulary' => $vocabulary), $tokens);
   }

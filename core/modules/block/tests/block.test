@@ -58,9 +58,9 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $this->assertText($data['subject'], 'Newly added block found.');
 
-    // Verify presence of configure and delete links for custom block.
+    // Verify presence of edit and delete links for custom block.
     $this->backdropGet('admin/structure/block');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $bid . '/configure', 0, 'Custom block configure link found.');
+    $this->assertLinkByHref('admin/structure/block/manage/' . $bid . '/edit', 0, 'Custom block edit link found.');
     $this->assertLinkByHref('admin/structure/block/manage/' . $bid . '/delete', 0, 'Custom block delete link found.');
 
     // Delete the created custom block & verify that it's been deleted and no longer appearing on the page.
@@ -97,9 +97,9 @@ class BlockTestCase extends BackdropWebTestCase {
     // but can still submit the form without errors.
     $block_admin = $this->backdropCreateUser(array('administer blocks'));
     $this->backdropLogin($block_admin);
-    $this->backdropGet('admin/structure/block/manage/' . $bid . '/configure');
+    $this->backdropGet('admin/structure/block/manage/' . $bid . '/edit');
     $this->assertFieldByXPath("//textarea[@name='body[value]' and @disabled='disabled']", 'This field has been disabled because you do not have sufficient permissions to edit it.', 'Body field contains denied message');
-    $this->backdropPost('admin/structure/block/manage/' . $bid . '/configure', array(), 'Save block');
+    $this->backdropPost('admin/structure/block/manage/' . $bid . '/edit', array(), 'Save block');
     $this->assertNoText(t('Ensure that each block description is unique.'));
 
     // Confirm that the custom block is still being displayed using configured text format.

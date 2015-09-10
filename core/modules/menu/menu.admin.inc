@@ -17,13 +17,13 @@ function menu_overview_page() {
     $row = array();
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
-    $links['list'] = array(
-      'title' => t('List links'),
+    $links['edit'] = array(
+      'title' => t('Edit'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
-    $links['edit'] = array(
-      'title' => t('Edit menu'),
-      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/edit',
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
     );
     $links['add'] = array(
       'title' => t('Add link'),
