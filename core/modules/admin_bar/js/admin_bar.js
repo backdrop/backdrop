@@ -26,7 +26,7 @@ Backdrop.behaviors.adminBar = {
     if (settings.admin_bar.suppress) {
       return;
     }
-    var $adminBar = $('#admin-bar', context);
+    var $adminBar = $('#admin-bar');
     // Client-side caching; if administration bar is not in the output, it is
     // fetched from the server and cached in the browser.
     if (!$adminBar.length && settings.admin_bar.hash) {
