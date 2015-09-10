@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Date API functions.
+ */
 
 /**
  * Set up some constants.

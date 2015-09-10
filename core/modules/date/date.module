@@ -5,6 +5,7 @@
  * Defines date/time field types.
  */
 
+require_once(__DIR__ . '/date.inc');
 require_once(__DIR__ . '/date.field.inc');
 
 /**
@@ -454,7 +455,7 @@ function date_formatter_format($formatter, $settings, $granularity = array(), $l
 function date_format_type_format($format_type, $langcode = NULL) {
   $static = &backdrop_static(__FUNCTION__);
   if (!isset($static[$langcode][$format_type])) {
-	$date_format = system_date_format_load($format_type);
+    $date_format = system_date_format_load($format_type);
     $format = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
 
     // If locale enabled and $format_type inexistent in {date_format_locale}
@@ -570,6 +571,7 @@ function date_views_api() {
  */
 function date_autoload_info() {
   return array(
+    'BackdropDateTime' => 'date.class.inc',
     'date_sql_handler' => 'views/date_sql_handler.inc',
     'date_views_argument_handler' => 'views/date_views_argument_handler.inc',
     'date_views_argument_handler_simple' => 'views/date_views_argument_handler_simple.inc',

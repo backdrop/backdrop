@@ -9,7 +9,7 @@ require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 class DateTimezoneTestCase extends DateFieldBasic {
 
   /**
-   * @todo.
+   * Creates one of each type of date field and check timezone handling in each.
    */
   public function testTimezone() {
     // Create date fields with combinations of various timezone handling and
@@ -149,7 +149,7 @@ class DateTimezoneTestCase extends DateFieldBasic {
   }
 
   /**
-   * @todo.
+   * Utility function to validate the node form displays date fields correctly.
    */
   public function dateForm($field_name, $field_type, $max_granularity, $tz_handling) {
     $format = system_date_format_load('long');

@@ -291,7 +291,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     $which = 'all';
     $source = '';
     if (!empty($form['operator'])) {
-      $source = ($form['operator']['#type'] == 'radios') ? 'radio:options[operator]' : 'edit-options-operator';
+      $source = ($form['operator']['#type'] == 'radios') ? 'radio:options[operator]' : '#edit-options-operator';
     }
 
     $identifier = $this->options['expose']['identifier'];
@@ -302,7 +302,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         $which = in_array($this->operator, $this->operator_values(2)) ? 'minmax' : 'value';
       }
       else {
-        $source = 'edit-' . backdrop_html_id($this->options['expose']['operator_id']);
+        $source = '#edit-' . backdrop_html_id($this->options['expose']['operator_id']);
       }
     }
 
@@ -329,7 +329,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    * @param string $prefix
    *   A prefix for the date values, 'value', 'min', or 'max' .
    * @param string $source
-   *   The operator for this element.
+   *   An HTML selector for the operator for this element.
    * @param string $which
    *   Which element to provide, 'all', 'value', or 'minmax' .
    * @param array $operator_values
@@ -367,7 +367,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     if (!empty($form_state['exposed'])) {
       // UI when the date selector is exposed.
       $default_date = $this->date_default_value($prefix);
-      $id = 'edit-' . str_replace('_', '-', $this->field) . '-' . $prefix;
       $form[$prefix] = array(
         '#title' => check_plain($label),
         '#type' => $type,
@@ -377,13 +376,14 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#date_label_position' => 'within',
         '#date_year_range' => $this->options['year_range'],
         '#process' => array($type . '_element_process'),
-        '#prefix' => '<div id="' . $id . '-wrapper"><div id="' . $id . '-inside-wrapper">',
-        '#suffix' => '</div></div>',
       );
       if ($which == 'all') {
-        $form[$prefix]['#states']['visible'][] = array(
-          $source => array('value' => $operator_values)
-        );
+        $form[$prefix]['#states']['visible'] = array();
+        foreach ($operator_values as $operator) {
+          $form[$prefix]['#states']['visible'][] = array(
+            $source => array('value' => $operator),
+          );
+        }
       }
       if (!isset($form_state['input'][$identifier][$prefix])) {
         // Ensure these exist.
@@ -395,7 +395,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     else {
       // UI when the date selector is on the views configuration screen.
       $default_date = '';
-      $id = 'edit-options-value-' . $prefix;
       $form[$prefix . '_group'] = array(
         '#type' => 'fieldset',
         '#attributes' => array('class' => array('date-views-filter-fieldset')),
@@ -416,8 +415,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#date_label_position' => 'within',
         '#date_year_range' => $this->options['year_range'],
         '#process' => array($type . '_element_process'),
-        '#prefix' => '<div id="' . $id . '-wrapper"><div id="' . $id . '-inside-wrapper">',
-        '#suffix' => '</div></div>',
         '#states' => array(
           'visible' => array(
             ":input.{$prefix}-choose-input-type" => array('value' => 'date'),
@@ -436,9 +433,12 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         ),
       );
       if ($which == 'all') {
-	    $form[$prefix . '_group']['#states']['visible'][] = array(
-		  $source => array('value' => $operator_values)
-		  );
+        $form[$prefix . '_group']['#states']['visible'] = array();
+        foreach ($operator_values as $operator) {
+          $form[$prefix . '_group']['#states']['visible'][] = array(
+            $source => array('value' => $operator),
+          );
+        }
       }
     }
     return $form;

@@ -15,22 +15,12 @@
 function theme_date_timezone($variables) {
   $element = $variables['element'];
   $attributes = $element['#attributes'];
-  $wrapper_attributes = array();
-  // Add an wrapper to mimic the way a single value field works, for ease in
-  // using #states.
+
+  // Wrap in a div with an ID for #states.
   if (isset($element['#children'])) {
-    $element['#children'] = '<div id="' . $element['#id'] . '" ' . backdrop_attributes($wrapper_attributes) . '>' . $element['#children'] . '</div>';
+    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
   }
   return '<div ' . backdrop_attributes($attributes) . '>' . theme('form_element', $element) . '</div>';
-}
-
-/**
- * Returns HTML for a date select element.
- */
-function theme_date_select($variables) {
-  $element = $variables['element'];
-  $element['#wrapper_attributes']['class'][] = 'container-inline-date';
-  return theme('form_element', $element);
 }
 
 /**
@@ -38,11 +28,33 @@ function theme_date_select($variables) {
  */
 function theme_date_text($variables) {
   $element = $variables['element'];
+
+  // Wrap in a div with an ID for #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
+  }
+
+  return theme('form_element', $element);
+}
+
+/**
+ * Returns HTML for a "date_select" element, including all child elements.
+ */
+function theme_date_select($variables) {
+  $element = $variables['element'];
+
+  // Wrap in a div with an ID for #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '">' . $element['#children'] . '</div>';
+  }
   return theme('form_element', $element);
 }
 
 /**
  * Returns HTML for a date select input form element.
+ *
+ * This is for an individual select element (e.g. Year, Month, Day). The
+ * complete element is wrapped in theme_date_select().
  */
 function theme_date_select_element($variables) {
   $element = $variables['element'];
@@ -334,10 +346,10 @@ function theme_date_display_range($variables) {
   $end_date = '<span class="date-display-end"' . backdrop_attributes($attributes_end) . '>' . $date2 . $timezone . '</span>';
 
   // Wrap the result with the attributes.
-  $output = '<div class="date-display-range">' . t('!start-date to !end-date', array(
+  $output = '<span class="date-display-range">' . t('!start-date to !end-date', array(
     '!start-date' => $start_date,
     '!end-date' => $end_date,
-  )) . '</div>';
+  )) . '</span>';
 
   // Add remaining message and return.
   return $output . $show_remaining_days;
@@ -428,7 +440,12 @@ function theme_date_text_parts($variables) {
  */
 function theme_date_popup($variables) {
   $element = $variables['element'];
-  $element['#wrapper_attributes']['class'][] = 'container-inline-date';
+
+  // Wrap in a div with an ID for #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-date">' . $element['#children'] . '</div>';
+  }
+
   return theme('form_element', $element);
 }
 

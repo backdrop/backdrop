@@ -13,7 +13,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(
-      array('administer content types', 'administer nodes', 'bypass node access')
+      array('access content', 'administer content types', 'administer nodes', 'bypass node access')
     );
     $this->backdropLogin($this->privileged_user);
 
@@ -249,7 +249,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
   }
 
   /**
-   * @todo.
+   * Remove a Date field though the UI.
    */
   protected function deleteDateField($label, $bundle = 'story', $bundle_name = 'Story') {
     $this->backdropGet("admin/structure/types/manage/$bundle/fields");
@@ -286,10 +286,9 @@ class DateFieldTestCase extends DateFieldBasic {
   }
 
   /**
-   * @todo.
+   * Tests that date field functions properly on the node form.
    */
   public function dateForm($field_name, $field_type, $widget_type, $todate = TRUE) {
-    // Tests that date field functions properly.
     $edit = array();
     $edit['title'] = $this->randomName(8);
     if ($widget_type == 'date_select') {

@@ -5496,7 +5496,6 @@ function _backdrop_bootstrap_full() {
   }
   $called = TRUE;
   require_once BACKDROP_ROOT . '/' . settings_get('path_inc', 'core/includes/path.inc');
-  require_once BACKDROP_ROOT . '/core/includes/date.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/pager.inc';
   require_once BACKDROP_ROOT . '/' . settings_get('menu_inc', 'core/includes/menu.inc');

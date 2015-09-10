@@ -7,7 +7,7 @@
  
 require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
-class DateViewsPopupTestCase extends DateFieldBasic {
+class DateViewsTestCase extends DateFieldBasic {
 
   /**
    * Test setup actions.
@@ -25,12 +25,6 @@ class DateViewsPopupTestCase extends DateFieldBasic {
       'input_format' => 'm/d/Y - H:i',
     );
     $this->createDateField($options);
-
-    // Set required permissions.
-    $permissions = array('administer views', 'administer site configuration');
-    // Create admin user and login.
-    $admin_user = $this->backdropCreateUser($permissions);
-    $this->backdropLogin($admin_user);
 
     // Create the view.
     $view = new view();
@@ -83,8 +77,12 @@ class DateViewsPopupTestCase extends DateFieldBasic {
   /**
    * Test date popup.
    */
-  public function testDatePopup() {
+  public function testDateViews() {
     // Go to view page.
     $this->backdropGet('test-date-popup');
+
+    // Ensure the exposed filter is present.
+    $this->assertField('field_test_date_popup_value[value][date]');
+    $this->assertNoField('field_test_date_popup_value[value][time]');
   }
 }

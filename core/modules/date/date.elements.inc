@@ -534,7 +534,7 @@ function date_select_element_process($element, &$form_state, $form) {
 
   $element['#tree'] = TRUE;
   $element['#theme_wrappers'] = array('date_select');
-
+  $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date.css';
   $element += (array) date_parts_element($element, $date, $element['#date_format']);
 
   // Store a hidden value for all date parts not in the current display.
@@ -983,13 +983,13 @@ function date_popup_element_process($element, &$form_state, $form) {
     }
     // Only date exists.
     elseif (!empty($element['date']) && empty($element['time'])) {
-      $element['date']['#title'] = check_plain($element['#date_title']);
+      $element['date']['#title'] = $element['#title'];
       $element['date']['#title_display'] = $element['#title_display'];
       $element['date']['#required'] = $element['#required'];
     }
     // Only time exists.
     elseif (empty($element['date']) && !empty($element['time'])) {
-      $element['time']['#title'] = check_plain($element['#date_title']);
+      $element['time']['#title'] = $element['#title'];
       $element['time']['#title_display'] = $element['#title_display'];
       $element['time']['#required'] = $element['#required'];
     }
