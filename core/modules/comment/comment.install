@@ -153,7 +153,7 @@ function comment_schema() {
       ),
       'thread' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'description' => "The alphadecimal representation of the comment's place in a thread, consisting of a base 36 string prefixed by an integer indicating its length.",
       ),
@@ -171,7 +171,7 @@ function comment_schema() {
       ),
       'homepage' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => FALSE,
         'description' => "The comment author's home page address from the comment form, if user is anonymous, and the 'Anonymous users may/must leave their contact information' setting is turned on.",
       ),

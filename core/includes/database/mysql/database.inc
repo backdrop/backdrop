@@ -65,7 +65,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       $this->exec('SET NAMES utf8 COLLATE ' . $connection_options['collation']);
     }
     else {
-      $this->exec('SET NAMES utf8');
+      $this->exec('SET NAMES utf8mb4');
     }
 
     // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL

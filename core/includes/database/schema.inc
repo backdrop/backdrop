@@ -110,7 +110,7 @@ require_once __DIR__ . '/query.inc';
  *     'vid'       => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
  *     'type'      => array('type' => 'varchar','length' => 32,'not null' => TRUE, 'default' => ''),
  *     'language'  => array('type' => 'varchar','length' => 12,'not null' => TRUE,'default' => ''),
- *     'title'     => array('type' => 'varchar','length' => 255,'not null' => TRUE, 'default' => ''),
+ *     'title'     => array('type' => 'varchar','length' => 191,'not null' => TRUE, 'default' => ''),
  *     'uid'       => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
  *     'status'    => array('type' => 'int', 'not null' => TRUE, 'default' => 1),
  *     'created'   => array('type' => 'int', 'not null' => TRUE, 'default' => 0),

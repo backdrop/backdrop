@@ -200,7 +200,7 @@ db_create_table('locales_source', array(
     ),
     'textgroup' => array(
       'type' => 'varchar',
-      'length' => 255,
+      'length' => 191,
       'not null' => TRUE,
       'default' => 'default',
     ),
@@ -210,7 +210,7 @@ db_create_table('locales_source', array(
     ),
     'context' => array(
       'type' => 'varchar',
-      'length' => 255,
+      'length' => 191,
       'not null' => TRUE,
       'default' => '',
     ),

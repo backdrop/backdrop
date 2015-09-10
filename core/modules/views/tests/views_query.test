@@ -175,7 +175,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'name' => array(
           'description' => "A person's name",
           'type' => 'varchar',
-          'length' => 255,
+          'length' => 191,
           'not null' => TRUE,
           'default' => '',
         ),
@@ -188,7 +188,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'job' => array(
           'description' => "The person's job",
           'type' => 'varchar',
-          'length' => 255,
+          'length' => 191,
           'not null' => TRUE,
           'default' => 'Undefined',
         ),
