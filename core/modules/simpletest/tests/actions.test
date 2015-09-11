@@ -39,9 +39,6 @@ class ActionLoopTestCase extends BackdropWebTestCase {
     $expected = array();
     $expected[] = 'Triggering action loop';
     $recursion_limit = config_get('system.core', 'action_recursion_limit');
-    if (empty($recursion_limit)) {
-      $recursion_limit = 35;
-    }
     for ($i = 1; $i <= $recursion_limit; $i++) {
       $expected[] = "Test log #$i";
     }
