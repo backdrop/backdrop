@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Implement an image field, based on the file module's file field.
@@ -23,8 +22,8 @@ function image_field_info() {
         'max_filesize' => '',
         'alt_field' => 0,
         'title_field' => 0,
-        'max_resolution' => '',
-        'min_resolution' => '',
+        'max_size' => '',
+        'min_size' => '',
         'default_image' => '',
       ),
       'default_widget' => 'image_image',
@@ -86,8 +85,8 @@ function image_field_instance_settings_form($field, $instance) {
   $form = file_field_instance_settings_form($field, $instance);
 
   // Add maximum and minimum resolution settings.
-  $max_resolution = explode('x', $settings['max_resolution']) + array('', '');
-  $form['max_resolution'] = array(
+  $max_size = explode('x', $settings['max_size']) + array('', '');
+  $form['max_size'] = array(
     '#type' => 'item',
     '#title' => t('Maximum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
@@ -96,27 +95,27 @@ function image_field_instance_settings_form($field, $instance) {
     '#field_suffix' => '</div>',
     '#description' => t('The maximum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
-  $form['max_resolution']['x'] = array(
+  $form['max_size']['x'] = array(
     '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
-    '#default_value' => $max_resolution[0],
+    '#default_value' => $max_size[0],
     '#min' => 1,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
-  $form['max_resolution']['y'] = array(
+  $form['max_size']['y'] = array(
     '#type' => 'number',
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
-    '#default_value' => $max_resolution[1],
+    '#default_value' => $max_size[1],
     '#min' => 1,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
 
-  $min_resolution = explode('x', $settings['min_resolution']) + array('', '');
-  $form['min_resolution'] = array(
+  $min_size = explode('x', $settings['min_size']) + array('', '');
+  $form['min_size'] = array(
     '#type' => 'item',
     '#title' => t('Minimum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
@@ -125,20 +124,20 @@ function image_field_instance_settings_form($field, $instance) {
     '#field_suffix' => '</div>',
     '#description' => t('The minimum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
-  $form['min_resolution']['x'] = array(
+  $form['min_size']['x'] = array(
     '#type' => 'number',
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
-    '#default_value' => $min_resolution[0],
+    '#default_value' => $min_size[0],
     '#min' => 1,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
-  $form['min_resolution']['y'] = array(
+  $form['min_size']['y'] = array(
     '#type' => 'number',
     '#title' => t('Minimum height'),
     '#title_display' => 'invisible',
-    '#default_value' => $min_resolution[1],
+    '#default_value' => $min_size[1],
     '#min' => 1,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
@@ -379,8 +378,8 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   foreach (element_children($elements) as $delta) {
     // Add upload resolution validation.
-    if ($settings['max_resolution'] || $settings['min_resolution']) {
-      $elements[$delta]['#upload_validators']['file_validate_image_resolution'] = array($settings['max_resolution'], $settings['min_resolution']);
+    if ($settings['max_size'] || $settings['min_size']) {
+      $elements[$delta]['#upload_validators']['file_validate_image_resolution'] = array($settings['max_size'], $settings['min_size']);
     }
 
     // If not using custom extension validation, ensure this is an image.
@@ -623,4 +622,3 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
   return $element;
 }
-
