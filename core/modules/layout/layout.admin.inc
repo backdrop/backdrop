@@ -908,6 +908,10 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
     '#attributes' => array(
       'id' => array('layout-block-list-search'),
     ),
+    // Hide the search if no JavaScript is available.
+    '#wrapper_attributes' => array(
+      'class' => array('js-show'),
+    ),
   );
   $output['block_list'] = array(
     '#type' => 'container',
@@ -915,14 +919,13 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       'class' => array('layout-block-list'),
     ),
   );
-  
+
   $output['block_list']['block_list_inner'] = array(
     '#type' => 'container',
     '#attributes' => array(
       'class' => array('layout-block-list-wrapper'),
     ),
   );
-  
 
   foreach ($block_list as $key => $block_info) {
     $output['block_list']['block_list_inner'][$key] = array(
