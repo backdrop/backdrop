@@ -5789,12 +5789,26 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     $searchdir[] = "$config/$directory";
   }
 
+  // Do not check for system files in common special-purpose directories.
+  $ignore_directories = array(
+    'assets',
+    'css',
+    'scss',
+    'js',
+    'images',
+    'config',
+    'templates',
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Get current list of items.
   if (!function_exists('file_scan_directory')) {
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
   foreach ($searchdir as $dir) {
-    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth));
+    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
 
     // Duplicate files found in later search directories take precedence over
     // earlier ones, so we want them to overwrite keys in our resulting

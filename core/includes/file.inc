@@ -2084,9 +2084,16 @@ function file_download_access($uri) {
  *   'filename', and 'name' members corresponding to the matching files.
  */
 function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
+  // By default, do not check for files in common special-purpose directories.
+  $ignore_directories = array(
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Merge in defaults.
   $options += array(
-    'nomask' => '/^(\..*)|(CVS)$/',
+    'nomask' => $no_mask,
     'callback' => 0,
     'recurse' => TRUE,
     'key' => 'uri',
