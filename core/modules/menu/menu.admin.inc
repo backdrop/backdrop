@@ -664,4 +664,6 @@ function menu_configure_submit($form, &$form_state) {
     ->set('menu_main_links', $form_state['values']['menu_main_links_source'])
     ->set('menu_secondary_links', $form_state['values']['menu_secondary_links_source'])
     ->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }

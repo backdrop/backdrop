@@ -105,8 +105,8 @@ function language_admin_overview_form_submit($form, &$form_state) {
 
     language_save($language);
   }
-
-  backdrop_set_message(t('Configuration saved.'));
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -314,6 +314,8 @@ function language_admin_edit_form_submit($form, &$form_state) {
   $language->name = $form_state['values']['name'];
   $language->direction = $form_state['values']['direction'];
   language_save($language);
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
   $form_state['redirect'] = 'admin/config/regional/language';
 }
 
