@@ -896,20 +896,20 @@ function backdrop_settings_initialize() {
  * The filename, whether provided, cached, or retrieved from the database, is
  * only returned if the file exists.
  *
- * This function plays a key role in allowing Backdrop's resources (modules
- * and themes) to be located in different places depending on a site's
+ * This function plays a key role in allowing Backdrop's resources (modules,
+ * layouts, and themes) to be located in different places depending on a site's
  * configuration. For example, a module 'foo' may legally be located
  * in any of these three places:
  *
+ * core/modules/foo/foo.module
  * modules/foo/foo.module
- * /modules/foo/foo.module
  * sites/example.com/modules/foo/foo.module
  *
  * Calling backdrop_get_filename('module', 'foo') will give you one of
  * the above, depending on where the module is located.
  *
  * @param $type
- *   The type of the item (theme, theme_engine, module, profile).
+ *   The type of the item (theme, layout, theme_engine, module, profile).
  * @param $name
  *   The name of the item for which the filename is requested.
  * @param $filename
@@ -937,7 +937,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
     $files[$type][$name] = $filename;
   }
   elseif (isset($files[$type][$name])) {
-    // nothing
+    // The file is in the database but does not exist on the disk.
   }
   // Verify that we have an active database connection, before querying
   // the database. This is required because this function is called both
@@ -945,7 +945,13 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
   // when a database connection fails.
   else {
     try {
-      if (function_exists('db_query')) {
+      // Layouts we use the existing registry rather than the system table.
+      if ($type === 'layout' && function_exists('layout_get_layout_info')) {
+        $layout_info = layout_get_layout_info($name);
+        $files[$type][$name] = $layout_info['path'] . '/' . $layout_info['name'] . '.info';
+      }
+      // Modules, themes, and profiles pull from the system table.
+      elseif (function_exists('db_query')) {
         $file = db_query("SELECT filename FROM {system} WHERE name = :name AND type = :type", array(':name' => $name, ':type' => $type))->fetchField();
         if ($file && file_exists(BACKDROP_ROOT . '/' . $file)) {
           $files[$type][$name] = $file;
@@ -957,6 +963,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
       // or the database might be down. We have a fallback for this case so we
       // hide the error completely.
     }
+
     // Fallback to searching the filesystem if the database could not find the
     // file or the file returned by the database is not found.
     if (!isset($files[$type][$name])) {
@@ -966,7 +973,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
         $dir = 'themes/engines';
         $extension = 'engine';
       }
-      elseif ($type == 'theme') {
+      elseif ($type === 'theme' || $type === 'layout') {
         $extension = 'info';
       }
       else {
@@ -990,9 +997,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
     }
   }
 
-  if (isset($files[$type][$name])) {
-    return $files[$type][$name];
-  }
+  return isset($files[$type][$name]) ? $files[$type][$name] : NULL;
 }
 
 /**
