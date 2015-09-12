@@ -130,29 +130,21 @@ Backdrop.behaviors.blockListFilterByText = {
         var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
         var $match = $row.closest('div.layout-block-add-row');
         $match.toggle(textMatch);
-        if(textMatch) {
+        if (textMatch) {
           stripeRow($match);
         }
       }
 
-      // Filter only if the length of the query is at least 2 characters.
-      if (query.length >= 2) {
-        $rows.each(showBlockItem);
-        
-        if ($('div.layout-block-add-row:visible').length === 0) {
-          if ($('.filter-empty').length === 0) {
-            $('.layout-block-list').append('<p class="filter-empty">' + Backdrop.t('No blocks match your search.') + '</p>');
-          }
-        }
-        else {
-          $('.filter-empty').remove();
+      // Reset the zebra striping for consistent even/odd classes.
+      zebraCounter = 0;
+      $rows.each(showBlockItem);
+
+      if ($('div.layout-block-add-row:visible').length === 0) {
+        if ($('.filter-empty').length === 0) {
+          $('.layout-block-list').append('<p class="filter-empty">' + Backdrop.t('No blocks match your search.') + '</p>');
         }
       }
       else {
-        $rows.show();
-        $rows.each(function() {
-          stripeRow($(this));
-        });
         $('.filter-empty').remove();
       }
     }
@@ -164,7 +156,7 @@ Backdrop.behaviors.blockListFilterByText = {
       zebraCounter++;
     }
 
-    if ($form.length) {
+    if ($form.length && $input.length) {
       $rows = $form.find('div.layout-block-add-row');
       $rows.each(function() {
         stripeRow($(this));
