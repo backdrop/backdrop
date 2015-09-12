@@ -2109,7 +2109,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 1,
-    'layout' => 'one_column',
+    'layout_template' => 'one_column',
     'settings' => array(),
     'positions' => array(
       'content' => array(
@@ -2151,7 +2151,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 0,
-    'layout' => $layout_name,
+    'layout_template' => $layout_name,
     'settings' => array(),
     'positions' => array(
       'header' => array(
@@ -2237,7 +2237,7 @@ function system_update_1025() {
     'footer_fourthcolumn' => 'footer_fourthcolumn',
     'footer' => 'footer',
   ));
-  $default_layout['layout'] = $layout_name;
+  $default_layout['layout_template'] = $layout_name;
 
   // Prepare a node-specific layout to be used if necessary.
   $node_layout = $default_layout;

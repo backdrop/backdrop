@@ -129,11 +129,11 @@ class LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_info($layout->layout);
-    $this->layout = &$layout;
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
+    $this->layout_template = &$layout;
 
     if (empty($layout_info)) {
-      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout, '@title' => $layout->title)));
+      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
     }
     else {
       $this->layout_info = $layout_info;
@@ -151,8 +151,8 @@ class LayoutRendererStandard {
    * method via parent::prepare(), or manually set $this->prep_run = TRUE.
    */
   function prepare() {
-    $this->prepareBlocks($this->layout->content);
-    $this->prepareRegions($this->layout->positions, $this->layout->settings);
+    $this->prepareBlocks($this->layout_template->content);
+    $this->prepareRegions($this->layout_template->positions, $this->layout_template->settings);
     $this->prep_run = TRUE;
   }
 
@@ -187,13 +187,13 @@ class LayoutRendererStandard {
         $has_contexts = TRUE;
         $required_contexts = $block->getRequiredContexts();
         if ($required_contexts) {
-          $has_contexts = $this->layout->hasContexts($required_contexts);
+          $has_contexts = $this->layout_template->hasContexts($required_contexts);
           if ($has_contexts) {
-            $block->setContexts($this->layout->getContexts());
+            $block->setContexts($this->layout_template->getContexts());
           }
         }
         elseif ($block->conditions) {
-          $block->setContexts($this->layout->getContexts());
+          $block->setContexts($this->layout_template->getContexts());
         }
 
         // Then check access on the block.
@@ -339,12 +339,12 @@ class LayoutRendererStandard {
 
     module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
-      $theme = 'layout__' . $this->layout->layout;
+      $theme = 'layout__' . $this->layout_template->layout_template;
     }
     else {
       $theme = str_replace('-', '_', $this->layout_info['template']);
     }
-    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout_template->settings, 'layout' => $this->layout_template, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 
@@ -440,9 +440,9 @@ class LayoutRendererStandard {
    *   The block to be rendered.
    */
   function renderBlock($block) {
-    if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
-      if ($block->uuid === $this->layout->settings['title_block']) {
-        $this->layout->settings['title'] = $block->getTitle();
+    if ($this->layout_template->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
+      if ($block->uuid === $this->layout_template->settings['title_block']) {
+        $this->layout_template->settings['title'] = $block->getTitle();
       }
     }
 
@@ -458,7 +458,7 @@ class LayoutRendererStandard {
       }
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
-        $content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
+        $content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout_template->name . '/modal', array($block->uuid));
       }
 
       $title = '';
@@ -473,11 +473,11 @@ class LayoutRendererStandard {
       );
 
       if (isset($style) && isset($style['block theme'])) {
-        $output = theme($style['block theme'] . '__' . $block->module . '__' . $block->delta, array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
+        $output = theme($style['block theme'] . '__' . $block->module . '__' . $block->delta, array('content' => $content, 'layout' => $this->layout_template, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
       }
       else {
         // Fallback.
-        $output = theme('block', array('content' => $content, 'layout' => $this->layout, 'block' => $block));
+        $output = theme('block', array('content' => $content, 'layout' => $this->layout_template, 'block' => $block));
       }
     }
     return $output;
@@ -531,7 +531,7 @@ class LayoutRendererStandard {
     $style = layout_get_style_info($style_name);
 
     if ($style['region theme']) {
-      $output = theme($style['region theme'], array('layout' => $this->layout, 'blocks' => $blocks, 'settings' => $style_settings, 'style' => $style));
+      $output = theme($style['region theme'], array('layout' => $this->layout_template, 'blocks' => $blocks, 'settings' => $style_settings, 'style' => $style));
     }
     else {
       $output = implode('', $blocks);
@@ -553,7 +553,7 @@ class LayoutRendererStandard {
     $default_region = $this->layout_info['default region'];
 
     // Check that the page content block exists in the layout.
-    foreach ($this->layout->content as $uuid => $block) {
+    foreach ($this->layout_template->content as $uuid => $block) {
       if ($block->module === 'system' && $block->delta === 'main') {
         $page_content_uuid = $uuid;
       }
@@ -563,16 +563,16 @@ class LayoutRendererStandard {
     if (!$page_content_uuid) {
       $block = layout_create_handler('block', 'system:main');
       $block->uuid = 'default';
-      $this->layout->content['default'] = $block;
+      $this->layout_template->content['default'] = $block;
       $page_content_uuid = $block->uuid;
     }
 
     // Add the page content block to the default region in the first position.
-    if (!isset($this->layout->positions[$default_region])) {
-      $this->layout->positions[$default_region] = array();
+    if (!isset($this->layout_template->positions[$default_region])) {
+      $this->layout_template->positions[$default_region] = array();
     }
-    if (!in_array($page_content_uuid, $this->layout->positions[$default_region])) {
-      array_unshift($this->layout->positions[$default_region], $page_content_uuid);
+    if (!in_array($page_content_uuid, $this->layout_template->positions[$default_region])) {
+      array_unshift($this->layout_template->positions[$default_region], $page_content_uuid);
     }
   }
 }
