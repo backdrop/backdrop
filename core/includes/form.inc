@@ -4049,7 +4049,7 @@ function theme_search($variables) {
 
   $extra = '';
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
-    backdrop_add_library('system', 'drupal.autocomplete');
+    backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
