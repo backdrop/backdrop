@@ -819,15 +819,6 @@ div.description,
 .password-strength {
   padding-top: 6px;
 }
-.password-strength .indicator {
-  color: #008000;
-}
-.password-match.match .password-match-text {
-  color: #008000;
-}
-.password-match.mismatch .password-match-text {
-  color: #8c2e0b
-}
 
 ul.tips li {
   margin: 0.25em 0 0.25em 1.5em; /* LTR */
