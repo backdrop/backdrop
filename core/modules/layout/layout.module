@@ -764,7 +764,7 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
       if (is_null($skip_menu_items)) {
         $skip_menu_items = TRUE;
       }
-      if (path_is_admin($_GET['q'])) {
+      if (path_is_admin($path)) {
         $layout_names[] = 'admin_default';
       }
       else {
