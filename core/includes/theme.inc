@@ -1320,9 +1320,9 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     'assets',
     'css',
     'scss',
+    'less',
     'js',
     'images',
-    'config',
     'node_modules',
     'bower_components',
   );
