@@ -7779,8 +7779,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * - screenshot: Path to screenshot relative to the theme's .info file.
  * - engine: Theme engine; typically phptemplate.
  * - base: Name of a base theme, if applicable; e.g., base = zen.
- * - regions: Listed regions; e.g., region[left] = Left sidebar.
- * - features: Features available; e.g., features[] = logo.
+ * - settings: Theme settings; e.g., settings[color] = true
  * - stylesheets: Theme stylesheets; e.g., stylesheets[all][] = my-style.css.
  * - scripts: Theme scripts; e.g., scripts[] = my-script.js.
  *
