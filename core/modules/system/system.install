@@ -1798,7 +1798,7 @@ function system_update_1013() {
  */
 function system_update_1014() {
   // Migrate variables to state and config.
-  state_set('maintenance_enabled', update_variable_get('maintenance_mode', 'enabled'));
+  state_set('maintenance_mode', update_variable_get('maintenance_mode', TRUE));
   config_set('system.core', 'maintenance_mode_message', update_variable_get('maintenance_mode_message', 'message'));
 
   // Delete variables.
