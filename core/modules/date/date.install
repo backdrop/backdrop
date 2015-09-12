@@ -81,3 +81,24 @@ function date_field_schema($field) {
 function date_update_last_removed() {
   return 7004;
 }
+
+/**
+ * Upgrade configuration from Drupal 7 Date module.
+ */
+function date_update_1000() {
+  // Update has been removed. Date no longer has configurable options.
+}
+
+/**
+ * Remove legacy Date API, Date Views, and Date Popup configurations.
+ */
+function date_update_1001() {
+  config('date_api.settings')->delete();
+  config('date.settings')->delete();
+
+  // Date now only ships with a single timepicker.
+  update_variable_del('date_popup_timepicker');
+
+  // Remove old system table entries for merged in modules.
+  db_query("DELETE FROM {system} WHERE name IN ('date_api', 'date_popup', 'date_views') AND type = 'module'");
+}
