@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the field_default_token module.
+ */
+
+/**
+ * Update field instances which use tokens as default value.
+ */
+function field_default_token_update_7000() {
+  $updated_fields = array();
+  foreach (field_info_instances() as $entity_instances) {
+    foreach ($entity_instances as $bundle_instances) {
+      foreach ($bundle_instances as $field_name => $instance) {
+        $has_tokens = FALSE;
+        if (!empty($instance['default_value'])) {
+          foreach ($instance['default_value'] as $values) {
+            if (!is_array($values)) {
+              if (strpos($values, '[') !== FALSE) {
+                $has_tokens = TRUE;
+              }
+            }
+            else {
+              foreach ($values as $value) {
+                if (!is_array($value)) {
+                  if (strpos($value, '[') !== FALSE) {
+                    $has_tokens = TRUE;
+                  }
+                }
+                else {
+                  foreach ($value as $column_value) {
+                    if (strpos($column_value, '[') !== FALSE) {
+                      $has_tokens = TRUE;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ($has_tokens) {
+          field_update_instance($instance);
+          $updated_fields[$field_name] = $field_name;
+        }
+      }
+    }
+  }
+  if (!empty($updated_fields)) {
+    return t('Updated fields: @fields.', array('@fields' => implode(', ', $updated_fields)));
+  }
+}
