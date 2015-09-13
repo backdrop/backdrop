@@ -53,6 +53,23 @@
 .layout-block-list {
   max-height: 300px;
   overflow: auto;
+  padding-right: 5px; /* LTR */
+}
+[dir="rtl"] .layout-block-list {
+  padding-right: 0;
+  padding-left: 5px;
+}
+.layout-block-add-row.form-item {
+  padding: 5px;
+  border-bottom: 1px solid #CCC;
+  margin: 0;
+}
+.layout-block-add-row.odd {
+  background-color: #F3F4EE;
+}
+.layout-block-list-wrapper {
+  border: 1px solid #CCC;
+  border-bottom: none;
 }
 
 /* Layout editor. */
