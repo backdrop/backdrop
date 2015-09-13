@@ -331,7 +331,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
    * Tests upload and remove buttons for a single-valued File field.
    */
   function testSingleValuedWidget() {
-    // Use 'page' instead of 'article', so that the 'article' image field does
+    // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
     // using a custom node type.
@@ -388,7 +388,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
    * Tests upload and remove buttons for multiple multi-valued File fields.
    */
   function testMultiValuedWidget() {
-    // Use 'page' instead of 'article', so that the 'article' image field does
+    // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
     // using a custom node type.
@@ -513,7 +513,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
    * Tests a file field with a "Private files" upload destination setting.
    */
   function testPrivateFileSetting() {
-    // Use 'page' instead of 'article', so that the 'article' image field does
+    // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
     // using a custom node type.
@@ -567,7 +567,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       'fields[_add_new_field][type]' => 'file',
       'fields[_add_new_field][widget_type]' => 'file_generic',
     );
-    $this->backdropPost('admin/structure/types/manage/article/comment/fields', $edit, t('Save'));
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields', $edit, t('Save'));
     $edit = array('field[settings][uri_scheme]' => 'private');
     $this->backdropPost(NULL, $edit, t('Save field settings'));
     $this->backdropPost(NULL, array(), t('Save settings'));
@@ -577,7 +577,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     $edit = array(
       'title' => $this->randomName(),
     );
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
     // Add a comment with a file.
@@ -640,7 +640,7 @@ class FileFieldRevisionTestCase extends FileFieldTestCase {
    *    should be deleted also.
    */
   function testRevisions() {
-    $type_name = 'article';
+    $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
     $field = field_info_field($field_name);
@@ -759,7 +759,7 @@ class FileFieldDisplayTestCase extends FileFieldTestCase {
    */
   function testNodeDisplay() {
     $field_name = strtolower($this->randomName());
-    $type_name = 'article';
+    $type_name = 'post';
     $field_settings = array(
       'display_field' => '1',
       'display_default' => '1',
@@ -817,7 +817,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
    * Tests the required property on file fields.
    */
   function testRequired() {
-    $type_name = 'article';
+    $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
     $field = field_info_field($field_name);
@@ -866,7 +866,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
    * Tests the max file size validator.
    */
   function testFileMaxSize() {
-    $type_name = 'article';
+    $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
     $field = field_info_field($field_name);
@@ -918,7 +918,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
    * Tests file extension checking.
    */
   function testFileExtension() {
-    $type_name = 'article';
+    $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
     $field = field_info_field($field_name);
@@ -969,7 +969,7 @@ class FileFieldPathTestCase extends FileFieldTestCase {
    */
   function testUploadPath() {
     $field_name = strtolower($this->randomName());
-    $type_name = 'article';
+    $type_name = 'post';
     $field = $this->createFileField($field_name, $type_name);
     $test_file = $this->getTestFile('text');
 
@@ -1043,7 +1043,7 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
     global $language;
 
     // Create file field.
-    $type_name = 'article';
+    $type_name = 'post';
     $field_name = 'field_' . strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
     $field = field_info_field($field_name);
@@ -1109,7 +1109,7 @@ class FilePrivateTestCase extends FileFieldTestCase {
    * Tests file access for file uploaded to a private node.
    */
   function testPrivateFile() {
-    // Use 'page' instead of 'article', so that the 'article' image field does
+    // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
     // using a custom node type.

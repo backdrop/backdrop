@@ -364,7 +364,7 @@ class Layout {
 
     // Position the new layout one level above the current layout, assuming that
     // users will start with a generic layout, such as a global "node" layout,
-    // then later create a more specific layout, such as "article nodes", which
+    // then later create a more specific layout, such as "post nodes", which
     // should come before the more generic version.
     $clone->weight--;
 

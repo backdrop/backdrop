@@ -173,7 +173,7 @@ class DBLogTestCase extends BackdropWebTestCase {
   private function verifyEvents() {
     // Invoke events.
     $this->doUser();
-    $this->doNode('article');
+    $this->doNode('post');
     $this->doNode('page');
     $this->doNode('book');
 
@@ -270,7 +270,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    * Generates and then verifies some node events.
    *
    * @param string $type
-   *   A node type (e.g., 'article', 'page' or 'poll').
+   *   A node type (e.g., 'post', 'page' or 'poll').
    */
   private function doNode($type) {
     // Create user.
@@ -334,7 +334,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    * Creates random content based on node content type.
    *
    * @param string $type
-   *   Node content type (e.g., 'article').
+   *   Node content type (e.g., 'post').
    *
    * @return array
    *   Random content needed by various node types.
@@ -363,7 +363,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    * Creates random content as an update based on node content type.
    *
    * @param string $type
-   *   Node content type (e.g., 'article').
+   *   Node content type (e.g., 'post').
    *
    * @return array
    *   Random content needed by various node types.

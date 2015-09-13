@@ -22,7 +22,7 @@
  *   CSS. The default values can be one or more of the following:
  *   - node: The current template type; for example, "theming hook".
  *   - node-[type]: The current node type. For example, if the node is a
- *     "Article" it would result in "node-article". Note that the machine
+ *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
  *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
  *   - preview: Nodes in preview mode.
@@ -42,7 +42,7 @@
  *
  * Other variables:
  * - $node: Full node entity. Contains data that may not be safe.
- * - $type: Node type; for example, article, basic page, blog, etc.
+ * - $type: Node type; for example, post, page, blog, etc.
  * - $uid: User ID of the node author.
  * - $created: Time the node was published formatted in Unix timestamp.
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in

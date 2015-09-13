@@ -1446,9 +1446,9 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $date2 = '2007-03-11 01:00:00 -0800';
     // One date in PDT (summer time):
     $date3 = '2007-03-20 21:00:00 -0700';
-    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'article'));
-    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'article'));
-    $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'post'));
+    $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'post'));
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");

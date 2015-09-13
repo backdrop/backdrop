@@ -1410,13 +1410,13 @@ class FieldInfoTestCase extends FieldTestCase {
     $instance_definition = array(
       'field_name' => 'field',
       'entity_type' => 'comment',
-      'bundle' => 'comment_node_article',
+      'bundle' => 'comment_node_post',
     );
     field_create_instance($instance_definition);
 
     // Disable coment module. This clears field_info cache.
     module_disable(array('comment'));
-    $this->assertNull(field_info_instance('comment', 'field', 'comment_node_article'), 'No instances are returned on disabled entity types.');
+    $this->assertNull(field_info_instance('comment', 'field', 'comment_node_post'), 'No instances are returned on disabled entity types.');
   }
 
   /**
