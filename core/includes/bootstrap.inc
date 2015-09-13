@@ -2543,8 +2543,6 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
-  global $databases;
-
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.
@@ -2552,11 +2550,17 @@ function backdrop_bootstrap_is_installed() {
   if (backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
     try {
       _backdrop_bootstrap_database();
+      // Getting a connection the first time opens it and populates the
+      // $GLOBALS['databases'] variable.
+      Database::getConnection('default');
     }
     catch (Exception $e) {}
   }
 
-  if (!empty($databases) && function_exists('db_query')) {
+  if (empty($GLOBALS['databases'])) {
+    return FALSE;
+  }
+  elseif (function_exists('db_query')) {
     try {
       db_query('SELECT name FROM {system} WHERE name = :name', array(':name' => 'system'));
     }

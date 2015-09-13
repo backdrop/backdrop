@@ -27,6 +27,13 @@ else {
   simpletest_script_init(NULL);
 }
 
+// Check if Backdrop is installed.
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
+if (!backdrop_bootstrap_is_installed()) {
+  echo "Backdrop must be installed before running tests.\n";
+  exit(1);
+}
+
 // Bootstrap to perform initial validation or other operations.
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 if ($args['force']) {
