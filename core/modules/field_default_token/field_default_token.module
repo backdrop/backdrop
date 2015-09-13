@@ -7,6 +7,13 @@
 
 /**
  * Implements hook_field_update_instance().
+ *
+ * When a field is updated, check for '[' in the value. Update the
+ * default_value_function key appropriately.
+ *
+ * @todo There is some code duplicated with field_default_token_update_7000().
+ * @todo Let the site builder decide whether to enable tokens.
+ * @todo Move the token handling to the Field module default processor.
  */
 function field_default_token_field_update_instance($instance, $prior_instance) {
   $has_tokens = FALSE;
@@ -110,6 +117,9 @@ function field_default_token_default_value_function($entity_type, $entity, $fiel
 
 /**
  * Implements hook_form_FORM_ID_alter().
+ *
+ * @todo Move this into field_ui_field_edit_form().
+ * @todo Let the site builder choose whether to enable tokens.
  */
 function field_default_token_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
   $field = $form['#field'];
@@ -231,6 +241,8 @@ function field_default_token_fix_number_validation(&$element) {
 
 /**
  * Implements hook_ctools_plugin_directory().
+ *
+ * @todo Port this to Backdrop.
  */
 function field_default_token_ctools_plugin_directory($module, $plugin) {
   if ($module == 'entityreference') {
@@ -240,6 +252,8 @@ function field_default_token_ctools_plugin_directory($module, $plugin) {
 
 /**
  * Implements hook_field_widget_form_alter().
+ *
+ * @todo Move this into field_widget_form().
  */
 function field_default_token_field_widget_form_alter(&$element, &$form_state, $context) {
   if (!empty($element['#entity_type'])) {
