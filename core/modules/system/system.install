@@ -526,6 +526,17 @@ function system_requirements($phase) {
         'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
+
+    // Check for a duplicate Date project.
+    $path = backdrop_get_path('module', 'date');
+    if ($path && strpos($path, 'core/modules/date') === FALSE) {
+      $requirements['date_replaced'] = array(
+        'title' => $t('Date'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
   }
 
   return $requirements;
@@ -2581,12 +2592,53 @@ function system_update_1041() {
 }
 
 /**
- * Notify administrators if a non-core version of link module is present.
+ * Notify administrators if a non-core version of Link module is present.
  */
 function system_update_1042() {
   $path = backdrop_get_path('module', 'link');
   if ($path && strpos($path, 'core/modules/link') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Remove old Date configuration files.
+ */
+function system_update_1043() {
+  config('date_views.settings')->delete();
+  config('date_api.settings')->delete();
+  config('date.settings')->delete();
+
+  // Remove variables from Drupal 7.
+  update_variable_del('date_min_year');
+  update_variable_del('date_max_year');
+  update_variable_del('date_php_min_year');
+  update_variable_del('date_api_use_iso8601');
+  update_variable_del('date_db_tz_support');
+  update_variable_del('date_api_version');
+  update_variable_del('date_popup_timepicker');
+  update_variable_del('date_views_month_format_with_year');
+  update_variable_del('date_views_month_format_without_year');
+  update_variable_del('date_views_day_format_with_year');
+  update_variable_del('date_views_day_format_without_year');
+  update_variable_del('date_views_week_format_with_year');
+  update_variable_del('date_views_week_format_without_year');
+
+  // A default timezone is now always required.
+  $default_timezone = config_get('system.date', 'default_timezone');
+  if (empty($default_timezone)) {
+    $default_timezone = @date_default_timezone_get();
+    config_set('system.date', 'default_timezone', $default_timezone);
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of the Date module is present.
+ */
+function system_update_1044() {
+  $path = backdrop_get_path('module', 'date');
+  if ($path && strpos($path, 'core/modules/date') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

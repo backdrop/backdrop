@@ -2594,7 +2594,8 @@ function backdrop_get_user_timezone() {
     // Ignore PHP strict notice if time zone has not yet been set in the php.ini
     // configuration.
     $config_data_default_timezone = $config->get('default_timezone');
-    return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();  }
+    return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();
+  }
 }
 
 /**

@@ -103,6 +103,7 @@ function seven_css_alter(&$css) {
   if (isset($css['core/misc/ui/jquery.ui.theme.css'])) {
     $css['core/misc/ui/jquery.ui.theme.css']['data'] = backdrop_get_path('theme', 'seven') . '/css/jquery.ui.theme.css';
     $css['core/misc/ui/jquery.ui.theme.css']['type'] = 'file';
+    $css['core/misc/ui/jquery.ui.theme.css']['weight'] = 10;
   }
 }
 

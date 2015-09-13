@@ -2,7 +2,7 @@
     "_config_name": "system.date",
     "first_day": 0,
     "default_country": "",
-    "default_timezone": "",
+    "default_timezone": "UTC",
     "user_timezone_configurable": 1,
     "user_timezone_default": 0,
     "user_timezone_warn": 0,
