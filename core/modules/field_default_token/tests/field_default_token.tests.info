@@ -1,0 +1,5 @@
+[FieldDefaultTokenProcessTokensTestCase]
+name = Process tokens
+description = Test the Field UI "Manage fields" screen.
+group = Field Default Token
+file = field_default_token.test

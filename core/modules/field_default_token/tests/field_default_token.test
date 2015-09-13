@@ -1,0 +1,96 @@
+<?php
+
+/**
+ * @file
+ * Tests for field_default_token.module.
+ */
+
+/**
+ * Tests that tokens in default values are processed.
+ *
+ * @see FieldUIManageFieldsTestCase::testDefaultValue().
+ */
+class FieldDefaultTokenProcessTokensTestCase extends FieldUITestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Create a text field and an instance of that field.
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // Create random field name.
+    $this->field_label = $this->randomName(8);
+    $this->field_name_input = strtolower($this->randomName(8));
+    $this->field_name = 'field_' . $this->field_name_input;
+
+    // Create Basic page and Article node types.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+
+    $field = array(
+      'field_name' => 'field_token_test',
+      'type' => 'text',
+    );
+    field_create_field($field);
+
+    $instance = array(
+      'field_name' => 'field_token_test',
+      'entity_type' => 'node',
+      'label' => 'Token test',
+      'bundle' => 'article',
+    );
+    field_create_instance($instance);
+  }
+
+  /**
+   * Tests that default value is correctly validated and saved.
+   */
+  public function testDefaultValue() {
+    // Create a test field and instance.
+    $field_name = 'test';
+    $field = array(
+      'field_name' => $field_name,
+      'type' => 'test_field',
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => $this->type,
+    );
+    field_create_instance($instance);
+
+    $langcode = LANGUAGE_NONE;
+    $admin_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields/' . $field_name;
+    $element_id = "edit-$field_name-$langcode-0-value";
+    $element_name = "{$field_name}[$langcode][0][value]";
+    $this->backdropGet($admin_path);
+    $this->assertFieldById($element_id, '', 'The default value widget was empty.');
+
+    // Check that token replacement makes a difference.
+    $token = '[site:name]';
+    $processed_token = token_replace($token);
+    $this->assertNotEqual($token, $processed_token, 'The processed token is not the same as the token.');
+
+    // Check that the default value is saved and the token is processed.
+    $edit = array($element_name => $token);
+    $this->backdropPost($admin_path, $edit, t('Save settings'));
+    $this->assertText("Saved $field_name configuration", 'The form was successfully submitted.');
+    $instance = field_info_instance('node', $field_name, $this->type);
+    $this->assertEqual($instance['default_value'], array(array('value' => $processed_token)), 'The default value was correctly saved with the processed token.');
+
+    // Check that the default value shows up in the form.
+    $this->backdropGet($admin_path);
+    $this->assertFieldById($element_id, $processed_token, 'The default value widget was displayed with the processed token.');
+
+    // Check that the default value can be emptied.
+    $edit = array($element_name => '');
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertText("Saved $field_name configuration", 'The form was successfully submitted.');
+    field_info_cache_clear();
+    $instance = field_info_instance('node', $field_name, $this->type);
+    $this->assertEqual($instance['default_value'], NULL, 'The default value was correctly saved.');
+  }
+
+}
