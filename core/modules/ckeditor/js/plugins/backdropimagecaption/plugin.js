@@ -240,6 +240,13 @@ CKEDITOR.plugins.add('backdropimagecaption', {
               captionElement.removeChild(captionElement.childNodes.item(0));
             }
           }
+          // Remove the caption class from the element if present.
+          else if (actualWidget.element) {
+            var classes = editor.config.image2_captionedClass.split(' ');
+            for (var i = 0; i < classes.length; i++) {
+              actualWidget.element.removeClass(classes[i]);
+            }
+          }
         };
       };
     }, null, null, 20); // Low priority to ensure backdropimage's event handler runs first.
