@@ -14,8 +14,8 @@ class CommentHelperCase extends BackdropWebTestCase {
     parent::setUp('comment', 'search');
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer layouts'));
-    $this->web_user = $this->backdropCreateUser(array('create article content', 'edit own comments'));
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
 
   /**
@@ -35,7 +35,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit['comment_body[' . $langcode . '][0][value]'] = $comment;
-    $node_type = node_type_get_type('article');
+    $node_type = node_type_get_type('post');
 
     $preview_mode = $node_type->settings['comment_preview'];
     $subject_mode = $node_type->settings['comment_subject_field'];
@@ -198,7 +198,7 @@ class CommentHelperCase extends BackdropWebTestCase {
   }
 
   /**
-   * Sets a comment config for the article content type.
+   * Sets a comment config for the post content type.
    *
    * @param string $name
    *   Name of setting.
@@ -208,7 +208,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   Status message to display.
    */
   function setCommentSettings($name, $value, $message) {
-    $node_type = node_type_get_type('article');
+    $node_type = node_type_get_type('post');
     $node_type->settings[$name] = $value;
     node_type_save($node_type);
     // Display status message.
@@ -374,22 +374,22 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentsPerPage(50);
 
     // Attempt to post to node with comments disabled.
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_HIDDEN));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_HIDDEN));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('This discussion is closed', 'Posting to node with comments disabled');
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with read-only comments.
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_CLOSED));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_CLOSED));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('This discussion is closed', 'Posting to node with comments read-only');
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with comments enabled (check field names etc).
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertNoText('This discussion is closed', 'Posting to node with comments enabled');
     $this->assertField('edit-comment-body-' . $langcode . '-0-value', 'Comment body field found.');
@@ -428,7 +428,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     // Test if the right links are displayed when no comment is present for the
     // node.
     $this->backdropLogin($this->admin_user);
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
     $this->backdropGet('node');
     $this->assertNoLink(t('@count comments', array('@count' => 0)));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
@@ -486,7 +486,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
     foreach ($permutations as $case) {
       // Create a new node.
-      $node = $this->backdropCreateNode(array('type' => 'article', 'uid' => $case['node_uid']));
+      $node = $this->backdropCreateNode(array('type' => 'post', 'uid' => $case['node_uid']));
 
       // Add a comment.
       $comment = entity_create('comment', array(
@@ -590,7 +590,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropLogout();
 
     // Creates a second user to post comments.
-    $this->web_user2 = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments'));
+    $this->web_user2 = $this->backdropCreateUser(array('access comments', 'post comments', 'create post content', 'edit own comments'));
 
     // Checks the initial values of node comment statistics with no comment.
     $node = node_load($this->node->nid);
@@ -1229,7 +1229,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
     $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
@@ -1305,7 +1305,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->setCommentsPerPage(1000);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
@@ -1406,7 +1406,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->setCommentsPerPage(1);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
@@ -1480,8 +1480,8 @@ class CommentNodeAccessTest extends CommentHelperCase {
 
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer blocks'));
-    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments', 'node test view'));
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create post content', 'edit own comments', 'node test view'));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
 
   /**
@@ -1808,7 +1808,7 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $this->setCommentSubject(TRUE);
 
     // Create a node and a comment.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $parent_comment = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
 
     // Post a reply to the comment.
@@ -2011,7 +2011,7 @@ class CommentFieldsTest extends CommentHelperCase {
     // Disable text processing for comments.
     $this->backdropLogin($this->admin_user);
     $edit = array('instance[settings][text_processing]' => 0);
-    $this->backdropPost('admin/structure/types/manage/article/comment/fields/comment_body', $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body', $edit, t('Save settings'));
 
     // Post a comment without an explicit subject.
     $this->backdropLogin($this->web_user);
@@ -2040,7 +2040,7 @@ class CommentThreadingTestCase extends CommentHelperCase {
 
     // Create a node.
     $this->backdropLogin($this->web_user);
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
 
     // Post comment #1.
     $this->backdropLogin($this->web_user);

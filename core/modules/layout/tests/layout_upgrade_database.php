@@ -95,7 +95,7 @@ db_insert('block_node_type')
   ->values(array(
     'module' => 'node',
     'delta' => 'recent',
-    'type' => 'article',
+    'type' => 'post',
   ))
   ->execute();
 

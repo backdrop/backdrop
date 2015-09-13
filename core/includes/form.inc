@@ -3393,9 +3393,9 @@ function theme_container($variables) {
  *     $options = array(
  *       array(
  *         'title' => 'How to Learn Backdrop',
- *         'content_type' => 'Article',
+ *         'content_type' => 'Post',
  *         'status' => 'published',
- *         '#attributes' => array('class' => array('article-row')),
+ *         '#attributes' => array('class' => array('post-row')),
  *       ),
  *       array(
  *         'title' => 'Privacy Policy',

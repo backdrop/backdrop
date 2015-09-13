@@ -82,7 +82,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     $vocabulary += array(
       'name' => $name,
       'machine_name' => $name,
-      'nodes' => array('article' => 'article'),
+      'nodes' => array('post' => 'post'),
     );
     $vocabulary = new TaxonomyVocabulary($vocabulary);
     taxonomy_vocabulary_save($vocabulary);
@@ -461,7 +461,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'path[alias]' => $manual_alias,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $this->assertText("Basic page $title has been updated.");
+    $this->assertText("Page $title has been updated.");
 
     // Check that the automatic alias checkbox is now unchecked by default.
     $this->backdropGet("node/{$node->nid}/edit");
@@ -470,7 +470,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Submit the node form with the default values.
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText("Basic page $title has been updated.");
+    $this->assertText("Page $title has been updated.");
 
     // Test that the old (automatic) alias has been deleted and only accessible
     // through the new (manual) alias.
@@ -479,14 +479,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropGet($manual_alias);
     $this->assertText($title, 'Node accessible through manual alias.');
 
-    // Now attempt to create a node that has no pattern (article content type).
+    // Now attempt to create a node that has no pattern (post content type).
     // The automatic alias checkbox should not exist.
-    $this->backdropGet('node/add/article');
+    $this->backdropGet('node/add/post');
     $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
 
     $edit = array();
-    $edit['title'] = 'My test article';
+    $edit['title'] = 'My test post';
     $this->backdropPost(NULL, $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
@@ -653,12 +653,12 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_page_pattern'] = 'page';
     $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
     $this->assertText('The Default path pattern (applies to all content types with blank patterns below) is using the following invalid tokens: [user:name], [term:name].');
-    $this->assertText('The Pattern for all Basic page paths cannot contain fewer than one token.');
+    $this->assertText('The Pattern for all Page paths cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['node_pattern'] = '[node:title]';
     $edit['node_page_pattern'] = 'page/[node:title]';
-    $edit['node_article_pattern'] = '';
+    $edit['node_post_pattern'] = '';
     $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
   }

@@ -1139,8 +1139,8 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
     // Create some nodes with different authored-on dates.
     $date1 = '2007-01-31 21:00:00 -1000';
     $date2 = '2007-07-31 21:00:00 -1000';
-    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'article'));
-    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'post'));
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");
@@ -1472,7 +1472,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('node', 'block'));
 
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
 
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'view the administration theme', 'administer themes', 'bypass node access', 'administer blocks'));
     $this->backdropLogin($this->admin_user);

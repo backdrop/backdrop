@@ -33,7 +33,7 @@ class ImageFieldTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('image');
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer nodes', 'create article content', 'edit any article content', 'delete any article content', 'administer image styles'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer nodes', 'create post content', 'edit any post content', 'delete any post content', 'administer image styles'));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -652,15 +652,15 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
 
     // Create an image field that uses the new style.
     $field_name = strtolower($this->randomName(10));
-    $this->createImageField($field_name, 'article');
-    $instance = field_info_instance('node', $field_name, 'article');
+    $this->createImageField($field_name, 'post');
+    $instance = field_info_instance('node', $field_name, 'post');
     $instance['display']['default']['type'] = 'image';
     $instance['display']['default']['settings']['image_style'] = $style_name;
     field_update_instance($instance);
 
     // Create a new node with an image attached.
     $test_image = current($this->backdropGetTestFiles('image'));
-    $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
+    $nid = $this->uploadNodeImage($test_image, $field_name, 'post');
     $node = node_load($nid);
 
     // Test that image is displayed using newly created style.
@@ -717,10 +717,10 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
    */
   function _testImageFieldFormatters($scheme) {
     $field_name = strtolower($this->randomName());
-    $this->createImageField($field_name, 'article', array('uri_scheme' => $scheme));
+    $this->createImageField($field_name, 'post', array('uri_scheme' => $scheme));
     // Create a new node with an image attached.
     $test_image = current($this->backdropGetTestFiles('image'));
-    $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
+    $nid = $this->uploadNodeImage($test_image, $field_name, 'post');
     $node = node_load($nid, NULL, TRUE);
 
     // Test that the default formatter is being used.
@@ -734,7 +734,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
     // Test the image linked to file formatter.
-    $instance = field_info_instance('node', $field_name, 'article');
+    $instance = field_info_instance('node', $field_name, 'post');
     $instance['display']['default']['type'] = 'image';
     $instance['display']['default']['settings']['image_link'] = 'file';
     field_update_instance($instance);
@@ -805,23 +805,23 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $widget_settings = array(
       'preview_image_style' => 'medium',
     );
-    $field = $this->createImageField($field_name, 'article', array(), $instance_settings, $widget_settings);
+    $field = $this->createImageField($field_name, 'post', array(), $instance_settings, $widget_settings);
     $field['deleted'] = 0;
     $table = _field_sql_storage_tablename($field);
     $schema = backdrop_get_schema($table, TRUE);
-    $instance = field_info_instance('node', $field_name, 'article');
+    $instance = field_info_instance('node', $field_name, 'post');
 
-    $this->backdropGet('node/add/article');
-    $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on article form.');
-    $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on article form.');
-    $this->assertText(t('Images must be between 10x10 and 100x100 pixels.'), 'Image widget allowed resolution displayed on article form.');
+    $this->backdropGet('node/add/post');
+    $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on post form.');
+    $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on post form.');
+    $this->assertText(t('Images must be between 10x10 and 100x100 pixels.'), 'Image widget allowed resolution displayed on post form.');
 
-    // We have to create the article first and then edit it because the alt
+    // We have to create the post first and then edit it because the alt
     // and title fields do not display until the image has been attached.
-    $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
+    $nid = $this->uploadNodeImage($test_image, $field_name, 'post');
     $this->backdropGet('node/' . $nid . '/edit');
-    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][alt]', '', t('Alt field displayed on article form.'));
-    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][title]', '', t('Title field displayed on article form.'));
+    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][alt]', '', t('Alt field displayed on post form.'));
+    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][title]', '', t('Title field displayed on post form.'));
     // Verify that the attached image is being previewed using the 'medium'
     // style.
     $node = node_load($nid, NULL, TRUE);
@@ -873,11 +873,11 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
   function testImageFieldDefaultImage() {
     // Create a new image field.
     $field_name = strtolower($this->randomName());
-    $this->createImageField($field_name, 'article');
+    $this->createImageField($field_name, 'post');
 
     // Create a new node, with no images and verify that no images are
     // displayed.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $this->backdropGet('node/' . $node->nid);
     // Verify that no image is displayed on the page by checking for the class
     // that would be used on the image field.
@@ -888,7 +888,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $edit = array(
       'files[field_settings_default_image_file]' => backdrop_realpath($images[0]->uri),
     );
-    $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
     field_info_cache_clear();
     $field = field_info_field($field_name);
@@ -899,7 +899,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Create a node with an image attached and ensure that the default image
     // is not displayed.
-    $nid = $this->uploadNodeImage($images[1], $field_name, 'article');
+    $nid = $this->uploadNodeImage($images[1], $field_name, 'post');
     $node = node_load($nid, NULL, TRUE);
     $image_info = array(
       'uri' => $node->{$field_name}[LANGUAGE_NONE][0]['uri'],
@@ -915,7 +915,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $edit = array(
       'field[settings][default_image][remove]' => 1,
     );
-    $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
     field_info_cache_clear();
     $field = field_info_field($field_name);
@@ -923,18 +923,18 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // Create an image field that uses the private:// scheme and test that the
     // default image works as expected.
     $private_field_name = strtolower($this->randomName());
-    $this->createImageField($private_field_name, 'article', array('uri_scheme' => 'private'));
+    $this->createImageField($private_field_name, 'post', array('uri_scheme' => 'private'));
     // Add a default image to the new field.
     $edit = array(
       'files[field_settings_default_image_file]' => backdrop_realpath($images[1]->uri),
     );
-    $this->backdropPost('admin/structure/types/manage/article/fields/' . $private_field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $private_field_name, $edit, t('Save settings'));
     $private_field = field_info_field($private_field_name);
     $uri = $private_field['settings']['default_image'];
     $this->assertEqual('private', file_uri_scheme($uri), 'Default image uses private:// scheme.');
     // Create a new node with no image attached and ensure that default private
     // image is displayed.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $default_output = theme('image', array('uri' => $uri));
     $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($default_output, 'Default private image displayed when no user supplied image is present.');
@@ -956,7 +956,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       'max_resolution' => $max_resolution . 'x' . $max_resolution,
       'min_resolution' => $min_resolution . 'x' . $min_resolution,
     );
-    $this->createImageField($field_name, 'article', array(), $instance_settings);
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
 
     // We want a test image that is too small, and a test image that is too
     // big, so cycle through test image files until we have what we need.
@@ -974,9 +974,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
         break;
       }
     }
-    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'article');
+    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
     $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image resolution was not met.');
-    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'article');
+    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
     $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max resolution was properly resized.');
   }
 }
@@ -1336,7 +1336,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
       $default_images[$image_target] = $file['uri'];
     }
 
-    // Create an image field and add an instance to the article content type.
+    // Create an image field and add an instance to the post content type.
     $field_name = strtolower($this->randomName());
     $field_settings = array(
       'default_image' => $default_images['field'],
@@ -1347,9 +1347,9 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $widget_settings = array(
       'preview_image_style' => 'medium',
     );
-    $this->createImageField($field_name, 'article', $field_settings, $instance_settings, $widget_settings);
+    $this->createImageField($field_name, 'post', $field_settings, $instance_settings, $widget_settings);
     $field = field_info_field($field_name);
-    $instance = field_info_instance('node', $field_name, 'article');
+    $instance = field_info_instance('node', $field_name, 'post');
 
     // Add another instance with another default image to the page content type.
     $instance2 = array_merge($instance, array(
@@ -1362,16 +1362,16 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $instance2 = field_info_instance('node', $field_name, 'page');
 
 
-    // Confirm the defaults are present on the article field admin form.
-    $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
+    // Confirm the defaults are present on the post field admin form.
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
 
-    // Article instance settings.
+    // Post instance settings.
     $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance'])));
-    $this->assertEqual(count($xpath), 1, format_string('Article image field instance default references expected file uri of @uri.', array('@uri' => $default_images['instance'])));
+    $this->assertEqual(count($xpath), 1, format_string('Post image field instance default references expected file uri of @uri.', array('@uri' => $default_images['instance'])));
 
     // Global field settings.
     $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field'])));
-    $this->assertEqual(count($xpath), 1, format_string('Article image field default references expected file uri of @uri.', array('@uri' => $default_images['field'])));
+    $this->assertEqual(count($xpath), 1, format_string('Post image field default references expected file uri of @uri.', array('@uri' => $default_images['field'])));
 
     // Confirm the defaults are present on the page field admin form.
     $this->backdropGet("admin/structure/types/manage/page/fields/$field_name");
@@ -1384,14 +1384,14 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field'])));
     $this->assertEqual(count($xpath), 1, format_string('Page image field default references expected file uri of @uri.', array('@uri' => $default_images['field'])));
 
-    // Confirm that the image default is shown for a new article node.
-    $article = $this->backdropCreateNode(array('type' => 'article'));
-    $article_built = node_view($article);
+    // Confirm that the image default is shown for a new post node.
+    $post = $this->backdropCreateNode(array('type' => 'post'));
+    $post_built = node_view($post);
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['uri'],
+      $post_built[$field_name]['#items'][0]['uri'],
       $default_images['instance'],
       format_string(
-        'A new article node without an image has the expected default image file URI of @uri.',
+        'A new post node without an image has the expected default image file URI of @uri.',
         array('@uri' => $default_images['instance'])
       )
     );
@@ -1412,19 +1412,19 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $field['settings']['default_image'] = $default_images['field_new'];
     field_update_field($field);
 
-    // Confirm that the new field default is used on the article admin form.
-    $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
+    // Confirm that the new field default is used on the post admin form.
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
     $xpath = $this->xpath('//*[@id="edit-field"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['field_new'])));
     $this->assertEqual(count($xpath), 1, format_string('Updated image field default references expected file uri of @uri.', array('@uri' => $default_images['field_new'])));
 
     // Reload the nodes and confirm the field instance defaults are used.
-    $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
+    $post_built = node_view($post = node_load($post->nid, NULL, $reset = TRUE));
     $page_built = node_view($page = node_load($page->nid, NULL, $reset = TRUE));
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['uri'],
+      $post_built[$field_name]['#items'][0]['uri'],
       $default_images['instance'],
       format_string(
-        'An existing article node without an image has the expected default image file URI of @uri.',
+        'An existing post node without an image has the expected default image file URI of @uri.',
         array('@uri' => $default_images['instance'])
       )
     );
@@ -1437,26 +1437,26 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
       )
     );
 
-    // Upload a new default for the article's field instance.
+    // Upload a new default for the post's field instance.
     $instance['settings']['default_image'] = $default_images['instance_new'];
     field_update_instance($instance);
 
-    // Confirm the new field instance default is used on the article field
+    // Confirm the new field instance default is used on the post field
     // admin form.
-    $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
     $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance_new'])));
     $this->assertEqual(count($xpath), 1, format_string('Updated image field default references expected file uri of @uri.', array('@uri' => $default_images['instance_new'])));
 
     // Reload the nodes.
-    $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
+    $post_built = node_view($post = node_load($post->nid, NULL, $reset = TRUE));
     $page_built = node_view($page = node_load($page->nid, NULL, $reset = TRUE));
 
-    // Confirm the article uses the new default.
+    // Confirm the post uses the new default.
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['uri'],
+      $post_built[$field_name]['#items'][0]['uri'],
       $default_images['instance_new'],
       format_string(
-        'An existing article node without an image has the expected default image file URI of @uri.',
+        'An existing post node without an image has the expected default image file URI of @uri.',
         array('@uri' => $default_images['instance_new'])
       )
     );
@@ -1470,24 +1470,24 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
       )
     );
 
-    // Remove the instance default from articles.
+    // Remove the instance default from posts.
     $instance['settings']['default_image'] = NULL;
     field_update_instance($instance);
 
-    // Confirm the article field instance default has been removed.
-    $this->backdropGet("admin/structure/types/manage/article/fields/$field_name");
+    // Confirm the post field instance default has been removed.
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
     $xpath = $this->xpath('//*[@id="edit-instance"]//div[contains(@class, "form-type-file")]//a[@href=:path]', array(':path' => file_create_url($default_images['instance_new'])));
-    $this->assertEqual(count($xpath), 0, format_string('Updated article image field instance default has been successfully removed.'));
+    $this->assertEqual(count($xpath), 0, format_string('Updated post image field instance default has been successfully removed.'));
 
     // Reload the nodes.
-    $article_built = node_view($article = node_load($article->nid, NULL, $reset = TRUE));
+    $post_built = node_view($post = node_load($post->nid, NULL, $reset = TRUE));
     $page_built = node_view($page = node_load($page->nid, NULL, $reset = TRUE));
-    // Confirm the article uses the new field (not instance) default.
+    // Confirm the post uses the new field (not instance) default.
     $this->assertEqual(
-      $article_built[$field_name]['#items'][0]['uri'],
+      $post_built[$field_name]['#items'][0]['uri'],
       $default_images['field_new'],
       format_string(
-        'An existing article node without an image has the expected default image file URI of @uri.',
+        'An existing post node without an image has the expected default image file URI of @uri.',
         array('@uri' => $default_images['field_new'])
       )
     );

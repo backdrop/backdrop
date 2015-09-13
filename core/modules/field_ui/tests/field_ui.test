@@ -147,9 +147,9 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->field_name_input =  strtolower($this->randomName(8));
     $this->field_name = 'field_'. $this->field_name_input;
 
-    // Create Basic page and Article node types.
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    // Create Page and Post node types.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Create a vocabulary named "Tags".
     $vocabulary = new TaxonomyVocabulary(array(
@@ -168,7 +168,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
       'field_name' => 'field_' . $vocabulary->machine_name,
       'entity_type' => 'node',
       'label' => 'Tags',
-      'bundle' => 'article',
+      'bundle' => 'post',
     );
     field_create_instance($instance);
   }
@@ -428,7 +428,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
 
     // Check that the instance does not appear in the 'add existing field' row
     // on other bundles.
-    $bundle_path = 'admin/structure/types/manage/article/fields/';
+    $bundle_path = 'admin/structure/types/manage/post/fields/';
     $this->backdropGet($bundle_path);
     $this->assertFalse($this->xpath('//select[@id="edit-add-existing-field-field-name"]//option[@value=:field_name]', array(':field_name' => $field_name)), "The 'add existing field' select respects field types 'no_ui' property.");
   }
@@ -471,13 +471,13 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * Tests that external URLs in the 'destinations' query parameter are blocked.
    */
   function testExternalDestinations() {
-    $path = 'admin/structure/types/manage/article/fields/field_tags/field-settings';
+    $path = 'admin/structure/types/manage/post/fields/field_tags/field-settings';
     $options = array(
       'query' => array('destinations' => array('http://example.com')),
     );
     $this->backdropPost($path, NULL, t('Save field settings'), $options);
 
-    $this->assertUrl('admin/structure/types/manage/article/fields', array(), 'Stayed on the same site.');
+    $this->assertUrl('admin/structure/types/manage/post/fields', array(), 'Stayed on the same site.');
   }
 }
 
@@ -712,7 +712,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
    * @see field_test_field_widget_form_alter()
    */
   function testDefaultWidgetPropertiesAlter() {
-    // Create the alter_test_text field and an instance on article nodes.
+    // Create the alter_test_text field and an instance on post nodes.
     field_create_field(array(
       'field_name' => 'alter_test_text',
       'type' => 'text',
@@ -720,7 +720,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     field_create_instance(array(
       'field_name' => 'alter_test_text',
       'entity_type' => 'node',
-      'bundle' => 'article',
+      'bundle' => 'post',
       'widget' => array(
         'type' => 'text_textfield',
         'size' => 60,
@@ -730,7 +730,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     // Test that field_test_field_widget_properties_alter() sets the size to
     // 42 and that field_test_field_widget_form_alter() reports the correct
     // size when the form is displayed.
-    $this->backdropGet('admin/structure/types/manage/article/fields/alter_test_text');
+    $this->backdropGet('admin/structure/types/manage/post/fields/alter_test_text');
     $this->assertText('Field size: 42', 'Altered field size is found in hook_field_widget_form_alter().');
 
     // Create the alter_test_options field.
