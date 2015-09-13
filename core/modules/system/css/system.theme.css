@@ -537,6 +537,10 @@ div.error:before {
 /**
  * Floated images.
  */
+img {
+  max-width: 100%;
+  height: auto;
+}
 img.align-left {
   margin-right: 2em;
   margin-bottom: 1em;
@@ -552,7 +556,8 @@ img.align-right {
  * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
  */
 .caption {
-  display: table;
+  display: inline-block;
+  max-width: 100%;
   margin: 0 12px 10px;
   border: 1px solid #ccc;
 }
@@ -565,11 +570,9 @@ img.align-right {
   max-width: 100%;
 }
 .caption > figcaption {
-  display: table-caption;
+  display: block;
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
-  border: 1px solid #ccc;
-  border-top: none;
   background-color: #eee;
 }
