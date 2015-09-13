@@ -1610,8 +1610,10 @@ function install_finished(&$install_state) {
 
   $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
 
-  backdrop_set_message($message);
-  backdrop_goto('<front>');
+  if (!backdrop_is_cli()) {
+    backdrop_set_message($message);
+    backdrop_goto('<front>');
+  }
 }
 
 /**
