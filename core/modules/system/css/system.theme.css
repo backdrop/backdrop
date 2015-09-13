@@ -14,7 +14,7 @@ fieldset {
 }
 @-moz-document url-prefix() {
   fieldset {
-    display: table-cell; /* Firefox mobile fix */
+    display: block; /* Firefox mobile fix */
   }
 }
 form {
