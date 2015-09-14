@@ -35,7 +35,7 @@ function date_token_info() {
  */
 function date_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
-  $language_code = isset($options['language']) ? $options['language']->language : NULL;
+  $language_code = isset($options['language']) ? $options['language']->langcode : NULL;
 
   if (($type == 'date-field-value') && !empty($data['item'])) {
     $item = $data['item'];
