@@ -19,14 +19,11 @@ class FieldUITestCase extends BackdropWebTestCase {
       $modules = $modules[0];
     }
     $modules[] = 'node';
+    $modules[] = 'field_default_token';
     $modules[] = 'field_ui';
     $modules[] = 'field_test';
     $modules[] = 'taxonomy';
     parent::setUp($modules);
-
-    // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy'));
-    $this->backdropLogin($admin_user);
 
     // Create content type, with underscores.
     $type_name = strtolower($this->randomName(8)) . '_test';
@@ -34,6 +31,16 @@ class FieldUITestCase extends BackdropWebTestCase {
     $this->type = $type->type;
     // Store a valid URL name, with hyphens instead of underscores.
     $this->hyphen_type = str_replace('_', '-', $this->type);
+
+    // Create test user.
+    $permissions = array(
+      'access content',
+      'administer content types',
+      "create {$this->type} content",
+      'administer taxonomy',
+    );
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
   }
 
   /**
