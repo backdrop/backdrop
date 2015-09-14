@@ -79,6 +79,7 @@
 ?>
 <article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
+  <?php if (!$page || $display_submitted): ?>
   <header>
     <?php print render($title_prefix); ?>
     <?php if (!$page): ?>
@@ -93,6 +94,7 @@
       </div>
     <?php endif; ?>
   </header>
+  <?php endif; ?>
 
   <div class="content clearfix"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
@@ -117,7 +119,7 @@
     </footer>
   <?php endif; ?>
 
-  <?php if ($page && !empty($comments)): ?>
+  <?php if ($page && isset($comments['comments'])): ?>
     <section class="comments">  
       <?php if ($comments['comments']): ?>
         <h2 class="title"><?php print t('Comments'); ?></h2>
