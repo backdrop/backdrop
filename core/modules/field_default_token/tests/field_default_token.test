@@ -5,6 +5,8 @@
  * Tests for field_default_token.module.
  */
 
+require_once BACKDROP_ROOT . '/core/modules/field_ui/tests/field_ui.test';
+
 /**
  * Tests that tokens in default values are processed.
  *
