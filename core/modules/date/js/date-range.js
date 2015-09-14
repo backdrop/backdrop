@@ -2,9 +2,9 @@
 
 "use strict";
 
-Backdrop.behaviors.dateSelect = {};
+Backdrop.behaviors.dateRange = {};
 
-Backdrop.behaviors.dateSelect.attach = function (context, settings) {
+Backdrop.behaviors.dateRange.attach = function (context, settings) {
   var $context = $(context);
   var $widgets = $context.find('.end-date-wrapper').once('date-select-range');
   for (var i = 0; i < $widgets.length; i++) {

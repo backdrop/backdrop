@@ -1466,7 +1466,6 @@ function date_combo_element_process($element, &$form_state, $form) {
       $element[$from_field]['#type'] = 'date_select';
       $element[$from_field]['#theme_wrappers'] = array('date_select');
       $element[$from_field]['#ajax'] = !empty($element['#ajax']) ? $element['#ajax'] : FALSE;
-      $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date-select.js';
       break;
 
     case 'date_popup':
@@ -1494,6 +1493,7 @@ function date_combo_element_process($element, &$form_state, $form) {
     $element[$to_field]['#weight'] += .2;
     $element[$to_field]['#prefix'] = '';
     $element[$to_field]['#date_title'] = $instance['label'];
+    $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date-range.js';
   }
   else {
     $element[$from_field]['#description'] = $description;
