@@ -110,7 +110,7 @@
 
   <?php print render($content['links']); ?>
 
-  <?php if ($page && !empty($comments)): ?>
+  <?php if ($page && isset($comments['comments'])): ?>
     <section class="comments">  
       <?php if ($comments['comments']): ?>
         <h2 class="title"><?php print t('Comments'); ?></h2>
