@@ -206,8 +206,8 @@ function template_preprocess_node(&$variables) {
     $variables['user_picture'] = '';
   }
 
-  // Add post ARIA role.
-  $variables['attributes']['role'] = 'post';
+  // Add article ARIA role.
+  $variables['attributes']['role'] = 'article';
 
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
