@@ -820,11 +820,9 @@ div.description,
   padding-top: 6px;
 }
 
-ul.tips li {
-  margin: 0.25em 0 0.25em 1.5em; /* LTR */
-}
-[dir="rtl"] ul.tips li {
-  margin: 0.25em 1.5em 0.25em 0;
+ul.tips {
+  margin: 0.25em 0.25em 0;
+  padding: 0 1em;
 }
 body div.form-type-radio div.description,
 body div.form-type-checkbox div.description {

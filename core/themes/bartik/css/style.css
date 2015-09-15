@@ -496,7 +496,7 @@ ul.tips {
   padding: 0;
   clear: both;
 }
-.l-header .block-user-login input.form-submit {
+.l-header .block-user-login .form-submit {
   border: 1px solid;
   border-color: #ccc;
   border-color: rgba(255, 255, 255, 0.5);
@@ -505,8 +505,8 @@ ul.tips {
   margin: 4px 0;
   padding: 3px 8px;
 }
-.l-header .block-user-login input.form-submit:hover,
-.l-header .block-user-login input.form-submit:focus {
+.l-header .block-user-login .form-submit:hover,
+.l-header .block-user-login .form-submit:focus {
   background: #fff;
   background: rgba(255, 255, 255, 0.9);
 }
@@ -1161,7 +1161,7 @@ ul.action-links li a {
 
 /* ---------------- Buttons    ---------------- */
 
-input.form-submit,
+.form-submit,
 a.button {
   background: #fff url(../images/buttons.png) 0 0 repeat-x;
   border: 1px solid #e4e4e4;
@@ -1179,7 +1179,7 @@ a.button {
   -moz-border-radius: 20px;
   border-radius: 15px;
 }
-[dir="rtl"] input.form-submit,
+[dir="rtl"] .form-submit,
 [dir="rtl"] a.button {
   margin-right: 0;
   margin-left: 0.6em;
@@ -1214,24 +1214,17 @@ fieldset {
 }
 .filter-wrapper {
   top: 0;
-  padding: 1em 0 0.2em;
+  padding: .5em 0;
   -moz-border-radius-topright: 0;
   -moz-border-radius-topleft: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.filter-help a {
-  font-size: 0.857em;
-  padding: 2px 20px 0;
+.filter-wrapper .fieldset-wrapper {
+  margin-top: 0;
 }
 .filter-wrapper .form-item label {
   margin-right: 10px;
-}
-.filter-wrapper .form-item {
-  padding: 0 0 0.5em 0.5em;
-}
-.filter-guidelines {
-  padding: 0 1.5em 0 0.5em;
 }
 fieldset.collapsed {
   background: transparent;
@@ -1309,8 +1302,8 @@ select.form-select {
   box-sizing: border-box;
   max-width: 100%;
 }
-input.form-submit:hover,
-input.form-submit:focus {
+.form-submit:hover,
+.form-submit:focus {
   background: #dedede;
 }
 .form-item {
@@ -1508,8 +1501,8 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   margin-left: 5px;
   margin-right: 0;
 }
-#search-block-form input.form-submit,
-#search-form input.form-submit {
+#search-block-form .form-submit,
+#search-form .form-submit {
   margin-left: 0;
   margin-right: 0;
   height: 25px;
@@ -1521,10 +1514,10 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   background: url(../images/search-button.png) no-repeat center top;
   overflow: hidden;
 }
-#search-block-form input.form-submit:hover,
-#search-block-form input.form-submit:focus,
-#search-form input.form-submit:hover,
-#search-form input.form-submit:focus {
+#search-block-form .form-submit:hover,
+#search-block-form .form-submit:focus,
+#search-form .form-submit:hover,
+#search-form .form-submit:focus {
   background-position: center bottom;
 }
 #search-form .form-item-keys label {
