@@ -2,5 +2,6 @@ name = "Test search type"
 description = "Support module for search module testing."
 package = Testing
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 hidden = TRUE

@@ -4,5 +4,6 @@ dependencies[] = requirements1_test
 dependencies[] = comment
 package = Testing
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 hidden = TRUE

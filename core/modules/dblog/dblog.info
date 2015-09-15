@@ -2,4 +2,5 @@ name = Database Logging
 description = Logs and records system events to the database.
 package = Development
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x

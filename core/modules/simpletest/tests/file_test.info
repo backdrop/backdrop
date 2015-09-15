@@ -2,5 +2,6 @@ name = "File test"
 description = "Support module for file handling tests."
 package = Testing
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 hidden = TRUE
