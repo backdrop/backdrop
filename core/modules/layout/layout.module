@@ -424,6 +424,13 @@ function layout_route_handler($router_item) {
     }
   }
 
+  // Safety check that we don't show an admin layout to a user who cannot view
+  // the admin theme. This may happen because the cached layout list does not
+  // include a permissions check on the admin theme.
+  if ($selected_layout->name === 'admin_default' && !user_access('view the administration theme')) {
+    $selected_layout = layout_load('default');
+  }
+
   // Special handling for 404 and 403 pages to render in admin theme. The
   // current path will be the 404/403 system path, and we need to check the
   // original path, which is stored in "destination" by
