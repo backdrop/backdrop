@@ -1159,6 +1159,13 @@ function filter_process_format($element) {
     $element['#format'] = filter_default_format($user);
   }
 
+  $fallback_format = config_get('system.core', 'filter_fallback_format');
+
+  // Remove the Plain text format if not set and other options are available.
+  if (($element['#format'] != $fallback_format) && (count($options) > 1) && array_key_exists($fallback_format, $options)) {
+    unset($options[$fallback_format]);
+  }
+
   $element['format']['format'] = array(
     '#type' => 'select',
     '#title' => t('Editor'),
