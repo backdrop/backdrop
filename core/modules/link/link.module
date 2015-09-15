@@ -35,7 +35,7 @@ function link_field_info() {
         'title_value' => '',
         'title_label_use_field_label' => FALSE,
         'title_maxlength' => 128,
-        'enable_tokens' => 1,
+        'enable_tokens' => 0,
         'display' => array(
           'url_cutoff' => 80,
         ),
@@ -123,19 +123,18 @@ function link_field_instance_settings_form($field, $instance) {
     '#size' => 3,
   );
 
-  $form['enable_tokens'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow user-entered tokens'),
-    '#default_value' => $instance['settings']['enable_tokens'],
-    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
-  );
-
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced Options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#parents' => array('instance', 'settings'),
+  );
+  $form['advanced']['enable_tokens'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow user-entered tokens'),
+    '#default_value' => $instance['settings']['enable_tokens'],
+    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
   );
   $form['advanced']['display']['url_cutoff'] = array(
     '#type' => 'textfield',
