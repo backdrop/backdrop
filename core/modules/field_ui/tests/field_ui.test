@@ -62,18 +62,25 @@ class FieldUITestCase extends BackdropWebTestCase {
 
     // First step : 'Add new field' on the 'Manage fields' page.
     $this->backdropPost("$bundle_path/fields",  $initial_edit, t('Save'));
-    $this->assertRaw(t('These settings apply to the %label field everywhere it is used.', array('%label' => $label)), 'Field settings page was displayed.');
 
     // Second step : 'Field settings' form.
-    $this->backdropPost(NULL, $field_edit, t('Save field settings'));
-    $this->assertRaw(t('Updated field %label field settings.', array('%label' => $label)), 'Redirected to instance and widget settings page.');
+    if (state_get('field_ui_test_field_settings', TRUE)) {
+      $this->assertRaw(format_string('These settings apply to the %label field everywhere it is used.', array('%label' => $label)), 'Field settings page was displayed.');
+      $this->backdropPost(NULL, $field_edit, t('Save field settings'));
+      $this->assertRaw(format_string('Updated field %label field settings.', array('%label' => $label)), 'Redirected to instance and widget settings page.');
+    }
+    // Second step is skipped if the field has no settings.
+    else {
+      $this->assertNoRaw(format_string('These settings apply to the %label field everywhere it is used.', array('%label' => $label)), 'Field settings page was skipped because it had no settings.');
+    }
 
     // Third step : 'Instance settings' form.
+    $this->assertRaw(format_string('These settings apply only to the %field field', array('%field' => $label)), 'Field instance settings page was displayed.');
     $this->backdropPost(NULL, $instance_edit, t('Save settings'));
-    $this->assertRaw(t('Saved %label configuration.', array('%label' => $label)), 'Redirected to "Manage fields" page.');
+    $this->assertRaw(format_string('Saved %label configuration.', array('%label' => $label)), 'Redirected to "Manage fields" page.');
 
     // Check that the field appears in the overview form.
-    $this->assertFieldByXPath('//table[@id="field-overview"]//td[1]', $label, 'Field was created and appears in the overview page.');
+    $this->assertLinkByHref("$bundle_path/fields/field_$field_name", 0, 'Field was created and appears in the overview page.');
   }
 
   /**
@@ -104,7 +111,7 @@ class FieldUITestCase extends BackdropWebTestCase {
     $this->assertRaw(t('Saved %label configuration.', array('%label' => $label)), 'Redirected to "Manage fields" page.');
 
     // Check that the field appears in the overview form.
-    $this->assertFieldByXPath('//table[@id="field-overview"]//td[1]', $label, 'Field was created and appears in the overview page.');
+    $this->assertLinkByHref("$bundle_path/fields/$field_name", 0, 'Field was created and appears in the overview page.');
   }
 
   /**
@@ -184,6 +191,18 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->createField();
     $this->updateField();
     $this->addExistingField();
+  }
+
+  /**
+   * Create a field that has no global field settings.
+   *
+   * This test creates a field but in one fewer step because the field has
+   * no global field settings.
+   */
+  function testCreateFieldNoSettings() {
+    // This setting is checked in field_test_field_settings_form().
+    state_get('field_ui_test_field_settings', FALSE);
+    $this->createField();
   }
 
   /**
@@ -402,7 +421,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * Tests that Field UI respects the 'no_ui' option in hook_field_info().
    */
   function testHiddenFields() {
-    $bundle_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields/';
+    $bundle_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields';
 
     // Check that the field type is not available in the 'add new field' row.
     $this->backdropGet($bundle_path);
@@ -424,11 +443,11 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     // Check that the newly added instance appears on the 'Manage Fields'
     // screen.
     $this->backdropGet($bundle_path);
-    $this->assertFieldByXPath('//table[@id="field-overview"]//td[1]', $instance['label'], 'Field was created and appears in the overview page.');
+    $this->assertLinkByHref("$bundle_path/$field_name", 0, 'Field was created and appears in the overview page.');
 
     // Check that the instance does not appear in the 'add existing field' row
     // on other bundles.
-    $bundle_path = 'admin/structure/types/manage/post/fields/';
+    $bundle_path = 'admin/structure/types/manage/post/fields';
     $this->backdropGet($bundle_path);
     $this->assertFalse($this->xpath('//select[@id="edit-add-existing-field-field-name"]//option[@value=:field_name]', array(':field_name' => $field_name)), "The 'add existing field' select respects field types 'no_ui' property.");
   }

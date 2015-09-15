@@ -38,7 +38,6 @@ class LinkUITest extends LinkBaseTestClass {
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Is field created?
@@ -152,10 +151,10 @@ class LinkUITest extends LinkBaseTestClass {
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $this->backdropPost(NULL, array(
       'instance[settings][title]' => 'value',
-      'instance[settings][title_value]' => '<strong>' . $name . '</strong>'), t('Save settings'));
+      'instance[settings][title_value]' => '<strong>' . $name . '</strong>'), t('Save settings')
+    );
 
     // Is field created?
     $this->assertRaw(t('Saved %label configuration', array('%label' => $name)), 'Field added');
@@ -189,7 +188,6 @@ class LinkUITest extends LinkBaseTestClass {
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $this->backdropPost(NULL, array(
       'instance[settings][url]' => 1,
     ), t('Save settings'));
@@ -228,7 +226,6 @@ class LinkUITest extends LinkBaseTestClass {
       'fields[_add_new_field][widget_type]' => 'link_field',
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Is field created?
@@ -263,7 +260,6 @@ class LinkUITest extends LinkBaseTestClass {
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
 
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $link_class_name = 'basic-link-' . strtolower($this->randomName());
     $edit = array(
       'instance[settings][attributes][class]' => $link_class_name,
@@ -322,7 +318,6 @@ class LinkUITest extends LinkBaseTestClass {
     );
     $this->backdropPost('admin/structure/types/manage/page/fields', $edit, t('Save'));
 
-    $this->backdropPost(NULL, array(), t('Save field settings'));
     $link_class_name = 'basic-link ' . strtoupper($this->randomName());
     $edit = array(
       'instance[settings][attributes][class]' => $link_class_name,
