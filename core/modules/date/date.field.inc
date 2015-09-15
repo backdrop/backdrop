@@ -232,7 +232,7 @@ function date_field_info() {
       'timezone_db' => 'UTC',
     ),
     'instance_settings' => array(
-      'default_value' => 'now',
+      'default_value' => 'blank',
       'default_value_code' => '',
       'default_value2' => 'same',
       'default_value_code2' => '',
