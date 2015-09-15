@@ -327,7 +327,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->web_user);
 
     $this->backdropGet('node/add/page');
-    // Assure Full HTML is allowed.
+    // Ensure Full HTML is allowed.
     $this->assertRaw('<option value="' . $full . '">Full HTML</option>', 'Full HTML filter accessible.');
 
     // Switch user.
@@ -460,10 +460,10 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
       'edit any page content',
     ));
 
-    // Create two text formats.
+    // Create three text formats.
     $this->backdropLogin($this->filter_admin_user);
     $formats = array();
-    for ($i = 0; $i < 2; $i++) {
+    for ($i = 0; $i < 3; $i++) {
       $edit = array(
         'format' => backdrop_strtolower($this->randomName()),
         'name' => $this->randomName(),
@@ -482,7 +482,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
       filter_permission_name($this->allowed_format),
     ));
 
-    // Create an administrative user who has access to use both formats.
+    // Create an administrative user who has access to use all formats.
     $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       'create page content',

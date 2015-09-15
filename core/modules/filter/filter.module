@@ -1134,6 +1134,17 @@ function filter_process_format($element) {
   // Turn original element into a text format wrapper.
   $element['#attached'] = filter_get_attached($formats);
 
+  // Use the default format for this user if none was selected.
+  if (!isset($element['#format'])) {
+    $element['#format'] = filter_default_format($user);
+  }
+
+  // Remove the Plain text format if not set and other options are available.
+  $fallback_format = config_get('system.core', 'filter_fallback_format');
+  if (($element['#format'] != $fallback_format) && (count($formats) > 1) && array_key_exists($fallback_format, $formats)) {
+    unset($formats[$fallback_format]);
+  }
+
   // Setup child container for the text format widget.
   $element['format'] = array(
     '#type' => 'fieldset',
@@ -1154,35 +1165,28 @@ function filter_process_format($element) {
     );
   }
 
-  // Use the default format for this user if none was selected.
-  if (!isset($element['#format'])) {
-    $element['#format'] = filter_default_format($user);
+  // If there are multiple options OR if the current text format is no
+  // longer available to the current user, then show as a select.
+  if (count($options) > 1 || !array_key_exists($element['#format'], $options)) {
+    $element['format']['format'] = array(
+      '#type' => 'select',
+      '#title' => t('Editor'),
+      '#options' => $options,
+      '#default_value' => $element['#format'],
+      '#weight' => 10,
+      '#attributes' => array('class' => array('filter-list')),
+      '#parents' => array_merge($element['#parents'], array('format')),
+    );
   }
-
-  $fallback_format = config_get('system.core', 'filter_fallback_format');
-
-  // Remove the Plain text format if not set and other options are available.
-  if (($element['#format'] != $fallback_format) && (count($options) > 1) && array_key_exists($fallback_format, $options)) {
-    unset($options[$fallback_format]);
+  else {
+    $element['format']['format'] = array(
+      '#type' => 'hidden',
+      '#value' => $element['#format'],
+      '#default_value' => $element['#format'],
+      '#attributes' => array('class' => array('filter-list')),
+      '#parents' => array_merge($element['#parents'], array('format')),
+    );
   }
-
-  $element['format']['format'] = array(
-    '#type' => 'select',
-    '#title' => t('Editor'),
-    '#options' => $options,
-    '#default_value' => $element['#format'],
-    '#access' => count($formats) > 1,
-    '#weight' => 10,
-    '#attributes' => array('class' => array('filter-list')),
-    '#parents' => array_merge($element['#parents'], array('format')),
-  );
-
-  $element['format']['help'] = array(
-    '#type' => 'container',
-    '#theme' => 'filter_tips_more_info',
-    '#attributes' => array('class' => array('filter-help')),
-    '#weight' => 0,
-  );
 
   $all_formats = filter_formats();
   $format_exists = isset($all_formats[$element['#format']]);
