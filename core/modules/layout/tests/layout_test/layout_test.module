@@ -71,6 +71,9 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
 
   switch ($delta) {
     case 'foo':
+      $settings += array(
+        'count' => 0,
+      );
       $block['subject'] = 'Foo subject';
       $block['content'] = format_string('The setting of count is @setting.', array('@setting' => $settings['count']));
       break;

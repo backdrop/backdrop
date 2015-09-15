@@ -945,21 +945,46 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
  * Tests that the correct layout is used in various situations.
  */
 class LayoutSelectionTest extends BackdropWebTestCase {
-  /**
-   * Tests the correct layout is used on 404 and 403 pages.
-   */
-  function testErrorPages() {
+  protected $profile = 'testing';
+  protected $content_type;
+  protected $web_user;
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout'));
+    config_set('system.core', 'node_admin_theme', TRUE);
+
+    // Create a content type for checking node/add page layouts.
+    $this->content_type = $this->backdropCreateContentType();
+
+    // Create a limited-ability user that cannot access the admin theme.
+    $this->web_user = $this->backdropCreateUser(array(
+      'access content',
+      'create ' . $this->content_type->type . ' content',
+    ));
+
     // Create and login admin user.
-    $admin_user = $this->backdropCreateUser(array(
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'create ' . $this->content_type->type . ' content',
       'access administration pages',
       'administer content types',
       'view the administration theme',
       'administer filters',
     ));
-    $this->backdropLogin($admin_user);
+    $this->backdropLogin($this->admin_user);
+  }
 
+  /**
+   * Tests the correct layout is used on 404 and 403 pages.
+   */
+  function testPages() {
     // Check that a known page is using the admin (one-column) layout.
     $this->backdropGet('admin/config/content/formats/plain_text');
+    $this->assertIsAdminLayout();
+
+    // Check that node/add uses the admin layout for the admin user.
+    $this->backdropGet('node/add/' . $this->content_type->type);
     $this->assertIsAdminLayout();
 
     // Check that a 403 page uses the admin layout.
@@ -983,6 +1008,12 @@ class LayoutSelectionTest extends BackdropWebTestCase {
 
     // Anonymous 404.
     $this->backdropGet('admin/config/content/formats/fake-format');
+    $this->assertIsDefaultLayout();
+
+    // Check that a logged in user that can access an admin page but not the
+    // admin theme uses the default layout.
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/add/' . $this->content_type->type);
     $this->assertIsDefaultLayout();
   }
 
