@@ -1810,6 +1810,12 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
   if (!($allowed_html = $filter->settings['allowed_html'])) {
     return;
   }
+
+  // Don't show allowed HTML tags if the user can't enter HTML.
+  if ($format->editor == 'ckeditor') {
+    return;
+  }
+
   $output = t('Allowed HTML tags: @tags', array('@tags' => $allowed_html));
   if (!$long) {
     return $output;
@@ -2254,6 +2260,11 @@ function _filter_autop($text) {
  * @see filter_filter_info()
  */
 function _filter_autop_tips($filter, $format, $long = FALSE) {
+  // Don't show tips if CKEditor will automatically create paragraphs itself.
+  if ($format->editor == 'ckeditor') {
+    return;
+  }
+
   if ($long) {
     return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized simply add a couple blank lines.');
   }
