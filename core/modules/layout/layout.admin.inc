@@ -1567,12 +1567,12 @@ function layout_enable_layout($status, Layout $layout) {
     return MENU_ACCESS_DENIED;
   }
 
-  $layout->disabled = !$status;
-  $layout->save();
   if ($status) {
+    $layout->enable();
     backdrop_set_message(t('Layout "@title" enabled.', array('@title' => $layout->title)));
   }
   else {
+    $layout->disable();
     backdrop_set_message(t('Layout "@title" disabled.', array('@title' => $layout->title)));
   }
   backdrop_goto('admin/structure/layouts');

@@ -1190,3 +1190,150 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     return $this->assertBlocks($blocks, TRUE);
   }
 }
+
+/**
+ * Tests invocation of hooks when performing an action.
+ *
+ * Tested hooks are:
+ * - hook_layout_presave
+ * - hook_layout_insert
+ * - hook_layout_update
+ * - hook_layout_disable
+ * - hook_layout_enable
+ * - hook_layout_delete
+ * - hook_layout_template_change
+ * - hook_layout_revert
+ */
+class LayoutHookTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('layout', 'layout_test');
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+  }
+
+  /**
+   * Checks the order of CRUD hook execution messages.
+   *
+   * layout_test.module implements all core layout CRUD hooks and
+   * stores a message for each in state_get('layout_test').
+   *
+   * @param $messages
+   *   An array of plain-text messages in the order they should appear.
+   */
+  protected function assertHookMessageOrder($messages) {
+    $positions = array();
+    $state_get = state_get('layout_test');
+    foreach ($messages as $message) {
+      // Verify that each message is found and record its position.
+      $position = array_search($message, $state_get);
+      if ($this->assertTrue($position !== FALSE, $message)) {
+        $positions[] = $position;
+      }
+    }
+    // Sort the positions and ensure they remain in the same order.
+    $sorted = $positions;
+    sort($sorted);
+    $this->assertTrue($sorted == $positions, 'The hook messages appear in the correct order.');
+  }
+
+  /**
+   * Tests hook invocations for operations on layouts.
+   */
+  public function testLayoutHooks() {
+    state_set('layout_test', array());
+    
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout' => 'two_column',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // We should be taken to the layout content page next.
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
+    
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_presave called',
+      'layout_test_layout_insert called',
+    ));
+
+    state_set('layout_test', array());
+
+    // Return to the layout edit page and save it again.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_presave called',
+      'layout_test_layout_update called',
+    ));
+
+    // Disable the layout via the dropbutton link.
+    state_set('layout_test', array());
+    $disable_link = $this->xpath('//*[contains(@class, "disable")]//a');
+    $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
+    $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_disable called',
+    ));
+
+    state_set('layout_test', array());
+
+    // Re-enable the layout.
+    $this->backdropGet('admin/structure/layouts/manage');
+    $enable_link = $this->xpath('//li[contains(@class, "enable")]//a');
+    $enable_url_parts = backdrop_parse_url($enable_link[0]['href']);
+    $this->backdropGet($enable_url_parts['path'], $enable_url_parts);
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_enable called',
+    ));
+
+    // Delete the layout.
+    state_set('layout_test', array());
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_delete called',
+    ));
+
+    // Go to the Default layout's edit page and change the layout to the 
+    // one_column layout.
+    state_set('layout_test', array());
+    $edit = array(
+      'layout' => 'one_column',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/settings', $edit, t('Save layout'));
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_template_change called',
+    ));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Revert the Default layout.
+    state_set('layout_test', array());
+    $this->backdropPost('admin/structure/layouts/manage/default/delete', array(), t('Revert layout'));
+    $this->assertHookMessageOrder(array(
+      'layout_test_layout_revert called',
+    ));
+
+  }
+}

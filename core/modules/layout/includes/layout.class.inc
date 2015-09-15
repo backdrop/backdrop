@@ -240,12 +240,25 @@ class Layout {
       }
     }
 
+    // Allow modules to act on layout data before saving.
+    foreach (module_implements('layout_presave') as $module) {
+      $function = $module . '_layout_presave';
+      $function($this->name, $data);
+    }
+
     if (isset($this->original_name) && $this->original_name != $this->name) {
       config('layout.layout.' . $this->original_name)->delete();
     }
     config('layout.layout.' . $this->name)
       ->setData($data)
       ->save();
+
+    if (!empty($this->is_new)) {
+      $this->invokeHook('insert');
+    }
+    else {
+      $this->invokeHook('update');
+    }
 
     // If this layout overrides an existing module path, reassign or delete
     // the layout menu item.
@@ -290,6 +303,7 @@ class Layout {
       if ($this->menu_item && $this->menu_item->name === $this->name) {
         $this->menu_item->reassign();
       }
+      $this->invokeHook('delete');
       layout_reset_caches();
     }
     else {
@@ -312,6 +326,7 @@ class Layout {
         $this->menu_item->revert();
       }
       layout_reset_caches();
+      $this->invokeHook('revert');
     }
   }
 
@@ -326,6 +341,7 @@ class Layout {
     if ($this->menu_item && $this->menu_item->name === $this->name) {
       $this->menu_item->reassign();
     }
+    $this->invokeHook('disable');
   }
 
   /**
@@ -336,9 +352,20 @@ class Layout {
     $this->save();
 
     // Check if the menu item needs to be assigned to this layout.
-    if ($this->menu_item->name === $this->name) {
+    if ($this->menu_item && $this->menu_item->name === $this->name) {
       $this->menu_item->reassign();
     }
+    $this->invokeHook('enable');
+  }
+
+  /**
+   * Invokes a hook on behalf of the layout.
+   *
+   * @param $hook
+   *   One of 'insert', 'update', 'enable', 'disable', 'revert', or 'delete'.
+   */
+   protected function invokeHook($hook) {
+    module_invoke_all('layout_' . $hook, $this);
   }
 
   /**
@@ -425,6 +452,7 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
+    $block = $this->content[$block_uuid];
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
@@ -433,6 +461,7 @@ class Layout {
         unset($this->content[$block_uuid]);
       }
     }
+
   }
 
   /**
@@ -624,6 +653,7 @@ class Layout {
 
     $this->layout = $layout_name;
     $this->positions = $new_positions;
+    module_invoke_all('layout_template_change', $this, $old_layout_info['name']);
   }
 
   /**
