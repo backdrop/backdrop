@@ -53,7 +53,10 @@ class LinkBaseTestClass extends BackdropWebTestCase {
     );
     $field_name = 'field_' . $name;
     $this->backdropPost('admin/structure/types/manage/' . $node_type . '/fields', $edit, t('Save'));
-    $this->backdropPost(NULL, array(), t('Save field settings'));
+
+    // Lind does not have any field settings, so these are skipped.
+    // $this->backdropPost(NULL, array(), t('Save field settings'));
+
     $this->backdropPost(NULL, $settings, t('Save settings'));
 
     // Is field created?
