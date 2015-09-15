@@ -140,15 +140,23 @@ Backdrop.verticalTab.prototype = {
    * Shows a vertical tab pane.
    */
   tabShow: function () {
-    // Display the tab.
-    this.focus();
+    // Show the tab.
+    this.item.show();
+
     // Update .first marker for items. We need recurse from parent to retain the
     // actual DOM element order as jQuery implements sortOrder, but not as public
     // method.
-    this.item.parent().children('.vertical-tab-item').removeClass('first')
-      .filter(':visible:first').addClass('first');
-    // Remove hidden class, in case tabHide was run on this tab
-    this.fieldset.removeClass('vertical-tab-hidden');
+    var $allTabs = this.item.parent().children('.vertical-tab-item');
+    $allTabs.removeClass('first').filter(':visible:first').addClass('first');
+
+    // Remove hidden class, in case tabHide was run on this tab.
+    this.fieldset.removeClass('vertical-tab-hidden').show();
+
+    // Focus this tab if it is the only one.
+    if ($allTabs.length === 1) {
+      $allTabs.first().data('verticalTab').focus();
+    }
+
     return this;
   },
 
@@ -156,13 +164,18 @@ Backdrop.verticalTab.prototype = {
    * Hides a vertical tab pane.
    */
   tabHide: function () {
+    // Hide the tab.
+    this.item.hide();
+
     // Update .first marker for items. We need recurse from parent to retain the
     // actual DOM element order as jQuery implements sortOrder, but not as public
     // method.
     this.item.parent().children('.vertical-tab-item').removeClass('first')
       .filter(':visible:first').addClass('first');
+
     // Hide the fieldset.
     this.fieldset.addClass('vertical-tab-hidden').hide();
+
     // Focus the first visible tab (if there is one).
     var $firstTab = this.fieldset.siblings('.vertical-tabs-pane:not(.vertical-tab-hidden):first');
     if ($firstTab.length) {
