@@ -1835,7 +1835,15 @@ function _filter_xss_attributes($attr) {
       case 2:
         // Attribute value, a URL after href= for instance.
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+          // Do not strip protocol information out from data attributes,
+          // which may be mangled if they contain JSON.
+          if (strpos($attrname, 'data-') === 0) {
+            $thisval = $match[1];
+          }
+          // Strip bad protocols from all other attributes, e.g. href, src.
+          else {
+            $thisval = filter_xss_bad_protocol($match[1]);
+          }
 
           if (!$skip) {
             $attrarr[] = "$attrname=\"$thisval\"";
