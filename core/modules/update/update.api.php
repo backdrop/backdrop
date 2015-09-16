@@ -16,7 +16,7 @@
  * Most modules will never need to implement this hook. It is for advanced
  * interaction with the Update Manager module. The primary use-case for this
  * hook is to add projects to the list; for example, to provide update status
- * data on disabled modules and themes. A contributed module might want to hide
+ * data on disabled modules, themes, and layouts. A contributed module might want to hide
  * projects from the list; for example, if there is a site-specific module that
  * doesn't have any official releases, that module could remove itself from this
  * list to avoid "No available releases found" warnings on the available updates
@@ -26,7 +26,7 @@
  * @param $projects
  *   Reference to an array of the projects installed on the system. This
  *   includes all the metadata documented in the comments below for each project
- *   (either module or theme) that is currently enabled. The array is initially
+ *   (either module, theme, or layout) that is currently enabled. The array is initially
  *   populated inside update_get_projects() with the help of
  *   _update_process_info_list(), so look there for examples of how to populate
  *   the array with real values.

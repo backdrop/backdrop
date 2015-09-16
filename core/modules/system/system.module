@@ -2014,6 +2014,11 @@ function system_updater_info() {
       'name' => t('Update themes'),
       'weight' => 0,
     ),
+    'layout' => array(
+      'class' => 'LayoutUpdater',
+      'name' => t('Update layouts'),
+      'weight' => 0,
+    ),
   );
 }
 
@@ -3590,6 +3595,7 @@ function system_autoload_info() {
     'Archive_Tar' => 'system.tar.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
+    'LayoutUpdater' => 'system.updater.inc',
 
     // @todo: Move file entities to File module.
     // https://github.com/backdrop/backdrop-issues/issues/213
