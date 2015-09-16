@@ -92,7 +92,9 @@ function ckeditor_library_info() {
     'title' => 'Loads the main CKEditor library.',
     'version' => CKEDITOR_VERSION,
     'js' => array(
-      'core/misc/ckeditor/ckeditor.js' => array('group' => JS_LIBRARY),
+      // CKEditor is both a large library and needs to be able to identify its
+      // installation path, so we disable aggregation on it.
+      'core/misc/ckeditor/ckeditor.js' => array('preprocess' => FALSE, 'group' => JS_LIBRARY),
     ),
   );
 
