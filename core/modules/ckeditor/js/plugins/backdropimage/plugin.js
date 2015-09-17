@@ -219,22 +219,33 @@ CKEDITOR.plugins.add('backdropimage', {
     }
   },
 
-  // Disable image2's integration with the link/backdroplink plugins: don't
-  // allow the widget itself to become a link. Support for that may be added
-  // by an text filter that adds a data- attribute specifically for that.
   afterInit: function (editor) {
+    var cmd;
+    var disableButtonIfOnWidget = function (evt) {
+      var widget = editor.widgets.focused;
+      if (widget && widget.name === 'image') {
+        this.setState(CKEDITOR.TRISTATE_DISABLED);
+        evt.cancel();
+      }
+    };
+
+    // Disable image2's integration with the link/backdroplink plugins: don't
+    // allow the widget itself to become a link. Support for that may be added
+    // by an text filter that adds a data- attribute specifically for that.
     if (editor.plugins.backdroplink) {
-      var cmd = editor.getCommand('backdroplink');
-      // Needs to be refreshed on selection changes.
+      cmd = editor.getCommand('backdroplink');
       cmd.contextSensitive = 1;
-      // Disable command and cancel event when the image widget is selected.
-      cmd.on('refresh', function (evt) {
-        var widget = editor.widgets.focused;
-        if (widget && widget.name === 'image') {
-          this.setState(CKEDITOR.TRISTATE_DISABLED);
-          evt.cancel();
-        }
-      });
+      cmd.on('refresh', disableButtonIfOnWidget);
+    }
+
+    // Disable alignment buttons if the align filter is not enabled.
+    if (editor.plugins.justify && !editor.config.backdrop.alignFilterEnabled) {
+      var commands = ['justifyleft', 'justifycenter', 'justifyright', 'justifyblock'];
+      for (var n = 0; n < commands.length; n++) {
+        cmd = editor.getCommand(commands[n]);
+        cmd.contextSensitive = 1;
+        cmd.on('refresh', disableButtonIfOnWidget, null, null, 4);
+      }
     }
   }
 
