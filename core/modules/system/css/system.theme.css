@@ -573,9 +573,7 @@ img.align-right {
   max-width: 100%;
 }
 .caption > figcaption {
-  display: table;
-  box-sizing: border-box;
-  width: 100%;
+  display: block;
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
