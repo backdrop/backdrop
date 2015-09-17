@@ -10,6 +10,12 @@ function system_test_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['system-test/sleep/shutdown/%'] = array(
+    'page callback' => 'system_test_sleep',
+    'page arguments' => array(3, TRUE),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['system-test/auth'] = array(
     'page callback' => 'system_test_basic_auth_page',
     'access callback' => TRUE,
@@ -93,7 +99,7 @@ function system_test_menu() {
   );
 
   $items['system-test/shutdown-functions'] = array(
-    'title' => 'Test main content duplication',
+    'title' => 'Test shutdown functions',
     'page callback' => 'system_test_page_shutdown_functions',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -116,8 +122,13 @@ function system_test_menu() {
   return $items;
 }
 
-function system_test_sleep($seconds) {
-  sleep($seconds);
+function system_test_sleep($seconds, $sleep_at_shutdown = FALSE) {
+  if ($sleep_at_shutdown) {
+    register_shutdown_function('system_test_sleep', $seconds);
+  }
+  else {
+    sleep($seconds);
+  }
 }
 
 function system_test_basic_auth_page() {
@@ -347,9 +358,11 @@ function system_test_page_shutdown_functions($arg1, $arg2) {
  * Dummy shutdown function which registers another shutdown function.
  */
 function _system_test_first_shutdown_function($arg1, $arg2) {
-  // Output something, page has already been printed and the session stored
-  // so we can't use backdrop_set_message.
-  print t('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+  // The page has already been printed, so we are unable to affect its output.
+  // Print something (which won't show up).
+  $output = format_string('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+  print $output;
+  watchdog('shutdown', $output);
   backdrop_register_shutdown_function('_system_test_second_shutdown_function', $arg1, $arg2);
 }
 
@@ -357,9 +370,11 @@ function _system_test_first_shutdown_function($arg1, $arg2) {
  * Dummy shutdown function.
  */
 function _system_test_second_shutdown_function($arg1, $arg2) {
-  // Output something, page has already been printed and the session stored
-  // so we can't use backdrop_set_message.
-  print t('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+  // The page has already been printed, so we are unable to affect its output.
+  // Print something (which won't show up).
+  $output = format_string('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+  print $output;
+  watchdog('shutdown', $output);
 
   // Throw an exception with an HTML tag. Since this is called in a shutdown
   // function, it will not bubble up to the default exception handler but will

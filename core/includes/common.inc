@@ -2916,16 +2916,41 @@ function backdrop_deliver_html_page($page_callback_result) {
 function backdrop_page_footer() {
   module_invoke_all('exit');
 
-  // Commit the user session, if needed.
+  // Commit the user session, if needed. This must be done before sending the
+  // response, as it may set a cookie header.
   backdrop_session_commit();
 
-  if (config_get('system.core', 'cache') && ($cache = backdrop_page_set_cache())) {
+  // In order to do post-delivery processing (e.g. cron run), we must close the
+  // connection. Otherwise the connection will wait for PHP to finish before it
+  // is used again in a subsequent request, such as for a JS or CSS file.
+  header('Connection: close');
+
+  // Get the contents of the output buffer, which was started in
+  // _backdrop_bootstrap_page_header().
+  $page_length = ob_get_length();
+  $page_content = ob_get_clean();
+
+  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
+    $cache = backdrop_page_create_cache($page_content);
     backdrop_serve_page_from_cache($cache);
   }
   else {
-    ob_flush();
+    backdrop_set_length_headers($page_length);
+    print $page_content;
   }
 
+  // End the request and send the response to the browser.
+  flush();
+
+  // Special consideration for PHP-FPM to end the request.
+  if (function_exists('fastcgi_finish_request')) {
+    fastcgi_finish_request();
+  }
+
+  // Then continue background tasks without holding up the rest of the request.
+  if (isset($cache)) {
+    backdrop_page_save_cache($cache);
+  }
   backdrop_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
@@ -5579,61 +5604,92 @@ function _backdrop_bootstrap_full() {
 
 /**
  * Stores the current page in the cache.
+ */
+function backdrop_page_set_cache($page_content = NULL) {
+  $cache = FALSE;
+  if (backdrop_page_is_cacheable()) {
+    // Backwards compatibility for when page content was implied.
+    if (empty($page_content)) {
+      $page_content = ob_get_clean();
+    }
+
+    $cache = backdrop_page_create_cache($page_content);
+    backdrop_page_save_cache($cache);
+  }
+  return $cache;
+}
+
+/**
+ * Create a page cache object for a page request.
  *
  * If page_compression is enabled, a gzipped version of the page is stored in
  * the cache to avoid compressing the output on each request. The cache entry
- * is unzipped in the relatively rare event that the page is requested by a
- * client without gzip support.
+ * is unzipped on delivery in the relatively rare event that the page is
+ * requested by a client without gzip support.
  *
  * Page compression requires the PHP zlib extension
  * (http://php.net/manual/ref.zlib.php).
  *
+ * @param $page_content
+ *   The page content (HTML) that should be entered into a cache entry.
+ *
+ * @return stdClass|FALSE
+ *   A cache entry ready to be written to the cache backend. If the page is not
+ *   cacheable, FALSE will be returned.
+ *
  * @see backdrop_page_header()
  */
-function backdrop_page_set_cache() {
+function backdrop_page_create_cache($page_content) {
   global $base_root;
 
-  if (backdrop_page_is_cacheable()) {
+  // Check whether the current page might be compressed.
+  $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
 
-    // Check whether the current page might be compressed.
-    $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
+  $cache = (object) array(
+    'cid' => $base_root . request_uri(),
+    'data' => array(
+      'path' => $_GET['q'],
+      'body' => $page_content,
+      'title' => backdrop_get_title(),
+      'headers' => array(),
+      // We need to store whether page was compressed or not,
+      // because by the time it is read, the configuration might change.
+      'page_compressed' => $page_compressed,
+    ),
+    'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
+    'created' => REQUEST_TIME,
+  );
 
-    $cache = (object) array(
-      'cid' => $base_root . request_uri(),
-      'data' => array(
-        'path' => $_GET['q'],
-        'body' => ob_get_clean(),
-        'title' => backdrop_get_title(),
-        'headers' => array(),
-        // We need to store whether page was compressed or not,
-        // because by the time it is read, the configuration might change.
-        'page_compressed' => $page_compressed,
-      ),
-      'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
-      'created' => REQUEST_TIME,
-    );
+  if ($page_compressed) {
+    $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
+  }
 
-    // Restore preferred header names based on the lower-case names returned
-    // by backdrop_get_http_header().
-    $header_names = _backdrop_set_preferred_header_name();
-    foreach (backdrop_get_http_header() as $name_lower => $value) {
-      $cache->data['headers'][$header_names[$name_lower]] = $value;
-      if ($name_lower == 'cache-control') {
-        // Set page cache expiration time based on Cache-Control header.
-        $matches = array();
-        if (preg_match('/max-age=(\d+)/', $value, $matches)) {
-          $cache->expire = REQUEST_TIME + $matches[1];
-        }
+  // Restore preferred header names based on the lower-case names returned
+  // by backdrop_get_http_header().
+  $header_names = _backdrop_set_preferred_header_name();
+  foreach (backdrop_get_http_header() as $name_lower => $value) {
+    $cache->data['headers'][$header_names[$name_lower]] = $value;
+    if ($name_lower == 'cache-control') {
+      // Set page cache expiration time based on Cache-Control header.
+      $matches = array();
+      if (preg_match('/max-age=(\d+)/', $value, $matches)) {
+        $cache->expire = REQUEST_TIME + $matches[1];
       }
     }
+  }
 
-    if ($cache->data['body']) {
-      if ($page_compressed) {
-        $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
-      }
-      cache('page')->set($cache->cid, $cache->data, $cache->expire);
-    }
-    return $cache;
+  return $cache;
+}
+
+/**
+ * Save a page cache entry to the cache.
+ *
+ * @param stdClass $cache
+ *   A cache entry object to be written to the cache backend.
+ */
+function backdrop_page_save_cache($cache) {
+  if ($cache->data['body']) {
+    cache('page')->set($cache->cid, $cache->data, $cache->expire);
   }
 }
 

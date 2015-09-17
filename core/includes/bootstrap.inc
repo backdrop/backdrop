@@ -1313,8 +1313,7 @@ function backdrop_page_is_cacheable($allow_caching = NULL) {
     $allow_caching_static = $allow_caching;
   }
 
-  return $allow_caching_static && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD')
-    && !backdrop_is_cli();
+  return $allow_caching_static && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD') && !backdrop_is_cli();
 }
 
 /**
@@ -1530,6 +1529,21 @@ function backdrop_page_header() {
 }
 
 /**
+ * Set headers for content-length and content-range.
+ *
+ * These headers allow the browser to deliver the page to the user without
+ * waiting for PHP to finish execution.
+ */
+function backdrop_set_length_headers($content_length) {
+  // Set the total content length.
+  header('Content-Length: ' . $content_length);
+
+  // If using chunked content (enabled with Apache mod_deflate), then specifying
+  // the content range is required. This delivers the entire page in one chunk.
+  header('Content-Range: 0-' . ($content_length - 1) . '/' . $content_length);
+}
+
+/**
  * Sets HTTP headers in preparation for a cached page response.
  *
  * The headers allow as much as possible in proxies and browsers without any
@@ -1541,6 +1555,8 @@ function backdrop_page_header() {
  * response is sent.
  */
 function backdrop_serve_page_from_cache(stdClass $cache) {
+  $page_content = $cache->data['body'];
+
   // Negotiate whether to use compression.
   $page_compression = !empty($cache->data['page_compressed']);
   $return_compressed = $page_compression && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE;
@@ -1572,7 +1588,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
   // Entity tag should change if the output changes.
-  $etag = '"' . $cache->created . '-' . intval($return_compressed) . '"';
+  $etag = $cache->created . ($return_compressed ? '-gzip' : '');
   header('Etag: ' . $etag);
 
   // See if the client has provided the required HTTP headers.
@@ -1624,12 +1640,17 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
     else {
       // The client does not support compression, so unzip the data in the
       // cache. Strip the gzip header and run uncompress.
-      $cache->data['body'] = gzinflate(substr(substr($cache->data['body'], 10), 0, -8));
+      $page_content = gzinflate(substr(substr($page_content, 10), 0, -8));
     }
   }
 
+  // Send the final headers that indicate the page total length, after the
+  // decompression of the gzipped HTML.
+  $page_length = strlen($page_content);
+  backdrop_set_length_headers($page_length);
+
   // Print the page.
-  print $cache->data['body'];
+  print $page_content;
 }
 
 /**
@@ -3792,12 +3813,16 @@ function _backdrop_shutdown_function() {
     }
   }
   catch (Exception $exception) {
-    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
-   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-   if (error_displayable()) {
-      print '<h1>Uncaught exception thrown in shutdown function.</h1>';
-      print '<p>' . _backdrop_render_exception_safe($exception) . '</p><hr />';
+    // If we are displaying errors, then do so with no possibility of a further
+    // uncaught exception being thrown.
+    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+    $message = '';
+    $message .= '<h1>Uncaught exception thrown in shutdown function.</h1>';
+    $message .= '<p>' . _backdrop_render_exception_safe($exception) . '</p><hr />';
+    try {
+      watchdog('system', $message, array(), WATCHDOG_CRITICAL);
     }
+    catch (Exception $e) {}
   }
 }
 

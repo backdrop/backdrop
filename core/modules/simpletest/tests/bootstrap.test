@@ -1,6 +1,8 @@
 <?php
 
 class BootstrapIPAddressTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     $this->oldserver = $_SERVER;
 
@@ -94,6 +96,8 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
 }
 
 class BootstrapPageCacheTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+
   function setUp() {
     parent::setUp('system_test');
   }
@@ -166,6 +170,22 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Vary', 'value' => 'User-Agent')));
     $this->assertEqual($this->backdropGetHeader('Vary'), 'User-Agent,Accept-Encoding', 'Default header was replaced.');
 
+    // Test that the initial load does not wait for shutdown functions.
+    // This request will wait 10 seconds, but it should return faster than this
+    // because Backdrop does not wait for shutdown functions after the page
+    // has been delivered.
+    $start = microtime(TRUE);
+    $this->backdropGet('system-test/sleep/shutdown/10');
+    $total = microtime(TRUE) - $start;
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
+    $this->assertTrue($total < 10, 'Initial page requests returned before shutdown functions are executed.');
+
+    $start = microtime(TRUE);
+    $this->backdropGet('system-test/sleep/shutdown/10');
+    $total = microtime(TRUE) - $start;
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cached page request.');
+    $this->assertTrue($total < 10, 'Cached page requests returned without executing shutdown functions.');
+
     // Check that authenticated users bypass the cache.
     $user = $this->backdropCreateUser();
     $this->backdropLogin($user);
@@ -224,6 +244,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 }
 
 class BootstrapVariableTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
 
   function setUp() {
     parent::setUp('system_test');
@@ -266,6 +287,8 @@ class BootstrapVariableTestCase extends BackdropWebTestCase {
  * Test hook_boot() and hook_exit().
  */
 class HookBootExitTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('system_test', 'dblog');
   }
@@ -495,6 +518,8 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
  * Tests for $_GET['destination'] and $_REQUEST['destination'] validation.
  */
 class BootstrapDestinationTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('system_test');
   }
