@@ -2288,6 +2288,10 @@ function system_preprocess_block(&$variables) {
         $variables['attributes']['role'] = 'complementary';
         break;
 
+      case 'main':
+        $variables['classes'] = array_values(array_diff($variables['classes'], array('block', 'block-system-main')));
+        break;
+
       // System menu blocks should get the same class as menu module blocks.
       default:
         if (in_array($variables['block']->delta, array_keys(menu_list_system_menus()))) {
