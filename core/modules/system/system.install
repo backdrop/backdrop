@@ -2694,6 +2694,16 @@ function system_update_1047() {
 }
 
 /**
+ * Set background fetch defaults.
+ */
+function system_update_1048() {
+  config('system.core')
+    ->set('page_cache_background_fetch', 1)
+    ->set('page_cache_keep_stale_age', 172800)
+    ->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
