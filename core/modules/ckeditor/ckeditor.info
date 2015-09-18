@@ -3,3 +3,4 @@ description = WYSIWYG editing for rich text fields using CKEditor.
 package = User interface
 backdrop = 1.x
 type = module
+configure = admin/config/content/formats
