@@ -39,6 +39,8 @@
     "menu_route_handler": null,
     "node_admin_theme": "",
     "page_cache_maximum_age": 300,
+    "page_cache_background_fetch": 1,
+    "page_cache_keep_stale_age": 172800,
     "page_compression": 1,
     "preprocess_css": 0,
     "preprocess_js": 0,

@@ -780,7 +780,9 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
 
   $url = url($path, $options);
 
-  header('Location: ' . $url, TRUE, $http_response_code);
+  if (!backdrop_is_background()) {
+    header('Location: ' . $url, TRUE, $http_response_code);
+  }
 
   // The "Location" header sends a redirect status code to the HTTP daemon. In
   // some cases this can be wrong, so we make sure none of the code below the
@@ -2923,7 +2925,9 @@ function backdrop_page_footer() {
   // In order to do post-delivery processing (e.g. cron run), we must close the
   // connection. Otherwise the connection will wait for PHP to finish before it
   // is used again in a subsequent request, such as for a JS or CSS file.
-  header('Connection: close');
+  if (!backdrop_is_background()) {
+    header('Connection: close');
+  }
 
   // Get the contents of the output buffer, which was started in
   // _backdrop_bootstrap_page_header().
@@ -2932,7 +2936,11 @@ function backdrop_page_footer() {
 
   if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
     $cache = backdrop_page_create_cache($page_content);
-    backdrop_serve_page_from_cache($cache);
+    // If this is a background request, there is no need to print the page to a
+    // buffer that will never be sent to the browser.
+    if (!backdrop_is_background()) {
+      backdrop_serve_page_from_cache($cache);
+    }
   }
   else {
     backdrop_set_length_headers($page_length);
@@ -2940,11 +2948,18 @@ function backdrop_page_footer() {
   }
 
   // End the request and send the response to the browser.
-  flush();
+  ob_end_flush();
 
-  // Special consideration for PHP-FPM to end the request.
-  if (function_exists('fastcgi_finish_request')) {
-    fastcgi_finish_request();
+  // If we're not already in a background request, flush to the browser.
+  if (!backdrop_is_background()) {
+    // Flushing for PHP-FPM based installations.
+    if (function_exists('fastcgi_finish_request')) {
+      fastcgi_finish_request();
+    }
+    // Flushing for Apache mod_php installations.
+    else {
+      flush();
+    }
   }
 
   // Then continue background tasks without holding up the rest of the request.
@@ -3096,7 +3111,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes), TRUE);
+    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes));
   }
 
   backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
@@ -5604,15 +5619,16 @@ function _backdrop_bootstrap_full() {
 
 /**
  * Stores the current page in the cache.
+ *
+ * This function is no longer used by core but is preserved for
+ * backwards-compatibility.
+ *
+ * @deprecated since 1.3.0
  */
-function backdrop_page_set_cache($page_content = NULL) {
+function backdrop_page_set_cache() {
   $cache = FALSE;
   if (backdrop_page_is_cacheable()) {
-    // Backwards compatibility for when page content was implied.
-    if (empty($page_content)) {
-      $page_content = ob_get_clean();
-    }
-
+    $page_content = ob_get_clean();
     $cache = backdrop_page_create_cache($page_content);
     backdrop_page_save_cache($cache);
   }
@@ -5638,12 +5654,30 @@ function backdrop_page_set_cache($page_content = NULL) {
  *   cacheable, FALSE will be returned.
  *
  * @see backdrop_page_header()
+ * @see backdrop_page_save_cache();
  */
 function backdrop_page_create_cache($page_content) {
   global $base_root;
 
   // Check whether the current page might be compressed.
-  $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
+  $config = config('system.core');
+  $page_compressed = $config->get('page_compression') && extension_loaded('zlib');
+
+  // If using background fetch, we keep cache entries for a much longer period.
+  // This allows the stale entries to be served while generating a new one.
+  if ($config->get('page_cache_background_fetch')) {
+    $stale_lifetime = $config->get('page_cache_keep_stale_age');
+    // Ensure a stale lifetime is set. Defaults to 2 days.
+    if (!$stale_lifetime) {
+      $stale_lifetime = 172800;
+    }
+    $cache_lifetime = $stale_lifetime;
+  }
+  // If not using background fetch, the page only needs to be kept for as long
+  // as the life of the cache lifetime.
+  else {
+    $cache_lifetime = $config->get('page_cache_maximum_age');
+  }
 
   $cache = (object) array(
     'cid' => $base_root . request_uri(),
@@ -5656,7 +5690,7 @@ function backdrop_page_create_cache($page_content) {
       // because by the time it is read, the configuration might change.
       'page_compressed' => $page_compressed,
     ),
-    'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
+    'expire' => REQUEST_TIME + $cache_lifetime,
     'created' => REQUEST_TIME,
   );
 
