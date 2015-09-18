@@ -16,6 +16,7 @@ function filter_admin_overview($form) {
   // Overview of all formats.
   $formats = filter_formats();
   $fallback_format = filter_fallback_format();
+  $editors = filter_get_editors();
 
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
@@ -44,7 +45,12 @@ function filter_admin_overview($form) {
         'href' => "admin/config/content/formats/$id/disable",
       );
     }
-    $form['formats'][$id]['roles'] = array('#markup' => $roles_markup);
+    $form['formats'][$id]['editor'] = array(
+      '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
+    );
+    $form['formats'][$id]['roles'] = array(
+      '#markup' => $roles_markup,
+    );
     $form['formats'][$id]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
