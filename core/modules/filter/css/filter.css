@@ -36,6 +36,7 @@ input#edit-filters-filter-html-settings-allowed-html {
 .editor-dialog {
   width: 100%;
   max-width: 500px;
+  z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
 }
 .editor-dialog .form-managed-file .form-file,
 .editor-dialog .form-managed-file .file {
