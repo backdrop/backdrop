@@ -705,6 +705,8 @@ function admin_bar_theme_settings_submit($form, $form_state) {
   $config->set('position_fixed', $form_state['values']['position_fixed']);
   $config->set('components', array_values(array_filter($form_state['values']['components'])));
   $config->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -759,6 +761,7 @@ function system_admin_bar_cache_info() {
   $caches = array(
     'assets' => t('CSS and JavaScript'),
     'cache' => t('Page and else'),
+    'layout' => t('Layout'),
     'menu' => t('Menu'),
     'theme' => t('Theme registry'),
     'token' => t('Token registry'),
@@ -831,6 +834,10 @@ function _admin_bar_flush_cache($name = NULL) {
 
     case 'token':
       token_cache_clear();
+      break;
+
+    case 'layout':
+      layout_reset_caches();
       break;
   }
 }

@@ -445,9 +445,8 @@ interface EntityStorageControllerInterface extends EntityControllerInterface {
    * @param EntityInterface $entity
    *   The entity to save.
    *
-   * @return
-   *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
-   *   performed.
+   * @return int
+   *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
    *
    * @throws EntityStorageException
    *   In case of failures, an exception is thrown.

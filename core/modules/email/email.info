@@ -1,0 +1,6 @@
+name = Email
+description = Defines an email field type.
+package = Fields
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = module

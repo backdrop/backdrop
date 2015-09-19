@@ -2274,6 +2274,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Submit the POST request.
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Ajax-Token'), '1', 'Ajax response header found.');
 
     // Change the page content by applying the returned commands.
     if (!empty($ajax_settings) && !empty($return)) {
@@ -2310,8 +2311,13 @@ class BackdropWebTestCase extends BackdropTestCase {
             if ($wrapperNode) {
               // ajax.js adds an enclosing DIV to work around a Safari bug.
               $newDom = new DOMDocument();
+              // DOM can load HTML soup. But, HTML soup can throw warnings,
+              // suppress them.
               $newDom->loadHTML('<div>' . $command['data'] . '</div>');
-              $newNode = $dom->importNode($newDom->documentElement->firstChild->firstChild, TRUE);
+              // Suppress warnings thrown when duplicate HTML IDs are
+              // encountered. This probably means we are replacing an element
+              // with the same ID.
+              $newNode = @$dom->importNode($newDom->documentElement->firstChild->firstChild, TRUE);
               $method = isset($command['method']) ? $command['method'] : $ajax_settings['method'];
               // The "method" is a jQuery DOM manipulation function. Emulate
               // each one using PHP's DOMNode API.
@@ -2965,7 +2971,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
     $this->backdropSettings = array();
-    if (preg_match('/window.Backdrop = {settings: (.*)}/', $content, $matches)) {
+    if (preg_match('/window.Backdrop[ ]?=[ ]?{settings:[ ]?(.*)}/', $content, $matches)) {
       $this->backdropSettings = backdrop_json_decode($matches[1]);
     }
   }

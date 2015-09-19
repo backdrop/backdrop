@@ -5,7 +5,7 @@
  */
 function actions_loop_test_watchdog(array $log_entry) {
   // If the triggering actions are not explicitly enabled, abort.
-  if (empty($_GET['trigger_actions_on_watchdog'])) {
+  if (empty($_GET['trigger_actions_on_watchdog']) || $log_entry['type'] !== 'actions_loop_test') {
     return;
   }
   // We can pass in any applicable information in $context.

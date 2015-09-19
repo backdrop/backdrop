@@ -122,7 +122,7 @@ function config_get_config_directory($type = 'active') {
 
     // If the path starts with a slash or dot, assume a normal path. If just
     // a directory name is provided, make it relative to the settings.php file.
-    $first_character = substr($path, 0);
+    $first_character = substr($path, 0, 1);
     if (!in_array($first_character, array('.', '/', '\\'))) {
       $path = conf_path() . '/' . $path;
     }
@@ -803,7 +803,7 @@ interface ConfigStorageInterface {
    * Gets configuration object names starting with a given prefix.
    *
    * Given the following configuration objects:
-   * - node.type.article
+   * - node.type.post
    * - node.type.page
    *
    * Passing the prefix 'node.type.' will return an array containing the above
@@ -822,7 +822,7 @@ interface ConfigStorageInterface {
    * Deletes configuration objects whose names start with a given prefix.
    *
    * Given the following configuration object names:
-   * - node.type.article
+   * - node.type.post
    * - node.type.page
    *
    * Passing the prefix 'node.type.' will delete the above configuration

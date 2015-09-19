@@ -1675,6 +1675,8 @@ function system_performance_settings_submit($form, &$form_state) {
   $config->set('preprocess_css', $form_state['values']['preprocess_css']);
   $config->set('preprocess_js', $form_state['values']['preprocess_js']);
   $config->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1759,14 +1761,14 @@ function system_file_system_settings() {
  * Submit handler for system_file_system_settings().
  */
 function system_file_system_settings_submit($form, &$form_state) {
-  backdrop_set_message(t('The configuration options have been saved.'));
   $config = config('system.core');
   $config->set('file_public_path', $form_state['values']['file_public_path']);
   $config->set('file_private_path', $form_state['values']['file_private_path']);
   $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
   $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
   $config->save();
-
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1998,6 +2000,8 @@ function system_regional_settings_submit($form, &$form_state) {
     ->set('user_empty_timezone_message', $form_state['values']['empty_timezone_message'])
     ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
     ->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -2011,7 +2015,7 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
-    '#default_value' => state_get('maintenance_mode', 0),
+    '#default_value' => state_get('maintenance_mode', FALSE),
     '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))),
   );
   $form['maintenance_mode_message'] = array(
@@ -2032,7 +2036,7 @@ function system_site_maintenance_mode($form, &$form_state) {
  * Submit handler for the system_site_maintenance_mode() form.
  */
 function system_site_maintenance_mode_submit($form, &$form_state) {
-  state_set('maintenance_mode', (int) $form_state['values']['maintenance_mode']);
+  state_set('maintenance_mode', (bool) $form_state['values']['maintenance_mode']);
   config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
 
   // Give specific messages on the primary action for this form.

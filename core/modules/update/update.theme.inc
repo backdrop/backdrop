@@ -70,7 +70,7 @@ function theme_update_report($variables) {
 
   $notification_level = config_get('update.settings', 'update_threshold');
 
-  // Create an array of status values keyed by module or theme name, since
+  // Create an array of status values keyed by module, theme, or layout name, since
   // we'll need this while generating the report if we have to cross reference
   // anything (e.g. subthemes which have base themes missing an update).
   foreach ($data as $project) {
@@ -261,8 +261,10 @@ function theme_update_report($variables) {
     'core' => t('Backdrop CMS'),
     'module' => t('Modules'),
     'theme' => t('Themes'),
+    'layout' => t('Layouts'),
     'module-disabled' => t('Disabled modules'),
     'theme-disabled' => t('Disabled themes'),
+    'layout-disabled' => t('Disabled layouts'),
   );
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {

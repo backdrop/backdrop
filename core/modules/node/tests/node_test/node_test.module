@@ -59,7 +59,7 @@ function node_test_node_grants($account, $op) {
   // Our node access tests asserts three realms of access.
   // See testGrantAlter().
   return array(
-    'test_article_realm' => array(1),
+    'test_post_realm' => array(1),
     'test_page_realm' => array(1),
     'test_alter_realm' => array(2),
   );
@@ -74,10 +74,10 @@ function node_test_node_access_records(Node $node) {
     return;
   }
   $grants = array();
-  if ($node->type == 'article') {
-    // Create grant in arbitrary article_realm for article nodes.
+  if ($node->type == 'post') {
+    // Create grant in arbitrary post_realm for post nodes.
     $grants[] = array(
-      'realm' => 'test_article_realm',
+      'realm' => 'test_post_realm',
       'gid' => 1,
       'grant_view' => 1,
       'grant_update' => 0,

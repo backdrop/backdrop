@@ -45,7 +45,7 @@ function update_test_menu() {
  * defined, its subarray will include .info keys and values for all modules and
  * themes on the system. Otherwise, the settings array is keyed by the module or
  * theme short name ($file->name) and the subarrays contain settings just for
- * that module or theme.
+ * that module, theme, or layout.
  */
 function update_test_system_info_alter(&$info, $file) {
   $setting = config_get('update.settings', 'update_system_info');
@@ -66,8 +66,8 @@ function update_test_system_info_alter(&$info, $file) {
  * The setting is expected to be a nested associative array. If the key '#all'
  * is defined, its subarray will include .info keys and values for all modules
  * and themes on the system. Otherwise, the settings array is keyed by the
- * module or theme short name and the subarrays contain settings just for that
- * module or theme.
+ * module, theme, or layout short name and the subarrays contain settings just for that
+ * module, theme, or layout.
  */
 function update_test_update_status_alter(&$projects) {
   $setting = config_get('update.settings', 'update_status');

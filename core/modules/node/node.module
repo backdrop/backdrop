@@ -940,14 +940,17 @@ function node_submit($node) {
 }
 
 /**
- * Saves changes to a node or adds a new node.
+ * Saves a new or updated node.
  *
  * @param Node $node
- *   The $node entity to be saved. If $node->nid is
- *   omitted (or $node->is_new is TRUE), a new node will be added.
+ *   The $node entity to be saved. If $node->nid is omitted (or $node->is_new
+ *   is TRUE), a new node will be added.
+ *
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function node_save(Node $node) {
-  $node->save();
+  return $node->save();
 }
 
 /**
@@ -2255,10 +2258,7 @@ function node_form_search_form_alter(&$form, $form_state) {
     );
 
     // Languages:
-    $language_options = array();
-    foreach (language_list(TRUE) as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
-    }
+    $language_options = language_list(TRUE, TRUE);
     if (count($language_options) > 1) {
       $form['advanced']['language'] = array(
         '#type' => 'checkboxes',
@@ -2396,7 +2396,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  *   - "create"
  * @param Node $node
  *   The node entity on which the operation is to be performed, or the node type
- *   (e.g., 'article') for the 'create' operation.
+ *   (e.g., 'post') for the 'create' operation.
  * @param $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
@@ -2765,6 +2765,12 @@ function _node_query_node_access_alter($query, $type) {
     return;
   }
 
+  // Make sure the query returns nothing if the user is not permitted to view
+  // nodes.
+  if (!user_access('access content', $account)) {
+    $query->range(0, 0);
+  }
+
   $tables = $query->getTables();
   $base_table = $query->getMetaData('base_table');
   // If no base table is specified explicitly, search for one.
@@ -3018,7 +3024,7 @@ function node_access_needs_rebuild($rebuild = NULL) {
  * of node_access_rebuild() lets the user perform his changes and actually
  * rebuild only once he is done.
  *
- * Note : As of Drupal 6, node access modules are not required to (and actually
+ * Note: As of Drupal 6, node access modules are not required to (and actually
  * should not) call node_access_rebuild() in hook_enable/disable anymore.
  *
  * @param $batch_mode

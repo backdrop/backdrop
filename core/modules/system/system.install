@@ -118,7 +118,7 @@ function system_requirements($phase) {
 
   if (!empty($missing_extensions)) {
     $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
-      '@system_requirements' => 'http://drupal.org/requirements',
+      '@system_requirements' => 'https://backdropcms.org/requirements',
     ));
 
     $description .= theme('item_list', array('items' => $missing_extensions));
@@ -141,7 +141,7 @@ function system_requirements($phase) {
     $database_ok = extension_loaded('pdo');
     if (!$database_ok) {
       $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
-        '@link' => 'http://drupal.org/requirements/pdo',
+        '@link' => 'https://backdropcms.org/requirements',
       ));
     }
     else {
@@ -205,7 +205,7 @@ function system_requirements($phase) {
         $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
       }
 
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'http://drupal.org/requirements'));
+      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
       $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
     }
   }
@@ -489,6 +489,52 @@ function system_requirements($phase) {
         'value' => $t('Problems detected'),
         'severity' => REQUIREMENT_WARNING,
         'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
+      );
+    }
+  }
+
+  if ($phase == 'runtime') {
+    // Check for a duplicate CKEditor project.
+    $path = backdrop_get_path('module', 'ckeditor');
+    if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+      $requirements['ckeditor_replaced'] = array(
+        'title' => $t('CKEditor'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Email project.
+    $path = backdrop_get_path('module', 'email');
+    if ($path && strpos($path, 'core/modules/email') === FALSE) {
+      $requirements['email_replaced'] = array(
+        'title' => $t('Email'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Link project.
+    $path = backdrop_get_path('module', 'link');
+    if ($path && strpos($path, 'core/modules/link') === FALSE) {
+      $requirements['link_replaced'] = array(
+        'title' => $t('Link'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Date project.
+    $path = backdrop_get_path('module', 'date');
+    if ($path && strpos($path, 'core/modules/date') === FALSE) {
+      $requirements['date_replaced'] = array(
+        'title' => $t('Date'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -1763,7 +1809,7 @@ function system_update_1013() {
  */
 function system_update_1014() {
   // Migrate variables to state and config.
-  state_set('maintenance_enabled', update_variable_get('maintenance_mode', 'enabled'));
+  state_set('maintenance_mode', update_variable_get('maintenance_mode', TRUE));
   config_set('system.core', 'maintenance_mode_message', update_variable_get('maintenance_mode_message', 'message'));
 
   // Delete variables.
@@ -2522,6 +2568,77 @@ function system_update_1039() {
     // Set all initial values to NULL, as we do not know at this point whether
     // aliases are automatic or not.
     db_query("UPDATE {url_alias} SET auto = NULL");
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of CKEditor module is present.
+ */
+function system_update_1040() {
+  $path = backdrop_get_path('module', 'ckeditor');
+  if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Email module is present.
+ */
+function system_update_1041() {
+  $path = backdrop_get_path('module', 'email');
+  if ($path && strpos($path, 'core/modules/email') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Link module is present.
+ */
+function system_update_1042() {
+  $path = backdrop_get_path('module', 'link');
+  if ($path && strpos($path, 'core/modules/link') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Remove old Date configuration files.
+ */
+function system_update_1043() {
+  config('date_views.settings')->delete();
+  config('date_api.settings')->delete();
+  config('date.settings')->delete();
+
+  // Remove variables from Drupal 7.
+  update_variable_del('date_min_year');
+  update_variable_del('date_max_year');
+  update_variable_del('date_php_min_year');
+  update_variable_del('date_api_use_iso8601');
+  update_variable_del('date_db_tz_support');
+  update_variable_del('date_api_version');
+  update_variable_del('date_popup_timepicker');
+  update_variable_del('date_views_month_format_with_year');
+  update_variable_del('date_views_month_format_without_year');
+  update_variable_del('date_views_day_format_with_year');
+  update_variable_del('date_views_day_format_without_year');
+  update_variable_del('date_views_week_format_with_year');
+  update_variable_del('date_views_week_format_without_year');
+
+  // A default timezone is now always required.
+  $default_timezone = config_get('system.date', 'default_timezone');
+  if (empty($default_timezone)) {
+    $default_timezone = @date_default_timezone_get();
+    config_set('system.date', 'default_timezone', $default_timezone);
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of the Date module is present.
+ */
+function system_update_1044() {
+  $path = backdrop_get_path('module', 'date');
+  if ($path && strpos($path, 'core/modules/date') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

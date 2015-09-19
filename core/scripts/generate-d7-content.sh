@@ -220,7 +220,7 @@ $node_type = 'broken';
 $user = user_load($uid);
 $node = new stdClass();
 $node->uid = $uid;
-$node->type = 'article';
+$node->type = 'post';
 $body_text = str_repeat("node body ($node_type) - 37", 100);
 $node->sticky = 0;
 $node->title = "node title 24";
@@ -259,5 +259,5 @@ db_update('field_config_instance')
   ->fields(array(
     'bundle' => $node_type,
   ))
-  ->condition('bundle', 'article')
+  ->condition('bundle', 'post')
   ->execute();

@@ -260,10 +260,12 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#title' => $title,
         '#required' => $instance['required'],
         '#description' => $description,
-        '#prefix' => '<div id="' . $wrapper_id . '">',
-        '#suffix' => '</div>',
         '#max_delta' => $max,
       );
+      if ($field['cardinality'] != 1) {
+        $field_elements['#prefix'] = '<div id="' . $wrapper_id . '">';
+        $field_elements['#suffix'] = '</div>';
+      }
       // Add 'add more' button, if not working with a programmed form.
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED && empty($form_state['programmed'])) {
         $field_elements['add_more'] = array(

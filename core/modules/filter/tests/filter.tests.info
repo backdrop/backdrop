@@ -51,3 +51,9 @@ name = Filter settings
 description = Tests filter settings.
 group = Filter
 file = filter.test
+
+[FilterFileUsageTest]
+name = Filter file usage
+description = Tests tracking of file usage by Filter module.
+group = Filter
+file = filter.test

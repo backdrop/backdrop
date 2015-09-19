@@ -134,6 +134,12 @@ function field_test_field_is_empty($item, $field) {
 function field_test_field_settings_form($field, $instance, $has_data) {
   $settings = $field['settings'];
 
+  // Return no settings if so set to test skipping the field settings
+  // form step when adding new fields.
+  if (state_get('field_ui_test_field_settings', TRUE) === FALSE) {
+    return array();
+  }
+
   $form['test_field_setting'] = array(
     '#type' => 'textfield',
     '#title' => t('Field test field setting'),

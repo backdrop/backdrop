@@ -253,13 +253,13 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
    * Tests node type links.
    */
   function testNode() {
-    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Create a content-type with special characters.
     $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
 
     $permissions = $this->basePermissions + array(
       'administer content types',
-      'create article content',
+      'create post content',
       'create special content',
     );
     $this->admin_user = $this->backdropCreateUser($permissions);
@@ -278,7 +278,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     // Verify Manage content type links.
     $links = array(
-      'admin/structure/types/manage/article' => 'Article',
+      'admin/structure/types/manage/post' => 'Post',
       'admin/structure/types/manage/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
@@ -290,7 +290,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     // Verify Add content links.
     $links = array(
-      'node/add/article' => 'Article',
+      'node/add/post' => 'Post',
       'node/add/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
@@ -314,9 +314,9 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     $this->backdropGet('');
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
-      ':path' => 'node/add/article',
-      ':title' => 'Article',
-    ), "Add content » Article link found after moving Add Content into a different menu.");
+      ':path' => 'node/add/post',
+      ':title' => 'Post',
+    ), "Add content » Post link found after moving Add Content into a different menu.");
     $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
       ':path' => 'node/add/special',
       ':title' => 'Cool & Special',
@@ -327,7 +327,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
    * Tests Add content links.
    */
   function testNodeAdd() {
-    $type = $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $type = $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Verify that "Add content" does not appear for unprivileged users.
     $permissions = $this->basePermissions + array();
@@ -338,7 +338,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     // Verify "Add content" appears below "Content" for administrative users.
     $permissions = $this->basePermissions + array(
       'access content overview',
-      'create article content',
+      'create post content',
     );
     $this->admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($this->admin_user);
@@ -349,7 +349,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
 
     // Verify "Add content" appears on the top-level for regular users.
     $permissions = $this->basePermissions + array(
-      'create article content',
+      'create post content',
     );
     $this->web_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($this->web_user);

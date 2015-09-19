@@ -571,6 +571,9 @@ function backdrop_http_build_query(array $query, $parent = '') {
   foreach ($query as $key => $value) {
     $key = ($parent ? $parent . '[' . rawurlencode($key) . ']' : rawurlencode($key));
 
+    // For better readability of paths in query strings, we decode slashes.
+    $key = str_replace('%2F', '/', $key);
+
     // Recurse into children.
     if (is_array($value)) {
       $params[] = backdrop_http_build_query($value, $key);
@@ -1746,7 +1749,7 @@ function _filter_xss_split($m, $store = FALSE) {
     return '&lt;';
   }
 
-  if (!preg_match('%^<\s*(/\s*)?([a-zA-Z0-9]+)([^>]*)>?|(<!--.*?-->)$%', $string, $matches)) {
+  if (!preg_match('%^<\s*(/\s*)?([a-zA-Z0-9\-]+)([^>]*)>?|(<!--.*?-->)$%', $string, $matches)) {
     // Seriously malformed.
     return '';
   }
@@ -1832,7 +1835,15 @@ function _filter_xss_attributes($attr) {
       case 2:
         // Attribute value, a URL after href= for instance.
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+          // Do not strip protocol information out from data attributes,
+          // which may be mangled if they contain JSON.
+          if (strpos($attrname, 'data-') === 0) {
+            $thisval = $match[1];
+          }
+          // Strip bad protocols from all other attributes, e.g. href, src.
+          else {
+            $thisval = filter_xss_bad_protocol($match[1]);
+          }
 
           if (!$skip) {
             $attrarr[] = "$attrname=\"$thisval\"";
@@ -2347,6 +2358,8 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     internal to the site, $options['language'] is used to look up the alias
  *     for the URL. If $options['language'] is omitted, the global $language_url
  *     will be used.
+ *   - 'clean': Force the enabling or disabling of the "Clean URLs" option for
+ *     the returned URL. If omitted, the site-wide setting will be used.
  *   - 'https': Whether this URL should point to a secure location. If not
  *     defined, the current scheme is used, so the user stays on HTTP or HTTPS
  *     respectively. TRUE enforces HTTPS and FALSE enforces HTTP, but HTTPS can
@@ -2474,16 +2487,23 @@ function url($path = NULL, array $options = array()) {
   // Cache the clean URLs setting, as url() is called very frequently.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
-    $backdrop_static_fast['clean_url'] = &backdrop_static(__FUNCTION__);
+    $backdrop_static_fast['clean_urls_enabled'] = &backdrop_static(__FUNCTION__);
   }
-  $clean_url = &$backdrop_static_fast['clean_url'];
-  if (!isset($clean_url)) {
+  $clean_urls_enabled = &$backdrop_static_fast['clean_urls_enabled'];
+  if (!isset($clean_urls_enabled)) {
     try {
-      $clean_url = config_get('system.core', 'clean_url') ? TRUE : FALSE;
+      $clean_urls_enabled = config_get('system.core', 'clean_url') ? TRUE : FALSE;
     }
     catch (ConfigException $e) {
-      $clean_url = FALSE;
+      $clean_urls_enabled = FALSE;
     }
+  }
+
+  if (isset($options['clean'])) {
+    $clean_url = $options['clean'];
+  }
+  else {
+    $clean_url = $clean_urls_enabled;
   }
 
   // With Clean URLs.
@@ -3887,7 +3907,7 @@ function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
 
   // Replaces @import commands with the actual stylesheet content.
   // This happens recursively but omits external files.
-  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_backdrop_load_stylesheet', $contents);
+  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)(?!\/\/)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_backdrop_load_stylesheet', $contents);
   return $contents;
 }
 
@@ -5777,12 +5797,26 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     $searchdir[] = "$config/$directory";
   }
 
+  // Do not check for system files in common special-purpose directories.
+  $ignore_directories = array(
+    'assets',
+    'css',
+    'scss',
+    'less',
+    'js',
+    'images',
+    'templates',
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Get current list of items.
   if (!function_exists('file_scan_directory')) {
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
   foreach ($searchdir as $dir) {
-    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth));
+    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
 
     // Duplicate files found in later search directories take precedence over
     // earlier ones, so we want them to overwrite keys in our resulting
@@ -6562,13 +6596,22 @@ function backdrop_render_cid_parts($granularity = NULL) {
   }
 
   if (!empty($granularity)) {
+    $cache_per_role = $granularity & BACKDROP_CACHE_PER_ROLE;
+    $cache_per_user = $granularity & BACKDROP_CACHE_PER_USER;
+    // User 1 has special permissions outside of the role system, so when
+    // caching per role is requested, it should cache per user instead.
+    if ($user->uid == 1 && $cache_per_role) {
+      $cache_per_user = TRUE;
+      $cache_per_role = FALSE;
+    }
+
     // 'PER_ROLE' and 'PER_USER' are mutually exclusive. 'PER_USER' can be a
     // resource drag for sites with many users, so when a module is being
     // equivocal, we favor the less expensive 'PER_ROLE' pattern.
-    if ($granularity & BACKDROP_CACHE_PER_ROLE) {
+    if ($cache_per_role) {
       $cid_parts[] = 'r.' . implode(',', array_keys($user->roles));
     }
-    elseif ($granularity & BACKDROP_CACHE_PER_USER) {
+    elseif ($cache_per_user) {
       $cid_parts[] = "u.$user->uid";
     }
 
@@ -6653,12 +6696,21 @@ function element_info_property($type, $property_name, $default = NULL) {
  * @param array $array
  *   The input array to be sorted.
  * @param array $keys
- *   An array of keys on which to be sort. Each key of the $keys array is the
- *   key by which sorting will be done. Each value of the $keys array must be
- *   one of the PHP constants sorting, either SORT_NUMERIC or SORT_STRING.
- *   If an unindexed array is passed in, each value will be assumed to be the
- *   key by which sorting will be done, and all comparisons will be done as
- *   though SORT_NUMERIC were passed in for each key.
+ *   An array of keys to sort by. Values must be PHP sorting type flags,
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
+ *   unindexed array is passed in. 
+ *
+ * Example usage:
+ * @code
+ * // Sort by a single numeric key:
+ * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
+ * 
+ * // Short-hand sort by a numeric key:
+ * backdrop_sort($my_array, array('weight'));
+ * 
+ * // Sort by numeric and string keys.
+ * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
+ * @endcode
  */
 function backdrop_sort(array &$array, array $keys = array('weight')) {
   // Ensure all keys have a sort value.
@@ -7735,8 +7787,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * - screenshot: Path to screenshot relative to the theme's .info file.
  * - engine: Theme engine; typically phptemplate.
  * - base: Name of a base theme, if applicable; e.g., base = zen.
- * - regions: Listed regions; e.g., region[left] = Left sidebar.
- * - features: Features available; e.g., features[] = logo.
+ * - settings: Theme settings; e.g., settings[color] = true
  * - stylesheets: Theme stylesheets; e.g., stylesheets[all][] = my-style.css.
  * - scripts: Theme scripts; e.g., scripts[] = my-script.js.
  *

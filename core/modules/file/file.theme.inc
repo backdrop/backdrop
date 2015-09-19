@@ -263,7 +263,7 @@ function theme_file_upload_help($variables) {
       $descriptions[] = t('Images must be larger than !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
     }
     elseif ($max) {
-      $descriptions[] = t('Images must be smaller than !max pixels.', array('!max' => '<strong>' . $max . '</strong>'));
+      $descriptions[] = t('Images larger than !max pixels will be scaled down.', array('!max' => '<strong>' . $max . '</strong>'));
     }
   }
 

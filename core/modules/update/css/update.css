@@ -120,7 +120,8 @@ table.update,
   direction: ltr;
 }
 
-.update table.version .version-links {
+.update table.version .version-links ul {
+  list-style-type: none;
   text-align: right; /* LTR */
   padding-right: 1em; /* LTR */
 }

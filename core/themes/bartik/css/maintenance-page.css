@@ -48,7 +48,7 @@ body.maintenance-page {
   font-weight: normal;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.maintenance-page  h1#page-title {
+.maintenance-page .page-title {
   line-height: 1em;
   margin-top: 0;
 }

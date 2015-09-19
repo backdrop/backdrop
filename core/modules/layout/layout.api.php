@@ -196,6 +196,143 @@ function hook_layout_renderer_info() {
 }
 
 /**
+ * Respond to a layout being reverted.
+ *
+ * Layouts can be reverted only if the configuration is provided
+ * by a module. Layouts created in the Layout Builder User Interface
+ * cannot be reverted. 
+ * A layout revert operation results in deletion of the existing
+ * layout configuration and replacement with the default configuration
+ * from the providing module. 
+ * This hook is invoked from Layout::revert() after a layout has been 
+ * reverted and the new configuration has been inserted into the live
+ * config directory and the layout cache has been cleared.
+ *
+ * @param Layout $layout
+ *   The old layout object that has just been deleted.
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_revert(Layout $old_layout) {
+  if ($old_layout->name == 'my_layout') {
+    my_custom_function();
+  }
+  // Get the new (reverted) configuration.
+  $new_config = config_get('layout.layout.' . $old_layout->name);
+}
+
+/**
+ * Respond to a layout being deleted.
+ *
+ * This hook is invoked from Layout::delete() after a layout has been 
+ * deleted.
+ *
+ * @param Layout $layout
+ *   The layout object that was deleted.
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_delete(Layout $layout) {
+  if ($layout->path == 'my_path') {
+    my_custom_function();
+  }
+}
+
+/**
+ * Respond to a layout being enabled.
+ *
+ * This hook is invoked from Layout::enable() after a layout has been 
+ * enabled.
+ *
+ * @param Layout $layout
+ *   The layout object that was enabled.
+ *
+ * @see hook_layout_disable()
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_enable(Layout $layout) {
+  if ($layout->path == 'my_path') {
+    my_custom_function();
+  }
+}
+
+/**
+ * Respond to a layout being disabled.
+ *
+ * This hook is invoked from Layout::disable() after a layout has been 
+ * disabled.
+ * A layout configuration may be disabled by a user from the administrative 
+ * list of layouts. A disabled layout will not affect pages at its configured 
+ * path, but will retain its configuration so that it may be enabled later.
+ *
+ * @param Layout $layout
+ *   The layout object that was disabled.
+ *
+ * @see hook_layout_enable()
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_disable(Layout $layout) {
+  if ($layout->path == 'my_path') {
+    my_custom_function();
+  }
+}
+
+/**
+ * Respond to updates to a layout.
+ *
+ * This hook is invoked from Layout::save() after a layout has been saved
+ * to configuration.
+ *
+ * @param Layout $layout
+ *   The layout object that was saved.
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_update(Layout $layout) {
+  if ($layout->path == 'my_path') {
+    my_custom_function();
+  }
+}
+
+/**
+ * Respond to initial creation of a layout.
+ *
+ * This hook is invoked from Layout::save() after a layout has been saved
+ * to configuration.
+ *
+ * @param Layout $layout
+ *   The layout object that was saved.
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_insert(Layout $layout) {
+  if ($layout->path == 'my_path') {
+    my_custom_function();
+  }
+}
+
+/**
+ * Act on a layout being inserted or updated.
+ *
+ * This hook is invoked from Layout::save() before the layout is saved to
+ * configuration.
+ *
+ * @param Layout $layout
+ *   The layout that is being inserted or updated.
+ *
+ * @ingroup layout_api_hooks
+ */
+function hook_layout_presave(Layout $layout) {
+  if ($layout->name == 'default') {
+    $my_block_uuid = get_my_uuid();
+    $my_block = $layout->content[$uuid];
+    $my_block->data['settings']['title'] = 'New Title';
+  }
+}
+
+/**
  * Defines to Backdrop what blocks are provided by your module.
  *
  * In hook_block_info(), each block your module provides is given a unique

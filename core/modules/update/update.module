@@ -4,10 +4,10 @@
  * Handles updates of Backdrop core and contributed projects.
  *
  * The module checks for available updates of Backdrop core and any installed
- * contributed modules and themes. It warns site administrators if newer
+ * contributed modules, themes, and layouts. It warns site administrators if newer
  * releases are available via the system status report (admin/reports/status),
- * the module and theme pages, and optionally via e-mail. It also provides the
- * ability to install contributed modules and themes via an user interface.
+ * the module, theme and layout pages, and optionally via e-mail. It also provides the
+ * ability to install contributed modules, themes, and layouts via an user interface.
  */
 
 /**
@@ -90,6 +90,7 @@ function update_init() {
       // of the update status.
       case 'admin/appearance':
       case 'admin/modules':
+      case 'admin/structure/layouts':
         $verbose = TRUE;
         break;
 
@@ -129,7 +130,7 @@ function update_menu() {
 
   $items['admin/reports/updates'] = array(
     'title' => 'Available updates',
-    'description' => 'Get a status report about available updates for your installed modules and themes.',
+    'description' => 'Get a status report about available updates for your installed modules, themes, and layouts.',
     'page callback' => 'update_status',
     'access arguments' => array('administer site configuration'),
     'weight' => -50,
@@ -158,7 +159,7 @@ function update_menu() {
   );
 
   // We want action links for updating projects at a few different locations:
-  // both the module and theme administration pages, and on the available
+  // on the module, theme and layout administration pages, and on the available
   // updates report itself. The menu items will be mostly identical, except the
   // paths and titles, so we just define them in a loop. We pass in a string
   // indicating what context we're entering the action from, so that can
@@ -167,6 +168,7 @@ function update_menu() {
     'report' => 'admin/reports/updates',
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
+    'layout' => 'admin/structure/layouts',
   );
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
@@ -191,9 +193,10 @@ function update_menu() {
   }
   // Customize the titles of the action links depending on where they appear.
   // We use += array() to let the translation extractor find these menu titles.
-  $items['admin/reports/updates/install'] += array('title' => 'Install module or theme');
+  $items['admin/reports/updates/install'] += array('title' => 'Install module, theme or layout');
   $items['admin/modules/install'] += array('title' => 'Install module');
   $items['admin/appearance/install'] += array('title' => 'Install theme');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install layout');
 
   // Menu callback used for the confirmation page after all the releases
   // have been downloaded, asking you to backup before installing updates.
@@ -644,10 +647,10 @@ function update_verify_update_archive($project, $archive_file, $directory) {
   $incompatible = array();
   $files = file_scan_directory("$directory/$project", '/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', array('key' => 'name', 'min_depth' => 0));
   foreach ($files as $key => $file) {
-    // Get the .info file for the module or theme this file belongs to.
+    // Get the .info file for the module, theme or layout this file belongs to.
     $info = backdrop_parse_info_file($file->uri);
 
-    // If the module or theme is incompatible with Backdrop core, set an error.
+    // If the module, theme or layout is incompatible with Backdrop core, set an error.
     if (empty($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
       $incompatible[] = !empty($info['name']) ? $info['name'] : t('Unknown');
     }
@@ -867,6 +870,28 @@ function _update_manager_extract_directory($create = TRUE) {
     }
   }
   return $directory;
+}
+
+/**
+ * Returns the type of package, either module, theme, or layout. Scans for an
+ * '.info' file and reads its 'type' key and returns it.
+ *
+ * @param $directory_path
+ *   The full path to the package directory
+ *
+ * @return
+ *   The type of package, either module, theme, or layout.
+ */
+function update_get_package_type($directory_path) {
+  if ($contents = file_scan_directory($directory_path, '/.*\.info$/')) {
+    foreach ($contents as $match) {
+      if (substr($match->filename, -5) == '.info') {
+        $info = backdrop_parse_info_file($match->uri);
+        return isset($info['type']) ? $info['type'] : FALSE;
+      }
+    }
+    return FALSE;
+  }
 }
 
 /**

@@ -106,7 +106,7 @@ function user_entity_info() {
           'label' => t('User'),
           'admin' => array(
             'path' => 'admin/config/people/manage',
-            'access arguments' => array('administer users'),
+            'access arguments' => array('administer account settings'),
           ),
         ),
       ),
@@ -258,18 +258,17 @@ function user_load_by_name($name) {
 }
 
 /**
- * Save changes to a user account or add a new user.
+ * Save a new or updated user.
  *
  * @param $account
- *   The user object to modify or add. If you want to modify
- *   an existing user account, you will need to ensure that (a) $account
- *   is an object, and (b) you have set $account->uid to the numeric
- *   user ID of the user account you wish to modify. If you
- *   want to create a new user account, you can set $account->is_new to
- *   TRUE or omit the $account->uid field.
+ *   The user object to modify or add. If you want to modify an existing user
+ *   account, you need to ensure that (a) $account is an object, and (b) you
+ *   have set $account->uid to the numeric user ID of the user account you wish
+ *   to modify. If you want to create a new user account, you can set
+ *   $account->is_new to TRUE or omit the $account->uid field.
  *
- * @return
- *   The saved $user object upon successful save or FALSE if the save failed.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function user_save($account) {
   return $account->save();
@@ -448,6 +447,25 @@ function user_is_blocked($name) {
     ->condition('name', db_like($name), 'LIKE')
     ->condition('status', 0)
     ->execute()->fetchObject();
+}
+
+/**
+ * Checks if a user has a role.
+ *
+ * @param int $rid
+ *   A role ID.
+ * @param User $account
+ *   (optional) A user account. Defaults to the current user.
+ *
+ * @return bool
+ *   TRUE or FALSE.
+ */
+function user_has_role($rid, $account = NULL) {
+  if (!$account) {
+    $account = $GLOBALS['user'];
+  }
+
+  return isset($account->roles[$rid]);
 }
 
 /**
@@ -1452,6 +1470,8 @@ function user_login($form, &$form_state) {
     backdrop_goto('user/' . $user->uid);
   }
 
+  backdrop_set_title(t('Log in'));
+
   // Display login form:
   $form['name'] = array('#type' => 'textfield',
     '#title' => t('Username'),
@@ -1460,10 +1480,8 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']['#description'] = t('Enter your @s username.', array('@s' => config_get('system.core', 'site_name')));
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
-    '#description' => t('Enter the password that accompanies your username.'),
     '#required' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();
@@ -1525,6 +1543,7 @@ function user_login_authenticate_validate($form, &$form_state) {
     }
     $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
     if ($account) {
+      $form_state['account_found'] = TRUE;
       if ($flood_config->get('flood_uid_only')) {
         // Register flood events based on the uid only, so they apply for any
         // IP address. This is the most secure option.
@@ -1544,6 +1563,9 @@ function user_login_authenticate_validate($form, &$form_state) {
         $form_state['flood_control_triggered'] = 'user';
         return;
       }
+    }
+    else {
+      $form_state['account_found'] = FALSE;
     }
     // We are not limited by flood control, so try to authenticate.
     // Set $form_state['uid'] as a flag for user_login_final_validate().
@@ -1577,8 +1599,12 @@ function user_login_final_validate($form, &$form_state) {
         form_set_error('name', t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
       }
     }
+    elseif (empty($form_state['account_found'])) {
+      form_set_error('name', t('Sorry, unrecognized username.'));
+      watchdog('user', 'The user account %name could not be found.', array('%name' => $form_state['values']['name']));
+    }
     else {
-      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
+      form_set_error('pass', t('Sorry, incorrect password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
   }

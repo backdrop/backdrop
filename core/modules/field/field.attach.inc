@@ -1343,7 +1343,7 @@ function field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
 }
 
 /**
- * Notify field.module the a bundle was deleted.
+ * Notify field.module that a bundle was deleted.
  *
  * This deletes the data for the field instances as well as the field instances
  * themselves. This function actually just marks the data and field instances

@@ -1,0 +1,5 @@
+[EmailFieldTestCase]
+name = E-mail field
+description = Tests e-mail field functionality.
+group = Field types
+file = email.test

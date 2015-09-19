@@ -5,7 +5,7 @@
  * This file contains tests for the Update Manager module.
  *
  * The overarching methodology of these tests is we need to compare a given
- * state of installed modules and themes (e.g., version, project grouping,
+ * state of installed modules, themes, and layouts (e.g., version, project grouping,
  * timestamps, etc) against a current state of what the release history XML
  * files we fetch say is available. We have dummy XML files (in the
  * modules/update/tests directory) that describe various scenarios of what's

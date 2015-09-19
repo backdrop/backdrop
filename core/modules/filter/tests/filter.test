@@ -166,7 +166,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink('Add text format');
+    $this->clickLink('Add text editor');
     $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(
@@ -327,33 +327,8 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->web_user);
 
     $this->backdropGet('node/add/page');
+    // Ensure Full HTML is allowed.
     $this->assertRaw('<option value="' . $full . '">Full HTML</option>', 'Full HTML filter accessible.');
-
-    // Use filtered HTML and see if it removes tags that are not allowed.
-    $body = '<em>' . $this->randomName() . '</em>';
-    $extra_text = 'text';
-    $text = $body . '<random>' . $extra_text . '</random>';
-
-    $edit = array();
-    $langcode = LANGUAGE_NONE;
-    $edit["title"] = $this->randomName();
-    $edit["body[$langcode][0][value]"] = $text;
-    $edit["body[$langcode][0][format]"] = $filtered;
-    $this->backdropPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $edit["title"])), 'Filtered node created.');
-
-    $node = $this->backdropGetNodeByTitle($edit["title"]);
-    $this->assertTrue($node, 'Node found in database.');
-
-    $this->backdropGet('node/' . $node->nid);
-    $this->assertRaw($body . $extra_text, 'Filter removed invalid tag.');
-
-    // Use plain text and see if it escapes all tags, whether allowed or not.
-    $edit = array();
-    $edit["body[$langcode][0][format]"] = $plain;
-    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->backdropGet('node/' . $node->nid);
-    $this->assertText(check_plain($text), 'The "Plain text" text format escapes all HTML tags.');
 
     // Switch user.
     $this->backdropLogout();
@@ -383,6 +358,43 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', $edit['filters[' . $second_filter . '][weight]'], 'Changes reverted.');
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', $edit['filters[' . $first_filter . '][weight]'], 'Changes reverted.');
+
+    // Switch user.
+    $this->backdropLogout();
+    $this->backdropLogin($this->web_user);
+
+    // Use filtered HTML and see if it removes tags that are not allowed.
+    $body = '<em>' . $this->randomName() . '</em>';
+    $extra_text = 'text';
+    $text = $body . '<random>' . $extra_text . '</random>';
+
+    $edit = array();
+    $langcode = LANGUAGE_NONE;
+    $edit["title"] = $this->randomName();
+    $edit["body[$langcode][0][value]"] = $text;
+    $edit["body[$langcode][0][format]"] = $filtered;
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $edit["title"])), 'Filtered node created.');
+
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->assertTrue($node, 'Node found in database.');
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertRaw($body . $extra_text, 'Filter removed invalid tag.');
+
+    // Use plain text and see if it escapes all tags, whether allowed or not.
+    foreach (filter_formats() as $format) {
+      if ($format->format != filter_fallback_format()) {
+        filter_format_disable($format);
+      }
+    }
+
+    $edit = array();
+    $langcode = LANGUAGE_NONE;
+    $edit["title"] = $this->randomName();
+    $edit["body[$langcode][0][value]"] = $text;
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $this->assertText(check_plain($text), 'The "Plain text" text format escapes all HTML tags.');
   }
 
   /**
@@ -448,10 +460,10 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
       'edit any page content',
     ));
 
-    // Create two text formats.
+    // Create three text formats.
     $this->backdropLogin($this->filter_admin_user);
     $formats = array();
-    for ($i = 0; $i < 2; $i++) {
+    for ($i = 0; $i < 3; $i++) {
       $edit = array(
         'format' => backdrop_strtolower($this->randomName()),
         'name' => $this->randomName(),
@@ -470,7 +482,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
       filter_permission_name($this->allowed_format),
     ));
 
-    // Create an administrative user who has access to use both formats.
+    // Create an administrative user who has access to use all formats.
     $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       'create page content',
@@ -516,7 +528,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     }
     $this->assertTrue(isset($options[$this->allowed_format->format]), 'The allowed text format appears as an option when adding a new node.');
     $this->assertFalse(isset($options[$this->disallowed_format->format]), 'The disallowed text format does not appear as an option when adding a new node.');
-    $this->assertTrue(isset($options[filter_fallback_format()]), 'The fallback format appears as an option when adding a new node.');
+    $this->assertFalse(isset($options[filter_fallback_format()]), 'The fallback format does not appear as an option when adding a new node.');
   }
 
   /**
@@ -619,24 +631,21 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');
 
     // Now select a new text format and make sure the node can be saved.
-    $edit[$body_format_key] = filter_fallback_format();
+    $this->backdropLogin($this->admin_user);
+    $edit[$body_format_key] = $this->allowed_format->format;
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertUrl('node/' . $node->nid);
     $this->assertText($new_title, 'New title found.');
     $this->assertNoText($old_title, 'Old title not found.');
 
-    // Switch the text format to a new one, then disable that format and all
-    // other formats on the site (leaving only the fallback format).
-    $this->backdropLogin($this->admin_user);
-    $edit = array($body_format_key => $this->allowed_format->format);
-    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertUrl('node/' . $node->nid);
+    // Then disable that format and all other formats on the site (leaving only
+    // the fallback format).
     foreach (filter_formats() as $format) {
       if ($format->format != filter_fallback_format()) {
         filter_format_disable($format);
@@ -653,7 +662,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), 'Error message is displayed.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Editor'))), 'Error message is displayed.');
     $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, 'Old title found.');
     $this->assertNoText($new_title, 'New title not found.');
@@ -803,7 +812,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * Tests the line break filter.
    */
   function testLineBreakFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_autop';
 
@@ -1074,10 +1083,10 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *   or better a whitelist approach should be used for that too.
    */
   function testHtmlFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <test-element>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     );
@@ -1113,13 +1122,17 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
 
     $f = _filter_html('<code onerror>&nbsp;</code>', $filter);
     $this->assertNoNormalized($f, 'onerror', 'HTML filter should remove empty on* attributes on default.');
+
+    // Custom tags are supported and should be allowed through.
+    $f = _filter_html('<test-element></test-element>', $filter);
+    $this->assertNormalized($f, 'test-element', 'HTML filter should allow custom elements.');
   }
 
   /**
    * Tests the spam deterrent.
    */
   function testNoFollowFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
       'allowed_html' => '<a>',
@@ -1167,7 +1180,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * check_plain() is not tested here.
    */
   function testHtmlEscapeFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_html_escape';
 
@@ -1185,7 +1198,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * Tests the URL filter.
    */
   function testUrlFilter() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_url';
     $filter->settings = array(
@@ -1527,7 +1540,7 @@ www.example.com with a newline in comments -->
    * - Mix of absolute and partial URLs, and e-mail addresses in one content.
    */
   function testUrlFilterContent() {
-    // Setup dummy filter object.
+    // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
       'filter_url_length' => 496,
@@ -1538,6 +1551,81 @@ www.example.com with a newline in comments -->
     $expected = file_get_contents($path . '/filter.url-output.txt');
     $result = _filter_url($input, $filter);
     $this->assertIdentical($result, $expected, 'Complex HTML document was correctly processed.');
+  }
+
+  /**
+   * Tests the Image alignment filter (data-align).
+   */
+  function testImageAlignFilter() {
+    // Set up dummy filter object.
+    $filter = new stdClass();
+    $filter->callback = '_filter_image_align';
+
+    $input = <<<EOF
+<p><img src="foo.png" width="100" height="100" data-align="right" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="left" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="center" /></p>
+<p><img src="foo.png" width="100" height="100" data-align="bottom" /></p>
+
+<p><img src="foo.png" class="foo" data-align="right" /></p>
+
+<blockquote data-align="left">
+  A quote
+</blockquote>
+
+<p class="foo" data-align="center">
+  Centered paragraph.
+</p>
+EOF;
+
+    $tests = array(
+      $input => array(
+        '<img src="foo.png" width="100" height="100" class="align-right" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-left" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-center" />' => TRUE,
+        // An unknown alignment (bottom) should be removed.
+        '<img src="foo.png" width="100" height="100" />' => TRUE,
+        '<img src="foo.png" width="100" height="100" class="align-bottom" />' => FALSE,
+
+        // The align class should be added to existing classes.
+        '<img src="foo.png" class="foo align-right" />' => TRUE,
+
+        // Align class also works on other elements, despite the filter name.
+        '<blockquote class="align-left">' => TRUE,
+        '<p class="foo align-center">' => TRUE,
+
+        // Ensure the temporarily wrapped body tag is stripped before output.
+        '<body>' => FALSE,
+      ),
+    );
+    $this->assertFilteredString($filter, $tests);
+  }
+
+  /**
+   * Tests the Image caption filter (data-caption).
+   */
+  function testImageAlignCaption() {
+    // Set up dummy filter object.
+    $filter = new stdClass();
+    $filter->callback = '_filter_image_caption';
+
+    $input = <<<EOF
+<img data-caption="Simple caption" src="foo.png" />
+<img data-caption="The caption with a &lt;a href=&quot;/foo&quot;&gt; link&lt;/a&gt;.&lt;strong&gt; Bold tag.&lt;/strong&gt;" src="foo.png" />
+<img data-caption="The caption with a &lt;div&gt;not allowed tag&lt;/div&gt;." src="foo.png" />
+EOF;
+
+    $tests = array(
+      $input => array(
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>Simple caption</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <a href="/foo"> link</a>.<strong> Bold tag.</strong></figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a not allowed tag.</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <div>not allowed tag</div>.</figcaption></figure>' => FALSE,
+        // Ensure the temporarily wrapped body tag is stripped before output.
+        '<body>' => FALSE,
+      ),
+    );
+    $this->assertFilteredString($filter, $tests);
   }
 
   /**
@@ -1889,5 +1977,72 @@ class FilterSettingsTestCase extends BackdropWebTestCase {
         '%previous' => $saved_settings[$name]['weight'],
       )));
     }
+  }
+}
+
+/**
+ * Tests for filter.module's node/entity hooks to track file usage.
+ */
+class FilterFileUsageTest extends BackdropWebTestCase {
+  /**
+   * Tests file usages are tracked in creating, updating, and deleting content.
+   */
+  function testFilterEntityHooks() {
+    $image = entity_create('file', array());
+    $image->uri = 'core/misc/favicon.ico';
+    $image->filename = 'favicon.ico';
+    $image->save();
+    $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages.');
+
+    // Test filter_entity_insert(): increment.
+    $node = new Node(array(
+      'type' => 'page',
+      'title' => 'test',
+      'uid' => 0,
+      'body' => array(
+        'und' => array(
+          0 => array(
+            'value' => '<p>Hello, world!</p><img src="awesome-llama.jpg" data-file-id="' . $image->fid . '" />',
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'log' => 'First revision.',
+    ));
+    debug($node);
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '1'))), file_usage_list($image), 'The image has 1 usage.');
+
+    // Test filter_entity_update(): increment, twice, by creating new revisions.
+    $node->vid = NULL;
+    $node->log = 'Second revision.';
+    $node->save();
+    $second_revision_id = $node->vid;
+    $node->vid = NULL;
+    $node->log = 'Third revision.';
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+
+    // Test hook_entity_update(): decrement, by modifying the last revision:
+    // remove the data- attribute from the body field.
+    $original_value = $node->body[LANGUAGE_NONE][0]['value'];
+    $new_value = str_replace('data-file-id', 'data-file-id-modified', $original_value);
+    $node->body[LANGUAGE_NONE][0]['value'] = $new_value;
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+
+    // Test hook_entity_update(): increment, by modifying the last revision:
+    // read the data- attribute to the body field.
+    $node->body[LANGUAGE_NONE][0]['value'] = $original_value;
+    $node->save();
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+
+    // Test filter_node_revision_delete(): decrement, by deleting a revision.
+    node_revision_delete($second_revision_id);
+    $this->assertIdentical(array('filter' => array('node' => array(1 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+
+    // Test filter_entity_delete().
+    $node->delete();
+    $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages again.');
   }
 }

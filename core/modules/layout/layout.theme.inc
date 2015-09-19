@@ -64,7 +64,7 @@ function theme_layout_option($variables) {
     'uri' => $icon_path,
     'attributes' => array('title' => $layout_info['title']),
   ));
-  $output .= '<div class="caption">' . check_plain($layout_info['title']) . '</div>';
+  $output .= '<div class="layout-caption">' . check_plain($layout_info['title']) . '</div>';
   $output .= '</div>';
   return $output;
 }

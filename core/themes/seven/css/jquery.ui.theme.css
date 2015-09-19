@@ -375,14 +375,26 @@
 /**
  * Date Picker
  */
-.ui-datepicker {
+.ui-datepicker-calendar th,
+.ui-datepicker-calendar td {
+  width: 14.28%;
+}
+.ui-datepicker .ui-datepicker-next {
+  right: 6px;
+  top: 4px;
+}
+.ui-datepicker .ui-datepicker-prev {
+  left: 6px;
+  top: 4px;
+}
+.ui-datepicker-calendar .ui-state-highlight {
+  background: none;
   border: none;
-}
-.ui-datepicker td span, .ui-datepicker td a {
-  text-align: center;
-}
-.ui-datepicker .ui-state-highlight {
-  background: #E4E4E4;
-  border-color: #D2D2D2;
   color: #000;
+}
+.ui-datepicker-calendar .ui-state-hover,
+.ui-datepicker-calendar .ui-datepicker-current-day a {
+  border: none;
+  outline: 1px solid #ED5;
+  background-color: #FE6;
 }

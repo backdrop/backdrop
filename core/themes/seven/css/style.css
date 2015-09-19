@@ -222,7 +222,7 @@ ul.menu li.expanded {
 /**
  * Page title.
  */
-#page-title {
+.page-title {
   color: #000;
   margin: 0 0 10px;
   padding: 0;
@@ -231,7 +231,7 @@ ul.menu li.expanded {
   font-weight: normal;
   float: left; /* LTR */
 }
-[dir="rtl"] #page-title {
+[dir="rtl"] .page-title {
   float: right;
 }
 
@@ -246,11 +246,14 @@ ul.menu li.expanded {
  * Tabs.
  */
 .tabs {
-  clear: both;
+  clear: none; /* For IE8 */
+}
+.tabs:nth-child(2) {
+  clear: both; /* For small screens */
 }
 @media only screen and (min-width: 600px) {
-  .tabs {
-    clear: none;
+  .tabs:nth-child(2) {
+    clear: none; /* For large screens */
   }
 }
 ul.primary {
@@ -376,6 +379,7 @@ ul.secondary li.active a.active {
   content: '';
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 100%;
@@ -385,6 +389,12 @@ ul.secondary li.active a.active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   background-color: #f0f0f0;
+}
+.l-header:after {
+  /* Clearfix for IE8 issue */
+  content: '';
+  display: table;
+  clear: both;
 }
 .l-header > * {
   /* Makes sure gray bar is behind header content */
@@ -623,25 +633,47 @@ tr.selected td {
  *   to apply all padding to the inner .fieldset-wrapper instead.
  */
 fieldset {
-  border: 1px solid #ccc;
-  padding: 2.5em 0 0 0; /* LTR */
   position: relative;
+  max-width: 100%;
   margin: 1em 0;
+  padding: 3em 0 0 0; /* LTR */
+  border-radius: 4px;
+  background-color:#fff;
+  border:solid 2px #EAEAEA;
+  min-width: 0;
 }
 [dir="rtl"] fieldset {
-  padding: 2.5em 0 0 0;
+  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
-  margin-top: 0.5em;
-  padding-left: 15px; /* LTR */
+  position: absolute;
   left: 0; /* LTR */
   top: 0;
-  position: absolute;
+  width: 100%;
+  margin-top: .35em;
+  padding-left: 15px; /* LTR */
   text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
-  padding-right: 15px;
   right: 0;
+  padding-right: 15px;
+  padding-left: 0;
+}
+legend {
+  font-size: 120%;
+  font-weight: normal;
+}
+fieldset fieldset {
+  background-color: #fff;
+}
+fieldset fieldset fieldset {
+  background-color: #f8f8f8;
+}
+/**
+ * Collapsible Fieldsets
+ */
+.js fieldset.collapsible {
+  position: relative;
 }
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
@@ -649,18 +681,49 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
 }
-fieldset.collapsed {
-  background-color: transparent;
+.js fieldset.collapsible .fieldset-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 94%; /* IE8 fallback */
+  width: calc(100% - 4em);
+  padding: .3em .3em .3em 1.8em;
+  margin: 0 -.5em;
+  border-radius: 4px;
+  background: transparent;
 }
+.js fieldset.collapsible .fieldset-legend a:before {
+  content: "";
+  position: absolute;
+  left: .6em;
+  top: .8em;
+  width: 0;
+  height: 0;
+  border: .32em solid transparent;
+  border-top-color: #000;
+  border-bottom: 0;
+}
+
+.fieldset-legend span.summary {
+  position: absolute;
+  top: .4em;
+  right: 2em;
+  display: none;
+}
+@media (min-width: 450px) {
+  .fieldset-legend span.summary {
+    display: block;
+  }
+}
+/* Collapsed state styles */
 .js fieldset.collapsed {
-  border-width: 1px;
-  height: auto;
+  padding: 1.6em 0;
 }
-fieldset fieldset {
-  background-color: #fff;
-}
-fieldset fieldset fieldset {
-  background-color: #f8f8f8;
+.js fieldset.collapsed .fieldset-legend a:before {
+  left: .8em;
+  top: .7em;
+  border: .32em solid transparent;
+  border-left-color: black;
 }
 
 /**
@@ -690,8 +753,14 @@ div.teaser-checkbox .form-item,
   padding-bottom: 0;
 }
 .form-item label {
+  margin: 0 0 10px;
+}
+fieldset label {
+  font-weight: normal;
+}
+.field-label label {
   margin: 0;
-  padding: 0 0 10px;
+  padding: 0;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -750,21 +819,10 @@ div.description,
 .password-strength {
   padding-top: 6px;
 }
-.password-strength .indicator {
-  color: #008000;
-}
-.password-match.match .password-match-text {
-  color: #008000;
-}
-.password-match.mismatch .password-match-text {
-  color: #8c2e0b
-}
 
-ul.tips li {
-  margin: 0.25em 0 0.25em 1.5em; /* LTR */
-}
-[dir="rtl"] ul.tips li {
-  margin: 0.25em 1.5em 0.25em 0;
+ul.tips {
+  margin: 0.25em 0.25em 0;
+  padding: 0 1em;
 }
 body div.form-type-radio div.description,
 body div.form-type-checkbox div.description {
@@ -823,7 +881,9 @@ input.form-submit:active {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
+  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
+  box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.form-button-disabled,
 input.form-button-disabled:active {
@@ -885,27 +945,32 @@ input.form-number,
 input.form-search,
 input.form-file,
 textarea.form-textarea {
-  font-weight: 400;
-  border: 0;
-  padding: 10px;
   box-sizing: border-box;
+  padding: 10px;
+  border: 2px solid #d0d0d0;
   max-width: 100%;
+  font-weight: 400;
   color: #444b53;
   background: #fff;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -moz-box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  box-shadow: inset 0px 0px 0px 2px rgba(208,208,208,1);
-  -webkit-transition: all 0.25s ease-in-out;
-  -moz-transition: all 0.25s ease-in-out;
-  -ms-transition: all 0.25s ease-in-out;
-  -o-transition: all 0.25s ease-in-out;
+  -webkit-transition: border-color 0.25s ease-in-out;
+  -moz-transition: border-color 0.25s ease-in-out;
+  -ms-transition: border-color 0.25s ease-in-out;
+  -o-transition: border-color 0.25s ease-in-out;
+  will-change: border-color;
+}
+input.form-text,
+input.form-email,
+input.form-url,
+input.form-search,
+textarea.form-textarea {
+  max-width: 100%;
 }
 select.form-select {
   font-weight: 400;
-  border: 2px solid rgba(208,208,208,1);
+  border: 2px solid #d0d0d0;
   padding: 10px;
   box-sizing: border-box;
   color: #444b53;
@@ -913,13 +978,11 @@ select.form-select {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+  will-change: border-color;
 }
 select.form-select:focus {
   color: #000;
-  border-color: rgba(4, 148, 219, 0.75);
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1);
+  border-color: #43afe4;
 }
 /* de-emphasize the text format */
 select.filter-list {
@@ -941,9 +1004,7 @@ input.form-file:focus,
 textarea.form-textarea:focus {
   outline: 0;
   color: #000;
-  -webkit-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  -moz-box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
-  box-shadow: 0 0 5px rgba(220, 220, 220, 1), inset 0px 0px 0px 2px rgba(4, 148, 219, 0.75);
+  border-color: #43afe4;
 }
 ul.action-links {
   margin: 1em 0;
@@ -1036,7 +1097,7 @@ div.admin-panel h3 {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
-#layout-edit-main #page-title {
+#layout-edit-main .page-title {
   float: none;
 }
 
@@ -1103,7 +1164,7 @@ body.maintenance-page #page:after {
   margin-top: -16px;
   margin-left: -34px;
 }
-body.maintenance-page #page-title {
+body.maintenance-page .page-title {
   background: transparent;
   padding-top: 0;
 }
@@ -1329,6 +1390,8 @@ div.add-or-remove-shortcuts {
     margin: 0;
     height: 100%;
     width: 100%;
+  }
+  .maintenance-page-wrapper {
     display: table;
   }
   body.maintenance-page {
@@ -1341,6 +1404,8 @@ div.add-or-remove-shortcuts {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }

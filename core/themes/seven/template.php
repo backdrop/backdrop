@@ -14,7 +14,7 @@ function seven_preprocess_layout(&$variables) {
     // markup requirements.
     if (isset($variables['content']['header'])) {
       if ($variables['title']) {
-        $title = '<h1 class="title" id="page-title">' . $variables['title'] . '</h1>';
+        $title = '<h1 class="page-title">' . $variables['title'] . '</h1>';
         $variables['content']['header'] .= $title;
         $variables['title'] = NULL;
       }
@@ -103,6 +103,7 @@ function seven_css_alter(&$css) {
   if (isset($css['core/misc/ui/jquery.ui.theme.css'])) {
     $css['core/misc/ui/jquery.ui.theme.css']['data'] = backdrop_get_path('theme', 'seven') . '/css/jquery.ui.theme.css';
     $css['core/misc/ui/jquery.ui.theme.css']['type'] = 'file';
+    $css['core/misc/ui/jquery.ui.theme.css']['weight'] = 10;
   }
 }
 
@@ -135,4 +136,8 @@ function seven_breadcrumb($variables) {
     $output .= '</nav>';
   }
   return $output;
+}
+
+function seven_preprocess_maintenance_page(&$variables) {
+  $variables['html_attributes']['class'][] = 'maintenance-page-wrapper';
 }

@@ -17,6 +17,7 @@ function standard_install() {
     'format' => 'filtered_html',
     'name' => 'Filtered HTML',
     'weight' => 0,
+    'editor' => 'ckeditor',
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -33,6 +34,16 @@ function standard_install() {
         'weight' => 2,
         'status' => 1,
       ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
       // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
@@ -47,6 +58,7 @@ function standard_install() {
     'format' => 'full_html',
     'name' => 'Full HTML',
     'weight' => 1,
+    'editor' => NULL,
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -56,6 +68,16 @@ function standard_install() {
       // Line break filter.
       'filter_autop' => array(
         'weight' => 1,
+        'status' => 1,
+      ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
         'status' => 1,
       ),
       // HTML corrector filter.
@@ -84,8 +106,8 @@ function standard_install() {
   $types = array(
     array(
       'type' => 'page',
-      'name' => st('Basic page'),
-      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'name' => st('Page'),
+      'description' => st("Add a page for static content, such as an 'About us' page."),
       'settings' => array(
         'status_default' => TRUE,
         'promote_enabled' => FALSE,
@@ -101,9 +123,9 @@ function standard_install() {
       'is_new' => TRUE,
     ),
     array(
-      'type' => 'article',
-      'name' => st('Article'),
-      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'type' => 'post',
+      'name' => st('Post'),
+      'description' => st('Add a blog post, news article, or press release.'),
       'settings' => array(
         'status_default' => TRUE,
         'promote_enabled' => TRUE,
@@ -141,8 +163,8 @@ function standard_install() {
   // Allow visitor account creation with administrative approval.
   config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 
-  // Create a default vocabulary named "Tags", enabled for the 'article' content type.
-  $description = st('Use tags to group articles on similar topics into categories.');
+  // Create a default vocabulary named "Tags", enabled for the 'post' content type.
+  $description = st('Use tags to group posts on similar topics into categories.');
   $vocabulary = new TaxonomyVocabulary(array(
     'name' => st('Tags'),
     'description' => $description,
@@ -171,7 +193,7 @@ function standard_install() {
     'field_name' => 'field_' . $vocabulary->machine_name,
     'entity_type' => 'node',
     'label' => 'Tags',
-    'bundle' => 'article',
+    'bundle' => 'post',
     'description' => $help,
     'widget' => array(
       'type' => 'taxonomy_autocomplete',
@@ -191,9 +213,9 @@ function standard_install() {
   field_create_instance($instance);
 
 
-  // Create an image field named "Image", enabled for the 'article' content type.
+  // Create an image field named "Image", enabled for the 'post' content type.
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See http://api.drupal.org/api/function/field_create_field/7
+  // See https://api.backdropcms.org/api/function/field_create_field/1
 
   $field = array(
     'field_name' => 'field_image',
@@ -214,13 +236,13 @@ function standard_install() {
 
 
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See http://api.drupal.org/api/function/field_create_instance/7
+  // See https://api.backdropcms.org/api/function/field_create_instance/1
   $instance = array(
     'field_name' => 'field_image',
     'entity_type' => 'node',
     'label' => 'Image',
-    'bundle' => 'article',
-    'description' => st('Upload an image to go with this article.'),
+    'bundle' => 'post',
+    'description' => st('Upload an image to go with this post.'),
     'required' => FALSE,
 
     'settings' => array(

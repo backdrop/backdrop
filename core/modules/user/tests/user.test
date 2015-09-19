@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for user.module.
@@ -402,6 +401,18 @@ class UserLoginTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Attempt to login with an unregistered username.
+   */
+  function testAccountNotFound() {
+    $edit = array(
+      'name' => $this->randomName(8),
+      'pass' => $this->randomName(8),
+    );
+    $this->backdropPost('user', $edit, t('Log in'));
+    $this->assertText(t('Sorry, unrecognized username.'));
+  }
+
+  /**
    * Make an unsuccessful login attempt.
    *
    * @param $account
@@ -427,7 +438,7 @@ class UserLoginTestCase extends BackdropWebTestCase {
       }
     }
     else {
-      $this->assertText(t('Sorry, unrecognized username or password. Have you forgotten your password?'));
+      $this->assertText(t('Sorry, incorrect password. Have you forgotten your password?'));
     }
   }
 }
@@ -1434,9 +1445,9 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $date2 = '2007-03-11 01:00:00 -0800';
     // One date in PDT (summer time):
     $date3 = '2007-03-20 21:00:00 -0700';
-    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'article'));
-    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'article'));
-    $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'post'));
+    $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'post'));
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");
@@ -1790,7 +1801,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
 
     // Prefetch text formats.
     $this->full_html_format = filter_format_load('full_html');
-    $this->plain_text_format = filter_format_load('plain_text');
+    $this->filtered_html_format = filter_format_load('filtered_html');
 
     // Create regular and administrative users.
     $this->web_user = $this->backdropCreateUser(array());
@@ -1825,13 +1836,11 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     $signature_text = "<h1>" . $this->randomName() . "</h1>";
     $edit = array(
       'signature[value]' => $signature_text,
-      'signature[format]' => $this->plain_text_format->format,
     );
     $this->backdropPost('user/' . $this->web_user->uid . '/edit', $edit, t('Save'));
 
     // Verify that values were stored.
     $this->assertFieldByName('signature[value]', $edit['signature[value]'], 'Submitted signature text found.');
-    $this->assertFieldByName('signature[format]', $edit['signature[format]'], 'Submitted signature format found.');
 
     // Create a comment.
     $langcode = LANGUAGE_NONE;
@@ -1855,7 +1864,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     // Assert that the signature did not make it through unfiltered.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoRaw($signature_text, 'Unfiltered signature text not found.');
-    $this->assertRaw(check_markup($signature_text, $this->plain_text_format->format), 'Filtered signature text found.');
+    $this->assertRaw(check_markup($signature_text, $this->filtered_html_format->format), 'Filtered signature text found.');
   }
 }
 

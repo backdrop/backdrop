@@ -1,6 +1,7 @@
 name = Bartik
 description = The default front-end theme for Backdrop CMS.
 version = BACKDROP_VERSION
+type = theme
 backdrop = 1.x
 
 stylesheets[all][] = css/style.css
