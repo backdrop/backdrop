@@ -57,7 +57,21 @@ When submitting a pull request, please make sure there is an open issue in the
 [issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
 reference it in the description on the pull request.
 
+Every pull request against Backdrop is tested using Travis-CI.
+
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
+
+Thanks to the following companies for providing sponsorship through services and
+products which may be used by Backdrop contributors to build and improve the
+project:
+
+- [BrowserStack](https://www.browserstack.com) for interface testing across
+  desktop and mobile browsers. *(Contact info@backdropcms.org for access
+  information.)*
+- [JetBrains](https://www.jetbrains.com/phpstorm/) for use of the PHPStorm IDE
+  for development. *(Contact info@backdropcms.org for a license.)*
+- [GitHub](https://github.com) for collaboration and code management tools.
+- [Travis-CI](https://travis-ci.org/) for continuous automated testing.
 
 Documentation
 -------------
