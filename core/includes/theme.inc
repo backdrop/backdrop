@@ -1236,7 +1236,8 @@ function path_to_theme() {
  */
 function backdrop_find_theme_functions($cache, $prefixes) {
   $implementations = array();
-  $functions = get_defined_functions();
+  $all_functions = get_defined_functions();
+  $theme_functions = preg_grep('/^(' . implode(')|(', $prefixes) . ')_/', $all_functions['user']);
 
   foreach ($cache as $hook => $info) {
     foreach ($prefixes as $prefix) {
@@ -1253,7 +1254,7 @@ function backdrop_find_theme_functions($cache, $prefixes) {
       // intermediary suggestion.
       $pattern = isset($info['pattern']) ? $info['pattern'] : ($hook . '__');
       if (!isset($info['base hook']) && !empty($pattern)) {
-        $matches = preg_grep('/^' . $prefix . '_' . $pattern . '/', $functions['user']);
+        $matches = preg_grep('/^' . $prefix . '_' . $pattern . '/', $theme_functions);
         if ($matches) {
           foreach ($matches as $match) {
             $new_hook = substr($match, strlen($prefix) + 1);
