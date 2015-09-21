@@ -551,7 +551,7 @@ ul.tips {
 .l-header ul.menu li {
   float: left; /* LTR */
   list-style: none;
-  padding: 0 1px;
+  /* padding: 0 1px; */
   margin: 0 1px;
 }
 [dir="rtl"] .l-header ul.menu li {
@@ -566,7 +566,18 @@ ul.tips {
   line-height: 2.4em;
   padding: 0 0.8em;
   text-decoration: none;
+}
+.rounded-tabs .l-header ul.menu a, .square-tabs .l-header ul.menu a {
+  color: #333;
   text-shadow: 0 1px #eee;
+}
+.rounded-tabs .l-header ul.menu a.active, .square-tabs .l-header ul.menu a.active,
+.rounded-tabs .l-header ul.menu a:active, .square-tabs .l-header ul.menu a:active {
+  color: #333;
+  background: #f6f6f2;
+  background: rgba(255, 255, 255, 0.95);
+}
+.rounded-tabs .l-header ul.menu a {
   -moz-border-radius-topleft: 8px;
   -moz-border-radius-topright: 8px;
   border-top-left-radius: 8px;
@@ -586,6 +597,24 @@ ul.tips {
 }
 .l-header ul.menu li a.active {
   border-bottom: none;
+}
+.no-tabs .l-header ul.menu a {
+  color: #fff;
+  background: none;
+  padding: 1em 2em 1em 0;
+}
+.no-tabs .l-header ul.menu a:hover,
+.no-tabs .l-header ul.menu a:focus {
+  background: none;
+}
+.no-tabs .l-header ul.menu a:active {
+  color: #fff;
+  background: none;
+}
+.no-tabs .l-header ul.menu li a.active {
+  color: #fff;
+  border-bottom: none;
+  background: none;
 }
 
 /* ------------------- Main ------------------- */

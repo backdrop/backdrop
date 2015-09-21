@@ -8,6 +8,13 @@ function bartik_preprocess_maintenance_page(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_page().
+ */
+function bartik_preprocess_page(&$variables) {
+  $variables['classes'][] = theme_get_setting('main_menu_tabs', 'bartik');
+}
+
+/**
  * Implements hook_preprocess_layout().
  */
 function bartik_preprocess_layout(&$variables) {

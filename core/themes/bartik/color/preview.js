@@ -34,6 +34,34 @@
       $('#preview #preview-header', form).attr('style', "background-color: " + gradient_start + "; background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(" + gradient_start + "), to(" + gradient_end + ")); background-image: -moz-linear-gradient(-90deg, " + gradient_start + ", " + gradient_end + ");");
 
       $('#preview #preview-site-name', form).css('color', $('#palette input[name="palette[titleslogan]"]', form).val());
+      
+      // Main menu
+      $('#preview #preview-main-menu-links a', form).css('color', $('#palette input[name="palette[menu]"]', form).val());
+      $('#preview #preview-main-menu-links a.active', form).css('color', $('#palette input[name="palette[activemenu]"]', form).val());
+      
+      checkTab();
+      
+      $('#edit-main-menu-tabs').find('input[type=radio]').on('change',function(){
+        checkTab();
+      });
+      
+      function checkTab() {
+        menuColor = $('#palette input[name="palette[menu]"]', form).val();
+        if($('#edit-main-menu-tabs-no-tabs').is(':checked')) { updateTabs('none', 'none', 0, menuColor); }
+        if($('#edit-main-menu-tabs-rounded-tabs').is(':checked')) { updateTabs('rgba(255, 255, 255, 0.7)', '0 1px #eee', '8px', '#333'); }
+        if($('#edit-main-menu-tabs-square-tabs').is(':checked')) { updateTabs('rgba(255, 255, 255, 0.7)', '0 1px #eee', 0, '#333'); }
+      }
+      
+      function updateTabs(bg, shadow, radius, menuColor) {
+        $('#preview #preview-main-menu-links a').css({
+          'background':bg, 
+          'text-shadow':shadow, 
+          'border-top-left-radius':radius, 
+          'border-top-right-radius':radius, 
+          'color':menuColor
+        });
+      }
+
     }
   };
 })(jQuery);
