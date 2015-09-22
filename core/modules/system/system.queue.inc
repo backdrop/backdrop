@@ -60,7 +60,7 @@ class BackdropQueue {
   /**
    * Returns the queue object for a given name.
    *
-   * The following variables can be set by variable_set or $conf overrides:
+   * The following can be set in settings.php through the $settings variable:
    * - queue_class_$name: the class to be used for the queue $name.
    * - queue_default_class: the class to use when queue_class_$name is not
    *   defined. Defaults to SystemQueue, a reliable backend using SQL.
@@ -80,13 +80,13 @@ class BackdropQueue {
   public static function get($name, $reliable = FALSE) {
     static $queues;
     if (!isset($queues[$name])) {
-      $class = variable_get('queue_class_' . $name, NULL);
+      $class = settings_get('queue_class_' . $name, NULL);
       if (!$class) {
-        $class = variable_get('queue_default_class', 'SystemQueue');
+        $class = settings_get('queue_default_class', 'SystemQueue');
       }
       $object = new $class($name);
       if ($reliable && !$object instanceof BackdropReliableQueueInterface) {
-        $class = variable_get('queue_default_reliable_class', 'SystemQueue');
+        $class = settings_get('queue_default_reliable_class', 'SystemQueue');
         $object = new $class($name);
       }
       $queues[$name] = $object;
@@ -96,13 +96,6 @@ class BackdropQueue {
 }
 
 interface BackdropQueueInterface {
-  /**
-   * Start working with a queue.
-   *
-   * @param $name
-   *   Arbitrary string. The name of the queue to work with.
-   */
-  public function __construct($name);
 
   /**
    * Add a queue item and store it directly to the queue.
@@ -237,7 +230,7 @@ class SystemQueue implements BackdropReliableQueueInterface {
     // until an item is successfully claimed or we are reasonably sure there
     // are no unclaimed items left.
     while (TRUE) {
-      $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE expire = 0 AND name = :name ORDER BY created ASC', 0, 1, array(':name' => $this->name))->fetchObject();
+      $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE expire = 0 AND name = :name ORDER BY created, item_id ASC', 0, 1, array(':name' => $this->name))->fetchObject();
       if ($item) {
         // Try to update the item. Only one thread can succeed in UPDATEing the
         // same row. We cannot rely on REQUEST_TIME because items might be
@@ -314,6 +307,12 @@ class MemoryQueue implements BackdropQueueInterface {
    */
   protected $id_sequence;
 
+  /**
+   * Start working with a queue.
+   *
+   * @param $name
+   *   Arbitrary string. The name of the queue to work with.
+   */
   public function __construct($name) {
     $this->queue = array();
     $this->id_sequence = 0;

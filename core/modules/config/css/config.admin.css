@@ -1,0 +1,22 @@
+/**
+ * CSS for the admin section of the Config module.
+ */
+.config-export-single-form textarea {
+  font: 1.2em monospace;
+  /* Note the Firefox does not support whitespace in textareas.
+     See https://bugzilla.mozilla.org/show_bug.cgi?id=82711 */
+  white-space: pre;
+}
+.ui-dialog.config-diff {
+  max-width: 95%;
+}
+@media only screen and (min-width: 768px) {
+  .ui-dialog.config-diff {
+    max-width: 80%;
+  }
+}
+@media only screen and (min-width: 1024px) {
+  .ui-dialog.config-diff {
+    max-width: 1000px;
+  }
+}

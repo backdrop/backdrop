@@ -1,72 +1,92 @@
 Description
 -----------
 
-Backdrop is a fully-featured content management system that allows non-technical
-users to manage a wide-variety of content. It can be used to create blogs,
-forums, image galleries, social networks, intranets, and more.
+Backdrop is a full-featured content management system that allows non-technical
+users to manage a wide variety of content. It can be used to create all kinds of
+websites including blogs, image galleries, social networks, intranets, and more.
 
 Backdrop aims to provide:
-
-- A full-featured CMS that puts editorial and end-users first.
-- A system that can be utilized out-of-the-box.
-- Code that can be learned and easily developed.
+- A CMS that can be used out-of-the-box.
+- Code that can be learned quickly.
 - Extensible APIs.
 
 Requirements
 ------------
 - PHP 5.3.2 or higher
-- MySQL 5.0.15 or PostgreSQL 8.3 or higher with PDO enabled
+- MySQL 5.0.15 or higher with PDO enabled
+- Apache (recommended) or Nginx web server
+- 50 MB of disk space (recommended), 15 MB (minimum)
 
 Installation
 ------------
 
-1. Create a new database, username, and password for Backdrop to use in MySQL
-   or PostgreSQL.
+1. Create a new database, username, and password for Backdrop to use in MySQL.
 
-2. Point your browser at the URL of your Backdrop installation. On Apache web
-   servers, you will be directed to the install screen. If you're not
-   redirected, visit the install URL. If Backdrop was installed at
-   http://example.com/backdrop, the install URL would be
-   http://example.com/backdrop/core/install.php.
+2. Point your browser at the URL of your Backdrop installation. You will be
+   redirected to the install screen. If you're not redirected, visit the install
+   URL. If Backdrop was installed at http://example.com/backdrop, the install
+   URL would be http://example.com/backdrop/core/install.php.
 
-3. Follow the instructions provided in the installer.
+3. Follow the instructions provided by the installer.
 
 Bug Reports and Feature Requests
 --------------------------------
-Please use this issue tracker for reporting all bugs and features:
-https://github.com/backdrop/backdrop-issues/issues. We use a separate issue
-tracker that is not under the main repository because of Github restrictions on
-the use of labels and issue assignment
+Please use the GitHub
+[issue tracker](https://github.com/backdrop/backdrop-issues/issues) for
+reporting all bugs and features. We use a separate issue tracker that is not
+part of the main Backdrop code repository because of GitHub's restrictions on
+the use of labels and issue management.
+
+Security Issues
+---------------
+If you have discovered a security issue with Backdrop CMS or any of its
+[contributed modules](https://github.com/backdrop-contrib/), please contact the
+Backdrop Security Team directly at [security@backdropcms.org](mailto:security@backdropcms.org).
+We manage security issues separately in a private repository until the issue
+has been resolved. Even if you're not sure if it's a security problem, please
+contact the security team before filing an issue.
 
 Developers
 ----------
 Backdrop is a fork of Drupal. It preserves the legacy audience of developers who
-value ease of use and ease of learning over architectural flexibility. You can
-join Backdrop's developer community by forking Backdrop from
-https://github.com/backdrop/backdrop.
+value ease of use and speed of learning over architectural flexibility. You can
+join Backdrop's developer community by
+[forking Backdrop](https://github.com/backdrop/backdrop) on GitHub.
 
-If submitting a pull request, please open an issue using the
-[issue tracker](https://github.com/backdrop/backdrop-issues/issues)
-first and then reference it in the title of the pull request.
+When submitting a pull request, please make sure there is an open issue in the
+[issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
+reference it in the description on the pull request.
+
+Every pull request against Backdrop is tested using Travis-CI.
 
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
 
+Thanks to the following companies for providing sponsorship through services and
+products which may be used by Backdrop contributors to build and improve the
+project:
+
+- [BrowserStack](https://www.browserstack.com) for interface testing across
+  desktop and mobile browsers. *(Contact info@backdropcms.org for access
+  information.)*
+- [JetBrains](https://www.jetbrains.com/phpstorm/) for use of the PHPStorm IDE
+  for development. *(Contact info@backdropcms.org for a license.)*
+- [GitHub](https://github.com) for collaboration and code management tools.
+- [Travis-CI](https://travis-ci.org/) for continuous automated testing.
+
 Documentation
 -------------
-The [Backdrop Handbook](http://handbook.backdropcms.org/) is the place to find
-documentation. You can contribute to the handbook by sending a pull request to
-[the handbook repository](https://github.com/backdrop/handbook).
+Please see the the [Backdrop Handbook](https://backdropcms.org/handbook) on the
+main Backdrop CMS website.
 
 License
 -------
-Backdrop is GPL v2 (or higher) software. See the LICENSE.txt file in the
-core directory or visit http://www.gnu.org/licenses/gpl-2.0.html for
-complete text. Distributions of this software may relicense it as any
-later version of the GPL.
+Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
+software. See the LICENSE.txt file in the core directory for complete text.
+Distributions of this software may relicense it as any later version of the GPL.
 
 All Backdrop code is Copyright 2001 - 2014 by the original authors.
 
-Backdrop includes works under other copyright notices and distributed
-according to the terms of the GNU General Public License or a compatible
-license. Individual works may have specific copyright information noted within
-their their source code files or directories.
+Backdrop also includes works under different copyright notices that are
+distributed according to the terms of the GNU General Public License or a
+compatible license. These individual works may have specific copyright 
+information noted within their source code files or directories.

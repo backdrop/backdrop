@@ -182,7 +182,7 @@
  * concrete implementation of it to support special handling required by that
  * database.
  *
- * @see http://php.net/manual/en/book.pdo.php
+ * @see http://php.net/manual/book.pdo.php
  */
 abstract class DatabaseConnection extends PDO {
 
@@ -625,7 +625,7 @@ abstract class DatabaseConnection extends PDO {
    *   A sanitized version of the query comment string.
    */
   protected function filterComment($comment = '') {
-    return preg_replace('/(\/\*\s*)|(\s*\*\/)/', '', $comment);
+    return strtr($comment, array('*' => ' * '));
   }
 
   /**
@@ -735,7 +735,7 @@ abstract class DatabaseConnection extends PDO {
     // to expand it out into a comma-delimited set of placeholders.
     foreach (array_filter($args, 'is_array') as $key => $data) {
       $new_keys = array();
-      foreach ($data as $i => $value) {
+      foreach (array_values($data) as $i => $value) {
         // This assumes that there are no other placeholders that use the same
         // name.  For example, if the array placeholder is defined as :example
         // and there is already an :example_2 placeholder, this will generate
@@ -1298,9 +1298,8 @@ abstract class DatabaseConnection extends PDO {
    * Retrieves an unique id from a given sequence.
    *
    * Use this function if for some reason you can't use a serial field. For
-   * example, MySQL has no ways of reading of the current value of a sequence
-   * and PostgreSQL can not advance the sequence to be larger than a given
-   * value. Or sometimes you just need a unique integer.
+   * example, MySQL has no ways of reading of the current value of a sequence.
+   * Or sometimes you just need a unique integer.
    *
    * @param $existing_id
    *   After a database import, it might be that the sequences table is behind,
@@ -1988,7 +1987,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Sets the default fetch mode for this statement.
    *
-   * See http://php.net/manual/en/pdo.constants.php for the definition of the
+   * See http://php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
    * @param $mode
@@ -2007,7 +2006,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Fetches the next row from a result set.
    *
-   * See http://php.net/manual/en/pdo.constants.php for the definition of the
+   * See http://php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
    * @param $mode
@@ -2382,14 +2381,14 @@ function db_query_range($query, $from, $count, array $args = array(), array $opt
 }
 
 /**
- * Executes a query string and saves the result set to a temporary table.
+ * Executes a SELECT query string and saves the result set to a temporary table.
  *
  * The execution of the query string happens against the active database.
  *
  * @param $query
- *   The prepared statement query to run. Although it will accept both named and
- *   unnamed placeholders, named placeholders are strongly preferred as they are
- *   more self-documenting.
+ *   The prepared SELECT statement query to run. Although it will accept both
+ *   named and unnamed placeholders, named placeholders are strongly preferred
+ *   as they are more self-documenting.
  * @param $args
  *   An array of values to substitute into the query. If the query uses named
  *   placeholders, this is an associative array in any order. If the query uses
@@ -2989,12 +2988,6 @@ function db_drop_index($table, $name) {
  *   array('primary key' => array('bar')));
  * @endcode
  *
- * The reasons for this are due to the different database engines:
- *
- * On PostgreSQL, changing a field definition involves adding a new field and
- * dropping an old one which causes any indices, primary keys and sequences
- * (from serial-type fields) that use the changed field to be dropped.
- *
  * On MySQL, all type 'serial' fields must be part of at least one key or index
  * as soon as they are created. You cannot use
  * db_add_{primary_key,unique_key,index}() for this purpose because the ALTER
@@ -3039,7 +3032,7 @@ function db_ignore_slave() {
     // Five minutes is long enough to allow the slave to break and resume
     // interrupted replication without causing problems on the Backdrop site
     // from the old data.
-    $duration = variable_get('maximum_replication_lag', 300);
+    $duration = settings_get('maximum_replication_lag', 300);
     // Set session variable with amount of time to delay before using slave.
     $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
   }

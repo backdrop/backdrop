@@ -55,7 +55,7 @@
  * whose duration has exceeded the timeout specified when it was acquired.
  *
  * Alternative implementations of this API (such as APC) may be substituted
- * by setting the 'lock_inc' variable to an alternate include filepath. Since
+ * by changing the $settings['lock_inc'] variable to an include filepath. Since
  * this is an API intended to support alternative implementations, code using
  * this API should never rely upon specific implementation details (for example
  * no code should look for or directly modify a lock in the {semaphore} table).
@@ -92,7 +92,7 @@ function _lock_id() {
  * Acquire (or renew) a lock, but do not block if it fails.
  *
  * @param $name
- *   The name of the lock.
+ *   The name of the lock. Limit of name's length is 255 characters.
  * @param $timeout
  *   A number of seconds (float) before the lock expires (minimum of 0.001).
  *
@@ -264,9 +264,18 @@ function lock_release_all($lock_id = NULL) {
   if (empty($lock_id)) {
     $lock_id = _lock_id();
   }
-  db_delete('semaphore')
-    ->condition('value', $lock_id)
-    ->execute();
+  try {
+    db_delete('semaphore')
+      ->condition('value', $lock_id)
+      ->execute();
+  }
+  catch (PDOException $e) {
+    // PDOException 42S02 is the internal error code for table does not exist.
+    // In the event that the table does not exist, suppress the exception.
+    if ($e->getCode() !== '42S02') {
+      throw $e;
+    }
+  }
 }
 
 /**

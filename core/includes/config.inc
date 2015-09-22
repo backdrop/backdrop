@@ -25,9 +25,28 @@
  *
  */
 function config($config_file, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
-  return new Config($config_file, $storage);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['loaded_configs'] = &backdrop_static(__FUNCTION__);
+  }
+  $loaded_configs = &$backdrop_static_fast['loaded_configs'];
+
+  if (!isset($loaded_configs[$type][$config_file])) {
+    $directory = config_get_config_directory($type);
+    $storage = new ConfigFileStorage($directory);
+    $config = new Config($config_file, $storage);
+    $config->load();
+    $cache = $config->get('_config_static');
+    if ($cache) {
+      $loaded_configs[$type][$config_file] = $config;
+    }
+  }
+  else {
+    $config = $loaded_configs[$type][$config_file];
+  }
+
+  return $config;
 }
 
 /**
@@ -103,7 +122,7 @@ function config_get_config_directory($type = 'active') {
 
     // If the path starts with a slash or dot, assume a normal path. If just
     // a directory name is provided, make it relative to the settings.php file.
-    $first_character = substr($path, 0);
+    $first_character = substr($path, 0, 1);
     if (!in_array($first_character, array('.', '/', '\\'))) {
       $path = conf_path() . '/' . $path;
     }
@@ -132,6 +151,23 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
 }
 
 /**
+ * Loads configuration objects by name.
+ *
+ * @param array $names
+ *   The list of configuration names to load.
+ * @param string $type
+ *   The configuration type, either "staging" or "active".
+ *
+ * @return array
+ *   An array containing matching configuration objects.
+ */
+function config_load_multiple($names, $type = 'active') {
+  $directory = config_get_config_directory($type);
+  $storage = new ConfigFileStorage($directory);
+  return $storage->readMultiple($names);
+}
+
+/**
  * Moves the default config supplied by a module to the live config directory.
  *
  * @param string $module
@@ -155,8 +191,31 @@ function config_install_default_config($module, $config_name = NULL) {
       if (is_null($config_name) || $file_config_name === $config_name) {
         $data = $storage->read($file_config_name);
         $config = config($file_config_name);
-        $config->setData($data);
-        $config->save();
+        // We only create new configs, and do not overwrite existing ones.
+        if ($config->isNew()) {
+          $config->setData($data);
+          $config->save();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Uninstall all the configuration provided by a module.
+ */
+function config_uninstall_config($module, $config_name = NULL) {
+  backdrop_load('module', $module);
+  if ($configs = module_invoke($module, 'config_info')) {
+    foreach ($configs as $config_name => $config_info) {
+      if (isset($config_info['name_key'])) {
+        $sub_names = config_get_names_with_prefix($config_name . '.');
+        foreach ($sub_names as $sub_name) {
+          config($sub_name)->delete();
+        }
+      }
+      else {
+        config($config_name)->delete();
       }
     }
   }
@@ -423,7 +482,7 @@ class Config {
         $value = $this->data;
         $key_exists = FALSE;
         foreach ($parts as $part) {
-          if ($value[$part]) {
+          if (is_array($value) && array_key_exists($part, $value)) {
             $value = $value[$part];
             $key_exists = TRUE;
           }
@@ -579,6 +638,16 @@ class Config {
     $this->data = array_merge(array('_config_name' => $this->name), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
+
+    // Empty static caches of this config file.
+    if ($static = &backdrop_static('config')) {
+      foreach ($static as $type => $configs) {
+        if (array_key_exists($this->name, $configs)) {
+          unset($static[$type][$this->name]);
+        }
+      }
+    }
+
     return $this;
   }
 
@@ -734,7 +803,7 @@ interface ConfigStorageInterface {
    * Gets configuration object names starting with a given prefix.
    *
    * Given the following configuration objects:
-   * - node.type.article
+   * - node.type.post
    * - node.type.page
    *
    * Passing the prefix 'node.type.' will return an array containing the above
@@ -753,7 +822,7 @@ interface ConfigStorageInterface {
    * Deletes configuration objects whose names start with a given prefix.
    *
    * Given the following configuration object names:
-   * - node.type.article
+   * - node.type.post
    * - node.type.page
    *
    * Passing the prefix 'node.type.' will delete the above configuration
@@ -850,11 +919,13 @@ class ConfigFileStorage implements ConfigStorageInterface {
   public function write($name, array $data) {
     // Ensure that the config name is included in the written file.
     $data = array_merge(array('_config_name' => $name), $data);
-    $data = $this->encode($data);
-    $status = @file_put_contents($this->getFilePath($name), $data);
+    $data = $this->encode($data) . "\n";
+    $file_path = $this->getFilePath($name);
+    $status = @file_put_contents($file_path, $data);
     if ($status === FALSE) {
       throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name));
     }
+    clearstatcache(FALSE, $file_path);
     return TRUE;
   }
 
@@ -868,7 +939,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
       return FALSE;
     }
-    return backdrop_unlink($this->getFilePath($name));
+    $file_path = $this->getFilePath($name);
+    $status = backdrop_unlink($file_path);
+    clearstatcache(FALSE, $file_path);
+    return $status;
   }
 
   /**

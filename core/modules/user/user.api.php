@@ -195,40 +195,6 @@ function hook_user_format_name_alter(&$name, $account) {
 }
 
 /**
- * Add mass user operations.
- *
- * This hook enables modules to inject custom operations into the mass operations
- * dropdown found at admin/people, by associating a callback function with
- * the operation, which is called when the form is submitted. The callback function
- * receives one initial argument, which is an array of the checked users.
- *
- * @return
- *   An array of operations. Each operation is an associative array that may
- *   contain the following key-value pairs:
- *   - "label": Required. The label for the operation, displayed in the dropdown menu.
- *   - "callback": Required. The function to call for the operation.
- *   - "callback arguments": Optional. An array of additional arguments to pass to
- *     the callback function.
- *
- */
-function hook_user_operations() {
-  $operations = array(
-    'unblock' => array(
-      'label' => t('Unblock the selected users'),
-      'callback' => 'user_user_operations_unblock',
-    ),
-    'block' => array(
-      'label' => t('Block the selected users'),
-      'callback' => 'user_user_operations_block',
-    ),
-    'cancel' => array(
-      'label' => t('Cancel the selected user accounts'),
-    ),
-  );
-  return $operations;
-}
-
-/**
  * Act on a user account being inserted or updated.
  *
  * This hook is invoked before the user account is saved to the database.
@@ -279,7 +245,7 @@ function hook_user_insert($account) {
  * @see hook_user_presave()
  * @see hook_user_insert()
  */
-function hook_user_update(&$edit, $account) {
+function hook_user_update($account) {
   db_insert('user_changes')
     ->fields(array(
       'uid' => $account->uid,
@@ -297,23 +263,15 @@ function hook_user_update(&$edit, $account) {
  *   The user object on which the operation was just performed.
  */
 function hook_user_login(&$edit, $account) {
+  $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
-  if (!$account->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
+  if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
     backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
 
 /**
  * The user just logged out.
- *
- * Note that when this hook is invoked, the changes have not yet been written to
- * the database, because a database transaction is still in progress. The
- * transaction is not finalized until the save operation is entirely completed
- * and user_save() goes out of scope. You should not rely on data in the
- * database at this time as it is not updated yet. You should also note that any
- * write/update database queries executed from this hook are also not committed
- * immediately. Check user_save() and db_transaction() for more info.
- *
  * @param $account
  *   The user object on which the operation was just performed.
  */
@@ -392,7 +350,7 @@ function hook_user_view_alter(&$build) {
 }
 
 /**
- * Inform other modules that a user role is about to be saved.
+ * Act on a user role being inserted or updated.
  *
  * Modules implementing this hook can act on the user role object before
  * it has been saved to the database.
@@ -411,7 +369,7 @@ function hook_user_role_presave($role) {
 }
 
 /**
- * Inform other modules that a user role has been added.
+ * Respond to creation of a new user role.
  *
  * Modules implementing this hook can act on the user role object when saved to
  * the database. It's recommended that you implement this hook if your module
@@ -425,14 +383,14 @@ function hook_user_role_insert($role) {
   // Save extra fields provided by the module to user roles.
   db_insert('my_module_table')
     ->fields(array(
-      'rid' => $role->rid,
+      'role' => $role->name,
       'role_description' => $role->description,
     ))
     ->execute();
 }
 
 /**
- * Inform other modules that a user role has been updated.
+ * Respond to updates to a user role.
  *
  * Modules implementing this hook can act on the user role object when updated.
  * It's recommended that you implement this hook if your module adds additional
@@ -445,7 +403,7 @@ function hook_user_role_insert($role) {
 function hook_user_role_update($role) {
   // Save extra fields provided by the module to user roles.
   db_merge('my_module_table')
-    ->key(array('rid' => $role->rid))
+    ->key(array('role' => $role->name))
     ->fields(array(
       'role_description' => $role->description
     ))
@@ -453,7 +411,7 @@ function hook_user_role_update($role) {
 }
 
 /**
- * Inform other modules that a user role has been deleted.
+ * Respond to user role deletion.
  *
  * This hook allows you act when a user role has been deleted.
  * If your module stores references to roles, it's recommended that you
@@ -466,7 +424,7 @@ function hook_user_role_update($role) {
 function hook_user_role_delete($role) {
   // Delete existing instances of the deleted role.
   db_delete('my_module_table')
-    ->condition('rid', $role->rid)
+    ->condition('role', $role->name)
     ->execute();
 }
 

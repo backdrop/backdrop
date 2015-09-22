@@ -316,7 +316,7 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Active'),
-      'type' => 'yes-no',
+      'type' => 'active-blocked',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -361,6 +361,16 @@ function user_views_data() {
     ),
   );
 
+  $data['users']['bulk_form'] = array(
+    'title' => t('Bulk operations'),
+    'help' => t('Provides a checkbox on each row and a form for executing bulk actions on users.'),
+    'real field' => 'uid',
+    'field' => array(
+      'handler' => 'views_handler_field_bulk_form',
+      'click sortable' => FALSE,
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // users_roles table
 
@@ -386,7 +396,7 @@ function user_views_data() {
     ),
   );
 
-  $data['users_roles']['rid'] = array(
+  $data['users_roles']['role'] = array(
     'title' => t('Roles'),
     'help' => t('Roles that a user belongs to.'),
     'field' => array(
@@ -399,128 +409,23 @@ function user_views_data() {
       'allow empty' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_users_roles_rid',
-      'name table' => 'role',
-      'name field' => 'name',
+      'handler' => 'views_handler_argument_users_roles',
       'empty field name' => t('No role'),
       'zero is null' => TRUE,
       'numeric' => TRUE,
     ),
   );
 
-  // ----------------------------------------------------------------------
-  // role table
-
-  $data['role']['table']['join'] = array(
-     // Directly links to users table.
-    'users' => array(
-      'left_table' => 'users_roles',
-      'left_field' => 'rid',
-      'field' => 'rid',
-    ),
-    // needed for many to one helper sometimes
-    'users_roles' => array(
-      'left_field' => 'rid',
-      'field' => 'rid',
-    ),
-  );
-
-  $data['role']['table']['default_relationship'] = array(
-    'node' => array(
-      'table' => 'node',
-      'field' => 'uid',
-    ),
-    'node_revision' => array(
-      'table' => 'node_revision',
-      'field' => 'uid',
-    ),
-  );
-
-  // permission table
-  $data['role_permission']['table']['group']  = t('User');
-  $data['role_permission']['table']['join'] = array(
-     // Directly links to users table.
-    'users' => array(
-      'left_table' => 'users_roles',
-      'left_field' => 'rid',
-      'field' => 'rid',
-    ),
-  );
-
-  $data['role_permission']['permission'] = array(
-    'title' => t('Permission'),
+  $data['users_roles']['permissions'] = array(
+    'title' => t('Permissions'),
     'help' => t('The user permissions.'),
+    'real field' => 'role',
     'field' => array(
       'handler' => 'views_handler_field_user_permissions',
       'no group by' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_user_permissions',
-    ),
-  );
-
-  // ----------------------------------------------------------------------
-  // authmap table
-
-  $data['authmap']['table']['group']  = t('User');
-  $data['authmap']['table']['join'] = array(
-     // Directly links to users table.
-    'users' => array(
-      'left_field' => 'uid',
-      'field' => 'uid',
-    ),
-  );
-
-  $data['authmap']['table']['default_relationship'] = array(
-    'node' => array(
-      'table' => 'node',
-      'field' => 'uid',
-    ),
-    'node_revision' => array(
-      'table' => 'node_revision',
-      'field' => 'uid',
-    ),
-  );
-
-  $data['authmap']['aid'] = array(
-    'title' => t('Authmap ID'),
-    'help' => t('The Authmap ID.'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-      'numeric' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-      'numeric' => TRUE,
-    ),
-  );
-  $data['authmap']['authname'] = array(
-    'title' => t('Authentication name'),
-    'help' => t('The unique authentication name.'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-    ),
-  );
-  $data['authmap']['module'] = array(
-    'title' => t('Authentication module'),
-    'help' => t('The name of the module managing the authentication entry.'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
     ),
   );
 
@@ -567,7 +472,7 @@ function user_views_plugins() {
 }
 
 /**
- * Allow replacement of current userid so we can cache these queries
+ * Allow replacement of current user ID so we can cache these queries.
  */
 function user_views_query_substitutions($view) {
   global $user;

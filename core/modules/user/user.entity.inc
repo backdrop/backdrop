@@ -39,13 +39,6 @@ class User extends Entity {
   public $mail = '';
 
   /**
-   * The user's default theme.
-   *
-   * @var string
-   */
-  public $theme;
-
-  /**
    * The user's signature.
    *
    * @var string
@@ -87,7 +80,7 @@ class User extends Entity {
    *
    * @var integer
    */
-  public $status = 0;
+  public $status = 1;
 
   /**
    * The user's timezone.
@@ -125,7 +118,7 @@ class User extends Entity {
   public $init = '';
 
   /**
-   * The user's roles.
+   * An unindexed list of role names.
    *
    * @var array
    */
@@ -166,6 +159,20 @@ class User extends Entity {
     }
     return $uri;
   }
+
+  /**
+   * Implements EntityInterface::save().
+   */
+  public function save() {
+    // Since pictures are not yet fields Save the picture object, if it is set.
+    $picture = empty($this->picture) ? NULL : $this->picture;
+    // Save the user.
+    $return = parent::save();
+    // Restore the picture object.
+    $this->picture = $picture;
+
+    return $return;
+  }
 }
 
 
@@ -190,21 +197,21 @@ class UserStorageController extends EntityDatabaseStorageController {
       $queried_users[$key]->data = unserialize($record->data);
       $queried_users[$key]->roles = array();
       if ($record->uid) {
-        $queried_users[$record->uid]->roles[BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
+        $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_ROLE;
       }
       else {
-        $queried_users[$record->uid]->roles[BACKDROP_ANONYMOUS_RID] = 'anonymous user';
+        $queried_users[$record->uid]->roles[] = BACKDROP_ANONYMOUS_ROLE;
       }
     }
 
     // Add any additional roles from the database.
-    $result = db_query('SELECT r.rid, r.name, ur.uid FROM {role} r INNER JOIN {users_roles} ur ON ur.rid = r.rid WHERE ur.uid IN (:uids)', array(':uids' => array_keys($queried_users)));
+    $result = db_query('SELECT role, uid FROM {users_roles} WHERE uid IN (:uids)', array(':uids' => array_keys($queried_users)));
     foreach ($result as $record) {
-      $queried_users[$record->uid]->roles[$record->rid] = $record->name;
+      $queried_users[$record->uid]->roles[] = $record->role;
     }
 
     // Add the full file objects for user pictures if enabled.
-    if (!empty($picture_fids) && variable_get('user_pictures', 1) == 1) {
+    if (!empty($picture_fids) && config_get('system.core', 'user_pictures')) {
       $pictures = file_load_multiple($picture_fids);
       foreach ($queried_users as $entity) {
         if (!empty($entity->picture) && isset($pictures[$entity->picture])) {
@@ -225,7 +232,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       $values['created'] = REQUEST_TIME;
     }
     // Users always have the authenticated user role.
-    $values['roles'][BACKDROP_AUTHENTICATED_RID] = 'authenticated user';
+    $values['roles'][] = BACKDROP_AUTHENTICATED_ROLE;
 
     return parent::create($values);
   }
@@ -248,7 +255,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Update the user password if it has changed.
     if ($entity->isNew() || (!empty($entity->pass) && $entity->pass != $entity->original->pass)) {
       // Allow alternate password hashing schemes.
-      require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'core/includes/password.inc');
+      require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
       $entity->pass = user_hash_password(trim($entity->pass));
       // Abort if the hashing failed and returned FALSE.
       if (!$entity->pass) {
@@ -275,7 +282,7 @@ class UserStorageController extends EntityDatabaseStorageController {
         // and make it permanent.
         if (!$picture->status) {
           $info = image_get_info($picture->uri);
-          $picture_directory =  file_default_scheme() . '://' . variable_get('user_picture_path', 'pictures');
+          $picture_directory =  file_default_scheme() . '://' . config_get('system.core', 'user_picture_path');
 
           // Prepare the pictures directory.
           file_prepare_directory($picture_directory, FILE_CREATE_DIRECTORY);
@@ -304,7 +311,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
     // Prepare user roles.
     if (isset($entity->roles)) {
-      $entity->roles = array_filter($entity->roles);
+      $entity->roles = array_values(array_filter($entity->roles));
     }
 
     // Move account cancellation information into $entity->data.
@@ -331,7 +338,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       }
 
       // Remove roles that are no longer enabled for the user.
-      $entity->roles = array_filter($entity->roles);
+      $entity->roles = array_values(array_filter($entity->roles));
 
       // Reload user roles if provided.
       if ($entity->roles != $entity->original->roles) {
@@ -339,12 +346,12 @@ class UserStorageController extends EntityDatabaseStorageController {
           ->condition('uid', $entity->uid)
           ->execute();
 
-        $query = db_insert('users_roles')->fields(array('uid', 'rid'));
-        foreach (array_keys($entity->roles) as $rid) {
-          if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
+        $query = db_insert('users_roles')->fields(array('uid', 'role'));
+        foreach ($entity->roles as $role_name) {
+          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
             $query->values(array(
               'uid' => $entity->uid,
-              'rid' => $rid,
+              'role' => $role_name,
             ));
           }
         }
@@ -364,16 +371,16 @@ class UserStorageController extends EntityDatabaseStorageController {
       }
     }
     else {
-      // Save user roles.
-      if (count($entity->roles) > 1) {
-        $query = db_insert('users_roles')->fields(array('uid', 'rid'));
-        foreach (array_keys($entity->roles) as $rid) {
-          if (!in_array($rid, array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID))) {
-            $query->values(array(
-              'uid' => $entity->uid,
-              'rid' => $rid,
-            ));
-          }
+      // Save user roles. Skip built-in roles, and ones that were already saved
+      // to the database during hook calls.
+      $role_names_to_skip = array_merge(array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE), db_query('SELECT role FROM {users_roles} WHERE uid = :uid', array(':uid' => $entity->uid))->fetchCol());
+      if ($roles_to_save = array_diff($entity->roles, $role_names_to_skip)) {
+        $query = db_insert('users_roles')->fields(array('uid', 'role'));
+        foreach ($roles_to_save as $role_name) {
+          $query->values(array(
+            'uid' => $entity->uid,
+            'role' => $role_name,
+          ));
         }
         $query->execute();
       }

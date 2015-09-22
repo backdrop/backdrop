@@ -22,7 +22,7 @@
 /**
  * Identifies a content type which has translation support enabled.
  */
-const TRANSLATION_ENABLED = 2;
+define('TRANSLATION_ENABLED', 2);
 
 /**
  * Implements hook_menu().
@@ -67,7 +67,7 @@ function _translation_tab_access($node) {
  * Implements hook_admin_paths().
  */
 function translation_admin_paths() {
-  if (variable_get('node_admin_theme')) {
+  if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
       'node/*/translate' => TRUE,
     );
@@ -84,6 +84,17 @@ function translation_permission() {
       'title' => t('Translate content'),
     ),
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function translation_config_info() {
+  $prefixes['translation.settings'] = array(
+    'label' => t('Translation settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -116,10 +127,10 @@ function translation_autoload_info() {
  */
 function translation_form_node_type_form_alter(&$form, &$form_state) {
   // Add translation option to content type form.
-  $form['workflow']['node_type_language']['#type'] = 'radios';
-  $form['workflow']['node_type_language']['#options'] = array(t('Disabled'), t('Enabled'), TRANSLATION_ENABLED => t('Enabled, with translation'));
+  $form['workflow']['language']['#type'] = 'radios';
+  $form['workflow']['language']['#options'] = array(t('Disabled'), t('Enabled'), TRANSLATION_ENABLED => t('Enabled, with translation'));
   // Description based on text from node.module.
-  $form['workflow']['node_type_language']['#description'] = t('Add a language selection field to the editing form, allowing you to select from one of the <a href="@languages">enabled languages</a>. You can also turn on translation for this content type, which lets you have content translated to any of the installed languages. If disabled, new posts are saved with the default language. Existing content will not be affected by changing this option.', array('@languages' => url('admin/config/regional/language')));
+  $form['workflow']['language']['#description'] = t('Add a language selection field to the editing form, allowing you to select from one of the <a href="@languages">enabled languages</a>. You can also turn on translation for this content type, which lets you have content translated to any of the installed languages. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('@languages' => url('admin/config/regional/language')));
 }
 
 /**
@@ -228,8 +239,8 @@ function translation_node_view(Node $node, $view_mode) {
     // content translation links. As custom language switch links are available
     // only for configurable language types and interface language is the only
     // configurable language type in core, we use it as default. Contributed
-    // modules can change this behavior by setting the system variable below.
-    $type = variable_get('translation_language_type', LANGUAGE_TYPE_INTERFACE);
+    // modules can change this behavior by setting the config option below.
+    $type = config_get('translation.settings', 'language_type');
     $custom_links = language_negotiation_get_switch_links($type, "node/$node->nid");
     $links = array();
 
@@ -339,9 +350,13 @@ function translation_node_insert(Node $node) {
             'tnid' => $tnid,
             'translate' => 0,
           ))
-          ->condition('nid', $node->translation_source->nid)
+          ->condition('nid', $tnid)
           ->execute();
+
+        // Flush the (untranslated) source node from the load cache.
+        entity_get_controller('node')->resetCache(array($tnid));
       }
+
       db_update('node')
         ->fields(array(
           'tnid' => $tnid,
@@ -370,13 +385,23 @@ function translation_node_update(Node $node) {
         ))
         ->condition('nid', $node->nid)
         ->execute();
+
       if (!empty($node->translation['retranslate'])) {
         // This is the source node, asking to mark all translations outdated.
-        db_update('node')
-          ->fields(array('translate' => 1))
+        $translations = db_select('node', 'n')
+          ->fields('n', array('nid'))
           ->condition('nid', $node->nid, '<>')
           ->condition('tnid', $node->tnid)
+          ->execute()
+          ->fetchCol();
+
+        db_update('node')
+          ->fields(array('translate' => 1))
+          ->condition('nid', $translations, 'IN')
           ->execute();
+
+        // Flush the modified translation nodes from the load cache.
+        entity_get_controller('node')->resetCache($translations);
       }
     }
   }
@@ -415,17 +440,22 @@ function translation_node_predelete(Node $node) {
  *   A node entity.
  */
 function translation_remove_from_set($node) {
-  if (isset($node->tnid)) {
+  if (isset($node->tnid) && $node->tnid) {
     $query = db_update('node')
       ->fields(array(
         'tnid' => 0,
         'translate' => 0,
       ));
-    if (db_query('SELECT COUNT(*) FROM {node} WHERE tnid = :tnid', array(':tnid' => $node->tnid))->fetchField() == 1) {
+
+    // Determine which nodes to apply the update to.
+    $set_nids = db_query('SELECT nid FROM {node} WHERE tnid = :tnid', array(':tnid' => $node->tnid))->fetchCol();
+    if (count($set_nids) == 1) {
       // There is only one node left in the set: remove the set altogether.
       $query
         ->condition('tnid', $node->tnid)
         ->execute();
+
+      $flush_set = TRUE;
     }
     else {
       $query
@@ -440,8 +470,14 @@ function translation_remove_from_set($node) {
           ->fields(array('tnid' => $new_tnid))
           ->condition('tnid', $node->tnid)
           ->execute();
+
+        $flush_set = TRUE;
       }
     }
+
+    // Flush the modified nodes from the load cache.
+    $nids = !empty($flush_set) ? $set_nids : array($node->nid);
+    entity_get_controller('node')->resetCache($nids);
   }
 }
 
@@ -486,7 +522,8 @@ function translation_node_get_translations($tnid) {
  *   TRUE if translation is supported, and FALSE if not.
  */
 function translation_supported_type($type) {
-  return variable_get('node_type_language_' . $type, 0) == TRANSLATION_ENABLED;
+  $node_type = node_type_get_type($type);
+  return $node_type->settings['language'] == TRANSLATION_ENABLED;
 }
 
 /**
@@ -515,7 +552,7 @@ function translation_path_get_translations($path) {
  * Replaces links with pointers to translated versions of the content.
  */
 function translation_language_switch_links_alter(array &$links, $type, $path) {
-  $language_type = variable_get('translation_language_type', LANGUAGE_TYPE_INTERFACE);
+  $language_type = config_get('translation.settings', 'language_type');
 
   if ($type == $language_type && preg_match("!^node/(\d+)(/.+|)!", $path, $matches)) {
     $node = node_load((int) $matches[1]);

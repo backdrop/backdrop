@@ -1,5 +1,5 @@
 {
-  "_config_name": "config_test.simple",
-  "favorite_animal": "cats",
-  "favorite_color": "blue"
+    "_config_name": "config_test.simple",
+    "favorite_animal": "cats",
+    "favorite_color": "blue"
 }

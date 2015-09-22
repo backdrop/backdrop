@@ -1,6 +1,7 @@
 name = File
 description = Defines a file field type.
-package = Core
+package = Fields
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 dependencies[] = field

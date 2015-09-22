@@ -174,6 +174,12 @@ function update_helpful_links() {
       'href' => 'admin',
     );
   }
+  if (user_access('administer site configuration')) {
+    $links['status-report'] = array(
+      'title' => t('Status report'),
+      'href' => 'admin/reports/status',
+    );
+  }
   return $links;
 }
 
@@ -205,8 +211,8 @@ function update_results_page() {
     $output .= '</p>';
   }
 
-  if (!empty($GLOBALS['update_free_access'])) {
-    $output .= "<p><strong>Reminder: don't forget to set the <code>\$update_free_access</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
+  if (settings_get('update_free_access')) {
+    $output .= "<p><strong>Reminder: Don't forget to set the <code>\$settings[&#39;update_free_access&#39;]</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
   }
 
   $output .= theme('links', array('links' => update_helpful_links()));
@@ -270,6 +276,8 @@ function update_results_page() {
  *   Rendered HTML form.
  */
 function update_info_page() {
+  global $databases;
+
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -277,17 +285,26 @@ function update_info_page() {
     cache('update')->flush();
   }
 
+  // Get database name
+  $db_name = $databases['default']['default']['database'];
+
+  // Get the config path
+  $config_dir = config_get_config_directory('active');
+
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever a new release of Backdrop or a module is installed.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
   $output .= "<ol>\n";
-  $output .= "<li><strong>Back up your database</strong>. This process will change your database values and in case of emergency you may need to revert to a backup.</li>\n";
-  $output .= "<li><strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Backdrop's auto-discovery mechanism.</li>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files in the appropriate location, as described in the handbook.</li>\n";
+  $output .= "<li><strong>Make any necessary backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
+  $output .= "<ul>\n";
+  $output .= "<li><strong>Database:</strong> Back up a dump of the '" . $db_name . "' database.</li>\n";
+  $output .= "<li><strong>Config files:</strong> Back up the entire '" . $config_dir . "' directory.</li>\n";
+  $output .= "</ul>\n";
+  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a> (optional but recommended).</li>' . "\n";
+  $output .= "<li>Install your new files into the appropriate location, as described in the handbook.</li>\n";
   $output .= "</ol>\n";
-  $output .= "<p>When you have performed the steps above, you may proceed.</p>\n";
+  $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
   $output .= "\n";
@@ -307,8 +324,8 @@ function update_access_denied_page() {
   return '<p>Access denied. You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:</p>
 <ol>
  <li>With a text editor find the settings.php file on your system and open it.</li>
- <li>There is a line inside your settings.php file that says <code>$update_free_access = FALSE;</code>. Change it to <code>$update_free_access = TRUE;</code>.</li>
- <li>As soon as the update.php script is done, you must change the settings.php file back to its original form with <code>$update_free_access = FALSE;</code>.</li>
+ <li>There is a line inside your settings.php file that says <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>. Change it to <code>$settings[&#39;update_free_access&#39;] = TRUE;</code>.</li>
+ <li>As soon as the update.php script is done, you must change the settings.php file back to its original form with <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>.</li>
  <li>To avoid having this problem in the future, remember to log in to your website using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation) before you backup your database at the beginning of the update process.</li>
 </ol>';
 }
@@ -320,10 +337,10 @@ function update_access_denied_page() {
  *   TRUE if the current user should be granted access, or FALSE otherwise.
  */
 function update_access_allowed() {
-  global $update_free_access, $user;
+  global $user;
 
   // Allow the global variable in settings.php to override the access check.
-  if (!empty($update_free_access)) {
+  if (settings_get('update_free_access')) {
     return TRUE;
   }
   // Calls to user_access() might fail during the update process,
@@ -406,8 +423,8 @@ update_prepare_bootstrap();
 // Determine if the current user has access to run update.php.
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
 
-// The interface language global has been renamed in D8, we must ensure that it
-// contains a valid value while language settings are upgraded.
+// The interface language global has been renamed in Backdrop, we must ensure
+// that it contains a valid value while language settings are upgraded.
 $GLOBALS[LANGUAGE_TYPE_INTERFACE] = language_default();
 
 // Only allow the requirements check to proceed if the current user has access

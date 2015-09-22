@@ -9,11 +9,6 @@
  * Implements hook_install().
  */
 function views_install() {
-  if (Database::getConnection()->databaseType() == 'pgsql') {
-    db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
-    db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
-    db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
-  }
   db_query("UPDATE {system} SET weight = 10 WHERE name = 'views'");
 }
 
@@ -37,17 +32,14 @@ function views_schema() {
  */
 
 /**
- * Convert database-based views to configuration files.
+ * Convert default views to configuration files.
  */
 function views_update_1000() {
-  // Install default views.
-  config_install_default_config('views', 'views.view.comments_recent');
-  config_install_default_config('views', 'views.view.frontpage');
-  config_install_default_config('views', 'views.view.taxonomy_term');
+  // This update removed. Updates for default views are in individual modules.
 }
 
 /**
- * Convert available database image styles to configuration files.
+ * Convert available database views to configuration files.
  */
 function views_update_1001() {
   if (db_table_exists('views_view')) {
@@ -121,15 +113,9 @@ function views_update_1003() {
 
   // Update the main views module variables.
   $config = config('views.settings');
-  $current_variables = db_select('variable')
-    ->fields('variable')
-    ->condition('name', array_keys($update_variables), 'IN')
-    ->execute()
-    ->fetchAllAssoc('name');
-  $current_variables = array_map('unserialize', $current_variables);
   foreach ($update_variables as $name => $default) {
+    $value = update_variable_get($name, $default);
     $name = str_replace('views_', '', $name);
-    $value = isset($current_variables[$name]) ? $current_variables[$name] : $default;
     $config->set($name, $value);
   }
   $config->save();

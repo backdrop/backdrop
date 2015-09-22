@@ -19,26 +19,29 @@
 function text_field_info() {
   return array(
     'text' => array(
-      'label' => t('Text'),
+      'label' => t('Text (short)'),
       'description' => t('This field stores varchar text in the database.'),
       'settings' => array('max_length' => 255),
       'instance_settings' => array('text_processing' => 0),
       'default_widget' => 'text_textfield',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
     'text_long' => array(
-      'label' => t('Long text'),
+      'label' => t('Text (long)'),
       'description' => t('This field stores long text in the database.'),
       'instance_settings' => array('text_processing' => 0),
       'default_widget' => 'text_textarea',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
     'text_with_summary' => array(
-      'label' => t('Long text and summary'),
+      'label' => t('Text (long with summary)'),
       'description' => t('This field stores long text in the database along with optional summary text.'),
       'instance_settings' => array('text_processing' => 1, 'display_summary' => 0),
       'default_widget' => 'text_textarea_with_summary',
       'default_formatter' => 'text_default',
+      'default_token_formatter' => 'text_default',
     ),
   );
 }
@@ -231,7 +234,7 @@ function text_field_formatter_settings_summary($field, $instance, $view_mode) {
   $summary = '';
 
   if (strpos($display['type'], '_trimmed') !== FALSE) {
-    $summary = t('Trim length') . ': ' . $settings['trim_length'];
+    $summary = t('Trim length') . ': ' . check_plain($settings['trim_length']);
   }
 
   return $summary;
@@ -315,7 +318,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  *
  * @param $text
  *   The content for which a summary will be generated.
- * @param $format
+ * @param $format_id
  *   The format of the content.
  *   If the PHP filter is present and $text contains PHP code, we do not
  *   split it up to prevent parse errors.
@@ -330,14 +333,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  * @return
  *   The generated summary.
  */
-function text_summary($text, $format = NULL, $size = NULL) {
-
-  if (!isset($size)) {
-    // What used to be called 'teaser' is now called 'summary', but
-    // the variable 'teaser_length' is preserved for backwards compatibility.
-    $size = variable_get('teaser_length', 600);
-  }
-
+function text_summary($text, $format_id = NULL, $size = 600) {
   // Find where the delimiter is in the body
   $delimiter = strpos($text, '<!--break-->');
 
@@ -351,14 +347,13 @@ function text_summary($text, $format = NULL, $size = NULL) {
     return substr($text, 0, $delimiter);
   }
 
+  $format = filter_format_load($format_id);
+
   // We check for the presence of the PHP evaluator filter in the current
   // format. If the body contains PHP code, we do not split it up to prevent
   // parse errors.
-  if (isset($format)) {
-    $filters = filter_list_format($format);
-    if (isset($filters['php_code']) && $filters['php_code']->status && strpos($text, '<?') !== FALSE) {
-      return $text;
-    }
+  if (isset($format->filters['php_code']) && $format->filters['php_code']->status && strpos($text, '<?') !== FALSE) {
+    return $text;
   }
 
   // If we have a short body, the entire body is the summary.
@@ -395,7 +390,7 @@ function text_summary($text, $format = NULL, $size = NULL) {
   $line_breaks = array('<br />' => 6, '<br>' => 4);
   // Newline only indicates a line break if line break converter
   // filter is present.
-  if (isset($filters['filter_autop'])) {
+  if (isset($format->filters['filter_autop'])) {
     $line_breaks["\n"] = 1;
   }
   $break_points[] = $line_breaks;
@@ -423,7 +418,7 @@ function text_summary($text, $format = NULL, $size = NULL) {
   }
 
   // If the htmlcorrector filter is present, apply it to the generated summary.
-  if (isset($filters['filter_htmlcorrector'])) {
+  if (isset($format->filters['filter_htmlcorrector'])) {
     $summary = _filter_htmlcorrector($summary);
   }
 
@@ -448,7 +443,7 @@ function text_field_widget_info() {
     'text_textarea_with_summary' => array(
       'label' => t('Text area with a summary'),
       'field types' => array('text_with_summary'),
-      'settings' => array('rows' => 20, 'summary_rows' => 5),
+      'settings' => array('rows' => 10, 'summary_rows' => 5),
     ),
   );
 }
@@ -473,6 +468,7 @@ function text_field_widget_settings_form($field, $instance) {
     $form['rows'] = array(
       '#type' => 'number',
       '#title' => t('Rows'),
+      '#description' => t('The number of visible lines in the text area.'),
       '#default_value' => $settings['rows'],
       '#required' => TRUE,
       '#min' => 1,
@@ -509,7 +505,7 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
         '#rows' => $instance['widget']['settings']['summary_rows'],
         '#description' => t('Leave blank to use trimmed value of full text as the summary.'),
         '#attached' => array(
-          'js' => array(backdrop_get_path('module', 'text') . '/text.js'),
+          'js' => array(backdrop_get_path('module', 'text') . '/js/text.js'),
         ),
         '#attributes' => array('class' => array('text-summary')),
         '#prefix' => '<div class="text-summary-wrapper">',

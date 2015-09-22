@@ -784,20 +784,29 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
    * Test updating with expressions.
    */
   function testExpressionUpdate() {
-    // Set age = 1 for a single row for this test to work.
-    db_update('test')
-      ->condition('id', 1)
-      ->fields(array('age' => 1))
-      ->execute();
-
-    // Ensure that expressions are handled properly.  This should set every
-    // record's age to a square of itself, which will change only three of the
-    // four records in the table since 1*1 = 1. That means only three records
-    // are modified, so we should get back 3, not 4, from execute().
+    // Ensure that expressions are handled properly. This should set every
+    // record's age to a square of itself
     $num_rows = db_update('test')
       ->expression('age', 'age * age')
       ->execute();
-    $this->assertIdentical($num_rows, 3, 'Number of affected rows are returned.');
+    $this->assertIdentical($num_rows, 4, 'Updated 4 records.');
+  }
+
+  /**
+   * Tests return value on update.
+   */
+  function testUpdateAffectedRows() {
+    // At 5am in the morning, all band members but those with a priority 1 task
+    // are sleeping. So we set their tasks to 'sleep'. 5 records match the
+    // condition and therefore are affected by the query, even though two of
+    // them actually don't have to be changed because their value was already
+    // 'sleep'. Still, execute() should return 5 affected rows, not only 3,
+    // because that's cross-db expected behaviour.
+    $num_rows = db_update('test_task')
+      ->condition('priority', 1, '<>')
+      ->fields(array('task' => 'sleep'))
+      ->execute();
+    $this->assertIdentical($num_rows, 5, 'Correctly returned 5 affected rows.');
   }
 
   /**
@@ -1047,22 +1056,24 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
    * Confirm that we can merge-insert a record successfully.
    */
   function testMergeInsert() {
-    $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
+    $max_id_before = db_query('SELECT MAX(id) FROM {test}')->fetchField();
 
-    $result = db_merge('test_people')
+    $merge = db_merge('test')
       ->key(array('job' => 'Presenter'))
       ->fields(array(
         'age' => 31,
         'name' => 'Tiffany',
-      ))
-      ->execute();
+      ));
+    $result = $merge->execute();
 
     $this->assertEqual($result, MergeQuery::STATUS_INSERT, 'Insert status returned.');
+    $this->assertEqual($merge->getResult(), $max_id_before + 1, 'Incremented ID returned.');
 
-    $num_records_after = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_after = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
     $this->assertEqual($num_records_before + 1, $num_records_after, 'Merge inserted properly.');
 
-    $person = db_query('SELECT * FROM {test_people} WHERE job = :job', array(':job' => 'Presenter'))->fetch();
+    $person = db_query('SELECT * FROM {test} WHERE job = :job', array(':job' => 'Presenter'))->fetch();
     $this->assertEqual($person->name, 'Tiffany', 'Name set correctly.');
     $this->assertEqual($person->age, 31, 'Age set correctly.');
     $this->assertEqual($person->job, 'Presenter', 'Job set correctly.');
@@ -1073,17 +1084,18 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
    */
   function testMergeUpdate() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
+    $num_records_matched = db_query('SELECT COUNT(*) FROM {test_people} WHERE job = :job', array(':job' => 'Speaker'))->fetchField();
 
-    $result = db_merge('test_people')
+    $merge = db_merge('test_people')
       ->key(array('job' => 'Speaker'))
       ->fields(array(
         'age' => 31,
         'name' => 'Tiffany',
-      ))
-      ->execute();
+      ));
+    $result = $merge->execute();
 
     $this->assertEqual($result, MergeQuery::STATUS_UPDATE, 'Update status returned.');
-
+    $this->assertEqual($merge->getResult(), $num_records_matched, 'Number of updated rows matches.');
     $num_records_after = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
     $this->assertEqual($num_records_before, $num_records_after, 'Merge updated properly.');
 
@@ -1266,9 +1278,10 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * Test rudimentary SELECT statement with a COMMENT.
    */
   function testSimpleComment() {
-    $query = db_select('test')->comment('Testing query comments');
-    $name_field = $query->addField('test', 'name');
-    $age_field = $query->addField('test', 'age', 'age');
+    $query = db_select('test');
+    $query->comment('Testing query comments');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
     $result = $query->execute();
 
     $num_records = 0;
@@ -1287,9 +1300,10 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * Test query COMMENT system against vulnerabilities.
    */
   function testVulnerableComment() {
-    $query = db_select('test')->comment('Testing query comments */ SELECT nid FROM {node}; --');
-    $name_field = $query->addField('test', 'name');
-    $age_field = $query->addField('test', 'age', 'age');
+    $query = db_select('test');
+    $query->comment('Testing query comments */ SELECT nid FROM {node}; --');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
     $result = $query->execute();
 
     $num_records = 0;
@@ -1298,10 +1312,47 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     }
 
     $query = (string)$query;
-    $expected = "/* Testing query comments SELECT nid FROM {node}; -- */ SELECT test.name AS name, test.age AS age\nFROM \n{test} test";
+    $expected = "/* Testing query comments  * / SELECT nid FROM {node}; -- */ SELECT test.name AS name, test.age AS age\nFROM \n{test} test";
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
     $this->assertEqual($query, $expected, 'The flattened query contains the sanitised comment string.');
+
+    $connection = Database::getConnection();
+    foreach ($this->makeCommentsProvider() as $test_set) {
+      list($expected, $comments) = $test_set;
+      $this->assertEqual($expected, $connection->makeComment($comments));
+    }
+  }
+
+  /**
+   * Provides expected and input values for testVulnerableComment().
+   */
+  function makeCommentsProvider() {
+    return array(
+      array(
+        '/*  */ ',
+        array(''),
+      ),
+      // Try and close the comment early.
+      array(
+        '/* Exploit  * / DROP TABLE node; -- */ ',
+        array('Exploit */ DROP TABLE node; --'),
+      ),
+      // Variations on comment closing.
+      array(
+        '/* Exploit  * / * / DROP TABLE node; -- */ ',
+        array('Exploit */*/ DROP TABLE node; --'),
+      ),
+      array(
+        '/* Exploit  *  * // DROP TABLE node; -- */ ',
+        array('Exploit **// DROP TABLE node; --'),
+      ),
+      // Try closing the comment in the second string which is appended.
+      array(
+        '/* Exploit  * / DROP TABLE node; --; Another try  * / DROP TABLE node; -- */ ',
+        array('Exploit */ DROP TABLE node; --', 'Another try */ DROP TABLE node; --'),
+      ),
+    );
   }
 
   /**
@@ -1664,6 +1715,19 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
     // WHERE tt2.pid IN (SELECT tt.pid AS pid FROM test_task tt WHERE tt.priority=1)
     $people = $select->execute()->fetchCol();
     $this->assertEqual(count($people), 5, 'Returned the correct number of rows.');
+
+    // Create a subquery that only returns one value
+    $subquery2 = db_select('test_task', 'tt');
+    $subquery2->addField('tt', 'priority');
+    $subquery2->condition('tt.task', 'eat'); // Gives 3
+
+    // Create another query that tests against the value returned by the subquery
+    $select2 = db_select('test_task', 'tt2');
+    $select2->addField('tt2', 'task');
+    $select2->condition('tt2.priority', $subquery2, '<');
+
+    $tasks = $select2->execute()->fetchCol();
+    $this->assertEqual(count($tasks), 4, 'Returned the correct number of rows.');
   }
 
   /**
@@ -1826,6 +1890,15 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
     }
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
+  }
+
+  /**
+   * Tests that the sort direction is sanitized properly.
+   */
+  function testOrderByEscaping() {
+    $query = db_select('test')->orderBy('name', 'invalid direction');
+    $order_bys = $query->getOrderBy();
+    $this->assertEqual($order_bys['name'], 'ASC', 'Invalid order by direction is converted to ASC.');
   }
 }
 
@@ -2447,6 +2520,52 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   }
 
   /**
+   * Confirm that an extended query has a "tag" added to it.
+   */
+  function testExtenderHasTag() {
+    $query = db_select('test')
+      ->extend('SelectQueryExtender');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
+
+    $query->addTag('test');
+
+    $this->assertTrue($query->hasTag('test'), 'hasTag() returned true.');
+    $this->assertFalse($query->hasTag('other'), 'hasTag() returned false.');
+  }
+
+  /**
+   * Test extended query tagging "has all of these tags" functionality.
+   */
+  function testExtenderHasAllTags() {
+    $query = db_select('test')
+      ->extend('SelectQueryExtender');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
+
+    $query->addTag('test');
+    $query->addTag('other');
+
+    $this->assertTrue($query->hasAllTags('test', 'other'), 'hasAllTags() returned true.');
+    $this->assertFalse($query->hasAllTags('test', 'stuff'), 'hasAllTags() returned false.');
+  }
+
+  /**
+   * Test extended query tagging "has at least one of these tags" functionality.
+   */
+  function testExtenderHasAnyTag() {
+    $query = db_select('test')
+      ->extend('SelectQueryExtender');
+    $query->addField('test', 'name');
+    $query->addField('test', 'age', 'age');
+
+    $query->addTag('test');
+
+    $this->assertTrue($query->hasAnyTag('test', 'other'), 'hasAnyTag() returned true.');
+    $this->assertFalse($query->hasAnyTag('other', 'stuff'), 'hasAnyTag() returned false.');
+  }
+
+  /**
    * Test that we can attach meta data to a query object.
    *
    * This is how we pass additional context to alter hooks.
@@ -2869,6 +2988,15 @@ class DatabaseTemporaryQueryTestCase extends BackdropWebTestCase {
 
     $this->assertEqual($this->countTableRows($table_name_system), $this->countTableRows("system"), 'A temporary table was created successfully in this request.');
     $this->assertEqual($this->countTableRows($table_name_users), $this->countTableRows("users"), 'A second temporary table was created successfully in this request.');
+
+    // Check that leading whitespace and comments do not cause problems
+    // in the modified query.
+    $sql = "
+      -- Let's select some rows into a temporary table
+      SELECT name FROM {test}
+    ";
+    $table_name_test = db_query_temporary($sql, array());
+    $this->assertEqual($this->countTableRows($table_name_test), $this->countTableRows('test'), 'Leading white space and comments do not interfere with temporary table creation.');    
   }
 }
 
@@ -3063,6 +3191,34 @@ class DatabaseQueryTestCase extends DatabaseTestCase {
 
     $this->assertEqual(count($names), 3, 'Correct number of names returned');
   }
+
+  /**
+   * Test SQL injection via database query array arguments.
+   */
+  public function testArrayArgumentsSQLInjection() {
+    // Attempt SQL injection and verify that it does not work.
+    $condition = array(
+      "1 ;INSERT INTO {test} SET name = 'test12345678'; -- " => '',
+      '1' => '',
+    );
+    try {
+      db_query("SELECT * FROM {test} WHERE name = :name", array(':name' => $condition))->fetchObject();
+      $this->fail('SQL injection attempt via array arguments should result in a PDOException.');
+    }
+    catch (PDOException $e) {
+      $this->pass('SQL injection attempt via array arguments should result in a PDOException.');
+    }
+
+    // Test that the insert query that was used in the SQL injection attempt did
+    // not result in a row being inserted in the database.
+    $result = db_select('test')
+      ->condition('name', 'test12345678')
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertFalse($result, 'SQL injection attempt did not result in a row being inserted in the database table.');
+  }
+
 }
 
 /**
@@ -3542,6 +3698,98 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
   }
 }
 
+/**
+ * Test proposed new data types for the schema API.
+ */
+class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
+
+  /**
+   * Test the date data type.
+   */
+   function testDateField() {
+     try {
+       $date_table = array(
+         'fields' => array(
+           'date_field' => array(
+             'description' => t('Test Date field'),
+             'type' => 'date',
+             'not null' => FALSE,
+           ),
+         ),
+       );
+       db_create_table('date_table', $date_table);
+       $this->assertTrue(db_table_exists('date_table'), t('Created table with date field'));
+
+       db_insert('date_table')->fields(array('date_field'))
+         ->values(array('date_field' => '2001-01-01'))
+         ->values(array('date_field' => '1856-12-31'))
+         ->values(array('date_field' => '2100-06-30'))
+         ->execute();
+
+       $num_records = (int) db_query('SELECT COUNT(*) FROM {date_table}')->fetchField();
+       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+       $res = db_query('SELECT date_field from {date_table} ORDER BY date_field');
+
+       $date = $res->fetch()->date_field;
+       $this->assertEqual($date, '1856-12-31', t('Date retrieved in order @date', array('@date' => $date)));
+       $date = $res->fetch()->date_field;
+       $this->assertEqual($date, '2001-01-01', t('Date retrieved in order @date', array('@date' => $date)));
+       $date = $res->fetch()->date_field;
+       $this->assertEqual($date, '2100-06-30', t('Date retrieved in order @date', array('@date' => $date)));
+
+
+       db_drop_table('date_table');
+       $this->assertFalse(db_table_exists('date_table'), t('Dropped table with date field'));
+
+     } catch (Exception $e) {
+       $this->fail($e->getMessage());
+     }
+
+   }
+
+  /**
+   * Test the time data type.
+   */
+   function testTimeField() {
+     try {
+       $time_table = array(
+         'fields' => array(
+           'time_field' => array(
+             'description' => t('Test Time field'),
+             'type' => 'time',
+             'not null' => FALSE,
+           ),
+         ),
+       );
+       db_create_table('time_table', $time_table);
+       $this->assertTrue(db_table_exists('time_table'), t('Created table with time field'));
+
+       db_insert('time_table')->fields(array('time_field'))
+         ->values(array('time_field' => '12:59:00'))
+         ->values(array('time_field' => '00:01:00'))
+         ->values(array('time_field' => '23:17:00'))
+         ->execute();
+
+       $num_records = (int) db_query('SELECT COUNT(*) FROM {time_table}')->fetchField();
+       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+       $res = db_query('SELECT time_field from {time_table} ORDER BY time_field');
+
+       $time = $res->fetch()->time_field;
+       $this->assertEqual($time, '00:01:00', t('Time retrieved in order @time', array('@time' => $time)));
+       $time = $res->fetch()->time_field;
+       $this->assertEqual($time, '12:59:00', t('Time retrieved in order @time', array('@time' => $time)));
+       $time = $res->fetch()->time_field;
+       $this->assertEqual($time, '23:17:00', t('Time retrieved in order @time', array('@time' => $time)));
+
+       db_drop_table('time_table');
+       $this->assertFalse(db_table_exists('time_table'), t('Dropped table with time field'));
+     } catch (Exception $e) {
+       $this->fail($e->getMessage());
+     }
+
+  }
+
+}
 
 /**
  * Check the sequences API.

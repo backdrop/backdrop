@@ -9,7 +9,7 @@
  * Maps PHP error constants to watchdog severity levels.
  *
  * The error constants are documented at
- * http://php.net/manual/en/errorfunc.constants.php
+ * http://php.net/manual/errorfunc.constants.php
  *
  * @ingroup logging_severity_levels
  */
@@ -148,7 +148,14 @@ function _backdrop_render_exception_safe($exception) {
  *   TRUE if an error should be displayed.
  */
 function error_displayable($error = NULL) {
-  $error_level = variable_get('error_level', ERROR_REPORTING_DISPLAY_ALL);
+  try {
+    $error_level = function_exists('config_get') ? config_get('system.core', 'error_level') : ERROR_REPORTING_DISPLAY_ALL;
+  }
+  catch (ConfigException $e) {}
+  if (empty($error_level)) {
+    $error_level = ERROR_REPORTING_DISPLAY_ALL;
+  }
+
   $updating = (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE == 'update');
   $all_errors_displayed = ($error_level == ERROR_REPORTING_DISPLAY_ALL);
   $error_needs_display = ($error_level == ERROR_REPORTING_DISPLAY_SOME &&

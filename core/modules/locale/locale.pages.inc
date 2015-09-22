@@ -10,7 +10,7 @@
  */
 function locale_translate_seek_screen() {
   // Add CSS.
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
   $elements = backdrop_get_form('locale_translation_filter_form');
   $output = backdrop_render($elements);
@@ -110,7 +110,7 @@ function _locale_translate_seek() {
     $rows[] = array(
       array('data' => check_plain(truncate_utf8($string['source'], 150, FALSE, TRUE)) . '<br /><small>' . $string['location'] . '</small>'),
       $string['context'],
-      array('data' => _locale_translate_language_list($string['languages'], $limit_language), 'align' => 'center'),
+      array('data' => _locale_translate_language_list($string, $limit_language), 'align' => 'center'),
       array('data' => array('#type' => 'operations', '#links' => $links)),
     );
   }
@@ -124,18 +124,23 @@ function _locale_translate_seek() {
 /**
  * List languages in search result table
  */
-function _locale_translate_language_list($translation, $limit_language) {
+function _locale_translate_language_list($string, $limit_language) {
   // Add CSS.
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
+  // Include both translated and not yet translated target languages in the
+  // list. The source language is English for built-in strings and the default
+  // language for other strings.
   $languages = language_list();
   if (!locale_translate_english()) {
-    unset($languages['en']);
+    $default = language_default();
+    $omit = empty($string['languages']) ? 'en' : $default->langcode;
+    unset($languages[$omit]);
   }
   $output = '';
   foreach ($languages as $langcode => $language) {
     if (!$limit_language || $limit_language == $langcode) {
-      $output .= (!empty($translation[$langcode])) ? $langcode . ' ' : "<em class=\"locale-untranslated\">$langcode</em> ";
+      $output .= (!empty($string['languages'][$langcode])) ? $langcode . ' ' : "<em class=\"locale-untranslated\">$langcode</em> ";
     }
   }
 
@@ -211,7 +216,7 @@ function locale_translation_filter_form() {
     // Special case for 'string' filter.
     if ($key == 'string') {
       $form['filters']['status']['string'] = array(
-        '#type' => 'textfield',
+        '#type' => 'search',
         '#title' => $filter['title'],
         '#description' => $filter['description'],
       );
@@ -231,6 +236,8 @@ function locale_translation_filter_form() {
     }
   }
 
+  $form['#attributes']['class'] = array('locale-translation-filter-form');
+  
   $form['filters']['actions'] = array(
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
@@ -316,8 +323,9 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
     '#value' => $source->location
   );
 
-  // Include default form controls with empty values for all languages.
-  // This ensures that the languages are always in the same order in forms.
+  // Include both translated and not yet translated target languages in the
+  // list. The source language is English for built-in strings and the default
+  // language for other strings.
   $languages = language_list();
   if (!locale_translate_english()) {
     unset($languages['en']);
@@ -349,6 +357,8 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
  * Validate string editing form submissions.
  */
 function locale_translate_edit_form_validate($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+  
   foreach ($form_state['values']['translations'] as $key => $value) {
     if (!locale_string_is_safe($value)) {
       form_set_error('translations', t('The submitted string contains disallowed HTML: %string', array('%string' => $value)));
@@ -363,6 +373,8 @@ function locale_translate_edit_form_validate($form, &$form_state) {
  * Saves all translations of one string submitted from a form.
  */
 function locale_translate_edit_form_submit($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   $lid = $form_state['values']['lid'];
   foreach ($form_state['values']['translations'] as $key => $value) {
     $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $key))->fetchField();
@@ -435,6 +447,8 @@ function locale_translate_delete_form($form, &$form_state, $source) {
  * Process string deletion submissions.
  */
 function locale_translate_delete_form_submit($form, &$form_state) {
+  require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
   db_delete('locales_source')
     ->condition('lid', $form_state['values']['lid'])
     ->execute();

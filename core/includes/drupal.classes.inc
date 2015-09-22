@@ -107,6 +107,10 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   }
 }
 
+// entity.controller.inc
+class DrupalDefaultEntityController extends DefaultEntityController {}
+interface DrupalEntityControllerInterface extends EntityControllerInterface {}
+
 /**
  * @}
  */

@@ -15,14 +15,14 @@
  * setting a "maintenance_theme" key in the $conf variable in settings.php.
  */
 function _backdrop_maintenance_theme() {
-  global $theme, $theme_key, $conf;
+  global $theme, $theme_key;
 
   // If $theme is already set, assume the others are set too, and do nothing.
   if (isset($theme)) {
     return;
   }
 
-  require_once BACKDROP_ROOT . '/' . variable_get('path_inc', 'core/includes/path.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('path_inc', 'core/includes/path.inc');
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/common.inc';
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
@@ -32,7 +32,7 @@ function _backdrop_maintenance_theme() {
 
   // Install and update pages are treated differently to prevent theming overrides.
   if (defined('MAINTENANCE_MODE') && (MAINTENANCE_MODE == 'install' || MAINTENANCE_MODE == 'update')) {
-    $custom_theme = (isset($conf['maintenance_theme']) ? $conf['maintenance_theme'] : 'seven');
+    $custom_theme = settings_get('maintenance_theme', 'seven');
   }
   else {
     // The bootstrap was not complete. So we are operating in a crippled
@@ -42,15 +42,19 @@ function _backdrop_maintenance_theme() {
       require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
     }
 
-    // We use the default theme as the maintenance theme. If a default theme
-    // isn't specified in the database or in settings.php, we use Bartik.
-    // @todo Should use the actual default theme configured, but that depends on
-    //   configuration being available while possibly not having a working
-    //   database connection (yet). And only if that fails, should fall back to
-    //   Stark otherwise. Since there is no low-level access to configuration
-    //   currently, we only consult settings.php and fall back to Bartik
-    //   otherwise, as it looks generic enough and way more user-friendly.
-    $custom_theme = variable_get('maintenance_theme', variable_get('theme_default', 'bartik'));
+    // We use the default theme as the maintenance theme. If a maintenance theme
+    // isn't specified in the database or in settings.php, we use the default.
+    try {
+      $custom_theme = config_get('system.core', 'maintenance_theme');
+      if (empty($custom_theme)) {
+        $custom_theme = config_get('system.core', 'theme_default');
+      }
+    }
+    catch (ConfigException $e) {}
+  }
+
+  if (empty($custom_theme)) {
+    $custom_theme = 'seven';
   }
 
   // Ensure that system.module is loaded.
@@ -82,10 +86,11 @@ function _backdrop_maintenance_theme() {
   // These are usually added from system_init() -except maintenance.css.
   // When the database is inactive it's not called so we add it here.
   $path = backdrop_get_path('module', 'system');
-  backdrop_add_css($path . '/system.base.css');
-  backdrop_add_css($path . '/system.admin.css');
-  backdrop_add_css($path . '/system.theme.css');
-  backdrop_add_css($path . '/system.maintenance.css');
+  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/css/system.css');
+  backdrop_add_css($path . '/css/system.admin.css');
+  backdrop_add_css($path . '/css/system.theme.css');
+  backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
 /**
@@ -110,26 +115,34 @@ function theme_task_list($variables) {
   $active = $variables['active'];
 
   $done = isset($items[$active]) || $active == NULL;
-  $output = '<h2 class="element-invisible">Installation tasks</h2>';
-  $output .= '<ol class="task-list">';
+  $total = count($items);
+  $count = 0;
+  $current = 0;
+  $list = '';
 
   foreach ($items as $k => $item) {
+    $count++;
     if ($active == $k) {
       $class = 'active';
       $status = '(' . t('active') . ')';
       $done = FALSE;
+      $current = $count;
     }
     else {
       $class = $done ? 'done' : '';
       $status = $done ? '(' . t('done') . ')' : '';
     }
-    $output .= '<li';
-    $output .= ($class ? ' class="' . $class . '"' : '') . '>';
-    $output .= $item;
-    $output .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
-    $output .= '</li>';
+    $list .= '<li';
+    $list .= ($class ? ' class="' . $class . '"' : '') . '>';
+    $list .= $item;
+    $list .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
+    $list .= '</li>';
   }
-  $output .= '</ol>';
+
+  $output = '<h2 class="element-invisible">Installation tasks</h2>';
+  $output .= '<div class="step-indicator">' . t('Step !current of !total', array('!current' => $current, '!total' => $total)) . '</div>';
+  $output .= '<ol class="task-list">' . $list . '</ol>';
+
   return $output;
 }
 

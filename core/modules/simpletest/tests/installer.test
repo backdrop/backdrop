@@ -12,7 +12,15 @@ class InstallerLanguageTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
-    variable_set('locale_translate_file_directory', backdrop_get_path('module', 'simpletest') . '/files/translations');
+
+    // Copy test translations to the active translations directory.
+    $source = backdrop_get_path('module', 'simpletest') . '/files/translations';
+    $destination = settings_get('locale_translate_file_directory', 'files/translations');
+    file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+    $files = file_scan_directory($source, '/^.*\.po$/');
+    foreach ($files as $file) {
+      file_unmanaged_copy($file->uri, $destination, FILE_EXISTS_REPLACE);
+    }
   }
 
   /**

@@ -16,7 +16,7 @@
  * check the Drupal 7 version once the update process has begun, so instead
  * we check the schema version of system.module in the system table.
  */
-const REQUIRED_D7_SCHEMA_VERSION = '7069';
+define('REQUIRED_D7_SCHEMA_VERSION', '7069');
 
 /**
  * Disable any items in the {system} table that are not core compatible.
@@ -121,8 +121,8 @@ function update_prepare_bootstrap() {
   // to happen AFTER the database bootstraps because of
   // backdrop_get_installed_schema_version().
   $system_schema = backdrop_get_installed_schema_version('system');
-  if ($system_schema > 7000) {
-    $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION;
+  if ($system_schema > 7000 || $system_schema < 6000) {
+    $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION || $system_schema < 6000;
     $requirements = array(
       'drupal 7 version' => array(
         'title' => 'Drupal 7 version',
@@ -137,11 +137,6 @@ function update_prepare_bootstrap() {
       // Bootstrap variables so we can update theme while preparing the update
       // process.
       backdrop_bootstrap(BACKDROP_BOOTSTRAP_VARIABLES);
-      // Update the dynamic include paths that might be used before running the
-      // proper update functions.
-      update_prepare_stored_includes();
-      // Update the environment for the language bootstrap if needed.
-      update_prepare_language();
 
       // Change language column to langcode in url_alias.
       if (db_table_exists('url_alias') && db_field_exists('url_alias', 'language')) {
@@ -186,23 +181,23 @@ function update_prepare_bootstrap() {
         );
         db_create_table('state', $schema);
       }
-    }
-  }
-}
 
-/**
- * Fix stored include paths to match the "/core" migration.
- */
-function update_prepare_stored_includes() {
-  // Update language negotiation settings.
-  foreach (language_types_get_all() as $language_type) {
-    $negotiation = variable_get("language_negotiation_$language_type", array());
-    foreach ($negotiation as $id => &$provider) {
-      if (isset($negotiation[$id]['file']) && $negotiation[$id]['file'] == 'includes/locale.inc') {
-        $negotiation[$id]['file'] = 'core/includes/locale.inc';
+      // Update role ID to be a varchar instead of an integer.
+      $role_column = array(
+        'type' => 'varchar',
+        'length' => 64,
+        'description' => 'Primary Key: The name of the role.',
+        'not null' => TRUE,
+        'default' => '',
+      );
+      if (!db_field_exists('users_roles', 'role')) {
+        db_add_field('users_roles', 'role', $role_column);
       }
+
+      // Update the environment for the language bootstrap if needed. Language
+      // depends on the state table, so this runs after its creation.
+      update_prepare_language();
     }
-    variable_set("language_negotiation_$language_type", $negotiation);
   }
 }
 
@@ -227,10 +222,10 @@ function update_prepare_language() {
       $prefixes[$language->language] = $language->prefix;
       $domains[$language->language] = $language->domain;
     }
-    variable_set('locale_translation_plurals', $plurals);
-    variable_set('locale_translation_javascript', $javascript);
-    variable_set('locale_language_negotiation_url_prefixes', $prefixes);
-    variable_set('locale_language_negotiation_url_domains', $domains);
+    state_set('locale_translation_plurals', $plurals);
+    state_set('locale_translation_javascript', $javascript);
+    config_set('locale.settings', 'language_negotiation_url_prefixes', $prefixes);
+    config_set('locale.settings', 'language_negotiation_url_domains', $domains);
 
     // Drop now unneeded columns.
     db_drop_field('languages', 'plurals');
@@ -301,8 +296,37 @@ function update_module_add_to_system($modules = array()) {
  * made which make it impossible to continue using the prior version.
  */
 function update_fix_requirements() {
-  if (backdrop_get_installed_schema_version('system') > 7000 && !variable_get('update_backdrop_requirements', FALSE)) {
-    variable_set('update_backdrop_requirements', TRUE);
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_backdrop_requirements', FALSE)) {
+    // Copy over the private key for continuity between the sites. If this is
+    // not migrated, a random key will be generated when visiting update.php.
+    if ($key = update_variable_get('drupal_private_key')) {
+      state_set('private_key', $key);
+      update_variable_del('drupal_private_key');
+    }
+
+    // Enable the Views module if necessary.
+    if (!db_query("SELECT name FROM {system} WHERE name = 'views' AND type = 'module' AND status = 1")->fetchField()) {
+      $schema_cache_views = backdrop_get_schema_unprocessed('system', 'cache');
+      $schema_cache_views['description'] = 'Cache table for Views to store loaded view configurations.';
+
+      $schema_cache_views_data = backdrop_get_schema_unprocessed('system', 'cache');
+      $schema_cache_views_data['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+      $schema_cache_views_data['fields']['serialized']['default'] = 1;
+
+      if (!db_table_exists('cache_views')) {
+        db_create_table('cache_views', $schema_cache_views);
+      }
+      if (!db_table_exists('cache_views_data')) {
+        db_create_table('cache_views_data', $schema_cache_views_data);
+      }
+      update_module_enable(array('views'));
+    }
+
+    // Empty a few basic caches.
+    db_query('TRUNCATE {cache}');
+    db_query('TRUNCATE {cache_bootstrap}');
+
+    state_set('update_backdrop_requirements', TRUE);
   }
 }
 
@@ -336,6 +360,61 @@ function update_module_enable(array $modules) {
     system_list_reset();
     //  @todo: figure out what to do about hook_install() and hook_enable().
   }
+}
+
+/**
+ * Gets the value of a variable from the database during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_get().
+ *
+ * @param string $name
+ *   The name of the variable.
+ * @param mixed $default
+ *   The default value of the variable.
+ * @return
+ *   The value of the variable in the database unserialized, or NULL if not set.
+ */
+function update_variable_get($name, $default = NULL) {
+  $result = db_query('SELECT value FROM {variable} WHERE name = :name', array(':name' => $name))->fetchField();
+  if ($result !== FALSE) {
+    return unserialize($result);
+  }
+  return $default;
+}
+
+/**
+ * Sets a persistent variable during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_set().
+ *
+ * @param string $name
+ *   The name of the variable.
+ * @param mixed $value
+ *   The value of the variable to be set.
+ */
+function update_variable_set($name, $value) {
+  db_merge('variable')
+    ->key(array(
+      'name' => $name,
+    ))
+    ->fields(array(
+      'value' => serialize($value),
+    ))
+    ->execute();
+}
+
+/**
+ * Delete a variable from the database during update hooks.
+ *
+ * Use this during the Drupal 7 upgrade path instead of variable_del().
+ *
+ * @param string $name
+ *   The name of the variable to delete.
+ */
+function update_variable_del($name) {
+  db_delete('variable')
+    ->condition('name', $name)
+    ->execute();
 }
 
 /**
@@ -669,7 +748,7 @@ function update_resolve_dependencies($starting_updates) {
   // Perform the depth-first search and sort the results.
   require_once BACKDROP_ROOT . '/core/includes/graph.inc';
   backdrop_depth_first_search($graph);
-  uasort($graph, 'backdrop_sort_weight');
+  backdrop_sort($graph);
 
   foreach ($graph as $function => &$data) {
     $module = $data['module'];

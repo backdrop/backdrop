@@ -29,7 +29,6 @@ class views_handler_argument_string extends views_handler_argument {
     $options['glossary'] = array('default' => FALSE, 'bool' => TRUE);
     $options['limit'] = array('default' => 0);
     $options['case'] = array('default' => 'none');
-    $options['path_case'] = array('default' => 'none');
     $options['transform_dash'] = array('default' => FALSE, 'bool' => TRUE);
     $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
 
@@ -77,21 +76,6 @@ class views_handler_argument_string extends views_handler_argument {
         'ucwords' => t('Capitalize each word'),
       ),
       '#default_value' => $this->options['case'],
-      '#fieldset' => 'more',
-    );
-
-    $form['path_case'] = array(
-      '#type' => 'select',
-      '#title' => t('Case in path'),
-      '#description' => t('When printing url paths, how to transform the case of the filter value. Do not use this unless with Postgres as it uses case sensitive comparisons.'),
-      '#options' => array(
-        'none' => t('No transform'),
-        'upper' => t('Upper case'),
-        'lower' => t('Lower case'),
-        'ucfirst' => t('Capitalize first letter'),
-        'ucwords' => t('Capitalize each word'),
-      ),
-      '#default_value' => $this->options['path_case'],
       '#fieldset' => 'more',
     );
 
@@ -228,7 +212,7 @@ class views_handler_argument_string extends views_handler_argument {
   }
 
   function summary_argument($data) {
-    $value = $this->case_transform($data->{$this->base_alias}, $this->options['path_case']);
+    $value = $data->{$this->base_alias};
     if (!empty($this->options['transform_dash'])) {
       $value = strtr($value, ' ', '-');
     }

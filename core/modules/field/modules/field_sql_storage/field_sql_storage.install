@@ -12,22 +12,22 @@ function field_sql_storage_schema() {
   $schema = array();
 
   // Dynamic (data) tables.
-  if (db_table_exists('field_config')) {
-    $fields = field_read_fields(array(), array('include_deleted' => TRUE, 'include_inactive' => TRUE));
-    backdrop_load('module', 'field_sql_storage');
-    foreach ($fields as $field) {
-      if ($field['storage']['type'] == 'field_sql_storage') {
-        $schema += _field_sql_storage_schema($field);
-      }
+  backdrop_load('module', 'field_sql_storage');
+  module_load_include('inc', 'field', 'field.crud');
+  $fields = field_read_fields(array(), array('include_deleted' => TRUE, 'include_inactive' => TRUE));
+  foreach ($fields as $field) {
+    if ($field['storage']['type'] == 'field_sql_storage') {
+      $schema += _field_sql_storage_schema($field);
     }
   }
+
   return $schema;
 }
 
 /**
  * Utility function: write field data directly to SQL storage.
  *
- * @ingroup update-api-7.x-to-8.x
+ * @ingroup update-api-7.x-to-1.x
  */
 function _update_7000_field_sql_storage_write($entity_type, $bundle, $entity_id, $revision_id, $field_name, $data) {
   $table_name = "field_data_{$field_name}";

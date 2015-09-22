@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Enables site-wide keyword searching.
@@ -65,13 +64,11 @@ define('PREG_CLASS_CJK', '\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
  */
 function search_theme() {
   return array(
-    'search_result' => array(
-      'variables' => array('result' => NULL, 'module' => NULL),
-    ),
     'search_results' => array(
       'variables' => array('results' => NULL, 'module' => NULL),
       'file' => 'search.pages.inc',
-      'template' => 'search-results',
+      'template' => 'templates/search-results',
+      'file' => 'search.theme.inc',
     ),
   );
 }
@@ -107,10 +104,10 @@ function search_views_api() {
  * Implements hook_block_info().
  */
 function search_block_info() {
-  $blocks['form']['info'] = t('Search form');
-  // Not worth caching.
-  $blocks['form']['cache'] = BACKDROP_NO_CACHE;
-  $blocks['form']['properties']['administrative'] = TRUE;
+  $blocks['form'] = array(
+    'info' => t('Search form'),
+    'description' => t('The search form for searching site content.'),
+  );
   return $blocks;
 }
 
@@ -130,8 +127,8 @@ function search_block_view($delta = '') {
  */
 function search_preprocess_block(&$variables) {
   if ($variables['block']->module == 'search' && $variables['block']->delta == 'form') {
-    $variables['attributes_array']['role'] = 'search';
-    $variables['content_attributes_array']['class'][] = 'container-inline';
+    $variables['attributes']['role'] = 'search';
+    $variables['content_attributes']['class'][] = 'container-inline';
   }
 }
 
@@ -247,8 +244,8 @@ function search_get_info($all = FALSE) {
     return $search_hooks;
   }
 
-  $active = variable_get('search_active_modules', array('node', 'user'));
-  return array_intersect_key($search_hooks, array_flip($active));
+  // Return only modules that are set to active in search settings.
+  return array_intersect_key($search_hooks, array_flip((array) config_get('search.settings', 'search_active_modules')));
 }
 
 /**
@@ -259,7 +256,7 @@ function search_get_info($all = FALSE) {
  */
 function search_get_default_module_info() {
   $info = search_get_info();
-  $default = variable_get('search_default_module', 'node');
+  $default = config_get('search.settings', 'search_default_module');
   if (isset($info[$default])) {
     return $info[$default];
   }
@@ -337,7 +334,7 @@ function search_cron() {
   // to date.
   backdrop_register_shutdown_function('search_update_totals');
 
-  foreach (variable_get('search_active_modules', array('node', 'user')) as $module) {
+  foreach (config_get('search.settings', 'search_active_modules') as $module) {
     // Update word index
     module_invoke($module, 'update_index');
   }
@@ -398,7 +395,7 @@ function search_simplify($text) {
   search_invoke_preprocess($text);
 
   // Simple CJK handling
-  if (variable_get('overlap_cjk', TRUE)) {
+  if (config_get('search.settings', 'search_overlap_cjk')) {
     $text = preg_replace_callback('/[' . PREG_CLASS_CJK . ']+/u', 'search_expand_cjk', $text);
   }
 
@@ -452,7 +449,7 @@ function search_simplify($text) {
  *   Tokenized text, starting and ending with a space character.
  */
 function search_expand_cjk($matches) {
-  $min = variable_get('minimum_word_size', 3);
+  $min = config_get('search.settings', 'search_minimum_word_size');
   $str = $matches[0];
   $length = backdrop_strlen($str);
   // If the text is shorter than the minimum word size, don't tokenize it.
@@ -531,7 +528,7 @@ function search_invoke_preprocess(&$text) {
  * @ingroup search
  */
 function search_index($sid, $module, $text) {
-  $minimum_word_size = variable_get('minimum_word_size', 3);
+  $minimum_word_size = config_get('search.settings', 'search_minimum_word_size');
 
   // Link matching
   global $base_url;
@@ -540,19 +537,7 @@ function search_index($sid, $module, $text) {
   // Multipliers for scores of words inside certain HTML tags. The weights are stored
   // in a variable so that modules can overwrite the default weights.
   // Note: 'a' must be included for link ranking to work.
-  $tags = variable_get('search_tag_weights', array(
-    'h1' => 25,
-    'h2' => 18,
-    'h3' => 15,
-    'h4' => 12,
-    'h5' => 9,
-    'h6' => 6,
-    'u' => 3,
-    'b' => 3,
-    'i' => 3,
-    'strong' => 3,
-    'em' => 3,
-    'a' => 10));
+  $tags = config_get('search.settings', 'search_tag_weights');
 
   // Strip off all ignored tags to speed up processing, but insert space before/after
   // them to keep word boundaries.
@@ -963,7 +948,7 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   $form['module'] = array('#type' => 'value', '#value' => $module);
   $form['basic'] = array('#type' => 'container', '#attributes' => array('class' => array('container-inline')));
   $form['basic']['keys'] = array(
-    '#type' => 'textfield',
+    '#type' => 'search',
     '#title' => $prompt,
     '#default_value' => $keys,
     '#size' => $prompt ? 40 : 20,
@@ -985,7 +970,7 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
  */
 function search_box($form, &$form_state, $form_id) {
   $form[$form_id] = array(
-    '#type' => 'textfield',
+    '#type' => 'search',
     '#title' => t('Search'),
     '#title_display' => 'invisible',
     '#size' => 15,
@@ -1318,4 +1303,15 @@ function search_autoload_info() {
     'views_handler_sort_search_score' => 'views/views_handler_sort_search_score.inc',
     'views_plugin_row_search_view' => 'views/views_plugin_row_search_view.inc',
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function search_config_info() {
+  $prefixes['search.settings'] = array(
+    'label' => t('Search settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }

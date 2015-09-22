@@ -1,77 +1,71 @@
 <?php
-
 /**
  * @file
  * Handles updates of Backdrop core and contributed projects.
  *
  * The module checks for available updates of Backdrop core and any installed
- * contributed modules and themes. It warns site administrators if newer
+ * contributed modules, themes, and layouts. It warns site administrators if newer
  * releases are available via the system status report (admin/reports/status),
- * the module and theme pages, and optionally via e-mail. It also provides the
- * ability to install contributed modules and themes via an user interface.
+ * the module, theme and layout pages, and optionally via e-mail. It also provides the
+ * ability to install contributed modules, themes, and layouts via an user interface.
  */
 
 /**
  * URL to check for updates, if a given project doesn't define its own.
  */
-const UPDATE_DEFAULT_URL = 'http://updates.drupal.org/release-history';
+define('UPDATE_DEFAULT_URL', 'https://updates.backdropcms.org/release-history');
 
 // These are internally used constants for this code, do not modify.
 
 /**
  * Project is missing security update(s).
  */
-const UPDATE_NOT_SECURE = 1;
+define('UPDATE_NOT_SECURE', 1);
 
 /**
  * Current release has been unpublished and is no longer available.
  */
-const UPDATE_REVOKED = 2;
+define('UPDATE_REVOKED', 2);
 
 /**
  * Current release is no longer supported by the project maintainer.
  */
-const UPDATE_NOT_SUPPORTED = 3;
+define('UPDATE_NOT_SUPPORTED', 3);
 
 /**
  * Project has a new release available, but it is not a security release.
  */
-const UPDATE_NOT_CURRENT = 4;
+define('UPDATE_NOT_CURRENT', 4);
 
 /**
  * Project is up to date.
  */
-const UPDATE_CURRENT = 5;
+define('UPDATE_CURRENT', 5);
 
 /**
  * Project's status cannot be checked.
  */
-const UPDATE_NOT_CHECKED = -1;
+define('UPDATE_NOT_CHECKED', -1);
 
 /**
  * No available update data was found for project.
  */
-const UPDATE_UNKNOWN = -2;
+define('UPDATE_UNKNOWN', -2);
 
 /**
  * There was a failure fetching available update data for this project.
  */
-const UPDATE_NOT_FETCHED = -3;
+define('UPDATE_NOT_FETCHED', -3);
 
 /**
  * We need to (re)fetch available update data for this project.
  */
-const UPDATE_FETCH_PENDING = -4;
+define('UPDATE_FETCH_PENDING', -4);
 
 /**
- * Maximum number of attempts to fetch available update data from a given host.
+ * The update server is a placeholder server that has not yet been implemented.
  */
-const UPDATE_MAX_FETCH_ATTEMPTS = 2;
-
-/**
- * Maximum number of seconds to try fetching available update data at a time.
- */
-const UPDATE_MAX_FETCH_TIME = 5;
+define('UPDATE_NOT_IMPLEMENTED', -5);
 
 /**
  * Implements hook_init().
@@ -96,6 +90,7 @@ function update_init() {
       // of the update status.
       case 'admin/appearance':
       case 'admin/modules':
+      case 'admin/structure/layouts':
         $verbose = TRUE;
         break;
 
@@ -135,7 +130,7 @@ function update_menu() {
 
   $items['admin/reports/updates'] = array(
     'title' => 'Available updates',
-    'description' => 'Get a status report about available updates for your installed modules and themes.',
+    'description' => 'Get a status report about available updates for your installed modules, themes, and layouts.',
     'page callback' => 'update_status',
     'access arguments' => array('administer site configuration'),
     'weight' => -50,
@@ -151,7 +146,7 @@ function update_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('update_settings'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'update.settings.inc',
+    'file' => 'update.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 50,
   );
@@ -164,7 +159,7 @@ function update_menu() {
   );
 
   // We want action links for updating projects at a few different locations:
-  // both the module and theme administration pages, and on the available
+  // on the module, theme and layout administration pages, and on the available
   // updates report itself. The menu items will be mostly identical, except the
   // paths and titles, so we just define them in a loop. We pass in a string
   // indicating what context we're entering the action from, so that can
@@ -173,6 +168,7 @@ function update_menu() {
     'report' => 'admin/reports/updates',
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
+    'layout' => 'admin/structure/layouts',
   );
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
@@ -197,9 +193,10 @@ function update_menu() {
   }
   // Customize the titles of the action links depending on where they appear.
   // We use += array() to let the translation extractor find these menu titles.
-  $items['admin/reports/updates/install'] += array('title' => 'Install new module or theme');
-  $items['admin/modules/install'] += array('title' => 'Install new module');
-  $items['admin/appearance/install'] += array('title' => 'Install new theme');
+  $items['admin/reports/updates/install'] += array('title' => 'Install module, theme or layout');
+  $items['admin/modules/install'] += array('title' => 'Install module');
+  $items['admin/appearance/install'] += array('title' => 'Install theme');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install layout');
 
   // Menu callback used for the confirmation page after all the releases
   // have been downloaded, asking you to backup before installing updates.
@@ -229,30 +226,33 @@ function update_menu() {
  * @see update_menu()
  */
 function update_manager_access() {
-  return variable_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
+  return settings_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
 }
 
 /**
  * Implements hook_theme().
  */
 function update_theme() {
+  $base = array(
+    'file' => 'update.theme.inc',
+  );
+
   return array(
     'update_manager_update_form' => array(
       'render element' => 'form',
-      'file' => 'update.manager.inc',
-    ),
+    ) + $base,
     'update_last_check' => array(
       'variables' => array('last' => NULL),
-    ),
+    ) + $base,
     'update_report' => array(
       'variables' => array('data' => NULL),
-    ),
+    ) + $base,
     'update_version' => array(
       'variables' => array('version' => NULL, 'tag' => NULL, 'class' => array()),
-    ),
+    ) + $base,
     'update_status_label' => array(
       'variables' => array('status' => NULL),
-    ),
+    ) + $base,
   );
 }
 
@@ -260,9 +260,9 @@ function update_theme() {
  * Implements hook_cron().
  */
 function update_cron() {
-  $frequency = variable_get('update_check_frequency', 1);
+  $frequency = config_get('update.settings', 'update_interval_days');
   $interval = 60 * 60 * 24 * $frequency;
-  if ((REQUEST_TIME - variable_get('update_last_check', 0)) > $interval) {
+  if ((REQUEST_TIME - state_get('update_last_check', 0)) > $interval) {
     // If the configured update interval has elapsed, we want to invalidate
     // the cached data for all projects, attempt to re-fetch, and trigger any
     // configured notifications about the new status.
@@ -274,7 +274,7 @@ function update_cron() {
     // missing data, and if so, try to fetch the data.
     update_get_available(TRUE);
   }
-  if ((REQUEST_TIME - variable_get('update_last_email_notification', 0)) > $interval) {
+  if ((REQUEST_TIME - state_get('update_last_email_notification', 0)) > $interval) {
     // If configured time between notifications elapsed, send email about
     // updates possibly available.
     module_load_include('inc', 'update', 'update.fetch');
@@ -365,8 +365,6 @@ function update_get_available($refresh = FALSE) {
 
   // Grab whatever data we currently have cached in the DB.
   $available = _update_get_cached_available_releases();
-  $num_avail = count($available);
-
   $projects = update_get_projects();
   foreach ($projects as $key => $project) {
     // If there's no data at all, we clearly need to fetch some.
@@ -489,7 +487,7 @@ function _update_get_cached_available_releases() {
 function update_mail($key, &$message, $params) {
   $language = $message['language'];
   $langcode = $language->langcode;
-  $message['subject'] .= t('New release(s) available for !site_name', array('!site_name' => variable_get('site_name', 'Backdrop')), array('langcode' => $langcode));
+  $message['subject'] .= t('New release(s) available for !site_name', array('!site_name' => config_get('system.core', 'site_name')), array('langcode' => $langcode));
   foreach ($params as $msg_type => $msg_reason) {
     $message['body'][] = _update_message_text($msg_type, $msg_reason, FALSE, $language);
   }
@@ -498,7 +496,7 @@ function update_mail($key, &$message, $params) {
     $message['body'][] = t('You can automatically install your missing updates using the Update manager:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates/update', array('absolute' => TRUE, 'language' => $language));
   }
   $settings_url = url('admin/reports/updates/settings', array('absolute' => TRUE));
-  if (variable_get('update_notification_threshold', 'all') == 'all') {
+  if (config_get('update.settings', 'update_threshold') == 'all') {
     $message['body'][] = t('Your site is currently configured to send these emails when any updates are available. To get notified only for security updates, !url.', array('!url' => $settings_url));
   }
   else {
@@ -578,6 +576,10 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
         $text = t('There was a problem checking <a href="@update-report">available updates</a> for your modules or themes.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
       }
       break;
+    case UPDATE_NOT_IMPLEMENTED:
+      $report_link = FALSE;
+      $text = t('The update server has not yet been implemented, so no update statuses could be retrieved. Until the update server becomes active, please check for updates manually.');
+      break;
   }
 
   if ($report_link) {
@@ -605,30 +607,6 @@ function _update_project_status_sort($a, $b) {
   $a_status = $a['status'] > 0 ? $a['status'] : (-10 * $a['status']);
   $b_status = $b['status'] > 0 ? $b['status'] : (-10 * $b['status']);
   return $a_status - $b_status;
-}
-
-/**
- * Returns HTML for the last time we checked for update data.
- *
- * In addition to properly formatting the given timestamp, this function also
- * provides a "Check manually" link that refreshes the available update and
- * redirects back to the same page.
- *
- * @param $variables
- *   An associative array containing:
- *   - last: The timestamp when the site last checked for available updates.
- *
- * @see theme_update_report()
- * @see theme_update_available_updates_form()
- * @ingroup themeable
- */
-function theme_update_last_check($variables) {
-  $last = $variables['last'];
-  $output = '<div class="update checked">';
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never');
-  $output .= ' <span class="check-manually">(' . l(t('Check manually'), 'admin/reports/updates/check', array('query' => backdrop_get_destination())) . ')</span>';
-  $output .= "</div>\n";
-  return $output;
 }
 
 /**
@@ -669,10 +647,10 @@ function update_verify_update_archive($project, $archive_file, $directory) {
   $incompatible = array();
   $files = file_scan_directory("$directory/$project", '/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', array('key' => 'name', 'min_depth' => 0));
   foreach ($files as $key => $file) {
-    // Get the .info file for the module or theme this file belongs to.
+    // Get the .info file for the module, theme or layout this file belongs to.
     $info = backdrop_parse_info_file($file->uri);
 
-    // If the module or theme is incompatible with Backdrop core, set an error.
+    // If the module, theme or layout is incompatible with Backdrop core, set an error.
     if (empty($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
       $incompatible[] = !empty($info['name']) ? $info['name'] : t('Unknown');
     }
@@ -895,6 +873,28 @@ function _update_manager_extract_directory($create = TRUE) {
 }
 
 /**
+ * Returns the type of package, either module, theme, or layout. Scans for an
+ * '.info' file and reads its 'type' key and returns it.
+ *
+ * @param $directory_path
+ *   The full path to the package directory
+ *
+ * @return
+ *   The type of package, either module, theme, or layout.
+ */
+function update_get_package_type($directory_path) {
+  if ($contents = file_scan_directory($directory_path, '/.*\.info$/')) {
+    foreach ($contents as $match) {
+      if (substr($match->filename, -5) == '.info') {
+        $info = backdrop_parse_info_file($match->uri);
+        return isset($info['type']) ? $info['type'] : FALSE;
+      }
+    }
+    return FALSE;
+  }
+}
+
+/**
  * Returns the directory where update archive files should be cached.
  *
  * @param $create
@@ -958,4 +958,15 @@ function update_delete_file_if_stale($path) {
       file_unmanaged_delete_recursive($path);
     }
   }
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function update_config_info() {
+  $prefixes['update.settings'] = array(
+    'label' => t('Update settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }

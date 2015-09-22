@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Describe hooks provided by the Views module.
@@ -651,7 +650,7 @@ function hook_views_api() {
   return array(
     'api' => 3,
     'path' => backdrop_get_path('module', 'example') . '/includes/views',
-    'template path' => backdrop_get_path('module', 'example') . '/themes',
+    'template path' => backdrop_get_path('module', 'example') . '/templates',
   );
 }
 
@@ -672,7 +671,7 @@ function hook_views_query_substitutions($view) {
     '***CURRENT_VERSION***' => BACKDROP_VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
     '***CURRENT_LANGUAGE***' => $language_content->langcode,
-    '***DEFAULT_LANGUAGE***' => language_default('language')->langcode,
+    '***DEFAULT_LANGUAGE***' => language_default()->langcode,
   );
 }
 

@@ -43,13 +43,6 @@ require_once __DIR__ . '/query.inc';
  *       'float', 'numeric', or 'serial'. Most types just map to the according
  *       database engine specific datatypes. Use 'serial' for auto incrementing
  *       fields. This will expand to 'INT auto_increment' on MySQL.
- *     - 'mysql_type', 'pgsql_type', 'sqlite_type', etc.: If you need to
- *       use a record type not included in the officially supported list
- *       of types above, you can specify a type for each database
- *       backend. In this case, you can leave out the type parameter,
- *       but be advised that your schema will fail to load on backends that
- *       do not have a type specified. A possible solution can be to
- *       use the "text" type as a fallback.
  *     - 'serialize': A boolean indicating whether the field will be stored as
  *       a serialized string.
  *     - 'size': The data size: 'tiny', 'small', 'medium', 'normal',
@@ -605,12 +598,6 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   array('primary key' => array('bar')));
    * @endcode
    *
-   * The reasons for this are due to the different database engines:
-   *
-   * On PostgreSQL, changing a field definition involves adding a new field
-   * and dropping an old one which* causes any indices, primary keys and
-   * sequences (from serial-type fields) that use the changed field to be dropped.
-   *
    * On MySQL, all type 'serial' fields must be part of at least one key
    * or index as soon as they are created. You cannot use
    * db_add_{primary_key,unique_key,index}() for this purpose because
@@ -656,7 +643,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    */
   public function createTable($name, $table) {
     if ($this->tableExists($name)) {
-      throw new DatabaseSchemaObjectExistsException(t('Table %name already exists.', array('%name' => $name)));
+      throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $name)));
     }
     $statements = $this->createTableSql($name, $table);
     foreach ($statements as $statement) {

@@ -1,6 +1,7 @@
 name = Testing
 description = Provides a framework for unit and functional testing.
-package = Core
+package = Development
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 configure = admin/config/development/testing/settings

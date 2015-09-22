@@ -276,12 +276,15 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = explode(' ', $this->options['element_class']);
-    foreach ($classes as &$class) {
-      $class = $this->tokenize_value($class, $row_index);
-      $class = backdrop_clean_css_identifier($class);
+    if ($this->options['element_class']) {
+      $classes = explode(' ', $this->options['element_class']);
+      foreach ($classes as &$class) {
+        $class = $this->tokenize_value($class, $row_index);
+        $class = backdrop_clean_css_identifier($class);
+      }
+      return implode(' ', $classes);
     }
-    return implode(' ', $classes);
+    return '';
   }
 
   /**
@@ -1241,7 +1244,12 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     if (!empty($alter['make_link']) && !empty($alter['path'])) {
       if (!isset($tokens)) {
-       $tokens = $this->get_render_tokens($alter);
+        if (strpos($value, '[') !== FALSE) {
+          $tokens = $this->get_render_tokens($alter);
+        }
+        else {
+          $tokens = array();
+        }
       }
       $value = $this->render_as_link($alter, $value, $tokens);
     }
@@ -1574,16 +1582,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     $display = $this->view->display[$this->view->current_display];
 
     if (!empty($display)) {
-      $themes[] = $hook . '__' . $this->view->name  . '__' . $display->id . '__' . $this->options['id'];
-      $themes[] = $hook . '__' . $this->view->name  . '__' . $display->id;
-      $themes[] = $hook . '__' . $display->id . '__' . $this->options['id'];
-      $themes[] = $hook . '__' . $display->id;
-      if ($display->id != $display->display_plugin) {
-        $themes[] = $hook . '__' . $this->view->name  . '__' . $display->display_plugin . '__' . $this->options['id'];
-        $themes[] = $hook . '__' . $this->view->name  . '__' . $display->display_plugin;
-        $themes[] = $hook . '__' . $display->display_plugin . '__' . $this->options['id'];
-        $themes[] = $hook . '__' . $display->display_plugin;
-      }
+      $themes[] = $hook . '__' . $this->view->name  . '__' . $display->display_plugin . '__' . $this->options['id'];
     }
     $themes[] = $hook . '__' . $this->view->name . '__' . $this->options['id'];
     $themes[] = $hook . '__' . $this->view->name;

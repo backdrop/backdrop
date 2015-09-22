@@ -3,143 +3,19 @@
  * Stark layout method
  *
  * To avoid obscuring CSS added to the page by Backdrop or a contrib module, the
- * Stark theme itself has no styling, except just enough CSS to arrange the page
- * in a traditional "Header, sidebars, content, and footer" layout.
- *
- * This layout method works reasonably well, but shouldn't be used on a
- * production site because it can break. For example, if an over-large image
- * (one that is wider than 20% of the viewport) is in the left sidebar, the
- * image will overlap with the .l-content to the right.
+ * Stark theme itself has no styling, except just enough CSS to display the page
+ * in a readable manner.
  */
-
-main:after {
-  content: "";
-  display: table;
-  clear: both;
+body {
+  margin: 10px;
+}
+body > .layout {
+  max-width: 940px;
+  margin: 0 auto;
 }
 
-.l-content,
-.l-sidebar-first,
-.l-sidebar-second {
-  display: inline;
-  position: relative;
-}
-
-.l-content {
+table {
   width: 100%;
-}
-
-
-@media all and (min-width: 480px) and (max-width: 959px) {
-  .l-content {
-    width: 100%;
-  }
-  .sidebar-first .l-content,
-  .two-sidebars .l-content {
-    width: 67%;
-    float: right; /* LTR */
-  }
-  [dir="rtl"] .sidebar-first .l-content,
-  [dir="rtl"] .two-sidebars .l-content {
-    float: left;
-  }
-  .sidebar-second .l-content {
-    width: 67%;
-    float: left; /* LTR */
-  }
-  [dir="rtl"] .sidebar-second .l-content {
-    float: right;
-  }
-
-  .l-sidebar-first {
-    width: 33%;
-    float: left; /* LTR */
-  }
-  [dir="rtl"] .l-sidebar-first {
-    float: right;
-  }
-
-  .l-sidebar-second {
-    width: 33%;
-    float: right; /* LTR */
-  }
-  [dir="rtl"] .l-sidebar-second {
-    float: left;
-  }
-  .two-sidebars .l-sidebar-second {
-    clear: both;
-    width: 100%;
-  }
-  [dir="rtl"] .two-sidebars .l-sidebar-second {
-    float: right;
-    clear: right;
-  }
-
-  .two-sidebars .l-sidebar-second .block {
-    float: left; /* LTR */
-    width: 33%;
-  }
-  [dir="rtl"] .two-sidebars .l-sidebar-second .block {
-    float: right;
-  }
-  .two-sidebars .l-sidebar-second .block:nth-child(3n+1) {
-    clear: both;
-  }
-}
-
-@media all and (min-width: 960px) {
-  .l-content {
-    width: 100%;
-    float: left; /* LTR */
-  }
-  [dir="rtl"] .l-content {
-    float: right;
-  }
-  .sidebar-first .l-content {
-    width: 80%;
-    left: 20%; /* LTR */
-  }
-  [dir="rtl"] .sidebar-first .l-content {
-    left: 0;
-    right: 20%;
-  }
-  .sidebar-second .l-content {
-    width: 80%;
-  }
-  .two-sidebars .l-content {
-    width: 60%;
-    left: 20%; /* LTR */
-  }
-  [dir="rtl"] .two-sidebars .l-content {
-    left: 0;
-    right: 20%;
-  }
-
-  .l-sidebar-first {
-    width: 20%;
-    float: left; /* LTR */
-    left: -80%; /* LTR */
-  }
-  [dir="rtl"] .l-sidebar-first {
-    float: right;
-    left: 0;
-    right: -80%;
-  }
-  .two-sidebars .l-sidebar-first {
-    left: -60%; /* LTR */
-  }
-    [dir="rtl"] .two-sidebars .l-sidebar-first {
-    left: 0;
-    right: -60%;
-  }
-
-  .l-sidebar-second {
-    float: right; /* LTR */
-    width: 20%;
-  }
-  [dir="rtl"] .l-sidebar-second {
-    float: left;
-  }
 }
 
 /**

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides testing functionality.
@@ -57,16 +56,29 @@ function simpletest_permission() {
  * Implements hook_theme().
  */
 function simpletest_theme() {
+  $base = array(
+    'file' => 'simpletest.theme.inc',
+  );
+
   return array(
     'simpletest_test_table' => array(
       'render element' => 'table',
-      'file' => 'simpletest.pages.inc',
-    ),
+    ) + $base,
     'simpletest_result_summary' => array(
       'render element' => 'form',
-      'file' => 'simpletest.pages.inc',
-    ),
+    ) + $base,
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function simpletest_config_info() {
+  $prefixes['simpletest.settings'] = array(
+    'label' => t('Testing settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -86,7 +98,7 @@ function simpletest_autoload_info() {
 function simpletest_js_alter(&$javascript) {
   // Since SimpleTest is a special use case for the table select, stick the
   // SimpleTest JavaScript above the table select.
-  $simpletest = backdrop_get_path('module', 'simpletest') . '/simpletest.js';
+  $simpletest = backdrop_get_path('module', 'simpletest') . '/js/simpletest.js';
   if (array_key_exists($simpletest, $javascript) && array_key_exists('core/misc/tableselect.js', $javascript)) {
     $javascript[$simpletest]['weight'] = $javascript['core/misc/tableselect.js']['weight'] - 1;
   }
@@ -135,7 +147,7 @@ function simpletest_run_tests($test_list, $reporter = 'backdrop') {
     ),
     'finished' => '_simpletest_batch_finished',
     'progress_message' => '',
-    'css' => array(backdrop_get_path('module', 'simpletest') . '/simpletest.css'),
+    'css' => array(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css'),
     'init_message' => t('Processing test @num of @max - %test.', array('%test' => $info['name'], '@num' => '1', '@max' => count($test_list))),
   );
   batch_set($batch);
@@ -415,7 +427,7 @@ function simpletest_generate_file($filename, $width, $lines, $type = 'binary-tex
 function simpletest_clean_environment() {
   simpletest_clean_database();
   simpletest_clean_temporary_directories();
-  if (variable_get('simpletest_clear_results', TRUE)) {
+  if (config_get('simpletest.settings', 'simpletest_clear_results')) {
     $count = simpletest_clean_results_table();
     backdrop_set_message(format_plural($count, 'Removed 1 test result.', 'Removed @count test results.'));
   }
@@ -484,7 +496,7 @@ function simpletest_clean_temporary_directories() {
  *   The number of results removed.
  */
 function simpletest_clean_results_table($test_id = NULL) {
-  if (variable_get('simpletest_clear_results', TRUE)) {
+  if (config_get('simpletest.settings', 'simpletest_clear_results')) {
     if ($test_id) {
       $count = db_query('SELECT COUNT(test_id) FROM {simpletest_prefix} WHERE test_id = :test_id', array(':test_id' => $test_id))->fetchField();
 

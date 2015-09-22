@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Allows users to create and organize related content in an outline.
@@ -9,29 +8,25 @@
  * Implements hook_theme().
  */
 function book_theme() {
+  $base = array(
+    'file' => 'book.theme.inc',
+  );
+
   return array(
     'book_navigation' => array(
       'variables' => array('book_link' => NULL),
-      'template' => 'book-navigation',
-    ),
-    'book_export_html' => array(
-      'variables' => array('title' => NULL, 'contents' => NULL, 'depth' => NULL),
-      'template' => 'book-export-html',
-    ),
+      'template' => 'templates/book-navigation',
+    ) + $base,
     'book_admin_table' => array(
       'render element' => 'form',
-    ),
+    ) + $base,
     'book_title_link' => array(
       'variables' => array('link' => NULL),
-    ),
+    ) + $base,
     'book_all_books_block' => array(
       'render element' => 'book_menus',
-      'template' => 'book-all-books-block',
-    ),
-    'book_node_export_html' => array(
-      'variables' => array('node' => NULL, 'children' => NULL),
-      'template' => 'book-node-export-html',
-    ),
+      'template' => 'templates/book-all-books-block',
+    ) + $base,
   );
 }
 
@@ -49,11 +44,18 @@ function book_permission() {
     'add content to books' => array(
       'title' => t('Add content and child pages to books'),
     ),
-    'access printer-friendly version' => array(
-      'title' => t('View printer-friendly books'),
-      'description' => t('View a book page and all of its sub-pages as a single document for ease of printing. Can be performance heavy.'),
-    ),
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function book_config_info() {
+  $prefixes['book.settings'] = array(
+    'label' => t('Book settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -88,20 +90,12 @@ function book_node_view_link(Node $node, $view_mode) {
 
   if (isset($node->book['depth'])) {
     if ($view_mode == 'full' && node_is_page($node)) {
-      $child_type = variable_get('book_child_type', 'book');
+      $child_type = config_get('book.settings', 'book_child_type');
       if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH) {
         $links['book_add_child'] = array(
           'title' => t('Add child page'),
           'href' => 'node/add/' . str_replace('_', '-', $child_type),
           'query' => array('parent' => $node->book['mlid']),
-        );
-      }
-
-      if (user_access('access printer-friendly version')) {
-        $links['book_printer'] = array(
-          'title' => t('Printer-friendly version'),
-          'href' => 'book/export/html/' . $node->nid,
-          'attributes' => array('title' => t('Show a printer-friendly version of this book page and its sub-pages.'))
         );
       }
     }
@@ -155,13 +149,6 @@ function book_menu() {
     'page callback' => 'book_render',
     'access arguments' => array('access content'),
     'type' => MENU_SUGGESTED_ITEM,
-    'file' => 'book.pages.inc',
-  );
-  $items['book/export/%/%'] = array(
-    'page callback' => 'book_export',
-    'page arguments' => array(2, 3),
-    'access arguments' => array('access printer-friendly version'),
-    'type' => MENU_CALLBACK,
     'file' => 'book.pages.inc',
   );
   $items['node/%node/outline'] = array(
@@ -231,7 +218,7 @@ function _book_node_is_removable($node) {
  * Implements hook_admin_paths().
  */
 function book_admin_paths() {
-  if (variable_get('node_admin_theme')) {
+  if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
       'node/*/outline' => TRUE,
       'node/*/outline/remove' => TRUE,
@@ -257,11 +244,13 @@ function book_entity_info_alter(&$info) {
  * Implements hook_block_info().
  */
 function book_block_info() {
-  $block = array();
-  $block['navigation']['info'] = t('Book navigation');
-  $block['navigation']['cache'] = BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE;
+  $blocks['navigation'] = array(
+    'info' => t('Book navigation'),
+    'description' => t('Shows the table of contents expanded to the current page if viewing book content.'),
+    'cache' =>  BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE,
+  );
 
-  return $block;
+  return $blocks;
 }
 
 /**
@@ -270,14 +259,14 @@ function book_block_info() {
  * Displays the book table of contents in a block when the current page is a
  * single-node view of a book node.
  */
-function book_block_view($delta = '') {
+function book_block_view($delta = '', $settings = array()) {
   $block = array();
   $current_bid = 0;
   if ($node = menu_get_object()) {
     $current_bid = empty($node->book['bid']) ? 0 : $node->book['bid'];
   }
 
-  if (variable_get('book_block_mode', 'all pages') == 'all pages') {
+  if ($settings['book_mode'] == 'all pages') {
     $block['subject'] = t('Book navigation');
     $book_menus = array();
     $pseudo_tree = array(0 => array('below' => FALSE));
@@ -325,29 +314,23 @@ function book_block_view($delta = '') {
 /**
  * Implements hook_block_configure().
  */
-function book_block_configure($delta = '') {
-  $block = array();
+function book_block_configure($delta = '', $settings = array()) {
+  $settings += array(
+    'book_mode' => 'all pages',
+  );
   $options = array(
     'all pages' => t('Show block on all pages'),
     'book pages' => t('Show block only on book pages'),
   );
-  $form['book_block_mode'] = array(
+  $form['book_mode'] = array(
     '#type' => 'radios',
     '#title' => t('Book navigation block display'),
     '#options' => $options,
-    '#default_value' => variable_get('book_block_mode', 'all pages'),
+    '#default_value' => $settings['book_mode'],
     '#description' => t("If <em>Show block on all pages</em> is selected, the block will contain the automatically generated menus for all of the site's books. If <em>Show block only on book pages</em> is selected, the block will contain only the one menu corresponding to the current page's book. In this case, if the current page is not in a book, no block will be displayed. The <em>Page specific visibility settings</em> or other visibility settings can be used in addition to selectively display this block."),
-    );
+  );
 
   return $form;
-}
-
-/**
- * Implements hook_block_save().
- */
-function book_block_save($delta = '', $edit = array()) {
-  $block = array();
-  variable_set('book_block_mode', $edit['book_block_mode']);
 }
 
 /**
@@ -419,7 +402,7 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
       '#submit' => array('book_pick_book_nojs_submit'),
       '#weight' => 20,
       '#attached' => array(
-        'css' => array(backdrop_get_path('module', 'book') . '/book.admin.css'),
+        'css' => array(backdrop_get_path('module', 'book') . '/css/book.admin.css'),
       ),
     );
   }
@@ -456,9 +439,6 @@ function book_pick_book_nojs_submit($form, &$form_state) {
  *   A parent selection form element.
  */
 function _book_parent_select($book_link) {
-  if (variable_get('menu_override_parent_selector', FALSE)) {
-    return array();
-  }
   // Offer a message or a drop-down to choose a different parent page.
   $form = array(
     '#type' => 'hidden',
@@ -519,7 +499,7 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
       'class' => array('book-outline-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'book') . '/book.js'),
+      'js' => array(backdrop_get_path('module', 'book') . '/js/book.js'),
     ),
     '#tree' => TRUE,
   );
@@ -887,12 +867,12 @@ function book_node_view(Node $node, $view_mode) {
 }
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_init().
  *
  * Adds the book menu to the list of menus used to build the active trail when
  * viewing a book page.
  */
-function book_page_alter(&$page) {
+function book_init() {
   if (($node = menu_get_object()) && !empty($node->book['bid'])) {
     $active_menus = menu_get_active_menu_names();
     $active_menus[] = $node->book['menu_name'];
@@ -1048,89 +1028,8 @@ function _book_link_defaults($nid) {
  * Implements hook_preprocess_block().
  */
 function book_preprocess_block(&$variables) {
-  if ($variables['block']-> module == 'book') {
-    $variables['attributes_array']['role'] = 'navigation';
-  }
-}
-
-/**
- * Processes variables for book-all-books-block.tpl.php.
- *
- * All non-renderable elements are removed so that the template has full access
- * to the structured data but can also simply iterate over all elements and
- * render them (as in the default template).
- *
- * @param $variables
- *   An associative array containing the following key:
- *   - book_menus
- *
- * @see book-all-books-block.tpl.php
- */
-function template_preprocess_book_all_books_block(&$variables) {
-  // Remove all non-renderable elements.
-  $elements = $variables['book_menus'];
-  $variables['book_menus'] = array();
-  foreach (element_children($elements) as $index) {
-    $variables['book_menus'][$index] = $elements[$index];
-  }
-}
-
-/**
- * Processes variables for book-navigation.tpl.php.
- *
- * @param $variables
- *   An associative array containing the following key:
- *   - book_link
- *
- * @see book-navigation.tpl.php
- */
-function template_preprocess_book_navigation(&$variables) {
-  $book_link = $variables['book_link'];
-
-  // Provide extra variables for themers. Not needed by default.
-  $variables['book_id'] = $book_link['bid'];
-  $variables['book_title'] = check_plain($book_link['link_title']);
-  $variables['book_url'] = 'node/' . $book_link['bid'];
-  $variables['current_depth'] = $book_link['depth'];
-  $variables['tree'] = '';
-
-  if ($book_link['mlid']) {
-    $variables['tree'] = book_children($book_link);
-
-    if ($prev = book_prev($book_link)) {
-      $prev_href = url($prev['href']);
-      backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
-      $variables['prev_url'] = $prev_href;
-      $variables['prev_title'] = check_plain($prev['title']);
-    }
-
-    if ($book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
-      $parent_href = url($parent['href']);
-      backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
-      $variables['parent_url'] = $parent_href;
-      $variables['parent_title'] = check_plain($parent['title']);
-    }
-
-    if ($next = book_next($book_link)) {
-      $next_href = url($next['href']);
-      backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
-      $variables['next_url'] = $next_href;
-      $variables['next_title'] = check_plain($next['title']);
-    }
-  }
-
-  $variables['has_links'] = FALSE;
-  // Link variables to filter for values and set state of the flag variable.
-  $links = array('prev_url', 'prev_title', 'parent_url', 'parent_title', 'next_url', 'next_title');
-  foreach ($links as $link) {
-    if (isset($variables[$link])) {
-      // Flag when there is a value.
-      $variables['has_links'] = TRUE;
-    }
-    else {
-      // Set empty to prevent notices.
-      $variables[$link] = '';
-    }
+  if ($variables['block']->module == 'book') {
+    $variables['attributes']['role'] = 'navigation';
   }
 }
 
@@ -1197,119 +1096,6 @@ function book_toc($bid, $depth_limit, $exclude = array()) {
 }
 
 /**
- * Preprocesses variables for book-export-html.tpl.php.
- *
- * @param $variables
- *   An associative array containing the following keys:
- *   - title
- *   - contents
- *   - depth
- *
- * @see book-export-html.tpl.php
- */
-function template_preprocess_book_export_html(&$variables) {
-  global $base_url, $language_interface;
-
-  $variables['title'] = check_plain($variables['title']);
-  $variables['base_url'] = $base_url;
-  $variables['language'] = $language_interface;
-  $variables['language_rtl'] = ($language_interface->direction == LANGUAGE_RTL);
-  $variables['head'] = backdrop_get_html_head();
-
-  // HTML element attributes.
-  $variables['html_attributes_array']['lang'] = $language_interface->langcode;
-  $variables['html_attributes_array']['dir'] = $language_interface->direction ? 'rtl' : 'ltr';
-}
-
-/**
- * Processes variables for book-export-html.tpl.php.
- *
- * @see book-export-html.tpl.php
- */
-function template_process_book_export_html(&$variables) {
-  // Flatten out html_attributes
-  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
-}
-
-/**
- * Traverses the book tree to build printable or exportable output.
- *
- * During the traversal, the $visit_func() callback is applied to each node and
- * is called recursively for each child of the node (in weight, title order).
- *
- * @param $tree
- *   A subtree of the book menu hierarchy, rooted at the current page.
- * @param $visit_func
- *   A function callback to be called upon visiting a node in the tree.
- *
- * @return
- *   The output generated in visiting each node.
- */
-function book_export_traverse($tree, $visit_func) {
-  $output = '';
-
-  foreach ($tree as $data) {
-    // Note- access checking is already performed when building the tree.
-    if ($node = node_load($data['link']['nid'], FALSE)) {
-      $children = '';
-
-      if ($data['below']) {
-        $children = book_export_traverse($data['below'], $visit_func);
-      }
-
-      if (!empty($visit_func)) {
-        $output .= call_user_func($visit_func, $node, $children);
-      }
-      else {
-        // Use the default function.
-        $output .= book_node_export($node, $children);
-      }
-    }
-  }
-
-  return $output;
-}
-
-/**
- * Generates printer-friendly HTML for a node.
- *
- * @param Node $node
- *   The node that will be output.
- * @param $children
- *   (optional) All the rendered child nodes within the current node. Defaults
- *   to an empty string.
- *
- * @return
- *   The HTML generated for the given node.
- *
- * @see book_export_traverse()
- */
-function book_node_export(Node $node, $children = '') {
-  $build = node_view($node, 'print');
-  unset($build['#theme']);
-  // @todo Rendering should happen in the template using render().
-  $node->rendered = backdrop_render($build);
-
-  return theme('book_node_export_html', array('node' => $node, 'children' => $children));
-}
-
-/**
- * Processes variables for book-node-export-html.tpl.php.
- *
- * @param $variables
- *   An associative array containing the following keys:
- *   - node
- *   - children
- *
- * @see book-node-export-html.tpl.php
- */
-function template_preprocess_book_node_export_html(&$variables) {
-  $variables['depth'] = $variables['node']->book['depth'];
-  $variables['title'] = check_plain($variables['node']->title);
-  $variables['content'] = $variables['node']->rendered;
-}
-
-/**
  * Determine if a given node type is in the list of types allowed for books.
  *
  * @param $type
@@ -1319,7 +1105,7 @@ function template_preprocess_book_node_export_html(&$variables) {
  *   A Boolean TRUE if the node type can be included in books; otherwise, FALSE.
  */
 function book_type_is_allowed($type) {
-  return in_array($type, variable_get('book_allowed_types', array('book')));
+  return in_array($type, config_get('book.settings', 'book_allowed_types'));
 }
 
 /**
@@ -1330,46 +1116,60 @@ function book_type_is_allowed($type) {
  */
 function book_node_type_update($type) {
   if (!empty($type->old_type) && $type->old_type != $type->type) {
+    $config = config('book.settings');
     // Update the list of node types that are allowed to be added to books.
-    $allowed_types = variable_get('book_allowed_types', array('book'));
+    $allowed_types = $config->get('book_allowed_types');
     $key = array_search($type->old_type, $allowed_types);
 
     if ($key !== FALSE) {
       $allowed_types[$type->type] = $allowed_types[$key] ? $type->type : 0;
       unset($allowed_types[$key]);
-      variable_set('book_allowed_types', $allowed_types);
+      $config->set('book_allowed_types', $allowed_types);
     }
 
     // Update the setting for the "Add child page" link.
-    if (variable_get('book_child_type', 'book') == $type->old_type) {
-      variable_set('book_child_type', $type->type);
+    if ($config->get('book_child_type') == $type->old_type) {
+      $config->set('book_child_type', $type->type);
     }
+    $config->save();
   }
 }
 
 /**
- * Gets a book menu link by its menu link ID.
+ * Get a translated book menu link by its menu link ID.
  *
  * Like menu_link_load(), but adds additional data from the {book} table.
  *
  * Do not call when loading a node, since this function may call node_load().
  *
  * @param $mlid
- *   The menu link ID of the menu item.
+ *   The menu link ID of the book menu item.
  *
  * @return
  *   A menu link, with the link translated for rendering and data added from the
- *   {book} table. FALSE if there is an error.
+ *   {book} table. EMPTY if there is no item. FALSE if there is an error.
+ *
+ * @see _menu_link_translate()
  */
-function book_link_load($mlid) {
-  if ($item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(
-      ':mlid' => $mlid,
-    ))->fetchAssoc()) {
-    _menu_link_translate($item);
-    return $item;
+function book_link_load($mlid, $skip_access_check = FALSE) {
+  $cache = &backdrop_static(__FUNCTION__, array());
+
+  if (!is_numeric($mlid)) {
+    return FALSE;
   }
 
-  return FALSE;
+  if (!isset($cache[$mlid])) {
+    $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
+    if (!empty($item)) {
+      if ($skip_access_check) {
+        $item['access'] = TRUE;
+      }
+      _menu_link_translate($item);
+    }
+    $cache[$mlid] = $item;
+  }
+
+  return $cache[$mlid];
 }
 
 /**

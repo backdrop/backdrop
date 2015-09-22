@@ -104,7 +104,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
         '#field_parents' => $parents,
         '#columns' => array_keys($field['columns']),
         '#title' => check_plain($instance['label']),
-        '#description' => field_filter_xss($instance['description']),
+        '#description' => field_filter_xss(token_replace($instance['description'])),
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
@@ -260,10 +260,12 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#title' => $title,
         '#required' => $instance['required'],
         '#description' => $description,
-        '#prefix' => '<div id="' . $wrapper_id . '">',
-        '#suffix' => '</div>',
         '#max_delta' => $max,
       );
+      if ($field['cardinality'] != 1) {
+        $field_elements['#prefix'] = '<div id="' . $wrapper_id . '">';
+        $field_elements['#suffix'] = '</div>';
+      }
       // Add 'add more' button, if not working with a programmed form.
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED && empty($form_state['programmed'])) {
         $field_elements['add_more'] = array(
@@ -284,82 +286,6 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   }
 
   return $field_elements;
-}
-
-/**
- * Returns HTML for an individual form element.
- *
- * Combine multiple values into a table with drag-n-drop reordering.
- * TODO : convert to a template.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the form element.
- *
- * @ingroup themeable
- */
-function theme_field_multiple_value_form($variables) {
-  $element = $variables['element'];
-  $output = '';
-
-  if ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-    $table_id = backdrop_html_id($element['#field_name'] . '_values');
-    $order_class = $element['#field_name'] . '-delta-order';
-    $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
-
-    $header = array(
-      array(
-        'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
-        'colspan' => 2,
-        'class' => array('field-label'),
-      ),
-      t('Order'),
-    );
-    $rows = array();
-
-    // Sort items according to '_weight' (needed when the form comes back after
-    // preview or failed validation)
-    $items = array();
-    foreach (element_children($element) as $key) {
-      if ($key === 'add_more') {
-        $add_more_button = &$element[$key];
-      }
-      else {
-        $items[] = &$element[$key];
-      }
-    }
-    usort($items, '_field_sort_items_value_helper');
-
-    // Add the items as table rows.
-    foreach ($items as $key => $item) {
-      $item['_weight']['#attributes']['class'] = array($order_class);
-      $delta_element = backdrop_render($item['_weight']);
-      $cells = array(
-        array('data' => '', 'class' => array('field-multiple-drag')),
-        backdrop_render($item),
-        array('data' => $delta_element, 'class' => array('delta-order')),
-      );
-      $rows[] = array(
-        'data' => $cells,
-        'class' => array('draggable'),
-      );
-    }
-
-    $output = '<div class="form-item">';
-    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
-    $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
-    $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
-    $output .= '</div>';
-
-    backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
-  }
-  else {
-    foreach (element_children($element) as $key) {
-      $output .= backdrop_render($element[$key]);
-    }
-  }
-
-  return $output;
 }
 
 /**
@@ -540,7 +466,7 @@ function _field_form_state_parents($parents, $field_name, $langcode) {
   // - Other fields are placed under
   //   $form_state['field']['#parents'][...$parents...]['#fields'][$field_name]
   //   to avoid clashes between field names and $parents parts.
-  // @todo Remove backwards compatibility in Drupal 8, and use a unique
+  // @todo Remove backwards compatibility and use a unique
   // $form_state['field'][...$parents...]['#fields'][$field_name] structure.
   if (!empty($parents)) {
     $form_state_parents = array_merge(array('#parents'), $parents, array('#fields'));

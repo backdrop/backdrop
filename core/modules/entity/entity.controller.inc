@@ -19,14 +19,6 @@
 interface EntityControllerInterface {
 
   /**
-   * Constructs a new EntityControllerInterface object.
-   *
-   * @param $entityType
-   *   The entity type for which the instance is created.
-   */
-  public function __construct($entityType);
-
-  /**
    * Resets the internal, static entity cache.
    *
    * @param $ids
@@ -41,7 +33,9 @@ interface EntityControllerInterface {
    * @param $ids
    *   An array of entity IDs, or FALSE to load all entities.
    * @param $conditions
-   *   An array of conditions in the form 'field' => $value.
+   *   An array of conditions. Keys are field names on the entity's base table.
+   *   Values will be compared for equality. All the comparisons will be ANDed
+   *   together. This parameter is deprecated; use an EntityFieldQuery instead.
    *
    * @return
    *   An array of entity objects indexed by their ids.
@@ -127,6 +121,9 @@ class DefaultEntityController implements EntityControllerInterface {
    * Implements EntityControllerInterface::__construct().
    *
    * Sets basic variables.
+   *
+   * @param $entityType
+   *   The entity type for which the instance is created.
    */
   public function __construct($entityType) {
     $this->entityType = $entityType;
@@ -254,7 +251,9 @@ class DefaultEntityController implements EntityControllerInterface {
    * @param $ids
    *   An array of entity IDs, or FALSE to load all entities.
    * @param $conditions
-   *   An array of conditions in the form 'field' => $value.
+   *   An array of conditions. Keys are field names on the entity's base table.
+   *   Values will be compared for equality. All the comparisons will be ANDed
+   *   together. This parameter is deprecated; use an EntityFieldQuery instead.
    * @param $revision_id
    *   The ID of the revision to load, or FALSE if this query is asking for the
    *   most current revision(s).
@@ -378,9 +377,23 @@ class DefaultEntityController implements EntityControllerInterface {
     // This ensures the same behavior whether loading from memory or database.
     if ($conditions) {
       foreach ($entities as $entity) {
-        $entity_values = (array) $entity;
-        if (array_diff_assoc($conditions, $entity_values)) {
-          unset($entities[$entity->{$this->idKey}]);
+        // Iterate over all conditions and compare them to the entity
+        // properties. We cannot use array_diff_assoc() here since the
+        // conditions can be nested arrays, too.
+        foreach ($conditions as $property_name => $condition) {
+          if (is_array($condition)) {
+            // Multiple condition values for one property are treated as OR
+            // operation: only if the value is not at all in the condition array
+            // we remove the entity.
+            if (!in_array($entity->{$property_name}, $condition)) {
+              unset($entities[$entity->{$this->idKey}]);
+              continue 2;
+            }
+          }
+          elseif ($condition != $entity->{$property_name}) {
+            unset($entities[$entity->{$this->idKey}]);
+            continue 2;
+          }
         }
       }
     }
@@ -432,9 +445,8 @@ interface EntityStorageControllerInterface extends EntityControllerInterface {
    * @param EntityInterface $entity
    *   The entity to save.
    *
-   * @return
-   *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
-   *   performed.
+   * @return int
+   *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
    *
    * @throws EntityStorageException
    *   In case of failures, an exception is thrown.
@@ -495,7 +507,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception($this->entityType, $e);
-      throw new EntityStorageException($e->getMessage, $e->getCode, $e);
+      throw new EntityStorageException($e->getMessage, (int) $e->getCode(), $e);
     }
   }
 
@@ -537,7 +549,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception($this->entityType, $e);
-      throw new EntityStorageException($e->getMessage(), $e->getCode(), $e);
+      throw new EntityStorageException($e->getMessage(), (int) $e->getCode(), $e);
     }
   }
 

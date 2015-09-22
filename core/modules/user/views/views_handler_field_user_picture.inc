@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_user_picture.
@@ -82,10 +81,10 @@ class views_handler_field_user_picture extends views_handler_field {
         $picture_filepath = $picture->uri;
       }
       else {
-        $picture_filepath = variable_get('user_picture_default', '');
+        $picture_filepath = config_get('system.core', 'user_picture_default');
       }
       if (file_valid_uri($picture_filepath)) {
-        $output = theme('image_style', array('style_name' => $this->options['image_style'], 'path' => $picture_filepath));
+        $output = theme('image_style', array('style_name' => $this->options['image_style'], 'uri' => $picture_filepath));
         if ($this->options['link_photo_to_profile'] && user_access('access user profiles')) {
           $uid = $this->get_value($values, 'uid');
           $output = l($output, "user/$uid", array('html' => TRUE));

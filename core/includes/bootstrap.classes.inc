@@ -97,23 +97,6 @@ function backdrop_class_list() {
     'TruncateQuery_mysql' => $path . 'database/mysql/query.inc',
     'DatabaseSchema_mysql' => $path . 'database/mysql/schema.inc',
 
-    'DatabaseConnection_pgsql' => $path . 'database/pgsql/database.inc',
-    'DatabaseTasks_pgsql' => $path . 'database/pgsql/install.inc',
-    'InsertQuery_pgsql' => $path . 'database/pgsql/query.inc',
-    'UpdateQuery_pgsql' => $path . 'database/pgsql/query.inc',
-    'DatabaseSchema_pgsql' => $path . 'database/pgsql/schema.inc',
-    'SelectQuery_pgsql' => $path . 'database/pgsql/select.inc',
-
-    'DatabaseConnection_sqlite' => $path . 'database/sqlite/database.inc',
-    'DatabaseStatement_sqlite' => $path . 'database/sqlite/database.inc',
-    'DatabaseTasks_sqlite' => $path . 'database/sqlite/install.inc',
-    'InsertQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'UpdateQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'DeleteQuery_sqlite' => $path . 'database/sqlite/query.inc',
-    'Truncate_sqlite' => $path . 'database/sqlite/query.inc',
-    'DatabaseSchema_sqlite' => $path . 'database/sqlite/schema.inc',
-    'SelectQuery_sqlite' => $path . 'database/sqlite/select.inc',
-
     'FileTransfer' => $path . 'filetransfer/filetransfer.inc',
     'FileTransferException' => $path . 'filetransfer/filetransfer.inc',
     'SkipDotsRecursiveDirectoryIterator' => $path . 'filetransfer/filetransfer.inc',
@@ -125,7 +108,7 @@ function backdrop_class_list() {
   );
 
   // Add in Drupal 7 class name wrappers if compatibility is enabled.
-  if (!empty($GLOBALS['conf']['backdrop_drupal_compatibility'])) {
+  if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
     $classes += array(
       'DrupalQueue' => $path . 'drupal.classes.inc',
       'DrupalQueueInterface' => $path . 'drupal.classes.inc',
@@ -144,6 +127,8 @@ function backdrop_class_list() {
       'DrupalTestCase' => $path . 'drupal.classes.inc',
       'DrupalUnitTestCase' => $path . 'drupal.classes.inc',
       'DrupalWebTestCase' => $path . 'drupal.classes.inc',
+      'DrupalDefaultEntityController' => $path . 'drupal.classes.inc',
+      'DrupalEntityControllerInterface' => $path . 'drupal.classes.inc',
     );
   }
 

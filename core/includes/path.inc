@@ -16,7 +16,7 @@ function backdrop_path_initialize() {
   // Ensure $_GET['q'] is set before calling backdrop_get_normal_path(), to
   // support path caching with hook_url_inbound_alter().
   if (empty($_GET['q'])) {
-    $_GET['q'] = variable_get('site_frontpage', 'user');
+    $_GET['q'] = config_get('system.core', 'site_frontpage');
   }
   $_GET['q'] = backdrop_get_normal_path($_GET['q']);
 }
@@ -62,14 +62,6 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
     );
   }
 
-  // Retrieve the path alias whitelist.
-  if (!isset($cache['whitelist'])) {
-    $cache['whitelist'] = variable_get('path_alias_whitelist', NULL);
-    if (!isset($cache['whitelist'])) {
-      $cache['whitelist'] = backdrop_path_alias_whitelist_rebuild();
-    }
-  }
-
   // If no language is explicitly specified we default to the current URL
   // language. If we used a language different from the one conveyed by the
   // requested URL, we might end up being unable to check if there is a path
@@ -78,9 +70,8 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
 
   if ($action == 'wipe') {
     $cache = array();
-    $cache['whitelist'] = backdrop_path_alias_whitelist_rebuild();
   }
-  elseif ($cache['whitelist'] && $path != '') {
+  elseif ($path != '') {
     if ($action == 'alias') {
       // During the first call to backdrop_lookup_path() per language, load the
       // expected system paths for the page from cache.
@@ -124,12 +115,6 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
       // If the alias has already been loaded, return it.
       if (isset($cache['map'][$langcode][$path])) {
         return $cache['map'][$langcode][$path];
-      }
-      // Check the path whitelist, if the top_level part before the first /
-      // is not in the list, then there is no need to do anything further,
-      // it is not in the database.
-      elseif (!isset($cache['whitelist'][strtok($path, '/')])) {
-        return FALSE;
       }
       // For system paths which were not cached, query aliases individually.
       elseif (!isset($cache['no_aliases'][$langcode][$path])) {
@@ -292,7 +277,7 @@ function backdrop_is_front_page() {
   if (!isset($is_front_page)) {
     // As backdrop_path_initialize updates $_GET['q'] with the 'site_frontpage' path,
     // we can check it against the 'site_frontpage' variable.
-    $is_front_page = ($_GET['q'] == variable_get('site_frontpage', 'user'));
+    $is_front_page = ($_GET['q'] == config_get('system.core', 'site_frontpage'));
   }
 
   return $is_front_page;
@@ -323,7 +308,7 @@ function backdrop_match_path($path, $patterns) {
     $replacements = array(
       '|',
       '.*',
-      '\1' . preg_quote(variable_get('site_frontpage', 'user'), '/') . '\2'
+      '\1' . preg_quote(config_get('system.core', 'site_frontpage'), '/') . '\2'
     );
     $patterns_quoted = preg_quote($patterns, '/');
     $regexps[$patterns] = '/^(' . preg_replace($to_replace, $replacements, $patterns_quoted) . ')$/';
@@ -356,36 +341,6 @@ function current_path() {
 }
 
 /**
- * Rebuild the path alias white list.
- *
- * @param $source
- *   An optional system path for which an alias is being inserted.
- *
- * @return
- *   An array containing a white list of path aliases.
- */
-function backdrop_path_alias_whitelist_rebuild($source = NULL) {
-  // When paths are inserted, only rebuild the whitelist if the system path
-  // has a top level component which is not already in the whitelist.
-  if (!empty($source)) {
-    $whitelist = variable_get('path_alias_whitelist', NULL);
-    if (isset($whitelist[strtok($source, '/')])) {
-      return $whitelist;
-    }
-  }
-  // For each alias in the database, get the top level component of the system
-  // path it corresponds to. This is the portion of the path before the first
-  // '/', if present, otherwise the whole path itself.
-  $whitelist = array();
-  $result = db_query("SELECT DISTINCT SUBSTRING_INDEX(source, '/', 1) AS path FROM {url_alias}");
-  foreach ($result as $row) {
-    $whitelist[$row->path] = TRUE;
-  }
-  variable_set('path_alias_whitelist', $whitelist);
-  return $whitelist;
-}
-
-/**
  * Fetches a specific URL alias from the database.
  *
  * @param $conditions
@@ -399,6 +354,7 @@ function backdrop_path_alias_whitelist_rebuild($source = NULL) {
  *   - alias: The URL alias.
  *   - pid: Unique path alias identifier.
  *   - langcode: The language code of the alias.
+ *   - auto: Boolean indicating if this alias was created from a pattern.
  */
 function path_load($conditions) {
   if (is_numeric($conditions)) {
@@ -414,10 +370,50 @@ function path_load($conditions) {
   foreach ($conditions as $field => $value) {
     $select->condition($field, $value);
   }
-  return $select
+  $path = $select
     ->fields('url_alias')
+    ->orderBy('pid', 'DESC')
     ->execute()
     ->fetchAssoc();
+  // Cast the auto column to boolean or NULL if unknown.
+  if ($path) {
+    $path['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  }
+  return $path;
+}
+
+/**
+ * Load a collection of URL aliases from the database all at once.
+ *
+ * @param array $keys
+ *   An array of keys by which the aliases should be loaded. This array may
+ *   contain a list of PIDs, sources, or aliases. The type of content within
+ *   this array is determined by the $field parameter.
+ * @param string $field
+ *   The type of data used within the $keys array. May be either "pid",
+ *   "source", or "alias".
+ * @param string $langcode
+ *   The langcode of the paths to be loaded.
+ *
+ * @return array
+ *   An array of the loaded paths, keyed by the $field parameter values.
+ */
+function path_load_multiple(array $keys, $field, $langcode) {
+  $paths = db_select('url_alias')
+    ->fields('url_alias')
+    ->condition($field, $keys, 'IN')
+    ->condition('langcode', $langcode)
+    ->orderBy('pid', 'DESC')
+    ->groupBy($field)
+    ->execute()
+    ->fetchAllAssoc($field, PDO::FETCH_ASSOC);
+
+  // Cast the auto column to boolean or NULL if unknown.
+  foreach ($paths as $key => $path) {
+    $paths[$key]['auto'] = is_null($path['auto']) ? NULL : (bool) $path['auto'];
+  }
+
+  return $paths;
 }
 
 /**
@@ -560,8 +556,8 @@ function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
   elseif ($dynamic_allowed && preg_match('/\/\%/', $path)) {
     // Path is dynamic (ie 'user/%'), so check directly against menu_router table.
     if ($item = db_query("SELECT * FROM {menu_router} where path = :path", array(':path' => $path))->fetchAssoc()) {
-      $item['link_path']  = $form_item['link_path'];
-      $item['link_title'] = $form_item['link_title'];
+      $item['link_path']  = $item['path'];
+      $item['link_title'] = $item['title'];
       $item['external']   = FALSE;
       $item['options'] = '';
       _menu_link_translate($item);
@@ -583,5 +579,4 @@ function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
 function backdrop_clear_path_cache($source = NULL) {
   // Clear the backdrop_lookup_path() static cache.
   backdrop_static_reset('backdrop_lookup_path');
-  backdrop_path_alias_whitelist_rebuild($source);
 }

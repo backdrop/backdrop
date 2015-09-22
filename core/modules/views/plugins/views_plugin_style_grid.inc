@@ -32,11 +32,12 @@ class views_plugin_style_grid extends views_plugin_style {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['columns'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Number of columns'),
       '#default_value' => $this->options['columns'],
       '#required' => TRUE,
-      '#element_validate' => array('views_element_validate_integer'),
+      '#min' => 1,
+      '#step' => 1,
     );
     $form['alignment'] = array(
       '#type' => 'radios',

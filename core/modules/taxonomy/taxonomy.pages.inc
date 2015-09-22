@@ -35,10 +35,10 @@ function taxonomy_term_page(TaxonomyTerm $term) {
 
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
-  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
-  // Set the non-aliased path as a default shortlink.
-  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
-
+  $canonical_secure = config_get('system.core', 'canonical_secure') == 1 ? TRUE : FALSE;
+  $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
+  
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
   // data structures and HTML markup than what Drupal 7 released with). Calling
@@ -50,7 +50,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
     'term' => taxonomy_term_view($term, 'full'),
   );
 
-  if ($nids = taxonomy_select_nodes($term->tid, TRUE, variable_get('default_nodes_main', 10))) {
+  if ($nids = taxonomy_select_nodes($term->tid, TRUE, config_get('system.core', 'default_nodes_main'))) {
     $nodes = node_load_multiple($nids);
     $build += node_view_multiple($nodes);
     $build['pager'] = array(
@@ -76,11 +76,11 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = variable_get('site_name', 'Backdrop') . ' - ' . $term->name;
+  $channel['title'] = config_get('system.core', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
-  $nids = taxonomy_select_nodes($term->tid, FALSE, variable_get('feed_default_items', 10));
+  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.rss', 'rss_limit'));
 
   node_feed($nids, $channel);
 }
@@ -129,14 +129,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
 
   $term_matches = array();
   if ($tag_last != '') {
-
-    // Part of the criteria for the query come from the field's own settings.
-    $vids = array();
-    $vocabularies = taxonomy_vocabulary_get_names();
-    foreach ($field['settings']['allowed_values'] as $tree) {
-      $vids[] = $vocabularies[$tree['vocabulary']]->vid;
-    }
-
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
     $query->addTag('term_access');
@@ -146,9 +138,10 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
       $query->condition('t.name', $tags_typed, 'NOT IN');
     }
     // Select rows that match by term name.
+    $vocabulary_list = isset($field['settings']['allowed_values']) ? $field['settings']['allowed_values'] : array();
     $tags_return = $query
       ->fields('t', array('tid', 'name'))
-      ->condition('t.vid', $vids)
+      ->condition('t.vocabulary', $vocabulary_list)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
       ->range(0, 10)
       ->execute()

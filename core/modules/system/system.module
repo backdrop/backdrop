@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Configuration system that lets administrators modify the workings of the site.
@@ -8,121 +7,136 @@
 /**
  * Maximum age of temporary files in seconds.
  */
-const BACKDROP_MAXIMUM_TEMP_FILE_AGE = 21600;
-
-/**
- * Default interval for automatic cron executions in seconds.
- */
-const BACKDROP_CRON_DEFAULT_THRESHOLD = 10800;
+define('BACKDROP_MAXIMUM_TEMP_FILE_AGE', 21600);
 
 /**
  * New users will be set to the default time zone at registration.
  */
-const BACKDROP_USER_TIMEZONE_DEFAULT = 0;
+define('BACKDROP_USER_TIMEZONE_DEFAULT', 0);
 
 /**
  * New users will get an empty time zone at registration.
  */
-const BACKDROP_USER_TIMEZONE_EMPTY = 1;
+define('BACKDROP_USER_TIMEZONE_EMPTY', 1);
 
 /**
  * New users will select their own timezone at registration.
  */
-const BACKDROP_USER_TIMEZONE_SELECT = 2;
+define('BACKDROP_USER_TIMEZONE_SELECT', 2);
 
  /**
  * Disabled option on forms and settings
  */
-const BACKDROP_DISABLED = 0;
+define('BACKDROP_DISABLED', 0);
 
 /**
  * Optional option on forms and settings
  */
-const BACKDROP_OPTIONAL = 1;
+define('BACKDROP_OPTIONAL', 1);
 
 /**
  * Required option on forms and settings
  */
-const BACKDROP_REQUIRED = 2;
+define('BACKDROP_REQUIRED', 2);
 
 /**
  * Maximum number of values in a weight select element.
  *
  * If the number of values is over the maximum, a text field is used instead.
  */
-const BACKDROP_WEIGHT_SELECT_MAX = 100;
+define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
- * Return only visible regions.
- *
- * @see system_region_list()
+ * Maximum length of e-mail fields.
  */
-const REGIONS_VISIBLE = 'visible';
+define('EMAIL_MAX_LENGTH', 254);
 
 /**
- * Return all regions.
- *
- * @see system_region_list()
+ * The maximum depth for token tree recursion.
  */
-const REGIONS_ALL = 'all';
+define('TOKEN_MAX_DEPTH', 9);
 
 /**
  * Implements hook_theme().
  */
 function system_theme() {
+  $base = array(
+    'file' => 'system.theme.inc',
+  );
+
   return array_merge(backdrop_common_theme(), array(
     'system_themes_page' => array(
       'variables' => array('theme_groups' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'system_settings_form' => array(
       'render element' => 'form',
-    ),
+    ) + $base,
     'confirm_form' => array(
       'render element' => 'form',
-    ),
+    ) + $base,
     'system_modules_fieldset' => array(
       'render element' => 'form',
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'system_modules_incompatible' => array(
       'variables' => array('message' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'system_modules_uninstall' => array(
       'render element' => 'form',
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'status_report' => array(
       'render element' => 'requirements',
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'admin_page' => array(
       'variables' => array('blocks' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'admin_block' => array(
       'variables' => array('block' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'admin_block_content' => array(
       'variables' => array('content' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'system_admin_index' => array(
       'variables' => array('menu_items' => NULL),
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
     'system_powered_by' => array(
       'variables' => array(),
-    ),
-    'system_compact_link' => array(
-      'variables' => array(),
-    ),
-    'system_date_time_settings' => array(
-      'render element' => 'form',
-      'file' => 'system.admin.inc',
-    ),
+    ) + $base,
+    'block__system__main' => array(
+      'template' => 'templates/block--system--main',
+      //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
+      'base hook' => 'block',
+    ) + $base,
+    'tree_table' => array(
+      'variables' => array(
+        'header' => array(),
+        'rows' => array(),
+        'attributes' => array(),
+        'empty' => '',
+        'caption' => '',
+      ),
+    ) + $base,
+    'token_tree' => array(
+      'variables' => array(
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => FALSE,
+      ),
+    ) + $base,
+    'token_tree_link' => array(
+      'variables' => array(
+        'text' => NULL,
+        'options' => array(),
+        'token_types' => array(),
+        'global_types' => TRUE,
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+        'recursion_limit' => 3,
+        'dialog' => TRUE,
+      ),
+    ) + $base,
   ));
 }
 
@@ -145,9 +159,6 @@ function system_permission() {
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
     ),
-    'administer actions' => array(
-      'title' => t('Administer actions'),
-    ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -156,7 +167,7 @@ function system_permission() {
     ),
     'view the administration theme' => array(
       'title' => t('View the administration theme'),
-      'description' => variable_get('admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
+      'description' => config_get('system.core', 'admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
     ),
     'access site reports' => array(
       'title' => t('View site reports'),
@@ -225,11 +236,6 @@ function system_element_info() {
     '#action' => request_uri(),
     '#theme_wrappers' => array('form'),
   );
-  $types['page'] = array(
-    '#show_messages' => TRUE,
-    '#theme' => 'page',
-    '#theme_wrappers' => array('html'),
-  );
   // By default, we don't want Ajax commands being rendered in the context of an
   // HTML page, so we don't provide defaults for #theme or #theme_wrappers.
   // However, modules can set these properties (for example, to provide an HTML
@@ -239,8 +245,8 @@ function system_element_info() {
     '#commands' => array(),
     '#error' => NULL,
   );
-  $types['html_tag'] = array(
-    '#theme' => 'html_tag',
+  $types['head_tag'] = array(
+    '#theme' => 'head_tag',
     '#pre_render' => array('backdrop_pre_render_conditional_comments'),
     '#attributes' => array(),
     '#value' => NULL,
@@ -293,7 +299,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'textfield',
     '#theme_wrappers' => array('form_element'),
   );
@@ -351,6 +357,15 @@ function system_element_info() {
     '#process' => array('ajax_process_form'),
     '#element_validate' => array('form_validate_number'),
     '#theme' => 'range',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['search'] = array(
+    '#input' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#autocomplete_path' => FALSE,
+    '#process' => array('ajax_process_form'),
+    '#theme' => 'search',
     '#theme_wrappers' => array('form_element'),
   );
   $types['machine_name'] = array(
@@ -531,7 +546,7 @@ function system_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['system/ajax'] = array(
-    'title' => 'AHAH callback',
+    'title' => 'AJAX callback',
     'page callback' => 'ajax_form_callback',
     'delivery callback' => 'ajax_deliver',
     'access callback' => TRUE,
@@ -547,19 +562,25 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
+  $items['system/404'] = array(
+    'title' => 'Page not found',
+    'page callback' => 'system_404',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['system/403'] = array(
+    'title' => 'Access denied',
+    'page callback' => 'system_403',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   $items['admin'] = array(
     'title' => 'Administration',
     'access arguments' => array('access administration pages'),
     'page callback' => 'system_admin_menu_block_page',
     'weight' => 9,
     'menu_name' => 'management',
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/compact'] = array(
-    'title' => 'Compact mode',
-    'page callback' => 'system_admin_compact_page',
-    'access arguments' => array('access administration pages'),
-    'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
   $items['admin/tasks'] = array(
@@ -581,7 +602,7 @@ function system_menu() {
     'title' => 'Structure',
     'description' => 'Administer blocks, content types, menus, etc.',
     'position' => 'right',
-    'weight' => -8,
+    'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -589,16 +610,16 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
-    'description' => 'Select and configure your themes.',
+    'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
     'position' => 'left',
-    'weight' => -6,
+    'weight' => -4,
     'file' => 'system.admin.inc',
   );
   $items['admin/appearance/list'] = array(
-    'title' => 'List',
-    'description' => 'Select and configure your theme',
+    'title' => 'Themes',
+    'description' => 'Select and configure themes.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
     'file' => 'system.admin.inc',
@@ -624,50 +645,37 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
-  $items['admin/appearance/settings'] = array(
-    'title' => 'Settings',
-    'description' => 'Configure default and theme specific settings.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_theme_settings'),
-    'access arguments' => array('administer themes'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'system.admin.inc',
-    'weight' => 20,
-  );
-  // Theme configuration subtabs.
-  $items['admin/appearance/settings/global'] = array(
-    'title' => 'Global settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -1,
-  );
 
   foreach (list_themes() as $key => $theme) {
-    $items['admin/appearance/settings/' . $theme->name] = array(
-      'title' => $theme->info['name'],
-      'page arguments' => array('system_theme_settings', $theme->name),
-      'type' => MENU_LOCAL_TASK,
-      'access callback' => '_system_themes_access',
-      'access arguments' => array($key),
-      'file' => 'system.admin.inc',
-    );
+    // Only provide pages for themes with settings.
+    if (theme_has_settings($key)) {
+      $items['admin/appearance/settings/' . $theme->name] = array(
+        'title' => $theme->info['name'] . ' settings',
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('system_theme_settings', $theme->name),
+        'access callback' => '_system_themes_access',
+        'access arguments' => array($key),
+        'file' => 'system.admin.inc',
+      );
+    }
   }
 
   // Modules.
   $items['admin/modules'] = array(
-    'title' => 'Modules',
-    'description' => 'Extend site functionality.',
+    'title' => 'Functionality',
+    'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
     'access arguments' => array('administer modules'),
     'file' => 'system.admin.inc',
-    'weight' => -2,
+    'weight' => -3,
   );
   $items['admin/modules/list'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/modules/list/confirm'] = array(
-    'title' => 'List',
+    'title' => 'Modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
@@ -680,7 +688,7 @@ function system_menu() {
     'weight' => 20,
   );
   $items['admin/modules/uninstall/confirm'] = array(
-    'title' => 'Uninstall',
+    'title' => 'Uninstall modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'system.admin.inc',
@@ -694,7 +702,6 @@ function system_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
-
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
     'description' => 'Administration tools.',
@@ -810,53 +817,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time'] = array(
-    'title' => 'Date and time',
-    'description' => 'Configure display formats for date and time.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_date_time_settings'),
-    'access arguments' => array('administer site configuration'),
-    'weight' => -15,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types'] = array(
-    'title' => 'Types',
-    'description' => 'Configure display formats for date and time.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_date_time_settings'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types/add'] = array(
-    'title' => 'Add date type',
-    'description' => 'Add new date type.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_add_date_format_type_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_ACTION,
-    'weight' => -10,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/types/%/delete'] = array(
-    'title' => 'Delete date type',
-    'description' => 'Allow users to delete a configured date type.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_delete_date_format_type_form', 5),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/regional/date-time/formats'] = array(
-    'title' => 'Formats',
-    'description' => 'Configure display format strings for date and time.',
+    'title' => 'Date and time formats',
+    'description' => 'Configure the display of date and time strings.',
     'page callback' => 'system_date_time_formats',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
     'weight' => -9,
     'file' => 'system.admin.inc',
   );
   $items['admin/config/regional/date-time/formats/add'] = array(
-    'title' => 'Add format',
+    'title' => 'Add date format',
     'description' => 'Allow users to add additional date formats.',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'backdrop_get_form',
@@ -865,15 +834,20 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/regional/date-time/formats/%/edit'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format'] = array(
     'title' => 'Edit date format',
-    'description' => 'Allow users to edit a configured date format.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_configure_date_formats_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/regional/date-time/formats/%/delete'] = array(
+  $items['admin/config/regional/date-time/formats/%system_date_format/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'Allow users to edit a configured date format.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/regional/date-time/formats/%system_date_format/delete'] = array(
     'title' => 'Delete date format',
     'description' => 'Allow users to delete a configured date format.',
     'page callback' => 'backdrop_get_form',
@@ -899,16 +873,24 @@ function system_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'title' => 'Clean URLs',
-    'description' => 'Enable or disable clean URLs for your site.',
+    'page callback' => 'backdrop_goto',
+    'page arguments' => array('admin/config/search/urls'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/config/search/urls'] = array(
+    'title' => 'URL handling',
+    'description' => 'Handling URL-related configuration of your site.',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_clean_url_settings'),
+    'page arguments' => array('system_urls_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'weight' => 5,
   );
-  $items['admin/config/search/clean-urls/check'] = array(
+  $items['admin/config/search/urls/check'] = array(
     'title' => 'Clean URL check',
     'page callback' => 'backdrop_json_output',
     'page arguments' => array(array('status' => TRUE)),
@@ -927,47 +909,9 @@ function system_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/system/actions'] = array(
-    'title' => 'Actions',
-    'description' => 'Manage the actions defined for your site.',
-    'access arguments' => array('administer actions'),
-    'page callback' => 'system_actions_manage',
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/manage'] = array(
-    'title' => 'Manage actions',
-    'description' => 'Manage the actions defined for your site.',
-    'page callback' => 'system_actions_manage',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -2,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/configure'] = array(
-    'title' => 'Configure an advanced action',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_actions_configure'),
-    'access arguments' => array('administer actions'),
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/delete/%actions'] = array(
-    'title' => 'Delete action',
-    'description' => 'Delete an action.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_actions_delete_form', 5),
-    'access arguments' => array('administer actions'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/system/actions/orphan'] = array(
-    'title' => 'Remove orphans',
-    'page callback' => 'system_actions_remove_orphans',
-    'access arguments' => array('administer actions'),
-    'type' => MENU_CALLBACK,
-    'file' => 'system.admin.inc',
-  );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, e-mail address, slogan, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -1053,6 +997,16 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
+
+  // Token paths.
+  $items['token/tree'] = array(
+    'page callback' => 'system_token_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
   return $items;
 }
 
@@ -1102,7 +1056,7 @@ function system_library_info() {
     'title' => 'Backdrop AJAX',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/ajax.js' => array('group' => JS_LIBRARY, 'weight' => 2),
+      'core/misc/ajax.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'backdrop.progress'),
@@ -1208,7 +1162,7 @@ function system_library_info() {
     'title' => 'Backdrop resizable textarea',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_DEFAULT),
+      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
     ),
   );
 
@@ -1227,6 +1181,14 @@ function system_library_info() {
     'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  $libraries['backdrop.modules'] = array(
+    'title' => 'Modules Filter',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1257,6 +1219,16 @@ function system_library_info() {
     'version' => '3.50.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
+    ),
+  );
+
+  // jQuery TimeEntry
+  $libraries['jquery.timeentry'] = array(
+    'title' => 'jQuery Time Entry Plugin',
+    'website' => 'http://keith-wood.name/timeEntry.html',
+    'version' => '1.5.2',
+    'js' => array(
+      'core/misc/jquery.timeentry.js' => array(),
     ),
   );
 
@@ -1297,7 +1269,7 @@ function system_library_info() {
     'title' => 'Jump Menu',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/system.jump-menu.js' => array('group' => JS_DEFAULT),
+      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1435,9 +1407,13 @@ function system_library_info() {
     'js' => array(
       'core/misc/ui/jquery.ui.draggable.min.js' => array(),
     ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.draggable.css' => array(),
+    ),
     'dependencies' => array(
       array('system', 'ui.widget'),
       array('system', 'ui.mouse'),
+      array('system', 'ui.touch-punch'),
     ),
   );
   $libraries['ui.droppable'] = array(
@@ -1531,6 +1507,23 @@ function system_library_info() {
       array('system', 'ui.mouse'),
     ),
   );
+
+  $libraries['ui.selectmenu'] = array(
+    'title' => 'jQuery UI: Select Menu',
+    'website' => 'http://jqueryui.com/selectmenu/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.selectmenu.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.selectmenu.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.position'),
+      array('system', 'ui.menu'),
+    ),
+  );
   $libraries['ui.slider'] = array(
     'title' => 'jQuery UI: Slider',
     'website' => 'http://jqueryui.com/slider/',
@@ -1553,9 +1546,12 @@ function system_library_info() {
     'js' => array(
       'core/misc/ui/jquery.ui.sortable.min.js' => array(),
     ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.sortable.css' => array(),
+    ),
     'dependencies' => array(
-      array('system', 'ui.widget'),
-      array('system', 'ui.mouse'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.droppable'),
     ),
   );
   $libraries['ui.spinner'] = array(
@@ -1694,6 +1690,17 @@ function system_library_info() {
       array('system', 'effects'),
     ),
   );
+  $libraries['effects.puff'] = array(
+    'title' => 'jQuery UI: Effects Puff',
+    'website' => 'http://jqueryui.com/effect/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-puff.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
   $libraries['effects.pulsate'] = array(
     'title' => 'jQuery UI: Effects Pulsate',
     'website' => 'http://jqueryui.com/effect/',
@@ -1727,6 +1734,17 @@ function system_library_info() {
       array('system', 'effects'),
     ),
   );
+  $libraries['effects.scale'] = array(
+    'title' => 'jQuery UI: Effects Scale',
+    'website' => 'http://jqueryui.com/effect/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
   $libraries['effects.slide'] = array(
     'title' => 'jQuery UI: Effects Slide',
     'website' => 'http://jqueryui.com/effect/',
@@ -1747,6 +1765,50 @@ function system_library_info() {
     ),
     'dependencies' => array(
       array('system', 'effects'),
+    ),
+  );
+
+  // Touch Punch for jQuery UI touch support.
+  $libraries['ui.touch-punch'] = array(
+    'title' => 'jQuery UI Touch Punch',
+    'website' => 'http://touchpunch.furf.com/',
+    'version' => '0.2.3',
+    'js' => array(
+      'core/misc/jquery.ui.touch-punch.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.mouse'),
+    ),
+  );
+
+  // Tokens.
+  $libraries['token'] = array(
+    'title' => 'Token behaviors',
+    'version' => '1.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.treetable'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['jquery.treetable'] = array(
+    'title' => 'jQuery treetable',
+    'website' => 'http://plugins.jquery.com/project/treetable',
+    'version' => '3.2.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
     ),
   );
 
@@ -1773,7 +1835,7 @@ function system_stream_wrappers() {
   );
 
   // Only register the private file stream wrapper if a file path has been set.
-  if (variable_get('file_private_path', FALSE)) {
+  if (config_get('system.core', 'file_private_path')) {
     $wrappers['private'] = array(
       'name' => t('Private files'),
       'class' => 'BackdropPrivateStreamWrapper',
@@ -1952,6 +2014,11 @@ function system_updater_info() {
       'name' => t('Update themes'),
       'weight' => 0,
     ),
+    'layout' => array(
+      'class' => 'LayoutUpdater',
+      'name' => t('Update layouts'),
+      'weight' => 0,
+    ),
   );
 }
 
@@ -1993,11 +2060,12 @@ function system_init() {
   $path = backdrop_get_path('module', 'system');
   // Add the CSS for this module. These aren't in system.info, because they
   // need to be in the CSS_SYSTEM group rather than the CSS_DEFAULT group.
-  backdrop_add_css($path . '/system.base.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE, 'weight' => -10));
+  backdrop_add_css($path . '/css/system.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   if (path_is_admin(current_path())) {
-    backdrop_add_css($path . '/system.admin.css', array('group' => CSS_SYSTEM));
+    backdrop_add_css($path . '/css/system.admin.css', array('group' => CSS_SYSTEM));
   }
-  backdrop_add_css($path . '/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
   // Ignore slave database servers for this request.
   //
@@ -2051,7 +2119,7 @@ function system_add_module_assets() {
  */
 function system_custom_theme() {
   if (user_access('view the administration theme') && path_is_admin(current_path())) {
-    return variable_get('admin_theme');
+    return config_get('system.core', 'admin_theme');
   }
 }
 
@@ -2059,7 +2127,7 @@ function system_custom_theme() {
  * Implements hook_form_FORM_ID_alter().
  */
 function system_form_user_profile_form_alter(&$form, &$form_state) {
-  if (variable_get('configurable_timezones', 1)) {
+  if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
   return $form;
@@ -2069,7 +2137,8 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
  * Implements hook_form_FORM_ID_alter().
  */
 function system_form_user_register_form_alter(&$form, &$form_state) {
-  if (variable_get('configurable_timezones', 1) && variable_get('user_default_timezone', BACKDROP_USER_TIMEZONE_DEFAULT) == BACKDROP_USER_TIMEZONE_SELECT) {
+  $config = config('system.date');
+  if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
     return $form;
   }
@@ -2079,8 +2148,9 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
  * Implements hook_user_presave().
  */
 function system_user_presave($account) {
-  if (variable_get('configurable_timezones', 1) && empty($account->timezone) && !variable_get('user_default_timezone', BACKDROP_USER_TIMEZONE_DEFAULT)) {
-    $account->timezone = variable_get('date_default_timezone', '');
+  $config = config('system.date');
+  if ($config->get('user_configurable_timezones') && empty($account->timezone) && !$config->get('user_default_timezone')) {
+    $account->timezone = $config->get('default_timezone');
   }
 }
 
@@ -2088,8 +2158,9 @@ function system_user_presave($account) {
  * Implements hook_user_login().
  */
 function system_user_login(&$edit, $account) {
+  $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
-  if (!$account->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
+  if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
     backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
@@ -2110,12 +2181,11 @@ function system_user_timezone(&$form, &$form_state) {
   $form['timezone']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
-    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? variable_get('date_default_timezone', '') : ''),
+    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
     '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['timezone']['#description'] = t('Your time zone setting will be automatically detected if possible. Confirm the selection and click save.');
     $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
@@ -2127,24 +2197,32 @@ function system_user_timezone(&$form, &$form_state) {
 function system_block_info() {
   $blocks['main'] = array(
     'info' => t('Main page content'),
-    // Cached elsewhere.
-    'cache' => BACKDROP_NO_CACHE,
-    // Auto-enable in 'content' region by default, which always exists.
-    // @see system_themes_page(), backdrop_render_page()
-    'region' => 'content',
-    'status' => 1,
+    'description' => t('The default content for this page. <strong>This block may be required for this page to work properly.</strong>'),
+    'required contexts' => array(
+      'overrides_path' => 'overrides_path',
+    ),
+    'render first' => TRUE,
+  );
+  $blocks['header'] = array(
+    'info' => t('Header block'),
+    'description' => t('Contains elements typical of a site header including the site logo, name, slogan, and optionally a navigational menu.'),
+  );
+  $blocks['breadcrumb'] = array(
+    'info' => t('Breadcrumb'),
+    'description' => t('The current page breadcrumb trail.'),
+    'render last' => TRUE,
   );
   $blocks['powered-by'] = array(
     'info' => t('Powered by Backdrop'),
+    'description' => t('Displays a link to <a href="http://backdropcms.org">Backdrop CMS</a>.'),
     'weight' => '10',
-    'cache' => BACKDROP_NO_CACHE,
   );
   // System-defined menu blocks.
   foreach (menu_list_system_menus() as $menu_name => $title) {
-    $blocks[$menu_name]['info'] = t($title);
-    // Menu blocks can't be cached because each menu item can have
-    // a custom access callback. menu.inc manages its own caching.
-    $blocks[$menu_name]['cache'] = BACKDROP_NO_CACHE;
+    $blocks[$menu_name] = array(
+      'info' => check_plain(t($title)),
+      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+    );
   }
   return $blocks;
 }
@@ -2155,12 +2233,24 @@ function system_block_info() {
  * Generate a block with a promotional link to BackdropCMS.org and
  * all system menu blocks.
  */
-function system_block_view($delta = '') {
+function system_block_view($delta = '', $settings = array()) {
   $block = array();
   switch ($delta) {
     case 'main':
+      $router_item = menu_get_item();
+      if ($router_item['include_file']) {
+        require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
+      }
       $block['subject'] = NULL;
-      $block['content'] = backdrop_set_page_content();
+      $block['content'] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
+      return $block;
+    case 'header':
+      $block['subject'] = NULL;
+      $block['content'] = system_header_block($settings);
+      return $block;
+    case 'breadcrumb':
+      $block['subject'] = NULL;
+      $block['content'] = theme('breadcrumb', array('breadcrumb' => backdrop_get_breadcrumb()));
       return $block;
     case 'powered-by':
       $block['subject'] = NULL;
@@ -2179,6 +2269,15 @@ function system_block_view($delta = '') {
 }
 
 /**
+ * Implements hook_block_configure().
+ */
+function system_block_configure($delta, $settings) {
+  if ($delta === 'header') {
+    return system_header_block_form($settings);
+  }
+}
+
+/**
  * Implements hook_preprocess_block().
  */
 function system_preprocess_block(&$variables) {
@@ -2186,14 +2285,14 @@ function system_preprocess_block(&$variables) {
 
     switch ($variables['block']->delta) {
       case 'powered-by':
-        $variables['attributes_array']['role'] = 'complementary';
+        $variables['attributes']['role'] = 'complementary';
         break;
 
       // System menu blocks should get the same class as menu module blocks.
       default:
         if (in_array($variables['block']->delta, array_keys(menu_list_system_menus()))) {
-          $variables['attributes_array']['role'] = 'navigation';
-          $variables['classes_array'][] = 'block-menu';
+          $variables['attributes']['role'] = 'navigation';
+          $variables['classes'][] = 'block-menu';
         }
     }
   }
@@ -2489,6 +2588,10 @@ function _system_rebuild_module_data() {
       continue;
     }
 
+    // Add the info file modification time, so it becomes available for
+    // contributed modules to use for ordering module lists.
+    $module->info['mtime'] = filemtime(dirname($module->uri) . '/' . $module->name . '.info');
+
     // Merge in defaults and save.
     $modules[$key]->info = $module->info + $defaults;
 
@@ -2609,11 +2712,9 @@ function _system_rebuild_theme_data() {
       'header' => 'Header',
       'footer' => 'Footer',
       'highlighted' => 'Highlighted',
-      'page_top' => 'Page top',
       'page_bottom' => 'Page bottom',
     ),
     'description' => '',
-    'features' => _system_default_theme_features(),
     'screenshot' => 'screenshot.png',
     'php' => BACKDROP_MINIMUM_PHP,
     'stylesheets' => array(),
@@ -2625,6 +2726,10 @@ function _system_rebuild_theme_data() {
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
+
+    // Add the info file modification time, so it becomes available for
+    // contributed modules to use for ordering theme lists.
+    $themes[$key]->info['mtime'] = filemtime($theme->uri);
 
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
@@ -2740,132 +2845,62 @@ function _system_info_add_path($info, $path) {
 }
 
 /**
- * Returns an array of default theme features.
+ * Settings form for the header block.
  */
-function _system_default_theme_features() {
-  return array(
-    'logo',
-    'favicon',
-    'name',
-    'slogan',
-    'node_user_picture',
-    'comment_user_picture',
-    'comment_user_verification',
-    'main_menu',
-    'secondary_menu',
+function system_header_block_form($settings) {
+  $settings += array(
+    'menu' => 'user-menu',
+    'logo' => TRUE,
+    'site_name' => TRUE,
+    'site_slogan' => TRUE,
   );
-}
 
-/**
- * Get a list of available regions from a specified theme.
- *
- * @param $theme_key
- *   The name of a theme.
- * @param $show
- *   Possible values: REGIONS_ALL or REGIONS_VISIBLE. Visible excludes hidden
- *   regions.
- * @return
- *   An array of regions in the form $region['name'] = 'description'.
- */
-function system_region_list($theme_key, $show = REGIONS_ALL) {
-  $themes = list_themes();
-  if (!isset($themes[$theme_key])) {
-    return array();
-  }
-
-  $list = array();
-  $info = $themes[$theme_key]->info;
-  // If requested, suppress hidden regions. See block_admin_display_form().
-  foreach ($info['regions'] as $name => $label) {
-    if ($show == REGIONS_ALL || !isset($info['regions_hidden']) || !in_array($name, $info['regions_hidden'])) {
-      $list[$name] = t($label);
-    }
-  }
-
-  return $list;
-}
-
-/**
- * Implements hook_system_info_alter().
- */
-function system_system_info_alter(&$info, $file, $type) {
-  // Remove page-top and page-bottom from the blocks UI since they are reserved for
-  // modules to populate from outside the blocks system.
-  if ($type == 'theme') {
-    $info['regions_hidden'][] = 'page_top';
-    $info['regions_hidden'][] = 'page_bottom';
-  }
-}
-
-/**
- * Get the name of the default region for a given theme.
- *
- * @param $theme
- *   The name of a theme.
- * @return
- *   A string that is the region name.
- */
-function system_default_region($theme) {
-  $regions = array_keys(system_region_list($theme, REGIONS_VISIBLE));
-  return isset($regions[0]) ? $regions[0] : '';
-}
-
-/**
- * Sets up a form to save information automatically.
- *
- * This function adds a submit handler and a submit button to a form array. The
- * submit function saves all the data in the form, using variable_set(), to
- * variables named the same as the keys in the form array. Note that this means
- * you should normally prefix your form array keys with your module name, so
- * that they are unique when passed into variable_set().
- *
- * If you need to manipulate the data in a custom manner, you can either put
- * your own submission handler in the form array before calling this function,
- * or just use your own submission handler instead of calling this function.
- *
- * @param $form
- *   An associative array containing the structure of the form.
- *
- * @return
- *   The form structure.
- *
- * @see system_settings_form_submit()
- *
- * @ingroup forms
- */
-function system_settings_form($form) {
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
-
-  if (!empty($_POST) && form_get_errors()) {
-    backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
-  }
-  $form['#submit'][] = 'system_settings_form_submit';
-  // By default, render the form using theme_system_settings_form().
-  if (!isset($form['#theme'])) {
-    $form['#theme'] = 'system_settings_form';
-  }
+  $form['menu'] = array(
+    '#title' => t('Menu'),
+    '#type' => 'select',
+    '#options' => menu_get_menus(),
+    '#empty_option' => '- ' . t('None') . ' -',
+    '#default_value' => $settings['menu'],
+  );
+  $form['logo'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Logo'),
+    '#default_value' => $settings['logo'],
+  );
+  $form['site_name'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Site name'),
+    '#default_value' => $settings['site_name'],
+  );
+  $form['site_slogan'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Site slogan'),
+    '#default_value' => $settings['site_slogan'],
+  );
   return $form;
 }
 
 /**
- * Form submission handler for system_settings_form().
+ * Output the content for the header block.
  *
- * If you want node type configure style handling of your checkboxes,
- * add an array_filter value to your form.
+ * @see system_block_view()
  */
-function system_settings_form_submit($form, &$form_state) {
-  // Exclude unnecessary elements.
-  form_state_values_clean($form_state);
+function system_header_block($settings) {
+  $settings += array(
+    'menu' => 'user-menu',
+    'logo' => TRUE,
+    'site_slogan' => TRUE,
+    'site_name' => TRUE,
+  );
 
-  foreach ($form_state['values'] as $key => $value) {
-    if (is_array($value) && isset($form_state['values']['array_filter'])) {
-      $value = array_keys(array_filter($value));
-    }
-    variable_set($key, $value);
-  }
+  $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
+  $site_config = config('system.core');
+  $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
+  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->get('site_name')) : '';
+  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->get('site_slogan')) : '';
+  $variables['menu']        = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
 
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return theme('header', $variables);
 }
 
 /**
@@ -2949,6 +2984,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => $yes ? $yes : t('Confirm'),
+    '#attributes' => array('class' => array('button-danger')),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -3106,40 +3142,6 @@ function system_jump_menu_submit($form, &$form_state) {
 }
 
 /**
- * Determines whether the current user is in compact mode.
- *
- * Compact mode shows certain administration pages with less description text,
- * such as the configuration page and the permissions page.
- *
- * Whether the user is in compact mode is determined by a cookie, which is set
- * for the user by system_admin_compact_page().
- *
- * If the user does not have the cookie, the default value is given by the
- * system variable 'admin_compact_mode', which itself defaults to FALSE. This
- * does not have a user interface to set it: it is a hidden variable which can
- * be set in the settings.php file.
- *
- * @return
- *   TRUE when in compact mode, FALSE when in expanded mode.
- */
-function system_admin_compact_mode() {
-  // PHP converts dots into underscores in cookie names to avoid problems with
-  // its parser, so we use a converted cookie name.
-  return isset($_COOKIE['Drupal_visitor_admin_compact_mode']) ? $_COOKIE['Drupal_visitor_admin_compact_mode'] : variable_get('admin_compact_mode', FALSE);
-}
-
-/**
- * Menu callback; Sets whether the admin menu is in compact mode or not.
- *
- * @param $mode
- *   Valid values are 'on' and 'off'.
- */
-function system_admin_compact_page($mode = 'off') {
-  user_cookie_save(array('admin_compact_mode' => ($mode == 'on')));
-  backdrop_goto();
-}
-
-/**
  * Generate a list of tasks offered by a specified module.
  *
  * @param $module
@@ -3212,13 +3214,13 @@ function system_get_module_admin_tasks($module, $info) {
 
   // Append link for permissions.
   if (module_hook($module, 'permission')) {
-    $item = menu_get_item('admin/people/permissions');
+    $item = menu_get_item('admin/config/people/permissions');
     if (!empty($item['access'])) {
       $item['link_path'] = $item['href'];
       $item['title'] = t('Configure @module permissions', array('@module' => $info['name']));
       unset($item['description']);
       $item['localized_options']['fragment'] = 'module-' . $module;
-      $admin_tasks["admin/people/permissions#module-$module"] = $item;
+      $admin_tasks["admin/config/people/permissions#module-$module"] = $item;
     }
   }
 
@@ -3265,10 +3267,11 @@ function system_cron() {
     }
   }
 
+  // Remove expired and temporary items from cache bins.
   $core = array('cache', 'path', 'filter', 'page', 'menu');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
-    cache($bin)->expire();
+    cache($bin)->garbageCollection();
   }
 
   // Cleanup the batch table and the queue for failed batches.
@@ -3295,159 +3298,8 @@ function system_cron() {
  * Implements hook_flush_caches().
  */
 function system_flush_caches() {
-  // Rebuild list of date formats.
-  system_date_formats_rebuild();
   // Reset the menu static caches.
   menu_reset_static_cache();
-}
-
-/**
- * Implements hook_action_info().
- */
-function system_action_info() {
-  return array(
-    'system_message_action' => array(
-      'type' => 'system',
-      'label' => t('Display a message to the user'),
-      'configurable' => TRUE,
-    ),
-    'system_send_email_action' => array(
-      'type' => 'system',
-      'label' => t('Send e-mail'),
-      'configurable' => TRUE,
-    ),
-    'system_block_ip_action' => array(
-      'type' => 'user',
-      'label' => t('Ban IP address of current user'),
-      'configurable' => FALSE,
-    ),
-    'system_goto_action' => array(
-      'type' => 'system',
-      'label' => t('Redirect to URL'),
-      'configurable' => TRUE,
-    ),
-  );
-}
-
-/**
- * Return a form definition so the Send email action can be configured.
- *
- * @param $context
- *   Default values (if we are editing an existing action instance).
- *
- * @return
- *   Form definition.
- *
- * @see system_send_email_action_validate()
- * @see system_send_email_action_submit()
- */
-function system_send_email_action_form($context) {
-  // Set default values for form.
-  if (!isset($context['recipient'])) {
-    $context['recipient'] = '';
-  }
-  if (!isset($context['subject'])) {
-    $context['subject'] = '';
-  }
-  if (!isset($context['message'])) {
-    $context['message'] = '';
-  }
-
-  $form['recipient'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Recipient'),
-    '#default_value' => $context['recipient'],
-    '#maxlength' => '254',
-    '#description' => t('The e-mail address to which the message should be sent OR enter [node:author:mail], [comment:author:mail], etc. if you would like to send an e-mail to the author of the original post.'),
-  );
-  $form['subject'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Subject'),
-    '#default_value' => $context['subject'],
-    '#maxlength' => '254',
-    '#description' => t('The subject of the message.'),
-  );
-  $form['message'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Message'),
-    '#default_value' => $context['message'],
-    '#cols' => '80',
-    '#rows' => '20',
-    '#description' => t('The message that should be sent. You may include placeholders like [node:title], [user:name], and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
-  );
-  return $form;
-}
-
-/**
- * Validate system_send_email_action form submissions.
- */
-function system_send_email_action_validate($form, $form_state) {
-  $form_values = $form_state['values'];
-  // Validate the configuration form.
-  if (!valid_email_address($form_values['recipient']) && strpos($form_values['recipient'], ':mail') === FALSE) {
-    // We want the literal %author placeholder to be emphasized in the error message.
-    form_set_error('recipient', t('Enter a valid email address or use a token e-mail address such as %author.', array('%author' => '[node:author:mail]')));
-  }
-}
-
-/**
- * Process system_send_email_action form submissions.
- */
-function system_send_email_action_submit($form, $form_state) {
-  $form_values = $form_state['values'];
-  // Process the HTML form to store configuration. The keyed array that
-  // we return will be serialized to the database.
-  $params = array(
-    'recipient' => $form_values['recipient'],
-    'subject'   => $form_values['subject'],
-    'message'   => $form_values['message'],
-  );
-  return $params;
-}
-
-/**
- * Sends an e-mail message.
- *
- * @param object $entity
- *   An optional node entity, which will be added as $context['node'] if
- *   provided.
- * @param array $context
- *   Array with the following elements:
- *   - 'recipient': E-mail message recipient. This will be passed through
- *     token_replace().
- *   - 'subject': The subject of the message. This will be passed through
- *     token_replace().
- *   - 'message': The message to send. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement.
- *
- * @ingroup actions
- */
-function system_send_email_action($entity, $context) {
-  if (empty($context['node'])) {
-    $context['node'] = $entity;
-  }
-
-  $recipient = token_replace($context['recipient'], $context);
-
-  // If the recipient is a registered user with a language preference, use
-  // the recipient's preferred language. Otherwise, use the system default
-  // language.
-  $recipient_account = user_load_by_mail($recipient);
-  if ($recipient_account) {
-    $language = user_preferred_language($recipient_account);
-  }
-  else {
-    $language = language_default();
-  }
-  $params = array('context' => $context);
-
-  if (backdrop_mail('system', 'action_send_email', $recipient, $language, $params)) {
-    watchdog('action', 'Sent email to %recipient', array('%recipient' => $recipient));
-  }
-  else {
-    watchdog('error', 'Unable to send email to %recipient', array('%recipient' => $recipient));
-  }
 }
 
 /**
@@ -3461,83 +3313,6 @@ function system_mail($key, &$message, $params) {
 
   $message['subject'] .= str_replace(array("\r", "\n"), '', $subject);
   $message['body'][] = $body;
-}
-
-function system_message_action_form($context) {
-  $form['message'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Message'),
-    '#default_value' => isset($context['message']) ? $context['message'] : '',
-    '#required' => TRUE,
-    '#rows' => '8',
-    '#description' => t('The message to be displayed to the current user. You may include placeholders like [node:title], [user:name], and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
-  );
-  return $form;
-}
-
-function system_message_action_submit($form, $form_state) {
-  return array('message' => $form_state['values']['message']);
-}
-
-/**
- * Sends a message to the current user's screen.
- *
- * @param object $entity
- *   An optional node entity, which will be added as $context['node'] if
- *   provided.
- * @param array $context
- *   Array with the following elements:
- *   - 'message': The message to send. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement in
- *     the message.
- *
- * @ingroup actions
- */
-function system_message_action(&$entity, $context = array()) {
-  if (empty($context['node'])) {
-    $context['node'] = $entity;
-  }
-
-  $context['message'] = token_replace(filter_xss_admin($context['message']), $context);
-  backdrop_set_message($context['message']);
-}
-
-/**
- * Settings form for system_goto_action().
- */
-function system_goto_action_form($context) {
-  $form['url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL'),
-    '#description' => t('The URL to which the user should be redirected. This can be an internal URL like node/1234 or an external URL like http://backdropcms.org.'),
-    '#default_value' => isset($context['url']) ? $context['url'] : '',
-    '#required' => TRUE,
-  );
-  return $form;
-}
-
-function system_goto_action_submit($form, $form_state) {
-  return array(
-    'url' => $form_state['values']['url']
-  );
-}
-
-/**
- * Redirects to a different URL.
- *
- * @param $entity
- *   Ignored.
- * @param array $context
- *   Array with the following elements:
- *   - 'url': URL to redirect to. This will be passed through
- *     token_replace().
- *   - Other elements will be used as the data for token replacement.
- *
- * @ingroup actions
- */
-function system_goto_action($entity, $context) {
-  backdrop_goto(token_replace($context['url'], $context));
 }
 
 /**
@@ -3554,7 +3329,7 @@ function system_time_zones($blank = NULL) {
     // reasons and should not be used, the list is filtered by a regular
     // expression.
     if (preg_match('!^((Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific)/|UTC$)!', $zone)) {
-      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', variable_get('date_format_long', 'l, F j, Y - H:i') . ' O', $zone)));
+      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern.php') . ' O', $zone)));
     }
   }
   // Sort the translated time zones alphabetically.
@@ -3578,7 +3353,7 @@ function system_check_http_request() {
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);
-  variable_set('backdrop_http_request_fails', !$works);
+  state_set('backdrop_http_request_fails', !$works);
   return $works;
 }
 
@@ -3591,33 +3366,6 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
   $abbreviation = $abbreviation ? $abbreviation : '';
   $timezone = timezone_name_from_abbr($abbreviation, intval($offset), $is_daylight_saving_time);
   backdrop_json_output($timezone);
-}
-
-/**
- * Returns HTML for the Powered by Backdrop text.
- *
- * @ingroup themeable
- */
-function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'http://backdropcms.org')) . '</span>';
-}
-
-/**
- * Returns HTML for a link to show or hide inline help descriptions.
- *
- * @ingroup themeable
- */
-function theme_system_compact_link() {
-  $output = '<div class="compact-link">';
-  if (system_admin_compact_mode()) {
-    $output .= l(t('Show descriptions'), 'admin/compact/off', array('attributes' => array('title' => t('Expand layout to include descriptions.')), 'query' => backdrop_get_destination()));
-  }
-  else {
-    $output .= l(t('Hide descriptions'), 'admin/compact/on', array('attributes' => array('title' => t('Compress layout by hiding descriptions.')), 'query' => backdrop_get_destination()));
-  }
-  $output .= '</div>';
-
-  return $output;
 }
 
 /**
@@ -3691,27 +3439,13 @@ function system_retrieve_file($url, $destination = NULL, $managed = FALSE, $repl
 }
 
 /**
- * Implements hook_page_alter().
- */
-function system_page_alter(&$page) {
-  // Find all non-empty page regions, and add a theme wrapper function that
-  // allows them to be consistently themed.
-  $regions = system_region_list($GLOBALS['theme']);
-  foreach (array_keys($regions) as $region) {
-    if (!empty($page[$region])) {
-      $page[$region]['#region'] = $region;
-    }
-  }
-}
-
-/**
  * Run the automated cron if enabled.
  */
 function system_run_automated_cron() {
   // If the site is not fully installed, suppress the automated cron run.
   // Otherwise it could be triggered prematurely by Ajax requests during
   // installation.
-  if (($threshold = variable_get('cron_safe_threshold', BACKDROP_CRON_DEFAULT_THRESHOLD)) > 0 && state_get('install_task') == 'done') {
+  if (($threshold = config('system.core')->get('cron_safe_threshold')) > 0 && state_get('install_task') == 'done') {
     $cron_last = state_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
       backdrop_cron_run();
@@ -3720,423 +3454,111 @@ function system_run_automated_cron() {
 }
 
 /**
- * Gets the list of available date types and attributes.
- *
- * @param $type
- *   (optional) The date type name.
- *
- * @return
- *   An associative array of date type information keyed by the date type name.
- *   Each date type information array has the following elements:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this date type in its
- *     hook_date_format_types(). An empty string if the date type was
- *     user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- *   If $type was defined, only a single associative array with the above
- *   elements is returned.
- */
-function system_get_date_types($type = NULL) {
-  $types = &backdrop_static(__FUNCTION__);
-
-  if (!isset($types)) {
-    $types = _system_date_format_types_build();
-  }
-
-  return $type ? (isset($types[$type]) ? $types[$type] : FALSE) : $types;
-}
-
-/**
- * Implements hook_date_format_types().
- */
-function system_date_format_types() {
-  return array(
-    'long' => t('Long'),
-    'medium' => t('Medium'),
-    'short' => t('Short'),
-  );
-}
-
-/**
- * Implements hook_date_formats().
- */
-function system_date_formats() {
-  include_once BACKDROP_ROOT . '/core/includes/date.inc';
-  return system_default_date_formats();
-}
-
-/**
  * Gets the list of defined date formats and attributes.
  *
- * @param $type
+ * @param $date_format_name
  *   (optional) The date type name.
  *
  * @return
- *   An associative array of date formats. The top-level keys are the names of
- *   the date types that the date formats belong to. The values are in turn
- *   associative arrays keyed by the format string, with the following keys:
- *   - dfid: The date format ID.
- *   - format: The format string.
- *   - type: The machine-readable name of the date type.
- *   - locales: An array of language codes. This can include both 2 character
- *     language codes like 'en and 'fr' and 5 character language codes like
- *     'en-gb' and 'en-us'.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this date format in its
- *     hook_date_formats(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- *   If $type was defined, only the date formats associated with the given date
- *   type are returned, in a single associative array keyed by format string.
- */
-function system_get_date_formats($type = NULL) {
-  $date_formats = &backdrop_static(__FUNCTION__);
-
-  if (!isset($date_formats)) {
-    $date_formats = _system_date_formats_build();
-  }
-
-  return $type ? (isset($date_formats[$type]) ? $date_formats[$type] : FALSE) : $date_formats;
-}
-
-/**
- * Gets the format details for a particular format ID.
+ *   An associative array of date formats. The top-level keys are the
+ *   machine-readable names of the date formats. The values are associative
+ *   arrays with the following keys:
+ *   - name: The string human readable name of the date format.
+ *   - pattern: The pattern string as usable by the PHP date() function.
  *
- * @param $dfid
- *   A date format ID.
- *
- * @return
- *   A date format object with the following properties:
- *   - dfid: The date format ID.
- *   - format: The date format string.
- *   - type: The name of the date type.
- *   - locked: Whether the date format can be changed or not.
+ *   If $date_format_name was defined, only the date formats associated with the
+ *   given machine name are returned, in an associative array keyed by format
+ *   string.
  */
-function system_get_date_format($dfid) {
-  return db_query('SELECT df.dfid, df.format, df.type, df.locked FROM {date_formats} df WHERE df.dfid = :dfid', array(':dfid' => $dfid))->fetch();
-}
-
-/**
- * Resets the database cache of date formats and saves all new date formats.
- */
-function system_date_formats_rebuild() {
-  backdrop_static_reset('system_get_date_formats');
-  $date_formats = system_get_date_formats(NULL);
-
-  foreach ($date_formats as $type => $formats) {
-    foreach ($formats as $format => $info) {
-      system_date_format_save($info);
+function system_get_date_formats($date_format_name = NULL) {
+  $date_formats = backdrop_static(__FUNCTION__, array());
+  if (empty($date_formats)) {
+    $date_formats = config_get('system.date', 'formats');
+    foreach ($date_formats as $name => $format) {
+      $date_formats[$name]['name'] = $name;
     }
   }
 
-  // Rebuild configured date formats locale list.
-  backdrop_static_reset('system_date_format_locale');
-  system_date_format_locale();
-
-  _system_date_formats_build();
-}
-
-/**
- * Gets the appropriate date format string for a date type and locale.
- *
- * @param $langcode
- *   (optional) Language code for the current locale. This can be a 2 character
- *   language code like 'en' and 'fr' or a 5 character language code like
- *   'en-gb' and 'en-us'.
- * @param $type
- *   (optional) The date type name.
- *
- * @return
- *   If $type and $langcode are specified, returns the corresponding date format
- *   string. If only $langcode is specified, returns an array of all date
- *   format strings for that locale, keyed by the date type. If neither is
- *   specified, or if no matching formats are found, returns FALSE.
- */
-function system_date_format_locale($langcode = NULL, $type = NULL) {
-  $formats = &backdrop_static(__FUNCTION__);
-
-  if (empty($formats)) {
-    $formats = array();
-    $result = db_query("SELECT format, type, language FROM {date_format_locale}");
-    foreach ($result as $record) {
-      if (!isset($formats[$record->language])) {
-        $formats[$record->language] = array();
-      }
-      $formats[$record->language][$record->type] = $record->format;
-    }
-  }
-
-  if ($type && $langcode && !empty($formats[$langcode][$type])) {
-    return $formats[$langcode][$type];
-  }
-  elseif ($langcode && !empty($formats[$langcode])) {
-    return $formats[$langcode];
-  }
-
-  return FALSE;
-}
-
-/**
- * Builds and returns information about available date types.
- *
- * @return
- *   An associative array of date type information keyed by name. Each date type
- *   information array has the following elements:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this format in its
- *     hook_date_format_types(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function _system_date_format_types_build() {
-  $types = array();
-
-  // Get list of modules that implement hook_date_format_types().
-  $modules = module_implements('date_format_types');
-
-  foreach ($modules as $module) {
-    $module_types = module_invoke($module, 'date_format_types');
-    foreach ($module_types as $module_type => $type_title) {
-      $type = array();
-      $type['module'] = $module;
-      $type['type'] = $module_type;
-      $type['title'] = $type_title;
-      $type['locked'] = 1;
-      // Will be over-ridden later if in the db.
-      $type['is_new'] = TRUE;
-      $types[$module_type] = $type;
-    }
-  }
-
-  // Get custom formats added to the database by the end user.
-  $result = db_query('SELECT dft.type, dft.title, dft.locked FROM {date_format_type} dft ORDER BY dft.title');
-  foreach ($result as $record) {
-    if (!isset($types[$record->type])) {
-      $type = array();
-      $type['is_new'] = FALSE;
-      $type['module'] = '';
-      $type['type'] = $record->type;
-      $type['title'] = $record->title;
-      $type['locked'] = $record->locked;
-      $types[$record->type] = $type;
-    }
-    else {
-      $type = array();
-      $type['is_new'] = FALSE;  // Over-riding previous setting.
-      $types[$record->type] = array_merge($types[$record->type], $type);
-    }
-  }
-
-  // Allow other modules to modify these date types.
-  backdrop_alter('date_format_types', $types);
-
-  return $types;
-}
-
-/**
- * Builds and returns information about available date formats.
- *
- * @return
- *   An associative array of date formats. The top-level keys are the names of
- *   the date types that the date formats belong to. The values are in turn
- *   associative arrays keyed by format with the following keys:
- *   - dfid: The date format ID.
- *   - format: The PHP date format string.
- *   - type: The machine-readable name of the date type the format belongs to.
- *   - locales: An array of language codes. This can include both 2 character
- *     language codes like 'en and 'fr' and 5 character language codes like
- *     'en-gb' and 'en-us'.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - module: The name of the module that defined this format in its
- *     hook_date_formats(). An empty string if the format was user-defined.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function _system_date_formats_build() {
-  $date_formats = array();
-
-  // First handle hook_date_format_types().
-  $types = _system_date_format_types_build();
-  foreach ($types as $type => $info) {
-    system_date_format_type_save($info);
-  }
-
-  // Get formats supplied by various contrib modules.
-  $module_formats = module_invoke_all('date_formats');
-
-  foreach ($module_formats as $module_format) {
-    // System types are locked.
-    $module_format['locked'] = 1;
-    // If no date type is specified, assign 'custom'.
-    if (!isset($module_format['type'])) {
-      $module_format['type'] = 'custom';
-    }
-    if (!in_array($module_format['type'], array_keys($types))) {
-      continue;
-    }
-    if (!isset($date_formats[$module_format['type']])) {
-      $date_formats[$module_format['type']] = array();
-    }
-
-    // If another module already set this format, merge in the new settings.
-    if (isset($date_formats[$module_format['type']][$module_format['format']])) {
-      $date_formats[$module_format['type']][$module_format['format']] = array_merge_recursive($date_formats[$module_format['type']][$module_format['format']], $module_format);
-    }
-    else {
-      // This setting will be overridden later if it already exists in the db.
-      $module_format['is_new'] = TRUE;
-      $date_formats[$module_format['type']][$module_format['format']] = $module_format;
-    }
-  }
-
-  // Get custom formats added to the database by the end user.
-  $result = db_query('SELECT df.dfid, df.format, df.type, df.locked, dfl.language FROM {date_formats} df LEFT JOIN {date_format_locale} dfl ON df.format = dfl.format AND df.type = dfl.type ORDER BY df.type, df.format');
-  foreach ($result as $record) {
-    // If this date type isn't set, initialise the array.
-    if (!isset($date_formats[$record->type])) {
-      $date_formats[$record->type] = array();
-    }
-    $format = (array) $record;
-    $format['is_new'] = FALSE; // It's in the db, so override this setting.
-    // If this format not already present, add it to the array.
-    if (!isset($date_formats[$record->type][$record->format])) {
-      $format['module'] = '';
-      $format['locales'] = array($record->language);
-      $date_formats[$record->type][$record->format] = $format;
-    }
-    // Format already present, so merge in settings.
-    else {
-      if (!empty($record->language)) {
-        $format['locales'] = array_merge($date_formats[$record->type][$record->format]['locales'], array($record->language));
-      }
-      $date_formats[$record->type][$record->format] = array_merge($date_formats[$record->type][$record->format], $format);
-    }
-  }
-
-  // Allow other modules to modify these formats.
-  backdrop_alter('date_formats', $date_formats);
-
-  return $date_formats;
-}
-
-/**
- * Saves a date type to the database.
- *
- * @param $type
- *   A date type array containing the following keys:
- *   - type: The machine-readable name of the date type.
- *   - title: The human-readable name of the date type.
- *   - locked: A boolean indicating whether or not this date type should be
- *     configurable from the user interface.
- *   - is_new: A boolean indicating whether or not this date type is as of yet
- *     unsaved in the database.
- */
-function system_date_format_type_save($type) {
-  $info = array();
-  $info['type'] = $type['type'];
-  $info['title'] = $type['title'];
-  $info['locked'] = $type['locked'];
-
-  // Update date_format table.
-  if (!empty($type['is_new'])) {
-    backdrop_write_record('date_format_type', $info);
+  // Return either the specific format or all formats.
+  if (empty($date_format_name)) {
+    return $date_formats;
   }
   else {
-    backdrop_write_record('date_format_type', $info, 'type');
+    return isset($date_formats[$date_format_name]) ? $date_formats[$date_format_name] : FALSE;
   }
 }
 
 /**
- * Deletes a date type from the database.
+ * Menu loader function for a date format.
  *
- * @param $type
- *   The machine-readable name of the date type.
+ * @param string $date_format_name
+ *   The date type name.
+ * @param bool $include_hidden
+ *   Include hidden, non-configurable date formats, such as those used by HTML5
+ *   date/time elements.
+ *
+ * @return
+ *   The date format id if it exists and is not hidden, FALSE otherwise.
  */
-function system_date_format_type_delete($type) {
-  db_delete('date_formats')
-    ->condition('type', $type)
-    ->execute();
-  db_delete('date_format_type')
-    ->condition('type', $type)
-    ->execute();
-  db_delete('date_format_locale')
-    ->condition('type', $type)
-    ->execute();
+function system_date_format_load($date_format_name, $include_hidden = TRUE) {
+  if (($format = system_get_date_formats($date_format_name)) && ($include_hidden || empty($format['hidden']))) {
+    return $format;
+  }
+  return FALSE;
 }
 
 /**
  * Saves a date format to the database.
  *
- * @param $date_format
+ * @param array $date_format
  *   A date format array containing the following keys:
- *   - type: The name of the date type this format is associated with.
- *   - format: The PHP date format string.
- *   - locked: A boolean indicating whether or not this format should be
- *     configurable from the user interface.
- * @param $dfid
- *   If set, replace the existing date format having this ID with the
- *   information specified in $date_format.
+ *   - name: The machine name of this date format.
+ *   - label: The human-readable label for this date format.
+ *   - pattern: The pattern string as usable by the PHP date() function.
+ *   - langcode: Optional. If multiple languages are available, this specifies
+ *     which language the default format is in.
+ *   - module: If provided by a module, the name of the providing module. This
+ *     will prevent the format from being deleted in the UI.
+ *   - hidden: Optional. A boolean indicating whether or not this format should
+ *     be configurable from the user interface.
  *
- * @see system_get_date_types()
  * @see http://php.net/date
  */
-function system_date_format_save($date_format, $dfid = 0) {
-  $info = array();
-  $info['dfid'] = $dfid;
-  $info['type'] = $date_format['type'];
-  $info['format'] = $date_format['format'];
-  $info['locked'] = $date_format['locked'];
-
-  // Update date_format table.
-  if (!empty($date_format['is_new'])) {
-    backdrop_write_record('date_formats', $info);
+function system_date_format_save($date_format) {
+  $format = array(
+    'label' => $date_format['label'],
+    'pattern' => $date_format['pattern'],
+  );
+  // Trim empty strings from locale settings.
+  if (isset($date_format['locales'])) {
+    $date_format['locales'] = array_filter(array_filter($date_format['locales'], 'trim'));
   }
-  else {
-    $keys = ($dfid ? array('dfid') : array('format', 'type'));
-    backdrop_write_record('date_formats', $info, $keys);
-  }
-
-  // Retrieve an array of language objects for enabled languages.
-  $languages = language_list(TRUE);
-
-  $locale_format = array();
-  $locale_format['type'] = $date_format['type'];
-  $locale_format['format'] = $date_format['format'];
-
-  // Check if the suggested language codes are configured and enabled.
-  if (!empty($date_format['locales'])) {
-    foreach ($date_format['locales'] as $langcode) {
-      // Only proceed if language is enabled.
-      if (isset($languages[$langcode])) {
-        $is_existing = (bool) db_query_range('SELECT 1 FROM {date_format_locale} WHERE type = :type AND language = :language', 0, 1, array(':type' => $date_format['type'], ':language' => $langcode))->fetchField();
-        if (!$is_existing) {
-          $locale_format['language'] = $langcode;
-          backdrop_write_record('date_format_locale', $locale_format);
-        }
-      }
+  // Don't save empty defaults.
+  foreach (array('module', 'hidden', 'locales') as $key) {
+    if (!empty($date_format[$key])) {
+      $format[$key] = $date_format[$key];
     }
   }
+  config_set('system.date', 'formats.' . $date_format['name'], $format);
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**
  * Deletes a date format from the database.
  *
- * @param $dfid
+ * @param $date_format_name
  *   The date format ID.
  */
-function system_date_format_delete($dfid) {
-  db_delete('date_formats')
-    ->condition('dfid', $dfid)
-    ->execute();
+function system_date_format_delete($date_format_name) {
+  // Do not allow deletion of module-provided formats.
+  $format = system_get_date_formats($date_format_name);
+  if (isset($format['module'])) {
+    return FALSE;
+  }
+
+  $format_id = 'formats.' . $date_format_name;
+  config('system.date')->clear($format_id)->save();
+  backdrop_static_reset('system_get_date_formats');
 }
 
 /**
@@ -4173,6 +3595,7 @@ function system_autoload_info() {
     'Archive_Tar' => 'system.tar.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
+    'LayoutUpdater' => 'system.updater.inc',
 
     // @todo: Move file entities to File module.
     // https://github.com/backdrop/backdrop-issues/issues/213
@@ -4195,72 +3618,66 @@ function system_autoload_info() {
  * Implements hook_config_info().
  */
 function system_config_info() {
-  $prefixes['system.performance'] = array(
-    'label' => t('System performance'),
+  $prefixes['system.core'] = array(
+    'label' => t('System core settings'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.authorize'] = array(
+    'label' => t('System authorize'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.date'] = array(
+    'label' => t('System date'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.mail'] = array(
+    'label' => t('Mail systems'),
+    'group' => t('Configuration'),
+  );
+
+  // Register config files for all active themes.
+  $themes = list_themes();
+  foreach ($themes as $theme_name => $theme) {
+    // If the theme registers settings, it needs a config file.
+    if (isset($theme->info['settings'])) {
+      $prefixes[$theme_name . '.settings'] = array(
+        'label' => t('!theme settings', array('!theme' => $theme->info['name'])),
+        'group' => t('Configuration'),
+      );
+    }
+  }
+
   return $prefixes;
 }
 
 /**
- * Returns HTML for a confirmation form.
+ * Implements hook_system_info_alter().
  *
- * By default this does not alter the appearance of a form at all,
- * but is provided as a convenience for themers.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
+ * @deprecated since 1.1
+ *   This function should not be necessary in Backdrop 2.0, where modules
+ *   built-into core no longer need to be prevented from enabling.
  */
-function theme_confirm_form($variables) {
-  return backdrop_render_children($variables['form']);
-}
-
-/**
- * Returns HTML for a system settings form.
- *
- * By default this does not alter the appearance of a form at all,
- * but is provided as a convenience for themers.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_system_settings_form($variables) {
-  return backdrop_render_children($variables['form']);
-}
-
-/**
- * Returns HTML for an exposed filter form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: An associative array containing the structure of the form.
- *
- * @return
- *   A string containing an HTML-formatted form.
- *
- * @ingroup themeable
- */
-function theme_exposed_filters($variables) {
-  $form = $variables['form'];
-  $output = '';
-
-  if (isset($form['current'])) {
-    $items = array();
-    foreach (element_children($form['current']) as $key) {
-      $items[] = backdrop_render($form['current'][$key]);
-    }
-    $output .= theme('item_list', array('items' => $items, 'attributes' => array('class' => array('clearfix', 'current-filters'))));
+function system_system_info_alter(&$info, $file, $type) {
+  if (in_array($file->name, backdrop_merged_modules())) {
+    // Set a special flag indicating this module is now in core.
+    $info['merged_into_core'] = TRUE;
+    // Remove Backdrop core version as a fallback, ensuring it won't be enabled.
+    $info['backdrop'] = NULL;
   }
+}
 
-  $output .= backdrop_render_children($form);
+/**
+ * Menu callback; Returns the standard "Page not found" error page.
+ */
+function system_404() {
+  return t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+}
 
-  return '<div class="exposed-filters">' . $output . '</div>';
+/**
+ * Menu callback; Returns the standard "Page not found" error page.
+ */
+function system_403() {
+  return t('You are not authorized to access this page.');
 }
 
 /**

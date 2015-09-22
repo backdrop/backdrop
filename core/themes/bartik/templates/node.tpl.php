@@ -10,6 +10,9 @@
  *   or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
  *   given element.
+ * - $comments: The comment-related elements for the node.
+ *   - $comments['comments']: Rendered comments for this node.
+ *   - $comments['comment_form']: Form for adding a new comment.
  * - $user_picture: The node author's picture from user-picture.tpl.php.
  * - $date: Formatted creation date. Preprocess functions can reformat it by
  *   calling format_date() with the desired parameters on the $created variable.
@@ -18,21 +21,20 @@
  * - $display_submitted: Whether submission information should be displayed.
  * - $submitted: Submission information created from $name and $date during
  *   template_preprocess_node().
- * - $classes: String of classes that can be used to style contextually through
- *   CSS. It can be manipulated through the variable $classes_array from
- *   preprocess functions. The default values can be one or more of the
- *   following:
+ * - $classes: Array of classes that can be used to style contextually through
+ *   CSS. The default values can be one or more of the following:
  *   - node: The current template type; for example, "theming hook".
  *   - node-[type]: The current node type. For example, if the node is a
- *     "Article" it would result in "node-article". Note that the machine
+ *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
  *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
- *   - preview: Nodes in preview mode.
  *   The following are controlled through the node publishing options.
  *   - promoted: Nodes promoted to the front page.
  *   - sticky: Nodes ordered above other non-sticky nodes in teaser
  *     listings.
  *   - unpublished: Unpublished nodes visible only to administrators.
+ * - $attributes: Array of additional HTML attributes that should be added to
+ *   the wrapper element. Flatten with backdrop_attributes().
  * - $title_prefix (array): An array containing additional output populated by
  *   modules, intended to be displayed in front of the main title tag that
  *   appears in the template.
@@ -42,12 +44,10 @@
  *
  * Other variables:
  * - $node: Full node entity. Contains data that may not be safe.
- * - $type: Node type; for example, article, basic page, blog, etc.
+ * - $type: Node type; for example, post, page, blog, etc.
  * - $comment_count: Number of comments attached to the node.
  * - $uid: User ID of the node author.
  * - $created: Time the node was published formatted in Unix timestamp.
- * - $classes_array: Array of html class attribute values. It is flattened
- *   into a string within the variable $classes.
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.
  * - $id: Position of the node. Increments each time it's output.
@@ -75,17 +75,15 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_node()
- * @see template_process()
  */
 ?>
-<article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?> role="article">
+<article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
+  <?php if (!$page || $display_submitted): ?>
   <header>
     <?php print render($title_prefix); ?>
     <?php if (!$page): ?>
-      <h2<?php print $title_attributes; ?>>
-        <a href="<?php print $node_url; ?>"><?php print $title; ?></a>
-      </h2>
+      <h2><a href="<?php print $node_url; ?>"><?php print $title; ?></a></h2>
     <?php endif; ?>
     <?php print render($title_suffix); ?>
 
@@ -96,11 +94,11 @@
       </div>
     <?php endif; ?>
   </header>
+  <?php endif; ?>
 
-  <div class="content clearfix"<?php print $content_attributes; ?>>
+  <div class="content clearfix"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
       // We hide the comments and links now so that we can render them later.
-      hide($content['comments']);
       hide($content['links']);
       print render($content);
     ?>
@@ -109,7 +107,7 @@
   <?php
     // Remove the "Add new comment" link on the teaser page or if the comment
     // form is being displayed on the same page.
-    if ($teaser || !empty($content['comments']['comment_form'])) {
+    if ($teaser || !empty($comments['comment_form'])) {
       unset($content['links']['comment']['#links']['comment-add']);
     }
     // Only display the footer if there are links.
@@ -121,6 +119,18 @@
     </footer>
   <?php endif; ?>
 
-  <?php print render($content['comments']); ?>
+  <?php if ($page && isset($comments['comments'])): ?>
+    <section class="comments">  
+      <?php if ($comments['comments']): ?>
+        <h2 class="title"><?php print t('Comments'); ?></h2>
+        <?php print render($comments['comments']); ?>
+      <?php endif; ?>
+
+      <?php if ($comments['comment_form']): ?>
+        <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
+        <?php print render($comments['comment_form']); ?>
+      <?php endif; ?>
+    </section>
+  <?php endif; ?>
 
 </article>

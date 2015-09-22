@@ -9,11 +9,15 @@
  * Implements hook_install().
  */
 function contact_install() {
+  $site_mail = config_get('system.core', 'site_mail');
+  if (empty($site_mail))  {
+    $site_mail = ini_get('sendmail_from');
+  }
   // Insert a default contact category.
   $contact = array(
     'cid' => 1,
     'category' => 'Website feedback',
-    'recipients' => variable_get('site_mail', ini_get('sendmail_from')),
+    'recipients' => $site_mail,
     'reply' => '',
     'weight' => 1,
   );
@@ -35,32 +39,28 @@ function contact_install() {
  * Convert contact module settings to use configuration files.
  */
 function contact_update_1000() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'contact.settings');
-  // Migrate variables if any.
+  // Migrate variables to config.
   $config = config('contact.settings');
-  $config->set('contact_default_status', variable_get('contact_default_status', 1));
-  $config->set('contact_threshold_limit', variable_get('contact_threshold_limit', 5));
-  $config->set('contact_threshold_window', variable_get('contact_threshold_window', 3600));
+  $config->set('contact_default_status', update_variable_get('contact_default_status', 1));
+  $config->set('contact_threshold_limit', update_variable_get('contact_threshold_limit', 5));
+  $config->set('contact_threshold_window', update_variable_get('contact_threshold_window', 3600));
   $config->save();
+
   // Delete variables.
-  variable_del('contact_default_status');
-  variable_del('contact_threshold_limit');
-  variable_del('contact_threshold_window');
+  update_variable_del('contact_default_status');
+  update_variable_del('contact_threshold_limit');
+  update_variable_del('contact_threshold_window');
 }
 
 /**
  * Convert available database contact categories to configuration files.
  */
 function contact_update_1001() {
-  // Copy config file to site config folder.
-  config_install_default_config('module', 'contact.categories');
-  // Migrate categories if any.
+  // Migrate categories to config.
   if (db_table_exists('contact')) {
     $contacts = db_query("SELECT * FROM {contact}");
-
+    $categories = array();
     foreach ($contacts as $contact) {
-
       if ($contact->selected == 1) {
         // Add selected category to config.
         $config_data['contact_default_category'] = $contact->cid;

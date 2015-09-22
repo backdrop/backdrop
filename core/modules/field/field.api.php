@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Hooks provided by the Field module.
+ */
 
 /**
  * @addtogroup hooks
@@ -37,6 +41,8 @@
  *   - delete: (optional) String containing markup (normally a link) used as the
  *     element's 'delete' operation in the administration interface. Only for
  *     'form' context.
+ *
+ * @ingroup field_types
  */
 function hook_field_extra_fields() {
   $extra['node']['example'] = array(
@@ -66,6 +72,8 @@ function hook_field_extra_fields() {
  *   The associative array of 'pseudo-field' components.
  *
  * @see hook_field_extra_fields()
+ *
+ * @ingroup field_types
  */
 function hook_field_extra_fields_alter(&$info) {
   // Force node title to always be at the top of the list by default.
@@ -250,12 +258,6 @@ function hook_field_schema($field) {
     'columns' => $columns,
     'indexes' => array(
       'format' => array('format'),
-    ),
-    'foreign keys' => array(
-      'format' => array(
-        'table' => 'filter_format',
-        'columns' => array('format' => 'format'),
-      ),
     ),
   );
 }
@@ -454,7 +456,7 @@ function hook_field_presave($entity_type, $entity, $field, $instance, $langcode,
  * @see hook_field_delete()
  */
 function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
+  if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
     $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created', ));
     foreach ($items as $item) {
       $query->values(array(
@@ -495,7 +497,7 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * @see hook_field_delete()
  */
 function hook_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
+  if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
     $first_call = &backdrop_static(__FUNCTION__, array());
 
     // We don't maintain data for old revisions, so clear all previous values
@@ -646,6 +648,8 @@ function hook_field_delete_revision($entity_type, $entity, $field, $instance, $l
  *   The source entity from which field values are being copied.
  * @param $source_langcode
  *   The source language from which field values are being copied.
+ *
+ * @ingroup field_language
  */
 function hook_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items, $source_entity, $source_langcode) {
   // If the translating user is not permitted to use the assigned text format,
@@ -764,7 +768,7 @@ function hook_field_widget_info() {
     'text_textarea_with_summary' => array(
       'label' => t('Text area with a summary'),
       'field types' => array('text_with_summary'),
-      'settings' => array('rows' => 20, 'summary_rows' => 5),
+      'settings' => array('rows' => 10, 'summary_rows' => 5),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -1240,7 +1244,7 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
  */
 
 /**
- * @ingroup field_attach
+ * @addtogroup field_attach
  * @{
  */
 
@@ -1308,10 +1312,27 @@ function hook_field_attach_load($entity_type, $entities, $age, $options) {
  * @param $entity
  *   The entity with fields to validate.
  * @param array $errors
- *   An associative array of errors keyed by field_name, language, delta.
+ *   The array of errors (keyed by field name, language code, and delta) that
+ *   have already been reported for the entity. The function should add its
+ *   errors to this array. Each error is an associative array with the following
+ *   keys and values:
+ *   - error: An error code (should be a string prefixed with the module name).
+ *   - message: The human readable message to be displayed.
  */
 function hook_field_attach_validate($entity_type, $entity, &$errors) {
-  // @todo Needs function body.
+  // Make sure any images in post nodes have an alt text.
+  if ($entity_type == 'node' && $entity->type == 'post' && !empty($entity->field_image)) {
+    foreach ($entity->field_image as $langcode => $items) {
+      foreach ($items as $delta => $item) {
+        if (!empty($item['fid']) && empty($item['alt'])) {
+          $errors['field_image'][$langcode][$delta][] = array(
+            'error' => 'field_example_invalid',
+            'message' => t('All images in posts need to have an alternative text set.'),
+          );
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -1507,11 +1528,13 @@ function hook_field_attach_prepare_translation_alter(&$entity, $context) {
  *   - entity_type: The type of the entity to be displayed.
  *   - entity: The entity with fields to render.
  *   - langcode: The language code $entity has to be displayed in.
+ *
+ * @ingroup field_language
  */
 function hook_field_language_alter(&$display_language, $context) {
   // Do not apply core language fallback rules if they are disabled or if Locale
   // is not registered as a translation handler.
-  if (variable_get('locale_field_language_fallback', TRUE) && field_has_translation_handler($context['entity_type'], 'locale')) {
+  if (config_get('locale.settings', 'field_language_fallback') && field_has_translation_handler($context['entity_type'], 'locale')) {
     locale_field_language_fallback($display_language, $context['entity'], $context['language']);
   }
 }
@@ -1548,7 +1571,7 @@ function hook_field_available_languages_alter(&$languages, $context) {
 function hook_field_attach_create_bundle($entity_type, $bundle) {
   // When a new bundle is created, the menu needs to be rebuilt to add the
   // Field UI menu item tabs.
-  variable_set('menu_rebuild_needed', TRUE);
+  state_set('menu_rebuild_needed', TRUE);
 }
 
 /**
@@ -1561,11 +1584,11 @@ function hook_field_attach_create_bundle($entity_type, $bundle) {
 function hook_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
   // Update the extra weights variable with new information.
   if ($bundle_old !== $bundle_new) {
-    $extra_weights = variable_get('field_extra_weights', array());
+    $extra_weights = config_get('my_module.settings', 'field_extra_weights');
     if (isset($info[$entity_type][$bundle_old])) {
       $extra_weights[$entity_type][$bundle_new] = $extra_weights[$entity_type][$bundle_old];
       unset($extra_weights[$entity_type][$bundle_old]);
-      variable_set('field_extra_weights', $extra_weights);
+      config_get('my_module.settings', 'field_extra_weights');
     }
   }
 }
@@ -1585,15 +1608,15 @@ function hook_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new)
  */
 function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
   // Remove the extra weights variable information for this bundle.
-  $extra_weights = variable_get('field_extra_weights', array());
+  $extra_weights = config_get('my_module.settings', 'field_extra_weights');
   if (isset($extra_weights[$entity_type][$bundle])) {
     unset($extra_weights[$entity_type][$bundle]);
-    variable_set('field_extra_weights', $extra_weights);
+    config_set('my_module.settings', 'field_extra_weights', $extra_weights);
   }
 }
 
 /**
- * @} End of "defgroup field_attach".
+ * @} End of "addtogroup field_attach".
  */
 
 /**
@@ -1729,8 +1752,10 @@ function hook_field_storage_details_alter(&$details, $field) {
  *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  * @param $fields
  *   An array listing the fields to be loaded. The keys of the array are field
- *   IDs, and the values of the array are the entity IDs (or revision IDs,
- *   depending on the $age parameter) to add each field to.
+ *   names, and the values of the array are the entity IDs (or revision IDs,
+ *   depending on the $age parameter) to add each field to. Note that deleted
+ *   data may need to be loaded, so requests to field_info_fields() should
+ *   the $include_deleted flag to ensure the field definition is loaded.
  * @param $options
  *   An associative array of additional options, with the following keys:
  *   - deleted: If TRUE, deleted fields should be loaded as well as
@@ -1738,18 +1763,18 @@ function hook_field_storage_details_alter(&$details, $field) {
  *     loaded.
  */
 function hook_field_storage_load($entity_type, $entities, $age, $fields, $options) {
-  $field_info = field_info_field_by_ids();
+  $field_info = field_info_fields(TRUE);
   $load_current = $age == FIELD_LOAD_CURRENT;
 
-  foreach ($fields as $field_id => $ids) {
-    $field = $field_info[$field_id];
+  foreach ($fields as $field_name => $entity_ids) {
+    $field = $field_info[$field_name];
     $field_name = $field['field_name'];
     $table = $load_current ? _field_sql_storage_tablename($field) : _field_sql_storage_revision_tablename($field);
 
     $query = db_select($table, 't')
       ->fields('t')
       ->condition('entity_type', $entity_type)
-      ->condition($load_current ? 'entity_id' : 'revision_id', $ids, 'IN')
+      ->condition($load_current ? 'entity_id' : 'revision_id', $entity_ids, 'IN')
       ->condition('language', field_available_languages($entity_type, $field), 'IN')
       ->orderBy('delta');
 
@@ -1805,8 +1830,8 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
     $vid = $id;
   }
 
-  foreach ($fields as $field_id) {
-    $field = field_info_field_by_id($field_id);
+  foreach ($fields as $field_name) {
+    $field = field_info_field($field_name);
     $field_name = $field['field_name'];
     $table_name = _field_sql_storage_tablename($field);
     $revision_name = _field_sql_storage_revision_tablename($field);
@@ -1847,7 +1872,7 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
       $items = (array) $entity->{$field_name}[$langcode];
       $delta_count = 0;
       foreach ($items as $delta => $item) {
-        // We now know we have someting to insert.
+        // We now know we have something to insert.
         $do_insert = TRUE;
         $record = array(
           'entity_type' => $entity_type,
@@ -1897,8 +1922,8 @@ function hook_field_storage_delete($entity_type, $entity, $fields) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   foreach (field_info_instances($entity_type, $bundle) as $instance) {
-    if (isset($fields[$instance['field_id']])) {
-      $field = field_info_field_by_id($instance['field_id']);
+    if (isset($fields[$instance['field_name']])) {
+      $field = field_info_field($instance['field_name']);
       field_sql_storage_field_storage_purge($entity_type, $entity, $field, $instance);
     }
   }
@@ -1927,8 +1952,8 @@ function hook_field_storage_delete_revision($entity_type, $entity, $fields) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   if (isset($vid)) {
-    foreach ($fields as $field_id) {
-      $field = field_info_field_by_id($field_id);
+    foreach ($fields as $field_name) {
+      $field = field_info_field($field_name);
       $revision_name = _field_sql_storage_revision_tablename($field);
       db_delete($revision_name)
         ->condition('entity_type', $entity_type)
@@ -2151,7 +2176,7 @@ function hook_field_storage_delete_instance($instance) {
  *   that your module has already loaded a field.
  * @param $options
  *   An associative array of additional options, with the following keys:
- *   - field_id: The field ID that should be loaded. If unset, all fields
+ *   - field_name: The field name that should be loaded. If empty, all fields
  *     should be loaded.
  *   - deleted: If TRUE, deleted fields should be loaded as well as
  *     non-deleted fields. If unset or FALSE, only non-deleted fields should be
@@ -2248,6 +2273,10 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
 }
 
 /**
+ * @} End of "addtogroup field_storage".
+ */
+
+/**
  * Returns the maximum weight for the entity components handled by the module.
  *
  * Field API takes care of fields and 'extra_fields'. This hook is intended for
@@ -2263,6 +2292,8 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
  * @return
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.
+ *
+ * @ingroup field_info 
  */
 function hook_field_info_max_weight($entity_type, $bundle, $context) {
   $weights = array();
@@ -2273,6 +2304,11 @@ function hook_field_info_max_weight($entity_type, $bundle, $context) {
 
   return $weights ? max($weights) : NULL;
 }
+
+/**
+ * @addtogroup field_types
+ * @{
+ */
 
 /**
  * Alters the display settings of a field before it gets displayed.
@@ -2341,6 +2377,10 @@ function hook_field_display_ENTITY_TYPE_alter(&$display, $context) {
 }
 
 /**
+ * @} End of "addtogroup field_types
+ */
+
+/**
  * Alters the display settings of pseudo-fields before an entity is displayed.
  *
  * This hook is called once per displayed entity. If the result of the hook
@@ -2355,6 +2395,8 @@ function hook_field_display_ENTITY_TYPE_alter(&$display, $context) {
  *   - entity_type: The entity type; e.g., 'node' or 'user'.
  *   - bundle: The bundle name.
  *   - view_mode: The view mode, e.g. 'full', 'teaser'...
+ *
+ * @ingroup field_types
  */
 function hook_field_extra_fields_display_alter(&$displays, $context) {
   if ($context['entity_type'] == 'taxonomy_term' && $context['view_mode'] == 'full') {
@@ -2384,6 +2426,8 @@ function hook_field_extra_fields_display_alter(&$displays, $context) {
  *   - instance: The instance of the field.
  *
  * @see hook_field_widget_properties_alter()
+ *
+ * @ingroup field_widget
  */
 function hook_field_widget_properties_ENTITY_TYPE_alter(&$widget, $context) {
   // Change a widget's type according to the time of day.
@@ -2393,10 +2437,6 @@ function hook_field_widget_properties_ENTITY_TYPE_alter(&$widget, $context) {
     $widget['type'] = $time < 12 ? 'widget_am' : 'widget_pm';
   }
 }
-
-/**
- * @} End of "addtogroup field_storage".
- */
 
 /**
  * @addtogroup field_crud
@@ -2593,6 +2633,8 @@ function hook_field_purge_instance($instance) {
  *
  * @param $field
  *   The field being purged.
+ *
+ * @ingroup field_storage 
  */
 function hook_field_storage_purge_field($field) {
   $table_name = _field_sql_storage_tablename($field);
@@ -2610,6 +2652,8 @@ function hook_field_storage_purge_field($field) {
  *
  * @param $instance
  *   The instance being purged.
+ *
+ * @ingroup field_storage  
  */
 function hook_field_storage_purge_field_instance($instance) {
   db_delete('my_module_field_instance_info')
@@ -2631,6 +2675,8 @@ function hook_field_storage_purge_field_instance($instance) {
  *   The (possibly deleted) field whose data is being purged.
  * @param $instance
  *   The deleted field instance whose data is being purged.
+ *
+ * @ingroup field_storage 
  */
 function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -2670,6 +2716,8 @@ function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
  *
  * @return
  *   TRUE if the operation is allowed, and FALSE if the operation is denied.
+ *
+ * @ingroup field_types 
  */
 function hook_field_access($op, $field, $entity_type, $entity, $account) {
   if ($field['field_name'] == 'field_of_interest' && $op == 'edit') {

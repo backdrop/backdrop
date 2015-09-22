@@ -205,8 +205,7 @@ db_create_table('locales_source', array(
       'default' => 'default',
     ),
     'source' => array(
-      'type' => 'text',
-      'mysql_type' => 'blob',
+      'type' => 'blob',
       'not null' => TRUE,
     ),
     'context' => array(
@@ -400,8 +399,7 @@ db_create_table('locales_target', array(
       'default' => 0,
     ),
     'translation' => array(
-      'type' => 'text',
-      'mysql_type' => 'blob',
+      'type' => 'blob',
       'not null' => TRUE,
     ),
     'language' => array(
@@ -852,5 +850,34 @@ db_insert('field_revision_comment_body')->fields(array(
   'delta' => '0',
   'comment_body_value' => 'Second comment body',
   'comment_body_format' => 'filtered_html',
+))
+->execute();
+
+// Add date localizations.
+db_insert('date_format_locale')
+->fields(array(
+  'format',
+  'type',
+  'language',
+))
+->values(array(
+  'Y/m/d - H:i',
+  'short',
+  'ca',
+))
+->values(array(
+  'Y/m/d - g:ia',
+  'short',
+  'cv',
+))
+->values(array(
+  'D, Y/m/d - H:i',
+  'medium',
+  'ca',
+))
+->values(array(
+  'D, Y/m/d - g:ia',
+  'medium',
+  'cv',
 ))
 ->execute();

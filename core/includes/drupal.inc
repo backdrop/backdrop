@@ -16,54 +16,54 @@
 /**
  * The current system version.
  */
-const VERSION = '7.0-dev';
+define('VERSION', '7.0-dev');
 
 /**
  * Core API compatibility.
  */
-const DRUPAL_CORE_COMPATIBILITY = '7.x';
+define('DRUPAL_CORE_COMPATIBILITY', '7.x');
 
 // Constants from bootstrap.inc.
-const DRUPAL_ROOT = BACKDROP_ROOT;
-const DRUPAL_BOOTSTRAP_CONFIGURATION = BACKDROP_BOOTSTRAP_CONFIGURATION;
-const DRUPAL_BOOTSTRAP_PAGE_CACHE = BACKDROP_BOOTSTRAP_PAGE_CACHE;
-const DRUPAL_BOOTSTRAP_DATABASE = BACKDROP_BOOTSTRAP_DATABASE;
-const DRUPAL_BOOTSTRAP_VARIABLES = BACKDROP_BOOTSTRAP_VARIABLES;
-const DRUPAL_BOOTSTRAP_SESSION = BACKDROP_BOOTSTRAP_SESSION;
-const DRUPAL_BOOTSTRAP_PAGE_HEADER = BACKDROP_BOOTSTRAP_PAGE_HEADER;
-const DRUPAL_BOOTSTRAP_LANGUAGE = BACKDROP_BOOTSTRAP_LANGUAGE;
-const DRUPAL_BOOTSTRAP_FULL = BACKDROP_BOOTSTRAP_FULL;
-const DRUPAL_ANONYMOUS_RID = BACKDROP_ANONYMOUS_RID;
-const DRUPAL_AUTHENTICATED_RID = BACKDROP_AUTHENTICATED_RID;
-const DRUPAL_KILOBYTE = BACKDROP_KILOBYTE;
-const DRUPAL_PHP_FUNCTION_PATTERN = BACKDROP_PHP_FUNCTION_PATTERN;
-const DRUPAL_MINIMUM_PHP = BACKDROP_MINIMUM_PHP;
-const DRUPAL_MINIMUM_PHP_MEMORY_LIMIT = BACKDROP_MINIMUM_PHP_MEMORY_LIMIT;
+define('DRUPAL_ROOT', BACKDROP_ROOT);
+define('DRUPAL_BOOTSTRAP_CONFIGURATION', BACKDROP_BOOTSTRAP_CONFIGURATION);
+define('DRUPAL_BOOTSTRAP_PAGE_CACHE', BACKDROP_BOOTSTRAP_PAGE_CACHE);
+define('DRUPAL_BOOTSTRAP_DATABASE', BACKDROP_BOOTSTRAP_DATABASE);
+define('DRUPAL_BOOTSTRAP_VARIABLES', BACKDROP_BOOTSTRAP_VARIABLES);
+define('DRUPAL_BOOTSTRAP_SESSION', BACKDROP_BOOTSTRAP_SESSION);
+define('DRUPAL_BOOTSTRAP_PAGE_HEADER', BACKDROP_BOOTSTRAP_PAGE_HEADER);
+define('DRUPAL_BOOTSTRAP_LANGUAGE', BACKDROP_BOOTSTRAP_LANGUAGE);
+define('DRUPAL_BOOTSTRAP_FULL', BACKDROP_BOOTSTRAP_FULL);
+define('DRUPAL_ANONYMOUS_RID', BACKDROP_ANONYMOUS_ROLE);
+define('DRUPAL_AUTHENTICATED_RID', BACKDROP_AUTHENTICATED_ROLE);
+define('DRUPAL_KILOBYTE', BACKDROP_KILOBYTE);
+define('DRUPAL_PHP_FUNCTION_PATTERN', BACKDROP_PHP_FUNCTION_PATTERN);
+define('DRUPAL_MINIMUM_PHP', BACKDROP_MINIMUM_PHP);
+define('DRUPAL_MINIMUM_PHP_MEMORY_LIMIT', BACKDROP_MINIMUM_PHP_MEMORY_LIMIT);
 
 // Constants from common.inc.
-const DRUPAL_NO_CACHE = -1;
-const DRUPAL_CACHE_CUSTOM = -2;
-const DRUPAL_CACHE_PER_ROLE = 0x0001;
-const DRUPAL_CACHE_PER_USER = 0x0002;
-const DRUPAL_CACHE_PER_PAGE = 0x0004;
-const DRUPAL_CACHE_GLOBAL = 0x0008;
+define('DRUPAL_NO_CACHE', -1);
+define('DRUPAL_CACHE_CUSTOM', -2);
+define('DRUPAL_CACHE_PER_ROLE', 0x0001);
+define('DRUPAL_CACHE_PER_USER', 0x0002);
+define('DRUPAL_CACHE_PER_PAGE', 0x0004);
+define('DRUPAL_CACHE_GLOBAL', 0x0008);
 
 // Constants from password.inc.
-const DRUPAL_HASH_COUNT = 16;
-const DRUPAL_MIN_HASH_COUNT = 7;
-const DRUPAL_MAX_HASH_COUNT = 30;
-const DRUPAL_HASH_LENGTH = 55;
+define('DRUPAL_HASH_COUNT', 16);
+define('DRUPAL_MIN_HASH_COUNT', 7);
+define('DRUPAL_MAX_HASH_COUNT', 30);
+define('DRUPAL_HASH_LENGTH', 55);
 
 // Constants from system.module.
-const DRUPAL_MAXIMUM_TEMP_FILE_AGE = 21600;
-const DRUPAL_CRON_DEFAULT_THRESHOLD = 10800;
-const DRUPAL_USER_TIMEZONE_DEFAULT = 0;
-const DRUPAL_USER_TIMEZONE_EMPTY = 1;
-const DRUPAL_USER_TIMEZONE_SELECT = 2;
-const DRUPAL_DISABLED = 0;
-const DRUPAL_OPTIONAL = 1;
-const DRUPAL_REQUIRED = 2;
-const DRUPAL_WEIGHT_SELECT_MAX = 100;
+define('DRUPAL_MAXIMUM_TEMP_FILE_AGE', 21600);
+define('DRUPAL_CRON_DEFAULT_THRESHOLD', 10800);
+define('DRUPAL_USER_TIMEZONE_DEFAULT', 0);
+define('DRUPAL_USER_TIMEZONE_EMPTY', 1);
+define('DRUPAL_USER_TIMEZONE_SELECT', 2);
+define('DRUPAL_DISABLED', 0);
+define('DRUPAL_OPTIONAL', 1);
+define('DRUPAL_REQUIRED', 2);
+define('DRUPAL_WEIGHT_SELECT_MAX', 100);
 
 // Functions from bootstrap.inc.
 function drupal_override_server_variables($variables = array()) {
@@ -302,9 +302,6 @@ function drupal_add_css($data = NULL, $options = NULL) {
 function drupal_get_css($css = NULL, $skip_alter = FALSE) {
   return backdrop_get_css($css, $skip_alter);
 }
-function drupal_sort_css_js($a, $b) {
-  return backdrop_sort_css_js($a, $b);
-}
 function drupal_group_css($css) {
   return backdrop_group_css($css);
 }
@@ -409,14 +406,8 @@ function drupal_page_set_cache() {
 function drupal_cron_run() {
   return backdrop_cron_run();
 }
-function drupal_cron_cleanup() {
-  return backdrop_cron_cleanup();
-}
 function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   return backdrop_system_listing($mask, $directory, $key, $min_depth);
-}
-function drupal_set_page_content($content = NULL) {
-  return backdrop_set_page_content($content);
 }
 function drupal_pre_render_conditional_comments($elements) {
   return backdrop_pre_render_conditional_comments($elements);
@@ -457,12 +448,65 @@ function drupal_render_cid_parts($granularity = NULL) {
 function drupal_render_cid_create($elements) {
   return backdrop_render_cid_create($elements);
 }
+
+/**
+ * Sorts a structured array by '#title' property.
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
+function element_sort_by_title($a, $b) {
+  $a_title = (is_array($a) && isset($a['#title'])) ? $a['#title'] : '';
+  $b_title = (is_array($b) && isset($b['#title'])) ? $b['#title'] : '';
+  return strnatcasecmp($a_title, $b_title);
+}
+
+/**
+ * Sorts a structured array by '#weight' property.
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
+function element_sort($a, $b) {
+  $a_weight = (is_array($a) && isset($a['#weight'])) ? $a['#weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['#weight'])) ? $b['#weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
+}
+
+/**
+ * Sorts a structured array by 'weight' key (no # prefix).
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
 function drupal_sort_weight($a, $b) {
-  return backdrop_sort_weight($a, $b);
+  $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
+  $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
+  if ($a_weight == $b_weight) {
+    return 0;
+  }
+  return ($a_weight < $b_weight) ? -1 : 1;
 }
+
+/**
+ * Sorts a structured array by 'title' key (no # prefix).
+ *
+ * @deprecated since 1.0
+ * @see backdrop_sort()
+ */
 function drupal_sort_title($a, $b) {
-  return backdrop_sort_title($a, $b);
+  if (!isset($b['title'])) {
+    return -1;
+  }
+  if (!isset($a['title'])) {
+    return 1;
+  }
+  return strcasecmp($a['title'], $b['title']);
 }
+
 function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }
@@ -520,6 +564,16 @@ function drupal_get_updaters() {
 function drupal_get_filetransfer_info() {
   return backdrop_get_filetransfer_info();
 }
+
+/**
+ * Format a username.
+ *
+ * @deprecated since 1.0
+ */
+function format_username($account) {
+  return user_format_name($account);
+}
+
 // Functions from errors.inc.
 function drupal_error_levels() {
   return backdrop_error_levels();
@@ -552,9 +606,20 @@ function drupal_rmdir($uri, $context = NULL) {
 function drupal_tempnam($directory, $prefix) {
   return backdrop_tempnam($directory, $prefix);
 }
+
+/**
+ * Creates a .htaccess file in the given directory.
+ *
+ * @deprecated since 1.0
+ */
+function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
+  return file_save_htaccess($directory, $private, $force_overwrite);
+}
+
 // Functions from form.inc.
-function drupal_get_form($form_id) {
-  return backdrop_get_form($form_id);
+function drupal_get_form() {
+  $args = func_get_args(); // pass $args to form function
+  return call_user_func_array('backdrop_get_form', $args);
 }
 function drupal_build_form($form_id, &$form_state) {
   return backdrop_build_form($form_id, $form_state);
@@ -608,10 +673,12 @@ function drupal_detect_baseurl($file = 'core/install.php') {
   return backdrop_detect_baseurl($file);
 }
 function drupal_detect_database_types() {
-  return backdrop_detect_database_types();
+  $installer = backdrop_load_database_driver();
+  return array('mysql' => $installer->name());
 }
 function drupal_get_database_types() {
-  return backdrop_get_database_types();
+  $mysql = backdrop_load_database_driver();
+  return array('mysql' => $mysql);
 }
 function drupal_rewrite_settings($settings = array()) {
   return backdrop_rewrite_settings($settings);
@@ -689,7 +756,7 @@ function drupal_match_path($path, $patterns) {
   return backdrop_match_path($path, $patterns);
 }
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
-  return backdrop_path_alias_whitelist_rebuild($source);
+  return;
 }
 function drupal_valid_path($path, $dynamic_allowed = FALSE) {
   return backdrop_valid_path($path, $dynamic_allowed);
@@ -766,6 +833,114 @@ function drupal_substr($text, $start, $length = NULL) {
 // Functions from utility.inc.
 function drupal_var_export($var, $prefix = '') {
   return backdrop_var_export($var, $prefix);
+}
+
+/**
+ * Drupal-compatible wrapper for clearing caches.
+ *
+ * Backdrop no longer needs to "rebuild" its node types, which previously
+ * were synced between the code and database in Drupal 7. In Backdrop, all
+ * node types are always stored in config.
+ *
+ * @deprecated since 1.0
+ */
+function node_types_rebuild() {
+  node_type_cache_reset();
+}
+
+/**
+ * Sets up a form to save information automatically.
+ *
+ * This function adds a submit handler and a submit button to a form array. The
+ * submit function saves all the data in the form, using variable_set(), to
+ * variables named the same as the keys in the form array. Note that this means
+ * you should normally prefix your form array keys with your module name, so
+ * that they are unique when passed into variable_set().
+ *
+ * If you need to manipulate the data in a custom manner, you can either put
+ * your own submission handler in the form array before calling this function,
+ * or just use your own submission handler instead of calling this function.
+ *
+ * This function is deprecated in Backdrop because it saves to the old
+ * "variables" table. In Backdrop sites, developers are encouraged to save
+ * configuration using the config system. See config(), config_set(), and
+ * config_get() for information on saving into configuration.
+ *
+ * @deprecated since 1.0
+ */
+function system_settings_form($form) {
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+
+  if (!empty($_POST) && form_get_errors()) {
+    backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
+  }
+  $form['#submit'][] = 'system_settings_form_submit';
+  if (!isset($form['#theme'])) {
+    $form['#theme'] = 'system_settings_form';
+  }
+  return $form;
+}
+
+/**
+ * Form submission handler for system_settings_form().
+ *
+ * If you want node type configure style handling of your checkboxes,
+ * add an array_filter value to your form.
+ *
+ * Use of this function is discouraged because it is not compatible with the
+ * configuration system. See config(), config_set(), and config_get() for
+ * alternatives. Rather than reusing this submit handler throughout settings
+ * forms, developers should create separate submit handlers for each form
+ * to save the settings into various configuration files as needed.
+ *
+ * @deprecated since 1.0
+ */
+function system_settings_form_submit($form, &$form_state) {
+  form_state_values_clean($form_state);
+
+  foreach ($form_state['values'] as $key => $value) {
+    if (is_array($value) && isset($form_state['values']['array_filter'])) {
+      $value = array_keys(array_filter($value));
+    }
+    variable_set($key, $value);
+  }
+
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Alters Backdrop's list of defined date formats and attributes to return the
+ * expected date types and attributes for Drupal's system_get_date_types()
+ * function.
+ *
+ * @deprecated since 1.0
+ */
+function system_get_date_types($type = NULL) {
+  $formats = system_get_date_formats($type);
+
+  if ($type) {
+    foreach ($formats as &$format) {
+      $format['type'] = $format['name'];
+      $format['title'] = $format['label'];
+      $format['locked'] = isset($format['hidden']) ? $format['hidden'] : '0';
+      if (!isset($format['module'])) {
+        $format['module'] = '';
+      }
+      $format['is_new'] = FALSE;
+    }
+  }
+  else {
+    $formats['type'] = $formats['name'];
+    $formats['title'] = $formats['label'];
+    $formats['locked'] = isset($formats['hidden']) ? $formats['hidden'] : '0';
+    if (!isset($formats['module'])) {
+      $formats['module'] = '';
+    }
+    $formats['is_new'] = FALSE;
+  }
+
+  return $formats;
 }
 
 /**

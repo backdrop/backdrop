@@ -33,9 +33,10 @@ function update_requirements($phase) {
       $data = update_calculate_project_data($available);
       // First, populate the requirements for core:
       $requirements['update_core'] = _update_requirement_check($data['backdrop'], 'core');
+      $core_status = $data['backdrop']['status'];
       // We don't want to check backdrop a second time.
       unset($data['backdrop']);
-      if (!empty($data)) {
+      if (!empty($data) && $core_status !== UPDATE_NOT_IMPLEMENTED) {
         // Now, sort our $data array based on each project's status. The
         // status constants are numbered in the right order of precedence, so
         // we just need to make sure the projects are sorted in ascending
@@ -77,20 +78,9 @@ function update_install() {
  * Implements hook_uninstall().
  */
 function update_uninstall() {
-  // Clear any variables that might be in use
-  $variables = array(
-    'update_check_frequency',
-    'update_fetch_url',
-    'update_last_check',
-    'update_last_email_notification',
-    'update_notification_threshold',
-    'update_notify_emails',
-    'update_max_fetch_attempts',
-    'update_max_fetch_time',
-  );
-  foreach ($variables as $variable) {
-    variable_del($variable);
-  }
+  state_del('update_last_check');
+  state_del('update_last_email_notification');
+
   $queue = BackdropQueue::get('update_fetch_tasks');
   $queue->deleteQueue();
 }
@@ -120,7 +110,7 @@ function _update_requirement_check($project, $type) {
     $requirement['title'] = t('Backdrop CMS update status');
   }
   else {
-    $requirement['title'] = t('Module and theme update status');
+    $requirement['title'] = t('Module, theme and layout update status');
   }
   $status = $project['status'];
   if ($status != UPDATE_CURRENT) {
@@ -148,12 +138,66 @@ function _update_requirement_check($project, $type) {
       $requirement_label = isset($project['reason']) ? $project['reason'] : t('Can not determine status');
       $requirement['severity'] = REQUIREMENT_WARNING;
       break;
+    case UPDATE_NOT_IMPLEMENTED:
+      $text = t('Not yet implemented');
+      $url = config_get('update.settings', 'update_not_implemented_url');
+      $requirement['value'] = $url ? l($text, $url) : $text;
+      $requirement['severity'] = REQUIREMENT_INFO;
+      break;
     default:
       $requirement_label = t('Up to date');
   }
-  if ($status != UPDATE_CURRENT && $type == 'core' && isset($project['recommended'])) {
-    $requirement_label .= ' ' . t('(version @version available)', array('@version' => $project['recommended']));
+  if (isset($requirement_label)) {
+    if ($status != UPDATE_CURRENT && $type == 'core' && isset($project['recommended'])) {
+      $requirement_label .= ' ' . t('(version @version available)', array('@version' => $project['recommended']));
+    }
+    $requirement['value'] = l($requirement_label, update_manager_access() ? 'admin/reports/updates/update' : 'admin/reports/updates');
   }
-  $requirement['value'] = l($requirement_label, update_manager_access() ? 'admin/reports/updates/update' : 'admin/reports/updates');
   return $requirement;
 }
+
+/**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
+ * Moves update settings from variables to config.
+ */
+function update_update_1000() {
+  // Migrate variables to config.
+  $config = config('update.settings');
+  $config->set('update_disabled_extensions', update_variable_get('update_check_disabled', 0));
+  $config->set('update_interval_days', update_variable_get('update_check_frequency', 1));
+  $config->set('update_url', update_variable_get('update_fetch_url', ''));
+  $config->set('update_max_attempts', update_variable_get('update_max_fetch_attempts', 2));
+  $config->set('update_timeout', update_variable_get('update_max_fetch_time', 5));
+  $config->set('update_emails', update_variable_get('update_notify_emails', array()));
+  $config->set('update_threshold', update_variable_get('update_notification_threshold', 0));
+  $config->set('update_projects', update_variable_get('update_advanced_project_settings', array()));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('update_check_disabled');
+  update_variable_del('update_check_frequency');
+  update_variable_del('update_fetch_url');
+  update_variable_del('update_max_fetch_attempts');
+  update_variable_del('update_max_fetch_time');
+  update_variable_del('update_notify_emails');
+  update_variable_del('update_notification_threshold');
+  update_variable_del('update_advanced_project_settings');
+}
+
+/**
+ * Add config default value for "update_not_implemented_url".
+ */
+function update_update_1001() {
+  $config = config('update.settings');
+  $config->set('update_not_implemented_url', 'https://github.com/backdrop-ops/backdropcms.org/issues/22');
+  $config->save();
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

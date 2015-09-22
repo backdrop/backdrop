@@ -18,9 +18,8 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
-      // Use the first available text format.
-      'format' => db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
-      'vid' => $vocabulary->vid,
+      'format' => filter_default_format(),
+      'vocabulary' => $vocabulary->machine_name,
     ));
     taxonomy_term_save($term);
     return $term;
@@ -29,15 +28,15 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
   function setUp() {
     parent::setUp();
 
-    //$web_user = $this->backdropCreateUser(array('create article content'));
+    //$web_user = $this->backdropCreateUser(array('create post content'));
     //$this->backdropLogin($web_user);
 
-    $vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+    $vocabulary = taxonomy_vocabulary_load('tags');
     $this->term_1 = $this->createTerm($vocabulary);
     $this->term_2 = $this->createTerm($vocabulary);
 
     $node = array();
-    $node['type'] = 'article';
+    $node['type'] = 'post';
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->term_1->tid;
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->term_2->tid;
     $this->node = $this->backdropCreateNode($node);
@@ -53,7 +52,6 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
       ),
     );
     $this->column_map = array('nid' => 'nid');
-    debug($view->result);
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 

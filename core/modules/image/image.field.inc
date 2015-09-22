@@ -14,8 +14,8 @@ function image_field_info() {
       'label' => t('Image'),
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
-        'uri_scheme' => variable_get('file_default_scheme', 'public'),
-        'default_image' => 0,
+        'uri_scheme' => config_get('system.core', 'file_default_scheme'),
+        'default_image' => '',
       ),
       'instance_settings' => array(
         'file_extensions' => 'png gif jpg jpeg',
@@ -25,10 +25,11 @@ function image_field_info() {
         'title_field' => 0,
         'max_resolution' => '',
         'min_resolution' => '',
-        'default_image' => 0,
+        'default_image' => '',
       ),
       'default_widget' => 'image_image',
       'default_formatter' => 'image',
+      'default_token_formatter' => 'file_url_plain',
     ),
   );
 }
@@ -52,16 +53,25 @@ function image_field_settings_form($field, $instance) {
     '#description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
   );
 
-  // When the user sets the scheme on the UI, even for the first time, it's
-  // updating a field because fields are created on the "Manage fields"
-  // page. So image_field_update_field() can handle this change.
   $form['default_image'] = array(
-    '#title' => t('Default image'),
-    '#type' => 'managed_file',
-    '#description' => t('If no image is uploaded, this image will be shown on display.'),
-    '#default_value' => $field['settings']['default_image'],
-    '#upload_location' => $settings['uri_scheme'] . '://default_images/',
+    '#element_validate' => array('_image_field_default_image_validate'),
+    '#default_scheme' => $field['settings']['uri_scheme'],
+    '#target' => array('field', 'settings', 'default_image'),
   );
+  $form['default_image']['file'] = array(
+    '#title' => t('Default image'),
+    '#type' => 'file',
+    '#description' => t('If no image is uploaded, this image will be shown on display.'),
+  );
+  if ($field['settings']['default_image']) {
+    $link = l(basename($field['settings']['default_image']), file_create_url($field['settings']['default_image']), array('attributes' => array('target' => '_blank')));
+    $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
+
+    $form['default_image']['remove'] = array(
+      '#type' => t('checkbox'),
+      '#title' => t('Remove default image'),
+    );
+  }
 
   return $form;
 }
@@ -79,7 +89,7 @@ function image_field_instance_settings_form($field, $instance) {
   $max_resolution = explode('x', $settings['max_resolution']) + array('', '');
   $form['max_resolution'] = array(
     '#type' => 'item',
-    '#title' => t('Maximum image resolution'),
+    '#title' => t('Maximum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
@@ -108,7 +118,7 @@ function image_field_instance_settings_form($field, $instance) {
   $min_resolution = explode('x', $settings['min_resolution']) + array('', '');
   $form['min_resolution'] = array(
     '#type' => 'item',
-    '#title' => t('Minimum image resolution'),
+    '#title' => t('Minimum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
@@ -155,12 +165,24 @@ function image_field_instance_settings_form($field, $instance) {
 
   // Add the default image to the instance.
   $form['default_image'] = array(
-    '#title' => t('Default image'),
-    '#type' => 'managed_file',
-    '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
-    '#default_value' => $settings['default_image'],
-    '#upload_location' => $field['settings']['uri_scheme'] . '://default_images/',
+    '#element_validate' => array('_image_field_default_image_validate'),
+    '#default_scheme' => $field['settings']['uri_scheme'],
+    '#target' => array('instance', 'settings', 'default_image'),
   );
+  $form['default_image']['file'] = array(
+    '#title' => t('Default image'),
+    '#type' => 'file',
+    '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
+  );
+  if ($settings['default_image']) {
+    $link = l(basename($settings['default_image']), file_create_url($settings['default_image']), array('attributes' => array('target' => '_blank')));
+    $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
+
+    $form['default_image']['remove'] = array(
+      '#type' => t('checkbox'),
+      '#title' => t('Remove default image'),
+    );
+  }
 
   return $form;
 }
@@ -184,6 +206,34 @@ function _image_field_resolution_validate($element, &$form_state) {
 }
 
 /**
+ * Element validation function for setting a default image.
+ */
+function _image_field_default_image_validate($element, &$form_state) {
+  // Save the file into the temporary directory.
+  $file = file_save_upload(implode('_', $element['file']['#parents']), array('file_validate_is_image' => array()));
+
+  if ($file) {
+    // Move the file to the final location, and don't manage it in the database.
+    // Because field configurations should not be tied to database auto-increment
+    // IDs, we only track the URI.
+    $uri = file_unmanaged_move($file->uri, $element['#default_scheme'] . '://default_images');
+
+    // Delete the file entity record.
+    file_delete($file->fid);
+  }
+  if (isset($element['remove']) && $element['remove']['#value']) {
+    $uri = '';
+  }
+
+  if (isset($uri)) {
+    backdrop_array_set_nested_value($form_state['values'], $element['#target'], $uri, TRUE);
+  }
+  else {
+    backdrop_array_unset_nested_value($form_state['values'], $element['#target']);
+  }
+}
+
+/**
  * Implements hook_field_load().
  */
 function image_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
@@ -197,19 +247,20 @@ function image_field_prepare_view($entity_type, $entities, $field, $instances, $
   // If there are no files specified at all, use the default.
   foreach ($entities as $id => $entity) {
     if (empty($items[$id])) {
-      $fid = 0;
+      $default_uri = '';
       // Use the default for the instance if one is available.
       if (!empty($instances[$id]['settings']['default_image'])) {
-        $fid = $instances[$id]['settings']['default_image'];
+        $default_uri = $instances[$id]['settings']['default_image'];
       }
       // Otherwise, use the default for the field.
       elseif ($field['settings']['default_image']) {
-        $fid = $field['settings']['default_image'];
+        $default_uri = $field['settings']['default_image'];
       }
 
       // Add the default image if one is found.
-      if ($fid && ($file = file_load($fid))) {
-        $items[$id][0] = (array) $file + array(
+      if ($default_uri) {
+        $items[$id][0] = (array) array(
+          'uri' => $default_uri,
           'is_default' => TRUE,
           'alt' => '',
           'title' => '',
@@ -369,7 +420,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   $widget_settings = $instance['widget']['settings'];
 
   $element['#theme'] = 'image_widget';
-  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/image.css';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
@@ -437,37 +488,6 @@ function image_field_widget_process($element, &$form_state, $form) {
 }
 
 /**
- * Returns HTML for an image field widget.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the image field widget.
- *
- * @ingroup themeable
- */
-function theme_image_widget($variables) {
-  $element = $variables['element'];
-  $output = '';
-  $output .= '<div class="image-widget form-managed-file clearfix">';
-
-  if (isset($element['preview'])) {
-    $output .= '<div class="image-preview">';
-    $output .= backdrop_render($element['preview']);
-    $output .= '</div>';
-  }
-
-  $output .= '<div class="image-widget-data">';
-  if ($element['fid']['#value'] != 0) {
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
@@ -475,7 +495,11 @@ function image_field_formatter_info() {
     'image' => array(
       'label' => t('Image'),
       'field types' => array('image'),
-      'settings' => array('image_style' => '', 'image_link' => ''),
+      'settings' => array(
+        'image_style' => '',
+        'image_link' => '',
+        'image_float' => '',
+      ),
     ),
   );
 
@@ -508,6 +532,18 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#default_value' => $settings['image_link'],
     '#empty_option' => t('Nothing'),
     '#options' => $link_types,
+  );
+
+  $element['image_float'] = array(
+    '#title' => t('Float image'),
+    '#type' => 'select',
+    '#description' => t('Display the image on the left or right, with the rest of the content wrapping around it.'),
+    '#default_value' => $settings['image_float'],
+    '#empty_option' => t('No'),
+    '#options' => array(
+      'left' => t('Left'),
+      'right' => t('Right'),
+    ),
   );
 
   return $element;
@@ -543,6 +579,11 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = $link_types[$settings['image_link']];
   }
 
+  // Display this setting only if image is floated.
+  if (!empty($settings['image_float'])) {
+    $summary[] = t('Floated: @side', array('@side' => $settings['image_float']));
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -561,6 +602,11 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
+    // Add class for floating the image
+    if (!empty($display['settings']['image_float'])) {
+      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+    }
+
     if (isset($link_file)) {
       $uri = array(
         'path' => file_create_url($item['uri']),
@@ -578,42 +624,3 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   return $element;
 }
 
-/**
- * Returns HTML for an image field formatter.
- *
- * @param $variables
- *   An associative array containing:
- *   - item: An array of image data.
- *   - image_style: An optional image style.
- *   - path: An optional array containing the link 'path' and link 'options'.
- *
- * @ingroup themeable
- */
-function theme_image_formatter($variables) {
-  $item = $variables['item'];
-
-  // Do not output an empty 'title' attribute.
-  if (isset($item['title']) && backdrop_strlen($item['title']) == 0) {
-    unset($item['title']);
-  }
-
-  if ($variables['image_style']) {
-    $item['style_name'] = $variables['image_style'];
-    $output = theme('image_style', $item);
-  }
-  else {
-    $output = theme('image', $item);
-  }
-
-  // The link path and link options are both optional, but for the options to be
-  // processed, the link path must at least be an empty string.
-  if (isset($variables['path']['path'])) {
-    $path = $variables['path']['path'];
-    $options = isset($variables['path']['options']) ? $variables['path']['options'] : array();
-    // When displaying an image inside a link, the html option must be TRUE.
-    $options['html'] = TRUE;
-    $output = l($output, $path, $options);
-  }
-
-  return $output;
-}

@@ -14,6 +14,8 @@
 
 Backdrop.ajax = Backdrop.ajax || {};
 
+Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
+
 /**
  * Attaches the Ajax behavior to each Ajax form element.
  */
@@ -125,7 +127,8 @@ Backdrop.ajax = function (base, element, element_settings) {
     },
     submit: {
       'js': true
-    }
+    },
+    currentRequests: []
   };
 
   $.extend(this, defaults, element_settings);
@@ -166,8 +169,14 @@ Backdrop.ajax = function (base, element, element_settings) {
   // 4. /nojs# - Followed by a fragment (e.g.: path/nojs#myfragment).
   this.url = this.url.replace(/\/nojs(\/|$|\?|#)/g, '/ajax$1');
 
+  // If the 'nojs' version of the URL is trusted, also trust the 'ajax' version.
+  if (Backdrop.settings.urlIsAjaxTrusted[element_settings.url]) {
+    Backdrop.settings.urlIsAjaxTrusted[this.url] = true;
+  }
+
   // Set the options for the ajaxSubmit function.
   // The 'this' variable will not persist inside of the options object.
+  var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
     url: ajax.url,
@@ -176,25 +185,46 @@ Backdrop.ajax = function (base, element, element_settings) {
       return ajax.beforeSerialize(element_settings, options);
     },
     beforeSubmit: function (form_values, element_settings, options) {
-      ajax.ajaxing = true;
       return ajax.beforeSubmit(form_values, element_settings, options);
     },
-    beforeSend: function (xmlhttprequest, options) {
-      ajax.ajaxing = true;
-      return ajax.beforeSend(xmlhttprequest, options);
+    beforeSend: function (jqXHR, options) {
+      jqXHR.ajaxRequestNumber = ++currentAjaxRequestNumber;
+      return ajax.beforeSend(jqXHR, options);
     },
-    success: function (response, status) {
+    success: function (response, status, jqXHR) {
+      // Skip success if this request has been superseded by a later request.
+      if (jqXHR.ajaxRequestNumber < currentAjaxRequestNumber) {
+        return false;
+      }
       // Sanity check for browser support (object expected).
       // When using iFrame uploads, responses must be returned as a string.
       if (typeof response == 'string') {
         response = $.parseJSON(response);
+
+        // Prior to invoking the response's commands, verify that they can be
+        // trusted by checking for a response header. See
+        // ajax_set_verification_header() for details.
+        // - Empty responses are harmless so can bypass verification. This avoids
+        //   an alert message for server-generated no-op responses that skip Ajax
+        //   rendering.
+        // - Ajax objects with trusted URLs (e.g., ones defined server-side via
+        //   #ajax) can bypass header verification. This is especially useful for
+        //   Ajax with multipart forms. Because IFRAME transport is used, the
+        //   response headers cannot be accessed for verification.
+        if (response !== null && !Backdrop.settings.urlIsAjaxTrusted[ajax.url]) {
+          if (jqXHR.getResponseHeader('X-Backdrop-Ajax-Token') !== '1') {
+            var customMessage = Backdrop.t("The response failed verification so will not be processed.");
+            return ajax.error(jqXHR, ajax.url, customMessage);
+          }
+        }
+
       }
-      return ajax.success(response, status);
+      return ajax.success(response, status, jqXHR);
     },
-    complete: function (response, status) {
-      ajax.ajaxing = false;
+    complete: function (jqXHR, status) {
+      ajax.cleanUp(jqXHR);
       if (status == 'error' || status == 'parsererror') {
-        return ajax.error(response, ajax.url);
+        return ajax.error(jqXHR, ajax.url);
       }
     },
     dataType: 'json',
@@ -209,6 +239,9 @@ Backdrop.ajax = function (base, element, element_settings) {
 
   // Bind the ajaxSubmit function to the element event.
   $(ajax.element).bind(element_settings.event, function (event) {
+    if (!Backdrop.settings.urlIsAjaxTrusted[ajax.url] && !Backdrop.urlIsLocal(ajax.url)) {
+      throw new Error(Backdrop.t('The callback URL is not local and not trusted: !url', {'!url': ajax.url}));
+    }
     return ajax.eventResponse(this, event);
   });
 
@@ -265,11 +298,6 @@ Backdrop.ajax.prototype.eventResponse = function (element, event) {
   // Create a synonym for this to reduce code confusion.
   var ajax = this;
 
-  // Do not perform another ajax command if one is already in progress.
-  if (ajax.ajaxing) {
-    return false;
-  }
-
   try {
     if (ajax.form) {
       // If setClick is set, we must set this to ensure that the button's
@@ -290,10 +318,7 @@ Backdrop.ajax.prototype.eventResponse = function (element, event) {
     }
   }
   catch (e) {
-    // Unset the ajax.ajaxing flag here because it won't be unset during
-    // the complete response.
-    ajax.ajaxing = false;
-    window.alert("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
+    $.error("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
   }
 
   // For radio/checkbox, allow the default event. On IE, this means letting
@@ -367,7 +392,7 @@ Backdrop.ajax.prototype.beforeSubmit = function (form_values, element, options) 
 /**
  * Prepare the Ajax request before it is sent.
  */
-Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
+Backdrop.ajax.prototype.beforeSend = function (jqXHR, options) {
   // For forms without file inputs, the jQuery Form plugin serializes the form
   // values, and then calls jQuery's $.ajax() function, which invokes this
   // handler. In this circumstance, options.extraData is never used. For forms
@@ -392,15 +417,15 @@ Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
     // this is only needed for IFRAME submissions.
     var v = $.fieldValue(this.element);
     if (v !== null) {
-      options.extraData[this.element.name] = v;
+      options.extraData[this.element.name] = Backdrop.checkPlain(v);
     }
   }
 
   // Disable the element that received the change to prevent user interface
-  // interaction while the Ajax request is in progress. ajax.ajaxing prevents
-  // the element from triggering a new request, but does not prevent the user
-  // from changing its value.
-  $(this.element).addClass('progress-disabled').prop('disabled', true);
+  // interaction while the Ajax request is in progress.
+  if (options.disable !== false) {
+    $(this.element).addClass('progress-disabled').prop('disabled', true);
+  }
 
   // Insert progressbar or throbber.
   if (this.progress.type == 'bar') {
@@ -411,34 +436,31 @@ Backdrop.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
     if (this.progress.url) {
       progressBar.startMonitoring(this.progress.url, this.progress.interval || 1500);
     }
-    this.progress.element = $(progressBar.element).addClass('ajax-progress ajax-progress-bar');
-    this.progress.object = progressBar;
-    $(this.element).after(this.progress.element);
+    jqXHR.progressElement = $(progressBar.element).addClass('ajax-progress ajax-progress-bar');
+    jqXHR.progressBar = progressBar;
+    $(this.element).after(jqXHR.progressElement);
   }
   else if (this.progress.type == 'throbber') {
-    this.progress.element = $('<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>');
+    jqXHR.progressElement = $('<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>');
     if (this.progress.message) {
-      $('.throbber', this.progress.element).after('<div class="message">' + this.progress.message + '</div>');
+      $('.throbber', jqXHR.progressElement).after('<div class="message">' + this.progress.message + '</div>');
     }
-    $(this.element).after(this.progress.element);
+    $(this.element).after(jqXHR.progressElement);
   }
+
+  // Register the AJAX request so it can be cancelled if needed.
+  this.currentRequests.push(jqXHR);
 };
 
 /**
  * Handler for the form redirection completion.
  */
-Backdrop.ajax.prototype.success = function (response, status) {
-  // Remove the progress element.
-  if (this.progress.element) {
-    $(this.progress.element).remove();
-  }
-  if (this.progress.object) {
-    this.progress.object.stopMonitoring();
-  }
-  $(this.element).removeClass('progress-disabled').prop('disabled', false);
+Backdrop.ajax.prototype.success = function (response, status, jqXHR) {
+  // Remove the throbber and progress elements.
+  this.cleanUp(jqXHR);
 
+  // Process the response.
   Backdrop.freezeHeight();
-
   for (var i in response) {
     if (response.hasOwnProperty(i) && response[i].command && this.commands[response[i].command]) {
        this.commands[response[i].command](this, response[i], status);
@@ -459,6 +481,28 @@ Backdrop.ajax.prototype.success = function (response, status) {
   // Remove any response-specific settings so they don't get used on the next
   // call by mistake.
   this.settings = null;
+};
+
+/**
+ * Clean up after an AJAX response, success or failure.
+ */
+Backdrop.ajax.prototype.cleanUp = function (jqXHR) {
+  // Remove the AJAX request from the current list.
+  var index = this.currentRequests.indexOf(jqXHR);
+  if (index > -1) {
+    this.currentRequests.splice(index, 1);
+  }
+
+  // Remove the progress element.
+  if (jqXHR.progressElement) {
+    $(jqXHR.progressElement).remove();
+  }
+  if (jqXHR.progressBar) {
+    jqXHR.progressBar.stopMonitoring();
+  }
+
+  // Reactivate the triggering element.
+  $(this.element).removeClass('progress-disabled').prop('disabled', false);
 };
 
 /**
@@ -491,22 +535,12 @@ Backdrop.ajax.prototype.getEffect = function (response) {
 /**
  * Handler for the form redirection error.
  */
-Backdrop.ajax.prototype.error = function (response, uri) {
-  window.alert(Backdrop.ajaxError(response, uri));
-  // Remove the progress element.
-  if (this.progress.element) {
-    $(this.progress.element).remove();
-  }
-  if (this.progress.object) {
-    this.progress.object.stopMonitoring();
-  }
-  // Undo hide.
-  $(this.wrapper).show();
-  // Re-enable the element.
-  $(this.element).removeClass('progress-disabled').removeAttr('disabled');
+Backdrop.ajax.prototype.error = function (jqXHR, uri) {
+  this.cleanUp(jqXHR);
+
   // Reattach behaviors, if they were detached in beforeSerialize().
   if (this.form) {
-    var settings = response.settings || this.settings || Backdrop.settings;
+    var settings = this.settings || Backdrop.settings;
     Backdrop.attachBehaviors(this.form, settings);
   }
 };
@@ -531,8 +565,8 @@ Backdrop.ajax.prototype.commands = {
     // $(response.data) as new HTML rather than a CSS selector. Also, if
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).
-    var new_content_wrapped = $('<div></div>').html(response.data);
-    var new_content = new_content_wrapped.contents();
+    var new_content_wrapped = $('<div></div>').html(response.data.replace(/^\s+|\s+$/g, ''));
+    var new_content = new_content_wrapped.children();
 
     // For legacy reasons, the effects processing code assumes that new_content
     // consists of a single top-level element. Also, it has not been
@@ -668,6 +702,33 @@ Backdrop.ajax.prototype.commands = {
       .removeClass('odd even')
       .filter(':even').addClass('odd').end()
       .filter(':odd').addClass('even');
+  },
+
+  /**
+   * Command to add css.
+   *
+   * Uses the proprietary addImport method if available as browsers which
+   * support that method ignore @import statements in dynamically added
+   * stylesheets.
+   */
+  addCss: function (ajax, response, status) {
+    // Add the styles in the normal way.
+    $('head').prepend(response.data);
+    // Add imports in the styles using the addImport method if available.
+    var match, importMatch = /^@import url\("(.*)"\);$/igm;
+    if (document.styleSheets[0].addImport && importMatch.test(response.data)) {
+      importMatch.lastIndex = 0;
+      while (match = importMatch.exec(response.data)) {
+        document.styleSheets[0].addImport(match[1]);
+      }
+    }
+  },
+
+  /**
+   * Command to update a form's build ID.
+   */
+  updateBuildId: function(ajax, response, status) {
+    $('input[name="form_build_id"][value="' + response['old'] + '"]').val(response['new']);
   }
 };
 

@@ -1,0 +1,7 @@
+name = "Node module access tests"
+description = "Support module for node permission testing."
+package = Testing
+version = BACKDROP_VERSION
+type = module
+backdrop = 1.x
+hidden = TRUE

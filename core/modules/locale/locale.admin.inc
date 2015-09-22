@@ -5,16 +5,18 @@
  * Administration functions for locale.module.
  */
 
+include_once BACKDROP_ROOT . '/core/includes/language.inc';
+include_once BACKDROP_ROOT . '/core/includes/locale.inc';
+
 /**
  * Builds the configuration form for language negotiation.
  */
 function language_negotiation_configure_form() {
-  include_once BACKDROP_ROOT . '/core/includes/language.inc';
 
   $form = array(
     '#submit' => array('language_negotiation_configure_form_submit'),
     '#theme' => 'language_negotiation_configure_form',
-    '#language_types' => language_types_get_configurable(FALSE),
+    '#language_types' => language_types_get_configurable(),
     '#language_types_info' => language_types_info(),
     '#language_providers' => language_negotiation_info(),
   );
@@ -49,27 +51,25 @@ function language_negotiation_configure_form_table(&$form, $type) {
   );
 
   $language_providers = $form['#language_providers'];
-  $enabled_providers = variable_get("language_negotiation_$type", array());
-  $providers_weight = variable_get("locale_language_providers_weight_$type", array());
-
-  // Add missing data to the providers lists.
-  foreach ($language_providers as $id => $provider) {
-    if (!isset($providers_weight[$id])) {
-      $providers_weight[$id] = language_provider_weight($provider);
-    }
-  }
+  $enabled_providers = (array) config_get('language.settings', "language_negotiation.$type");
 
   // Order providers list by weight.
-  asort($providers_weight);
+  foreach ($language_providers as $id => $provider) {
+    $set_weight = array_search($id, $enabled_providers);
+    $language_providers[$id]['set_weight'] = $set_weight !== FALSE ? $set_weight - 10 : 20;
+  }
+  // Put the default language at the bottom of the list.
+  $last_provider = end($enabled_providers);
+  if ($last_provider === LANGUAGE_NEGOTIATION_DEFAULT) {
+    $language_providers[$id]['set_weight'] = 21;
+  }
+  backdrop_sort($language_providers, array('set_weight' => SORT_NUMERIC, 'weight' => SORT_NUMERIC));
+  if ($last_provider === LANGUAGE_NEGOTIATION_DEFAULT) {
+    $language_providers[$id]['set_weight'] = 10;
+  }
 
-  foreach ($providers_weight as $id => $weight) {
-    // A language provider might be no more available if the defining module has
-    // been disabled after the last configuration saving.
-    if (!isset($language_providers[$id])) {
-      continue;
-    }
-
-    $enabled = isset($enabled_providers[$id]);
+  foreach ($language_providers as $id => $provider) {
+    $enabled = in_array($id, $enabled_providers);
     $provider = $language_providers[$id];
 
     // List the provider only if the current type is defined in its 'types' key.
@@ -80,28 +80,28 @@ function language_negotiation_configure_form_table(&$form, $type) {
       $table_form['#language_providers'][$id] = $provider;
       $provider_name = check_plain($provider['name']);
 
-      $table_form['weight'][$id] = array(
+      $table_form[$id]['weight'] = array(
         '#type' => 'weight',
         '#title' => t('Weight for !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
-        '#default_value' => $weight,
+        '#default_value' => $provider['set_weight'] > 10 ? $provider['weight'] : $provider['set_weight'],
         '#attributes' => array('class' => array("language-provider-weight-$type")),
       );
 
-      $table_form['title'][$id] = array('#markup' => $provider_name);
+      $table_form[$id]['title'] = array('#markup' => $provider_name);
 
-      $table_form['enabled'][$id] = array(
+      $table_form[$id]['enabled'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
         '#default_value' => $enabled,
       );
       if ($id === LANGUAGE_NEGOTIATION_DEFAULT) {
-        $table_form['enabled'][$id]['#default_value'] = TRUE;
-        $table_form['enabled'][$id]['#attributes'] = array('disabled' => 'disabled');
+        $table_form[$id]['enabled']['#default_value'] = TRUE;
+        $table_form[$id]['enabled']['#attributes'] = array('disabled' => 'disabled');
       }
 
-      $table_form['description'][$id] = array('#markup' => filter_xss_admin($provider['description']));
+      $table_form[$id]['description'] = array('#markup' => filter_xss_admin($provider['description']));
 
       $config_op = array();
       if (isset($provider['config'])) {
@@ -109,78 +109,11 @@ function language_negotiation_configure_form_table(&$form, $type) {
         // If there is at least one operation enabled show the operation column.
         $table_form['#show_operations'] = TRUE;
       }
-      $table_form['operation'][$id] = $config_op;
+      $table_form[$id]['operation'] = $config_op;
     }
   }
 
   $form[$type] = $table_form;
-}
-
-/**
- * Returns HTML for the language negotiation configuration form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_language_negotiation_configure_form($variables) {
-  $form = $variables['form'];
-  $output = '';
-
-  foreach ($form['#language_types'] as $type) {
-    $rows = array();
-    $info = $form['#language_types_info'][$type];
-    $title = '<label>' . $form[$type]['#title'] . '</label>';
-    $description = '<div class="description">' . $form[$type]['#description'] . '</div>';
-
-    foreach ($form[$type]['title'] as $id => $element) {
-      // Do not take form control structures.
-      if (is_array($element) && element_child($id)) {
-        $row = array(
-          'data' => array(
-            '<strong>' . backdrop_render($form[$type]['title'][$id]) . '</strong>',
-            backdrop_render($form[$type]['description'][$id]),
-            backdrop_render($form[$type]['enabled'][$id]),
-            backdrop_render($form[$type]['weight'][$id]),
-          ),
-          'class' => array('draggable'),
-        );
-        if ($form[$type]['#show_operations']) {
-          $row['data'][] = backdrop_render($form[$type]['operation'][$id]);
-        }
-        $rows[] = $row;
-      }
-    }
-
-    $header = array(
-      array('data' => t('Detection method')),
-      array('data' => t('Description')),
-      array('data' => t('Enabled')),
-      array('data' => t('Weight')),
-    );
-
-    // If there is at least one operation enabled show the operation column.
-    if ($form[$type]['#show_operations']) {
-      $header[] = array('data' => t('Operations'));
-    }
-
-    $variables = array(
-      'header' => $header,
-      'rows' => $rows,
-      'attributes' => array('id' => "language-negotiation-providers-$type"),
-    );
-    $table  = theme('table', $variables);
-    $table .= backdrop_render_children($form[$type]);
-
-    backdrop_add_tabledrag("language-negotiation-providers-$type", 'order', 'sibling', "language-provider-weight-$type");
-
-    $output .= '<div class="form-item">' . $title . $description . $table . '</div>';
-  }
-
-  $output .= backdrop_render_children($form);
-  return $output;
 }
 
 /**
@@ -191,25 +124,18 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
 
   foreach ($configurable_types as $type) {
     $negotiation = array();
-    $enabled_providers = $form_state['values'][$type]['enabled'];
-    $enabled_providers[LANGUAGE_NEGOTIATION_DEFAULT] = TRUE;
-    $providers_weight = $form_state['values'][$type]['weight'];
+    $providers = $form_state['values'][$type];
+    $providers[LANGUAGE_NEGOTIATION_DEFAULT]['enabled'] = 1;
+    backdrop_sort($providers);
 
-    foreach ($providers_weight as $id => $weight) {
-      if ($enabled_providers[$id]) {
-        $provider = $form[$type]['#language_providers'][$id];
-        $provider['weight'] = $weight;
-        $negotiation[$id] = $provider;
+    foreach ($providers as $id => $provider_settings) {
+      if ($provider_settings['enabled']) {
+        $negotiation[] = $id;
       }
     }
 
     language_negotiation_set($type, $negotiation);
-    variable_set("locale_language_providers_weight_$type", $providers_weight);
   }
-
-  // Update non-configurable language types and the related language negotiation
-  // configuration.
-  language_types_set();
 
   $form_state['redirect'] = 'admin/config/regional/language/detection';
   backdrop_set_message(t('Language negotiation configuration saved.'));
@@ -217,6 +143,9 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
 
 /**
  * Builds the URL language provider configuration form.
+ *
+ * @see language_negotiation_configure_url_form_validate()
+ * @see language_negotiation_configure_url_form_submit()
  */
 function language_negotiation_configure_url_form($form, &$form_state) {
   $form['locale_language_negotiation_url_part'] = array(
@@ -226,7 +155,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       LANGUAGE_NEGOTIATION_URL_PREFIX => t('Path prefix'),
       LANGUAGE_NEGOTIATION_URL_DOMAIN => t('Domain'),
     ),
-    '#default_value' => variable_get('locale_language_negotiation_url_part', LANGUAGE_NEGOTIATION_URL_PREFIX),
+    '#default_value' => config_get('locale.settings', 'language_negotiation_url_part'),
   );
 
   $form['prefix'] = array(
@@ -260,13 +189,19 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   $languages = language_list(TRUE);
   $prefixes = locale_language_negotiation_url_prefixes();
   $domains = locale_language_negotiation_url_domains();
+
+  // Use a mock language for the URL field prefix to prevent use of any language
+  // codes in the field prefix.
+  $mock_language = (object)(array(
+    'langcode' => '',
+  ));
   foreach ($languages as $langcode => $language) {
     $form['prefix'][$langcode] = array(
       '#type' => 'textfield',
       '#title' => t('%language (%langcode) path prefix', array('%language' => $language->name, '%langcode' => $language->langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
-      '#field_prefix' => url('', array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
+      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',
@@ -308,7 +243,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
         form_error($form['prefix'][$langcode], t('The prefix may only be left blank for the default language.'));
       }
     }
-    else if (isset($count[$value]) && $count[$value] > 1) {
+    elseif (isset($count[$value]) && $count[$value] > 1) {
       // Validation error if there are two languages with the same domain/prefix.
       form_error($form['prefix'][$langcode], t('The prefix for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }
@@ -325,7 +260,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
         form_error($form['domain'][$langcode], t('The domain may only be left blank for the default language.'));
       }
     }
-    else if (isset($count[$value]) && $count[$value] > 1) {
+    elseif (isset($count[$value]) && $count[$value] > 1) {
       // Validation error if there are two languages with the same domain/domain.
       form_error($form['domain'][$langcode], t('The domain for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }
@@ -333,12 +268,11 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
 }
 
 /**
- * Save URL negotiation provider settings.
+ * Form submission handler for language_negotiation_configure_url_form().
  */
 function language_negotiation_configure_url_form_submit($form, &$form_state) {
-
   // Save selected format (prefix or domain).
-  variable_set('locale_language_negotiation_url_part', $form_state['values']['locale_language_negotiation_url_part']);
+  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['locale_language_negotiation_url_part']);
 
   // Save new domain and prefix values.
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
@@ -349,18 +283,33 @@ function language_negotiation_configure_url_form_submit($form, &$form_state) {
 
 /**
  * The URL language provider configuration form.
+ *
+ * @see language_negotiation_configure_session_form_submit()
  */
 function language_negotiation_configure_session_form($form, &$form_state) {
-  $form['locale_language_negotiation_session_param'] = array(
+  $form['language_negotiation_session_parameter'] = array(
     '#title' => t('Request/session parameter'),
     '#type' => 'textfield',
-    '#default_value' => variable_get('locale_language_negotiation_session_param', 'language'),
+    '#default_value' => config_get('locale.settings', 'language_negotiation_session_parameter'),
     '#description' => t('Name of the request/session parameter used to determine the desired language.'),
   );
 
   $form_state['redirect'] = 'admin/config/regional/language/detection';
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for language_negotiation_configure_session_form().
+ */
+function language_negotiation_configure_session_form_submit($form, &$form_state) {
+  config_set('locale.settings', 'language_negotiation_session_parameter', $form_state['values']['language_negotiation_session_parameter']);
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -368,119 +317,54 @@ function language_negotiation_configure_session_form($form, &$form_state) {
  */
 
 /**
- * Returns HTML for a locale date format form.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
+ * Form callback; Display fields for setting the date format for each language.
  */
-function theme_locale_date_format_form($variables) {
-  $form = $variables['form'];
-  $header = array(
-    t('Date type'),
-    t('Format'),
+function locale_date_format_form($form, &$form_state, $format) {
+  backdrop_set_title(t('Localize %format', array('%format' => $format['name'])), PASS_THROUGH);
+
+  // We use the system_date_time_lookup() function from system.admin.inc.
+  form_load_include($form_state, 'inc', 'system', 'system.admin');
+  $form_state['format'] = $format;
+
+  $form['#tree'] = TRUE;
+  $form['help'] = array(
+    '#markup' => '<p>' . t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')) . '</p>',
   );
 
-  foreach (element_children($form['date_formats']) as $key) {
-    $row = array();
-    $row[] = $form['date_formats'][$key]['#title'];
-    unset($form['date_formats'][$key]['#title']);
-    $row[] = array('data' => backdrop_render($form['date_formats'][$key]));
-    $rows[] = $row;
-  }
-
-  $output = backdrop_render($form['language']);
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
-  $output .= backdrop_render_children($form);
-
-  return $output;
-}
-
-/**
- * Display edit date format links for each language.
- */
-function locale_date_format_language_overview_page() {
-  $header = array(
-    t('Language'),
-    t('Operations'),
+  $form['locales']['default'] = array(
+    '#type' => 'item',
+    '#title' => t('Default'),
+    '#markup' => '<strong>' . check_plain($format['pattern']) . '</strong>',
+    '#field_suffix' => '<small>' . t('Displayed as %date_format' , array('%date_format' => format_date(REQUEST_TIME, 'custom', $format['pattern']))) . '</small>',
   );
 
   // Get the enabled languages only.
   $languages = language_list(TRUE);
-
   foreach ($languages as $langcode => $language) {
-    $row = array();
-    $row[] = $language->name;
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/edit',
-    );
-    $links['reset'] = array(
-      'title' => t('Reset'),
-      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/reset',
-    );
-    $row[] = array(
-      'data' => array(
-        '#type' => 'operations',
-        '#links' => $links,
+    $pattern = isset($format['locales'][$langcode]) ? $format['locales'][$langcode] : '';
+    if (!empty($form_state['values']['locales'][$langcode])) {
+      $pattern = $form_state['values']['locales'][$langcode];
+    }
+    $placeholder_pattern = $pattern ? $pattern : $format['pattern'];
+    $preview = t('Displayed as %date_format', array('%date_format' => format_date(REQUEST_TIME, 'custom', $placeholder_pattern)));
+
+    $form['locales'][$langcode] = array(
+      '#title' => check_plain($language->name),
+      '#type' => 'textfield',
+      '#maxlength' => 100,
+      '#default_value' => $pattern,
+      '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
+      '#ajax' => array(
+        'callback' => 'system_date_time_lookup',
+        'event' => 'keyup',
+        'progress' => array('type' => 'none', 'message' => NULL),
+        'disable' => FALSE,
       ),
-    );
-    $rows[] = $row;
-  }
-
-  return theme('table', array('header' => $header, 'rows' => $rows));
-}
-
-/**
- * Provide date localization configuration options to users.
- */
-function locale_date_format_form($form, &$form_state, $langcode) {
-  // Display the current language name.
-  $form['language'] = array(
-    '#type' => 'item',
-    '#title' => t('Language'),
-    '#markup' => language_load($langcode)->name,
-    '#weight' => -10,
-  );
-  $form['langcode'] = array(
-    '#type' => 'value',
-    '#value' => $langcode,
-  );
-
-  // Get list of date format types.
-  $types = system_get_date_types();
-
-  // Get list of available formats.
-  $formats = system_get_date_formats();
-  $choices = array();
-  foreach ($formats as $type => $list) {
-    foreach ($list as $f => $format) {
-      $choices[$f] = format_date(REQUEST_TIME, 'custom', $f);
-    }
-  }
-  reset($formats);
-
-  // Get configured formats for each language.
-  $locale_formats = system_date_format_locale($langcode);
-  // Display a form field for each format type.
-  foreach ($types as $type => $type_info) {
-    if (!empty($locale_formats) && in_array($type, array_keys($locale_formats))) {
-      $default = $locale_formats[$type];
-    }
-    else {
-      $default = variable_get('date_format_' . $type, key($formats));
-    }
-
-    // Show date format select list.
-    $form['date_formats']['date_format_' . $type] = array(
-      '#type' => 'select',
-      '#title' => check_plain($type_info['title']),
-      '#attributes' => array('class' => array('date-format')),
-      '#default_value' => (isset($choices[$default]) ? $default : 'custom'),
-      '#options' => $choices,
+      '#placeholder' => $placeholder_pattern,
+      '#size' => 30,
+      '#wrapper_attributes' => array(
+        'id' => 'locale-pattern-' . $langcode,
+      ),
     );
   }
 
@@ -497,43 +381,14 @@ function locale_date_format_form($form, &$form_state, $langcode) {
  * Submit handler for configuring localized date formats on the locale_date_format_form.
  */
 function locale_date_format_form_submit($form, &$form_state) {
-  include_once BACKDROP_ROOT . '/core/includes/locale.inc';
-  $langcode = $form_state['values']['langcode'];
-
-  // Get list of date format types.
-  $types = system_get_date_types();
-  foreach ($types as $type => $type_info) {
-    $format = $form_state['values']['date_format_' . $type];
-    if ($format == 'custom') {
-      $format = $form_state['values']['date_format_' . $type . '_custom'];
+  $format = $form_state['format'];
+  foreach ($form_state['values']['locales'] as $langcode => $pattern) {
+    if (!empty($pattern)) {
+      $format['locales'][$langcode] = $pattern;
     }
-    locale_date_format_save($langcode, $type, $format);
   }
-  backdrop_set_message(t('Configuration saved.'));
-  $form_state['redirect'] = 'admin/config/regional/date-time/locale';
+  system_date_format_save($format);
+  backdrop_set_message(t('Date localizations saved.'));
+  $form_state['redirect'] = 'admin/config/regional/date-time';
 }
 
-/**
- * Reset locale specific date formats to the global defaults.
- *
- * @param $langcode
- *   Language code, e.g. 'en'.
- */
-function locale_date_format_reset_form($form, &$form_state, $langcode) {
-  $form['langcode'] = array('#type' => 'value', '#value' => $langcode);
-  return confirm_form($form,
-    t('Are you sure you want to reset the date formats for %language to the global defaults?', array('%language' => language_load($langcode)->name)),
-    'admin/config/regional/date-time/locale',
-    t('Resetting will remove all localized date formats for this language. This action cannot be undone.'),
-    t('Reset'), t('Cancel'));
-}
-
-/**
- * Reset date formats for a specific language to global defaults.
- */
-function locale_date_format_reset_form_submit($form, &$form_state) {
-  db_delete('date_format_locale')
-    ->condition('language', $form_state['values']['langcode'])
-    ->execute();
-  $form_state['redirect'] = 'admin/config/regional/date-time/locale';
-}

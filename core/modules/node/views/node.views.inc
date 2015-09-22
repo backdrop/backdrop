@@ -712,21 +712,21 @@ function node_views_plugins() {
 /**
  * Implements hook_preprocess_node().
  */
-function node_row_node_view_preprocess_node(&$vars) {
-  $node = $vars['node'];
-  $options = $vars['view']->style_plugin->row_plugin->options;
+function node_row_node_view_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  $options = $variables['view']->style_plugin->row_plugin->options;
 
   // Prevent the comment form from showing up if this is not a page display.
-  if ($vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
+  if ($variables['view_mode'] == 'full' && !$variables['view']->display_handler->has_path()) {
     $node->comment = FALSE;
   }
 
   if (!$options['links']) {
-    unset($vars['content']['links']);
+    unset($variables['content']['links']);
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $vars['content']['comments'] = comment_node_page_additions($node);
+    $variables['content']['comments'] = comment_node_page_additions($node);
   }
 }
 
@@ -756,19 +756,8 @@ function node_views_analyze($view) {
         // check for no access control
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
-          $select = db_select('role', 'r');
-          $select->innerJoin('role_permission', 'p', 'r.rid = p.rid');
-          $result = $select->fields('r', array('name'))
-            ->fields('p', array('permission'))
-            ->condition('r.name', array('anonymous user', 'authenticated user'), 'IN')
-            ->condition('p.permission', 'access content')
-            ->execute();
-
-          foreach ($result as $role) {
-            $role->safe = TRUE;
-            $roles[$role->name] = $role;
-          }
-          if (!($roles['anonymous user']->safe && $roles['authenticated user']->safe)) {
+          $roles = user_roles(FALSE, NULL, TRUE);
+          if (!in_array('access content', $roles[BACKDROP_ANONYMOUS_ROLE]->permissions) || !in_array('access content', $roles[BACKDROP_AUTHENTICATED_ROLE]->permissions)) {
             $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
           }
           $filters = $display->handler->get_option('filters');

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by Backdrop core and the System module.
@@ -118,8 +117,8 @@ function hook_admin_paths_alter(&$paths) {
   // Treat all user pages as administrative.
   $paths['user'] = TRUE;
   $paths['user/*'] = TRUE;
-  // Treat the article node form as a non-administrative page.
-  $paths['node/add/article'] = FALSE;
+  // Treat the post node form as a non-administrative page.
+  $paths['node/add/post'] = FALSE;
 }
 
 /**
@@ -160,8 +159,8 @@ function hook_cron() {
  * @return
  *   An associative array where the key is the queue name and the value is
  *   again an associative array. Possible keys are:
- *   - 'worker callback': The name of the function to call. It will be called
- *     with one argument, the item created via BackdropQueue::createItem().
+ *   - 'worker callback': A PHP callable to call that is an implementation of
+ *     callback_queue_worker().
  *   - 'time': (optional) How much time Backdrop should spend on calling this
  *     worker in seconds. Defaults to 15.
  *   - 'skip on cron': (optional) Set to TRUE to avoid being processed during
@@ -194,6 +193,50 @@ function hook_cron_queue_info_alter(&$queues) {
   // This site has many feeds so let's spend 90 seconds on each cron run
   // updating feeds instead of the default 60.
   $queues['aggregator_feeds']['time'] = 90;
+}
+
+ /**
+ * Work on a single queue item.
+ *
+ * Callback for hook_queue_info().
+ *
+ * @param $queue_item_data
+ *   The data that was passed to BackdropQueue::createItem() when the item was
+ *   queued.
+ *
+ * @throws \Exception
+ *   The worker callback may throw an exception to indicate there was a problem.
+ *   The cron process will log the exception, and leave the item in the queue to
+ *   be processed again later.
+ *
+ * @see backdrop_cron_run()
+ */
+function callback_queue_worker($queue_item_data) {
+  $node = node_load($queue_item_data);
+  $node->title = 'Updated title';
+  $node->save();
+}
+
+/**
+ * Work on a single queue item.
+ *
+ * Callback for hook_queue_info().
+ *
+ * @param $queue_item_data
+ *   The data that was passed to BackdropQueue::createItem() when the item was
+ *   queued.
+ *
+ * @throws \Exception
+ *   The worker callback may throw an exception to indicate there was a problem.
+ *   The cron process will log the exception, and leave the item in the queue to
+ *   be processed again later.
+ *
+ * @see backdrop_cron_run()
+ */
+function callback_queue_worker($queue_item_data) {
+  $node = node_load($queue_item_data);
+  $node->title = 'Updated title';
+  $node->save();
 }
 
 /**
@@ -267,12 +310,9 @@ function hook_element_info_alter(&$type) {
  * anything because by the time it runs the response is already sent to
  * the browser.
  *
- * Only use this hook if your code must run even for cached page views.
- * If you have code which must run once on all non-cached pages, use
- * hook_init() instead. That is the usual case. If you implement this hook
- * and see an error like 'Call to undefined function', it is likely that
- * you are depending on the presence of a module which has not been loaded yet.
- * It is not loaded because Backdrop is still in bootstrap mode.
+ * This hook by default is not called on pages served by the default page cache,
+ * but can be enabled through the $settings['invoke_page_cache_hooks'] option in
+ * settings.php.
  *
  * @param $destination
  *   If this hook is invoked as part of a backdrop_goto() call, then this argument
@@ -434,39 +474,6 @@ function hook_ajax_render_alter(&$commands) {
 }
 
 /**
- * Add elements to a page before it is rendered.
- *
- * Use this hook when you want to add elements at the page level. For your
- * additions to be printed, they have to be placed below a top level array key
- * of the $page array that has the name of a region of the active theme.
- *
- * By default, valid region keys are 'page_top', 'header', 'sidebar_first',
- * 'content', 'sidebar_second' and 'page_bottom'. To get a list of all regions
- * of the active theme, use system_region_list($theme). Note that $theme is a
- * global variable.
- *
- * If you want to alter the elements added by other modules or if your module
- * depends on the elements of other modules, use hook_page_alter() instead which
- * runs after this hook.
- *
- * @param $page
- *   Nested array of renderable elements that make up the page.
- *
- * @see hook_page_alter()
- * @see backdrop_render_page()
- */
-function hook_page_build(&$page) {
-  if (menu_get_object('node', 1)) {
-    // We are on a node detail page. Append a standard disclaimer to the
-    // content region.
-    $page['content']['disclaimer'] = array(
-      '#markup' => t('Acme, Inc. is not responsible for the contents of this sample code.'),
-      '#weight' => 25,
-    );
-  }
-}
-
-/**
  * Alter a menu router item right after it has been retrieved from the database or cache.
  *
  * This hook is invoked by menu_get_item() and allows for run-time alteration of router
@@ -503,8 +510,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * This hook enables modules to register paths in order to define how URL
  * requests are handled. Paths may be registered for URL handling only, or they
- * can register a link to be placed in a menu (usually the Navigation menu). A
- * path and its associated information is commonly called a "menu router item".
+ * can register a link to be placed in a menu (usually the Main menu). A path
+ * and its associated information is commonly called a "menu router item".
  * This hook is rarely called (for example, when modules are enabled), and
  * its results are cached in the database.
  *
@@ -764,7 +771,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     the menu; higher-weighted items sink. Defaults to 0. Menu items with the
  *     same weight are ordered alphabetically.
  *   - "menu_name": Optional. Set this to a custom menu if you don't want your
- *     item to be placed in Navigation.
+ *     item to be placed in the Main menu.
  *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
  *     this menu item (as a result of other properties), then the menu link is
  *     always expanded, equivalent to its 'always expanded' checkbox being set
@@ -1127,65 +1134,6 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
 }
 
 /**
- * Perform alterations before a page is rendered.
- *
- * Use this hook when you want to remove or alter elements at the page
- * level, or add elements at the page level that depend on an other module's
- * elements (this hook runs after hook_page_build().
- *
- * If you are making changes to entities such as forms, menus, or user
- * profiles, use those objects' native alter hooks instead (hook_form_alter(),
- * for example).
- *
- * The $page array contains top level elements for each block region:
- * @code
- *   $page['page_top']
- *   $page['header']
- *   $page['sidebar_first']
- *   $page['content']
- *   $page['sidebar_second']
- *   $page['page_bottom']
- * @endcode
- *
- * The 'content' element contains the main content of the current page, and its
- * structure will vary depending on what module is responsible for building the
- * page. Some legacy modules may not return structured content at all: their
- * pre-rendered markup will be located in $page['content']['main']['#markup'].
- *
- * Pages built by Backdrop's core Node module use a standard structure:
- *
- * @code
- *   // Node body.
- *   $page['content']['system_main']['nodes'][$nid]['body']
- *   // Array of links attached to the node (add comments, read more).
- *   $page['content']['system_main']['nodes'][$nid]['links']
- *   // The node entity itself.
- *   $page['content']['system_main']['nodes'][$nid]['#node']
- *   // The results pager.
- *   $page['content']['system_main']['pager']
- * @endcode
- *
- * Blocks may be referenced by their module/delta pair within a region:
- * @code
- *   // The login block in the first sidebar region.
- *   $page['sidebar_first']['user_login']['#block'];
- * @endcode
- *
- * @param $page
- *   Nested array of renderable elements that make up the page.
- *
- * @see hook_page_build()
- * @see backdrop_render_page()
- */
-function hook_page_alter(&$page) {
-  // Add help text to the user login block.
-  $page['sidebar_first']['user_login']['help'] = array(
-    '#weight' => -10,
-    '#markup' => t('To post comments or add new content, you first have to log in.'),
-  );
-}
-
-/**
  * Perform alterations before a form is rendered.
  *
  * One popular use of this hook is to add form elements to the node form. When
@@ -1226,7 +1174,7 @@ function hook_form_alter(&$form, &$form_state, $form_id) {
     $form['workflow']['upload_' . $form['type']['#value']] = array(
       '#type' => 'radios',
       '#title' => t('Attachments'),
-      '#default_value' => variable_get('upload_' . $form['type']['#value'], 1),
+      '#default_value' => config_get('my_module.settings', 'upload_' . $form['type']['#value']),
       '#options' => array(t('Disabled'), t('Enabled')),
     );
   }
@@ -1405,9 +1353,11 @@ function hook_forms($form_id, $args) {
  * This hook is run at the beginning of the page request. It is typically
  * used to set up global parameters that are needed later in the request.
  *
- * Only use this hook if your code must run even for cached page views. This
- * hook is called before the theme, modules, or most include files are loaded
- * into memory. It happens while Backdrop is still in bootstrap mode.
+ * If needing to execute code early in the page request, consider using
+ * hook_init() instead. In hook_boot(), only the most basic APIs are available
+ * and not all modules have been loaded. This hook by default is not called on
+ * pages served by the default page cache, but can be enabled through the
+ * $settings['invoke_page_cache_hooks'] option in settings.php.
  *
  * @see hook_init()
  */
@@ -1443,9 +1393,8 @@ function hook_init() {
 /**
  * Define image toolkits provided by this module.
  *
- * The file which includes each toolkit's functions must be declared as part of
- * the files array in the module .info file so that the registry will find and
- * parse it.
+ * The file which includes each toolkit's functions must be included in this
+ * hook.
  *
  * The toolkit's functions must be named image_toolkitname_operation().
  * where the operation may be:
@@ -1531,7 +1480,7 @@ function hook_mail_alter(&$message) {
       $message['send'] = FALSE;
       return;
     }
-    $message['body'][] = "--\nMail sent out from " . variable_get('site_name', 'Backdrop');
+    $message['body'][] = "--\nMail sent out from " . config_get('system.core', 'site_name');
   }
 }
 
@@ -1774,10 +1723,6 @@ function hook_theme($existing, $type, $theme, $path) {
       'render element' => 'requirements',
       'file' => 'system.admin.inc',
     ),
-    'system_date_time_settings' => array(
-      'render element' => 'form',
-      'file' => 'system.admin.inc',
-    ),
   );
 }
 
@@ -1896,7 +1841,7 @@ function hook_custom_theme() {
  *     the message is not possible to translate.
  */
 function hook_watchdog(array $log_entry) {
-  global $base_url, $language_interface;
+  global $base_url, $language;
 
   $severity_list = array(
     WATCHDOG_EMERGENCY     => t('Emergency'),
@@ -1912,7 +1857,7 @@ function hook_watchdog(array $log_entry) {
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
-    '@site_name' => variable_get('site_name', 'Backdrop'),
+    '@site_name' => config_get('system.core', 'site_name'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
   ));
 
@@ -1942,7 +1887,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language_interface, $params);
+  backdrop_mail('emaillog', 'entry', $to, $language, $params);
 }
 
 /**
@@ -1978,19 +1923,19 @@ function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
   $variables = array(
-    '%site_name' => variable_get('site_name', 'Backdrop'),
+    '%site_name' => config_get('system.core', 'site_name'),
     '%username' => user_format_name($account),
   );
   if ($context['hook'] == 'taxonomy') {
     $entity = $params['entity'];
-    $vocabulary = taxonomy_vocabulary_load($entity->vid);
+    $vocabulary = taxonomy_vocabulary_load($entity->vocabulary);
     $variables += array(
       '%term_name' => $entity->name,
       '%term_description' => $entity->description,
       '%term_id' => $entity->tid,
       '%vocabulary_name' => $vocabulary->name,
       '%vocabulary_description' => $vocabulary->description,
-      '%vocabulary_id' => $vocabulary->vid,
+      '%vocabulary_machine_name' => $vocabulary->machine_name,
     );
   }
 
@@ -2069,8 +2014,8 @@ function hook_modules_preenable($modules) {
  * @see hook_install()
  */
 function hook_modules_installed($modules) {
-  if (in_array('lousy_module', $modules)) {
-    variable_set('lousy_module_conflicting_variable', FALSE);
+  if (in_array('other_module', $modules)) {
+    backdrop_set_message(t('My module works together with Other Module. See the settings page for new options.'));
   }
 }
 
@@ -2421,7 +2366,7 @@ function hook_file_download($uri) {
   if (!file_prepare_directory($uri)) {
     $uri = FALSE;
   }
-  if (strpos(file_uri_target($uri), variable_get('user_picture_path', 'pictures') . '/picture-') === 0) {
+  if (strpos(file_uri_target($uri), config_get('system.core', 'user_picture_path') . '/picture-') === 0) {
     if (!user_access('access user profiles')) {
       // Access to the file is denied.
       return -1;
@@ -2599,37 +2544,39 @@ function hook_requirements($phase) {
 /**
  * Define the current version of the database schema.
  *
- * A Backdrop schema definition is an array structure representing one or
- * more tables and their related keys and indexes. A schema is defined by
+ * A Backdrop schema definition is an array structure representing one or more
+ * tables and their related keys and indexes. A schema is defined by
  * hook_schema() which must live in your module's .install file.
  *
- * This hook is called at install and uninstall time, and in the latter
- * case, it cannot rely on the .module file being loaded or hooks being known.
- * If the .module file is needed, it may be loaded with backdrop_load().
+ * This hook is called at install and uninstall time, and in the latter case, it
+ * cannot rely on the .module file being loaded or hooks being known. If the
+ * .module file is needed, it may be loaded with backdrop_load().
  *
- * The tables declared by this hook will be automatically created when
- * the module is first enabled, and removed when the module is uninstalled.
- * This happens before hook_install() is invoked, and after hook_uninstall()
- * is invoked, respectively.
+ * The tables declared by this hook will be automatically created when the
+ * module is first enabled, and removed when the module is uninstalled. This
+ * happens before hook_install() is invoked, and after hook_uninstall() is
+ * invoked, respectively.
  *
  * By declaring the tables used by your module via an implementation of
  * hook_schema(), these tables will be available on all supported database
  * engines. You don't have to deal with the different SQL dialects for table
  * creation and alteration of the supported database engines.
  *
- * See the Schema API Handbook at http://drupal.org/node/146843 for
- * details on schema definition structures.
+ * See the Schema API Handbook at http://drupal.org/node/146843 for details on
+ * schema definition structures.
  *
- * @return
+ * @return array
  *   A schema definition structure array. For each element of the
  *   array, the key is a table name and the value is a table structure
  *   definition.
+ *
+ * @see hook_schema_alter()
  *
  * @ingroup schemaapi
  */
 function hook_schema() {
   $schema['node'] = array(
-    // example (partial) specification for table "node"
+    // Example (partial) specification for table "node".
     'description' => 'The base table for nodes.',
     'fields' => array(
       'nid' => array(
@@ -3034,7 +2981,7 @@ function hook_update_last_removed() {
  * Remove any information that the module sets.
  *
  * The information that the module should remove includes:
- * - variables that the module has set using variable_set() or system_settings_form()
+ * - settings that the module has set using state_set().
  * - modifications to existing tables
  *
  * The module should not remove its entry from the {system} table. Database
@@ -3059,7 +3006,7 @@ function hook_update_last_removed() {
  * @see hook_modules_uninstalled()
  */
 function hook_uninstall() {
-  variable_del('upload_file_types');
+  state_del('my_module_last_cron');
 }
 
 /**
@@ -3110,8 +3057,9 @@ function hook_class_registry_alter(&$class_registry, $modules) {
  *
  * Any tasks you define here will be run, in order, after the installer has
  * finished the site configuration step but before it has moved on to the
- * final import of languages and the end of the installation. You can have any
- * number of custom tasks to perform during this phase.
+ * final import of languages and the end of the installation. This is invoked
+ * by install_tasks().  You can have any number of custom tasks to perform
+ * during this phase.
  *
  * Each task you define here corresponds to a callback function which you must
  * separately define and which is called when your task is run. This function
@@ -3146,10 +3094,10 @@ function hook_class_registry_alter(&$class_registry, $modules) {
  * access to this information.
  *
  * Remember that a user installing Backdrop interactively will be able to reload
- * an installation page multiple times, so you should use variable_set() and
- * variable_get() if you are collecting any data that you need to store and
+ * an installation page multiple times, so you should use state_set() and
+ * state_get() if you are collecting any data that you need to store and
  * inspect later. It is important to remove any temporary variables using
- * variable_del() before your last task has completed and control is handed
+ * state_del() before your last task has completed and control is handed
  * back to the installer.
  * 
  * @param array $install_state
@@ -3204,12 +3152,14 @@ function hook_class_registry_alter(&$class_registry, $modules) {
  *
  * @see install_state_defaults()
  * @see batch_set()
+ * @see hook_install_tasks_alter()
+ * @see install_tasks()
  */
 function hook_install_tasks(&$install_state) {
   // Here, we define a variable to allow tasks to indicate that a particular,
   // processor-intensive batch process needs to be triggered later on in the
   // installation.
-  $myprofile_needs_batch_processing = variable_get('myprofile_needs_batch_processing', FALSE);
+  $myprofile_needs_batch_processing = state_get('myprofile_needs_batch_processing', FALSE);
   $tasks = array(
     // This is an example of a task that defines a form which the user who is
     // installing the site will be asked to fill out. To implement this task,
@@ -3217,7 +3167,7 @@ function hook_install_tasks(&$install_state) {
     // as a normal form API callback function, with associated validation and
     // submit handlers. In the submit handler, in addition to saving whatever
     // other data you have collected from the user, you might also call
-    // variable_set('myprofile_needs_batch_processing', TRUE) if the user has
+    // state_set('myprofile_needs_batch_processing', TRUE) if the user has
     // entered data which requires that batch processing will need to occur
     // later on.
     'myprofile_data_import_form' => array(
@@ -3253,7 +3203,7 @@ function hook_install_tasks(&$install_state) {
     // function named myprofile_final_site_setup(), in which additional,
     // automated site setup operations would be performed. Since this is the
     // last task defined by your profile, you should also use this function to
-    // call variable_del('myprofile_needs_batch_processing') and clean up the
+    // call state_del('myprofile_needs_batch_processing') and clean up the
     // variable that was used above. If you want the user to pass to the final
     // Backdrop installation tasks uninterrupted, return no output from this
     // function. Otherwise, return themed output that the user will see (for
@@ -3306,6 +3256,8 @@ function hook_html_head_alter(&$head_elements) {
 /**
  * Alter the full list of installation tasks.
  *
+ * This hook is invoked on the install profile in install_tasks().
+ *
  * You can use this hook to change or replace any part of the Backdrop
  * installation process that occurs after the installation profile is selected.
  *
@@ -3315,6 +3267,9 @@ function hook_html_head_alter(&$head_elements) {
  *   steps within the installation process.
  * @param $install_state
  *   An array of information about the current installation state.
+ *
+ * @see hook_install_tasks()
+ * @see install_tasks()
  */
 function hook_install_tasks_alter(&$tasks, $install_state) {
   // Replace the entire site configuration form provided by Backdrop core
@@ -3348,18 +3303,13 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
 /**
  * Declares information about actions.
  *
- * Any module can define actions, and then call actions_do() to make those
+ * Any module can define actions, and then call actions_execute() to make those
  * actions happen in response to events.
  *
- * An action consists of two or three parts:
+ * An action consists of two parts:
  * - an action definition (returned by this hook)
  * - a function which performs the action (which by convention is named
  *   MODULE_description-of-function_action)
- * - an optional form definition function that defines a configuration form
- *   (which has the name of the action function with '_form' appended to it.)
- *
- * The action function takes two to four arguments, which come from the input
- * arguments to actions_do().
  *
  * @return
  *   An associative array of action descriptions. The keys of the array
@@ -3369,19 +3319,12 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  *     'node', 'user', 'comment', and 'system'.
  *   - 'label': The human-readable name of the action, which should be passed
  *     through the t() function for translation.
- *   - 'configurable': If FALSE, then the action doesn't require any extra
- *     configuration. If TRUE, then your module must define a form function with
- *     the same name as the action function with '_form' appended (e.g., the
- *     form for 'node_assign_owner_action' is 'node_assign_owner_action_form'.)
- *     This function takes $context as its only parameter, and is paired with
- *     the usual _submit function, and possibly a _validate function.
- *   - 'behavior': (optional) A machine-readable array of behaviors of this
- *     action, used to signal additionally required actions that may need to be
- *     triggered. Modules that are processing actions should take special care
- *     for the "presave" hook, in which case a dependent "save" action should
- *     NOT be invoked.
- *   - 'redirect': (optional) A path to which the user will be redirected after
- *     this action has been completed.
+ *   - 'callback': Optional. A function name that will execute the action if the
+ *     name of the action differs from the function name.
+ *   - 'file': Optional. Relative path to a file from the module's directory
+ *     that contains the callback function.
+ *
+ * @see action_get_info()
  *
  * @ingroup actions
  */
@@ -3390,35 +3333,20 @@ function hook_action_info() {
     'comment_unpublish_action' => array(
       'type' => 'comment',
       'label' => t('Unpublish comment'),
-      'configurable' => FALSE,
-      'behavior' => array('changes_property'),
-    ),
-    'comment_unpublish_by_keyword_action' => array(
-      'type' => 'comment',
-      'label' => t('Unpublish comment containing keyword(s)'),
-      'configurable' => TRUE,
-      'behavior' => array('changes_property'),
+      'callback' => 'comment_unpublish_action',
     ),
   );
 }
 
 /**
- * Executes code after an action is deleted.
- *
- * @param $aid
- *   The action ID.
- */
-function hook_actions_delete($aid) {
-  db_delete('actions_assignments')
-    ->condition('aid', $aid)
-    ->execute();
-}
-
-/**
  * Alters the actions declared by another module.
  *
- * Called by actions_list() to allow modules to alter the return values from
+ * Called by action_get_info() to allow modules to alter the return values from
  * implementations of hook_action_info().
+ *
+ * @see action_get_info()
+ *
+ * @ingroup actions
  */
 function hook_action_info_alter(&$actions) {
   $actions['node_unpublish_action']['label'] = t('Unpublish and remove from public view.');
@@ -3462,143 +3390,6 @@ function hook_archiver_info() {
  */
 function hook_archiver_info_alter(&$info) {
   $info['tar']['extensions'][] = 'tgz';
-}
-
-/**
- * Define additional date types.
- *
- * Next to the 'long', 'medium' and 'short' date types defined in core, any
- * module can define additional types that can be used when displaying dates,
- * by implementing this hook. A date type is basically just a name for a date
- * format.
- *
- * Date types are used in the administration interface: a user can assign
- * date format types defined in hook_date_formats() to date types defined in
- * this hook. Once a format has been assigned by a user, the machine name of a
- * type can be used in the format_date() function to format a date using the
- * chosen formatting.
- *
- * To define a date type in a module and make sure a format has been assigned to
- * it, without requiring a user to visit the administrative interface, use
- * @code variable_set('date_format_' . $type, $format); @endcode
- * where $type is the machine-readable name defined here, and $format is a PHP
- * date format string.
- *
- * To avoid namespace collisions with date types defined by other modules, it is
- * recommended that each date type starts with the module name. A date type
- * can consist of letters, numbers and underscores.
- *
- * @return
- *   An array of date types where the keys are the machine-readable names and
- *   the values are the human-readable labels.
- *
- * @see hook_date_formats()
- * @see format_date()
- */
-function hook_date_format_types() {
-  // Define the core date format types.
-  return array(
-    'long' => t('Long'),
-    'medium' => t('Medium'),
-    'short' => t('Short'),
-  );
-}
-
-/**
- * Modify existing date types.
- *
- * Allows other modules to modify existing date types like 'long'. Called by
- * _system_date_format_types_build(). For instance, A module may use this hook
- * to apply settings across all date types, such as locking all date types so
- * they appear to be provided by the system.
- *
- * @param $types
- *   A list of date types. Each date type is keyed by the machine-readable name
- *   and the values are associative arrays containing:
- *   - is_new: Set to FALSE to override previous settings.
- *   - module: The name of the module that created the date type.
- *   - type: The machine-readable date type name.
- *   - title: The human-readable date type name.
- *   - locked: Specifies that the date type is system-provided.
- */
-function hook_date_format_types_alter(&$types) {
-  foreach ($types as $name => $type) {
-    $types[$name]['locked'] = 1;
-  }
-}
-
-/**
- * Define additional date formats.
- *
- * This hook is used to define the PHP date format strings that can be assigned
- * to date types in the administrative interface. A module can provide date
- * format strings for the core-provided date types ('long', 'medium', and
- * 'short'), or for date types defined in hook_date_format_types() by itself
- * or another module.
- *
- * Since date formats can be locale-specific, you can specify the locales that
- * each date format string applies to. There may be more than one locale for a
- * format. There may also be more than one format for the same locale. For
- * example d/m/Y and Y/m/d work equally well in some locales. You may wish to
- * define some additional date formats that aren't specific to any one locale,
- * for example, "Y m". For these cases, the 'locales' component of the return
- * value should be omitted.
- *
- * Providing a date format here does not normally assign the format to be
- * used with the associated date type -- a user has to choose a format for each
- * date type in the administrative interface. There is one exception: locale
- * initialization chooses a locale-specific format for the three core-provided
- * types (see locale_get_localized_date_format() for details). If your module
- * needs to ensure that a date type it defines has a format associated with it,
- * call @code variable_set('date_format_' . $type, $format); @endcode
- * where $type is the machine-readable name defined in hook_date_format_types(),
- * and $format is a PHP date format string.
- *
- * @return
- *   A list of date formats to offer as choices in the administrative
- *   interface. Each date format is a keyed array consisting of three elements:
- *   - 'type': The date type name that this format can be used with, as
- *     declared in an implementation of hook_date_format_types().
- *   - 'format': A PHP date format string to use when formatting dates. It
- *     can contain any of the formatting options described at
- *     http://php.net/manual/en/function.date.php
- *   - 'locales': (optional) An array of 2 and 5 character locale codes,
- *     defining which locales this format applies to (for example, 'en',
- *     'en-us', etc.). If your date format is not language-specific, leave this
- *     array empty.
- *
- * @see hook_date_format_types()
- */
-function hook_date_formats() {
-  return array(
-    array(
-      'type' => 'mymodule_extra_long',
-      'format' => 'l jS F Y H:i:s e',
-      'locales' => array('en-ie'),
-    ),
-    array(
-      'type' => 'mymodule_extra_long',
-      'format' => 'l jS F Y h:i:sa',
-      'locales' => array('en', 'en-us'),
-    ),
-    array(
-      'type' => 'short',
-      'format' => 'F Y',
-      'locales' => array(),
-    ),
-  );
-}
-
-/**
- * Alter date formats declared by another module.
- *
- * Called by _system_date_format_types_build() to allow modules to alter the
- * return values from implementations of hook_date_formats().
- */
-function hook_date_formats_alter(&$formats) {
-  foreach ($formats as $id => $format) {
-    $formats[$id]['locales'][] = 'en-ca';
-  }
 }
 
 /**
@@ -3790,7 +3581,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $name = ($node->uid == 0) ? variable_get('anonymous', t('Anonymous')) : $node->name;
+          $name = ($node->uid == 0) ? config_get('system.core', 'anonymous') : $node->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 
@@ -3893,6 +3684,9 @@ function hook_tokens_alter(array &$replacements, array $context) {
  *       the node author token provides a user object, which can then be used
  *       for token replacement data in token_replace() without having to supply
  *       a separate user object.
+ *     - deprecated (optional): If set to TRUE, the token will not be displayed
+ *       in token listings, but will still be replaced if encountered and pass
+ *       form validation by token_element_validate().
  *
  * @see hook_token_info_alter()
  * @see hook_tokens()
@@ -3906,27 +3700,27 @@ function hook_token_info() {
 
   // Core tokens for nodes.
   $node['nid'] = array(
-    'name' => t("Node ID"),
-    'description' => t("The unique ID of the node."),
+    'name' => t('Node ID'),
+    'description' => t('The unique ID of the node.'),
   );
   $node['title'] = array(
-    'name' => t("Title"),
-    'description' => t("The title of the node."),
+    'name' => t('Title'),
+    'description' => t('The title of the node.'),
   );
   $node['edit-url'] = array(
-    'name' => t("Edit URL"),
+    'name' => t('Edit URL'),
     'description' => t("The URL of the node's edit page."),
   );
 
   // Chained tokens for nodes.
   $node['created'] = array(
-    'name' => t("Date created"),
-    'description' => t("The date the node was posted."),
+    'name' => t('Date created'),
+    'description' => t('The date the node was posted.'),
     'type' => 'date',
   );
   $node['author'] = array(
-    'name' => t("Author"),
-    'description' => t("The author of the node."),
+    'name' => t('Author'),
+    'description' => t('The author of the node.'),
     'type' => 'user',
   );
 
@@ -3948,17 +3742,17 @@ function hook_token_info_alter(&$data) {
   // Modify description of node tokens for our site.
   $data['tokens']['node']['nid'] = array(
     'name' => t("Node ID"),
-    'description' => t("The unique ID of the article."),
+    'description' => t("The unique ID of the post."),
   );
   $data['tokens']['node']['title'] = array(
     'name' => t("Title"),
-    'description' => t("The title of the article."),
+    'description' => t("The title of the post."),
   );
 
   // Chained tokens for nodes.
   $data['tokens']['node']['created'] = array(
     'name' => t("Date created"),
-    'description' => t("The date the article was posted."),
+    'description' => t("The date the post was posted."),
     'type' => 'date',
   );
 }
@@ -4059,6 +3853,20 @@ function hook_countries_alter(&$countries) {
 }
 
 /**
+ * Alter the default timezone country list.
+ *
+ * @param $timezone_countries
+ *   The associative array of ISO 3166-1 country codes keyed by timezone.
+ *
+ * @see timezone_country_get_list()
+ * @see standard_timezone_country_list()
+ */
+function hook_timezone_countries_alter(&$timezone_countries) {
+  // Elbonia is now independent, so add its timezone to the list.
+  $timezone_countries['Europe/Elbonia'] = 'EB';
+}
+
+/**
  * Control site status before menu dispatching.
  *
  * The hook is called after checking whether the site is offline but before
@@ -4138,7 +3946,7 @@ function hook_filetransfer_info() {
  * @see hook_filetransfer_info()
  */
 function hook_filetransfer_info_alter(&$filetransfer_info) {
-  if (variable_get('paranoia', FALSE)) {
+  if (config_get('mymodule.settings', 'paranoia')) {
     // Remove the FTP option entirely.
     unset($filetransfer_info['ftp']);
     // Make sure the SSH option is listed first.

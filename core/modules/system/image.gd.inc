@@ -25,7 +25,7 @@ function image_gd_settings() {
       '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
       '#min' => 0,
       '#max' => 100,
-      '#default_value' => variable_get('image_jpeg_quality', 75),
+      '#default_value' => config_get('system.core', 'image_jpeg_quality', 75),
       '#field_suffix' => t('%'),
     );
 
@@ -44,13 +44,8 @@ function image_gd_settings() {
  *   A boolean indicating if the GD toolkit is available on this machine.
  */
 function image_gd_check_settings() {
-  if ($check = get_extension_funcs('gd')) {
-    if (in_array('imagegd2', $check)) {
-      // GD2 support is available.
-      return TRUE;
-    }
-  }
-  return FALSE;
+  // GD2 support is available.
+  return function_exists('imagegd2');
 }
 
 /**
@@ -257,7 +252,7 @@ function image_gd_save(stdClass $image, $destination) {
     return FALSE;
   }
   if ($extension == 'jpeg') {
-    $success = $function($image->resource, $destination, variable_get('image_jpeg_quality', 75));
+    $success = $function($image->resource, $destination, config_get('system.core', 'image_jpeg_quality', 75));
   }
   else {
     // Always save PNG images with full transparency.
@@ -334,7 +329,7 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
  */
 function image_gd_get_info(stdClass $image) {
   $details = FALSE;
-  $data = getimagesize($image->source);
+  $data = @getimagesize($image->source);
 
   if (isset($data) && is_array($data)) {
     $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');

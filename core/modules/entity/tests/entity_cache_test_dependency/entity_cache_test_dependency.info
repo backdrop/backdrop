@@ -1,0 +1,7 @@
+name = "Entity cache test dependency"
+description = "Support dependency module for testing entity cache."
+package = Testing
+version = BACKDROP_VERSION
+type = module
+backdrop = 1.x
+hidden = TRUE

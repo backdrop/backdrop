@@ -9,38 +9,38 @@
  * The language is determined using a URL language indicator:
  * path prefix or domain according to the configuration.
  */
-const LANGUAGE_NEGOTIATION_URL = 'locale-url';
+define('LANGUAGE_NEGOTIATION_URL', 'locale-url');
 
 /**
  * The language is set based on the browser language settings.
  */
-const LANGUAGE_NEGOTIATION_BROWSER = 'locale-browser';
+define('LANGUAGE_NEGOTIATION_BROWSER', 'locale-browser');
 
 /**
  * The language is determined using the current interface language.
  */
-const LANGUAGE_NEGOTIATION_INTERFACE = 'locale-interface';
+define('LANGUAGE_NEGOTIATION_INTERFACE', 'locale-interface');
 
 /**
  * If no URL language is available language is determined using an already
  * detected one.
  */
-const LANGUAGE_NEGOTIATION_URL_FALLBACK = 'locale-url-fallback';
+define('LANGUAGE_NEGOTIATION_URL_FALLBACK', 'locale-url-fallback');
 
 /**
  * The language is set based on the user language settings.
  */
-const LANGUAGE_NEGOTIATION_USER = 'locale-user';
+define('LANGUAGE_NEGOTIATION_USER', 'locale-user');
 
 /**
  * The language is set based on the request/session parameters.
  */
-const LANGUAGE_NEGOTIATION_SESSION = 'locale-session';
+define('LANGUAGE_NEGOTIATION_SESSION', 'locale-session');
 
 /**
  * Regular expression pattern used to localize JavaScript strings.
  */
-const LOCALE_JS_STRING = '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+\s*)?)+';
+define('LOCALE_JS_STRING', '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+\s*)?)+');
 
 /**
  * Regular expression pattern used to match simple JS object literal.
@@ -48,7 +48,7 @@ const LOCALE_JS_STRING = '(?:(?:\'(?:\\\\\'|[^\'])*\'|"(?:\\\\"|[^"])*")(?:\s*\+
  * This pattern matches a basic JS object, but will fail on an object with
  * nested objects. Used in JS file parsing for string arg processing.
  */
-const LOCALE_JS_OBJECT = '\{.*?\}';
+define('LOCALE_JS_OBJECT', '\{.*?\}');
 
 /**
  * Regular expression to match an object containing a key 'context'.
@@ -76,25 +76,25 @@ define('LOCALE_JS_OBJECT_CONTEXT', '
  * Translation import mode overwriting all existing translations
  * if new translated version available.
  */
-const LOCALE_IMPORT_OVERWRITE = 0;
+define('LOCALE_IMPORT_OVERWRITE', 0);
 
 /**
  * Translation import mode keeping existing translations and only
  * inserting new strings.
  */
-const LOCALE_IMPORT_KEEP = 1;
+define('LOCALE_IMPORT_KEEP', 1);
 
 /**
  * URL language negotiation: use the path prefix as URL language
  * indicator.
  */
-const LANGUAGE_NEGOTIATION_URL_PREFIX = 0;
+define('LANGUAGE_NEGOTIATION_URL_PREFIX', 'path_prefix');
 
 /**
  * URL language negotiation: use the domain as URL language
  * indicator.
  */
-const LANGUAGE_NEGOTIATION_URL_DOMAIN = 1;
+define('LANGUAGE_NEGOTIATION_URL_DOMAIN', 'domain');
 
 /**
  * @defgroup locale-languages-negotiation Language negotiation options
@@ -112,8 +112,8 @@ const LANGUAGE_NEGOTIATION_URL_DOMAIN = 1;
  *   The current interface language code.
  */
 function locale_language_from_interface() {
-  global $language_interface;
-  return isset($language_interface->langcode) ? $language_interface->langcode : FALSE;
+  global $language;
+  return isset($language->langcode) ? $language->langcode : FALSE;
 }
 
 /**
@@ -232,7 +232,7 @@ function locale_language_from_user($languages) {
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_session($languages) {
-  $param = variable_get('locale_language_negotiation_session_param', 'language');
+  $param = config_get('locale.settings', 'language_negotiation_session_parameter');
 
   // Request parameter: we need to update the session parameter only if we have
   // an authenticated user.
@@ -268,7 +268,7 @@ function locale_language_from_url($languages) {
     return $language_url;
   }
 
-  switch (variable_get('locale_language_negotiation_url_part', LANGUAGE_NEGOTIATION_URL_PREFIX)) {
+  switch (config_get('locale.settings', 'language_negotiation_url_part')) {
     case LANGUAGE_NEGOTIATION_URL_PREFIX:
       // $_GET['q'] might not be available at this time, because
       // path initialization runs after the language bootstrap phase.
@@ -337,9 +337,9 @@ function locale_language_from_url($languages) {
  * @return
  *   A valid language code.
  */
-function locale_language_url_fallback($language = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
+function locale_language_url_fallback($languages = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
   $default = language_default();
-  $prefix = (variable_get('locale_language_negotiation_url_part', LANGUAGE_NEGOTIATION_URL_PREFIX) == LANGUAGE_NEGOTIATION_URL_PREFIX);
+  $prefix = (config_get('locale.settings', 'language_negotiation_url_part') == LANGUAGE_NEGOTIATION_URL_PREFIX);
 
   // If the default language is not configured to convey language information,
   // a missing URL language information indicates that URL language should be
@@ -380,9 +380,9 @@ function locale_language_switcher_url($type, $path) {
  * Return the session language switcher block.
  */
 function locale_language_switcher_session($type, $path) {
-  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
-  $param = variable_get('locale_language_negotiation_session_param', 'language');
+  $param = config_get('locale.settings', 'language_negotiation_session_parameter');
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
@@ -404,7 +404,7 @@ function locale_language_switcher_session($type, $path) {
       $links[$langcode]['query'][$param] = $langcode;
     }
     else {
-      $links[$langcode]['attributes']['class'][] = ' session-active';
+      $links[$langcode]['attributes']['class'][] = 'session-active';
     }
   }
 
@@ -439,7 +439,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
   }
 
   if (isset($options['language'])) {
-    switch (variable_get('locale_language_negotiation_url_part', LANGUAGE_NEGOTIATION_URL_PREFIX)) {
+    switch (config_get('locale.settings', 'language_negotiation_url_part')) {
       case LANGUAGE_NEGOTIATION_URL_DOMAIN:
         $domains = locale_language_negotiation_url_domains();
         if (!empty($domains[$options['language']->langcode])) {
@@ -448,7 +448,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
           $url_scheme = ($is_https) ? 'https://' : 'http://';
           $options['absolute'] = TRUE;
           $options['base_url'] = $url_scheme . $domains[$options['language']->langcode];
-          if (isset($options['https']) && variable_get('https', FALSE)) {
+          if (isset($options['https']) && settings_get('https', FALSE)) {
             if ($options['https'] === TRUE) {
               $options['base_url'] = str_replace('http://', 'https://', $options['base_url']);
             }
@@ -473,28 +473,28 @@ function locale_language_url_rewrite_url(&$path, &$options) {
  * Reads language prefixes and uses the langcode if no prefix is set.
  */
 function locale_language_negotiation_url_prefixes() {
-  return variable_get('locale_language_negotiation_url_prefixes', array());
+  return config_get('locale.settings', 'language_negotiation_url_prefixes');
 }
 
 /**
  * Saves language prefix settings.
  */
 function locale_language_negotiation_url_prefixes_save(array $prefixes) {
-  variable_set('locale_language_negotiation_url_prefixes', $prefixes);
+  config_set('locale.settings', 'language_negotiation_url_prefixes', $prefixes);
 }
 
 /**
  * Reads language domains.
  */
 function locale_language_negotiation_url_domains() {
-  return variable_get('locale_language_negotiation_url_domains', array());
+  return config_get('locale.settings', 'language_negotiation_url_domains');
 }
 
 /**
  * Saves the language domain settings.
  */
 function locale_language_negotiation_url_domains_save(array $domains) {
-  variable_set('locale_language_negotiation_url_domains', $domains);
+  config_set('locale.settings', 'language_negotiation_url_domains', $domains);
 }
 
 /**
@@ -510,7 +510,7 @@ function locale_language_url_rewrite_session(&$path, &$options) {
     if (!$user->uid) {
       // Get the enabled languages only.
       $languages = language_list(TRUE);
-      $query_param = check_plain(variable_get('locale_language_negotiation_session_param', 'language'));
+      $query_param = check_plain(config_get('locale.settings', 'language_negotiation_session_parameter'));
       $query_value = isset($_GET[$query_param]) ? check_plain($_GET[$query_param]) : NULL;
       $query_rewrite = isset($languages[$query_value]) && language_negotiation_get_any(LANGUAGE_NEGOTIATION_SESSION);
     }
@@ -688,7 +688,7 @@ function _locale_parse_js_file($filepath) {
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
-  $parsed = variable_get('javascript_parsed', array());
+  $parsed = state_get('locale_javascript_parsed', array());
 
   if (empty($langcode)) {
     // Invalidate all languages.
@@ -705,7 +705,7 @@ function _locale_invalidate_js($langcode = NULL) {
     $parsed['refresh:' . $langcode] = 'waiting';
   }
 
-  variable_set('javascript_parsed', $parsed);
+  state_set('locale_javascript_parsed', $parsed);
   return $parsed;
 }
 
@@ -717,8 +717,8 @@ function _locale_invalidate_js($langcode = NULL) {
  */
 function _locale_rebuild_js($langcode = NULL) {
   if (!isset($langcode)) {
-    global $language_interface;
-    $language = $language_interface;
+    global $language;
+    $language = $language;
   }
   else {
     // Get information about the locale.
@@ -742,7 +742,7 @@ function _locale_rebuild_js($langcode = NULL) {
 
     $data = "Backdrop.locale = { ";
 
-    $locale_plurals = variable_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', array());
     if (!empty($locale_plurals[$language->langcode])) {
       $data .= "'pluralFormula': function (\$n) { return Number({$locale_plurals[$language->langcode]['formula']}); }, ";
     }
@@ -752,11 +752,10 @@ function _locale_rebuild_js($langcode = NULL) {
   }
 
   // Construct the filepath where JS translation files are stored.
-  // There is (on purpose) no front end to edit that variable.
-  $dir = 'public://' . variable_get('locale_js_directory', 'languages');
+  $dir = 'public://' . settings_get('locale_js_directory', 'languages');
 
   // Delete old file, if we have no translations anymore, or a different file to be saved.
-  $locale_javascripts = variable_get('locale_translation_javascript', array());
+  $locale_javascripts = state_get('locale_translation_javascript', array());
   $changed_hash = !isset($locale_javascripts[$language->langcode]) || ($locale_javascripts[$language->langcode] != $data_hash);
   if (!empty($locale_javascripts[$language->langcode]) && (!$data || $changed_hash)) {
     file_unmanaged_delete($dir . '/' . $language->langcode . '_' . $locale_javascripts[$language->langcode] . '.js');
@@ -800,7 +799,7 @@ function _locale_rebuild_js($langcode = NULL) {
   // deleted). Act only if some operation was executed that changed the hash
   // code.
   if ($status && $changed_hash) {
-    variable_set('locale_translation_javascript', $locale_javascripts);
+    state_set('locale_translation_javascript', $locale_javascripts);
   }
 
   // Log the operation and return success flag.
@@ -842,86 +841,15 @@ function country_get_list() {
 }
 
 /**
- * Save locale specific date formats to the database.
- *
- * @param $langcode
- *   Language code, can be 2 characters, e.g. 'en' or 5 characters, e.g.
- *   'en-CA'.
- * @param $type
- *   Date format type, e.g. 'short', 'medium'.
- * @param $format
- *   The date format string.
- */
-function locale_date_format_save($langcode, $type, $format) {
-  $locale_format = array();
-  $locale_format['language'] = $langcode;
-  $locale_format['type'] = $type;
-  $locale_format['format'] = $format;
-
-  $is_existing = (bool) db_query_range('SELECT 1 FROM {date_format_locale} WHERE language = :langcode AND type = :type', 0, 1, array(':langcode' => $langcode, ':type' => $type))->fetchField();
-  if ($is_existing) {
-    $keys = array('type', 'language');
-    backdrop_write_record('date_format_locale', $locale_format, $keys);
-  }
-  else {
-    backdrop_write_record('date_format_locale', $locale_format);
-  }
-}
-
-/**
- * Select locale date format details from database.
- *
- * @param $languages
- *   An array of language codes.
+ * Get list of all predefined and custom timezone countries.
  *
  * @return
- *   An array of date formats.
+ *   An array of all timezone => country code pairs.
  */
-function locale_get_localized_date_format($languages) {
-  $formats = array();
-
-  // Get list of different format types.
-  $format_types = system_get_date_types();
-  $short_default = variable_get('date_format_short', 'm/d/Y - H:i');
-
-  // Loop through each language until we find one with some date formats
-  // configured.
-  foreach ($languages as $language) {
-    $date_formats = system_date_format_locale($language);
-    if (!empty($date_formats)) {
-      // We have locale-specific date formats, so check for their types. If
-      // we're missing a type, use the default setting instead.
-      foreach ($format_types as $type => $type_info) {
-        // If format exists for this language, use it.
-        if (!empty($date_formats[$type])) {
-          $formats['date_format_' . $type] = $date_formats[$type];
-        }
-        // Otherwise get default variable setting. If this is not set, default
-        // to the short format.
-        else {
-          $formats['date_format_' . $type] = variable_get('date_format_' . $type, $short_default);
-        }
-      }
-
-      // Return on the first match.
-      return $formats;
-    }
-  }
-
-  // No locale specific formats found, so use defaults.
-  $system_types = array('short', 'medium', 'long');
-  // Handle system types separately as they have defaults if no variable exists.
-  $formats['date_format_short'] = $short_default;
-  $formats['date_format_medium'] = variable_get('date_format_medium', 'D, m/d/Y - H:i');
-  $formats['date_format_long'] = variable_get('date_format_long', 'l, F j, Y - H:i');
-
-  // For non-system types, get the default setting, otherwise use the short
-  // format.
-  foreach ($format_types as $type => $type_info) {
-    if (!in_array($type, $system_types)) {
-      $formats['date_format_' . $type] = variable_get('date_format_' . $type, $short_default);
-    }
-  }
-
-  return $formats;
+function timezone_country_get_list() {
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  $timezone_countries = standard_timezone_country_list();
+  // Allow other modules to modify the timezone_country list.
+  backdrop_alter('timezone_countries', $timezone_countries);
+  return $timezone_countries;
 }

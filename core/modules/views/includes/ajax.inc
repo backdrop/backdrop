@@ -164,7 +164,7 @@ function views_ajax_command_replace_title($title) {
   $command = array(
     'command' => 'viewsReplaceTitle',
     'title' => $title,
-    'siteName' => variable_get('site_name', 'Backdrop'),
+    'siteName' => config_get('system.core', 'site_name'),
   );
   return $command;
 }
@@ -199,7 +199,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
   // These forms have the title built in, so set the title here:
   if (empty($form_state['ajax']) && !empty($form_state['title'])) {
     backdrop_set_title($form_state['title']);
-    backdrop_add_css(backdrop_get_path('module', 'views_ui') . '/css/views-admin.css');
+    backdrop_add_css(backdrop_get_path('module', 'views_ui') . '/css/views_ui.admin.css');
   }
 
   if (!empty($form_state['ajax']) && (empty($form_state['executed']) || !empty($form_state['rerender']))) {
@@ -283,7 +283,7 @@ function views_ajax_autocomplete_user($string = '') {
  *
  * @see taxonomy_autocomplete()
  */
-function views_ajax_autocomplete_taxonomy($vid, $tags_typed = '') {
+function views_ajax_autocomplete_taxonomy($vocabulary_name, $tags_typed = '') {
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
   $tags_typed = backdrop_explode_tags($tags_typed);
   $tag_last = backdrop_strtolower(array_pop($tags_typed));
@@ -302,7 +302,7 @@ function views_ajax_autocomplete_taxonomy($vid, $tags_typed = '') {
     // Select rows that match by term name.
     $tags_return = $query
       ->fields('t', array('tid', 'name'))
-      ->condition('t.vid', $vid)
+      ->condition('t.vocabulary', $vocabulary_name)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
       ->range(0, 10)
       ->execute()

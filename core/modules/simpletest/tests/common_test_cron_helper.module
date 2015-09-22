@@ -13,5 +13,5 @@
  * @see common_test_cron()
  */
 function common_test_cron_helper_cron() {
-  variable_set('common_test_cron', 'success');
+  state_set('common_test_cron', 'success');
 }

@@ -16,7 +16,7 @@ function file_field_info() {
       'settings' => array(
         'display_field' => 0,
         'display_default' => 0,
-        'uri_scheme' => variable_get('file_default_scheme', 'public'),
+        'uri_scheme' => config_get('system.core', 'file_default_scheme'),
       ),
       'instance_settings' => array(
         'file_extensions' => 'txt',
@@ -26,6 +26,7 @@ function file_field_info() {
       ),
       'default_widget' => 'file_generic',
       'default_formatter' => 'file_default',
+      'default_token_formatter' => 'file_url_plain',
     ),
   );
 }
@@ -37,7 +38,7 @@ function file_field_settings_form($field, $instance, $has_data) {
   $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/file.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/js/file.js';
 
   $form['display_field'] = array(
     '#type' => 'checkbox',
@@ -92,6 +93,7 @@ function file_field_instance_settings_form($field, $instance) {
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
     '#element_validate' => array('_file_generic_settings_extensions'),
     '#weight' => 1,
+    '#maxlength' => 256,
     // By making this field required, we prevent a potential security issue
     // that would allow files of any type to be uploaded.
     '#required' => TRUE,
@@ -582,10 +584,10 @@ function file_field_widget_process($element, &$form_state, $form) {
   // Add the description field if enabled.
   if (!empty($instance['settings']['description_field']) && $item['fid']) {
     $element['description'] = array(
-      '#type' => variable_get('file_description_type', 'textfield'),
+      '#type' => 'textfield',
       '#title' => t('Description'),
       '#value' => isset($item['description']) ? $item['description'] : '',
-      '#maxlength' => variable_get('file_description_length', 128),
+      '#maxlength' => 500,
       '#description' => t('The description may be used as the label of the link to the file.'),
     );
   }
@@ -709,7 +711,7 @@ function file_field_widget_submit($form, &$form_state) {
   $langcode = $element['#language'];
   $parents = $element['#field_parents'];
 
-  $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2));
+  $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
     if (!$submitted_value['fid']) {
       unset($submitted_values[$delta]);
@@ -720,190 +722,12 @@ function file_field_widget_submit($form, &$form_state) {
   $submitted_values = array_values($submitted_values);
 
   // Update form_state values.
-  backdrop_array_set_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2), $submitted_values);
+  backdrop_array_set_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2), $submitted_values);
 
   // Update items.
   $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
   $field_state['items'] = $submitted_values;
   field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
-}
-
-/**
- * Returns HTML for an individual file upload widget.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the widget.
- *
- * @ingroup themeable
- */
-function theme_file_widget($variables) {
-  $element = $variables['element'];
-  $output = '';
-
-  // The "form-managed-file" class is required for proper Ajax functionality.
-  $output .= '<div class="file-widget form-managed-file clearfix">';
-  if ($element['fid']['#value'] != 0) {
-    // Add the file size after the file name.
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
- * Returns HTML for a group of file upload widgets.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the widgets.
- *
- * @ingroup themeable
- */
-function theme_file_widget_multiple($variables) {
-  $element = $variables['element'];
-
-  // Special ID and classes for draggable tables.
-  $weight_class = $element['#id'] . '-weight';
-  $table_id = $element['#id'] . '-table';
-
-  // Build up a table of applicable fields.
-  $headers = array();
-  $headers[] = t('File information');
-  if ($element['#display_field']) {
-    $headers[] = array(
-      'data' => t('Display'),
-      'class' => array('checkbox'),
-    );
-  }
-  $headers[] = t('Weight');
-  $headers[] = t('Operations');
-
-  // Get our list of widgets in order (needed when the form comes back after
-  // preview or failed validation).
-  $widgets = array();
-  foreach (element_children($element) as $key) {
-    $widgets[] = &$element[$key];
-  }
-  usort($widgets, '_field_sort_items_value_helper');
-
-  $rows = array();
-  foreach ($widgets as $key => &$widget) {
-    // Save the uploading row for last.
-    if ($widget['#file'] == FALSE) {
-      $widget['#title'] = $element['#file_upload_title'];
-      $widget['#description'] = $element['#file_upload_description'];
-      continue;
-    }
-
-    // Delay rendering of the buttons, so that they can be rendered later in the
-    // "operations" column.
-    $operations_elements = array();
-    foreach (element_children($widget) as $sub_key) {
-      if (isset($widget[$sub_key]['#type']) && $widget[$sub_key]['#type'] == 'submit') {
-        hide($widget[$sub_key]);
-        $operations_elements[] = &$widget[$sub_key];
-      }
-    }
-
-    // Delay rendering of the "Display" option and the weight selector, so that
-    // each can be rendered later in its own column.
-    if ($element['#display_field']) {
-      hide($widget['display']);
-    }
-    hide($widget['_weight']);
-
-    // Render everything else together in a column, without the normal wrappers.
-    $widget['#theme_wrappers'] = array();
-    $information = backdrop_render($widget);
-
-    // Render the previously hidden elements, using render() instead of
-    // backdrop_render(), to undo the earlier hide().
-    $operations = '';
-    foreach ($operations_elements as $operation_element) {
-      $operations .= render($operation_element);
-    }
-    $display = '';
-    if ($element['#display_field']) {
-      unset($widget['display']['#title']);
-      $display = array(
-        'data' => render($widget['display']),
-        'class' => array('checkbox'),
-      );
-    }
-    $widget['_weight']['#attributes']['class'] = array($weight_class);
-    $weight = render($widget['_weight']);
-
-    // Arrange the row with all of the rendered columns.
-    $row = array();
-    $row[] = $information;
-    if ($element['#display_field']) {
-      $row[] = $display;
-    }
-    $row[] = $weight;
-    $row[] = $operations;
-    $rows[] = array(
-      'data' => $row,
-      'class' => isset($widget['#attributes']['class']) ? array_merge($widget['#attributes']['class'], array('draggable')) : array('draggable'),
-    );
-  }
-
-  backdrop_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
-
-  $output = '';
-  $output = empty($rows) ? '' : theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $table_id)));
-  $output .= backdrop_render_children($element);
-  return $output;
-}
-
-
-/**
- * Returns HTML for help text based on file upload validators.
- *
- * @param $variables
- *   An associative array containing:
- *   - description: The normal description for this field, specified by the
- *     user.
- *   - upload_validators: An array of upload validators as used in
- *     $element['#upload_validators'].
- *
- * @ingroup themeable
- */
-function theme_file_upload_help($variables) {
-  $description = $variables['description'];
-  $upload_validators = $variables['upload_validators'];
-
-  $descriptions = array();
-
-  if (strlen($description)) {
-    $descriptions[] = $description;
-  }
-  if (isset($upload_validators['file_validate_size'])) {
-    $descriptions[] = t('Files must be less than !size.', array('!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>'));
-  }
-  if (isset($upload_validators['file_validate_extensions'])) {
-    $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>'));
-  }
-  if (isset($upload_validators['file_validate_image_resolution'])) {
-    $max = $upload_validators['file_validate_image_resolution'][0];
-    $min = $upload_validators['file_validate_image_resolution'][1];
-    if ($min && $max && $min == $max) {
-      $descriptions[] = t('Images must be exactly !size pixels.', array('!size' => '<strong>' . $max . '</strong>'));
-    }
-    elseif ($min && $max) {
-      $descriptions[] = t('Images must be between !min and !max pixels.', array('!min' => '<strong>' . $min . '</strong>', '!max' => '<strong>' . $max . '</strong>'));
-    }
-    elseif ($min) {
-      $descriptions[] = t('Images must be larger than !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
-    }
-    elseif ($max) {
-      $descriptions[] = t('Images must be smaller than !max pixels.', array('!max' => '<strong>' . $max . '</strong>'));
-    }
-  }
-
-  return implode('<br />', $descriptions);
 }
 
 /**
@@ -942,24 +766,3 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
   return $element;
 }
 
-/**
- * Returns HTML for a file attachments table.
- *
- * @param $variables
- *   An associative array containing:
- *   - items: An array of file attachments.
- *
- * @ingroup themeable
- */
-function theme_file_formatter_table($variables) {
-  $header = array(t('Attachment'), t('Size'));
-  $rows = array();
-  foreach ($variables['items'] as $delta => $item) {
-    $rows[] = array(
-      theme('file_link', array('file' => (object) $item)),
-      format_size($item['filesize']),
-    );
-  }
-
-  return empty($rows) ? '' : theme('table', array('header' => $header, 'rows' => $rows));
-}

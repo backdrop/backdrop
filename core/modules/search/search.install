@@ -6,15 +6,6 @@
  */
 
 /**
- * Implements hook_uninstall().
- */
-function search_uninstall() {
-  variable_del('minimum_word_size');
-  variable_del('overlap_cjk');
-  variable_del('search_cron_limit');
-}
-
-/**
  * Implements hook_schema().
  */
 function search_schema() {
@@ -153,3 +144,51 @@ function search_schema() {
 
   return $schema;
 }
+
+/**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */ 
+
+/**
+ * Update search module to use the configuration system.
+ */
+function search_update_1000() {
+  // Migrate variables to config.
+  $config = config('search.settings');
+  $config->set('search_minimum_word_size', update_variable_get('minimum_word_size', 3));
+  $config->set('search_overlap_cjk', update_variable_get('overlap_cjk', 1));
+  $config->set('search_cron_limit', update_variable_get('search_cron_limit', 100));
+  $config->set('search_tag_weights', update_variable_get('search_tag_weights', array(
+    'h1' => 25,
+    'h2' => 18,
+    'h3' => 15,
+    'h4' => 12,
+    'h5' => 9,
+    'h6' => 6,
+    'u' => 3,
+    'b' => 3,
+    'i' => 3,
+    'strong' => 3,
+    'em' => 3,
+    'a' => 10
+  )));
+  $config->set('search_active_modules', update_variable_get('search_active_modules', array('node', 'user')));
+  $config->set('search_and_or_limit', update_variable_get('search_and_or_limit', 7));
+  $config->set('search_default_module', update_variable_get('search_default_module', 'node'));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('minimum_word_size');
+  update_variable_del('overlap_cjk');
+  update_variable_del('search_cron_limit');
+  update_variable_del('search_tag_weights');
+  update_variable_del('search_active_modules');
+  update_variable_del('search_and_or_limit');
+  update_variable_del('search_default_module');
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */

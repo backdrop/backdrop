@@ -19,7 +19,7 @@ class views_handler_argument_user_uid extends views_handler_argument_numeric {
    */
   function title_query() {
     if (!$this->argument) {
-      return array(variable_get('anonymous', t('Anonymous')));
+      return array(config_get('system.core', 'anonymous'));
     }
 
     $titles = array();

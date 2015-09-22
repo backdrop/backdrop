@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the node module.
@@ -28,14 +27,14 @@ function node_schema() {
         'default' => NULL,
       ),
       'type' => array(
-        'description' => 'The {node_type}.type of this node.',
+        'description' => 'The type of this node.',
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
         'default' => '',
       ),
       'langcode' => array(
-        'description' => 'The {language}.langcode of this node.',
+        'description' => 'The language code of this node.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
@@ -272,131 +271,6 @@ function node_schema() {
     ),
   );
 
-  $schema['node_type'] = array(
-    'description' => 'Stores information about all defined {node} types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The machine-readable name of this type.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-      ),
-      'name' => array(
-        'description' => 'The human-readable name of this type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'base' => array(
-        'description' => 'The base string used to construct callbacks corresponding to this node type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'module' => array(
-        'description' => 'The module defining this node type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'description' => array(
-        'description' => 'A brief description of this type.',
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'medium',
-        'translatable' => TRUE,
-      ),
-      'help' => array(
-        'description' => 'Help information shown to the user when creating a {node} of this type.',
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'medium',
-        'translatable' => TRUE,
-      ),
-      'has_title' => array(
-        'description' => 'Boolean indicating whether this type uses the {node}.title field.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'size' => 'tiny',
-      ),
-      'title_label' => array(
-        'description' => 'The label displayed for the title field on the edit form.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'custom' => array(
-        'description' => 'A boolean indicating whether this type is defined by a module (FALSE) or by a user via Add content type (TRUE).',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-      ),
-      'modified' => array(
-        'description' => 'A boolean indicating whether this type has been modified by an administrator; currently not used in any way.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-      ),
-      'locked' => array(
-        'description' => 'A boolean indicating whether the administrator can change the machine name of this type.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-      ),
-      'disabled' => array(
-        'description' => 'A boolean indicating whether the node type is disabled.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny'
-      ),
-      'orig_type' => array(
-        'description' => 'The original machine-readable name of this node type. This may be different from the current type name if the locked field is 0.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'primary key' => array('type'),
-  );
-
-  $schema['block_node_type'] = array(
-    'description' => 'Sets up display criteria for blocks based on content types',
-    'fields' => array(
-      'module' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'description' => "The block's origin module, from {block}.module.",
-      ),
-      'delta' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'description' => "The block's unique delta within module, from {block}.delta.",
-      ),
-      'type' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'description' => "The machine-readable name of this type from {node_type}.type.",
-      ),
-    ),
-    'primary key' => array('module', 'delta', 'type'),
-    'indexes' => array(
-      'type' => array('type'),
-    ),
-  );
-
   $schema['history'] = array(
     'description' => 'A record of which {users} have read which {node}s.',
     'fields' => array(
@@ -449,64 +323,36 @@ function node_install() {
  * Implements hook_uninstall().
  */
 function node_uninstall() {
-  // Delete node type variables.
-  $types = db_query('SELECT type FROM {node_type}')->fetchCol();
-  foreach ($types as $type) {
-    db_delete('variable')
-      ->condition(db_or()
-        ->condition('name', 'node_preview_' . $type)
-        ->condition('name', 'node_options_' . $type)
-        ->condition('name', 'node_submitted_' . $type)
-        ->condition('name', 'node_permissions_' . $type)
-        ->condition('name', 'node_type_language_' . $type)
-      )
-      ->execute();
+  // Delete node types.
+  $names = config_get_names_with_prefix('node.type');
+  foreach ($names as $config_name) {
+    $config = config_load($config_name);
+    $config->delete();
   }
 
-  // Delete node search ranking variables.
-  // @see node_ranking(), _node_rankings()
-  variable_del('node_rank_relevance');
-  variable_del('node_rank_sticky');
-  variable_del('node_rank_promote');
-  variable_del('node_rank_recent');
-
-  // Delete remaining general module variables.
-  variable_del('node_access_needs_rebuild');
-  variable_del('node_admin_theme');
-  variable_del('node_cron_last');
-  variable_del('node_recent_block_count');
-  variable_del('default_nodes_main');
+  // Delete remaining general module settings.
+  state_del('node_access_needs_rebuild');
+  state_del('node_cron_last');
 }
 
 /**
- * Fetches node types directly from the database.
- *
- * @ingroup update-api-7.x-to-8.x
+ * Implements hook_update_dependencies().
  */
-function _update_7000_node_get_types() {
-  $node_types = db_query('SELECT * FROM {node_type}')->fetchAllAssoc('type', PDO::FETCH_OBJ);
-
-  // Create default settings for orphaned nodes.
-  $all_types = db_query('SELECT DISTINCT type FROM {node}')->fetchCol();
-  $extra_types = array_diff($all_types, array_keys($node_types));
-
-  foreach ($extra_types as $type) {
-    $type_object = new stdClass();
-    $type_object->type = $type;
-    // In Drupal 6, whether you have a body field or not is a flag in the node
-    // type table. If it's enabled, nodes may or may not have an empty string
-    // for the bodies. As we can't detect what this setting should be in
-    // Drupal 7 without access to the Drupal 6 node type settings, we assume
-    // the default, which is to enable the body field.
-    $type_object->has_body = 1;
-    $type_object->body_label = 'Body';
-    $node_types[$type_object->type] = $type_object;
-  }
-  return $node_types;
+function node_update_dependencies() {
+  // Ensure that Entity module is enabled before running any of our updates.
+  $dependencies['node'][1000] = array(
+    'system' => 1000,
+  );
+  // Do not drop the block tables until after System module has enabled and
+  // migrated blocks into layouts.
+  $dependencies['node'][1004] = array(
+    'system' => 1025,
+  );
+  return $dependencies;
 }
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
@@ -521,9 +367,9 @@ function _update_7000_node_get_types() {
  * @see http://drupal.org/node/375397
  */
 function node_update_1000() {
-  $front_page = variable_get('site_frontpage');
+  $front_page = config_get('system.core', 'site_frontpage');
   if (!isset($front_page)) {
-    variable_set('site_frontpage', 'node');
+    config_set('system.core', 'site_frontpage', 'node');
   }
 }
 
@@ -535,11 +381,11 @@ function node_update_1000() {
 function node_update_1001() {
   $types = db_query('SELECT type FROM {node_type}')->fetchCol();
   foreach ($types as $type) {
-    $language = variable_get('language_content_type_' . $type);
+    $language = update_variable_get('language_content_type_' . $type);
     if (isset($language)) {
-      variable_set('node_type_language_' . $type, $language);
+      update_variable_set('node_type_language_' . $type, $language);
     }
-    variable_del('language_content_type_' . $type);
+    update_variable_del('language_content_type_' . $type);
   }
 }
 
@@ -548,13 +394,697 @@ function node_update_1001() {
  */
 function node_update_1002() {
   $spec = array(
-    'description' => 'The {language}.langcode of this node.',
+    'description' => 'The language code of this node.',
     'type' => 'varchar',
     'length' => 12,
     'not null' => TRUE,
     'default' => '',
   );
   db_change_field('node', 'language', 'langcode', $spec);
+}
+
+/**
+ * Move theme settings to global site configuration.
+ */
+function node_update_1003() {
+  $types = db_query('SELECT type FROM {node_type}')->fetchCol();
+  $theme = update_variable_get('theme_default', 'stark');
+  $settings = update_variable_get('theme_' . $theme . '_settings', array());
+
+  // Each setting defaults to TRUE if not set at all.
+  $comment_picture = !isset($settings['toggle_comment_user_picture']) || $settings['toggle_comment_user_picture'];
+  $node_picture = !isset($settings['toggle_node_user_picture']) || $settings['toggle_node_user_picture'];
+
+  // These variables will be converted to be node type settings when converted
+  // to saving in config.
+  foreach ($types as $type_name) {
+    update_variable_set('node_user_picture_' . $type_name, $node_picture);
+    update_variable_set('comment_user_picture_' . $type_name, $comment_picture);
+  }
+}
+
+/**
+ * Remove the block_node_type table, now stored in layout configuration files.
+ */
+function node_update_1004() {
+  db_drop_table('block_node_type');
+}
+
+/**
+ * Convert content types to configuration files.
+ */
+function node_update_1005() {
+  // Basic sanity check.
+  if (!db_table_exists('node_type')) {
+    return;
+  }
+
+  // Ensure module-provided code is loaded.
+  backdrop_load('module', 'node');
+  backdrop_load('module', 'entity');
+
+  $result = db_query("SELECT * FROM {node_type}");
+  foreach ($result as $row) {
+    $node_type = (object) $row;
+    unset($node_type->locked);
+    unset($node_type->custom);
+
+    // To help assist moving to config from Features in Drupal 7, reclaim node
+    // types owned by other modules that use the standard node base type.
+    if ($node_type->base === 'node_content') {
+      $node_type->module = 'node';
+    }
+
+    // Create each content type.
+    $options = update_variable_get('node_options_' . $node_type->type, array('status', 'promote'));
+    $node_type->settings = array(
+      'status_default' => in_array('status', $options),
+      'sticky_enabled' => TRUE,
+      'sticky_default' => in_array('sticky', $options),
+      'promote_enabled' => TRUE,
+      'promote_default' => in_array('promote', $options),
+      'revision_enabled' => TRUE,
+      'revision_default' => in_array('revision', $options),
+      'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
+      'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
+      'node_user_picture' => update_variable_get('node_user_picture_' . $node_type->type, TRUE),
+      'language' => update_variable_get('node_type_language_' . $node_type->type),
+    );
+    node_type_save($node_type);
+
+    // Delete the migrated variables.
+    update_variable_del('node_options_' . $node_type->type);
+    update_variable_del('node_preview_' . $node_type->type);
+    update_variable_del('node_submitted_' . $node_type->type);
+    update_variable_del('node_user_picture_' . $node_type->type);
+    update_variable_del('node_type_language_' . $node_type->type);
+  }
+}
+
+/**
+ * Delete the node_type table after conversions to configuration files.
+ */
+function node_update_1006() {
+  // This update is separate from node_update_1004() in the event that a module
+  // needs to use the node_type table before it is deleted.
+  if (db_table_exists('node_type')) {
+    db_drop_table('node_type');
+  }
+}
+
+/**
+ * Convert variables to configuration.
+ */
+function node_update_1007() {
+  $config = config('search.settings');
+  $config->set('node_rank_comments', update_variable_get('node_rank_comments', 0));
+  $config->set('node_rank_relevance', update_variable_get('node_rank_relevance', 0));
+  $config->set('node_rank_sticky', update_variable_get('node_rank_sticky', 0));
+  $config->set('node_rank_promote', update_variable_get('node_rank_promote', 0));
+  $config->save();
+
+  update_variable_del('node_rank_comments');
+  update_variable_del('node_rank_relevance');
+  update_variable_del('node_rank_sticky');
+  update_variable_del('node_rank_promote');
+}
+
+/**
+ * Create the view replacement for admin/content/node.
+ */
+function node_update_1008() {
+  $data = array(
+    'name' => 'node_admin_content',
+    'description' => 'Find and manage content.',
+    'module' => 'node',
+    'storage' => 4,
+    'tag' => 'default',
+    'disabled' => FALSE,
+    'base_table' => 'node',
+    'human_name' => 'Admin Content',
+    'core' => '1.0',
+    'display' => array(
+      'default' => array(
+        'display_title' => 'Master',
+        'display_plugin' => 'default',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(),
+          ),
+          'access' => array(
+            'type' => 'perm',
+            'perm' => 'access content overview',
+          ),
+          'cache' => array(
+            'type' => 'none',
+          ),
+          'exposed_form' => array(
+            'type' => 'basic',
+            'options' => array(
+              'submit_button' => 'Filter',
+              'reset_button' => 0,
+              'reset_button_label' => 'Reset',
+              'exposed_sorts_label' => 'Sort by',
+              'expose_sort_order' => 1,
+              'sort_asc_label' => 'Asc',
+              'sort_desc_label' => 'Desc',
+              'autosubmit' => 0,
+              'autosubmit_hide' => 1,
+            ),
+          ),
+          'pager' => array(
+            'type' => 'full',
+            'options' => array(
+              'items_per_page' => '50',
+              'offset' => '0',
+              'id' => '0',
+              'total_pages' => '',
+              'quantity' => '9',
+              'tags' => array(
+                'first' => '« first',
+                'previous' => '‹ previous',
+                'next' => 'next ›',
+                'last' => 'last »',
+              ),
+              'expose' => array(
+                'items_per_page' => 0,
+                'items_per_page_label' => 'Items per page',
+                'items_per_page_options' => '5, 10, 20, 40, 60',
+                'items_per_page_options_all' => 0,
+                'items_per_page_options_all_label' => '- All -',
+                'offset' => 0,
+                'offset_label' => 'Offset',
+              ),
+            ),
+          ),
+          'style_plugin' => 'table',
+          'row_plugin' => 'fields',
+          'fields' => array(
+            'bulk_form' => array(
+              'id' => 'bulk_form',
+              'table' => 'node',
+              'field' => 'bulk_form',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'include_exclude' => 'exclude',
+              'selected_actions' => array(),
+            ),
+            'title' => array(
+              'id' => 'title',
+              'table' => 'node',
+              'field' => 'title',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'link_to_node' => 1,
+            ),
+            'type' => array(
+              'id' => 'type',
+              'table' => 'node',
+              'field' => 'type',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Content type',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => 'priority-medium',
+              'element_label_colon' => 0,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_node' => 0,
+              'machine_name' => 0,
+            ),
+            'name' => array(
+              'id' => 'name',
+              'table' => 'users',
+              'field' => 'name',
+              'relationship' => 'uid',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Name',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => 'priority-low',
+              'element_label_colon' => 0,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_user' => 1,
+              'overwrite_anonymous' => 0,
+              'anonymous_text' => '',
+              'format_username' => 1,
+            ),
+            'status' => array(
+              'id' => 'status',
+              'table' => 'node',
+              'field' => 'status',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Status',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => 0,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'type' => 'published-notpublished',
+              'type_custom_true' => '',
+              'type_custom_false' => '',
+              'not' => 0,
+            ),
+            'changed' => array(
+              'id' => 'changed',
+              'table' => 'node',
+              'field' => 'changed',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Updated date',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => 'priority-low',
+              'element_label_colon' => 0,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'date_format' => 'short',
+              'custom_date_format' => '',
+              'timezone' => '',
+            ),
+            'edit_node' => array(
+              'id' => 'edit_node',
+              'table' => 'views_entity_node',
+              'field' => 'edit_node',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'text' => '',
+            ),
+            'delete_node' => array(
+              'id' => 'delete_node',
+              'table' => 'views_entity_node',
+              'field' => 'delete_node',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'text' => '',
+            ),
+            'dropbutton' => array(
+              'id' => 'dropbutton',
+              'table' => 'views',
+              'field' => 'dropbutton',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Operations',
+              'exclude' => 0,
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => 0,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'fields' =>
+                array(
+                  'edit_node' => 'edit_node',
+                  'delete_node' => 'delete_node',
+                ),
+              'destination' => 1,
+            ),
+          ),
+          'filters' => array(
+            'status' => array(
+              'id' => 'status',
+              'table' => 'node',
+              'field' => 'status',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => '=',
+              'value' => 'All',
+              'group' => 1,
+              'exposed' => TRUE,
+              'expose' => array(
+                'operator_id' => '',
+                'label' => 'Published',
+                'description' => '',
+                'use_operator' => FALSE,
+                'operator' => 'status_op',
+                'identifier' => 'status',
+                'required' => 0,
+                'remember' => 0,
+                'multiple' => FALSE,
+                'remember_roles' => array(
+                  'anonymous' => 0,
+                  'authenticated' => 0,
+                  'administrator' => 0,
+                ),
+              ),
+              'is_grouped' => FALSE,
+            ),
+            'type' => array(
+              'id' => 'type',
+              'table' => 'node',
+              'field' => 'type',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => 'in',
+              'value' => array(),
+              'group' => '1',
+              'exposed' => TRUE,
+              'expose' => array(
+                'operator_id' => 'type_op',
+                'label' => 'Type',
+                'description' => '',
+                'use_operator' => 0,
+                'operator' => 'type_op',
+                'identifier' => 'type',
+                'required' => 0,
+                'remember' => 0,
+                'multiple' => 0,
+                'remember_roles' => array(
+                  'anonymous' => 0,
+                  'authenticated' => 0,
+                  'administrator' => 0,
+                ),
+                'reduce' => 0,
+              ),
+              'is_grouped' => FALSE,
+            ),
+            'title' => array(
+              'id' => 'title',
+              'table' => 'node',
+              'field' => 'title',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => 'word',
+              'value' => '',
+              'group' => '1',
+              'exposed' => TRUE,
+              'expose' => array(
+                'operator_id' => 'title_op',
+                'label' => 'Title contains',
+                'description' => '',
+                'use_operator' => 0,
+                'operator' => 'title_op',
+                'identifier' => 'title',
+                'required' => 0,
+                'remember' => 0,
+                'multiple' => FALSE,
+                'remember_roles' => array(
+                  'anonymous' => 0,
+                  'authenticated' => 0,
+                  'administrator' => 0,
+                ),
+              ),
+              'is_grouped' => FALSE,
+            ),
+            'status_extra' => array(
+              'id' => 'status_extra',
+              'table' => 'node',
+              'field' => 'status_extra',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => '=',
+              'value' => '',
+              'group' => '1',
+              'exposed' => FALSE,
+              'is_grouped' => FALSE,
+            ),
+          ),
+          'sorts' => array(
+            'changed' => array(
+              'id' => 'changed',
+              'table' => 'node',
+              'field' => 'changed',
+              'order' => 'DESC',
+            ),
+          ),
+          'title' => 'Admin Content',
+          'relationships' => array(
+            'uid' => array(
+              'id' => 'uid',
+              'table' => 'node',
+              'field' => 'uid',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'author',
+              'required' => 0,
+            ),
+          ),
+          'css_class' => 'node-admin-content',
+          'empty' => array(
+            'area_text_custom' => array(
+              'id' => 'area_text_custom',
+              'table' => 'views',
+              'field' => 'area_text_custom',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'empty' => TRUE,
+              'content' => 'No content available.',
+              'tokenize' => 0,
+            ),
+          ),
+          'style_options' => array(
+            'grouping' => array(),
+            'row_class' => '',
+            'default_row_class' => 1,
+            'row_class_special' => 1,
+            'override' => 1,
+            'sticky' => 0,
+            'caption' => '',
+            'summary' => '',
+            'columns' => array(
+              'bulk_form' => 'bulk_form',
+              'title' => 'title',
+              'type' => 'type',
+              'name' => 'name',
+              'status' => 'status',
+              'changed' => 'changed',
+              'edit_node' => 'edit_node',
+              'delete_node' => 'delete_node',
+              'dropbutton' => 'dropbutton',
+            ),
+            'info' => array(
+              'bulk_form' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'title' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'type' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'name' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'status' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'changed' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'desc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'edit_node' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'delete_node' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'dropbutton' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+            ),
+            'default' => 'changed',
+            'empty_table' => 1,
+          ),
+        ),
+      ),
+      'page' => array(
+        'display_title' => 'Page',
+        'display_plugin' => 'page',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(),
+          ),
+          'path' => 'admin/content/node',
+          'menu' => array(
+            'type' => 'default tab',
+            'title' => 'Find content',
+            'description' => '',
+            'name' => 'management',
+            'weight' => '-1',
+            'context' => 0,
+            'context_only_inline' => 0,
+          ),
+          'tab_options' => array(
+            'type' => 'normal',
+            'title' => 'Content',
+            'description' => 'Find and manage content.',
+            'name' => 'management',
+            'weight' => '-10',
+          ),
+        ),
+      ),
+    ),
+  );
+  $config = config('views.view.node_admin_content');
+  if ($config->isNew()) {
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Update the language setting for all node types.
+ */
+function node_update_1009() {
+  $types = config_get_names_with_prefix('node.type');
+  foreach ($types as $config_name) {
+    $config = config($config_name);
+    $language_setting = $config->get('settings.node_type_language');
+    if (isset($language_setting)) {
+      $config->set('settings.language', $language_setting);
+      $config->clear('settings.node_type_language');
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Set all nodes to be language agnostic on mono-lingual sites.
+ */
+function node_update_1010() {
+  // Because this update may adversely affect sites that once were multilingual
+  // but are now mono-lingual, we only apply if we're absolutely sure only a
+  // single language is used, both in the configuration and in the node table.
+  $language_count = config_get('system.core', 'language_count');
+  $default_langcode = config_get('system.core', 'language_default');
+  $other_languages = db_query("SELECT COUNT(langcode) FROM {node} WHERE langcode NOT IN (:list)", array(':list' => array('und', $default_langcode)))->fetchField();
+  if ($language_count == 1 && $other_languages == 0) {
+    db_query("UPDATE {node} SET langcode = 'und' WHERE langcode = :default", array('default' => $default_langcode));
+    db_query("UPDATE {url_alias} SET langcode = 'und' WHERE source LIKE 'node/%' AND langcode = :default", array('default' => $default_langcode));
+  }
+}
+
+/**
+ * Delete the node_type table if it still exists.
+ */
+function node_update_1011() {
+  if (db_table_exists('node_type')) {
+    db_drop_table('node_type');
+  }
 }
 
 /**

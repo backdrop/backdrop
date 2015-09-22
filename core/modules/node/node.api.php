@@ -12,14 +12,21 @@
  *
  * Each content type is maintained by a primary module, which is either
  * node.module (for content types created in the user interface) or the module
- * that implements hook_node_info() to define the content type.
+ * that provides a node type in its default config directory. Modules that
+ * provide a content type should explicitly set the "module" key in their
+ * config file.
  *
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: These hooks are only invoked on the primary
- *   module, using the "base" return component of hook_node_info() as the
- *   function prefix.
+ * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ *   returns a 'base' component. Node-type-specific hooks are named
+ *   base_hookname() instead of mymodule_hookname() (in a module called
+ *   'mymodule' for example). Only the node type's corresponding implementation
+ *   is invoked. For example, book_node_info() in book.module defines the base
+ *   for the 'book' node type as 'book'. So when a book node is created,
+ *   hook_insert() is invoked on book_insert() only. Hooks that are
+ *   node-type-specific are noted below.
  * - All-module hooks: This set of hooks is invoked on all implementing modules,
  *   to allow other modules to modify what the primary node module is doing. For
  *   example, hook_node_insert() is invoked on all modules when creating a book
@@ -194,7 +201,7 @@ function hook_node_grants($account, $op) {
   if (user_access('access private content', $account)) {
     $grants['example'] = array(1);
   }
-  $grants['example_owner'] = array($account->uid);
+  $grants['example_author'] = array($account->uid);
   return $grants;
 }
 
@@ -314,7 +321,7 @@ function hook_node_access_records(Node $node) {
  *
  * The preferred use of this hook is in a module that bridges multiple node
  * access modules with a configurable behavior, as shown in the example with the
- * 'is_preview' field.
+ * 'sticky' field.
  *
  * @see hook_node_access_records()
  * @see hook_node_grants()
@@ -322,11 +329,11 @@ function hook_node_access_records(Node $node) {
  * @ingroup node_access
  */
 function hook_node_access_records_alter(&$grants, Node $node) {
-  // Our module allows editors to mark specific articles with the 'is_preview'
+  // Our module allows editors to mark specific posts with the 'sticky'
   // field. If the node being saved has a TRUE value for that field, then only
   // our grants are retained, and other grants are removed. Doing so ensures
   // that our rules are enforced no matter what priority other grants are given.
-  if ($node->is_preview) {
+  if ($node->sticky) {
     // Our module grants are set in $grants['example'].
     $temp = $grants['example'];
     // Now remove all module grants but our own.
@@ -373,7 +380,7 @@ function hook_node_grants_alter(&$grants, $account, $op) {
   // array for roles specified in our variable setting.
 
   // Get our list of banned roles.
-  $restricted = variable_get('example_restricted_roles', array());
+  $restricted = config_get('my_module.settings', 'example_restricted_roles', array());
 
   if ($op != 'view' && !empty($restricted)) {
     // Now check the roles for this account against the restrictions.
@@ -383,64 +390,6 @@ function hook_node_grants_alter(&$grants, $account, $op) {
       }
     }
   }
-}
-
-/**
- * Add mass node operations.
- *
- * This hook enables modules to inject custom operations into the mass
- * operations dropdown found at admin/content, by associating a callback
- * function with the operation, which is called when the form is submitted. The
- * callback function receives one initial argument, which is an array of the
- * checked nodes.
- *
- * @return
- *   An array of operations. Each operation is an associative array that may
- *   contain the following key-value pairs:
- *   - label: (required) The label for the operation, displayed in the dropdown
- *     menu.
- *   - callback: (required) The function to call for the operation.
- *   - callback arguments: (optional) An array of additional arguments to pass
- *     to the callback function.
- */
-function hook_node_operations() {
-  $operations = array(
-    'publish' => array(
-      'label' => t('Publish selected content'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('status' => NODE_PUBLISHED)),
-    ),
-    'unpublish' => array(
-      'label' => t('Unpublish selected content'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('status' => NODE_NOT_PUBLISHED)),
-    ),
-    'promote' => array(
-      'label' => t('Promote selected content to front page'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('status' => NODE_PUBLISHED, 'promote' => NODE_PROMOTED)),
-    ),
-    'demote' => array(
-      'label' => t('Demote selected content from front page'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('promote' => NODE_NOT_PROMOTED)),
-    ),
-    'sticky' => array(
-      'label' => t('Make selected content sticky'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('status' => NODE_PUBLISHED, 'sticky' => NODE_STICKY)),
-    ),
-    'unsticky' => array(
-      'label' => t('Make selected content not sticky'),
-      'callback' => 'node_mass_update',
-      'callback arguments' => array('updates' => array('sticky' => NODE_NOT_STICKY)),
-    ),
-    'delete' => array(
-      'label' => t('Delete selected content'),
-      'callback' => NULL,
-    ),
-  );
-  return $operations;
 }
 
 /**
@@ -648,7 +597,7 @@ function hook_node_access($node, $op, $account) {
  */
 function hook_node_prepare(Node $node) {
   if (!isset($node->comment)) {
-    $node->comment = variable_get("comment_$node->type", COMMENT_NODE_OPEN);
+    $node->my_setting = config_get('my_module.settings', 'my_setting');
   }
 }
 
@@ -749,9 +698,9 @@ function hook_node_update_index(Node $node) {
  * Perform node validation before a node is created or updated.
  *
  * This hook is invoked from node_validate(), after a user has has finished
- * editing the node and is previewing or submitting it. It is invoked at the
- * end of all the standard validation steps, and after the type-specific
- * hook_validate() is invoked.
+ * editing the node and is submitting it. It is invoked at the end of all the
+ * standard validation steps, and after the type-specific hook_validate() is
+ * invoked.
  *
  * To indicate a validation error, use form_set_error().
  *
@@ -780,13 +729,12 @@ function hook_node_validate(Node $node, $form, &$form_state) {
 /**
  * Act on a node after validated form values have been copied to it.
  *
- * This hook is invoked when a node form is submitted with either the "Save" or
- * "Preview" button, after form values have been copied to the form state's node
- * object, but before the node is saved or previewed. It is a chance for modules
- * to adjust the node's properties from what they are simply after a copy from
- * $form_state['values']. This hook is intended for adjusting non-field-related
- * properties. See hook_field_attach_submit() for customizing field-related
- * properties.
+ * This hook is invoked when a node form is submitted with the "Save" button,
+ * after form values have been copied to the form state's node object, but
+ * before the node is saved. It is a chance for modules to adjust the node's
+ * properties from what they are simply after a copy from $form_state['values'].
+ * This hook is intended for adjusting non-field-related properties. See
+ * hook_field_attach_submit() for customizing field-related properties.
  *
  * @param Node $node
  *   The node entity being updated in response to a form submission.
@@ -868,61 +816,6 @@ function hook_node_view_alter(&$build) {
 }
 
 /**
- * Define module-provided node types.
- *
- * This hook allows a module to define one or more of its own node types. The
- * name and attributes of each desired node type are specified in an array
- * returned by the hook.
- *
- * Only module-provided node types should be defined through this hook. User-
- * provided (or 'custom') node types should be defined only in the 'node_type'
- * database table, and should be maintained by using the node_type_save() and
- * node_type_delete() functions.
- *
- * @return
- *   An array of information defining the module's node types. The array
- *   contains a sub-array for each node type, with the the machine name of a
- *   content type as the key. Each sub-array has up to 10 attributes.
- *   Possible attributes:
- *   - name: (required) The human-readable name of the node type.
- *   - base: (required) The base string used to construct callbacks
- *     corresponding to this node type (for example, if base is defined as
- *     example_foo, then example_foo_insert will be called when inserting a node
- *     of that type). This string is usually the name of the module, but not
- *     always.
- *   - description: (required) A brief description of the node type.
- *   - help: (optional) Help information shown to the user when creating a node
- *     of this type.
- *   - has_title: (optional) A Boolean indicating whether or not this node type
- *     has a title field.
- *   - title_label: (optional) The label for the title field of this content
- *     type.
- *   - locked: (optional) A Boolean indicating whether the administrator can
- *     change the machine name of this type. FALSE = changeable (not locked),
- *     TRUE = unchangeable (locked).
- *
- * The machine name of a node type should contain only letters, numbers, and
- * underscores. Underscores will be converted into hyphens for the purpose of
- * constructing URLs.
- *
- * All attributes of a node type that are defined through this hook (except for
- * 'locked') can be edited by a site administrator. This includes the
- * machine-readable name of a node type, if 'locked' is set to FALSE.
- *
- * @ingroup node_api_hooks
- */
-function hook_node_info() {
-  return array(
-    'blog' => array(
-      'name' => t('Blog post'),
-      'base' => 'blog',
-      'description' => t('A <em>Blog post</em> is a discussion starter.'),
-      'title_label' => t('Subject'),
-    )
-  );
-}
-
-/**
  * Provide additional methods of scoring for core search results for nodes.
  *
  * A node's search score is used to rank it among other nodes matched by the
@@ -967,7 +860,8 @@ function hook_node_info() {
  */
 function hook_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
-  if (variable_get('vote_node_enabled', TRUE)) {
+  $config = config_get('my_module.settings');
+  if ($config->get('vote_node_enabled')) {
     return array(
       'vote_average' => array(
         'title' => t('Average vote'),
@@ -978,12 +872,40 @@ function hook_ranking() {
         // always 0, should be 0.
         'score' => 'vote_node_data.average / CAST(%f AS DECIMAL)',
         // Pass in the highest possible voting score as a decimal argument.
-        'arguments' => array(variable_get('vote_score_max', 5)),
+        'arguments' => array($config->get('vote_score_max')),
       ),
     );
   }
 }
 
+/**
+ * Respond to the loading of node types.
+ *
+ * This hook is called after loading node types from configuration files. It can
+ * be used to populate default values within a node type's settings. Note that
+ * after loading, if the node type is later saved, these defaults are saved into
+ * configuration.
+ *
+ * @param $types
+ *   An array of type information, passed by reference. Each item is keyed by
+ *   the node type name, and is an array of values as loaded from the node
+ *   type config file. The most common use is to populate the "settings" array
+ *   with defaults. For a complete list of keys for a node type, see
+ *   _node_types_build().
+ *
+ * @see _node_types_build()
+ */
+function hook_node_type_load(&$types) {
+  foreach ($types as $type_name => $type) {
+    $types[$type_name]->settings += array(
+      'status_default' => TRUE,
+      'promote_default' => FALSE,
+      'sticky_default' => FALSE,
+      'revision_default' => FALSE,
+      'show_submitted_info' => TRUE,
+    );
+  }
+}
 
 /**
  * Respond to node type creation.
@@ -1008,10 +930,13 @@ function hook_node_type_insert($info) {
  *   The node type object that is being updated.
  */
 function hook_node_type_update($info) {
+  // Update a setting that pointed at the old type name to the new type name.
   if (!empty($info->old_type) && $info->old_type != $info->type) {
-    $setting = variable_get('comment_' . $info->old_type, COMMENT_NODE_OPEN);
-    variable_del('comment_' . $info->old_type);
-    variable_set('comment_' . $info->type, $setting);
+    $config = config('my_module.settings');
+    $default_type = $config->get('defaut_node_type');
+    if ($default_type === $info->old_type) {
+      $config->set('default_node_type', $info->type);
+    }
   }
 }
 
@@ -1025,18 +950,36 @@ function hook_node_type_update($info) {
  *   The node type object that is being deleted.
  */
 function hook_node_type_delete($info) {
-  variable_del('comment_' . $info->type);
+  // Remove the deleted node type from a module's config.
+  $config = config('my_module.settings');
+  $enabled_types = $config->get('enabled_types');
+  $key = array_search($info->type, $enabled_types);
+  if ($key !== FALSE) {
+    unset($enabled_types[$key]);
+    $config->set('enabled_types', $enabled_types);
+  }
 }
 
 /**
  * Respond to node deletion.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_delete() to respond to all node deletions).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
  *
- * This hook is invoked from node_delete_multiple() after the node has been
- * removed from the node table in the database, before hook_node_delete() is
- * invoked, and before field_attach_delete() is called.
+ * Use hook_node_delete() to respond to node deletion of all node types.
+ *
+ * This hook is invoked from node_delete_multiple() before hook_node_delete()
+ * is invoked and before field_attach_delete() is called.
+ *
+ * Note that when this hook is invoked, the changes have not yet been written
+ * to the database, because a database transaction is still in progress. The
+ * transaction is not finalized until the delete operation is entirely
+ * completed and node_delete_multiple() goes out of scope. You should not rely
+ * on data in the database at this time as it is not updated yet. You should
+ * also note that any write/update database queries executed from this hook are
+ * also not committed immediately. Check node_delete_multiple() and
+ * db_transaction() for more info.
  *
  * @param Node $node
  *   The node that is being deleted.
@@ -1052,8 +995,11 @@ function hook_delete(Node $node) {
 /**
  * Act on a node object about to be shown on the add/edit form.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_prepare() to act on all node preparations).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_prepare() to respond to node preparation of all node types.
  *
  * This hook is invoked from node_object_prepare() before the general
  * hook_node_prepare() is invoked.
@@ -1064,35 +1010,40 @@ function hook_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_prepare(Node $node) {
-  if ($file = file_check_upload($field_name)) {
-    $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
-    if ($file) {
-      if (!image_get_info($file->uri)) {
-        form_set_error($field_name, t('Uploaded file is not a valid image'));
-        return;
-      }
-    }
-    else {
+  $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
+  if ($file) {
+    if (!image_get_info($file->uri)) {
+      form_set_error($field_name, t('Uploaded file is not a valid image'));
       return;
     }
-    $node->images['_original'] = $file->uri;
-    _image_build_derivatives($node, TRUE);
-    $node->new_file = TRUE;
   }
+  else {
+    return;
+  }
+  $node->images['_original'] = $file->uri;
+  _image_build_derivatives($node, TRUE);
+  $node->new_file = TRUE;
 }
 
 /**
  * Display a node editing form.
  *
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_form_BASE_FORM_ID_alter(), with base form ID 'node_form', to alter
+ * node forms for all node types.
+ *
  * This hook, implemented by node modules, is called to retrieve the form
  * that is displayed to create or edit a node. This form is displayed at path
  * node/add/[node type] or node/[node ID]/edit.
  *
- * The submit and preview buttons, administrative and display controls, and
- * sections added by other modules (such as path settings, menu settings,
- * comment settings, and fields managed by the Field UI module) are
- * displayed automatically by the node module. This hook just needs to
- * return the node title and form editing fields specific to the node type.
+ * The submit button, administrative and display controls, and sections added by
+ * other modules (such as path settings, menu settings, comment settings, and
+ * fields managed by the Field UI module) are displayed automatically by the
+ * node module. This hook just needs to return the node title and form editing
+ * fields specific to the node type.
  *
  * @param Node $node
  *   The node being added or edited.
@@ -1139,8 +1090,11 @@ function hook_form(Node $node, &$form_state) {
 /**
  * Respond to creation of a new node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_insert() to act on all node insertions).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_insert() to respond to node insertion of all node types.
  *
  * This hook is invoked from node_save() after the node is inserted into the
  * node table in the database, before field_attach_insert() is called, and
@@ -1163,8 +1117,11 @@ function hook_insert(Node $node) {
 /**
  * Act on nodes being loaded from the database.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_load() to respond to all node loads).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_load() to respond to node load of all node types.
  *
  * This hook is invoked during node loading, which is handled by entity_load(),
  * via classes NodeController and DefaultEntityController. After the node
@@ -1197,8 +1154,11 @@ function hook_load($nodes) {
 /**
  * Respond to updates to a node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_update() to act on all node updates).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_update() to respond to node update of all node types.
  *
  * This hook is invoked from node_save() after the node is updated in the
  * node table in the database, before field_attach_update() is called, and
@@ -1219,13 +1179,15 @@ function hook_update(Node $node) {
 /**
  * Perform node validation before a node is created or updated.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_validate() to act on all node validations).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_validate() to respond to node validation of all node types.
  *
  * This hook is invoked from node_validate(), after a user has finished
- * editing the node and is previewing or submitting it. It is invoked at the end
- * of all the standard validation steps, and before hook_node_validate() is
- * invoked.
+ * editing the node and is submitting it. It is invoked at the end of all the
+ * standard validation steps, and before hook_node_validate() is invoked.
  *
  * To indicate a validation error, use form_set_error().
  *
@@ -1253,8 +1215,11 @@ function hook_validate(Node $node, $form, &$form_state) {
 /**
  * Display a node.
  *
- * This hook is invoked only on the module that defines the node's content type
- * (use hook_node_view() to act on all node views).
+ * This is a node-type-specific hook, which is invoked only for the node type
+ * being affected. See
+ * @link node_api_hooks Node API hooks @endlink for more information.
+ *
+ * Use hook_node_view() to respond to node view of all node types.
  *
  * This hook is invoked during node viewing after the node is fully loaded, so
  * that the node type module can define a custom method for display, or add to

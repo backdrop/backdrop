@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Tests date popup in Views
+ */
+ 
+require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
+
+class DateViewsTestCase extends DateFieldBasic {
+
+  /**
+   * Test setup actions.
+   */
+  public function setUp() {
+    parent::setUp(array('views', 'views_ui'));
+
+    // Create a date field.
+    $field_name = 'field_test_date_popup';
+    $options = array(
+      'label' => 'Test',
+      'widget_type' => 'date_popup',
+      'field_name' => $field_name,
+      'field_type' => 'datetime',
+      'input_format' => 'm/d/Y - H:i',
+    );
+    $this->createDateField($options);
+
+    // Create the view.
+    $view = new view();
+    $view->name = 'test_date_popup';
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = 'Test date_popup';
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['title'] = 'test_date_popup_page';
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'none';
+    $handler->display->display_options['pager']['options']['offset'] = '0';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'node';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+    /* Filter criterion: Content: test_date_popup (field_test_date_popup) */
+    $handler->display->display_options['filters']['field_test_date_popup_value']['id'] = 'field_test_date_popup_value';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['table'] = 'field_data_field_test_date_popup';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['field'] = 'field_test_date_popup_value';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['exposed'] = TRUE;
+    $handler->display->display_options['filters']['field_test_date_popup_value']['expose']['operator_id'] = 'field_test_date_popup_value_op';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['expose']['label'] = 'test_date_popup (field_test_date_popup)';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['expose']['operator'] = 'field_test_date_popup_value_op';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['expose']['identifier'] = 'field_test_date_popup_value';
+    $handler->display->display_options['filters']['field_test_date_popup_value']['form_type'] = 'date_popup';
+
+    /* Display: Page */
+    $handler = $view->new_display('page', 'Page', 'page');
+    $handler->display->display_options['path'] = 'test-date-popup';
+
+    $view->save();
+  }
+
+  /**
+   * Test date popup.
+   */
+  public function testDateViews() {
+    // Go to view page.
+    $this->backdropGet('test-date-popup');
+
+    // Ensure the exposed filter is present.
+    $this->assertField('field_test_date_popup_value[value][date]');
+    $this->assertNoField('field_test_date_popup_value[value][time]');
+  }
+}

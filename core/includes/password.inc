@@ -18,22 +18,22 @@
  * increase by 1 every Backdrop version in order to counteract increases in the
  * speed and power of computers available to crack the hashes.
  */
-const BACKDROP_HASH_COUNT = 16;
+define('BACKDROP_HASH_COUNT', 16);
 
 /**
  * The minimum allowed log2 number of iterations for password stretching.
  */
-const BACKDROP_MIN_HASH_COUNT = 7;
+define('BACKDROP_MIN_HASH_COUNT', 7);
 
 /**
  * The maximum allowed log2 number of iterations for password stretching.
  */
-const BACKDROP_MAX_HASH_COUNT = 30;
+define('BACKDROP_MAX_HASH_COUNT', 30);
 
 /**
  * The expected (and maximum) number of characters in a hashed password.
  */
-const BACKDROP_HASH_LENGTH = 55;
+define('BACKDROP_HASH_LENGTH', 55);
 
 /**
  * Returns a string for mapping an int to the corresponding base 64 character.
@@ -140,7 +140,7 @@ function _password_enforce_log2_boundaries($count_log2) {
  * @param $algo
  *   The string name of a hashing algorithm usable by hash(), like 'sha256'.
  * @param $password
- *   The plain-text password to hash.
+ *   Plain-text password up to 512 bytes (128 to 512 UTF-8 characters) to hash.
  * @param $setting
  *   An existing hash or the output of _password_generate_salt().  Must be
  *   at least 12 characters (the settings and salt).
@@ -150,6 +150,10 @@ function _password_enforce_log2_boundaries($count_log2) {
  *   The return string will be truncated at BACKDROP_HASH_LENGTH characters max.
  */
 function _password_crypt($algo, $password, $setting) {
+  // Prevent DoS attacks by refusing to hash large passwords.
+  if (strlen($password) > 512) {
+    return FALSE;
+  }
   // The first 12 characters of an existing hash are its setting string.
   $setting = substr($setting, 0, 12);
 
@@ -207,7 +211,7 @@ function _password_get_count_log2($setting) {
 function user_hash_password($password, $count_log2 = 0) {
   if (empty($count_log2)) {
     // Use the standard iteration count.
-    $count_log2 = variable_get('password_count_log2', BACKDROP_HASH_COUNT);
+    $count_log2 = settings_get('password_count_log2', BACKDROP_HASH_COUNT);
   }
   return _password_crypt('sha512', $password, _password_generate_salt($count_log2));
 }
@@ -229,9 +233,6 @@ function user_hash_password($password, $count_log2 = 0) {
  */
 function user_check_password($password, $account) {
   if (substr($account->pass, 0, 2) == 'U$') {
-    // This may be an updated password from user_update_7000(). Such hashes
-    // have 'U' added as the first character and need an extra md5() (see the
-    // Drupal 7 documentation).
     $stored_hash = substr($account->pass, 1);
     $password = md5($password);
   }
@@ -242,7 +243,7 @@ function user_check_password($password, $account) {
   $type = substr($stored_hash, 0, 3);
   switch ($type) {
     case '$S$':
-      // A normal Drupal 7 password using sha512.
+      // A normal Backdrop password using sha512.
       $hash = _password_crypt('sha512', $password, $stored_hash);
       break;
     case '$H$':
@@ -264,8 +265,7 @@ function user_check_password($password, $account) {
  * This is typically called during the login process when the plain text
  * password is available. A new hash is needed when the desired iteration count
  * has changed through a change in the variable password_count_log2 or
- * BACKDROP_HASH_COUNT or if the user's password hash was generated in an update
- * like user_update_7000() (see the Drupal 7 documentation).
+ * BACKDROP_HASH_COUNT.
  *
  * Alternative implementations of this function might use other criteria based
  * on the fields in $account.
@@ -282,7 +282,7 @@ function user_needs_new_hash($account) {
     return TRUE;
   }
   // Ensure that $count_log2 is within set bounds.
-  $count_log2 = _password_enforce_log2_boundaries(variable_get('password_count_log2', BACKDROP_HASH_COUNT));
+  $count_log2 = _password_enforce_log2_boundaries(settings_get('password_count_log2', BACKDROP_HASH_COUNT));
   // Check whether the iteration count used differs from the standard number.
   return (_password_get_count_log2($account->pass) !== $count_log2);
 }

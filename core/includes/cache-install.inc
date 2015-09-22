@@ -26,7 +26,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::getMultiple().
    */
-  function getMultiple(&$cids) {
+  function getMultiple(array &$cids) {
     return array();
   }
 
@@ -37,7 +37,33 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   }
 
   /**
-   * Implements BackdropCacheInterface::deletePrefix().
+   * Overrides BackdropDatabaseCache::delete().
+   */
+  function delete($cid) {
+    try {
+      if (class_exists('Database')) {
+        parent::delete($cid);
+      }
+    }
+    catch (Exception $e) {
+    }
+  }
+
+  /**
+   * Overrides BackdropDatabaseCache::deleteMultiple().
+   */
+  function deleteMultiple(array $cids) {
+    try {
+      if (class_exists('Database')) {
+        parent::deleteMultiple($cids);
+      }
+    }
+    catch (Exception $e) {
+    }
+  }
+
+  /**
+   * Overrides BackdropDatabaseCache::deletePrefix().
    */
   function deletePrefix($cid) {
     try {
@@ -50,30 +76,27 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   }
 
   /**
-   * Overrides BackdropDatabaseCache::clear().
+   * Overrides BackdropDatabaseCache::flush().
    */
-  function clear($cid = NULL, $wildcard = FALSE) {
-    // If there is a database cache, attempt to clear it whenever possible. The
-    // reason for doing this is that the database cache can accumulate data
-    // during installation due to any full bootstraps that may occur at the
-    // same time (for example, Ajax requests triggered by the installer). If we
-    // didn't try to clear it whenever this function is called, the data in the
-    // cache would become stale; for example, the installer sometimes calls
-    // variable_set(), which updates the {variable} table and then clears the
-    // cache to make sure that the next page request picks up the new value.
-    // Not actually clearing the cache here therefore leads old variables to be
-    // loaded on the first page requests after installation, which can cause
-    // subtle bugs, some of which would not be fixed unless the site
-    // administrator cleared the cache manually.
+  function flush() {
     try {
       if (class_exists('Database')) {
-        parent::clear($cid, $wildcard);
+        parent::flush();
       }
     }
-    // If the attempt at clearing the cache causes an error, that means that
-    // either the database connection is not set up yet or the relevant cache
-    // table in the database has not yet been created, so we can safely do
-    // nothing here.
+    catch (Exception $e) {
+    }
+  }
+
+  /**
+   * Overrides BackdropDatabaseCache::garbageCollection().
+   */
+  function garbageCollection() {
+    try {
+      if (class_exists('Database')) {
+        parent::garbageCollection();
+      }
+    }
     catch (Exception $e) {
     }
   }

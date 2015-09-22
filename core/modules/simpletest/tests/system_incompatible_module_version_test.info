@@ -4,3 +4,4 @@ package = Testing
 version = 1.0
 backdrop = 1.x
 hidden = TRUE
+type = module

@@ -34,6 +34,9 @@ class FormsTestCase extends BackdropWebTestCase {
     $elements['url']['element'] = array('#title' => $this->randomName(), '#type' => 'url');
     $elements['url']['empty_values'] = $empty_strings;
 
+    $elements['search']['element'] = array('#title' => $this->randomName(), '#type' => 'search');
+    $elements['search']['empty_values'] = $empty_strings;
+
     $elements['password']['element'] = array('#title' => $this->randomName(), '#type' => 'password');
     $elements['password']['empty_values'] = $empty_strings;
 
@@ -231,7 +234,7 @@ class FormsTestCase extends BackdropWebTestCase {
     // First, try to submit without the required checkbox.
     $edit = array();
     $this->backdropPost('form-test/checkbox', $edit, t('Submit'));
-    $this->assertRaw(t('!name field is required.', array('!name' => 'required_checkbox')), t('A required checkbox is actually mandatory'));
+    $this->assertRaw(t('!name field is required.', array('!name' => 'required_checkbox')), 'A required checkbox is actually mandatory');
 
     // Now try to submit the form correctly.
     $values = backdrop_json_decode($this->backdropPost(NULL, array('required_checkbox' => 1), t('Submit')));
@@ -244,7 +247,7 @@ class FormsTestCase extends BackdropWebTestCase {
       'zero_checkbox_off' => '',
     );
     foreach ($expected_values as $widget => $expected_value) {
-      $this->assertEqual($values[$widget], $expected_value, t('Checkbox %widget returns expected value (expected: %expected, got: %value)', array(
+      $this->assertEqual($values[$widget], $expected_value, format_string('Checkbox %widget returns expected value (expected: %expected, got: %value)', array(
         '%widget' => var_export($widget, TRUE),
         '%expected' => var_export($expected_value, TRUE),
         '%value' => var_export($values[$widget], TRUE),
@@ -308,7 +311,7 @@ class FormsTestCase extends BackdropWebTestCase {
       'multiple_no_default_required' => array('three' => 'three'),
     );
     foreach ($expected as $key => $value) {
-      $this->assertIdentical($values[$key], $value, t('@name: @actual is equal to @expected.', array(
+      $this->assertIdentical($values[$key], $value, format_string('@name: @actual is equal to @expected.', array(
         '@name' => $key,
         '@actual' => var_export($values[$key], TRUE),
         '@expected' => var_export($value, TRUE),
@@ -460,7 +463,7 @@ class FormsTestCase extends BackdropWebTestCase {
 
     // All the elements should be marked as disabled, including the ones below
     // the disabled container.
-    $this->assertEqual(count($disabled_elements), 38, 'The correct elements have the disabled property in the HTML code.');
+    $this->assertEqual(count($disabled_elements), 39, 'The correct elements have the disabled property in the HTML code.');
 
     $this->backdropPost(NULL, $edit, t('Submit'));
     $returned_values['hijacked'] = backdrop_json_decode($this->content);
@@ -489,7 +492,11 @@ class FormsTestCase extends BackdropWebTestCase {
           // Checkboxes values are not filtered out.
           $values[$key] = array_filter($values[$key]);
         }
-        $this->assertIdentical($expected_value, $values[$key], t('Default value for %type: expected %expected, returned %returned.', array('%type' => $key, '%expected' => var_export($expected_value, TRUE), '%returned' => var_export($values[$key], TRUE))));
+        $this->assertIdentical($expected_value, $values[$key], format_string('Default value for %type: expected %expected, returned %returned.', array(
+          '%type' => $key,
+          '%expected' => var_export($expected_value, TRUE),
+          '%returned' => var_export($values[$key], TRUE),
+        )));
       }
 
       // Recurse children.
@@ -540,7 +547,7 @@ class FormsTestCase extends BackdropWebTestCase {
         ':div-class' => $class,
         ':value' => isset($item['#value']) ? $item['#value'] : '',
       ));
-      $this->assertTrue(isset($element[0]), t('Disabled form element class found for #type %type.', array('%type' => $item['#type'])));
+      $this->assertTrue(isset($element[0]), format_string('Disabled form element class found for #type %type.', array('%type' => $item['#type'])));
     }
 
     // Verify special element #type text-format.
@@ -548,12 +555,12 @@ class FormsTestCase extends BackdropWebTestCase {
       ':name' => 'text_format[value]',
       ':div-class' => 'form-disabled',
     ));
-    $this->assertTrue(isset($element[0]), t('Disabled form element class found for #type %type.', array('%type' => 'text_format[value]')));
+    $this->assertTrue(isset($element[0]), format_string('Disabled form element class found for #type %type.', array('%type' => 'text_format[value]')));
     $element = $this->xpath('//div[contains(@class, :div-class)]/descendant::select[@name=:name]', array(
       ':name' => 'text_format[format]',
       ':div-class' => 'form-disabled',
     ));
-    $this->assertTrue(isset($element[0]), t('Disabled form element class found for #type %type.', array('%type' => 'text_format[format]')));
+    $this->assertTrue(isset($element[0]), format_string('Disabled form element class found for #type %type.', array('%type' => 'text_format[format]')));
   }
 
   /**
@@ -566,7 +573,7 @@ class FormsTestCase extends BackdropWebTestCase {
     $checkbox = $this->xpath('//input[@name="checkboxes[two]"]');
     $checkbox[0]['value'] = 'FORGERY';
     $this->backdropPost(NULL, array('checkboxes[one]' => TRUE, 'checkboxes[two]' => TRUE), t('Submit'));
-    $this->assertText('An illegal choice has been detected.', t('Input forgery was detected.'));
+    $this->assertText('An illegal choice has been detected.', 'Input forgery was detected.');
   }
 }
 
@@ -592,7 +599,7 @@ class FormElementTestCase extends BackdropWebTestCase {
         ':id' => 'edit-' . $type,
         ':expected' => $expected,
       ));
-      $this->assertTrue(!empty($element), t('Placeholder text placed in @type.', array('@type' => $type)));
+      $this->assertTrue(!empty($element), format_string('Placeholder text placed in @type.', array('@type' => $type)));
     }
 
     // Test to make sure textarea has the proper placeholder text.
@@ -600,7 +607,7 @@ class FormElementTestCase extends BackdropWebTestCase {
       ':id' => 'edit-textarea',
       ':expected' => $expected,
     ));
-    $this->assertTrue(!empty($element), t('Placeholder text placed in textarea.'));
+    $this->assertTrue(!empty($element), 'Placeholder text placed in textarea.');
   }
 
   /**
@@ -638,7 +645,7 @@ class FormElementTestCase extends BackdropWebTestCase {
         ':id' => 'edit-' . $type . '-foo',
         ':class' => 'description',
       ));
-      $this->assertTrue(count($elements), t('Custom %type option description found.', array(
+      $this->assertTrue(count($elements), format_string('Custom %type option description found.', array(
         '%type' => $type,
       )));
     }
@@ -649,6 +656,8 @@ class FormElementTestCase extends BackdropWebTestCase {
  * Test form alter hooks.
  */
 class FormAlterTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -661,13 +670,12 @@ class FormAlterTestCase extends BackdropWebTestCase {
     // Ensure that the order is first by module, then for a given module, the
     // id-specific one after the generic one.
     $expected = array(
-      'block_form_form_test_alter_form_alter() executed.',
       'form_test_form_alter() executed.',
       'form_test_form_form_test_alter_form_alter() executed.',
       'system_form_form_test_alter_form_alter() executed.',
     );
     $content = preg_replace('/\s+/', ' ', filter_xss($this->content, array()));
-    $this->assert(strpos($content, implode(' ', $expected)) !== FALSE, t('Form alter hooks executed in the expected order.'));
+    $this->assert(strpos($content, implode(' ', $expected)) !== FALSE, format_string('Form alter hooks executed in the expected order.'));
   }
 }
 
@@ -675,6 +683,8 @@ class FormAlterTestCase extends BackdropWebTestCase {
  * Test form validation handlers.
  */
 class FormValidationTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -690,8 +700,8 @@ class FormValidationTestCase extends BackdropWebTestCase {
       'name' => 'element_validate',
     );
     $this->backdropPost(NULL, $edit, 'Save');
-    $this->assertFieldByName('name', '#value changed by #element_validate', t('Form element #value was altered.'));
-    $this->assertText('Name value: value changed by form_set_value() in #element_validate', t('Form element value in $form_state was altered.'));
+    $this->assertFieldByName('name', '#value changed by #element_validate', 'Form element #value was altered.');
+    $this->assertText('Name value: value changed by form_set_value() in #element_validate', 'Form element value in $form_state was altered.');
 
     // Verify that #validate handlers can alter the form and submitted
     // form values.
@@ -699,8 +709,8 @@ class FormValidationTestCase extends BackdropWebTestCase {
       'name' => 'validate',
     );
     $this->backdropPost(NULL, $edit, 'Save');
-    $this->assertFieldByName('name', '#value changed by #validate', t('Form element #value was altered.'));
-    $this->assertText('Name value: value changed by form_set_value() in #validate', t('Form element value in $form_state was altered.'));
+    $this->assertFieldByName('name', '#value changed by #validate', 'Form element #value was altered.');
+    $this->assertText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was altered.');
 
     // Verify that #element_validate handlers can make form elements
     // inaccessible, but values persist.
@@ -709,12 +719,12 @@ class FormValidationTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertNoFieldByName('name', t('Form element was hidden.'));
-    $this->assertText('Name value: element_validate_access', t('Value for inaccessible form element exists.'));
+    $this->assertText('Name value: element_validate_access', 'Value for inaccessible form element exists.');
 
     // Verify that value for inaccessible form element persists.
     $this->backdropPost(NULL, array(), 'Save');
     $this->assertNoFieldByName('name', t('Form element was hidden.'));
-    $this->assertText('Name value: element_validate_access', t('Value for inaccessible form element exists.'));
+    $this->assertText('Name value: element_validate_access', 'Value for inaccessible form element exists.');
 
     // Verify that #validate handlers don't run if the CSRF token is invalid.
     $this->backdropLogin($this->backdropCreateUser());
@@ -787,6 +797,8 @@ class FormValidationTestCase extends BackdropWebTestCase {
  * Test form element labels, required markers and associated output.
  */
 class FormsElementsLabelsTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -801,57 +813,57 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
     // Check that the checkbox/radio processing is not interfering with
     // basic placement.
     $elements = $this->xpath('//input[@id="edit-form-checkboxes-test-third-checkbox"]/following-sibling::label[@for="edit-form-checkboxes-test-third-checkbox" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label follows field and label option class correct for regular checkboxes."));
+    $this->assertTrue(isset($elements[0]), 'Label follows field and label option class correct for regular checkboxes.');
 
     // Make sure the label is rendered for checkboxes.
     $elements = $this->xpath('//input[@id="edit-form-checkboxes-test-0"]/following-sibling::label[@for="edit-form-checkboxes-test-0" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label 0 found checkbox."));
+    $this->assertTrue(isset($elements[0]), 'Label 0 found checkbox.');
 
     $elements = $this->xpath('//input[@id="edit-form-radios-test-second-radio"]/following-sibling::label[@for="edit-form-radios-test-second-radio" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label follows field and label option class correct for regular radios."));
+    $this->assertTrue(isset($elements[0]), 'Label follows field and label option class correct for regular radios.');
 
     // Make sure the label is rendered for radios.
     $elements = $this->xpath('//input[@id="edit-form-radios-test-0"]/following-sibling::label[@for="edit-form-radios-test-0" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label 0 found radios."));
+    $this->assertTrue(isset($elements[0]), 'Label 0 found radios.');
 
     // Exercise various defaults for checkboxes and modifications to ensure
     // appropriate override and correct behavior.
     $elements = $this->xpath('//input[@id="edit-form-checkbox-test"]/following-sibling::label[@for="edit-form-checkbox-test" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label follows field and label option class correct for a checkbox by default."));
+    $this->assertTrue(isset($elements[0]), 'Label follows field and label option class correct for a checkbox by default.');
 
     // Exercise various defaults for textboxes and modifications to ensure
     // appropriate override and correct behavior.
     $elements = $this->xpath('//label[@for="edit-form-textfield-test-title-and-required"]/child::abbr[@class="form-required"]/parent::*/following-sibling::input[@id="edit-form-textfield-test-title-and-required"]');
-    $this->assertTrue(isset($elements[0]), t("Label precedes textfield, with required marker inside label."));
+    $this->assertTrue(isset($elements[0]), 'Label precedes textfield, with required marker inside label.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-no-title-required"]/preceding-sibling::label[@for="edit-form-textfield-test-no-title-required"]/abbr[@class="form-required"]');
-    $this->assertTrue(isset($elements[0]), t("Label tag with required marker precedes required textfield with no title."));
+    $this->assertTrue(isset($elements[0]), 'Label tag with required marker precedes required textfield with no title.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-title-invisible"]/preceding-sibling::label[@for="edit-form-textfield-test-title-invisible" and @class="element-invisible"]');
-    $this->assertTrue(isset($elements[0]), t("Label preceding field and label class is element-invisible."));
+    $this->assertTrue(isset($elements[0]), 'Label preceding field and label class is element-invisible.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-title"]/preceding-sibling::abbr[@class="form-required"]');
-    $this->assertFalse(isset($elements[0]), t("No required marker on non-required field."));
+    $this->assertFalse(isset($elements[0]), 'No required marker on non-required field.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-title-after"]/following-sibling::label[@for="edit-form-textfield-test-title-after" and @class="option"]');
-    $this->assertTrue(isset($elements[0]), t("Label after field and label option class correct for text field."));
+    $this->assertTrue(isset($elements[0]), 'Label after field and label option class correct for text field.');
 
     $elements = $this->xpath('//label[@for="edit-form-textfield-test-title-no-show"]');
-    $this->assertFalse(isset($elements[0]), t("No label tag when title set not to display."));
+    $this->assertFalse(isset($elements[0]), 'No label tag when title set not to display.');
 
     // Check #field_prefix and #field_suffix placement.
     $elements = $this->xpath('//span[@class="field-prefix"]/following-sibling::div[@id="edit-form-radios-test"]');
-    $this->assertTrue(isset($elements[0]), t("Properly placed the #field_prefix element after the label and before the field."));
+    $this->assertTrue(isset($elements[0]), 'Properly placed the #field_prefix element after the label and before the field.');
 
     $elements = $this->xpath('//span[@class="field-suffix"]/preceding-sibling::div[@id="edit-form-radios-test"]');
-    $this->assertTrue(isset($elements[0]), t("Properly places the #field_suffix element immediately after the form field."));
+    $this->assertTrue(isset($elements[0]), 'Properly places the #field_suffix element immediately after the form field.');
 
     // Check #prefix and #suffix placement.
     $elements = $this->xpath('//div[@id="form-test-textfield-title-prefix"]/following-sibling::div[contains(@class, \'form-item-form-textfield-test-title\')]');
-    $this->assertTrue(isset($elements[0]), t("Properly places the #prefix element before the form item."));
+    $this->assertTrue(isset($elements[0]), 'Properly places the #prefix element before the form item.');
 
     $elements = $this->xpath('//div[@id="form-test-textfield-title-suffix"]/preceding-sibling::div[contains(@class, \'form-item-form-textfield-test-title\')]');
-    $this->assertTrue(isset($elements[0]), t("Properly places the #suffix element before the form item."));
+    $this->assertTrue(isset($elements[0]), 'Properly places the #suffix element before the form item.');
 
     // Check that required checkboxes with #title_display attribute have a
     // description but no title is displayed.
@@ -870,6 +882,8 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
  * Test the tableselect form element for expected behavior.
  */
 class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -882,14 +896,14 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
 
     $this->backdropGet('form_test/tableselect/multiple-true');
 
-    $this->assertNoText(t('Empty text.'), t('Empty text should not be displayed.'));
+    $this->assertNoText(t('Empty text.'), 'Empty text should not be displayed.');
 
     // Test for the presence of the Select all rows tableheader.
-    $this->assertFieldByXPath('//th[@class="select-all"]', NULL, t('Presence of the "Select all" checkbox.'));
+    $this->assertFieldByXPath('//th[@class="select-all"]', NULL, 'Presence of the "Select all" checkbox.');
 
     $rows = array('row1', 'row2', 'row3');
     foreach ($rows as $row) {
-      $this->assertFieldByXPath('//input[@type="checkbox"]', $row, t('Checkbox for value @row.', array('@row' => $row)));
+      $this->assertFieldByXPath('//input[@type="checkbox"]', $row, format_string('Checkbox for value @row.', array('@row' => $row)));
     }
   }
 
@@ -899,14 +913,14 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   function testMultipleFalse() {
     $this->backdropGet('form_test/tableselect/multiple-false');
 
-    $this->assertNoText(t('Empty text.'), t('Empty text should not be displayed.'));
+    $this->assertNoText(t('Empty text.'), 'Empty text should not be displayed.');
 
     // Test for the absence of the Select all rows tableheader.
-    $this->assertNoFieldByXPath('//th[@class="select-all"]', '', t('Absence of the "Select all" checkbox.'));
+    $this->assertNoFieldByXPath('//th[@class="select-all"]', '', 'Absence of the "Select all" checkbox.');
 
     $rows = array('row1', 'row2', 'row3');
     foreach ($rows as $row) {
-      $this->assertFieldByXPath('//input[@type="radio"]', $row, t('Radio button for value @row.', array('@row' => $row)));
+      $this->assertFieldByXPath('//input[@type="radio"]', $row, format_string('Radio button for value @row.', array('@row' => $row)));
     }
   }
 
@@ -915,7 +929,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
    */
   function testEmptyText() {
     $this->backdropGet('form_test/tableselect/empty-text');
-    $this->assertText(t('Empty text.'), t('Empty text should be displayed.'));
+    $this->assertText(t('Empty text.'), 'Empty text should be displayed.');
   }
 
   /**
@@ -928,18 +942,18 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     $edit['tableselect[row1]'] = TRUE;
     $this->backdropPost('form_test/tableselect/multiple-true', $edit, 'Submit');
 
-    $this->assertText(t('Submitted: row1 = row1'), t('Checked checkbox row1'));
-    $this->assertText(t('Submitted: row2 = 0'), t('Unchecked checkbox row2.'));
-    $this->assertText(t('Submitted: row3 = 0'), t('Unchecked checkbox row3.'));
+    $this->assertText(t('Submitted: row1 = row1'), 'Checked checkbox row1');
+    $this->assertText(t('Submitted: row2 = 0'), 'Unchecked checkbox row2.');
+    $this->assertText(t('Submitted: row3 = 0'), 'Unchecked checkbox row3.');
 
     // Test a submission with multiple checkboxes checked.
     $edit['tableselect[row1]'] = TRUE;
     $edit['tableselect[row3]'] = TRUE;
     $this->backdropPost('form_test/tableselect/multiple-true', $edit, 'Submit');
 
-    $this->assertText(t('Submitted: row1 = row1'), t('Checked checkbox row1.'));
-    $this->assertText(t('Submitted: row2 = 0'), t('Unchecked checkbox row2.'));
-    $this->assertText(t('Submitted: row3 = row3'), t('Checked checkbox row3.'));
+    $this->assertText(t('Submitted: row1 = row1'), 'Checked checkbox row1.');
+    $this->assertText(t('Submitted: row2 = 0'), 'Unchecked checkbox row2.');
+    $this->assertText(t('Submitted: row3 = row3'), 'Checked checkbox row3.');
 
   }
 
@@ -949,7 +963,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   function testMultipleFalseSubmit() {
     $edit['tableselect'] = 'row1';
     $this->backdropPost('form_test/tableselect/multiple-false', $edit, 'Submit');
-    $this->assertText(t('Submitted: row1'), t('Selected radio button'));
+    $this->assertText(t('Submitted: row1'), 'Selected radio button');
   }
 
   /**
@@ -958,18 +972,18 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   function testAdvancedSelect() {
     // When #multiple = TRUE a Select all checkbox should be displayed by default.
     $this->backdropGet('form_test/tableselect/advanced-select/multiple-true-default');
-    $this->assertFieldByXPath('//th[@class="select-all"]', NULL, t('Display a "Select all" checkbox by default when #multiple is TRUE.'));
+    $this->assertFieldByXPath('//th[@class="select-all"]', NULL, 'Display a "Select all" checkbox by default when #multiple is TRUE.');
 
     // When #js_select is set to FALSE, a "Select all" checkbox should not be displayed.
     $this->backdropGet('form_test/tableselect/advanced-select/multiple-true-no-advanced-select');
-    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, t('Do not display a "Select all" checkbox when #js_select is FALSE.'));
+    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, 'Do not display a "Select all" checkbox when #js_select is FALSE.');
 
     // A "Select all" checkbox never makes sense when #multiple = FALSE, regardless of the value of #js_select.
     $this->backdropGet('form_test/tableselect/advanced-select/multiple-false-default');
-    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, t('Do not display a "Select all" checkbox when #multiple is FALSE.'));
+    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, 'Do not display a "Select all" checkbox when #multiple is FALSE.');
 
     $this->backdropGet('form_test/tableselect/advanced-select/multiple-false-advanced-select');
-    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, t('Do not display a "Select all" checkbox when #multiple is FALSE, even when #js_select is TRUE.'));
+    $this->assertNoFieldByXPath('//th[@class="select-all"]', NULL, 'Do not display a "Select all" checkbox when #multiple is FALSE, even when #js_select is TRUE.');
   }
 
 
@@ -988,11 +1002,11 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
 
     // Test with a valid value.
     list($processed_form, $form_state, $errors) = $this->formSubmitHelper($form, array('tableselect' => array('row1' => 'row1')));
-    $this->assertFalse(isset($errors['tableselect']), t('Option checker allows valid values for checkboxes.'));
+    $this->assertFalse(isset($errors['tableselect']), 'Option checker allows valid values for checkboxes.');
 
     // Test with an invalid value.
     list($processed_form, $form_state, $errors) = $this->formSubmitHelper($form, array('tableselect' => array('non_existing_value' => 'non_existing_value')));
-    $this->assertTrue(isset($errors['tableselect']), t('Option checker disallows invalid values for checkboxes.'));
+    $this->assertTrue(isset($errors['tableselect']), 'Option checker disallows invalid values for checkboxes.');
 
   }
 
@@ -1013,11 +1027,11 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
 
     // Test with a valid value.
     list($processed_form, $form_state, $errors) = $this->formSubmitHelper($form, array('tableselect' => 'row1'));
-    $this->assertFalse(isset($errors['tableselect']), t('Option checker allows valid values for radio buttons.'));
+    $this->assertFalse(isset($errors['tableselect']), 'Option checker allows valid values for radio buttons.');
 
     // Test with an invalid value.
     list($processed_form, $form_state, $errors) = $this->formSubmitHelper($form, array('tableselect' => 'non_existing_value'));
-    $this->assertTrue(isset($errors['tableselect']), t('Option checker disallows invalid values for radio buttons.'));
+    $this->assertTrue(isset($errors['tableselect']), 'Option checker disallows invalid values for radio buttons.');
   }
 
 
@@ -1066,6 +1080,8 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
  * Test the vertical_tabs form element for expected behavior.
  */
 class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1079,7 +1095,7 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('form_test/vertical-tabs');
     $position1 = strpos($this->content, 'core/misc/vertical-tabs.js');
     $position2 = strpos($this->content, 'core/misc/collapse.js');
-    $this->assertTrue($position1 !== FALSE && $position2 !== FALSE && $position1 < $position2, t('vertical-tabs.js is included before collapse.js'));
+    $this->assertTrue($position1 !== FALSE && $position2 !== FALSE && $position1 < $position2, 'vertical-tabs.js is included before collapse.js');
   }
 }
 
@@ -1093,10 +1109,12 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
  * values aren't lost due to a wrong form rebuild.
  */
 class FormsFormStorageTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
 
-    $this->web_user = $this->backdropCreateUser(array('access content'));
+    $this->web_user = $this->backdropCreateUser();
     $this->backdropLogin($this->web_user);
   }
 
@@ -1117,13 +1135,13 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
     // Reset the form to the values of the storage, using a form rebuild
     // triggered by button of type button.
     $this->backdropPost(NULL, array('title' => 'changed'), 'Reset');
-    $this->assertFieldByName('title', 'new', 'Values have been resetted.');
+    $this->assertFieldByName('title', 'new', 'Values have been reset.');
     // After rebuilding, the form has been cached.
     $this->assertText('Form constructions: 4');
 
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertText('Form constructions: 4');
-    $this->assertText('Title: new', t('The form storage has stored the values.'));
+    $this->assertText('Title: new', 'The form storage has stored the values.');
   }
 
   /**
@@ -1142,12 +1160,12 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
     // Reset the form to the values of the storage, using a form rebuild
     // triggered by button of type button.
     $this->backdropPost(NULL, array('title' => 'changed'), 'Reset');
-    $this->assertFieldByName('title', 'new', 'Values have been resetted.');
+    $this->assertFieldByName('title', 'new', 'Values have been reset.');
     $this->assertText('Form constructions: 3');
 
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertText('Form constructions: 3');
-    $this->assertText('Title: new', t('The form storage has stored the values.'));
+    $this->assertText('Title: new', 'The form storage has stored the values.');
   }
 
   /**
@@ -1155,7 +1173,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    */
   function testValidation() {
     $this->backdropPost('form_test/form-storage', array('title' => '', 'value' => 'value_is_set'), 'Continue submit');
-    $this->assertPattern('/value_is_set/', t('The input values have been kept.'));
+    $this->assertPattern('/value_is_set/', 'The input values have been kept.');
   }
 
   /**
@@ -1222,12 +1240,184 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
       $this->assertText('State persisted.');
     }
   }
+
+  /**
+   * Verify that the form build-id remains the same when validation errors
+   * occur on a mutable form.
+   */
+  function testMutableForm() {
+    // Request the form with 'cache' query parameter to enable form caching.
+    $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1)));
+    $buildIdFields = $this->xpath('//input[@name="form_build_id"]');
+    $this->assertEqual(count($buildIdFields), 1, 'One form build id field on the page');
+    $buildId = (string) $buildIdFields[0]['value'];
+
+    // Trigger validation error by submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Continue submit');
+
+    // Verify that the build-id did not change.
+    $this->assertFieldByName('form_build_id', $buildId, 'Build id remains the same when form validation fails');
+  }
+
+  /**
+   * Verifies that form build-id is regenerated when loading an immutable form
+   * from the cache.
+   */
+  function testImmutableForm() {
+    // Request the form with 'cache' query parameter to enable form caching.
+    $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1, 'immutable' => 1)));
+    $buildIdFields = $this->xpath('//input[@name="form_build_id"]');
+    $this->assertEqual(count($buildIdFields), 1, 'One form build id field on the page');
+    $buildId = (string) $buildIdFields[0]['value'];
+
+    // Trigger validation error by submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Continue submit');
+
+    // Verify that the build-id did change.
+    $this->assertNoFieldByName('form_build_id', $buildId, 'Build id changes when form validation fails');
+
+    // Retrieve the new build-id.
+    $buildIdFields = $this->xpath('//input[@name="form_build_id"]');
+    $this->assertEqual(count($buildIdFields), 1, 'One form build id field on the page');
+    $buildId = (string) $buildIdFields[0]['value'];
+
+    // Trigger validation error by again submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Continue submit');
+
+    // Verify that the build-id does not change the second time.
+    $this->assertFieldByName('form_build_id', $buildId, 'Build id remains the same when form validation fails subsequently');
+  }
+
+  /**
+   * Verify that existing contrib code cannot overwrite immutable form state.
+   */
+  public function testImmutableFormLegacyProtection() {
+    module_enable(array('dblog'));
+
+    $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1, 'immutable' => 1)));
+    $build_id_fields = $this->xpath('//input[@name="form_build_id"]');
+    $this->assertEqual(count($build_id_fields), 1, 'One form build id field on the page');
+    $build_id = (string) $build_id_fields[0]['value'];
+
+    // Try to poison the form cache.
+    $original = $this->backdropGetAJAX('form_test/form-storage-legacy/' . $build_id);
+    $this->assertEqual($original['form']['#build_id_old'], $build_id, 'Original build_id was recorded');
+    $this->assertNotEqual($original['form']['#build_id'], $build_id, 'New build_id was generated');
+
+    // Assert that a watchdog message was logged by form_set_cache.
+    $status = (bool) db_query_range('SELECT 1 FROM {watchdog} WHERE message = :message', 0, 1, array(':message' => 'Form build-id mismatch detected while attempting to store a form in the cache.'));
+    $this->assert($status, 'A watchdog message was logged by form_set_cache');
+
+    // Ensure that the form state was not poisoned by the preceeding call.
+    $original = $this->backdropGetAJAX('form_test/form-storage-legacy/' . $build_id);
+    $this->assertEqual($original['form']['#build_id_old'], $build_id, 'Original build_id was recorded');
+    $this->assertNotEqual($original['form']['#build_id'], $build_id, 'New build_id was generated');
+    $this->assert(empty($original['form']['#poisoned']), 'Original form structure was preserved');
+    $this->assert(empty($original['form_state']['poisoned']), 'Original form state was preserved');
+  }
+}
+
+/**
+ * Test the form storage when page caching for anonymous users is turned on.
+ */
+class FormsFormStoragePageCacheTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  public function setUp() {
+    parent::setUp('form_test');
+
+    config_set('system.core', 'cache', TRUE);
+  }
+
+  /**
+   * Return the build id of the current form.
+   */
+  protected function getFormBuildId() {
+    $build_id_fields = $this->xpath('//main//input[@name="form_build_id"]');
+    $this->assertEqual(count($build_id_fields), 1, 'One form build id field on the page');
+    return (string) $build_id_fields[0]['value'];
+  }
+
+  /**
+   * Build-id is regenerated when validating cached form.
+   */
+  public function testValidateFormStorageOnCachedPage() {
+    $this->backdropGet('form_test/form-storage-page-cache');
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
+    $this->assertText('No old build id', 'No old build id on the page');
+    $build_id_initial = $this->getFormBuildId();
+
+    // Trigger validation error by submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Save');
+    $this->assertText($build_id_initial, 'Old build id on the page');
+    $build_id_first_validation = $this->getFormBuildId();
+    $this->assertNotEqual($build_id_initial, $build_id_first_validation, 'Build id changes when form validation fails');
+
+    // Trigger validation error by again submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Save');
+    $this->assertText('No old build id', 'No old build id on the page');
+    $build_id_second_validation = $this->getFormBuildId();
+    $this->assertEqual($build_id_first_validation, $build_id_second_validation, 'Build id remains the same when form validation fails subsequently');
+
+    // Repeat the test sequence but this time with a page loaded from the cache.
+    $this->backdropGet('form_test/form-storage-page-cache');
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
+    $this->assertText('No old build id', 'No old build id on the page');
+    $build_id_from_cache_initial = $this->getFormBuildId();
+    $this->assertEqual($build_id_initial, $build_id_from_cache_initial, 'Build id is the same as on the first request');
+
+    // Trigger validation error by submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Save');
+    $this->assertText($build_id_initial, 'Old build id is initial build id');
+    $build_id_from_cache_first_validation = $this->getFormBuildId();
+    $this->assertNotEqual($build_id_initial, $build_id_from_cache_first_validation, 'Build id changes when form validation fails');
+    $this->assertNotEqual($build_id_first_validation, $build_id_from_cache_first_validation, 'Build id from first user is not reused');
+
+    // Trigger validation error by again submitting an empty title.
+    $edit = array('title' => '');
+    $this->backdropPost(NULL, $edit, 'Save');
+    $this->assertText('No old build id', 'No old build id on the page');
+    $build_id_from_cache_second_validation = $this->getFormBuildId();
+    $this->assertEqual($build_id_from_cache_first_validation, $build_id_from_cache_second_validation, 'Build id remains the same when form validation fails subsequently');
+  }
+
+  /**
+   * Build-id is regenerated when rebuilding cached form.
+   */
+  public function testRebuildFormStorageOnCachedPage() {
+    $this->backdropGet('form_test/form-storage-page-cache');
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
+    $this->assertText('No old build id', 'No old build id on the page');
+    $build_id_initial = $this->getFormBuildId();
+
+    // Trigger rebuild, should regenerate build id.
+    $edit = array('title' => 'something');
+    $this->backdropPost(NULL, $edit, 'Rebuild');
+    $this->assertText($build_id_initial, 'Initial build id as old build id on the page');
+    $build_id_first_rebuild = $this->getFormBuildId();
+    $this->assertNotEqual($build_id_initial, $build_id_first_rebuild, 'Build id changes on first rebuild.');
+
+    // Trigger subsequent rebuild, should regenerate the build id again.
+    $edit = array('title' => 'something');
+    $this->backdropPost(NULL, $edit, 'Rebuild');
+    $this->assertText($build_id_first_rebuild, 'First build id as old build id on the page');
+    $build_id_second_rebuild = $this->getFormBuildId();
+    $this->assertNotEqual($build_id_first_rebuild, $build_id_second_rebuild, 'Build id changes on second rebuild.');
+  }
 }
 
 /**
  * Test wrapper form callbacks.
  */
 class FormsFormWrapperTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1237,8 +1427,8 @@ class FormsFormWrapperTestCase extends BackdropWebTestCase {
    */
   function testWrapperCallback() {
     $this->backdropGet('form_test/wrapper-callback');
-    $this->assertText('Form wrapper callback element output.', t('The form contains form wrapper elements.'));
-    $this->assertText('Form builder element output.', t('The form contains form builder elements.'));
+    $this->assertText('Form wrapper callback element output.', 'The form contains form wrapper elements.');
+    $this->assertText('Form builder element output.', 'The form contains form builder elements.');
   }
 }
 
@@ -1246,6 +1436,8 @@ class FormsFormWrapperTestCase extends BackdropWebTestCase {
  * Test $form_state clearance.
  */
 class FormStateValuesCleanTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1263,22 +1455,22 @@ class FormStateValuesCleanTestCase extends BackdropWebTestCase {
     );
 
     // Verify that all internal Form API elements were removed.
-    $this->assertFalse(isset($values['form_id']), t('%element was removed.', array('%element' => 'form_id')));
-    $this->assertFalse(isset($values['form_token']), t('%element was removed.', array('%element' => 'form_token')));
-    $this->assertFalse(isset($values['form_build_id']), t('%element was removed.', array('%element' => 'form_build_id')));
-    $this->assertFalse(isset($values['op']), t('%element was removed.', array('%element' => 'op')));
+    $this->assertFalse(isset($values['form_id']), format_string('%element was removed.', array('%element' => 'form_id')));
+    $this->assertFalse(isset($values['form_token']), format_string('%element was removed.', array('%element' => 'form_token')));
+    $this->assertFalse(isset($values['form_build_id']), format_string('%element was removed.', array('%element' => 'form_build_id')));
+    $this->assertFalse(isset($values['op']), format_string('%element was removed.', array('%element' => 'op')));
 
     // Verify that all buttons were removed.
-    $this->assertFalse(isset($values['foo']), t('%element was removed.', array('%element' => 'foo')));
-    $this->assertFalse(isset($values['bar']), t('%element was removed.', array('%element' => 'bar')));
-    $this->assertFalse(isset($values['baz']['foo']), t('%element was removed.', array('%element' => 'foo')));
-    $this->assertFalse(isset($values['baz']['baz']), t('%element was removed.', array('%element' => 'baz')));
+    $this->assertFalse(isset($values['foo']), format_string('%element was removed.', array('%element' => 'foo')));
+    $this->assertFalse(isset($values['bar']), format_string('%element was removed.', array('%element' => 'bar')));
+    $this->assertFalse(isset($values['baz']['foo']), format_string('%element was removed.', array('%element' => 'foo')));
+    $this->assertFalse(isset($values['baz']['baz']), format_string('%element was removed.', array('%element' => 'baz')));
 
     // Verify that nested form value still exists.
-    $this->assertTrue(isset($values['baz']['beer']), t('Nested form value still exists.'));
+    $this->assertTrue(isset($values['baz']['beer']), 'Nested form value still exists.');
 
     // Verify that actual form values equal resulting form values.
-    $this->assertEqual($values, $result, t('Expected form values equal actual form values.'));
+    $this->assertEqual($values, $result, 'Expected form values equal actual form values.');
   }
 }
 
@@ -1286,13 +1478,15 @@ class FormStateValuesCleanTestCase extends BackdropWebTestCase {
  * Tests $form_state clearance with form elements having buttons.
  */
 class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * An image file path for uploading.
    */
   protected $image;
 
   function setUp() {
-    parent::setUp('form_test');
+    parent::setUp('file', 'form_test');
   }
 
   /**
@@ -1305,7 +1499,7 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
     $this->image = current($image_files);
 
     // Check if the physical file is there.
-    $this->assertTrue(is_file($this->image->uri), t("The image file we're going to upload exists."));
+    $this->assertTrue(is_file($this->image->uri), "The image file we're going to upload exists.");
 
     // "Browse" for the desired file.
     $edit = array('files[image]' => backdrop_realpath($this->image->uri));
@@ -1314,8 +1508,8 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
     $this->backdropPost('form_test/form-state-values-clean-advanced', $edit, t('Submit'));
 
     // Expecting a 200 HTTP code.
-    $this->assertResponse(200, t('Received a 200 response for posted test file.'));
-    $this->assertRaw(t('You WIN!'), t('Found the success message.'));
+    $this->assertResponse(200, 'Received a 200 response for posted test file.');
+    $this->assertRaw(t('You WIN!'), 'Found the success message.');
   }
 }
 
@@ -1328,7 +1522,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('form_test');
 
-    $this->web_user = $this->backdropCreateUser(array('access content'));
+    $this->web_user = $this->backdropCreateUser();
     $this->backdropLogin($this->web_user);
   }
 
@@ -1344,14 +1538,14 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
     $this->backdropPost('form-test/form-rebuild-preserve-values', $edit, 'Add more');
 
     // Verify that initial elements retained their submitted values.
-    $this->assertFieldChecked('edit-checkbox-1-default-off', t('A submitted checked checkbox retained its checked state during a rebuild.'));
-    $this->assertNoFieldChecked('edit-checkbox-1-default-on', t('A submitted unchecked checkbox retained its unchecked state during a rebuild.'));
-    $this->assertFieldById('edit-text-1', 'foo', t('A textfield retained its submitted value during a rebuild.'));
+    $this->assertFieldChecked('edit-checkbox-1-default-off', 'A submitted checked checkbox retained its checked state during a rebuild.');
+    $this->assertNoFieldChecked('edit-checkbox-1-default-on', 'A submitted unchecked checkbox retained its unchecked state during a rebuild.');
+    $this->assertFieldById('edit-text-1', 'foo', 'A textfield retained its submitted value during a rebuild.');
 
     // Verify that newly added elements were initialized with their default values.
-    $this->assertFieldChecked('edit-checkbox-2-default-on', t('A newly added checkbox was initialized with a default checked state.'));
-    $this->assertNoFieldChecked('edit-checkbox-2-default-off', t('A newly added checkbox was initialized with a default unchecked state.'));
-    $this->assertFieldById('edit-text-2', 'DEFAULT 2', t('A newly added textfield was initialized with its default value.'));
+    $this->assertFieldChecked('edit-checkbox-2-default-on', 'A newly added checkbox was initialized with a default checked state.');
+    $this->assertNoFieldChecked('edit-checkbox-2-default-off', 'A newly added checkbox was initialized with a default unchecked state.');
+    $this->assertFieldById('edit-text-2', 'DEFAULT 2', 'A newly added textfield was initialized with its default value.');
   }
 
   /**
@@ -1385,7 +1579,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
     // field items in the field for which we just added an item.
     $this->backdropGet('node/add/page');
     $this->backdropPostAJAX(NULL, array(), array('field_ajax_test_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'page-node-form');
-    $this->assert(count($this->xpath('//div[contains(@class, "field-name-field-ajax-test")]//input[@type="text"]')) == 2, t('AJAX submission succeeded.'));
+    $this->assert(count($this->xpath('//div[contains(@class, "field-name-field-ajax-test")]//input[@type="text"]')) == 2, 'AJAX submission succeeded.');
 
     // Submit the form with the non-Ajax "Save" button, leaving the title field
     // blank to trigger a validation error, and ensure that a validation error
@@ -1393,15 +1587,15 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
     // re-rendered without being re-built, which is what happens when there's
     // a validation error.
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText('Title field is required.', t('Non-AJAX submission correctly triggered a validation error.'));
+    $this->assertText('Title field is required.', 'Non-AJAX submission correctly triggered a validation error.');
 
     // Ensure that the form contains two items in the multi-valued field, so we
     // know we're testing a form that was correctly retrieved from cache.
-    $this->assert(count($this->xpath('//form[contains(@id, "page-node-form")]//div[contains(@class, "form-item-field-ajax-test")]//input[@type="text"]')) == 2, t('Form retained its state from cache.'));
+    $this->assert(count($this->xpath('//form[contains(@id, "page-node-form")]//div[contains(@class, "form-item-field-ajax-test")]//input[@type="text"]')) == 2, 'Form retained its state from cache.');
 
     // Ensure that the form's action is correct.
     $forms = $this->xpath('//form[contains(@class, "node-page-form")]');
-    $this->assert(count($forms) == 1 && $forms[0]['action'] == url('node/add/page'), t('Re-rendered form contains the correct action value.'));
+    $this->assert(count($forms) == 1 && $forms[0]['action'] == url('node/add/page'), 'Re-rendered form contains the correct action value.');
   }
 }
 
@@ -1409,6 +1603,8 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
  * Tests form redirection.
  */
 class FormsRedirectTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp(array('form_test'));
   }
@@ -1475,6 +1671,8 @@ class FormsRedirectTestCase extends BackdropWebTestCase {
  * Test the programmatic form submission behavior.
  */
 class FormsProgrammaticTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1555,7 +1753,7 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
       '%values' => print_r($values, TRUE),
       '%errors' => $valid_form ? t('None') : implode(' ', $errors),
     );
-    $this->assertTrue($valid_input == $valid_form, t('Input values: %values<br/>Validation handler errors: %errors', $args));
+    $this->assertTrue($valid_input == $valid_form, format_string('Input values: %values<br/>Validation handler errors: %errors', $args));
 
     // We check submitted values only if we have a valid input.
     if ($valid_input) {
@@ -1566,7 +1764,10 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
         $expected_values = $values;
       }
       foreach ($expected_values as $key => $value) {
-        $this->assertTrue(isset($stored_values[$key]) && $stored_values[$key] == $value, t('Submission handler correctly executed: %stored_key is %stored_value', array('%stored_key' => $key, '%stored_value' => print_r($value, TRUE))));
+        $this->assertTrue(isset($stored_values[$key]) && $stored_values[$key] == $value, format_string('Submission handler correctly executed: %stored_key is %stored_value', array(
+          '%stored_key' => $key,
+          '%stored_value' => print_r($value, TRUE),
+        )));
       }
     }
   }
@@ -1576,6 +1777,8 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
  * Test that FAPI correctly determines $form_state['triggering_element'].
  */
 class FormsTriggeringElementTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1594,24 +1797,24 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     // $form_state['triggering_element'] and the form submit handler not
     // running.
     $this->backdropPost($path, $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('There is no clicked button.', t('$form_state[\'triggering_element\'] set to NULL.'));
-    $this->assertNoText('Submit handler for form_test_clicked_button executed.', t('Form submit handler did not execute.'));
+    $this->assertText('There is no clicked button.', '$form_state[\'triggering_element\'] set to NULL.');
+    $this->assertNoText('Submit handler for form_test_clicked_button executed.', 'Form submit handler did not execute.');
 
     // Ensure submitting a form with one or more submit buttons results in
     // $form_state['triggering_element'] being set to the first one the user has
     // access to. An argument with 'r' in it indicates a restricted
     // (#access=FALSE) button.
     $this->backdropPost($path . '/s', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button1.', t('$form_state[\'triggering_element\'] set to only button.'));
-    $this->assertText('Submit handler for form_test_clicked_button executed.', t('Form submit handler executed.'));
+    $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to only button.');
+    $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
 
     $this->backdropPost($path . '/s/s', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button1.', t('$form_state[\'triggering_element\'] set to first button.'));
-    $this->assertText('Submit handler for form_test_clicked_button executed.', t('Form submit handler executed.'));
+    $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
+    $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
 
     $this->backdropPost($path . '/rs/s', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button2.', t('$form_state[\'triggering_element\'] set to first available button.'));
-    $this->assertText('Submit handler for form_test_clicked_button executed.', t('Form submit handler executed.'));
+    $this->assertText('The clicked button is button2.', '$form_state[\'triggering_element\'] set to first available button.');
+    $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
 
     // Ensure submitting a form with buttons of different types results in
     // $form_state['triggering_element'] being set to the first button,
@@ -1619,16 +1822,16 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     // submit handler not executing. The types are 's'(ubmit), 'b'(utton), and
     // 'i'(mage_button).
     $this->backdropPost($path . '/s/b/i', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button1.', t('$form_state[\'triggering_element\'] set to first button.'));
-    $this->assertText('Submit handler for form_test_clicked_button executed.', t('Form submit handler executed.'));
+    $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
+    $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
 
     $this->backdropPost($path . '/b/s/i', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button1.', t('$form_state[\'triggering_element\'] set to first button.'));
-    $this->assertNoText('Submit handler for form_test_clicked_button executed.', t('Form submit handler did not execute.'));
+    $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
+    $this->assertNoText('Submit handler for form_test_clicked_button executed.', 'Form submit handler did not execute.');
 
     $this->backdropPost($path . '/i/s/b', $edit, NULL, array(), array(), $form_html_id);
-    $this->assertText('The clicked button is button1.', t('$form_state[\'triggering_element\'] set to first button.'));
-    $this->assertText('Submit handler for form_test_clicked_button executed.', t('Form submit handler executed.'));
+    $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
+    $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
   }
 
   /**
@@ -1656,8 +1859,8 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     // because negative assertions alone can be brittle. See
     // testNoButtonInfoInPost() for why the triggering element gets set to
     // 'button2'.
-    $this->assertNoText('The clicked button is button1.', t('$form_state[\'triggering_element\'] not set to a restricted button.'));
-    $this->assertText('The clicked button is button2.', t('$form_state[\'triggering_element\'] not set to a restricted button.'));
+    $this->assertNoText('The clicked button is button1.', '$form_state[\'triggering_element\'] not set to a restricted button.');
+    $this->assertText('The clicked button is button2.', '$form_state[\'triggering_element\'] not set to a restricted button.');
   }
 }
 
@@ -1687,7 +1890,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
       ),
     );
     field_create_instance($instance);
-    variable_set('user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**
@@ -1723,6 +1926,8 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
  * Tests form API file inclusion.
  */
 class FormsFileInclusionTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1748,6 +1953,8 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
  * Tests checkbox element.
  */
 class FormCheckboxTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1781,7 +1988,10 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
           $checked = ($default_value === '1foobar');
         }
         $checked_in_html = strpos($form, 'checked') !== FALSE;
-        $message = t('#default_value is %default_value #return_value is %return_value.', array('%default_value' => var_export($default_value, TRUE), '%return_value' => var_export($return_value, TRUE)));
+        $message = format_string('#default_value is %default_value #return_value is %return_value.', array(
+          '%default_value' => var_export($default_value, TRUE),
+          '%return_value' => var_export($return_value, TRUE),
+        ));
         $this->assertIdentical($checked, $checked_in_html, $message);
       }
     }
@@ -1789,12 +1999,12 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     // Ensure that $form_state['values'] is populated correctly for a checkboxes
     // group that includes a 0-indexed array of options.
     $results = json_decode($this->backdropPost('form-test/checkboxes-zero', array(), 'Save'));
-    $this->assertIdentical($results->checkbox_off, array(0, 0, 0), t('All three in checkbox_off are zeroes: off.'));
-    $this->assertIdentical($results->checkbox_zero_default, array('0', 0, 0), t('The first choice is on in checkbox_zero_default'));
-    $this->assertIdentical($results->checkbox_string_zero_default, array('0', 0, 0), t('The first choice is on in checkbox_string_zero_default'));
+    $this->assertIdentical($results->checkbox_off, array(0, 0, 0), 'All three in checkbox_off are zeroes: off.');
+    $this->assertIdentical($results->checkbox_zero_default, array('0', 0, 0), 'The first choice is on in checkbox_zero_default');
+    $this->assertIdentical($results->checkbox_string_zero_default, array('0', 0, 0), 'The first choice is on in checkbox_string_zero_default');
     $edit = array('checkbox_off[0]' => '0');
     $results = json_decode($this->backdropPost('form-test/checkboxes-zero', $edit, 'Save'));
-    $this->assertIdentical($results->checkbox_off, array('0', 0, 0), t('The first choice is on in checkbox_off but the rest is not'));
+    $this->assertIdentical($results->checkbox_off, array('0', 0, 0), 'The first choice is on in checkbox_off but the rest is not');
 
     // Ensure that each checkbox is rendered correctly for a checkboxes group
     // that includes a 0-indexed array of options.
@@ -1803,7 +2013,7 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     foreach ($checkboxes as $checkbox) {
       $checked = isset($checkbox['checked']);
       $name = (string) $checkbox['name'];
-      $this->assertIdentical($checked, $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', t('Checkbox %name correctly checked', array('%name' => $name)));
+      $this->assertIdentical($checked, $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', format_string('Checkbox %name correctly checked', array('%name' => $name)));
     }
     $edit = array('checkbox_off[0]' => '0');
     $this->backdropPost('form-test/checkboxes-zero/0', $edit, 'Save');
@@ -1811,7 +2021,7 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     foreach ($checkboxes as $checkbox) {
       $checked = isset($checkbox['checked']);
       $name = (string) $checkbox['name'];
-      $this->assertIdentical($checked, $name == 'checkbox_off[0]' || $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', t('Checkbox %name correctly checked', array('%name' => $name)));
+      $this->assertIdentical($checked, $name == 'checkbox_off[0]' || $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', format_string('Checkbox %name correctly checked', array('%name' => $name)));
     }
   }
 }
@@ -1856,6 +2066,8 @@ class FormEmailTestCase extends BackdropWebTestCase {
  * Tests uniqueness of generated HTML IDs.
  */
 class HTMLIdTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('form_test');
   }

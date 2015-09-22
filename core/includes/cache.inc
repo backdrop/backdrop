@@ -30,9 +30,9 @@ function cache($bin = 'cache') {
   // storage of a cache bin mid-request.
   static $cache_objects;
   if (!isset($cache_objects[$bin])) {
-    $class = variable_get('cache_class_' . $bin);
+    $class = settings_get('cache_class_' . $bin);
     if (!isset($class)) {
-      $class = variable_get('cache_default_class', 'BackdropDatabaseCache');
+      $class = settings_get('cache_default_class', 'BackdropDatabaseCache');
     }
     $cache_objects[$bin] = new $class($bin);
   }
@@ -40,19 +40,170 @@ function cache($bin = 'cache') {
 }
 
 /**
- * Expires data from the block and page caches.
+ * Returns data from the persistent cache.
+ *
+ * Data may be stored as either plain text or as serialized data. cache_get()
+ * will automatically return unserialized objects and arrays.
+ *
+ * @param string $cid
+ *   The cache ID of the data to retrieve.
+ * @param string $bin
+ *   The cache bin from which data should be retrieved. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution.
+ *
+ * @return
+ *   The cache or FALSE on failure.
  */
-function cache_clear_all() {
-  // @todo: remove before release.
-  if (func_get_args()) {
-    throw new Exception(t('cache_clear_all() no longer takes arguments, use cache() instead.'));
+function cache_get($cid, $bin = 'cache') {
+  return cache($bin)->get($cid);
+}
+
+/**
+ * Returns data from the persistent cache when given an array of cache IDs.
+ *
+ * @param $cids
+ *   An array of cache IDs for the data to retrieve. This is passed by
+ *   reference, and will have the IDs successfully returned from cache
+ *   removed.
+ * @param $bin
+ *   The cache bin from which data should be retrieved. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution
+ *
+ * @return
+ *   An array of the items successfully returned from cache indexed by cid.
+ */
+function cache_get_multiple(array &$cids, $bin = 'cache') {
+  return cache($bin)->getMultiple($cids);
+}
+
+/**
+ * Stores data in the persistent cache.
+ *
+ * The persistent cache is split up into several cache bins. In the default
+ * cache implementation, each cache bin corresponds to a database table by the
+ * same name. Other implementations might want to store several bins in data
+ * structures that get flushed together. While it is not a problem for most
+ * cache bins if the entries in them are flushed before their expire time, some
+ * might break functionality or are extremely expensive to recalculate. The
+ * other bins are expired automatically by core. Contributed modules can add
+ * additional bins and get them expired automatically by implementing
+ * hook_flush_caches().
+ *
+ * The reasons for having several bins are as follows:
+ * - Smaller bins mean smaller database tables and allow for faster selects and
+ *   inserts.
+ * - We try to put fast changing cache items and rather static ones into
+ *   different bins. The effect is that only the fast changing bins will need a
+ *   lot of writes to disk. The more static bins will also be better cacheable
+ *   with MySQL's query cache.
+ *
+ * @param string $cid
+ *   The cache ID of the data to store.
+ * @param mixed $data
+ *   The data to store in the cache. Complex data types will be automatically
+ *   serialized before insertion. Strings will be stored as plain text and are
+ *   not serialized.
+ * @param string $bin
+ *   The cache bin in which data should be stored. Valid core values are
+ *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
+ *   "update", "views", and "views_data". Bin names may include the prefix of
+ *   "cache_", but it is stripped out before execution
+ * @param int $expire
+ *   One of the following values:
+ *   - CACHE_PERMANENT: Indicates that the item should never be removed unless
+ *     explicitly told to using cache_clear_all() with a cache ID.
+ *   - CACHE_TEMPORARY: Indicates that the item should be removed at the next
+ *     general cache wipe.
+ *   - A Unix timestamp: Indicates that the item should be kept at least until
+ *     the given time, after which it behaves like CACHE_TEMPORARY.
+ *
+ * @see cache_get()
+ */
+function cache_set($cid, $data, $bin = 'cache', $expire = CACHE_PERMANENT) {
+  return cache($bin)->set($cid, $data, $expire);
+}
+
+/**
+ * Flushes all cache items in a bin.
+ *
+ * @param string $bin
+ *   The bin whose data should be emptied.
+ */
+function cache_flush($bin) {
+  return cache($bin)->flush();
+}
+
+/**
+ * Clears data from the cache.
+ *
+ * If called with the arguments $cid and $bin set to NULL or omitted, then
+ * expirable entries will be cleared from the page and layout bins, and the
+ * $wildcard argument is ignored.
+ *
+ * @param string $cid
+ *   The cache ID or an array of cache IDs. Otherwise, all cache entries that
+ *   can expire are deleted.
+ * @param string $bin
+ *   The cache bin whose data should be cleared. Mandatory argument if $cid is
+ *   set.
+ * @param bool $wildcard
+ *   If TRUE, the $cid argument must contain a string value and cache IDs
+ *   starting with $cid are deleted in addition to the exact cache ID specified
+ *   by $cid. If $wildcard is TRUE and $cid is '*', the entire cache is emptied.
+ *
+ *   The wildcard parameter is a legacy argument. If needing to do a full bin
+ *   flush, use cache_flush() instead. Prefix-based flushes are also
+ *   discouraged, as not all cache backends natively support wildcard
+ *   functionality.
+ *
+ * @see cache_flush()
+ */
+function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
+  // Default value cache flush.
+  if (!isset($cid) && !isset($bin)) {
+    if (module_exists('layout')) {
+      cache('layout_path')->flush();
+    }
+    cache('page')->flush();
+    return;
   }
-  // Clear the block cache first, so stale data will
-  // not end up in the page cache.
-  if (module_exists('block')) {
-    cache('block')->expire();
+
+  if (!$wildcard) {
+    if (is_null($cid)) {
+      cache($bin)->garbageCollection();
+    }
+    else {
+      cache($bin)->delete($cid);
+    }
   }
-  cache('page')->expire();
+  else {
+    if ($cid === '*') {
+      cache($bin)->flush();
+    }
+    else {
+      cache($bin)->deletePrefix($cid);
+    }
+  }
+}
+
+/**
+ * Checks if a cache bin is empty.
+ *
+ * A cache bin is considered empty if it does not contain any valid data for any
+ * cache ID.
+ *
+ * @param string $bin
+ *   The cache bin to check.
+ *
+ * @return
+ *   TRUE if the cache bin specified is empty.
+ */
+function cache_is_empty($bin) {
+  return cache($bin)->isEmpty();
 }
 
 /**
@@ -63,24 +214,24 @@ function cache_clear_all() {
  * consulted as an example.
  *
  * To make Backdrop use your implementation for a certain cache bin, you have to
- * set a variable with the name of the cache bin as its key and the name of
- * your class as its value. For example, if your implementation of
- * BackdropCacheInterface was called MyCustomCache, the following line would make
- * Backdrop use it for the 'cache_page' bin:
+ * set a value in settings.php with the name of the cache bin as its key and the
+ * name of your class as its value. For example, if your implementation of
+ * BackdropCacheInterface was called MyCustomCache, the following line in
+ * settings.php would make Backdrop use it for the 'cache_page' bin:
  * @code
- *  variable_set('cache_class_cache_page', 'MyCustomCache');
+ *  $settings['cache_class_cache_page'] = 'MyCustomCache';
  * @endcode
  *
  * Additionally, you can register your cache implementation to be used by
- * default for all cache bins by setting the variable 'cache_default_class' to
+ * default for all cache bins by setting the $settings['cache_default_class'] to
  * the name of your implementation of the BackdropCacheInterface, e.g.
  * @code
- *  variable_set('cache_default_class', 'MyCustomCache');
+ *  $settings['cache_default_class'] = 'MyCustomCache';
  * @endcode
  *
- * To implement a completely custom cache bin, use the same variable format:
+ * To implement a completely custom cache bin, use the same format:
  * @code
- *  variable_set('cache_class_custom_bin', 'MyCustomCache');
+ *  $settings['cache_class_custom_bin'] = 'MyCustomCache';
  * @endcode
  * To access your custom cache bin, specify the name of the bin when storing
  * or retrieving cached data:
@@ -93,13 +244,6 @@ function cache_clear_all() {
  * @see BackdropDatabaseCache
  */
 interface BackdropCacheInterface {
-  /**
-   * Constructs a new cache interface.
-   *
-   * @param $bin
-   *   The cache bin for which the object is created.
-   */
-  function __construct($bin);
 
   /**
    * Returns data from the persistent cache.
@@ -107,7 +251,7 @@ interface BackdropCacheInterface {
    * Data may be stored as either plain text or as serialized data.
    * cache()->get() will automatically return unserialized objects and arrays.
    *
-   * @param $cid
+   * @param string $cid
    *   The cache ID of the data to retrieve.
    *
    * @return
@@ -118,7 +262,7 @@ interface BackdropCacheInterface {
   /**
    * Returns data from the persistent cache when given an array of cache IDs.
    *
-   * @param $cids
+   * @param array $cids
    *   An array of cache IDs for the data to retrieve. This is passed by
    *   reference, and will have the IDs successfully returned from cache
    *   removed.
@@ -126,19 +270,21 @@ interface BackdropCacheInterface {
    * @return
    *   An array of the items successfully returned from cache indexed by cid.
    */
-   function getMultiple(&$cids);
+   function getMultiple(array &$cids);
 
   /**
    * Stores data in the persistent cache.
    *
-   * @param $cid
+   * @param string $cid
    *   The cache ID of the data to store.
-   * @param $data
+   * @param mixed $data
    *   The data to store in the cache. Complex data types will be automatically
-   *   serialized before insertion.
-   *   Strings will be stored as plain text and not serialized.
-   * @param $expire
-   *   One of the following values:
+   *   serialized before insertion. Strings will be stored as plain text and not
+   *   serialized. Some storage engines only allow objects up to a maximum of
+   *   1MB in size to be stored by default. When caching large arrays or
+   *   similar, take care to ensure $data does not exceed this size.
+   * @param int $expire
+   *   (optional) One of the following values:
    *   - CACHE_PERMANENT: Indicates that the item should never be removed unless
    *     explicitly told to using cache_clear_all() with a cache ID.
    *   - CACHE_TEMPORARY: Indicates that the item should be removed at the next
@@ -151,7 +297,7 @@ interface BackdropCacheInterface {
   /**
    * Deletes an item from the cache.
    *
-   * @param $cid
+   * @param string $cid
    *    The cache ID to delete.
    */
   function delete($cid);
@@ -167,7 +313,7 @@ interface BackdropCacheInterface {
   /**
    * Deletes items from the cache using a wildcard prefix.
    *
-   * @param $prefix
+   * @param string $prefix
    *   A wildcard prefix.
    */
   function deletePrefix($prefix);
@@ -178,12 +324,7 @@ interface BackdropCacheInterface {
   function flush();
 
   /**
-   * Expires temporary items from the cache.
-   */
-  function expire();
-
-  /**
-   * Performs garbage collection on a cache bin.
+   * Performs garbage collection on a cache bin. Removing expired items.
    */
   function garbageCollection();
 
@@ -214,6 +355,9 @@ class BackdropNullCache implements BackdropCacheInterface {
 
   /**
    * Constructs a BackdropNullCache object.
+   *
+   * @param $bin
+   *   The cache bin for which the object is created.
    */
   function __construct($bin) {}
 
@@ -227,7 +371,7 @@ class BackdropNullCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(&$cids) {
+  function getMultiple(array &$cids) {
     return array();
   }
 
@@ -293,6 +437,11 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
       $bin = 'cache_' . $bin;
     }
     $this->bin = $bin;
+
+    // Bootstrap the database if it is not yet available.
+    if (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
+      backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+    }
   }
 
   /**
@@ -307,11 +456,8 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(&$cids) {
+  function getMultiple(array &$cids) {
     try {
-      // Garbage collection necessary when enforcing a minimum cache lifetime.
-      $this->garbageCollection($this->bin);
-
       // When serving cached pages, the overhead of using db_select() was found
       // to add around 30% overhead to the request. Since $this->bin is a
       // variable, this means the call to db_query() here uses a concatenated
@@ -356,16 +502,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
     if (!isset($cache->data)) {
       return FALSE;
     }
-    // If the cached data is temporary and subject to a per-user minimum
-    // lifetime, compare the cache entry timestamp with the user session
-    // cache_expiration timestamp. If the cache entry is too old, ignore it.
-    if ($cache->expire != CACHE_PERMANENT && config_get('system.performance', 'cache_lifetime') && isset($_SESSION['cache_expiration'][$this->bin]) && $_SESSION['cache_expiration'][$this->bin] > $cache->created) {
-      // Ignore cache data that is too old and thus not valid for this user.
-      return FALSE;
-    }
 
-    // If the data is permanent or not subject to a minimum cache lifetime,
-    // unserialize and return the cached data.
     if ($cache->serialized) {
       $cache->data = unserialize($cache->data);
     }
@@ -412,9 +549,9 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   }
 
   /**
-   * Implements BackdropCacheInterface::deleteMultiple().
-   */
-  function deleteMultiple(Array $cids) {
+ * Implements BackdropCacheInterface::deleteMultiple().
+ */
+  function deleteMultiple(array $cids) {
     // Delete in chunks when a large array is passed.
     do {
       db_delete($this->bin)
@@ -441,77 +578,13 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   }
 
   /**
-   * Implements BackdropCacheInterface::expire().
-   */
-  function expire() {
-    if (config_get('system.performance', 'cache_lifetime')) {
-      // We store the time in the current user's session. We then simulate
-      // that the cache was flushed for this user by not returning cached
-      // data that was cached before the timestamp.
-      $_SESSION['cache_expiration'][$this->bin] = REQUEST_TIME;
-
-      $cache_flush = variable_get('cache_flush_' . $this->bin, 0);
-      if ($cache_flush == 0) {
-        // This is the first request to clear the cache; start a timer.
-        variable_set('cache_flush_' . $this->bin, REQUEST_TIME);
-      }
-      elseif (REQUEST_TIME > ($cache_flush + config_get('system.performance', 'cache_lifetime'))) {
-        // Clear the cache for everyone; cache_lifetime seconds have passed
-        // since the first request to clear the cache.
-        db_delete($this->bin)
-          ->condition('expire', CACHE_PERMANENT, '<>')
-          ->condition('expire', REQUEST_TIME, '<')
-          ->execute();
-        variable_set('cache_flush_' . $this->bin, 0);
-      }
-    }
-    else {
-      // No minimum cache lifetime; flush all temporary cache entries now.
-      db_delete($this->bin)
-        ->condition('expire', CACHE_PERMANENT, '<>')
-        ->condition('expire', REQUEST_TIME, '<')
-        ->execute();
-    }
-  }
-
-  /**
    * Implements BackdropCacheInterface::garbageCollection().
    */
   function garbageCollection() {
-    $cache_lifetime = config_get('system.performance', 'cache_lifetime');
-
-    // Clean-up the per-user cache expiration session data, so that the session
-    // handler can properly clean-up the session data for anonymous users.
-    if (isset($_SESSION['cache_expiration'])) {
-      $expire = REQUEST_TIME - $cache_lifetime;
-      foreach ($_SESSION['cache_expiration'] as $bin => $timestamp) {
-        if ($timestamp < $expire) {
-          unset($_SESSION['cache_expiration'][$bin]);
-        }
-      }
-      if (!$_SESSION['cache_expiration']) {
-        unset($_SESSION['cache_expiration']);
-      }
-    }
-
-    // Garbage collection of temporary items is only necessary when enforcing
-    // a minimum cache lifetime.
-    if (!$cache_lifetime) {
-      return;
-    }
-    // When cache lifetime is in force, avoid running garbage collection too
-    // often since this will remove temporary cache items indiscriminately.
-    $cache_flush = variable_get('cache_flush_' . $this->bin, 0);
-    if ($cache_flush && ($cache_flush + $cache_lifetime <= REQUEST_TIME)) {
-      // Reset the variable immediately to prevent a meltdown in heavy load
-      // situations.
-      variable_set('cache_flush_' . $this->bin, 0);
-      // Time to flush old cache data
-      db_delete($this->bin)
-        ->condition('expire', CACHE_PERMANENT, '<>')
-        ->condition('expire', $cache_flush, '<=')
-        ->execute();
-    }
+    db_delete($this->bin)
+      ->condition('expire', CACHE_PERMANENT, '<>')
+      ->condition('expire', REQUEST_TIME, '<')
+      ->execute();
   }
 
   /**

@@ -11,7 +11,7 @@
  * below. If using master/slave or multiple connections, see the advanced
  * database settings.
  */
-$database = 'mysql://root:root@localhost/playground_backdrop';
+$database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
@@ -205,7 +205,7 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
  * After finishing the upgrade, be sure to open this file again and change the
  * TRUE back to a FALSE!
  */
-$update_free_access = FALSE;
+$settings['update_free_access'] = FALSE;
 
 /**
  * Salt for one-time login links and cancel links, form tokens, etc.
@@ -221,10 +221,10 @@ $update_free_access = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $hash_salt = file_get_contents('/home/example/salt.txt');
+ *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  *
  */
-$hash_salt = 'E3Mg1WMf6wpCInmyztHjMi2WizgBTyJUj_4QaYmp8nk';
+$settings['hash_salt'] = '';
 
 /**
  * Base URL (optional).
@@ -252,7 +252,7 @@ $hash_salt = 'E3Mg1WMf6wpCInmyztHjMi2WizgBTyJUj_4QaYmp8nk';
  *
  * To see what PHP settings are possible, including whether they can be set at
  * runtime (by using ini_set()), read the PHP documentation:
- * http://www.php.net/manual/en/ini.list.php
+ * http://www.php.net/manual/ini.list.php
  * See backdrop_environment_initialize() in includes/bootstrap.inc for required
  * runtime settings and the .htaccess file for non-runtime settings. Settings
  * defined there should not be duplicated here so as to avoid conflict issues.
@@ -305,27 +305,6 @@ ini_set('session.cookie_lifetime', 2000000);
 // $cookie_domain = '.example.com';
 
 /**
- * Variable overrides:
- *
- * To override specific entries in the 'variable' table for this site,
- * set them here. You usually don't need to use this feature. This is
- * useful in a configuration file for a vhost or directory, rather than
- * the default settings.php. Any configuration setting from the 'variable'
- * table can be given a new value. Note that any values you provide in
- * these variable overrides will not be modifiable from the Backdrop
- * administration interface.
- *
- * The following overrides are examples:
- * - site_name: Defines the site's name.
- * - theme_default: Defines the default theme for this site.
- * - anonymous: Defines the human-readable name of anonymous users.
- * Uncomment the examples below or set your own to enable overriding variables.
- */
-// $conf['site_name'] = 'My Backdrop site';
-// $conf['theme_default'] = 'stark';
-// $conf['anonymous'] = 'Visitor';
-
-/**
  * A custom theme can be set for the offline page. This applies when the site
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
@@ -333,7 +312,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-// $conf['maintenance_theme'] = 'bartik';
+// $settings['maintenance_theme'] = 'bartik';
 
 /**
  * Reverse Proxy Configuration:
@@ -350,35 +329,35 @@ ini_set('session.cookie_lifetime', 2000000);
  * malicious client could bypass restrictions by setting the
  * X-Forwarded-For header directly. Therefore, Backdrop's proxy
  * configuration requires the IP addresses of all remote proxies to be
- * specified in $conf['reverse_proxy_addresses'] to work correctly.
+ * specified in $settings['reverse_proxy_addresses'] to work correctly.
  *
  * Enable this setting to get Backdrop to determine the client IP from
- * the X-Forwarded-For header (or $conf['reverse_proxy_header'] if set).
+ * the X-Forwarded-For header (or $settings['reverse_proxy_header'] if set).
  * If you are unsure about this setting, do not have a reverse proxy,
  * or Backdrop operates in a shared hosting environment, this setting
  * should remain commented out.
  *
  * In order for this setting to be used you must specify every possible
- * reverse proxy IP address in $conf['reverse_proxy_addresses'].
+ * reverse proxy IP address in $settings['reverse_proxy_addresses'].
  * If a complete list of reverse proxies is not available in your
  * environment (for example, if you use a CDN) you may set the
  * $_SERVER['REMOTE_ADDR'] variable directly in settings.php.
  * Be aware, however, that it is likely that this would allow IP
  * address spoofing unless more advanced precautions are taken.
  */
-// $conf['reverse_proxy'] = TRUE;
+// $settings['reverse_proxy'] = TRUE;
 
 /**
  * Specify every reverse proxy IP address in your environment.
- * This setting is required if $conf['reverse_proxy'] is TRUE.
+ * This setting is required if $settings['reverse_proxy'] is TRUE.
  */
-// $conf['reverse_proxy_addresses'] = array('a.b.c.d', ...);
+// $settings['reverse_proxy_addresses'] = array('a.b.c.d', ...);
 
 /**
  * Set this value if your proxy server sends the client IP in a header
  * other than X-Forwarded-For.
  */
-// $conf['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
+// $settings['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
 
 /**
  * Page caching:
@@ -396,23 +375,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * HTTP proxy, and bypass the reverse proxy if one is used) in order to avoid
  * getting cached pages from the proxy.
  */
-// $conf['omit_vary_cookie'] = TRUE;
-
-/**
- * CSS/JS aggregated file gzip compression:
- *
- * By default, when CSS or JS aggregation and clean URLs are enabled Backdrop
- * will store a gzip compressed (.gz) copy of the aggregated files. If this file
- * is available then rewrite rules in the default .htaccess file will serve
- * these files to browsers that accept gzip encoded content. This allows pages
- * to load faster for these users and has minimal impact on server load. If you
- * are using a webserver other than Apache httpd, or a caching reverse proxy
- * that is configured to cache and compress these files itself you may want to
- * uncomment one or both of the below lines, which will prevent gzip files being
- * generated.
- */
-// $conf['css_gzip_compression'] = FALSE;
-// $conf['js_gzip_compression'] = FALSE;
+// $settings['omit_vary_cookie'] = TRUE;
 
 /**
  * String overrides:
@@ -424,7 +387,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * Uncomment the lines below to enable.
  */
 /*
-$conf['locale_custom_strings_en'][''] = array(
+$settings['locale_custom_strings_en'][''] = array(
   'forum'      => 'Discussion board',
   '@count min' => '@count minutes',
 );
@@ -449,9 +412,9 @@ $conf['locale_custom_strings_en'][''] = array(
  *
  * Comment out this code if you would like to disable this functionality.
  */
-$conf['404_fast_paths_exclude'] = '/\/(?:styles)\//';
-$conf['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
-$conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
+$settings['404_fast_paths_exclude'] = '/\/(?:styles)\//';
+$settings['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
+$settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
 /**
  * By default, fast 404s are returned as part of the normal page request
@@ -477,12 +440,12 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $conf['proxy_server'] = '';
-# $conf['proxy_port'] = 8080;
-# $conf['proxy_username'] = '';
-# $conf['proxy_password'] = '';
-# $conf['proxy_user_agent'] = '';
-# $conf['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+# $settings['proxy_server'] = '';
+# $settings['proxy_port'] = 8080;
+# $settings['proxy_username'] = '';
+# $settings['proxy_password'] = '';
+# $settings['proxy_user_agent'] = '';
+# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
@@ -504,7 +467,15 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  *
  * Uncomment the line below to disable authorize operations.
  */
-// $conf['allow_authorize_operations'] = FALSE;
+// $settings['allow_authorize_operations'] = FALSE;
+
+/**
+ * Mixed-mode sessions:
+ *
+ * Set to TRUE to create both secure and insecure sessions when using HTTPS.
+ * Defaults to FALSE.
+ */
+// $settings['https'] = TRUE;
 
 /**
  * Drupal backwards compatibility.
@@ -514,4 +485,4 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * layer however. You may disable it if all the modules you're running were
  * built for Backdrop.
  */
-$conf['backdrop_drupal_compatibility'] = TRUE;
+$settings['backdrop_drupal_compatibility'] = TRUE;

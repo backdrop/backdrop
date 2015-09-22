@@ -1,5 +1,6 @@
 name = Color
 description = Allows administrators to change the color scheme of compatible themes.
-package = Core
+package = Appearance
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x

@@ -15,7 +15,7 @@ function module_test_permission() {
  * Manipulate module dependencies to test dependency chains.
  */
 function module_test_system_info_alter(&$info, $file, $type) {
-  if (variable_get('dependency_test', FALSE) == 'missing dependency') {
+  if (state_get('dependency_test', FALSE) == 'missing dependency') {
     if ($file->name == 'dependency_test3') {
       // Make dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';
@@ -25,7 +25,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
       $info['dependencies'][] = 'foo';
     }
   }
-  elseif (variable_get('dependency_test', FALSE) == 'dependency') {
+  elseif (state_get('dependency_test', FALSE) == 'dependency') {
     if ($file->name == 'dependency_test3') {
       // Make the dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';
@@ -40,7 +40,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
       $info['hidden'] = FALSE;
     }
   }
-  elseif (variable_get('dependency_test', FALSE) == 'version dependency') {
+  elseif (state_get('dependency_test', FALSE) == 'version dependency') {
     if ($file->name == 'dependency_test3') {
       // Make the dependency_test3 module depend on dependency_test2.
       $info['dependencies'][] = 'dependency_test2';
@@ -51,7 +51,7 @@ function module_test_system_info_alter(&$info, $file, $type) {
     }
     elseif ($file->name == 'dependency_test1') {
       // Set dependency_test1 module to a version compatible with the above.
-      $info['version'] = '8.x-1.0';
+      $info['version'] = '1.x-1.0';
     }
   }
   if ($file->name == 'seven' && $type == 'theme') {
@@ -114,7 +114,7 @@ function module_test_hook_dynamic_loading_invoke_all() {
 function module_test_modules_enabled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were enabled in the correct sequence.
-  variable_set('test_module_enable_order', $modules);
+  state_set('test_module_enable_order', $modules);
 }
 
 /**
@@ -123,7 +123,7 @@ function module_test_modules_enabled($modules) {
 function module_test_modules_disabled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were disabled in the correct sequence.
-  variable_set('test_module_disable_order', $modules);
+  state_set('test_module_disable_order', $modules);
 }
 
 /**
@@ -132,5 +132,5 @@ function module_test_modules_disabled($modules) {
 function module_test_modules_uninstalled($modules) {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were uninstalled in the correct sequence.
-  variable_set('test_module_uninstall_order', $modules);
+  state_set('test_module_uninstall_order', $modules);
 }

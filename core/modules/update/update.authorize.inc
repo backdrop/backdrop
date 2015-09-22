@@ -220,7 +220,7 @@ function update_authorize_update_batch_finished($success, $results) {
   }
   // Since we're doing an update of existing code, always add a task for
   // running update.php.
-  $results['tasks'][] = t('Your modules have been downloaded and updated.');
+  $results['tasks'][] = t('Your projects have been downloaded and updated.');
   $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
 
   // Unset the variable since it is no longer needed.

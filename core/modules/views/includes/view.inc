@@ -1704,7 +1704,7 @@ class view {
       foreach ($this->build_info['breadcrumb'] as $path => $title) {
         // Check to see if the frontpage is in the breadcrumb trail; if it
         // is, we'll remove that from the actual breadcrumb later.
-        if ($path == variable_get('site_frontpage', 'node')) {
+        if ($path == config_get('system.core', 'site_frontpage')) {
           $base = FALSE;
           $title = t('Home');
         }
@@ -1842,6 +1842,7 @@ class view {
    * Revert the view based on its module-provided default version (if any).
    */
   function revert($clear = TRUE) {
+    config('views.view.' . $this->name)->delete();
     config_install_default_config($this->module, 'views.view.' . $this->name);
     cache('views')->deletePrefix('views_query:' . $this->name);
 

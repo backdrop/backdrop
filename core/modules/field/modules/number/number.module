@@ -11,26 +11,29 @@
 function number_field_info() {
   return array(
     'number_integer' => array(
-      'label' => t('Integer'),
+      'label' => t('Number (integer)'),
       'description' => t('This field stores a number in the database as an integer.'),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_integer',
+      'default_token_formatter' => 'number_unformatted',
     ),
     'number_decimal' => array(
-      'label' => t('Decimal'),
+      'label' => t('Number (decimal)'),
       'description' => t('This field stores a number in the database in a fixed decimal format.'),
       'settings' => array('precision' => 10, 'scale' => 2),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_decimal',
+      'default_token_formatter' => 'number_unformatted',
     ),
     'number_float' => array(
-      'label' => t('Float'),
+      'label' => t('Number (float)'),
       'description' => t('This field stores a number in the database in a floating point format.'),
       'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
       'default_widget' => 'number',
       'default_formatter' => 'number_decimal',
+      'default_token_formatter' => 'number_unformatted',
     ),
   );
 }
@@ -198,6 +201,7 @@ function number_field_formatter_info() {
 function number_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $element = array();
 
   if ($display['type'] == 'number_decimal' || $display['type'] == 'number_integer') {
     $options = array(

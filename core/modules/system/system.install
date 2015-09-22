@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the system module.
@@ -119,7 +118,7 @@ function system_requirements($phase) {
 
   if (!empty($missing_extensions)) {
     $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
-      '@system_requirements' => 'http://drupal.org/requirements',
+      '@system_requirements' => 'https://backdropcms.org/requirements',
     ));
 
     $description .= theme('item_list', array('items' => $missing_extensions));
@@ -142,18 +141,10 @@ function system_requirements($phase) {
     $database_ok = extension_loaded('pdo');
     if (!$database_ok) {
       $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
-        '@link' => 'http://drupal.org/requirements/pdo',
+        '@link' => 'https://backdropcms.org/requirements',
       ));
     }
     else {
-      // Make sure at least one supported database driver exists.
-      $drivers = backdrop_detect_database_types();
-      if (empty($drivers)) {
-        $database_ok = FALSE;
-        $pdo_message = $t('Your web server does not appear to support any common PDO database extensions. Check with your hosting provider to see if they support PDO (PHP Data Objects) and offer any databases that <a href="@support-url">Backdrop CMS supports</a>.', array(
-          '@support-url' => 'http://backdropcms.org/guide/requirements',
-        ));
-      }
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
@@ -214,38 +205,9 @@ function system_requirements($phase) {
         $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
       }
 
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'http://drupal.org/requirements'));
+      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
       $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
     }
-  }
-
-  // Test settings.php file writability
-  if ($phase == 'runtime') {
-    $conf_path = BACKDROP_ROOT . ltrim('.', conf_path());
-    $conf_dir = backdrop_verify_install_file($conf_path, FILE_NOT_WRITABLE, 'dir');
-    $conf_file = backdrop_verify_install_file($conf_path . '/settings.php', FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE);
-    if (!$conf_dir || !$conf_file) {
-      $requirements['settings.php'] = array(
-        'value' => $t('Not protected'),
-        'severity' => REQUIREMENT_ERROR,
-        'description' => '',
-      );
-      if (!$conf_dir) {
-        $requirements['settings.php']['description'] .= $t('The directory %file is not protected from modifications and poses a security risk. You must change the directory\'s permissions to be non-writable. ', array('%file' => $conf_path));
-      }
-      if (!$conf_file) {
-        $requirements['settings.php']['description'] .= $t('The file %file is not protected from modifications and poses a security risk. You must change the file\'s permissions to be non-writable.', array('%file' => $conf_path . '/settings.php'));
-      }
-      if ($requirements['settings.php']['description']) {
-        $requirements['settings.php']['description'] .= ' ' . $t('If unsure how to set these permissions, see the <a href="!url">online handbook</a>.', array('!url' => 'http://backdropcms.org/guide/installation'));
-      }
-    }
-    else {
-      $requirements['settings.php'] = array(
-        'value' => $t('Protected'),
-      );
-    }
-    $requirements['settings.php']['title'] = $t('Configuration file');
   }
 
   // Test the contents of the .htaccess files.
@@ -255,9 +217,9 @@ function system_requirements($phase) {
     file_ensure_htaccess();
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => variable_get('file_public_path', 'files'),
+      'directory' => config_get('system.core', 'file_public_path'),
     );
-    if ($private_files_directory = variable_get('file_private_path')) {
+    if ($private_files_directory = config_get('system.core', 'file_private_path')) {
       $htaccess_files['private://.htaccess'] = array(
         'title' => $t('Private files directory'),
         'directory' => $private_files_directory,
@@ -265,7 +227,7 @@ function system_requirements($phase) {
     }
     $htaccess_files['temporary://.htaccess'] = array(
       'title' => $t('Temporary files directory'),
-      'directory' => variable_get('file_temporary_path', file_directory_temp()),
+      'directory' => file_directory_temp(),
     );
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
@@ -283,10 +245,11 @@ function system_requirements($phase) {
 
   // Report cron status.
   if ($phase == 'runtime') {
+    $config = config('system.core');
     // Cron warning threshold defaults to two days.
-    $threshold_warning = variable_get('cron_threshold_warning', 172800);
+    $threshold_warning = $config->get('cron_threshold_warning');
     // Cron error threshold defaults to two weeks.
-    $threshold_error = variable_get('cron_threshold_error', 1209600);
+    $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
     $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
 
@@ -324,21 +287,14 @@ function system_requirements($phase) {
   }
 
   // Test files directories.
-  $directories = array(
-    variable_get('file_public_path', 'files'),
-    // By default no private files directory is configured. For private files
-    // to be secure the admin needs to provide a path outside the webroot.
-    variable_get('file_private_path', FALSE),
-  );
-
-  // Do not check for the temporary files directory during installation
-  // unless it has been set in settings.php. In this case the user has
-  // no alternative but to fix the directory if it is not writable.
-  if ($phase == 'install') {
-    $directories[] = variable_get('file_temporary_path', FALSE);
+  $directories = array();
+  if ($phase == 'runtime') {
+    $directories[] = config_get('system.core', 'file_public_path');
+    $directories[] = config_get('system.core', 'file_private_path');
+    $directories[] = file_directory_temp();
   }
   else {
-    $directories[] = variable_get('file_temporary_path', file_directory_temp());
+    $directories[] = 'files';
   }
 
   $requirements['file system'] = array(
@@ -351,12 +307,10 @@ function system_requirements($phase) {
     if (!$directory) {
       continue;
     }
-    if ($phase == 'install') {
-      file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    }
+    $prepared = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $is_writable = is_writable($directory);
     $is_directory = is_dir($directory);
-    if (!$is_writable || !$is_directory) {
+    if (!$prepared || !$is_writable || !$is_directory) {
       $description = '';
       $requirements['file system']['value'] = $t('Not writable');
       if (!$is_directory) {
@@ -505,12 +459,82 @@ function system_requirements($phase) {
     $requirements['update status']['title'] = $t('Update notifications');
 
     // Check that Backdrop can issue HTTP requests.
-    if (variable_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
+    if (state_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
       $requirements['http requests'] = array(
         'title' => $t('HTTP request status'),
         'value' => $t('Fails'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$conf[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$state[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+      );
+    }
+  }
+
+  if ($phase == 'runtime') {
+    // Check for various token definition problems.
+    $token_problems = token_get_token_problems();
+    // Format and display each token problem.
+    foreach ($token_problems as $problem_key => $problem) {
+      if (!empty($problem['problems'])) {
+        $problems = array_unique($problem['problems']);
+        $problems = array_map('check_plain', $problems);
+        $token_problems[$problem_key] = $problem['label'] . theme('item_list', array('items' => $problems));
+      }
+      else {
+        unset($token_problems[$problem_key]);
+      }
+    }
+    if (!empty($token_problems)) {
+      $requirements['token_problems'] = array(
+        'title' => $t('Tokens'),
+        'value' => $t('Problems detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
+      );
+    }
+  }
+
+  if ($phase == 'runtime') {
+    // Check for a duplicate CKEditor project.
+    $path = backdrop_get_path('module', 'ckeditor');
+    if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+      $requirements['ckeditor_replaced'] = array(
+        'title' => $t('CKEditor'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Email project.
+    $path = backdrop_get_path('module', 'email');
+    if ($path && strpos($path, 'core/modules/email') === FALSE) {
+      $requirements['email_replaced'] = array(
+        'title' => $t('Email'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Link project.
+    $path = backdrop_get_path('module', 'link');
+    if ($path && strpos($path, 'core/modules/link') === FALSE) {
+      $requirements['link_replaced'] = array(
+        'title' => $t('Link'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate Date project.
+    $path = backdrop_get_path('module', 'date');
+    if ($path && strpos($path, 'core/modules/date') === FALSE) {
+      $requirements['date_replaced'] = array(
+        'title' => $t('Date'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -537,7 +561,6 @@ function system_install() {
   system_rebuild_theme_data();
 
   // Enable the default theme.
-  variable_set('theme_default', 'stark');
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
@@ -553,9 +576,6 @@ function system_install() {
  * Implements hook_schema().
  */
 function system_schema() {
-  // NOTE: {variable} needs to be created before all other tables, as
-  // some database drivers, e.g. Oracle and DB2, will require variable_get()
-  // and variable_set() for overcoming some database specific limitations.
   $schema['variable'] = array(
     'description' => 'Named variable/value pairs created by Backdrop core or any other module or theme. All variables are cached in memory at the start of every Backdrop request so developers should not be careless about what is stored here.',
     'fields' => array(
@@ -575,47 +595,6 @@ function system_schema() {
       ),
     ),
     'primary key' => array('name'),
-  );
-
-  $schema['actions'] = array(
-    'description' => 'Stores action information.',
-    'fields' => array(
-      'aid' => array(
-        'description' => 'Primary Key: Unique actions ID.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '0',
-      ),
-      'type' => array(
-        'description' => 'The object that that action acts on (node, user, comment, system or custom types.)',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'callback' => array(
-        'description' => 'The callback function that executes when the action runs.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'parameters' => array(
-        'description' => 'Parameters to be passed to the callback function.',
-        'type' => 'blob',
-        'not null' => TRUE,
-        'size' => 'big',
-      ),
-      'label' => array(
-        'description' => 'Label of the action.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '0',
-      ),
-    ),
-    'primary key' => array('aid'),
   );
 
   $schema['batch'] = array(
@@ -702,96 +681,8 @@ function system_schema() {
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
   $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
-
-  $schema['date_format_type'] = array(
-    'description' => 'Stores configured date format types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'title' => array(
-        'description' => 'The human readable name of the format type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'locked' => array(
-        'description' => 'Whether or not this is a system provided format.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('type'),
-    'indexes' => array(
-      'title' => array('title'),
-    ),
-  );
-
-  // This table's name is plural as some versions of MySQL can't create a
-  // table named 'date_format'.
-  $schema['date_formats'] = array(
-    'description' => 'Stores configured date formats.',
-    'fields' => array(
-      'dfid' => array(
-        'description' => 'The date format identifier.',
-        'type' => 'serial',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ),
-      'format' => array(
-        'description' => 'The date format string.',
-        'type' => 'varchar',
-        'length' => 100,
-        'not null' => TRUE,
-        'binary' => TRUE,
-      ),
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'locked' => array(
-        'description' => 'Whether or not this format can be modified.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('dfid'),
-    'unique keys' => array('formats' => array('format', 'type')),
-  );
-
-  $schema['date_format_locale'] = array(
-    'description' => 'Stores configured date formats for each locale.',
-    'fields' => array(
-      'format' => array(
-        'description' => 'The date format string.',
-        'type' => 'varchar',
-        'length' => 100,
-        'not null' => TRUE,
-      ),
-      'type' => array(
-        'description' => 'The date format type, e.g. medium.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'language' => array(
-        'description' => 'A {language}.langcode for this format to be used with.',
-        'type' => 'varchar',
-        'length' => 12,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('type', 'language'),
-  );
+  $schema['cache_token'] = $schema['cache'];
+  $schema['cache_token']['description'] = 'Cache table for token information.';
 
   $schema['file_managed'] = array(
     'description' => 'Stores information for uploaded files.',
@@ -1119,7 +1010,7 @@ function system_schema() {
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
      'menu_name' => array(
-        'description' => "The menu name. All links with the same menu name (such as 'navigation') are part of the same menu.",
+        'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
@@ -1436,12 +1327,6 @@ function system_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'cache' => array(
-        'description' => "The time of this user's last post. This is used when the site has specified a minimum_cache_lifetime. See BackdropCacheInterface::get().",
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
       'session' => array(
         'description' => 'The serialized contents of $_SESSION, an array of name/value pairs that persists across page requests by this session ID. Backdrop loads $_SESSION from here at the start of each request and saves it at the end.',
         'type' => 'blob',
@@ -1623,6 +1508,13 @@ function system_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'auto' => array(
+        'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('pid'),
     'indexes' => array(
@@ -1663,8 +1555,8 @@ function system_update_1000() {
 function system_update_1001() {
   $themes = array('theme_default', 'maintenance_theme', 'admin_theme');
   foreach ($themes as $theme) {
-    if (variable_get($theme) == 'garland') {
-      variable_set($theme, 'bartik');
+    if (update_variable_get($theme) == 'garland') {
+      update_variable_set($theme, 'bartik');
     }
   }
 }
@@ -1682,9 +1574,9 @@ function system_update_1001() {
  * @see http://drupal.org/node/1181776
  */
 function system_update_1002() {
-  $theme = variable_get('theme_default');
+  $theme = update_variable_get('theme_default');
   if (!isset($theme)) {
-    variable_set('theme_default', 'bartik');
+    update_variable_set('theme_default', 'bartik');
   }
 }
 
@@ -1692,15 +1584,21 @@ function system_update_1002() {
  * Convert performance module settings to use configuration files.
  */
 function system_update_1003() {
-  config_install_default_config('system', 'system.performance');
-  $config = config('system.performance');
-  $config->set('cache', variable_get('cache', 0));
-  $config->set('cache_lifetime', variable_get('cache_lifetime', '0'));
-  $config->set('page_cache_maximum_age', variable_get('page_cache_maximum_age', '0'));
-  $config->set('page_compression', variable_get('page_compression', 1));
-  $config->set('preprocess_css', variable_get('preprocess_css', 0));
-  $config->set('preprocess_js', variable_get('preprocess_js', 0));
+  $config = config('system.core');
+  $config->set('cache', update_variable_get('cache', 0));
+  $config->set('cache_lifetime', update_variable_get('cache_lifetime', '0'));
+  $config->set('page_cache_maximum_age', update_variable_get('page_cache_maximum_age', '0'));
+  $config->set('page_compression', update_variable_get('page_compression', 1));
+  $config->set('preprocess_css', update_variable_get('preprocess_css', 0));
+  $config->set('preprocess_js', update_variable_get('preprocess_js', 0));
   $config->save();
+
+  update_variable_del('cache');
+  update_variable_del('cache_lifetime');
+  update_variable_del('page_cache_maximum_age');
+  update_variable_del('page_compression');
+  update_variable_del('preprocess_css');
+  update_variable_del('preprocess_js');
 }
 
 /**
@@ -1744,8 +1642,8 @@ function system_update_1005() {
     'css_js_query_string' => '',
   );
   foreach ($variables as $name => $default) {
-    state_set($name, variable_get($name, $default));
-    variable_del($name);
+    state_set($name, update_variable_get($name, $default));
+    update_variable_del($name);
   }
 }
 
@@ -1826,16 +1724,26 @@ function system_update_1008() {
  * Enable Admin Menu module.
  */
 function system_update_1009() {
-  update_module_enable(array('admin_menu'));
+  update_module_enable(array('admin_bar'));
 
   // Install default config.
-  config_install_default_config('admin_menu', 'admin_menu.settings');
+  $config = config('admin_bar.settings');
+  $config->set('margin_top', 1);
+  $config->set('position_fixed', 0);
+  $config->set('components', array(
+    'admin_bar.icon',
+    'admin_bar.menu',
+    'admin_bar.search',
+    'admin_bar.users',
+    'admin_bar.account',
+  ));
+  $config->save();
 
   // Manually install schema, as update_module_enable() does not do this for us.
-  if (!db_table_exists('cache_admin_menu')) {
-    $cache_admin_menu = backdrop_get_schema_unprocessed('system', 'cache');
-    $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
-    db_create_table('cache_admin_menu', $cache_admin_menu);
+  if (!db_table_exists('cache_admin_bar')) {
+    $cache_admin_bar = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_admin_bar['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
+    db_create_table('cache_admin_bar', $cache_admin_bar);
   }
 }
 
@@ -1855,16 +1763,895 @@ function system_update_1010() {
  * Specify the files directory manually if needed.
  */
 function system_update_1011() {
-  $file_path = variable_get('file_public_path', NULL);
+  $file_path = update_variable_get('file_public_path', NULL);
   if (is_null($file_path)) {
     $conf_path = conf_path();
     if ($conf_path != '.') {
       $conf_path = str_replace('./', '', $conf_path);
-      variable_set('file_public_path', $conf_path . '/files');
+      update_variable_set('file_public_path', $conf_path . '/files');
     }
     else {
-      variable_set('file_public_path', 'sites/default/files');
+      update_variable_set('file_public_path', 'sites/default/files');
     }
+  }
+}
+
+/**
+ * Convert cron settings to use configuration files.
+ */
+function system_update_1012() {
+  // Migrate the variable settings.
+  $config = config('system.core');
+  $config->set('cron_threshold_warning', update_variable_get('cron_threshold_warning', 172800));
+  $config->set('cron_safe_threshold', update_variable_get('cron_safe_threshold', 10800));
+  $config->set('cron_max_threshold', update_variable_get('cron_max_threshold', 10800));
+  $config->set('cron_threshold_error', update_variable_get('cron_threshold_error', 1209600));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('cron_threshold_warning');
+  update_variable_del('cron_safe_threshold');
+  update_variable_del('cron_max_threshold');
+  update_variable_del('cron_threshold_error');
+}
+
+/**
+ * Moves site system settings from variable to config.
+ */
+function system_update_1013() {
+  // Set the default variables for the system.site config file.
+  $config = config('system.core');
+  $config->set('site_name', update_variable_get('site_name', 'Backdrop'));
+  $config->set('site_mail', update_variable_get('site_mail', ''));
+  $config->set('site_slogan', update_variable_get('site_slogan', ''));
+  $config->set('site_frontpage', update_variable_get('site_frontpage', 'node'));
+  $config->set('site_403', update_variable_get('site_403', ''));
+  $config->set('site_404', update_variable_get('site_404', ''));
+  $config->save();
+  // Delete variables.
+  update_variable_del('site_name');
+  update_variable_del('site_mail');
+  update_variable_del('site_slogan');
+  update_variable_del('site_frontpage');
+  update_variable_del('site_403');
+  update_variable_del('site_404');
+}
+
+/**
+ * Move the system maintenance settings from variable to config.
+ */
+function system_update_1014() {
+  // Migrate variables to state and config.
+  state_set('maintenance_mode', update_variable_get('maintenance_mode', TRUE));
+  config_set('system.core', 'maintenance_mode_message', update_variable_get('maintenance_mode_message', 'message'));
+
+  // Delete variables.
+  update_variable_del('maintenance_mode');
+  update_variable_del('maintenance_mode_message');
+}
+
+/**
+ *  Convert RSS publishing settings to use configuration files.
+ */
+function system_update_1015() {
+  // Migrate variables to config.
+  $config = config('system.core');
+  $config->set('rss_description', update_variable_get('feed_description', ''));
+  $config->set('rss_limit', update_variable_get('feed_default_items', 10));
+  $config->set('rss_viewmode', update_variable_get('feed_item_length', 'fulltext'));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('feed_description');
+  update_variable_del('feed_default_items');
+  update_variable_del('feed_item_length');
+}
+
+/**
+ * Moves action_max_stack from variable to config.
+ */
+function system_update_1016() {
+  // Migrate variables to config.
+  $config = config('system.core');
+  $config->set('action_recursion_limit', update_variable_get('actions_max_stack', 35));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('actions_max_stack');
+}
+
+/**
+ * Moves system logging settings from variables to config.
+ */
+function system_update_1017() {
+  // Migrate variables to config.
+  $config = config('system.core');
+  $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
+  $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
+  $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
+  $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
+  $config->set('error_level', update_variable_get('error_level', 'all'));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('error_level');
+  update_variable_del('dblog_row_limit');
+  update_variable_del('syslog_identity');
+  update_variable_del('syslog_facility');
+  update_variable_del('syslog_format');
+}
+
+/**
+ * Moves authorize system settings from variable to config.
+ */
+function system_update_1018() {
+  // Migrate variables to config.
+  $config = config('system.authorize');
+  $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
+  $settings = db_query("SELECT name, value FROM variable WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
+  foreach ($settings as $row)  {
+    $row = unserialize($row);
+    $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
+  }
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('allow_authorize_operations');
+  update_variable_del('authorize_filetransfer_default');
+
+}
+
+/**
+ * Converts active_menus_default variable to config.
+ */
+function system_update_1019() {
+  // Migrate variables to config.
+  $config = config('system.core');
+  $config->set('active_menus_default', update_variable_get('menu_default_active_menus', array()));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('menu_default_active_menus');
+}
+
+/**
+ * Convert date settings to config.
+ */
+function system_update_1020() {
+  // Safety check for date formats.
+  if (!db_table_exists('date_format_type')) {
+    return;
+  }
+
+  // Migrate variables if any.
+  $config = config('system.date');
+  $config->set('first_day', update_variable_get('date_first_day', 0));
+  $config->set('default_country', update_variable_get('site_default_country', ''));
+  $config->set('default_timezone', update_variable_get('date_default_timezone', ''));
+  $config->set('user_configurable_timezones', update_variable_get('configurable_timezones', 1));
+  $config->set('user_empty_timezone_message', update_variable_get('empty_timezone_message', 0));
+  $config->set('user_default_timezone', update_variable_get('user_default_timezone', 0));
+
+  // Delete variables.
+  update_variable_del('site_default_country');
+  update_variable_del('date_first_day');
+  update_variable_del('date_default_timezone');
+  update_variable_del('configurable_timezones');
+  update_variable_del('empty_timezone_message');
+  update_variable_del('user_default_timezone');
+
+  // Migrate date formats. These are the defaults that must exist.
+  $formats = array(
+    'long' => array(
+      'label' => 'Default Long Date',
+      'pattern' => 'l, F j, Y - H:i',
+      'module' => 'system',
+    ),
+    'medium' => array(
+      'label' => 'Default Medium Date',
+      'pattern' => 'D, m/d/Y - H:i',
+      'module' => 'system',
+    ),
+    'short' => array(
+      'label' => 'Default Short Date',
+      'pattern' => 'm/d/Y - H:i',
+      'module' => 'system',
+    ),
+    'html_datetime' => array(
+      'label' => 'HTML Datetime',
+      'pattern' => 'Y-m-d\\TH:i:sO',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_date' => array(
+      'label' => 'HTML Date',
+      'pattern' => 'Y-m-d',
+      'module' => 'system',
+      'hidden' => 1
+    ),
+    'html_time' => array(
+      'label' => 'HTML Time',
+      'pattern' => 'H:i:s',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_yearless_date' => array(
+      'label' => 'HTML Yearless date',
+      'pattern' => 'm-d',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_week' => array(
+      'label' => 'HTML Week',
+      'pattern' => 'Y-\\WW',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_month' => array(
+      'label' => 'HTML Month',
+      'pattern' => 'Y-m',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+    'html_year' => array(
+      'label' => 'HTML Year',
+      'pattern' => 'Y',
+      'module' => 'system',
+      'hidden' => 1,
+    ),
+  );
+
+  // Update/create custom formats.
+  $result = db_query("SELECT * FROM {date_format_type}");
+  foreach ($result as $row) {
+    if ($pattern = update_variable_get('date_format_' . $row->type)) {
+      $format = isset($formats[$row->type]) ? $formats[$row->type] : array();
+      $format['label'] = $row->title;
+      $format['pattern'] = $pattern;
+      $formats[$row->type] = $format;
+      update_variable_del('date_format_' . $row->type);
+    }
+  }
+
+  // Copy over all locale-specific patterns for each date format.
+  $locale_result = db_query("SELECT * FROM {date_format_locale}");
+  foreach ($locale_result as $row) {
+    if (array_key_exists($row->type, $formats)) {
+      $formats[$row->type]['locales'][$row->language] = $row->format;
+    }
+  }
+
+  $config->set('formats', $formats);
+  $config->save();
+
+  db_drop_table('date_formats');
+  db_drop_table('date_format_type');
+  db_drop_table('date_format_locale');
+}
+
+/**
+ * Removes the js_cache_files variable.
+ */
+function system_update_1021() {
+  update_variable_del('js_cache_files');
+}
+
+/**
+ * Converts theme logo and shortcut settings to site-wide config.
+ */
+function system_update_1022() {
+  // Update to set the defaults.
+  $config = config('system.core');
+  $config->set('site_logo_theme', 1);
+  $config->set('site_logo_path', '');
+  $config->set('site_favicon_theme', 1);
+  $config->set('site_favicon_path', 'core/misc/favicon.ico');
+  $config->set('site_favicon_mimetype', 'image/vnd.microsoft.icon');
+
+  $settings = update_variable_get('theme_settings');
+
+  // Copy over logo settings.
+  if (!empty($settings['toggle_logo'])) {
+    $config->set('site_logo_theme', $settings['default_logo']);
+    if (is_file($settings['logo_path'])) {
+      $config->set('site_favicon_path', $settings['logo_path']);
+      $config->set('site_favicon_mimetype', file_get_mimetype($settings['logo_path']));
+    }
+  }
+
+  // Copy over favicon settings.
+  if (!empty($settings['toggle_favicon'])) {
+    $config->set('site_favicon_theme', $settings['default_favicon']);
+    if (is_file($settings['favicon_path'])) {
+      $config->set('site_favicon_path', $settings['favicon_path']);
+    }
+  }
+}
+
+/**
+ * Enable admin_bar, replacing the renamed admin_menu.
+ */
+function system_update_1023() {
+  // This update is no longer necessary and has been removed.
+}
+
+/**
+ * Consolidate common config files into "system.core".
+ */
+function system_update_1024() {
+  // This update only affects HEAD2HEAD upgrades, as system.core is used in all
+  // previous updates instead of the old files names updated here.
+  $core_config = config('system.core');
+  if (!$core_config->isNew()) {
+    return;
+  }
+
+  $files_to_upgrade = array(
+    'system.site',
+    'system.rss',
+    'system.performance',
+    'system.menu',
+    'system.maintenance',
+    'system.logging',
+    'system.cron',
+    'user.settings',
+  );
+
+  $combined_data = array();
+  foreach ($files_to_upgrade as $file) {
+    $config = config($file);
+    if ($config_data = $config->get()) {
+      $combined_data = array_merge($combined_data, $config_data);
+    }
+    $config->delete();
+  }
+  $combined_data['_config_name'] = 'system.core';
+  $combined_data['_config_static'] = TRUE;
+  ksort($combined_data);
+
+  $core_config->setData($combined_data);
+  $core_config->save();
+}
+
+/**
+ * Convert block positioning and configuration to the default layout.
+ */
+function system_update_1025() {
+  update_module_enable(array('layout'));
+
+  // Manually install schema, as update_module_enable() does not do this for us.
+  if (!db_table_exists('cache_layout_path')) {
+    $cache_table = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_table['description'] = 'Cache table to store which layouts are active at a given path.';
+    db_create_table('cache_layout_path', $cache_table);
+  }
+
+  $admin_layout = array(
+    'path' => NULL,
+    'name' => 'admin_default',
+    'title' => 'Default Administrative Layout',
+    'description' => NULL,
+    'module' => 'layout',
+    'weight' => 1,
+    'layout' => 'one_column',
+    'settings' => array(),
+    'positions' => array(
+      'content' => array(
+        'default',
+      ),
+      'top' => array(
+        '55f542fe-0763-453b-ba3e-62677ea559e5'
+      ),
+    ),
+    'content' => array(
+      '55f542fe-0763-453b-ba3e-62677ea559e5' => array(
+        'plugin' => 'system:breadcrumb',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'breadcrumb',
+        ),
+        'uuid' => '55f542fe-0763-453b-ba3e-62677ea559e5',
+      ),
+      'default' => array(
+        'plugin' => 'system:main',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'main',
+        ),
+        'uuid' => 'default',
+      ),
+    ),
+  );
+  $admin_config = config('layout.layout.admin_default');
+  $admin_config->setData($admin_layout);
+  $admin_config->save();
+
+  $layout_name = state_get('upgrade_layout_name', 'three_three_four_column');
+
+  $default_layout = array(
+    'path' => NULL,
+    'name' => 'default',
+    'title' => 'Default Layout',
+    'description' => NULL,
+    'module' => 'layout',
+    'weight' => 0,
+    'layout' => $layout_name,
+    'settings' => array(),
+    'positions' => array(
+      'header' => array(
+        '84c43df4-1165-4faf-8700-c362a7153c0b',
+        '13b2f325-af26-40bb-8c61-97fe1d93f19f',
+      ),
+      'content' => array(
+        'default',
+      ),
+      'footer' => array(
+        'cd4d033d-3f67-4191-8655-85ee758877c0',
+      ),
+      'sidebar' => array(
+        'b7efc039-1518-4331-9808-8e5060a3caed',
+      ),
+      'top' => array(
+        '09f11b4e-877e-45ab-9000-a4c6254faa04'
+      ),
+    ),
+    'content' => array(
+      '84c43df4-1165-4faf-8700-c362a7153c0b' => array(
+      'plugin' => 'system:header',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'header',
+          'settings' => array(),
+          'uuid' => '84c43df4-1165-4faf-8700-c362a7153c0b',
+        ),
+      ),
+      '13b2f325-af26-40bb-8c61-97fe1d93f19f' => array(
+        'plugin' => 'system:main-menu',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'main-menu',
+          'uuid' => '13b2f325-af26-40bb-8c61-97fe1d93f19f',
+          'settings' => array(
+            'title_display' => 'none',
+          ),
+        ),
+      ),
+      '09f11b4e-877e-45ab-9000-a4c6254faa04' => array(
+        'plugin' => 'system:breadcrumb',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'breadcrumb',
+          'uuid' => '09f11b4e-877e-45ab-9000-a4c6254faa04',
+        ),
+      ),
+      'default' => array(
+        'plugin' => 'system:main',
+        'data' => array(
+          'module' => 'system',
+          'delta' => 'main',
+          'uuid' => 'default',
+        ),
+      ),
+      'b7efc039-1518-4331-9808-8e5060a3caed' => array(
+        'plugin' => 'user:login',
+        'data' => array(
+          'module' => 'user',
+          'delta' => 'login',
+          'uuid' => 'b7efc039-1518-4331-9808-8e5060a3caed',
+        ),
+      )
+    ),
+  );
+
+  $current_theme = update_variable_get('theme_default', 'bartik');
+
+  // Load the default layout to prepare copying blocks into it.
+  $layout_regions = state_get('upgrade_layout_regions', array(
+    'header' => 'header',
+    'top' => 'top',
+    'content' => 'content',
+    'sidebar_first' => 'sidebar_first',
+    'sidebar_second' => 'sidebar_second',
+    'triptych_first' => 'triptych_first',
+    'triptych_middle' => 'triptych_middle',
+    'triptych_last' => 'triptych_last',
+    'footer_firstcolumn' => 'footer_firstcolumn',
+    'footer_secondcolumn' => 'footer_secondcolumn',
+    'footer_thirdcolumn' => 'footer_thirdcolumn',
+    'footer_fourthcolumn' => 'footer_fourthcolumn',
+    'footer' => 'footer',
+  ));
+  $default_layout['layout'] = $layout_name;
+
+  // Prepare a node-specific layout to be used if necessary.
+  $node_layout = $default_layout;
+  $node_layout['title'] = t('Node layout');
+  $node_layout['name'] = 'node';
+  $node_layout['path'] = 'node/%';
+  unset($node_layout['module']);
+  $node_layout_required = FALSE;
+
+  $result = db_query("SELECT * FROM {block} WHERE theme = :theme AND status = 1 AND NOT (module = 'system' AND delta = 'main') ORDER BY region, weight", array(':theme' => $current_theme));
+  foreach ($result as $block_row) {
+    if (array_key_exists($block_row->region, $layout_regions)) {
+      $region = $layout_regions[$block_row->region];
+      $is_node_block = FALSE;
+
+      // Create a new layout block object.
+      $uuid = new Uuid();
+      $block_uuid = $uuid->generate();
+      $block_config = array(
+        'plugin' => $block_row->module . ':' . $block_row->delta,
+        'data' => array(
+          'module' => $block_row->module,
+          'delta' => $block_row->delta,
+          'uuid' => $block_uuid,
+          'conditions' => array(),
+        ),
+      );
+
+      // Add any path restrictions, excluding PHP visibility rules.
+      $pages = trim($block_row->pages);
+      $visibility = (int) $block_row->visibility;
+      if ($pages && $visibility !== 2) {
+        $settings = array(
+          'paths' => $pages,
+          'visibility_setting' => $visibility,
+        );
+        $access_config = array(
+          'plugin' => 'path',
+          'data' => array(
+            'settings' => $settings,
+          ),
+        );
+        $block_config['data']['conditions'][] = $access_config;
+      }
+
+      // Add any role restrictions.
+      if (db_table_exists('block_role')) {
+        $role_result = db_query("SELECT * FROM {block_role} WHERE module = :module AND delta = :delta", array(':module' => $block_row->module, ':delta' => $block_row->delta));
+        $roles = array();
+        foreach ($role_result as $role_row) {
+          switch ($role_row->rid) {
+            case 1:
+              $roles[] = 'anonymous';
+              break;
+            case 2:
+              $roles[] = 'authenticated';
+              break;
+            default:
+              $roles[] = $role_row->rid;
+          }
+        }
+        if ($roles) {
+          $settings = array('roles' => $roles);
+          $access_config = array(
+            'plugin' => 'user_role',
+            'data' => array(
+              'settings' => $settings,
+            ),
+          );
+          $block_config['data']['conditions'][] = $access_config;
+        }
+      }
+
+      // Add any node type restrictions.
+      if (db_table_exists('block_node_type')) {
+        $type_result = db_query("SELECT * FROM {block_node_type} WHERE module = :module AND delta = :delta", array(':module' => $block_row->module, ':delta' => $block_row->delta));
+        $types = array();
+        foreach ($type_result as $type_row) {
+          $types[] = $type_row->type;
+          $node_layout_required = TRUE;
+          $is_node_block = TRUE;
+        }
+        if ($types) {
+          $settings = array('bundles' => $types);
+          $access_config = array(
+            'plugin' => 'node:bundle',
+            'data' => array(
+              'settings' => $settings,
+            ),
+          );
+          $block_config['data']['conditions'][] = $access_config;
+        }
+      }
+
+      // Position the block in the default layout if not node-type specific.
+      if (!$is_node_block) {
+        $default_layout['positions'][$region][] = $block_uuid;
+        $default_layout['content'][$block_uuid] = $block_config;
+      }
+
+      // Position the block in the node layout.
+      $node_layout['positions'][$region][] = $block_uuid;
+      $node_layout['content'][$block_uuid] = $block_config;
+    }
+  }
+
+  // Save the layout with the migrated blocks in position.
+  $layout_config = config('layout.layout.default');
+  $layout_config->setData($default_layout);
+  $layout_config->save();
+
+  // If any node-specific blocks were found, save the node layout as well.
+  if ($node_layout_required) {
+    $layout_config = config('layout.layout.node');
+    $layout_config->setData($node_layout);
+    $layout_config->save();
+  }
+
+  // Set layout as the default route handler.
+  config_set('system.core', 'menu_route_handler', 'layout_route_handler');
+}
+
+/**
+ * Convert file system, clean URL, profile, and theme variables to config.
+ */
+function system_update_1026() {
+  $config = config('system.core');
+  $config->set('file_default_scheme', update_variable_get('file_default_scheme', 'public'));
+  $config->set('file_public_path', update_variable_get('file_public_path', 'files'));
+  $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
+  $config->set('file_private_path', update_variable_get('file_private_path', ''));
+  $config->set('image_jpeg_quality', update_variable_get('image_jpeg_quality', 75));
+  $config->set('install_profile', update_variable_get('install_profile', 'standard'));
+  $config->set('clean_url', update_variable_get('clean_url', 0));
+  $config->set('theme_default', update_variable_get('theme_default', 'stark'));
+  $config->set('admin_theme', update_variable_get('admin_theme', ''));
+  $config->set('node_admin_theme', update_variable_get('node_admin_theme', ''));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('file_default_scheme');
+  update_variable_del('file_public_path');
+  update_variable_del('file_temporary_path');
+  update_variable_del('file_private_path');
+  update_variable_del('install_profile');
+  update_variable_del('clean_url');
+  update_variable_del('theme_default');
+  update_variable_del('admin_theme');
+  update_variable_del('node_admin_theme');
+  update_variable_del('image_jpeg_quality');
+
+  // These variables have been converted to settings:
+  update_variable_del('css_gzip_compression');
+  update_variable_del('js_gzip_compression');
+
+  // And these variables have been converted to state:
+  update_variable_del('javascript_parsed');
+}
+
+/**
+ * Remove the per-user cache column from the session table.
+ */
+function system_update_1027() {
+  if (db_field_exists('sessions', 'cache')) {
+    db_drop_field('sessions', 'cache');
+  }
+
+  $config = config('system.core');
+  $config->clear('cache_lifetime');
+  $config->save();
+}
+
+/**
+ * Convert filter fallback and user cancellation method variables to config.
+ */
+function system_update_1028() {
+  $config = config('system.core');
+  $config->set('filter_fallback_format', update_variable_get('filter_fallback_format', 'plain_text'));
+  $config->set('user_cancel_method', update_variable_get('user_cancel_method', 'user_cancel_block'));
+  $config->save();
+
+  update_variable_del('filter_fallback_format');
+  update_variable_del('user_cancel_method');
+}
+
+/**
+ * Convert config sync size to config.
+ */
+function system_update_1029() {
+  $config = config('system.core');
+  $config->set('config_sync_batch_size', update_variable_get('config_sync_batch_size', 20));
+  $config->set('default_nodes_main', update_variable_get('default_nodes_main', 10));
+  $config->save();
+}
+
+/**
+ * Convert mail system variable to config.
+ */
+function system_update_1030() {
+  $config = config('system.mail');
+  $config->setData(update_variable_get('mail_system', array('default-system' => 'DefaultMailSystem')));
+  $config->save();
+  update_variable_del('mail_system');
+}
+
+/**
+ * Drop the actions table, no longer used by Backdrop.
+ */
+function system_update_1031() {
+  // The actions UI and table were removed in Backdrop. Module-provided actions
+  // may still be defined through hook_action_info(), including potentially
+  // configurable actions, but core no longer attempts to manage them directly.
+  if (db_table_exists('actions')) {
+    db_drop_table('actions');
+  }
+
+  // Actions had been given it's own config file, now it is part of system.core.
+  $action_config = config('system.action');
+  if (!$action_config->isNew()) {
+    $config = config('system.core');
+    $config->set('action_recursion_limit', $action_config->get('action_recursion_limit'));
+    $config->save();
+    $action_config->delete();
+  }
+}
+
+/**
+ * Enable config module.
+ */
+function system_update_1032() {
+  update_module_enable(array('config'));
+}
+
+/**
+ * Set the minimum page cache lifetime to 5 minutes by default.
+ */
+function system_update_1033() {
+  $config = config('system.core');
+  if ($config->get('page_cache_maximum_age') == 0) {
+    $config->set('page_cache_maximum_age', 300);
+    $config->save();
+  }
+}
+
+/**
+ * Set the theme_debug flag to FALSE.
+ */
+function system_update_1034() {
+  config_set('system.core', 'theme_debug', FALSE);
+}
+
+/**
+ * Set the weight of Layout module to run last.
+ */
+function system_update_1035() {
+  // This is in system module because Layout module was enabled earlier in the
+  // upgrade path from D7. If it is in layout.install, it requires that
+  // update.php be run twice when doing an upgrade.
+  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+}
+
+/**
+ * Remove the private key from configuration.
+ */
+function system_update_1036() {
+  // A new private key is generated automatically by backdrop_get_private_key().
+  $config = config('system.core');
+  $config->clear('private_key');
+  $config->save();
+}
+
+/**
+ * Set the default value for canonical_secure option.
+ * Check if old menu item exists and remove it.
+ */
+function system_update_1037() {
+  config_set('system.core', 'canonical_secure', 0);
+  
+  $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
+  if ($res->rowCount()) {
+    $mlid = $res->fetch()->mlid;
+    db_delete('menu_links')
+      ->condition('mlid', $mlid, '=')
+      ->execute();
+  }
+}
+
+/**
+ * Upgrade or prepare for token module in core.
+ */
+function system_update_1038() {
+  // Manually install the schema for token's cache table.
+  if (!db_table_exists('cache_token')) {
+    $cache_token = backdrop_get_schema_unprocessed('system', 'cache');
+    $cache_token['description'] = 'Cache table for token information.';
+    db_create_table('cache_token', $cache_token);
+  }
+
+  // Remove the entry for the token module in the system table. This will
+  // "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'token' AND type = 'module'");
+}
+
+/**
+ * Add the "auto" column to the url_alias table.
+ */
+function system_update_1039() {
+  if (!db_field_exists('url_alias', 'auto')) {
+    $spec = array(
+      'description' => 'Boolean indicator if this path was generated from a pattern or manually.',
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => FALSE,
+      'default' => 0,
+    );
+    db_add_field('url_alias', 'auto', $spec);
+    // Set all initial values to NULL, as we do not know at this point whether
+    // aliases are automatic or not.
+    db_query("UPDATE {url_alias} SET auto = NULL");
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of CKEditor module is present.
+ */
+function system_update_1040() {
+  $path = backdrop_get_path('module', 'ckeditor');
+  if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Email module is present.
+ */
+function system_update_1041() {
+  $path = backdrop_get_path('module', 'email');
+  if ($path && strpos($path, 'core/modules/email') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Link module is present.
+ */
+function system_update_1042() {
+  $path = backdrop_get_path('module', 'link');
+  if ($path && strpos($path, 'core/modules/link') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Remove old Date configuration files.
+ */
+function system_update_1043() {
+  config('date_views.settings')->delete();
+  config('date_api.settings')->delete();
+  config('date.settings')->delete();
+
+  // Remove variables from Drupal 7.
+  update_variable_del('date_min_year');
+  update_variable_del('date_max_year');
+  update_variable_del('date_php_min_year');
+  update_variable_del('date_api_use_iso8601');
+  update_variable_del('date_db_tz_support');
+  update_variable_del('date_api_version');
+  update_variable_del('date_popup_timepicker');
+  update_variable_del('date_views_month_format_with_year');
+  update_variable_del('date_views_month_format_without_year');
+  update_variable_del('date_views_day_format_with_year');
+  update_variable_del('date_views_day_format_without_year');
+  update_variable_del('date_views_week_format_with_year');
+  update_variable_del('date_views_week_format_without_year');
+
+  // A default timezone is now always required.
+  $default_timezone = config_get('system.date', 'default_timezone');
+  if (empty($default_timezone)) {
+    $default_timezone = @date_default_timezone_get();
+    config_set('system.date', 'default_timezone', $default_timezone);
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of the Date module is present.
+ */
+function system_update_1044() {
+  $path = backdrop_get_path('module', 'date');
+  if ($path && strpos($path, 'core/modules/date') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

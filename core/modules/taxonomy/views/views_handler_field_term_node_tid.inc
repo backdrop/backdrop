@@ -99,26 +99,23 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     if ($nids) {
       $query = db_select('taxonomy_term_data', 'td');
       $query->innerJoin('taxonomy_index', 'tn', 'td.tid = tn.tid');
-      $query->innerJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
       $query->fields('td');
       $query->addField('tn', 'nid', 'node_nid');
-      $query->addField('tv', 'name', 'vocabulary');
-      $query->addField('tv', 'machine_name', 'vocabulary_machine_name');
+      $query->addField('td', 'vocabulary', 'vocabulary');
       $query->orderby('td.weight');
       $query->orderby('td.name');
       $query->condition('tn.nid', $nids);
       $query->addTag('term_access');
       $vocabs = array_filter($this->options['vocabularies']);
       if (!empty($this->options['limit']) && !empty($vocabs)) {
-        $query->condition('tv.machine_name', $vocabs);
+        $query->condition('td.vocabulary', $vocabs);
       }
       $result = $query->execute();
 
       foreach ($result as $term) {
         $this->items[$term->node_nid][$term->tid]['name'] = check_plain($term->name);
         $this->items[$term->node_nid][$term->tid]['tid'] = $term->tid;
-        $this->items[$term->node_nid][$term->tid]['vocabulary_machine_name'] = check_plain($term->vocabulary_machine_name);
-        $this->items[$term->node_nid][$term->tid]['vocabulary'] = check_plain($term->vocabulary);
+        $this->items[$term->node_nid][$term->tid]['vocabulary'] = $term->vocabulary;
 
         if (!empty($this->options['link_to_taxonomy'])) {
           $this->items[$term->node_nid][$term->tid]['make_link'] = TRUE;
@@ -136,13 +133,16 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     $tokens['[' . $this->options['id'] . '-tid' . ']'] = t('The taxonomy term ID for the term.');
     $tokens['[' . $this->options['id'] . '-name' . ']'] = t('The taxonomy term name for the term.');
     $tokens['[' . $this->options['id'] . '-vocabulary-machine-name' . ']'] = t('The machine name for the vocabulary the term belongs to.');
-    $tokens['[' . $this->options['id'] . '-vocabulary' . ']'] = t('The name for the vocabulary the term belongs to.');
+    $tokens['[' . $this->options['id'] . '-vocabulary' . ']'] = t('The label for the vocabulary the term belongs to.');
   }
 
   function add_self_tokens(&$tokens, $item) {
-    foreach(array('tid', 'name', 'vocabulary_machine_name', 'vocabulary') as $token) {
+    foreach(array('tid', 'name', 'vocabulary_machine_name') as $token) {
       // Replace _ with - for the vocabulary machine name.
       $tokens['[' . $this->options['id'] . '-' . str_replace('_', '-', $token). ']'] = isset($item[$token]) ? $item[$token] : '';
+    }
+    if (isset($item['vocabulary'])) {
+      // @todo: Figure out how to get the vocabulary label here.
     }
   }
 }

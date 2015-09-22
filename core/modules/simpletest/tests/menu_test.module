@@ -372,7 +372,7 @@ function menu_test_callback() {
  * Callback that test menu_test_menu_tree_set_path().
  */
 function menu_test_menu_trail_callback() {
-  $menu_path = variable_get('menu_test_menu_tree_set_path', array());
+  $menu_path = state_get('menu_test_menu_tree_set_path', array());
   if (!empty($menu_path)) {
     menu_tree_set_path($menu_path['menu_name'], $menu_path['path']);
   }
@@ -386,9 +386,19 @@ function menu_test_init() {
   // When requested by one of the MenuTrailTestCase tests, record the initial
   // active trail during Backdrop's bootstrap (before the user is redirected to
   // a custom 403 or 404 page). See menu_test_custom_403_404_callback().
-  if (variable_get('menu_test_record_active_trail', FALSE)) {
-    variable_set('menu_test_active_trail_initial', menu_get_active_trail());
+  if (state_get('menu_test_record_active_trail', FALSE)) {
+    state_set('menu_test_active_trail_initial', menu_get_active_trail());
   }
+
+  // Set string overrides to be used in MenuRouterTestCase.
+  $string_overrides = array(
+    'Example title - Case 1' => 'Alternative example title - Case 1',
+    'Example @sub1 - Case @op2' => 'Alternative example @sub1 - Case @op2',
+    'Example title' => 'Alternative example title',
+    'Example title' => 'Alternative example title',
+  );
+  $GLOBALS['settings']['locale_custom_strings_en'] = array('' => $string_overrides);
+  backdrop_static_reset('t');
 }
 
 /**
@@ -398,8 +408,8 @@ function menu_test_custom_403_404_callback() {
   // When requested by one of the MenuTrailTestCase tests, record the final
   // active trail now that the user has been redirected to the custom 403 or
   // 404 page. See menu_test_init().
-  if (variable_get('menu_test_record_active_trail', FALSE)) {
-    variable_set('menu_test_active_trail_final', menu_get_active_trail());
+  if (state_get('menu_test_record_active_trail', FALSE)) {
+    state_set('menu_test_active_trail_final', menu_get_active_trail());
   }
 
   return 'This is menu_test_custom_403_404_callback().';
@@ -440,7 +450,7 @@ function menu_test_theme_page_callback($inherited = FALSE) {
 function menu_test_theme_callback($argument) {
   // Test using the variable administrative theme.
   if ($argument == 'use-admin-theme') {
-    return variable_get('admin_theme');
+    return config_get('system.core', 'admin_theme');
   }
   // Test using a theme that exists, but may or may not be enabled.
   elseif ($argument == 'use-stark-theme') {
@@ -465,7 +475,7 @@ function menu_test_custom_theme() {
   // If an appropriate variable has been set in the database, request the theme
   // that is stored there. Otherwise, do not attempt to dynamically set the
   // theme.
-  if ($theme = variable_get('menu_test_hook_custom_theme_name', FALSE)) {
+  if ($theme = state_get('menu_test_hook_custom_theme_name', FALSE)) {
     return $theme;
   }
 }

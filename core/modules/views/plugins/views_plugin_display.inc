@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the base display plugin.
@@ -1800,7 +1799,7 @@ class views_plugin_display extends views_plugin {
           $this->theme = $_POST['theme'];
         }
         elseif (empty($this->theme)) {
-          $this->theme = variable_get('theme_default', 'bartik');
+          $this->theme = config_get('system.core', 'theme_default');
         }
 
         if (isset($GLOBALS['theme']) && $GLOBALS['theme'] == $this->theme) {
@@ -2049,7 +2048,7 @@ class views_plugin_display extends views_plugin {
 
         // Field templates aren't registered the normal way...and they're always
         // this one, anyhow.
-        $output .= '<pre>' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/theme/views-view-field.tpl.php')) . '</pre>';
+        $output .= '<pre>' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/templates/views-view-field.tpl.php')) . '</pre>';
 
         $form['analysis'] = array(
           '#markup' => '<div class="form-item">' . $output . '</div>',

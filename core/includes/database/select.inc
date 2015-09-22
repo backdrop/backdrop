@@ -368,16 +368,14 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * order this method is called.
    *
    * If the query uses DISTINCT or GROUP BY conditions, fields or expressions
-   * that are used for the order must be selected to be compatible with some
-   * databases like PostgreSQL. The PostgreSQL driver can handle simple cases
-   * automatically but it is suggested to explicitly specify them. Additionally,
-   * when ordering on an alias, the alias must be added before orderBy() is
-   * called.
+   * that are used for the order must be selected. Additionally, when ordering
+   * on an alias, the alias must be added before orderBy() is called.
    *
    * @param $field
    *   The field on which to order.
    * @param $direction
-   *   The direction to sort. Legal values are "ASC" and "DESC".
+   *   The direction to sort. Legal values are "ASC" and "DESC". Any other value
+   *   will be converted to "ASC".
    * @return SelectQueryInterface
    *   The called object.
    */
@@ -594,7 +592,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   }
 
   public function hasAnyTag() {
-    return call_user_func_array(array($this->query, 'hasAnyTags'), func_get_args());
+    return call_user_func_array(array($this->query, 'hasAnyTag'), func_get_args());
   }
 
   public function addMetaData($key, $object) {
@@ -1380,6 +1378,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   public function orderBy($field, $direction = 'ASC') {
+    // Only allow ASC and DESC, default to ASC.
+    $direction = strtoupper($direction) == 'DESC' ? 'DESC' : 'ASC';
     $this->order[$field] = $direction;
     return $this;
   }
@@ -1502,8 +1502,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       }
     }
     foreach ($this->fields as $alias => $field) {
-      // Always use the AS keyword for field aliases, as some
-      // databases require it (e.g., PostgreSQL).
+      // Always use the AS keyword for field aliases
       $fields[] = (isset($field['table']) ? $this->connection->escapeTable($field['table']) . '.' : '') . $this->connection->escapeField($field['field']) . ' AS ' . $this->connection->escapeAlias($field['alias']);
     }
     foreach ($this->expressions as $alias => $expression) {

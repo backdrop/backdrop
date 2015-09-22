@@ -25,12 +25,12 @@ function contextual_library_info() {
   $libraries['contextual-links'] = array(
     'title' => 'Contextual Links',
     'website' => 'http://drupal.org/node/473268',
-    'version' => '1.0',
+    'version' => BACKDROP_VERSION,
     'js' => array(
-      $path . '/contextual.js' => array(),
+      $path . '/js/contextual.js' => array(),
     ),
     'css' => array(
-      $path . '/contextual.css' => array(),
+      $path . '/css/contextual.css' => array(),
     ),
   );
   return $libraries;
@@ -91,7 +91,8 @@ function contextual_preprocess(&$variables, $hook) {
       '#element' => $element,
     );
     // Mark this element as potentially having contextual links attached to it.
-    $variables['classes_array'][] = 'contextual-links-region';
+    $variables['classes'][] = 'contextual-links-region';
+    unset($element['#contextual_links']);
   }
 }
 
@@ -105,8 +106,8 @@ function contextual_preprocess(&$variables, $hook) {
  *   menu_contextual_links(). For example:
  *   @code
  *     array('#contextual_links' => array(
- *       'block' => array('admin/structure/block/manage', array('system', 'navigation')),
- *       'menu' => array('admin/structure/menu/manage', array('navigation')),
+ *       'block' => array('admin/structure/block/manage', array('system', 'management')),
+ *       'menu' => array('admin/structure/menu/manage', array('management')),
  *     ))
  *   @endcode
  *

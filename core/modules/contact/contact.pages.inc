@@ -22,8 +22,7 @@ function contact_site_form($form, &$form_state) {
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms')) {
     backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    backdrop_access_denied();
-    backdrop_exit();
+    return array();
   }
 
   // Get an array of the categories.
@@ -130,10 +129,10 @@ function contact_site_form_validate($form, &$form_state) {
  * @see contact_site_form_validate()
  */
 function contact_site_form_submit($form, &$form_state) {
-  global $user, $language_interface;
+  global $user, $language;
 
   $values = $form_state['values'];
-  $values['sender'] = $user;
+  $values['sender'] = clone $user;
   $values['sender']->name = $values['name'];
   $values['sender']->mail = $values['mail'];
   $values['category'] = contact_load($values['cid']);
@@ -152,12 +151,12 @@ function contact_site_form_submit($form, &$form_state) {
 
   // If the user requests it, send a copy using the current language.
   if ($values['copy']) {
-    backdrop_mail('contact', 'page_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'page_copy', $from, $language, $values, $from);
   }
 
   // Send an auto-reply if necessary using the current language.
   if ($values['category']['reply']) {
-    backdrop_mail('contact', 'page_autoreply', $from, $language_interface, $values, $to);
+    backdrop_mail('contact', 'page_autoreply', $from, $language, $values, $to);
   }
 
   $config = config('contact.settings');
@@ -192,8 +191,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('administer users')) {
     backdrop_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
-    backdrop_access_denied();
-    backdrop_exit();
+    return array();
   }
 
   backdrop_set_title(t('Contact @username', array('@username' => user_format_name($recipient))), PASS_THROUGH);
@@ -259,10 +257,10 @@ function contact_personal_form($form, &$form_state, $recipient) {
  * @see contact_personal_form_validate()
  */
 function contact_personal_form_submit($form, &$form_state) {
-  global $user, $language_interface;
+  global $user, $language;
 
   $values = $form_state['values'];
-  $values['sender'] = $user;
+  $values['sender'] = clone $user;
   $values['sender']->name = $values['name'];
   $values['sender']->mail = $values['mail'];
 
@@ -280,7 +278,7 @@ function contact_personal_form_submit($form, &$form_state) {
 
   // Send a copy if requested, using current page language.
   if ($values['copy']) {
-    backdrop_mail('contact', 'user_copy', $from, $language_interface, $values, $from);
+    backdrop_mail('contact', 'user_copy', $from, $language, $values, $from);
   }
 
   $config = config('contact.settings');

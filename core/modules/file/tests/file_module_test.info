@@ -1,6 +1,0 @@
-name = File test
-description = Provides hooks for testing File module functionality.
-package = Core
-version = BACKDROP_VERSION
-backdrop = 1.x
-hidden = TRUE

@@ -1,5 +1,0 @@
-name = AAA Update test
-description = Support module for update module testing.
-package = Testing
-backdrop = 1.x
-hidden = TRUE

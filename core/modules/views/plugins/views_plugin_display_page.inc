@@ -28,7 +28,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => variable_get('menu_default_node_menu', 'navigation')),
+        'name' => array('default' => 'main-menu'),
         'context' => array('default' => ''),
         'context_only_inline' => array('default' => FALSE),
        ),
@@ -40,7 +40,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => 'navigation'),
+        'name' => array('default' => 'main-menu'),
        ),
     );
 
@@ -312,7 +312,7 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for contextual filters: For example, "node/%/feed".'),
           '#default_value' => $this->get_option('path'),
-	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
 	  '#field_suffix' => '</span>&lrm;',
 	  '#attributes' => array('dir'=>'ltr'),
         );
@@ -416,7 +416,7 @@ class views_plugin_display_page extends views_plugin_display {
           '#title' => t('Weight'),
           '#type' => 'textfield',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
-          '#description' => t('The lower the weight the higher/further left it will appear.'),
+          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
           '#states' => array(
             'visible' => array(
               array(
@@ -539,14 +539,22 @@ class views_plugin_display_page extends views_plugin_display {
         }
         $form['tab_options']['weight'] = array(
           '#suffix' => '</div>',
-          '#title' => t('Tab weight'),
+          '#title' => t('Item weight'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['weight'],
           '#size' => 5,
-          '#description' => t('If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be.'),
+          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
           '#states' => array(
             'visible' => array(
-              ':input[name="tab_options[type]"]' => array('value' => 'tab'),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'tab'),
+              ),
+              array(
+                ':input[name="menu[parent][type]"]' => array('value' => 'default tab'),
+              ),
             ),
           ),
         );

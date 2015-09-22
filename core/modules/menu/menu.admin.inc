@@ -8,9 +8,9 @@
 /**
  * Menu callback which shows an overview page of all the custom menus and their descriptions.
  */
-function menu_overview_page()
-{
+function menu_overview_page() {
   $menus = menu_load_all();
+  backdrop_sort($menus, array('title' => SORT_STRING));
 
   // Enable language column if language module is enabled.
   $multilanguage = module_exists('language');
@@ -20,6 +20,7 @@ function menu_overview_page()
   } else {
     $header = array(t('Title'), t('Operations'));
   }
+  
   $rows = array();
 
   foreach ($menus as $menu) {
@@ -82,8 +83,7 @@ function menu_overview_page()
  *
  * @ingroup themeable
  */
-function theme_menu_admin_overview($variables)
-{
+function theme_menu_admin_overview($variables) {
   $output = check_plain($variables['title']);
   $output .= '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 
@@ -96,8 +96,7 @@ function theme_menu_admin_overview($variables)
  * Shows for one menu the menu links accessible to the current user and
  * relevant operations.
  */
-function menu_overview_form($form, &$form_state, $menu)
-{
+function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
   global $language_interface;
 
@@ -459,6 +458,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
     backdrop_set_breadcrumb($breadcrumb);
   }
   $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   $form['link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
@@ -527,7 +527,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
   $options = menu_parent_options(menu_get_menus(), $item);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
-    $default = 'navigation:0';
+    $default = 'main-menu:0';
   }
   $form['parent'] = array(
     '#type' => 'select',
@@ -712,8 +712,6 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
     '#title' => t('Title'),
     '#default_value' => $menu['title'],
     '#required' => TRUE,
-    // The title of a system menu cannot be altered.
-    '#access' => !isset($system_menus[$menu['menu_name']]),
   );
 
   $form['menu_name'] = array(
@@ -828,8 +826,7 @@ function menu_delete_menu_page($menu)
   // System-defined menus may not be deleted.
   $system_menus = menu_list_system_menus();
   if (isset($system_menus[$menu['menu_name']])) {
-    backdrop_access_denied();
-    return;
+    return MENU_ACCESS_DENIED;
   }
   return backdrop_get_form('menu_delete_menu_confirm', $menu);
 }
@@ -859,7 +856,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state)
 
   // System-defined menus may not be deleted - only menus defined by this module.
   $system_menus = menu_list_system_menus();
-  if (isset($system_menus[$menu['menu_name']]) || !(db_query("SELECT 1 FROM {menu_custom} WHERE menu_name = :menu", array(':menu' => $menu['menu_name']))->fetchField())) {
+  if (isset($system_menus[$menu['menu_name']])) {
     return;
   }
 
@@ -893,7 +890,7 @@ function menu_edit_menu_name_exists($value)
 {
   // 'menu-' is added to the menu name to avoid name-space conflicts.
   $value = 'menu-' . $value;
-  $custom_exists = db_query_range('SELECT 1 FROM {menu_custom} WHERE menu_name = :menu', 0, 1, array(':menu' => $value))->fetchField();
+  $custom_exists = (bool) menu_load($value);
   $link_exists = db_query_range("SELECT 1 FROM {menu_links} WHERE menu_name = :menu", 0, 1, array(':menu' => $value))->fetchField();
 
   return $custom_exists || $link_exists;
@@ -942,8 +939,7 @@ function menu_item_delete_page($item)
   // Links defined via hook_menu may not be deleted. Updated items are an
   // exception, as they can be broken.
   if ($item['module'] == 'system' && !$item['updated']) {
-    backdrop_access_denied();
-    return;
+    return MENU_ACCESS_DENIED;
   }
   return backdrop_get_form('menu_item_delete_form', $item);
 }
@@ -992,9 +988,12 @@ function menu_reset_item_confirm_submit($form, &$form_state)
 
 /**
  * Menu callback; Build the form presenting menu configuration options.
+ *
+ * @ingroup forms
+ * @see menu_configure_submit()
  */
-function menu_configure()
-{
+function menu_configure($form, &$form_state) {
+  $config = config('menu.settings');
   $form['intro'] = array(
     '#type' => 'item',
     '#markup' => t('The menu module allows on-the-fly creation of menu links in the content authoring forms. To configure these settings for a particular content type, visit the <a href="@content-types">Content types</a> page, click the <em>edit</em> link for the content type, and go to the <em>Menu settings</em> section.', array('@content-types' => url('admin/structure/types'))),
@@ -1002,11 +1001,11 @@ function menu_configure()
 
   $menu_options = menu_get_menus();
 
-  $main = variable_get('menu_main_links_source', 'main-menu');
+  $main = $config->get('menu_main_links');
   $form['menu_main_links_source'] = array(
     '#type' => 'select',
     '#title' => t('Source for the Main links'),
-    '#default_value' => variable_get('menu_main_links_source', 'main-menu'),
+    '#default_value' => $main,
     '#empty_option' => t('No Main links'),
     '#options' => $menu_options,
     '#tree' => FALSE,
@@ -1016,14 +1015,31 @@ function menu_configure()
   $form['menu_secondary_links_source'] = array(
     '#type' => 'select',
     '#title' => t('Source for the Secondary links'),
-    '#default_value' => variable_get('menu_secondary_links_source', 'user-menu'),
+    '#default_value' => $config->get('menu_secondary_links'),
     '#empty_option' => t('No Secondary links'),
     '#options' => $menu_options,
     '#tree' => FALSE,
     '#description' => t('Select the source for the Secondary links. An advanced option allows you to use the same source for both Main links (currently %main) and Secondary links: if your source menu has two levels of hierarchy, the top level menu links will appear in the Main links, and the children of the active link will appear in the Secondary links.', array('%main' => $main ? $menu_options[$main] : t('none'))),
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for menu_configure().
+ */
+function menu_configure_submit($form, &$form_state) {
+  config('menu.settings')
+    ->set('menu_main_links', $form_state['values']['menu_main_links_source'])
+    ->set('menu_secondary_links', $form_state['values']['menu_secondary_links_source'])
+    ->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

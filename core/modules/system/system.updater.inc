@@ -3,7 +3,7 @@
 /**
  * @file
  * Subclasses of the Updater class to update Backdrop core knows how to update.
- * At this time, only modules and themes are supported.
+ * At this time, only modules, themes and layouts are supported.
  */
 
 /**
@@ -38,10 +38,7 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   public static function canUpdateDirectory($directory) {
-    if (file_scan_directory($directory, '/.*\.module$/')) {
-      return TRUE;
-    }
-    return FALSE;
+    return (update_get_package_type($directory) == 'module');
   }
 
   public static function canUpdate($project_name) {
@@ -123,11 +120,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   static function canUpdateDirectory($directory) {
-    // This is a lousy test, but don't know how else to confirm it is a theme.
-    if (file_scan_directory($directory, '/.*\.module$/')) {
-      return FALSE;
-    }
-    return TRUE;
+    return (update_get_package_type($directory) == 'theme');
   }
 
   public static function canUpdate($project_name) {
@@ -138,12 +131,63 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
     // Update the system table.
     clearstatcache();
     system_rebuild_theme_data();
-
   }
 
   public function postInstallTasks() {
     return array(
       l(t('Enable newly added themes'), 'admin/appearance'),
+      l(t('Administration pages'), 'admin'),
+    );
+  }
+}
+
+/**
+ * Class for updating layouts using FileTransfer classes via authorize.php.
+ */
+class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
+
+  /**
+   * Return the directory where a layout should be installed.
+   *
+   * If the layout is already installed, backdrop_get_path() will return
+   * a valid path and we should install it there (although we need to use an
+   * absolute path, so we prepend BACKDROP_ROOT). If we're installing a new
+   * layout, we always want it to go into /layouts, since that's
+   * where all the documentation recommends users install their layouts, and
+   * there's no way that can conflict on a multi-site installation, since
+   * the Update manager won't let you install a new layout if it's already
+   * found on your system, and if there was a copy in top-level, we'd see it.
+   */
+  public function getInstallDirectory() {
+    if ($relative_path = backdrop_get_path('layout', $this->name)) {
+      $relative_path = dirname($relative_path);
+    }
+    else {
+      $relative_path = 'layouts';
+    }
+    return BACKDROP_ROOT . '/' . $relative_path;
+  }
+
+  public function isInstalled() {
+    return (bool) backdrop_get_path('layout', $this->name);
+  }
+
+  static function canUpdateDirectory($directory) {
+    return (update_get_package_type($directory) == 'layout');
+  }
+
+  public static function canUpdate($project_name) {
+    return (bool) backdrop_get_path('layout', $project_name);
+  }
+
+  public function postInstall() {
+    layout_reset_caches();
+    clearstatcache();
+  }
+
+  public function postInstallTasks() {
+    return array(
+      l(t('Use newly added layouts'), 'admin/structure/layouts'),
       l(t('Administration pages'), 'admin'),
     );
   }

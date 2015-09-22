@@ -141,6 +141,18 @@ class Node extends Entity {
   public $revision_uid;
 
   /**
+   * Create a new Node instance.
+   */
+  function __construct(array $values = array()) {
+    parent::__construct($values);
+
+    // Set the created time to now.
+    if (empty($this->created)) {
+      $this->created = REQUEST_TIME;
+    }
+  }
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -199,20 +211,6 @@ class Node extends Entity {
 class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
-   * Overrides EntityDatabaseStorageController::create().
-   */
-  public function create(array $values) {
-    $node = parent::create($values);
-
-    // Set the created time to now.
-    if (empty($node->created)) {
-      $node->created = REQUEST_TIME;
-    }
-
-    return $node;
-  }
-
-  /**
    * Overrides EntityDatabaseStorageController::delete().
    */
   public function delete($ids) {
@@ -253,7 +251,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception($this->entityType, $e);
-      throw new EntityStorageException($e->getMessage, $e->getCode, $e);
+      throw new EntityStorageException($e->getMessage(), (int) $e->getCode(), $e);
     }
   }
 
@@ -300,7 +298,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception($this->entityType, $e);
-      throw new EntityStorageException($e->getMessage(), $e->getCode(), $e);
+      throw new EntityStorageException($e->getMessage(), (int) $e->getCode(), $e);
     }
   }
 
@@ -376,7 +374,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     if ($hook == 'insert' || $hook == 'update') {
       node_invoke($node, $hook);
     }
-    else if ($hook == 'predelete') {
+    elseif ($hook == 'predelete') {
       // 'delete' is triggered in 'predelete' is here to preserve hook ordering
       // from Drupal 7.
       node_invoke($node, 'delete');

@@ -38,27 +38,27 @@ require_once BACKDROP_ROOT . '/core/includes/stream_wrappers.inc';
 /**
  * Flag used by file_prepare_directory() -- create directory if not present.
  */
-const FILE_CREATE_DIRECTORY = 1;
+define('FILE_CREATE_DIRECTORY', 1);
 
 /**
  * Flag used by file_prepare_directory() -- file permissions may be changed.
  */
-const FILE_MODIFY_PERMISSIONS = 2;
+define('FILE_MODIFY_PERMISSIONS', 2);
 
 /**
  * Flag for dealing with existing files: Appends number until name is unique.
  */
-const FILE_EXISTS_RENAME = 0;
+define('FILE_EXISTS_RENAME', 0);
 
 /**
  * Flag for dealing with existing files: Replace the existing file.
  */
-const FILE_EXISTS_REPLACE = 1;
+define('FILE_EXISTS_REPLACE', 1);
 
 /**
  * Flag for dealing with existing files: Do nothing and return FALSE.
  */
-const FILE_EXISTS_ERROR = 2;
+define('FILE_EXISTS_ERROR', 2);
 
 /**
  * Indicates that the file is permanent and should not be deleted.
@@ -67,7 +67,7 @@ const FILE_EXISTS_ERROR = 2;
  * during cron runs, but permanent files will not be removed during the file
  * garbage collection process.
  */
-const FILE_STATUS_PERMANENT = 1;
+define('FILE_STATUS_PERMANENT', 1);
 
 /**
  * Provides Backdrop stream wrapper registry.
@@ -254,7 +254,14 @@ function file_uri_target($uri) {
  *   'public', 'private' or any other file scheme defined as the default.
  */
 function file_default_scheme() {
-  return variable_get('file_default_scheme', 'public');
+  try {
+    $scheme = config_get('system.core', 'file_default_scheme');
+  }
+  catch (ConfigException $e) {}
+  if (empty($scheme)) {
+    $scheme = 'public';
+  }
+  return $scheme;
 }
 
 /**
@@ -462,7 +469,7 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
  */
 function file_ensure_htaccess() {
   file_save_htaccess('public://', FALSE);
-  if (variable_get('file_private_path', FALSE)) {
+  if (config_get('system.core', 'file_private_path')) {
     file_save_htaccess('private://', TRUE);
   }
   file_save_htaccess('temporary://', TRUE);
@@ -523,7 +530,7 @@ function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
 # Turn off all options we don't need.
 Options None
-Options +FollowSymLinks
+Options +SymLinksIfOwnerMatch
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -536,10 +543,23 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php5.c>
   php_flag engine off
 </IfModule>
+
 EOF;
 
   if ($private) {
-    $lines = "Deny from all\n\n" . $lines;
+    $lines .= <<<EOF
+
+# Deny all requests from Apache 2.4+.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+# Deny all requests from Apache 2.0-2.2.
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>
+
+EOF;
   }
 
   return $lines;
@@ -559,8 +579,6 @@ EOF;
  *
  * @return
  *   An array of file entities, indexed by fid.
- *
- * @todo Remove $conditions in Drupal 8.
  *
  * @see hook_file_load()
  * @see file_load()
@@ -589,15 +607,14 @@ function file_load($fid) {
 }
 
 /**
- * Saves a file entity to the database.
- *
- * If the $file->fid is not set a new record will be added.
+ * Saves a new or updated file.
  *
  * @param File $file
- *   A file object returned by file_load().
+ *   A file object returned by file_load(). If the $file->fid is not set a new
+ *   record will be added.
  *
- * @return
- *   Either SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  *
  * @see hook_file_insert()
  * @see hook_file_update()
@@ -1132,11 +1149,11 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
   $original = $filename;
 
   // Allow potentially insecure uploads for very savvy users and admin
-  if (!variable_get('allow_insecure_uploads', 0)) {
-    // Remove any null bytes. See http://php.net/manual/en/security.filesystem.nullbytes.php
+  if (!settings_get('allow_insecure_uploads', 0)) {
+    // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
-    $whitelist = array_unique(explode(' ', trim($extensions)));
+    $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1149,7 +1166,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // of allowed extensions.
     foreach ($filename_parts as $filename_part) {
       $new_filename .= '.' . $filename_part;
-      if (!in_array($filename_part, $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
+      if (!in_array(strtolower($filename_part), $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
         $new_filename .= '_';
       }
     }
@@ -1369,8 +1386,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  * Temporary files are periodically cleaned. Use file_usage_add() to register
  * the usage of the file which will automatically mark it as permanent.
  *
- * @param $source
- *   A string specifying the filepath or URI of the uploaded file to save.
+ * @param $form_field_name
+ *   A string that is the associative array key of the upload form element in
+ *   the form array.
  * @param $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. See file_validate() for a full discussion of the array format.
@@ -1381,9 +1399,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   (Beware: this is not safe and should only be allowed for trusted users, if
  *   at all).
  * @param $destination
- *   A string containing the URI $source should be copied to.
- *   This must be a stream wrapper URI. If this value is omitted, Backdrop's
- *   temporary files scheme will be used ("temporary://").
+ *   A string containing the URI that the file should be copied to. This must
+ *   be a stream wrapper URI. If this value is omitted, Backdrop's temporary
+ *   files scheme will be used ("temporary://").
  * @param $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE: Replace the existing file.
@@ -1401,54 +1419,54 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   - source: Path to the file before it is moved.
  *   - destination: Path to the file after it is moved (same as 'uri').
  */
-function file_save_upload($source, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
+function file_save_upload($form_field_name, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
   global $user;
   static $upload_cache;
 
   // Return cached objects without processing since the file will have
   // already been processed and the paths in _FILES will be invalid.
-  if (isset($upload_cache[$source])) {
-    return $upload_cache[$source];
+  if (isset($upload_cache[$form_field_name])) {
+    return $upload_cache[$form_field_name];
   }
 
   // Make sure there's an upload to process.
-  if (empty($_FILES['files']['name'][$source])) {
+  if (empty($_FILES['files']['name'][$form_field_name])) {
     return NULL;
   }
 
   // Check for file upload errors and return FALSE if a lower level system
   // error occurred. For a complete list of errors:
-  // See http://php.net/manual/en/features.file-upload.errors.php.
-  switch ($_FILES['files']['error'][$source]) {
+  // See http://php.net/manual/features.file-upload.errors.php.
+  switch ($_FILES['files']['error'][$form_field_name]) {
     case UPLOAD_ERR_INI_SIZE:
     case UPLOAD_ERR_FORM_SIZE:
-      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$source], '%maxsize' => format_size(file_upload_max_size()))), 'error');
+      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$form_field_name], '%maxsize' => format_size(file_upload_max_size()))), 'error');
       return FALSE;
 
     case UPLOAD_ERR_PARTIAL:
     case UPLOAD_ERR_NO_FILE:
-      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
       return FALSE;
 
     case UPLOAD_ERR_OK:
       // Final check that this is a valid upload, if it isn't, use the
       // default error handler.
-      if (is_uploaded_file($_FILES['files']['tmp_name'][$source])) {
+      if (is_uploaded_file($_FILES['files']['tmp_name'][$form_field_name])) {
         break;
       }
 
     // Unknown error
     default:
-      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$source])), 'error');
+      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
       return FALSE;
   }
   // Begin building file entity.
   $values = array(
     'uid' => $user->uid,
     'status' => 0,
-    'filename' => trim(backdrop_basename($_FILES['files']['name'][$source]), '.'),
-    'uri' => $_FILES['files']['tmp_name'][$source],
-    'filesize' => $_FILES['files']['size'][$source],
+    'filename' => trim(backdrop_basename($_FILES['files']['name'][$form_field_name]), '.'),
+    'uri' => $_FILES['files']['tmp_name'][$form_field_name],
+    'filesize' => $_FILES['files']['size'][$form_field_name],
   );
   $values['filemime'] = file_get_mimetype($values['filename']);
   $file = entity_create('file', $values);
@@ -1484,7 +1502,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // rename filename.php.foo and filename.php to filename.php.foo.txt and
   // filename.php.txt, respectively). Don't rename if 'allow_insecure_uploads'
   // evaluates to TRUE.
-  if (!variable_get('allow_insecure_uploads', 0) && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+  if (!settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
     $file->filemime = 'text/plain';
     $file->uri .= '.txt';
     $file->filename .= '.txt';
@@ -1508,7 +1526,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     return FALSE;
   }
 
-  $file->source = $source;
+  $file->source = $form_field_name;
   // A URI may already have a trailing slash or look like "public://".
   if (substr($destination, -1) != '/') {
     $destination .= '/';
@@ -1517,7 +1535,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // If file_destination() returns FALSE then $replace == FILE_EXISTS_ERROR and
   // there's an existing file so we need to bail.
   if ($file->destination === FALSE) {
-    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $source, '%directory' => $destination)), 'error');
+    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
     return FALSE;
   }
 
@@ -1536,7 +1554,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
     else {
       $message .= ' ' . array_pop($errors);
     }
-    form_set_error($source, $message);
+    form_set_error($form_field_name, $message);
     return FALSE;
   }
 
@@ -1544,8 +1562,8 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // directory. This overcomes open_basedir restrictions for future file
   // operations.
   $file->uri = $file->destination;
-  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$source], $file->uri)) {
-    form_set_error($source, t('File upload error. Could not move uploaded file.'));
+  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$form_field_name], $file->uri)) {
+    form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
     watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
     return FALSE;
   }
@@ -1565,7 +1583,7 @@ function file_save_upload($source, $validators = array(), $destination = FALSE, 
   // If we made it this far it's safe to record this file in the database.
   $file->save();
   // Add file to the cache.
-  $upload_cache[$source] = $file;
+  $upload_cache[$form_field_name] = $file;
   return $file;
 }
 
@@ -1689,8 +1707,6 @@ function file_validate_extensions(File $file, $extensions) {
 /**
  * Checks that the file's size is below certain limits.
  *
- * This check is not enforced for the user #1.
- *
  * @param File $file
  *   A file entity.
  * @param $file_limit
@@ -1711,17 +1727,15 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
 
   $errors = array();
 
-  // Bypass validation for uid  = 1.
-  if ($user->uid != 1) {
-    if ($file_limit && $file->filesize > $file_limit) {
-      $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
-    }
-
-    // Save a query by only calling file_space_used() when a limit is provided.
-    if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
-      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
-    }
+  if ($file_limit && $file->filesize > $file_limit) {
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
   }
+
+  // Save a query by only calling file_space_used() when a limit is provided.
+  if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
+      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
+  }
+
   return $errors;
 }
 
@@ -1958,23 +1972,7 @@ function file_download() {
   $target = implode('/', $args);
   $uri = $scheme . '://' . $target;
   if (file_stream_wrapper_valid_scheme($scheme) && file_exists($uri)) {
-    // Let other modules provide headers and controls access to the file.
-    // module_invoke_all() uses array_merge_recursive() which merges header
-    // values into a new array. To avoid that and allow modules to override
-    // headers instead, use array_merge() to merge the returned arrays.
-    $headers = array();
-    foreach (module_implements('file_download') as $module) {
-      $function = $module . '_file_download';
-      $result = $function($uri);
-      if ($result == -1) {
-        // Throw away the headers received so far.
-        $headers = array();
-        break;
-      }
-      if (isset($result) && is_array($result)) {
-        $headers = array_merge($headers, $result);
-      }
-    }
+    $headers = file_download_headers($uri);
     if (count($headers)) {
       file_transfer($uri, $headers);
     }
@@ -1986,6 +1984,69 @@ function file_download() {
   backdrop_exit();
 }
 
+/**
+ * Retrieves headers for a private file download.
+ *
+ * Calls all module implementations of hook_file_download() to retrieve headers
+ * for files by the module that originally provided the file. The presence of
+ * returned headers indicates the current user has access to the file.
+ *
+ * @param $uri
+ *   The URI for the file whose headers should be retrieved.
+ *
+ * @return
+ *   If access is allowed, headers for the file, suitable for passing to
+ *   file_transfer(). If access is not allowed, an empty array will be returned.
+ *
+ * @see file_transfer()
+ * @see file_download_access()
+ * @see hook_file_downlaod()
+ */
+function file_download_headers($uri) {
+  // Let other modules provide headers and control access to the file.
+  // module_invoke_all() uses array_merge_recursive() which merges header
+  // values into a new array. To avoid that and allow modules to override
+  // headers instead, use array_merge() to merge the returned arrays.
+  $headers = array();
+  foreach (module_implements('file_download') as $module) {
+    $function = $module . '_file_download';
+    $result = $function($uri);
+    if ($result == -1) {
+      // Throw away the headers received so far.
+      $headers = array();
+      break;
+    }
+    if (isset($result) && is_array($result)) {
+      $headers = array_merge($headers, $result);
+    }
+  }
+  return $headers;
+}
+
+/**
+ * Checks that the current user has access to a particular file.
+ *
+ * The return value of this function hinges on the return value from
+ * file_download_headers(), which is the function responsible for collecting
+ * access information through hook_file_download().
+ *
+ * If immediately transferring the file to the browser and the headers will
+ * need to be retrieved, the return value of file_download_headers() should be
+ * used to determine access directly, so that access checks will not be run
+ * twice.
+ *
+ * @param $uri
+ *   The URI for the file whose access should be retrieved.
+ *
+ * @return
+ *   Boolean TRUE if access is allowed. FALSE if access is not allowed.
+ *
+ * @see file_download_headers()
+ * @see hook_file_download()
+ */
+function file_download_access($uri) {
+  return count(file_download_headers($uri)) > 0;
+}
 
 /**
  * Finds all files that match a given mask in a given directory.
@@ -2001,7 +2062,8 @@ function file_download() {
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'nomask': The preg_match() regular expression of the files to ignore.
- *     Defaults to '/(\.\.?|CVS)$/'.
+ *     Defaults to '/^(\..*)|(CVS)$/'. This default ignores all hidden files
+ *     (those that start with a period) and items named "CVS".
  *   - 'callback': The callback function to call for each match. There is no
  *     default callback.
  *   - 'recurse': When TRUE, the directory scan will recurse the entire tree
@@ -2021,9 +2083,16 @@ function file_download() {
  *   'filename', and 'name' members corresponding to the matching files.
  */
 function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
+  // By default, do not check for files in common special-purpose directories.
+  $ignore_directories = array(
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Merge in defaults.
   $options += array(
-    'nomask' => '/(\.\.?|CVS)$/',
+    'nomask' => $no_mask,
     'callback' => 0,
     'recurse' => TRUE,
     'key' => 'uri',
@@ -2034,7 +2103,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
   $files = array();
   if (is_dir($dir) && $handle = opendir($dir)) {
     while (FALSE !== ($filename = readdir($handle))) {
-      if (!preg_match($options['nomask'], $filename) && $filename[0] != '.') {
+      if (!preg_match($options['nomask'], $filename) && $filename !== '.' && $filename !== '..') {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {
@@ -2145,10 +2214,10 @@ function file_get_mimetype($uri, $mapping = NULL) {
 function backdrop_chmod($uri, $mode = NULL) {
   if (!isset($mode)) {
     if (is_dir($uri)) {
-      $mode = variable_get('file_chmod_directory', 0775);
+      $mode = settings_get('file_chmod_directory', 0775);
     }
     else {
-      $mode = variable_get('file_chmod_file', 0664);
+      $mode = settings_get('file_chmod_file', 0664);
     }
   }
 
@@ -2179,7 +2248,7 @@ function backdrop_chmod($uri, $mode = NULL) {
  * @param $uri
  *   A URI or pathname.
  * @param $context
- *   Refer to http://php.net/manual/en/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php
  *
  * @return
  *   Boolean TRUE on success, or FALSE on failure.
@@ -2306,7 +2375,7 @@ function backdrop_basename($uri, $suffix = NULL) {
  * @param $recursive
  *   Default to FALSE.
  * @param $context
- *   Refer to http://php.net/manual/en/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php
  *
  * @return
  *   Boolean TRUE on success, or FALSE on failure.
@@ -2317,7 +2386,7 @@ function backdrop_basename($uri, $suffix = NULL) {
  */
 function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
   if (!isset($mode)) {
-    $mode = variable_get('file_chmod_directory', 0775);
+    $mode = settings_get('file_chmod_directory', 0775);
   }
 
   if (!isset($context)) {
@@ -2337,7 +2406,7 @@ function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL)
  * @param $uri
  *   A URI or pathname.
  * @param $context
- *   Refer to http://php.net/manual/en/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php
  *
  * @return
  *   Boolean TRUE on success, or FALSE on failure.
@@ -2403,7 +2472,7 @@ function backdrop_tempnam($directory, $prefix) {
  * Gets the path of system-appropriate temporary directory.
  */
 function file_directory_temp() {
-  $temporary_directory = variable_get('file_temporary_path', NULL);
+  $temporary_directory = config_get('system.core', 'file_temporary_path');
 
   if (empty($temporary_directory)) {
     $directories = array();
@@ -2433,7 +2502,7 @@ function file_directory_temp() {
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
-      $temporary_directory = variable_get('file_public_path', 'files') . '/tmp';
+      $temporary_directory = config_get('system.core', 'file_public_path') . '/tmp';
 
       // Windows accepts paths with either slash (/) or backslash (\), but will
       // not accept a path which contains both a slash and a backslash. Since
@@ -2441,8 +2510,6 @@ function file_directory_temp() {
       // everything to use slash which is supported on all platforms.
       $temporary_directory = str_replace('\\', '/', $temporary_directory);
     }
-    // Save the path of the discovered directory.
-    variable_set('file_temporary_path', $temporary_directory);
   }
 
   return $temporary_directory;

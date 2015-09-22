@@ -39,6 +39,11 @@ class views_handler_argument extends views_handler {
   var $validator = NULL;
   var $argument = NULL;
   var $value = NULL;
+  var $name_alias;
+  var $base_alias;
+  var $name_table_alias;
+  var $count_alias;
+  var $position = 0;
 
   /**
    * The table to use for the name, should it not be in the same table as the argument.
@@ -1116,6 +1121,7 @@ class views_handler_argument extends views_handler {
    */
   function get_plugin($type = 'argument default', $name = NULL) {
     $options = array();
+    $plugin_name = NULL;
     switch ($type) {
       case 'argument default':
         $plugin_name = $this->options['default_argument_type'];

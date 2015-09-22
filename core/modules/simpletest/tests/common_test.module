@@ -244,15 +244,9 @@ function common_test_theme() {
   return array(
     'common_test_foo' => array(
       'variables' => array('foo' => 'foo', 'bar' => 'bar'),
+      'file' => 'common_test.theme.inc',
     ),
   );
-}
-
-/**
- * Theme function for testing backdrop_render() theming.
- */
-function theme_common_test_foo($variables) {
-  return $variables['foo'] . $variables['bar'];
 }
 
 /**
@@ -291,8 +285,8 @@ function common_test_library_info() {
  * Adds a JavaScript file and a CSS file with a query string appended.
  */
 function common_test_js_and_css_querystring() {
-   backdrop_add_js(backdrop_get_path('module', 'node') . '/node.js');
-   backdrop_add_css(backdrop_get_path('module', 'node') . '/node.admin.css');
+   backdrop_add_js(backdrop_get_path('module', 'node') . '/js/node.js');
+   backdrop_add_css(backdrop_get_path('module', 'node') . '/css/node.admin.css');
    // A relative URI may have a query string.
    backdrop_add_css('/' . backdrop_get_path('module', 'node') . '/node-fake.css?arg1=value1&arg2=value2');
    return '';

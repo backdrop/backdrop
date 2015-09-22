@@ -36,7 +36,7 @@ define('BACKDROP_ROOT', getcwd());
  * translation, and solves some theming issues. The flag is checked in other
  * places in Backdrop code (not just authorize.php).
  */
-const MAINTENANCE_MODE = 'update';
+define('MAINTENANCE_MODE', 'update');
 
 /**
  * Renders a 403 access denied page for authorize.php.
@@ -58,7 +58,7 @@ function authorize_access_denied_page() {
  *   TRUE if the current user can run authorize.php, and FALSE if not.
  */
 function authorize_access_allowed() {
-  return variable_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
+  return settings_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
 }
 
 // *** Real work of the script begins here. ***

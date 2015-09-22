@@ -6,7 +6,7 @@
  *
  * This allows site administrators with the 'administer software updates'
  * permission to either upgrade existing projects, or download and install new
- * ones, so long as the killswitch setting ('allow_authorize_operations') is
+ * ones, so long as the killswitch $settings['allow_authorize_operations'] is
  * still TRUE.
  *
  * To install new code, the administrator is prompted for either the URL of an
@@ -60,6 +60,21 @@
  * @ingroup forms
  */
 function update_manager_update_form($form, $form_state = array(), $context) {
+  switch ($context) {
+    case 'module':
+      backdrop_set_title('Update modules');
+      break;
+    case 'theme':
+      backdrop_set_title('Update themes');
+      break;
+    case 'layout':
+      backdrop_set_title('Update layouts');
+      break;
+    case 'report':
+      backdrop_set_title('Update projects');
+      break;
+  }
+
   if (!_update_manager_check_backends($form, 'update')) {
     return $form;
   }
@@ -74,7 +89,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
     return $form;
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/update.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/css/update.css';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
@@ -192,11 +207,13 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
       case 'module':
       case 'theme':
+      case 'layout':
         $projects['enabled'][$name] = $entry;
         break;
 
       case 'module-disabled':
       case 'theme-disabled':
+      case 'layout-disabled':
         $projects['disabled'][$name] = $entry;
         break;
     }
@@ -204,7 +221,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
   if (empty($projects)) {
     $form['message'] = array(
-      '#markup' => t('All of your projects are up to date.'),
+      '#markup' => '<p>' . t('No updates are available for any of your projects.') . '</p>',
     );
     return $form;
   }
@@ -262,23 +279,6 @@ function update_manager_update_form($form, $form_state = array(), $context) {
   }
 
   return $form;
-}
-
-/**
- * Returns HTML for the first page in the process of updating projects.
- *
- * @param $variables
- *   An associative array containing:
- *   - form: A render element representing the form.
- *
- * @ingroup themeable
- */
-function theme_update_manager_update_form($variables) {
-  $form = $variables['form'];
-  $last = variable_get('update_last_check', 0);
-  $output = theme('update_last_check', array('last' => $last));
-  $output .= backdrop_render_children($form);
-  return $output;
 }
 
 /**
@@ -420,7 +420,7 @@ function update_manager_update_ready_form($form, &$form_state) {
  */
 function update_manager_update_ready_form_submit($form, &$form_state) {
   // Store maintenance_mode setting so we can restore it when done.
-  $_SESSION['maintenance_mode'] = variable_get('maintenance_mode', FALSE);
+  $_SESSION['maintenance_mode'] = config_get('system.core', 'maintenance_mode');
   if ($form_state['values']['maintenance_mode'] == TRUE) {
     state_set('maintenance_mode', TRUE);
   }
@@ -482,11 +482,11 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
  * Form constructor for the install form of the Update Manager module.
  *
  * This presents a place to enter a URL or upload an archive file to use to
- * install a new module or theme.
+ * install a new module, theme, or layout.
  *
  * @param $context
  *   String representing the context from which we're trying to install.
- *   Allowed values are 'module', 'theme', and 'report'.
+ *   Allowed values are 'module', 'theme', 'layout', and 'report'.
  *
  * @see update_manager_install_form_validate()
  * @see update_manager_install_form_submit()
@@ -498,9 +498,11 @@ function update_manager_install_form($form, &$form_state, $context) {
     return $form;
   }
 
+  backdrop_set_title('Install a project');
+
   $form['help_text'] = array(
     '#prefix' => '<p>',
-    '#markup' => t('You can find modules and themes on <a href="@url">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
+    '#markup' => t('You can find modules, themes, and layouts on <a href="@url">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
       '@url' => 'http://backdropcms.org',
       '%extensions' => archiver_get_extensions(),
     )),
@@ -510,7 +512,7 @@ function update_manager_install_form($form, &$form_state, $context) {
   $form['project_url'] = array(
     '#type' => 'url',
     '#title' => t('Install from a URL'),
-    '#description' => t('For example: %url', array('%url' => 'http://ftp.drupal.org/files/projects/name.tar.gz')),
+    '#description' => t('For example: %url', array('%url' => 'https://github.com/backdrop-contrib/module/archive/1.x-1.2.3.zip')),
   );
 
   $form['information'] = array(
@@ -521,7 +523,7 @@ function update_manager_install_form($form, &$form_state, $context) {
 
   $form['project_upload'] = array(
     '#type' => 'file',
-    '#title' => t('Upload a module or theme archive to install'),
+    '#title' => t('Upload a module, theme, or layout archive to install'),
     '#description' => t('For example: %filename from your local computer', array('%filename' => 'name.tar.gz')),
   );
 
@@ -566,10 +568,10 @@ function _update_manager_check_backends(&$form, $operation) {
   $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules and themes from this interface. Instead, update modules and themes by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules and themes from this interface. Instead, install modules and themes by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
     }
     return FALSE;
   }
@@ -581,21 +583,21 @@ function _update_manager_check_backends(&$form, $operation) {
   if ($operation == 'update') {
     $form['available_backends']['#markup'] = format_plural(
       count($available_backends),
-      'Updating modules and themes requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other update methods.',
-      'Updating modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
+      'Updating modules, themes, and layouts requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other update methods.',
+      'Updating modules, themes, and layouts requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'https://backdropcms.org/guide/modules',
       ));
   }
   else {
     $form['available_backends']['#markup'] = format_plural(
       count($available_backends),
-      'Installing modules and themes requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other installation methods.',
-      'Installing modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
+      'Installing modules, themes, and layouts requires <strong>@backends access</strong> to your server. See the <a href="@handbook_url">handbook</a> for other installation methods.',
+      'Installing modules, themes, and layouts requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'https://backdropcms.org/guide/modules',
       ));
   }
   return TRUE;
@@ -665,14 +667,14 @@ function update_manager_install_form_submit($form, &$form_state) {
 
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.TXT).
+  // and others list an actual file (i.e., MODULE/README.MD).
   $project = strtok($files[0], '/\\');
 
   $archive_errors = update_manager_archive_verify($project, $local_cache, $directory);
   if (!empty($archive_errors)) {
     form_set_error($field, array_shift($archive_errors));
-    // @todo: Fix me in D8: We need a way to set multiple errors on the same
-    // form element and have all of them appear!
+    // @todo: We need a way to set multiple errors on the same form element and
+    // have all of them appear!
     if (!empty($archive_errors)) {
       foreach ($archive_errors as $error) {
         backdrop_set_message($error, 'error');
@@ -709,7 +711,6 @@ function update_manager_install_form_submit($form, &$form_state) {
     form_set_error($field, t('%project is already installed.', array('%project' => $project_title)));
     return;
   }
-
   $project_real_location = backdrop_realpath($project_location);
   $arguments = array(
     'project' => $project,
@@ -775,7 +776,7 @@ function update_manager_archive_extract($file, $directory) {
 
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.TXT).
+  // and others list an actual file (i.e., MODULE/README.MD).
   $project = strtok($files[0], '/\\');
 
   $extract_location = $directory . '/' . $project;

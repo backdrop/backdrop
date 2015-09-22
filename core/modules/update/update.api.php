@@ -16,7 +16,7 @@
  * Most modules will never need to implement this hook. It is for advanced
  * interaction with the Update Manager module. The primary use-case for this
  * hook is to add projects to the list; for example, to provide update status
- * data on disabled modules and themes. A contributed module might want to hide
+ * data on disabled modules, themes, and layouts. A contributed module might want to hide
  * projects from the list; for example, if there is a site-specific module that
  * doesn't have any official releases, that module could remove itself from this
  * list to avoid "No available releases found" warnings on the available updates
@@ -26,7 +26,7 @@
  * @param $projects
  *   Reference to an array of the projects installed on the system. This
  *   includes all the metadata documented in the comments below for each project
- *   (either module or theme) that is currently enabled. The array is initially
+ *   (either module, theme, or layout) that is currently enabled. The array is initially
  *   populated inside update_get_projects() with the help of
  *   _update_process_info_list(), so look there for examples of how to populate
  *   the array with real values.
@@ -47,8 +47,8 @@ function hook_update_projects_alter(&$projects) {
     'info' => array(
       'name' => 'Some disabled module',
       'description' => 'A module not enabled on the site that you want to see in the available updates report.',
-      'version' => '8.x-1.0',
-      'backdrop' => '8.x',
+      'version' => '1.x-1.0',
+      'backdrop' => '1.x',
       // The maximum file change time (the "ctime" returned by the filectime()
       // PHP method) for all of the .info files included in this project.
       '_info_file_ctime' => 1243888165,
@@ -83,7 +83,7 @@ function hook_update_projects_alter(&$projects) {
  * @see update_calculate_project_data()
  */
 function hook_update_status_alter(&$projects) {
-  $settings = variable_get('update_advanced_project_settings', array());
+  $settings = config_get('update.settings', 'update_projects');
   foreach ($projects as $project => $project_info) {
     if (isset($settings[$project]) && isset($settings[$project]['check']) &&
         ($settings[$project]['check'] == 'never' ||

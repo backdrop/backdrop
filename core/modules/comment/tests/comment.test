@@ -13,9 +13,9 @@ class CommentHelperCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('comment', 'search');
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer blocks'));
-    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments'));
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer layouts'));
+    $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
 
   /**
@@ -35,9 +35,10 @@ class CommentHelperCase extends BackdropWebTestCase {
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit['comment_body[' . $langcode . '][0][value]'] = $comment;
+    $node_type = node_type_get_type('post');
 
-    $preview_mode = variable_get('comment_preview_article', BACKDROP_OPTIONAL);
-    $subject_mode = variable_get('comment_subject_field_article', 1);
+    $preview_mode = $node_type->settings['comment_preview'];
+    $subject_mode = $node_type->settings['comment_subject_field'];
 
     // Must get the page before we test for fields.
     if ($node !== NULL) {
@@ -48,7 +49,7 @@ class CommentHelperCase extends BackdropWebTestCase {
       $edit['subject'] = $subject;
     }
     else {
-      $this->assertNoFieldByName('subject', '', 'Subject field not found.');
+      $this->assertNoFieldByName('subject', '', 'Title field not found.');
     }
 
     if ($contact !== NULL && is_array($contact)) {
@@ -79,7 +80,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 
     // Get comment.
     if ($contact !== TRUE) { // If true then attempting to find error message.
-      if ($subject) {
+      if ($subject && $subject_mode) {
         $this->assertText($subject, 'Comment subject posted.');
       }
       $this->assertText($comment, 'Comment body posted.');
@@ -159,7 +160,7 @@ class CommentHelperCase extends BackdropWebTestCase {
         $mode_text = 'required';
         break;
     }
-    $this->setCommentSettings('comment_preview', $mode, 'Comment preview ' . $mode_text . '.');
+    $this->setCommentSettings('comment_preview', $mode, format_string('Comment preview @mode_text.', array('@mode_text' => $mode_text)));
   }
 
   /**
@@ -183,7 +184,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   - 2: Contact information required.
    */
   function setCommentAnonymous($level) {
-    $this->setCommentSettings('comment_anonymous', $level, 'Anonymous commenting set to level ' . $level . '.');
+    $this->setCommentSettings('comment_anonymous', $level, format_string('Anonymous commenting set to level @level.', array('@level' => $level)));
   }
 
   /**
@@ -193,23 +194,25 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   Comments per page value.
    */
   function setCommentsPerPage($number) {
-    $this->setCommentSettings('comment_default_per_page', $number, 'Number of comments per page set to ' . $number . '.');
+    $this->setCommentSettings('comment_per_page', $number, format_string('Number of comments per page set to @number.', array('@number' => $number)));
   }
 
   /**
-   * Sets a comment settings variable for the article content type.
+   * Sets a comment config for the post content type.
    *
    * @param string $name
-   *   Name of variable.
+   *   Name of setting.
    * @param string $value
-   *   Value of variable.
+   *   Value of setting.
    * @param string $message
    *   Status message to display.
    */
   function setCommentSettings($name, $value, $message) {
-    variable_set($name . '_article', $value);
+    $node_type = node_type_get_type('post');
+    $node_type->settings[$name] = $value;
+    node_type_save($node_type);
     // Display status message.
-    $this->assertTrue(TRUE, $message);
+    $this->pass($message);
   }
 
   /**
@@ -275,7 +278,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(FALSE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Post comment #1 without subject or preview.
@@ -371,22 +374,22 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentsPerPage(50);
 
     // Attempt to post to node with comments disabled.
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_HIDDEN));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_HIDDEN));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('This discussion is closed', 'Posting to node with comments disabled');
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with read-only comments.
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_CLOSED));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_CLOSED));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('This discussion is closed', 'Posting to node with comments read-only');
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with comments enabled (check field names etc).
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
+    $this->assertTrue($this->node, 'Post node created.');
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertNoText('This discussion is closed', 'Posting to node with comments enabled');
     $this->assertField('edit-comment-body-' . $langcode . '-0-value', 'Comment body field found.');
@@ -425,7 +428,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     // Test if the right links are displayed when no comment is present for the
     // node.
     $this->backdropLogin($this->admin_user);
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'comment' => COMMENT_NODE_OPEN));
     $this->backdropGet('node');
     $this->assertNoLink(t('@count comments', array('@count' => 0)));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
@@ -483,7 +486,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
     foreach ($permutations as $case) {
       // Create a new node.
-      $node = $this->backdropCreateNode(array('type' => 'article', 'uid' => $case['node_uid']));
+      $node = $this->backdropCreateNode(array('type' => 'post', 'uid' => $case['node_uid']));
 
       // Add a comment.
       $comment = entity_create('comment', array(
@@ -583,11 +586,11 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(FALSE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Creates a second user to post comments.
-    $this->web_user2 = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments'));
+    $this->web_user2 = $this->backdropCreateUser(array('access comments', 'post comments', 'create post content', 'edit own comments'));
 
     // Checks the initial values of node comment statistics with no comment.
     $node = node_load($this->node->nid);
@@ -610,9 +613,9 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertEqual($node->comment_count, 1, 'The value of node comment_count is 1.');
 
     // Prepare for anonymous comment submission (comment approval enabled).
-    variable_set('user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
     $this->backdropLogin($this->admin_user);
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => TRUE,
       'skip comment approval' => FALSE,
@@ -636,7 +639,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
     // Prepare for anonymous comment submission (no approval required).
     $this->backdropLogin($this->admin_user);
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => TRUE,
       'skip comment approval' => TRUE,
@@ -671,7 +674,7 @@ class CommentInterfaceTest extends CommentHelperCase {
   function testCommentLinks() {
     // Bartik theme alters comment links, so use a different theme.
     theme_enable(array('stark'));
-    variable_set('theme_default', 'stark');
+    config_set('system.core', 'theme_default', 'stark');
 
     // Remove additional user permissions from $this->web_user added by setUp(),
     // since this test is limited to anonymous and authenticated roles only.
@@ -789,20 +792,22 @@ class CommentInterfaceTest extends CommentHelperCase {
     }
 
     // Change comment settings.
-    variable_set('comment_form_location_' . $this->node->type, $info['form']);
-    variable_set('comment_anonymous_' . $this->node->type, $info['contact']);
+    $node_type = node_type_get_type($this->node->type);
+    $node_type->settings['comment_form_location'] = $info['form'];
+    $node_type->settings['comment_anonymous'] = $info['contact'];
+    node_type_save($node_type);
     if ($this->node->comment != $info['comments']) {
       $this->node->comment = $info['comments'];
       node_save($this->node);
     }
 
     // Change user settings.
-    variable_set('user_register', $info['user_register']);
+    config_set('system.core', 'user_register', $info['user_register']);
 
     // Change user permissions.
-    $rid = ($this->loggedInUser ? BACKDROP_AUTHENTICATED_RID : BACKDROP_ANONYMOUS_RID);
+    $role_name = ($this->loggedInUser ? BACKDROP_AUTHENTICATED_ROLE : BACKDROP_ANONYMOUS_ROLE);
     $perms = array_intersect_key($info, array('access comments' => 1, 'post comments' => 1, 'skip comment approval' => 1, 'edit own comments' => 1));
-    user_role_change_permissions($rid, $perms);
+    user_role_change_permissions($role_name, $perms);
 
     // Output verbose debugging information.
     // @see BackdropTestCase::error()
@@ -889,7 +894,7 @@ class CommentInterfaceTest extends CommentHelperCase {
         if (!$this->loggedInUser) {
           if (user_access('post comments', $this->web_user)) {
             // The note depends on whether users are actually able to register.
-            if ($info['user_register']) {
+            if ($info['user_register'] != USER_REGISTER_ADMINISTRATORS_ONLY) {
               $this->assertText('Log in or register to post comments');
             }
             else {
@@ -957,13 +962,15 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Login as web user and add a signature and a user picture.
     $this->backdropLogin($this->web_user);
-    variable_set('user_signatures', 1);
-    variable_set('user_pictures', 1);
+    config('system.core')
+      ->set('user_signatures', 1)
+      ->set('user_pictures', 1)
+      ->save();
     $test_signature = $this->randomName();
     $edit['signature[value]'] = '<a href="http://example.com/">' . $test_signature. '</a>';
     $edit['signature[format]'] = 'filtered_html';
@@ -979,11 +986,11 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the preview is displaying the title and body.
     $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
-    $this->assertText($edit['subject'], 'Subject displayed.');
+    $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
 
     // Check that the title and body fields are displayed with the correct values.
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
 
     // Check that the signature is displaying with the correct text format.
@@ -1003,7 +1010,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
 
     $edit = array();
     $edit['subject'] = $this->randomName(8);
@@ -1013,18 +1020,18 @@ class CommentPreviewTest extends CommentHelperCase {
     $raw_date = strtotime($edit['date']);
     $expected_text_date = format_date($raw_date);
     $expected_form_date = format_date($raw_date, 'custom', 'Y-m-d H:i O');
-    $comment = $this->postComment($this->node, $edit['subject'], $edit['comment_body[' . $langcode . '][0][value]'], TRUE);
+    $comment = $this->postComment($this->node, $edit['comment_body[' . $langcode . '][0][value]'], '', TRUE);
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Preview'));
 
     // Check that the preview is displaying the subject, comment, author and date correctly.
     $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
-    $this->assertText($edit['subject'], 'Subject displayed.');
+    $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
     $this->assertText($edit['name'], 'Author displayed.');
     $this->assertText($expected_text_date, 'Date displayed.');
 
     // Check that the subject, comment, author and date fields are displayed with the correct values.
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
     $this->assertFieldByName('name', $edit['name'], 'Author field displayed.');
     $this->assertFieldByName('date', $edit['date'], 'Date field displayed.');
@@ -1035,7 +1042,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the comment fields are correct after loading the saved comment.
     $this->backdropGet('comment/' . $comment->id . '/edit');
-    $this->assertFieldByName('subject', $edit['subject'], 'Subject field displayed.');
+    $this->assertFieldByName('subject', $edit['subject'], 'Title field displayed.');
     $this->assertFieldByName('comment_body[' . $langcode . '][0][value]', $edit['comment_body[' . $langcode . '][0][value]'], 'Comment field displayed.');
     $this->assertFieldByName('name', $edit['name'], 'Author field displayed.');
     $this->assertFieldByName('date', $expected_form_date, 'Date field displayed.');
@@ -1050,7 +1057,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that the saved comment is still correct.
     $comment_loaded = comment_load($comment->id);
-    $this->assertEqual($comment_loaded->subject, $edit['subject'], 'Subject loaded.');
+    $this->assertEqual($comment_loaded->subject, $edit['subject'], 'Title loaded.');
     $this->assertEqual($comment_loaded->comment_body[$langcode][0]['value'], $edit['comment_body[' . $langcode . '][0][value]'], 'Comment body loaded.');
     $this->assertEqual($comment_loaded->name, $edit['name'], 'Name loaded.');
     $this->assertEqual($comment_loaded->created, $raw_date, 'Date loaded.');
@@ -1064,7 +1071,7 @@ class CommentPreviewTest extends CommentHelperCase {
 class CommentAnonymous extends CommentHelperCase {
   function setUp() {
     parent::setUp();
-    variable_set('user_register', USER_REGISTER_VISITORS);
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
 
   /**
@@ -1073,7 +1080,7 @@ class CommentAnonymous extends CommentHelperCase {
   function testAnonymous() {
     $this->backdropLogin($this->admin_user);
     // Enabled anonymous user comments.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => TRUE,
       'skip comment approval' => TRUE,
@@ -1082,7 +1089,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropLogout();
 
     // Post anonymous comment without contact info.
-    $anonymous_comment1 = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $anonymous_comment1 = $this->postComment($this->node, $this->randomName());
     $this->assertTrue($this->commentExists($anonymous_comment1), 'Anonymous comment without contact info found.');
 
     // Allow contact info.
@@ -1091,7 +1098,7 @@ class CommentAnonymous extends CommentHelperCase {
 
     // Attempt to edit anonymous comment.
     $this->backdropGet('comment/' . $anonymous_comment1->id . '/edit');
-    $edited_comment = $this->postComment(NULL, $this->randomName(), $this->randomName());
+    $edited_comment = $this->postComment(NULL, $this->randomName());
     $this->assertTrue($this->commentExists($edited_comment, FALSE), 'Modified reply found.');
     $this->backdropLogout();
 
@@ -1099,7 +1106,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertTrue($this->commentContactInfoAvailable(), 'Contact information available.');
 
-    $anonymous_comment2 = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $anonymous_comment2 = $this->postComment($this->node, $this->randomName());
     $this->assertTrue($this->commentExists($anonymous_comment2), 'Anonymous comment with contact info (optional) found.');
 
     // Ensure anonymous users cannot post in the name of registered users.
@@ -1110,6 +1117,8 @@ class CommentAnonymous extends CommentHelperCase {
       'subject' => $this->randomName(),
       "comment_body[$langcode][0][value]" => $this->randomName(),
     );
+    $this->setCommentSubject(TRUE);
+
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
     $this->assertText(t('The name you used belongs to a registered user.'));
 
@@ -1122,7 +1131,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertTrue($this->commentContactInfoAvailable(), 'Contact information available.');
 
-    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), $this->randomName(), TRUE);
+    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), '', TRUE);
     // Name should have 'Anonymous' for value by default.
     $this->assertText(t('E-mail field is required.'), 'E-mail required.');
     $this->assertFalse($this->commentExists($anonymous_comment3), 'Anonymous comment with contact info (required) not found.');
@@ -1130,7 +1139,7 @@ class CommentAnonymous extends CommentHelperCase {
     // Post comment with contact info (required).
     $author_name = $this->randomName();
     $author_mail = $this->randomName() . '@example.com';
-    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), $this->randomName(), array('name' => $author_name, 'mail' => $author_mail));
+    $anonymous_comment3 = $this->postComment($this->node, $this->randomName(), '', array('name' => $author_name, 'mail' => $author_mail));
     $this->assertTrue($this->commentExists($anonymous_comment3), 'Anonymous comment with contact info (required) found.');
 
     // Make sure the user data appears correctly when editing the comment.
@@ -1159,7 +1168,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->backdropLogout();
 
     // Reset.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => FALSE,
       'post comments' => FALSE,
       'skip comment approval' => FALSE,
@@ -1175,10 +1184,10 @@ class CommentAnonymous extends CommentHelperCase {
     // Attempt to view node-comment form while disallowed.
     $this->backdropGet('comment/reply/' . $this->node->nid);
     $this->assertText('You are not authorized to post comments', 'Error attempting to post comment.');
-    $this->assertNoFieldByName('subject', '', 'Subject field not found.');
+    $this->assertNoFieldByName('subject', '', 'Title field not found.');
     $this->assertNoFieldByName("comment_body[$langcode][0][value]", '', 'Comment field not found.');
 
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => FALSE,
       'skip comment approval' => FALSE,
@@ -1188,14 +1197,14 @@ class CommentAnonymous extends CommentHelperCase {
     $this->assertLink('Log in', 1, 'Link to log in was found.');
     $this->assertLink('register', 1, 'Link to register was found.');
 
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => FALSE,
       'post comments' => TRUE,
       'skip comment approval' => TRUE,
     ));
     $this->backdropGet('node/' . $this->node->nid);
     $this->assertNoPattern('@<h2[^>]*>Comments</h2>@', 'Comments were not displayed.');
-    $this->assertFieldByName('subject', '', 'Subject field found.');
+    $this->assertFieldByName('subject', '', 'Title field found.');
     $this->assertFieldByName("comment_body[$langcode][0][value]", '', 'Comment field found.');
 
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $anonymous_comment3->id);
@@ -1214,19 +1223,19 @@ class CommentPagerTest extends CommentHelperCase {
   function testCommentPaging() {
     $this->backdropLogin($this->admin_user);
 
-    // Set comment variables.
+    // Set comment config.
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
     $this->setCommentPreview(BACKDROP_DISABLED);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
-    $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
+    $comments[] = $this->postComment($node, $this->randomName(), '', TRUE);
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     // Set comments to one per page so that we are able to test paging without
     // needing to insert large numbers of comments.
@@ -1256,7 +1265,7 @@ class CommentPagerTest extends CommentHelperCase {
     $replies = array();
     $oldest_comment = reset($comments);
     $this->backdropGet('comment/reply/' . $node->nid . '/' . $oldest_comment->id);
-    $reply = $this->postComment(NULL, $this->randomName(), $this->randomName(), TRUE);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
 
     $this->setCommentsPerPage(2);
     // We are still in flat view - the replies should not be on the first page,
@@ -1267,7 +1276,7 @@ class CommentPagerTest extends CommentHelperCase {
     // If we switch to threaded mode, the replies on the oldest comment
     // should be bumped to the first page and comment 6 should be bumped
     // to the second page.
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
     $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 0)));
     $this->assertTrue($this->commentExists($reply, TRUE), 'In threaded mode, reply appears on page 1.');
     $this->assertFalse($this->commentExists($comments[1]), 'In threaded mode, comment 2 has been bumped off of page 1.');
@@ -1287,7 +1296,7 @@ class CommentPagerTest extends CommentHelperCase {
   function testCommentOrderingThreading() {
     $this->backdropLogin($this->admin_user);
 
-    // Set comment variables.
+    // Set comment config.
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
     $this->setCommentPreview(BACKDROP_DISABLED);
@@ -1296,7 +1305,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->setCommentsPerPage(1000);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
@@ -1327,7 +1336,7 @@ class CommentPagerTest extends CommentHelperCase {
     // - 2
     //   - 5
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     $expected_order = array(
       0,
@@ -1341,7 +1350,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->backdropGet('node/' . $node->nid);
     $this->assertCommentOrder($comments, $expected_order);
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
 
     $expected_order = array(
       0,
@@ -1387,7 +1396,7 @@ class CommentPagerTest extends CommentHelperCase {
   function testCommentNewPageIndicator() {
     $this->backdropLogin($this->admin_user);
 
-    // Set comment variables.
+    // Set comment config.
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
     $this->setCommentPreview(BACKDROP_DISABLED);
@@ -1397,7 +1406,7 @@ class CommentPagerTest extends CommentHelperCase {
     $this->setCommentsPerPage(1);
 
     // Create a node and three comments.
-    $node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $comments = array();
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
     $comments[] = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
@@ -1423,7 +1432,7 @@ class CommentPagerTest extends CommentHelperCase {
     // - 2
     //   - 5
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_FLAT, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_FLAT, 'Comment paging changed.');
 
     $expected_pages = array(
       1 => 5, // Page of comment 5
@@ -1441,7 +1450,7 @@ class CommentPagerTest extends CommentHelperCase {
       $this->assertIdentical($expected_page, $returned_page, format_string('Flat mode, @new replies: expected page @expected, returned page @returned.', array('@new' => $new_replies, '@expected' => $expected_page, '@returned' => $returned_page)));
     }
 
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Switched to threaded mode.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Switched to threaded mode.');
 
     $expected_pages = array(
       1 => 5, // Page of comment 5
@@ -1463,10 +1472,6 @@ class CommentPagerTest extends CommentHelperCase {
 
 /**
  * Tests comments with node access.
- *
- * See http://drupal.org/node/886752 -- verify there is no PostgreSQL error when
- * viewing a node with threaded comments (a comment and a reply), if a node
- * access module is in use.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
   function setUp() {
@@ -1475,8 +1480,8 @@ class CommentNodeAccessTest extends CommentHelperCase {
 
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer blocks'));
-    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create article content', 'edit own comments', 'node test view'));
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create post content', 'edit own comments', 'node test view'));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
 
   /**
@@ -1489,7 +1494,7 @@ class CommentNodeAccessTest extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Post comment.
@@ -1530,7 +1535,7 @@ class CommentApprovalTest extends CommentHelperCase {
    */
   function testApprovalAdminInterface() {
     // Set anonymous comments to require approval.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => TRUE,
       'skip comment approval' => FALSE,
@@ -1543,6 +1548,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->assertText(t('No comments available.'));
 
     $this->backdropLogout();
+    $this->setCommentSubject(TRUE);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1599,7 +1605,7 @@ class CommentApprovalTest extends CommentHelperCase {
    */
   function testApprovalNodeInterface() {
     // Set anonymous comments to require approval.
-    user_role_change_permissions(BACKDROP_ANONYMOUS_RID, array(
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access comments' => TRUE,
       'post comments' => TRUE,
       'skip comment approval' => FALSE,
@@ -1607,6 +1613,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentAnonymous('0'); // Ensure that doesn't require contact info.
     $this->backdropLogout();
+    $this->setCommentSubject(TRUE);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1646,21 +1653,24 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
    */
   function testRecentCommentBlock() {
     $this->backdropLogin($this->admin_user);
+    $this->setCommentSubject(TRUE);
 
-    // Set the block to a region to confirm block is available.
-    $edit = array(
-      'blocks[comment_recent][region]' => 'sidebar_first',
-    );
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $this->assertText(t('The block settings have been updated.'), 'Block saved to first sidebar region.');
-
-    // Set block title and variables.
+    // Add the block to the sidebar region in the default layout.
+    $layout_name = 'default';
+    $region = 'sidebar';
     $block = array(
-      'title' => $this->randomName(),
-      'comment_block_count' => 2,
+      'module' => 'comment',
+      'delta' => 'recent',
     );
-    $this->backdropPost('admin/structure/block/manage/comment/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block saved.');
+    $block_title = $this->randomName(16);
+    $edit = array(
+      'region' => $region,
+      'title' => $block_title,
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'block_settings[comment_count]' => 2,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Add some test comments, one without a subject.
     $comment1 = $this->postComment($this->node, $this->randomName(), $this->randomName());
@@ -1670,19 +1680,18 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
     // Test that a user without the 'access comments' permission cannot see the
     // block.
     $this->backdropLogout();
-    user_role_revoke_permissions(BACKDROP_ANONYMOUS_RID, array('access comments'));
-    // backdropCreateNode() does not automatically flush content caches unlike
-    // posting a node from a node form.
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array('access comments'));
+    // Clear the page cache.
     cache_clear_all();
     $this->backdropGet('');
-    $this->assertNoText($block['title'], 'Block was not found.');
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_RID, array('access comments'));
+    $this->assertNoText($block_title, 'Block was not found.');
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access comments'));
 
     // Test that a user with the 'access comments' permission can see the
     // block.
     $this->backdropLogin($this->web_user);
     $this->backdropGet('');
-    $this->assertText($block['title'], 'Block was found.');
+    $this->assertText($block_title, 'Block was found.');
 
     // Test the only the 2 latest comments are shown and in the proper order.
     $this->assertNoText($comment1->subject, 'Comment not found in block.');
@@ -1693,11 +1702,11 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
     // Set the number of recent comments to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
-    $block = array(
-      'comment_block_count' => 10,
+    $edit = array(
+      'block_settings[comment_count]' => 10,
     );
-    $this->backdropPost('admin/structure/block/manage/comment/recent/configure', $block, t('Save block'));
-    $this->assertText(t('The block configuration has been saved.'), 'Block saved.');
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Post an additional comment.
     $comment4 = $this->postComment($this->node, $this->randomName(), $this->randomName());
@@ -1787,19 +1796,19 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
    * Creates a comment, then tests the tokens generated from it.
    */
   function testCommentTokenReplacement() {
-    global $language_interface;
+    global $language;
     $url_options = array(
       'absolute' => TRUE,
-      'language' => $language_interface,
+      'language' => $language,
     );
 
     $this->backdropLogin($this->admin_user);
 
-    // Set comment variables.
+    // Set comment config.
     $this->setCommentSubject(TRUE);
 
     // Create a node and a comment.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $parent_comment = $this->postComment($node, $this->randomName(), $this->randomName(), TRUE);
 
     // Post a reply to the comment.
@@ -1823,20 +1832,21 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = _text_sanitize($instance, LANGUAGE_NONE, $comment->comment_body[LANGUAGE_NONE][0], 'value');
     $tests['[comment:url]'] = url('comment/' . $comment->cid, $url_options + array('fragment' => 'comment-' . $comment->cid));
     $tests['[comment:edit-url]'] = url('comment/' . $comment->cid . '/edit', $url_options);
-    $tests['[comment:created:since]'] = format_interval(REQUEST_TIME - $comment->created, 2, $language_interface->langcode);
-    $tests['[comment:changed:since]'] = format_interval(REQUEST_TIME - $comment->changed, 2, $language_interface->langcode);
+    $tests['[comment:created:since]'] = format_interval(REQUEST_TIME - $comment->created, 2, $language->langcode);
+    $tests['[comment:changed:since]'] = format_interval(REQUEST_TIME - $comment->changed, 2, $language->langcode);
     $tests['[comment:parent:cid]'] = $comment->pid;
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
     $tests['[comment:node:title]'] = check_plain($node->title);
+    $tests['[comment:author]'] = check_plain(format_username($this->admin_user));
     $tests['[comment:author:uid]'] = $comment->uid;
-    $tests['[comment:author:name]'] = check_plain($this->admin_user->name);
+    $tests['[comment:author:name]'] = check_plain(format_username($this->admin_user));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('comment' => $comment), array('language' => $language_interface));
+      $output = token_replace($input, array('comment' => $comment), array('language' => $language));
       $this->assertEqual($output, $expected, format_string('Sanitized comment token %token replaced.', array('%token' => $input)));
     }
 
@@ -1849,10 +1859,11 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = $comment->comment_body[LANGUAGE_NONE][0]['value'];
     $tests['[comment:parent:title]'] = $parent_comment->subject;
     $tests['[comment:node:title]'] = $node->title;
-    $tests['[comment:author:name]'] = $this->admin_user->name;
+    $tests['[comment:author]'] = format_username($this->admin_user);
+    $tests['[comment:author:name]'] = format_username($this->admin_user);
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('comment' => $comment), array('language' => $language_interface, 'sanitize' => FALSE));
+      $output = token_replace($input, array('comment' => $comment), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized comment token %token replaced.', array('%token' => $input)));
     }
 
@@ -1865,7 +1876,7 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[node:comment-count-new]'] = 2;
 
     foreach ($tests as $input => $expected) {
-      $output = token_replace($input, array('node' => $node), array('language' => $language_interface));
+      $output = token_replace($input, array('node' => $node), array('language' => $language));
       $this->assertEqual($output, $expected, format_string('Node comment token %token replaced.', array('%token' => $input)));
     }
   }
@@ -1882,31 +1893,14 @@ class CommentActionsTestCase extends CommentHelperCase {
     $this->backdropLogin($this->web_user);
     $comment_text = $this->randomName();
     $subject = $this->randomName();
-    $comment = $this->postComment($this->node, $comment_text, $subject);
+    $comment = $this->postComment($this->node, $comment_text, '');
     $comment = comment_load($comment->id);
 
-    // Unpublish a comment (direct form: doesn't actually save the comment).
     comment_unpublish_action($comment);
-    $this->assertEqual($comment->status, COMMENT_NOT_PUBLISHED, 'Comment was unpublished');
-    $this->assertWatchdogMessage('Unpublished comment %subject.', array('%subject' => $subject), 'Found watchdog message');
-    $this->clearWatchdog();
-
-    // Unpublish a comment (indirect form: modify the comment in the database).
-    comment_unpublish_action(NULL, array('cid' => $comment->cid));
     $this->assertEqual(comment_load($comment->cid)->status, COMMENT_NOT_PUBLISHED, 'Comment was unpublished');
-    $this->assertWatchdogMessage('Unpublished comment %subject.', array('%subject' => $subject), 'Found watchdog message');
 
-    // Publish a comment (direct form: doesn't actually save the comment).
     comment_publish_action($comment);
-    $this->assertEqual($comment->status, COMMENT_PUBLISHED, 'Comment was published');
-    $this->assertWatchdogMessage('Published comment %subject.', array('%subject' => $subject), 'Found watchdog message');
-    $this->clearWatchdog();
-
-    // Publish a comment (indirect form: modify the comment in the database).
-    comment_publish_action(NULL, array('cid' => $comment->cid));
     $this->assertEqual(comment_load($comment->cid)->status, COMMENT_PUBLISHED, 'Comment was published');
-    $this->assertWatchdogMessage('Published comment %subject.', array('%subject' => $subject), 'Found watchdog message');
-    $this->clearWatchdog();
   }
 
   /**
@@ -1979,20 +1973,20 @@ class CommentFieldsTest extends CommentHelperCase {
 
     // Disable the comment module.
     $edit = array();
-    $edit['modules[Core][comment][enable]'] = FALSE;
+    $edit['modules[Comments][comment][enable]'] = FALSE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
     $this->assertFalse(module_exists('comment'), 'Comment module disabled.');
 
     // Enable core content type module: book.
     $edit = array();
-    $edit['modules[Core][book][enable]'] = 'book';
+    $edit['modules[System][book][enable]'] = 'book';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
 
     // Now enable the comment module.
     $edit = array();
-    $edit['modules[Core][comment][enable]'] = 'comment';
+    $edit['modules[Comments][comment][enable]'] = 'comment';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
     $this->assertTrue(module_exists('comment'), 'Comment module enabled.');
@@ -2007,7 +2001,7 @@ class CommentFieldsTest extends CommentHelperCase {
     // asserting that the body is actually posted correctly.
     $this->web_user = $this->backdropCreateUser(array('access content', 'access comments', 'post comments', 'skip comment approval'));
     $this->backdropLogin($this->web_user);
-    $this->postComment($book_node, $this->randomName(), $this->randomName());
+    $this->postComment($book_node, $this->randomName(), '');
   }
 
   /**
@@ -2017,7 +2011,7 @@ class CommentFieldsTest extends CommentHelperCase {
     // Disable text processing for comments.
     $this->backdropLogin($this->admin_user);
     $edit = array('instance[settings][text_processing]' => 0);
-    $this->backdropPost('admin/structure/types/manage/article/comment/fields/comment_body', $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body', $edit, t('Save settings'));
 
     // Post a comment without an explicit subject.
     $this->backdropLogin($this->web_user);
@@ -2041,12 +2035,12 @@ class CommentThreadingTestCase extends CommentHelperCase {
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
-    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
     // Create a node.
     $this->backdropLogin($this->web_user);
-    $this->node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
 
     // Post comment #1.
     $this->backdropLogin($this->web_user);
@@ -2123,7 +2117,7 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
    */
   function testNodeDeletion() {
     $this->backdropLogin($this->web_user);
-    $comment = $this->postComment($this->node, $this->randomName(), $this->randomName());
+    $comment = $this->postComment($this->node, $this->randomName(), '');
     $this->assertTrue(comment_load($comment->id), 'The comment could be loaded.');
     node_delete($this->node->nid);
     $this->assertFalse(comment_load($comment->id), 'The comment could not be loaded after the node was deleted.');

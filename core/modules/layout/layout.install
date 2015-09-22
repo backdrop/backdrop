@@ -1,0 +1,36 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Layout module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function layout_schema() {
+  $schema['cache_layout_path'] = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_layout_path']['description'] = 'Cache table to store which layouts are active at a given path.';
+
+  return $schema;
+}
+
+/**
+ * Implements hook_enable().
+ */
+function layout_enable() {
+  config_set('system.core', 'menu_route_handler', 'layout_route_handler');
+}
+
+/**
+ * Implements hook_disable().
+ */
+function layout_disable() {
+  config_set('system.core', 'menu_route_handler', NULL);
+}
+
+/**
+ * Implements hook_install().
+ */
+function layout_install() {
+  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+}

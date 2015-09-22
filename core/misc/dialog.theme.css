@@ -10,7 +10,6 @@
   background: #fff;
   border: solid 1px #ccc;
   padding: 0;
-  max-width: 300px;
 }
 .ui-dialog .ui-dialog-titlebar {
   font-weight: bold;
@@ -37,6 +36,7 @@
 }
 .ui-dialog .ui-dialog-buttonpane .ui-button-text-only .ui-button-text {
   padding: 0;
+  line-height: inherit;
 }
 
 /* Form action buttons are moved in dialogs. Remove empty space. */

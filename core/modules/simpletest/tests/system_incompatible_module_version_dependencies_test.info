@@ -2,6 +2,7 @@ name = "System incompatible module version dependencies test"
 description = "Support module for testing system dependencies."
 package = Testing
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x
 hidden = TRUE
 ; system_incompatible_module_version_test declares version 1.0

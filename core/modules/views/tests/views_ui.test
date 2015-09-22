@@ -26,7 +26,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
-    $this->assertText(t('Add new view'));
+    $this->assertText(t('Add view'));
 
     // Create a simple and not at all useful view.
     $view1 = array();
@@ -48,7 +48,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // Create two nodes.
     $node1 = $this->backdropCreateNode(array('type' => 'page'));
-    $node2 = $this->backdropCreateNode(array('type' => 'article'));
+    $node2 = $this->backdropCreateNode(array('type' => 'post'));
 
     // Now create a page with simple node listing and an attached feed.
     $view2 = array();
@@ -70,7 +70,10 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertText($node2->title);
 
     // Check if we have the feed.
-    $this->assertLinkByHref(url($view2['page[feed_properties][path]']));
+    $link = $this->xpath('/html/head/link[@type="application/rss+xml"][@href=:url]', array(
+      ':url' => url($view2['page[feed_properties][path]'], array('absolute' => TRUE)),
+    ));
+    $this->assertEqual(count($link), 1, 'RSS Feed found in page header.');
     $this->backdropGet($view2['page[feed_properties][path]']);
     $this->assertRaw('<rss version="2.0"');
     // The feed should have the same title and nodes as the page.
@@ -116,12 +119,10 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertText($view3['description']);
     $this->assertLinkByHref(url($view3['page[path]']));
 
-    // Put the block into the first sidebar region.
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('View: ' . $view3['human_name']);
-    $edit = array();
-    $edit["blocks[views_{$view3['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $layout->addBlock('views', $view3['name'] . '-block', 'sidebar');
+    $layout->save();
 
     // Visit a random page (not the one that displays the view itself) and look
     // for the expected node title in the block.
@@ -238,7 +239,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->node_type_without_tags = $this->backdropCreateContentType();
 
     // Create the vocabulary for the tag field.
-    $this->tag_vocabulary = entity_create('taxonomy_vocabulary', array(
+    $this->tag_vocabulary = new TaxonomyVocabulary(array(
       'name' => 'Views testing tags',
       'machine_name' => 'views_testing_tags',
     ));
@@ -450,13 +451,13 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
    * Tests the number of items per page.
    */
   function testItemsPerPage() {
-    // Create articles, each with a different creation time so that we can do a
+    // Create posts, each with a different creation time so that we can do a
     // meaningful sort.
-    $node1 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME));
-    $node2 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 1));
-    $node3 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 2));
-    $node4 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 3));
-    $node5 = $this->backdropCreateNode(array('type' => 'article', 'created' => REQUEST_TIME + 4));
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME));
+    $node2 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 2));
+    $node4 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 3));
+    $node5 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 4));
 
     // Create a page. This should never appear in the view created below.
     $page_node = $this->backdropCreateNode(array('type' => 'page', 'created' => REQUEST_TIME + 2));
@@ -468,7 +469,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $view['name'] = strtolower($this->randomName(16));
     $view['description'] = $this->randomName(16);
     $view['show[wizard_key]'] = 'node';
-    $view['show[type]'] = 'article';
+    $view['show[type]'] = 'post';
     $view['show[sort]'] = 'created:DESC';
     $view['page[create]'] = 1;
     $view['page[title]'] = $this->randomName(16);
@@ -499,11 +500,11 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     // Put the block into the first sidebar region, visit a page that displays
     // the block, and check that the nodes we expect appear in the correct
     // order.
-    $this->backdropGet('admin/structure/block');
-    $this->assertText('View: ' . $view['human_name']);
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $layout->save();
+
     $this->backdropGet('user');
     $content = $this->backdropGetContent();
     $this->assertText($node5->title);
@@ -555,7 +556,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
         break;
       }
     }
-    $this->assertTrue($found, t('Found a link to %path in the main menu', array('%path' => $view['page[path]'])));
+    $this->assertTrue($found, t('Found a link to %path in the primary navigation', array('%path' => $view['page[path]'])));
   }
 }
 
@@ -604,6 +605,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       $view['page[style][style_plugin]'] = 'jump_menu';
       $view['page[style][row_plugin]'] = 'fields';
       $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+      $this->backdropGet($view['page[path]']);
 
       // Submit the jump menu form, and check that we are redirected to the
       // expected URL.
@@ -668,7 +670,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a taxonomy term and return its expected path.
    */
   function createTaxonomyTermAndGetPath() {
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
+    $vocabulary = new TaxonomyVocabulary(array(
       'name' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
     ));
@@ -676,7 +678,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
-      'vid' => $vocabulary->vid,
+      'vocabulary' => $vocabulary->machine_name,
     ));
     taxonomy_term_save($term);
 
@@ -742,17 +744,19 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
     $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
 
-    // Put the block into the first sidebar region, and make sure it will not
+    // Put the block into the sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
     // presence/absence of the view's title in both the page and the block).
-    $this->backdropGet('admin/structure/block');
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $edit = array();
-    $edit['visibility'] = BLOCK_VISIBILITY_NOTLISTED;
-    $edit['pages'] = $view_path;
-    $this->backdropPost("admin/structure/block/manage/views/{$view['name']}-block/configure", $edit, t('Save block'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $block = $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $block->conditions[] = layout_create_access('path', array(
+      'settings' => array(
+        'visibility_setting' => 0,
+        'paths' => $view_path,
+      )
+    ));
+    $layout->save();
 
     // Add a node that will appear in the view, so that the block will actually
     // be displayed.
@@ -801,14 +805,16 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     // Put the block into the first sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
     // presence/absence of the view's title in both the page and the block).
-    $this->backdropGet('admin/structure/block');
-    $edit = array();
-    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
-    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
-    $edit = array();
-    $edit['visibility'] = BLOCK_VISIBILITY_NOTLISTED;
-    $edit['pages'] = $view['page[path]'];
-    $this->backdropPost("admin/structure/block/manage/views/{$view['name']}-block/configure", $edit, t('Save block'));
+    views_invalidate_cache();
+    $layout = layout_load('default');
+    $block = $layout->addBlock('views', $view['name'] . '-block', 'sidebar');
+    $block->conditions[] = layout_create_access('path', array(
+      'settings' => array(
+        'visibility_setting' => 0,
+        'paths' => $view['page[path]'],
+      )
+    ));
+    $layout->save();
 
     // Add a node that will appear in the view, so that the block will actually
     // be displayed.

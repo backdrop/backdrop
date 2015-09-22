@@ -946,8 +946,6 @@ class TruncateQuery extends Query {
     // In most cases, TRUNCATE is not a transaction safe statement as it is a
     // DDL statement which results in an implicit COMMIT. When we are in a
     // transaction, fallback to the slower, but transactional, DELETE.
-    // PostgreSQL also locks the entire table for a TRUNCATE strongly reducing
-    // the concurrency with other transactions.
     if ($this->connection->inTransaction()) {
       return $comments . 'DELETE FROM {' . $this->connection->escapeTable($this->table) . '}';
     }
@@ -1147,10 +1145,10 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * Executes the UPDATE query.
    *
    * @return
-   *   The number of rows affected by the update.
+   *   The number of rows matched by the update. This count includes rows that
+   *   may have matched but not necessarily changed by the update.
    */
   public function execute() {
-
     // Expressions take priority over literal fields, so we process those first
     // and remove any literal fields that conflict.
     $fields = $this->fields;
@@ -1227,13 +1225,9 @@ class UpdateQuery extends Query implements QueryConditionInterface {
  *   INSERT (column1 [, column2 ...]) VALUES (value1 [, value2 ...
  * @endcode
  *
- * Other databases (most notably MySQL, PostgreSQL and SQLite) will emulate
- * this statement by running a SELECT and then INSERT or UPDATE.
- *
- * By default, the two table names are identical and they are passed into the
- * the constructor. table_name_2 can be specified by the
- * MergeQuery::conditionTable() method. It can be either a string or a
- * subquery.
+ * MySQL does not directly implement MERGE queries and will emulate this
+ * statement by running an UPDATE, and if that does not match any rows, then
+ * an INSERT.
  *
  * The condition is built exactly like SelectQuery or UpdateQuery conditions,
  * the UPDATE query part is built similarly like an UpdateQuery and finally the
@@ -1242,7 +1236,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
  * MergeQuery::updateFields() and MergeQuery::insertFields() needs to be called
  * instead. MergeQuery::fields() can also be called which calls both of these
  * methods as the common case is to use the same column-value pairs for both
- * INSERT and UPDATE. However, this is not mandatory. Another convinient
+ * INSERT and UPDATE. However, this is not mandatory. Another convenient
  * wrapper is MergeQuery::key() which adds the same column-value pairs to the
  * condition and the INSERT query part.
  *
@@ -1268,11 +1262,6 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @var string
    */
   protected $table;
-
-  /**
-   * The table or subquery to be used for the condition.
-   */
-  protected $conditionTable;
 
   /**
    * An array of fields on which to insert.
@@ -1327,6 +1316,15 @@ class MergeQuery extends Query implements QueryConditionInterface {
   protected $needsUpdate = FALSE;
 
   /**
+   * The result of the merge query.
+   *
+   * Contains either the new ID or number of rows affected.
+   *
+   * @var int
+   */
+  protected $result;
+
+  /**
   * Constructs a MergeQuery object.
   *
   * @param DatabaseConnection $connection
@@ -1340,23 +1338,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
-    $this->conditionTable = $table;
     $this->condition = new DatabaseCondition('AND');
-  }
-
-  /**
-   * Sets the table or subquery to be used for the condition.
-   *
-   * @param $table
-   *   The table name or the subquery to be used. Use a SelectQuery object to
-   *   pass in a subquery.
-   *
-   * @return MergeQuery
-   *   The called object.
-   */
-  protected function conditionTable($table) {
-    $this->conditionTable = $table;
-    return $this;
   }
 
   /**
@@ -1609,28 +1591,8 @@ class MergeQuery extends Query implements QueryConditionInterface {
     if (!count($this->condition)) {
       throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
     }
-    $select = $this->connection->select($this->conditionTable)
-      ->condition($this->condition);
-    $select->addExpression('1');
-    if (!$select->execute()->fetchField()) {
-      try {
-        $insert = $this->connection->insert($this->table)->fields($this->insertFields);
-        if ($this->defaultFields) {
-          $insert->useDefaults($this->defaultFields);
-        }
-        $insert->execute();
-        return self::STATUS_INSERT;
-      }
-      catch (Exception $e) {
-        // The insert query failed, maybe it's because a racing insert query
-        // beat us in inserting the same row. Retry the select query, if it
-        // returns a row, ignore the error and continue with the update
-        // query below.
-        if (!$select->execute()->fetchField()) {
-          throw $e;
-        }
-      }
-    }
+
+    // If doing an update, try that first and see if it matches any rows.
     if ($this->needsUpdate) {
       $update = $this->connection->update($this->table)
         ->fields($this->updateFields)
@@ -1640,9 +1602,57 @@ class MergeQuery extends Query implements QueryConditionInterface {
           $update->expression($field, $data['expression'], $data['arguments']);
         }
       }
-      $update->execute();
-      return self::STATUS_UPDATE;
-     }
+      $this->result = $update->execute();
+      $row_exists = (bool) $this->result;
+      // If updated, we have no more work to be done.
+      if ($row_exists) {
+        return self::STATUS_UPDATE;
+      }
+    }
+    // If only doing inserts, select first to see if the row exists.
+    else {
+      $select = $this->connection->select($this->table)
+        ->condition($this->condition);
+      $select->addExpression('1');
+      $row_exists = (bool) $select->execute()->fetchField();
+    }
+
+    if (!$row_exists) {
+      try {
+        $insert = $this->connection->insert($this->table)->fields($this->insertFields);
+        if ($this->defaultFields) {
+          $insert->useDefaults($this->defaultFields);
+        }
+        $this->result = $insert->execute();
+        return self::STATUS_INSERT;
+      }
+      catch (Exception $e) {
+        // The insert query failed, maybe it's because a racing insert query
+        // beat us in inserting the same row. Retry the select query, if it
+        // returns a row, ignore the error and continue with the update
+        // query below.
+        if (!isset($select)) {
+          $select = $this->connection->select($this->table)
+            ->condition($this->condition);
+          $select->addExpression('1');
+        }
+        if (!$select->execute()->fetchField()) {
+          throw $e;
+        }
+      }
+    }
+  }
+
+  /**
+   * Return the result of the merge query.
+   *
+   * If an insert has been performed, this will be the last ID inserted. On
+   * updates, it will be the number of rows matched by the merge.
+   *
+   * @return int
+   */
+  public function getResult() {
+    return (int) $this->result;
   }
 }
 
@@ -1694,7 +1704,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    * Implements Countable::count().
    *
    * Returns the size of this conditional. The size of the conditional is the
-   * size of its conditional array minus one, because one element is the the
+   * size of its conditional array minus one, because one element is the
    * conjunction.
    */
   public function count() {
@@ -1833,6 +1843,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
 
             $placeholders = array();
             if ($condition['value'] instanceof SelectQueryInterface) {
+              $operator = $this->ensureBrackets($operator);
               $condition['value']->compile($connection, $queryPlaceholder);
               $placeholders[] = (string) $condition['value'];
               $arguments += $condition['value']->arguments();
@@ -1951,6 +1962,30 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
     $return += array('operator' => $operator);
 
     return $return;
+  }
+
+  /**
+   * Ensures that the value being tested against is bracketed.
+   *
+   * Some operators don't usually need brackets around the value being tested,
+   * but when the value being tested is a SelectQueryInterface it needs to be
+   * bracketed. This function adds those necessary brackets.
+   *
+   * @param array $operator
+   *   The extra handling directives for the operator
+   *
+   * @return array
+   *   The updated extra handling directives for the operator with brackets
+   *   added if necessary.
+   */
+  protected function ensureBrackets($operator) {
+    if (strpos($operator['prefix'], '(') === FALSE) {
+      $operator['prefix'] .= ' (';
+    }
+    if (strpos($operator['postfix'], ')') === FALSE) {
+      $operator['postfix'] = ')' . $operator['postfix'];
+    }
+    return $operator;
   }
 
 }

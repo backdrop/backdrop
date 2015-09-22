@@ -36,18 +36,18 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
  * of fields that are treated as a group by the Field Attach API and
  * is related to a single fieldable entity type.
  *
- * For example, suppose a site administrator wants Article nodes to
+ * For example, suppose a site administrator wants Post nodes to
  * have a subtitle and photo. Using the Field API or Field UI module,
  * the administrator creates a field named 'subtitle' of type 'text'
  * and a field named 'photo' of type 'image'. The administrator
  * (again, via a UI) creates two Field Instances, one attaching the
- * field 'subtitle' to the 'node' bundle 'article' and one attaching
- * the field 'photo' to the 'node' bundle 'article'. When the node
- * system uses the Field Attach API to load all fields for an Article
+ * field 'subtitle' to the 'node' bundle 'post' and one attaching
+ * the field 'photo' to the 'node' bundle 'post'. When the node
+ * system uses the Field Attach API to load all fields for an Post
  * node, it passes the node's entity type (which is 'node') and
- * content type (which is 'article') as the node's bundle.
+ * content type (which is 'post') as the node's bundle.
  * field_attach_load() then loads the 'subtitle' and 'photo' fields
- * because they are both attached to the 'node' bundle 'article'.
+ * because they are both attached to the 'node' bundle 'post'.
  *
  * Field definitions are represented as an array of key/value pairs.
  *
@@ -111,9 +111,6 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
  * array $instance:
  * - id (integer, read-only): The primary identifier of this field instance.
  *   It is assigned automatically by field_create_instance().
- * - field_id (integer, read-only): The foreign key of the field attached to
- *   the bundle by this instance. It is populated automatically by
- *   field_create_instance().
  * - field_name (string): The name of the field attached to the bundle by this
  *   instance.
  * - entity_type (string): The name of the entity type the instance is attached
@@ -225,14 +222,14 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
 /**
  * Value for field API indicating a field accepts an unlimited number of values.
  */
-const FIELD_CARDINALITY_UNLIMITED = -1;
+define('FIELD_CARDINALITY_UNLIMITED', -1);
 
 /**
  * Value for field API indicating a widget doesn't accept default values.
  *
  * @see hook_field_widget_info()
  */
-const FIELD_BEHAVIOR_NONE = 0x0001;
+define('FIELD_BEHAVIOR_NONE', 0x0001);
 
 /**
  * Value for field API concerning widget default and multiple value settings.
@@ -244,38 +241,42 @@ const FIELD_BEHAVIOR_NONE = 0x0001;
  * input of one single field value, indicates that the widget will be repeated
  * for each value input.
  */
-const FIELD_BEHAVIOR_DEFAULT = 0x0002;
+define('FIELD_BEHAVIOR_DEFAULT', 0x0002);
 
 /**
  * Value for field API indicating a widget can receive several field values.
  *
  * @see hook_field_widget_info()
  */
-const FIELD_BEHAVIOR_CUSTOM = 0x0004;
+define('FIELD_BEHAVIOR_CUSTOM', 0x0004);
 
 /**
  * Age argument for loading the most recent version of an entity's
  * field data with field_attach_load().
  */
-const FIELD_LOAD_CURRENT = 'FIELD_LOAD_CURRENT';
+define('FIELD_LOAD_CURRENT', 'FIELD_LOAD_CURRENT');
 
 /**
  * Age argument for loading the version of an entity's field data
  * specified in the entity with field_attach_load().
  */
-const FIELD_LOAD_REVISION = 'FIELD_LOAD_REVISION';
+define('FIELD_LOAD_REVISION', 'FIELD_LOAD_REVISION');
 
 /**
  * Implements hook_theme().
  */
 function field_theme() {
+  $base = array(
+    'file' => 'field.theme.inc',
+  );
+
   return array(
     'field' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'field_multiple_value_form' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
   );
 }
 
@@ -297,7 +298,7 @@ function field_cron() {
   field_sync_field_status();
 
   // Do a pass of purging on deleted Field API data, if any exists.
-  $limit = variable_get('field_purge_batch_size', 10);
+  $limit = config_get('system.core', 'field_purge_batch_size');
   field_purge_batch($limit);
 }
 
@@ -311,7 +312,7 @@ function field_system_info_alter(&$info, $file, $type) {
   if ($type == 'module' && module_hook($file->name, 'field_info')) {
     $fields = field_read_fields(array('module' => $file->name), array('include_deleted' => TRUE));
     if ($fields) {
-      $info['required'] = TRUE;
+      $info['disabled'] = TRUE;
 
       // Provide an explanation message (only mention pending deletions if there
       // remains no actual, non-deleted fields)
@@ -359,8 +360,12 @@ function field_autoload_info() {
  * Implements hook_flush_caches().
  */
 function field_flush_caches() {
-  // Refresh the 'active' status of fields.
-  field_sync_field_status();
+  // Refresh the 'active' status of fields. We only do this if not in
+  // maintenance mode to prevent it running during update.php, where the full
+  // API of field module may not be available.
+  if (!defined('MAINTENANCE_MODE')) {
+    field_sync_field_status();
+  }
 
  // Request a flush of our cache table.
   return array('field');
@@ -383,7 +388,199 @@ function field_modules_disabled($modules) {
 }
 
 /**
- * Refreshes the 'active' and 'storage_active' columns for fields.
+ * Implements hook_config_info().
+ */
+function field_config_info() {
+  $prefixes['field.field'] = array(
+    'name_key' => 'field_name',
+    'label_key' => 'field_name',
+    'group' => t('Fields'),
+  );
+  $prefixes['field.instance'] = array(
+    'name_key' => array('entity_type', 'bundle', 'field_name'),
+    'label_callback' => 'field_config_label_instance',
+    'group' => t('Field instances'),
+  );
+  $prefixes['field.bundle'] = array(
+    'name_key' => array('entity_type', 'bundle'),
+    'label_callback' => 'field_config_label_bundle',
+    'group' => t('Field display settings'),
+  );
+
+  return $prefixes;
+}
+
+/**
+ * Given a field array, display a unique label.
+ */
+function field_config_label_instance($instance, $config_name) {
+  list($entity_type_name, $bundle, $field_name) = explode('.', str_replace('field.instance.', '', $config_name));
+  $entity_type = entity_get_info($entity_type_name);
+  $entity_label = $entity_type['label'];
+  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+  return $entity_label . ' - ' . $bundle_label . ' - ' . $instance['label'];
+}
+
+/**
+ * Given a bundle config file, display a unique label.
+ */
+function field_config_label_bundle($bundle_config, $config_name) {
+  list($entity_type_name, $bundle) = explode('.', str_replace('field.bundle.', '', $config_name));
+  $entity_type = entity_get_info($entity_type_name);
+  $entity_label = $entity_type['label'];
+  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+
+  return $entity_label . ' - ' . $bundle_label;
+}
+
+/**
+ * Implements hook_config_create_validate().
+ */
+function field_config_create_validate(Config $staging_config, $all_changes) {
+  $config_name = $staging_config->getName();
+
+  // Field validation.
+  if (strpos($config_name, 'field.field.') === 0) {
+    // Ensure fields are not created with existing names.
+    $field_name = str_replace('field.field.', '', $config_name);
+    if (field_info_field($field_name)) {
+      throw new ConfigValidateException(t('The field "@name" cannot be created because another field with the same name already exists. Delete the field manually before importing the new field.', array('@name' => $field_name)));
+    }
+
+    // Do the complete field validation and rethrow any errors that occur.
+    try {
+      $field = $staging_config->get();
+      field_validate_field($field);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+
+  // Instance validation.
+  if (strpos($config_name, 'field.instance.') === 0) {
+    // Ensure instances reference new or existing fields. Because we do not know
+    // the configuration names of entity types, each module providing an entity
+    // type must validate the type exists. See node_config_create_validate(),
+    // comment_config_create_validate(), and taxonomy_config_create_validate().
+    $field_name = $staging_config->get('field_name');
+    $label = $staging_config->get('label');
+    if (!field_info_field($field_name) && empty($all_changes['field.field.' . $field_name])) {
+      throw new ConfigValidateException(t('The field instance "@label" cannot be created because the field type "@field" does not exist.', array('@label' => $label, '@field' => $field_name)));
+    }
+
+    // Do the complete instance validation and rethrow any errors that occur.
+    try {
+      $instance = $staging_config->get();
+      field_validate_instance($instance, FALSE, FALSE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create_update().
+ */
+function field_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+  $config_name = $staging_config->getName();
+
+  // Field validation.
+  if (strpos($config_name, 'field.field.') === 0) {
+    // Ensure the field type does not change in updates. Fields must be manually
+    // deleted and then imported if changing a field type.
+    $field_name = str_replace('field.field.', '', $config_name);
+    $current_type = $active_config->get('type');
+    $new_type = $staging_config->get('type');
+    if ($current_type !== $new_type) {
+      throw new ConfigValidateException(t('The field "@name" cannot be created because another field with the same name already exists and is a different type of field. The current type is "@current" and the imported type would be "@new". Delete the field manually before importing the new field.', array('@name' => $field_name, '@current' => $current_type, '@new' => $new_type)));
+    }
+
+    // Do the complete field validation and rethrow any errors that occur.
+    try {
+      $field = $staging_config->get();
+      field_validate_field($field, TRUE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+
+  // Instance validation.
+  if (strpos($config_name, 'field.instance.') === 0) {
+    // Do the complete instance validation and rethrow any errors that occur.
+    try {
+      $instance = $staging_config->get();
+      field_validate_instance($instance, FALSE, FALSE);
+    }
+    catch (FieldException $e) {
+      throw new ConfigValidateException($e->getMessage());
+    }
+  }
+}
+
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function field_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+
+  // @todo: We could support field deletion through config updates, but the
+  // additional processing time or required cron runs to clear the data could
+  // cause long imports or user confusion. For now fields have to be manually
+  // deleted when they contain data, rather than deleted through config.
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field_name = $active_config->get('field_name');
+    $field = $active_config->get();
+    if (field_has_data($field)) {
+      throw new ConfigValidateException(t('The field "@field" cannot be deleted through a configuration import. Delete the field manually first, then retry the import.', array('@field' => $field_name)));
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create().
+ */
+function field_config_create(Config $staging_config) {
+  $config_name = $staging_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field = $staging_config->get();
+    field_create_field($field);
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function field_config_update(Config $staging_config, Config $active_config) {
+  $config_name = $staging_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field = $staging_config->get();
+    field_update_field($field);
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function field_config_delete(Config $active_config) {
+  // This should only be called on fields that have no data at all, as fields
+  // with data are prevented from deletion in field_config_delete_validate().
+  $config_name = $active_config->getName();
+  if (strpos($config_name, 'field.field.') === 0) {
+    $field_name = $active_config->get('field_name');
+    if (($field = field_read_field($field_name)) && !field_has_data($field)) {
+      field_delete_field($field_name);
+      // Fields are only marked for deletion. Purge to the field entirely.
+      field_purge_batch(0);
+    }
+  }
+}
+
+/**
+ * Refreshes the 'active' and 'storage[active]' properties on fields.
  */
 function field_sync_field_status() {
   // Refresh the 'active' and 'storage_active' columns according to the current
@@ -392,14 +589,16 @@ function field_sync_field_status() {
   foreach ($modules as $module_name) {
     field_associate_fields($module_name);
   }
-  db_update('field_config')
-    ->fields(array('active' => 0))
-    ->condition('module', $modules, 'NOT IN')
-    ->execute();
-  db_update('field_config')
-    ->fields(array('storage_active' => 0))
-    ->condition('storage_module', $modules, 'NOT IN')
-    ->execute();
+
+  $fields = field_read_fields(array(), array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+  foreach ($fields as $field) {
+    $current_field = $field;
+    $field['active'] = (int) in_array($field['module'], $modules);
+    $field['storage']['active'] = (int) in_array($field['storage']['module'], $modules);
+    if ($current_field !== $field) {
+      field_update_field($field);
+    }
+  }
 }
 
 /**
@@ -411,19 +610,21 @@ function field_sync_field_status() {
 function field_associate_fields($module) {
   // Associate field types.
   $field_types = (array) module_invoke($module, 'field_info');
-  if ($field_types) {
-    db_update('field_config')
-      ->fields(array('module' => $module, 'active' => 1))
-      ->condition('type', array_keys($field_types))
-      ->execute();
-  }
-  // Associate storage backends.
   $storage_types = (array) module_invoke($module, 'field_storage_info');
-  if ($storage_types) {
-    db_update('field_config')
-      ->fields(array('storage_module' => $module, 'storage_active' => 1))
-      ->condition('storage_type', array_keys($storage_types))
-      ->execute();
+  $fields = field_read_fields();
+  foreach ($fields as $field) {
+    $old_field = $field;
+    if (array_key_exists($field['type'], $field_types)) {
+      $field['module'] = $module;
+      $field['active'] = 1;
+    }
+    if (array_key_exists($field['storage']['type'], $storage_types)) {
+      $field['storage']['module'] = $module;
+      $field['storage']['active'] = 1;
+    }
+    if ($old_field !== $field) {
+      field_update_field($field);
+    }
   }
 }
 
@@ -545,11 +746,28 @@ function _field_sort_items_value_helper($a, $b) {
  */
 function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
   if (isset($settings)) {
-    variable_set('field_bundle_settings_' . $entity_type . '__' . $bundle, $settings);
+    $config = config('field.bundle.' . $entity_type . '.' . $bundle);
+    $data = array(
+      'bundle' => $bundle,
+      'entity_type' => $entity_type,
+    ) + $settings;
+    $config->setData($data);
+    $config->save();
     field_info_cache_clear();
   }
   else {
-    $settings = variable_get('field_bundle_settings_' . $entity_type . '__' . $bundle, array());
+    $config = config('field.bundle.' . $entity_type . '.' . $bundle);
+    $data = $config->get();
+    if (empty($data)) {
+      $settings = array();
+    }
+    else {
+      // Remove bundle and entity type from settings, as they are already known.
+      $settings = array_diff_key($data, array(
+        'bundle' => $bundle,
+        'entity_type' => $entity_type,
+      ));
+    }
     $settings += array(
       'view_modes' => array(),
       'extra_fields' => array(),
@@ -909,14 +1127,17 @@ function field_get_items($entity_type, $entity, $field_name, $langcode = NULL) {
  */
 function field_has_data($field) {
   $query = new EntityFieldQuery();
-  return (bool) $query
-    ->fieldCondition($field)
+  $query = $query->fieldCondition($field)
     ->range(0, 1)
     ->count()
     // Neutralize the 'entity_field_access' query tag added by
     // field_sql_storage_field_storage_query(). The result cannot depend on the
     // access grants of the current user.
-    ->addTag('DANGEROUS_ACCESS_CHECK_OPT_OUT')
+    ->addTag('DANGEROUS_ACCESS_CHECK_OPT_OUT');
+
+  return (bool) $query
+    ->execute() || (bool) $query
+    ->age(FIELD_LOAD_REVISION)
     ->execute();
 }
 
@@ -981,163 +1202,30 @@ function field_extract_bundle($entity_type, $bundle) {
 }
 
 /**
- * Theme preprocess function for theme_field() and field.tpl.php.
- *
- * @see theme_field()
- * @see field.tpl.php
- */
-function template_preprocess_field(&$variables, $hook) {
-  $element = $variables['element'];
-
-  // There's some overhead in calling check_plain() so only call it if the label
-  // variable is being displayed. Otherwise, set it to NULL to avoid PHP
-  // warnings if a theme implementation accesses the variable even when it's
-  // supposed to be hidden. If a theme implementation needs to print a hidden
-  // label, it needs to supply a preprocess function that sets it to the
-  // sanitized element title or whatever else is wanted in its place.
-  $variables['label_hidden'] = ($element['#label_display'] == 'hidden');
-  $variables['label'] = $variables['label_hidden'] ? NULL : check_plain($element['#title']);
-
-  // We want other preprocess functions and the theme implementation to have
-  // fast access to the field item render arrays. The item render array keys
-  // (deltas) should always be a subset of the keys in #items, and looping on
-  // those keys is faster than calling element_children() or looping on all keys
-  // within $element, since that requires traversal of all element properties.
-  $variables['items'] = array();
-  foreach ($element['#items'] as $delta => $item) {
-    if (!empty($element[$delta])) {
-      $variables['items'][$delta] = $element[$delta];
-    }
-  }
-
-  // Add default CSS classes. Since there can be many fields rendered on a page,
-  // save some overhead by calling strtr() directly instead of
-  // backdrop_html_class().
-  $variables['field_name_css'] = strtr($element['#field_name'], '_', '-');
-  $variables['field_type_css'] = strtr($element['#field_type'], '_', '-');
-  $variables['classes_array'] = array(
-    'field',
-    'field-name-' . $variables['field_name_css'],
-    'field-type-' . $variables['field_type_css'],
-    'field-label-' . $element['#label_display'],
-  );
-  // Add a "clearfix" class to the wrapper since we float the label and the
-  // field items in field.css if the label is inline.
-  if ($element['#label_display'] == 'inline') {
-    $variables['classes_array'][] = 'clearfix';
-  }
-
-  // Add specific suggestions that can override the default implementation.
-  $variables['theme_hook_suggestions'] = array(
-    'field__' . $element['#field_type'],
-    'field__' . $element['#field_name'],
-    'field__' . $element['#bundle'],
-    'field__' . $element['#field_name'] . '__' . $element['#bundle'],
-  );
-}
-
-/**
- * Theme process function for theme_field() and field.tpl.php.
- *
- * @see theme_field()
- * @see field.tpl.php
- */
-function template_process_field(&$variables, $hook) {
-  // The default theme implementation is a function, so template_process() does
-  // not automatically run, so we need to flatten the classes and attributes
-  // here. For best performance, only call backdrop_attributes() when needed, and
-  // note that template_preprocess_field() does not initialize the
-  // *_attributes_array variables.
-  $variables['classes'] = implode(' ', $variables['classes_array']);
-  $variables['attributes'] = empty($variables['attributes_array']) ? '' : backdrop_attributes($variables['attributes_array']);
-  $variables['title_attributes'] = empty($variables['title_attributes_array']) ? '' : backdrop_attributes($variables['title_attributes_array']);
-  $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : backdrop_attributes($variables['content_attributes_array']);
-  foreach ($variables['items'] as $delta => $item) {
-    $variables['item_attributes'][$delta] = empty($variables['item_attributes_array'][$delta]) ? '' : backdrop_attributes($variables['item_attributes_array'][$delta]);
-  }
-}
-/**
  * @} End of "defgroup field".
  */
 
 /**
- * Returns HTML for a field.
- *
- * This is the default theme implementation to display the value of a field.
- * Theme developers who are comfortable with overriding theme functions may do
- * so in order to customize this markup. This function can be overridden with
- * varying levels of specificity. For example, for a field named 'body'
- * displayed on the 'article' content type, any of the following functions will
- * override this default implementation. The first of these functions that
- * exists is used:
- * - THEMENAME_field__body__article()
- * - THEMENAME_field__article()
- * - THEMENAME_field__body()
- * - THEMENAME_field()
- *
- * Theme developers who prefer to customize templates instead of overriding
- * functions may copy the "field.tpl.php" from the "modules/field/theme" folder
- * of the Backdrop installation to somewhere within the theme's folder and
- * customize it, just like customizing other Backdrop templates such as
- * page.tpl.php or node.tpl.php. However, it takes longer for the server to
- * process templates than to call a function, so for websites with many fields
- * displayed on a page, this can result in a noticeable slowdown of the website.
- * For these websites, developers are discouraged from placing a field.tpl.php
- * file into the theme's folder, but may customize templates for specific
- * fields. For example, for a field named 'body' displayed on the 'article'
- * content type, any of the following templates will override this default
- * implementation. The first of these templates that exists is used:
- * - field--body--article.tpl.php
- * - field--article.tpl.php
- * - field--body.tpl.php
- * - field.tpl.php
- * So, if the body field on the article content type needs customization, a
- * field--body--article.tpl.php file can be added within the theme's folder.
- * Because it's a template, it will result in slightly more time needed to
- * display that field, but it will not impact other fields, and therefore,
- * is unlikely to cause a noticeable change in website performance. A very rough
- * guideline is that if a page is being displayed with more than 100 fields and
- * they are all themed with a template instead of a function, it can add up to
- * 5% to the time it takes to display that page. This is a guideline only and
- * the exact performance impact depends on the server configuration and the
- * details of the website.
- *
- * @param $variables
- *   An associative array containing:
- *   - label_hidden: A boolean indicating to show or hide the field label.
- *   - title_attributes: A string containing the attributes for the title.
- *   - label: The label for the field.
- *   - content_attributes: A string containing the attributes for the content's
- *     div.
- *   - items: An array of field items.
- *   - item_attributes: An array of attributes for each item.
- *   - classes: A string containing the classes for the wrapping div.
- *   - attributes: A string containing the attributes for the wrapping div.
- *
- * @see template_preprocess_field()
- * @see template_process_field()
- * @see field.tpl.php
- *
- * @ingroup themeable
+ * Implements hook_field_display_alter().
  */
-function theme_field($variables) {
-  $output = '';
+function field_field_display_alter(&$display, $context) {
+  if ($context['view_mode'] == 'token') {
+    $view_mode_settings = field_view_mode_settings($context['instance']['entity_type'], $context['instance']['bundle']);
+    // If the token view mode fell back to the 'default' view mode, then
+    // use the default token formatter.
+    if (empty($view_mode_settings[$context['view_mode']]['custom_settings'])) {
+      $field_type_info = field_info_field_types($context['field']['type']);
 
-  // Render the label, if it's not hidden.
-  if (!$variables['label_hidden']) {
-    $output .= '<div class="field-label"' . $variables['title_attributes'] . '>' . $variables['label'] . ':&nbsp;</div>';
+      // If the field has specified a specific formatter to be used by default
+      // with tokens, use that, otherwise use the default formatter.
+      $formatter = !empty($field_type_info['default_token_formatter']) ? $field_type_info['default_token_formatter'] : $field_type_info['default_formatter'];
+
+      // Now that we have a formatter, fill in all the settings.
+      $display['type'] = $formatter;
+      $formatter_info = field_info_formatter_types($formatter);
+      $display['settings'] = isset($formatter_info['settings']) ? $formatter_info['settings'] : array();
+      $display['settings']['label'] = 'hidden';
+      $display['module'] = $formatter_info['module'];
+    }
   }
-
-  // Render the items.
-  $output .= '<div class="field-items"' . $variables['content_attributes'] . '>';
-  foreach ($variables['items'] as $delta => $item) {
-    $classes = 'field-item ' . ($delta % 2 ? 'odd' : 'even');
-    $output .= '<div class="' . $classes . '"' . $variables['item_attributes'][$delta] . '>' . backdrop_render($item) . '</div>';
-  }
-  $output .= '</div>';
-
-  // Render the top-level DIV.
-  $output = '<div class="' . $variables['classes'] . '"' . $variables['attributes'] . '>' . $output . '</div>';
-
-  return $output;
 }

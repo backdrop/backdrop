@@ -53,8 +53,8 @@ function file_element_info() {
     '#size' => 22,
     '#extended' => FALSE,
     '#attached' => array(
-      'css' => array($file_path . '/file.admin.css'),
-      'js' => array($file_path . '/file.js'),
+      'css' => array($file_path . '/css/file.admin.css'),
+      'js' => array($file_path . '/js/file.js'),
     ),
   );
   return $types;
@@ -64,31 +64,32 @@ function file_element_info() {
  * Implements hook_theme().
  */
 function file_theme() {
+  $base = array(
+    'file' => 'file.theme.inc',
+  );
+
   return array(
-    // file.module.
     'file_link' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
-    ),
+    ) + $base,
     'file_icon' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
-    ),
+    ) + $base,
     'file_managed_file' => array(
       'render element' => 'element',
-    ),
-
-    // file.field.inc.
+    ) + $base,
     'file_widget' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'file_widget_multiple' => array(
       'render element' => 'element',
-    ),
+    ) + $base,
     'file_formatter_table' => array(
       'variables' => array('items' => NULL),
-    ),
+    ) + $base,
     'file_upload_help' => array(
       'variables' => array('description' => NULL, 'upload_validators' => NULL),
-    ),
+    ) + $base,
   );
 }
 
@@ -233,7 +234,7 @@ function file_ajax_upload() {
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
-  list($form, $form_state) = ajax_get_form();
+  list($form, $form_state, $form_id, $form_build_id, $commands) = ajax_get_form();
 
   if (!$form) {
     // Invalid form_build_id.
@@ -258,20 +259,11 @@ function file_ajax_upload() {
     $form = $form[$parent];
   }
 
-  // Add the special Ajax class if a new file was added.
-  if (isset($form['#file_upload_delta']) && $current_file_count < $form['#file_upload_delta']) {
-    $form[$current_file_count]['#attributes']['class'][] = 'ajax-new-content';
-  }
-  // Otherwise just add the new content class on a placeholder.
-  else {
-    $form['#suffix'] .= '<span class="ajax-new-content"></span>';
-  }
-
-  $output = theme('status_messages') . backdrop_render($form);
+  $form['#prefix'] .= theme('status_messages');
+  $output = backdrop_render($form);
   $js = backdrop_add_js();
   $settings = call_user_func_array('array_merge_recursive', $js['settings']['data']);
 
-  $commands = array();
   $commands[] = ajax_command_replace(NULL, $output, $settings);
   return array('#type' => 'ajax', '#commands' => $commands);
 }
@@ -305,6 +297,7 @@ function file_ajax_progress($key) {
   }
 
   backdrop_json_output($progress);
+  backdrop_exit();
 }
 
 /**
@@ -357,7 +350,7 @@ function file_managed_file_process($element, &$form_state, $form) {
   $ajax_settings = array(
     'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
     'wrapper' => $element['#id'] . '-ajax-wrapper',
-    'effect' => 'fade',
+    'effect' => 'none',
     'progress' => array(
       'type' => $element['#progress_indicator'],
       'message' => $element['#progress_message'],
@@ -380,7 +373,6 @@ function file_managed_file_process($element, &$form_state, $form) {
   // 'throbber', even if the upload button is using something else.
   $ajax_settings['progress']['type'] = ($element['#progress_indicator'] == 'none') ? 'none' : 'throbber';
   $ajax_settings['progress']['message'] = NULL;
-  $ajax_settings['effect'] = 'none';
   $element['remove_button'] = array(
     '#name' => implode('_', $element['#parents']) . '_remove_button',
     '#type' => 'submit',
@@ -502,9 +494,12 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           $callback($element, $input, $form_state);
         }
       }
-      // Load file if the FID has changed to confirm it exists.
-      if (isset($input['fid']) && $file = file_load($input['fid'])) {
-        $fid = $file->fid;
+      // Load file and check access if the FID has changed, to confirm it
+      // exists and that the current user has access to it.
+      if (isset($input['fid']) && ($file = file_load($input['fid']))) {
+        if (file_uri_scheme($file->uri) == 'public' || file_download_access($file->uri)) {
+          $fid = $file->fid;
+        }
       }
     }
   }
@@ -644,35 +639,6 @@ function file_managed_file_save_upload($element) {
 }
 
 /**
- * Returns HTML for a managed file element.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: A render element representing the file.
- *
- * @ingroup themeable
- */
-function theme_file_managed_file($variables) {
-  $element = $variables['element'];
-
-  $attributes = array();
-  if (isset($element['#id'])) {
-    $attributes['id'] = $element['#id'];
-  }
-  if (!empty($element['#attributes']['class'])) {
-    $attributes['class'] = (array) $element['#attributes']['class'];
-  }
-  $attributes['class'][] = 'form-managed-file';
-
-  // This wrapper is required to apply JS behaviors and CSS styling.
-  $output = '';
-  $output .= '<div' . backdrop_attributes($attributes) . '>';
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-  return $output;
-}
-
-/**
  * Render API callback: Hides display of the upload or remove controls.
  *
  * Upload controls are hidden when a file is already uploaded. Remove controls
@@ -704,65 +670,6 @@ function file_managed_file_pre_render($element) {
     $element['remove_button']['#access'] = FALSE;
   }
   return $element;
-}
-
-/**
- * Returns HTML for a link to a file.
- *
- * @param $variables
- *   An associative array containing:
- *   - file: A file object to which the link will be created.
- *   - icon_directory: (optional) A path to a directory of icons to be used for
- *     files. Defaults to the value of the "file_icon_directory" variable.
- *
- * @ingroup themeable
- */
-function theme_file_link($variables) {
-  $file = $variables['file'];
-  $icon_directory = $variables['icon_directory'];
-
-  $url = file_create_url($file->uri);
-  // theme_file_icon() requires a file entity, make sure it gets one.
-  $icon = theme('file_icon', array('file' => ($file instanceof File) ? $file : file_load($file->fid), 'icon_directory' => $icon_directory));
-
-  // Set options as per anchor format described at
-  // http://microformats.org/wiki/file-format-examples
-  $options = array(
-    'attributes' => array(
-      'type' => $file->filemime . '; length=' . $file->filesize,
-    ),
-  );
-
-  // Use the description as the link text if available.
-  if (empty($file->description)) {
-    $link_text = $file->filename;
-  }
-  else {
-    $link_text = $file->description;
-    $options['attributes']['title'] = check_plain($file->filename);
-  }
-
-  return '<span class="file">' . $icon . ' ' . l($link_text, $url, $options) . '</span>';
-}
-
-/**
- * Returns HTML for an image with an appropriate icon for the given file.
- *
- * @param $variables
- *   An associative array containing:
- *   - file: A file entity for which to make an icon.
- *   - icon_directory: (optional) A path to a directory of icons to be used for
- *     files. Defaults to the value of the "file_icon_directory" variable.
- *
- * @ingroup themeable
- */
-function theme_file_icon($variables) {
-  $file = $variables['file'];
-  $icon_directory = $variables['icon_directory'];
-
-  $mime = check_plain($file->filemime);
-  $icon_url = file_icon_url($file, $icon_directory);
-  return '<img class="file-icon" alt="" title="' . $mime . '" src="' . $icon_url . '" />';
 }
 
 /**
@@ -800,7 +707,7 @@ function file_icon_url(File $file, $icon_directory = NULL) {
 function file_icon_path(File $file, $icon_directory = NULL) {
   // Use the default set of icons if none specified.
   if (!isset($icon_directory)) {
-    $icon_directory = variable_get('file_icon_directory', backdrop_get_path('module', 'file') . '/icons');
+    $icon_directory = backdrop_get_path('module', 'file') . '/icons';
   }
 
   // If there's an icon matching the exact mimetype, go for it.
