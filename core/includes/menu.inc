@@ -2981,7 +2981,7 @@ function menu_load_links($menu_name) {
 function menu_multilingual_condition($select, $joined = FALSE) {
   global $language_interface;
 
-  if (language_multilingual()) {
+  /*if (language_multilingual()) {
     if (!$joined) {
       $select->join('menu_custom', 'mc', 'mc.menu_name = ml.menu_name');
     }
@@ -3002,7 +3002,7 @@ function menu_multilingual_condition($select, $joined = FALSE) {
       )
       ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
     );
-  }
+  }*/
   return $select;
 }
 

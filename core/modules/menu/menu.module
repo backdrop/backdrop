@@ -872,10 +872,10 @@ function menu_preprocess_block(&$variables) {
  */
 function menu_get_menu_translation_set($menu_name) {
 
-  $query = db_select('menu_custom');
+  /*$query = db_select('menu_custom');
   $query->fields('menu_custom');
-  $query->condition('tmenu_name', $menu_name);
-  $translations = $query->execute()->fetchAllAssoc('langcode', PDO::FETCH_ASSOC);
+  $query->condition('tmenu_name', $menu_name);*/
+  $translations = [];//$query->execute()->fetchAllAssoc('langcode', PDO::FETCH_ASSOC);
 
   return $translations;
 }
@@ -896,7 +896,7 @@ function menu_get_menu_translation($menu_name, $langcode = LANGUAGE_NONE) {
     $translations = menu_get_menu_translation_set($menu['tmenu_name']);
 
     if($langcode == LANGUAGE_NONE) {
-      $langcode = $GLOBALS['language_interface']->langcode;
+      $langcode = $GLOBALS['language']->langcode;
     }
 
     if (isset($translations[$langcode])) {
