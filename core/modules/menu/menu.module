@@ -278,6 +278,24 @@ function menu_load_all() {
 }
 
 /**
+ * Load all custom menu data by translation set.
+ *
+ * @return
+ *   Array of custom menu data.
+ */
+function menu_load_translations($tmenu_name) {
+  $config_names = config_get_names_with_prefix('menu.menu.');
+  $translations = array();
+  foreach ($config_names as $config_name) {
+    $menu = config_get($config_name);
+    if ($menu['tmenu_name'] == $tmenu_name) {
+      $translations[$menu['langcode']] = $menu;
+    }
+  }
+  return $translations;
+}
+
+/**
  * Save a custom menu.
  *
  * @param $menu
@@ -371,6 +389,18 @@ function menu_delete($menu) {
     if ($menu['menu_name'] == $menu_name) {
       unset($active_menus[$i]);
       $config->set('active_menus_default', $active_menus)->save();
+    }
+  }
+
+  // Check if the menu belongs to a translation set. If it does, remove
+  // the references in the set.
+  if ($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    $translations = menu_get_menu_translation_set($menu['menu_name']);
+    foreach($translations as $langcode => $tmenu) {
+      if ($tmenu['menu_name'] != $menu['menu_name']){
+        $tmenu['tmenu_name'] = '';
+        menu_save($tmenu);
+      }
     }
   }
 
@@ -871,12 +901,7 @@ function menu_preprocess_block(&$variables) {
  * @return array
  */
 function menu_get_menu_translation_set($menu_name) {
-
-  /*$query = db_select('menu_custom');
-  $query->fields('menu_custom');
-  $query->condition('tmenu_name', $menu_name);*/
-  $translations = [];//$query->execute()->fetchAllAssoc('langcode', PDO::FETCH_ASSOC);
-
+  $translations = menu_load_translations($menu_name);
   return $translations;
 }
 

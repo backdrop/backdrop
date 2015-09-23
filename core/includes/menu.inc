@@ -1453,8 +1453,6 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     }
     $query->condition('ml.menu_name', $menu_name);
 
-    menu_multilingual_condition($query);
-
     if (!empty($parameters['expanded'])) {
       $query->condition('ml.plid', $parameters['expanded'], 'IN');
     }
@@ -1476,9 +1474,29 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     }
 
     // Build an ordered array of links using the query result object.
+    global $language;
+    $menu = menu_load($menu_name);
+
     $links = array();
     foreach ($query->execute() as $item) {
-      $links[] = $item;
+
+      // We will add the menu links if:
+      //   No extra languages are enabled.
+      // or
+      //   The menu is multilingual
+      //   and
+      //   The menu has been set to the current language or undefined
+      //   and
+      //   The item has been set to the current language or undefined
+      //
+      if (!language_multilingual()
+        || (($menu['multilingual_mode'] != MENU_MULTILINGUAL_DISABLED)
+          && ($menu['langcode'] == LANGUAGE_NONE || $menu['langcode'] == $language->langcode)
+          && ($item['langcode'] == LANGUAGE_NONE || $item['langcode'] == $language->langcode))
+        || ($menu['multilingual_mode'] == MENU_MULTILINGUAL_DISABLED)
+      ) {
+        $links[] = $item;
+      }
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
     $data['tree'] = menu_tree_data($links, $active_trail, $min_depth);
@@ -2970,48 +2988,9 @@ function menu_load_links($menu_name) {
   return $links;
 }
 
-/**
- * Add a condition to only select links that match the menu's multilingual conditions.
- *
- * @param SelectQuery $select
- * @param bool $joined
- *   Flag indicating the menu_custom table has already been joined before calling this method.
- * @return SelectQuery
- */
-function menu_multilingual_condition($select, $joined = FALSE) {
-  global $language_interface;
-
-  /*if (language_multilingual()) {
-    if (!$joined) {
-      $select->join('menu_custom', 'mc', 'mc.menu_name = ml.menu_name');
-    }
-
-    $select->condition(db_or()
-      ->condition(db_and()
-        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED, '<>')
-        ->condition(db_and()
-          ->condition(db_or()
-            ->condition('mc.langcode', LANGUAGE_NONE)
-            ->condition('mc.langcode', $language_interface->langcode)
-          )
-          ->condition(db_or()
-            ->condition('ml.langcode', LANGUAGE_NONE)
-            ->condition('ml.langcode', $language_interface->langcode)
-          )
-        )
-      )
-      ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
-    );
-  }*/
-  return $select;
-}
-
 function menu_translate_name($menu_name) {
   $menu = db_select('menu_');
-
-
 }
-
 
 /**
  * Deletes all links for a menu.

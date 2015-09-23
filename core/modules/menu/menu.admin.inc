@@ -81,7 +81,6 @@ function menu_overview_page() {
  */
 function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
-  global $language_interface;
 
   // Enable language if language module is enabled.
   $multilanguage = module_exists('language');
@@ -134,11 +133,7 @@ function menu_overview_form($form, &$form_state, $menu) {
       $langcode = (isset($form_state['values']['langcode'])?$form_state['values']['langcode']:LANGUAGE_NONE);
 
       // Show a select box;
-      $languages = language_list(TRUE);
-      $language_options = array();
-      foreach ($languages as $lcode => $language) {
-        $language_options[$lcode] = $language->name;
-      }
+      $language_options = language_list(TRUE, TRUE);
 
       $form['langcode'] = array(
         '#type' => 'select',
@@ -147,6 +142,7 @@ function menu_overview_form($form, &$form_state, $menu) {
         '#default_value' => $langcode,
         '#options' => $language_options,
         '#empty_value' => LANGUAGE_NONE,
+        '#empty_option' => t('All languages'),
         '#ajax' => array(
           'wrapper' => 'menu_overview_form_wrapper'
         )
@@ -655,7 +651,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
       '#type' => 'radios',
       '#title' => t('Multilingual support'),
       '#default_value' => $menu['multilingual_mode'],
-      '#description' => '
+      '#description' => t('
         <ul>
           <li><strong>Disabled</strong>: The menu will show all links of all languages.</li>
           <li><strong>Enabled</strong>: The menu will show links in the current language.
@@ -664,7 +660,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
           in this language. New links will be saved using the selected language.</li>
           <li><strong>Enabled, with translation</strong>: The menu is only visible in the selected language and show only links
            in this language. Menus in other languages can be linked as translations.</li>
-        </ul>',
+        </ul>'),
       '#options' => array(
         MENU_MULTILINGUAL_DISABLED => t('Disabled'),
         MENU_MULTILINGUAL_ENABLED => t('Enabled'),
@@ -817,6 +813,7 @@ function menu_edit_menu_submit($form, &$form_state)
   if ($form['#insert']) {
     // Add 'menu-' to the menu name to help avoid name-space conflicts.
     $menu['menu_name'] = 'menu-' . $menu['menu_name'];
+    $link['langcode'] = $menu['langcode'];
     $link['link_title'] = $menu['title'];
     $link['link_path'] = $path . $menu['menu_name'];
     $link['router_path'] = $path . '%';
