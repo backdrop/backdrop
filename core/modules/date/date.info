@@ -1,6 +1,7 @@
 name = Date
 description = Makes date/time fields available.
 package = Date/Time
+version = BACKDROP_VERSION
 backdrop = 1.x
 type = module
 
