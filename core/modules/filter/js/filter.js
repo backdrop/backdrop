@@ -78,6 +78,17 @@ Backdrop.behaviors.filterEditors = {
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
       });
     });
+  },
+  detach: function (context, settings) {
+    var $context = $(context);
+    $context.find('.filter-list:input').each(function () {
+      var $this = $(this);
+      var activeEditor = $this.val();
+      var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
+      if (field && Backdrop.settings.filter.formats[activeEditor]) {
+        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
+      }
+    });
   }
 };
 
