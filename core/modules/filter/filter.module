@@ -1264,6 +1264,7 @@ function filter_get_attached($formats) {
     $settings = filter_get_js_settings($formats);
     $attached['js'][] = array(
       'type' => 'setting',
+      'key' => 'filter_formats',
       'data' => array('filter' => array('formats' => $settings)),
     );
   }
