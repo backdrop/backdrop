@@ -33,6 +33,10 @@
 
     detach: function (element, format, trigger) {
       var editor = CKEDITOR.dom.element.get(element).getEditor();
+      if (!editor) {
+        return false;
+      }
+
       var height = $(editor.container.$).find('iframe').height();
 
       if (editor) {
