@@ -716,7 +716,8 @@ function path_form_element_validate($element, &$form_state, $complete_form) {
     $query->range(0, 1);
 
     // Ensure that the submitted alias is not a system path.
-    $is_system_path = !empty(menu_get_item($path['alias']));
+    $menu_item = menu_get_item($path['alias']);
+    $is_system_path = !empty($menu_item);
 
     if ($query->execute()->fetchField() || $is_system_path) {
       form_error($element, t('The alias is already in use.'));
