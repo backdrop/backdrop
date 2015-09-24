@@ -1,7 +1,7 @@
 name = Token Test
 description = Testing module for token functionality.
 package = Testing
-core = 7.x
-files[] = token_test.module
+backdrop = 1.x
+version = BACKDROP_VERSION
 hidden = TRUE
 type = module
