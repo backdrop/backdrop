@@ -1704,66 +1704,86 @@ array_space[a b] = Value';
   }
 }
 
-
-class InfoFileTypeTest extends BackdropUnitTestCase {
+/**
+ * Ensures that all info files have expected contents.
+ */
+class InfoFileCoreTest extends BackdropUnitTestCase {
   /**
    * Tests that all core modules' .info files have the project type string set to "module".
    */
-  function testModuleInfoFileType() {
+  function testModuleInfoFileContents() {
     $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'core/modules', 'name', 0);
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($modules as $key => $module) {
       $info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "module".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->failt(format_string('%key does not have project type set to "module".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'module') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "module".', array('%key' => $key)));
+      elseif ($info['type'] != 'module') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "module".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "module" for all core modules.');
+    $this->assertFalse($type_fails, 'Project type string set to "module" for all core modules.');
+    $this->assertFalse($version_fails, 'Version set for all core modules.');
   }
 
   /**
    * Tests that all core themes' .info files have the project type string set to "theme".
    */
-  function testThemeInfoFileType() {
+  function testThemeInfoFileContents() {
     $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/themes');
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($themes as $key => $theme) {
       $info = backdrop_parse_info_file(dirname($theme->uri) . '/' . $theme->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "theme".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->fail(format_string('%key does not have project type set to "theme".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'theme') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "theme".', array('%key' => $key)));
+      elseif ($info['type'] != 'theme') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "theme".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "theme" for all core themes.');
+    $this->assertFalse($type_fails, 'Project type string set to "theme" for all core themes.');
+    $this->assertFalse($version_fails, 'Version set for all core themes.');
   }
 
   /**
    * Tests that all core layouts' .info files have the project type string set to "layout".
    */
-  function testLayoutInfoFileType() {
+  function testLayoutInfoFileContents() {
     $layouts = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/layouts', 'name', 0);
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($layouts as $key => $layout) {
       $info = backdrop_parse_info_file(dirname($layout->uri) . '/' . $layout->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "layout".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->fail(format_string('%key does not have project type set to "layout".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'layout') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "layout".', array('%key' => $key)));
+      elseif ($info['type'] != 'layout') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "layout".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "layout" for all core layouts.');
+    $this->assertFalse($type_fails, 'Project type string set to "layout" for all core layouts.');
+    $this->assertFalse($version_fails, 'Version set for all core layouts.');
   }
 }
 
