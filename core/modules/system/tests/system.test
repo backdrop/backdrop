@@ -1719,7 +1719,7 @@ class InfoFileCoreTest extends BackdropUnitTestCase {
       $info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
       if (!isset($info['type'])) {
         $type_fails[] = $key;
-        $this->failt(format_string('%key does not have project type set to "module".', array('%key' => $key)));
+        $this->fail(format_string('%key does not have project type set to "module".', array('%key' => $key)));
       }
       elseif ($info['type'] != 'module') {
         $type_fails[] = $key;
