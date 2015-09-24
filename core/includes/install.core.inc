@@ -1603,6 +1603,10 @@ function install_finished(&$install_state) {
   // Cache a fully-built schema.
   backdrop_get_schema(NULL, TRUE);
 
+  // Set a state indicating that Backdrop is fully installed. Prevents further
+  // visiting of install.php.
+  state_set('install_task', 'done');
+
   // Run cron to populate update status tables (if available) so that users
   // will be warned if they've installed an out of date Backdrop version.
   // Will also trigger indexing of profile-supplied content or feeds.
