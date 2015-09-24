@@ -1482,6 +1482,7 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $form['cron'] = array(
+    '#title' => t('Cron configuration'),
     '#type' => 'fieldset',
   );
   $form['cron']['cron_safe_threshold'] = array(
