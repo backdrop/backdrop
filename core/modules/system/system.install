@@ -2643,6 +2643,13 @@ function system_update_1044() {
 }
 
 /**
+ * Ensure that the installation flag is properly set.
+ */
+function system_update_1045() {
+  state_set('install_task', 'done');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
