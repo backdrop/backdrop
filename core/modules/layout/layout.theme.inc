@@ -123,6 +123,14 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
+ * Output the content for a custom text block.
+ */
+function theme_layout_custom_text_block($variables) {
+  $custom_text_block = $variables['element'];
+  return $custom_text_block;
+}
+
+/**
  * Prepares variables for layout templates.
  *
  * This uses [module_name]_preprocess_layout() instead of

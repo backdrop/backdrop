@@ -486,6 +486,9 @@ function layout_theme() {
     'layout_settings_context_table' => array(
       'render element' => 'element',
     ) + $base,
+    'layout_custom_text_block' => array(
+      'render element' => 'element',
+    ) + $base,
   );
 
   // Register all layouts.
@@ -1524,4 +1527,49 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
 
   // All required contexts populated successfully.
   return TRUE;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function layout_block_info() {
+  $blocks = array();
+  $blocks['custom_text_block'] = array(
+    'info' => t('Custom text'),
+    'description' => t('Create a custom text block'),
+  );
+
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function layout_block_view($delta = '', $settings = array(), $contexts = array()) {
+  $block['subject'] = $settings['subject'];
+  $block['content'] = theme('layout_custom_text_block', array('element' => filter_xss(token_replace($settings['content']['value']))));
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function layout_block_configure($delta = '', $settings = array()) {
+  $token_link = ' ' . theme('token_tree_link');
+  $form = array();
+  $form['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $settings['subject'],
+  );
+  $form['content'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Block content'),
+    '#default_value' => $settings['content']['value'],
+    '#options' => $formatters,
+    '#description' => $token_link,
+    '#token_types' => array(),
+  );
+  return $form;
 }
