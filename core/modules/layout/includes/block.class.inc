@@ -301,7 +301,17 @@ class Block extends LayoutHandler {
     }
     return TRUE;
   }
-
+  
+  /**
+   * Allows an array of "child blocks" for display on the layouts "Add Block" 
+   * dialog. 
+   *
+   * This allows a single entry in hook_block_info() to provide multiple
+   * block instances displaying different fields.
+   */
+  function getChildren() {
+  }
+  
 }
 
 /**

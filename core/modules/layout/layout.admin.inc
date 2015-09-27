@@ -893,10 +893,23 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   $block_list = array();
   foreach ($blocks as $module => $module_blocks) {
     foreach ($module_blocks as $delta => $block_info) {
-      // Skip blocks that don't have context requirements met.
-      $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
-      if ($layout->hasContexts($required_contexts)) {
-        $block_list[$module . ':' . $delta] = $block_info;
+      $parent_block = layout_create_handler('block', $module . ':' . $delta);
+      if (!empty($parent_block->getChildren())) {
+        $children = $parent_block->getChildren();
+        foreach ($children as $child_id => $child_info) {
+          // Skip blocks that don't have context requirements met.
+          $required_contexts = isset($child_info['required contexts']) ? $child_info['required contexts'] : array();
+          if ($layout->hasContexts($required_contexts)) {
+            $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
+          }
+        }
+      }
+      else {
+        $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
+        // Skip blocks that don't have context requirements met.
+        if ($layout->hasContexts($required_contexts)) {
+          $block_list[$module . ':' . $delta] = $block_info;
+        }
       }
     }
   }
