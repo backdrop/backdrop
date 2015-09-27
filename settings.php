@@ -188,7 +188,7 @@ $database_prefix = '';
  * Example using absolute paths:
  * @code
  * $config_directories['active'] = '/home/myusername/config/active';
- * $config_directories['staging'] = '/home/myusername/config/active';
+ * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
 $config_directories['active'] = 'files/config_' . md5($database) . '/active';
