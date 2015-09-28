@@ -135,8 +135,8 @@ function _update_requirement_check($project, $type) {
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
     case UPDATE_NOT_FETCHED:
-      $requirement_label = isset($project['reason']) ? $project['reason'] : t('Can not determine status');
-      $requirement['severity'] = REQUIREMENT_WARNING;
+      $requirement_label = isset($project['reason']) ? $project['reason'] : t('Update information not available.');
+      $requirement['severity'] = REQUIREMENT_INFO;
       break;
     case UPDATE_NOT_IMPLEMENTED:
       $text = t('Not yet implemented');
