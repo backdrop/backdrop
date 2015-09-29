@@ -1625,7 +1625,7 @@ function node_menu() {
     'access arguments' => array('administer content types'),
     'file' => 'node.types.inc',
   );
-  $items['admin/structure/types/manage/%node_type/edit'] = array(
+  $items['admin/structure/types/manage/%node_type/configure'] = array(
     'title' => 'Configure',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
