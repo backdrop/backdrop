@@ -37,8 +37,8 @@ function block_menu() {
     'access arguments' => array('administer blocks'),
     'file' => 'block.admin.inc',
   );
-  $items['admin/structure/block/manage/%/configure'] = array(
-    'title' => 'Configure block',
+  $items['admin/structure/block/manage/%/edit'] = array(
+    'title' => 'Edit block',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_INLINE,
   );
