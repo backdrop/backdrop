@@ -236,7 +236,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $edit['recipients'] = $recipients;
     $edit['reply'] = $reply;
     $edit['selected'] = ($selected ? '1' : '0');
-    $this->backdropPost('admin/structure/contact/edit/' . $category_id, $edit, t('Save'));
+    $this->backdropPost('admin/structure/contact/configure/' . $category_id, $edit, t('Save'));
     return ($category_id);
   }
 
