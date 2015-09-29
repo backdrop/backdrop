@@ -136,7 +136,16 @@ class Block extends LayoutHandler {
     if (isset($info['description'])) {
       $preview .= '<p>' . $info['description'] . '</p>';
     }
+    $preview .= $this->getAdminConditionsPreview();
 
+    return $preview;
+  }
+
+  /**
+   * Return a fieldset listing any visibility conditions set for this block.
+   */
+  function getAdminConditionsPreview() {
+    $preview = '';
     if (!empty($this->conditions)) {
       foreach ($this->conditions as $condition) {
         $condition_list[] = $condition->summary();
@@ -152,7 +161,7 @@ class Block extends LayoutHandler {
       );
       $form_state = array();
       form_process_fieldset($fieldset, $form_state);
-      $preview .= backdrop_render($fieldset);
+      $preview = backdrop_render($fieldset);
     }
 
     return $preview;
