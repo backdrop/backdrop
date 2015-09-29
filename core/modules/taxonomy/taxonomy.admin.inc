@@ -33,12 +33,12 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Add terms'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
     );
-    $links['edit'] = array(
-      'title' => t('Edit vocabulary'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/configure",
     );
     $links['delete'] = array(
-      'title' => t('Delete vocabulary'),
+      'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
     );
     $form[$vocabulary->machine_name]['operations'] = array(
@@ -183,13 +183,13 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   switch (taxonomy_vocabulary_save($vocabulary)) {
     case SAVED_NEW:
       backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
       break;
 
     case SAVED_UPDATED:
       backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
       break;
   }
