@@ -147,7 +147,7 @@ class Block extends LayoutHandler {
     if (isset($info['description'])) {
       $preview .= '<p>' . $info['description'] . '</p>';
     }
-    $preview .= $this->getConditionSummary();
+    $preview .= $this->getAdminConditionsPreview();
 
     return $preview;
   }
@@ -171,10 +171,11 @@ class Block extends LayoutHandler {
   }
 
   /**
-   * Return markup for a summary of conditions on this block.
+   * Return a fieldset listing any visibility conditions set for this block.
    */
-  protected function getConditionSummary() {
-    $summary = '';
+  function getAdminConditionsPreview() {
+    $preview = '';
+
     if (!empty($this->conditions)) {
       $condition_list = array();
       foreach ($this->conditions as $condition) {
@@ -191,9 +192,10 @@ class Block extends LayoutHandler {
       );
       $form_state = array();
       form_process_fieldset($fieldset, $form_state);
-      $summary = backdrop_render($fieldset);
+
+      $preview = backdrop_render($fieldset);
     }
-    return $summary;
+    return $preview;
   }
 
   /**

@@ -604,6 +604,7 @@ function layout_autoload_info() {
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
+    'TextBlock' => 'includes/block.text.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
@@ -1533,4 +1534,18 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
 
   // All required contexts populated successfully.
   return TRUE;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function layout_block_info() {
+  $blocks = array();
+  $blocks['text_block'] = array(
+    'info' => t('Text block'),
+    'description' => t('Create a text block.'),
+    'class' => 'TextBlock',
+  );
+
+  return $blocks;
 }
