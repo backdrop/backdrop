@@ -111,7 +111,7 @@ class FieldBlock extends Block {
     $form['label'] = array(
       '#type' => 'radios',
       '#title' => t('Show field label'),
-      '#default_value' => $settings['label'],
+      '#default_value' => isset($settings['label']) ? $settings['label'] : 'above',
       '#options' => array(
         'hidden' => 'Hide label',
         'above' => 'Above',
@@ -121,7 +121,7 @@ class FieldBlock extends Block {
     $form['formatter'] = array(
       '#type' => 'select',
       '#title' => t('Choose display format'),
-      '#default_value' => $settings['formatter'],
+      '#default_value' => isset($settings['formatter']) ? $settings['formatter'] : '',
       '#options' => $formatters,
     );
     if (isset($field['cardinality']) && $field['cardinality'] != 1) {

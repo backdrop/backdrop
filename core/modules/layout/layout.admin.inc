@@ -877,7 +877,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
 
   // If a block has been selected, return the block configuration form.
   if (isset($block_key)) {
-    list($module, $delta, $child_id) = explode(':', $block_key);
+    list($module, $delta) = explode(':', $block_key);
     $block_info = layout_get_block_info($module, $delta);
     if (!$block_info) {
       return MENU_NOT_FOUND;
