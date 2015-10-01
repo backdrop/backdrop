@@ -217,15 +217,14 @@ Drupal.behaviors.fieldGroup = {
     $('.fieldset-wrapper .fieldset > legend').css({display: 'block'});
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
-
     // Add a new ID to each fieldset.
-    $('.group-wrapper fieldset').each(function() {
+    $('.group-wrapper .horizontal-tabs-panes > fieldset', context).once('group-wrapper-panes-processed', function() {
       // Tats bad, but we have to keep the actual id to prevent layouts to break.
-      var fieldgorupID = 'field_group-' + $(this).attr('id') + ' ' + $(this).attr('id');
-      $(this).attr('id', fieldgorupID);
-    })
+      var fieldgroupID = 'field_group-' + $(this).attr('id');
+      $(this).attr('id', fieldgroupID);
+    });
     // Set the hash in url to remember last userselection.
-    $('.group-wrapper ul li').each(function() {
+    $('.group-wrapper ul li').once('group-wrapper-ul-processed', function() {
       var fieldGroupNavigationListIndex = $(this).index();
       $(this).children('a').click(function() {
         var fieldset = $('.group-wrapper fieldset').get(fieldGroupNavigationListIndex);
@@ -234,6 +233,7 @@ Drupal.behaviors.fieldGroup = {
         window.location.hash = hashUrl;
       });
     });
+
   }
 };
 
