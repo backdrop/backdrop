@@ -442,8 +442,17 @@ function views_ui_add_form($form, &$form_state) {
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
+  
+  $path = 'admin/structure/views';
+  $options = array();
+  $options['attributes']['class'][] = 'form-cancel';
+  
   $form['actions']['cancel'] = array(
-    '#markup' => l(t('Cancel'), 'admin/structure/views'),
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $path,
+    '#options' => $options,
+    '#weight' => 1,
   );
 
   return $form;
