@@ -835,7 +835,7 @@ function path_admin_bulk_delete_submit($form, &$form_state) {
       }
       $all_path_info = path_get_info();
       if (array_key_exists($key, $all_path_info)) {
-        $path_prefix = isset($all_path_info[$key]['path prefix']) ? $all_path_info[$key]['path prefix'] : $key . '/';
+        $path_prefix = isset($all_path_info[$key]['source prefix']) ? $all_path_info[$key]['source prefix'] : $key . '/';
         db_delete('url_alias')
           ->condition('source', db_like($path_prefix) . '%', 'LIKE')
           ->execute();
