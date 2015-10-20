@@ -443,7 +443,7 @@ function views_ui_add_form($form, &$form_state) {
     '#submit' => array('views_ui_add_form_save_submit'),
   );
   
-  $path = 'admin/structure/views'
+  $path = 'admin/structure/views';
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
   
