@@ -382,7 +382,13 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
   $entity_type_name = $entity->entityType();
   $entity_type = entity_get_info($entity_type_name);
   $token_type = isset($entity_type['token type']) ? $entity_type['token type'] : NULL;
-  $bundle = $entity->bundle();
+  //$bundle = $entity->bundle();
+  if ($entity_type_name == 'taxonomy_term') {
+    $bundle = $entity->vocabulary;
+  }
+  else {
+    $bundle = $entity->bundle();
+  }
 
   if (!isset($source)) {
     $uri = $entity->uri();
