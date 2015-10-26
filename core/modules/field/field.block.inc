@@ -10,6 +10,14 @@ class FieldBlock extends Block {
     parent::__construct($plugin_name, $data);
     $parts = explode(':', $this->plugin, 3);
     $this->child_id = isset($parts[2]) ? $parts[2] : NULL;
+
+    $this->settings += array(
+      'label' => 'hidden',
+      'formatter' => '',
+      'delta_offset' => 0,
+      'delta_limit' => '',
+      'delta_reversed' => 0,
+    );
   }
 
   /**
@@ -32,6 +40,14 @@ class FieldBlock extends Block {
    */
   function getTitle() {
     $title = parent::getTitle();
+
+    if (empty($title) && $this->settings['title_display'] === LAYOUT_TITLE_DEFAULT) {
+      list($entity_type, $field_name) = explode('-', $this->child_id);
+      $bundle_name = $this->contexts[$entity_type]->bundle();
+      $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+      $title = t($instance['label']);
+    }
+
     return $title;
   }
 
@@ -43,18 +59,10 @@ class FieldBlock extends Block {
 
     // Get a shortcut to the entity.
     list($entity_type, $field_name) = explode('-', $this->child_id);
-    $block_list = field_get_block_list();
-    $context = $block_list[$this->child_id]['required contexts'][$entity_type];
-    $entity = menu_get_object($context);
-
-    // Do not render if the entity is not available.
-    if (empty($entity)) {
-      return;
-    }
+    $entity = $this->contexts['entity']->data;
 
     // Load the entity type's information for this field.
-    $ids = entity_extract_ids($entity_type, $entity);
-    $field = field_info_instance($entity_type, $field_name, $ids[2]);
+    $field = field_info_instance($entity_type, $field_name, $entity->bundle());
 
     // Do not render if the entity type does not have this field.
     if (empty($field)) {
@@ -73,7 +81,7 @@ class FieldBlock extends Block {
       return;
     }
     // Reverse values.
-    if (isset($settings['delta_reversed']) && $settings['delta_reversed']) {
+    if ($settings['delta_reversed']) {
       $all_values = array_reverse($all_values, TRUE);
     }
 
@@ -95,7 +103,11 @@ class FieldBlock extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    
+
+    // Clarify what the default title type is.
+    $form['title_display']['title_display']['#options'][LAYOUT_TITLE_DEFAULT] = t('Use field label as title');
+    $form['title_display']['title_display']['#description'] = t('The block title is displayed outside of the block content area.');
+
     $settings = $this->settings;
     $fields = field_get_block_list();
 
@@ -107,23 +119,27 @@ class FieldBlock extends Block {
     foreach ($field_cached['formatters'] as $key => $formatter) {
       $formatters[$key] = $formatter['label'];
     }
-    
+
     $form['label'] = array(
-      '#type' => 'radios',
-      '#title' => t('Show field label'),
-      '#default_value' => isset($settings['label']) ? $settings['label'] : 'above',
+      '#type' => 'select',
+      '#title' => t('Field label display'),
+      '#default_value' => $settings['label'],
       '#options' => array(
-        'hidden' => 'Hide label',
+        'hidden' => 'None',
         'above' => 'Above',
         'inline' => 'Inline',
       ),
+      '#description' => t('The field label is displayed within the block content area.'),
     );
+
     $form['formatter'] = array(
       '#type' => 'select',
-      '#title' => t('Choose display format'),
-      '#default_value' => isset($settings['formatter']) ? $settings['formatter'] : '',
+      '#title' => t('Field display format'),
+      '#default_value' => $settings['formatter'],
       '#options' => $formatters,
     );
+
+    // Settings that are only shown for multiple field
     if (isset($field['cardinality']) && $field['cardinality'] != 1) {
       list($prefix, $suffix) = explode('@count', t('Skip the first @count item(s)'));
       $form['trim_output'] = array(
@@ -135,7 +151,7 @@ class FieldBlock extends Block {
         '#size' => 5,
         '#field_prefix' => $prefix,
         '#field_suffix' => $suffix,
-        '#default_value' => isset($settings['delta_offset']) ? $settings['delta_offset'] : 0,
+        '#default_value' => $settings['delta_offset'],
       );
 
       list($prefix, $suffix) = explode('@count', t('Then display at most @count item(s)'));
@@ -145,7 +161,7 @@ class FieldBlock extends Block {
         '#field_prefix' => $prefix,
         '#field_suffix' => $suffix,
         '#description' => t('Enter 0 to display all items.'),
-        '#default_value' => isset($settings['delta_limit']) ? $settings['delta_limit'] : 0,
+        '#default_value' => $settings['delta_limit'],
       );
 
       $form['delta_reversed'] = array(
@@ -171,9 +187,9 @@ class FieldBlock extends Block {
 
     $this->settings['label'] = $values['label'];
     $this->settings['formatter'] = $values['formatter'];
-    $this->settings['delta_offset'] = isset($values['trim_output']['delta_offset']) ? $values['trim_output']['delta_offset'] : NULL;
-    $this->settings['delta_limit'] = isset($values['trim_output']['delta_limit']) ? $values['trim_output']['delta_limit'] : NULL;
-    $this->settings['delta_reversed'] = isset($values['delta_reversed']['delta_reversed']) ? $values['delta_reversed']['delta_reversed'] : NULL;
+    $this->settings['delta_offset'] = isset($values['trim_output']['delta_offset']) ? $values['trim_output']['delta_offset'] : 0;
+    $this->settings['delta_limit'] = !empty($values['trim_output']['delta_limit']) ? $values['trim_output']['delta_limit'] : '';
+    $this->settings['delta_reversed'] = isset($values['delta_reversed']['delta_reversed']) ? $values['delta_reversed']['delta_reversed'] : 0;
   }
   
   /**
