@@ -139,7 +139,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   $form['path']['path_settings'] = array(
     '#type' => 'textfield',
     '#title' => t('Path settings'),
-    '#default_value' => '[vocabulary:name]',
+    '#default_value' => '[term:vocabulary:name]',
     '#description' => t('The default path for this content type.'),
   );
   $form['path']['path-settings']['tokens'] = array(
@@ -213,10 +213,10 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
       $form_state['redirect'] = 'admin/structure/taxonomy';
       break;
   }
-  /*$config = config('path.settings');
+  $config = config('path.settings');
   $variable = 'taxonomy_term_' . $form_state['input']['machine_name'] . '_pattern';
   $config->set($variable, $form_state['values']['path_settings']);
-  $config->save();*/
+  $config->save();
 }
 
 /**
