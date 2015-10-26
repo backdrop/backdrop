@@ -264,6 +264,25 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $form['path'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Path settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+  );
+  $form['path']['path_settings'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path settings'),
+    '#default_value' => '[node:title]',
+    '#description' => t('The default path for this content type.'),
+  );
+  $form['path']['path-settings']['tokens'] = array(
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => FALSE,
+    '#click_insert' => TRUE,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
@@ -379,6 +398,29 @@ function node_type_form_submit($form, &$form_state) {
     backdrop_set_message(t('The content type %name has been added.', array('%name' => $type->name)));
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
+
+  // this sets the default path for a content type
+  $config = config('path.settings');
+  /*//$values = $form_state['values'];
+
+  //$all_path_info = path_get_info();
+  //foreach ($all_path_info as $path_type => $path_info) {
+    // Save default pattern per path type.
+    $variable = $form_state['values']['path_settings'] . '_pattern';
+    $config->set($variable, $values[$variable]);
+
+    // Save specialized patterns per path type.
+    if (isset($path_info['pattern items'])) {
+      foreach ($path_info['pattern items'] as $item_name => $item_label) {
+        $variable = $path_type . '_' . $item_name . '_pattern';
+        $config->set($variable, $values[$variable]);
+      }
+    }*/
+  //}
+
+  $variable = 'node_' . $form_state['input']['type'] . '_pattern';
+  $config->set($variable, $form_state['values']['path_settings']);
+  $config->save();
 
   $form_state['redirect'] = 'admin/structure/types';
   return;
