@@ -4153,10 +4153,7 @@ function backdrop_region_class($region) {
  *   on the current page by placing the code directly in the page (for example,
  *   to tell the user that a new message arrived, by opening a pop up, alert
  *   box, etc.). This should only be used for JavaScript that cannot be executed
- *   from a file. When adding inline code, make sure that you are not relying on
- *   $() being the jQuery function. Wrap your code in
- *   @code (function ($) {... })(jQuery); @endcode
- *   or use jQuery() instead of $().
+ *   from a file.
  * - Add external JavaScript ('external'): Allows the inclusion of external
  *   JavaScript files that are not hosted on the local server. Note that these
  *   external JavaScript references do not get aggregated when preprocessing is
@@ -4177,8 +4174,8 @@ function backdrop_region_class($region) {
  *   backdrop_add_js(array('myModule' => array('key' => 'value')), 'setting');
  * @endcode
  *
- * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript added
- * so far.
+ * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript
+ * added so far.
  *
  * If JavaScript aggregation is enabled, all JavaScript files added with
  * $options['preprocess'] set to TRUE will be merged into one aggregate file.
@@ -4210,17 +4207,20 @@ function backdrop_region_class($region) {
  *   - 'setting': An associative array with configuration options. The array is
  *     merged directly into Backdrop.settings. All modules should wrap their
  *     actual configuration settings in another variable to prevent conflicts in
- *     the Backdrop.settings namespace. Items added with a string key will replace
- *     existing settings with that key; items with numeric array keys will be
- *     added to the existing settings array.
+ *     the Backdrop.settings namespace. Settings within the same namespace will
+ *     be recursively merged together unless a "key" option is specified in the
+ *     $options array.
  * @param $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
- *   associative array. JavaScript settings should always pass the string
- *   'setting' only. Other types can have the following elements in the array:
+ *   associative array.
  *   - type: The type of JavaScript that is to be added to the page. Allowed
  *     values are 'file', 'inline', 'external' or 'setting'. Defaults
  *     to 'file'.
+ *   - key: Applies to the 'setting' and 'inline' types only. A string that
+ *     identifies data that should only be added once per page. If omitted,
+ *     multiple settings within the same namespace will be merged together
+ *     recursively.
  *   - scope: The location in which you want to place the script. Possible
  *     values are 'header' or 'footer'. If your theme implements different
  *     regions, you can also use these. Defaults to 'header'.
@@ -4367,11 +4367,21 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       case 'setting':
         // All JavaScript settings are placed in the header of the page with
         // the library weight so that inline scripts appear afterwards.
-        $javascript['settings']['data'][] = $data;
+        if (isset($options['key'])) {
+          $javascript['settings']['data'][$options['key']] = $data;
+        }
+        else {
+          $javascript['settings']['data'][] = $data;
+        }
         break;
 
       case 'inline':
-        $javascript[] = $options;
+        if (isset($options['key'])) {
+          $javascript[$options['key']] = $options;
+        }
+        else {
+          $javascript[] = $options;
+        }
         break;
 
       default: // 'file' and 'external'
