@@ -538,10 +538,10 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['user_path_pattern'] = array(
     '#type' => 'fieldset',
-    '#title' => t('User path pattern'),
+    '#title' => t('User path settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#description' => t('Set the default path pattern for users).') . ' ' . $email_token_link,
+    '#description' => t('Set the default path setting for users).') . ' ' . $email_token_link,
     '#group' => 'email',
   );
   $form['user_path_pattern']['path_settings'] = array(
