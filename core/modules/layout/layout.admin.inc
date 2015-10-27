@@ -714,7 +714,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   $form['title_display']['#tree'] = FALSE;
   $form['title_display']['title_display'] = array(
     '#type' => 'select',
-    '#title' => t('Title type'),
+    '#title' => t('Block title type'),
     '#default_value' => $layout->settings['title_display'],
     '#options' => array(
       LAYOUT_TITLE_DEFAULT => t('Default title'),
@@ -894,8 +894,8 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   foreach ($blocks as $module => $module_blocks) {
     foreach ($module_blocks as $delta => $block_info) {
       $parent_block = layout_create_handler('block', $module . ':' . $delta);
-      if (!empty($parent_block->getChildren())) {
-        $children = $parent_block->getChildren();
+      $children = $parent_block->getChildren();
+      if (is_array($children)) {
         foreach ($children as $child_id => $child_info) {
           // Skip blocks that don't have context requirements met.
           $required_contexts = isset($child_info['required contexts']) ? $child_info['required contexts'] : array();
