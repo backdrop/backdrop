@@ -648,6 +648,16 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
 }
 
 /**
+ * Implements hook_search_reset().
+ */
+function user_search_reset() {
+  db_update('search_dataset')
+    ->fields(array('reindex' => REQUEST_TIME))
+    ->condition('type', 'user')
+    ->execute();
+}
+
+/**
  * Implements hook_user_view().
  */
 function user_user_view($account) {
