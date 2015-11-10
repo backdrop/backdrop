@@ -724,7 +724,7 @@ function comment_node_page_additions(Node $node) {
   // Only attempt to render comments if the node has visible comments.
   // Unpublished comments are not included in $node->comment_count, so show
   // comments unconditionally if the user is an administrator.
-  if (($node->comment_count && user_access('access comments')) || user_access('administer comments')) {
+  if ((!empty($node->comment_count) && user_access('access comments')) || user_access('administer comments')) {
     $mode = $node_type->settings['comment_mode'];
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($cids = comment_get_thread($node, $mode, $comments_per_page)) {
