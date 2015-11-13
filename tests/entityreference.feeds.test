@@ -17,6 +17,7 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
       'name' => 'Feeds integration (field mapper)',
       'description' => 'Test Feeds Mapper support for fields.',
       'group' => 'Entity Reference',
+      'dependencies' => array('feeds'),
     );
   }
 
@@ -27,10 +28,6 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
     parent::setUp();
     module_enable(array('entityreference_feeds_test'), TRUE);
     $this->resetAll();
-
-    if (!module_exists('feeds')) {
-      return;
-    }
 
     $permissions[] = 'access content';
     $permissions[] = 'administer site configuration';
@@ -157,10 +154,6 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
    * Basic test loading a double entry CSV file.
    */
   public function test() {
-    if (!module_exists('feeds')) {
-      return;
-    }
-
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/structure/types/manage/article/fields');
     $this->assertText('Ref - entity ID', t('Found Entity reference field %field.', array('%field' => 'field_er_id')));
