@@ -3,6 +3,66 @@
 /**
  * @file
  * This script runs Backdrop tests from command line.
+ *
+ *
+ *  Run Backdrop tests from the shell.
+ *
+ *  Usage:        ./run-tests.sh [OPTIONS] <testClassNames>
+ *  Example:      ./run-tests.sh --url="http://backdrop" BootstrapPageCacheTestCase
+ *
+ *  All arguments are long options.
+ *
+ * @code
+ *  --help      Print this page.
+ *
+ *  --list      Display all available test groups.
+ *
+ *  --clean     Cleans up database tables or directories from previous, failed,
+ *              tests and then exits (no tests are run).
+ *
+ *  --url       Immediately precedes a URL to set the host and path. You will
+ *              need this parameter if Backdrop is in a subdirectory on your
+ *              localhost and you have not set \$base_url in settings.php. Tests
+ *              can be run under SSL by including https:// in the URL.
+ *
+ *  --php       The absolute path to the PHP executable. Usually not needed.
+ *
+ *  --concurrency [num]
+ *
+ *              Run tests in parallel, up to [num] tests at a time.
+ *
+ *  --force     Enable the Simpletest module if it's not enabled already.
+ *
+ *  --all       Run all available tests.
+ *
+ *  --group     Run tests identified by specific group names, instead of class names.
+ *
+ *  --file      Run tests identified by specific file names, instead of class names.
+ *              Specify the path and the extension
+ *              (i.e. 'core/modules/user/user.test').
+ *
+ *  --xml       <path>
+ *
+ *              If provided, test results will be written as xml files to this path.
+ *
+ *  --color     Output text format results with color highlighting.
+ *
+ *  --verbose   Output detailed assertion messages in addition to summary.
+ *
+ *  <test1>[ <test2>[ <test3> ...]]
+ *
+ *              One or more tests classes (or groups names) to be run. Names may
+ *              be separated by spaces or commas.
+ * @endcode
+ *
+ *  To run this script you will normally invoke it from the root directory of your
+ *  Backdrop installation as the webserver user (differs per configuration), or root:
+ *    --url http://example.com/ BlockTestCase
+ *
+ *  @code
+ *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ --all
+ *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ BlockTestCase
+ *  @endcode
  */
 
 define('SIMPLETEST_SCRIPT_COLOR_PASS', 32);
