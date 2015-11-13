@@ -41,6 +41,7 @@ function entityreference_field_schema($field) {
     }
 
     // Invoke the behaviors to allow them to change the schema.
+    module_load_include('module', 'entityreference');
     foreach (entityreference_get_behavior_handlers($field) as $handler) {
       $handler->schema_alter($schema, $field);
     }
