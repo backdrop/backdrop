@@ -1107,6 +1107,7 @@ function entityreference_field_formatter_info() {
 function entityreference_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $element = array();
 
   if ($display['type'] == 'entityreference_label') {
     $element['link'] = array(
