@@ -100,7 +100,7 @@ class Block extends LayoutHandler {
    */
   function getTitle() {
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
-      return $this->settings['title'];
+      return check_plain($this->settings['title']);
     }
   }
 

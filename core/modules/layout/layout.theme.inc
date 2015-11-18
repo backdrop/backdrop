@@ -248,7 +248,7 @@ function template_preprocess_block(&$variables) {
   // Add template file suggestion for content type and sub-type.
   $variables['theme_hook_suggestions'][] = $base . $delimiter . strtr($block->plugin, '-', '_');
 
-  $variables['title'] = !empty($content->title) ? check_plain($content->title) : '';
+  $variables['title'] = !empty($content->title) ? $content->title : '';
   $variables['content'] = !empty($content->content) ? $content->content : '';
 }
 

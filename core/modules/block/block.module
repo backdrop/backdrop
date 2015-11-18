@@ -113,7 +113,7 @@ function block_block_save($delta, &$edit = array()) {
  */
 function block_block_view($delta = '') {
   $block = db_query('SELECT title, body, format FROM {block_custom} WHERE bid = :bid', array(':bid' => $delta))->fetchObject();
-  $data['subject'] = strlen($block->title) ? $block->title : NULL;
+  $data['subject'] = strlen($block->title) ? check_plain($block->title) : NULL;
   $data['content'] = check_markup($block->body, $block->format, '', TRUE);
   return $data;
 }
