@@ -1489,6 +1489,11 @@ function views_get_view($name, $reset = FALSE) {
       $cache[$name] = FALSE;
     }
   }
+  else {
+    if ($cache[$name]) {
+      $cache[$name] = $cache[$name]->clone_view();
+    }
+  }
 
   return $cache[$name];
 }
