@@ -1002,7 +1002,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     // Create a style.
     image_style_save(array('name' => 'test', 'label' => 'Test'));
-    $generated_uri = 'public://styles/test/public/'. backdrop_basename($original_uri);
+    $generated_uri = 'public://styles/test/public/' . backdrop_basename($original_uri);
     $url = image_style_url('test', $original_uri);
 
     $variables = array(

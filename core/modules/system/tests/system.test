@@ -2260,6 +2260,7 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
  */
 class SystemValidTokenTest extends BackdropWebTestCase {
   protected $profile = 'testing';
+  private $assertErrors = FALSE;
 
   /**
    * Tests invalid invocations of backdrop_valid_token() that must return FALSE.

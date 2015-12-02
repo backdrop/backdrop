@@ -567,6 +567,8 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
  * Test the Backdrop CSS system.
  */
 class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('language', 'common_test');
     // Reset backdrop_add_css() before each test.
@@ -761,6 +763,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     $this->assert(strpos($styles, $simpletest . '/tests/system.css') !== FALSE, 'The overriding CSS file is output.');
     $this->assert(strpos($styles, $system . '/css/system.css') === FALSE, 'The overridden CSS file is not output.');
 
+    backdrop_static_reset('backdrop_add_css');
     backdrop_add_css($simpletest . '/tests/system.css');
     backdrop_add_css($system . '/css/system.css');
 
