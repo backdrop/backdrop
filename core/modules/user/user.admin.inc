@@ -809,7 +809,7 @@ function user_admin_roles_add_submit($form, &$form_state) {
  * @ingroup forms
  * @see user_admin_role_submit()
  */
-function user_admin_role($form, $form_state, $role) {
+function user_admin_role($form, &$form_state, $role) {
   $form_state['role'] = $role;
 
   $form['label'] = array(
