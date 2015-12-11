@@ -895,7 +895,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string('The configuration file "@filename" could not be read.', array('@filename' => $name)));
+      throw new ConfigStorageReadException(format_string('The configuration file "@filename" is not properly formatted JSON.', array('@filename' => $name)));
     }
     return $data;
   }
