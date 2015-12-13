@@ -522,9 +522,8 @@ function path_patterns_settings_form($form) {
   $form['transliterate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Transliterate prior to creating alias'),
-    '#default_value' => $config->get('transliterate') && module_exists('transliteration'),
-    '#description' => t('When a pattern includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet? Transliteration is handled by the Transliteration module.'),
-    '#access' => module_exists('transliteration'),
+    '#default_value' => $config->get('transliterate'),
+    '#description' => t('When a pattern includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet?'),
   );
 
   $form['reduce_ascii'] = array(

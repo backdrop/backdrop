@@ -730,6 +730,21 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
+  $items['admin/config/media/file-system/settings'] = array(
+    'title' => 'Settings',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/media/file-system/transliteration'] = array(
+    'title' => 'Transliteration',
+    'description' => 'Convert existing file names to US-ASCII.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_transliteration_retroactive'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'weight' => 10,
+    'type' => MENU_LOCAL_TASK,
+  );
   $items['admin/config/media/image-toolkit'] = array(
     'title' => 'Image toolkit',
     'description' => 'Choose which image toolkit to use if you have installed optional toolkits.',
@@ -1005,6 +1020,15 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // Machine names transliteration.
+  $items['machine_name/transliterate/%/%'] = array(
+    'page callback' => 'system_machine_name_transliterate',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'system.admin.inc',
   );
 
   return $items;
@@ -2054,6 +2078,24 @@ function system_filetransfer_info() {
 }
 
 /**
+ * Implements hook_file_presave().
+ */
+function system_file_presave($file) {
+  // If an uploaded file had its name altered in transliteration_init() and if
+  // the human-readable display name is not being transliterated, restore the
+  // original version as the human-readable name before saving. (The
+  // transliterated version will still be used in the file URI, which is the
+  // only place where it matters.)
+  $config = config('system.core');
+  if (!empty($_FILES['files']['name']) && $config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
+    $key = array_search($file->filename, $_FILES['files']['name']);
+    if ($key !== FALSE && isset($_FILES['files']['orig_name'][$key])) {
+      $file->filename = $_FILES['files']['orig_name'][$key];
+    }
+  }
+}
+
+/**
  * Implements hook_init().
  */
 function system_init() {
@@ -2092,6 +2134,26 @@ function system_init() {
 
   // Add CSS/JS files from module .info files.
   system_add_module_assets();
+
+  // Sanitizes file names during upload.
+  if (!empty($_FILES['files']) && config_get('system.core', 'file_transliterate_uploads')) {
+    // Figure out language, which is available in $_POST['language'] for node
+    // forms.
+    $langcode = NULL;
+    if (!empty($_POST['language'])) {
+      $languages = language_list();
+      if (isset($languages[$_POST['language']])) {
+        $langcode = $_POST['language'];
+      }
+    }
+    foreach ($_FILES['files']['name'] as $field => $filename) {
+      include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+      // Keep a copy of the unaltered file name.
+      $_FILES['files']['orig_name'][$field] = $filename;
+      $_FILES['files']['name'][$field] = transliteration_clean_filename($filename, $langcode);
+    }
+  }
+
 }
 
 /**

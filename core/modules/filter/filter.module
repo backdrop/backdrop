@@ -1747,6 +1747,16 @@ function filter_filter_info() {
     'process callback' => '_filter_image_align',
     'weight' => 5,
   );
+  $filters['filter_transliteration'] = array(
+    'title' => t('Convert all characters to US-ASCII'),
+    'process callback' => '_filter_transliteration',
+    'settings callback' => '_filter_transliteration_settings',
+    'default settings' => array(
+      'filter_transliteration_no_known' => '?'
+    ),
+    'tips callback' => '_filter_transliteration_tips',
+    'weight' => 6,
+  );
   return $filters;
 }
 
@@ -2433,6 +2443,37 @@ function _filter_image_align($text) {
   }
 
   return filter_dom_serialize($dom);
+}
+
+/**
+ * Process callback for the transliteration filter.
+ */
+function _filter_transliteration($text, $filter, $format, $langcode, $cache, $cache_id) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  return transliteration_get($text, $filter->settings['filter_transliteration_no_known'], $langcode);
+}
+
+/**
+ * Settings callback for the transliteration filter.
+ */
+function _filter_transliteration_settings($form, &$form_state, $filter, $format) {
+  return array(
+    'transliteration' => array(
+      '#type' => 'textfield',
+      '#title' => t('Placeholder for characters with no known US-ASCII equivalent'),
+      '#size' => 2,
+      // The maximum length is 5 in order to accommodate unicode multibyte input.
+      '#maxlength' => 5,
+      '#default_value' => $filter->settings['filter_transliteration_no_known'],
+    )
+  );
+}
+
+/**
+ * Filter tips callback for the transliteration filter.
+ */
+function _filter_transliteration_tips($filter, $format, $long) {
+  return t('Non-latin text (e.g., å, ö, 漢) will be converted to US-ASCII equivalents (a, o, ?).');
 }
 
 /**

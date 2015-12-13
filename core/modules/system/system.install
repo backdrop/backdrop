@@ -2650,6 +2650,50 @@ function system_update_1045() {
 }
 
 /**
+ * Upgrade or prepare for transliteration functions in core.
+ */
+function system_update_1046() {
+  $config = config('system.core');
+
+  // If contrib module was installed, migrate settings and disable module.
+  if (module_exists('transliteration')) {
+    $contrib_config = config('transliteration.settings');
+    $config->set('file_transliterate_lowercase', $contrib_config->get('file_lowercase'));
+    $config->set('file_transliterate_uploads', $contrib_config->get('file_uploads'));
+    $config->set('file_transliterate_uploads_display_name', $contrib_config->get('file_uploads_display_name'));
+
+    module_disable(array('transliteration'), FALSE);
+    $path = backdrop_get_path('module', 'transliteration');
+    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can uninstall and remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+  else {
+    // Migrate variables to config.
+    $config->set('file_transliterate_lowercase', update_variable_get('transliteration_file_lowercase', TRUE));
+    $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', TRUE));
+    $config->set('file_transliterate_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', TRUE));
+  
+    // Remove variables from D7.
+    update_variable_del('transliteration_file_lowercase');
+    update_variable_del('transliteration_file_uploads');
+    update_variable_del('transliteration_file_uploads_display_name');
+
+    // Check for files that need to be fixed.
+    module_load_include('inc', 'system', 'system.admin');
+
+    if (!$query = system_transliteration_file_query()) {
+      // Database not supported.
+      return;
+    }
+    if (!$query->countQuery()->execute()->fetchColumn()) {
+      // Don't bother if no files need to be fixed.
+      return;
+    }
+    return t('Transliteration has been installed. <a href="@transliteration-url">Fix existing file names</a>.', array('@transliteration-url' => url('admin/config/media/file-system/transliteration')));
+  }
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

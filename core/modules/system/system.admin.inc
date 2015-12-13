@@ -1749,6 +1749,40 @@ function system_file_system_settings() {
     );
   }
 
+  $form['transliteration'] = array(
+    '#type' => 'item',
+    '#title' => t('Transliteration'),
+    '#value' => '',
+  );
+  $form['transliteration']['file_transliterate_uploads'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate file names during upload.'),
+    '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility.'),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads'),
+  );
+  $form['transliteration']['file_transliterate_uploads_display_name'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate the displayed file name.'),
+    '#description' => t('Enable to also convert the file name that is displayed within the site (for example, in link text).'),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads_display_name'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['transliteration']['file_transliterate_lowercase'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Lowercase transliterated file names.'),
+    '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
+    '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -1767,6 +1801,9 @@ function system_file_system_settings_submit($form, &$form_state) {
   $config->set('file_private_path', $form_state['values']['file_private_path']);
   $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
   $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
+  $config->set('file_transliterate_uploads', $form_state['values']['file_transliterate_file_uploads']);
+  $config->set('file_transliterate_uploads_display_name', $form_state['values']['file_transliterate_uploads_display_name']);
+  $config->set('file_transliterate_lowercase', $form_state['values']['file_transliterate_lowercase']);
   $config->save();
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));
@@ -2417,4 +2454,154 @@ function system_date_time_lookup($form, &$form_state) {
   $parent_id = $element['#wrapper_attributes']['id'];
   $commands[] = ajax_command_html("#$parent_id .field-suffix", '<span>' . $element['#field_suffix'] . '</span>');
   return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Form builder function; generates retroactive transliteration confirm form.
+ *
+ * @see system_transliteration_retroactive_submit()
+ * @ingroup forms
+ */
+function system_transliteration_retroactive() {
+  if (!$query = system_transliteration_file_query()) {
+    backdrop_set_message(t('Database not supported.'), 'error');
+    $form['description']['#markup'] = t('Retroactive transliteration is not supported for the database system of this Drupal installation. If you think this should be fixed please <a href="@issues-url">file an issue</a> in the project issue queue.', array('@issues-url' => 'http://drupal.org/project/issues/transliteration'));
+    return $form;
+  }
+
+  $count = $query->countQuery()->execute()->fetchColumn();
+  if (!$count) {
+    backdrop_set_message(t('Transliteration is not required.'), 'status');
+    $form['description']['#markup'] = t('There are currently no files names containing non-ASCII characters.');
+    return $form;
+  }
+
+  $form['#redirect'] = 'admin/config/media/file-system/settings';
+  $question = t('Are you sure you want to transliterate existing file names?');
+
+  // Generate a sample list.
+  $rows = array();
+  $header = array(
+    t('Original file name'),
+    t('Transliterated file name')
+  );
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  foreach ($query->range(0, 10)->execute() as $file) {
+    $filename = basename($file->uri);
+    $rows[] = array(l($filename, file_create_url($file->uri)), transliteration_clean_filename($filename));
+  }
+  $description = '<p><strong>' . t('The database currently lists @x_filenames containing non-ASCII characters.', array('@x_filenames' => format_plural($count, '1 file name', '@count file names'))) . '</strong><br />';
+  $description .= t('This count might be inaccurate, though, since some files may not need to be renamed. For example, off-site files will never be changed.') . '</p>';
+  $description .= theme('table', array('header' => $header, 'rows' => $rows));
+  if ($count > 10) {
+    $description .= '<p>' . t('Note: table shows only the first 10 entries.') . '</p>';
+  }
+  $description .= '<p>' . t('<strong>WARNING:</strong> if you have manually entered image or file paths in text fields (for example, text areas or WYSIWYG editors), renaming the files will break these references. Since there is currently no automated way to also fix referenced files in textual contents, it is a very good idea to backup the database and %files directory beforehand. Modules accessing files using their internal system ids are not affected.', array('%files' => backdrop_realpath(file_default_scheme() . '://'))) . '</p>';
+  $description .= '<p style="color: red; font-weight: bold; font-size: 18px;">' . t('This action cannot be undone.') . '</p>';
+
+  return confirm_form($form, $question, 'admin/config/media/file-system/settings', $description, t('Transliterate'));
+}
+
+/**
+ * Form submit function; retroactively transliterates existing file names.
+ *
+ * @see system_transliteration_retroactive()
+ */
+function system_transliteration_retroactive_submit($form, &$form_state) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $count = 0;
+  $errors = array();
+  $result = system_transliteration_file_query()->execute();
+
+  while ($file = $result->fetchObject()) {
+    $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
+    $scheme = file_uri_scheme($file->uri);
+
+    // Missing implementation.
+    if (!$wrapper) {
+      $errors[] = file_uri_target($file->uri);
+      continue;
+    }
+
+    // Skip non-writable stream wrappers.
+    $writeable_stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE);
+    if (!isset($writeable_stream_wrappers[$scheme])) {
+      continue;
+    }
+
+    // Missing file.
+    if (!file_exists($wrapper->realpath())) {
+      $errors[] = file_uri_target($file->uri);
+      continue;
+    }
+
+    // Sanitize file name.
+    $filename = transliteration_clean_filename(basename($file->uri));
+    // Build destination URI.
+    $destination = file_stream_wrapper_uri_normalize(backdrop_dirname($file->uri) . '/' . $filename);
+    $destination = file_destination($destination, FILE_EXISTS_RENAME);
+
+    // Rename and update the file record accordingly.
+    if ($wrapper->rename($file->uri, $destination)) {
+      // If possible, add a url redirect to handle old URL references.
+      if (module_exists('redirect')) {
+        $redirect = new stdClass();
+        redirect_object_prepare($redirect, array(
+          'source' => $wrapper->getDirectoryPath() . '/' . file_uri_target($file->uri),
+          'redirect' => $wrapper->getDirectoryPath() . '/' . file_uri_target($destination),
+          'status_code' => 301)
+        );
+        redirect_save($redirect);
+      }
+      $file->uri = $destination;
+      // Don't use file_save() as it modifies the timestamp.
+      backdrop_write_record('file_managed', $file, 'fid');
+      // Inform modules that the file has been updated.
+      module_invoke_all('file_update', $file);
+      $count++;
+    }
+    else {
+      $errors[] = file_uri_target($file->uri);
+    }
+  }
+
+  if ($errors) {
+    $message = t('Not all file names could be converted. The following files could not be accessed and have been ignored:');
+    $message .= theme('item_list', array('items' => $errors));
+    backdrop_set_message($message, 'error');
+  }
+  else {
+    backdrop_set_message(t('@filenames have been successfully transliterated.', array('@filenames' => format_plural($count, '1 file name', '@count file names'))));
+  }
+
+  // Flush page cache.
+  cache_clear_all();
+}
+
+/**
+ * Builds a query that returns all file names from the database containing non-ASCII characters.
+ *
+ * @return
+ *   SelectQuery
+ */
+function system_transliteration_file_query() {
+  // Regular expressions are not supported by Drupal's database layer.
+  $operator = 'NOT REGEXP';
+  if (config_get('system.core', 'file_transliterate_lowercase')) {
+    $operator .= ' BINARY';
+  }
+  $regex = '/[a-z0-9_.-]+$';
+
+  return db_select('file_managed')
+    ->fields('file_managed')
+    ->condition('uri', $regex, $operator);
+}
+
+/**
+  * Ajax callback; Returns the transliterated version for a given string.
+  */
+function system_machine_name_transliterate($string = '', $unknown = '?') {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  backdrop_json_output(transliteration_get($string, $unknown));
+  backdrop_exit();
 }

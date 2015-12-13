@@ -40,20 +40,31 @@ Backdrop.behaviors.machineName = {
 
      function machineNameHandler(e) {
        var data = e.data;
-       machine = self.transliterate($(e.target).val(), data.options);
-       // Set the machine name to the transliterated value.
-       if (machine !== '') {
-         if (machine !== data.options.replace) {
-           data.$target.val(machine);
-           data.$preview.html(data.options.field_prefix + Backdrop.checkPlain(machine) + data.options.field_suffix);
+       self.transliterate($(e.target).val(), data.options).done(function (machine) {
+         showMachineName(machine, data);
+       });
+     }
+
+     function showMachineName(machine, data) {
+       // Respect maximum length
+         machine_short = machine.substr(0, data.options.maxlength);
+         // Set the machine name to the transliterated value.
+         if (machine_short !== '') {
+           if (machine_short !== data.options.replace) {
+             data.$target.val(machine_short);
+             data.$preview.html(data.options.field_prefix + Backdrop.checkPlain(machine_short) + data.options.field_suffix);
+           }
+           data.$suffix.show();
          }
-         data.$suffix.show();
-       }
-       else {
-         data.$suffix.hide();
-         data.$target.val(machine);
-         data.$preview.empty();
-       }
+         else {
+           data.$suffix.hide();
+           data.$target.val(machine_short);
+           data.$preview.empty();
+         }
+     }
+
+     function appendMachineName(machine, data) {
+       
      }
 
      for (source_id in settings.machineName) {
@@ -79,11 +90,13 @@ Backdrop.behaviors.machineName = {
          // Determine the initial machine name value. Unless the machine name form
          // element is disabled or not empty, the initial default value is based on
          // the human-readable form element value.
+         var field_needs_transliteration = false;
          if ($target.is(':disabled') || $target.val() !== '') {
            machine = $target.val();
          }
          else {
-           machine = self.transliterate($source.val(), options);
+           machine = $source.val();
+           field_needs_transliteration = true;
          }
          // Append the machine name preview to the source field.
          var $preview = $('<span class="machine-name-value">' + options.field_prefix + Backdrop.checkPlain(machine) + options.field_suffix + '</span>');
@@ -106,6 +119,12 @@ Backdrop.behaviors.machineName = {
           $preview: $preview,
           options: options
         };
+
+        if (field_needs_transliteration) {
+          self.transliterate(machine, options).done(function (machine) {
+            showMachineName(machine, eventData);
+          });
+        }
 
         // If it is editable, append an edit link.
         var $link = $('<span class="admin-link"><a href="#">' + Backdrop.t('Edit') + '</a></span>').bind('click', eventData, clickEditHandler);
@@ -130,8 +149,6 @@ Backdrop.behaviors.machineName = {
    *   A string to transliterate.
    * @param settings
    *   The machine name settings for the corresponding field, containing:
-   *   - replace_pattern: A regular expression (without modifiers) matching
-   *     disallowed characters in the machine name; e.g., '[^a-z0-9]+'.
    *   - replace: A character to replace disallowed characters with; e.g., '_'
    *     or '-'.
    *   - maxlength: The maximum length of the machine name.
@@ -140,8 +157,10 @@ Backdrop.behaviors.machineName = {
    *   The transliterated source string.
    */
   transliterate: function (source, settings) {
-    var rx = new RegExp(settings.replace_pattern, 'g');
-    return source.toLowerCase().replace(rx, settings.replace).substr(0, settings.maxlength);
+    return $.ajax({
+      url: Backdrop.settings.basePath + "machine_name/transliterate/" + source.toLowerCase() + "/" + settings.replace,
+      dataType: "json"
+    }); 
   }
 };
 

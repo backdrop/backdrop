@@ -102,6 +102,7 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
 
+
   // Collect some stats
   $remaining = 0;
   $total = 0;
@@ -140,6 +141,12 @@ function search_admin_settings($form, &$form_state) {
     '#min' => 1,
     '#max' => 10000,
     '#description' => t('The number of characters a word has to be to be indexed. A lower setting means better search result ranking, but also a larger database. Each search query must contain at least one keyword that is this size (or longer). <strong>Changing this setting will invalidate the search index.</strong>'),
+  );
+  $form['indexing']['transliteration'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate search index and searched strings.'),
+    '#description' => t('Enable to allow searching and indexing using US-ASCII character set, i.e. to treat accented and unaccented letters the same.'),
+    '#default_value' => $config->get('transliteration'),
   );
   $form['indexing']['search_overlap_cjk'] = array(
     '#type' => 'checkbox',
