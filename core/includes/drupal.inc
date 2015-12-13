@@ -139,7 +139,8 @@ function drupal_hash_base64($data) {
   return backdrop_hash_base64($data);
 }
 function drupal_array_merge_deep() {
-  return backdrop_array_merge_deep();
+  $args = func_get_args(); // pass $args to function
+  return call_user_func_array('backdrop_array_merge_deep', $args);
 }
 function drupal_array_merge_deep_array($arrays) {
   return backdrop_array_merge_deep_array($arrays);
@@ -606,6 +607,16 @@ function drupal_rmdir($uri, $context = NULL) {
 function drupal_tempnam($directory, $prefix) {
   return backdrop_tempnam($directory, $prefix);
 }
+
+/**
+ * Creates a .htaccess file in the given directory.
+ *
+ * @deprecated since 1.0
+ */
+function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
+  return file_save_htaccess($directory, $private, $force_overwrite);
+}
+
 // Functions from form.inc.
 function drupal_get_form() {
   $args = func_get_args(); // pass $args to form function

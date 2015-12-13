@@ -1,0 +1,7 @@
+name = CKEditor
+description = WYSIWYG editing for rich text fields using CKEditor.
+package = User interface
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = module
+configure = admin/config/content/formats

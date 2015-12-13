@@ -1320,14 +1320,14 @@ function hook_field_attach_load($entity_type, $entities, $age, $options) {
  *   - message: The human readable message to be displayed.
  */
 function hook_field_attach_validate($entity_type, $entity, &$errors) {
-  // Make sure any images in article nodes have an alt text.
-  if ($entity_type == 'node' && $entity->type == 'article' && !empty($entity->field_image)) {
+  // Make sure any images in post nodes have an alt text.
+  if ($entity_type == 'node' && $entity->type == 'post' && !empty($entity->field_image)) {
     foreach ($entity->field_image as $langcode => $items) {
       foreach ($items as $delta => $item) {
         if (!empty($item['fid']) && empty($item['alt'])) {
           $errors['field_image'][$langcode][$delta][] = array(
             'error' => 'field_example_invalid',
-            'message' => t('All images in articles need to have an alternative text set.'),
+            'message' => t('All images in posts need to have an alternative text set.'),
           );
         }
       }

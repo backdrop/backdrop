@@ -299,7 +299,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'textfield',
     '#theme_wrappers' => array('form_element'),
   );
@@ -1056,7 +1056,7 @@ function system_library_info() {
     'title' => 'Backdrop AJAX',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/ajax.js' => array('group' => JS_LIBRARY, 'weight' => 2),
+      'core/misc/ajax.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'backdrop.progress'),
@@ -1162,7 +1162,7 @@ function system_library_info() {
     'title' => 'Backdrop resizable textarea',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_DEFAULT),
+      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
     ),
   );
 
@@ -1219,6 +1219,16 @@ function system_library_info() {
     'version' => '3.50.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
+    ),
+  );
+
+  // jQuery TimeEntry
+  $libraries['jquery.timeentry'] = array(
+    'title' => 'jQuery Time Entry Plugin',
+    'website' => 'http://keith-wood.name/timeEntry.html',
+    'version' => '1.5.2',
+    'js' => array(
+      'core/misc/jquery.timeentry.js' => array(),
     ),
   );
 
@@ -2004,6 +2014,11 @@ function system_updater_info() {
       'name' => t('Update themes'),
       'weight' => 0,
     ),
+    'layout' => array(
+      'class' => 'LayoutUpdater',
+      'name' => t('Update layouts'),
+      'weight' => 0,
+    ),
   );
 }
 
@@ -2271,6 +2286,10 @@ function system_preprocess_block(&$variables) {
     switch ($variables['block']->delta) {
       case 'powered-by':
         $variables['attributes']['role'] = 'complementary';
+        break;
+
+      case 'main':
+        $variables['classes'] = array_values(array_diff($variables['classes'], array('block', 'block-system-main')));
         break;
 
       // System menu blocks should get the same class as menu module blocks.
@@ -3580,6 +3599,7 @@ function system_autoload_info() {
     'Archive_Tar' => 'system.tar.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
+    'LayoutUpdater' => 'system.updater.inc',
 
     // @todo: Move file entities to File module.
     // https://github.com/backdrop/backdrop-issues/issues/213

@@ -6,7 +6,7 @@ file = update.test
 
 [UpdateTestContribCase]
 name = Update contrib functionality
-description = Tests how the update module handles contributed modules and themes in a series of functional tests using mock XML data.
+description = Tests how the update module handles contributed modules, themes, and layouts in a series of functional tests using mock XML data.
 group = Update
 file = update.test
 

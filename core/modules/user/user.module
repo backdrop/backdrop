@@ -106,7 +106,7 @@ function user_entity_info() {
           'label' => t('User'),
           'admin' => array(
             'path' => 'admin/config/people/manage',
-            'access arguments' => array('administer users'),
+            'access arguments' => array('administer account settings'),
           ),
         ),
       ),
@@ -258,18 +258,17 @@ function user_load_by_name($name) {
 }
 
 /**
- * Save changes to a user account or add a new user.
+ * Save a new or updated user.
  *
  * @param $account
- *   The user object to modify or add. If you want to modify
- *   an existing user account, you will need to ensure that (a) $account
- *   is an object, and (b) you have set $account->uid to the numeric
- *   user ID of the user account you wish to modify. If you
- *   want to create a new user account, you can set $account->is_new to
- *   TRUE or omit the $account->uid field.
+ *   The user object to modify or add. If you want to modify an existing user
+ *   account, you need to ensure that (a) $account is an object, and (b) you
+ *   have set $account->uid to the numeric user ID of the user account you wish
+ *   to modify. If you want to create a new user account, you can set
+ *   $account->is_new to TRUE or omit the $account->uid field.
  *
- * @return
- *   The saved $user object upon successful save or FALSE if the save failed.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function user_save($account) {
   return $account->save();
@@ -578,7 +577,7 @@ function user_file_predelete(File $file) {
  */
 function user_search_info() {
   return array(
-    'title' => 'Users',
+    'title' => 'User accounts',
   );
 }
 
@@ -1471,6 +1470,8 @@ function user_login($form, &$form_state) {
     backdrop_goto('user/' . $user->uid);
   }
 
+  backdrop_set_title(t('Log in'));
+
   // Display login form:
   $form['name'] = array('#type' => 'textfield',
     '#title' => t('Username'),
@@ -1479,10 +1480,8 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['name']['#description'] = t('Enter your @s username.', array('@s' => config_get('system.core', 'site_name')));
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
-    '#description' => t('Enter the password that accompanies your username.'),
     '#required' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();

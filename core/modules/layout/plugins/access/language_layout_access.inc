@@ -22,9 +22,7 @@ class LanguageLayoutAccess extends LayoutAccess {
     $languages = array(
       'default' => t('Default site language'),
     );
-    foreach (language_list() as $langcode => $language) {
-      $languages[$langcode] = $language->name;
-    }
+    $languages += language_list(FALSE, TRUE);
     $names = array();
     foreach ($this->settings['language'] as $langcode) {
       $names[] = $languages[$langcode];
@@ -61,9 +59,7 @@ class LanguageLayoutAccess extends LayoutAccess {
     $options = array(
       'default' => t('Default site language'),
     );
-    foreach (language_list() as $langcode => $language) {
-      $options[$langcode] = $language->name;
-    }
+    $options += language_list(FALSE, TRUE);
     $form['language'] = array(
       '#title' => t('Language'),
       '#type' => 'checkboxes',

@@ -110,5 +110,62 @@ Backdrop.behaviors.layoutDisplayEditor = {
   }
 };
 
+/**
+ * Filters the 'Add block' list by a text input search string.
+ */
+Backdrop.behaviors.blockListFilterByText = {
+  attach: function(context, settings) {
+    var $input = $('input#layout-block-list-search').once('layout-block-list-search');
+    var $form = $('.layout-block-list');
+    var $rows, zebraClass;
+    var zebraCounter = 0;
+
+    // Fliter the list of layouts by provided search string.
+    function filterBlockList() {
+      var query = $input.val().toLowerCase();
+
+      function showBlockItem(index, row) {
+        var $row = $(row);
+        var $sources = $row.find('.block-item, .description');
+        var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
+        var $match = $row.closest('div.layout-block-add-row');
+        $match.toggle(textMatch);
+        if (textMatch) {
+          stripeRow($match);
+        }
+      }
+
+      // Reset the zebra striping for consistent even/odd classes.
+      zebraCounter = 0;
+      $rows.each(showBlockItem);
+
+      if ($('div.layout-block-add-row:visible').length === 0) {
+        if ($('.filter-empty').length === 0) {
+          $('.layout-block-list').append('<p class="filter-empty">' + Backdrop.t('No blocks match your search.') + '</p>');
+        }
+      }
+      else {
+        $('.filter-empty').remove();
+      }
+    }
+    
+    function stripeRow($match) {
+      zebraClass = (zebraCounter % 2) ? 'odd' : 'even';
+      $match.removeClass('even odd');
+      $match.addClass(zebraClass);
+      zebraCounter++;
+    }
+
+    if ($form.length && $input.length) {
+      $rows = $form.find('div.layout-block-add-row');
+      $rows.each(function() {
+        stripeRow($(this));
+      });
+
+      // @todo Use autofocus attribute when possible.
+      $input.focus().on('keyup', filterBlockList);
+    }
+  }
+};
 
 })(jQuery);

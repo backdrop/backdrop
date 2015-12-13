@@ -1,4 +1,3 @@
-
 (function ($) {
 
 /**
@@ -32,7 +31,7 @@ Backdrop.behaviors.verticalTabs = {
       $fieldsets.each(function () {
         var vertical_tab = new Backdrop.verticalTab({
           title: $('> legend', this).text(),
-          fieldset: $(this)
+          fieldset: $(this),
         });
         tab_list.append(vertical_tab.item);
         $(this)
@@ -81,6 +80,11 @@ Backdrop.verticalTab = function (settings) {
     return false;
   });
 
+  this.fieldset.children('legend').click(function () {
+    self.focus();
+    return false;
+  });
+
   // Keyboard events added:
   // Pressing the Enter key will open the tab pane.
   this.link.keydown(function(event) {
@@ -91,6 +95,11 @@ Backdrop.verticalTab = function (settings) {
       return false;
     }
   });
+
+  // Add summary to legend which is seen on smaller breakpoints
+  var $legend = this.fieldset.children('legend');
+  $legend.append(this.legendSummary = $('<span class="summary"></span>'));
+  $legend.addClass('vertical-tab-link');
 
   this.fieldset
     .bind('summaryUpdated', function () {
@@ -104,18 +113,15 @@ Backdrop.verticalTab.prototype = {
    * Displays the tab's content pane.
    */
   focus: function () {
-    this.fieldset
-      .siblings('fieldset.vertical-tabs-pane')
-        .each(function () {
-          var tab = $(this).data('verticalTab');
-          tab.fieldset.hide();
-          tab.item.removeClass('selected');
-        })
-        .end()
-      .show()
+    // Update tab control for desktop
+    this.item.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
+    this.item
+      .addClass('vertical-tab-selected')
       .siblings(':hidden.vertical-tabs-active-tab')
         .val(this.fieldset.attr('id'));
-    this.item.addClass('selected');
+    // Update classes on previous active and new active pane
+    this.fieldset.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
+    this.fieldset.addClass('vertical-tab-selected');
     // Mark the active tab for screen readers.
     $('#active-vertical-tab').remove();
     this.link.append('<span id="active-vertical-tab" class="element-invisible">' + Backdrop.t('(active tab)') + '</span>');
@@ -125,22 +131,32 @@ Backdrop.verticalTab.prototype = {
    * Updates the tab's summary.
    */
   updateSummary: function () {
-    this.summary.html(this.fieldset.backdropGetSummary());
+    var summaryText = this.fieldset.backdropGetSummary();
+    this.summary.html(summaryText);
+    this.legendSummary.html(summaryText);
   },
 
   /**
    * Shows a vertical tab pane.
    */
   tabShow: function () {
-    // Display the tab.
+    // Show the tab.
     this.item.show();
+
     // Update .first marker for items. We need recurse from parent to retain the
     // actual DOM element order as jQuery implements sortOrder, but not as public
     // method.
-    this.item.parent().children('.vertical-tab-button').removeClass('first')
-      .filter(':visible:first').addClass('first');
-    // Display the fieldset.
+    var $allTabs = this.item.parent().children('.vertical-tab-item');
+    $allTabs.removeClass('first').filter(':visible:first').addClass('first');
+
+    // Remove hidden class, in case tabHide was run on this tab.
     this.fieldset.removeClass('vertical-tab-hidden').show();
+
+    // Focus this tab if it is the only one.
+    if ($allTabs.length === 1) {
+      $allTabs.first().data('verticalTab').focus();
+    }
+
     return this;
   },
 
@@ -148,15 +164,18 @@ Backdrop.verticalTab.prototype = {
    * Hides a vertical tab pane.
    */
   tabHide: function () {
-    // Hide this tab.
+    // Hide the tab.
     this.item.hide();
+
     // Update .first marker for items. We need recurse from parent to retain the
     // actual DOM element order as jQuery implements sortOrder, but not as public
     // method.
-    this.item.parent().children('.vertical-tab-button').removeClass('first')
+    this.item.parent().children('.vertical-tab-item').removeClass('first')
       .filter(':visible:first').addClass('first');
+
     // Hide the fieldset.
     this.fieldset.addClass('vertical-tab-hidden').hide();
+
     // Focus the first visible tab (if there is one).
     var $firstTab = this.fieldset.siblings('.vertical-tabs-pane:not(.vertical-tab-hidden):first');
     if ($firstTab.length) {
@@ -181,8 +200,9 @@ Backdrop.verticalTab.prototype = {
  */
 Backdrop.theme.prototype.verticalTab = function (settings) {
   var tab = {};
-  tab.item = $('<li class="vertical-tab-button" tabindex="-1"></li>')
-    .append(tab.link = $('<a href="#"></a>')
+  // Calculating height in em so CSS has a chance to update height
+  tab.item = $('<li class="vertical-tab-item" tabindex="-1"></li>')
+    .append(tab.link = $('<a href="#" class="vertical-tab-link"></a>')
       .append(tab.title = $('<strong></strong>').text(settings.title))
       .append(tab.summary = $('<span class="summary"></span>')
     )

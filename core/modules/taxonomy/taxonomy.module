@@ -383,14 +383,13 @@ function taxonomy_vocabulary_title(TaxonomyVocabulary $vocabulary) {
 }
 
 /**
- * Saves a vocabulary.
+ * Saves a new or updated taxonomy vocabulary.
  *
  * @param TaxonomyVocabulary $vocabulary
  *   The taxonomy vocabulary entity to be saved.
  *
- * @return
- *   Status constant indicating whether the vocabulary was inserted (SAVED_NEW)
- *   or updated (SAVED_UPDATED).
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function taxonomy_vocabulary_save(TaxonomyVocabulary $vocabulary) {
   return $vocabulary->save();
@@ -492,15 +491,13 @@ function taxonomy_check_vocabulary_hierarchy(TaxonomyVocabulary $vocabulary, $ch
 }
 
 /**
- * Saves a term object to the database.
+ * Saves a new or updated taxonomy term.
  *
  * @param TaxonomyTerm $term
  *   The taxonomy term entity to be saved.
  *
- * @return
- *   Status constant indicating whether term was inserted (SAVED_NEW) or updated
- *   (SAVED_UPDATED). When inserting a new term, $term->tid will contain the
- *   term ID of the newly created term.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function taxonomy_term_save(TaxonomyTerm $term) {
   return $term->save();

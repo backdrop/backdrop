@@ -14,7 +14,7 @@ class MenuTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('menu');
     // Create users.
-    $this->big_user = $this->backdropCreateUser(array('access administration pages', 'administer blocks', 'administer menu', 'create article content'));
+    $this->big_user = $this->backdropCreateUser(array('access administration pages', 'administer blocks', 'administer menu', 'create post content'));
     $this->std_user = $this->backdropCreateUser(array());
   }
 
@@ -192,11 +192,11 @@ class MenuTestCase extends BackdropWebTestCase {
    */
   function doMenuTests($menu_name = 'main-menu') {
     // Add nodes to use as links for menu links.
-    $node1 = $this->backdropCreateNode(array('type' => 'article'));
-    $node2 = $this->backdropCreateNode(array('type' => 'article'));
-    $node3 = $this->backdropCreateNode(array('type' => 'article'));
-    $node4 = $this->backdropCreateNode(array('type' => 'article'));
-    $node5 = $this->backdropCreateNode(array('type' => 'article'));
+    $node1 = $this->backdropCreateNode(array('type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('type' => 'post'));
+    $node3 = $this->backdropCreateNode(array('type' => 'post'));
+    $node4 = $this->backdropCreateNode(array('type' => 'post'));
+    $node5 = $this->backdropCreateNode(array('type' => 'post'));
 
     // Add menu links.
     $item1 = $this->addMenuLink(0, 'node/' . $node1->nid, $menu_name);
@@ -687,7 +687,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $item['menu_name'] = 'main-menu';
     menu_link_save($item);
     // Create a second node.
-    $child_node = $this->backdropCreateNode(array('type' => 'article'));
+    $child_node = $this->backdropCreateNode(array('type' => 'post'));
     // Assign a menu link to the second node, being a child of the first one.
     $child_item = array(
       'link_path' => 'node/'. $child_node->nid,

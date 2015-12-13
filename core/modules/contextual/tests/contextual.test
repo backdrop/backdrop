@@ -13,9 +13,9 @@ class ContextualDynamicContextTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp(array('contextual', 'node'));
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
-    $web_user = $this->backdropCreateUser(array('access content', 'access contextual links', 'edit any article content'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    $web_user = $this->backdropCreateUser(array('access content', 'access contextual links', 'edit any post content'));
     $this->backdropLogin($web_user);
   }
 
@@ -24,18 +24,18 @@ class ContextualDynamicContextTestCase extends BackdropWebTestCase {
    */
   function testNodeLinks() {
     // Create three nodes in the following order:
-    // - An article, which should be user-editable.
+    // - An post, which should be user-editable.
     // - A page, which should not be user-editable.
-    // - A second article, which should also be user-editable.
-    $node1 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    // - A second post, which should also be user-editable.
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $node2 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 1));
-    $node3 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
-    // Now, on the front page, all article nodes should have contextual edit
+    // Now, on the front page, all post nodes should have contextual edit
     // links. The page node in between should not.
     $this->backdropGet('node');
-    $this->assertRaw('node/' . $node1->nid . '/edit', 'Edit link for oldest article node showing.');
+    $this->assertRaw('node/' . $node1->nid . '/edit', 'Edit link for oldest post node showing.');
     $this->assertNoRaw('node/' . $node2->nid . '/edit', 'No edit link for page nodes.');
-    $this->assertRaw('node/' . $node3->nid . '/edit', 'Edit link for most recent article node showing.');
+    $this->assertRaw('node/' . $node3->nid . '/edit', 'Edit link for most recent post node showing.');
   }
 }

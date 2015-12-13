@@ -42,7 +42,7 @@ class views_handler extends views_object {
   /**
    * Where the $query object will reside:
    *
-   * @var views_plugin_query
+   * @var views_plugin_query_default
    */
   var $query = NULL;
 
@@ -52,9 +52,19 @@ class views_handler extends views_object {
   var $handler_type = NULL;
 
   /**
+   * The Views name of the table on which this handler effects.
+   */
+  public $table;
+
+  /**
    * The alias of the table of this handler which is used in the query.
    */
   public $table_alias;
+
+  /**
+   * The named field for this handler.
+   */
+  var $field;
 
   /**
    * The actual field in the database table, maybe different
@@ -532,7 +542,7 @@ class views_handler extends views_object {
   /**
    * Provide text for the administrative summary
    */
-  function admin_summary() { }
+  function admin_summary() { return NULL; }
 
   /**
    * Determine if the argument needs a style plugin.
@@ -638,7 +648,7 @@ class views_many_to_one_helper {
    */
   public $placeholders = array();
 
-  function views_many_to_one_helper(&$handler) {
+  function __construct(&$handler) {
     $this->handler = &$handler;
   }
 

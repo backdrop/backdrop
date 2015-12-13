@@ -151,7 +151,7 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
    */
   function testBackdropHttpBuildQuery() {
     $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
-    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23%2F%2F%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
+    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
     $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
     $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.');
   }
@@ -567,6 +567,8 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
  * Test the Backdrop CSS system.
  */
 class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('language', 'common_test');
     // Reset backdrop_add_css() before each test.
@@ -761,6 +763,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     $this->assert(strpos($styles, $simpletest . '/tests/system.css') !== FALSE, 'The overriding CSS file is output.');
     $this->assert(strpos($styles, $system . '/css/system.css') === FALSE, 'The overridden CSS file is not output.');
 
+    backdrop_static_reset('backdrop_add_css');
     backdrop_add_css($simpletest . '/tests/system.css');
     backdrop_add_css($system . '/css/system.css');
 

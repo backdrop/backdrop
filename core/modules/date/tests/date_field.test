@@ -6,21 +6,16 @@
  */
 abstract class DateFieldBasic extends BackdropWebTestCase {
   protected $privileged_user;
+  protected $profile = 'testing';
 
-  /**
-   * @todo.
-   */
-  protected function setUp() {
-    // Load the date_api module.
-    parent::setUp('field', 'field_ui', 'date_api', 'date', 'date_popup');
+  protected function setUp($modules = array()) {
+    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date')));
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(
-      array('administer content types', 'administer nodes', 'bypass node access')
+      array('access content', 'administer content types', 'administer nodes', 'bypass node access')
     );
     $this->backdropLogin($this->privileged_user);
-
-    config_set('date.settings','date_popup_timepicker', 'none');
 
     module_load_include('inc', 'node', 'content_types');
     module_load_include('inc', 'node', 'node.pages');
@@ -85,7 +80,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'label' => $label,
       'bundle' => $bundle,
       // Move the date right below the title.
-      'weight' => -4,
+      'weight' => -5,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -100,7 +95,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
           'label_position' => 'above',
           'repeat_collapsed' => 0,
         ),
-        'weight' => -4,
+        'weight' => -5,
       ),
       'settings' => array(
         'default_value' => $default_value,
@@ -139,16 +134,8 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       ),
     );
 
-    $field = field_create_field($field);
-    $instance = field_create_instance($instance);
-
-    field_info_cache_clear(TRUE);
-    field_cache_clear(TRUE);
-
-    // Look at how the field got configured.
-    $this->backdropGet("admin/structure/types/manage/$bundle/fields/$field_name");
-    $this->backdropGet("admin/structure/types/manage/$bundle/display");
-
+    field_create_field($field);
+    field_create_instance($instance);
   }
 
   /**
@@ -203,7 +190,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'label' => $label,
       'bundle' => $bundle,
       // Move the date right below the title.
-      'weight' => -4,
+      'weight' => -5,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -218,7 +205,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
           'label_position' => 'above',
           'repeat_collapsed' => 0,
         ),
-        'weight' => -4,
+        'weight' => -5,
       ),
       'settings' => array(
         'default_value' => $default_value,
@@ -257,19 +244,12 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       ),
     );
 
-    $field = field_create_field($field);
-    $instance = field_create_instance($instance);
-
-    field_info_cache_clear(TRUE);
-    field_cache_clear(TRUE);
-
-    // Look at how the field got configured.
-    $this->backdropGet("admin/structure/types/manage/$bundle/fields/$field_name");
-    $this->backdropGet("admin/structure/types/manage/$bundle/display");
+    field_create_field($field);
+    field_create_instance($instance);
   }
 
   /**
-   * @todo.
+   * Remove a Date field though the UI.
    */
   protected function deleteDateField($label, $bundle = 'story', $bundle_name = 'Story') {
     $this->backdropGet("admin/structure/types/manage/$bundle/fields");
@@ -306,10 +286,9 @@ class DateFieldTestCase extends DateFieldBasic {
   }
 
   /**
-   * @todo.
+   * Tests that date field functions properly on the node form.
    */
   public function dateForm($field_name, $field_type, $widget_type, $todate = TRUE) {
-    // Tests that date field functions properly.
     $edit = array();
     $edit['title'] = $this->randomName(8);
     if ($widget_type == 'date_select') {

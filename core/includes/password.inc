@@ -233,9 +233,6 @@ function user_hash_password($password, $count_log2 = 0) {
  */
 function user_check_password($password, $account) {
   if (substr($account->pass, 0, 2) == 'U$') {
-    // This may be an updated password from user_update_7000(). Such hashes
-    // have 'U' added as the first character and need an extra md5() (see the
-    // Drupal 7 documentation).
     $stored_hash = substr($account->pass, 1);
     $password = md5($password);
   }
@@ -246,7 +243,7 @@ function user_check_password($password, $account) {
   $type = substr($stored_hash, 0, 3);
   switch ($type) {
     case '$S$':
-      // A normal Drupal 7 password using sha512.
+      // A normal Backdrop password using sha512.
       $hash = _password_crypt('sha512', $password, $stored_hash);
       break;
     case '$H$':
@@ -268,8 +265,7 @@ function user_check_password($password, $account) {
  * This is typically called during the login process when the plain text
  * password is available. A new hash is needed when the desired iteration count
  * has changed through a change in the variable password_count_log2 or
- * BACKDROP_HASH_COUNT or if the user's password hash was generated in an update
- * like user_update_7000() (see the Drupal 7 documentation).
+ * BACKDROP_HASH_COUNT.
  *
  * Alternative implementations of this function might use other criteria based
  * on the fields in $account.

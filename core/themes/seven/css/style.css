@@ -222,7 +222,7 @@ ul.menu li.expanded {
 /**
  * Page title.
  */
-#page-title {
+.page-title {
   color: #000;
   margin: 0 0 10px;
   padding: 0;
@@ -231,7 +231,7 @@ ul.menu li.expanded {
   font-weight: normal;
   float: left; /* LTR */
 }
-[dir="rtl"] #page-title {
+[dir="rtl"] .page-title {
   float: right;
 }
 
@@ -753,11 +753,14 @@ div.teaser-checkbox .form-item,
   padding-bottom: 0;
 }
 .form-item label {
-  margin: 0;
-  padding: 0 0 10px;
+  margin: 0 0 10px;
 }
 fieldset label {
   font-weight: normal;
+}
+.field-label label {
+  margin: 0;
+  padding: 0;
 }
 .form-item label.option {
   font-size: 0.923em;
@@ -816,21 +819,10 @@ div.description,
 .password-strength {
   padding-top: 6px;
 }
-.password-strength .indicator {
-  color: #008000;
-}
-.password-match.match .password-match-text {
-  color: #008000;
-}
-.password-match.mismatch .password-match-text {
-  color: #8c2e0b
-}
 
-ul.tips li {
-  margin: 0.25em 0 0.25em 1.5em; /* LTR */
-}
-[dir="rtl"] ul.tips li {
-  margin: 0.25em 1.5em 0.25em 0;
+ul.tips {
+  margin: 0.25em 0.25em 0;
+  padding: 0 1em;
 }
 body div.form-type-radio div.description,
 body div.form-type-checkbox div.description {
@@ -1105,7 +1097,7 @@ div.admin-panel h3 {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
-#layout-edit-main #page-title {
+#layout-edit-main .page-title {
   float: none;
 }
 
@@ -1172,7 +1164,7 @@ body.maintenance-page #page:after {
   margin-top: -16px;
   margin-left: -34px;
 }
-body.maintenance-page #page-title {
+body.maintenance-page .page-title {
   background: transparent;
   padding-top: 0;
 }
@@ -1398,6 +1390,8 @@ div.add-or-remove-shortcuts {
     margin: 0;
     height: 100%;
     width: 100%;
+  }
+  .maintenance-page-wrapper {
     display: table;
   }
   body.maintenance-page {

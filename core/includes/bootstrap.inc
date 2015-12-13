@@ -8,7 +8,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.2.x-dev');
+define('BACKDROP_VERSION', '1.3.x-dev');
 
 /**
  * Core API compatibility.
@@ -896,20 +896,20 @@ function backdrop_settings_initialize() {
  * The filename, whether provided, cached, or retrieved from the database, is
  * only returned if the file exists.
  *
- * This function plays a key role in allowing Backdrop's resources (modules
- * and themes) to be located in different places depending on a site's
+ * This function plays a key role in allowing Backdrop's resources (modules,
+ * layouts, and themes) to be located in different places depending on a site's
  * configuration. For example, a module 'foo' may legally be located
  * in any of these three places:
  *
+ * core/modules/foo/foo.module
  * modules/foo/foo.module
- * /modules/foo/foo.module
  * sites/example.com/modules/foo/foo.module
  *
  * Calling backdrop_get_filename('module', 'foo') will give you one of
  * the above, depending on where the module is located.
  *
  * @param $type
- *   The type of the item (theme, theme_engine, module, profile).
+ *   The type of the item (theme, layout, theme_engine, module, profile).
  * @param $name
  *   The name of the item for which the filename is requested.
  * @param $filename
@@ -937,7 +937,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
     $files[$type][$name] = $filename;
   }
   elseif (isset($files[$type][$name])) {
-    // nothing
+    // The file is in the database but does not exist on the disk.
   }
   // Verify that we have an active database connection, before querying
   // the database. This is required because this function is called both
@@ -945,7 +945,13 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
   // when a database connection fails.
   else {
     try {
-      if (function_exists('db_query')) {
+      // Layouts we use the existing registry rather than the system table.
+      if ($type === 'layout' && function_exists('layout_get_layout_info')) {
+        $layout_info = layout_get_layout_info($name);
+        $files[$type][$name] = $layout_info['path'] . '/' . $layout_info['name'] . '.info';
+      }
+      // Modules, themes, and profiles pull from the system table.
+      elseif (function_exists('db_query')) {
         $file = db_query("SELECT filename FROM {system} WHERE name = :name AND type = :type", array(':name' => $name, ':type' => $type))->fetchField();
         if ($file && file_exists(BACKDROP_ROOT . '/' . $file)) {
           $files[$type][$name] = $file;
@@ -957,6 +963,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
       // or the database might be down. We have a fallback for this case so we
       // hide the error completely.
     }
+
     // Fallback to searching the filesystem if the database could not find the
     // file or the file returned by the database is not found.
     if (!isset($files[$type][$name])) {
@@ -966,7 +973,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
         $dir = 'themes/engines';
         $extension = 'engine';
       }
-      elseif ($type == 'theme') {
+      elseif ($type === 'theme' || $type === 'layout') {
         $extension = 'info';
       }
       else {
@@ -990,9 +997,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
     }
   }
 
-  if (isset($files[$type][$name])) {
-    return $files[$type][$name];
-  }
+  return isset($files[$type][$name]) ? $files[$type][$name] : NULL;
 }
 
 /**
@@ -2538,8 +2543,6 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
-  global $databases;
-
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.
@@ -2547,11 +2550,17 @@ function backdrop_bootstrap_is_installed() {
   if (backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
     try {
       _backdrop_bootstrap_database();
+      // Getting a connection the first time opens it and populates the
+      // $GLOBALS['databases'] variable.
+      Database::getConnection('default');
     }
     catch (Exception $e) {}
   }
 
-  if (!empty($databases) && function_exists('db_query')) {
+  if (empty($GLOBALS['databases'])) {
+    return FALSE;
+  }
+  elseif (function_exists('db_query')) {
     try {
       db_query('SELECT name FROM {system} WHERE name = :name', array(':name' => 'system'));
     }
@@ -2585,7 +2594,8 @@ function backdrop_get_user_timezone() {
     // Ignore PHP strict notice if time zone has not yet been set in the php.ini
     // configuration.
     $config_data_default_timezone = $config->get('default_timezone');
-    return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();  }
+    return !empty($config_data_default_timezone) ? $config_data_default_timezone : @date_default_timezone_get();
+  }
 }
 
 /**
@@ -3040,12 +3050,15 @@ function language_multilingual() {
  *
  * @param $only_enabled
  *   (optional) Whether to return only enabled languages.
+ * @param $option_list
+ *   (optional) Whether to return a list of options instead of objects. This
+ *   list is suitable for use in a select list #options array.
  *
  * @return
  *   An associative array of languages, keyed by the language code, ordered by
  *   weight ascending and name ascending.
  */
-function language_list($only_enabled = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3094,6 +3107,15 @@ function language_list($only_enabled = FALSE) {
         $languages['enabled'][$langcode] = $languages['all'][$langcode];
       }
     }
+  }
+
+  if ($option_list) {
+    $list = array();
+    $this_list = $only_enabled ? $languages['enabled'] : $languages['all'];
+    foreach ($this_list as $language) {
+      $list[$language->langcode] = $language->name;
+    }
+    return $list;
   }
 
   return $only_enabled ? $languages['enabled'] : $languages['all'];

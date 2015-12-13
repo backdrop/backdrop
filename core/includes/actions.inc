@@ -79,8 +79,7 @@ function actions_get_info($action_name = NULL) {
  *   comment object.
  *
  * @return
- *   An associative array containing the results of the functions that
- *   perform the actions, keyed on action ID.
+ *   The result of the executed action callback.
  *
  * @ingroup actions
  */
@@ -89,6 +88,9 @@ function actions_execute($action_name, Entity $entity = NULL, &$context) {
   static $stack;
   $stack++;
   $recursion_limit = config_get('system.core', 'action_recursion_limit');
+  if (empty($recursion_limit)) {
+    $recursion_limit = 35;
+  }
   if ($stack > $recursion_limit) {
     watchdog('actions', 'Stack overflow: recursion limit for actions_execute() has been reached. Stack is limited by %limit calls.', array('%limit' => $recursion_limit), WATCHDOG_ERROR);
     return;
@@ -102,13 +104,15 @@ function actions_execute($action_name, Entity $entity = NULL, &$context) {
   $context['action_name'] = $action_name;
   $context['action_info'] = $action_info;
   if (function_exists($callback)) {
-    return $callback($entity, $context);
+    $result = $callback($entity, $context);
   }
   else {
+    $result = NULL;
     trigger_error(t('The action "@action" could not be executed because the function "@callback" could not be found.', array('@action' => $action_name, '@callback' => $callback)), E_USER_ERROR);
   }
 
   $stack--;
+  return $result;
 }
 
 /**

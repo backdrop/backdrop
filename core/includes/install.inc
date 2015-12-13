@@ -722,7 +722,7 @@ function backdrop_install_config_directories() {
       )));
     }
 
-    // Put a README.txt into each config directory. This is required so that
+    // Put a README.md into each config directory. This is required so that
     // they can later be added to git. Since these directories are auto-
     // created, we have to write out the README rather than just adding it
     // to the Backdrop core repository. These strings are formatted to wrap at
@@ -742,7 +742,7 @@ make this configuration active, see admin/config/development/configuration/sync.
 ');
     }
 
-    file_put_contents($config_directory . '/README.txt', $text);
+    file_put_contents($config_directory . '/README.md', $text);
   }
 }
 

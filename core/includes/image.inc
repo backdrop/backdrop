@@ -304,6 +304,27 @@ function image_resize(stdClass $image, $width, $height) {
  * @see image_gd_rotate()
  */
 function image_rotate(stdClass $image, $degrees, $background = NULL) {
+  // Standardize $degrees to be an integer if possible. This avoids strange
+  // rounding errors when rotating multiples of 90 degrees. For example a
+  // 100x100 image when rotated 90.0 (float) degrees may result in an image
+  // dimension of 99x100 pixels. See https://bugs.php.net/bug.php?id=65148.
+  if (strcmp((int) $degrees, $degrees) === 0) {
+    $degrees = (int) $degrees;
+  }
+  else {
+    $degrees = (float) $degrees;
+  }
+  // Likewise, negative rotations can sometimes have rounding errors, convert
+  // to a positive number before passing to the toolkit. This bug is also
+  // reported at https://bugs.php.net/bug.php?id=65148 (same as above).
+  while ($degrees < 0) {
+    $degrees = 360 + $degrees;
+  }
+  // Reduce greater than 360 degrees just for good measure.
+  while ($degrees >= 360) {
+    $degrees = 360 - $degrees;
+  }
+
   return image_toolkit_invoke('rotate', $image, array($degrees, $background));
 }
 

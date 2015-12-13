@@ -15,3 +15,9 @@ name = Layout Upgrade Test
 description = Tests the upgrade path from block-based regions to layouts.
 group = Layout
 file = layout.test
+
+[LayoutHookTestCase]
+name = Layout Hook Test
+description = Tests the upgrade path from block-based regions to layouts.
+group = Layout
+file = layout.test

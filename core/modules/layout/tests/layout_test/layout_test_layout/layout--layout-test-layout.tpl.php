@@ -14,7 +14,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout-test-layout <?php print $classes; ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout-test-layout <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
@@ -41,7 +41,7 @@
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
-        <h1 class="title" id="page-title">
+        <h1 class="page-title">
           <?php print $title; ?>
         </h1>
       <?php endif; ?>

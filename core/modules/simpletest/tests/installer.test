@@ -9,6 +9,7 @@
  * Tests installer language detection.
  */
 class InstallerLanguageTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp();

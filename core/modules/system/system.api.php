@@ -117,8 +117,8 @@ function hook_admin_paths_alter(&$paths) {
   // Treat all user pages as administrative.
   $paths['user'] = TRUE;
   $paths['user/*'] = TRUE;
-  // Treat the article node form as a non-administrative page.
-  $paths['node/add/article'] = FALSE;
+  // Treat the post node form as a non-administrative page.
+  $paths['node/add/post'] = FALSE;
 }
 
 /**
@@ -223,7 +223,7 @@ function callback_queue_worker($queue_item_data) {
  * Callback for hook_queue_info().
  *
  * @param $queue_item_data
- *   The data that was passed to DrupalQueue::createItem() when the item was
+ *   The data that was passed to BackdropQueue::createItem() when the item was
  *   queued.
  *
  * @throws \Exception
@@ -231,7 +231,7 @@ function callback_queue_worker($queue_item_data) {
  *   The cron process will log the exception, and leave the item in the queue to
  *   be processed again later.
  *
- * @see drupal_cron_run()
+ * @see backdrop_cron_run()
  */
 function callback_queue_worker($queue_item_data) {
   $node = node_load($queue_item_data);
@@ -3742,17 +3742,17 @@ function hook_token_info_alter(&$data) {
   // Modify description of node tokens for our site.
   $data['tokens']['node']['nid'] = array(
     'name' => t("Node ID"),
-    'description' => t("The unique ID of the article."),
+    'description' => t("The unique ID of the post."),
   );
   $data['tokens']['node']['title'] = array(
     'name' => t("Title"),
-    'description' => t("The title of the article."),
+    'description' => t("The title of the post."),
   );
 
   // Chained tokens for nodes.
   $data['tokens']['node']['created'] = array(
     'name' => t("Date created"),
-    'description' => t("The date the article was posted."),
+    'description' => t("The date the post was posted."),
     'type' => 'date',
   );
 }

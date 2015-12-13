@@ -1116,7 +1116,7 @@ file = theme.test
 
 [RenderElementTypesTestCase]
 name = Render element types
-description = Tests the markup of core render element types passed to drupal_render().
+description = Tests the markup of core render element types passed to backdrop_render().
 group = Theme
 file = theme.test
 

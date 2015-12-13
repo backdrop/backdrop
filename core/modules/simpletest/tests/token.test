@@ -456,7 +456,7 @@ class TokenNodeTestCase extends TokenTestHelper {
   protected $profile = 'standard';
 
   function testNodeTokens() {
-    $admin_user = $this->backdropCreateUser(array('create article content', 'create url aliases'));
+    $admin_user = $this->backdropCreateUser(array('create post content', 'create url aliases'));
     $this->backdropLogin($admin_user);
 
     $files = $this->backdropGetTestFiles('image');
@@ -469,7 +469,7 @@ class TokenNodeTestCase extends TokenTestHelper {
       'field_tags[und]' => 'foo, bar',
       'field_image[und][0][fid]' => $file->fid,
     );
-    $this->backdropPost('node/add/article', $node_edit, t('Save'));
+    $this->backdropPost('node/add/post', $node_edit, t('Save'));
     $source_node = $this->backdropGetNodeByTitle($node_title);
 
     $tokens = array(
@@ -480,25 +480,25 @@ class TokenNodeTestCase extends TokenTestHelper {
       'url:absolute' => url("node/{$source_node->nid}", array('absolute' => TRUE)),
       'url:relative' => url("node/{$source_node->nid}", array('absolute' => FALSE)),
       'url:unaliased:path' => "node/{$source_node->nid}",
-      'content-type' => 'Article',
-      'content-type:name' => 'Article',
-      'content-type:machine-name' => 'article',
-      'content-type:description' => "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
+      'content-type' => 'Post',
+      'content-type:name' => 'Post',
+      'content-type:machine-name' => 'post',
+      'content-type:description' => "Add a blog post, news article, or press release.",
       'content-type:node-count' => 1,
-      'content-type:edit-url' => url('admin/structure/types/manage/article', array('absolute' => TRUE)),
+      'content-type:edit-url' => url('admin/structure/types/manage/post', array('absolute' => TRUE)),
       'field_image' => file_create_url($file->uri),
       'field_tags' => 'foo, bar',
       // Deprecated tokens.
       //'tnid' => 0,
-      'type' => 'article',
-      'type-name' => 'Article',
+      'type' => 'post',
+      'type-name' => 'Post',
       'url:alias' => 'content/source-node',
     );
     $this->assertTokens('node', array('node' => $source_node), $tokens);
 
     $translated_node = $this->backdropCreateNode(array(
       'tnid' => $source_node->nid,
-      'type' => 'article',
+      'type' => 'post',
     ));
     $tokens = array(
       'source' => $source_node->title,
@@ -508,15 +508,15 @@ class TokenNodeTestCase extends TokenTestHelper {
       'url:absolute' => url("node/{$translated_node->nid}", array('absolute' => TRUE)),
       'url:relative' => url("node/{$translated_node->nid}", array('absolute' => FALSE)),
       'url:unaliased:path' => "node/{$translated_node->nid}",
-      'content-type' => 'Article',
-      'content-type:name' => 'Article',
-      'content-type:machine-name' => 'article',
-      'content-type:description' => "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
+      'content-type' => 'Post',
+      'content-type:name' => 'Post',
+      'content-type:machine-name' => 'post',
+      'content-type:description' => "Add a blog post, news article, or press release.",
       'content-type:node-count' => 2,
-      'content-type:edit-url' => url('admin/structure/types/manage/article', array('absolute' => TRUE)),
+      'content-type:edit-url' => url('admin/structure/types/manage/post', array('absolute' => TRUE)),
       // Deprecated tokens.
-      'type' => 'article',
-      'type-name' => 'Article',
+      'type' => 'post',
+      'type-name' => 'Post',
       'tnid' => $source_node->nid,
       'url:alias' => "node/{$translated_node->nid}",
     );
@@ -700,7 +700,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
   function addVocabulary(array $vocabulary = array()) {
     $vocabulary += array(
       'name' => backdrop_strtolower($this->randomName(5)),
-      'nodes' => array('article' => 'article'),
+      'nodes' => array('post' => 'post'),
     );
     $vocabulary = new TaxonomyVocabulary($vocabulary);
     taxonomy_vocabulary_save($vocabulary);

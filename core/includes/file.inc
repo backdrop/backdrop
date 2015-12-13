@@ -530,7 +530,7 @@ function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
 # Turn off all options we don't need.
 Options None
-Options +FollowSymLinks
+Options +SymLinksIfOwnerMatch
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -543,19 +543,22 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php5.c>
   php_flag engine off
 </IfModule>
+
 EOF;
 
   if ($private) {
-    $lines = <<<EOF
-    # Deny all requests from Apache 2.4+.
-    <IfModule mod_authz_core.c>
-      Require all denied
-    </IfModule>
+    $lines .= <<<EOF
 
-    # Deny all requests from Apache 2.0-2.2.
-    <IfModule !mod_authz_core.c>
-      Deny from all
-    </IfModule>
+# Deny all requests from Apache 2.4+.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+# Deny all requests from Apache 2.0-2.2.
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>
+
 EOF;
   }
 
@@ -604,15 +607,14 @@ function file_load($fid) {
 }
 
 /**
- * Saves a file entity to the database.
- *
- * If the $file->fid is not set a new record will be added.
+ * Saves a new or updated file.
  *
  * @param File $file
- *   A file object returned by file_load().
+ *   A file object returned by file_load(). If the $file->fid is not set a new
+ *   record will be added.
  *
- * @return
- *   Either SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
+ * @return int
+ *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  *
  * @see hook_file_insert()
  * @see hook_file_update()
@@ -2060,7 +2062,8 @@ function file_download_access($uri) {
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'nomask': The preg_match() regular expression of the files to ignore.
- *     Defaults to '/(\.\.?|CVS)$/'.
+ *     Defaults to '/^(\..*)|(CVS)$/'. This default ignores all hidden files
+ *     (those that start with a period) and items named "CVS".
  *   - 'callback': The callback function to call for each match. There is no
  *     default callback.
  *   - 'recurse': When TRUE, the directory scan will recurse the entire tree
@@ -2080,9 +2083,16 @@ function file_download_access($uri) {
  *   'filename', and 'name' members corresponding to the matching files.
  */
 function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
+  // By default, do not check for files in common special-purpose directories.
+  $ignore_directories = array(
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Merge in defaults.
   $options += array(
-    'nomask' => '/(\.\.?|CVS)$/',
+    'nomask' => $no_mask,
     'callback' => 0,
     'recurse' => TRUE,
     'key' => 'uri',
@@ -2093,7 +2103,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
   $files = array();
   if (is_dir($dir) && $handle = opendir($dir)) {
     while (FALSE !== ($filename = readdir($handle))) {
-      if (!preg_match($options['nomask'], $filename) && $filename[0] != '.') {
+      if (!preg_match($options['nomask'], $filename) && $filename !== '.' && $filename !== '..') {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {

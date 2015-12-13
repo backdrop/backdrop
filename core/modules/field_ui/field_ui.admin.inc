@@ -1528,9 +1528,6 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   // See if data already exists for this field.
   // If so, prevent changes to the field settings.
   $has_data = field_has_data($field);
-  if ($has_data) {
-    $form['field']['#description'] = '<div class="messages error">' . t('There is data for this field in the database. The field settings can no longer be changed.') . '</div>' . $form['field']['#description'];
-  }
 
   // Build the non-configurable field values.
   $form['field']['field_name'] = array('#type' => 'value', '#value' => $field['field_name']);
@@ -1544,9 +1541,19 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   $form['field']['settings'] = array();
   $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
   if (is_array($additions)) {
+    if ($has_data) {
+      $form['field']['#description'] = '<div class="messages warning">' . t('There is data for this field in the database. Some field settings may no longer be changed.') . '</div>' . $form['field']['#description'];
+    }
     $form['field']['settings'] = $additions;
   }
-  if (empty($form['field']['settings'])) {
+  if (empty($additions)) {
+    // If there are no settings and we are in the middle of adding a field for
+    // the first time, skip this page entirely and proceed to the widget
+    // settings.
+    $redirect = field_ui_next_destination($entity_type, $bundle);
+    if (is_array($redirect)) {
+      call_user_func_array('backdrop_goto', $redirect);
+    }
     $form['field']['settings'] = array(
       '#markup' => t('%field has no field settings.', array('%field' => $instance['label'])),
     );
@@ -1750,6 +1757,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $bundle = $instance['bundle'];
   $entity_type = $instance['entity_type'];
   $field = field_info_field($instance['field_name']);
+  $token_link = ' ' . theme('token_tree_link');
 
   backdrop_set_title($instance['label']);
 
@@ -1763,7 +1771,6 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     return $form;
   }
 
-  $field_type = field_info_field_types($field['type']);
   $widget_type = field_info_widget_types($instance['widget']['type']);
   $bundles = field_info_bundles();
 
@@ -1813,16 +1820,10 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#title' => t('Help text'),
     '#default_value' => !empty($instance['description']) ? $instance['description'] : '',
     '#rows' => 5,
-    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', array('@tags' => _field_filter_xss_display_allowed_tags())),
+    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', array('@tags' => _field_filter_xss_display_allowed_tags())) . $token_link,
     '#weight' => -10,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array(),
-  );
-
-  $form['instance']['settings']['token_tree'] = array(
-    '#theme' => 'token_tree_link',
-    '#token_types' => array(),
-    '#weight' => -9,
   );
 
   $form['instance']['required'] = array(

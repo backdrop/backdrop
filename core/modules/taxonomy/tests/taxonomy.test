@@ -178,7 +178,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
 class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('taxonomy', 'field_test');
-    $admin_user = $this->backdropCreateUser(array('create article content', 'administer taxonomy'));
+    $admin_user = $this->backdropCreateUser(array('create post content', 'administer taxonomy'));
     $this->backdropLogin($admin_user);
     $this->vocabulary = $this->createVocabulary();
   }
@@ -394,14 +394,14 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
    * Test taxonomy functionality with nodes prior to 1970.
    */
   function testTaxonomyLegacyNode() {
-    // Posts an article with a taxonomy term and a date prior to 1970.
+    // Posts a post with a taxonomy term and a date prior to 1970.
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit['title'] = $this->randomName();
     $edit['date'] = '1969-01-01 00:00:00 -0500';
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit["field_tags[$langcode]"] = $this->randomName();
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
     // Checks that the node has been saved.
     $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, strtotime($edit['date']), 'Legacy node was saved with the right date.');
@@ -436,7 +436,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
     $this->instance = array(
       'field_name' => 'taxonomy_' . $this->vocabulary->machine_name,
-      'bundle' => 'article',
+      'bundle' => 'post',
       'entity_type' => 'node',
       'widget' => array(
         'type' => 'options_select',
@@ -497,13 +497,13 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $term1 = $this->createTerm($this->vocabulary);
     $term2 = $this->createTerm($this->vocabulary);
 
-    // Post an article.
+    // Post a post.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit[$this->instance['field_name'] . '[' . $langcode . '][]'] = $term1->tid;
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
 
     // Check that the term is displayed when the node is viewed.
     $node = $this->backdropGetNodeByTitle($edit["title"]);
@@ -547,7 +547,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
     // Save, creating the terms.
     $this->backdropPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('@type %title has been created.', array('@type' => t('Basic page'), '%title' => $edit["title"])), 'The node was created successfully.');
+    $this->assertRaw(t('@type %title has been created.', array('@type' => t('Page'), '%title' => $edit["title"])), 'The node was created successfully.');
     foreach ($terms as $term) {
       $this->assertText($term, 'The term was saved and appears on the node page.');
     }
@@ -859,7 +859,7 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
 
     $this->instance = array(
       'field_name' => 'taxonomy_' . $this->vocabulary->machine_name,
-      'bundle' => 'article',
+      'bundle' => 'post',
       'entity_type' => 'node',
       'widget' => array(
         'type' => 'options_select',
@@ -883,25 +883,25 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
     $term1 = $this->createTerm($this->vocabulary);
 
     // RSS display must be added manually.
-    $this->backdropGet("admin/structure/types/manage/article/display");
+    $this->backdropGet("admin/structure/types/manage/post/display");
     $edit = array(
       "view_modes_custom[rss]" => '1',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Change the format to 'RSS category'.
-    $this->backdropGet("admin/structure/types/manage/article/display/rss");
+    $this->backdropGet("admin/structure/types/manage/post/display/rss");
     $edit = array(
       "fields[taxonomy_" . $this->vocabulary->machine_name . "][type]" => 'taxonomy_term_reference_rss_category',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    // Post an article.
+    // Post a post.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName();
     $edit[$this->instance['field_name'] . '[' . $langcode . '][]'] = $term1->tid;
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
 
     // Check that the term is displayed when the RSS feed is viewed.
     $this->backdropGet('rss.xml');
@@ -928,7 +928,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
     $this->backdropLogin($this->admin_user);
 
-    // Create a vocabulary and add two term reference fields to article nodes.
+    // Create a vocabulary and add two term reference fields to post nodes.
     $this->vocabulary = $this->createVocabulary();
 
     $this->field_name_1 = backdrop_strtolower($this->randomName());
@@ -948,7 +948,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     field_create_field($this->field_1);
     $this->instance_1 = array(
       'field_name' => $this->field_name_1,
-      'bundle' => 'article',
+      'bundle' => 'post',
       'entity_type' => 'node',
       'widget' => array(
         'type' => 'options_select',
@@ -978,7 +978,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     field_create_field($this->field_2);
     $this->instance_2 = array(
       'field_name' => $this->field_name_2,
-      'bundle' => 'article',
+      'bundle' => 'post',
       'entity_type' => 'node',
       'widget' => array(
         'type' => 'options_select',
@@ -1000,14 +1000,14 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     $term_1 = $this->createTerm($this->vocabulary);
     $term_2 = $this->createTerm($this->vocabulary);
 
-    // Post an article.
+    // Post a post.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit["{$this->field_name_1}[$langcode][]"] = $term_1->tid;
     $edit["{$this->field_name_2}[$langcode][]"] = $term_1->tid;
-    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
 
     // Check that the term is indexed, and only once.
     $node = $this->backdropGetNodeByTitle($edit["title"]);
@@ -1017,7 +1017,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     ))->fetchField();
     $this->assertEqual(1, $index_count, 'Term 1 is indexed once.');
 
-    // Update the article to change one term.
+    // Update the post to change one term.
     $edit["{$this->field_name_1}[$langcode][]"] = $term_2->tid;
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
@@ -1033,7 +1033,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     ))->fetchField();
     $this->assertEqual(1, $index_count, 'Term 2 is indexed.');
 
-    // Update the article to change another term.
+    // Update the post to change another term.
     $edit["{$this->field_name_2}[$langcode][]"] = $term_2->tid;
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
@@ -1054,7 +1054,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     unset($node->{$this->field_name_1});
     unset($node->{$this->field_name_2});
 
-    // Update the article with no term changed.
+    // Update the post with no term changed.
     $node->save();
 
     // Check that the index was not changed.
@@ -1069,7 +1069,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     ))->fetchField();
     $this->assertEqual(1, $index_count, 'Term 2 is indexed once.');
 
-    // Update the article to change one term.
+    // Update the post to change one term.
     $node->{$this->field_name_1}[$langcode] = array(array('tid' => $term_1->tid));
     $node->save();
 
@@ -1085,7 +1085,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     ))->fetchField();
     $this->assertEqual(1, $index_count, 'Term 2 is indexed.');
 
-    // Update the article to change another term.
+    // Update the post to change another term.
     $node->{$this->field_name_2}[$langcode] = array(array('tid' => $term_1->tid));
     $node->save();
 
@@ -1483,7 +1483,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
 
     $this->instance = array(
       'field_name' => 'taxonomy_' . $this->vocabulary->machine_name,
-      'bundle' => 'article',
+      'bundle' => 'post',
       'entity_type' => 'node',
       'widget' => array(
         'type' => 'options_select',
@@ -1515,7 +1515,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
 
     // Create node with term2.
     $edit = array();
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $edit[$this->instance['field_name'] . '[' . $this->langcode . '][]'] = $term2->tid;
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 

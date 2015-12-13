@@ -571,6 +571,9 @@ function backdrop_http_build_query(array $query, $parent = '') {
   foreach ($query as $key => $value) {
     $key = ($parent ? $parent . '[' . rawurlencode($key) . ']' : rawurlencode($key));
 
+    // For better readability of paths in query strings, we decode slashes.
+    $key = str_replace('%2F', '/', $key);
+
     // Recurse into children.
     if (is_array($value)) {
       $params[] = backdrop_http_build_query($value, $key);
@@ -1832,7 +1835,15 @@ function _filter_xss_attributes($attr) {
       case 2:
         // Attribute value, a URL after href= for instance.
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+          // Do not strip protocol information out from data attributes,
+          // which may be mangled if they contain JSON.
+          if (strpos($attrname, 'data-') === 0) {
+            $thisval = $match[1];
+          }
+          // Strip bad protocols from all other attributes, e.g. href, src.
+          else {
+            $thisval = filter_xss_bad_protocol($match[1]);
+          }
 
           if (!$skip) {
             $attrarr[] = "$attrname=\"$thisval\"";
@@ -2347,6 +2358,8 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     internal to the site, $options['language'] is used to look up the alias
  *     for the URL. If $options['language'] is omitted, the global $language_url
  *     will be used.
+ *   - 'clean': Force the enabling or disabling of the "Clean URLs" option for
+ *     the returned URL. If omitted, the site-wide setting will be used.
  *   - 'https': Whether this URL should point to a secure location. If not
  *     defined, the current scheme is used, so the user stays on HTTP or HTTPS
  *     respectively. TRUE enforces HTTPS and FALSE enforces HTTP, but HTTPS can
@@ -2474,16 +2487,23 @@ function url($path = NULL, array $options = array()) {
   // Cache the clean URLs setting, as url() is called very frequently.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
-    $backdrop_static_fast['clean_url'] = &backdrop_static(__FUNCTION__);
+    $backdrop_static_fast['clean_urls_enabled'] = &backdrop_static(__FUNCTION__);
   }
-  $clean_url = &$backdrop_static_fast['clean_url'];
-  if (!isset($clean_url)) {
+  $clean_urls_enabled = &$backdrop_static_fast['clean_urls_enabled'];
+  if (!isset($clean_urls_enabled)) {
     try {
-      $clean_url = config_get('system.core', 'clean_url') ? TRUE : FALSE;
+      $clean_urls_enabled = config_get('system.core', 'clean_url') ? TRUE : FALSE;
     }
     catch (ConfigException $e) {
-      $clean_url = FALSE;
+      $clean_urls_enabled = FALSE;
     }
+  }
+
+  if (isset($options['clean'])) {
+    $clean_url = $options['clean'];
+  }
+  else {
+    $clean_url = $clean_urls_enabled;
   }
 
   // With Clean URLs.
@@ -4133,10 +4153,7 @@ function backdrop_region_class($region) {
  *   on the current page by placing the code directly in the page (for example,
  *   to tell the user that a new message arrived, by opening a pop up, alert
  *   box, etc.). This should only be used for JavaScript that cannot be executed
- *   from a file. When adding inline code, make sure that you are not relying on
- *   $() being the jQuery function. Wrap your code in
- *   @code (function ($) {... })(jQuery); @endcode
- *   or use jQuery() instead of $().
+ *   from a file.
  * - Add external JavaScript ('external'): Allows the inclusion of external
  *   JavaScript files that are not hosted on the local server. Note that these
  *   external JavaScript references do not get aggregated when preprocessing is
@@ -4157,8 +4174,8 @@ function backdrop_region_class($region) {
  *   backdrop_add_js(array('myModule' => array('key' => 'value')), 'setting');
  * @endcode
  *
- * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript added
- * so far.
+ * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript
+ * added so far.
  *
  * If JavaScript aggregation is enabled, all JavaScript files added with
  * $options['preprocess'] set to TRUE will be merged into one aggregate file.
@@ -4190,17 +4207,20 @@ function backdrop_region_class($region) {
  *   - 'setting': An associative array with configuration options. The array is
  *     merged directly into Backdrop.settings. All modules should wrap their
  *     actual configuration settings in another variable to prevent conflicts in
- *     the Backdrop.settings namespace. Items added with a string key will replace
- *     existing settings with that key; items with numeric array keys will be
- *     added to the existing settings array.
+ *     the Backdrop.settings namespace. Settings within the same namespace will
+ *     be recursively merged together unless a "key" option is specified in the
+ *     $options array.
  * @param $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
- *   associative array. JavaScript settings should always pass the string
- *   'setting' only. Other types can have the following elements in the array:
+ *   associative array.
  *   - type: The type of JavaScript that is to be added to the page. Allowed
  *     values are 'file', 'inline', 'external' or 'setting'. Defaults
  *     to 'file'.
+ *   - key: Applies to the 'setting' and 'inline' types only. A string that
+ *     identifies data that should only be added once per page. If omitted,
+ *     multiple settings within the same namespace will be merged together
+ *     recursively.
  *   - scope: The location in which you want to place the script. Possible
  *     values are 'header' or 'footer'. If your theme implements different
  *     regions, you can also use these. Defaults to 'header'.
@@ -4347,11 +4367,21 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       case 'setting':
         // All JavaScript settings are placed in the header of the page with
         // the library weight so that inline scripts appear afterwards.
-        $javascript['settings']['data'][] = $data;
+        if (isset($options['key'])) {
+          $javascript['settings']['data'][$options['key']] = $data;
+        }
+        else {
+          $javascript['settings']['data'][] = $data;
+        }
         break;
 
       case 'inline':
-        $javascript[] = $options;
+        if (isset($options['key'])) {
+          $javascript[$options['key']] = $options;
+        }
+        else {
+          $javascript[] = $options;
+        }
         break;
 
       default: // 'file' and 'external'
@@ -5777,12 +5807,26 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     $searchdir[] = "$config/$directory";
   }
 
+  // Do not check for system files in common special-purpose directories.
+  $ignore_directories = array(
+    'assets',
+    'css',
+    'scss',
+    'less',
+    'js',
+    'images',
+    'templates',
+    'node_modules',
+    'bower_components',
+  );
+  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+
   // Get current list of items.
   if (!function_exists('file_scan_directory')) {
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
   foreach ($searchdir as $dir) {
-    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth));
+    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
 
     // Duplicate files found in later search directories take precedence over
     // earlier ones, so we want them to overwrite keys in our resulting
@@ -7753,8 +7797,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * - screenshot: Path to screenshot relative to the theme's .info file.
  * - engine: Theme engine; typically phptemplate.
  * - base: Name of a base theme, if applicable; e.g., base = zen.
- * - regions: Listed regions; e.g., region[left] = Left sidebar.
- * - features: Features available; e.g., features[] = logo.
+ * - settings: Theme settings; e.g., settings[color] = true
  * - stylesheets: Theme stylesheets; e.g., stylesheets[all][] = my-style.css.
  * - scripts: Theme scripts; e.g., scripts[] = my-script.js.
  *

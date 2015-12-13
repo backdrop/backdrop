@@ -89,7 +89,7 @@ function image_field_instance_settings_form($field, $instance) {
   $max_resolution = explode('x', $settings['max_resolution']) + array('', '');
   $form['max_resolution'] = array(
     '#type' => 'item',
-    '#title' => t('Maximum image resolution'),
+    '#title' => t('Maximum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
@@ -118,7 +118,7 @@ function image_field_instance_settings_form($field, $instance) {
   $min_resolution = explode('x', $settings['min_resolution']) + array('', '');
   $form['min_resolution'] = array(
     '#type' => 'item',
-    '#title' => t('Minimum image resolution'),
+    '#title' => t('Minimum image size'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',

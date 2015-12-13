@@ -3,4 +3,5 @@ description = Allows content to be translated into different languages.
 dependencies[] = locale
 package = Translation
 version = BACKDROP_VERSION
+type = module
 backdrop = 1.x

@@ -1245,8 +1245,8 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     backdrop_language_initialize();
     $this->assertEqual($GLOBALS['language']->langcode, $this->langcode, format_string('Current language: %lang', array('%lang' => $GLOBALS['language']->langcode)));
 
-    // Enable multilingual workflow option for articles.
-    $node_type = node_type_load('article');
+    // Enable multilingual workflow option for posts.
+    $node_type = node_type_load('post');
     $node_type->settings['language'] = 1;
     node_type_save($node_type);
 
@@ -1780,8 +1780,8 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     path_delete($edit);
 
     // Create language nodes to check priority of aliases.
-    $first_node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
-    $second_node = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $first_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
+    $second_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
     // Assign a custom path alias to the first node with the English language.
     $edit = array(
@@ -1863,7 +1863,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     // User to add and remove language.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'administer content types', 'access administration pages'));
     // User to create a node.
-    $web_user = $this->backdropCreateUser(array('create article content', 'create page content', 'edit any page content'));
+    $web_user = $this->backdropCreateUser(array('create post content', 'create page content', 'edit any page content'));
 
     // Add custom language.
     $this->backdropLogin($admin_user);
@@ -1898,32 +1898,32 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save configuration'));
 
-    // Set "Basic page" content type to use multilingual support.
+    // Set "Page" content type to use multilingual support.
     $this->backdropGet('admin/structure/types/manage/page');
     $this->assertText(t('Multilingual support'), 'Multilingual support fieldset present on content type configuration form.');
     $edit = array(
       'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
     $this->backdropLogout();
 
-    // Verify language selection is not present on add article form.
+    // Verify language selection is not present on add post form.
     $this->backdropLogin($web_user);
-    $this->backdropGet('node/add/article');
+    $this->backdropGet('node/add/post');
     // Verify language select list is not present.
-    $this->assertNoFieldByName('language', NULL, 'Language select not present on add article form.');
+    $this->assertNoFieldByName('language', NULL, 'Language select not present on add post form.');
 
-    // Verify language selection appears on add "Basic page" form.
+    // Verify language selection appears on add "Page" form.
     $this->backdropGet('node/add/page');
     // Verify language select list is present.
-    $this->assertFieldByName('langcode', NULL, 'Language select present on add Basic page form.');
+    $this->assertFieldByName('langcode', NULL, 'Language select present on add Page form.');
     // Ensure enabled language appears.
     $this->assertText($name, 'Enabled language present.');
     // Ensure disabled language doesn't appear.
     $this->assertNoText($name_disabled, 'Disabled language not present.');
 
-    // Create "Basic page" content.
+    // Create "Page" content.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
     $edit = array(
@@ -1942,7 +1942,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'en',
     );
     $this->backdropPost($path, $edit, t('Save'));
-    $this->assertRaw(t('%title has been updated.', array('%title' => $node_title)), 'Basic page content updated.');
+    $this->assertRaw(t('%title has been updated.', array('%title' => $node_title)), 'Page content updated.');
 
     $this->backdropLogout();
   }
@@ -1954,7 +1954,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     // User to add and remove language.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'administer content types', 'access administration pages'));
     // User to create a node.
-    $web_user = $this->backdropCreateUser(array('create article content', 'edit own article content'));
+    $web_user = $this->backdropCreateUser(array('create post content', 'edit own post content'));
 
     // Login as admin.
     $this->backdropLogin($admin_user);
@@ -1969,22 +1969,22 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     $edit['predefined_langcode'] = 'es';
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
-    // Set "Article" content type to use multilingual support.
-    $this->backdropGet('admin/structure/types/manage/article');
+    // Set "Post" content type to use multilingual support.
+    $this->backdropGet('admin/structure/types/manage/post');
     $edit = array(
       'language' => 1,
     );
-    $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Article')), 'Article content type has been updated.');
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Post')), 'Post content type has been updated.');
     $this->backdropLogout();
 
-    // Login as web user to add new article.
+    // Login as web user to add new post.
     $this->backdropLogin($web_user);
 
     // Create three nodes: English, Arabic and Spanish.
-    $node_en = $this->createNodeArticle('en');
-    $node_ar = $this->createNodeArticle('ar');
-    $node_es = $this->createNodeArticle('es');
+    $node_en = $this->createNodePost('en');
+    $node_ar = $this->createNodePost('ar');
+    $node_es = $this->createNodePost('es');
 
     $this->backdropGet('node');
 
@@ -2014,12 +2014,12 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
   /**
    * Create node in a specific language.
    */
-  protected function createNodeArticle($langcode) {
-    $this->backdropGet('node/add/article');
+  protected function createNodePost($langcode) {
+    $this->backdropGet('node/add/post');
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
     $edit = array(
-      'type' => 'article',
+      'type' => 'post',
       'title' => $node_title,
       'body' => array($langcode => array(array('value' => $node_body))),
       'langcode' => $langcode,
@@ -2449,12 +2449,12 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
     $edit = array('language[locale-url][enabled]' => '1');
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
-    // Set "Basic page" content type to use multilingual support.
+    // Set "Page" content type to use multilingual support.
     $edit = array(
       'language' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
 
     // Make node body translatable.
     $field = field_info_field('body');
@@ -2466,7 +2466,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
    * Test if field languages are correctly set through the node form.
    */
   function testMultilingualNodeForm() {
-    // Create "Basic page" content.
+    // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $title_value = $this->randomName(8);
@@ -2515,7 +2515,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
    * Test multilingual field display settings.
    */
   function testMultilingualDisplaySettings() {
-    // Create "Basic page" content.
+    // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $title_value = $this->randomName(8);
@@ -2548,16 +2548,16 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     parent::setUp('locale', 'locale_test');
 
     // Create and login user.
-    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'administer content types', 'create article content'));
+    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'administer content types', 'create post content'));
     $this->backdropLogin($admin_user);
 
     // Add language.
     $edit = array('predefined_langcode' => 'fr');
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
 
-    // Set "Article" content type to use multilingual support.
+    // Set "Post" content type to use multilingual support.
     $edit = array('language' => 1);
-    $this->backdropPost('admin/structure/types/manage/article', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
 
     // Enable content language negotiation UI.
     state_set('locale_test_content_language_type', TRUE);
@@ -2594,14 +2594,14 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
     foreach (language_list() as $node_langcode => $node_language) {
       $langcode_none = LANGUAGE_NONE;
 
-      // Create "Article" content.
+      // Create "Post" content.
       $title = $this->randomName();
       $edit = array(
         "title" => $title,
         "body[$langcode_none][0][value]" => $this->randomName(),
         "langcode" => $node_langcode,
       );
-      $this->backdropPost("node/add/article", $edit, t('Save'));
+      $this->backdropPost("node/add/post", $edit, t('Save'));
       $node = $this->backdropGetNodeByTitle($title);
 
       $prefixes = locale_language_negotiation_url_prefixes();
@@ -2633,7 +2633,7 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     parent::setUp('locale');
 
     // Create and login user.
-    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'create article content'));
+    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'create post content'));
     $this->backdropLogin($admin_user);
   }
 
@@ -2688,7 +2688,7 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     $this->assertText(t('Date localizations saved.'), 'Medium date formats updated.');
 
     // Create node content.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
 
     // Configure format for the node posted date changes with the language.
     $this->backdropGet('node/' . $node->nid);
