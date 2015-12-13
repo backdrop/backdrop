@@ -99,6 +99,12 @@ function search_admin_settings($form, &$form_state) {
     '#max' => 10000,
     '#description' => t('The number of characters a word has to be to be indexed. A lower setting means better search result ranking, but also a larger database. Each search query must contain at least one keyword that is this size (or longer).'),
   );
+  $form['indexing_settings']['transliteration'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate search index and searched strings.'),
+    '#description' => t('Enable to allow searching and indexing using US-ASCII character set, i.e. to treat accented and unaccented letters the same.'),
+    '#default_value' => $config->get('transliteration'),
+  );
   $form['indexing_settings']['search_overlap_cjk'] = array(
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
@@ -169,6 +175,7 @@ function search_admin_settings_submit($form, &$form_state) {
   // If these settings change, the index needs to be rebuilt.
   if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk'])) {
     $config->set('search_minimum_word_size', $form_state['values']['search_minimum_word_size']);
+    $config->set('transliteration', $form_state['values']['transliteration']);
     $config->set('search_overlap_cjk', $form_state['values']['search_overlap_cjk']);
     backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();

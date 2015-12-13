@@ -394,6 +394,12 @@ function search_simplify($text) {
   // Call an external processor for word handling.
   search_invoke_preprocess($text);
 
+  // Transliteration
+  if (config_get('search.settings', 'transliteration')) {
+    include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+    $text = transliteration_get($text, '', language_default('language'));
+  }
+
   // Simple CJK handling
   if (config_get('search.settings', 'search_overlap_cjk')) {
     $text = preg_replace_callback('/[' . PREG_CLASS_CJK . ']+/u', 'search_expand_cjk', $text);
