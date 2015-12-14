@@ -1,0 +1,7 @@
+name = Render Cache
+description = Render cache helps to avoid needless re-rendering of page elements by caching results.
+package = Development
+backdrop = 1.x
+configure = admin/config/development/performance
+tags[] = developer
+type = module

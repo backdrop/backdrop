@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function render_cache_schema() {
+  $schema['cache_render'] = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_render']['description'] = 'Cache table used to store render cache data, if database caching setting enabled.';
+  return $schema;
+}

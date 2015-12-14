@@ -6218,6 +6218,13 @@ function backdrop_render(&$elements) {
     return '';
   }
 
+  if(module_exists('render_cache')){
+    $config = config('render_cache.settings');
+    if($config->get('enable')){
+      return render_cache_backdrop_render($elements);
+    }
+  }
+
   // Try to fetch the element's markup from cache and return.
   if (isset($elements['#cache'])) {
     $cached_output = backdrop_render_cache_get($elements);
