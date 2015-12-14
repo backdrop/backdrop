@@ -303,16 +303,15 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     // Remove the node/add items from the management menu and check that the add
     // links are still added to the menu.
     module_load_include('inc', 'admin_bar');
-    $link = db_query("SELECT * FROM {menu_links} WHERE router_path = 'node/add' AND module = 'system'")->fetchAssoc();
+    $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'node/add%' AND module = 'system'")->fetchAssoc();
     $link = menu_link_load($link['mlid']);
     $link['menu_name'] = 'main-menu';
     menu_link_save($link);
 
     // Delete the special type and check that the link disappears.
-    node_type_delete('special');
-    menu_rebuild();
+    $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete'));
+    $this->backdropGet('js/admin_bar/cache/' . $hash);
 
-    $this->backdropGet('');
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
       ':path' => 'node/add/post',
       ':title' => 'Post',
