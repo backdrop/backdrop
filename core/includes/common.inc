@@ -4541,12 +4541,6 @@ function backdrop_pre_render_scripts($elements) {
   // page request.
   $default_query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
-  // For inline JavaScript to validate as XHTML, all JavaScript containing
-  // XHTML needs to be wrapped in CDATA. To make that backwards compatible
-  // with HTML 4, we need to comment out the CDATA-tag.
-  $embed_prefix = "\n<!--//--><![CDATA[//><!--\n";
-  $embed_suffix = "\n//--><!]]>\n";
-
   // Defaults for each SCRIPT element.
   $element_defaults = array(
     '#type' => 'head_tag',
@@ -4579,15 +4573,11 @@ function backdrop_pre_render_scripts($elements) {
         // Element properties that depend on item type.
         switch ($item['type']) {
           case 'setting':
-            $element['#value_prefix'] = $embed_prefix;
             $element['#value'] = 'window.Backdrop = {settings: ' . backdrop_json_encode(backdrop_array_merge_deep_array($item['data'])) . "};";
-            $element['#value_suffix'] = $embed_suffix;
             break;
 
           case 'inline':
-            $element['#value_prefix'] = $embed_prefix;
             $element['#value'] = $item['data'];
-            $element['#value_suffix'] = $embed_suffix;
             break;
 
           case 'file':
