@@ -164,14 +164,12 @@ function render_cache_prepare_elements_for_md5(&$elements) {
 
   foreach ($elements as $key => $element) {
     if (is_array($element)) {
-      $elements[$key] = render_cache_prepare_elements_for_md5($element);
+      render_cache_prepare_elements_for_md5($elements[$key]);
     }
     elseif (is_object($element)) {
-      $elements[$key] = render_cache_get_object_values($element);
+      render_cache_get_object_values($elements[$key]);
     }
   }
-
-  return $return;
 }
 
 /**
