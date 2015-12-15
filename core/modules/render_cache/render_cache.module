@@ -44,7 +44,7 @@ function render_cache_cron() {
         if(is_file($dirpath . '/' . $entry)){
           $fileinfo = fileatime($dirpath . '/' . $entry);
           if($fileinfo < REQUEST_TIME - $expire_after){
-            backdrop_set_message($dirpath . '/' . $entry . ":" .$fileinfo. ":" . (REQUEST_TIME - $expire_after));
+            unlink($dirpath . '/' . $entry);
           }
         }
       }
@@ -123,19 +123,38 @@ function render_cache_checksum($element) {
 
   $serialize = serialize($element);
 
-  if (is_array($element) || is_object($element)) {
+  if (is_array($element)) {
     $need_sanitize = FALSE;
-    $search_for = array('form_token', 'form_build_id', '#build_id');
+    $search_for = array('form_token', 'form_build_id', '#build_id', 'date');
     foreach ($search_for as $str) {
-      if (FALSE !== strpos($serialize, $str)) {
+      if (FALSE !== strpos($serialize, '"'.$str.'"')) {
         $need_sanitize = TRUE;
         break;
       }
     }
     if ($need_sanitize) {
       $element_copy = $element;
-      render_cache_prepare_elements_for_md5($element_copy);
+      if (is_array($element_copy)) {
+        if (isset($element_copy['form_token'])) {
+          unset($element_copy['form_token']);
+        }
+        if (isset($element_copy['form_build_id'])) {
+          unset($element_copy['form_build_id']);
+        }
+        if (isset($element_copy['#build_id'])) {
+          unset($element_copy['#build_id']);
+        }
+        if (isset($element_copy['date'])) {
+          unset($element_copy['date']);
+        }
+        if (isset($element_copy['#attached'])) {
+          unset($element_copy['#attached']);
+        }
+      }
+
+      array_walk_recursive($element_copy,'render_cache_sanitize_objects');
       $serialize = serialize($element_copy);
+
     }
   }
 
@@ -144,30 +163,11 @@ function render_cache_checksum($element) {
   return $checksum;
 }
 
-/**
- * Internal function to prepare element for checksum
- * by removing dynamic data (form_token, form_build_id) from checksum.
- */
-function render_cache_prepare_elements_for_md5(&$elements) {
-
-  if (is_array($elements)) {
-    if (isset($elements['form_token'])) {
-      unset($elements['form_token']);
-    }
-    if (isset($elements['form_build_id'])) {
-      unset($elements['form_build_id']);
-    }
-    if (isset($elements['#build_id'])) {
-      unset($elements['#build_id']);
-    }
-  }
-
-  foreach ($elements as $key => $element) {
-    if (is_array($element)) {
-      render_cache_prepare_elements_for_md5($elements[$key]);
-    }
-    elseif (is_object($element)) {
-      render_cache_get_object_values($elements[$key]);
+function render_cache_sanitize_objects(&$item, $key){
+  if(is_object($item)){
+    $item = render_cache_get_object_values($item);
+    if(isset($item['created'])){
+      unset($item['created']);
     }
   }
 }
@@ -193,6 +193,7 @@ function render_cache_store_cache($checksum, $data) {
     // Do not cache empty data.
     return;
   }
+
   global $_render_cache_devel;
   $now = render_cache_microtime_float();
   // Construct the filepath where JS translation files are stored.
@@ -302,10 +303,27 @@ function render_cache_backdrop_render(&$elements) {
     return render_cache_original_render($elements);
   }
 
+  if (isset($elements['#type']) && $elements['#type'] == 'form') {
+    // Do not cache form render ....
+    return render_cache_original_render($elements);
+  }  
+  if (isset($elements['#type']) && $elements['#type'] == 'submit') {
+    // Do not cache form render ....
+    return render_cache_original_render($elements);
+  }  
+
+  if (isset($elements['#entity_type']) && $elements['#entity_type'] == 'node') {
+    // It's hard to cache this data ....
+    return render_cache_original_render($elements);
+  }  
+  
+
   if (isset($elements['#type']) && $elements['#type'] == 'scripts') {
     // No need to cache window.Backdrop = ....
     return render_cache_original_render($elements);
   }
+  
+  
 
   // Do not print elements twice.
   if (!empty($elements['#printed'])) {
@@ -323,6 +341,7 @@ function render_cache_backdrop_render(&$elements) {
       }
     }
     else {
+      $output = '<cached id=' . $check_sum . '>' ."\n" . $output . "\n" . '</cached>' ."\n";
       render_cache_enable_forms_states_attaches($elements);
     }
   }
@@ -374,6 +393,16 @@ function render_cache_get_form_element($name, $elements) {
       }
     }
   }
+  
+  // If we get here, value is much dipper.
+  foreach ($elements as $variable => $element) {
+    if (is_array($element)) {
+      if($data =  render_cache_get_form_element($name, $element)){
+        return $data;
+      }
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -504,8 +533,8 @@ function render_cache_cachedir_prepare() {
 function render_cache_render_wrapper(&$elements) {
 
   $dynamic_content = FALSE;
-  if (isset($elements['#name']) && in_array($elements['#name'], array('form_token', 'form_build_id'))) {
-    $dynamic_content = TRUE;
+  if (isset($elements['#name']) && in_array($elements['#name'], array('form_token', 'form_build_id', 'date'))) {
+//    $dynamic_content = TRUE;
   }
 
   $output = render_cache_original_render($elements);
