@@ -1313,8 +1313,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
     $javascript = backdrop_get_js();
 
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script type="text/javascript" src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script type="text/javascript">' . "\n<!--//--><![CDATA[//><!--\n" . 'jQuery(function () { });' . "\n//--><!]]>\n" . '</script>' . "\n<!--<![endif]-->";
+    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
+    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>' . "\n<!--//--><![CDATA[//><!--\n" . 'jQuery(function () { });' . "\n//--><!]]>\n" . '</script>' . "\n<!--<![endif]-->";
 
     $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
     $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
@@ -1346,10 +1346,10 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('core/misc/batch.js', array('every_page' => TRUE));
     $javascript = backdrop_get_js();
     $expected = implode("\n", array(
-      '<script type="text/javascript" src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/batch.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/batch.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
     ));
     $this->assertTrue(strpos($javascript, $expected) > 0, t('Unaggregated JavaScript is added in the expected group order.'));
 
@@ -1364,8 +1364,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $js_items = backdrop_add_js();
     $javascript = backdrop_get_js();
     $expected = implode("\n", array(
-      '<script type="text/javascript" src="' . file_create_url(backdrop_build_js_cache(array('core/misc/collapse.js' => $js_items['core/misc/collapse.js'], 'core/misc/batch.js' => $js_items['core/misc/batch.js']))) . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url(backdrop_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
+      '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/collapse.js' => $js_items['core/misc/collapse.js'], 'core/misc/batch.js' => $js_items['core/misc/batch.js']))) . '"></script>',
+      '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
     ));
     $this->assertTrue(strpos($javascript, $expected) > 0, t('JavaScript is aggregated in the expected groups and order.'));
   }

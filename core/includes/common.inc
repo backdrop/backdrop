@@ -4552,9 +4552,6 @@ function backdrop_pre_render_scripts($elements) {
     '#type' => 'head_tag',
     '#tag' => 'script',
     '#value' => '',
-    '#attributes' => array(
-      'type' => 'text/javascript',
-    ),
   );
 
   // Loop through each group.
