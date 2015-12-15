@@ -133,7 +133,8 @@ function render_cache_checksum($element) {
       }
     }
     if ($need_sanitize) {
-      $element_copy = render_cache_prepare_elements_for_md5($element);
+      $element_copy = $element;
+      render_cache_prepare_elements_for_md5($element_copy);
       $serialize = serialize($element_copy);
     }
   }
@@ -147,9 +148,8 @@ function render_cache_checksum($element) {
  * Internal function to prepare element for checksum
  * by removing dynamic data (form_token, form_build_id) from checksum.
  */
-function render_cache_prepare_elements_for_md5($elements) {
+function render_cache_prepare_elements_for_md5(&$elements) {
 
-  $return  = '';
   if (is_array($elements)) {
     if (isset($elements['form_token'])) {
       unset($elements['form_token']);
@@ -160,61 +160,14 @@ function render_cache_prepare_elements_for_md5($elements) {
     if (isset($elements['#build_id'])) {
       unset($elements['#build_id']);
     }
-
-    $return = array();
-  }
-
-  if (is_object($elements)) {
-    $return = new stdClass();
-    if (isset($elements->form_token)) {
-      unset($elements->form_token);
-    }
-    if (isset($elements->form_build_id)) {
-      unset($elements->form_build_id);
-    }
-    if (isset($elements->{'#build_id'})) {
-      unset($elements->{'#build_id'});
-    }
-
   }
 
   foreach ($elements as $key => $element) {
-    if (is_string($element)) {
-      if (0 !== strcmp($element, 'form_token')
-        && 0 !== strcmp($element, 'form_build_id')
-        && 0 !== strcmp($element, '#build_id')
-      ) {
-        if (is_array($return)) {
-          $return[$key] = $element;
-        }
-        if (is_object($return)) {
-          $return->{$key} = $element;
-        }
-      }
-    }
-    elseif (is_array($element)) {
-      if (is_array($return)) {
-        $return[$key] = render_cache_prepare_elements_for_md5($element);
-      }
-      if (is_object($return)) {
-        $return->{$key} = render_cache_prepare_elements_for_md5($element);
-      }
+    if (is_array($element)) {
+      $elements[$key] = render_cache_prepare_elements_for_md5($element);
     }
     elseif (is_object($element)) {
-      if (is_array($return)) {
-        $return[$key] = render_cache_get_object_values($element);
-      }
-      if (is_object($return)) {
-        $return->{$key} = render_cache_get_object_values($element);
-      }
-    }
-    else {
-      if (is_array($return)) {
-        $return[$key] = $element;
-      }
-      if (is_object($return)) {
-        $return->{$key} = $element;
-      }
+      $elements[$key] = render_cache_get_object_values($element);
     }
   }
 
