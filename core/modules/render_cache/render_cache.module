@@ -29,7 +29,6 @@ function render_cache_ajax_render_alter() {
   $GLOBALS['render_cache_debug_shutdown'] = FALSE;
 }
 
-
 /**
  * Implements hook_cron().
  */
