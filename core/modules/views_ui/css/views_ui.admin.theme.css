@@ -440,14 +440,6 @@ td.group-title {
  * The tabs that switch between sections
  */
 
-ul#views-display-menu-tabs {
-  margin-right: 200px; /* RTL */
-}
-[dir="rtl"] ul#views-display-menu-tabs {
-  margin-right: auto;
-  margin-left: 200px;
-}
-
 ul#views-display-menu-tabs li {
   margin-bottom: 5px;
 }
@@ -672,6 +664,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 .views-ui-display-tab-bucket {
   position: relative;
+  margin: 0 0 0.8em;
 }
 
 /* @end */
@@ -683,8 +676,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 .views-ui-display-tab-bucket .views-display-setting {
   color: #666666;
-  font-size: 12px;
-  padding-bottom: 2px;
+  font-size: 14px;
+  padding-bottom: 0.5em;
 }
 
 .views-ui-display-tab-bucket .views-group-text {
@@ -743,7 +736,6 @@ ul#views-display-menu-tabs li.add ul.action-list li{
  */
 
 .views-ui-dialog {
-  font-size: small;
   padding: 0;
 }
 
