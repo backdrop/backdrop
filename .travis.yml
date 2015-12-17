@@ -1,6 +1,8 @@
 # Configuration file for running the test suite. Results typically at http://travis-ci.org/backdrop/backdrop
-# whitelist
 language: php
+sudo: required
+dist: precise
+group: legacy
 php:
   - 5.3
   - 7.0
@@ -17,6 +19,9 @@ before_script:
   # Travis CI currently, so we have to locate and enable it manually.
   - sudo cp core/misc/travis-ci/php-fpm.conf $HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - $HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+
+  # Disable XDebug to speed up execution.
+  - phpenv config-rm xdebug.ini
 
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-ci/php.ini
