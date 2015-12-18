@@ -8,3 +8,15 @@ function render_cache_schema() {
   $schema['cache_render']['description'] = 'Cache table used to store render cache data, if database caching setting enabled.';
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+function render_cache_install() {
+ $config = config('render_cache.settings');
+  $config->set('enable', 1);
+  $config->set('expire', 3600);
+  $config->set('debug', 0);
+  $config->set('method', 1);
+  $config->save();
+}
