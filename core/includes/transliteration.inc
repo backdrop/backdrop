@@ -1,6 +1,4 @@
 <?php
-
-
 /**
  * @file
  * Transliteration processing functions.
@@ -246,7 +244,7 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
   // Remove multiple consecutive non-alphabetical characters.
   $filename = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $filename);
   // Force lowercase to prevent issues on case-insensitive file systems.
-  if (config_get('system.core', 'transliteration_file_lowercase')) {
+  if (config_get('system.core', 'file_transliterate_lowercase')) {
     $filename = strtolower($filename);
   }
   return $filename;

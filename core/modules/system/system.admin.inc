@@ -1754,31 +1754,31 @@ function system_file_system_settings() {
     '#title' => t('Transliteration'),
     '#value' => '',
   );
-  $form['transliteration']['transliteration_file_uploads'] = array(
+  $form['transliteration']['file_transliterate_uploads'] = array(
     '#type' => 'checkbox',
     '#title' => t('Transliterate file names during upload.'),
     '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility.'),
-    '#default_value' => config_get('system.core', 'transliteration_file_uploads'),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads'),
   );
-  $form['transliteration']['transliteration_file_uploads_display_name'] = array(
+  $form['transliteration']['file_transliterate_uploads_display_name'] = array(
     '#type' => 'checkbox',
     '#title' => t('Transliterate the displayed file name.'),
     '#description' => t('Enable to also convert the file name that is displayed within the site (for example, in link text).'),
-    '#default_value' => config_get('system.core', 'transliteration_file_uploads_display_name'),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads_display_name'),
     '#states' => array(
       'invisible' => array(
-        'input[name="transliteration_file_uploads"]' => array('checked' => FALSE),
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
       ),
     ),
   );
-  $form['transliteration']['transliteration_file_lowercase'] = array(
+  $form['transliteration']['file_transliterate_lowercase'] = array(
     '#type' => 'checkbox',
     '#title' => t('Lowercase transliterated file names.'),
-    '#default_value' => config_get('system.core', 'transliteration_file_lowercase'),
+    '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
     '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
     '#states' => array(
       'invisible' => array(
-        'input[name="transliteration_file_uploads"]' => array('checked' => FALSE),
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
       ),
     ),
   );
@@ -1801,9 +1801,9 @@ function system_file_system_settings_submit($form, &$form_state) {
   $config->set('file_private_path', $form_state['values']['file_private_path']);
   $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
   $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
-  $config->set('transliteration_file_uploads', $form_state['values']['transliteration_file_uploads']);
-  $config->set('transliteration_file_uploads_display_name', $form_state['values']['transliteration_file_uploads_display_name']);
-  $config->set('transliteration_file_lowercase', $form_state['values']['transliteration_file_lowercase']);
+  $config->set('file_transliterate_uploads', $form_state['values']['file_transliterate_file_uploads']);
+  $config->set('file_transliterate_uploads_display_name', $form_state['values']['file_transliterate_uploads_display_name']);
+  $config->set('file_transliterate_lowercase', $form_state['values']['file_transliterate_lowercase']);
   $config->save();
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));
@@ -2585,33 +2585,23 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
  *   SelectQuery
  */
 function system_transliteration_file_query() {
-  // Regular expressions are not supported by Drupal's database layer and
-  // operators differ between manufacturers.
-  switch (db_driver()) {
-    case 'mysql':
-    case 'mysqli':
-      $operator = 'NOT REGEXP';
-      if (config_get('transliteration.settings', 'file_lowercase')) {
-        $operator .= ' BINARY';
-      }
-      $regex = '/[a-z0-9_.-]+$';
-      break;
-
-    case 'pgsql':
-      $operator = '!~*';
-      $regex = '/[a-z0-9_.-]+$';
-      break;
-
-    case 'mssql':
-      $operator = 'LIKE';
-      $regex = '%[^a-z0-9_.-]%';
-      break;
-
-    default:
-      return FALSE;
+  // Regular expressions are not supported by Drupal's database layer.
+  $operator = 'NOT REGEXP';
+  if (config_get('system.core', 'file_transliterate_lowercase')) {
+    $operator .= ' BINARY';
   }
+  $regex = '/[a-z0-9_.-]+$';
 
   return db_select('file_managed')
     ->fields('file_managed')
     ->condition('uri', $regex, $operator);
+}
+
+/**
+  * Ajax callback; Returns the transliterated version for a given string.
+  */
+function system_machine_name_transliterate($string = '', $unknown = '?') {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  backdrop_json_output(transliteration_get($string, $unknown));
+  backdrop_exit();
 }

@@ -1022,6 +1022,15 @@ function system_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
+  // Machine names transliteration.
+  $items['machine_name/transliterate/%/%'] = array(
+    'page callback' => 'system_machine_name_transliterate',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'system.admin.inc',
+  );
+
   return $items;
 }
 
@@ -2078,7 +2087,7 @@ function system_file_presave($file) {
   // transliterated version will still be used in the file URI, which is the
   // only place where it matters.)
   $config = config('system.core');
-  if (!empty($_FILES['files']['name']) && $config->get('transliteration_file_uploads') && !$config->get('transliteration_file_uploads_display_name')) {
+  if (!empty($_FILES['files']['name']) && $config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
     $key = array_search($file->filename, $_FILES['files']['name']);
     if ($key !== FALSE && isset($_FILES['files']['orig_name'][$key])) {
       $file->filename = $_FILES['files']['orig_name'][$key];
@@ -2127,7 +2136,7 @@ function system_init() {
   system_add_module_assets();
 
   // Sanitizes file names during upload.
-  if (!empty($_FILES['files']) && config_get('system.core', 'transliteration_file_uploads')) {
+  if (!empty($_FILES['files']) && config_get('system.core', 'file_transliterate_uploads')) {
     // Figure out language, which is available in $_POST['language'] for node
     // forms.
     $langcode = NULL;
