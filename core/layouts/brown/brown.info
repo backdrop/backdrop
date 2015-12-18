@@ -1,0 +1,22 @@
+name = Brown
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header] = Header
+regions[slider] = Slider
+regions[slidergutter] = Slider Gutter
+regions[column1] = First Column
+regions[column2] = Second Column
+regions[column3] = Third Column
+regions[footercolumn1] = Footer First Column
+regions[footercolumn2] = Footer Second Column
+regions[footercolumn3] = Footer Third Column
+regions[footer] = Footer
+
+; Preview
+preview = brown.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

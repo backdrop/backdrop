@@ -1,0 +1,19 @@
+name = Taylor
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header]      = Header
+regions[top]         = Top
+regions[half]        = Half Column
+regions[quarter1]    = Quarter 1 Column
+regions[quarter2]    = Quarter 2 Column
+regions[bottom]      = Bottom
+regions[footer]      = Footer
+
+; Preview
+preview = taylor.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

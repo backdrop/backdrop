@@ -1,0 +1,22 @@
+name = Pond
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header]           = Header
+regions[top]              = Top
+regions[column1]          = First Column
+regions[column2]          = Second Column
+regions[column3]          = Third Column
+regions[secondarycolumn1] = Row 2: First Column
+regions[secondarycolumn2] = Row 2: Second Column
+regions[secondarycolumn3] = Row 2: Third Column
+regions[bottom]           = Bottom
+regions[footer]           = Footer
+
+; Preview
+preview = pond.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

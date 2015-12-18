@@ -1,0 +1,19 @@
+name = Selby
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header] = Header
+regions[sidebar] = Sidebar
+regions[top] = Top
+regions[contentcolumn1] = Content Column 1
+regions[contentcolumn2] = Content Column 2
+regions[bottom] = Bottom
+regions[footer] = Footer
+
+; Preview
+preview = selby.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

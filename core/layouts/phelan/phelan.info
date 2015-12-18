@@ -1,0 +1,16 @@
+name = Phelan
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header] = Header
+regions[column1] = First Column
+regions[column2] = Second Column
+regions[footer] = Footer
+
+; Preview
+preview = phelan.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css
