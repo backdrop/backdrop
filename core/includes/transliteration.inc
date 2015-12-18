@@ -278,3 +278,64 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
 function transliteration_get($text, $unknown = '?', $source_langcode = NULL) {
   return _transliteration_process($text, $unknown, $source_langcode);
 }
+
+function transliteration_remove_diacritics($string) {
+  $result = '';
+
+  foreach (preg_split('//u', $string, 0, PREG_SPLIT_NO_EMPTY) as $character) {
+    $code = _transliteration_ord_utf8($character);
+
+    // These two Unicode ranges include the accented US-ASCII letters, with a
+    // few characters that aren't accented letters mixed in. So define the
+    // ranges and the excluded characters.
+    $range1 = $code > 0x00bf && $code < 0x017f;
+    $exclusions_range1 = array(0x00d0, 0x00d7, 0x00f0, 0x00f7, 0x0138, 0x014a, 0x014b);
+    $range2 = $code > 0x01cc && $code < 0x0250;
+    $exclusions_range2 = array(0x01DD, 0x01f7, 0x021c, 0x021d, 0x0220, 0x0221, 0x0241, 0x0242, 0x0245);
+
+    $replacement = $character;
+    if (($range1 && !in_array($code, $exclusions_range1)) || ($range2 && !in_array($code, $exclusions_range2))) {
+      $to_add = transliteration_get($code, 'xyz');
+      if(strlen($to_add) === 1) {
+        $replacement = $to_add;
+      }
+    }
+
+    $result .= $replacement;
+  }
+
+  return $result;
+}
+
+/**
+ * Finds the character code for a UTF-8 character: like ord() but for UTF-8.
+ *
+ * @param string $character
+ *   A single UTF-8 character.
+ *
+ * @return int
+ *   The character code, or -1 if an illegal character is found.
+ */
+function _transliteration_ord_utf8($character) {
+  $first_byte = ord($character[0]);
+
+  if (($first_byte & 0x80) == 0) {
+    // Single-byte form: 0xxxxxxxx.
+    return $first_byte;
+  }
+  if (($first_byte & 0xe0) == 0xc0) {
+    // Two-byte form: 110xxxxx 10xxxxxx.
+    return (($first_byte & 0x1f) << 6) + (ord($character[1]) & 0x3f);
+  }
+  if (($first_byte & 0xf0) == 0xe0) {
+    // Three-byte form: 1110xxxx 10xxxxxx 10xxxxxx.
+    return (($first_byte & 0x0f) << 12) + ((ord($character[1]) & 0x3f) << 6) + (ord($character[2]) & 0x3f);
+  }
+  if (($first_byte & 0xf8) == 0xf0) {
+    // Four-byte form: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx.
+    return (($first_byte & 0x07) << 18) + ((ord($character[1]) & 0x3f) << 12) + ((ord($character[2]) & 0x3f) << 6) + (ord($character[3]) & 0x3f);
+  }
+
+  // Other forms are not legal.
+  return -1;
+}

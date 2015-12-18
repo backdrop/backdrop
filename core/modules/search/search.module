@@ -391,14 +391,12 @@ function search_simplify($text) {
   // Lowercase
   $text = backdrop_strtolower($text);
 
+  // Remove Diacritics
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $text = transliteration_remove_diacritics($text);
+
   // Call an external processor for word handling.
   search_invoke_preprocess($text);
-
-  // Transliteration
-  if (config_get('search.settings', 'transliteration')) {
-    include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
-    $text = transliteration_get($text, '', language_default('language'));
-  }
 
   // Simple CJK handling
   if (config_get('search.settings', 'search_overlap_cjk')) {

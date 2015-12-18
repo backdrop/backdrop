@@ -2661,7 +2661,6 @@ function system_update_1046() {
     $config->set('transliteration_file_lowercase', $contrib_config->get('file_lowercase'));
     $config->set('transliteration_file_uploads', $contrib_config->get('file_uploads'));
     $config->set('transliteration_file_uploads_display_name', $contrib_config->get('file_uploads_display_name'));
-    config_set('search.settings', 'transliteration', $contrib_config->get('search'));
 
     module_disable(array('transliteration'), FALSE);
     $path = backdrop_get_path('module', 'transliteration');
@@ -2672,18 +2671,16 @@ function system_update_1046() {
     $config->set('transliteration_file_lowercase', update_variable_get('transliteration_file_lowercase', TRUE));
     $config->set('transliteration_file_uploads', update_variable_get('transliteration_file_uploads', TRUE));
     $config->set('transliteration_file_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', TRUE));
-    config_set('search.settings', 'transliteration', update_variable_get('transliteration_search', TRUE));
   
     // Remove variables from D7.
     update_variable_del('transliteration_file_lowercase');
     update_variable_del('transliteration_file_uploads');
     update_variable_del('transliteration_file_uploads_display_name');
-    update_variable_del('transliteration_search');
 
     // Check for files that need to be fixed.
     module_load_include('inc', 'system', 'system.admin');
 
-    if (!$query = transliteration_file_query()) {
+    if (!$query = system_transliteration_file_query()) {
       // Database not supported.
       return;
     }
