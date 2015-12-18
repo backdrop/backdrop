@@ -7,45 +7,62 @@ body {
 .comment .comment-arrow {
   border-color: #ffffff;
 }
-.l-container,
+.l-container, .layout {
+  background: #ffffff;
+}
 .l-header ul.menu li a.active,
 .l-header ul.menu li.active-trail a {
-  background: #ffffff;
+  color: #fefeff;
 }
 .tabs ul.primary li a.active {
   background-color: #ffffff;
 }
 .tabs ul.primary li.active a {
+  background-color: #e8e6e5;
+}
+.rounded-tabs .tabs ul.primary li.active a, .square-tabs .tabs ul.primary li.active a {
   background-color: #ffffff;
   border-bottom: 1px solid #ffffff;
 }
+.l-header ul.menu a {
+  color: #fffeff;
+}
+.no-tabs .l-header ul.menu a {
+  color: #fffeff;
+}
+.no-tabs .l-header ul.menu a:active {
+  color: #fefeff;
+}
+.no-tabs .l-header ul.menu li a.active {
+  color: #fefeff;
+}
 .l-header {
   color: #fffeff;
-  background-color: #48a9e4;
-  background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -ms-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -o-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0779bf), color-stop(1, #48a9e4));
-  background-image: -webkit-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-color: #000001;
+  background-image: -moz-linear-gradient(top, #000000 0%, #000001 100%);
+  background-image: -ms-linear-gradient(top, #000000 0%, #000001 100%);
+  background-image: -o-linear-gradient(top, #000000 0%, #000001 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #000000), color-stop(1, #000001));
+  background-image: -webkit-linear-gradient(top, #000000 0%, #000001 100%);
+  background-image: linear-gradient(top, #000000 0%, #000001 100%);
 }
 a {
-  color: #0071b3;
+  color: #27ace2;
 }
 a:hover,
 a:focus {
-  color: #018fe2;
+  color: #3b3b3b;
 }
 a:active {
-  color: #23aeff;
+  color: #feffff;
 }
 .l-sidebar .block {
-  background-color: #f6f6f2;
-  border-color: #f9f9f9;
+  background-color: #e8e6e5;
+  border-color: #ffffff;
 }
 .l-footer-wrapper,
 .l-footer {
-  background: #292929;
+  background: #191919;
 }
 .l-header a,
 .l-footer-wrapper,

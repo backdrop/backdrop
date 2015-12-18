@@ -307,9 +307,9 @@ ul.tips {
   -ms-flex-direction: column;
   flex-direction: column;
 }
-.admin-bar body .layout {
-  padding-top: 33px;
-  margin-top: -33px;
+body.admin-bar .layout {
+  padding-top: 30px;
+  margin-top: -30px;
 }
 .l-container,
 .l-triptych {
@@ -496,7 +496,7 @@ ul.tips {
   padding: 0;
   clear: both;
 }
-.l-header .block-user-login .form-submit {
+.l-header .block-user-login input.form-submit {
   border: 1px solid;
   border-color: #ccc;
   border-color: rgba(255, 255, 255, 0.5);
@@ -505,8 +505,8 @@ ul.tips {
   margin: 4px 0;
   padding: 3px 8px;
 }
-.l-header .block-user-login .form-submit:hover,
-.l-header .block-user-login .form-submit:focus {
+.l-header .block-user-login input.form-submit:hover,
+.l-header .block-user-login input.form-submit:focus {
   background: #fff;
   background: rgba(255, 255, 255, 0.9);
 }
@@ -551,7 +551,6 @@ ul.tips {
 .l-header ul.menu li {
   float: left; /* LTR */
   list-style: none;
-  padding: 0 1px;
   margin: 0 1px;
 }
 [dir="rtl"] .l-header ul.menu li {
@@ -566,7 +565,18 @@ ul.tips {
   line-height: 2.4em;
   padding: 0 0.8em;
   text-decoration: none;
+}
+.rounded-tabs .l-header ul.menu a, .square-tabs .l-header ul.menu a {
+  color: #333;
   text-shadow: 0 1px #eee;
+}
+.rounded-tabs .l-header ul.menu a.active, .square-tabs .l-header ul.menu a.active,
+.rounded-tabs .l-header ul.menu a:active, .square-tabs .l-header ul.menu a:active {
+  color: #333;
+  background: #f6f6f2;
+  background: rgba(255, 255, 255, 0.95);
+}
+.rounded-tabs .l-header ul.menu a {
   -moz-border-radius-topleft: 8px;
   -moz-border-radius-topright: 8px;
   border-top-left-radius: 8px;
@@ -587,6 +597,24 @@ ul.tips {
 .l-header ul.menu li a.active {
   border-bottom: none;
 }
+.no-tabs .l-header ul.menu a {
+  color: #fff;
+  background: none;
+  padding: 1em 2em 1em 0;
+}
+.no-tabs .l-header ul.menu a:hover,
+.no-tabs .l-header ul.menu a:focus {
+  background: none;
+}
+.no-tabs .l-header ul.menu a:active {
+  color: #fff;
+  background: none;
+}
+.no-tabs .l-header ul.menu li a.active {
+  color: #fff;
+  border-bottom: none;
+  background: none;
+}
 
 /* ------------------- Main ------------------- */
 
@@ -606,7 +634,7 @@ ul.tips {
 .content {
   margin-top: 10px;
 }
-.page-title {
+h1#page-title {
   font-size: 2em;
   line-height: 1;
   margin-top: .5em;
@@ -1056,7 +1084,6 @@ article .link-wrapper ul.links {
   margin: 0;
   overflow: hidden;
   border: none;
-  background: transparent url(../images/tabs-border.png) repeat-x left bottom;
 }
 .tabs ul.primary li {
   display: block;
@@ -1073,19 +1100,36 @@ article .link-wrapper ul.links {
 }
 .tabs ul.primary li a {
   color: #000;
-  background-color: #ededed;
+  background-color: #efefef;
   height: 1.8em;
   line-height: 1.9;
   display: block;
   font-size: 0.929em;
   float: left; /* not LTR */
-  padding: 0 10px 3px;
+  padding: 0 10px;
   margin: 0;
+}
+.rounded-tabs .tabs ul.primary, .square-tabs .tabs ul.primary {
+  background: transparent url(../images/tabs-border.png) repeat-x left bottom;
+}
+.rounded-tabs .tabs ul.primary li a {
+  background-color: #ededed;
+  padding: 0 10px 3px;
   text-shadow: 0 1px 0 #fff;
   -moz-border-radius-topleft: 6px;
   border-top-left-radius: 6px;
   -moz-border-radius-topright: 6px;
   border-top-right-radius: 6px;
+}
+.square-tabs .tabs ul.primary li a {
+  background-color: #ededed;
+  padding: 0 10px 3px;
+  text-shadow: 0 1px 0 #fff;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+}
+.no-tabs ul.primary li.active a {
+  border:none;
 }
 .tabs ul.primary li.active a {
   background-color: #ffffff;
@@ -1161,7 +1205,7 @@ ul.action-links li a {
 
 /* ---------------- Buttons    ---------------- */
 
-.form-submit,
+input.form-submit,
 a.button {
   background: #fff url(../images/buttons.png) 0 0 repeat-x;
   border: 1px solid #e4e4e4;
@@ -1179,7 +1223,7 @@ a.button {
   -moz-border-radius: 20px;
   border-radius: 15px;
 }
-[dir="rtl"] .form-submit,
+[dir="rtl"] input.form-submit,
 [dir="rtl"] a.button {
   margin-right: 0;
   margin-left: 0.6em;
@@ -1214,17 +1258,24 @@ fieldset {
 }
 .filter-wrapper {
   top: 0;
-  padding: .5em 0;
+  padding: 1em 0 0.2em;
   -moz-border-radius-topright: 0;
   -moz-border-radius-topleft: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.filter-wrapper .fieldset-wrapper {
-  margin-top: 0;
+.filter-help a {
+  font-size: 0.857em;
+  padding: 2px 20px 0;
 }
 .filter-wrapper .form-item label {
   margin-right: 10px;
+}
+.filter-wrapper .form-item {
+  padding: 0 0 0.5em 0.5em;
+}
+.filter-guidelines {
+  padding: 0 1.5em 0 0.5em;
 }
 fieldset.collapsed {
   background: transparent;
@@ -1302,8 +1353,8 @@ select.form-select {
   box-sizing: border-box;
   max-width: 100%;
 }
-.form-submit:hover,
-.form-submit:focus {
+input.form-submit:hover,
+input.form-submit:focus {
   background: #dedede;
 }
 .form-item {
@@ -1501,8 +1552,8 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   margin-left: 5px;
   margin-right: 0;
 }
-#search-block-form .form-submit,
-#search-form .form-submit {
+#search-block-form input.form-submit,
+#search-form input.form-submit {
   margin-left: 0;
   margin-right: 0;
   height: 25px;
@@ -1514,10 +1565,10 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
   background: url(../images/search-button.png) no-repeat center top;
   overflow: hidden;
 }
-#search-block-form .form-submit:hover,
-#search-block-form .form-submit:focus,
-#search-form .form-submit:hover,
-#search-form .form-submit:focus {
+#search-block-form input.form-submit:hover,
+#search-block-form input.form-submit:focus,
+#search-form input.form-submit:hover,
+#search-form input.form-submit:focus {
   background-position: center bottom;
 }
 #search-form .form-item-keys label {
