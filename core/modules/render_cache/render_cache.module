@@ -114,12 +114,18 @@ function render_cache_checksum($element) {
   if (empty($element)) {
     return FALSE;
   }
+  
+  $config = config('render_cache.settings');
+  $debug = FALSE;
+  if ($config->get('enable') && $config->get('debug')) {
+    $debug = TRUE;
+  }
 
-  global $_render_cache_devel;
-
-  $now = render_cache_microtime_float();
-  $_render_cache_devel['count']++;
-
+  if($debug){
+    global $_render_cache_devel;
+    $now = render_cache_microtime_float();
+    $_render_cache_devel['count']++;
+  }
   $serialize = serialize($element);
 
   if (is_array($element)) {
@@ -158,7 +164,9 @@ function render_cache_checksum($element) {
   }
 
   $checksum = md5($serialize);
-  $_render_cache_devel['checksum'] = $_render_cache_devel['checksum'] + (render_cache_microtime_float() - $now);
+  if($debug){
+    $_render_cache_devel['checksum'] = $_render_cache_devel['checksum'] + (render_cache_microtime_float() - $now);
+  }
   return $checksum;
 }
 
@@ -193,13 +201,15 @@ function render_cache_store_cache($checksum, $data) {
     return;
   }
 
-  global $_render_cache_devel;
-  $now = render_cache_microtime_float();
-  // Construct the filepath where JS translation files are stored.
-  static $config;
-
-  if (empty($config)) {
-    $config = config('render_cache.settings');
+  $config = config('render_cache.settings');
+  $debug = FALSE;
+  if ($config->get('enable') && $config->get('debug')) {
+    $debug = TRUE;
+  }
+  
+  if($debug){
+    global $_render_cache_devel;
+    $now = render_cache_microtime_float();
   }
 
   if ($config->get('method')) {
@@ -213,7 +223,10 @@ function render_cache_store_cache($checksum, $data) {
     $record = '<?php $cached_data = \'' . str_replace("'", "\'", $data) . '\';';
     file_unmanaged_save_data($record, $dest, FILE_EXISTS_REPLACE);
   }
-  $_render_cache_devel['store'] = $_render_cache_devel['store'] + (render_cache_microtime_float() - $now);
+
+  if($debug){
+    $_render_cache_devel['store'] = $_render_cache_devel['store'] + (render_cache_microtime_float() - $now);
+  }
 }
 
 
@@ -222,8 +235,16 @@ function render_cache_store_cache($checksum, $data) {
  */
 function render_cache_get_cache($checksum) {
 
-  global $_render_cache_devel;
-  $now = render_cache_microtime_float();
+  $config = config('render_cache.settings');
+  $debug = FALSE;
+  if ($config->get('enable') && $config->get('debug')) {
+    $debug = TRUE;
+  }
+  
+  if($debug){
+    global $_render_cache_devel;
+    $now = render_cache_microtime_float();
+  }
 
   static $checksums;
 
@@ -232,12 +253,6 @@ function render_cache_get_cache($checksum) {
   }
 
   $return = FALSE;
-
-  static $config;
-
-  if (empty($config)) {
-    $config = config('render_cache.settings');
-  }
 
   if ($config->get('method')) {
     if ($cache = cache('cache_render')->get($checksum)) {
@@ -256,7 +271,9 @@ function render_cache_get_cache($checksum) {
 
   }
   $checksums[$checksum] = $return;
-  $_render_cache_devel['get'] = $_render_cache_devel['get'] + (render_cache_microtime_float() - $now);
+  if($debug){
+    $_render_cache_devel['get'] = $_render_cache_devel['get'] + (render_cache_microtime_float() - $now);
+  }
 
   return $return;
 }
