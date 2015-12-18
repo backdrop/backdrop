@@ -357,7 +357,7 @@ function render_cache_backdrop_render(&$elements) {
       }
     }
     else {
-      $output = '<cached id=' . $check_sum . '>' ."\n" . $output . "\n" . '</cached>' ."\n";
+      $output = $output;
       render_cache_enable_forms_states_attaches($elements);
     }
   }
