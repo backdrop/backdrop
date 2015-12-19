@@ -1073,7 +1073,7 @@ function user_update_1009() {
           'path' => 'admin/people/list',
           'menu' => array(
             'type' => 'default tab',
-            'title' => 'Find user accounts',
+            'title' => 'Manage user accounts',
             'description' => '',
             'name' => 'management',
             'weight' => '0',
