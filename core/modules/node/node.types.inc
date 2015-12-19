@@ -271,10 +271,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
   );
+  // get the default path value for the node type.
+  $path_config = config_get('path.settings');
+  $default_path_value = $path_config["node_" . $type->type . "_pattern"];
   $form['path']['path_settings'] = array(
     '#type' => 'textfield',
     '#title' => t('Path settings'),
-    '#default_value' => '[node:title]',
+    '#default_value' => $default_path_value,
     '#description' => t('When new content of this type is created, it will use this pattern by default when generating URL paths.'),
   );
   $form['path']['path-settings']['tokens'] = array(
@@ -417,7 +420,6 @@ function node_type_form_submit($form, &$form_state) {
       }
     }*/
   //}
-
   $variable = 'node_' . $form_state['values']['type'] . '_pattern';
   $config->set($variable, $form_state['values']['path_settings']);
   $config->save();
