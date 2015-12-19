@@ -1,8 +1,11 @@
 # Configuration file for running the test suite. Results typically at http://travis-ci.org/backdrop/backdrop
-# whitelist
 language: php
+sudo: required
+dist: precise
+group: legacy
 php:
   - 5.3
+  - 7.0
 before_script:
   # Install Apache and FastCGI extension to connect to PHP-FPM.
   - sudo apt-get update > /dev/null
@@ -14,8 +17,11 @@ before_script:
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
-  - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
-  - $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
+  - sudo cp core/misc/travis-ci/php-fpm.conf $HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - $HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+
+  # Disable XDebug to speed up execution.
+  - phpenv config-rm xdebug.ini
 
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-ci/php.ini

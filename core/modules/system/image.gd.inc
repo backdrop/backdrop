@@ -104,9 +104,6 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
     return FALSE;
   }
 
-  $width = $image->info['width'];
-  $height = $image->info['height'];
-
   // Convert the hexadecimal background value to a color index value.
   if (isset($background)) {
     $rgb = array();
@@ -120,8 +117,14 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
     // Get the current transparent color.
     $background = imagecolortransparent($image->resource);
 
-    // If no transparent colors, use white.
-    if ($background == 0) {
+    // If using a PNG with alpha transparency, the color may be -1. Allocate a
+    // dedicated full alpha transparent color.
+    if ($background === -1) {
+      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 127);
+    }
+    // Allocating a transparent color may fail (e.g. on a jpg). Use white as
+    // a fallback.
+    if ($background === FALSE) {
       $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 0);
     }
   }
@@ -135,7 +138,15 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
     }
   }
 
-  $image->resource = imagerotate($image->resource, 360 - $degrees, $background);
+  if ($rotated_resource = imagerotate($image->resource, 360 - $degrees, $background)) {
+    // Free up the previous image resource.
+    imagedestroy($image->resource);
+    // Assign the new image resource.
+    $image->resource = $rotated_resource;
+  }
+  else {
+    return FALSE;
+  }
 
   // GIFs need to reassign the transparent color after performing the rotate.
   if (isset($transparent_gif_color)) {
@@ -217,7 +228,10 @@ function image_gd_desaturate(stdClass $image) {
 function image_gd_load(stdClass $image) {
   $extension = str_replace('jpg', 'jpeg', $image->info['extension']);
   $function = 'imagecreatefrom' . $extension;
-  return (function_exists($function) && $image->resource = $function($image->source));
+  if (function_exists($function)) {
+    $image->resource = $function($image->source);
+  }
+  return !empty($image->resource);
 }
 
 /**

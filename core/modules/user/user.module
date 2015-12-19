@@ -577,7 +577,7 @@ function user_file_predelete(File $file) {
  */
 function user_search_info() {
   return array(
-    'title' => 'Users',
+    'title' => 'User accounts',
   );
 }
 

@@ -80,7 +80,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'label' => $label,
       'bundle' => $bundle,
       // Move the date right below the title.
-      'weight' => -4,
+      'weight' => -5,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -95,7 +95,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
           'label_position' => 'above',
           'repeat_collapsed' => 0,
         ),
-        'weight' => -4,
+        'weight' => -5,
       ),
       'settings' => array(
         'default_value' => $default_value,
@@ -190,7 +190,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'label' => $label,
       'bundle' => $bundle,
       // Move the date right below the title.
-      'weight' => -4,
+      'weight' => -5,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -205,7 +205,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
           'label_position' => 'above',
           'repeat_collapsed' => 0,
         ),
-        'weight' => -4,
+        'weight' => -5,
       ),
       'settings' => array(
         'default_value' => $default_value,
