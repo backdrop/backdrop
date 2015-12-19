@@ -840,7 +840,7 @@
                 "path": "admin/people/list",
                 "menu": {
                     "type": "default tab",
-                    "title": "Find user accounts",
+                    "title": "Manage user accounts",
                     "description": "",
                     "name": "management",
                     "weight": "0",
