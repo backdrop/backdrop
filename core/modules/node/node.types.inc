@@ -275,7 +275,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'textfield',
     '#title' => t('Path settings'),
     '#default_value' => '[node:title]',
-    '#description' => t('The default path for this content type.'),
+    '#description' => t('When new content of this type is created, it will use this pattern by default when generating URL paths.'),
   );
   $form['path']['path-settings']['tokens'] = array(
     '#theme' => 'token_tree_link',

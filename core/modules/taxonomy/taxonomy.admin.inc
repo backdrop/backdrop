@@ -140,7 +140,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
     '#type' => 'textfield',
     '#title' => t('Path settings'),
     '#default_value' => '[term:vocabulary:name]',
-    '#description' => t('The default path for this content type.'),
+    '#description' => t('When new terms within this vocabulary are created, they will use this pattern by default when generating URL paths.'),
   );
   $form['path']['path-settings']['tokens'] = array(
     '#theme' => 'token_tree_link',
