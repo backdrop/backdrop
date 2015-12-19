@@ -283,7 +283,7 @@ function user_admin_settings($form, &$form_state) {
 
   $form['email_title'] = array(
     '#type' => 'item',
-    '#title' => t('User E-mails and path settings.'),
+    '#title' => t('E-mails'),
   );
   $form['email'] = array(
     '#type' => 'vertical_tabs',
@@ -536,19 +536,27 @@ function user_admin_settings($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  $form['user_path_pattern'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('User path settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#description' => t('Set the default path setting for users).') . ' ' . $email_token_link,
-    '#group' => 'email',
+  $form['user_title'] = array(
+      '#type' => 'item',
+      '#title' => t('User settings'),
   );
+  $form['user_settings'] = array(
+      '#type' => 'vertical_tabs',
+  );
+  $form['user_path_pattern'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('User path settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('Set the default path setting for users).') . ' ' . $email_token_link,
+      '#group' => 'user_settings',
+  );
+  $user_path_default = config_get('path.settings', 'user_pattern');
   $form['user_path_pattern']['path_settings'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path settings'),
-    '#default_value' => '[user:name]',
-    '#description' => t('The default path for user profiles.'),
+      '#type' => 'textfield',
+      '#title' => t('Path settings'),
+      '#default_value' => $user_path_default,
+      '#description' => t("When new users are created, it will use this pattern by default when generating URL paths."),
   );
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
