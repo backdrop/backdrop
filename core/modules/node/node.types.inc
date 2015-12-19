@@ -418,7 +418,7 @@ function node_type_form_submit($form, &$form_state) {
     }*/
   //}
 
-  $variable = 'node_' . $form_state['input']['type'] . '_pattern';
+  $variable = 'node_' . $form_state['values']['type'] . '_pattern';
   $config->set($variable, $form_state['values']['path_settings']);
   $config->save();
 

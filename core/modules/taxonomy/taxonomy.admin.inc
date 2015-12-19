@@ -214,7 +214,7 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
       break;
   }
   $config = config('path.settings');
-  $variable = 'taxonomy_term_' . $form_state['input']['machine_name'] . '_pattern';
+  $variable = 'taxonomy_term_' . $form_state['values']['machine_name'] . '_pattern';
   $config->set($variable, $form_state['values']['path_settings']);
   $config->save();
 }
