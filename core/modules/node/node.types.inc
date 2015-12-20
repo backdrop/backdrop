@@ -273,13 +273,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   // get the default path value for the node type.
   $path_config = config_get('path.settings');
-  if (isset($type->type)) {
-    $default_path_value = $path_config["node_" . $type->type . "_pattern"];
+  if (!empty($type->type)) {
+    if (isset($path_config["node_" . $type->type . "_pattern"])) {
+      $default_path_value = $path_config["node_" . $type->type . "_pattern"];
+    }
+    else {
+      $default_path_value = $path_config['node_pattern'];
+    }
   }
   else {
     $default_path_value = $path_config['node_pattern'];
   }
-
   $form['path']['path_settings'] = array(
     '#type' => 'textfield',
     '#title' => t('Path settings'),
