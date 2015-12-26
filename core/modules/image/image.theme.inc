@@ -81,7 +81,7 @@ function theme_image_style_list($variables) {
       );
     }
     else {
-      $row[] = t('Default');
+      $row[] = t('Default (module-provided)');
     }
     $row[] = array(
       'data' => array(
