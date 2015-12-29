@@ -95,18 +95,15 @@
  * @endcode
  *
  * Handlers are stored in their own files and loaded on demand. Like all other
- * module files, they must first be registered through the module's info file.
+ * autoloaded files, they must first be registered via hook_autoload_info().
  * For example:
  *
  * @code
- * name = Example module
- * description = "Gives an example of a module."
- * core = 7.x
- * files[] = example.module
- * files[] = example.install
- *
- * ; Views handlers
- * files[] = includes/views/handlers/example_handler_argument_string.inc
+ * function example_autoload_info() {
+ * return array(
+ *   // Views handlers
+ *   'example_handler_argument_string' => 'handlers/example_handler_argument_string.inc',
+ * );
  * @endcode
  *
  * The best place to learn more about handlers and how they work is to explore
@@ -513,8 +510,8 @@ function hook_views_data_alter(&$data) {
  * This hook should be placed in MODULENAME.views.inc and it will be
  * auto-loaded. MODULENAME.views.inc must be in the directory specified by the
  * 'path' key returned by MODULENAME_views_api(), or the same directory as the
- * .module file, if 'path' is unspecified. All plugin files need to be
- * referenced in MODULENAME.info with the files[] directive.
+ * .module file, if 'path' is unspecified. All plugin files need to be loaded
+ * via hook_autoload_info().
  *
  * @return
  *   An array on the form $plugins['PLUGIN TYPE']['PLUGIN NAME']. The plugin
