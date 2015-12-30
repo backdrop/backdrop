@@ -3039,15 +3039,55 @@ function hook_disable() {
 }
 
 /**
+ * Define the paths to classes and interfaces within a module.
+ *
+ * Most classes and interfaces in Backdrop should be autoloaded. This will
+ * prevent the need to manually include the file that contains that class with
+ * PHP's include_once() or require_once().
+ *
+ * Note that all paths to classes are relative to the module that is
+ * implementing this hook. If you need to reference classes outside of the
+ * module root or modify existing paths, use hook_autoload_info_alter() instead.
+ *
+ * Class names in Backdrop are typically CamelCase, with uppercase letters at
+ * the start of each word (including the first letter) and no underscores.
+ * The file names for classes are typically either [module_name].[class_name].inc
+ * or simply [ModuleNameClassName].php.
+ *
+ * For more information about class naming conventions see the
+ * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
+ *
+ * The contents of this hook are not cached. Because of this, absolutely no
+ * logic should be included in this hook. Do not do any database queries or
+ * traverse files or directories on disk. Each class and interface class should
+ * be specified manually with the exact path to ensure fast performance.
+ *
+ * @see backdrop_autoload()
+ * @see hook_autoload_info_alter()
+ */
+function hook_autoload_info() {
+  return array(
+    'MyModuleClassName' => 'includes/my_module.class_name.inc',
+    'MyModuleOtherName' => 'includes/my_module.other_name.inc',
+    'MyModuleSomeInterface' => 'includes/my_module.some_interface.inc',
+  );
+}
+
+/**
  * Perform alterations to the list of classes included in the registry.
  *
- * Modules can manually modify the list of classes before the registry caches
- * them.
+ * This hook may be used to modify the list of classes and interfaces used by
+ * Backdrop that have been provided by other modules. If your module is
+ * defining it's own classes or interfaces, it should use hook_autoload_info()
+ * instead.
  *
  * @param $class_registry
  *   List of classes in the registry.
+ *
+ * @see backdrop_autoload()
+ * @see hook_autoload_info()
  */
-function hook_class_registry_alter(&$class_registry, $modules) {
+function hook_autoload_info_alter(&$class_registry) {
   // Replace the database cache with a different database cache.
   $class_registry['BackdropDatabaseCache'] = 'alternative/path/to/cache.inc';
 }
