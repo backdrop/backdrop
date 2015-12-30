@@ -1884,17 +1884,42 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   );
 
   // Build the configurable field values.
+  $cardinality = $field['cardinality'];
+  $form['field']['cardinality_container'] = array(
+    '#type' => 'item',
+    // Reset #parents to 'field', so the additional container does not appear.
+    '#parents' => array('field'),
+    '#field_prefix' => '<div class="container-inline">',
+    '#field_suffix' => '</div>',
+    '#title' => t('Number of values'),
+  );
+
+  $form['field']['cardinality_container']['cardinality'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      'number' => t('Limited'),
+      FIELD_CARDINALITY_UNLIMITED => t('Unlimited'),
+    ),
+    '#default_value' => ($cardinality == FIELD_CARDINALITY_UNLIMITED) ? FIELD_CARDINALITY_UNLIMITED : 'number',
+  );
+  $form['field']['cardinality_container']['cardinality_number'] = array(
+    '#type' => 'number',
+    '#default_value' => $cardinality != FIELD_CARDINALITY_UNLIMITED ? $cardinality : 1,
+    '#min' => 1,
+    '#step' => 1,
+    '#title' => t('Number'),
+    '#title_display' => 'invisible',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="field[cardinality]"]' => array('value' => 'number'),
+      ),
+    ),
+  );
   $description = t('Maximum number of values users can enter for this field.');
   if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
     $description .= '<br/>' . t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
   }
-  $form['field']['cardinality'] = array(
-    '#type' => 'select',
-    '#title' => t('Number of values'),
-    '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + backdrop_map_assoc(range(1, 10)),
-    '#default_value' => $field['cardinality'],
-    '#description' => $description,
-  );
+  $form['field']['cardinality_container']['#description'] = $description;
 
   // Add additional field type settings. The field type module is
   // responsible for not returning settings that cannot be changed if
@@ -2000,6 +2025,14 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
   $instance = $form_state['values']['instance'];
   $field_name = $instance['field_name'];
 
+
+  // Validate field cardinality.
+  $cardinality = $form_state['values']['field']['cardinality'];
+  $cardinality_number = $form_state['values']['field']['cardinality_number'];
+  if ($cardinality === 'number' && empty($cardinality_number)) {
+    form_error($form['field']['cardinality_container']['cardinality_number'], t('Number of values is required.'));
+  }
+
   if (isset($form['instance']['default_value_widget'])) {
     $element = $form['instance']['default_value_widget'];
 
@@ -2034,6 +2067,14 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
 function field_ui_field_edit_form_submit($form, &$form_state) {
   $instance = $form_state['values']['instance'];
   $field = $form_state['values']['field'];
+
+  // Save field cardinality.
+  $cardinality = $field['cardinality'];
+  $cardinality_number = $field['cardinality_number'];
+  if ($cardinality == 'number') {
+    $cardinality = $cardinality_number;
+  }
+  $field['cardinality'] = $cardinality;
 
   // Update any field settings that have changed.
   $field_source = field_info_field($instance['field_name']);

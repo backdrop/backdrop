@@ -1017,7 +1017,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $settings
    *   An associative array of settings to change from the defaults, keys are
    *   node properties, for example 'title' => 'Hello, world!'.
-   * @return
+   * @return Node
    *   Created node entity.
    */
   protected function backdropCreateNode($settings = array()) {
