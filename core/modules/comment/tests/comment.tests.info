@@ -77,7 +77,7 @@ group = Comment
 file = comment.test
 
 [CommentNodeChangesTestCase]
-name = Comment deletion on node changes
+name = Comments after node changes
 description = Tests that comments behave correctly when the node is changed.
 group = Comment
 file = comment.test
