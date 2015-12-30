@@ -9,6 +9,8 @@
  * Provides common functionality for the Field UI test classes.
  */
 class FieldUITestCase extends BackdropWebTestCase {
+  protected $type;
+  protected $hyphen_type;
 
   function setUp() {
     // Since this is a base class for many test cases, support the same
@@ -145,6 +147,9 @@ class FieldUITestCase extends BackdropWebTestCase {
  */
 class FieldUIManageFieldsTestCase extends FieldUITestCase {
   protected $profile = 'testing';
+  protected $field_label;
+  protected $field_name_input;
+  protected $field_name;
 
   function setUp() {
     parent::setUp();
@@ -293,6 +298,47 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
       'fields[_add_existing_field][field_name]' => $this->field_name,
     );
     $this->fieldUIAddExistingField("admin/structure/types/manage/page", $edit);
+  }
+
+  /**
+   * Tests the cardinality settings of a field.
+   *
+   * We do not test if the number can be submitted with anything else than a
+   * numeric value. That is tested already in FormsTestCase::testNumber().
+   */
+  function testCardinalitySettings() {
+    $this->createField();
+    $field_edit_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields/' . $this->field_name;
+
+    // Assert the cardinality other field cannot be empty when cardinality is
+    // set to 'number'.
+    $edit = array(
+      'field[cardinality]' => 'number',
+      'field[cardinality_number]' => '',
+    );
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    $this->assertText('Number of values is required.');
+
+    // Submit a custom number.
+    $edit = array(
+      'field[cardinality]' => 'number',
+      'field[cardinality_number]' => 6,
+    );
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    $this->assertRaw(format_string('Saved %label configuration.', array('%label' => $this->field_label)), 'Redirected to "Manage fields" page.');
+    $this->backdropGet($field_edit_path);
+    $this->assertFieldByXPath("//select[@name='field[cardinality]']", 'number');
+    $this->assertFieldByXPath("//input[@name='field[cardinality_number]']", 6);
+
+    // Set to unlimited.
+    $edit = array(
+      'field[cardinality]' => FIELD_CARDINALITY_UNLIMITED,
+    );
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    $this->assertRaw(format_string('Saved %label configuration.', array('%label' => $this->field_label)), 'Redirected to "Manage fields" page.');
+    $this->backdropGet($field_edit_path);
+    $this->assertFieldByXPath("//select[@name='field[cardinality]']", FIELD_CARDINALITY_UNLIMITED);
+    $this->assertFieldByXPath("//input[@name='field[cardinality_number]']", 1);
   }
 
   /**
