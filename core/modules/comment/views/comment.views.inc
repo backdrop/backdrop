@@ -616,14 +616,14 @@ function comment_views_data_alter(&$data) {
  */
 function comment_views_plugins() {
   return array(
-    'module' => 'views',
+    'module' => 'views', // These templates are in the views module.
     'row' => array(
       'comment' => array(
         'title' => t('Comment'),
         'help' => t('Display the comment with standard comment view.'),
         'handler' => 'views_plugin_row_comment_view',
         'theme' => 'views_view_row_comment',
-        'path' => backdrop_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
+        'theme file' => 'views.theme.inc',
         'base' => array('comment'), // only works with 'comment' as base.
         'uses options' => TRUE,
         'type' => 'normal',
@@ -634,7 +634,7 @@ function comment_views_plugins() {
         'help' => t('Display the comment as RSS.'),
         'handler' => 'views_plugin_row_comment_rss',
         'theme' => 'views_view_row_rss',
-        'path' => backdrop_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
+        'theme file' => 'views.theme.inc',
         'base' => array('comment'), // only works with 'comment' as base.
         'uses options' => TRUE,
         'type' => 'feed',

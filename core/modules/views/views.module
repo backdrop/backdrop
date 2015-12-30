@@ -73,7 +73,7 @@ function views_api_minimum_version() {
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = backdrop_get_path('module', 'views');
-  module_load_include('inc', 'views', 'templates/views.theme');
+  module_load_include('inc', 'views', 'views.theme');
 
   // Some quasi clever array merging here.
   $base = array(
@@ -116,20 +116,21 @@ function views_theme($existing, $type, $theme, $path) {
   foreach ($plugins as $type => $info) {
     foreach ($info as $plugin => $def) {
       if (isset($def['theme']) && (!isset($def['register theme']) || !empty($def['register theme']))) {
+
         $hooks[$def['theme']] = array(
           'pattern' => $def['theme'] . '__',
           'file' => $def['theme file'],
-          'path' => $def['theme path'],
+          'path' => $def['path'],
           'variables' => $variables[$type],
         );
 
-        $include = BACKDROP_ROOT . '/' . $def['theme path'] . '/' . $def['theme file'];
+        $include = BACKDROP_ROOT . '/' . $def['path'] . '/' . $def['theme file'];
         if (file_exists($include)) {
           require_once $include;
         }
 
         if (!function_exists('theme_' . $def['theme'])) {
-          $hooks[$def['theme']]['template'] = backdrop_clean_css_identifier($def['theme']);
+          $hooks[$def['theme']]['template'] = 'templates/' . backdrop_clean_css_identifier($def['theme']);
         }
       }
       if (isset($def['additional themes'])) {
@@ -142,12 +143,12 @@ function views_theme($existing, $type, $theme, $path) {
           $hooks[$theme] = array(
             'pattern' => $theme . '__',
             'file' => $def['theme file'],
-            'path' => $def['theme path'],
+            'path' => $def['path'],
             'variables' => $variables[$theme_type],
           );
 
           if (!function_exists('theme_' . $theme)) {
-            $hooks[$theme]['template'] = backdrop_clean_css_identifier($theme);
+            $hooks[$theme]['template'] = 'templates/' . backdrop_clean_css_identifier($theme);
           }
         }
       }
@@ -159,19 +160,19 @@ function views_theme($existing, $type, $theme, $path) {
   );
 
   $hooks['views_exposed_form'] = $base + array(
-    'template' => 'views-exposed-form',
+    'template' => 'templates/views-exposed-form',
     'pattern' => 'views_exposed_form__',
     'render element' => 'form',
   );
 
   $hooks['views_more'] = $base + array(
-    'template' => 'views-more',
+    'template' => 'templates/views-more',
     'pattern' => 'views_more__',
     'variables' => array('more_url' => NULL, 'link_text' => 'more', 'view' => NULL),
   );
   $hooks['views_container'] = array(
     'render element' => 'element',
-    'file' => 'templates/views.theme.inc',
+    'file' => 'views.theme.inc',
   );
 
   // Add theme suggestions which are part of modules.
@@ -180,6 +181,7 @@ function views_theme($existing, $type, $theme, $path) {
       $hooks += _views_find_module_templates($hooks, $info['template path']);
     }
   }
+
   return $hooks;
 }
 
@@ -1867,7 +1869,7 @@ function views_exposed_form_cache($views_name, $display_name, $form_output = NUL
  * Build a list of theme function names for use most everywhere.
  */
 function views_theme_functions($hook, $view, $display = NULL) {
-  require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'views') . "/templates/views.theme.inc";
+  require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'views') . "/views.theme.inc";
   return _views_theme_functions($hook, $view, $display);
 }
 

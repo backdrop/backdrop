@@ -454,27 +454,22 @@ function views_discover_plugins() {
     }
 
     // Setup automatic path/file finding for theme registration
-    $module_dir = isset($result['module']) ? $result['module'] : $module;
-    // Assume the plugin path includes a 'plugins' directory.
-    $path = backdrop_get_path('module', $module_dir) . '/plugins';
-    // Assume the theme path includes a 'templates' directory.
-    $theme_path = backdrop_get_path('module', $module_dir) . '/templates';
-    // Assume the *.views.inc file for theme implementations.
-    $theme_file = "$module.views.inc";
-
-    // Add some special casing for the views module itself.
-    if ($module_dir == 'views') {
-      $theme_file = 'views.theme.inc';
-    }
+    $module_name = isset($result['module']) ? $result['module'] : $module;
+    // Assume the views plugin path is the module root if unspecified.
+    $path = backdrop_get_path('module', $module_name);
+    // Assume the template path includes a 'templates' directory.
+    $template_path = $path . '/templates';
+    // Assume the *.theme.inc file for theme implementations.
+    $theme_file = "$module.theme.inc";
 
     foreach ($result as $type => $info) {
       if ($type == 'module') {
         continue;
       }
       foreach ($info as $plugin => $def) {
-        $def['module'] = $module_dir;
+        $def['module'] = $module_name;
         if (!isset($def['theme path'])) {
-          $def['theme path'] = $theme_path;
+          $def['theme path'] = $template_path;
         }
         if (!isset($def['theme file'])) {
           $def['theme file'] = $theme_file;
