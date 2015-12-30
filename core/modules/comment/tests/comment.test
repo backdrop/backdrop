@@ -9,11 +9,61 @@ class CommentHelperCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $web_user;
   protected $node;
+  protected $profile = 'testing';
 
-  function setUp() {
-    parent::setUp('comment', 'search');
+  function setUp($modules = array()) {
+    $modules = array_merge($modules, array('comment', 'node', 'search'));
+    parent::setUp($modules);
+
+    // Create a post content type with comments enabled.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+      ),
+      'is_new' => TRUE,
+    ));
+
+    // Add text formats.
+    $filtered_html_format = array(
+      'format' => 'filtered_html',
+      'name' => 'Filtered HTML',
+      'weight' => 0,
+      'editor' => 'ckeditor',
+      'filters' => array(
+        // URL filter.
+        'filter_url' => array(
+          'weight' => 0,
+          'status' => 1,
+        ),
+        // HTML filter.
+        'filter_html' => array(
+          'weight' => 1,
+          'status' => 1,
+        ),
+        // Line break filter.
+        'filter_autop' => array(
+          'weight' => 2,
+          'status' => 1,
+        ),
+        // HTML corrector filter.
+        'filter_htmlcorrector' => array(
+          'weight' => 10,
+          'status' => 1,
+        ),
+      ),
+    );
+    $filtered_html_format = (object) $filtered_html_format;
+    filter_format_save($filtered_html_format);
+    $filtered_html_permission = filter_permission_name($filtered_html_format);
+
+    // Grant basic permissions for comments to anonymous and authenticated roles.
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
+
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer layouts'));
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
   }
@@ -107,7 +157,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     if ($comment && is_object($comment)) {
       $regex = '/' . ($reply ? '<div class="indented">(.*?)' : '');
       $regex .= '<a id="comment-' . $comment->id . '"(.*?)'; // Comment anchor.
-      $regex .= '<div(.*?)'; // Begin in comment div.
+      $regex .= '<article(.*?)'; // Begin in comment wrapper.
       $regex .= $comment->subject . '(.*?)'; // Match subject.
       $regex .= $comment->comment . '(.*?)'; // Match comment.
       $regex .= '/s';
@@ -433,8 +483,8 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertNoLink(t('@count comments', array('@count' => 0)));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
     $this->assertLink(t('Read more'));
-    $count = $this->xpath('//article[@id=:id]/footer[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
-    $this->assertTrue(count($count) == 1, 'One child found');
+    $count = $this->xpath('//article[@id=:id]//ul/li', array(':id' => 'node-' . $this->node->nid));
+    $this->assertTrue(count($count) == 2, 'Two node links found (Read more and Add new comment)');
 
     // Create a new comment. This helper function may be run with different
     // comment settings so use comment_save() to avoid complex setup.
@@ -467,8 +517,8 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertLink(t('Read more'));
     $this->assertNoLink(t('1 new comment'));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
-    $count = $this->xpath('//article[@id=:id]/footer[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
-    $this->assertTrue(count($count) == 2, print_r($count, TRUE));
+    $count = $this->xpath('//article[@id=:id]//ul/li', array(':id' => 'node-' . $this->node->nid));
+    $this->assertTrue(count($count) == 3, print_r($count, TRUE));
   }
 
   /**
@@ -1018,8 +1068,8 @@ class CommentPreviewTest extends CommentHelperCase {
     $edit['name'] = $web_user->name;
     $edit['date'] = '2008-03-02 17:23 +0300';
     $raw_date = strtotime($edit['date']);
-    $expected_text_date = format_date($raw_date);
-    $expected_form_date = format_date($raw_date, 'custom', 'Y-m-d H:i O');
+    $expected_text_date = format_date($raw_date, 'medium', NULL, 'UTC');
+    $expected_form_date = format_date($raw_date, 'custom', 'Y-m-d H:i O', 'UTC');
     $comment = $this->postComment($this->node, $edit['comment_body[' . $langcode . '][0][value]'], '', TRUE);
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Preview'));
 
@@ -1475,13 +1525,10 @@ class CommentPagerTest extends CommentHelperCase {
  */
 class CommentNodeAccessTest extends CommentHelperCase {
   function setUp() {
-    BackdropWebTestCase::setUp('comment', 'search', 'node_access_test');
-    node_access_rebuild();
+    parent::setUp(array('node_access_test'));
 
-    // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'administer blocks'));
-    $this->web_user = $this->backdropCreateUser(array('access comments', 'post comments', 'create post content', 'edit own comments', 'node test view'));
-    $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
+    $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
+    user_role_grant_permissions($web_user_role, array('node test view'));
   }
 
   /**
@@ -1648,6 +1695,13 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
+  function setUp() {
+    parent::setUp(array('block'));
+
+    $admin_user_role = $this->admin_user->roles[count($this->admin_user->roles) - 1];
+    user_role_grant_permissions($admin_user_role, array('administer blocks'));
+  }
+
   /**
    * Tests the recent comments block.
    */
@@ -1930,6 +1984,10 @@ class CommentActionsTestCase extends CommentHelperCase {
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
+  function setUp() {
+    parent::setUp(array('field_ui'));
+  }
+
   /**
    * Tests that the default 'comment_body' field is correctly added.
    */
@@ -2121,5 +2179,46 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
     $this->assertTrue(comment_load($comment->id), 'The comment could be loaded.');
     node_delete($this->node->nid);
     $this->assertFalse(comment_load($comment->id), 'The comment could not be loaded after the node was deleted.');
+  }
+
+  /**
+   * Tests opening, closing, and hiding comments.
+   */
+  function testNodeCommentSettings() {
+    $this->backdropLogin($this->admin_user);
+
+    // Check that the comment settings only include "Open" and "Closed" if
+    // no comments yet exist.
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertField('edit-comment-' . COMMENT_NODE_OPEN, 'Comments open field found.');
+    $this->assertField('edit-comment-' . COMMENT_NODE_CLOSED, 'Comments closed field found.');
+    $this->assertNoField('edit-comment-' . COMMENT_NODE_HIDDEN, 'Comments hidden field not shown when no comments exist.');
+
+    // Post a comment with the default settings (comments open).
+    $comment = $this->postComment($this->node, $this->randomName());
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertTrue($this->commentExists($comment), 'Comments shown when comments are open.');
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form found on node page when comments are open.');
+
+    // Now check that the hidden option exists in the edit form.
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertField('edit-comment-hidden', 'Comments hidden field shown after comments have been added.');
+
+    // Close the comments and check that adding a comment is no longer possible.
+    $edit = array(
+      'comment' => COMMENT_NODE_CLOSED,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertTrue($this->commentExists($comment), 'Comments shown when comments are closed.');
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when comments are closed.');
+
+    // Hide comments and check that adding comments is disabled also.
+    $edit = array(
+      'comment_hidden' => TRUE,
+    );
+    $this->backdropPost('node/' . $this->node->nid . '/edit', $edit, t('Save'));
+    $this->assertFalse($this->commentExists($comment), 'Comments are not shown when hidden.');
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when comments are hidden.');
+
   }
 }
