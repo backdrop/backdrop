@@ -1701,9 +1701,19 @@ function backdrop_unpack($obj, $field = 'data') {
  * @param $string
  *   A string containing the English string to translate.
  * @param $args
- *   An associative array of replacements to make after translation. Based
- *   on the first character of the key, the value is escaped and/or themed.
- *   See format_string() for details.
+ *   An associative array of replacements to make. Occurrences in $string of
+ *   any key in $args are replaced with the corresponding value, after optional
+ *   sanitization and formatting. The type of sanitization and formatting
+ *   depends on the first character of the key:
+ *   - @variable: Escaped to HTML using check_plain(). Use this as the default
+ *     choice for anything displayed on a page on the site.
+ *   - %variable: Escaped to HTML and formatted using backdrop_placeholder(),
+ *     which makes it display as <em>emphasized</em> text.
+ *   - !variable: Inserted as is, with no sanitization or formatting. Only use
+ *     this for text that has already been prepared for HTML display (for
+ *     example, user-supplied text that has already been run through
+ *     check_plain() previously, or is expected to contain some limited HTML
+ *     tags and has already been run through filter_xss() previously).
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'langcode' (defaults to the current language): The language code to
