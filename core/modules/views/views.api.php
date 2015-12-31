@@ -582,6 +582,9 @@ function hook_views_data_alter(&$data) {
  *     - uses grouping: Set to TRUE to allow the grouping settings for rows.
  *     - even empty: May have the value 'even empty' to tell Views that the style
  *       should be rendered even if there are no results.
+ *     - theme file: Name of the file containing theme or preprocess functions.
+ *     - theme path: Location of the theme file and template files needed
+ *         relative to the Backdrop root.
  *
  *   - Used by row plugins:
  *     - uses fields: Set to TRUE to have the row plugin accept field handlers.
