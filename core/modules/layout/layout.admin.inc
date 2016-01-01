@@ -47,10 +47,10 @@ function layout_list_page() {
         $storage = t('Overridden');
       }
       elseif ($layout->storage === LAYOUT_STORAGE_DEFAULT) {
-        $storage = t('Default');
+        $storage = t('Default (module-provided)');
       }
       else {
-        $storage = t('User-created');
+        $storage = t('Custom');
       }
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
