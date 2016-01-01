@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Content type editing user interface.

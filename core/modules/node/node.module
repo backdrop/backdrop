@@ -18,12 +18,12 @@ define('NODE_NOT_PUBLISHED', 0);
 define('NODE_PUBLISHED', 1);
 
 /**
- * Denotes that the node is not promoted to the front page.
+ * Denotes that the node is not promoted.
  */
 define('NODE_NOT_PROMOTED', 0);
 
 /**
- * Denotes that the node is promoted to the front page.
+ * Denotes that the node is promoted.
  */
 define('NODE_PROMOTED', 1);
 
@@ -1401,7 +1401,7 @@ function node_ranking() {
       'score' => 'n.sticky',
     ),
     'promote' => array(
-      'title' => t('Content is promoted to the front page'),
+      'title' => t('Content is promoted'),
       // The promote flag is either 0 or 1, which is automatically normalized.
       'score' => 'n.promote',
     ),
