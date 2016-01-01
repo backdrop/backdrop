@@ -747,23 +747,44 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
   private $nodes;
 
   function testBulkUpdate() {
-    // Create some nodes.
+    // Create five nodes.
     $this->nodes = array();
     for ($i = 1; $i <= 5; $i++) {
       $node = $this->backdropCreateNode();
       $this->nodes[$node->nid] = $node;
     }
+    // Create three terms.
+    $this->terms = array();
+    for ($i = 1; $i <= 3; $i++) {
+      $term = entity_create('taxonomy_term', array(
+        'name' => $this->randomName(),
+        'vocabulary' => 'tags',
+        'langcode' => LANGUAGE_NONE,
+      ));
+      taxonomy_term_save($term);
+      $this->terms[$term->tid] = $term;
+      // Test that terms have proper aliases.
+      $this->assertEntityAlias('term', $term, 'tags/' . strtolower($term->name));
+    }
 
     // Clear out all aliases.
     $this->deleteAllAliases();
+    // Test that aliases were deleted.
+    foreach ($this->nodes as $node) {
+      $this->assertNoEntityAliasExists('node', $node);
+    }
+    foreach ($this->terms as $term) {
+      $this->assertNoEntityAliasExists('term', $term);
+    }
 
     // Bulk create aliases.
     $edit = array(
       'update[node_path_bulk_update_batch_process]' => TRUE,
+      'update[taxonomy_path_bulk_update_batch_process]' => TRUE,
       'update[user_path_bulk_update_batch_process]' => TRUE,
     );
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
-    $this->assertText('Generated 7 URL aliases.'); // 5 nodes + 2 users
+    $this->assertText('Generated 10 URL aliases.'); // 5 nodes + 2 users
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
