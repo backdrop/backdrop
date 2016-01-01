@@ -1132,7 +1132,12 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
 
   // Turn original element into a text format wrapper.
-  $element['#attached'] = filter_get_attached($formats);
+  if (isset($element['#attached'])) {
+    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
+  }
+  else {
+    $element['#attached'] = filter_get_attached($formats);
+  }
 
   // Use the default format for this user if none was selected.
   if (!isset($element['#format'])) {
