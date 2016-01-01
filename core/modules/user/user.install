@@ -1116,3 +1116,11 @@ function user_update_1010() {
   }
   $config->save();
 }
+
+/**
+ * Set default option for login method to use accounts only.
+ */
+function user_update_1011() {
+  config_set('system.core', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
+}
+

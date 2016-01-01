@@ -155,6 +155,22 @@ function user_admin_settings($form, &$form_state) {
     '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
   );
 
+  // User login settings.
+  $form['user_login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User log in'),
+  );
+  $form['user_login']['user_login_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Users may log in using'),
+    '#options' => array(
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or e-mail address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username'),
+      USER_LOGIN_EMAIL_ONLY => t('E-mail address'),
+    ),
+    '#default_value' => $config->get('user_login_method'),
+  );
+
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -555,6 +571,7 @@ function user_admin_settings_submit($form, &$form_state) {
   $config->set('anonymous', $values['anonymous']);
   $config->set('user_admin_role', $values['user_admin_role']);
   $config->set('user_cancel_method', $values['user_cancel_method']);
+  $config->set('user_login_method', $values['user_login_method']);
   $config->set('user_register', $values['user_register']);
   $config->set('user_email_verification', $values['user_email_verification']);
   $config->set('user_signatures', $values['user_signatures']);
