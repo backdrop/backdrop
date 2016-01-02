@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Callbacks for adding, editing, and deleting content and managing revisions.
@@ -293,7 +292,7 @@ function node_form($form, &$form_state, Node $node) {
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Promoted to front page'),
+    '#title' => t('Promoted'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
   );
