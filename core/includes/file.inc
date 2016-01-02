@@ -529,8 +529,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
 # Turn off all options we don't need.
-Options None
-Options +SymLinksIfOwnerMatch
+Options -Indexes -ExecCGI -Includes
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
