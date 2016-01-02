@@ -5118,7 +5118,7 @@ function backdrop_get_library($module, $name = NULL) {
  * @endcode
  *
  * In a more complex case where there are several groups in one column (such as
- * the block regions on the admin/structure/block page), a separate subgroup
+ * the block regions on the admin/content/block page), a separate subgroup
  * class must also be added to differentiate the groups.
  * @code
  * $form['my_elements'][$region][$delta]['weight']['#attributes']['class'] = array('my-elements-weight', 'my-elements-weight-' . $region);

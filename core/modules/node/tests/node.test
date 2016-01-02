@@ -1760,7 +1760,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $custom_block['info'] = $this->randomName();
     $custom_block['title'] = $this->randomName();
     $custom_block['body[value]'] = $this->randomName(32);
-    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropPost('admin/content/block/add', $custom_block, t('Save block'));
 
     // Add a new layout with the node/% path.
     $edit = array(

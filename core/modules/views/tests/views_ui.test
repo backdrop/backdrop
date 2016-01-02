@@ -43,7 +43,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     }
 
     // This view should not have a block.
-    $this->backdropGet('admin/structure/block');
+    $this->backdropGet('admin/content/block');
     $this->assertNoText('View: ' . $view1['human_name']);
 
     // Create two nodes.
@@ -90,7 +90,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertLinkByHref(url($view2['page[path]']));
 
     // This view should not have a block.
-    $this->backdropGet('admin/structure/block');
+    $this->backdropGet('admin/content/block');
     $this->assertNoText('View: ' . $view2['human_name']);
 
     // Create a view with a page and a block, and filter the listing.
