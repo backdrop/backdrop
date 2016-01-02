@@ -155,6 +155,12 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
       }
     }
   }
+  // Replace whitespace.
+  $result = str_replace(' ', $unknown, $result);
+  // Remove remaining unsafe characters.
+  $result = preg_replace('![^0-9A-Za-z_.-]!', '', $result);
+  // Remove multiple consecutive non-alphabetical characters.
+  $result = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $result);
   return $result;
 }
 
@@ -237,12 +243,6 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
   // Allow other modules to alter the filename prior to processing.
   backdrop_alter('transliteration_clean_filename_prepare', $filename, $source_langcode);
   $filename = transliteration_get($filename, '', $source_langcode);
-  // Replace whitespace.
-  $filename = str_replace(' ', '_', $filename);
-  // Remove remaining unsafe characters.
-  $filename = preg_replace('![^0-9A-Za-z_.-]!', '', $filename);
-  // Remove multiple consecutive non-alphabetical characters.
-  $filename = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $filename);
   // Force lowercase to prevent issues on case-insensitive file systems.
   if (config_get('system.core', 'file_transliterate_lowercase')) {
     $filename = strtolower($filename);

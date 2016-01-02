@@ -2465,7 +2465,7 @@ function system_date_time_lookup($form, &$form_state) {
 function system_transliteration_retroactive() {
   if (!$query = system_transliteration_file_query()) {
     backdrop_set_message(t('Database not supported.'), 'error');
-    $form['description']['#markup'] = t('Retroactive transliteration is not supported for the database system of this Drupal installation. If you think this should be fixed please <a href="@issues-url">file an issue</a> in the project issue queue.', array('@issues-url' => 'http://drupal.org/project/issues/transliteration'));
+    $form['description']['#markup'] = t('Retroactive transliteration is not supported for the database system of this Backdrop installation.');
     return $form;
   }
 
@@ -2585,7 +2585,7 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
  *   SelectQuery
  */
 function system_transliteration_file_query() {
-  // Regular expressions are not supported by Drupal's database layer.
+  // Regular expressions are not supported by Backdrop's database layer.
   $operator = 'NOT REGEXP';
   if (config_get('system.core', 'file_transliterate_lowercase')) {
     $operator .= ' BINARY';
