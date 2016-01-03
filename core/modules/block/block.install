@@ -6,57 +6,6 @@
  */
 
 /**
- * Implements hook_schema().
- */
-function block_schema() {
-  $schema['block_custom'] = array(
-    'description' => 'Stores contents of custom-made blocks.',
-    'fields' => array(
-      'bid' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => "Primary Key: This custom block's unique ID.",
-      ),
-      'body' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'description' => 'Block contents.',
-        'translatable' => TRUE,
-      ),
-      'info' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Block description.',
-      ),
-      'title' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Custom title for the block. (Empty string will use block default title, <none> will remove the title, text will cause block to use specified title.)',
-        'translatable' => TRUE,
-      ),
-      'format' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'description' => 'The {filter_format}.format of the block body.',
-      ),
-    ),
-    'unique keys' => array(
-      'info' => array('info'),
-    ),
-    'primary key' => array('bid'),
-  );
-
-  return $schema;
-}
-
-/**
  * Implements hook_update_dependencies().
  */
 function block_update_dependencies() {
@@ -140,6 +89,34 @@ function block_update_1003() {
       'translatable' => TRUE,
     )
   );
+}
+
+/**
+ * Move individual blocks into config files.
+ */
+function block_update_1004() {
+  if (!db_table_exists('block_custom')) {
+    return;
+  }
+
+  $blocks = db_query("SELECT * FROM {block_custom}")->fetchAllAssoc('bid');
+  foreach ($blocks as $block) {
+    $block = (array) $block;
+    $data = array(
+      'delta' => $block['bid'],
+      'info' => $block['info'],
+      'title' => $block['title'],
+      'body' => array(
+        'value'=> $block['body'],
+        'format' => $block['format'],
+        ),
+      );
+    $config = config('block.custom.' . $block['bid']);
+    $config->setData($data);
+    $config->save();
+  }
+
+  db_drop_table('block_custom');
 }
 
 /**

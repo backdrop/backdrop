@@ -1758,6 +1758,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Create the custom block.
     $custom_block = array();
     $custom_block['info'] = $this->randomName();
+    $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName();
     $custom_block['body[value]'] = $this->randomName(32);
     $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
@@ -1779,7 +1780,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Add the custom block to the layout.
     $layout = layout_load('post_layout');
-    $layout->addBlock('block', 1, 'sidebar');
+    $layout->addBlock('block', $custom_block['delta'], 'sidebar');
     $layout->save();
 
     // Verify visibility rules.

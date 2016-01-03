@@ -1909,6 +1909,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     // Add a new custom block.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
+    $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = $this->randomName(32);
     // Use the format created.
@@ -1916,9 +1917,9 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
     $this->assertText(t('The block has been created.'), 'New block successfully created.');
 
-    // Verify the new block is in the database.
-    $bid = db_query("SELECT bid FROM {block_custom} WHERE info = :info", array(':info' => $custom_block['info']))->fetchField();
-    $this->assertNotNull($bid, 'New block found in database');
+    // Check to see if the custom block was created by checking that it has a configuration file.
+    $custom_block = config_get('block.custom.'.$custom_block['delta']);
+    $this->assertNotNull($custom_block['delta'], 'New block found in configuration.');
 
     // Disable the text format.
     $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
