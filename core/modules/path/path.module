@@ -58,7 +58,7 @@ function path_menu() {
     'weight' => -10,
   );
   $items['admin/config/search/path/add'] = array(
-    'title' => 'Add alias',
+    'title' => 'Add URL alias',
     'page callback' => 'path_admin_edit',
     'access arguments' => array('administer url aliases'),
     'type' => MENU_LOCAL_ACTION,
