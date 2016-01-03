@@ -383,7 +383,7 @@ class LayoutRendererStandard {
         break;
       case 'inline':
         $url = base_path() . $filename;
-        $this->prefix .= '<link type="text/css" rel="stylesheet" href="' . $url . '" />'."\n";
+        $this->prefix .= '<link rel="stylesheet" href="' . $url . '" />' . "\n";
         break;
     }
   }
