@@ -86,7 +86,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('views-attachment', 'fieldset-no-legend'),),
+      '#attributes' => array(
+        'class' => array(
+          'views-attachment',
+          'edit-page-style-wrapper',
+        ),
+      ),
       '#tree' => TRUE,
     );
     $form['displays']['page']['create'] = array(
@@ -107,7 +112,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ':input[name="page[create]"]' => array('checked' => TRUE),
         ),
       ),
-      '#prefix' => '<div><div id="edit-page-wrapper">',
+      '#prefix' => '<div><div class="edit-page-style-inner-wrapper">',
       '#suffix' => '</div></div>',
       '#parents' => array('page'),
     );
@@ -232,7 +237,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['block'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('views-attachment', 'fieldset-no-legend'),),
+      '#attributes' => array(
+        'class' => array(
+          'views-attachment',
+          'edit-block-style-wrapper',
+        ),
+      ),
       '#tree' => TRUE,
     );
     $form['displays']['block']['create'] = array(
@@ -252,7 +262,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ':input[name="block[create]"]' => array('checked' => TRUE),
         ),
       ),
-      '#prefix' => '<div id="edit-block-wrapper">',
+      '#prefix' => '<div class="edit-block-style-inner-wrapper">',
       '#suffix' => '</div>',
       '#parents' => array('block'),
     );
