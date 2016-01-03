@@ -376,15 +376,11 @@ table th {
 /* These header classes are ambiguous and should be scoped to th elements */
 
 th.views-ui-name {
-  width: 18%;
+  width: 20%;
 }
 
 th.views-ui-description {
-  width: 26%;
-}
-
-th.views-ui-tag {
-  width: 8%;
+  width: 40%;
 }
 
 th.views-ui-path {
@@ -392,7 +388,7 @@ th.views-ui-path {
 }
 
 th.views-ui-operations {
-  width: 24%;
+  width: 10%;
 }
 
 /* @end */

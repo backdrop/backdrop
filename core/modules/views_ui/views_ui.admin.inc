@@ -244,16 +244,35 @@ function views_ui_list_page() {
   views_ui_add_admin_css();
 
   $header = array(
-    array('data' => t('View name'), 'class' => array('views-ui-name')),
+    array('data' => t('View info'), 'class' => array('views-ui-name')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
-    array('data' => t('Tag'), 'class' => array('views-ui-tag')),
-    array('data' => t('Path'), 'class' => array('views-ui-path')),
+    array('data' => t('Path(s)'), 'class' => array('views-ui-path')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
   );
 
-  $views = views_get_enabled_views() + views_get_disabled_views();
+  // Get and sort enabled views.
+  $enabled = views_get_enabled_views();
+  $enabled_sorted = array();
+  foreach ($enabled as $key => $view) {
+    $enabled_sorted[$key] = $view->human_name;
+  }
+  natcasesort($enabled_sorted);
+
+  // Get and sort disabled views.
+  $disabled = views_get_disabled_views();
+  $disabled_sorted = array();
+  foreach ($disabled as $key => $view) {
+    $disabled_sorted[$key] = $view->human_name;
+  }
+  natcasesort($disabled_sorted);
+
+  // Get complete set of views.
+  $views = $enabled + $disabled;
+  $sorted = array_keys($enabled_sorted + $disabled_sorted);
+
   $rows = array();
-  foreach ($views as $view) {
+  foreach ($sorted as $key) {
+    $view = $views[$key];
     $paths = _views_ui_get_paths($view);
     $paths = implode(", ", $paths);
 
@@ -261,22 +280,19 @@ function views_ui_list_page() {
     $row[] = array(
       'data' => theme('views_ui_view_info', array('view' => $view)),
       'class' => array('views-ui-name'),
-      'data-label' => t('View Name'),
+      'data-label' => t('View info'),
     );
+    $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
+    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tag:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
-      'data' => check_plain($view->description),
+      'data' => $data,
       'class' => array('views-ui-description'),
       'data-label' => t('Description'),
     );
     $row[] = array(
-      'data' => check_plain($view->tag),
-      'class' => array('views-ui-tag'),
-      'data-label' => t('Tag'),
-    );
-    $row[] = array(
       'data' => $paths,
       'class' => array('views-ui-path'),
-      'data-label' => t('Path'),
+      'data-label' => t('Path(s)'),
     );
     $row[] = array(
       'data' => array(
