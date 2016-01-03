@@ -1359,6 +1359,7 @@ function views_get_all_views($reset = FALSE) {
       $name = str_replace('views.view.', '', $config_file);
       $views[$name] = new view($config->get());
     }
+    ksort($views, SORT_STRING);
   }
   return $views;
 }

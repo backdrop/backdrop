@@ -160,11 +160,13 @@ function views_ui_admin_bar_map() {
   }
   $views = array();
   foreach (views_get_enabled_views() as $name => $view) {
-    $views[] = $name;
+    $views[$name] = $view->human_name;
   }
   if (empty($views)) {
     return;
   }
+  natcasesort($views);
+  $views = array_keys($views);
   $map['admin/structure/views/view/%views_ui_cache'] = array(
     'parent' => 'admin/structure/views',
     'arguments' => array(
