@@ -123,7 +123,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     var self = this;
     return $.ajax({
       url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("machine_name/transliterate/" + self.source.val().toLowerCase() + "/" + self.replace),
-      dataType: "json"
+      dataType: "text"
     });
   },
   

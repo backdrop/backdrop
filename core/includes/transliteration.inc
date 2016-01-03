@@ -155,12 +155,6 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
       }
     }
   }
-  // Replace whitespace.
-  $result = str_replace(' ', $unknown, $result);
-  // Remove remaining unsafe characters.
-  $result = preg_replace('![^0-9A-Za-z_.-]!', '', $result);
-  // Remove multiple consecutive non-alphabetical characters.
-  $result = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $result);
   return $result;
 }
 
@@ -274,7 +268,15 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
  * @see language_default()
  */
 function transliteration_get($text, $unknown = '?', $source_langcode = NULL) {
-  return _transliteration_process($text, $unknown, $source_langcode);
+  $result = _transliteration_process($text, $unknown, $source_langcode);
+  // Replace whitespace.
+  $result = str_replace(' ', $unknown, $result);
+  // Remove remaining unsafe characters.
+  $result = preg_replace('![^0-9A-Za-z_.-]!', '', $result);
+  // Remove multiple consecutive non-alphabetical characters.
+  $result = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $result);
+
+  return $result;
 }
 
 function transliteration_remove_diacritics($string) {

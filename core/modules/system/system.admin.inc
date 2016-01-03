@@ -2602,6 +2602,7 @@ function system_transliteration_file_query() {
   */
 function system_machine_name_transliterate($string = '', $unknown = '?') {
   include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
-  backdrop_json_output(transliteration_get($string, $unknown));
+  backdrop_add_http_header('Content-Type', 'text/plain');
+  print transliteration_get($string, $unknown);
   backdrop_exit();
 }
