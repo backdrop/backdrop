@@ -1604,7 +1604,7 @@ function node_menu() {
     'file' => 'node.types.inc',
   );
   $items['admin/structure/types/list'] = array(
-    'title' => 'List',
+    'title' => 'List content types',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );

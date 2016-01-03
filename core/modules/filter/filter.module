@@ -93,7 +93,7 @@ function filter_menu() {
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/list'] = array(
-    'title' => 'List',
+    'title' => 'List text formats',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
