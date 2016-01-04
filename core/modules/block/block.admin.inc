@@ -23,11 +23,11 @@ function block_admin_list() {
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
-      'href' => 'admin/structure/block/manage/' . $delta . '/configure',
+      'href' => 'admin/content/block/manage/' . $delta . '/configure',
     );
     $links['delete'] = array(
       'title' => t('Delete'),
-      'href' => 'admin/structure/block/manage/' . $delta . '/delete',
+      'href' => 'admin/content/block/manage/' . $delta . '/delete',
     );
     $operations = array(
       '#type' => 'operations',
@@ -108,7 +108,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     $path = urldecode($_SERVER['HTTP_REFERER']);
   }
   elseif (user_access('administer blocks')) {
-    $path = 'admin/structure/block';
+    $path = 'admin/content/block';
   }
   else {
     $path = '<front>';
@@ -157,7 +157,7 @@ function block_admin_configure_validate($form, &$form_state) {
 function block_admin_configure_submit($form, &$form_state) {
   block_custom_block_save($form_state['values'], $form_state['values']['delta']);
   backdrop_set_message(t('The block configuration has been saved.'));
-  $form_state['redirect'] = 'admin/structure/block';
+  $form_state['redirect'] = 'admin/content/block';
 }
 
 /**
@@ -200,7 +200,7 @@ function block_add_block_form_submit($form, &$form_state) {
   $form_state['values']['delta'] = $delta;
 
   backdrop_set_message(t('The block has been created.'));
-  $form_state['redirect'] = 'admin/structure/block';
+  $form_state['redirect'] = 'admin/content/block';
 }
 
 /**
@@ -220,7 +220,7 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
   $form['bid'] = array('#type' => 'hidden', '#value' => $delta);
 
-  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/content/block', '', t('Delete'), t('Cancel'));
 }
 
 /**
@@ -233,6 +233,6 @@ function block_custom_block_delete_submit($form, &$form_state) {
     ->condition('bid', $form_state['values']['bid'])
     ->execute();
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
-  $form_state['redirect'] = 'admin/structure/block';
+  $form_state['redirect'] = 'admin/content/block';
 }
 

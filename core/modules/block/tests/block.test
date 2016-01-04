@@ -28,15 +28,15 @@ class BlockTestCase extends BackdropWebTestCase {
    */
   function testCustomBlock() {
     // Confirm that the add block link appears on block overview pages.
-    $this->backdropGet('admin/structure/block');
-    $this->assertRaw(l('Add block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
+    $this->backdropGet('admin/content/block');
+    $this->assertRaw(l('Add block', 'admin/content/block/add'), 'Add block link is present on block overview page for default theme.');
 
-    // Add a new custom block by filling out the input form on the admin/structure/block/add page.
+    // Add a new custom block by filling out the input form on the admin/content/block/add page.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = $this->randomName(32);
-    $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
+    $this->backdropPost('admin/content/block/add', $custom_block, 'Save block');
 
     // Confirm that the custom block has been created, and then query the created bid.
     $this->assertText(t('The block has been created.'), 'Custom block successfully created.');
@@ -59,13 +59,13 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->assertText($data['subject'], 'Newly added block found.');
 
     // Verify presence of configure and delete links for custom block.
-    $this->backdropGet('admin/structure/block');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $bid . '/configure', 0, 'Custom block configure link found.');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $bid . '/delete', 0, 'Custom block delete link found.');
+    $this->backdropGet('admin/content/block');
+    $this->assertLinkByHref('admin/content/block/manage/' . $bid . '/configure', 0, 'Custom block configure link found.');
+    $this->assertLinkByHref('admin/content/block/manage/' . $bid . '/delete', 0, 'Custom block delete link found.');
 
     // Delete the created custom block & verify that it's been deleted and no longer appearing on the page.
     $this->clickLink(t('Delete'));
-    $this->backdropPost('admin/structure/block/manage/' . $bid . '/delete', array(), 'Delete');
+    $this->backdropPost('admin/content/block/manage/' . $bid . '/delete', array(), 'Delete');
     $this->assertRaw(t('The block %title has been removed.', array('%title' => $custom_block['info'])), 'Custom block successfully deleted.');
     $this->assertNoText(t($custom_block['title']), 'Custom block no longer appears on page.');
   }
@@ -74,14 +74,14 @@ class BlockTestCase extends BackdropWebTestCase {
    * Test creating custom block using Full HTML.
    */
   function testCustomBlockFormat() {
-    // Add a new custom block by filling out the input form on the admin/structure/block/add page.
+    // Add a new custom block by filling out the input form on the admin/content/block/add page.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = '<h1>Full HTML</h1>';
     $full_html_format = filter_format_load('full_html');
     $custom_block['body[format]'] = $full_html_format->format;
-    $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
+    $this->backdropPost('admin/content/block/add', $custom_block, 'Save block');
 
     // Set the created custom block to a specific region.
     $bid = 1;
@@ -97,9 +97,9 @@ class BlockTestCase extends BackdropWebTestCase {
     // but can still submit the form without errors.
     $block_admin = $this->backdropCreateUser(array('administer blocks'));
     $this->backdropLogin($block_admin);
-    $this->backdropGet('admin/structure/block/manage/' . $bid . '/configure');
+    $this->backdropGet('admin/content/block/manage/' . $bid . '/configure');
     $this->assertFieldByXPath("//textarea[@name='body[value]' and @disabled='disabled']", 'This field has been disabled because you do not have sufficient permissions to edit it.', 'Body field contains denied message');
-    $this->backdropPost('admin/structure/block/manage/' . $bid . '/configure', array(), 'Save block');
+    $this->backdropPost('admin/content/block/manage/' . $bid . '/configure', array(), 'Save block');
     $this->assertNoText(t('Ensure that each block description is unique.'));
 
     // Confirm that the custom block is still being displayed using configured text format.

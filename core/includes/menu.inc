@@ -2149,7 +2149,7 @@ function menu_local_tasks($level = 0) {
  *   will be 'block-edit'.
  * @param $parent_path
  *   The static menu router path of the object to retrieve local tasks for, for
- *   example 'node' or 'admin/structure/block/manage'.
+ *   example 'node' or 'admin/content/block/manage'.
  * @param $args
  *   A list of dynamic path arguments to append to $parent_path to form the
  *   fully-qualified menu router path, for example array(123) for a certain

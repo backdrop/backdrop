@@ -19,30 +19,30 @@ function block_permission() {
  * Implements hook_menu().
  */
 function block_menu() {
-  $items['admin/structure/block'] = array(
+  $items['admin/content/block'] = array(
     'title' => 'Custom blocks',
     'description' => 'Create reusable blocks that can be placed in layouts.',
     'page callback' => 'block_admin_list',
     'access arguments' => array('administer blocks'),
     'file' => 'block.admin.inc',
   );
-  $items['admin/structure/block/list'] = array(
+  $items['admin/content/block/list'] = array(
     'title' => 'List blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/structure/block/manage/%block_custom_block'] = array(
+  $items['admin/content/block/manage/%block_custom_block'] = array(
     'title' => 'Configure block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_admin_configure', 4),
     'access arguments' => array('administer blocks'),
     'file' => 'block.admin.inc',
   );
-  $items['admin/structure/block/manage/%/configure'] = array(
+  $items['admin/content/block/manage/%/configure'] = array(
     'title' => 'Configure block',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_INLINE,
   );
-  $items['admin/structure/block/manage/%/delete'] = array(
+  $items['admin/content/block/manage/%/delete'] = array(
     'title' => 'Delete block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_delete', 4),
@@ -51,7 +51,7 @@ function block_menu() {
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );
-  $items['admin/structure/block/add'] = array(
+  $items['admin/content/block/add'] = array(
     'title' => 'Add block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_add_block_form'),

@@ -1913,7 +1913,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     $custom_block['body[value]'] = $this->randomName(32);
     // Use the format created.
     $custom_block['body[format]'] = $format_id;
-    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropPost('admin/content/block/add', $custom_block, t('Save block'));
     $this->assertText(t('The block has been created.'), 'New block successfully created.');
 
     // Verify the new block is in the database.
