@@ -1327,7 +1327,7 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get a listing of all template files in the path to search.
   $files = file_scan_directory($path, $regex, array('key' => 'name', 'nomask' => $no_mask));

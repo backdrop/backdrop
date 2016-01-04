@@ -5810,7 +5810,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get current list of items.
   if (!function_exists('file_scan_directory')) {
