@@ -5299,8 +5299,11 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
     }
     else {
       $string = json_encode($var);
+      // PHP 5.3 JSON_PRETTY_PRINT.
       $string = backdrop_json_format($string);
+      // PHP 5.3 JSON_UNESCAPED_UNICODE.
       $string = backdrop_json_decode_unicode($string);
+      // PHP 5.3 JSON_UNESCAPED_SLASHES.
       $string = str_replace('\/', '/', $string);
     }
     // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
@@ -5395,9 +5398,20 @@ function backdrop_json_format($json) {
  * Decode Unicode characters in JSON strings.
  */
 function backdrop_json_decode_unicode($json) {
-  return preg_replace_callback('/\\\\u([0-9a-f]{4})/i', function ($match) {
-    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
-  }, $json);
+  // Convert escaped characters, such as \u00e9 to the unescaped version (é).
+  // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
+  $decode_callback = function ($match) {
+    return $match[1] . mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+  };
+  // To prevent unintentionally unescaping the string "\u", be sure that the
+  // the backslash itself is not also escaped. Note that because the replacement
+  // may include part of a 4-digit code for a previous Unicode character, this
+  // will only escape every-other Unicode character if they are next to each
+  // other.
+  $pattern = '/([^\\\\])\\\\u([0-9a-fA-F]{4})/';
+  $json = preg_replace_callback($pattern, $decode_callback, $json);
+  // Replace a second time to catch any sequences multiple Unicode characters.
+  return preg_replace_callback($pattern, $decode_callback, $json);
 }
 
 /**
