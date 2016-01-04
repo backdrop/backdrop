@@ -142,6 +142,12 @@ description = Make sure the variable system functions correctly.
 group = Bootstrap
 file = bootstrap.test
 
+[EarlyBootstrapTestCase]
+name = Early bootstrap test
+description = Confirm that calling module_implements() during early bootstrap does not pollute the module_implements() cache.
+group = System
+file = boot.test
+
 [HookBootExitTestCase]
 name = Boot and exit hook invocation
 description = Test that hook_boot() and hook_exit() are called correctly.
