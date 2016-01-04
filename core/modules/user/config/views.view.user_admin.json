@@ -806,7 +806,7 @@
                     "empty_table": 1
                 },
                 "header": [],
-                "title": "User accounts",
+                "title": "Manage user accounts",
                 "empty": {
                     "area_text_custom": {
                         "id": "area_text_custom",
@@ -840,7 +840,7 @@
                 "path": "admin/people/list",
                 "menu": {
                     "type": "default tab",
-                    "title": "Find user accounts",
+                    "title": "Manage user accounts",
                     "description": "",
                     "name": "management",
                     "weight": "0",
