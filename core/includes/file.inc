@@ -2087,7 +2087,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Merge in defaults.
   $options += array(
