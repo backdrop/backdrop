@@ -283,7 +283,7 @@ function user_admin_settings($form, &$form_state) {
 
   $form['email_title'] = array(
     '#type' => 'item',
-    '#title' => t('E-mails'),
+    '#title' => t('User E-mails and path settings.'),
   );
   $form['email'] = array(
     '#type' => 'vertical_tabs',
@@ -294,7 +294,6 @@ function user_admin_settings($form, &$form_state) {
     'token_types' => array('user'),
     'show_restricted' => TRUE,
   ));
-
   $form['email_admin_created'] = array(
     '#type' => 'fieldset',
     '#title' => t('Welcome (new user created by administrator)'),
@@ -537,7 +536,20 @@ function user_admin_settings($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-
+  $form['user_path_pattern'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User path settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => t('Set the default path setting for users).') . ' ' . $email_token_link,
+    '#group' => 'email',
+  );
+  $form['user_path_pattern']['path_settings'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path settings'),
+    '#default_value' => '[user:name]',
+    '#description' => t('The default path for user profiles.'),
+  );
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -590,6 +602,10 @@ function user_admin_settings_submit($form, &$form_state) {
   $config->set('status_canceled_body', $values['user_mail_status_canceled_body']);
   $config->set('status_canceled_subject', $values['user_mail_status_canceled_subject']);
   $config->save();
+
+  $user_config = config('path.settings');
+  $user_config->set('user_pattern', $form_state['values']['path_settings']);
+  $user_config->save();
 
   // Clear the token cache.
   token_cache_clear();
