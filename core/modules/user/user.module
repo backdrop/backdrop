@@ -2305,6 +2305,13 @@ function user_role_save($role) {
 function user_role_delete($role_name) {
   $role = user_role_load($role_name);
 
+  // If this is the administrator role, delete the user_admin_role variable.
+  if ($role_name == config_get('system.core', 'user_admin_role')) {
+    $system_config = config('system.core');
+    $system_config->clear('user_admin_role');
+    $system_config->save();
+  }
+
   $config = config('user.role.' . $role_name);
   $config->delete();
 
