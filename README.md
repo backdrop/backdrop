@@ -1,6 +1,8 @@
 Description
 -----------
 
+[![Join the chat at https://gitter.im/backdrop/backdrop](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/backdrop/backdrop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Backdrop is a full-featured content management system that allows non-technical
 users to manage a wide variety of content. It can be used to create all kinds of
 websites including blogs, image galleries, social networks, intranets, and more.
