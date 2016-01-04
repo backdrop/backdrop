@@ -1024,6 +1024,12 @@ description = Tests the uninstallation of modules.
 group = Module
 file = module.test
 
+[ModuleImplementsAlterTestCase]
+name = Module implements alter
+description = Tests the hook_module_implements_alter.
+group = Module
+file = module.test
+
 [PasswordHashingTest]
 name = Password hashing
 description = Password hashing unit tests.
