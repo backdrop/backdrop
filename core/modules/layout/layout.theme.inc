@@ -194,6 +194,7 @@ function template_preprocess_block(&$variables) {
       $element = array(
         '#type' => 'contextual_links',
         '#contextual_links' => $content->content['#contextual_links'],
+        '#element' => $content->content,
       );
       unset($content->content['#contextual_links']);
 
