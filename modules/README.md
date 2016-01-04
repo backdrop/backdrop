@@ -6,7 +6,8 @@ Backdrop community may be downloaded at http://backdropcms.org/guide/modules.
 It is safe to organize modules into subdirectories, such as "contrib" for
 contributed modules, and "custom" for custom modules. Note that if you move a
 module to a subdirectory after it has been enabled, you may need to clear the
-Backdrop cache so that it can be found.
+Backdrop cache so that it can be found. Alternatively, you can disable the
+module before moving it and then re-enable it after the move.
 
 In multisite configuration, modules found in this directory are available to
 all sites. In addition to this directory, shared common modules may also be kept
