@@ -153,7 +153,7 @@ function search_menu() {
     'file' => 'search.admin.inc',
   );
   $items['admin/config/search/settings/reindex'] = array(
-    'title' => 'Clear index',
+    'title' => 'Invalidate search index',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_reindex_confirm'),
     'access arguments' => array('administer search'),
