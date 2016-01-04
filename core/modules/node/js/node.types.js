@@ -8,7 +8,6 @@ Backdrop.behaviors.contentTypes = {
     $context.find('fieldset#edit-submission').backdropSetSummary(function() {
       var vals = [];
       vals.push(Backdrop.checkPlain($context.find('input[name="title_label"]').val()) || Backdrop.t('Requires a title'));
-      vals.push(Backdrop.t('Preview !status', { '!status': $context.find('input[name="node_preview"]:checked').siblings('label').text() }));
       return vals.join(', ');
     });
 
