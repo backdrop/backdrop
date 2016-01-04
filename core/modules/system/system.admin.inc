@@ -1219,13 +1219,6 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
   );
-  $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select', '#title' => t('Number of posts on front page'),
-    '#default_value' => $site_config->get('default_nodes_main'),
-    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
-    '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
-    '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
-  );
   $form['error_page'] = array(
     '#type' => 'fieldset',
     '#title' => t('Error pages'),
@@ -1342,8 +1335,8 @@ function system_site_information_settings_validate($form, &$form_state) {
 
   // Check for empty front page path.
   if (empty($form_state['values']['site_frontpage'])) {
-    // Set to default "user".
-    form_set_value($form['front_page']['site_frontpage'], 'user', $form_state);
+    // Set to default front page.
+    form_set_value($form['front_page']['site_frontpage'], 'node', $form_state);
   }
   else {
     // Get the normal path of the front page.
@@ -1471,7 +1464,7 @@ function system_cron_settings($form, &$form_state) {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
-  
+
   $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
@@ -2140,7 +2133,7 @@ function system_urls_settings($form, &$form_state) {
       '#value' => 1,
     );
   }
-  
+
   $form['canonical_secure'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),
