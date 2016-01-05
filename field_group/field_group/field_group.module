@@ -720,12 +720,12 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
   $html_element = isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : 'div';
   $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
   $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'div';
-  $attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
+  $configured_attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
   $group->classes = trim($group->classes);
 
   // This regex split the attributes string so that we can pass that
   // later to drupal_attributes().
-  preg_match_all('/([^\s=]+)="([^"]+)"/', $attributes, $matches);
+  preg_match_all('/([^\s=]+)="([^"]+)"/', $configured_attributes, $matches);
 
   $element_attributes = array();
   // Put the attribute and the value together.
@@ -745,7 +745,9 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
     $element_attributes['id'] = $element['#id'];
   }
 
-  $attributes = drupal_attributes($element_attributes);
+  // Sanitize the attributes.
+  $element_attributes = _filter_xss_attributes(drupal_attributes($element_attributes));
+  $attributes = $element_attributes ? ' ' . implode(' ', $element_attributes) : '';
 
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
   if ($show_label) {
