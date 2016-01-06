@@ -1200,6 +1200,14 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
       return FALSE;
     }
   }
+  elseif (isset($block_module)) {
+    if (isset($block_info['modules'][$block_module])) {
+      return $block_info['modules'][$block_module];
+    }
+    else {
+      return FALSE;
+    }
+  }
 
   return $block_info['modules'];
 }
