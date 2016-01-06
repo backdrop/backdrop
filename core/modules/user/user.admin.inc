@@ -155,6 +155,22 @@ function user_admin_settings($form, &$form_state) {
     '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
   );
 
+  // User login settings.
+  $form['user_login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User log in'),
+  );
+  $form['user_login']['user_login_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Users may log in using'),
+    '#options' => array(
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username'),
+      USER_LOGIN_EMAIL_ONLY => t('Email address'),
+    ),
+    '#default_value' => $config->get('user_login_method'),
+  );
+
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -176,6 +192,11 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Require e-mail verification when a visitor creates an account.'),
     '#default_value' => $config->get('user_email_verification'),
     '#description' => t('New users will be required to validate their e-mail address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+  );
+  $form['registration_cancellation']['user_email_match'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
   $form['registration_cancellation']['user_cancel_method'] = array(
@@ -551,12 +572,15 @@ function user_admin_settings($form, &$form_state) {
  */
 function user_admin_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
+
   $config = config('system.core');
   $config->set('anonymous', $values['anonymous']);
   $config->set('user_admin_role', $values['user_admin_role']);
   $config->set('user_cancel_method', $values['user_cancel_method']);
+  $config->set('user_login_method', $form_state['values']['user_login_method']);
   $config->set('user_register', $values['user_register']);
   $config->set('user_email_verification', $values['user_email_verification']);
+  $config->set('user_email_match', $form_state['values']['user_email_match']);
   $config->set('user_signatures', $values['user_signatures']);
   $config->set('user_pictures', $values['user_pictures']);
   $config->set('user_picture_path', $values['user_picture_path']);

@@ -1100,10 +1100,6 @@ function user_update_1009() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-1.x"
- */
-
-/**
  * Update 'People' menus to 'User accounts'
  */
 function user_update_1010() {
@@ -1116,3 +1112,17 @@ function user_update_1010() {
   }
   $config->save();
 }
+
+/**
+ * Set default option for login method to use accounts only.
+ */
+function user_update_1011() {
+  $config = config('system.core');
+  $config->set('user_login_method', 'username_only');
+  $config->set('user_email_match', 1);
+  $config->save();
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ */
