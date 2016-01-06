@@ -111,8 +111,8 @@ class Block extends LayoutHandler {
     $title = $this->getTitle();
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
-      $info = module_invoke($this->module, 'block_info');
-      $title = $info[$this->delta]['info'];
+      $info = layout_get_block_info($this->module, $this->delta);
+      $title = $info['info'];
     }
     return $title;
   }
@@ -131,10 +131,10 @@ class Block extends LayoutHandler {
    * Return a preview for this block.
    */
   function getAdminPreview() {
-    $info = module_invoke($this->module, 'block_info');
+    $info = layout_get_block_info($this->module, $this->delta);
     $preview = '';
-    if (isset($info[$this->delta]['description'])) {
-      $preview .= '<p>' . $info[$this->delta]['description'] . '</p>';
+    if (isset($info['description'])) {
+      $preview .= '<p>' . $info['description'] . '</p>';
     }
 
     if (!empty($this->conditions)) {
