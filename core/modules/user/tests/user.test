@@ -69,9 +69,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
 }
 
 class UserRegistrationTestCase extends UserLoginTestBase {
-  function setUp() {
-    parent::setUp(array('field', 'field_test'));
-  }
+  protected $profile = 'testing';
 
   function testRegistrationWithEmailVerification() {
     $config = config('system.core');
@@ -240,6 +238,8 @@ class UserRegistrationTestCase extends UserLoginTestBase {
    * Tests Field API fields on user registration forms.
    */
   function testRegistrationWithUserFields() {
+    module_enable(array('field', 'field_test'));
+
     // Create a field, and an instance on 'user' entity type.
     $field = array(
       'type' => 'test_field',
@@ -383,7 +383,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   }
 }
 
-class UserValidationTestCase extends BackdropWebTestCase {
+class UserValidationTestCase extends BackdropUnitTestCase {
   // Username validation.
   function testUsernames() {
     $test_cases = array( // '<username>' => array('<description>', 'assert<testName>'),
@@ -416,6 +416,7 @@ class UserValidationTestCase extends BackdropWebTestCase {
  * Functional tests for user logins, including rate limiting of login attempts.
  */
 class UserLoginTestCase extends UserLoginTestBase {
+  protected $profile = 'testing';
 
   /**
    * Test that login credentials work (or not) in different login modes.
@@ -575,10 +576,6 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp(array('comment'));
-  }
-
   /**
    * Attempt to cancel account without permission.
    */
@@ -969,11 +966,13 @@ class UserCancelTestCase extends BackdropWebTestCase {
 }
 
 class UserPictureTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
   protected $user;
   protected $_directory_test;
 
   function setUp() {
-    parent::setUp();
+    parent::setUp(array('image'));
+
     // Enable user pictures.
     config_set('system.core', 'user_pictures', 1);
 
@@ -1288,6 +1287,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
 
 class UserPermissionsTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
   protected $admin_user;
   protected $role_name;
 
@@ -1606,6 +1606,8 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
  * Test user autocompletion.
  */
 class UserAutocompleteTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
 
@@ -1639,6 +1641,8 @@ class UserAutocompleteTestCase extends BackdropWebTestCase {
  * Tests user links in the header menu.
  */
 class UserAccountLinksUnitTests extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Test the user login block.
    */
@@ -1718,22 +1722,6 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
   }
 
   /**
-   * Insert a user session into the {sessions} table. This function is used
-   * since we cannot log in more than one user at the same time in tests.
-   */
-  private function insertSession(array $fields = array()) {
-    $fields += array(
-      'uid' => 0,
-      'sid' => backdrop_hash_base64(uniqid(mt_rand(), TRUE)),
-      'timestamp' => REQUEST_TIME,
-    );
-    db_insert('sessions')
-      ->fields($fields)
-      ->execute();
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {sessions} WHERE uid = :uid AND sid = :sid AND timestamp = :timestamp", array(':uid' => $fields['uid'], ':sid' => $fields['sid'], ':timestamp' => $fields['timestamp']))->fetchField(), 1, 'Session record inserted.');
-  }
-
-  /**
    * Tests disabling the 'My account' link.
    */
   function testDisabledAccountLink() {
@@ -1770,6 +1758,8 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
  * Test case to test user_save() behavior.
  */
 class UserSaveTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Test creating a user with arbitrary uid.
    */
@@ -1804,6 +1794,12 @@ class UserSaveTestCase extends BackdropWebTestCase {
  * Test the create user administration page.
  */
 class UserCreateTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('views'));
+  }
+
   /**
    * Create a user through the administration interface and ensure that it
    * displays in the user list.
@@ -1852,6 +1848,8 @@ class UserCreateTestCase extends BackdropWebTestCase {
  * Test case to test user_save() behavior.
  */
 class UserEditTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Test user edit page.
    */
@@ -2000,6 +1998,8 @@ class UserSignatureTestCase extends BackdropWebTestCase {
  * Test that a user, having editing their own account, can still log in.
  */
 class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Tests a user editing their own account.
    */
@@ -2053,6 +2053,8 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
  * Test case to test adding, editing and deleting roles.
  */
 class UserRoleAdminTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
@@ -2110,7 +2112,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     // Pick up a role and get its weight.
-    $role_name = 'administrator';
+    $role_name = $this->admin_user->roles[count($this->admin_user->roles) - 1];
     $role = user_role_load($role_name);
     $old_weight = $role->weight;
 
@@ -2131,6 +2133,8 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
  * Test user token replacement in strings.
  */
 class UserTokenReplaceTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Creates a user, then tests the tokens generated from it.
    */
@@ -2188,6 +2192,12 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
  * Test user search.
  */
 class UserUserSearchTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('search'));
+  }
+
   function testUserSearch() {
     $user1 = $this->backdropCreateUser(array('access user profiles', 'search content', 'use advanced search'));
     $this->backdropLogin($user1);
@@ -2230,6 +2240,7 @@ class UserUserSearchTestCase extends BackdropWebTestCase {
  * Test role assignment.
  */
 class UserRolesAssignmentTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
   protected $admin_user;
 
   function setUp() {
@@ -2311,6 +2322,8 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
  * Tests user_validate_current_pass on a custom form.
  */
 class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * User with permission to view content.
    */
@@ -2347,9 +2360,10 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
  * Test user entity callbacks.
  */
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('user');
+  protected $profile = 'testing';
 
+  function setUp() {
+    parent::setUp();
     $this->account = $this->backdropCreateUser();
     $this->anonymous = backdrop_anonymous_user();
   }
