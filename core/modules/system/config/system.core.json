@@ -57,6 +57,8 @@
     "user_admin_role": "",
     "user_cancel_method": "user_cancel_block",
     "user_email_verification": 1,
+    "user_email_match": 1,
+    "user_login_method": "username_or_email",
     "user_mail_status_activated_notify": 1,
     "user_mail_status_blocked_notify": 0,
     "user_mail_status_canceled_notify": 0,
