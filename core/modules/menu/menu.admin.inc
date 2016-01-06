@@ -18,16 +18,16 @@ function menu_overview_page() {
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
     $links['list'] = array(
-      'title' => t('List links'),
+      'title' => t('Edit links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
-    );
-    $links['edit'] = array(
-      'title' => t('Edit menu'),
-      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/edit',
     );
     $links['add'] = array(
       'title' => t('Add link'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/add',
+    );
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
     );
     $row[] = array(
       'data' => array(
@@ -559,7 +559,7 @@ function menu_edit_menu_submit($form, &$form_state) {
     }
   }
   backdrop_set_message(t('Your configuration has been saved.'));
-  $form_state['redirect'] = $path . $menu['menu_name'];
+  $form_state['redirect'] = 'admin/structure/menu';
 }
 
 /**
