@@ -37,7 +37,7 @@ function user_pass() {
     '#type' => 'textfield',
     '#title' => t('Username or e-mail address'),
     '#size' => 60,
-    '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
+    '#maxlength' => max(USERNAME_MAX_LENGTH, USERMAIL_MAX_LENGTH),
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
   );
