@@ -2664,7 +2664,9 @@ function system_update_1046() {
 
     module_disable(array('transliteration'), FALSE);
     $path = backdrop_get_path('module', 'transliteration');
-    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can uninstall and remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the transliteration module in the system table.
+    db_query("DELETE FROM {system} WHERE name = 'transliteration' AND type = 'module'");
   }
   else {
     // Migrate variables to config.

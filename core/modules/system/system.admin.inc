@@ -1757,7 +1757,7 @@ function system_file_system_settings() {
   $form['transliteration']['file_transliterate_uploads'] = array(
     '#type' => 'checkbox',
     '#title' => t('Transliterate file names during upload.'),
-    '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility.'),
+    '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility. If you enable this setting later, you may want to <a href="@transliteration">retroactively transliterate existing file names</a>', array('@transliteration' => url('admin/config/media/file-system/transliteration'))),
     '#default_value' => config_get('system.core', 'file_transliterate_uploads'),
   );
   $form['transliteration']['file_transliterate_uploads_display_name'] = array(

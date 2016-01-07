@@ -730,11 +730,6 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/media/file-system/settings'] = array(
-    'title' => 'Settings',
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
   $items['admin/config/media/file-system/transliteration'] = array(
     'title' => 'Transliteration',
     'description' => 'Convert existing file names to US-ASCII.',
@@ -742,8 +737,7 @@ function system_menu() {
     'page arguments' => array('system_transliteration_retroactive'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
-    'weight' => 10,
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
   );
   $items['admin/config/media/image-toolkit'] = array(
     'title' => 'Image toolkit',
@@ -1023,7 +1017,7 @@ function system_menu() {
   );
 
   // Machine names transliteration.
-  $items['machine_name/transliterate/%/%'] = array(
+  $items['system/transliterate/%/%'] = array(
     'page callback' => 'system_machine_name_transliterate',
     'page arguments' => array(2, 3),
     'access arguments' => array('access content'),

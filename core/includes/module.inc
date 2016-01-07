@@ -909,6 +909,7 @@ function backdrop_merged_modules() {
   return array(
     'token', // Backdrop 1.1.0.
     'pathauto', // Backdrop 1.1.0.
+    'transliteration', // Backdrop 1.3.0.
   );
 }
 
