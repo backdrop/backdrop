@@ -333,7 +333,6 @@ ul.primary li:last-child a {
  * Secondary admin tabs
  */
 ul.secondary {
-  text-align: right; /* LTR */
   font-size: 0.8125em;
   font-weight: bold;
   padding: 16px 23px 6px;
@@ -343,9 +342,6 @@ ul.secondary {
   background-color: #fafafa;
   clear: both;
   border: none;
-}
-[dir="rtl"] ul.secondary {
-  text-align: left;
 }
 ul.secondary li {
   display: inline-block;

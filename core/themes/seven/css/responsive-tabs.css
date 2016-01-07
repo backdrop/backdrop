@@ -147,7 +147,6 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   -moz-border-radius: 4px 4px 0 0;
   overflow: hidden;
   border-radius: 4px 4px 0 0;
-  background: #fff;
 }
 .responsive-tabs-mobile .expand-dropdown-tabs-control.js-active {
   background: #fafafa;
