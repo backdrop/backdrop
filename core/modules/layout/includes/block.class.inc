@@ -172,7 +172,7 @@ class Block extends LayoutHandler {
     $form['title_display']['#tree'] = FALSE;
     $form['title_display']['title_display'] = array(
       '#type' => 'select',
-      '#title' => t('Title type'),
+      '#title' => t('Block title type'),
       '#options' => array(
         LAYOUT_TITLE_DEFAULT => t('Default'),
         LAYOUT_TITLE_CUSTOM => t('Custom'),
@@ -301,7 +301,24 @@ class Block extends LayoutHandler {
     }
     return TRUE;
   }
-
+  
+  /**
+   * Allows an array of "child blocks" for display on the layouts "Add Block" 
+   * dialog. 
+   *
+   * This allows a single entry in hook_block_info() to provide multiple
+   * block instances displaying different fields.
+   *
+   * Note that this function may return NULL or an empty array, which have
+   * different meanings. NULL means that a block does not provide children at
+   * all. An empty array means that a block may provide children, but that there
+   * are none currently.
+   *
+   * return array|NULL
+   */
+  function getChildren() {
+    return NULL;
+  }
 }
 
 /**
