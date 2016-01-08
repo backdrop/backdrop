@@ -513,7 +513,11 @@ $(document).bind('state:disabled', function(e) {
 $(document).bind('state:required', function(e) {
   if (e.trigger) {
     if (e.value) {
-      $(e.target).closest('.form-item, .form-wrapper').find('label').append('<abbr class="form-required" title="' + Backdrop.t('This field is required.') + '">*</abbr>');
+      var $label = $(e.target).closest('.form-item, .form-wrapper').find('label');
+      // Avoids duplicate required markers on initialization.
+      if (!$label.find('.form-required').length) {
+        $label.append('<abbr class="form-required" title="' + Backdrop.t('This field is required.') + '">*</abbr>');
+      }
     }
     else {
       $(e.target).closest('.form-item, .form-wrapper').find('label .form-required').remove();
