@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines a "managed_file" Form API field and a "file" field for Field module.
@@ -73,7 +72,7 @@ function file_theme() {
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
     ) + $base,
     'file_icon' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL),
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'alt' => ''),
     ) + $base,
     'file_managed_file' => array(
       'render element' => 'element',
