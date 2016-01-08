@@ -2563,7 +2563,9 @@ function hook_requirements($phase) {
  * creation and alteration of the supported database engines.
  *
  * See the Schema API Handbook at http://drupal.org/node/146843 for details on
- * schema definition structures.
+ * schema definition structures. Note that foreign key definitions are for
+ * documentation purposes only; foreign keys are not created in the database,
+ * nor are they enforced by Backdrop.
  *
  * @return array
  *   A schema definition structure array. For each element of the
@@ -2615,6 +2617,8 @@ function hook_schema() {
       'nid_vid' => array('nid', 'vid'),
       'vid'     => array('vid')
     ),
+    // For documentation purposes only; foreign keys are not created in the
+    // database.
     'foreign keys' => array(
       'node_revision' => array(
         'table' => 'node_revision',
