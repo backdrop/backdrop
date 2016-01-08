@@ -1303,7 +1303,7 @@ function backdrop_page_get_cache($check_only = FALSE) {
  * Determines the cacheability of the current page.
  *
  * @param $allow_caching
- *   Set to FALSE if you want to prevent this page to get cached.
+ *   Set to FALSE if you want to prevent this page from being cached.
  *
  * @return
  *   TRUE if the current page can be cached, FALSE otherwise.
