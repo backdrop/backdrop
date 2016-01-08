@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for filter.module.
@@ -2047,5 +2046,19 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     // Test filter_entity_delete().
     $node->delete();
     $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages again.');
+  }
+}
+
+/**
+ * Tests DOMDocument Serialization.
+ */
+class FilterDOMSerializeTestCase extends BackdropWebTestCase {
+  /**
+   * Tests empty DOMDocument object.
+   */
+  function testFilterEmptyDOMSerialization() {
+    $document = new DOMDocument();
+    $result = filter_dom_serialize($document);
+    $this->assertEqual('', $result);
   }
 }
