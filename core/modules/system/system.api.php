@@ -2006,6 +2006,8 @@ function hook_modules_preenable($modules) {
  * module_enable() for a detailed description of the order in which install and
  * enable hooks are invoked.
  *
+ * This hook should be implemented in a .module file, not in an .install file.
+ *
  * @param $modules
  *   An array of the modules that were installed.
  *
