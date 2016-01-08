@@ -541,30 +541,30 @@ class TokenMenuTestCase extends TokenTestHelper {
     menu_link_save($root_link);
 
     // Add another link with the root link as the parent
-    $parent_link = array(
+    $child_link = array(
       'link_path' => 'root/parent',
       'link_title' => 'Parent link',
       'menu_name' => 'main-menu',
       'plid' => $root_link['mlid'],
     );
-    menu_link_save($parent_link);
+    menu_link_save($child_link);
 
     // Test menu link tokens.
     $tokens = array(
-      'mlid' => $parent_link['mlid'],
+      'mlid' => $child_link['mlid'],
       'title' => 'Parent link',
       'menu' => 'Primary navigation',
       'menu:name' => 'Primary navigation',
       'menu:machine-name' => 'main-menu',
       'menu:description' => 'The <em>Primary navigation</em> menu is used on many sites to show the major sections of the site, often in a top navigation bar.',
-      'menu:menu-link-count' => 10,
+      'menu:menu-link-count' => 11,
       'menu:edit-url' => url("admin/structure/menu/manage/main-menu", array('absolute' => TRUE)),
       'url' => url('root/parent', array('absolute' => TRUE)),
       'url:absolute' => url('root/parent', array('absolute' => TRUE)),
       'url:relative' => url('root/parent', array('absolute' => FALSE)),
       'url:path' => 'root/parent',
       'url:alias' => 'root/parent',
-      'edit-url' => url("admin/structure/menu/item/{$parent_link['mlid']}/edit", array('absolute' => TRUE)),
+      'edit-url' => url("admin/structure/menu/item/{$child_link['mlid']}/edit", array('absolute' => TRUE)),
       'parent' => 'Root link',
       'parent:mlid' => $root_link['mlid'],
       'parent:title' => 'Root link',
@@ -578,13 +578,13 @@ class TokenMenuTestCase extends TokenTestHelper {
       'root:parent' => NULL,
       'root:root' => NULL,
     );
-    $this->assertTokens('menu-link', array('menu-link' => $parent_link), $tokens);
+    $this->assertTokens('menu-link', array('menu-link' => $child_link), $tokens);
 
     // Add a node menu link
     $node_link = array(
       'enabled' => TRUE,
       'link_title' => 'Node link',
-      'plid' => $parent_link['mlid'],
+      'plid' => $child_link['mlid'],
       'customized' => 0,
       'description' => '',
     );
@@ -601,10 +601,10 @@ class TokenMenuTestCase extends TokenTestHelper {
       'menu-link:edit-url' => url("admin/structure/menu/item/{$node->menu['mlid']}/edit", array('absolute' => TRUE)),
       'menu-link:parent' => 'Parent link',
       'menu-link:parent:mlid' => $node->menu['plid'],
-      'menu-link:parent:mlid' => $parent_link['mlid'],
+      'menu-link:parent:mlid' => $child_link['mlid'],
       'menu-link:parents' => 'Root link, Parent link',
       'menu-link:parents:count' => 2,
-      'menu-link:parents:keys' => $root_link['mlid'] . ', ' . $parent_link['mlid'],
+      'menu-link:parents:keys' => $root_link['mlid'] . ', ' . $child_link['mlid'],
       'menu-link:root' => 'Root link',
       'menu-link:root:mlid' => $root_link['mlid'],
     );

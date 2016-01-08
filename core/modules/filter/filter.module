@@ -83,6 +83,14 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['filter/tips/%filter_format'] = array(
+    'title' => 'Compose tips',
+    'page callback' => 'filter_tips_long',
+    'page arguments' => array(2),
+    'access callback' => 'filter_access',
+    'access arguments' => array(2),
+    'file' => 'filter.pages.inc',
+  );
   $items['admin/config/content/formats'] = array(
     'title' => 'Text editors and formats',
     'description' => 'Configure WYSIWYG and text editors on the site. Restrict or allow certain HTML tags to be used in content.',
