@@ -5627,8 +5627,8 @@ function backdrop_page_set_cache() {
  *
  * Do not call this function from a test. Use $this->cronRun() instead.
  *
- * @return
- *   TRUE if cron ran successfully.
+ * @return bool
+ *   TRUE if cron ran successfully and FALSE if cron is already running.
  */
 function backdrop_cron_run() {
   // Allow execution to continue even if the request gets canceled.
