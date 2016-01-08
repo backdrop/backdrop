@@ -314,6 +314,21 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 // $settings['allow_authorize_operations'] = FALSE;
 
 /**
+ * Theme development debugging:
+ *
+ * When theme debugging is enabled:
+ * - The markup of each template is surrounded by HTML comments that contain
+ *   theming information, such as template file name suggestions.
+ * - Note that this debugging markup will cause automated tests that directly
+ *   check rendered HTML to fail.
+ *
+ * Not recommended in production environments.
+ *
+ * Remove the leading hash sign to enable.
+ */
+# $conf['theme_debug'] = TRUE;
+
+/**
  * Mixed-mode sessions:
  *
  * Set to TRUE to create both secure and insecure sessions when using HTTPS.
