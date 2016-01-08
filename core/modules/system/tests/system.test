@@ -725,7 +725,6 @@ class CronRunTestCase extends BackdropWebTestCase {
  * Test execution of the cron queue.
  */
 class CronQueueTestCase extends BackdropWebTestCase {
-
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
   }
@@ -747,6 +746,22 @@ class CronQueueTestCase extends BackdropWebTestCase {
     $this->assertEqual($queue->numberOfItems(), 1, 'Failing item still in the queue after throwing an exception.');
   }
 
+  /**
+   * Tests worker defined as a class method callable.
+   */
+  function testCallable() {
+    $queue = BackdropQueue::get('cron_queue_test_callback');
+
+    // Enqueue an item for processing.
+    $queue->createItem(array($this->randomName() => $this->randomName()));
+
+    // Run cron; the worker should perform the task and delete the item from the
+    // queue.
+    $this->cronRun();
+
+    // The queue should be empty.
+    $this->assertEqual($queue->numberOfItems(), 0);
+  }
 }
 
 class MetaTagsTestCase extends BackdropWebTestCase {
