@@ -726,7 +726,7 @@ class CronRunTestCase extends BackdropWebTestCase {
  */
 class CronQueueTestCase extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp(array('common_test', 'common_test_cron_helper'));
+    parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
 
   /**
