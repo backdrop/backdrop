@@ -263,6 +263,38 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $form['path'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Path settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+  );
+  // get the default path value for the node type.
+  $path_config = config_get('path.settings');
+  if (!empty($type->type)) {
+    if (isset($path_config["node_" . $type->type . "_pattern"])) {
+      $default_path_value = $path_config["node_" . $type->type . "_pattern"];
+    }
+    else {
+      $default_path_value = $path_config['node_pattern'];
+    }
+  }
+  else {
+    $default_path_value = $path_config['node_pattern'];
+  }
+  $form['path']['path_settings'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path settings'),
+    '#default_value' => $default_path_value,
+    '#description' => t('When new content of this type is created, it will use this pattern by default when generating URL paths.'),
+  );
+  $form['path']['path-settings']['tokens'] = array(
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => FALSE,
+    '#click_insert' => TRUE,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
@@ -378,6 +410,28 @@ function node_type_form_submit($form, &$form_state) {
     backdrop_set_message(t('The content type %name has been added.', array('%name' => $type->name)));
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
+
+  // this sets the default path for a content type
+  $config = config('path.settings');
+  /*//$values = $form_state['values'];
+
+  //$all_path_info = path_get_info();
+  //foreach ($all_path_info as $path_type => $path_info) {
+    // Save default pattern per path type.
+    $variable = $form_state['values']['path_settings'] . '_pattern';
+    $config->set($variable, $values[$variable]);
+
+    // Save specialized patterns per path type.
+    if (isset($path_info['pattern items'])) {
+      foreach ($path_info['pattern items'] as $item_name => $item_label) {
+        $variable = $path_type . '_' . $item_name . '_pattern';
+        $config->set($variable, $values[$variable]);
+      }
+    }*/
+  //}
+  $variable = 'node_' . $form_state['values']['type'] . '_pattern';
+  $config->set($variable, $form_state['values']['path_settings']);
+  $config->save();
 
   $form_state['redirect'] = 'admin/structure/types';
   return;

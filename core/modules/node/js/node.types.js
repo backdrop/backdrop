@@ -53,6 +53,13 @@ Backdrop.behaviors.contentTypes = {
       }
       return vals.join(', ');
     });
+
+    // Path settings.
+    $context.find('#edit-path').backdropSetSummary(function(context) {
+      var vals = [];
+      vals.push(Backdrop.t("Path pattern for this content type."));
+      return vals.join(', ');
+    });
   }
 };
 
