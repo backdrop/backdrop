@@ -1257,7 +1257,7 @@ function field_get_block_list() {
     return $types;
   }
 
-  $cache_key = 'field_get_block_list';
+  $cache_key = 'field_block_list';
   if ($cache = cache_get($cache_key)) {
     $types = $cache->data;
     if (!empty($types)) {
@@ -1279,13 +1279,8 @@ function field_get_block_list() {
         if (!isset($types[$entity_type . '-' . $field_name])) {
           $label = t($field['label']);
           $types[$entity_type . '-' . $field_name] = array(
-            'info' => t('Field: @widget_label (@field_name)', array(
-              '@widget_label' => $label,
-              '@field_name' => $field_name,
-            )),
+            'info' => t('Field: @widget_label (@field_name)', array('@widget_label' => $label, '@field_name' => $field_name)),
             'description' => $description,
-            'widget_label' => $label,
-            'field_name' => $field_name,
             'required contexts' => array($entity_type => $entity_type),
           );
         }
@@ -1293,36 +1288,7 @@ function field_get_block_list() {
     }
   }
 
-  $formatter_info = field_blocks_get_field_formatter_info($all_fields);
-
-  // Get formatter types.
-  foreach ($types as $key => $field_content_type) {
-    list($entity_type, $field_name) = explode('-', $key, 2);
-    $types[$key]['formatters'] = $formatter_info[$field_name];
-  }
-
   cache_set($cache_key, $types);
 
   return $types;
-}
-
-/**
- * Helper function for generating all the formatter information associated with
- * any fields.
- *
- * @param $fields
- *   An array of fully loaded fields.
- */
-function field_blocks_get_field_formatter_info($fields) {
-  $info = array();
-  $field_info = module_invoke_all('field_formatter_info');
-  foreach ($fields as $field_name => $field) {
-    foreach ($field_info as $format_name => $formatter_info) {
-      if (in_array($field['type'], $formatter_info['field types'])) {
-        $info[$field_name][$format_name] = $formatter_info;
-      }
-    }
-  }
-  backdrop_alter('field_formatter_info', $info);
-  return $info;
 }

@@ -892,6 +892,9 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   // Assemble all blocks into a single list and sort.
   $block_list = array();
   foreach ($blocks as $module => $module_blocks) {
+    if (empty($module_blocks)) {
+      continue;
+    }
     foreach ($module_blocks as $delta => $block_info) {
       $parent_block = layout_create_handler('block', $module . ':' . $delta);
       $children = $parent_block->getChildren();

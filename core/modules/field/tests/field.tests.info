@@ -52,6 +52,12 @@ description = Test storage-related Field Attach API functions.
 group = Field API
 file = field.test
 
+[FieldBlockTestCase]
+name = Field block tests
+description = Tests the adding of field blocks and formatter settings.
+group = Field API
+file = field.test
+
 [FieldViewsDataTest]
 name = Views integration for Field API
 description = Tests the Field API Views data.

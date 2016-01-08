@@ -220,7 +220,7 @@ function template_preprocess_block(&$variables) {
 
   // Basic classes.
   $variables['classes'][] = 'block';
-  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . $block->delta);
+  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . (isset($block->childDelta) ? $block->childDelta : $block->delta));
 
   // Add custom classes if sent in.
   if (!empty($style->settings['classes'])) {
