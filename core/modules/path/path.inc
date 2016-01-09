@@ -177,6 +177,7 @@ function path_clean_string($string, array $options = array()) {
     // If the reduce strings to letters and numbers is enabled, don't bother
     // replacing unknown characters with a question mark. Use an empty string
     // instead.
+    include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
     $output = transliteration_get($output, $cache['reduce_ascii'] ? '' : '?', $langcode);
   }
 
