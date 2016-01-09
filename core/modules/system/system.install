@@ -2670,7 +2670,7 @@ function system_update_1046() {
   else {
     // Migrate variables to config.
     $config->set('file_transliterate_lowercase', update_variable_get('transliteration_file_lowercase', FALSE));
-    $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', FALSE));
+    $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', TRUE));
     $config->set('file_transliterate_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', FALSE));
   
     // Remove variables from D7.
