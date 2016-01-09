@@ -12,33 +12,3 @@ $base = array(
   0xF0 => 'd', 'n', 'o', 'o', 'o', 'o', 'o', '/', 'o', 'u', 'u', 'u', 'u', 'y', 'th', 'y',
 );
 
-// Overrides for Danish input.
-$variant['da'] = array(
-  0xC5 => 'Aa',
-  0xC6 => 'Ae',
-  0xD8 => 'Oe',
-  0xE5 => 'aa',
-  0xE6 => 'ae',
-  0xF8 => 'oe',
-);
-
-// Overrides for German input.
-$variant['de'] = array(
-  0xC4 => 'Ae',
-  0xD6 => 'Oe',
-  0xDC => 'Ue',
-  0xE4 => 'ae',
-  0xF6 => 'oe',
-  0xFC => 'ue',
-  0xDF => 'ss',
-);
-
-// Overrides for Spanish input.
-$variant['es'] = array(
-  0xE1 => 'a',
-  0xE9 => 'e',
-  0xED => 'i',
-  0xF3 => 'o',
-  0xFA => 'u',
-  0xF1 => 'n',
-);

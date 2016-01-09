@@ -176,10 +176,26 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
  */
 function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
   static $map = array();
+  static $language_overrides = array();
 
   if (!isset($langcode)) {
     global $language;
     $langcode = $language->langcode;
+  }
+
+  // See if there is a language-specific override for this character.
+  if (!isset($language_overrides[$langcode])) {
+    $file = BACKDROP_ROOT . '/core/includes/transliteration/' . preg_replace('/[^a-zA-Z\-]/', '', $langcode) . '.php';
+    if (file_exists($file)) {
+      include $file;
+      if (!isset($overrides[$langcode]) || !is_array($overrides[$langcode])) {
+        $overrides[$langcode] = array();
+      }
+      $language_overrides[$langcode] = $overrides[$langcode];
+    }
+  }
+  if (isset($language_overrides[$langcode][$ord])) {
+    return $language_overrides[$langcode][$ord];
   }
 
   $bank = $ord >> 8;
@@ -189,13 +205,7 @@ function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
     $file = BACKDROP_ROOT . '/core/includes/transliteration/' . sprintf('x%02x', $bank) . '.php';
     if (file_exists($file)) {
       include $file;
-      if ($langcode != 'en' && isset($variant[$langcode])) {
-        // Merge in language specific mappings.
-        $map[$bank][$langcode] = $variant[$langcode] + $base;
-      }
-      else {
-        $map[$bank][$langcode] = $base;
-      }
+      $map[$bank][$langcode] = $base;
     }
     else {
       $map[$bank][$langcode] = array();

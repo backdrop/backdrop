@@ -18,39 +18,3 @@ $base = array(
   0xE0 => 'Dz', 'dz', 'I', 'i', 'I', 'i', 'O', 'o', 'O', 'o', 'O', 'o', 'E', 'e', 'U', 'u',
   0xF0 => 'U', 'u', 'U', 'u', 'C', 'c', NULL, NULL, 'Y', 'y', NULL, NULL, NULL, NULL, NULL, NULL,
 );
-
-// Overrides for Kyrgyz input.
-$variant['kg'] = array(
-  0x01 => 'E',
-  0x16 => 'C',
-  0x19 => 'J',
-  0x25 => 'X',
-  0x26 => 'TS',
-  0x29 => 'SCH',
-  0x2E => 'JU',
-  0x2F => 'JA',
-  0x36 => 'c',
-  0x39 => 'j',
-  0x45 => 'x',
-  0x46 => 'ts',
-  0x49 => 'sch',
-  0x4E => 'ju',
-  0x4F => 'ja',
-  0x51 => 'e',
-  0xA2 => 'H',
-  0xA3 => 'h',
-  0xAE => 'W',
-  0xAF => 'w',
-  0xE8 => 'Q',
-  0xE9 => 'q',
-);
-
-// Overrides for Ukrainian input.
-$variant['uk'] = array(
-  0x90 => 'G',
-  0x91 => 'g',
-  0x04 => 'YE',
-  0x54 => 'ye',
-  0x18 => 'Y',
-  0x38 => 'y',
-);
