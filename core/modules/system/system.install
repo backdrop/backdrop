@@ -2650,6 +2650,97 @@ function system_update_1045() {
 }
 
 /**
+ * Save the current Bartik theme palette as a custom palette.
+ */
+function system_update_1046() {
+  global $theme;
+
+  // Only bother if the current theme is Bartik.
+  if ($theme == 'bartik') {
+    // Define the old Blue Lagoon color palette
+    $palette_default = array (
+      'top' => '#0779bf',
+      'bottom' => '#48a9e4',
+      'bg' => '#ffffff',
+      'sidebar' => '#f6f6f2',
+      'sidebarborders' => '#f9f9f9',
+      'footer' => '#292929',
+      'titleslogan' => '#fffeff',
+      'text' => '#3b3b3b',
+      'link' => '#0071B3',
+      'menu' => '#f3f7fa',
+      'activemenu' => '#fefeff',
+    );
+    $palette = theme_get_setting('color.palette', 'bartik');
+    // If there were no color settings, then Blue Lagoon was default
+    if (empty($palette)) {
+      $palette = $palette_default;
+    }
+    // _color_rewrite_stylesheet() requires a 'base' key
+    $palette['base'] = '#ffffff';
+
+    // Much of the following code is copied verbatim from 
+    // color_scheme_form_submit() since there doesn't appear to be another way
+    // to save a color palette.
+    $info = color_get_info('bartik');
+    $info['schemes'][''] = array('title' => t('Custom'), 'colors' => array());
+
+    // Prepare target locations for generated files.
+    $theme = 'bartik';
+    $file = 'css/colors.css';
+    $id = $theme . '-' . substr(hash('sha256', serialize($palette) . microtime()), 0, 8);
+    $paths['color'] = 'public://color';
+    $paths['target'] = $paths['color'] . '/' . $id;
+    foreach ($paths as $path) {
+      file_prepare_directory($path, FILE_CREATE_DIRECTORY);
+    }
+    $paths['target'] = $paths['target'] . '/';
+    $paths['id'] = $id;
+    $paths['source'] = backdrop_get_path('theme', $theme) . '/';
+    $paths['files'] = $paths['map'] = array();
+
+    $style = backdrop_load_stylesheet($paths['source'] . $file, FALSE);
+
+    // Return the path to where this CSS file originated from, stripping
+    // off the name of the file at the end of the path.
+    $base = base_path() . dirname($paths['source'] . $file) . '/';
+    _backdrop_build_css_path(NULL, $base);
+
+    // Prefix all paths within this CSS file, ignoring absolute paths.
+    $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $style);
+
+    // Rewrite stylesheet with new colors.
+    $style = _color_rewrite_stylesheet($theme, $info, $paths, $palette, $style);
+    $base_file = backdrop_basename($file);
+    $css[] = $paths['target'] . $base_file;
+    _color_save_stylesheet($paths['target'] . $base_file, $style, $paths);
+
+    unset($palette['base']);
+
+    // Now save the new theme setting to config
+    $config_color_set = array(
+      'theme' => 'bartik',
+      'main_menu_tabs' => 'rounded-tabs',
+      'op' => 'Save theme settings',
+      'color' => array ( 
+        'palette' => $palette,
+        'stylesheets' => array (
+          0 => $paths['target'] . 'colors.css',
+        ),
+        'files' => array (
+          0 => $paths['target'] . 'colors.css',
+        ),
+      ),
+    );
+
+    $config = config('bartik.settings');
+    $config->setData($config_color_set);
+    $config->save();
+  }
+}
+
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
