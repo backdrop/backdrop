@@ -1749,6 +1749,40 @@ function system_file_system_settings() {
     );
   }
 
+  $form['transliteration'] = array(
+    '#type' => 'item',
+    '#title' => t('Transliteration'),
+    '#value' => '',
+  );
+  $form['transliteration']['file_transliterate_uploads'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate file names during upload'),
+    '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility. If you enable this setting later, you may want to <a href="@transliteration">retroactively transliterate existing file names</a>.', array('@transliteration' => url('admin/config/media/file-system/transliteration'))),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads'),
+  );
+  $form['transliteration']['file_transliterate_uploads_display_name'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate the displayed file name'),
+    '#description' => t('Enable to also convert the file name that is displayed within the site (for example, in link text).'),
+    '#default_value' => config_get('system.core', 'file_transliterate_uploads_display_name'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['transliteration']['file_transliterate_lowercase'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Lowercase transliterated file names'),
+    '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
+    '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -1767,6 +1801,9 @@ function system_file_system_settings_submit($form, &$form_state) {
   $config->set('file_private_path', $form_state['values']['file_private_path']);
   $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
   $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
+  $config->set('file_transliterate_uploads', $form_state['values']['file_transliterate_uploads']);
+  $config->set('file_transliterate_uploads_display_name', $form_state['values']['file_transliterate_uploads_display_name']);
+  $config->set('file_transliterate_lowercase', $form_state['values']['file_transliterate_lowercase']);
   $config->save();
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));
@@ -2417,4 +2454,209 @@ function system_date_time_lookup($form, &$form_state) {
   $parent_id = $element['#wrapper_attributes']['id'];
   $commands[] = ajax_command_html("#$parent_id .field-suffix", '<span>' . $element['#field_suffix'] . '</span>');
   return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Form builder function; generates retroactive transliteration confirm form.
+ *
+ * @see system_transliteration_retroactive_submit()
+ * @ingroup forms
+ */
+function system_transliteration_retroactive() {
+  $query = system_transliteration_file_query();
+  $count = $query->countQuery()->execute()->fetchColumn();
+  if (!$count) {
+    if (empty($_POST)) {
+      backdrop_set_message(t('Transliteration is not required.'));
+    }
+    $form['description']['#markup'] = t('There are currently no file names containing non-ASCII characters. Return to the !file_system page.', array('!file_system' => l('File system', 'admin/config/media/file-system')));
+    return $form;
+  }
+
+  if (!config_get('system.core', 'file_transliterate_uploads')) {
+    backdrop_set_message(t('File transliteration is not yet enabled.'), 'warning');
+    $form['description']['#markup'] = t('You must enable the "@option" on the !file_system page to use this form.', array('@option' => t('Transliterate file names during upload'), '!file_system' => l('File system', 'admin/config/media/file-system')));
+    return $form;
+  }
+
+  $form['#redirect'] = 'admin/config/media/file-system/settings';
+  $question = t('Are you sure you want to transliterate existing file names?');
+
+  // Generate a sample list.
+  $rows = array();
+  $header = array(
+    t('Original file name'),
+    t('Transliterated file name')
+  );
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  foreach ($query->range(0, 10)->execute() as $file) {
+    $filename = backdrop_basename($file->uri);
+    $rows[] = array(l($filename, file_create_url($file->uri)), transliteration_clean_filename($filename));
+  }
+  $description = '<p><strong>' . t('The database currently lists @x_filenames containing non-ASCII characters.', array('@x_filenames' => format_plural($count, '1 file name', '@count file names'))) . '</strong><br />';
+  $description .= t('This count might be inaccurate, though, since some files may not need to be renamed. For example, off-site files will never be changed.') . '</p>';
+  $description .= theme('table', array('header' => $header, 'sticky' => FALSE, 'rows' => $rows));
+  if ($count > 10) {
+    $description .= '<p>' . t('Note: table shows only the first 10 entries.') . '</p>';
+  }
+  $description .= '<p>' . t('<strong>WARNING:</strong> if you have manually entered image or file paths in text fields (for example, text areas or WYSIWYG editors), renaming the files will break these references. Since there is currently no automated way to also fix referenced files in textual contents, it is a very good idea to backup the database and %files directory beforehand. Modules accessing files using their internal system ids are not affected.', array('%files' => backdrop_realpath(file_default_scheme() . '://'))) . '</p>';
+  $description .= '<p>' . t('This action cannot be undone.') . '</p>';
+
+  return confirm_form($form, $question, 'admin/config/media/file-system/settings', $description, t('Transliterate'));
+}
+
+/**
+ * Form submit function; retroactively transliterates existing file names.
+ *
+ * @see system_transliteration_retroactive()
+ */
+function system_transliteration_retroactive_submit($form, &$form_state) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $count = 0;
+  $errors = array();
+  $result = system_transliteration_file_query()->execute();
+
+  while ($row = $result->fetchAssoc()) {
+    $file = new File($row);
+    $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
+    $scheme = file_uri_scheme($file->uri);
+
+    // Missing implementation.
+    if (!$wrapper) {
+      $errors[] = file_uri_target($file->uri);
+      continue;
+    }
+
+    // Skip non-writable stream wrappers.
+    $writeable_stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE);
+    if (!isset($writeable_stream_wrappers[$scheme])) {
+      continue;
+    }
+
+    // Missing file.
+    if (!file_exists($wrapper->realpath())) {
+      $errors[] = file_uri_target($file->uri);
+      continue;
+    }
+
+    // Sanitize file name.
+    $filename = transliteration_clean_filename(backdrop_basename($file->uri));
+
+    // Build destination URI.
+    $destination = file_stream_wrapper_uri_normalize(backdrop_dirname($file->uri) . '/' . $filename);
+    $destination = file_destination($destination, FILE_EXISTS_RENAME);
+
+    // Rename and update the file record accordingly.
+    if ($wrapper->rename($file->uri, $destination)) {
+      $file->uri = $destination;
+      // Don't use file_save() as it modifies the timestamp.
+      backdrop_write_record('file_managed', $file, 'fid');
+      // Inform modules that the file has been updated.
+      module_invoke_all('file_update', $file);
+      $count++;
+    }
+    else {
+      $errors[] = file_uri_target($file->uri);
+    }
+  }
+
+  if ($errors) {
+    $message = t('Not all file names could be converted. The following files could not be accessed and have been ignored:');
+    $message .= theme('item_list', array('items' => $errors));
+    backdrop_set_message($message, 'error');
+  }
+  else {
+    backdrop_set_message(format_plural($count, 'One file name has been successfully transliterated.', '@count file names have been successfully transliterated.'));
+  }
+
+  backdrop_flush_all_caches();
+}
+
+/**
+ * Builds a query that returns all file names from the database containing non-ASCII characters.
+ *
+ * @return
+ *   SelectQuery
+ */
+function system_transliteration_file_query() {
+  $operator = 'NOT REGEXP';
+  if (config_get('system.core', 'file_transliterate_lowercase')) {
+    $operator .= ' BINARY';
+  }
+  $regex = '/[a-z0-9_.-]+$';
+
+  return db_select('file_managed')
+    ->fields('file_managed')
+    ->condition('uri', $regex, $operator);
+}
+
+/**
+ * Ajax callback; Returns the transliterated version for a given string.
+ *
+ * This callback takes an array of arguments from $_GET and passes them to
+ * system_transliterate_machine_name().
+ *
+ * @param $string
+ *   The string to be transliterated.
+ */
+function system_transliterate_ajax($string = '') {
+  backdrop_add_http_header('Content-Type', 'text/plain');
+  $string = system_transliterate_machine_name($string, $_GET);
+
+  print $string;
+  backdrop_exit();
+}
+
+/**
+ * Wrapper around transliteration_get() that handles common clean up on strings.
+ *
+ * @param string $string
+ *   The string to be transliterated.
+ * @param $options
+ *   An array of options for further cleanup. This array includes:
+ *   - langcode: The language code of the source string.
+ *   - replace: The character with which to replace unknown characters in the
+ *     string. Defaults to '_'.
+ *   - replace_pattern: A pattern for replacing unknown characters with the
+ *     "replace" value.
+ *   - maxlength: The maximum allowed length of the returned string.
+ * @return string
+ *   The transliterated and cleaned up string.
+ */
+function system_transliterate_machine_name($string, $options) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $defaults = array(
+    'langcode' => $GLOBALS['language']->langcode,
+    'replace' => '_',
+    'replace_pattern' => NULL,
+    'maxlength' => NULL,
+  );
+  $options = array_intersect_key($options, $defaults) + $defaults;
+
+  // Build the default replacement pattern on the given "replace" property.
+  if (!isset($options['replace_pattern'])) {
+    $options['replace_pattern'] = '[^0-9A-Za-z' . $options['replace'] . ']+';
+  }
+
+  $replace = $options['replace'];
+  $string = transliteration_get($string, $replace, $options['langcode']);
+
+  // Remove remaining unsafe characters.
+  if ($options['replace_pattern']) {
+    $string = preg_replace('/' . $options['replace_pattern'] . '/', $options['replace'], $string);
+  }
+  // Replace whitespace.
+  $string = str_replace(' ', $replace, $string);
+  // Remove leading and trailing whitespace/unknown characters.
+  $string = trim($string, $replace);
+  // Collapse multiple consecutive replacement characters.
+  $replace_regex = strlen($replace) ? "([$replace])[$replace]+|" : '';
+  $string = preg_replace("/{$replace_regex}(_)_+|(\\.)\\.+|(-)-+/", '$1$2$3$4$5', $string);
+
+  // Set maxlength.
+  if ($options['maxlength']) {
+    $string = substr($string, 0, $options['maxlength']);
+  }
+
+  return $string;
 }
