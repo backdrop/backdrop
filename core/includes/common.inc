@@ -2983,11 +2983,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  * into script execution a call such as set_time_limit(20) is made, the
  * script will run for a total of 45 seconds before timing out.
  *
- * It also means that it is possible to decrease the total time limit if
- * the sum of the new time limit and the current time spent running the
- * script is inferior to the original time limit. It is inherent to the way
- * set_time_limit() works, it should rather be called with an appropriate
- * value every time you need to allocate a certain amount of time
+ * If the current time limit is not unlimited it is possible to decrease the
+ * total time limit if the sum of the new time limit and the current time spent
+ * running the script is inferior to the original time limit. It is inherent to
+ * the way set_time_limit() works, it should rather be called with an
+ * appropriate value every time you need to allocate a certain amount of time
  * to execute a task than only once at the beginning of the script.
  *
  * Before calling set_time_limit(), we check if this function is available
@@ -3004,7 +3004,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  */
 function backdrop_set_time_limit($time_limit) {
   if (function_exists('set_time_limit')) {
-    @set_time_limit($time_limit);
+    $current = ini_get('max_execution_time');
+    // Do not set time limit if it is currently unlimited.
+    if ($current != 0) {
+      @set_time_limit($time_limit);
+    }
   }
 }
 
@@ -5695,12 +5699,12 @@ function backdrop_cron_run() {
       // Do not run if queue wants to skip.
       continue;
     }
-    $function = $info['worker callback'];
+    $callback = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
     $queue = BackdropQueue::get($queue_name);
     while (time() < $end && ($item = $queue->claimItem())) {
       try {
-        $function($item->data);
+        call_user_func($callback, $item->data);
         $queue->deleteItem($item);
       }
       catch (Exception $e) {
@@ -8084,11 +8088,17 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * Parses a dependency for comparison by backdrop_check_incompatibility().
  *
  * @param $dependency
- *   A dependency string, for example 'foo (>=1.x-4.5-beta5, 3.x)'.
+ *   A dependency string, which specifies a module dependency, and optionally
+ *   the project it comes from and versions that are supported. Supported
+ *   formats include:
+ *   - 'module'
+ *   - 'project:module'
+ *   - 'project:module (>=version, version)'
  *
  * @return
  *   An associative array with three keys:
- *   - 'name' includes the name of the thing to depend on (e.g. 'foo').
+ *   - 'project' includes the name of the project containing the module.
+ *   - 'name' includes the name of the module to depend on.
  *   - 'original_version' contains the original version string (which can be
  *     used in the UI for reporting incompatibilities).
  *   - 'versions' is a list of associative arrays, each containing the keys
@@ -8099,6 +8109,12 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * @see backdrop_check_incompatibility()
  */
 function backdrop_parse_dependency($dependency) {
+  $value = array();
+  // Split out the optional project name.
+  if (strpos($dependency, ':')) {
+    list($project_name, $dependency) = explode(':', $dependency);
+    $value['project'] = $project_name;
+  }
   // We use named subpatterns and support every op that version_compare
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
@@ -8107,7 +8123,6 @@ function backdrop_parse_dependency($dependency) {
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
-  $value = array();
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {
