@@ -74,7 +74,6 @@ function user_theme() {
   return array(
     'user_picture' => array(
       'variables' => array('account' => NULL),
-      'template' => 'templates/user-picture',
     ) + $base,
     'user_profile' => array(
       'render element' => 'elements',
