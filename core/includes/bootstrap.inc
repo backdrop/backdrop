@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions that need to be loaded on every Backdrop request.
@@ -2068,7 +2067,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  * @see theme_status_messages()
  */
 function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
-  if ($message) {
+  if ($message || $message === '0' || $message === 0) {
     if (!isset($_SESSION['messages'][$type])) {
       $_SESSION['messages'][$type] = array();
     }

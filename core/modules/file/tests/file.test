@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for file.module.
@@ -957,6 +956,34 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
 
     // Remove our file field.
     field_delete_field($field_name);
+  }
+
+  /**
+   * Tests default display of File Field.
+   */
+  function testDefaultFileFieldDisplay() {
+    $field_name = strtolower($this->randomName());
+    $type_name = 'post';
+    $field_settings = array(
+      'display_field' => '1',
+      'display_default' => '0',
+    );
+    $instance_settings = array(
+      'description_field' => '1',
+    );
+    $widget_settings = array();
+    $this->createFileField($field_name, $type_name, $field_settings, $instance_settings, $widget_settings);
+    $field = field_info_field($field_name);
+    $instance = field_info_instance('node', $field_name, $type_name);
+
+    $test_file = $this->getTestFile('text');
+
+    // Create a new node with the uploaded file.
+    $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
+
+    $this->backdropGet('node/' . $nid . '/edit');
+    $this->assertFieldByXPath('//input[@type="checkbox" and @name="' . $field_name . '[und][0][display]"]', NULL, 'Default file display checkbox field exists.');
+    $this->assertFieldByXPath('//input[@type="checkbox" and @name="' . $field_name . '[und][0][display]" and not(@checked)]', NULL, 'Default file display is off.');
   }
 }
 
