@@ -15,6 +15,7 @@ class EntityLayoutContext extends LayoutContext {
     parent::__construct($plugin_name, $config);
 
     $this->entity_type = $plugin_name;
+    $this->aliases = array('entity');
   }
 
   function type() {

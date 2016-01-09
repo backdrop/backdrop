@@ -17,6 +17,17 @@ abstract class LayoutContext {
   var $plugin;
 
   /**
+   * An array of plugin names by which this context may also be called.
+   *
+   * For example the "node" plugin is an alias of the "entity" plugin.
+   *
+   * @var array
+   *
+   * @see EntityLayoutContext
+   */
+  var $aliases = array();
+
+  /**
    * Indicator as to whether this context is required and cannot be removed.
    *
    * Required contexts typically are those provided by a menu path wildcard.
@@ -138,6 +149,27 @@ abstract class LayoutContext {
    */
   function setData($data) {
     $this->data = $data;
+  }
+
+  /**
+   * Check if this context matches a plugin name.
+   *
+   * This helps identify contexts which have aliases, such as a "node" context
+   * which is also considered an "entity" context.
+   *
+   * For example:
+   * @code
+   * $context = layout_create_context('node');
+   *
+   * var_dump($context->isA('node')); // TRUE.
+   * var_dump($context->isA('entity')); // TRUE.
+   * var_dump($context->isA('user')); // FALSE.
+   * @endcode
+   *
+   * @param $plugin
+   */
+  function isA($plugin) {
+    return $plugin === $this->plugin || in_array($plugin, $this->aliases);
   }
 }
 

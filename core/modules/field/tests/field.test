@@ -14,7 +14,7 @@ class FieldTestCase extends BackdropWebTestCase {
    *
    * @param $cardinality
    *   Number of values to generate.
-   * @return
+   * @return array
    *  An array of random values, in the format expected for field values.
    */
   function _generateTestFieldValues($cardinality) {
@@ -54,6 +54,10 @@ class FieldTestCase extends BackdropWebTestCase {
 }
 
 class FieldAttachTestCase extends FieldTestCase {
+  protected $field_name;
+  protected $field;
+  protected $instance;
+
   function setUp() {
     // Since this is a base class for many test cases, support the same
     // flexibility that BackdropWebTestCase::setUp() has for the modules to be
@@ -133,6 +137,8 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
     // TODO : test empty values filtering and "compression" (store consecutive deltas).
 
     // Preparation: create three revisions and store them in $revision array.
+    $current_revision = NULL;
+    $revision = array();
     for ($revision_id = 0; $revision_id < 3; $revision_id++) {
       $revision[$revision_id] = field_test_create_stub_entity(0, $revision_id, $this->instance['bundle']);
       // Note: we try to insert one extra value.
@@ -200,6 +206,8 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
       2 => array(1),
       3 => array(2),
     );
+    $field_names = array();
+    $entities = array();
     for ($i = 1; $i <= 3; $i++) {
       $field_names[$i] = 'field_' . $i;
       $field = array('field_name' => $field_names[$i], 'type' => 'test_field');
@@ -221,6 +229,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
     }
 
     // Create one test entity per bundle, with random values.
+    $values = array();
     foreach ($bundles as $index => $bundle) {
       $entities[$index] = field_test_create_stub_entity($index, $index, $bundle);
       $entity = clone($entities[$index]);
@@ -317,7 +326,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
       'cardinality' => 4,
       'storage' => array('type' => 'field_test_storage'),
     );
-    $field = field_create_field($field);
+    field_create_field($field);
     $instance = array(
       'field_name' => $field_name,
       'entity_type' => 'test_entity',
@@ -326,7 +335,6 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
     field_create_instance($instance);
 
     $field = field_info_field($instance['field_name']);
-    $instance = field_info_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']);
 
     // The storage details are indexed by a storage engine type.
     $this->assertTrue(array_key_exists('backdrop_variables', $field['storage']['details']), 'The storage type is Backdrop variables.');
@@ -469,13 +477,6 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
 
     $this->assertFalse(field_has_data($field), "No data should be detected.");
 
-    $instance = array(
-      'field_name' => $field_name,
-      'entity_type' => 'test_entity',
-      'bundle' => 'test_bundle'
-    );
-    $instance = field_create_instance($instance);
-    $table = _field_sql_storage_tablename($field);
     $revision_table = _field_sql_storage_revision_tablename($field);
 
     $columns = array('entity_type', 'entity_id', 'revision_id', 'delta', 'language', $field_name . '_value');
@@ -495,15 +496,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
 
     $this->assertFalse(field_has_data($field), "No data should be detected.");
 
-    $instance = array(
-      'field_name' => $field_name,
-      'entity_type' => 'test_entity',
-      'bundle' => 'test_bundle'
-    );
-    $instance = field_create_instance($instance);
     $table = _field_sql_storage_tablename($field);
-    $revision_table = _field_sql_storage_revision_tablename($field);
-
     $columns = array('entity_type', 'entity_id', 'revision_id', 'delta', 'language', $field_name . '_value');
 
     $eid = 1;
@@ -677,6 +670,10 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
  * Unit test class for non-storage related field_attach_* functions.
  */
 class FieldAttachOtherTestCase extends FieldAttachTestCase {
+  protected $field_name_2;
+  protected $field_2;
+  protected $instance_2;
+
   /**
    * Test field_attach_view() and field_attach_prepare_view().
    */
@@ -854,15 +851,15 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     // hook_field_formatter_prepare_view().
     field_test_create_bundle('test_bundle_2');
     $formatter_setting = $this->randomName();
-    $this->instance2 = $this->instance;
-    $this->instance2['bundle'] = 'test_bundle_2';
-    $this->instance2['display']['full'] = array(
+    $this->instance_2 = $this->instance;
+    $this->instance_2['bundle'] = 'test_bundle_2';
+    $this->instance_2['display']['full'] = array(
       'type' => 'field_test_with_prepare_view',
       'settings' => array(
         'test_formatter_setting_additional' => $formatter_setting,
       )
     );
-    field_create_instance($this->instance2);
+    field_create_instance($this->instance_2);
 
     // Create one entity in each bundle.
     $entity1_init = field_test_create_stub_entity(1, 1, 'test_bundle');
@@ -935,7 +932,6 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     // Load a single field, and check that no cache entry is present.
     $entity = clone($entity_init);
     field_attach_load($entity_type, array($entity->ftid => $entity), FIELD_LOAD_CURRENT, array('field_name' => $this->field_name));
-    $cache = cache('field')->get($cid);
     $this->assertFalse(cache('field')->get($cid), 'Cached: no cache entry on loading a single field');
 
     // Load, and check that a cache entry is present with the expected values.
@@ -963,7 +959,6 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     $entity = clone($entity_init);
     $entity->{$this->field_name}[$langcode] = $values;
     field_attach_update($entity_type, $entity);
-    $cache = cache('field')->get($cid);
     $this->assertFalse(cache('field')->get($cid), 'Cached: no cache entry on new revision creation');
 
     // Load, and check that a cache entry is present with the expected values.
@@ -1007,6 +1002,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     $entity->{$this->field_name_2}[$langcode] = $values_2;
 
     // Validate all fields.
+    $errors = array();
     try {
       field_attach_validate($entity_type, $entity);
     }
@@ -1446,6 +1442,13 @@ class FieldInfoTestCase extends FieldTestCase {
 }
 
 class FieldFormTestCase extends FieldTestCase {
+  protected $field;
+  protected $field_name;
+  protected $instance;
+  protected $field_single;
+  protected $field_multiple;
+  protected $field_unlimited;
+
   function setUp() {
     parent::setUp('field_test');
 
@@ -1964,6 +1967,16 @@ class FieldFormTestCase extends FieldTestCase {
 }
 
 class FieldDisplayAPITestCase extends FieldTestCase {
+  protected $field_name;
+  protected $field;
+  protected $instance;
+
+  protected $cardinality;
+  protected $label;
+  protected $is_new;
+  protected $values;
+  protected $entity;
+
   function setUp() {
     parent::setUp('field_test');
 
@@ -2103,7 +2116,6 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       ),
     );
     $setting = $display['settings']['test_formatter_setting_multiple'];
-    $array = array();
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, $display);
@@ -2119,7 +2131,6 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       ),
     );
     $setting = $display['settings']['test_formatter_setting_additional'];
-    $array = array();
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, $display);
@@ -2150,6 +2161,10 @@ class FieldDisplayAPITestCase extends FieldTestCase {
 }
 
 class FieldCrudTestCase extends FieldTestCase {
+  protected $field_name;
+  protected $field;
+  protected $instance;
+
   function setUp() {
     // field_update_field() tests use number.module
     parent::setUp('field_test', 'number');
@@ -2270,7 +2285,7 @@ class FieldCrudTestCase extends FieldTestCase {
         'type' => 'test_field',
         'field_name' => 'ftvid',
       );
-      $field = field_create_field($field_definition);
+      field_create_field($field_definition);
       $this->fail(t('Cannot create a field bearing the name of an entity key.'));
     }
     catch (FieldException $e) {
@@ -2291,7 +2306,7 @@ class FieldCrudTestCase extends FieldTestCase {
 
     // Try to create the field.
     try {
-      $field = field_create_field($field_definition);
+      field_create_field($field_definition);
       $this->assertTrue(FALSE, 'Field creation (correctly) fails.');
     }
     catch (Exception $e) {
@@ -2327,11 +2342,11 @@ class FieldCrudTestCase extends FieldTestCase {
     // Create two fields (so we can test that only one is deleted).
     $this->field = array('field_name' => 'field_1', 'type' => 'test_field');
     field_create_field($this->field);
-    $this->another_field = array('field_name' => 'field_2', 'type' => 'test_field');
-    field_create_field($this->another_field);
+    $another_field = array('field_name' => 'field_2', 'type' => 'test_field');
+    field_create_field($another_field);
 
     // Create instances for each.
-    $this->instance_definition = array(
+    $instance_definition = array(
       'field_name' => $this->field['field_name'],
       'entity_type' => 'test_entity',
       'bundle' => 'test_bundle',
@@ -2339,10 +2354,10 @@ class FieldCrudTestCase extends FieldTestCase {
         'type' => 'test_field_widget',
       ),
     );
-    field_create_instance($this->instance_definition);
-    $this->another_instance_definition = $this->instance_definition;
-    $this->another_instance_definition['field_name'] = $this->another_field['field_name'];
-    field_create_instance($this->another_instance_definition);
+    field_create_instance($instance_definition);
+    $another_instance_definition = $instance_definition;
+    $another_instance_definition['field_name'] = $another_field['field_name'];
+    field_create_instance($another_instance_definition);
 
     // Test that the first field is not deleted, and then delete it.
     $field = field_read_field($this->field['field_name'], array('include_deleted' => TRUE));
@@ -2354,15 +2369,15 @@ class FieldCrudTestCase extends FieldTestCase {
     $this->assertFalse($field, 'A deleted field is completely purged when it has no data.');
 
     // The instances of that field should be purged entirely as well.
-    $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle'], array('include_deleted' => TRUE));
+    $instance = field_read_instance('test_entity', $instance_definition['field_name'], $instance_definition['bundle'], array('include_deleted' => TRUE));
     $this->assertFalse($instance, 'An instance for a deleted field is completely purged when it has no data.');
 
     // Re-create the field and attempt again with data in the fields.
     field_create_field($this->field);
-    field_create_instance($this->instance_definition);
+    field_create_instance($instance_definition);
 
     // Add an entry.
-    $entity = field_test_create_stub_entity(1, 1, $this->instance_definition['bundle']);
+    $entity = field_test_create_stub_entity(1, 1, $instance_definition['bundle']);
     $entity->{$this->field['field_name']}[LANGUAGE_NONE][0]['value'] = 1;
     field_attach_insert('test_entity', $entity);
 
@@ -2376,7 +2391,7 @@ class FieldCrudTestCase extends FieldTestCase {
 
     // Make sure that this field's instance is marked as deleted when it is
     // specifically loaded.
-    $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle'], array('include_deleted' => TRUE));
+    $instance = field_read_instance('test_entity', $instance_definition['field_name'], $instance_definition['bundle'], array('include_deleted' => TRUE));
     $this->assertTrue(!empty($instance['deleted']), 'An instance for a deleted field is marked for deletion.');
 
     // Try to load the field normally and make sure it does not show up.
@@ -2384,13 +2399,13 @@ class FieldCrudTestCase extends FieldTestCase {
     $this->assertTrue(empty($field), 'A deleted field is not loaded by default.');
 
     // Try to load the instance normally and make sure it does not show up.
-    $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
+    $instance = field_read_instance('test_entity', $instance_definition['field_name'], $instance_definition['bundle']);
     $this->assertTrue(empty($instance), 'An instance for a deleted field is not loaded by default.');
 
     // Make sure the other field (and its field instance) are not deleted.
-    $another_field = field_read_field($this->another_field['field_name']);
+    $another_field = field_read_field($another_field['field_name']);
     $this->assertTrue(!empty($another_field) && empty($another_field['deleted']), 'A non-deleted field is not marked for deletion.');
-    $another_instance = field_read_instance('test_entity', $this->another_instance_definition['field_name'], $this->another_instance_definition['bundle']);
+    $another_instance = field_read_instance('test_entity', $another_instance_definition['field_name'], $another_instance_definition['bundle']);
     $this->assertTrue(!empty($another_instance) && empty($another_instance['deleted']), 'An instance of a non-deleted field is not marked for deletion.');
 
     // Run a purge to delete the piece of content and check if the field is
@@ -2414,7 +2429,7 @@ class FieldCrudTestCase extends FieldTestCase {
 
   function testUpdateFieldType() {
     $field = array('field_name' => 'field_type', 'type' => 'number_decimal');
-    $field = field_create_field($field);
+    field_create_field($field);
 
     $test_field = array('field_name' => 'field_type', 'type' => 'number_integer');
     try {
@@ -2561,6 +2576,7 @@ class FieldCrudTestCase extends FieldTestCase {
 
 class FieldInstanceCrudTestCase extends FieldTestCase {
   protected $field;
+  protected $instance_definition;
 
   function setUp() {
     parent::setUp('field_test');
@@ -2747,9 +2763,9 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     // Create two instances for the same field so we can test that only one
     // is deleted.
     field_create_instance($this->instance_definition);
-    $this->another_instance_definition = $this->instance_definition;
-    $this->another_instance_definition['bundle'] .= '_another_bundle';
-    $instance = field_create_instance($this->another_instance_definition);
+    $another_instance_definition = $this->instance_definition;
+    $another_instance_definition['bundle'] .= '_another_bundle';
+    field_create_instance($another_instance_definition);
 
     // Test that the first instance is not deleted, and then delete it.
     $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle'], array('include_deleted' => TRUE));
@@ -2766,7 +2782,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     $this->assertTrue(empty($instance), 'A deleted field instance is not loaded by default.');
 
     // Make sure the other field instance is not deleted.
-    $another_instance = field_read_instance('test_entity', $this->another_instance_definition['field_name'], $this->another_instance_definition['bundle']);
+    $another_instance = field_read_instance('test_entity', $another_instance_definition['field_name'], $another_instance_definition['bundle']);
     $this->assertTrue(!empty($another_instance) && empty($another_instance['deleted']), 'A non-deleted field instance is not marked for deletion.');
 
     // Make sure the field is deleted when its last instance is deleted.
@@ -2783,6 +2799,11 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
  * that only the correct values are returned by field_available_languages().
  */
 class FieldTranslationsTestCase extends FieldTestCase {
+  protected $field_name;
+  protected $field;
+  protected $instance;
+  protected $entity_type;
+
   function setUp() {
     parent::setUp('locale', 'field_test');
 
@@ -2899,6 +2920,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     $entity_type = 'test_entity';
     $entity_count = 5;
     $available_languages = field_available_languages($this->entity_type, $this->field);
+    $display_language = NULL;
 
     for ($id = 1; $id <= $entity_count; ++$id) {
       $entity = field_test_create_stub_entity($id, $id, $this->instance['bundle']);
@@ -3127,7 +3149,12 @@ class FieldTranslationsTestCase extends FieldTestCase {
  * Unit test class for field bulk delete and batch purge functionality.
  */
 class FieldBulkDeleteTestCase extends FieldTestCase {
-  protected $field;
+  protected $entity_type;
+  protected $fields;
+  protected $instances;
+  protected $bundles;
+  protected $entities;
+  protected $entities_by_bundles;
 
   /**
    * Convenience function for Field API tests.
@@ -3144,7 +3171,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
    * @param $field_name
    *   Optional; a field name whose data should be copied from
    *   $entities into the returned stub entities.
-   * @return
+   * @return array
    *   An array of stub entities corresponding to $entities.
    */
   function _generateStubEntities($entity_type, $entities, $field_name = NULL) {
@@ -3412,3 +3439,125 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
   }
 }
 
+/**
+ * Test the field blocks and their display of different formatters.
+ */
+class FieldBlockTestCase extends FieldTestCase {
+  protected $profile = 'testing';
+  protected $content_type;
+  protected $field_name;
+  protected $field;
+  protected $instance;
+  protected $admin_user;
+  protected $node;
+
+  function setUp() {
+    parent::setUp(array('node', 'field', 'field_test'));
+
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer nodes', 'administer layouts'));
+
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $this->field = field_create_field(array(
+      'field_name' => $this->field_name,
+      'type' => 'test_field',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ));
+    $this->instance = field_create_instance(array(
+      'label' => $this->randomName(),
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    ));
+
+    // Create a dummy node.
+    $this->node = $this->backdropCreateNode(array(
+      'type' => 'post',
+      $this->field_name => array(LANGUAGE_NONE => array(
+        array('value' => 1),
+        array('value' => 2),
+      )),
+    ));
+  }
+
+  /**
+   * Check special conditions around the main content block.
+   */
+  function testFieldBlock() {
+    $this->backdropLogin($this->admin_user);
+
+    // Override the node/% path to test the availability of the field blocks.
+    $layout_path = 'node/%';
+    $edit = array(
+      'title' => 'Post layout',
+      'name' => 'node_post',
+      'layout' => 'two_column',
+      'path' => $layout_path,
+    );
+    // Save directly without checking contexts.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add the field block to the right sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Field: @label (@name)', array('@label' => $this->instance['label'], '@name' => $this->field_name)));
+
+    $block_settings = array(
+      'formatter' => 'field_test_default',
+      'formatter_settings[test_formatter_setting]' => 'My custom formatter string',
+    );
+
+    $this->backdropPost(NULL, $block_settings, t('Add block'));
+
+    // Check that the formatter summary is displayed.
+    $this->assertText('test_formatter_setting: My custom formatter string');
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[@id="layout-edit-main"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check the block contents display with the configured formatter.
+    $this->backdropGet('node/' . $this->node->nid);
+    $block_class = backdrop_clean_css_identifier('block-field-node-' . $this->field_name);
+    $frontend_block = $this->xpath('(//*[contains(@class, :region)]//*[contains(@class, :block)])[last()]', array(
+      ':region' => 'l-sidebar',
+      ':block' => $block_class,
+    ));
+
+    // The ".//" in these selectors means "any element under the starting item".
+    $block_title = ($frontend_block[0]->xpath('.//h2'));
+    $field_items = ($frontend_block[0]->xpath('.//*[contains(@class, "field-items")]/*[contains(@class, "field-item")]'));
+    $this->assertIdentical((string) $block_title[0], $this->instance['label'], 'Block title displayed as field label.');
+    $this->assertIdentical((string) $field_items[0], 'My custom formatter string|1', 'First item displayed with correct formatter settings.');
+    $this->assertIdentical((string) $field_items[1], 'My custom formatter string|2', 'Second item displayed with correct formatter settings.');
+
+    // Edit the block and change the title display settings.
+    $this->backdropGet('admin/structure/layouts/manage/node_post/configure-block/editor/' . $block_uuid);
+    $block_settings = array(
+      'title_display' => 'none',
+      'label' => 'above',
+    );
+    $this->backdropPost(NULL, $block_settings, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check the block title settings are shown on the front-end.
+    $this->backdropGet('node/' . $this->node->nid);
+    $frontend_block = $this->xpath('(//*[contains(@class, :region)]//*[contains(@class, :block)])[last()]', array(
+      ':region' => 'l-sidebar',
+      ':block' => $block_class,
+    ));
+
+    // The ".//" in these selectors means "any element under the starting item".
+    $block_title = ($frontend_block[0]->xpath('.//h2'));
+    $field_label = ($frontend_block[0]->xpath('.//*[contains(@class, "field-label-above")]/*[contains(@class, "field-label")]'));
+    $this->assertIdentical(array(), $block_title, 'Block title not shown when set to "None".');
+    $this->assertTrue(strpos($field_label[0], $this->instance['label']) !== FALSE, 'Block label shown above the field content in the block.');
+  }
+}
