@@ -5784,8 +5784,8 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   $searchdir = array('core/' . $directory);
 
   // For the case of searching for profiles, scan top-level directories.
-  // Always search for contributed and custom extensions in top-level
-  // directories as well as sites/all/* directories. If the same extension is
+  // Always search for contributed and custom extensions in the profile
+  // directories as well as in the root directories. If the same extension is
   // located in both directories, then the latter wins for legacy/historical
   // reasons.
   $profiles = array();
