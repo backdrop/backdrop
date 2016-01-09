@@ -2662,9 +2662,10 @@ function system_update_1046() {
     $config->set('file_transliterate_uploads', $contrib_config->get('file_uploads'));
     $config->set('file_transliterate_uploads_display_name', $contrib_config->get('file_uploads_display_name'));
 
-    module_disable(array('transliteration'), FALSE);
     $path = backdrop_get_path('module', 'transliteration');
-    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can uninstall and remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the transliteration module in the system table.
+    db_query("DELETE FROM {system} WHERE name = 'transliteration' AND type = 'module'");
   }
   else {
     // Migrate variables to config.
@@ -2679,18 +2680,10 @@ function system_update_1046() {
 
     // Check for files that need to be fixed.
     module_load_include('inc', 'system', 'system.admin');
-
-    if (!$query = system_transliteration_file_query()) {
-      // Database not supported.
-      return;
-    }
-    if (!$query->countQuery()->execute()->fetchColumn()) {
-      // Don't bother if no files need to be fixed.
-      return;
-    }
-    return t('Transliteration has been installed. <a href="@transliteration-url">Fix existing file names</a>.', array('@transliteration-url' => url('admin/config/media/file-system/transliteration')));
   }
   $config->save();
+
+  return t('Transliteration has been merged into core. <a href="@transliteration-url">Fix existing file names</a>.', array('@transliteration-url' => url('admin/config/media/file-system/transliteration')));
 }
 
 /**

@@ -730,11 +730,6 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
-  $items['admin/config/media/file-system/settings'] = array(
-    'title' => 'Settings',
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
   $items['admin/config/media/file-system/transliteration'] = array(
     'title' => 'Transliteration',
     'description' => 'Convert existing file names to US-ASCII.',
@@ -742,8 +737,7 @@ function system_menu() {
     'page arguments' => array('system_transliteration_retroactive'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
-    'weight' => 10,
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/config/media/image-toolkit'] = array(
     'title' => 'Image toolkit',
@@ -1023,9 +1017,9 @@ function system_menu() {
   );
 
   // Machine names transliteration.
-  $items['machine_name/transliterate/%/%'] = array(
-    'page callback' => 'system_machine_name_transliterate',
-    'page arguments' => array(2, 3),
+  $items['system/transliterate/%'] = array(
+    'page callback' => 'system_transliterate_ajax',
+    'page arguments' => array(2),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
@@ -2080,8 +2074,8 @@ function system_filetransfer_info() {
 /**
  * Implements hook_file_presave().
  */
-function system_file_presave($file) {
-  // If an uploaded file had its name altered in transliteration_init() and if
+function system_file_presave(File $file) {
+  // If an uploaded file had its name altered in system_init() and if
   // the human-readable display name is not being transliterated, restore the
   // original version as the human-readable name before saving. (The
   // transliterated version will still be used in the file URI, which is the
@@ -2137,13 +2131,13 @@ function system_init() {
 
   // Sanitizes file names during upload.
   if (!empty($_FILES['files']) && config_get('system.core', 'file_transliterate_uploads')) {
-    // Figure out language, which is available in $_POST['language'] for node
+    // Figure out language, which is available in $_POST['langcode'] for node
     // forms.
     $langcode = NULL;
-    if (!empty($_POST['language'])) {
+    if (!empty($_POST['langcode'])) {
       $languages = language_list();
-      if (isset($languages[$_POST['language']])) {
-        $langcode = $_POST['language'];
+      if (isset($languages[$_POST['langcode']])) {
+        $langcode = $_POST['langcode'];
       }
     }
     foreach ($_FILES['files']['name'] as $field => $filename) {

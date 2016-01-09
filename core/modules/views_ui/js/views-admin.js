@@ -120,22 +120,29 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
    * Get the source form field value as altered by the passed-in parameters.
    */
   getTransliterated: function () {
-    var from = this.source.val();
+    var self = this;
     return $.ajax({
-      url: Backdrop.settings.basePath + "machine_name/transliterate/" + from.toLowerCase() + "/" + self.replace,
-      dataType: "json",
+      url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + self.source.val().toLowerCase()),
+      data: { replace: self.replace },
+      dataType: "text"
     });
   },
   
   /**
-   * Send a request for a translitared version of the source field value.
+   * Use the title for populating the fields, or send a request
+   * for a translitarated version of the source field value when needed.
    */
   _populate: function () {
-    var transliterated = this.getTransliterated();
-    var self = this;
-    transliterated.done(function(machine) {
-      self.target.val(machine + self.suffix);
-    });
+    if (this.replace == '') {
+      this.target.val(this.source.val() + this.suffix);
+    }
+    else {
+      var transliterated = this.getTransliterated();
+      var self = this;
+      transliterated.done(function(machine) {
+        self.target.val(machine + self.suffix);
+      });
+    }
   },
   
   /**

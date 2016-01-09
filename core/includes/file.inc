@@ -339,7 +339,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
  * @param $scheme
  *   If the stream was "public://target", "public" would be the scheme.
  *
- * @return
+ * @return BackdropLocalStreamWrapper|BackdropStreamWrapperInterface|FALSE
  *   Returns a new stream wrapper object appropriate for the given $scheme.
  *   For example, for the public scheme a stream wrapper object
  *   (BackdropPublicStreamWrapper).
@@ -576,7 +576,7 @@ EOF;
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
  *
- * @return
+ * @return array
  *   An array of file entities, indexed by fid.
  *
  * @see hook_file_load()

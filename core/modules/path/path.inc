@@ -96,7 +96,6 @@ function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
  *   The cleaned string.
  */
 function path_clean_string($string, array $options = array()) {
-  $config = config('path.settings');
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
@@ -107,10 +106,11 @@ function path_clean_string($string, array $options = array()) {
   // Generate and cache variables used in this function so that on the second
   // call to path_clean_string() we focus on processing.
   if (!isset($cache)) {
+    $config = config('path.settings');
     $cache = array(
       'separator' => $config->get('separator'),
       'strings' => array(),
-      'transliterate' => $config->get('transliterate') && module_exists('transliteration'),
+      'transliterate' => $config->get('transliterate'),
       'punctuation' => array(),
       'reduce_ascii' => (bool) $config->get('reduce_ascii'),
       'ignore_words_regex' => FALSE,
@@ -148,6 +148,9 @@ function path_clean_string($string, array $options = array()) {
         $cache['ignore_words_regex'] = '/' . $cache['ignore_words_regex'] . '/i';
       }
     }
+
+    // Remove to prevent any unintentional use of $config outside of the cache.
+    unset($config);
   }
 
   // Empty strings do not need any proccessing.
