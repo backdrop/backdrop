@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API for loading and interacting with Backdrop modules.
@@ -675,13 +674,17 @@ function module_hook($module, $hook) {
 /**
  * Determines which modules are implementing a hook.
  *
- * @param $hook
+ * Lazy-loaded include files specified with "group" via hook_hook_info() or
+ * hook_module_implements_alter() will be automatically included as part of
+ * module_implements(*, *, FALSE).
+ *
+ * @param string $hook
  *   The name of the hook (e.g. "help" or "menu").
- * @param $sort
+ * @param bool $sort
  *   By default, modules are ordered by weight and filename, settings this option
  *   to TRUE, module list will be ordered by module name.
  *
- * @return
+ * @return string[]|null
  *   An array with the names of the modules which are implementing this hook.
  *
  * @see module_implements_write_cache()
@@ -691,20 +694,30 @@ function module_implements($hook, $sort = FALSE) {
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['implementations'] = &backdrop_static(__FUNCTION__, array());
+    $backdrop_static_fast['verified'] = &backdrop_static(__FUNCTION__ . ':verified');
   }
   $implementations = &$backdrop_static_fast['implementations'];
+  $verified = &$backdrop_static_fast['verified'];
 
   // Fetch implementations from cache.
+  // This happens on the first call to module_implements(*, *, FALSE) during a
+  // request, but also when $implementations have been reset, e.g. after
+  // module_enable().
   if (empty($implementations) && function_exists('cache')) {
     if ($implementation_cache = cache('bootstrap')->get('module_implements')) {
       $implementations = $implementation_cache->data;
     }
+    // Forget all previously "verified" hooks, in case that $implementations
+    // were cleared via backdrop_static_reset('module_implements') instead of
+    // module_implements(*, *, TRUE).
+    $verified = array();
   }
 
   if (!isset($implementations[$hook])) {
     // The hook is not cached, so ensure that whether or not it has
     // implementations, that the cache is updated at the end of the request.
     $implementations['#write_cache'] = TRUE;
+    // Discover implementations for this hook.
     $hook_info = module_hook_info();
     $implementations[$hook] = array();
     $list = module_list(FALSE, FALSE, $sort);
@@ -716,13 +729,32 @@ function module_implements($hook, $sort = FALSE) {
         $implementations[$hook][$module] = $include_file ? $hook_info[$hook]['group'] : FALSE;
       }
     }
-    // Allow modules to change the weight of specific implementations but avoid
+    // Allow modules to change the weight of specific implementations, but avoid
     // an infinite loop.
     if ($hook != 'module_implements_alter') {
+      // Remember the implementations before hook_module_implements_alter().
+      $implementations_before = $implementations[$hook];
       backdrop_alter('module_implements', $implementations[$hook], $hook);
+
+      // Verify implementations that were added or modified.
+      foreach (array_diff_assoc($implementations[$hook], $implementations_before) as $module => $group) {
+        // If backdrop_alter('module_implements') changed or added a $group, the
+        // respective file needs to be included.
+        if ($group) {
+          module_load_include('inc', $module, "$module.$group");
+        }
+        // If a new implementation was added, verify that the function exists.
+        if (!function_exists($module . '_' . $hook)) {
+          unset($implementations[$hook][$module]);
+        }
+      }
     }
+    // Implementations for this hook are now "verified"
+    $verified[$hook] = TRUE;
   }
-  else {
+  elseif (!isset($verified[$hook])) {
+    // Implementations for this hook were in the cache, but they are not
+    // "verified" yet.
     foreach ($implementations[$hook] as $module => $group) {
       // If this hook implementation is stored in a lazy-loaded file, so include
       // that file first.
@@ -741,6 +773,7 @@ function module_implements($hook, $sort = FALSE) {
         $implementations['#write_cache'] = TRUE;
       }
     }
+    $verified[$hook] = TRUE;
   }
 
   return array_keys($implementations[$hook]);
@@ -826,6 +859,11 @@ function module_hook_info() {
  * @see module_implements()
  */
 function module_implements_write_cache() {
+  // The list of implementations includes vital modules only before full
+  // bootstrap, so do not write cache if we are not fully bootstrapped yet.
+  if (backdrop_get_bootstrap_phase() != BACKDROP_BOOTSTRAP_FULL) {
+    return;
+  }
   $implementations = &backdrop_static('module_implements');
   if (isset($implementations['#write_cache'])) {
     unset($implementations['#write_cache']);

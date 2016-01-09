@@ -2090,19 +2090,33 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->assertFalse($role->label === $old_label, 'The role has had its label changed.');
     $this->assertTrue($role->label === $new_label, 'The role has the new label.');
 
-    // Test deleting a role.
-    $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
-    $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
-    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
-    backdrop_static_reset('user_roles');
-    $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
-
     // Make sure that the system-defined roles can still be edited, to adjust
     // their labels.
     $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
     $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_AUTHENTICATED_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
+
+    // Create a default role for site administrators, with all available permissions assigned.
+    $admin_role = new stdClass();
+    $admin_role->name = 'administrator';
+    $admin_role->label = st('Administrator');
+    $admin_role->weight = 2;
+    $admin_role->permissions = array_keys(module_invoke_all('permission'));
+    user_role_save($admin_role);
+    // Set this as the administrator role.
+    config_set('system.core', 'user_admin_role', $admin_role->name);
+
+    // Test deleting the default administrator role.
+    $role_name = 'administrator';
+    $role = user_role_load($role_name);
+    $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
+    $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
+    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
+    backdrop_static_reset('user_roles');
+    $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
+    // Make sure this role is no longer configured as the administrator role.
+    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The administrator role is no longer configured as the administrator role.');
   }
 
   /**
