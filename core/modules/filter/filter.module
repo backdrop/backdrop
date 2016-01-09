@@ -1154,6 +1154,9 @@ function filter_process_format($element) {
   $element['format'] = array(
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
+    '#title' => 'Formatting options',
+    '#collapsible' => TRUE, 
+    '#collapsed' => TRUE,
   );
 
   // Prepare text format guidelines.

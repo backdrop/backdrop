@@ -805,6 +805,7 @@ td.checkbox .form-item input {
 }
 .filter-wrapper .fieldset-wrapper {
   padding: 0 6px;
+  margin-top: 45px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
