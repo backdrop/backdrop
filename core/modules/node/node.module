@@ -1617,7 +1617,7 @@ function node_menu() {
     'file' => 'node.types.inc',
   );
   $items['admin/structure/types/manage/%node_type'] = array(
-    'title' => 'Edit content type',
+    'title' => 'Configure content type',
     'title callback' => 'node_type_page_title',
     'title arguments' => array(4),
     'page callback' => 'backdrop_get_form',

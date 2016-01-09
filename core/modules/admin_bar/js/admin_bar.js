@@ -382,8 +382,8 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       var result = this.text;
       var $element = $(this.element);
 
-      // Check whether there is a top-level category that can be prepended.
-      var $category = $element.closest('#admin-bar-menu > li > ul > li');
+      // Check whether there is a parent category that can be prepended.
+      var $category = $element.parent().parent().parent();
       var categoryText = $category.find('> a').text()
       if ($category.length && categoryText) {
         result = categoryText + ': ' + result;
