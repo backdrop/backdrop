@@ -167,7 +167,7 @@
   padding-left: 0;
   padding-right: 0;
 }
-.layout-editor-block-content .item-list  ul {
+.layout-editor-block-content .item-list ul {
   margin: 0;
   padding: 0;
 }
@@ -186,4 +186,8 @@
 /* Layout Misc */
 #layout-edit h1 {
   margin: 1em 0 .6em;
+}
+.layout-access-list ul {
+  margin: 1em 0px;
+  padding: 0px 20px;
 }
