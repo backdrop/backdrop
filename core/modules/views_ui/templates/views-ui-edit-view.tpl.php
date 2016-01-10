@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template for the primary view editing window.
+ * Template for the primary view configuration window.
  */
 ?>
 <div class="views-edit-view">

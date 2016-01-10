@@ -31,14 +31,14 @@ class ViewsAnalyzeTest extends ViewsSqlTest {
     $view = views_get_view('frontpage');
     $view->save();
 
-    $this->backdropGet('admin/structure/views/view/frontpage/edit');
+    $this->backdropGet('admin/structure/views/view/frontpage/configure');
     $this->assertLink(t('analyze view'));
 
     // This redirects the user to the form.
     $this->clickLink(t('analyze view'));
     $this->assertText(t('View analysis'));
 
-    // This redirects the user back to the main views edit page.
+    // This redirects the user back to the main views configure page.
     $this->backdropPost(NULL, array(), t('Ok'));
   }
 }
