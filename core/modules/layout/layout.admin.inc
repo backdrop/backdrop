@@ -1101,6 +1101,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
+    '#theme' => 'layout_conditions',
     '#id' => 'layout-access-list',
   );
   foreach ($block->conditions as $access_key => $block_access) {
