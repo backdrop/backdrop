@@ -1102,7 +1102,7 @@ function user_update_1009() {
 /**
  * Set default option for login method to use accounts only.
  */
-function user_update_1011() {
+function user_update_1010() {
   $config = config('system.core');
   $config->set('user_login_method', 'username_only');
   $config->set('user_email_match', 1);
@@ -1112,7 +1112,7 @@ function user_update_1011() {
 /**
  * Update 'People' menus to 'User accounts'.
  */
-function user_update_1012() {
+function user_update_1011() {
   $config = config('views.view.user_admin');
   if ($config->get('display.default.display_options.title') == 'People') {
     $config->set('display.default.display_options.title', 'User accounts');
