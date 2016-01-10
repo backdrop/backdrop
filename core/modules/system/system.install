@@ -2687,6 +2687,13 @@ function system_update_1046() {
 }
 
 /**
+ * Provide a default value for maintenance_page_maximum_age.
+ */
+function system_update_1047() {
+  config_set('system.core', 'maintenance_page_maximum_age', 10);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

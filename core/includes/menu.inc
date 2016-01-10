@@ -507,16 +507,16 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   // Check if site is offline.
-  $page_callback_result = _menu_site_is_offline() ? MENU_SITE_OFFLINE : MENU_SITE_ONLINE;
+  $site_status = _menu_site_is_offline() ? MENU_SITE_OFFLINE : MENU_SITE_ONLINE;
 
   // Allow other modules to change the site status but not the path because that
   // would not change the global variable. hook_url_inbound_alter() can be used
   // to change the path. Code later will not use the $read_only_path variable.
   $read_only_path = !empty($path) ? $path : $_GET['q'];
-  backdrop_alter('menu_site_status', $page_callback_result, $read_only_path);
+  backdrop_alter('menu_site_status', $site_status, $read_only_path);
 
-  // Only continue if the site status is not set.
-  if ($page_callback_result == MENU_SITE_ONLINE) {
+  // If online, check access to the page and call the menu handler.
+  if ($site_status == MENU_SITE_ONLINE) {
     if ($router_item = menu_get_item($path)) {
       if ($router_item['access']) {
         // In most cases, Layout module will provide the route handler if
@@ -536,6 +536,21 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
     else {
       $page_callback_result = MENU_NOT_FOUND;
     }
+  }
+  // Offline pages are not cached in the database but have a Cache-Control
+  // header to allow reverse proxies to serve offline hits instead of Backdrop.
+  elseif ($site_status == MENU_SITE_OFFLINE) {
+    $page_cache_enabled = (bool) config_get('system.core', 'page_cache_maximum_age');
+    $maintenance_max_age = config_get('system.core', 'maintenance_page_maximum_age');
+    if ($page_cache_enabled && $maintenance_max_age) {
+      backdrop_add_http_header('Cache-Control', 'public; max-age: ' . $maintenance_max_age);
+    }
+    backdrop_page_is_cacheable(FALSE);
+    $page_callback_result = MENU_SITE_OFFLINE;
+  }
+  // Any other statuses that may have been set in hook_menu_site_status_alter().
+  else {
+    $page_callback_result = $site_status;
   }
 
   // Deliver the result of the page callback to the browser, or if requested,

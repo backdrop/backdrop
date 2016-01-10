@@ -1041,6 +1041,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp();
@@ -1056,6 +1057,9 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
    * Verify site maintenance mode functionality.
    */
   function testSiteMaintenance() {
+    // Start with the page cache disabled.
+    config_set('system.core', 'page_cache_maximum_age', 0);
+
     // Turn on maintenance mode.
     $edit = array(
       'maintenance_mode' => TRUE,
@@ -1072,17 +1076,36 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Logout and verify that offline message is displayed.
     $this->backdropLogout();
-    $this->backdropGet('');
+
+    $this->backdropGet('token/tree');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
-    $this->backdropGet('node');
-    $this->assertText($offline_message);
+
+    // With caching disabled, the maintenance page is also disabled.
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
+
+    // Enable caching and check that the default maintenance max age is set.
+    config_set('system.core', 'page_cache_maximum_age', 300);
+    $this->backdropGet('token/tree');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 10');
+
+    // Increase the cache lifetime and try a different path.
+    config_set('system.core', 'maintenance_page_maximum_age', 60);
     $this->backdropGet('user/register');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 60');
 
     // Verify that user is able to log in.
     $this->backdropGet('user');
+    $this->assertResponse(200);
+    $this->assertNoText($offline_message);
+    // The user should also be able to reset their password.
+    $this->backdropGet('user/password');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
     $this->backdropGet('user/login');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
 
     // Log in user and verify that maintenance mode message is displayed
