@@ -321,3 +321,13 @@ tr.admin-bar-tweak-permissions-processed {
 tr.admin-bar-tweak-permissions-processed td.module {
   border-top: 0;
 }
+
+#admin-bar .dropdown li.admin-bar-alerts {
+  margin-right:5px !important;
+}
+.admin-bar-alert-warning {
+  background-color:orange;
+}
+.admin-bar-alert-error {
+  background-color:red;
+}

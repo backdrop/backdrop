@@ -5,6 +5,15 @@
  */
 
 /**
+ * Renders an alert icon to display in the administration bar.
+ *
+ * @ingroup themeable
+ */
+function theme_admin_bar_alert_icon($variables) {
+  return '<img class="admin-bar-alert-icon" src="' . $variables['src'] . '" width="14" height="12" alt="' . $variables['alt'] . '" />';
+}
+
+/**
  * Renders an icon to display in the administration bar.
  *
  * @ingroup themeable
@@ -113,5 +122,13 @@ function theme_admin_bar_links($variables) {
 function template_preprocess_admin_bar_icon(&$variables) {
   $variables['src'] = $GLOBALS['base_url'] . '/' . backdrop_get_path('module', 'admin_bar') . '/images/home.png';
   $variables['alt'] = t('Home');
+}
+
+/**
+ * Preprocesses variables for theme_admin_bar_alert_icon().
+ */
+function template_preprocess_admin_bar_alert_icon(&$variables) {
+  $variables['src'] = $GLOBALS['base_url'] . '/' . backdrop_get_path('module', 'admin_bar') . '/images/alert-icon.png';
+  $variables['alt'] = t('Alert icon');
 }
 

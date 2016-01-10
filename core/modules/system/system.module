@@ -3596,6 +3596,23 @@ function system_archiver_info() {
 }
 
 /**
+ * Implements hook_admin_bar_alerts().
+ */
+function system_admin_bar_alerts() {
+  module_load_include('inc', 'system', 'system.admin');
+  if (!system_status(TRUE)) {
+    // Add link to manually run cron.
+    $alert['system'] = array(
+      'title' => t('Site errors found'),
+      'access' => user_access('administer site configuration'),
+      'page' => 'admin/reports/status',
+      'severity' => 'warning',
+    );
+    return $alert;
+  }
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function system_autoload_info() {

@@ -22,7 +22,7 @@ function admin_bar_output($complete = FALSE) {
   // Try to load and output administration bar from server-side cache. The
   // cache is only valid if a hash key exists, otherwise it needs to be
   // regenerated.
-  $old_hash = admin_bar_cache_get($cid);
+  $old_hash = json_decode(admin_bar_cache_get($cid));
   if ($cache_server_enabled && $old_hash) {
     $cache = cache('menu')->get($cid);
     if ($cache && isset($cache->data)) {
@@ -77,7 +77,6 @@ function admin_bar_output($complete = FALSE) {
     if (in_array('admin_bar.users', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_users();
     }
-
     // Allow modules to enhance the menu.
     // Uses '_output' suffix for consistency with the alter hook (see below).
     foreach (module_implements('admin_bar_output_build') as $module) {
@@ -99,7 +98,6 @@ function admin_bar_output($complete = FALSE) {
     // name clashes with the contributed Admin module.
     backdrop_alter('admin_bar_output', $content);
 
-    $content = backdrop_render($content);
 
     // Cache the menu for this user.
     if ($cache_server_enabled) {
@@ -109,10 +107,47 @@ function admin_bar_output($complete = FALSE) {
 
   // Store the new hash for this user.
   if (!$complete) {
-    admin_bar_cache_set($cid, md5($content));
+    admin_bar_cache_set($cid, md5(json_encode($content)));
   }
+  // Don't cache the alerts
+  $content['extra']['extra'] += admin_bar_links_alerts();
 
+  $content = backdrop_render($content);
   return $content;
+}
+
+/**
+ * Build an alert icon with dropdown links.
+ */
+function admin_bar_links_alerts() {
+  // Get all module provided alerts.
+  $alerts = module_invoke_all('admin_bar_alerts');
+  
+  // Find out if any modules provided an 'error' or 'warning' alert.
+  $levels = array_column($alerts, 'severity');
+  $level = in_array('error', $levels) ? 'error' : (in_array('warning', $levels) ? 'warning' : 'normal');
+
+  // Build the links array.
+  $links['alerts'] = array(
+    '#title' => theme('admin_bar_alert_icon'),
+    '#attributes' => array('class' => array('admin-bar-alerts admin-bar-alert-' . $level)),
+    '#access' => user_access('administer site configuration'),
+    '#weight' => -100,
+    '#options' => array(
+      'html' => TRUE,
+    ),
+    '#href' => 'admin/reports/status',
+  );
+  foreach($alerts as $key => $alert) {
+    $links['alerts'][$key] = array(
+      '#title' => $alert['title'],
+      '#access' => $alert['access'],
+      '#href' => $alert['page'],
+    );
+  }
+  backdrop_alter('admin_bar_alerts', $alerts);
+
+  return $links;
 }
 
 /**

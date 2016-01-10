@@ -66,6 +66,9 @@ function admin_bar_theme() {
     'admin_bar_icon' => array(
       'variables' => array('src' => NULL, 'alt' => NULL),
     ) + $base,
+    'admin_bar_alert_icon' => array(
+      'variables' => array('src' => NULL, 'alt' => NULL),
+    ) + $base,
   );
 }
 
