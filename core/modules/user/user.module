@@ -1264,9 +1264,20 @@ function user_menu() {
   // Settings.
   $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
-    'description' => 'Configure settings for user accounts including registration requirements and customization of automated e-mails.',
+    'description' => 'Configure settings for user accounts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+    'weight' => 10,
+  );
+
+  // User email settings.
+  $items['admin/config/people/emails'] = array(
+    'title' => 'User email settings',
+    'description' => 'Configure email templates used for account registration and management.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_settings_email'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
     'weight' => 10,

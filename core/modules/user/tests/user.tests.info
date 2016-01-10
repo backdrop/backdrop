@@ -40,9 +40,15 @@ description = Test user administration page functionality.
 group = User
 file = user.test
 
+[UserAdminSettingsEmailFormTest]
+name = User email administration
+description = Test user email administration form page functionality.
+group = User
+file = user.test
+
 [UserAdminSettingsFormTest]
 name = User admin settings
-description = Configuration object user mail and user settings save test.
+description = Configuration object user settings save test.
 group = User
 file = user.test
 

@@ -834,7 +834,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $node_type = node_type_get_type('page');
     $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
-    
+
     // Create a simple node.
     $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
@@ -942,7 +942,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people', $edit, t('Execute'));
     $this->assertText(t('Are you sure you want to cancel these user accounts?'), 'Confirmation form to cancel accounts displayed.');
     $this->assertText(t('When cancelling these accounts'), 'Allows to select account cancellation method.');
-    $this->assertText(t('Require e-mail confirmation to cancel account.'), 'Allows to send confirmation mail.');
+    $this->assertText(t('Require email confirmation to cancel account.'), 'Allows to send confirmation mail.');
     $this->assertText(t('Notify user when account is canceled.'), 'Allows to send notification mail.');
 
     // Confirm deletion.
@@ -1530,6 +1530,16 @@ class UserAdminSettingsFormTest extends SystemConfigFormCase {
         '#config_name' => 'system.core',
         '#config_key' => 'anonymous',
       ),
+    );
+  }
+}
+
+class UserAdminSettingsEmailFormTest extends SystemConfigFormCase {
+  public function setUp() {
+    parent::setUp();
+    module_load_include('admin.inc', 'user');
+    $this->form_id = 'user_settings_email';
+    $this->values = array(
       'user_mail_cancel_confirm_body' => array(
         '#value' => $this->randomString(),
         '#config_name' => 'user.mail',
@@ -1949,7 +1959,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     $node_type = node_type_get_type('page');
     $node_type->settings['comment_subject_field'] = TRUE;
     node_type_save($node_type);
-    
+
     // Create a new node with comments on.
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
