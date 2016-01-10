@@ -170,6 +170,8 @@ function theme_field_multiple_value_form($variables) {
 function template_preprocess_field(&$variables, $hook) {
   $element = $variables['element'];
   $variables['attributes'] = array();
+  $variables['content_attributes'] = array();
+  $variables['item_attributes'] = array();
 
   // There's some overhead in calling check_plain() so only call it if the label
   // variable is being displayed. Otherwise, set it to NULL to avoid PHP
@@ -189,6 +191,7 @@ function template_preprocess_field(&$variables, $hook) {
   foreach ($element['#items'] as $delta => $item) {
     if (!empty($element[$delta])) {
       $variables['items'][$delta] = $element[$delta];
+      $variables['item_attributes'][$delta] = array();
     }
   }
 
