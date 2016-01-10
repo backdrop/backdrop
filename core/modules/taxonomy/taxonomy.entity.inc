@@ -82,6 +82,13 @@ class TaxonomyTerm extends Entity {
   }
 
   /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->vocabulary;
+  }
+
+  /**
    * Implements EntityInterface::entityType().
    */
   public function entityType() {
