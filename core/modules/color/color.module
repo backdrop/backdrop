@@ -31,6 +31,13 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     $form['color'] += color_scheme_form($form, $form_state, $theme);
     $form['#validate'][] = 'color_scheme_form_validate';
     array_unshift($form['#submit'], 'color_scheme_form_submit');
+
+    // Check for legacy Bartik colors. @todo remove in Backdrop 2.0.
+    if (config_get('bartik.settings', 'legacy')) {
+      $path = backdrop_get_path('module', 'color') . '/bartik.inc';
+      include $path;
+      bartik_form_system_theme_settings_alter($form, $form_state);
+    }
   }
 }
 
@@ -337,11 +344,14 @@ function color_scheme_form_submit($form, &$form_state) {
     $form_state['values']['color'] = NULL;
     return;
   }
-  // Update the legacy Bartik color flag.
-    // @todo remove in Backdrop 2.0 (when Bartik is removed from core).
-  else if (config_get('bartik.settings', 'legacy')) {
-    // We were previously using the legacy colors, now using color module.
-    config_set('bartik.settings', 'legacy', FALSE);
+
+  // Don't generate color files if using the legacy Bartik scheme.
+  // @todo remove in Backdrop 2.0 when Bartik is removed from core.
+  if ($form_state['values']['color'] === FALSE) {
+    unset($form_state['values']['scheme']);
+    unset($form_state['values']['palette']);
+    $form_state['values']['color'] = NULL;
+    return;
   }
 
   // Prepare target locations for generated files.

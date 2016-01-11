@@ -6,6 +6,15 @@
 .layout {
   background: transparent;
 }
+.l-header {
+  background-color: #48a9e4;
+  background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-image: -ms-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-image: -o-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0779bf), color-stop(1, #48a9e4));
+  background-image: -webkit-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-image: linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+}
 .no-tabs .l-header ul.menu a {
   padding: 0 0.8em;
   color: #333;
@@ -22,15 +31,6 @@
 .no-tabs .l-header ul.menu li.active-trail a {
   background: #ffffff none repeat scroll 0 0;
   color: #333;
-}
-.l-header {
-  background-color: #48a9e4;
-  background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -ms-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -o-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0779bf), color-stop(1, #48a9e4));
-  background-image: -webkit-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: linear-gradient(top, #0779bf 0%, #48a9e4 100%);
 }
 a {
   color: #0071b3;

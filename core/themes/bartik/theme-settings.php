@@ -11,16 +11,6 @@ $form['color'] = array(
   '#markup' => '<p>' . t('This theme supports custom color palettes if the Color module is enabled on the <a href="!url">modules page</a>. Enable the Color module to customize this theme.', array('!url' => url('admin/modules'))) . '</p>',
 );
 
-$legacy = config_get('bartik.settings', 'legacy');
-if ($legacy) {
-  $form['legacy'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Using legacy <em>Blue Lagoon</em> color palette'),
-    '#default_value' => $legacy,
-    '#weight' => -100,
-  );
-}
-
 $form['tabs_wrapper'] = array(
   '#type' => 'fieldset',
   '#title' => t('Main menu tab style'),
