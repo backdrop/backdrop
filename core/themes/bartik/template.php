@@ -1,14 +1,35 @@
 <?php
+/**
+ * @file
+ * Contains a theme's functions to manipulate or override the default markup.
+ */
 
 /**
- * Implements hook_preprocess_maintenance_page().
+ * Prepares variables for maintenance page templates.
+ *
+ * @see maintenance_page.tpl.php
  */
 function bartik_preprocess_maintenance_page(&$variables) {
   backdrop_add_css(backdrop_get_path('theme', 'bartik') . '/css/maintenance-page.css');
 }
 
 /**
- * Implements hook_preprocess_layout().
+ * Prepares variables for page templates.
+ *
+ * @see page.tpl.php
+ */
+function bartik_preprocess_page(&$variables) {
+  $variables['classes'][] = theme_get_setting('main_menu_tabs', 'bartik');
+  if (config_get('bartik.settings', 'legacy')) {
+    $path = backdrop_get_path('theme', 'bartik') . '/css/colors-legacy.css';
+    backdrop_add_css($path, array('group' => CSS_THEME, 'weight' => 100));
+  }
+}
+
+/**
+ * Prepares variables for layout template files.
+ *
+ * @see layout.tpl.php
  */
 function bartik_preprocess_layout(&$variables) {
   if ($variables['content']['header']) {
@@ -17,14 +38,14 @@ function bartik_preprocess_layout(&$variables) {
 }
 
 /**
- * Implements theme_menu_tree().
+ * Overrides theme_menu_tree().
  */
 function bartik_menu_tree($variables) {
   return '<ul class="menu clearfix">' . $variables['tree'] . '</ul>';
 }
 
 /**
- * Implements theme_field__field_type().
+ * Overrides theme_field__FIELD_TYPE().
  */
 function bartik_field__taxonomy_term_reference($variables) {
   $output = '';
