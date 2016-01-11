@@ -1307,9 +1307,9 @@ function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
     $cache = cache('page')->get($base_root . request_uri());
     if ($cache !== FALSE) {
       $cache_lifetime = config_get('system.core', 'page_cache_maximum_age');
-      $cache_expired = $cache->created + $cache_lifetime < REQUEST_TIME;
+      $cache_valid = $cache->created + $cache_lifetime >= REQUEST_TIME;
       // Return the cache entry if not expired or if an expired entry is okay.
-      if (!$cache_expired || $return_stale) {
+      if ($cache_valid || $return_stale) {
         $cache_hit[$cache_type] = TRUE;
       }
       else {
@@ -2776,6 +2776,10 @@ function _backdrop_bootstrap_page_cache() {
     $cache_enabled = config_get('system.core', 'cache') ? TRUE : FALSE;
   }
   catch (ConfigException $e) {
+    $cache_enabled = FALSE;
+  }
+
+  if (!backdrop_page_is_cacheable()) {
     $cache_enabled = FALSE;
   }
 

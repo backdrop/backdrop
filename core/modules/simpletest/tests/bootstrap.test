@@ -149,26 +149,32 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     config_set('system.core', 'cache', 1);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
+    // Emulate a browser's support for keep-alive so that we can check
+    // Connection: "close" headers.
+    $headers = array('Connection: "keep-alive"');
+
     // Fill the cache.
-    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
+    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
-    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
+    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header set to keep alive when getting a cached page.');
 
     // Check replacing default headers.
-    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Expires', 'value' => 'Fri, 19 Nov 2008 05:00:00 GMT')));
+    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Expires', 'value' => 'Fri, 19 Nov 2008 05:00:00 GMT')), $headers);
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 19 Nov 2008 05:00:00 GMT', 'Default header was replaced.');
-    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Vary', 'value' => 'User-Agent')));
+    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Vary', 'value' => 'User-Agent')), $headers);
     $this->assertEqual($this->backdropGetHeader('Vary'), 'User-Agent,Accept-Encoding', 'Default header was replaced.');
 
     // Test that the initial load does not wait for shutdown functions.
@@ -176,13 +182,13 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // because Backdrop does not wait for shutdown functions after the page
     // has been delivered.
     $start = microtime(TRUE);
-    $this->backdropGet('system-test/sleep/shutdown/5');
+    $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
     $start = microtime(TRUE);
-    $this->backdropGet('system-test/sleep/shutdown/5');
+    $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cached page request.');
     $this->assertTrue($total < 5, 'Cached page requests returned without executing shutdown functions.');
@@ -191,45 +197,72 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // generating a new cache entry.
     config_set('system.core', 'page_cache_maximum_age', 5);
     config_set('system.core', 'page_cache_background_fetch', 0);
-    $this->backdropGet('system-test/sleep/0');
+
+    // Create a new cache entry.
+    $this->backdropGet('system-test/sleep/0', array(), $headers);
     $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=5');
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age. Fresh copy expected.
-    sleep(6);
-    $this->backdropGet('system-test/sleep/0');
+    // Wait 6 seconds to wait past the maximum age (5). Fresh copy expected.
+    //sleep(6);
+    $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
+
+    $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time2 = (string) $start_element[0];
     $this->assertNotIdentical($start_time1, $start_time2, 'Fresh page generated after waiting cache lifetime.');
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS');
 
     // Clear the current cache to try with background fetch enabled.
     cache('page')->flush();
     config_set('system.core', 'page_cache_background_fetch', 1);
 
     // Do the double-hit again with a delay in between.
-    $this->backdropGet('system-test/sleep/0');
+    $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age. Stale copy expected.
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
     sleep(6);
-    $this->backdropGet('system-test/sleep/0');
+    print $this->backdropGet('system-test/sleep/0', array(), $headers) . "\n";;
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time2 = (string) $start_element[0];
+    print $start_time2 . "\n";
     $this->assertIdentical($start_time1, $start_time2, 'Stale page served after waiting cache lifetime.');
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT');
 
-    // Wait 2 more seconds to ensure that the new cache entry is generated.
-    sleep(2);
-    $this->backdropGet('system-test/sleep/0');
+    // When a stale page is served, the connection is closed to prevent the PHP
+    // process from holding up other assets (JS/CSS/images) from waiting to use
+    // that same connection.
+    $this->assertIdentical($this->backdropGetHeader('Connection'), 'close', 'Connection closed after serving stale page to allow background processes to run.');
+
+    // Wait 1 more second, after which the new cache entry should be saved.
+    sleep(1);
+    print $this->backdropGet('system-test/sleep/0', array(), $headers) . "\n";;
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time3 = (string) $start_element[0];
-    $this->assertNotIdentical($start_time2, $start_time3, 'A fresh page is generated on the next page load.');
+    print $start_time3 . "\n";
+    $this->assertNotIdentical($start_time2, $start_time3, 'A fresh page is shown on the next page load (generated by the previous request).');
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT');
+    $this->assertIdentical($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header not set keep-alive when serving cached page.');
+
+    // TEST REQUEST
+    sleep(1);
+    print $this->backdropGet('system-test/sleep/0', array(), $headers) . "\n";
+    $start_element = $this->xpath('//div[@id="start"]');
+    $start_time4 = (string) $start_element[0];
+    print $start_time4 . "\n";
+    $this->assertNotIdentical($start_time2, $start_time4, 'TEST: A fresh page is shown on the next page load (generated by the previous request).');
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT');
+    $this->assertIdentical($this->backdropGetHeader('Connection'), 'Keep-Alive', 'TEST: Connection header set to keep-alive when serving cached page.');
+    // END TEST
+
 
     // Check that authenticated users bypass the cache.
     $user = $this->backdropCreateUser();
     $this->backdropLogin($user);
-    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
+    $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate, post-check=0, pre-check=0', 'Cache-Control header was sent.');
