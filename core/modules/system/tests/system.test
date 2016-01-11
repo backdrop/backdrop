@@ -2140,12 +2140,29 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
     $arg1 = $this->randomName();
     $arg2 = $this->randomName();
     $this->backdropGet('system-test/shutdown-functions/' . $arg1 . '/' . $arg2);
-    $this->assertText(t('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
-    $this->assertText(t('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
+
+    // Now wait a few seconds to ensure that the watchdog entries are written
+    // before we check for them.
+    sleep(2);
+
+    $shutdown1 = format_string('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+    $shutdown2 = format_string('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+
+    // Text doesn't show up because the page returns before shutdown functions.
+    $this->assertNoText($shutdown1);
+    $this->assertNoText($shutdown2);
+
+    // However, the messages should show up in watchdog.
+    $shutdown1_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown1))->fetchField();
+    $shutdown2_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown2))->fetchField();
+    $this->assertEqual($shutdown1_log, 1, 'Shutdown message 1 logged.');
+    $this->assertEqual($shutdown2_log, 1, 'Shutdown message 2 logged.');
 
     // Make sure exceptions displayed through _backdrop_render_exception_safe()
     // are correctly escaped.
-    $this->assertRaw('Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;.');
+    $message = 'Exception: Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;';
+    $exception_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message LIKE :string", array(':string' => db_like($message) . '%'))->fetchField();
+    $this->assertRaw($exception_log, 1, 'Uncaught exception logged.');
   }
 }
 

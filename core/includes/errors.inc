@@ -201,7 +201,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
         'line' => $error['%line'],
       ),
     );
-    header('X-Backdrop-Assertion-' . $number . ': ' . rawurlencode(serialize($assertion)));
+    backdrop_add_http_header('X-Backdrop-Assertion-' . $number, rawurlencode(serialize($assertion)));
     $number++;
   }
 
