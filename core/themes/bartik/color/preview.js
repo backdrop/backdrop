@@ -1,4 +1,7 @@
-
+/**
+ * @file
+ * Javascript for the theme settings preview.
+ */
 (function ($) {
   Backdrop.color = {
     logoChanged: false,
@@ -34,6 +37,49 @@
       $('#preview #preview-header', form).attr('style', "background-color: " + gradient_start + "; background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(" + gradient_start + "), to(" + gradient_end + ")); background-image: -moz-linear-gradient(-90deg, " + gradient_start + ", " + gradient_end + ");");
 
       $('#preview #preview-site-name', form).css('color', $('#palette input[name="palette[titleslogan]"]', form).val());
+
+      // Main menu
+      $('#preview #preview-main-menu-links a', form).css('color', $('#palette input[name="palette[menu]"]', form).val());
+      $('#preview #preview-main-menu-links a.active', form).css('color', $('#palette input[name="palette[activemenu]"]', form).val());
+
+      checkTab();
+
+      $('#edit-main-menu-tabs').find('input[type=radio]').on('change',function(){
+        checkTab();
+      });
+
+      function checkTab() {
+        var menuColor = $('#palette input[name="palette[menu]"]', form).val();
+        var activeMenuColor = $('#palette input[name="palette[activemenu]"]', form).val();
+        if ($('#edit-main-menu-tabs-no-tabs').is(':checked')) {
+          updateTabs('none', 'none', 0, menuColor);
+          $('#preview-main-menu-links a.active').css({'text-decoration': 'underline', 'color': activeMenuColor });
+        }
+        if ($('#edit-main-menu-tabs-rounded-tabs').is(':checked')) {
+          updateTabs('rgba(255, 255, 255, 0.7)', '0 1px #eee', '8px', '#333');
+          $('#preview-main-menu-links a.active').css({
+            'text-decoration': 'none',
+            'background': '#ffffff'
+          });
+        }
+        if ($('#edit-main-menu-tabs-square-tabs').is(':checked')) {
+          updateTabs('rgba(255, 255, 255, 0.7)', '0 1px #eee', 0, '#333');
+          $('#preview-main-menu-links a.active').css({
+            'text-decoration': 'none',
+            'background': '#ffffff'
+          });
+        }
+      }
+
+      function updateTabs(bg, shadow, radius, menuColor) {
+        $('#preview #preview-main-menu-links a').css({
+          'background': bg,
+          'text-shadow': shadow,
+          'border-top-left-radius': radius,
+          'border-top-right-radius': radius,
+          'color': menuColor
+        });
+      }
     }
   };
 })(jQuery);

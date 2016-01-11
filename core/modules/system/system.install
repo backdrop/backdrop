@@ -2704,6 +2704,22 @@ function system_update_1048() {
 }
 
 /**
+ * Bartik theme settings update: Indicate whether legacy colors should be used.
+ */
+function system_update_1049() {
+  // Only bother if the default theme is Bartik.
+  $default_theme = config_get('system.core', 'theme_default');
+  if ($default_theme == 'bartik') {
+    // If there are no color settings then the default (Blue Lagoon) was in use.
+    if (config_get('bartik.settings', 'color') === NULL) {
+      // Set a flag indicating that we should use the legacy style sheet.
+      config_set('bartik.settings', 'legacy', TRUE);
+    }
+    config_set('bartik.settings', 'main_menu_tabs', 'rounded-tabs');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

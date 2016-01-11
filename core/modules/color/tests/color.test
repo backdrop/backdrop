@@ -23,7 +23,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $this->themes = array(
       'bartik' => array(
         'palette_input' => 'palette[bg]',
-        'scheme' => 'slate',
+        'scheme' => 'goldfish',
         'scheme_color' => '#3b3b3b',
       ),
     );
@@ -110,7 +110,7 @@ class ColorTestCase extends BackdropWebTestCase {
       $edit['palette[bg]'] = $color;
       $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
-      if($is_valid) {
+      if ($is_valid) {
         $this->assertText('The configuration options have been saved.');
       }
       else {
