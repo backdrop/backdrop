@@ -1601,6 +1601,17 @@ function system_performance_settings($form, &$form_state) {
     '#default_value' => $config->get('cache'),
     '#weight' => -2,
   );
+  $form['caching']['page_cache_background_fetch'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use background fetch for cached pages'),
+    '#default_value' => $config->get('page_cache_background_fetch'),
+    '#description' => t('Allows serving stale pages while new page cache entries are being generated.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="cache"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $period = backdrop_map_assoc(array(60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
   $form['caching']['page_cache_maximum_age'] = array(
     '#type' => 'select',
@@ -1608,6 +1619,11 @@ function system_performance_settings($form, &$form_state) {
     '#default_value' => $config->get('page_cache_maximum_age'),
     '#options' => $period,
     '#description' => t('The maximum time the page cache can use an old version of a page.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="cache"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $directory = 'public://';
@@ -1672,6 +1688,7 @@ function system_performance_settings_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('cache', $form_state['values']['cache']);
   $config->set('page_cache_maximum_age', $form_state['values']['page_cache_maximum_age']);
+  $config->set('page_cache_background_fetch', $form_state['values']['page_cache_background_fetch']);
   $config->set('page_compression', $form_state['values']['page_compression']);
   $config->set('preprocess_css', $form_state['values']['preprocess_css']);
   $config->set('preprocess_js', $form_state['values']['preprocess_js']);

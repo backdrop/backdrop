@@ -18,7 +18,7 @@ before_script:
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
   - sudo cp core/misc/travis-ci/php-fpm.conf $HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - $HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo $HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
 
   # Disable XDebug to speed up execution.
   - phpenv config-rm xdebug.ini
@@ -34,7 +34,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url 'http://localhost' --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url 'http://localhost' --color --verbose --force BootstrapPageCacheTestCase
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
