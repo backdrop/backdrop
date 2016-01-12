@@ -8,10 +8,6 @@
  * Menu callback; Provide the administration overview page.
  */
 function system_admin_config_page() {
-  // Check for status report errors.
-  if (system_status(TRUE) && user_access('administer site configuration')) {
-    backdrop_set_message(t('One or more problems were detected with your Backdrop installation. Check the <a href="@status">status report</a> for more information.', array('@status' => url('admin/reports/status'))), 'error');
-  }
   $blocks = array();
   if ($admin = db_query("SELECT menu_name, mlid FROM {menu_links} WHERE link_path = 'admin/config' AND module = 'system'")->fetchAssoc()) {
     $result = db_query("
@@ -2221,16 +2217,16 @@ function system_urls_settings_submit($form, $form_state) {
  *
  * @param $check
  *   If true, only returns a boolean whether there are system status errors.
+ *   This parameter will be removed in Backdrop 2.0.
+ *
+ * @see system_get_requirements().
  */
 function system_status($check = FALSE) {
   // Load .install files
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
-  backdrop_load_updates();
+  $requirements = system_get_requirements();
 
-  // Check run-time requirements and status information.
-  $requirements = module_invoke_all('requirements', 'runtime');
-  usort($requirements, '_system_sort_requirements');
-
+  // @todo remove this check and return in Backdrop 2.0.
   if ($check) {
     return backdrop_requirements_severity($requirements) == REQUIREMENT_ERROR;
   }

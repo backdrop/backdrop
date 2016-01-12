@@ -1193,11 +1193,12 @@ function backdrop_check_profile($profile) {
  * Extracts the highest severity from the requirements array.
  *
  * @param $requirements
- *   An array of requirements, in the same format as is returned by
- *   hook_requirements().
+ *   An array of requirements as returned by system_get_requirements().
  *
  * @return
  *   The highest severity in the array.
+ *
+ * @see system_get_requirements().
  */
 function backdrop_requirements_severity(&$requirements) {
   $severity = REQUIREMENT_OK;
@@ -1207,6 +1208,23 @@ function backdrop_requirements_severity(&$requirements) {
     }
   }
   return $severity;
+}
+
+/**
+ * Get run-time requirements and status information.
+ *
+ * @return
+ *   An array of requirements in the same format as is returned by
+ *   hook_requirements().
+ */
+function system_get_requirements() {
+  backdrop_load_updates();
+
+  // Check run-time requirements and status information.
+  $requirements = module_invoke_all('requirements', 'runtime');
+  usort($requirements, '_system_sort_requirements');
+
+  return $requirements;
 }
 
 /**
