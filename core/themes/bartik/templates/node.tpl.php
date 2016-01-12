@@ -119,7 +119,7 @@
   <?php endif; ?>
 
   <?php if ($page && isset($comments['comments'])): ?>
-    <section class="comments">  
+    <section class="comments">
       <?php if ($comments['comments']): ?>
         <h2 class="title"><?php print t('Comments'); ?></h2>
         <?php print render($comments['comments']); ?>
