@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsPagerTest.
@@ -24,9 +23,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
     // Test behaviour described in http://drupal.org/node/652712#comment-2354918.
-
-    $this->backdropGet('admin/structure/views/view/frontpage/edit');
-
+    $this->backdropGet('admin/structure/views/view/frontpage/configure');
 
     $edit = array(
       'pager_options[items_per_page]' => 20,
@@ -40,22 +37,22 @@ class ViewsPagerTest extends ViewsSqlTest {
       'pager[type]' => 'mini',
     );
     $this->backdropPost('admin/structure/views/nojs/display/frontpage/default/pager', $edit, t('Apply'));
-    $this->backdropGet('admin/structure/views/view/frontpage/edit');
+    $this->backdropGet('admin/structure/views/view/frontpage/configure');
     $this->assertText('Mini', 'Changed pager plugin, should change some text');
 
     // Test behaviour described in http://drupal.org/node/652712#comment-2354400
     $view = $this->viewsStorePagerSettings();
-    // Make it editable in the admin interface.
+    // Make it configurable in the admin interface.
     $view->save();
 
-    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/edit');
+    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/configure');
 
     $edit = array();
     $edit = array(
       'pager[type]' => 'full',
     );
     $this->backdropPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager', $edit, t('Apply'));
-    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/edit');
+    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/configure');
     $this->assertText('Full');
 
     $edit = array(
@@ -67,7 +64,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     // add new display and test the settings again, by override it.
     $edit = array( );
     // Add a display and override the pager settings.
-    $this->backdropPost('admin/structure/views/view/test_store_pager_settings/edit', $edit, t('Add Page'));
+    $this->backdropPost('admin/structure/views/view/test_store_pager_settings/configure', $edit, t('Add Page'));
     $edit = array(
       'override[dropdown]' => 'page_1',
     );
@@ -77,7 +74,7 @@ class ViewsPagerTest extends ViewsSqlTest {
       'pager[type]' => 'mini',
     );
     $this->backdropPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', $edit, t('Apply'));
-    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/edit');
+    $this->backdropGet('admin/structure/views/view/test_store_pager_settings/configure');
     $this->assertText('Mini', 'Changed pager plugin, should change some text');
 
     $edit = array(

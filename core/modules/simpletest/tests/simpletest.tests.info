@@ -142,6 +142,12 @@ description = Make sure the variable system functions correctly.
 group = Bootstrap
 file = bootstrap.test
 
+[EarlyBootstrapTestCase]
+name = Early bootstrap test
+description = Confirm that calling module_implements() during early bootstrap does not pollute the module_implements() cache.
+group = System
+file = boot.test
+
 [HookBootExitTestCase]
 name = Boot and exit hook invocation
 description = Test that hook_boot() and hook_exit() are called correctly.
@@ -628,6 +634,12 @@ description = Tests the file uploading functions.
 group = File API (remote)
 file = file.test
 
+[FileUploadTransliterationTest]
+name = File uploading transliteration
+description = Tests files are transliterated when uploaded.
+group = File API
+file = file.test
+
 [FileDirectoryTest]
 name = File paths and directories
 description = Tests operations dealing with directories.
@@ -1024,6 +1036,12 @@ description = Tests the uninstallation of modules.
 group = Module
 file = module.test
 
+[ModuleImplementsAlterTestCase]
+name = Module implements alter
+description = Tests the hook_module_implements_alter.
+group = Module
+file = module.test
+
 [PasswordHashingTest]
 name = Password hashing
 description = Password hashing unit tests.
@@ -1137,6 +1155,12 @@ name = Theme Datetime
 description = Test the theme_datetime() function.
 group = Theme
 file = theme.test
+
+[TransliterationTest]
+name = Transliteration API
+description = Tests the transliteration API.
+group = Transliteration
+file = transliteration.test
 
 [UnicodeUnitTest]
 name = Unicode handling

@@ -1,6 +1,3 @@
-Description
------------
-
 Backdrop is a full-featured content management system that allows non-technical
 users to manage a wide variety of content. It can be used to create all kinds of
 websites including blogs, image galleries, social networks, intranets, and more.
@@ -73,10 +70,13 @@ project:
 - [GitHub](https://github.com) for collaboration and code management tools.
 - [Travis-CI](https://travis-ci.org/) for continuous automated testing.
 
-Documentation
--------------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook) on the
-main Backdrop CMS website.
+User Guide
+----------
+Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+
+Developer Documentation
+-----------------------
+Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
 
 License
 -------

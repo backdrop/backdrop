@@ -21,7 +21,7 @@ function file_test_menu() {
     'title' => 'Upload test',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('_file_test_form'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   return $items;

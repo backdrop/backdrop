@@ -9,12 +9,32 @@
 "use strict";
 
 /**
+ * Behavior for showing a list of layouts.
+ *
+ * Detect flexbox support for displaying our list of layouts with vertical
+ * height matching for each row of layout template icons.
+ */
+Backdrop.behaviors.layoutList = {
+  attach: function(context) {
+    var $element = $(context).find('.layout-options');
+    if ($element.length) {
+      if ($element.css('flex-wrap')) {
+        $element.addClass('flexbox');
+      }
+      else {
+        $element.addClass('no-flexbox');
+      }
+    }
+  }
+};
+
+/**
  * Behavior for creating/configuring layout settings.
  */
 Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
     var $form = $('.layout-settings-form').once('layout-settings');
-    if ($form.length) {
+    if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
         // Cancel existing AJAX requests and start a new one.
@@ -114,7 +134,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
  * Filters the 'Add block' list by a text input search string.
  */
 Backdrop.behaviors.blockListFilterByText = {
-  attach: function(context, settings) {
+  attach: function (context, settings) {
     var $input = $('input#layout-block-list-search').once('layout-block-list-search');
     var $form = $('.layout-block-list');
     var $rows, zebraClass;
@@ -148,7 +168,7 @@ Backdrop.behaviors.blockListFilterByText = {
         $('.filter-empty').remove();
       }
     }
-    
+
     function stripeRow($match) {
       zebraClass = (zebraCounter % 2) ? 'odd' : 'even';
       $match.removeClass('even odd');
@@ -158,7 +178,7 @@ Backdrop.behaviors.blockListFilterByText = {
 
     if ($form.length && $input.length) {
       $rows = $form.find('div.layout-block-add-row');
-      $rows.each(function() {
+      $rows.each(function () {
         stripeRow($(this));
       });
 
@@ -166,6 +186,6 @@ Backdrop.behaviors.blockListFilterByText = {
       $input.focus().on('keyup', filterBlockList);
     }
   }
-};
+}
 
 })(jQuery);

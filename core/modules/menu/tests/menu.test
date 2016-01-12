@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for menu.module.
@@ -69,6 +68,17 @@ class MenuTestCase extends BackdropWebTestCase {
     $saved_item = menu_link_load($item['mlid']);
     $this->assertEqual($description, $saved_item['options']['attributes']['title'], 'Saving an existing link updates the description (title attribute)');
     $this->resetMenuLink($item, $old_title);
+
+    // Test for the correct behavior of a menu link title.
+    // @see https://www.drupal.org/node/1973262
+    $item = $this->addMenuLink(0, 'user/register', 'user-menu');
+    $this->backdropGet('user/password');
+    $this->assertNoTitle('Home | Backdrop');
+    $this->backdropLogout();
+    $this->backdropGet('user/register');
+    $this->assertTitle($item['link_title'] . ' | Backdrop');
+    $this->backdropGet('user');
+    $this->assertNoTitle('Home | Backdrop');
   }
 
   /**

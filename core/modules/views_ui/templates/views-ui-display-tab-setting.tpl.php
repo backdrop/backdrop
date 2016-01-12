@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template for each row inside the "boxes" on the display query edit screen.
+ * Template for each row inside the "boxes" on the configuration screen.
  */
 ?>
 <div class="views-display-setting <?php print implode(' ', $classes); ?> <?php print $zebra; ?> clearfix"<?php print backdrop_attributes($attributes); ?>>

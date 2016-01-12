@@ -391,6 +391,10 @@ function search_simplify($text) {
   // Lowercase
   $text = backdrop_strtolower($text);
 
+  // Remove Diacritics
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $text = transliteration_remove_diacritics($text);
+
   // Call an external processor for word handling.
   search_invoke_preprocess($text);
 

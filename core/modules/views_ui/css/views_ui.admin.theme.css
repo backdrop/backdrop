@@ -799,45 +799,6 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 /* @end */
 
-/* @group Preview
- *
- * The preview controls and the preview pane
- */
-
-#edit-displays-preview-controls .fieldset-wrapper > * {
-  float: left;
-}
-
-#edit-displays-preview-controls .fieldset-wrapper > .form-item {
-  margin-top: 0.3333em;
-}
-
-#edit-displays-preview-controls .form-submit {
-  display: inline-block;
-  margin-right: 1em;
-}
-
-#edit-displays-preview-controls .form-type-textfield {
-  margin-left: 1em;
-  position: relative;
-}
-
-#edit-displays-preview-controls .form-type-textfield label {
-  border-left: 1px solid #999;
-  padding-left: 1em;
-  position: absolute;
-}
-
-#edit-displays-preview-controls .form-type-textfield label:after {
-  content: ":";
-}
-
-#edit-displays-preview-controls .form-type-textfield label ~ * {
-  margin-left: 105px;
-}
-
-/* @end */
-
 /* @group Modal dialog box
  *
  * The contents of the popup dialog on the views edit form.

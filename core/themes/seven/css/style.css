@@ -1110,6 +1110,56 @@ div.admin-panel h3 {
   float: none;
 }
 
+/**
+ * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
+ */
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+  /* Hide radios from visuals but not screen-readers */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.layout-settings-form .layout-options .form-type-radio label {
+  position: relative;
+  z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
+  display: block;
+  padding: .6em;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  min-height: 145px;
+  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  will-change: border-color, background-color;
+}
+.layout-settings-form .layout-options.no-flexbox .form-type-radio label {
+  min-height: 150px;
+}
+.layout-settings-form .layout-options .form-type-radio:active label,
+.layout-settings-form .layout-options .form-type-radio:hover label,
+.layout-settings-form .layout-options .form-type-radio input:checked + label {
+  background-color: #ffffff;
+  border-color: #d0d0d0;
+}
+.layout-settings-form .layout-options .form-type-radio input:focus + label {
+  background-color: #ffffff;
+  border-color: #43afe4;
+}
+.layout-settings-form .layout-options .form-type-radio img {
+  position: relative;
+  z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
+  padding: 4px;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
 /* Update options. */
 div.admin-options {
   background: #f8f8f8;

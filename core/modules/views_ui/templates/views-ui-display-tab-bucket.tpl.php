@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template for each "box" on the display query edit screen.
+ * Template for each "box" on the display query configuration screen.
  */
 ?>
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>

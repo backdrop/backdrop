@@ -17,7 +17,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
   function assertToken($type, $object, $token, $expected) {
     $tokens = token_generate($type, array($token => $token), array($type => $object));
     $tokens += array($token => '');
-    $this->assertIdentical($tokens[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $tokens[$token], '@expected' => $expected)));
+    $this->assertIdentical($tokens[$token], $expected, format_string("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $tokens[$token], '@expected' => $expected)));
   }
 
   function saveAlias($source, $alias, $langcode = LANGUAGE_NONE) {
@@ -58,18 +58,18 @@ class PathPatternTestHelper extends BackdropWebTestCase {
   function assertAlias($source, $expected_alias, $langcode = LANGUAGE_NONE) {
     backdrop_clear_path_cache($source);
     $alias = backdrop_get_path_alias($source, $langcode);
-    $this->assertIdentical($alias, $expected_alias, t("Alias for %source with language '@language' was %actual, expected %expected.", array('%source' => $source, '%actual' => $alias, '%expected' => $expected_alias, '@language' => $langcode)));
+    $this->assertIdentical($alias, $expected_alias, format_string("Alias for %source with language '@language' was %actual, expected %expected.", array('%source' => $source, '%actual' => $alias, '%expected' => $expected_alias, '@language' => $langcode)));
   }
 
   function assertAliasExists($conditions) {
     $path = path_load($conditions);
-    $this->assertTrue($path, t('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
+    $this->assertTrue($path, format_string('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
     return $path;
   }
 
   function assertNoAliasExists($conditions) {
     $alias = path_load($conditions);
-    $this->assertFalse($alias, t('Alias with conditions @conditions not found.', array('@conditions' => var_export($conditions, TRUE))));
+    $this->assertFalse($alias, format_string('Alias with conditions @conditions not found.', array('@conditions' => var_export($conditions, TRUE))));
   }
 
   function deleteAllAliases() {
@@ -150,7 +150,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     );
     foreach ($tests as $test) {
       $actual = path_get_pattern_by_entity_type($test['entity'], $test['bundle'], $test['langcode']);
-      $this->assertIdentical($actual, $test['expected'], t("path_get_pattern_by_entity_type('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
+      $this->assertIdentical($actual, $test['expected'], format_string("path_get_pattern_by_entity_type('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
     }
   }
 
@@ -160,7 +160,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   function testCleanString() {
     $config = config('path.settings');
     $tests = array();
-    $config->set('ignore_words', ', in, is,that, the  , this, with, ');
+    $config->set('ignore_words', ', a, in, is,that, the  , this, with, ');
     $config->set('max_component_length', 35);
     $config->save();
 
@@ -178,8 +178,18 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
 
     foreach ($tests as $input => $expected) {
       $output = path_clean_string($input);
-      $this->assertEqual($output, $expected, t("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+      $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
+
+    // Test transliteration replacements.
+    $config->set('transliterate', 1);
+    $config->save();
+    backdrop_static_reset('path_clean_string');
+
+    $input = 'ädd ä accènts thè';
+    $expected = 'add-accents'; // "a" and "the" is stripped out.
+    $output = path_clean_string($input);
+    $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
   }
 
   /**
@@ -194,7 +204,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $tests['one/-//three--/four'] = 'one/three/four';
     foreach ($tests as $input => $expected) {
       $output = path_clean_alias($input);
-      $this->assertEqual($output, $expected, t("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+      $this->assertEqual($output, $expected, format_string("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
 
   }
@@ -836,16 +846,16 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     foreach ($tokens as $name => $expected) {
       $token = $input[$name];
       if (!isset($expected)) {
-        $this->assertTrue(!isset($values[$token]), t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->assertTrue(!isset($values[$token]), format_string("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
       }
       elseif (!isset($replacements[$token])) {
         $this->fail(t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
       }
       elseif (!empty($options['regex'])) {
-        $this->assertTrue(preg_match('/^' . $expected . '$/', $replacements[$token]), t("Token value for @token was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+        $this->assertTrue(preg_match('/^' . $expected . '$/', $replacements[$token]), format_string("Token value for @token was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
       }
       else {
-        $this->assertIdentical($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+        $this->assertIdentical($replacements[$token], $expected, format_string("Token value for @token was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
       }
     }
 

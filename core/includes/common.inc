@@ -780,7 +780,9 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
 
   $url = url($path, $options);
 
-  header('Location: ' . $url, TRUE, $http_response_code);
+  if (!backdrop_is_background()) {
+    header('Location: ' . $url, TRUE, $http_response_code);
+  }
 
   // The "Location" header sends a redirect status code to the HTTP daemon. In
   // some cases this can be wrong, so we make sure none of the code below the
@@ -1146,6 +1148,12 @@ function backdrop_http_request($url, array $options = array()) {
 
   switch ($code) {
     case 200: // OK
+    case 201: // Created
+    case 202: // Accepted
+    case 203: // Non-Authoritative Information
+    case 204: // No Content
+    case 205: // Reset Content
+    case 206: // Partial Content
     case 304: // Not modified
       break;
     case 301: // Moved permanently
@@ -2910,16 +2918,54 @@ function backdrop_deliver_html_page($page_callback_result) {
 function backdrop_page_footer() {
   module_invoke_all('exit');
 
-  // Commit the user session, if needed.
+  // Commit the user session, if needed. This must be done before sending the
+  // response, as it may set a cookie header.
   backdrop_session_commit();
 
-  if (config_get('system.core', 'cache') && ($cache = backdrop_page_set_cache())) {
-    backdrop_serve_page_from_cache($cache);
-  }
-  else {
-    ob_flush();
+  // In order to do post-delivery processing (e.g. cron run), we must close the
+  // connection. Otherwise the connection will wait for PHP to finish before it
+  // is used again in a subsequent request, such as for a JS or CSS file.
+  if (!backdrop_is_background()) {
+    header('Connection: close');
   }
 
+  // Get the contents of the output buffer, which was started in
+  // _backdrop_bootstrap_page_header().
+  $page_length = ob_get_length();
+  $page_content = ob_get_clean();
+
+  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
+    $cache = backdrop_page_create_cache($page_content);
+    // If this is a background request, there is no need to print the page to a
+    // buffer that will never be sent to the browser.
+    if (!backdrop_is_background()) {
+      backdrop_serve_page_from_cache($cache);
+    }
+  }
+  else {
+    backdrop_set_length_headers($page_length);
+    print $page_content;
+  }
+
+  // End the request and send the response to the browser.
+  ob_end_flush();
+
+  // If we're not already in a background request, flush to the browser.
+  if (!backdrop_is_background()) {
+    // Flushing for PHP-FPM based installations.
+    if (function_exists('fastcgi_finish_request')) {
+      fastcgi_finish_request();
+    }
+    // Flushing for Apache mod_php installations.
+    else {
+      flush();
+    }
+  }
+
+  // Then continue background tasks without holding up the rest of the request.
+  if (isset($cache)) {
+    backdrop_page_save_cache($cache);
+  }
   backdrop_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
@@ -2983,11 +3029,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  * into script execution a call such as set_time_limit(20) is made, the
  * script will run for a total of 45 seconds before timing out.
  *
- * It also means that it is possible to decrease the total time limit if
- * the sum of the new time limit and the current time spent running the
- * script is inferior to the original time limit. It is inherent to the way
- * set_time_limit() works, it should rather be called with an appropriate
- * value every time you need to allocate a certain amount of time
+ * If the current time limit is not unlimited it is possible to decrease the
+ * total time limit if the sum of the new time limit and the current time spent
+ * running the script is inferior to the original time limit. It is inherent to
+ * the way set_time_limit() works, it should rather be called with an
+ * appropriate value every time you need to allocate a certain amount of time
  * to execute a task than only once at the beginning of the script.
  *
  * Before calling set_time_limit(), we check if this function is available
@@ -3004,7 +3050,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  */
 function backdrop_set_time_limit($time_limit) {
   if (function_exists('set_time_limit')) {
-    @set_time_limit($time_limit);
+    $current = ini_get('max_execution_time');
+    // Do not set time limit if it is currently unlimited.
+    if ($current != 0) {
+      @set_time_limit($time_limit);
+    }
   }
 }
 
@@ -3061,7 +3111,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes), TRUE);
+    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes));
   }
 
   backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
@@ -5528,6 +5578,11 @@ function _backdrop_bootstrap_full() {
   fix_gpc_magic();
   // Load all enabled modules
   module_load_all();
+  // Reset backdrop_alter() and module_implements() static caches as these
+  // include implementations for vital modules only when called early on
+  // in the bootstrap.
+  backdrop_static_reset('backdrop_alter');
+  backdrop_static_reset('module_implements');
   // Make sure all stream wrappers are registered.
   file_get_stream_wrappers();
   // Ensure mt_rand is reseeded, to prevent random values from one page load
@@ -5565,60 +5620,110 @@ function _backdrop_bootstrap_full() {
 /**
  * Stores the current page in the cache.
  *
+ * This function is no longer used by core but is preserved for
+ * backwards-compatibility.
+ *
+ * @deprecated since 1.3.0
+ */
+function backdrop_page_set_cache() {
+  $cache = FALSE;
+  if (backdrop_page_is_cacheable()) {
+    $page_content = ob_get_clean();
+    $cache = backdrop_page_create_cache($page_content);
+    backdrop_page_save_cache($cache);
+  }
+  return $cache;
+}
+
+/**
+ * Create a page cache object for a page request.
+ *
  * If page_compression is enabled, a gzipped version of the page is stored in
  * the cache to avoid compressing the output on each request. The cache entry
- * is unzipped in the relatively rare event that the page is requested by a
- * client without gzip support.
+ * is unzipped on delivery in the relatively rare event that the page is
+ * requested by a client without gzip support.
  *
  * Page compression requires the PHP zlib extension
  * (http://php.net/manual/ref.zlib.php).
  *
+ * @param $page_content
+ *   The page content (HTML) that should be entered into a cache entry.
+ *
+ * @return stdClass|FALSE
+ *   A cache entry ready to be written to the cache backend. If the page is not
+ *   cacheable, FALSE will be returned.
+ *
  * @see backdrop_page_header()
+ * @see backdrop_page_save_cache();
  */
-function backdrop_page_set_cache() {
+function backdrop_page_create_cache($page_content) {
   global $base_root;
 
-  if (backdrop_page_is_cacheable()) {
+  // Check whether the current page might be compressed.
+  $config = config('system.core');
+  $page_compressed = $config->get('page_compression') && extension_loaded('zlib');
 
-    // Check whether the current page might be compressed.
-    $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
+  // If using background fetch, we keep cache entries for a much longer period.
+  // This allows the stale entries to be served while generating a new one.
+  if ($config->get('page_cache_background_fetch')) {
+    $stale_lifetime = $config->get('page_cache_keep_stale_age');
+    // Ensure a stale lifetime is set. Defaults to 2 days.
+    if (!$stale_lifetime) {
+      $stale_lifetime = 172800;
+    }
+    $cache_lifetime = $stale_lifetime;
+  }
+  // If not using background fetch, the page only needs to be kept for as long
+  // as the life of the cache lifetime.
+  else {
+    $cache_lifetime = $config->get('page_cache_maximum_age');
+  }
 
-    $cache = (object) array(
-      'cid' => $base_root . request_uri(),
-      'data' => array(
-        'path' => $_GET['q'],
-        'body' => ob_get_clean(),
-        'title' => backdrop_get_title(),
-        'headers' => array(),
-        // We need to store whether page was compressed or not,
-        // because by the time it is read, the configuration might change.
-        'page_compressed' => $page_compressed,
-      ),
-      'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
-      'created' => REQUEST_TIME,
-    );
+  $cache = (object) array(
+    'cid' => $base_root . request_uri(),
+    'data' => array(
+      'path' => $_GET['q'],
+      'body' => $page_content,
+      'title' => backdrop_get_title(),
+      'headers' => array(),
+      // We need to store whether page was compressed or not,
+      // because by the time it is read, the configuration might change.
+      'page_compressed' => $page_compressed,
+    ),
+    'expire' => REQUEST_TIME + $cache_lifetime,
+    'created' => REQUEST_TIME,
+  );
 
-    // Restore preferred header names based on the lower-case names returned
-    // by backdrop_get_http_header().
-    $header_names = _backdrop_set_preferred_header_name();
-    foreach (backdrop_get_http_header() as $name_lower => $value) {
-      $cache->data['headers'][$header_names[$name_lower]] = $value;
-      if ($name_lower == 'cache-control') {
-        // Set page cache expiration time based on Cache-Control header.
-        $matches = array();
-        if (preg_match('/max-age=(\d+)/', $value, $matches)) {
-          $cache->expire = REQUEST_TIME + $matches[1];
-        }
+  if ($page_compressed) {
+    $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
+  }
+
+  // Restore preferred header names based on the lower-case names returned
+  // by backdrop_get_http_header().
+  $header_names = _backdrop_set_preferred_header_name();
+  foreach (backdrop_get_http_header() as $name_lower => $value) {
+    $cache->data['headers'][$header_names[$name_lower]] = $value;
+    if ($name_lower == 'cache-control') {
+      // Set page cache expiration time based on Cache-Control header.
+      $matches = array();
+      if (preg_match('/max-age=(\d+)/', $value, $matches)) {
+        $cache->expire = REQUEST_TIME + $matches[1];
       }
     }
+  }
 
-    if ($cache->data['body']) {
-      if ($page_compressed) {
-        $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
-      }
-      cache('page')->set($cache->cid, $cache->data, $cache->expire);
-    }
-    return $cache;
+  return $cache;
+}
+
+/**
+ * Save a page cache entry to the cache.
+ *
+ * @param stdClass $cache
+ *   A cache entry object to be written to the cache backend.
+ */
+function backdrop_page_save_cache($cache) {
+  if ($cache->data['body']) {
+    cache('page')->set($cache->cid, $cache->data, $cache->expire);
   }
 }
 
@@ -5627,8 +5732,8 @@ function backdrop_page_set_cache() {
  *
  * Do not call this function from a test. Use $this->cronRun() instead.
  *
- * @return
- *   TRUE if cron ran successfully.
+ * @return bool
+ *   TRUE if cron ran successfully and FALSE if cron is already running.
  */
 function backdrop_cron_run() {
   // Allow execution to continue even if the request gets canceled.
@@ -5690,12 +5795,12 @@ function backdrop_cron_run() {
       // Do not run if queue wants to skip.
       continue;
     }
-    $function = $info['worker callback'];
+    $callback = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
     $queue = BackdropQueue::get($queue_name);
     while (time() < $end && ($item = $queue->claimItem())) {
       try {
-        $function($item->data);
+        call_user_func($callback, $item->data);
         $queue->deleteItem($item);
       }
       catch (Exception $e) {
@@ -5769,8 +5874,8 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   $searchdir = array('core/' . $directory);
 
   // For the case of searching for profiles, scan top-level directories.
-  // Always search for contributed and custom extensions in top-level
-  // directories as well as sites/all/* directories. If the same extension is
+  // Always search for contributed and custom extensions in the profile
+  // directories as well as in the root directories. If the same extension is
   // located in both directories, then the latter wins for legacy/historical
   // reasons.
   $profiles = array();
@@ -7503,7 +7608,8 @@ function backdrop_uninstall_schema($module) {
  * specification of a schema, as it was defined in a module's
  * hook_schema(). No additional default values will be set,
  * hook_schema_alter() is not invoked and these unprocessed
- * definitions won't be cached.
+ * definitions won't be cached. To retrieve the schema after
+ * hook_schema_alter() has been invoked use backdrop_get_schema().
  *
  * This function can be used to retrieve a schema specification in
  * hook_schema(), so it allows you to derive your tables from existing
@@ -8079,11 +8185,17 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * Parses a dependency for comparison by backdrop_check_incompatibility().
  *
  * @param $dependency
- *   A dependency string, for example 'foo (>=1.x-4.5-beta5, 3.x)'.
+ *   A dependency string, which specifies a module dependency, and optionally
+ *   the project it comes from and versions that are supported. Supported
+ *   formats include:
+ *   - 'module'
+ *   - 'project:module'
+ *   - 'project:module (>=version, version)'
  *
  * @return
  *   An associative array with three keys:
- *   - 'name' includes the name of the thing to depend on (e.g. 'foo').
+ *   - 'project' includes the name of the project containing the module.
+ *   - 'name' includes the name of the module to depend on.
  *   - 'original_version' contains the original version string (which can be
  *     used in the UI for reporting incompatibilities).
  *   - 'versions' is a list of associative arrays, each containing the keys
@@ -8094,6 +8206,12 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * @see backdrop_check_incompatibility()
  */
 function backdrop_parse_dependency($dependency) {
+  $value = array();
+  // Split out the optional project name.
+  if (strpos($dependency, ':')) {
+    list($project_name, $dependency) = explode(':', $dependency);
+    $value['project'] = $project_name;
+  }
   // We use named subpatterns and support every op that version_compare
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
@@ -8102,7 +8220,6 @@ function backdrop_parse_dependency($dependency) {
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
-  $value = array();
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {

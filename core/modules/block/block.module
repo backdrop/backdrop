@@ -52,7 +52,7 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/add'] = array(
-    'title' => 'Add block',
+    'title' => 'Add custom block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_add_block_form'),
     'access arguments' => array('administer blocks'),

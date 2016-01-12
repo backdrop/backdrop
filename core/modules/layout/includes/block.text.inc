@@ -5,23 +5,12 @@
  *  
  *  This class allows us to create text blocks.
  */
-class TextBlock extends Block {
+class BlockText extends Block {
   /**
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    return t('Text block');
-  }
-
-  /**
-   *  Sets description text on draggable block in Layout builder.
-   */
-  function getAdminPreview() {
-    $label_text = !empty($this->settings['subject']) ? ': ' . check_plain($this->settings['subject']) : '';
-    $preview = '<p>' . t('Text') . $label_text . '</p>';
-    $preview .= $this->getAdminConditionsPreview();
-
-    return $preview;
+    return !empty($this->settings['subject']) ? check_plain($this->settings['subject']) : t('Custom block');
   }
 
   /**

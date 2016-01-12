@@ -1,0 +1,8 @@
+type = module
+name = System project namespace test
+description = Support module for testing project namespace dependencies.
+package = Testing
+version = VERSION
+backdrop = 1.x
+hidden = TRUE
+dependencies[] = backdrop:filter

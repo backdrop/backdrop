@@ -2650,6 +2650,76 @@ function system_update_1045() {
 }
 
 /**
+ * Upgrade or prepare for transliteration functions in core.
+ */
+function system_update_1046() {
+  $config = config('system.core');
+
+  // If contrib module was installed, migrate settings and disable module.
+  if (module_exists('transliteration')) {
+    $contrib_config = config('transliteration.settings');
+    $config->set('file_transliterate_lowercase', $contrib_config->get('file_lowercase'));
+    $config->set('file_transliterate_uploads', $contrib_config->get('file_uploads'));
+    $config->set('file_transliterate_uploads_display_name', $contrib_config->get('file_uploads_display_name'));
+
+    $path = backdrop_get_path('module', 'transliteration');
+    backdrop_set_message(t('Backdrop core now provides transliteration functions in core. A copy of Transliteration module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the transliteration module in the system table.
+    db_query("DELETE FROM {system} WHERE name = 'transliteration' AND type = 'module'");
+  }
+  else {
+    // Migrate variables to config.
+    $config->set('file_transliterate_lowercase', update_variable_get('transliteration_file_lowercase', FALSE));
+    $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', TRUE));
+    $config->set('file_transliterate_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', FALSE));
+  
+    // Remove variables from D7.
+    update_variable_del('transliteration_file_lowercase');
+    update_variable_del('transliteration_file_uploads');
+    update_variable_del('transliteration_file_uploads_display_name');
+
+    // Check for files that need to be fixed.
+    module_load_include('inc', 'system', 'system.admin');
+  }
+  $config->save();
+
+  return t('Transliteration has been merged into core. <a href="@transliteration-url">Fix existing file names</a>.', array('@transliteration-url' => url('admin/config/media/file-system/transliteration')));
+}
+
+/**
+ * Provide a default value for maintenance_page_maximum_age.
+ */
+function system_update_1047() {
+  config_set('system.core', 'maintenance_page_maximum_age', 10);
+}
+
+/**
+ * Set background fetch defaults.
+ */
+function system_update_1048() {
+  config('system.core')
+    ->set('page_cache_background_fetch', 1)
+    ->set('page_cache_keep_stale_age', 172800)
+    ->save();
+}
+
+/**
+ * Bartik theme settings update: Indicate whether legacy colors should be used.
+ */
+function system_update_1049() {
+  // Only bother if the default theme is Bartik.
+  $default_theme = config_get('system.core', 'theme_default');
+  if ($default_theme == 'bartik') {
+    // If there are no color settings then the default (Blue Lagoon) was in use.
+    if (config_get('bartik.settings', 'color') === NULL) {
+      // Set a flag indicating that we should use the legacy style sheet.
+      config_set('bartik.settings', 'legacy', TRUE);
+    }
+    config_set('bartik.settings', 'main_menu_tabs', 'rounded-tabs');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

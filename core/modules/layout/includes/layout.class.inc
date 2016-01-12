@@ -719,7 +719,7 @@ class Layout {
     foreach ($required_contexts as $required_context_name) {
       $context_missing = TRUE;
       foreach ($all_contexts as $context) {
-        if ($context->plugin === $required_context_name) {
+        if ($context->isA($required_context_name)) {
           // Matching context available, continue to the next one.
           $context_missing = FALSE;
           break;

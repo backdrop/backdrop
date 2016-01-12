@@ -333,6 +333,18 @@ class HookRequirementsTestCase extends ModuleTestCase {
  */
 class ModuleDependencyTestCase extends ModuleTestCase {
   /**
+   * Checks functionality of project namespaces for dependencies.
+   */
+  function testProjectNamespaceForDependencies() {
+    // Enable module with project namespace to ensure nothing breaks.
+    $edit = array(
+      'modules[Testing][system_project_namespace_test][enable]' => TRUE,
+    );
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertModules(array('system_project_namespace_test'), TRUE);
+  }
+
+  /**
    * Attempt to enable translation module without locale enabled.
    */
   function testEnableWithoutDependency() {
@@ -713,9 +725,8 @@ class CronRunTestCase extends BackdropWebTestCase {
  * Test execution of the cron queue.
  */
 class CronQueueTestCase extends BackdropWebTestCase {
-
   function setUp() {
-    parent::setUp(array('common_test', 'common_test_cron_helper'));
+    parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
 
   /**
@@ -735,6 +746,22 @@ class CronQueueTestCase extends BackdropWebTestCase {
     $this->assertEqual($queue->numberOfItems(), 1, 'Failing item still in the queue after throwing an exception.');
   }
 
+  /**
+   * Tests worker defined as a class method callable.
+   */
+  function testCallable() {
+    $queue = BackdropQueue::get('cron_queue_test_callback');
+
+    // Enqueue an item for processing.
+    $queue->createItem(array($this->randomName() => $this->randomName()));
+
+    // Run cron; the worker should perform the task and delete the item from the
+    // queue.
+    $this->cronRun();
+
+    // The queue should be empty.
+    $this->assertEqual($queue->numberOfItems(), 0);
+  }
 }
 
 class MetaTagsTestCase extends BackdropWebTestCase {
@@ -1014,6 +1041,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp();
@@ -1029,6 +1057,9 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
    * Verify site maintenance mode functionality.
    */
   function testSiteMaintenance() {
+    // Start with the page cache disabled.
+    config_set('system.core', 'page_cache_maximum_age', 0);
+
     // Turn on maintenance mode.
     $edit = array(
       'maintenance_mode' => TRUE,
@@ -1045,17 +1076,36 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Logout and verify that offline message is displayed.
     $this->backdropLogout();
-    $this->backdropGet('');
+
+    $this->backdropGet('token/tree');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
-    $this->backdropGet('node');
-    $this->assertText($offline_message);
+
+    // With caching disabled, the maintenance page is also disabled.
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
+
+    // Enable caching and check that the default maintenance max age is set.
+    config_set('system.core', 'page_cache_maximum_age', 300);
+    $this->backdropGet('token/tree');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 10');
+
+    // Increase the cache lifetime and try a different path.
+    config_set('system.core', 'maintenance_page_maximum_age', 60);
     $this->backdropGet('user/register');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 60');
 
     // Verify that user is able to log in.
     $this->backdropGet('user');
+    $this->assertResponse(200);
+    $this->assertNoText($offline_message);
+    // The user should also be able to reset their password.
+    $this->backdropGet('user/password');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
     $this->backdropGet('user/login');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
 
     // Log in user and verify that maintenance mode message is displayed
@@ -2090,12 +2140,29 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
     $arg1 = $this->randomName();
     $arg2 = $this->randomName();
     $this->backdropGet('system-test/shutdown-functions/' . $arg1 . '/' . $arg2);
-    $this->assertText(t('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
-    $this->assertText(t('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
+
+    // Now wait a few seconds to ensure that the watchdog entries are written
+    // before we check for them.
+    sleep(2);
+
+    $shutdown1 = format_string('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+    $shutdown2 = format_string('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+
+    // Text doesn't show up because the page returns before shutdown functions.
+    $this->assertNoText($shutdown1);
+    $this->assertNoText($shutdown2);
+
+    // However, the messages should show up in watchdog.
+    $shutdown1_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown1))->fetchField();
+    $shutdown2_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown2))->fetchField();
+    $this->assertEqual($shutdown1_log, 1, 'Shutdown message 1 logged.');
+    $this->assertEqual($shutdown2_log, 1, 'Shutdown message 2 logged.');
 
     // Make sure exceptions displayed through _backdrop_render_exception_safe()
     // are correctly escaped.
-    $this->assertRaw('Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;.');
+    $message = 'Exception: Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;';
+    $exception_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message LIKE :string", array(':string' => db_like($message) . '%'))->fetchField();
+    $this->assertRaw($exception_log, 1, 'Uncaught exception logged.');
   }
 }
 

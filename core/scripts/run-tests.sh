@@ -447,8 +447,11 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
  */
 function simpletest_script_run_one_test($test_id, $test_class) {
   try {
-    // Bootstrap Backdrop.
+    // Bootstrap Backdrop. Disable the fast return of the page cache.
+    backdrop_page_is_cacheable(FALSE);
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+    backdrop_page_is_cacheable(TRUE);
+
     $info = simpletest_test_get_by_class($test_class);
     include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);

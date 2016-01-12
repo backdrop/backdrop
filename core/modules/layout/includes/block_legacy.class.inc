@@ -62,7 +62,7 @@ class BlockLegacy extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
-    $info = layout_get_block_info($this->module, $this->delta);
+    $info = $this->getBlockInfo();
     return $info['info'];
   }
 
