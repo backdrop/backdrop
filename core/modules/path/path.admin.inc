@@ -50,12 +50,12 @@ function path_admin_overview($keys = NULL) {
     $operations = array();
     $operations['edit'] = array(
       'title' => t('Edit'),
-      'href' => "admin/config/search/path/edit/$data->pid",
+      'href' => "admin/structure/path/edit/$data->pid",
       'query' => $destination,
     );
     $operations['delete'] = array(
       'title' => t('Delete'),
-      'href' => "admin/config/search/path/delete/$data->pid",
+      'href' => "admin/structure/path/delete/$data->pid",
       'query' => $destination,
     );
     $row['data']['operations'] = array(
@@ -78,7 +78,7 @@ function path_admin_overview($keys = NULL) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/search/path/add'))),
+    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/structure/path/add'))),
   );
   $build['path_pager'] = array('#theme' => 'pager');
 
@@ -204,7 +204,7 @@ function path_admin_form_delete_submit($form, &$form_state) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
-  $form_state['redirect'] = array('admin/config/search/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
+  $form_state['redirect'] = array('admin/structure/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
 }
 
 /**
@@ -250,7 +250,7 @@ function path_admin_form_submit($form, &$form_state) {
   path_save($form_state['values']);
 
   backdrop_set_message(t('The alias has been saved.'));
-  $form_state['redirect'] = 'admin/config/search/path';
+  $form_state['redirect'] = 'admin/structure/path';
 }
 
 /**
@@ -268,7 +268,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
       $form,
       t('Are you sure you want to delete path alias %title?',
       array('%title' => $path['alias'])),
-      'admin/config/search/path'
+      'admin/structure/path'
     );
   }
   return array();
@@ -280,7 +280,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
 function path_admin_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     path_delete($form_state['path']['pid']);
-    $form_state['redirect'] = 'admin/config/search/path';
+    $form_state['redirect'] = 'admin/structure/path';
   }
 }
 
@@ -326,7 +326,7 @@ function path_admin_filter_form($form, &$form_state, $keys = '') {
  * @see path_admin_filter_form_submit_reset()
  */
 function path_admin_filter_form_submit_filter($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/structure/path/list/' . trim($form_state['values']['filter']);
 }
 
 /**
@@ -335,7 +335,7 @@ function path_admin_filter_form_submit_filter($form, &$form_state) {
  * @see path_admin_filter_form_submit_filter()
  */
 function path_admin_filter_form_submit_reset($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list';
+  $form_state['redirect'] = 'admin/structure/path/list';
 }
 
 /**
@@ -654,7 +654,7 @@ function path_bulk_update_form($form, &$form_state) {
   $all_path_info = path_get_info();
 
   $rows = array();
-  
+
   foreach ($all_path_info as $type => $path_info) {
     if (!empty($path_info['batch update callback'])) {
       $form['update'][$type]['base'] = array(
@@ -669,7 +669,7 @@ function path_bulk_update_form($form, &$form_state) {
       $form['#update_callbacks'][$type] = $path_info;
       // Check if this entity provides bundle types as pattern items and create
       // a row for each of these bundle types. For the Node entity the pattern
-      // items would be keyed by be node types; for taxonomy, these would be 
+      // items would be keyed by be node types; for taxonomy, these would be
       // vocabularies.
       if (isset($path_info['pattern items'])) {
         foreach ($path_info['pattern items'] as $item => $item_label) {
@@ -760,8 +760,8 @@ function theme_path_bulk_update_form($variables) {
  * @see path_admin_bulk_delete_confirm()
  */
 function path_bulk_update_form_rebuild_submit($form, &$form_state) {
-  // If aliases are being deleted, rebuild the form to show the confirm form. 
-  // Otherwise aliases are being generated or updated, call the 
+  // If aliases are being deleted, rebuild the form to show the confirm form.
+  // Otherwise aliases are being generated or updated, call the
   // path_bulk_update_form_generate_submit() form.
   if ($form_state['values']['operations']['operation'] == 'delete') {
     $form_state['storage']['delete'] = TRUE;
@@ -910,7 +910,34 @@ function path_admin_bulk_delete_confirm($form, $form_state) {
         }
       }
     }
+    $form['delete'] = array(
+      '#type' => 'value',
+      '#value' => $form_state['values']['delete'],
+    );
+    $form['delete_list'] = array(
+      '#markup' => theme('item_list', array('items' => $delete_list)),
+    );
+
+    $question = t('Delete all the following URL aliases?');
+    $path = 'admin/config/search/path/bulk-delete';
+    $description = t('Deleting these URL aliases cannot be undone.');
+    $yes = t('Delete URL aliases');
+
+    return confirm_form($form, $question, $path, $description, $yes);
   }
+
+  /* TODO:
+   1) all - DONE
+   2) all content URL aliases - DONE
+   4) all user URL aliases - DONE
+   5) all taxonomy term URL aliases - DONE
+   6) by node type
+   7) by taxonomy vocabulary
+   8) no longer existing URL aliases (see http://drupal.org/node/128366)
+   9) where src like 'pattern' - DON'T DO
+   10) where dst like 'pattern' - DON'T DO
+  */
+
   $form['delete'] = array(
     '#type' => 'value',
     '#value' => $form_state['values']['update'],
@@ -988,5 +1015,5 @@ function path_bulk_update_form_bulk_delete_submit($form, &$form_state) {
     }
   }
 
-  $form_state['redirect'] = 'admin/config/search/path/bulk-update';
+  $form_state['redirect'] = 'admin/structure/path/bulk-delete';
 }
