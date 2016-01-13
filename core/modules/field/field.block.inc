@@ -39,7 +39,7 @@ class FieldBlock extends Block {
 
     $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
-    $preview .= $this->getConditionSummary();
+    $preview .= $this->getAdminConditionsPreview();
     return $preview;
   }
 
