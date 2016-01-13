@@ -116,7 +116,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'page callback' => 'backdrop_goto',
+    'page callback' => 'backdrop_goto_deprecated',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/blocks'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -129,7 +129,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'page callback' => 'backdrop_goto',
+    'page callback' => 'backdrop_goto_deprecated',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/configure'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,

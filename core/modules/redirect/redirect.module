@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @defgroup redirect_api Redirection API
  * @{
@@ -60,7 +59,7 @@ function redirect_permission() {
  * Implements hook_menu().
  */
 function redirect_menu() {
-  $items['admin/config/search/redirect'] = array(
+  $items['admin/config/urls/redirect'] = array(
     'title' => 'URL redirects',
     'description' => 'Redirect users from one URL to another.',
     'page callback' => 'backdrop_get_form',
@@ -68,13 +67,13 @@ function redirect_menu() {
     'access arguments' => array('administer redirects'),
     'file' => 'redirect.admin.inc',
   );
-  $items['admin/config/search/redirect/list'] = array(
+  $items['admin/config/urls/redirect/list'] = array(
     'title' => 'List URL redirects',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/config/search/redirect/add'] = array(
-    'title' => 'Add URL redirect',
+  $items['admin/config/urls/redirect/add'] = array(
+    'title' => 'Add redirect',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('redirect_edit_form'),
     'access callback' => 'redirect_access',
@@ -82,7 +81,7 @@ function redirect_menu() {
     'file' => 'redirect.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
-  $items['admin/config/search/redirect/edit/%redirect'] = array(
+  $items['admin/config/urls/redirect/edit/%redirect'] = array(
     'title' => 'Edit redirect',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('redirect_edit_form', 5),
@@ -90,7 +89,7 @@ function redirect_menu() {
     'access arguments' => array('update', 5),
     'file' => 'redirect.admin.inc',
   );
-  $items['admin/config/search/redirect/delete/%redirect'] = array(
+  $items['admin/config/urls/redirect/delete/%redirect'] = array(
     'title' => 'Delete redirect',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('redirect_delete_form', 5),
@@ -98,7 +97,7 @@ function redirect_menu() {
     'access arguments' => array('delete', 5),
     'file' => 'redirect.admin.inc',
   );
-  $items['admin/config/search/redirect/settings'] = array(
+  $items['admin/config/urls/redirect/settings'] = array(
     'title' => 'Settings',
     'description' => 'Configure behavior for URL redirects.',
     'page callback' => 'backdrop_get_form',
@@ -107,6 +106,52 @@ function redirect_menu() {
     'file' => 'redirect.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 50,
+  );
+
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect'),
+    'access arguments' => array('administer redirects'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect/list'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect/list'),
+    'access arguments' => array('administer redirects'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect/add'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect/add'),
+    'access callback' => 'redirect_access',
+    'access arguments' => array('create', 'redirect'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect/edit/%redirect'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect/edit/%redirect'),
+    'access callback' => 'redirect_access',
+    'access arguments' => array('update', 5),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect/delete/%redirect'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect/delete/%redirect'),
+    'access callback' => 'redirect_access',
+    'access arguments' => array('delete', 5),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/redirect/settings'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/redirect/settings'),
+    'access arguments' => array('administer redirects'),
+    'type' => MENU_CALLBACK,
   );
 
   // Add an action link to the 404 page.
@@ -125,7 +170,7 @@ function redirect_menu() {
 
   // If the database logging module is enabled, add special 404 listing pages.
   if (module_exists('dblog')) {
-    $items['admin/config/search/redirect/404'] = array(
+    $items['admin/config/urls/redirect/404'] = array(
       'title' => 'Fix 404 pages',
       'description' => 'Add URL redirects for 404 pages.',
       'page callback' => 'redirect_404_list',
@@ -134,10 +179,17 @@ function redirect_menu() {
       'type' => MENU_LOCAL_TASK,
       'weight' => 20,
     );
+    // @deprecated: Remove backwards-compatibility redirect in 2.0.
+    $items['admin/config/search/redirect/404'] = array(
+      'page callback' => 'backdrop_goto_deprecated',
+      'page arguments' => array('admin/config/urls/redirect/404'),
+      'access arguments' => array('administer redirects'),
+      'type' => MENU_CALLBACK,
+    );
     $items['admin/reports/page-not-found/redirect'] = array(
       'title' => 'Fix 404 pages with URL redirects',
       'page callback' => 'backdrop_goto',
-      'page arguments' => array('admin/config/search/redirect/404'),
+      'page arguments' => array('admin/config/urls/redirect/404'),
       'access arguments' => array('administer redirects'),
       'type' => MENU_LOCAL_ACTION,
     );

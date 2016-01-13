@@ -180,7 +180,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $edit = array(
       'purge_inactive' => 604800,
     );
-    $this->backdropPost('admin/config/search/redirect/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/redirect/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
     $this->backdropLogout();
 
@@ -249,7 +249,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
       'source' => 'manual-test',
       'redirect' => $node_path,
     );
-    $this->backdropPost('admin/config/search/redirect/add', $edit, t('Save redirect'));
+    $this->backdropPost('admin/config/urls/redirect/add', $edit, t('Save redirect'));
     $this->assertText(t('You are attempting to redirect the page to itself. This will result in an infinite loop.'));
 
     // Redirect that points to the alias.
@@ -257,7 +257,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
       'source' => 'manual-redirect',
       'redirect' => 'manual-test',
     );
-    $this->backdropPost('admin/config/search/redirect/add', $edit, t('Save redirect'));
+    $this->backdropPost('admin/config/urls/redirect/add', $edit, t('Save redirect'));
     $this->assertText(t('The redirect has been saved.'));
 
     // The redirect will resolve from "manual-test" (the alias) to the internal

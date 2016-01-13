@@ -50,12 +50,12 @@ function path_admin_overview($keys = NULL) {
     $operations = array();
     $operations['edit'] = array(
       'title' => t('Edit'),
-      'href' => "admin/config/search/path/edit/$data->pid",
+      'href' => "admin/config/urls/path/edit/$data->pid",
       'query' => $destination,
     );
     $operations['delete'] = array(
       'title' => t('Delete'),
-      'href' => "admin/config/search/path/delete/$data->pid",
+      'href' => "admin/config/urls/path/delete/$data->pid",
       'query' => $destination,
     );
     $row['data']['operations'] = array(
@@ -78,7 +78,7 @@ function path_admin_overview($keys = NULL) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/search/path/add'))),
+    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/urls/path/add'))),
   );
   $build['path_pager'] = array('#theme' => 'pager');
 
@@ -204,7 +204,7 @@ function path_admin_form_delete_submit($form, &$form_state) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
-  $form_state['redirect'] = array('admin/config/search/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
+  $form_state['redirect'] = array('admin/config/urls/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
 }
 
 /**
@@ -250,7 +250,7 @@ function path_admin_form_submit($form, &$form_state) {
   path_save($form_state['values']);
 
   backdrop_set_message(t('The alias has been saved.'));
-  $form_state['redirect'] = 'admin/config/search/path';
+  $form_state['redirect'] = 'admin/config/urls/path';
 }
 
 /**
@@ -268,7 +268,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
       $form,
       t('Are you sure you want to delete path alias %title?',
       array('%title' => $path['alias'])),
-      'admin/config/search/path'
+      'admin/config/urls/path'
     );
   }
   return array();
@@ -280,7 +280,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
 function path_admin_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     path_delete($form_state['path']['pid']);
-    $form_state['redirect'] = 'admin/config/search/path';
+    $form_state['redirect'] = 'admin/config/urls/path';
   }
 }
 
@@ -326,7 +326,7 @@ function path_admin_filter_form($form, &$form_state, $keys = '') {
  * @see path_admin_filter_form_submit_reset()
  */
 function path_admin_filter_form_submit_filter($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/path/list/' . trim($form_state['values']['filter']);
 }
 
 /**
@@ -335,7 +335,7 @@ function path_admin_filter_form_submit_filter($form, &$form_state) {
  * @see path_admin_filter_form_submit_filter()
  */
 function path_admin_filter_form_submit_reset($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list';
+  $form_state['redirect'] = 'admin/config/urls/path/list';
 }
 
 /**
@@ -880,6 +880,7 @@ function path_admin_bulk_delete_confirm($form, $form_state) {
       }
     }
   }
+
   $form['delete'] = array(
     '#type' => 'value',
     '#value' => $form_state['values']['update'],
@@ -957,5 +958,5 @@ function path_bulk_update_form_bulk_delete_submit($form, &$form_state) {
     }
   }
 
-  $form_state['redirect'] = 'admin/config/search/path/bulk-update';
+  $form_state['redirect'] = 'admin/config/urls/path/bulk-update';
 }
