@@ -2644,7 +2644,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @param $xpath
    *   The xpath string to use in the search.
-   * @return SimpleXmlElement
+   * @return SimpleXmlElement[]|FALSE
    *   The return value of the xpath search. For details on the xpath string
    *   format and return values see the SimpleXML documentation,
    *   http://us.php.net/manual/function.simplexml-element-xpath.php.

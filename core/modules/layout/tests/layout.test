@@ -243,6 +243,69 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test Custom Text blocks.
+   */
+  function testCustomTextBlocks() {
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $layout_title_1 = t('Title of block one');
+    $layout_content_1 = t('Content of block one');
+    $layout_content_2 = t('Content of block two');
+    $layout_title_3 = t('Title of block three');
+
+    // Add a Custom Text block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'title' => $layout_title_1,
+      'content[value]' => $layout_content_1,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a Custom Text block without subject.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'content[value]' => $layout_content_2,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a Custom Text block without content.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'title' => $layout_title_3,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the front page and check that the text shows.
+    $this->backdropGet('<front>');
+
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
+      ':block' => 'block-layout-custom-block',
+    ));
+    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
+
+    // Both title and content are visible for block one.
+    $this->assertText(t($layout_title_1));
+    $this->assertText(t($layout_content_1));
+
+    // Block two content is visible.
+    $this->assertText(t($layout_content_2));
+    // Block two has no title.
+    $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
+    $this->assertFalse($title_2);
+
+    // Block three doesn't appear.
+    $this->assertNoText(t($layout_title_3));
+    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
+    $this->assertFalse($block_3);
+  }
+
+  /**
    * Test block conditions.
    */
   function testBlockConditions() {
