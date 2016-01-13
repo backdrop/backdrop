@@ -53,6 +53,13 @@ Backdrop.behaviors.contentTypes = {
       }
       return vals.join(', ');
     });
+
+    // Permissions settings.
+    $context.find('#edit-permissions').backdropSetSummary(function(context) {
+      var vals = [];
+      vals.push(Backdrop.t('Permissions'));
+      return vals.join(', ');
+    });
   }
 };
 
