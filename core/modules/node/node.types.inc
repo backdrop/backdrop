@@ -127,6 +127,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#title' => t('Submission form settings'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
+    '#weight' => -10,
   );
   $form['submission']['title_label'] = array(
     '#title' => t('Title field label'),
@@ -153,6 +154,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
+    '#weight' => -5,
   );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
@@ -230,6 +232,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
+    '#weight' => 1,
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
@@ -258,6 +261,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#access' => user_access('administer permissions'),
+    '#weight' => -3,
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
@@ -267,6 +271,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
+    '#weight' => 10,
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',

@@ -1141,6 +1141,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#attached' => array(
         'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
       ),
+      '#weight' => 20,
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states

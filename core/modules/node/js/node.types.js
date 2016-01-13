@@ -63,7 +63,7 @@ Backdrop.behaviors.contentTypes = {
       var columnOffset, $cell;
 
       // Find all checked boxes and save the column number.
-      $(context).find('input:checked:visible').each(function() {
+      $(context).find('input:checked:visible').each(function () {
         $cell = $(this).closest('td');
         columnOffset = $cell.closest('tr').children('td').index($cell);
         if (checkedColumns.indexOf(columnOffset) === -1) {
@@ -88,9 +88,16 @@ Backdrop.behaviors.contentTypes = {
       }
       // If more than 4, show the first 3 and then a count of others.
       else if (extraPermissions >= 2) {
-        permissionNames.push(Backdrop.t('@count other roles', { '@count': extraPermissions }));
+        permissionNames.push(Backdrop.t('@count other roles', {'@count': extraPermissions}));
       }
-      return permissionNames.join(', ');
+      return permissionNames.length ? permissionNames.join(', ') : Backdrop.t('No permissions set');
+    });
+
+    // Path settings.
+    $context.find('#edit-path').backdropSetSummary(function(context) {
+      var vals = [];
+      vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL pattern set'));
+      return vals.join(', ');
     });
   }
 };

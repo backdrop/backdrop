@@ -725,6 +725,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
     ),
     '#group' => 'additional_settings',
+    '#weight' => 8,
   );
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',

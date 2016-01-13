@@ -138,6 +138,7 @@ function user_admin_settings($form, &$form_state) {
   $form['admin_role'] = array(
     '#type' => 'fieldset',
     '#title' => t('Administrator role'),
+    '#weight' => -1,
   );
 
   // Do not allow users to set the anonymous or authenticated user roles as the
@@ -153,12 +154,14 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_admin_role'),
     '#options' => $roles,
     '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
+    '#weight' => -3,
   );
 
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
     '#title' => t('User log in'),
+    '#weight' => -2,
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
@@ -175,6 +178,7 @@ function user_admin_settings($form, &$form_state) {
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
     '#title' => t('Registration and cancellation'),
+    '#weight' => -4,
   );
 
   $form['registration_cancellation']['user_register'] = array(
@@ -221,6 +225,7 @@ function user_admin_settings($form, &$form_state) {
   $form['personalization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Personalization'),
+    '#weight' => 2,
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',

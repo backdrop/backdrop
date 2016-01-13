@@ -88,7 +88,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
- if (!isset($form_state['vocabulary'])) {
+  if (!isset($form_state['vocabulary'])) {
     // Create a new TaxonomyVocabulary entity for the add form.
     if (!isset($vocabulary)) {
       $vocabulary = new TaxonomyVocabulary();
