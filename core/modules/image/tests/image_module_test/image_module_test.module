@@ -21,7 +21,7 @@ function image_module_test_image_effect_info() {
     ),
     'image_module_test_wait' => array(
       'label' => t('Wait 2 seconds'),
-      'help' => t('Performs a NULL operation that takes 2 seconds.'),
+      'help' => t('Performs a NULL operation that takes 5 seconds.'),
       'effect callback' => 'image_module_test_wait_effect',
       'dimensions passthrough' => TRUE,
     )
@@ -55,7 +55,7 @@ function image_module_test_null_effect(array &$image, array $data) {
  * @return TRUE
  */
 function image_module_test_wait_effect() {
-  sleep(2);
+  sleep(5);
   return TRUE;
 }
 
