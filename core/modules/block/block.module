@@ -100,11 +100,12 @@ function block_block_info() {
 function block_block_configure($delta) {
   if ($delta) {
     $custom_block = block_custom_block_load($delta);
+    $custom_block['delta'] = $delta;
   }
   else {
     $custom_block = array();
   }
-  return block_custom_block_form($custom_block);
+  return block_custom_block_form($custom_block, FALSE);
 }
 
 /**
@@ -163,13 +164,27 @@ function block_custom_block_load($delta) {
  *   (optional) An associative array of information retrieved by
  *   block_custom_get_block() if an existing block is being edited, or an empty
  *   array otherwise. Defaults to array().
+ * @param $stand_alone
+ *   (optional) If this is a stand-alone form, such as when editing a block
+ *   at it's own URL, then set this value to TRUE. The default value of FALSE
+ *   is used when displaying as part of a form within the Layout UI.
  *
  * @ingroup forms
  */
-function block_custom_block_form($edit = array()) {
+function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   $edit += array(
     'info' => '',
+    'title' => '',
     'body' => array('value' => '', 'format' => NULL),
+    'delta' => NULL,
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Display title'),
+    '#default_value' => $edit['title'],
+    '#maxlength' => 255,
+    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#weight' => -18,
   );
   $form['info'] = array(
     '#type' => 'textfield',
@@ -179,7 +194,19 @@ function block_custom_block_form($edit = array()) {
     '#description' => t('Used in administrative interfaces and not shown to end-users.'),
     '#required' => TRUE,
     '#weight' => -20,
-    '#id' => 'block-info'
+    '#id' => 'block-info',
+  );
+  $form['delta'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => $edit['delta'],
+    '#maxlength' => 128,
+    '#machine_name' => array(
+      'exists' => 'block_custom_block_load',
+      'source' => array('info'),
+    ),
+    '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
+    '#weight' => -19,
+    '#disabled' => isset($edit['delta']),
   );
   $form['body'] = array(
     '#type' => 'text_format',
@@ -190,6 +217,26 @@ function block_custom_block_form($edit = array()) {
     '#required' => TRUE,
     '#weight' => -17,
   );
+
+  // When displaying as part of the Layout UI
+  if (!$stand_alone) {
+    $form['title']['#states'] = array(
+      'visible' => array(
+        '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
+      ),
+    );
+    $form['info']['#weight'] = 5;
+    $form['delta']['#weight'] = 6;
+    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
+    $form['reusable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Make this block reusable'),
+      '#description' => t('This option may not be unchecked once enabled. You may configure or delete this reusable block from the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+      '#weight' => 4,
+      '#default_value' => TRUE,
+      '#disabled' => TRUE,
+    );
+  }
 
   return $form;
 }
@@ -231,4 +278,7 @@ function block_custom_block_save(array $edit, $delta = NULL) {
   $config = config('block.custom.' . $delta);
   $config->setData($block);
   $config->save();
+
+  // Reset the static cache on the block list so this block is picked up.
+  backdrop_static_reset('block_block_info');
 }

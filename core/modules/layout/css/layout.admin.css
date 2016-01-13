@@ -111,7 +111,16 @@
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
   width: 105px;
-  margin: 10px 0;
+  margin: 4px 0 10px
+}
+.layout-editor-region .dropbutton-wrapper a {
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+}
+.layout-editor-region .dropbutton-wrapper .ajax-progress {
+  position: absolute;
+  padding: 0.1em 0;
 }
 .ui-sortable .layout-editor-block {
   cursor: move;

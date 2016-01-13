@@ -63,26 +63,12 @@ function block_admin_list() {
 function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($delta) {
     $custom_block = block_custom_block_load($delta);
-    $form['delta'] = array(
-      '#type' => 'value',
-      '#value' => $delta,
-    );
   }
   else {
     $custom_block = array(
       'info' => '',
       'title' => '',
       'body' => array('value' => '', 'format' => NULL),
-    );
-    $form['delta'] = array(
-      '#type' => 'machine_name',
-      '#maxlength' => 128,
-      '#machine_name' => array(
-      'exists' => 'block_custom_block_load',
-      'source' => array('info'),
-      ),
-      '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
-      '#weight' => -19,
     );
   }
   if ($custom_block['info']) {
@@ -92,21 +78,8 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     backdrop_set_title(t('Add new block'));
   }
 
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Display title'),
-    '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user.'),
-    '#default_value' => isset($custom_block['title']) ? $custom_block['title'] : '',
-    '#weight' => -18,
-  );
-
-  // Module-specific block configuration.
-  if ($settings = module_invoke('block', 'block_configure', $delta)) {
-    foreach ($settings as $k => $v) {
-      $form[$k] = $v;
-    }
-  }
+  // Call our own block configuration form (also used by Layout module).
+  $form += block_custom_block_form($custom_block, TRUE);
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
