@@ -81,6 +81,11 @@ class ModuleUnitTest extends BackdropWebTestCase {
     cache('bootstrap')->delete('module_implements');
     $this->assertFalse(cache('bootstrap')->get('module_implements'), 'The module implements cache is empty.');
     $this->backdropGet('');
+
+    // The module_implements cache is written after delivering the page, so
+    // allow a few seconds for it to be written to the cache.
+    sleep(3);
+
     $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Test again with an authenticated user.
@@ -88,6 +93,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     $this->backdropLogin($this->user);
     cache('bootstrap')->delete('module_implements');
     $this->backdropGet('');
+    sleep(3);
     $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Make sure group include files are detected properly even when the file is
