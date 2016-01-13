@@ -617,11 +617,16 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     // Delete all current URL aliases.
     $this->deleteAllAliases();
 
+    // Find the last row in the users table to apply the alias to the new user.
+    $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
+    $checkbox_name = (string) $checkbox[0]['name'];
+
     $edit = array(
       'action' => 'path_user_update_action',
-      'bulk_form[' . ($account->uid - 1) . ']' => TRUE,
+      $checkbox_name => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Execute'));
+    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item.', array('%action' => 'Update user alias')));
 
     $this->assertEntityAlias('user', $account, 'accounts/' . backdrop_strtolower($account->name));
