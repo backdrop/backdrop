@@ -1399,13 +1399,13 @@ class UserAdminTestCase extends BackdropWebTestCase {
    * Registers a user and deletes it.
    */
   function testUserAdmin() {
+    // Create admin user to delete registered user.
+    $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
 
     $user_a = $this->backdropCreateUser(array());
     $user_b = $this->backdropCreateUser(array('administer taxonomy'));
     $user_c = $this->backdropCreateUser(array('administer taxonomy'));
 
-    // Create admin user to delete registered user.
-    $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
     $this->backdropLogin($admin_user);
     $this->backdropGet('admin/people');
     $this->assertText($user_a->name, 'Found user A on admin users page');
@@ -1428,26 +1428,28 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertText($user_c->name, 'User C on filtered by role on admin users page');
 
     // Test blocking of a user.
-    $this->backdropGet('admin/people');
-    $name_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=2]/a');
-    $account = user_load_by_name(trim($name_result[0]));
+    $user_c = user_load($user_c->uid, TRUE);
+    $this->assertEqual($user_c->status, 1, 'User C not blocked');
 
-    $this->assertEqual($account->status, 1, 'User C not blocked');
+    $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
+    $user_c_checkbox = (string) $checkbox[0]['name'];
+
     $edit = array();
     $edit['action'] = 'user_block_user_action';
-    $edit['bulk_form[3]'] = TRUE;
-    $this->backdropPost('admin/people', $edit, t('Execute'));
-    $status_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=3]');
+    $edit[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
     $editunblock = array();
     $editunblock['action'] = 'user_unblock_user_action';
-    $editunblock['bulk_form[3]'] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'));
-    $status_result = $this->xpath('//div[contains(@class, "view-user-admin")]//table/tbody/tr[position()=4]//td[position()=3]');
+    $editunblock[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
-    $this->assertMail("to", $account->mail, "Activation mail sent to user C");
+    $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
 
     // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail
     $user_d = $this->backdropCreateUser(array());

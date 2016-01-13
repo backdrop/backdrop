@@ -360,15 +360,24 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     config_set('system.core', 'cache', 0);
 
     $this->backdropGet('');
+
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(3);
+
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
 
     // Test with normal cache. Boot and exit should be called.
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
     $this->backdropGet('');
+
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(3);
+
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with normal cache.'));
@@ -376,6 +385,10 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     // Test with page cache cleared, boot and exit should be called.
     $this->assertTrue(db_delete('cache_page')->execute(), t('Page cache cleared.'));
     $this->backdropGet('');
+
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(3);
+
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with aggressive cache and no cached page.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with aggressive cache and no cached page.'));
