@@ -57,15 +57,6 @@ function menu_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'menu.admin.inc',
   );
-  $items['admin/structure/menu/settings'] = array(
-    'title' => 'Settings',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('menu_configure'),
-    'access arguments' => array('administer menu'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
-    'file' => 'menu.admin.inc',
-  );
   $items['admin/structure/menu/manage/%menu'] = array(
     'title' => 'Edit links',
     'page callback' => 'backdrop_get_form',
@@ -151,10 +142,6 @@ function menu_theme() {
  * Implements hook_config_info().
  */
 function menu_config_info() {
-  $prefixes['menu.settings'] = array(
-    'label' => t('Menu settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['menu.menu'] = array(
     'name_key' => 'menu_name',
     'label_key' => 'title',

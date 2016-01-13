@@ -1819,37 +1819,6 @@ function menu_list_system_menus() {
 }
 
 /**
- * Returns an array of links to be rendered as the Main menu.
- */
-function menu_main_menu() {
-  $config = config('menu.settings');
-  $menu_enabled = module_exists('menu');
-  // When menu module is not enabled, we need a hardcoded default value.
-  $main_links_source = $menu_enabled ? $config->get('menu_main_links') : 'main-menu';
-  return menu_navigation_links($main_links_source);
-}
-
-/**
- * Returns an array of links to be rendered as the Secondary links.
- */
-function menu_secondary_menu() {
-  $config = config('menu.settings');
-  $menu_enabled = module_exists('menu');
-  // When menu module is not enabled, we need a hardcoded default value.
-  $main_links_source = $menu_enabled ? $config->get('menu_main_links') : 'main-menu';
-  $secondary_links_source = $menu_enabled ? $config->get('menu_secondary_links') : 'user-menu';
-
-  // If the secondary menu source is set as the primary menu, we display the
-  // second level of the primary menu.
-  if ($secondary_links_source == $main_links_source) {
-    return menu_navigation_links($main_links_source, 1);
-  }
-  else {
-    return menu_navigation_links($secondary_links_source, 0);
-  }
-}
-
-/**
  * Returns an array of links for a navigation menu.
  *
  * @param $menu_name
