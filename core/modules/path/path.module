@@ -53,7 +53,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/list'] = array(
-    'title' => 'List',
+    'title' => 'List URL aliases',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -74,7 +74,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/patterns/list'] = array(
-    'title' => 'Pattern List',
+    'title' => 'List patterns',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_form'),
     'access arguments' => array('administer path patterns'),

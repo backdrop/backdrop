@@ -137,7 +137,7 @@ function update_menu() {
     'file' => 'update.report.inc',
   );
   $items['admin/reports/updates/list'] = array(
-    'title' => 'List',
+    'title' => 'List available updates',
     'access arguments' => array('administer site configuration'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );

@@ -26,7 +26,7 @@ function views_ui_menu() {
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
   $items['admin/structure/views/list'] = array(
-      'title' => 'List',
+      'title' => 'List views',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -1,
     );
@@ -177,7 +177,7 @@ function views_ui_menu() {
 
   // A page in the Reports section to show usage of fields in all views
   $items['admin/reports/fields/list'] = array(
-    'title' => 'List',
+    'title' => 'List fields',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );

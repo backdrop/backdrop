@@ -27,7 +27,7 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/list'] = array(
-    'title' => 'List blocks',
+    'title' => 'List custom blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/block/manage/%block_custom_block'] = array(
