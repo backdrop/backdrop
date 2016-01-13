@@ -594,6 +594,20 @@ function layout_layout_api() {
 }
 
 /**
+ * Implements hook_block_info().
+ */
+function layout_block_info() {
+  $blocks = array();
+  $blocks['custom_block'] = array(
+    'info' => t('Add a custom block'),
+    'description' => t('A basic block for adding custom text.'),
+    'class' => 'BlockText',
+  );
+
+  return $blocks;
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function layout_autoload_info() {
@@ -604,7 +618,7 @@ function layout_autoload_info() {
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
-    'TextBlock' => 'includes/block.text.inc',
+    'BlockText' => 'includes/block.text.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
@@ -1534,18 +1548,4 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
 
   // All required contexts populated successfully.
   return TRUE;
-}
-
-/**
- * Implements hook_block_info().
- */
-function layout_block_info() {
-  $blocks = array();
-  $blocks['text_block'] = array(
-    'info' => t('Text block'),
-    'description' => t('Create a text block.'),
-    'class' => 'TextBlock',
-  );
-
-  return $blocks;
 }

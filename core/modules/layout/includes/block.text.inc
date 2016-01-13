@@ -5,30 +5,19 @@
  *  
  *  This class allows us to create text blocks.
  */
-class TextBlock extends Block {
+class BlockText extends Block {
   /**
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    return t('Text block');
-  }
-
-  /**
-   *  Sets description text on draggable block in Layout builder.
-   */
-  function getAdminPreview() {
-    $label_text = !empty($this->settings['subject']) ? ': ' . check_plain($this->settings['subject']) : '';
-    $preview = '<p>' . t('Text') . $label_text . '</p>';
-    $preview .= $this->getAdminConditionsPreview();
-
-    return $preview;
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Custom block');
   }
 
   /**
    *  Sets block subject on block view.
    */
   function getTitle() {
-    return isset($this->settings['subject']) ? check_plain($this->settings['subject']) : '';
+    return isset($this->settings['title']) ? check_plain($this->settings['title']) : '';
   }
 
   /**
@@ -44,10 +33,10 @@ class TextBlock extends Block {
    *  Builds the block's configuration form.
    */
   function form(&$form, &$form_state) {
-    $form['subject'] = array(
+    $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Display title'),
-      '#default_value' => !empty($this->settings['subject']) ? $this->settings['subject'] : '',
+      '#default_value' => !empty($this->settings['title']) ? $this->settings['title'] : '',
     );
     $form['content'] = array(
       '#type' => 'text_format',
@@ -62,7 +51,7 @@ class TextBlock extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
-    $this->settings['subject'] = $form_state['values']['subject'];
+    $this->settings['title'] = $form_state['values']['title'];
     $this->settings['content'] = $form_state['values']['content']['value'];
     $this->settings['format'] = $form_state['values']['content']['format'];
   }

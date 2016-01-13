@@ -254,16 +254,16 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add a Custom Text block to the sidebar.
     $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Text block'));
+    $this->clickLink(t('Add a custom block'));
     $edit = array(
-      'subject' => $layout_title_1,
+      'title' => $layout_title_1,
       'content[value]' => $layout_content_1,
     );
     $this->backdropPost(NULL, $edit, t('Add block'));
 
     // Add a Custom Text block without subject.
     $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Text block'));
+    $this->clickLink(t('Add a custom block'));
     $edit = array(
       'content[value]' => $layout_content_2,
     );
@@ -271,9 +271,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add a Custom Text block without content.
     $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Text block'));
+    $this->clickLink(t('Add a custom block'));
     $edit = array(
-      'subject' => $layout_title_3,
+      'title' => $layout_title_3,
     );
     $this->backdropPost(NULL, $edit, t('Add block'));
 
@@ -285,7 +285,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
       ':region' => 'l-sidebar',
-      ':block' => 'block-layout-text-block',
+      ':block' => 'block-layout-custom-block',
     ));
     $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
 
