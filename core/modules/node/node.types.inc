@@ -258,7 +258,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
   );
-  $form['permissions']['permissions'] = node_type_permissions($type->type);
+  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
   $form['display'] = array(
     '#type' => 'fieldset',
@@ -416,12 +416,12 @@ function node_type_form_submit($form, &$form_state) {
  *
  * @see node_type_form()
  */
-function node_type_permissions($type) {
+function node_type_form_permissions($type) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
 
-  $form['#theme'] = array('node_type_permissions');
+  $form['#theme'] = array('node_type_form_permissions');
   $form['roles'] = array(
     '#type' => 'value',
     '#value' => $roles,
@@ -473,7 +473,7 @@ function node_type_permissions($type) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Have to build checkboxes here after checkbox arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
