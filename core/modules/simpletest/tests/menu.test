@@ -988,6 +988,20 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
    * Tests breadcrumbs on node and administrative paths.
    */
   function testBreadCrumbs() {
+    foreach (array('default', 'admin_default') as $layout_name) {
+      $layout = layout_load($layout_name);
+      // Assume that the menu block is the second block in the default layout.
+      $menu_uuid = $layout->positions['header'][1];
+      $menu_block = $layout->content[$menu_uuid];
+
+      // Set the menu block depth and level.
+      $menu_block->settings['block_settings']['level'] = 1;
+      $menu_block->settings['block_settings']['depth'] = 0;
+
+      // Save the layout containing the block.
+      $layout->save();
+    }
+
     // Prepare common base breadcrumb elements.
     $home = array('<front>' => 'Home');
     $admin = $home + array('admin' => t('Administration'));
@@ -1465,6 +1479,18 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $layout = layout_load('admin_default');
     $layout->addBlock('system', 'management', 'content');
     $layout->addBlock('system', 'main-menu', 'content');
+    $layout->save();
+    // Set the main menu link depth to unlimited.
+    $layout = layout_load('default');
+    // Assume that the menu block is the second block in the default layout.
+    $menu_uuid = $layout->positions['header'][1];
+    $menu_block = $layout->content[$menu_uuid];
+
+    // Set the menu block depth and level.
+    $menu_block->settings['block_settings']['level'] = 1;
+    $menu_block->settings['block_settings']['depth'] = 0;
+
+    // Save the layout containing the block.
     $layout->save();
   }
 

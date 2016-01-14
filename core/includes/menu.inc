@@ -1094,6 +1094,9 @@ function menu_tree_output($tree) {
     else {
       $class[] = 'leaf';
     }
+    if (!empty($data['link']['leaf_has_children'])) {
+      $class[] = 'has-children';
+    }
     // Set a class if the link is in the active trail.
     if ($data['link']['in_active_trail']) {
       $class[] = 'active-trail';
@@ -1113,7 +1116,7 @@ function menu_tree_output($tree) {
       (empty($data['link']['language']) || $data['link']['language']->langcode == $language_url->langcode)) {
       $class[] = 'active';
     }
-
+    $class[] = 'menu-mlid-' . $data['link']['mlid'];
     // Allow menu-specific theme overrides.
     $element['#theme'] = 'menu_link__' . strtr($data['link']['menu_name'], '-', '_');
     $element['#attributes']['class'] = $class;

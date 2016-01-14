@@ -81,7 +81,7 @@ function menu_menu() {
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/configure'] = array(
-    'title' => 'Configure',
+    'title' => 'Configure menu',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_menu', 'configure', 4),
     'access arguments' => array('administer menu'),
@@ -462,15 +462,29 @@ function menu_block_info() {
 /**
  * Implements hook_block_view().
  */
-function menu_block_view($delta = '') {
-  $menus = menu_get_menus(FALSE);
-  $data['subject'] = check_plain($menus[$delta]);
-  $data['content'] = menu_tree($delta);
+function menu_block_view($delta = '', $settings = array()) {
+  module_load_include('inc', 'system', 'system.menu');
+  $settings += system_menu_block_defaults($delta);
+  $data = system_menu_block_build($settings);
+  $block['subject'] = $data['subject'];
+  $block['content'] = $data['content'];
   // Add contextual links for this block.
-  if (!empty($data['content'])) {
-    $data['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
+  if (!empty($block['content'])) {
+    $block['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
   }
-  return $data;
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function menu_block_configure($delta, $settings) {
+  foreach (menu_get_menus(FALSE) as $menu_name => $title) {
+    if ($delta === $menu_name) {
+      module_load_include('inc', 'system', 'system.menu');
+      return _system_block_configure($delta, $settings);
+    }
+  }
 }
 
 /**

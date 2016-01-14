@@ -2334,11 +2334,11 @@ function system_block_view($delta = '', $settings = array()) {
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
       if (isset($system_menus[$delta])) {
-        // Load customizations from Menu module if present.
-        $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
-        $custom_title = isset($all_menus[$delta]) ? $all_menus[$delta] : $system_menus[$delta];
-        $block['subject'] = t($custom_title);
-        $block['content'] = menu_tree($delta);
+        module_load_include('inc', 'system', 'system.menu');
+        $settings += system_menu_block_defaults($delta);
+        $data = system_menu_block_build($settings);
+        $block['subject'] = $data['subject'];
+        $block['content'] = $data['content'];
         return $block;
       }
       break;
@@ -2351,6 +2351,13 @@ function system_block_view($delta = '', $settings = array()) {
 function system_block_configure($delta, $settings) {
   if ($delta === 'header') {
     return system_header_block_form($settings);
+  }
+  // System-defined menu blocks.
+  foreach (menu_list_system_menus() as $menu_name => $title) {
+    if ($delta === $menu_name) {
+      module_load_include('inc', 'system', 'system.menu');
+      return _system_block_configure($delta, $settings);
+    }
   }
 }
 
