@@ -129,7 +129,7 @@ function block_block_view($delta = '') {
   if (!$block) {
     return array();
   }
-  $data['subject'] = strlen($block['title']) ? $block['title'] : NULL;
+  $data['subject'] = strlen($block['title']) ? check_plain($block['title']) : NULL;
   $data['content'] = check_markup($block['body']['value'], $block['body']['format'], '', TRUE);
   return $data;
 }
