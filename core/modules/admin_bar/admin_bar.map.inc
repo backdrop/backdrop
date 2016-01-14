@@ -159,14 +159,15 @@ function views_ui_admin_bar_map() {
     return;
   }
   $views = array();
-  foreach (views_get_enabled_views() as $name => $view) {
+
+  foreach (array_keys(views_get_enabled_views()) as $name) {
     $views[] = $name;
   }
   if (empty($views)) {
     return;
   }
   $map['admin/structure/views/view/%views_ui_cache'] = array(
-    'parent' => 'admin/structure/views',
+    'parent' => 'admin/structure/views/list',
     'arguments' => array(
       array('%views_ui_cache' => $views),
     ),
