@@ -1,0 +1,312 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function project_browser_test_menu() {
+  $items['core/modules/update/tests/update_test_xml/%/%'] = array(
+    'title' => 'XML feed page',
+    'description' => "Deliver release info as an XML file.",
+    'page callback' => 'update_test_xml',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['project_browser_test/query/%/%'] = array(
+    'title' => 'Test Query page',
+    'description' => "Tests the ability to fetch and display projects, and filter them appropriately.",
+    'page callback' => 'project_browser_test_query',
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['project_browser_test/categories/%'] = array(
+    'title' => 'Test Query page',
+    'description' => "Tests the ability to fetch and display projects, and filter them appropriately.",
+    'page callback' => 'project_browser_test_query',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Page callback. Outputs release information for test projects as XML data.
+ */
+function update_test_xml($project = NULL, $version = '1.x') {
+  $path = url(backdrop_get_path('module', 'update') . '/tests/update_test_xml/' . $project . '.xml', array('absolute' => TRUE)); 
+  print file_get_contents($path);
+  exit();
+}
+
+/**
+ * Page callback. Generates json based on the input filters
+ */
+function project_browser_test_query($query, $type, $version = 1) {
+  switch ($query) {
+    case 'categories':
+      if (!isset($type)) {
+        print backdrop_json_encode(t('You must specify a project type.'));
+        exit();
+      }
+      
+      $categories['project_browser_test'] = project_browser_test_get_categories($type);
+      
+      print backdrop_json_encode($categories);
+      exit();
+    
+    case 'query':
+      // Check that we have valid data
+      if (!isset($version)) {
+        print backdrop_json_encode(t('You must specify a backdrop version.'));
+        exit();
+      }
+      if (!isset($type)) {
+        print backdrop_json_encode(t('You must specify a project type.'));
+        exit();
+      }
+      
+      // Get the filters
+      $filters = array(
+        'version' => $version,
+        'type' => $type,
+        'text' => (isset($_GET['text']) AND $_GET['text']) ? $_GET['text'] : '',
+        'order_by' => isset($_GET['order_by']) ? $_GET['order_by'] : 'usage',
+        'sort' => isset($_GET['sort']) ? $_GET['sort'] : 'desc',
+        'requested' => isset($_GET['requested']) ? (int) $_GET['requested'] : 12,
+        'page' => isset($_GET['page']) ? (int) $_GET['page'] : 0,
+      );
+      
+      if (isset($_GET['categories'])) {
+        $categories = unserialize($_GET['categories']);
+        if (is_array($categories) AND !empty($categories)) {
+          $filters['categories'] = $categories;
+        }
+      }
+      
+      // Pass them off to the project_browser_server_get_results() function
+      $results = project_browser_test_get_results($filters);
+      
+      print backdrop_json_encode($results);
+      
+      exit();
+  }
+}
+
+/**
+ * Returns some static categories
+ */
+function project_browser_test_get_categories($type) {
+  $categories = array();
+  
+  switch ($type) {
+    case 'module':
+      $categories = array(
+        'admin' => "Administrative",
+        'search' => "Search",
+        'user_management' => "User Management",
+      );
+      break;
+      
+    case 'theme':
+      $categories = array(
+        'dark' => "Dark",
+        'light' => "Light",
+      );
+  }
+
+  return $categories;
+}
+
+/**
+ * Returns projects based on the filters
+ */
+function project_browser_test_get_results($filters) {
+  $projects = project_browser_test_projects();
+  
+  $results = array(
+    'total' => count($projects),
+    'projects' => array(),
+  );
+  
+  // Filter out projects based on type
+  if (isset($filters['type']) AND $type = $filters['type']) {
+    foreach ($projects as $name => $project) {
+      if ($type != $project['type']) {
+        unset($projects[$name]);
+      }
+    }
+  }
+  
+  // Filter out projects based on backdrop version number
+  if (isset($filters['version']) AND $version = $filters['version']) {
+    foreach ($projects as $name => $project) {
+      if ($version != $project['version']) {
+        unset($projects[$name]);
+      }
+    }
+  }
+  
+  // Filter out projects based on categories number
+  if (isset($filters['categories']) AND is_array($filters['categories']) AND !empty($filters['categories'])) {
+    $filtered = array();
+    foreach ($projects as $name => $project) {
+      foreach ($project['categories'] as $category) {
+        if (in_array($category, $filters['categories'])) {
+          $filtered[$name] = $project;
+        }
+      }
+    }
+    $projects = $filtered;
+  }
+
+  // Filter out projects based on the text query
+  if (isset($filters['text']) AND $text = $filters['text']) {
+    foreach ($projects as $name => $project) {
+      if (!stristr($project['title'], $text) AND !stristr($project['description'], $text)) {
+        unset($projects[$name]);
+      }
+    }
+  }
+  
+  $results['total'] = count($projects);
+  
+  // Only send back the requested amount
+  $start = $filters['page'] * $filters['requested'];
+  $end = $start + $filters['requested'];
+  
+  $results['projects'] = $projects;
+  
+  return $results;
+}
+
+/**
+ * Returns some static projects
+ */
+function project_browser_test_projects() {
+  $projects = array();
+  
+  $projects['aaa_update_test'] = array(
+    'type' => 'module',
+    'title' => 'AAA Update test',
+    'name' => 'aaa_update_test',
+    'version' => 1,
+    'author' => 'docwilmot',
+    'description' => "Support module for update module testing",
+    'versions' => array(1),
+    'categories' => array('admin', 'search'),
+    'image' => '',
+    'usage' => '542312',
+    'project url' => '',
+    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'info' => array(
+      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    ),
+    'last updated' => '12342521',
+    'maintenance status' => 'Actively maintained',
+    'development status' => 'Under active development',
+    'rating' => '9.6',
+    'includes' => array(),
+    'dependencies' => array(),
+  );
+  
+  $projects['ddd_update_test'] = array(
+    'type' => 'module',
+    'title' => 'DDD Update test',
+    'name' => 'ddd_update_test',
+    'version' => 1,
+    'author' => 'docwilmot',
+    'description' => "Support module for update module testing",
+    'versions' => array(1),
+    'categories' => array('admin', 'search'),
+    'image' => '',
+    'usage' => '542312',
+    'project url' => '',
+    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'info' => array(
+      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    ),
+    'last updated' => '12342522',
+    'maintenance status' => 'Actively maintained',
+    'development status' => 'Under active development',
+    'rating' => '9.6',
+    'includes' => array(),
+    'dependencies' => array(
+      'eee_update_test',
+    ),
+  );
+  
+  $projects['eee_update_test'] = array(
+    'type' => 'module',
+    'title' => 'EEE Update test',
+    'name' => 'eee_update_test',
+    'version' => 1,
+    'author' => 'docwilmot',
+    'description' => "Support module for update module testing",
+    'versions' => array(1),
+    'categories' => array('admin', 'search'),
+    'image' => '',
+    'usage' => '542312',
+    'project url' => '',
+    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'info' => array(
+      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    ),
+    'last updated' => '12342523',
+    'maintenance status' => 'Actively maintained',
+    'development status' => 'Under active development',
+    'rating' => '9.6',
+    'includes' => array(),
+    'dependencies' => array(),
+  );
+  
+  $projects['ttt_update_test'] = array(
+    'type' => 'theme',
+    'title' => 'TTT Update test',
+    'name' => 'ttt_update_test',
+    'version' => 1,
+    'author' => 'docwilmot',
+    'description' => "Support theme for update module testing",
+    'versions' => array(1),
+    'categories' => array('admin', 'search'),
+    'image' => '',
+    'usage' => '542312',
+    'project url' => '',
+    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'info' => array(
+      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    ),
+    'last updated' => '12342511',
+    'maintenance status' => 'Actively maintained',
+    'development status' => 'Under active development',
+    'rating' => '9.6',
+    'includes' => array(),
+    'dependencies' => array(),
+  );
+  $projects['lll_update_test'] = array(
+    'type' => 'layout',
+    'title' => 'LLL Update test',
+    'name' => 'lll_update_test',
+    'version' => 1,
+    'author' => 'docwilmot',
+    'description' => "Support layout for update module testing",
+    'versions' => array(1),
+    'categories' => array('admin', 'search'),
+    'image' => '',
+    'usage' => '542312',
+    'project url' => '',
+    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'info' => array(
+      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    ),
+    'last updated' => '12342531',
+    'maintenance status' => 'Actively maintained',
+    'development status' => 'Under active development',
+    'rating' => '9.6',
+    'includes' => array(),
+    'dependencies' => array(),
+  );
+  
+  return $projects;
+}
