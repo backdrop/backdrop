@@ -32,7 +32,7 @@ function system_menu_block_defaults($menu_name) {
  * Returns the configuration form for a menu tree.
  *
  * @param $config
- *   An associated array of settings passed in by hook_block_configure(). 
+ *   An associated array of settings passed in by hook_block_configure().
  *   If none are given, default configuration is assumed.
  * @return
  *   The form array. This is a form fragment and not in full Form API format.
@@ -105,8 +105,8 @@ function system_menu_block_build(array $config) {
   }
   else {
     $menu_names = menu_list_system_menus();
-  }  
-  
+  }
+
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
   $menu_name = str_replace('_', '-', $config['menu_name']);
@@ -115,7 +115,7 @@ function system_menu_block_build(array $config) {
   // Get the raw menu tree data.
   $tree = system_menu_tree_block_data($config);
   $title = system_menu_block_get_title();
-  
+
   // Create a renderable tree.
   $data = array();
   $data['subject'] = $title;
