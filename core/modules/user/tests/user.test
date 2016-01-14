@@ -4,15 +4,10 @@
  * Tests for user.module.
  */
 
-<<<<<<< HEAD
 class UserRegistrationTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('field_test');
   }
-=======
-class UserRegistrationTestCase extends UserLoginTestBase {
-  protected $profile = 'testing';
->>>>>>> a13b279... Issue #1485: Optimize user.test to use testing profiles.
 
   function testRegistrationWithEmailVerification() {
     $config = config('system.core');
@@ -297,45 +292,7 @@ class UserValidationTestCase extends BackdropUnitTestCase {
 /**
  * Functional tests for user logins, including rate limiting of login attempts.
  */
-<<<<<<< HEAD
 class UserLoginTestCase extends BackdropWebTestCase {
-=======
-class UserLoginTestCase extends UserLoginTestBase {
-  protected $profile = 'testing';
-
-  /**
-   * Test that login credentials work (or not) in different login modes.
-   */
-  function testLoginMethods() {
-    $account = $this->backdropCreateUser(array());
-
-    // Login via name or email (both succeed). The default for new sites.
-    config_set('system.core', 'user_login_method', USER_LOGIN_USERNAME_OR_EMAIL);
-    $this->backdropLogin($account, TRUE);
-    $this->backdropLogin($account);
-
-    // Login via email only.
-    config_set('system.core', 'user_login_method', USER_LOGIN_EMAIL_ONLY);
-    $this->backdropLogin($account, TRUE);
-    // Fail login via name.
-    $this->assertFailedLogin($account);
-
-    // Login via name.
-    config_set('system.core', 'user_login_method', USER_LOGIN_USERNAME_ONLY);
-    $this->backdropLogin($account);
-    // Fail login via email.
-    $this->assertFailedLogin($account, TRUE);
-
-    // Test login when no user_login_method is set. Allows for logging in for
-    // users that are upgrading their site for the first time to support login
-    // by username.
-    config_set('system.core', 'user_login_method', NULL);
-    $this->backdropLogin($account);
-    // Fail login via email.
-    $this->assertFailedLogin($account, TRUE);
-  }
-
->>>>>>> a13b279... Issue #1485: Optimize user.test to use testing profiles.
   /**
    * Test the global login flood control.
    */
@@ -492,13 +449,10 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
-<<<<<<< HEAD
   function setUp() {
     parent::setUp('comment');
   }
 
-=======
->>>>>>> a13b279... Issue #1485: Optimize user.test to use testing profiles.
   /**
    * Attempt to cancel account without permission.
    */
@@ -1923,14 +1877,6 @@ class UserSignatureTestCase extends BackdropWebTestCase {
  * Test that a user, having editing their own account, can still log in.
  */
 class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
-<<<<<<< HEAD
-=======
-  protected $profile = 'testing';
-
-  /**
-   * Tests a user editing their own account.
-   */
->>>>>>> a13b279... Issue #1485: Optimize user.test to use testing profiles.
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
