@@ -2319,8 +2319,8 @@ function system_block_view($delta = '', $settings = array()) {
       $system_menus = menu_list_system_menus();
       if (isset($system_menus[$delta])) {
         module_load_include('inc', 'system', 'system.menu');
-        $settings += system_menu_default_config($delta);
-        $data = system_menu_tree_build($settings);
+        $settings += system_menu_block_defaults($delta);
+        $data = system_menu_block_build($settings);
         $block['subject'] = $data['subject'];
         $block['content'] = $data['content'];
         return $block;

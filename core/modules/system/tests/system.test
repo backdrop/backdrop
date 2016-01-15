@@ -2470,3 +2470,154 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
 
   }
 }
+
+/**
+ * Test menu block settings.
+ */
+class MenuBlockTestCase extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('menu');
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer content types',
+      'administer menu',
+      'administer layouts',
+      'create page content',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test UUID validation.
+   */
+  function testMenuBlocks() {
+
+    // Add nodes to use as links for menu links.
+    $node1 = $this->backdropCreateNode(array('type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('type' => 'post'));
+    $node3 = $this->backdropCreateNode(array('type' => 'post'));
+    $node4 = $this->backdropCreateNode(array('type' => 'post'));
+    $node5 = $this->backdropCreateNode(array('type' => 'post'));
+    $node6 = $this->backdropCreateNode(array('type' => 'post'));
+
+    // Add menu links.
+    $item1 = $this->addMenuLink(0);
+    $item2 = $this->addMenuLink($item1['mlid']);
+    $item3 = $this->addMenuLink($item2['mlid']);
+    $item4 = $this->addMenuLink($item3['mlid']);
+    $item5 = $this->addMenuLink($item4['mlid']);
+    $item6 = $this->addMenuLink(0);
+
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Remove'), 1);
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Primary navigation'));
+    $edit = array();
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+    $block_edit_url = 'admin/structure/layouts/manage/default/configure-block/editor/' . $block_uuid;
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('<front>');
+
+    // Verify menu links. By default the main menu should only show first-level
+    // links
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item6['link_title']);
+    $this->assertNoLink($item2['link_title']);
+
+    // Go to the configure page and change the depth to 3.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[depth]' => 3,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('<front>');
+
+    // Verify level 3 links are shown, but not level 4.
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+    $this->assertLink($item6['link_title']);
+    $this->assertNoLink($item4['link_title']);
+
+    // Go to the configure page and change the depth to unlimited.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[depth]' => 0,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('<front>');
+
+    // Verify level 5 links are shown.
+    $this->assertLink($item5['link_title']);
+
+    // Go to the configure page and change the starting level to 2.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[level]' => 2,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('<front>');
+
+    // Verify level 2 links are shown, but not level 1.
+    $this->assertNoLink($item1['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+  }
+
+  /**
+   * Add a menu link using the menu module UI.
+   *
+   * @param integer $plid Parent menu link id.
+   * @param string $link Link path.
+   * @param string $menu_name Menu name.
+   * @return array Menu link created.
+   */
+  function addMenuLink($plid = 0) {
+    $link = '<front>';
+    $menu_name = 'main-menu';
+
+    // View add menu link page.
+    $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
+    $this->assertResponse(200);
+
+    $title = '!link_' . $this->randomName(16);
+    $edit = array(
+      'link_path' => $link,
+      'link_title' => $title,
+      'description' => '',
+      'enabled' => TRUE,
+      'expanded' => TRUE,
+      'parent' =>  $menu_name . ':' . $plid,
+      'weight' => '0',
+    );
+
+    // Add menu link.
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    // Unlike most other modules, there is no confirmation message displayed.
+    $this->assertText($title, 'Menu link was added');
+
+    $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => $title))->fetchAssoc();
+    $this->assertTrue(t('Menu link was found in database.'));
+
+    return $item;
+  }
+}

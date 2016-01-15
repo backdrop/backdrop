@@ -5,8 +5,8 @@
  */
 function _system_block_configure($delta = '', $settings = array()) {
   // Merge in the default configuration.
-  $settings += system_menu_default_config($delta);
-  return system_menu_configure_form($settings);
+  $settings += system_menu_block_defaults($delta);
+  return system_menu_block_form($settings);
 }
 
 /**
@@ -14,12 +14,18 @@ function _system_block_configure($delta = '', $settings = array()) {
  *
  * @return array
  */
-function system_menu_default_config($menu_name) {
-  return array(
+function system_menu_block_defaults($menu_name) {
+  $defaults = array(
     'level' => 1,
-    'depth' => 0,
     'menu_name' => $menu_name,
   );
+  if ($menu_name == 'main-menu') {
+    $defaults['depth'] = 1;
+  }
+  else {
+    $defaults['depth'] = 0;
+  }
+  return $defaults;
 }
 
 /**
@@ -31,7 +37,7 @@ function system_menu_default_config($menu_name) {
  * @return
  *   The form array. This is a form fragment and not in full Form API format.
  */
-function system_menu_configure_form($config) {
+function system_menu_block_form($config) {
   $form['menu_name'] = array(
     '#type' => 'value',
     '#value' => $config['menu_name'],
@@ -93,7 +99,7 @@ function system_menu_configure_form($config) {
  *   - subject: The title rendered as HTML.
  *   - subject_array: The title as a renderable array.
  */
-function system_menu_tree_build(array $config) {
+function system_menu_block_build(array $config) {
   $menu_names = menu_list_system_menus();
   
   // Get the default block name.
