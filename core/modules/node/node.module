@@ -98,6 +98,10 @@ function node_theme() {
     'node_recent_content' => array(
       'variables' => array('node' => NULL),
     ) + $base,
+    'node_type_form_permissions' => array(
+      'render element' => 'form',
+      'function' => 'theme_user_admin_permissions',
+    ),
   );
 }
 
