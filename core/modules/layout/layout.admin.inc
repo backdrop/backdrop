@@ -1042,6 +1042,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#title' => t('Style settings'),
     '#collapsed' => $layout->in_progress['section'] !== 'style',
     '#collapsible' => TRUE,
+    '#weight' => 10,
   );
   $styles = _layout_get_all_info('layout_style');
   $style_options = array();
@@ -1083,6 +1084,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#collapsed' => $layout->in_progress['section'] !== 'conditions',
     '#description' => t('Visibility conditions allow this block to be shown only in certain situations, such as for certain roles or types of content.'),
     '#id' => 'block-access',
+    '#weight' => 20,
   );
   $form['conditions']['add'] = array(
     '#type' => 'submit',
@@ -1224,9 +1226,23 @@ function layout_block_configure_form_submit($form, &$form_state) {
   $layout = $form_state['layout'];
   $style = $form_state['style'];
   $renderer = $form_state['renderer'];
+  $block_plugin = $block->plugin;
 
   // Save the block settings.
   $block->formSubmit($form, $form_state);
+
+  // Allow the block to change it's type by updating the plugin.
+  if ($block_plugin !== $block->plugin) {
+    $old_block = clone $block;
+    $block = layout_create_handler('block', $old_block->plugin);
+    $block->settings = $old_block->settings;
+    $block->uuid = $old_block->uuid;
+    $block->conditions = $old_block->conditions;
+    $block->style = $old_block->style;
+    $block->contexts = $old_block->contexts;
+    $block->is_new = TRUE;
+    $form_state['block'] = $block;
+  }
 
   // Save the style settings.
   $style->formSubmit($form['style']['style_settings'], $form_state);
@@ -1246,12 +1262,9 @@ function layout_block_configure_form_submit($form, &$form_state) {
     $layout->in_progress['block'] = $block;
     $layout->in_progress['renderer'] = $renderer;
   }
-  // Insert new blocks into the layout. Updates to $block are already done by
-  // reference, so no additional action is needed for updating.
+  // Insert new blocks into the layout.
   else {
-    if (!isset($layout->content[$block->uuid])) {
-      $layout->content[$block->uuid] = $block;
-    }
+    $layout->content[$block->uuid] = $block;
     if ($form_state['values']['region']) {
       $layout->setBlockPosition($block->uuid, $form_state['values']['region']);
     }
