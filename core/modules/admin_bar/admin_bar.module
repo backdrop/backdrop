@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Render an administrative bar as a dropdown menu at the top of the window.
@@ -137,6 +136,12 @@ function admin_bar_preprocess_page(&$variables) {
   // Performance: Skip this entirely for AJAX requests.
   if (!backdrop_is_html()) {
     return;
+  }
+
+  // For the status report page, generate the admin bar from scratch to refresh
+  // the site status indicator.
+  if (strpos($_GET['q'], 'admin/reports/status') === 0) {
+    cache('admin_bar')->flush();
   }
 
   global $user, $language;
