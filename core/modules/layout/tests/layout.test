@@ -29,7 +29,14 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
 
     // Create a web user.
-    $this->web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
+    $this->web_user = $this->backdropCreateUser(array(
+      'access user profiles',
+      'access content'
+    ));
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     $this->test_node1 = $this->backdropCreateNode(array(
       'type' => 'post',
@@ -40,7 +47,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => $this->randomString(),
     ));
   }
-
   /**
    * Add and remove blocks from a custom layout path.
    */

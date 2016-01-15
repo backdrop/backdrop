@@ -165,9 +165,9 @@ function block_custom_block_load($delta) {
  *   block_custom_get_block() if an existing block is being edited, or an empty
  *   array otherwise. Defaults to array().
  * @param $stand_alone
- *   (optional) If this is a stand-alone form, such as when editing a block
- *   at it's own URL, then set this value to TRUE. The default value of FALSE
- *   is used when displaying as part of a form within the Layout UI.
+ *   (optional) Set to FALSE if this form is used when displaying as part of a
+ *   form within the Layout UI. The default value of TRUE should be used if this
+ *   is a stand-alone form, such as when editing a block at it's own URL.
  *
  * @ingroup forms
  */
@@ -218,7 +218,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#weight' => -17,
   );
 
-  // When displaying as part of the Layout UI
+  // When displaying as part of the Layout UI.
   if (!$stand_alone) {
     $form['title']['#states'] = array(
       'visible' => array(
