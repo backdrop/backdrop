@@ -494,41 +494,6 @@ function path_field_attach_delete_bundle($entity_type, $bundle) {
 }
 
 /**
- * Implements hook_field_extra_fields().
- *
- * Add support for the 'URL settings' to be re-ordered by the user on the
- * 'Manage Fields' tab of content types and vocabularies.
- */
-function path_field_extra_fields() {
-  $info = array();
-
-  foreach (node_type_get_types() as $node_type) {
-    if (!isset($info['node'][$node_type->type]['form']['path'])) {
-      $info['node'][$node_type->type]['form']['path'] = array(
-        'label' => t('URL settings'),
-        'description' => t('Path module form elements'),
-        'weight' => 30,
-      );
-    }
-  }
-
-  if (module_exists('taxonomy')) {
-    $vocabularies = taxonomy_get_vocabularies();
-    foreach ($vocabularies as $vocabulary) {
-      if (!isset($info['taxonomy_term'][$vocabulary->machine_name]['form']['path'])) {
-        $info['taxonomy_term'][$vocabulary->machine_name]['form']['path'] = array(
-          'label' => t('URL settings'),
-          'description' => t('Path module form elements'),
-          'weight' => 30,
-        );
-      }
-    }
-  }
-
-  return $info;
-}
-
-/**
  * Implements hook_config_info().
  */
 function path_config_info() {
