@@ -223,7 +223,7 @@ function path_entity_insert(Entity $entity) {
     'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
   );
 
-  // Trim whitespace and slashes from path alias start and end.
+  // Trim whitespace and slashes from alias start and end.
   $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
 
   // Save an automatic alias if specified.
@@ -261,7 +261,7 @@ function path_entity_update(Entity $entity) {
       'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
     );
 
-    // Trim whitespace and slashes from path alias start and end.
+    // Trim whitespace and slashes from alias start and end.
     $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
 
     // Save an automatic alias if specified.

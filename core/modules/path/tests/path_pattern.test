@@ -667,8 +667,8 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
     $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
-    $this->assertText('The Default path pattern (applies to all content types with blank patterns below) is using the following invalid tokens: [user:name], [term:name].');
-    $this->assertText('The Pattern for all Page paths cannot contain fewer than one token.');
+    $this->assertText('The Default URL pattern (applies to all content types with blank patterns below) is using the following invalid tokens: [user:name], [term:name].');
+    $this->assertText('The Pattern for all Page URLs cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['node_pattern'] = '[node:title]';
@@ -794,11 +794,11 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
 
     // Bulk create aliases.
     $edit = array(
-      'update[node_path_bulk_update_batch_process]' => TRUE,
-      'update[taxonomy_path_bulk_update_batch_process]' => TRUE,
-      'update[user_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][node_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][taxonomy_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][user_path_bulk_update_batch_process]' => TRUE,
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
     $this->assertText('Generated 10 URL aliases.'); // 5 nodes + 2 users
 
     // Check that aliases have actually been created.
@@ -811,7 +811,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
