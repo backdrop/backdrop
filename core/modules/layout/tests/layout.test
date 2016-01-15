@@ -426,7 +426,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'path' => 'foo/%/bar/%',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Check path'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Check path'));
     $edit = array(
       'context[required][1][plugin]' => 'node',
     );
@@ -441,7 +441,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'context[required][3][plugin]' => 'node',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
     // Now the page should show the current user instead of the one in the URL.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->test_node2->nid);
@@ -815,7 +815,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'path' => $subtab_layout_path_last,
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $tab_layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $tab_layout_name . '/configure', $edit, t('Save layout'));
 
     // Now we should have an active tab with subtabs, the first one is active.
     $this->backdropGet($subtab_layout_path);
@@ -946,7 +946,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'layout' => 'layout_test_layout',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
     layout_reset_caches();
     $layout = layout_load($layout_name);
@@ -956,7 +956,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'layout' => 'one_column',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
     $deleted_uuids = $default_layout->positions['sidebar'];
     layout_reset_caches();
@@ -1414,7 +1414,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $edit = array(
       'layout' => 'one_column',
     );
-    $this->backdropPost('admin/structure/layouts/manage/default/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/default/configure', $edit, t('Save layout'));
     $this->assertHookMessageOrder(array(
       'layout_test_layout_template_change called',
     ));
