@@ -9,17 +9,17 @@
     "formats": {
         "long": {
             "label": "Long Date",
-            "pattern": "l, F j, Y - H:i",
+            "pattern": "l, F j, Y - g:ia",
             "module": "system"
         },
         "medium": {
             "label": "Medium Date",
-            "pattern": "D, m/d/Y - H:i",
+            "pattern": "D, m/d/Y - g:ia",
             "module": "system"
         },
         "short":{
             "label": "Short Date",
-            "pattern": "m/d/Y - H:i",
+            "pattern": "m/d/Y - g:ia",
             "module": "system"
         },
         "html_datetime": {
