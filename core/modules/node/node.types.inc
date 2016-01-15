@@ -257,6 +257,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
@@ -421,7 +422,14 @@ function node_type_form_permissions($type) {
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
 
+  // Node that in node_theme(), the 'node_type_form_permissions' theme callback
+  // reuses theme_user_admin_permissions(), to make it identical to the user
+  // module permissions page.
   $form['#theme'] = array('node_type_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
   $form['roles'] = array(
     '#type' => 'value',
     '#value' => $roles,
