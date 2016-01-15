@@ -1274,7 +1274,7 @@ function user_menu() {
 
   // User email settings.
   $items['admin/config/people/emails'] = array(
-    'title' => 'User email settings',
+    'title' => 'Account emails',
     'description' => 'Configure email templates used for account registration and management.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_settings_email'),
