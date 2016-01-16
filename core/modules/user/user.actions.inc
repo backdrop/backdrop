@@ -58,7 +58,7 @@ function user_cancel_user_action($account, &$context) {
 
   $_SESSION['user_cancel_action']['uids'][] = $account->uid;
 
-  $context['redirect'] = 'admin/people/cancel';
+  $context['redirect'] = 'admin/accounts/cancel';
 }
 
 /**

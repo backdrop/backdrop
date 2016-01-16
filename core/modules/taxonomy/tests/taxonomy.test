@@ -137,7 +137,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save'));
 
     // Check that the permission changes are saved on the permissions page.
-    $this->backdropGet('admin/config/people/permissions');
+    $this->backdropGet('admin/config/accounts/permissions');
     $this->assertFieldByName($role_name . '[edit terms in tags]', 'edit terms in tags', "Role $role_name has edit terms in tags permission.");
 
     // Check that the new role does not have a permission which wasn't granted.
@@ -147,7 +147,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit = array(
       $role_name . '[delete terms in tags]' => TRUE,
     );
-    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/accounts/permissions', $edit, t('Save permissions'));
 
     // Check that this permission is now selected on the vocabulary page.
     $this->backdropGet('admin/structure/taxonomy/tags/configure');

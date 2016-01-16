@@ -769,7 +769,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     @endcode
  *   - "tab_parent": For local task menu items, the path of the task's parent
  *     item; defaults to the same path without the last component (e.g., the
- *     default parent for 'admin/people/create' is 'admin/people').
+ *     default parent for 'admin/accounts/create' is 'admin/accounts').
  *   - "tab_root": For local task menu items, the path of the closest non-tab
  *     item; same default as "tab_parent".
  *   - "position": Position of the block ('left' or 'right') on the system

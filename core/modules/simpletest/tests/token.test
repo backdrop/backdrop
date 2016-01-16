@@ -763,7 +763,7 @@ class TokenUserTestCase extends TokenTestHelper {
     $this->assertTokens('user', array('user' => $this->account), $user_tokens);
 
     $edit = array('user_pictures' => FALSE);
-    $this->backdropPost('admin/config/people/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/accounts/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
 
     // Remove the simpletest-created user role.

@@ -678,7 +678,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->deleteAllAliases();
 
     // Find the last row in the users table to apply the URL alias to the new user.
-    $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $this->backdropGet('admin/accounts', array('query' => array('order' => 'created', 'sort' => 'asc')));
     $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
     $checkbox_name = (string) $checkbox[0]['name'];
 
@@ -686,7 +686,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'action' => 'path_user_update_action',
       $checkbox_name => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $this->backdropPost('admin/accounts', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item.', array('%action' => 'Update user URL alias')));
 
     $this->assertEntityAlias('user', $account, 'accounts/' . backdrop_strtolower($account->name));
@@ -751,7 +751,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Test alternate interfaces - user configuration.
     $edit = array('path_pattern' => 'accounts/[user:name]/foo');
-    $this->backdropPost('admin/config/people/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/accounts/settings', $edit, 'Save configuration');
     // Check that the page URL alias pattern is on the pathauto form.
     $this->backdropGet('admin/config/urls/path/patterns');
     $this->assertFieldByName('user_pattern', 'accounts/[user:name]/foo', 'URL alias pattern set with user account settings appears on path config page.');

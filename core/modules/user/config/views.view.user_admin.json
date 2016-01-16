@@ -837,7 +837,7 @@
                     "type": "views_query",
                     "options": []
                 },
-                "path": "admin/people/list",
+                "path": "admin/accounts/list",
                 "menu": {
                     "type": "default tab",
                     "title": "Manage user accounts",

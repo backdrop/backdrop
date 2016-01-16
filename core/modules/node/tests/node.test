@@ -1404,7 +1404,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
     // Check that the permission changes are saved on the permissions page.
-    $this->backdropGet('admin/config/people/permissions');
+    $this->backdropGet('admin/config/accounts/permissions');
     $this->assertFieldByName($role_name . '[edit own page content]', 'edit own page content', "Role $role_name has edit own page content permission.");
 
     // Check that the new role does not have a permission which wasn't granted.
@@ -1414,7 +1414,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $edit = array(
       $role_name . '[edit any page content]' => TRUE,
     );
-    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/accounts/permissions', $edit, t('Save permissions'));
 
     // Check that this permission is now selected on the Node Type page.
     $this->backdropGet('admin/structure/types/manage/page');

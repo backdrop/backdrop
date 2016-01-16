@@ -437,7 +437,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
   if (user_access('administer users') && empty($form_state['values']['user_cancel_confirm']) && $account->uid != $user->uid) {
     user_cancel($form_state['values'], $account->uid, $form_state['values']['user_cancel_method']);
 
-    $form_state['redirect'] = 'admin/people';
+    $form_state['redirect'] = 'admin/accounts';
   }
   else {
     // Store cancelling method and whether to notify the user in $account for
