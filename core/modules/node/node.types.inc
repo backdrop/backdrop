@@ -420,6 +420,9 @@ function node_type_form_submit($form, &$form_state) {
 /**
  * Builds a matrix of node permissions for this node type.
  *
+ * @param $type
+ *   Machine name for node type.
+ *
  * @see node_type_form()
  */
 function node_type_form_permissions($type) {
@@ -427,7 +430,7 @@ function node_type_form_permissions($type) {
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
 
-  // Node that in node_theme(), the 'node_type_form_permissions' theme callback
+  // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
   // module permissions page.
   $form['#theme'] = array('node_type_form_permissions');
