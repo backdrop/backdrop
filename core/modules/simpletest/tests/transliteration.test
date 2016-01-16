@@ -19,8 +19,6 @@ class TransliterationTest extends BackdropUnitTestCase {
     $four_byte = html_entity_decode('&#x1411;', ENT_NOQUOTES, 'UTF-8');
     // A character that doesn't have a replacement value.
     $unknown_character = html_entity_decode('&#xfff1;', ENT_NOQUOTES, 'UTF-8');
-    // A string of Chinese characters.
-    $chinese = '一個簡單的句子';
 
     $cases = array(
       // Each test case is (language code, input, output).
@@ -49,7 +47,10 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', 'foo' . $unknown_character . $unknown_character . $unknown_character . 'foo', 'foo???foo'),
 
       // Chinese characters.
-      array('en', $chinese, 'yigejiandandejuzi'),
+      array('en', '一個簡單的句子', 'yigejiandandejuzi'),
+
+      // Bulgarian characters.
+      array('bg', 'първа статия', 'pyrva statija'),
     );
 
     include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
