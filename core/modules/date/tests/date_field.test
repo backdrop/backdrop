@@ -27,7 +27,6 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
     $edit['type'] = 'story';
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $this->assertText('The content type Story has been added.', 'Content type added.');
-
   }
 
   /**
@@ -297,6 +296,7 @@ class DateFieldTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value][day]'] = '7';
       $edit[$field_name . '[und][0][value][hour]'] = '10';
       $edit[$field_name . '[und][0][value][minute]'] = '30';
+      $edit[$field_name . '[und][0][value][ampm]'] = 'am';
       if ($todate) {
         $edit[$field_name . '[und][0][show_todate]'] = '1';
         $edit[$field_name . '[und][0][value2][year]'] = '2010';
@@ -304,6 +304,7 @@ class DateFieldTestCase extends DateFieldBasic {
         $edit[$field_name . '[und][0][value2][day]'] = '7';
         $edit[$field_name . '[und][0][value2][hour]'] = '11';
         $edit[$field_name . '[und][0][value2][minute]'] = '30';
+        $edit[$field_name . '[und][0][value2][ampm]'] = 'am';
       }
     }
     elseif ($widget_type == 'date_text') {
