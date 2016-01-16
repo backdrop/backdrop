@@ -3417,16 +3417,21 @@ function system_time_zones($blank = NULL) {
  * backdrop_http_request() does not work and then the system status report page
  * will contain an error.
  *
+ * Note that this check was never 100% reliable. On some web servers, it would
+ * return FALSE even if external requests were allowed. Use of this function
+ * has been deprecated and it will be removed in Backdrop 2.0.
+ *
  * @return
  *  TRUE if this installation can issue HTTP requests.
+ *
+ * @deprecated since 1.3.1
  */
 function system_check_http_request() {
   // Try to get the content of the front page via backdrop_http_request().
-  $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0));
+  $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);
-  state_set('backdrop_http_request_fails', !$works);
   return $works;
 }
 

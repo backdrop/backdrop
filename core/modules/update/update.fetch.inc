@@ -155,7 +155,10 @@ function _update_process_fetch_task($project) {
   if (empty($fail[$fetch_url_base]) || $fail[$fetch_url_base] < $max_fetch_attempts) {
     $response = backdrop_http_request($url);
     $response_code = (int) $response->code;
-    if (!isset($response->error) && isset($response->data)) {
+    if (isset($response->error)) {
+      watchdog('update', 'HTTP request to @url failed with error: @error.', array('@url' => $url, '@error' => $response->error));
+    }
+    elseif (!isset($response->error) && isset($response->data)) {
       $data = $response->data;
     }
   }
