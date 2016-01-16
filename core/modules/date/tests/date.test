@@ -61,6 +61,7 @@ class DateUITestCase extends DateFieldBasic {
       $edit['field_test[und][0][value][day]'] = '7';
       $edit['field_test[und][0][value][hour]'] = '10';
       $edit['field_test[und][0][value][minute]'] = '30';
+      $edit['field_test[und][0][value][ampm]'] = 'am';
     }
     elseif ($options == 'date_text') {
       $edit['field_test[und][0][value][date]'] = format_string('10/07/!year - 10:30', array('!year' => $current_year));
