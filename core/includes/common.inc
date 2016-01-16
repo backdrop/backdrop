@@ -2947,9 +2947,6 @@ function backdrop_page_footer() {
     print $page_content;
   }
 
-  // End the request and send the response to the browser.
-  ob_end_flush();
-
   // If we're not already in a background request, flush to the browser.
   if (!backdrop_is_background()) {
     // Flushing for PHP-FPM based installations.
