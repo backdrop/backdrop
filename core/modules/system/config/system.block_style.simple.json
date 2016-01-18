@@ -1,0 +1,16 @@
+{
+    "_config_name": "menu.block_style.simple",
+    "simple_absolute": {
+        "1": "1"
+    },
+    "simple_disable_mouse_events": {
+        "1": "0"
+    },
+    "simple_remove_attributes": {
+        "1": "1"
+    },
+    "simple_css_selectors": "#main-menu",
+    "simple_text": "? Menu",
+    "simple_media_size": "768",
+    "simple_media_unit": "px"
+}
