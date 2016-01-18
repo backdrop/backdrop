@@ -1124,5 +1124,19 @@ function user_update_1011() {
 }
 
 /**
+ * Update 'Find user accounts'  to 'Manage user accounts'
+ */
+function user_update_1012() {
+  $config = config('views.view.user_admin');
+	if ($config->get('display.default.display_options.title') == 'User accounts') {
+    $config->set('display.default.display_options.title', 'Manage user accounts');
+  }
+  if ($config->get('display.page.display_options.menu.title') == 'Find user accounts') {
+    $config->set('display.page.display_options.menu.title', 'Manage user accounts');
+  }
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
