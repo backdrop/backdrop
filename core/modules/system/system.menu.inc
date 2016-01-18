@@ -38,10 +38,8 @@ function system_menu_block_defaults($menu_name) {
  *   The form array. This is a form fragment and not in full Form API format.
  */
 function system_menu_block_form($config) {
-  $form['menu_name'] = array(
-    '#type' => 'value',
-    '#value' => $config['menu_name'],
-  );
+  $form = array();
+  $form['#config'] = $config;
   $form['level'] = array(
     '#type' => 'select',
     '#title' => t('Starting level'),
@@ -80,6 +78,7 @@ function system_menu_block_form($config) {
 
   return $form;
 }
+
 
 /**
  * Build a menu tree based on the provided configuration.

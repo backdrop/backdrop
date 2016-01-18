@@ -3708,6 +3708,8 @@ function system_autoload_info() {
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',
+    'MenuStyleSimple' => 'includes/menu_block_style_simple.inc',
+    'MenuStyle' => 'includes/menu_block_style.class.inc',
 
     // @todo: Move file entities to File module.
     // https://github.com/backdrop/backdrop-issues/issues/213
@@ -3805,4 +3807,200 @@ function system_admin_paths() {
     'admin/reports/status/php' => FALSE,
   );
   return $paths;
+}
+
+/**
+ * Get form.
+ */
+function system_menu_block_style_settings_form($style = 'simple', $config) {
+  $style = empty($style) ? 'simple' : $style;
+  $styles = system_menu_block_get_style_info();
+  $menu_style = $styles[$style]['class'];
+  $class = new $menu_style($config);
+  return $class->form($config);
+}
+
+/**
+ * Get styles().
+ */
+function system_menu_block_get_style_info($name = NULL) {
+  $results = array();
+  foreach (module_implements('menu_block_style_info') as $module) {
+    $function = $module . '_menu_block_style_info';
+    $result = $function();
+    foreach ($result as $key => $style) {
+      $results[$key] = $style;
+    }
+  }
+
+  if ($name) {
+    return $results[$name];
+  }
+  return $results;
+}
+
+/**
+ * Implements hook_menu_block_style_info().
+ */
+function system_menu_block_style_info() {
+  $info['simple'] = array(
+    'name' => 'simple',
+    'title' => t('Simple'),
+    'description' => t('The default menu style with simple JS dropdown effect.'),
+    'class' => 'MenuStyleSimple',
+    'js' => array('menu_styles/js/simple.js'),
+    'css' => array('menu_styles/js/simple.css'),
+    'js_settings' => 'responsive_menus_simple_style_js_settings',
+    'file' => 'includes/menu_block_style_simple.inc',
+    // 'selector' => t('Anything.  Example: Given <code>@code</code> you could use !use', array('@ul' => '<ul>', '@code' => '<div id="parent-div"> <ul class="menu"> </ul> </div>', '!use' => '<strong>#parent-div or .menu</strong>')),
+  );
+  return $info;
+}
+
+function system_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'layout_block_configure_form') {
+    // Todo: decide if we want to check the form using the following instead
+    // Likely more accurate, but would call menu_list_system_menus() for every
+    // invocation of hook_form_alter.
+    // Checking for $form['block_settings']['menu_name'] might be enough since
+    // really only the menu blocks would have this set, I think.
+    // $system_menus = menu_list_system_menus();
+    // if (isset($form_state['block']) && isset($system_menus[$form_state['block']->delta])) {}
+    $config = $form['block_settings']['#config'];
+
+    $current_style = '';
+    if (isset($form_state['values']['animation_style'])) {
+      $current_style = $form_state['values']['animation_style'];
+    }
+    /* Style settings: */
+    $form['animation_style'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Animation style settings'),
+      '#collapsed' => FALSE,
+      '#collapsible' => TRUE,
+    );
+    $styles = system_menu_block_get_style_info();
+    $style_options = array('' => t('No animation'));
+
+    foreach ($styles as $style_name => $style_info) {
+      $style_options[$style_name] = $style_info['title'];
+    }
+    $form['animation_style']['animation_style'] = array(
+      '#type' => 'select',
+      '#title' => t('Animation style'),
+      '#options' => $style_options,
+      '#default_value' => $current_style,
+      '#ajax' => array(
+        'wrapper' => 'block_animation_settings',
+        'callback' => 'system_menu_block_configure_ajax_style'
+      ),
+      '#parents' => array('animation_style'),
+    );
+    $form['animation_style']['block_settings'] = array(
+      '#type' => 'container',
+      '#id' => 'block_animation_settings',
+      '#parents' => array('block_settings'),
+    );
+
+    $settings_form = ($current_style) ? system_menu_block_style_settings_form($current_style, $config) : NULL;
+    $form['animation_style']['block_settings']['style_settings'] = $settings_form;
+  }
+}
+
+/**
+ * AJAX callback to update the style settings within the block configure form.
+ */
+function system_menu_block_configure_ajax_style($form, &$form_state) {
+  return $form['animation_style']['block_settings'];
+}
+
+/**
+ * Final execution for Responsive Menus.  Add any js/css and settings required.
+ */
+function responsive_menus_init() {
+  // Load our style.
+  if (!isset($style)) {
+    $ignore_admin = config_get('responsive_menus.settings', 'responsive_menus_ignore_admin');
+    if ($ignore_admin[1] && path_is_admin(current_path())) {
+      return;
+    }
+    $style = config_get('responsive_menus.settings', 'responsive_menus_style');
+  }
+  
+  $usedesktopdropdown = config_get('responsive_menus.settings', 'responsive_menus_use_desktopcss');
+  if ($usedesktopdropdown[1])
+  {
+  backdrop_add_css(backdrop_get_path('module', 'responsive_menus') . "/styles/desktopcss/desktopcss.css", "module");
+  }
+  
+  // $jq_update_ignore = config_get('responsive_menus.settings', 'responsive_menus_no_jquery_update');
+  // $jq_update_ignore = 1;
+  $style_info = responsive_menus_style_load($style);
+  if (!$style_info) {
+    return;
+  }
+  $data = &backdrop_static(__FUNCTION__, array());
+  if (!isset($data['execute_index'])) {
+    $data['execute_index'] = -1;
+  }
+  $data['execute_index']++;
+
+  $js_settings = array();
+  $js_files = array();
+  $css_files = array();
+  // Load JS files from folder.
+  if (!empty($style_info['js_folder'])) {
+    $js_files = responsive_menus_glob_files($style_info['js_folder'], 'js');
+  }
+  // Load CSS files from folder.
+  if (!empty($style_info['css_folder'])) {
+    $css_files = responsive_menus_glob_files($style_info['css_folder'], 'css');
+  }
+  // Load individual JS files.
+  if (!empty($style_info['js_files'])) {
+    $js_files = array_unique(array_merge($js_files, $style_info['js_files']));
+  }
+  // Load individual CSS files.
+  if (!empty($style_info['css_files'])) {
+    $css_files = array_unique(array_merge($css_files, $style_info['css_files']));
+  }
+  // Add JS files.
+  if (!empty($js_files)) {
+    foreach ($js_files as $js_file) {
+      backdrop_add_js($js_file);
+    }
+  }
+  // Add CSS files.
+  if (!empty($css_files)) {
+    foreach ($css_files as $css_file) {
+      backdrop_add_css($css_file);
+    }
+  }
+  // Add JS settings.
+  $js_settings[$data['execute_index']] = $style_info['js_settings']($js_defaults);
+  $js_settings[$data['execute_index']]['responsive_menus_style'] = $style;
+  backdrop_alter('responsive_menus_execute', $js_settings);
+  backdrop_add_js(array('responsive_menus' => $js_settings), 'setting');
+}
+
+/**
+ * Load a single style.
+ *
+ * @param string $style
+ *   Style id to be loaded.
+ */
+function responsive_menus_style_load($style) {
+  $styles = system_menu_block_get_style_info();
+  $data = &backdrop_static(__FUNCTION__, array());
+  if (!isset($data[$style]) && !empty($styles[$style])) {
+    $style_info = $styles[$style];
+    $data[$style] = $style_info;
+    return $data[$style];
+  }
+  else {
+    // This style is already loaded.
+    return $data[$style];
+  }
+
+  return FALSE;
 }
