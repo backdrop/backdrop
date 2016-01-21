@@ -2127,6 +2127,10 @@ function system_urls_settings($form, &$form_state) {
       }
     }
     else {
+      if ($request->error) {
+        watchdog('system', 'HTTP request for Clean URLs failed with error: @error', array('@error' => $request->error));
+      }
+
       // If the test failed while clean URLs are enabled, make sure clean URLs
       // can be disabled.
       if (config_get('system.core', 'clean_url')) {
