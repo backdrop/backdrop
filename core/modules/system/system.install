@@ -2703,9 +2703,21 @@ function system_update_1049() {
     // If there are no color settings then the default (Blue Lagoon) was in use.
     if (config_get('bartik.settings', 'color') === NULL) {
       // Set a flag indicating that we should use the legacy style sheet.
-      config_set('bartik.settings', 'legacy', TRUE);
+      config_set('bartik.settings', 'color_legacy', TRUE);
     }
     config_set('bartik.settings', 'main_menu_tabs', 'rounded-tabs');
+  }
+}
+
+/**
+ * Fix legacy color setting in Bartik.
+ */
+function system_update_1050() {
+  $config = config('bartik.settings');
+  if ($config->get('legacy')) {
+    $config->set('color_legacy', TRUE);
+    $config->clear('legacy');
+    $config->save();
   }
 }
 
