@@ -332,6 +332,14 @@ function ckeditor_ckeditor_plugins() {
     ),
   );
 
+  // The backdropuploadimage plugin replaces normal uploadimage funcitonality.
+  $plugins['backdropuploadimage'] = array(
+    'path' =>  backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropuploadimage',
+    'buttons' => array(),
+    'enabled callback' => TRUE,
+    'file' => 'plugin.js',
+  );
+
   return $plugins;
 }
 
