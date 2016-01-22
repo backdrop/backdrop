@@ -25,10 +25,11 @@
       }
 
       var entityType = (editor.element.$.attributes['data-dnd-context']) ? 'node' : 'file';
+      var format = editor.config.backdrop.format;
 
       var fileTools = CKEDITOR.fileTools,
       //uploadUrl = fileTools.getUploadUrl( editor.config, 'image' );
-        uploadUrl = Backdrop.settings.basePath + entityType + '/uploadimage';
+        uploadUrl = Backdrop.settings.basePath + 'filter/uploadimage/' + entityType + '/' + format;
 
       // Handle images which are available in the dataTransfer.
       fileTools.addUploadWidget(editor, 'uploadimage', {
@@ -56,9 +57,10 @@
           range.setStartBefore(this.wrapper);
           range.setEndAfter(this.wrapper);
           if (entityType == 'node') {
+            var
+              sid = upload.url,
+              context = editor.element.$.attributes['data-dnd-context'].value;
             Backdrop.dnd.refreshLibraries();
-            var sid = upload.url;
-            var context = editor.element.$.attributes['data-dnd-context'].value;
             Backdrop.dnd.fetchNode(context, sid, function() {
               Backdrop.dnd.Nodes[sid].meta.entityType = entityType;
               Backdrop.dnd.Nodes[sid].meta.type = 'image';
@@ -67,14 +69,13 @@
             });
           }
           else {
-          //var fid = upload.fid;
-            var str = upload.url;
-            var arr = str.split('@');
-            var fid = arr[0];
-            var url = arr[1];
-            var range = editor.getSelection().getRanges()[0];
-            var html = '<img alt="" src="'+url+'" data-file-id="'+fid+'">';
-            var element = CKEDITOR.htmlParser.fragment.fromHtml(html).children[0];
+            var
+              arr = upload.url.split('@'),
+              fid = arr[0],
+              url = arr[1],
+              range = editor.getSelection().getRanges()[0],
+              html = '<img alt="" src="'+url+'" data-file-id="'+fid+'">',
+              element = CKEDITOR.htmlParser.fragment.fromHtml(html).children[0];
             // Turn it into a proper DOM element, and insert it.
             element = CKEDITOR.dom.element.createFromHtml(element.getOuterHtml());
             // ∆ image, not image2 !
