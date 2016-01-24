@@ -14,7 +14,7 @@
 "use strict";
 
 CKEDITOR.plugins.add('backdropimage', {
-  requires: 'image2',
+  requires: 'widget,image2',
 
   beforeInit: function (editor) {
     // Override the image2 widget definition to require and handle the
@@ -167,31 +167,7 @@ CKEDITOR.plugins.add('backdropimage', {
         };
       };
     });
-
-    // Add a widget#edit listener to every instance of image2 widget in order
-    // to handle its editing with a Backdrop-native dialog.
-    // This includes also a case just after the image was created
-    // and dialog should be opened for it for the first time.
-    editor.widgets.on('instanceCreated', function (event) {
-      var widget = event.data;
-
-      if (widget.name !== 'image') {
-        return;
-      }
-
-      widget.on('edit', function (event) {
-        // Cancel edit event to break image2's dialog binding
-        // (and also to prevent automatic insertion before opening dialog).
-        event.cancel();
-
-        // Open backdropimage dialog.
-        editor.execCommand('editbackdropimage', {
-          existingValues: widget.definition._dataToDialogValues(widget.data),
-          saveCallback: widget.definition._createDialogSaveCallback(editor, widget)
-        });
-      });
-    });
-
+//init
     // Register the "editbackdropimage" command, which essentially just replaces
     // the "image" command's CKEditor dialog with a Backdrop-native dialog.
     editor.addCommand('editbackdropimage', {
@@ -217,6 +193,33 @@ CKEDITOR.plugins.add('backdropimage', {
         icon: this.path + '/image.png'
       });
     }
+  },
+
+  init: function (editor) {
+    // Add a widget#edit listener to every instance of image2 widget in order
+    // to handle its editing with a Backdrop-native dialog.
+    // This includes also a case just after the image was created
+    // and dialog should be opened for it for the first time.
+    editor.widgets.on('instanceCreated', function (event) {
+  //editor.widgets.on('instanceLoaded', function (event) {
+      var widget = event.data;
+
+      if (widget.name !== 'image') {
+        return;
+      }
+
+      widget.on('edit', function (event) {
+        // Cancel edit event to break image2's dialog binding
+        // (and also to prevent automatic insertion before opening dialog).
+        event.cancel();
+
+        // Open backdropimage dialog.
+        editor.execCommand('editbackdropimage', {
+          existingValues: widget.definition._dataToDialogValues(widget.data),
+          saveCallback: widget.definition._createDialogSaveCallback(editor, widget)
+        });
+      });
+    });
   },
 
   afterInit: function (editor) {

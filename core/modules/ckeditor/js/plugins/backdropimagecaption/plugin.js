@@ -23,7 +23,8 @@ CKEDITOR.plugins.add('backdropimagecaption', {
     // Disable default placeholder text that comes with CKEditor's image2
     // plugin: it has an inferior UX (it requires the user to manually delete
     // the place holder text).
-    editor.lang.image2.captionPlaceholder = '';
+    // No, because user needs a crowbar to open the caption area to insert text.
+  //-  editor.lang.image2.captionPlaceholder = '';
 
     // Override the image2 widget definition to handle the additional
     // data-align and data-caption attributes.
