@@ -80,7 +80,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('node/add/article');
     $this->assertRaw('ckeditor/css/ckeditor.css');
-    $this->assertRaw('misc/ckeditor/ckeditor.js');
+  //$this->assertRaw('misc/ckeditor/ckeditor.js');
     $this->assertRaw('ckeditor/js/ckeditor.js');
     $settings = $this->backdropGetSettings();
     $format_settings = $settings['filter']['formats']['ckeditor'];
