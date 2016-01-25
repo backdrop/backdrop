@@ -560,6 +560,19 @@ ul.tips {
 [dir="rtl"] .l-header ul.menu li {
   float: right;
 }
+.l-header ul.menu.slimmenu li .sub-toggle {
+  display:none;
+}
+.l-header ul.menu.slimmenu li ul .sub-toggle {
+  display:inherit;
+}
+ul.slimmenu li {
+  background-color: inherit;
+}
+.l-header .slimmenu ul.menu a {
+  background: none;
+  width: 100px;
+}
 .l-header ul.menu a {
   color: #333;
   background: #ccc;
@@ -593,6 +606,11 @@ ul.tips {
 }
 .l-header .no-tabs ul.menu li a.active {
   text-decoration: underline;
+}
+.l-header  .slimmenu ul.menu a:hover,
+.l-header  .slimmenu ul.menu a:focus,
+.l-header .slimmenu ul.menu a:active {
+  background: none;
 }
 .l-header ul.menu a:hover,
 .l-header ul.menu a:focus {
