@@ -878,7 +878,7 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
 
     // Check to see if grants added by node_test_node_access_records made it in.
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node3->nid))->fetchAll();
-    $this->assertEqual(count($records), 1, 'Returned the correct number of rows.');
+    $this->assertEqual(count($records), 4, 'Returned the correct number of rows.');
     $this->assertEqual($records[0]->realm, 'test_page_realm', 'Grant with page_realm acquired for node without alteration.');
     $this->assertEqual($records[0]->gid, 1, 'Grant with gid = 1 acquired for node without alteration.');
 
@@ -904,11 +904,10 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
       $this->assertNotEqual($grants, $altered_grants, format_string('Altered the %op grant for a user.', array('%op' => $op)));
     }
 
-    // Check that core does not grant access to an unpublished node when an
-    // empty $grants array is returned.
+    // Check correct access is set for an unpublished node.
     $node6 = $this->backdropCreateNode(array('status' => 0, 'disable_node_access' => TRUE));
     $records = db_query('SELECT realm, gid FROM {node_access} WHERE nid = :nid', array(':nid' => $node6->nid))->fetchAll();
-    $this->assertEqual(count($records), 0, 'Returned no records for unpublished node.');
+    $this->assertEqual(count($records), 3, 'Returned no records for unpublished node.');
   }
 }
 
