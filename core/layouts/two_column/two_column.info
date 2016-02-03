@@ -3,6 +3,9 @@ version = BACKDROP_VERSION
 type = layout
 backdrop = 1.x
 
+; Include file for special preprocessing of this layout's variables.
+file = two-column.php
+
 ; Specify regions for this layout.
 regions[header] = Header
 regions[top] = Top
