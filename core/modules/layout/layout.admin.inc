@@ -711,33 +711,6 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#suffix' => '</div>',
   );
 
-  $form['title_display']['#tree'] = FALSE;
-  $form['title_display']['title_display'] = array(
-    '#type' => 'select',
-    '#title' => t('Block title type'),
-    '#default_value' => $layout->settings['title_display'],
-    '#options' => array(
-      LAYOUT_TITLE_DEFAULT => t('Default title'),
-      LAYOUT_TITLE_CUSTOM => t('Custom title'),
-      // @todo: Port "from block" title ability.
-      //LAYOUT_TITLE_BLOCK => t('From block'),
-      LAYOUT_TITLE_NONE => t('No title'),
-    ),
-  );
-
-  $form['title_display']['title'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $layout->settings['title'],
-    '#title' => t('Title'),
-    '#description' => t('The title of this layout. If left blank, a default title may be used.'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
-      ),
-    ),
-    '#maxlength' => 255,
-  );
-
   $form['content'] = array('#tree' => TRUE);
   $form['content']['block'] = array('#tree' => TRUE);
 
@@ -963,6 +936,77 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   }
 
   return $output;
+}
+
+/**
+ * Form callback; Configure layout title type.
+ *
+ * @ingroup forms
+ */
+function layout_title_settings_form($form, &$form_state, Layout $layout) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $form_state['layout'] = $layout;
+  $form_state['menu_item'] = NULL;
+
+  $form['title_display']['#tree'] = FALSE;
+  $form['title_display']['title_display'] = array(
+    '#type' => 'radios',
+    '#default_value' => $layout->settings['title_display'],
+    '#options' => array(
+      LAYOUT_TITLE_DEFAULT => t('Default title'),
+      LAYOUT_TITLE_CUSTOM => t('Custom title'),
+      // @todo: Port "from block" title ability.
+      //LAYOUT_TITLE_BLOCK => t('From block'),
+      LAYOUT_TITLE_NONE => t('No title'),
+    ),
+  );
+
+  $form['title_display']['title'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $layout->settings['title'],
+    '#title' => t('Title'),
+    '#description' => t('The title of this layout. If left blank, a default title may be used.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
+      ),
+    ),
+    '#maxlength' => 255,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Configure'),
+    '#attributes' => array('class' => array('layout-title-button')),
+    '#submit' => array(
+      'layout_title_settings_form_submit',
+    ),
+    '#save_in_progress' => TRUE,
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
+  );
+  
+  return $form;
+}
+
+/**
+ * Submit handler for layout_title_settings_form() to change title settings.
+ */
+function layout_title_settings_form_submit($form, &$form_state) {
+  $layout = $form_state['layout'];
+
+
+  // Save title settings.
+  if (isset($form_state['values']['title_display'])) {
+    $layout->settings['title'] = $form_state['values']['title'];
+    $layout->settings['title_display'] = $form_state['values']['title_display'];
+  }
+
+  $layout->in_progress['section'] = 'title';
+  layout_set_layout_tempstore($layout);
 }
 
 /**

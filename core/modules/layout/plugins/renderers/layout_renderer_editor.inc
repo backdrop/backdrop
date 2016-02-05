@@ -11,7 +11,13 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     parent::__construct($layout, $renderer_plugin);
+
+    // Set the page title region if not already.
+    if (!isset($this->layout_info['regions']['title'])) {
+      $this->layout_info['regions']['title'] = t('Page title');
+    }
     $this->admin = TRUE;
+
   }
 
   /**
@@ -41,16 +47,45 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderRegion($region_id, $blocks) {
-    $content = implode('', $blocks);
+    $output = '';
+    if ($region_id == 'title') {
+      return $this->renderTitleRegion($region_id);
+    }
+    else {
+      $content = implode('', $blocks);
+      $region_buttons = $this->getRegionLinks($region_id);
+      
+      $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
+      $output .= '<div class="layout-editor-region-title clearfix">';
+      $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
+      $output .= $region_buttons;
+      $output .= '</div>';
+      $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+      $output .= '</div>';
+    }
 
+    return $output;
+  }
+
+  /**
+   * Render the Page Title region in the Layout Editor.
+   */
+  function renderTitleRegion($region_id) {
+    $options = array(
+      LAYOUT_TITLE_DEFAULT => t('Default title'),
+      LAYOUT_TITLE_CUSTOM => t('Custom title'),
+      LAYOUT_TITLE_NONE => t('No title'),
+    );
+    $title_setting = $this->layout->settings['title_display'];
+    $description = t('Displaying: ') . $options[$title_setting];
     $region_buttons = $this->getRegionLinks($region_id);
-
-    $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
+    
+    $output = '<div class="layout-editor-region layout-editor-region-page-title" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
     $output .= '<div class="layout-editor-region-title clearfix">';
     $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
     $output .= $region_buttons;
+    $output .= '<div class="description">' . $description . '</div>';
     $output .= '</div>';
-    $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
     $output .= '</div>';
 
     return $output;
@@ -117,10 +152,18 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * Render the links to display when editing a region.
    */
   protected function getRegionLinks($region_id) {
+    if ($region_id == 'title') {
+      $title =  t('Configure');
+      $link = 'edit-title';
+    }
+    else {
+      $title = t('Add block');
+      $link = 'add-block';
+    }
     $links = array();
     $links['add'] = array(
-      'title' => t('Add block'),
-      'href' => $this->getUrl('add-block', $region_id),
+      'title' => $title,
+      'href' => $this->getUrl($link, $region_id),
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,

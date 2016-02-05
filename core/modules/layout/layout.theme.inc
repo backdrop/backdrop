@@ -174,7 +174,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
   else {
-    $variables['title'] = t('Page title');
+    $variables['title'] = $variables['content']['title'];
   }
 
   if (!$variables['admin']) {
