@@ -3346,7 +3346,7 @@ function form_process_container($element, &$form_state) {
 /**
  * Returns HTML to wrap child elements in a container.
  *
- * Used for grouped form items. Can also be used as a #theme_wrapper for any
+ * Used for grouped form items. Can also be used as a theme wrapper for any
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
  *
