@@ -3350,6 +3350,9 @@ function form_process_container($element, &$form_state) {
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
  *
+ * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * for more information on the #theme_wrappers render array property.
+ *
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
