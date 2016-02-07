@@ -1909,6 +1909,89 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node4->nid);
     $this->assertNoText($custom_block['title'], 'Block was not displayed on the page node.');
   }
+
+  /**
+   * Tests the content block.
+   */
+  function testNodeBlock() {
+    $this->backdropLogin($this->admin_user);
+
+    // Add some test nodes.
+    $node1_settings = array('uid' => $this->web_user->uid, 'type' => 'post');
+    $node2_settings = array(
+      'body' => array(LANGUAGE_NONE => array(array('value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. This is the middle. Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero. Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci. Curabitur feugiat egestas nisl sed accumsan. This is the end.'))),
+      'promote' => 1,
+    );
+
+    $node1 = $this->backdropCreateNode($node1_settings);
+    $node2 = $this->backdropCreateNode($node2_settings);
+
+    // Check that $node2 does not appear on $node1 path.
+    $this->backdropGet('node/' . $node1->nid);
+    $this->assertNoText($node2->title, t('Node 2 title not found on Node 1.'));
+
+    // Add a Content Block with default settings.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Content block'));
+    $edit = array(
+      'nid' => $node2->nid,
+      'leave_node_title' => TRUE,
+      'link_node_title' => TRUE,
+      'links' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $first_block_uuid = (string) $first_block[0]['data-block-id'];
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check that $node2 appears on $node1 path twice (as block title and as
+    // node title.
+    $elements = $this->xpath('//*[text()="' . $node2->title . '"]');
+    $this->assertEqual(count($elements), 2, 'The node title appears twice on the page.');
+
+    // Test that the full node is shown.
+    $this->assertText('This is the middle');
+    $this->assertText('This is the end');
+    
+    // Read more text not found.
+    $this->assertNoText('Read more');
+
+    // The block title is linked to the node
+    $elements = $this->xpath("//h2[contains(@class, :class)]//a[contains(@href, :href)]", array(':class' => 'block-title', ':href' => strtolower($node2->title)));
+    $this->assertEqual(count($elements), 1, 'The block title is linked to the node');
+
+    // Make several changes to the Content Block settings.
+    $edit = array(
+      'leave_node_title' => FALSE,
+      'link_node_title' => FALSE,
+      'view_mode' => 'teaser',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check that $node2 title now only appears on $node1 path once
+    $this->assertUniqueText($node2->title, 'The node title appears once on the page.');
+
+    // The title is from the block title, not the node
+    $elements = $this->xpath("//h2[contains(@class,':class') and text() = ':title']", array(':class' => 'block-title', ':title' => $node2->title));
+    $this->assertFalse($elements, 'The block title is the node title.');
+
+    // The title is not linked to the node.
+    $elements = $this->xpath("//h2[contains(@class,':class')]//a[contains(@href,'node/:href')]", array(':class' => 'block-title', ':href' => $node2->nid));
+    $this->assertFalse($elements, 'The block title is not linked to the node');
+
+    // Test that the full node is not shown.
+    $this->assertText('This is the middle');
+    $this->assertNoText('This is the end');
+    
+    // Read more text now found.
+    $this->assertText('Read more');
+  }
 }
 
 /**
