@@ -2240,6 +2240,20 @@ class UserUserSearchTestCase extends BackdropWebTestCase {
     $this->backdropPost('search/user/', $edit, t('Search'));
     $this->assertText($keys);
 
+    // Verify that wildcard search works.
+    $keys = $user1->name;
+    $keys = substr($keys, 0, 2) . '*' . substr($keys, 4, 2);
+    $edit = array('keys' => $keys);
+    $this->backdropPost('search/user/', $edit, t('Search'));
+    $this->assertText($user1->name, 'Search for username wildcard resulted in user name on page for administrative user.');
+
+    // Verify that wildcard search works for email.
+    $keys = $user1->mail;
+    $keys = substr($keys, 0, 2) . '*' . substr($keys, 4, 2);
+    $edit = array('keys' => $keys);
+    $this->backdropPost('search/user/', $edit, t('Search'));
+    $this->assertText($user1->name, 'Search for email wildcard resulted in user name on page for administrative user.');
+
     // Create a blocked user.
     $blocked_user = $this->backdropCreateUser();
     $blocked_user->status = 0;
