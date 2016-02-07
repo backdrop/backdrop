@@ -87,7 +87,7 @@
 <article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
-  <?php if (!$page): ?>
+  <?php if (!$page && !empty($title)): ?>
     <h2><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
   <?php endif; ?>
   <?php print render($title_suffix); ?>
