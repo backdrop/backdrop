@@ -1,0 +1,419 @@
+[EntityCacheBookTestCase]
+name = Copy of BookTestCase
+description = Copy of BookTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentAnonymous]
+name = Copy of CommentAnonymous
+description = Copy of CommentAnonymous
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentApprovalTest]
+name = Copy of CommentApprovalTest
+description = Copy of CommentApprovalTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentBlockFunctionalTest]
+name = Copy of CommentBlockFunctionalTest
+description = Copy of CommentBlockFunctionalTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentContentRebuild]
+name = Copy of CommentContentRebuild
+description = Copy of CommentContentRebuild
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentFieldsTest]
+name = Copy of CommentFieldsTest
+description = Copy of CommentFieldsTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentHelperCase]
+name = Copy of CommentHelperCase
+description = Copy of CommentHelperCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentNodeAccessTest]
+name = Copy of CommentNodeAccessTest
+description = Copy of CommentNodeAccessTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentPagerTest]
+name = Copy of CommentPagerTest
+description = Copy of CommentPagerTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentPreviewTest]
+name = Copy of CommentPreviewTest
+description = Copy of CommentPreviewTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentRSSUnitTest]
+name = Copy of CommentRSSUnitTest
+description = Copy of CommentRSSUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheCommentTokenReplaceTestCase]
+name = Copy of CommentTokenReplaceTestCase
+description = Copy of CommentTokenReplaceTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeAccessRebuildTestCase]
+name = Copy of NodeAccessRebuildTestCase
+description = Copy of NodeAccessRebuildTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeAccessRecordsUnitTest]
+name = Copy of NodeAccessRecordsUnitTest
+description = Copy of NodeAccessRecordsUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeAccessUnitTest]
+name = Copy of NodeAccessUnitTest
+description = Copy of NodeAccessUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeAdminTestCase]
+name = Copy of NodeAdminTestCase
+description = Copy of NodeAdminTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeBlockFunctionalTest]
+name = Copy of NodeBlockFunctionalTest
+description = Copy of NodeBlockFunctionalTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeBlockTestCase]
+name = Copy of NodeBlockTestCase
+description = Copy of NodeBlockTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeBuildContent]
+name = Copy of NodeBuildContent
+description = Copy of NodeBuildContent
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeCreationTestCase]
+name = Copy of NodeCreationTestCase
+description = Copy of NodeCreationTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeEntityFieldQueryAlter]
+name = Copy of NodeEntityFieldQueryAlter
+description = Copy of NodeEntityFieldQueryAlter
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeFeedTestCase]
+name = Copy of NodeFeedTestCase
+description = Copy of NodeFeedTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeLoadHooksTestCase]
+name = Copy of NodeLoadHooksTestCase
+description = Copy of NodeLoadHooksTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeLoadMultipleUnitTest]
+name = Copy of NodeLoadMultipleUnitTest
+description = Copy of NodeLoadMultipleUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodePostSettingsTestCase]
+name = Copy of NodePostSettingsTestCase
+description = Copy of NodePostSettingsTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeQueryAlter]
+name = Copy of NodeQueryAlter
+description = Copy of NodeQueryAlter
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeRevisionsTestCase]
+name = Copy of NodeRevisionsTestCase
+description = Copy of NodeRevisionsTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeRSSContentTestCase]
+name = Copy of NodeRSSContentTestCase
+description = Copy of NodeRSSContentTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeSaveTestCase]
+name = Copy of NodeSaveTestCase
+description = Copy of NodeSaveTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeTitleTestCase]
+name = Copy of NodeTitleTestCase
+description = Copy of NodeTitleTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeTitleXSSTestCase]
+name = Copy of NodeTitleXSSTestCase
+description = Copy of NodeTitleXSSTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeTokenReplaceTestCase]
+name = Copy of NodeTokenReplaceTestCase
+description = Copy of NodeTokenReplaceTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeTypePersistenceTestCase]
+name = Copy of NodeTypePersistenceTestCase
+description = Copy of NodeTypePersistenceTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheNodeTypeTestCase]
+name = Copy of NodeTypeTestCase
+description = Copy of NodeTypeTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCachePageEditTestCase]
+name = Copy of PageEditTestCase
+description = Copy of PageEditTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCachePagePreviewTestCase]
+name = Copy of PagePreviewTestCase
+description = Copy of PagePreviewTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCachePageViewTestCase]
+name = Copy of PageViewTestCase
+description = Copy of PageViewTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheSummaryLengthTestCase]
+name = Copy of SummaryLengthTestCase
+description = Copy of SummaryLengthTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyHooksTestCase]
+name = Copy of TaxonomyHooksTestCase
+description = Copy of TaxonomyHooksTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyLegacyTestCase]
+name = Copy of TaxonomyLegacyTestCase
+description = Copy of TaxonomyLegacyTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyLoadMultipleUnitTest]
+name = Copy of TaxonomyLoadMultipleUnitTest
+description = Copy of TaxonomyLoadMultipleUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyTermFieldTestCase]
+name = Copy of TaxonomyTermFieldTestCase
+description = Copy of TaxonomyTermFieldTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyTermTestCase]
+name = Copy of TaxonomyTermTestCase
+description = Copy of TaxonomyTermTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyTermUnitTest]
+name = Copy of TaxonomyTermUnitTest
+description = Copy of TaxonomyTermUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyThemeTestCase]
+name = Copy of TaxonomyThemeTestCase
+description = Copy of TaxonomyThemeTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyTokenReplaceTestCase]
+name = Copy of TaxonomyTokenReplaceTestCase
+description = Copy of TaxonomyTokenReplaceTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyVocabularyFunctionalTest]
+name = Copy of TaxonomyVocabularyFunctionalTest
+description = Copy of TaxonomyVocabularyFunctionalTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyVocabularyUnitTest]
+name = Copy of TaxonomyVocabularyUnitTest
+description = Copy of TaxonomyVocabularyUnitTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheTaxonomyWebTestCase]
+name = Copy of TaxonomyWebTestCase
+description = Copy of TaxonomyWebTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserAccountLinksUnitTests]
+name = Copy of UserAccountLinksUnitTests
+description = Copy of UserAccountLinksUnitTests
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserAdminTestCase]
+name = Copy of UserAdminTestCase
+description = Copy of UserAdminTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserAutocompleteTestCase]
+name = Copy of UserAutocompleteTestCase
+description = Copy of UserAutocompleteTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserBlocksUnitTests]
+name = Copy of UserBlocksUnitTests
+description = Copy of UserBlocksUnitTests
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserCancelTestCase]
+name = Copy of UserCancelTestCase
+description = Copy of UserCancelTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserCreateTestCase]
+name = Copy of UserCreateTestCase
+description = Copy of UserCreateTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserEditedOwnAccountTestCase]
+name = Copy of UserEditedOwnAccountTestCase
+description = Copy of UserEditedOwnAccountTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserEditTestCase]
+name = Copy of UserEditTestCase
+description = Copy of UserEditTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserLoginTestCase]
+name = Copy of UserLoginTestCase
+description = Copy of UserLoginTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserPermissionsTestCase]
+name = Copy of UserPermissionsTestCase
+description = Copy of UserPermissionsTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserPictureTestCase]
+name = Copy of UserPictureTestCase
+description = Copy of UserPictureTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserRegistrationTestCase]
+name = Copy of UserRegistrationTestCase
+description = Copy of UserRegistrationTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserRoleAdminTestCase]
+name = Copy of UserRoleAdminTestCase
+description = Copy of UserRoleAdminTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserRolesAssignmentTestCase]
+name = Copy of UserRolesAssignmentTestCase
+description = Copy of UserRolesAssignmentTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserSaveTestCase]
+name = Copy of UserSaveTestCase
+description = Copy of UserSaveTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserSignatureTestCase]
+name = Copy of UserSignatureTestCase
+description = Copy of UserSignatureTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserTimeZoneFunctionalTest]
+name = Copy of UserTimeZoneFunctionalTest
+description = Copy of UserTimeZoneFunctionalTest
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserTokenReplaceTestCase]
+name = Copy of UserTokenReplaceTestCase
+description = Copy of UserTokenReplaceTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserUserSearchTestCase]
+name = Copy of UserUserSearchTestCase
+description = Copy of UserUserSearchTestCase
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserValidateCurrentPassCustomForm]
+name = Copy of UserValidateCurrentPassCustomForm
+description = Copy of UserValidateCurrentPassCustomForm
+group = Entity cache
+file = entitycache.test
+
+[EntityCacheUserValidationTestCase]
+name = Copy of UserValidationTestCase
+description = Copy of UserValidationTestCase
+group = Entity cache
+file = entitycache.test
