@@ -23,6 +23,17 @@ function render_cache_boot() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function render_cache_config_info() {
+  $prefixes['render_cache.settings'] = array(
+    'label' => t('Render cache settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Disable devel output for AJAX queries.
  */
 function render_cache_ajax_render_alter() {
@@ -160,22 +171,28 @@ function render_cache_get_cache($checksum) {
 
   if ($cache = cache('cache_render')->get($checksum)) {
     
-    if(isset($cache->data['js'])){
+    if(isset($cache->data['js']) && is_array($cache->data['js']) ){
       foreach($cache->data['js'] as $key => $val){
-        backdrop_add_js($key, $val['type']);
+        if(!empty($val['type'])){
+          backdrop_add_js($key, $val['type']);
+        }
       }
     }
-    if(isset($cache->data['css'])){
+    if(isset($cache->data['css']) && is_array($cache->data['css']) ){
       foreach($cache->data['css'] as $key => $val){
-        backdrop_add_css($key, $val);
+        if(!empty($val)){
+          backdrop_add_css($key, $val);
+        }
       }
     }
-    if(isset($cache->data['settings'])){
+    if(isset($cache->data['settings']) && is_array($cache->data['settings']) ){
       foreach($cache->data['settings'] as $key => $val){
-        backdrop_add_js($val, 'setting');
+        if(!empty($val)){
+          backdrop_add_js($val, 'setting');
+        }
       }
     }
-    $return = '<!-- cached:' . $checksum. ' -->' . $cache->data['output'] . '<!-- /cached:' . $checksum. ' -->';
+    $return = $cache->data['output'];
   }
 
   $checksums[$checksum] = $return;
@@ -261,8 +278,6 @@ function render_cache_render(&$elements) {
     // No need to cache window.Backdrop = ....
     return render_cache_original_render($elements);
   }
-  
-  
 
   // Do not print elements twice.
   if (!empty($elements['#printed'])) {
@@ -306,9 +321,10 @@ function render_cache_render(&$elements) {
 
         if($diff = array_diff($data_keys_after,$data_keys_before)){
           foreach($diff as $key){
-            $data['settings'][$key] = $data_keys_after[$key];
+            $data['settings'][$key] = $scripts_after['settings']['data'][$key];
           }
         }
+        
         
         $css_keys_before = array_keys($css_before);
         $css_keys_after = array_keys($css_after);
