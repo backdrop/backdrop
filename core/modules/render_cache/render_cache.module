@@ -8,7 +8,8 @@
 /**
  * Implements hook_boot().
  */
-function render_cache_boot() {
+function render_cache_boot()
+{
   $config = config('render_cache.settings');
   if ($config->get('enable') && $config->get('debug')) {
     // Init statistics data.
@@ -25,25 +26,26 @@ function render_cache_boot() {
 /**
  * Implements hook_config_info().
  */
-function render_cache_config_info() {
-  $prefixes['render_cache.settings'] = array(
-    'label' => t('Render cache settings'),
-    'group' => t('Configuration'),
-  );
+function render_cache_config_info()
+{
+  $prefixes['render_cache.settings'] = array('label' => t('Render cache settings'),
+    'group' => t('Configuration'),);
   return $prefixes;
 }
 
 /**
  * Disable devel output for AJAX queries.
  */
-function render_cache_ajax_render_alter() {
+function render_cache_ajax_render_alter()
+{
   $GLOBALS['render_cache_debug_shutdown'] = FALSE;
 }
 
 /**
  * Implements hook_flush_caches().
  */
-function render_cache_flush_caches() {
+function render_cache_flush_caches()
+{
   $config = config('render_cache.settings');
   return array('cache_render');
 }
@@ -51,7 +53,8 @@ function render_cache_flush_caches() {
 /**
  * Internal function to measure time for devel output.
  */
-function render_cache_microtime_float() {
+function render_cache_microtime_float()
+{
   list($usec, $sec) = explode(" ", microtime());
   return ((float) $usec + (float) $sec);
 }
@@ -61,7 +64,8 @@ function render_cache_microtime_float() {
  *
  * render_cache_boot() registers this function as a shutdown function.
  */
-function render_cache_shutdown() {
+function render_cache_shutdown()
+{
   if (isset($GLOBALS['render_cache_debug_shutdown'])) {
     return;
   }
@@ -78,18 +82,19 @@ function render_cache_shutdown() {
 /**
  * Generate checksum for render element.
  */
-function render_cache_checksum($element) {
+function render_cache_checksum($element)
+{
   if (empty($element)) {
     return FALSE;
   }
-  
+
   $config = config('render_cache.settings');
   $debug = FALSE;
   if ($config->get('enable') && $config->get('debug')) {
     $debug = TRUE;
   }
 
-  if($debug){
+  if ($debug) {
     global $_render_cache_devel;
     $now = render_cache_microtime_float();
     $_render_cache_devel['count']++;
@@ -97,7 +102,7 @@ function render_cache_checksum($element) {
   $serialize = serialize($element);
   $checksum = md5($serialize);
 
-  if($debug){
+  if ($debug) {
     $_render_cache_devel['checksum'] = $_render_cache_devel['checksum'] + (render_cache_microtime_float() - $now);
   }
   return $checksum;
@@ -106,7 +111,8 @@ function render_cache_checksum($element) {
 /**
  * Store cached data.
  */
-function render_cache_store_cache($checksum, $data) {
+function render_cache_store_cache($checksum, $data)
+{
   if (empty($data)) {
     // Do not cache empty data.
     return;
@@ -117,8 +123,8 @@ function render_cache_store_cache($checksum, $data) {
   if ($config->get('enable') && $config->get('debug')) {
     $debug = TRUE;
   }
-  
-  if($debug){
+
+  if ($debug) {
     global $_render_cache_devel;
     $now = render_cache_microtime_float();
   }
@@ -127,19 +133,20 @@ function render_cache_store_cache($checksum, $data) {
   $expire = REQUEST_TIME + $expire_after ;
   cache('cache_render')->set($checksum, $data, $expire);
 
-  if($debug){
+  if ($debug) {
     $_render_cache_devel['store'] = $_render_cache_devel['store'] + (render_cache_microtime_float() - $now);
   }
 }
 
-function render_cache_store_checksums($checksum = NULL){
+function render_cache_store_checksums($checksum = NULL)
+{
   static $checksums;
-  
-  if(!$checksums){
+
+  if (!$checksums) {
     $checksums = array();
   }
-  
-  if($checksum){
+
+  if ($checksum) {
     $checksums[] = $checksum;
   }
   return $checksums;
@@ -148,15 +155,16 @@ function render_cache_store_checksums($checksum = NULL){
 /**
  * Get cache by checksum.
  */
-function render_cache_get_cache($checksum) {
+function render_cache_get_cache($checksum)
+{
 
   $config = config('render_cache.settings');
   $debug = FALSE;
   if ($config->get('enable') && $config->get('debug')) {
     $debug = TRUE;
   }
-  
-  if($debug){
+
+  if ($debug) {
     global $_render_cache_devel;
     $now = render_cache_microtime_float();
   }
@@ -169,25 +177,25 @@ function render_cache_get_cache($checksum) {
 
   $return = FALSE;
 
-  if ($cache = cache('cache_render')->get($checksum)) {
-    
-    if(isset($cache->data['js']) && is_array($cache->data['js']) ){
-      foreach($cache->data['js'] as $key => $val){
-        if(!empty($val['type'])){
+  if ($cache = cache('cache_render') ->get($checksum)) {
+
+    if (isset($cache->data['js']) && is_array($cache->data['js'])) {
+      foreach ($cache->data['js'] as $key => $val) {
+        if (!empty($val['type'])) {
           backdrop_add_js($key, $val['type']);
         }
       }
     }
-    if(isset($cache->data['css']) && is_array($cache->data['css']) ){
-      foreach($cache->data['css'] as $key => $val){
-        if(!empty($val)){
+    if (isset($cache->data['css']) && is_array($cache->data['css'])) {
+      foreach ($cache->data['css'] as $key => $val) {
+        if (!empty($val)) {
           backdrop_add_css($key, $val);
         }
       }
     }
-    if(isset($cache->data['settings']) && is_array($cache->data['settings']) ){
-      foreach($cache->data['settings'] as $key => $val){
-        if(!empty($val)){
+    if (isset($cache->data['settings']) && is_array($cache->data['settings'])) {
+      foreach ($cache->data['settings'] as $key => $val) {
+        if (!empty($val)) {
           backdrop_add_js($val, 'setting');
         }
       }
@@ -197,7 +205,7 @@ function render_cache_get_cache($checksum) {
 
   $checksums[$checksum] = $return;
   render_cache_store_checksums($checksum);
-  if($debug){
+  if ($debug) {
     $_render_cache_devel['get'] = $_render_cache_devel['get'] + (render_cache_microtime_float() - $now);
   }
 
@@ -207,31 +215,31 @@ function render_cache_get_cache($checksum) {
 /**
  * Main function. Replace backdrop_render function.
  */
-function render_cache_backdrop_render(&$elements) {
- 
-  
+function render_cache_backdrop_render(&$elements)
+{
+
+
   $output = render_cache_render($elements);
   preg_match_all('/<!-- render_cache_form:(.*?):(.*?) --\>/', $output, $matches);
-  
+
   if (!empty($matches[0])) {
     $form_storage = render_cache_form_storage();
-    
+
     foreach ($matches[2] as $key => $form_serial_number) {
       $rendered_element = $form_storage[$form_serial_number]['render'];
       $output = str_replace($matches[0][$key], $rendered_element, $output);
     }
   }
-  
+
   return $output;
 }
 
 /**
  * Multy time used render.
  */
-function render_cache_render(&$elements) {  
-  $empty_array = array(
-    '#printed' => FALSE,
-  );
+function render_cache_render(&$elements)
+{
+  $empty_array = array('#printed' => FALSE,);
 
   // We have an empty elements. Nothing to render or cache.
   if ($elements === $empty_array) {
@@ -247,12 +255,12 @@ function render_cache_render(&$elements) {
     // No need to cache markup.
     return render_cache_original_render($elements);
   }
-  
+
   if (isset($elements['#ajax'])) {
     // No cache for markup.
     return render_cache_original_render($elements);
   }
-  
+
   if (isset($elements['#name']) && $elements['#name'] == 'form_build_id') {
     // No cache for form_build_id
     return render_cache_original_render($elements);
@@ -262,17 +270,17 @@ function render_cache_render(&$elements) {
 /*  if (isset($elements['#type']) && $elements['#type'] == 'form') {
     // Do not cache form render ....
     return render_cache_original_render($elements);
-  }  
+  }
   if (isset($elements['#type']) && $elements['#type'] == 'submit') {
     // Do not cache form render ....
     return render_cache_original_render($elements);
-  }  
+  }
 /*
   if (isset($elements['#entity_type']) && $elements['#entity_type'] == 'node') {
     // It's hard to cache this data ....
     return render_cache_original_render($elements);
-  }  
-  
+  }
+
 */
   if (isset($elements['#type']) && $elements['#type'] == 'scripts') {
     // No need to cache window.Backdrop = ....
@@ -285,7 +293,7 @@ function render_cache_render(&$elements) {
   }
 
   if ($check_sum = render_cache_checksum($elements)) {
-    
+
     $output = render_cache_get_cache($check_sum);
     if (FALSE === $output) {
 
@@ -300,46 +308,43 @@ function render_cache_render(&$elements) {
         $scripts_keys_before = array_keys($scripts_before);
         $scripts_keys_after = array_keys($scripts_after);
 
-        if($diff = array_diff($scripts_keys_after,$scripts_keys_before)){
-          foreach($diff as $key){
+        if ($diff = array_diff($scripts_keys_after, $scripts_keys_before)) {
+          foreach ($diff as $key) {
             $data['js'][$key] = $scripts_after[$key];
           }
         }
-        
-        if(isset($scripts_before['settings']['data'])){
+
+        if (isset($scripts_before['settings']['data'])) {
           $data_keys_before = array_keys($scripts_before['settings']['data']);
-        }
-        else{
+        } else {
           $data_keys_before = array();
         }
-        if(isset($scripts_after['settings']['data'])){
+        if (isset($scripts_after['settings']['data'])) {
           $data_keys_after = array_keys($scripts_after['settings']['data']);
-        }
-        else{
+        } else {
           $data_keys_after = array();
         }
 
-        if($diff = array_diff($data_keys_after,$data_keys_before)){
-          foreach($diff as $key){
+        if ($diff = array_diff($data_keys_after, $data_keys_before)) {
+          foreach ($diff as $key) {
             $data['settings'][$key] = $scripts_after['settings']['data'][$key];
           }
         }
-        
-        
+
+
         $css_keys_before = array_keys($css_before);
         $css_keys_after = array_keys($css_after);
-        
-        if($diff = array_diff($css_keys_after,$css_keys_before)){
-          foreach($diff as $key){
+
+        if ($diff = array_diff($css_keys_after, $css_keys_before)) {
+          foreach ($diff as $key) {
             $data['css'][$key] = $css_after[$key];
           }
         }
         render_cache_store_cache($check_sum, $data);
-        
+
       }
     }
-  }
-  else {
+  } else {
     $output = render_cache_original_render($elements);
   }
   return $output;
@@ -348,7 +353,8 @@ function render_cache_render(&$elements) {
 /**
  * Alter Performace page settings to add Render Cache settings.
  */
-function render_cache_form_system_performance_settings_alter(&$form, &$form_state, $form_id) {
+function render_cache_form_system_performance_settings_alter(&$form, &$form_state, $form_id)
+{
 
   $config = config('render_cache.settings');
 
@@ -362,16 +368,13 @@ function render_cache_form_system_performance_settings_alter(&$form, &$form_stat
   $form['render_cache']['enable'] = array(
     '#type' => 'checkbox',
     '#title' => t("Enable render cache."),
-    '#default_value' => $config->get('enable'),
-  );
+    '#default_value' => $config->get('enable'),);
 
   $form['render_cache']['settings'] = array(
     '#type' => 'container',
     '#states' => array(
       // Hide the query log settings when not displaying query log.
-      'invisible' => array(
-        'input[name="render_cache[enable]"]' => array('checked' => FALSE),
-      ),
+      'invisible' => array('input[name="render_cache[enable]"]' => array('checked' => FALSE),),
     ),
   );
 
@@ -381,14 +384,12 @@ function render_cache_form_system_performance_settings_alter(&$form, &$form_stat
     '#title' => t("Cache expiration time"),
     '#options' => $period,
     '#default_value' => $config->get('expire') ? $config->get('expire') : 3600 ,
-    '#description' => t('Clean cache after this period.'),
-  );
+    '#description' => t('Clean cache after this period.'),);
 
   $form['render_cache']['settings']['debug'] = array(
     '#type' => 'checkbox',
     '#title' => t("Enable debug output."),
-    '#default_value' => $config->get('debug'),
-  );
+    '#default_value' => $config->get('debug'),);
 
   $form['#submit'][] = 'render_cache_system_settings_submit';
 }
@@ -396,7 +397,8 @@ function render_cache_form_system_performance_settings_alter(&$form, &$form_stat
 /**
  * Save Render Cache settings.
  */
-function render_cache_system_settings_submit($form, &$form_state) {
+function render_cache_system_settings_submit($form, &$form_state)
+{
   $config = config('render_cache.settings');
   $config->set('enable', $form_state['values']['render_cache']['enable']);
   $config->set('expire', $form_state['values']['render_cache']['settings']['expire']);
@@ -409,7 +411,8 @@ function render_cache_system_settings_submit($form, &$form_state) {
 /**
  * Original backdrop_render function except cache functions.
  */
-function render_cache_original_render(&$elements) {
+function render_cache_original_render(&$elements)
+{
   // Early-return nothing if user does not have access.
   if (empty($elements) || (isset($elements['#access']) && !$elements['#access'])) {
     return '';
@@ -510,64 +513,63 @@ function render_cache_original_render(&$elements) {
  * It is nesessary to store:
  * '<!-- render_cache_form:form_id:form_unique_id -->' instead of actuall form in render cache.
  **/
-function render_cache_form_storage($form_id = NULL, $form_render = NULL){
+function render_cache_form_storage($form_id = NULL, $form_render = NULL)
+{
   static $form_storage;
-  if($form_render){
-    if ($cache = cache('cache_render')->get($form_id)) {
+  if ($form_render) {
+    if ($cache = cache('cache_render') ->get($form_id)) {
       $subcaches = cache_get_multiple($cache->data, 'cache_render');
 
       $checksums = &backdrop_static('render_cache_get_cache');
-      
+
       $tmplist = array();
-      foreach($cache->data as $form_chksum){
+      foreach ($cache->data as $form_chksum) {
         $tmplist[$form_chksum] = $form_chksum;
       }
-      foreach($subcaches as $checksum => $subcache){
+      foreach ($subcaches as $checksum => $subcache) {
         unset($tmplist[$checksum]);
-        
-        if(isset($checksums[$checksum])){
+
+        if (isset($checksums[$checksum])) {
           continue;
         }
         $checksums[$checksum] = $subcache->data['output'];
-        if(isset($subcache->data['js']) && is_array($subcache->data['js']) ){
-          foreach($subcache->data['js'] as $key => $val){
-            if(!empty($val['type'])){
+        if (isset($subcache->data['js']) && is_array($subcache->data['js'])) {
+          foreach ($subcache->data['js'] as $key => $val) {
+            if (!empty($val['type'])) {
               backdrop_add_js($key, $val['type']);
             }
           }
         }
-        if(isset($subcache->data['css']) && is_array($subcache->data['css']) ){
-          foreach($subcache->data['css'] as $key => $val){
-            if(!empty($val)){
+        if (isset($subcache->data['css']) && is_array($subcache->data['css'])) {
+          foreach ($subcache->data['css'] as $key => $val) {
+            if (!empty($val)) {
               backdrop_add_css($key, $val);
             }
           }
         }
-        if(isset($subcache->data['settings']) && is_array($subcache->data['settings']) ){
-          foreach($subcache->data['settings'] as $key => $val){
-            if(!empty($val)){
+        if (isset($subcache->data['settings']) && is_array($subcache->data['settings'])) {
+          foreach ($subcache->data['settings'] as $key => $val) {
+            if (!empty($val)) {
               backdrop_add_js($val, 'setting');
             }
           }
         }
       }
-      
-      foreach($tmplist as $form_chksum){
+
+      foreach ($tmplist as $form_chksum) {
         $checksums[$form_chksum] = '';
       }
       $form_storage[] = array(
         'elements' => $form_render,
-        'render' => render_cache_original_render($form_render)
-      );
-    }else{
+        'render' => render_cache_original_render($form_render));
+    } else {
       $before = render_cache_store_checksums();
       $form_storage[] = array(
         'elements' => $form_render,
-        'render' => render_cache_original_render($form_render)
-      );
+        'render' => render_cache_original_render($form_render));
       $after = render_cache_store_checksums();
-      
-      if($diff = array_diff($after,$before)){
+
+      if ($diff = array_diff($after, $before)) {
         $config = config('render_cache.settings');
         $expire_after = $config->get('expire') ? $config->get('expire') : 3600;
         $expire = REQUEST_TIME + $expire_after ;
@@ -575,7 +577,7 @@ function render_cache_form_storage($form_id = NULL, $form_render = NULL){
       }
     }
     return count($form_storage) - 1;
-  }else{
+  } else {
     return $form_storage;
   }
 }
