@@ -291,8 +291,18 @@ function render_cache_render(&$elements) {
           }
         }
         
-        $data_keys_before = array_keys($scripts_before['settings']['data']);
-        $data_keys_after = array_keys($scripts_after['settings']['data']);
+        if(isset($scripts_before['settings']['data'])){
+          $data_keys_before = array_keys($scripts_before['settings']['data']);
+        }
+        else{
+          $data_keys_before = array();
+        }
+        if(isset($scripts_after['settings']['data'])){
+          $data_keys_after = array_keys($scripts_after['settings']['data']);
+        }
+        else{
+          $data_keys_after = array();
+        }
 
         if($diff = array_diff($data_keys_after,$data_keys_before)){
           foreach($diff as $key){
