@@ -84,69 +84,12 @@ function render_cache_checksum($element) {
     $_render_cache_devel['count']++;
   }
   $serialize = serialize($element);
-
-  if (is_array($element)) {
-    $need_sanitize = FALSE;
-    $search_for = array('form_token', 'form_build_id', '#build_id', 'date');
-    foreach ($search_for as $str) {
-      if (FALSE !== strpos($serialize, '"'.$str.'"')) {
-        $need_sanitize = TRUE;
-        break;
-      }
-    }
-    if ($need_sanitize) {
-      $element_copy = $element;
-      if (is_array($element_copy)) {
-        if (isset($element_copy['form_token'])) {
-          unset($element_copy['form_token']);
-        }
-        if (isset($element_copy['form_build_id'])) {
-          unset($element_copy['form_build_id']);
-        }
-        if (isset($element_copy['#build_id'])) {
-          unset($element_copy['#build_id']);
-        }
-        if (isset($element_copy['date'])) {
-          unset($element_copy['date']);
-        }
-        if (isset($element_copy['#attached'])) {
-          unset($element_copy['#attached']);
-        }
-      }
-
-      array_walk_recursive($element_copy,'render_cache_sanitize_objects');
-      $serialize = serialize($element_copy);
-
-    }
-  }
-
   $checksum = md5($serialize);
+
   if($debug){
     $_render_cache_devel['checksum'] = $_render_cache_devel['checksum'] + (render_cache_microtime_float() - $now);
   }
   return $checksum;
-}
-
-function render_cache_sanitize_objects(&$item, $key){
-  if(is_object($item)){
-    $item = render_cache_get_object_values($item);
-    if(isset($item['created'])){
-      unset($item['created']);
-    }
-  }
-}
-
-/**
- * Get first level properties from object.
- */
-function render_cache_get_object_values($object) {
-  $result = array();
-  foreach ($object as $key => $val) {
-    if (is_string($val) || is_bool($val) || is_numeric($val)) {
-      $result[$key] = $val;
-    }
-  }
-  return $result;
 }
 
 /**
@@ -178,6 +121,18 @@ function render_cache_store_cache($checksum, $data) {
   }
 }
 
+function render_cache_store_checksums($checksum = NULL){
+  static $checksums;
+  
+  if(!$checksums){
+    $checksums = array();
+  }
+  
+  if($checksum){
+    $checksums[] = $checksum;
+  }
+  return $checksums;
+}
 
 /**
  * Get cache by checksum.
@@ -195,7 +150,7 @@ function render_cache_get_cache($checksum) {
     $now = render_cache_microtime_float();
   }
 
-  static $checksums;
+  $checksums = &backdrop_static('render_cache_get_cache');
 
   if (isset($checksums[$checksum])) {
     return $checksums[$checksum];
@@ -204,10 +159,27 @@ function render_cache_get_cache($checksum) {
   $return = FALSE;
 
   if ($cache = cache('cache_render')->get($checksum)) {
-    $return = $cache->data;
+    
+    if(isset($cache->data['js'])){
+      foreach($cache->data['js'] as $key => $val){
+        backdrop_add_js($key, $val['type']);
+      }
+    }
+    if(isset($cache->data['css'])){
+      foreach($cache->data['css'] as $key => $val){
+        backdrop_add_css($key, $val);
+      }
+    }
+    if(isset($cache->data['settings'])){
+      foreach($cache->data['settings'] as $key => $val){
+        backdrop_add_js($val, 'setting');
+      }
+    }
+    $return = '<!-- cached:' . $checksum. ' -->' . $cache->data['output'] . '<!-- /cached:' . $checksum. ' -->';
   }
 
   $checksums[$checksum] = $return;
+  render_cache_store_checksums($checksum);
   if($debug){
     $_render_cache_devel['get'] = $_render_cache_devel['get'] + (render_cache_microtime_float() - $now);
   }
@@ -216,27 +188,30 @@ function render_cache_get_cache($checksum) {
 }
 
 /**
- * Process form states and attachments fo cached data.
- */
-function render_cache_enable_forms_states_attaches($elements) {
-  if (!empty($elements['#states'])) {
-    backdrop_process_states($elements);
-  }
-
-  if (!empty($elements['#attached'])) {
-    backdrop_process_attached($elements);
-  }
-  foreach ($elements as $key => $val) {
-    if (is_array($val)) {
-      render_cache_enable_forms_states_attaches($val);
-    }
-  }
-}
-
-/**
  * Main function. Replace backdrop_render function.
  */
 function render_cache_backdrop_render(&$elements) {
+ 
+  
+  $output = render_cache_render($elements);
+  preg_match_all('/<!-- render_cache_form:(.*?):(.*?) --\>/', $output, $matches);
+  
+  if (!empty($matches[0])) {
+    $form_storage = render_cache_form_storage();
+    
+    foreach ($matches[2] as $key => $form_serial_number) {
+      $rendered_element = $form_storage[$form_serial_number]['render'];
+      $output = str_replace($matches[0][$key], $rendered_element, $output);
+    }
+  }
+  
+  return $output;
+}
+
+/**
+ * Multy time used render.
+ */
+function render_cache_render(&$elements) {  
   $empty_array = array(
     '#printed' => FALSE,
   );
@@ -255,8 +230,19 @@ function render_cache_backdrop_render(&$elements) {
     // No need to cache markup.
     return render_cache_original_render($elements);
   }
+  
+  if (isset($elements['#ajax'])) {
+    // No cache for markup.
+    return render_cache_original_render($elements);
+  }
+  
+  if (isset($elements['#name']) && $elements['#name'] == 'form_build_id') {
+    // No cache for form_build_id
+    return render_cache_original_render($elements);
+  }
 
-  if (isset($elements['#type']) && $elements['#type'] == 'form') {
+
+/*  if (isset($elements['#type']) && $elements['#type'] == 'form') {
     // Do not cache form render ....
     return render_cache_original_render($elements);
   }  
@@ -264,13 +250,13 @@ function render_cache_backdrop_render(&$elements) {
     // Do not cache form render ....
     return render_cache_original_render($elements);
   }  
-
+/*
   if (isset($elements['#entity_type']) && $elements['#entity_type'] == 'node') {
     // It's hard to cache this data ....
     return render_cache_original_render($elements);
   }  
   
-
+*/
   if (isset($elements['#type']) && $elements['#type'] == 'scripts') {
     // No need to cache window.Backdrop = ....
     return render_cache_original_render($elements);
@@ -284,78 +270,53 @@ function render_cache_backdrop_render(&$elements) {
   }
 
   if ($check_sum = render_cache_checksum($elements)) {
+    
+    $output = render_cache_get_cache($check_sum);
+    if (FALSE === $output) {
 
-    if (!$output = render_cache_get_cache($check_sum)) {
-
-      $output = render_cache_render_wrapper($elements);
-
+      $scripts_before = backdrop_add_js();
+      $css_before = backdrop_add_css();
+      $output = render_cache_original_render($elements);
+      $scripts_after = backdrop_add_js();
+      $css_after = backdrop_add_css();
       if (!empty($output)) {
-        render_cache_store_cache($check_sum, $output);
+        $data = array();
+        $data['output'] = $output;
+        $scripts_keys_before = array_keys($scripts_before);
+        $scripts_keys_after = array_keys($scripts_after);
+
+        if($diff = array_diff($scripts_keys_after,$scripts_keys_before)){
+          foreach($diff as $key){
+            $data['js'][$key] = $scripts_after[$key];
+          }
+        }
+        
+        $data_keys_before = array_keys($scripts_before['settings']['data']);
+        $data_keys_after = array_keys($scripts_after['settings']['data']);
+
+        if($diff = array_diff($data_keys_after,$data_keys_before)){
+          foreach($diff as $key){
+            $data['settings'][$key] = $scripts_after['settings']['data'][$key];
+          }
+        }
+        
+        $css_keys_before = array_keys($css_before);
+        $css_keys_after = array_keys($css_after);
+        
+        if($diff = array_diff($css_keys_after,$css_keys_before)){
+          foreach($diff as $key){
+            $data['css'][$key] = $css_after[$key];
+          }
+        }
+        render_cache_store_cache($check_sum, $data);
+        
       }
-    }
-    else {
-      $output = $output;
-      render_cache_enable_forms_states_attaches($elements);
     }
   }
   else {
-    $output = render_cache_render_wrapper($elements);
+    $output = render_cache_original_render($elements);
   }
-
-  render_cache_replace_dynamic_content($elements, $output);
-
   return $output;
-}
-
-/**
- * Replace place holders (form_token, form_build_id) with actual data.
- */
-function render_cache_replace_dynamic_content($elements, &$output) {
-
-  preg_match_all('/<!-- REPLACE: (.*?) --\>/', $output, $matches);
-
-  if (!empty($matches[0])) {
-
-    foreach ($matches[1] as $key => $name) {
-      if ($element = render_cache_get_form_element($name, $elements)) {
-        if (!empty($element['#printed'])) {
-          $rendered_element = $element['#children'];
-        }
-        else {
-          $rendered_element = render_cache_original_render($element);
-        }
-        $output = str_replace($matches[0][$key], $rendered_element, $output);
-      }
-    }
-  }
-}
-
-/**
- * Used by render_cache_replace_dynamic_content to get data for element by name.
- */
-function render_cache_get_form_element($name, $elements) {
-  if (isset($elements['#type']) && $elements['#type'] == 'form') {
-    if (isset($elements[$name])) {
-      return $elements[$name];
-    }
-  }
-  else {
-    foreach ($elements as $variable => $element) {
-      if (is_array($element) && isset($element[$name])) {
-        return $element[$name];
-      }
-    }
-  }
-  
-  // If we get here, value is much dipper.
-  foreach ($elements as $variable => $element) {
-    if (is_array($element)) {
-      if($data =  render_cache_get_form_element($name, $element)){
-        return $data;
-      }
-    }
-  }
-  return FALSE;
 }
 
 /**
@@ -420,24 +381,6 @@ function render_cache_system_settings_submit($form, &$form_state) {
 
 
 /**
- * Render wrapper. Replace form_token and form_build_id with Placeholder.
- */
-function render_cache_render_wrapper(&$elements) {
-
-  $dynamic_content = FALSE;
-  if (isset($elements['#name']) && in_array($elements['#name'], array('form_token', 'form_build_id', 'date'))) {
-//    $dynamic_content = TRUE;
-  }
-
-  $output = render_cache_original_render($elements);
-
-  if ($dynamic_content) {
-    $output = '<!-- REPLACE: ' . $elements['#name'] . ' -->';
-  }
-  return $output;
-}
-
-/**
  * Original backdrop_render function except cache functions.
  */
 function render_cache_original_render(&$elements) {
@@ -495,7 +438,7 @@ function render_cache_original_render(&$elements) {
   // for speed.
   if ($elements['#children'] == '') {
     foreach ($children as $key) {
-      $elements['#children'] .= render_cache_render_wrapper($elements[$key]);
+      $elements['#children'] .= render_cache_original_render($elements[$key]);
     }
   }
 
@@ -534,4 +477,73 @@ function render_cache_original_render(&$elements) {
   $elements['#printed'] = TRUE;
 
   return $output;
+}
+
+/**
+ * Store form related data to apply it after cache HIT.
+ * It is nesessary to store:
+ * '<!-- render_cache_form:form_id:form_unique_id -->' instead of actuall form in render cache.
+ **/
+function render_cache_form_storage($form_id = NULL, $form_render = NULL){
+  static $form_storage;
+  if($form_render){
+    if ($cache = cache('cache_render')->get($form_id)) {
+      $subcaches = cache_get_multiple($cache->data, 'cache_render');
+
+      $checksums = &backdrop_static('render_cache_get_cache');
+      
+      $tmplist = array();
+      foreach($cache->data as $form_chksum){
+        $tmplist[$form_chksum] = $form_chksum;
+      }
+      foreach($subcaches as $checksum => $subcache){
+        unset($tmplist[$checksum]);
+        
+        if(isset($checksums[$checksum])){
+          continue;
+        }
+        $checksums[$checksum] = $subcache->data['output'];
+        if(isset($subcache->data['js'])){
+          foreach($subcache->data['js'] as $key => $val){
+            drupal_add_js($key, $val['type']);
+          }
+        }
+        if(isset($subcache->data['css'])){
+          foreach($subcache->data['css'] as $key => $val){
+            drupal_add_css($key, $val);
+          }
+        }
+        if(isset($subcache->data['settings'])){
+          foreach($subcache->data['settings'] as $key => $val){
+            drupal_add_js($val, 'setting');
+          }
+        }
+      }
+      
+      foreach($tmplist as $form_chksum){
+        $checksums[$form_chksum] = '';
+      }
+      $form_storage[] = array(
+        'elements' => $form_render,
+        'render' => render_cache_original_render($form_render)
+      );
+    }else{
+      $before = render_cache_store_checksums();
+      $form_storage[] = array(
+        'elements' => $form_render,
+        'render' => render_boost_original_render($form_render)
+      );
+      $after = render_boost_store_checksums();
+      
+      if($diff = array_diff($after,$before)){
+        $config = config('render_cache.settings');
+        $expire_after = $config->get('expire') ? $config->get('expire') : 3600;
+        $expire = REQUEST_TIME + $expire_after ;
+        cache('cache_render')->set($form_id, $diff, $expire);
+      }
+    }
+    return count($form_storage) - 1;
+  }else{
+    return $form_storage;
+  }
 }
