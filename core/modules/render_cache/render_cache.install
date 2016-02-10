@@ -17,6 +17,5 @@ function render_cache_install() {
   $config->set('enable', 1);
   $config->set('expire', 3600);
   $config->set('debug', 0);
-  $config->set('method', 1);
   $config->save();
 }
