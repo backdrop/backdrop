@@ -30,53 +30,10 @@ function render_cache_ajax_render_alter() {
 }
 
 /**
- * Implements hook_cron().
- */
-function render_cache_cron() {
-  $config = config('render_cache.settings');
-  if ($config->get('enable') && (0 == $config->get('method'))) {
-    $expire_after = $config->get('expire') ? $config->get('expire') : 3600;
-    $dirpath = $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache';
-    if (is_dir($dirpath)) {
-    $dir = dir($dirpath);
-      while (($entry = $dir->read()) !== FALSE) {
-        if(is_file($dirpath . '/' . $entry)){
-          $fileinfo = fileatime($dirpath . '/' . $entry);
-          if($fileinfo < REQUEST_TIME - $expire_after){
-            unlink($dirpath . '/' . $entry);
-          }
-        }
-      }
-      $dir->close();
-    }
-  }
-}
-
-/**
  * Implements hook_flush_caches().
  */
 function render_cache_flush_caches() {
   $config = config('render_cache.settings');
-  if (0 == $config->get('method')) {
-    // Clear files data.
-    $dirpath = $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache';
-    
-    if (is_dir($dirpath)) {
-    $dir = dir($dirpath);
-      while (($entry = $dir->read()) !== FALSE) {
-        if(is_file($dirpath . '/' . $entry)){
-          $fileinfo = pathinfo($dirpath . '/' . $entry);
-          if($fileinfo['extension'] == 'php'){
-            unlink($dirpath . '/' . $entry);
-          }
-        }
-      }
-      $dir->close();
-    }
-  
-    render_cache_cachedir_prepare();
-  }
-
   return array('cache_render');
 }
 
@@ -212,17 +169,9 @@ function render_cache_store_cache($checksum, $data) {
     $now = render_cache_microtime_float();
   }
 
-  if ($config->get('method')) {
-    $expire_after = $config->get('expire') ? $config->get('expire') : 3600;
-    $expire = REQUEST_TIME + $expire_after ;
-    cache('cache_render')->set($checksum, $data, $expire);
-  }
-  else {
-    $dir = $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache';
-    $dest = $dir . '/' . $checksum . '.php';
-    $record = '<?php $cached_data = \'' . str_replace("'", "\'", $data) . '\';';
-    file_unmanaged_save_data($record, $dest, FILE_EXISTS_REPLACE);
-  }
+  $expire_after = $config->get('expire') ? $config->get('expire') : 3600;
+  $expire = REQUEST_TIME + $expire_after ;
+  cache('cache_render')->set($checksum, $data, $expire);
 
   if($debug){
     $_render_cache_devel['store'] = $_render_cache_devel['store'] + (render_cache_microtime_float() - $now);
@@ -254,22 +203,10 @@ function render_cache_get_cache($checksum) {
 
   $return = FALSE;
 
-  if ($config->get('method')) {
-    if ($cache = cache('cache_render')->get($checksum)) {
-      $return = $cache->data;
-    }
+  if ($cache = cache('cache_render')->get($checksum)) {
+    $return = $cache->data;
   }
-  else {
-    $dir = $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache';
-    $dest = $dir . '/' . $checksum . '.php';
-    if (is_file($dest)) {
-      include_once $dest;
-      if (isset($cached_data)) {
-        $return = $cached_data;
-      }
-    }
 
-  }
   $checksums[$checksum] = $return;
   if($debug){
     $_render_cache_devel['get'] = $_render_cache_devel['get'] + (render_cache_microtime_float() - $now);
@@ -460,47 +397,6 @@ function render_cache_form_system_performance_settings_alter(&$form, &$form_stat
     '#description' => t('Clean cache after this period.'),
   );
 
-  $form['render_cache']['settings']['method'] = array(
-    '#type' => 'select',
-    '#title' => t("Cache method"),
-    '#options' => array(
-      0 => t('File storage'),
-      1 => t('Database storage'),
-    ),
-    '#default_value' => $config->get('method'),
-  );
-
-  $form['render_cache']['settings']['file_storage_description'] = array(
-    '#type' => 'item',
-    '#states' => array(
-      'visible' => array(
-        'select[name="render_cache[settings][method]"]' => array('value' => 0),
-      ),
-    ),
-    '#description' => t('Please make sure that you properly configured cron.'),
-  );
-
-  $form['render_cache']['settings']['file_storage_dir'] = array(
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-        'select[name="render_cache[settings][method]"]' => array('value' => 0),
-      ),
-    ),
-    '#default_value' => $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache',
-    '#description' => t('Directory to store cache files.'),
-  );
-
-  $form['render_cache']['settings']['database_storage_description'] = array(
-    '#type' => 'item',
-    '#states' => array(
-      'visible' => array(
-        'select[name="render_cache[settings][method]"]' => array('value' => 1),
-      ),
-    ),
-    '#description' => t('Cached results cleaned after 1 hour by cache clean process.'),
-  );
-
   $form['render_cache']['settings']['debug'] = array(
     '#type' => 'checkbox',
     '#title' => t("Enable debug output."),
@@ -518,30 +414,10 @@ function render_cache_system_settings_submit($form, &$form_state) {
   $config->set('enable', $form_state['values']['render_cache']['enable']);
   $config->set('expire', $form_state['values']['render_cache']['settings']['expire']);
   $config->set('debug', $form_state['values']['render_cache']['settings']['debug']);
-  $config->set('method', $form_state['values']['render_cache']['settings']['method']);
-  $config->set('file_storage_dir', $form_state['values']['render_cache']['settings']['file_storage_dir']);
   $config->save();
 
-  if (0 == $form_state['values']['render_cache']['settings']['method']) {
-    render_cache_cachedir_prepare();
-  }
 }
 
-/**
- * Prepare directory for filecache mode.
- */
-function render_cache_cachedir_prepare() {
-  $config = config('render_cache.settings');
-  $dir = $config->get('file_storage_dir') ? $config->get('file_storage_dir') : 'public://render_cache';
-
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-  $htaccess_file = $dir . '/.htaccess';
-
-  if (!is_file($htaccess_file)) {
-    $htaccess_data = "order deny,allow\ndeny from all";
-    file_unmanaged_save_data($htaccess_data, $htaccess_file, FILE_EXISTS_REPLACE);
-  }
-}
 
 /**
  * Render wrapper. Replace form_token and form_build_id with Placeholder.
