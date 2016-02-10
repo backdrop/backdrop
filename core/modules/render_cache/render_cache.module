@@ -306,7 +306,7 @@ function render_cache_render(&$elements) {
 
         if($diff = array_diff($data_keys_after,$data_keys_before)){
           foreach($diff as $key){
-            $data['settings'][$key] = $scripts_after['settings']['data'][$key];
+            $data['settings'][$key] = $data_keys_after[$key];
           }
         }
         
@@ -513,19 +513,25 @@ function render_cache_form_storage($form_id = NULL, $form_render = NULL){
           continue;
         }
         $checksums[$checksum] = $subcache->data['output'];
-        if(isset($subcache->data['js'])){
+        if(isset($subcache->data['js']) && is_array($subcache->data['js']) ){
           foreach($subcache->data['js'] as $key => $val){
-            drupal_add_js($key, $val['type']);
+            if(!empty($val['type'])){
+              backdrop_add_js($key, $val['type']);
+            }
           }
         }
-        if(isset($subcache->data['css'])){
+        if(isset($subcache->data['css']) && is_array($subcache->data['css']) ){
           foreach($subcache->data['css'] as $key => $val){
-            drupal_add_css($key, $val);
+            if(!empty($val)){
+              backdrop_add_css($key, $val);
+            }
           }
         }
-        if(isset($subcache->data['settings'])){
+        if(isset($subcache->data['settings']) && is_array($subcache->data['settings']) ){
           foreach($subcache->data['settings'] as $key => $val){
-            drupal_add_js($val, 'setting');
+            if(!empty($val)){
+              backdrop_add_js($val, 'setting');
+            }
           }
         }
       }
