@@ -531,9 +531,9 @@ function render_cache_form_storage($form_id = NULL, $form_render = NULL){
       $before = render_cache_store_checksums();
       $form_storage[] = array(
         'elements' => $form_render,
-        'render' => render_boost_original_render($form_render)
+        'render' => render_cache_original_render($form_render)
       );
-      $after = render_boost_store_checksums();
+      $after = render_cache_store_checksums();
       
       if($diff = array_diff($after,$before)){
         $config = config('render_cache.settings');
