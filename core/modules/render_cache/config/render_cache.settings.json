@@ -1,5 +1,5 @@
 {
-	"enable": 1,
-	"expire": "3600",
-	"debug": 0,
+    "enable": 1,
+    "expire": "3600",
+    "debug": 0
 }
