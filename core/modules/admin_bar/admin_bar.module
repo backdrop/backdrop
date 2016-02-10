@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Render an administrative bar as a dropdown menu at the top of the window.
@@ -137,6 +136,12 @@ function admin_bar_preprocess_page(&$variables) {
   // Performance: Skip this entirely for AJAX requests.
   if (!backdrop_is_html()) {
     return;
+  }
+
+  // For the status report page, generate the admin bar from scratch to refresh
+  // the site status indicator.
+  if (strpos($_GET['q'], 'admin/reports/status') === 0) {
+    cache('admin_bar')->flush();
   }
 
   global $user, $language;
@@ -288,7 +293,7 @@ function admin_bar_js_cache() {
   // @see _backdrop_bootstrap_page_cache()
   $cache = backdrop_page_get_cache();
   if (is_object($cache)) {
-    header('X-Backdrop-Cache: HIT');
+    backdrop_add_http_header('X-Backdrop-Cache', 'HIT');
     // Restore the metadata cached with the page.
     $_GET['q'] = $cache->data['path'];
     date_default_timezone_set(backdrop_get_user_timezone());
@@ -300,7 +305,7 @@ function admin_bar_js_cache() {
   }
 
   // Otherwise, create a new page response (that will be cached).
-  header('X-Backdrop-Cache: MISS');
+  backdrop_add_http_header('X-Backdrop-Cache', 'MISS');
 
   // The Expires HTTP header is the heart of the client-side HTTP caching. The
   // additional server-side page cache only takes effect when the client
@@ -355,16 +360,15 @@ function admin_bar_admin_bar_replacements($complete) {
 }
 
 /**
- * Return count of online anonymous/authenticated users.
+ * Return count of online authenticated users.
  *
  * @see user_block(), user.module
  */
 function admin_bar_get_user_count() {
   $interval   = REQUEST_TIME - 900;
-  $count_anon = admin_bar_session_count($interval, TRUE);
   $count_auth = admin_bar_session_count($interval, FALSE);
 
-  return t('@count-anon / @count-auth', array('@count-anon' => $count_anon, '@count-auth' => $count_auth));
+  return $count_auth;
 }
 
 /**

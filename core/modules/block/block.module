@@ -27,7 +27,7 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/list'] = array(
-    'title' => 'List blocks',
+    'title' => 'List custom blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/block/manage/%block_custom_block'] = array(
@@ -52,7 +52,7 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/add'] = array(
-    'title' => 'Add block',
+    'title' => 'Add custom block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_add_block_form'),
     'access arguments' => array('administer blocks'),
@@ -60,6 +60,18 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function block_config_info() {
+  $prefixes['block.custom'] = array(
+    'name_key' => 'delta',
+    'label_key' => 'info',
+    'group' => t('Custom Blocks'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -73,10 +85,11 @@ function block_block_info() {
   }
 
   $blocks = array();
-  $result = db_query('SELECT bid, info FROM {block_custom} ORDER BY info');
-  foreach ($result as $block) {
-    $blocks[$block->bid]['info'] = $block->info;
-    $blocks[$block->bid]['description'] = t('A custom block.');
+  $config_names = config_get_names_with_prefix('block.custom.');
+  foreach ($config_names as $config_name) {
+    $block = config_get($config_name);
+    $blocks[$block['delta']] = $block;
+    $blocks[$block['delta']]['description'] = t('A reusable custom block.');
   }
   return $blocks;
 }
@@ -87,11 +100,12 @@ function block_block_info() {
 function block_block_configure($delta) {
   if ($delta) {
     $custom_block = block_custom_block_load($delta);
+    $custom_block['delta'] = $delta;
   }
   else {
     $custom_block = array();
   }
-  return block_custom_block_form($custom_block);
+  return block_custom_block_form($custom_block, FALSE);
 }
 
 /**
@@ -112,28 +126,35 @@ function block_block_save($delta, &$edit = array()) {
  * Generates the administrator-defined blocks for display.
  */
 function block_block_view($delta = '') {
-  $block = db_query('SELECT title, body, format FROM {block_custom} WHERE bid = :bid', array(':bid' => $delta))->fetchObject();
-  $data['subject'] = strlen($block->title) ? $block->title : NULL;
-  $data['content'] = check_markup($block->body, $block->format, '', TRUE);
+  $block = block_custom_block_load($delta);
+  if (!$block) {
+    return array();
+  }
+  $data['subject'] = strlen($block['title']) ? check_plain($block['title']) : NULL;
+  $data['content'] = check_markup($block['body']['value'], $block['body']['format'], '', TRUE);
   return $data;
 }
 
 /**
- * Returns information from database about a user-created (custom) block.
+ * Returns information from configuration about a user-created (custom) block.
  *
- * @param $bid
+ * @param $delta
  *   ID of the block to get information for.
  *
  * @return
- *   Associative array of information stored in the database for this block.
+ *   Associative array of information stored in configuration for this block, or FALSE if it doesn't exist
  *   Array keys:
- *   - bid: Block ID.
+ *   - delta: Block ID.
  *   - info: Block description.
  *   - body: Block contents.
  *   - format: Filter ID of the filter format for the body.
  */
-function block_custom_block_load($bid) {
-  return db_query("SELECT * FROM {block_custom} WHERE bid = :bid", array(':bid' => $bid))->fetchAssoc();
+function block_custom_block_load($delta) {
+  $blocks = block_block_info();
+  if (isset($blocks[$delta])) {
+    return $blocks[$delta];
+  }
+  return FALSE;
 }
 
 /**
@@ -143,69 +164,121 @@ function block_custom_block_load($bid) {
  *   (optional) An associative array of information retrieved by
  *   block_custom_get_block() if an existing block is being edited, or an empty
  *   array otherwise. Defaults to array().
+ * @param $stand_alone
+ *   (optional) Set to FALSE if this form is used when displaying as part of a
+ *   form within the Layout UI. The default value of TRUE should be used if this
+ *   is a stand-alone form, such as when editing a block at it's own URL.
  *
  * @ingroup forms
  */
-function block_custom_block_form($edit = array()) {
+function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   $edit += array(
     'info' => '',
-    'body' => '',
-    'format' => NULL,
+    'title' => '',
+    'body' => array('value' => '', 'format' => NULL),
+    'delta' => NULL,
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Display title'),
+    '#default_value' => $edit['title'],
+    '#maxlength' => 255,
+    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#weight' => -18,
   );
   $form['info'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name'),
+    '#title' => t('Admin label'),
     '#default_value' => $edit['info'],
     '#maxlength' => 64,
     '#description' => t('Used in administrative interfaces and not shown to end-users.'),
     '#required' => TRUE,
+    '#weight' => -20,
+    '#id' => 'block-info',
+  );
+  $form['delta'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => $edit['delta'],
+    '#maxlength' => 128,
+    '#machine_name' => array(
+      'exists' => 'block_custom_block_load',
+      'source' => array('info'),
+    ),
+    '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
     '#weight' => -19,
+    '#disabled' => isset($edit['delta']),
   );
   $form['body'] = array(
     '#type' => 'text_format',
-    '#title' => t('Body'),
-    '#default_value' => $edit['body'],
-    '#format' => $edit['format'],
+    '#title' => t('Block content'),
+    '#default_value' => $edit['body']['value'],
+    '#format' => $edit['body']['format'],
     '#rows' => 8,
     '#required' => TRUE,
     '#weight' => -17,
   );
 
+  // When displaying as part of the Layout UI.
+  if (!$stand_alone) {
+    $form['title']['#states'] = array(
+      'visible' => array(
+        '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
+      ),
+    );
+    $form['info']['#weight'] = 5;
+    $form['delta']['#weight'] = 6;
+    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
+    $form['reusable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Make this block reusable'),
+      '#description' => t('This option may not be unchecked once enabled. You may configure or delete this reusable block from the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+      '#weight' => 4,
+      '#default_value' => TRUE,
+      '#disabled' => TRUE,
+    );
+  }
+
   return $form;
 }
 
 /**
- * Saves a user-created block in the database.
+ * Saves a user-created block in a config file.
  *
  * @param array $edit
  *   Associative array of fields to save. Array keys:
+ *   - delta: The machine name for the block
  *   - info: Block description.
- *   - title: The block title.
+ *   - title: The block title (optional, since layouts have their own title field)
  *   - body: Associative array of body value and format. Array keys:
  *     - value: Block contents.
  *     - format: Filter ID of the filter format for the body.
- * @param integer|NULL $delta
- *   Block ID of the block to save or NULL if saving a new block.
+ * @param string|NULL $delta
+ *   Machine name of the block to save, comprised of lower-case letters, numbers, and underscores
+ *   Note: null values are still accepted when creating new nodes to maintain API contiguity
  *
  * @return
  *   Always returns TRUE.
  */
 function block_custom_block_save(array $edit, $delta = NULL) {
-  $custom_block = $delta ? block_custom_block_load($delta) : array('title' => '');
-  $merge = db_merge('block_custom')
-    ->key(array(
-      'bid' => $delta,
-    ))
-    ->fields(array(
-      'body' => $edit['body']['value'],
-      'info' => $edit['info'],
-      'title' => isset($edit['title']) ? $edit['title'] : $custom_block['title'],
-      'format' => $edit['body']['format'],
-    ));
-  $result = $merge->execute();
-  if ($result === $merge::STATUS_INSERT) {
-    $delta = $merge->getResult();
+  $delta = $delta ? $delta : preg_replace('/[^a-z0-9_]+/', '_', strtolower($edit['info']));
+  $block = block_custom_block_load($delta);
+  if (!$block) {
+    $block = array(
+      'delta' => $delta,
+      'info' => '',
+      'title' => '',
+      'body' => '',
+    );
   }
+  foreach ($block as $key => $value) {
+    if (isset($edit[$key])) {
+      $block[$key] = $edit[$key];
+    }
+  }
+  $config = config('block.custom.' . $delta);
+  $config->setData($block);
+  $config->save();
 
-  return $delta;
+  // Reset the static cache on the block list so this block is picked up.
+  backdrop_static_reset('block_block_info');
 }

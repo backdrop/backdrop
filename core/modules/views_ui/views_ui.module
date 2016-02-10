@@ -26,7 +26,7 @@ function views_ui_menu() {
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
   $items['admin/structure/views/list'] = array(
-      'title' => 'List',
+      'title' => 'List views',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -1,
     );
@@ -55,22 +55,22 @@ function views_ui_menu() {
     'weight' => 1,
   ) + $base;
 
-  // The primary Edit View page. Secondary tabs for each Display are added in
-  // views_ui_menu_local_tasks_alter().
+  // The primary Configure View page. Secondary tabs for each Display are added
+  // in views_ui_menu_local_tasks_alter().
   $items['admin/structure/views/view/%views_ui_cache'] = array(
     'title callback' => 'views_ui_edit_page_title',
     'title arguments' => array(4),
     'page callback' => 'views_ui_edit_page',
     'page arguments' => array(4),
   ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
-    'title' => 'Edit view',
+  $items['admin/structure/views/view/%views_ui_cache/configure'] = array(
+    'title' => 'Configure view',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'weight' => -10,
     'theme callback' => 'ajax_base_page_theme',
   ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/edit/%/ajax'] = array(
+  $items['admin/structure/views/view/%views_ui_cache/configure/%/ajax'] = array(
     'page callback' => 'views_ui_ajax_get_form',
     'page arguments' => array('views_ui_edit_form', 4, 6),
     'delivery callback' => 'ajax_deliver',
@@ -177,7 +177,7 @@ function views_ui_menu() {
 
   // A page in the Reports section to show usage of fields in all views
   $items['admin/reports/fields/list'] = array(
-    'title' => 'List',
+    'title' => 'List fields',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -291,7 +291,7 @@ function views_ui_autoload_info() {
 }
 
 /**
- * Page title callback for the Edit View page.
+ * Page title callback for the Configure View page.
  */
 function views_ui_edit_page_title($view) {
   module_load_include('inc', 'views_ui', 'views_ui.admin');
@@ -312,7 +312,7 @@ function views_ui_edit_page_title($view) {
  *
  * @return
  *   The view object, with a "locked" property indicating whether or not
- *   someone else is already editing the view.
+ *   someone else is already configuring the view.
  */
 function views_ui_cache_load($name) {
   global $user;
@@ -323,7 +323,7 @@ function views_ui_cache_load($name) {
   if (empty($view)) {
     $view = $original_view;
     if (!empty($view)) {
-      // Set a flag to indicate that this view is being edited.
+      // Set a flag to indicate that this view is being configured.
       // This flag will be used e.g. to determine whether strings
       // should be localized.
       $view->editing = TRUE;
@@ -334,7 +334,7 @@ function views_ui_cache_load($name) {
     if ($original_view) {
       $view->disabled = !empty($original_view->disabled);
     }
-    // Remove the lock if being edited by the user that owns the lock.
+    // Remove the lock if being configured by the user that owns the lock.
     if (!empty($view->locked) && $view->locked->uid === $user->uid) {
       unset($view->locked);
     }
@@ -461,7 +461,7 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
   foreach ($handlers as $id => $handler) {
     $field_name = $handler->ui_name(TRUE);
     $links[$type . '-edit-' . $id] = array(
-      'title' => t('Edit @section', array('@section' => $field_name)),
+      'title' => t('Configure @section', array('@section' => $field_name)),
       'href' => "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id",
       'attributes' => array('class' => array('views-ajax-link')),
     );
@@ -476,13 +476,13 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
 }
 
 /**
- * Returns a link to editing a certain display setting.
+ * Returns a link to configuring a certain display setting.
  */
 function views_ui_view_preview_section_display_category_links($view, $type, $title) {
   $display = $view->display_handler->display;
   $links = array(
     $type . '-edit' => array(
-      'title' => t('Edit @section', array('@section' => $title)),
+      'title' => t('Configure @section', array('@section' => $title)),
       'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
       'attributes' => array('class' => array('views-ajax-link')),
     ),
@@ -786,7 +786,7 @@ function views_ui_get_form_wizard_instance($wizard) {
 function views_ui_views_plugins_alter(&$plugins) {
   // Attach contextual links to each display plugin. The links will point to
   // paths underneath "admin/structure/views/view/{$view->name}" (i.e., paths
-  // for editing and performing other contextual actions on the view).
+  // for configuring and performing other contextual actions on the view).
   foreach ($plugins['display'] as &$display) {
     $display['contextual links']['views_ui'] = array(
       'parent path' => 'admin/structure/views/view',
@@ -804,12 +804,12 @@ function views_ui_contextual_links_view_alter(&$element, $items) {
   if (views_ui_contextual_links_suppress()) {
     $element['#links'] = array();
   }
-  // Append the display ID to the Views UI edit links, so that clicking on the
-  // contextual link takes you directly to the correct display tab on the edit
-  // screen.
-  elseif (!empty($element['#links']['views-ui-edit']) && !empty($element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'])) {
+  // Append the display ID to the Views UI configure links, so that clicking on
+  // the contextual link takes you directly to the correct display tab on the
+  // configure screen.
+  elseif (!empty($element['#links']['views-ui-configure']) && !empty($element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'])) {
     $display_id = $element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'];
-    $element['#links']['views-ui-edit']['href'] .= '/' . $display_id;
+    $element['#links']['views-ui-configure']['href'] .= '/' . $display_id;
   }
 }
 
@@ -909,7 +909,7 @@ function views_ui_ajax_get_form($form_id) {
 function _views_ui_get_paths($view) {
   $all_paths = array();
   if (empty($view->display)) {
-    $all_paths[] = t('Edit this view to add a display.');
+    $all_paths[] = t('Configure this view to add a display.');
   }
   else {
     $view->init_display();   // Make sure all the handlers are set up

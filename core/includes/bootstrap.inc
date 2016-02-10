@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions that need to be loaded on every Backdrop request.
@@ -1275,35 +1274,58 @@ function state_del($name) {
  * from a form submission, the contents of a shopping cart, or other user-
  * specific content that should not be cached and displayed to other users.
  *
- * @param $check_only
- *   (optional) Set to TRUE to only return whether a previous call found a
- *   cache entry.
+ * @param bool $check_only
+ *   Set to TRUE to only return whether a previous call found a cache entry.
+ * @param bool $return_stale
+ *   If background fetch is enabled, page cache entries are stored for longer
+ *   period of time than the page cache maximum age. This allows stale entries
+ *   to be served while generating new cache entries. If set to TRUE, then
+ *   these stale cache entries will be returned. If left at the default of
+ *   FALSE, only cache entries within the maximum cache lifetime will be
+ *   returned.
  *
  * @return
  *   The cache object, if the page was found in the cache, NULL otherwise.
  */
-function backdrop_page_get_cache($check_only = FALSE) {
+function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
   global $base_root;
-  static $cache_hit = FALSE;
+  static $cache_hit = array();
 
-  if ($check_only) {
-    return $cache_hit;
+  // Keep two separate cache entries for an expired or non-expired hit.
+  $cache_type = $return_stale ? 'stale' : 'fresh';
+  if (!isset($cache_hit[$cache_type])) {
+    $cache_hit[$cache_type] = FALSE;
   }
 
+  // Return any previous value on checks only.
+  if ($check_only) {
+    return $cache_hit[$cache_type];
+  }
+
+  $cache = NULL;
   if (backdrop_page_is_cacheable()) {
     $cache = cache('page')->get($base_root . request_uri());
-    if ($cache !== FALSE && $cache->expire >= REQUEST_TIME) {
-      $cache_hit = TRUE;
-      return $cache;
+    if ($cache !== FALSE) {
+      $cache_lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $cache_valid = $cache->created + $cache_lifetime >= REQUEST_TIME;
+      // Return the cache entry if not expired or if an expired entry is okay.
+      if ($cache_valid || $return_stale) {
+        $cache_hit[$cache_type] = TRUE;
+      }
+      else {
+        $cache_hit[$cache_type] = FALSE;
+        $cache = NULL;
+      }
     }
   }
+  return $cache;
 }
 
 /**
  * Determines the cacheability of the current page.
  *
  * @param $allow_caching
- *   Set to FALSE if you want to prevent this page to get cached.
+ *   Set to FALSE if you want to prevent this page from being cached.
  *
  * @return
  *   TRUE if the current page can be cached, FALSE otherwise.
@@ -1314,8 +1336,7 @@ function backdrop_page_is_cacheable($allow_caching = NULL) {
     $allow_caching_static = $allow_caching;
   }
 
-  return $allow_caching_static && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD')
-    && !backdrop_is_cli();
+  return $allow_caching_static && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD') && !backdrop_is_cli();
 }
 
 /**
@@ -1460,6 +1481,12 @@ function _backdrop_set_preferred_header_name($name = NULL) {
  *   specified headers.
  */
 function backdrop_send_headers($default_headers = array(), $only_default = FALSE) {
+  // If we are in background mode, we are unable to send headers because the
+  // request has already been delivered back to the client.
+  if (backdrop_is_background()) {
+    return;
+  }
+
   $headers_sent = &backdrop_static(__FUNCTION__, FALSE);
   $headers = backdrop_get_http_header();
   if ($only_default && $headers_sent) {
@@ -1511,7 +1538,8 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * the client think that the anonymous and authenticated pageviews are
  * identical.
  *
- * @see backdrop_page_set_cache()
+ * @see backdrop_page_create_cache()
+ * @see backdrop_page_save_cache()
  */
 function backdrop_page_header() {
   $headers_sent = &backdrop_static(__FUNCTION__, FALSE);
@@ -1524,9 +1552,25 @@ function backdrop_page_header() {
     'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
     'Cache-Control' => 'no-cache, must-revalidate, post-check=0, pre-check=0',
+    'X-Content-Type-Options' => 'nosniff',
     'ETag' => '"' . REQUEST_TIME . '"',
   );
   backdrop_send_headers($default_headers);
+}
+
+/**
+ * Set headers for content-length and content-range.
+ *
+ * These headers allow the browser to deliver the page to the user without
+ * waiting for PHP to finish execution.
+ */
+function backdrop_set_length_headers($content_length) {
+  // Set the total content length.
+  backdrop_add_http_header('Content-Length', $content_length);
+
+  // If using chunked content (enabled with Apache mod_deflate), then specifying
+  // the content range is required. This delivers the entire page in one chunk.
+  backdrop_add_http_header('Content-Range', '0-' . ($content_length - 1) . '/' . $content_length);
 }
 
 /**
@@ -1541,6 +1585,8 @@ function backdrop_page_header() {
  * response is sent.
  */
 function backdrop_serve_page_from_cache(stdClass $cache) {
+  $page_content = $cache->data['body'];
+
   // Negotiate whether to use compression.
   $page_compression = !empty($cache->data['page_compressed']);
   $return_compressed = $page_compression && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE;
@@ -1572,7 +1618,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
   // Entity tag should change if the output changes.
-  $etag = '"' . $cache->created . '-' . intval($return_compressed) . '"';
+  $etag = $cache->created . ($return_compressed ? '-gzip' : '');
   header('Etag: ' . $etag);
 
   // See if the client has provided the required HTTP headers.
@@ -1624,12 +1670,17 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
     else {
       // The client does not support compression, so unzip the data in the
       // cache. Strip the gzip header and run uncompress.
-      $cache->data['body'] = gzinflate(substr(substr($cache->data['body'], 10), 0, -8));
+      $page_content = gzinflate(substr(substr($page_content, 10), 0, -8));
     }
   }
 
+  // Send the final headers that indicate the page total length, after the
+  // decompression of the gzipped HTML.
+  $page_length = strlen($page_content);
+  backdrop_set_length_headers($page_length);
+
   // Print the page.
-  print $cache->data['body'];
+  print $page_content;
 }
 
 /**
@@ -1701,9 +1752,19 @@ function backdrop_unpack($obj, $field = 'data') {
  * @param $string
  *   A string containing the English string to translate.
  * @param $args
- *   An associative array of replacements to make after translation. Based
- *   on the first character of the key, the value is escaped and/or themed.
- *   See format_string() for details.
+ *   An associative array of replacements to make. Occurrences in $string of
+ *   any key in $args are replaced with the corresponding value, after optional
+ *   sanitization and formatting. The type of sanitization and formatting
+ *   depends on the first character of the key:
+ *   - @variable: Escaped to HTML using check_plain(). Use this as the default
+ *     choice for anything displayed on a page on the site.
+ *   - %variable: Escaped to HTML and formatted using backdrop_placeholder(),
+ *     which makes it display as <em>emphasized</em> text.
+ *   - !variable: Inserted as is, with no sanitization or formatting. Only use
+ *     this for text that has already been prepared for HTML display (for
+ *     example, user-supplied text that has already been run through
+ *     check_plain() previously, or is expected to contain some limited HTML
+ *     tags and has already been run through filter_xss() previously).
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'langcode' (defaults to the current language): The language code to
@@ -2057,7 +2118,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  * @see theme_status_messages()
  */
 function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
-  if ($message) {
+  if ($message || $message === '0' || $message === 0) {
     if (!isset($_SESSION['messages'][$type])) {
       $_SESSION['messages'][$type] = array();
     }
@@ -2719,20 +2780,37 @@ function _backdrop_bootstrap_page_cache() {
     $cache_enabled = FALSE;
   }
 
+  if (!backdrop_page_is_cacheable()) {
+    $cache_enabled = FALSE;
+  }
+
   // If there is no session cookie and cache is enabled, serve a cached page.
   if (!isset($_COOKIE[session_name()]) && $cache_enabled) {
     // Make sure there is a user object because its timestamp will be
     // checked, hook_boot might check for anonymous user etc.
     $user = backdrop_anonymous_user();
     // Get the page from the cache.
-    $cache = backdrop_page_get_cache();
+    $background_fetch_enabled = config_get('system.core', 'page_cache_background_fetch');
+    $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
       header('X-Backdrop-Cache: HIT');
+
       // Restore the metadata cached with the page.
       $_GET['q'] = $cache->data['path'];
       backdrop_set_title($cache->data['title'], PASS_THROUGH);
       date_default_timezone_set(backdrop_get_user_timezone());
+
+      // Although a cached page was found, it may be expired if background
+      // fetch is enabled. So we calculate if it is within the max age based
+      // on its creation date.
+      $lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $expires_on = $cache->created + $lifetime;
+      $cache_expired = REQUEST_TIME > $expires_on;
+
+      // Start a buffer for hook_boot(), the cached page, and hook_exit().
+      ob_start();
+
       // Calls to hook_boot() on page cache requests is deprecated, though they
       // can still be enabled via settings.php
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
@@ -2746,9 +2824,36 @@ function _backdrop_bootstrap_page_cache() {
       // requests unless enabled via settings.php.
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
         bootstrap_invoke_all('exit');
+      };
+
+      // Close the connection immediately if we are about to serve an expired
+      // cache entry. This allows for background processing without holding up
+      // the browser.
+      if ($cache_expired) {
+        header('Connection: close');
       }
-      // We are done.
-      exit;
+
+      // End the request and send the response to the browser.
+      ob_end_flush();
+
+      // Flushing for PHP-FPM based installations.
+      if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+      }
+      // Flushing for Apache mod_php installations.
+      else {
+        flush();
+      }
+
+      // Continue processing to generate the new cache entry for the next user.
+      if ($cache_expired) {
+        // Enter background mode (this suppresses any output of headers).
+        backdrop_is_background(TRUE);
+      }
+      // No new cache entry needed. Exit immediately after serving the page.
+      else {
+        exit();
+      }
     }
     else {
       header('X-Backdrop-Cache: MISS');
@@ -3367,7 +3472,9 @@ function ip_address() {
  * Gets the schema definition of a table, or the whole database schema.
  *
  * The returned schema will include any modifications made by any
- * module that implements hook_schema_alter().
+ * module that implements hook_schema_alter(). To get the schema without
+ * modifications, use backdrop_get_schema_unprocessed().
+ *
  *
  * @param $table
  *   The name of the table. If not given, the schema of all tables is returned.
@@ -3715,6 +3822,42 @@ function backdrop_is_dialog() {
 }
 
 /**
+ * Stores if Backdrop is currently being executed in the background.
+ *
+ * If Backdrop has entered into background mode, it can no longer print anything
+ * to the page, because the response has already been returned to the browser.
+ * Anything that has been output while in background mode will simply be
+ * silently discarded. Background mode is extremely useful for doing processing
+ * that doesn't require output, such as cron job execution or creating cache
+ * entries.
+ *
+ * Backdrop core uses background mode in two ways:
+ *   - After generating a page (logged-in or anonymous) if cron has not run
+ *     recently, the page will be returned to the user, and Backdrop will enter
+ *     background mode to process the cron jobs.
+ *   - If the page cache is turned on, and the "Use background fetch" option is
+ *     turned on in the performance settings, then Backdrop will serve a cached
+ *     page even after it has expired. After serving the cached page, Backdrop
+ *     will enter background mode to generate a new cache entry for the page,
+ *     which will be delivered to the next user.
+ *
+ * @param bool $is_background
+ *   May be set to TRUE to indicate entering background mode. Once set, it can
+ *   not be set back to FALSE.
+ *
+ * @return bool
+ *   TRUE if the request is in background mode. FALSE if in a normal page
+ *   request and output has not yet started.
+ */
+function backdrop_is_background($is_background = NULL) {
+  static $static = FALSE;
+  if (isset($is_background) && $is_background === TRUE) {
+    $static = $is_background;
+  }
+  return $static;
+}
+
+/**
  * Formats text for emphasized display in a placeholder inside a sentence.
  *
  * Used automatically by format_string().
@@ -3780,12 +3923,16 @@ function _backdrop_shutdown_function() {
     }
   }
   catch (Exception $exception) {
-    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
-   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-   if (error_displayable()) {
-      print '<h1>Uncaught exception thrown in shutdown function.</h1>';
-      print '<p>' . _backdrop_render_exception_safe($exception) . '</p><hr />';
+    // If we are displaying errors, then do so with no possibility of a further
+    // uncaught exception being thrown.
+    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+    $message = '';
+    $message .= '<h1>Uncaught exception thrown in shutdown function.</h1>';
+    $message .= '<p>' . _backdrop_render_exception_safe($exception) . '</p><hr />';
+    try {
+      watchdog('system', $message, array(), WATCHDOG_CRITICAL);
     }
+    catch (Exception $e) {}
   }
 }
 

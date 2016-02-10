@@ -660,7 +660,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    */
   function testRenderInlinePreprocess() {
     $css = 'body { padding: 0px; }';
-    $css_preprocessed = '<style media="all">' . "\n/* <![CDATA[ */\n" . backdrop_load_stylesheet_content($css, TRUE) . "\n/* ]]> */\n" . '</style>';
+    $css_preprocessed = '<style media="all">' . backdrop_load_stylesheet_content($css, TRUE) . '</style>';
     backdrop_add_css($css, array('type' => 'inline'));
     $styles = backdrop_get_css();
     $this->assertEqual(trim($styles), $css_preprocessed, 'Rendering preprocessed inline CSS adds it to the page.');
@@ -1313,8 +1313,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
     $javascript = backdrop_get_js();
 
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script type="text/javascript" src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script type="text/javascript">' . "\n<!--//--><![CDATA[//><!--\n" . 'jQuery(function () { });' . "\n//--><!]]>\n" . '</script>' . "\n<!--<![endif]-->";
+    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
+    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>' . 'jQuery(function () { });' . '</script>' . "\n<!--<![endif]-->";
 
     $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
     $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
@@ -1346,10 +1346,10 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('core/misc/batch.js', array('every_page' => TRUE));
     $javascript = backdrop_get_js();
     $expected = implode("\n", array(
-      '<script type="text/javascript" src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/batch.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/batch.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
+      '<script src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
     ));
     $this->assertTrue(strpos($javascript, $expected) > 0, t('Unaggregated JavaScript is added in the expected group order.'));
 
@@ -1364,8 +1364,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $js_items = backdrop_add_js();
     $javascript = backdrop_get_js();
     $expected = implode("\n", array(
-      '<script type="text/javascript" src="' . file_create_url(backdrop_build_js_cache(array('core/misc/collapse.js' => $js_items['core/misc/collapse.js'], 'core/misc/batch.js' => $js_items['core/misc/batch.js']))) . '"></script>',
-      '<script type="text/javascript" src="' . file_create_url(backdrop_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
+      '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/collapse.js' => $js_items['core/misc/collapse.js'], 'core/misc/batch.js' => $js_items['core/misc/batch.js']))) . '"></script>',
+      '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
     ));
     $this->assertTrue(strpos($javascript, $expected) > 0, t('JavaScript is aggregated in the expected groups and order.'));
   }
@@ -2698,7 +2698,6 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
    */
   function testJSON() {
     // Setup a string with the full ASCII table.
-    // @todo: Add tests for non-ASCII characters and Unicode.
     $str = '';
     for ($i=0; $i < 128; $i++) {
       $str .= chr($i);
@@ -2742,6 +2741,29 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $json_decoded = backdrop_json_decode($json);
     $this->assertNotIdentical($source, $json, 'An array encoded in JSON is not identical to the source.');
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to JSON and decoding back results in the original data.');
+
+    // Unicode test strings.
+    $unicode_decoded = 'üéåâ';
+    $unicode_encoded = '\u00fc\u00e9\u00e5\u00e2';
+    $unicode_encoded_escaped = '\\\\u00fc\\\\u00e9\\\\u00e5\\\\u00e2';
+
+    // Verify that Unicode characters are not encoded when using pretty print.
+    $this->assertIdentical('"' . $unicode_decoded . '"', backdrop_json_encode($unicode_decoded, TRUE), 'UTF-8 characters are not encoded in pretty print JSON.');
+    $this->assertIdentical('"' . $unicode_encoded_escaped . '"', backdrop_json_encode($unicode_encoded, TRUE), 'Escaped Unicode characters are double-escaped in pretty print JSON.');
+
+    // Non-pretty print JSON uses encoded characters.
+    $this->assertIdentical('"' . $unicode_encoded . '"', backdrop_json_encode($unicode_decoded), 'UTF-8 characters are Unicode encoded in non-pretty JSON.');
+    $this->assertIdentical('"' . $unicode_encoded_escaped . '"', backdrop_json_encode($unicode_encoded), 'Escaped Unicode characters are double-escaped in non-pretty JSON.');
+
+    // Verify reversibility of Unicode characters (pretty print).
+    $this->assertIdentical($unicode_decoded, backdrop_json_decode(backdrop_json_encode($unicode_decoded, TRUE)), 'UTF-8 characters escaped and then unescaped matches original.');
+    $this->assertIdentical($unicode_encoded, backdrop_json_decode(backdrop_json_encode($unicode_encoded, TRUE)), 'Unicode characters escaped and then unescaped matches original.');
+    $this->assertIdentical($unicode_encoded_escaped, backdrop_json_decode(backdrop_json_encode($unicode_encoded_escaped, TRUE)), 'Escaped Unicode characters escaped and then unescaped matches original.');
+
+    // Verify reversibility of Unicode characters (non-pretty print).
+    $this->assertIdentical($unicode_decoded, backdrop_json_decode(backdrop_json_encode($unicode_decoded)), 'UTF-8 characters escaped and then unescaped matches original.');
+    $this->assertIdentical($unicode_encoded, backdrop_json_decode(backdrop_json_encode($unicode_encoded)), 'Unicode characters escaped and then unescaped matches original.');
+    $this->assertIdentical($unicode_encoded_escaped, backdrop_json_decode(backdrop_json_encode($unicode_encoded_escaped)), 'Escaped Unicode characters escaped and then unescaped matches original.');
   }
 }
 

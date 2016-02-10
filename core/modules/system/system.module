@@ -730,6 +730,15 @@ function system_menu() {
     'weight' => -10,
     'file' => 'system.admin.inc',
   );
+  $items['admin/config/media/file-system/transliteration'] = array(
+    'title' => 'Transliteration',
+    'description' => 'Convert existing file names to US-ASCII.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_transliteration_retroactive'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  );
   $items['admin/config/media/image-toolkit'] = array(
     'title' => 'Image toolkit',
     'description' => 'Choose which image toolkit to use if you have installed optional toolkits.',
@@ -1005,6 +1014,15 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // Machine names transliteration.
+  $items['system/transliterate/%'] = array(
+    'page callback' => 'system_transliterate_ajax',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'system.admin.inc',
   );
 
   return $items;
@@ -2054,6 +2072,24 @@ function system_filetransfer_info() {
 }
 
 /**
+ * Implements hook_file_presave().
+ */
+function system_file_presave(File $file) {
+  // If an uploaded file had its name altered in system_init() and if
+  // the human-readable display name is not being transliterated, restore the
+  // original version as the human-readable name before saving. (The
+  // transliterated version will still be used in the file URI, which is the
+  // only place where it matters.)
+  $config = config('system.core');
+  if (!empty($_FILES['files']['name']) && $config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
+    $key = array_search($file->filename, $_FILES['files']['name']);
+    if ($key !== FALSE && isset($_FILES['files']['orig_name'][$key])) {
+      $file->filename = $_FILES['files']['orig_name'][$key];
+    }
+  }
+}
+
+/**
  * Implements hook_init().
  */
 function system_init() {
@@ -2092,6 +2128,26 @@ function system_init() {
 
   // Add CSS/JS files from module .info files.
   system_add_module_assets();
+
+  // Sanitizes file names during upload.
+  if (!empty($_FILES['files']) && config_get('system.core', 'file_transliterate_uploads')) {
+    // Figure out language, which is available in $_POST['langcode'] for node
+    // forms.
+    $langcode = NULL;
+    if (!empty($_POST['langcode'])) {
+      $languages = language_list();
+      if (isset($languages[$_POST['langcode']])) {
+        $langcode = $_POST['langcode'];
+      }
+    }
+    foreach ($_FILES['files']['name'] as $field => $filename) {
+      include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+      // Keep a copy of the unaltered file name.
+      $_FILES['files']['orig_name'][$field] = $filename;
+      $_FILES['files']['name'][$field] = transliteration_clean_filename($filename, $langcode);
+    }
+  }
+
 }
 
 /**
@@ -2217,10 +2273,12 @@ function system_block_info() {
     'description' => t('Displays a link to <a href="http://backdropcms.org">Backdrop CMS</a>.'),
     'weight' => '10',
   );
-  // System-defined menu blocks.
+  // System-defined menu blocks. Load customizations from Menu module.
+  $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
   foreach (menu_list_system_menus() as $menu_name => $title) {
+    $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
-      'info' => check_plain(t($title)),
+      'info' => check_plain(t($custom_title)),
       'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
     );
   }
@@ -2260,7 +2318,10 @@ function system_block_view($delta = '', $settings = array()) {
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
       if (isset($system_menus[$delta])) {
-        $block['subject'] = t($system_menus[$delta]);
+        // Load customizations from Menu module if present.
+        $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
+        $custom_title = isset($all_menus[$delta]) ? $all_menus[$delta] : $system_menus[$delta];
+        $block['subject'] = t($custom_title);
         $block['content'] = menu_tree($delta);
         return $block;
       }
@@ -2599,6 +2660,10 @@ function _system_rebuild_module_data() {
     // Merge in defaults and save.
     $modules[$key]->info = $module->info + $defaults;
 
+    // The "name" key is required, but to avoid a fatal error in the menu system
+    // we set a reasonable default if it is not provided.
+    $modules[$key]->info += array('name' => $key);
+
     // Prefix stylesheets and scripts with module path.
     $path = dirname($module->uri);
     if (isset($module->info['stylesheets'])) {
@@ -2730,6 +2795,10 @@ function _system_rebuild_theme_data() {
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
+
+    // The "name" key is required, but to avoid a fatal error in the menu system
+    // we set a reasonable default if it is not provided.
+    $themes[$key]->info += array('name' => $key);
 
     // Add the info file modification time, so it becomes available for
     // contributed modules to use for ordering theme lists.
@@ -2913,7 +2982,7 @@ function system_header_block($settings) {
 function _system_sort_requirements($a, $b) {
   if (!isset($a['weight'])) {
     if (!isset($b['weight'])) {
-      return strcmp($a['title'], $b['title']);
+      return strcasecmp($a['title'], $b['title']);
     }
     return -$b['weight'];
   }
@@ -3348,16 +3417,21 @@ function system_time_zones($blank = NULL) {
  * backdrop_http_request() does not work and then the system status report page
  * will contain an error.
  *
+ * Note that this check was never 100% reliable. On some web servers, it would
+ * return FALSE even if external requests were allowed. Use of this function
+ * has been deprecated and it will be removed in Backdrop 2.0.
+ *
  * @return
  *  TRUE if this installation can issue HTTP requests.
+ *
+ * @deprecated since 1.3.1
  */
 function system_check_http_request() {
   // Try to get the content of the front page via backdrop_http_request().
-  $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0));
+  $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);
-  state_set('backdrop_http_request_fails', !$works);
   return $works;
 }
 

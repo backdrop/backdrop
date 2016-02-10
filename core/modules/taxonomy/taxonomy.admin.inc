@@ -33,12 +33,12 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Add terms'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
     );
-    $links['edit'] = array(
-      'title' => t('Edit vocabulary'),
-      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => "admin/structure/taxonomy/$vocabulary->machine_name/configure",
     );
     $links['delete'] = array(
-      'title' => t('Delete vocabulary'),
+      'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
     );
     $form[$vocabulary->machine_name]['operations'] = array(
@@ -88,7 +88,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
- if (!isset($form_state['vocabulary'])) {
+  if (!isset($form_state['vocabulary'])) {
     // Create a new TaxonomyVocabulary entity for the add form.
     if (!isset($vocabulary)) {
       $vocabulary = new TaxonomyVocabulary();
@@ -129,11 +129,103 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
     '#value' => '0',
   );
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.vocabulary.js'),
+    ),
+  );
+
+  // Vocabulary permissions.
+  $form['permissions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+  );
+  $form['permissions']['permissions'] = taxonomy_vocabulary_form_permissions($vocabulary);
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+
+  return $form;
+}
+
+/**
+ * Builds a matrix of node permissions for this node type.
+ *
+ * @param $vocabulary
+ *   Fully loaded TaxonomyVocabulary object.
+ *
+ * @see taxonomy_form_vocabulary()
+ */
+function taxonomy_vocabulary_form_permissions($vocabulary) {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Note that in taxonomy_theme() the 'node_type_form_permissions' theme
+  // callback reuses theme_user_admin_permissions(), to make it identical to
+  // the user module permissions page.
+  $form['#theme'] = array('node_type_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Render role/permission overview:
+  $options = array();
+
+  $permissions = taxonomy_vocabulary_list_permissions($vocabulary);
+
+  $status = array();
+  foreach ($permissions as $perm => $perm_item) {
+    // Fill in default values for the permission.
+    $perm_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$perm] = '';
+    $parts = explode(': ', $perm_item['title']);
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $parts[1],
+      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+    );
+    foreach ($roles as $role_name => $role) {
+      // Builds arrays for checked boxes for each role. Always select the Admin
+      // role on new forms.
+      if (in_array($perm, $role->permissions) || (!$vocabulary->machine_name && $role->name == $admin_role)) {
+        $status[$role_name][] = $perm;
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
   return $form;
 }
@@ -183,14 +275,30 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   switch (taxonomy_vocabulary_save($vocabulary)) {
     case SAVED_NEW:
       backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
+      // Save new permissions
+      foreach ($form_state['values']['roles'] as $role_name => $role) {
+        $valid_perms = array();
+        // Create the permissions string in the format 'edit terms in $vocab'.
+        foreach ($form_state['values'][$role->name] as $string => $perm) {
+          if ($perm) {
+            $parts = explode(' terms in ', $string);
+            $valid_perms[] = $parts[0] . ' terms in ' . $vocabulary->machine_name;
+          }
+        }
+        user_role_grant_permissions($role->name, $valid_perms);
+      }
       break;
 
     case SAVED_UPDATED:
       backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('edit'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit'));
+      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
+      // Update permissions.
+      foreach ($form_state['values']['roles'] as $role_name => $role) {
+        user_role_change_permissions($role->name, $form_state['values'][$role->name]);
+      }
       break;
   }
 }

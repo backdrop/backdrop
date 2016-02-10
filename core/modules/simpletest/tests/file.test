@@ -196,7 +196,7 @@ class FileTestCase extends BackdropWebTestCase {
    *   Optional string indicating the stream scheme to use. Backdrop core
    *   includes public, private, and temporary. The public wrapper is the
    *   default.
-   * @return
+   * @return File
    *   File object.
    */
   function createFile($filepath = NULL, $contents = NULL, $scheme = NULL) {
@@ -356,14 +356,19 @@ class FileSpaceUsedTest extends FileTestCase {
  *  This will run tests against the file validation functions (file_validate_*).
  */
 class FileValidatorTest extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
+  protected $profile = 'testing';
+  protected $image;
+  protected $non_image;
+  protected $file;
 
-    $this->image = entity_create('file', array());
+  function setUp() {
+    parent::setUp(array('file'));
+
+    $this->image = new File(array());
     $this->image->uri = 'core/misc/feed.png';
     $this->image->filename = backdrop_basename($this->image->uri);
 
-    $this->non_image = entity_create('file', array());
+    $this->non_image = new File(array());
     $this->non_image->uri = 'core/misc/jquery.js';
     $this->non_image->filename = backdrop_basename($this->non_image->uri);
   }
@@ -372,7 +377,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    * Test the file_validate_extensions() function.
    */
   function testFileValidateExtensions() {
-    $file = entity_create('file', array('filename' => 'asdf.txt'));
+    $file = new File(array('filename' => 'asdf.txt'));
     $errors = file_validate_extensions($file, 'asdf txt pork');
     $this->assertEqual(count($errors), 0, 'Valid extension accepted.', 'File');
 
@@ -442,7 +447,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateNameLength() {
     // Create a new file entity.
-    $file = entity_create('file', array());
+    $file = new File();
 
     // Add a filename with an allowed length and test it.
     $file->filename = str_repeat('x', 240);
@@ -467,7 +472,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateSize() {
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
-    $file = entity_create('file', array('filesize' => 1000));
+    $file = new File(array('filesize' => 1000));
     $errors = file_validate_size($file, 0, 0);
     $this->assertEqual(count($errors), 0, 'No limits means no errors.', 'File');
     $errors = file_validate_size($file, 1, 0);
@@ -524,6 +529,7 @@ class FileSaveUploadTest extends FileHookTestCase {
    * An image file path for uploading.
    */
   protected $image;
+  protected $image_extension;
 
   /**
    * A PHP file path for upload security testing.
@@ -537,11 +543,9 @@ class FileSaveUploadTest extends FileHookTestCase {
 
   function setUp() {
     parent::setUp();
-    $account = $this->backdropCreateUser(array('access content'));
-    $this->backdropLogin($account);
 
     $image_files = $this->backdropGetTestFiles('image');
-    $this->image = entity_create('file', (array) current($image_files));
+    $this->image = new File((array) current($image_files));
 
     list(, $this->image_extension) = explode('.', $this->image->filename);
     $this->assertTrue(is_file($this->image->uri), "The image file we're going to upload exists.");
@@ -581,7 +585,6 @@ class FileSaveUploadTest extends FileHookTestCase {
     file_test_reset();
 
     // Upload a second file.
-    $max_fid_before = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
     $image2 = current($this->backdropGetTestFiles('image'));
     $edit = array('files[file_test_upload]' => backdrop_realpath($image2->uri));
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
@@ -807,7 +810,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test for failure when uploading over a file that already exists.
    */
-  function testExistingError() {
+  function testErrors() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_ERROR,
       'files[file_test_upload]' => backdrop_realpath($this->image->uri)
@@ -818,12 +821,11 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     // Check that the no hooks were called while failing.
     $this->assertFileHooksCalled(array());
-  }
 
-  /**
-   * Test for no failures when not uploading a file.
-   */
-  function testNoUpload() {
+    // Reset the hook counters.
+    file_test_reset();
+
+    // Test for failures when not uploading a file.
     $this->backdropPost('file-test/upload', array(), t('Submit'));
     $this->assertNoRaw(t('Epic upload FAIL!'), 'Failure message not found.');
   }
@@ -834,8 +836,120 @@ class FileSaveUploadTest extends FileHookTestCase {
  */
 class RemoteFileSaveUploadTest extends FileSaveUploadTest {
   function setUp() {
-    parent::setUp('file_test');
+    parent::setUp();
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
+  }
+}
+
+/**
+ * Tests transliterating files on upload and subsequent bulk updating.
+ */
+class FileUploadTransliterationTest extends FileTestCase {
+  function setUp() {
+    parent::setUp(array('file_test'));
+
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
+  }
+
+  function testTransliteration() {
+    // Make a particularly troublesome file name, starting with an umlaut and
+    // containing upper-case variant characters.
+    $original_filename = 'üФайл Ä fàü.txt';
+    $file = $this->createFile($original_filename, 'Sample text');
+    $config = config('system.core');
+
+    $upload_options = array(
+      'file_test_replace' => FILE_EXISTS_RENAME,
+      'extensions' => 'txt',
+      'is_image_file' => FALSE,
+      'files[file_test_upload]' => backdrop_realpath($file->uri),
+    );
+    $this->backdropPost('file-test/upload', $upload_options, t('Submit'));
+    $first_fid = db_query("SELECT MAX(fid) FROM {file_managed}")->fetchField();
+    $first_file = file_load($first_fid);
+
+    // Check that characters were transliterated and the file exists.
+    debug($first_file);
+    $this->assertIdentical($first_file->filename, $original_filename, 'File name not transliterated or modified to lowercase.');
+    $this->assertIdentical($first_file->uri, 'temporary://uFail_A_fau.txt', 'File name has been transliterated upon upload.');
+    $this->assertTrue(file_exists($first_file->uri), 'Transliterated file exists at expected path.');
+
+    // Delete the file to prevent conflicts.
+    $first_file->delete();
+
+    // Change transliteration settings and upload again.
+    $config->set('file_transliterate_lowercase', 1);
+    $config->set('file_transliterate_uploads_display_name', 1);
+    $config->save();
+
+    $this->backdropPost('file-test/upload', $upload_options, t('Submit'));
+    $second_fid = db_query("SELECT MAX(fid) FROM {file_managed}")->fetchField();
+    $second_file = file_load($second_fid);
+
+    debug($second_file);
+    $this->assertIdentical($second_file->filename, 'ufail_a_fau.txt', 'File display name transliterated and converted to lowercase.');
+    $this->assertIdentical($second_file->uri, 'temporary://ufail_a_fau.txt', 'File name has been transliterated and lowercased.');
+    $this->assertTrue(file_exists($second_file->uri), 'Transliterated file exists at expected path.');
+
+    // Delete the file to prevent conflicts.
+    $second_file->delete();
+
+    // Disable all transliteration.
+    $config->set('file_transliterate_uploads', 0);
+    $config->save();
+
+    $this->backdropPost('file-test/upload', $upload_options, t('Submit'));
+    $non_transliterated_fid = db_query("SELECT MAX(fid) FROM {file_managed}")->fetchField();
+    $non_transliterated_file = file_load($non_transliterated_fid);
+
+    $this->assertIdentical($non_transliterated_file->filename, $original_filename, 'File display name not transliterated or modified to lowercase.');
+    $this->assertIdentical($non_transliterated_file->uri, 'temporary://' . $original_filename, 'File name has not been modified in any way.');
+    $this->assertTrue(file_exists($non_transliterated_file->uri), 'Non-transliterated file exists at expected path.');
+
+    // Now that we have a non-transliterated file. Use the bulk conversion
+    // form to transliterate all of the existing files.
+    $this->backdropGet('admin/config/media/file-system/transliteration');
+    // Inaccessible initially because we've disabled transliteration.
+    $this->assertText('File transliteration is not yet enabled.');
+
+    // Enable again, but disable lowercase and display name.
+    $config->set('file_transliterate_uploads', 1);
+    $config->set('file_transliterate_lowercase', 0);
+    $config->set('file_transliterate_uploads_display_name', 0);
+    $config->save();
+
+    // Now available, one table row should be available.
+    $this->backdropGet('admin/config/media/file-system/transliteration');
+    $table_rows = $this->xpath('//*[@id="system-transliteration-retroactive"]//tbody//tr');
+    $this->assertEqual(count($table_rows), 2, 'Two files available for transliteration.');
+    $this->backdropPost(NULL, array(), t('Transliterate'));
+    $this->assertText('2 file names have been successfully transliterated.');
+
+    entity_get_controller('file')->resetCache();
+    $now_transliterated_file = file_load($non_transliterated_fid);
+    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
+    $this->assertIdentical($now_transliterated_file->uri, 'temporary://uFail_A_fau.txt', 'File name transliterated after bulk updating.');
+
+    // Revisit the page. No files should be available for transliteration.
+    $this->backdropGet('admin/config/media/file-system/transliteration');
+    $this->assertText('Transliteration is not required.');
+
+    // Lowercase existing file names and bulk update again.
+    $config->set('file_transliterate_lowercase', 1);
+    $config->set('file_transliterate_uploads_display_name', 1);
+    $config->save();
+    $this->backdropGet('admin/config/media/file-system/transliteration');
+    $table_rows = $this->xpath('//*[@id="system-transliteration-retroactive"]//tbody//tr');
+    $this->assertEqual(count($table_rows), 2, 'Two files available for transliteration.');
+    $this->backdropPost(NULL, array(), t('Transliterate'));
+    $this->assertText('2 file names have been successfully transliterated.');
+
+    // Reload and re-check the transliterated file is now lowercase.
+    entity_get_controller('file')->resetCache();
+    $now_transliterated_file = file_load($non_transliterated_fid);
+    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
+    $this->assertIdentical($now_transliterated_file->uri, 'temporary://ufail_a_fau.txt', 'File name transliterated and lower case after bulk updating.');
   }
 }
 
@@ -975,6 +1089,8 @@ class RemoteFileDirectoryTest extends FileDirectoryTest {
  * Tests the file_scan_directory() function.
  */
 class FileScanDirectoryTest extends FileTestCase {
+  protected $path;
+
   function setUp() {
     parent::setUp();
     $this->path = backdrop_get_path('module', 'simpletest') . '/files';
@@ -1104,7 +1220,7 @@ class FileScanDirectoryTest extends FileTestCase {
  */
 class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
   function setUp() {
-    parent::setUp('file_test');
+    parent::setUp();
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
 }
@@ -1502,7 +1618,7 @@ class FileMoveTest extends FileHookTestCase {
 
     // Reload the file from the database and check that the changes were
     // actually saved.
-    $loaded_file = file_load($result->fid, TRUE);
+    $loaded_file = file_load($result->fid);
     $this->assertTrue($loaded_file, 'File can be loaded from the database.');
     $this->assertFileUnchanged($result, $loaded_file);
   }
@@ -1530,14 +1646,14 @@ class FileMoveTest extends FileHookTestCase {
     $this->assertFileHooksCalled(array('move', 'load', 'update'));
 
     // Compare the returned value to what made it into the database.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
     // The target file should not have been altered.
-    $this->assertFileUnchanged($target, file_load($target->fid, TRUE));
+    $this->assertFileUnchanged($target, file_load($target->fid));
     // Make sure we end up with two distinct files afterwards.
     $this->assertDifferentFile($target, $result);
 
     // Compare the source and results.
-    $loaded_source = file_load($source->fid, TRUE);
+    $loaded_source = file_load($source->fid);
     $this->assertEqual($loaded_source->fid, $result->fid, "Returned file's id matches the source.");
     $this->assertNotEqual($loaded_source->uri, $source->uri, "Returned file path has changed from the original.");
   }
@@ -1566,7 +1682,7 @@ class FileMoveTest extends FileHookTestCase {
 
     // Reload the file from the database and check that the changes were
     // actually saved.
-    $loaded_result = file_load($result->fid, TRUE);
+    $loaded_result = file_load($result->fid);
     $this->assertFileUnchanged($result, $loaded_result);
     // Check that target was re-used.
     $this->assertSameFile($target, $loaded_result);
@@ -1593,7 +1709,7 @@ class FileMoveTest extends FileHookTestCase {
 
     // Load the file from the database and make sure it is identical to what
     // was returned.
-    $this->assertFileUnchanged($source, file_load($source->fid, TRUE));
+    $this->assertFileUnchanged($source, file_load($source->fid));
   }
 
   /**
@@ -1620,8 +1736,8 @@ class FileMoveTest extends FileHookTestCase {
 
     // Load the file from the database and make sure it is identical to what
     // was returned.
-    $this->assertFileUnchanged($source, file_load($source->fid, TRUE));
-    $this->assertFileUnchanged($target, file_load($target->fid, TRUE));
+    $this->assertFileUnchanged($source, file_load($source->fid));
+    $this->assertFileUnchanged($target, file_load($target->fid));
   }
 }
 
@@ -1656,7 +1772,7 @@ class FileCopyTest extends FileHookTestCase {
 
     // Reload the file from the database and check that the changes were
     // actually saved.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
   }
 
   /**
@@ -1683,9 +1799,9 @@ class FileCopyTest extends FileHookTestCase {
 
     // Load all the affected files to check the changes that actually made it
     // to the database.
-    $loaded_source = file_load($source->fid, TRUE);
-    $loaded_target = file_load($target->fid, TRUE);
-    $loaded_result = file_load($result->fid, TRUE);
+    $loaded_source = file_load($source->fid);
+    $loaded_target = file_load($target->fid);
+    $loaded_result = file_load($result->fid);
 
     // Verify that the source file wasn't changed.
     $this->assertFileUnchanged($source, $loaded_source);
@@ -1723,9 +1839,9 @@ class FileCopyTest extends FileHookTestCase {
 
     // Load all the affected files to check the changes that actually made it
     // to the database.
-    $loaded_source = file_load($source->fid, TRUE);
-    $loaded_target = file_load($target->fid, TRUE);
-    $loaded_result = file_load($result->fid, TRUE);
+    $loaded_source = file_load($source->fid);
+    $loaded_target = file_load($target->fid);
+    $loaded_result = file_load($result->fid);
 
     // Verify that the source file wasn't changed.
     $this->assertFileUnchanged($source, $loaded_source);
@@ -1758,8 +1874,8 @@ class FileCopyTest extends FileHookTestCase {
     // Check that the correct hooks were called.
     $this->assertFileHooksCalled(array());
 
-    $this->assertFileUnchanged($source, file_load($source->fid, TRUE));
-    $this->assertFileUnchanged($target, file_load($target->fid, TRUE));
+    $this->assertFileUnchanged($source, file_load($source->fid));
+    $this->assertFileUnchanged($target, file_load($target->fid));
   }
 }
 
@@ -1845,7 +1961,7 @@ class FileLoadTest extends FileHookTestCase {
 class FileSaveTest extends FileHookTestCase {
   function testFileSave() {
     // Create a new file object.
-    $file = entity_create('file', array(
+    $file = new File(array(
       'uid' => 1,
       'filename' => 'backdrop.txt',
       'uri' => 'public://backdrop.txt',
@@ -2047,7 +2163,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $this->assertFileHooksCalled(array('insert'));
 
     // Verify that what was returned is what's in the database.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
   }
 
   /**
@@ -2072,7 +2188,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $this->assertFileHooksCalled(array('insert'));
 
     // Verify that what was returned is what's in the database.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
   }
 
   /**
@@ -2097,10 +2213,10 @@ class FileSaveDataTest extends FileHookTestCase {
 
     // Ensure that the existing file wasn't overwritten.
     $this->assertDifferentFile($existing, $result);
-    $this->assertFileUnchanged($existing, file_load($existing->fid, TRUE));
+    $this->assertFileUnchanged($existing, file_load($existing->fid));
 
     // Verify that was returned is what's in the database.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
   }
 
   /**
@@ -2127,7 +2243,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $this->assertSameFile($existing, $result);
 
     // Verify that what was returned is what's in the database.
-    $this->assertFileUnchanged($result, file_load($result->fid, TRUE));
+    $this->assertFileUnchanged($result, file_load($result->fid));
   }
 
   /**
@@ -2146,7 +2262,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $this->assertFileHooksCalled(array());
 
     // Ensure that the existing file wasn't overwritten.
-    $this->assertFileUnchanged($existing, file_load($existing->fid, TRUE));
+    $this->assertFileUnchanged($existing, file_load($existing->fid));
   }
 }
 
@@ -2358,6 +2474,10 @@ class FileURLRewritingTest extends FileTestCase {
  * Tests for file_munge_filename() and file_unmunge_filename().
  */
 class FileNameMungingTest extends FileTestCase {
+  protected $bad_extension;
+  protected $name;
+  protected $name_with_uc_ext;
+
   function setUp() {
     parent::setUp();
     $this->bad_extension = 'php';

@@ -137,7 +137,7 @@ function update_menu() {
     'file' => 'update.report.inc',
   );
   $items['admin/reports/updates/list'] = array(
-    'title' => 'List',
+    'title' => 'List available updates',
     'access arguments' => array('administer site configuration'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
@@ -567,6 +567,8 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
+      $text = t('Update version checking not enabled.');
+      break;
     case UPDATE_NOT_FETCHED:
     case UPDATE_FETCH_PENDING:
       if ($msg_type == 'core') {

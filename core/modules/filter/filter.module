@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Framework for handling the filtering of content.
@@ -84,6 +83,14 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['filter/tips/%filter_format'] = array(
+    'title' => 'Compose tips',
+    'page callback' => 'filter_tips_long',
+    'page arguments' => array(2),
+    'access callback' => 'filter_access',
+    'access arguments' => array(2),
+    'file' => 'filter.pages.inc',
+  );
   $items['admin/config/content/formats'] = array(
     'title' => 'Text editors and formats',
     'description' => 'Configure WYSIWYG and text editors on the site. Restrict or allow certain HTML tags to be used in content.',
@@ -93,7 +100,7 @@ function filter_menu() {
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/list'] = array(
-    'title' => 'List',
+    'title' => 'List text formats',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
@@ -1132,7 +1139,12 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
 
   // Turn original element into a text format wrapper.
-  $element['#attached'] = filter_get_attached($formats);
+  if (isset($element['#attached'])) {
+    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
+  }
+  else {
+    $element['#attached'] = filter_get_attached($formats);
+  }
 
   // Use the default format for this user if none was selected.
   if (!isset($element['#format'])) {
@@ -1149,6 +1161,9 @@ function filter_process_format($element) {
   $element['format'] = array(
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
+    '#title' => 'Formatting options',
+    '#collapsible' => TRUE, 
+    '#collapsed' => TRUE,
   );
 
   // Prepare text format guidelines.
@@ -1445,18 +1460,23 @@ function filter_dom_serialize($dom_document) {
   $body_node = $dom_document->getElementsByTagName('body')->item(0);
   $body_content = '';
 
-  foreach ($body_node->getElementsByTagName('script') as $node) {
-    filter_dom_serialize_escape_cdata_element($dom_document, $node);
-  }
+  if ($body_node !== NULL) {
+    foreach ($body_node->getElementsByTagName('script') as $node) {
+      filter_dom_serialize_escape_cdata_element($dom_document, $node);
+    }
 
-  foreach ($body_node->getElementsByTagName('style') as $node) {
-    filter_dom_serialize_escape_cdata_element($dom_document, $node, '/*', '*/');
-  }
+    foreach ($body_node->getElementsByTagName('style') as $node) {
+      filter_dom_serialize_escape_cdata_element($dom_document, $node, '/*', '*/');
+    }
 
-  foreach ($body_node->childNodes as $child_node) {
-    $body_content .= $dom_document->saveXML($child_node);
+    foreach ($body_node->childNodes as $child_node) {
+      $body_content .= $dom_document->saveXML($child_node);
+    }
+    return preg_replace('|<([^> ]*)/>|i', '<$1 />', $body_content);
   }
-  return $body_content;
+  else {
+    return $body_content;
+  }
 }
 
 /**
@@ -2004,7 +2024,7 @@ function _filter_url($text, $filter) {
   $tasks['_filter_url_parse_full_links'] = $pattern;
 
   // Match e-mail addresses.
-  $url_pattern = "[A-Za-z0-9._-]{1,254}@(?:$domain)";
+  $url_pattern = "[A-Za-z0-9._+-]{1,254}@(?:$domain)";
   $pattern = "`($url_pattern)`";
   $tasks['_filter_url_parse_email_links'] = $pattern;
 

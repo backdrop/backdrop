@@ -3556,6 +3556,8 @@ function form_process_tableselect($element) {
  *     - replace: (optional) A character to replace disallowed characters in the
  *       machine name via JavaScript. Defaults to '_' (underscore). When using a
  *       different character, 'replace_pattern' needs to be set accordingly.
+ *     - langcode: (optional) The two-character language code for the input
+ *       language, with which transliteration will be used.
  *     - error: (optional) A custom form error message string to show, if the
  *       machine name contains disallowed characters.
  *     - standalone: (optional) Whether the live preview should stay in its own
@@ -3581,10 +3583,10 @@ function form_process_machine_name($element, &$form_state) {
   // were defined in hook_element_info(). Therefore, we apply the defaults here.
   $element['#machine_name'] += array(
     'source' => array('name'),
-    'target' => '#' . $element['#id'],
     'label' => t('Machine name'),
     'replace_pattern' => '[^a-z0-9_]+',
     'replace' => '_',
+    'langcode' => $GLOBALS['language']->langcode,
     'standalone' => FALSE,
     'field_prefix' => $element['#field_prefix'],
     'field_suffix' => $element['#field_suffix'],
@@ -3627,16 +3629,10 @@ function form_process_machine_name($element, &$form_state) {
     backdrop_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
   }
 
-  $js_settings = array(
-    'type' => 'setting',
-    'data' => array(
-      'machineName' => array(
-        '#' . $source['#id'] => $element['#machine_name'],
-      ),
-    ),
-  );
+  $js_settings = $element['#machine_name'];
+  $js_settings['source'] = '#' . $source['#id'];
+  $element['#attributes']['data-machine-name'] = json_encode($js_settings);
   $element['#attached']['js'][] = 'core/misc/machine-name.js';
-  $element['#attached']['js'][] = $js_settings;
 
   return $element;
 }
@@ -4709,7 +4705,7 @@ function _form_set_class(&$element, $class = array()) {
  *
  * Sample callback_batch_finished():
  * @code
- * function batch_test_finished($success, $results, $operations) {
+ * function my_finished_callback($success, $results, $operations) {
  *   // The 'success' parameter means no fatal PHP errors were detected. All
  *   // other error management should be handled using 'results'.
  *   if ($success) {

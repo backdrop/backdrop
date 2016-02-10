@@ -18,7 +18,7 @@ function field_ui_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_
  */
 function field_ui_menu() {
   $items['admin/reports/fields'] = array(
-    'title' => 'Field list',
+    'title' => 'Fields',
     'description' => 'Overview of fields on all entity types.',
     'page callback' => 'field_ui_fields_list',
     'access arguments' => array('administer content types'),

@@ -390,8 +390,8 @@ function ajax_form_callback() {
   if (!empty($form_state['triggering_element'])) {
     $callback = $form_state['triggering_element']['#ajax']['callback'];
   }
-  if (!empty($callback) && function_exists($callback)) {
-    $result = $callback($form, $form_state);
+  if (!empty($callback) && is_callable($callback)) {
+    $result = call_user_func_array($callback, array(&$form, &$form_state));
 
     if (!(is_array($result) && isset($result['#type']) && $result['#type'] == 'ajax')) {
       // Turn the response into a #type=ajax array if it isn't one already.
@@ -1340,6 +1340,11 @@ function ajax_command_restripe($selector) {
 function ajax_command_open_dialog($selector, $title, $html, array $dialog_options = array()) {
   // Add the library for handling the dialog in the response.
   backdrop_add_library('system', 'backdrop.dialog.ajax');
+
+  // jQuery UI does not allow markup in its titles, and does its own escaping.
+  // The value passed in should already be escaped (as it would be from
+  // backdrop_get_title()), so we decode it back to the original characters.
+  $title = html_entity_decode(strip_tags($title));
 
   $dialog_options['title'] = $title;
 

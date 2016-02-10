@@ -119,14 +119,10 @@ Backdrop.tableDrag = function (table, tableSettings) {
 
   // Add event bindings to the document. The self variable is passed along
   // as event handlers do not have direct access to the tableDrag object.
-  if (self.touchSupport) {
-    $(document).on('touchmove', function (event) { return self.dragRow(event.originalEvent.touches[0], self); });
-    $(document).on('touchend', function (event) { return self.dropRow(event.originalEvent.touches[0], self); });
-  }
-  else {
-    $(document).on('mousemove', function (event) { return self.dragRow(event, self); });
-    $(document).on('mouseup', function (event) { return self.dropRow(event, self); });
-  }
+  $(document).on('touchmove', function (event) { return self.dragRow(event.originalEvent.touches[0], self); });
+  $(document).on('touchend', function (event) { return self.dropRow(event.originalEvent.touches[0], self); });
+  $(document).on('mousemove', function (event) { return self.dragRow(event, self); });
+  $(document).on('mouseup', function (event) { return self.dropRow(event, self); });
 };
 
 /**
@@ -313,19 +309,14 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
     self.dragObject == null ? $(this).removeClass('tabledrag-handle-hover') : null;
   });
 
-  if (this.touchSupport) {
-    handle.on('touchstart', function (event) {
-      event.preventDefault();
+  // Add event handler to start dragging when a handle is clicked or touched
+  handle.on('mousedown touchstart pointerdown', function (event) {
+    event.preventDefault();
+    if (event.type == "touchstart") {
       event = event.originalEvent.touches[0];
-      self.dragStart(event, self, item);
-    });
-  }
-  else {
-    handle.on('mousedown', function (event) {
-      event.preventDefault();
-      self.dragStart(event, self, item);
-    });
-  }
+    }
+    self.dragStart(event, self, item);
+  });
 
   // Prevent the anchor tag from jumping us to the top of the page.
   handle.on('click', function (e) {

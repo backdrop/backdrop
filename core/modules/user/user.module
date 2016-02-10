@@ -10,6 +10,21 @@
 define('USERNAME_MAX_LENGTH', 60);
 
 /**
+ * Users can login with username only.
+ */
+define('USER_LOGIN_USERNAME_ONLY', 'username_only');
+
+/**
+ * Users can login with email address only.
+ */
+define('USER_LOGIN_EMAIL_ONLY', 'email_only');
+
+/**
+ * Users can login using either username or email address.
+ */
+define('USER_LOGIN_USERNAME_OR_EMAIL', 'username_or_email');
+
+/**
  * Only administrators can create user accounts.
  */
 define('USER_REGISTER_ADMINISTRATORS_ONLY', 'admin_only');
@@ -229,7 +244,7 @@ function user_load($uid, $reset = FALSE) {
  * Fetch a user object by email address.
  *
  * @param $mail
- *   String with the account's e-mail address.
+ *   String with the account's email address.
  * @return
  *   A fully-loaded $user object upon successful user load or FALSE if user
  *   cannot be loaded.
@@ -849,9 +864,12 @@ function user_validate_current_pass(&$form, &$form_state) {
  */
 function user_account_form_validate($form, &$form_state) {
   $account = $form['#user'];
+  $mail = $form_state['values']['mail'];
+
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
-    if ($error = user_validate_name($form_state['values']['name'])) {
+    $name = $form_state['values']['name'];
+    if ($error = user_validate_name($name)) {
       form_set_error('name', $error);
     }
     // Cast the user ID as an integer. It might have been set to NULL, which
@@ -860,18 +878,23 @@ function user_account_form_validate($form, &$form_state) {
       $name_taken = (bool) db_select('users')
         ->fields('users', array('uid'))
         ->condition('uid', (int) $account->uid, '<>')
-        ->condition('name', db_like($form_state['values']['name']), 'LIKE')
+        ->condition('name', db_like($name), 'LIKE')
         ->range(0, 1)
         ->execute()
         ->fetchField();
 
       if ($name_taken) {
-        form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
+        form_set_error('name', t('The name %name is already taken.', array('%name' => $name)));
+      }
+      // Check whether the user name provided is an email address. If so, make
+      // sure it matches the mail value.
+      if (config('system.core')->get('user_email_match') && (valid_email_address($name))) {
+        if ($name !== $mail) {
+          form_set_error('name', t('An email address was provided as a username, but does not match the account email address.'));
+        }
       }
     }
   }
-
-  $mail = $form_state['values']['mail'];
 
   if (!empty($mail)) {
     $mail_taken = (bool) db_select('users')
@@ -909,14 +932,16 @@ function user_account_form_validate($form, &$form_state) {
 }
 
 function user_login_block($form) {
+  $credentials = config_get('system.core', 'user_login_method');
+
   $form['#action'] = url(current_path(), array('query' => backdrop_get_destination(), 'external' => FALSE));
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Username'),
-    '#maxlength' => USERNAME_MAX_LENGTH,
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
@@ -1239,9 +1264,20 @@ function user_menu() {
   // Settings.
   $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
-    'description' => 'Configure settings for user accounts including registration requirements and customization of automated e-mails.',
+    'description' => 'Configure settings for user accounts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+    'weight' => 10,
+  );
+
+  // User email settings.
+  $items['admin/config/people/emails'] = array(
+    'title' => 'Account emails',
+    'description' => 'Configure email templates used for account registration and management.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_settings_email'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
     'weight' => 10,
@@ -1375,13 +1411,13 @@ function user_menu_link_alter(&$link) {
   // for authenticated users. Authenticated users should see "My account", but
   // anonymous users should not see it at all. Therefore, invoke
   // user_translated_menu_link_alter() to conditionally hide the link.
-  if ($link['link_path'] == 'user' && $link['module'] == 'system') {
+  if ($link['link_path'] == 'user' && isset($link['module']) && $link['module'] == 'system') {
     $link['options']['alter'] = TRUE;
   }
 
   // Force the Logout link to appear on the top-level of 'user-menu' menu by
   // default (i.e., unless it has been customized).
-  if ($link['link_path'] == 'user/logout' && $link['module'] == 'system' && empty($link['customized'])) {
+  if ($link['link_path'] == 'user/logout' && isset($link['module']) && $link['module'] == 'system' && empty($link['customized'])) {
     $link['plid'] = 0;
   }
 }
@@ -1473,10 +1509,11 @@ function user_login($form, &$form_state) {
   backdrop_set_title(t('Log in'));
 
   // Display login form:
+  $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
-    '#title' => t('Username'),
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
-    '#maxlength' => USERNAME_MAX_LENGTH,
     '#required' => TRUE,
   );
 
@@ -1514,19 +1551,37 @@ function user_login_default_validators() {
 }
 
 /**
- * A FAPI validate handler. Sets an error if supplied username has been blocked.
+ * First phase validation handler for the login form.
+ *
+ * Check for invalid email addresses and blocked accounts.
  */
 function user_login_name_validate($form, &$form_state) {
-  if (!empty($form_state['values']['name']) && user_is_blocked($form_state['values']['name'])) {
-    // Blocked in user administration.
-    form_set_error('name', t('The username %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+  if (isset($form_state['values']['name'])) {
+    $name = $form_state['values']['name'];
+    $credentials = config_get('system.core', 'user_login_method');
+    if ($credentials !== USER_LOGIN_USERNAME_ONLY) {
+      if ($account = db_query("SELECT * FROM {users} WHERE mail = :mail", array(':mail' => $name))->fetchObject()) {
+        $name = $account->name;
+      }
+      // If can't find account, check if valid email address.
+      elseif ($credentials === USER_LOGIN_EMAIL_ONLY && !valid_email_address($name)) {
+        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $form_state['values']['name'])));
+      }
+    }
+    // If can find account, check if user is blocked.
+    if ($name && user_is_blocked($name)) {
+      form_set_error('name', t('The account for %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+    }
   }
 }
 
 /**
- * A validate handler on the login form. Check supplied username/password
- * against local users table. If successful, $form_state['uid']
- * is set to the matching user ID.
+ * Second phase validation handler on the login form.
+ *
+ * Checks supplied username/password against local users table. If successful,
+ * $form_state['uid'] is set to the matching user ID. If an account is found
+ * $form_state['account_found'] is set to TRUE, though the password may still
+ * fail even if an account is found.
  */
 function user_login_authenticate_validate($form, &$form_state) {
   $password = trim($form_state['values']['pass']);
@@ -1541,7 +1596,15 @@ function user_login_authenticate_validate($form, &$form_state) {
       $form_state['flood_control_triggered'] = 'ip';
       return;
     }
-    $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
+    $account = FALSE;
+    $credentials = config_get('system.core', 'user_login_method');
+    if (($credentials === USER_LOGIN_USERNAME_OR_EMAIL || $credentials === USER_LOGIN_EMAIL_ONLY) && valid_email_address($form_state['values']['name'])) {
+      $account = db_query("SELECT * FROM {users} WHERE mail = :mail AND status = 1", array(':mail' => $form_state['values']['name']))->fetchObject();
+    }
+    if (!$account && $credentials !== USER_LOGIN_EMAIL_ONLY) {
+      $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
+    }
+
     if ($account) {
       $form_state['account_found'] = TRUE;
       if ($flood_config->get('flood_uid_only')) {
@@ -1563,13 +1626,13 @@ function user_login_authenticate_validate($form, &$form_state) {
         $form_state['flood_control_triggered'] = 'user';
         return;
       }
+      // We are not limited by flood control, so try to authenticate.
+      // Set $form_state['uid'] as a flag for user_login_final_validate().
+      $form_state['uid'] = user_authenticate($account->name, $password);
     }
     else {
       $form_state['account_found'] = FALSE;
     }
-    // We are not limited by flood control, so try to authenticate.
-    // Set $form_state['uid'] as a flag for user_login_final_validate().
-    $form_state['uid'] = user_authenticate($form_state['values']['name'], $password);
   }
 }
 
@@ -1600,8 +1663,14 @@ function user_login_final_validate($form, &$form_state) {
       }
     }
     elseif (empty($form_state['account_found'])) {
-      form_set_error('name', t('Sorry, unrecognized username.'));
-      watchdog('user', 'The user account %name could not be found.', array('%name' => $form_state['values']['name']));
+      $login_method = config_get('system.core', 'user_login_method');
+      if ((valid_email_address($form_state['values']['name']) && $login_method === USER_LOGIN_USERNAME_OR_EMAIL) || $login_method === USER_LOGIN_EMAIL_ONLY) {
+        form_set_error('name', t('Sorry, no account with that email address found.'));
+      }
+      else {
+        form_set_error('name', t('Sorry, unrecognized username.'));
+      }
+      watchdog('user', 'The user account or email %name could not be found.', array('%name' => $form_state['values']['name']));
     }
     else {
       form_set_error('pass', t('Sorry, incorrect password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
@@ -2074,7 +2143,7 @@ function _user_mail_text($key, $language = NULL, $variables = array()) {
   $langcode = isset($language) ? $language->langcode : NULL;
 
   // We do not sanitize the token replacement, since the output of this
-  // replacement is intended for an e-mail message, not a web browser.
+  // replacement is intended for an email message, not a web browser.
   return token_replace(config('user.mail')->get($key), $variables, array('langcode' => $langcode, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
 }
 
@@ -2247,6 +2316,13 @@ function user_role_save($role) {
 function user_role_delete($role_name) {
   $role = user_role_load($role_name);
 
+  // If this is the administrator role, delete the user_admin_role variable.
+  if ($role_name == config_get('system.core', 'user_admin_role')) {
+    $system_config = config('system.core');
+    $system_config->clear('user_admin_role');
+    $system_config->save();
+  }
+
   $config = config('user.role.' . $role_name);
   $config->delete();
 
@@ -2366,143 +2442,6 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
   $user_role = user_role_load($role_name);
   $user_role->permissions = array_values(array_diff($user_role->permissions, $permissions));
   user_role_save($user_role);
-}
-
-/**
- * Implements hook_user_operations().
- */
-function user_user_operations($form = array(), $form_state = array()) {
-  $operations = array(
-    'unblock' => array(
-      'label' => t('Unblock the selected users'),
-      'callback' => 'user_user_operations_unblock',
-    ),
-    'block' => array(
-      'label' => t('Block the selected users'),
-      'callback' => 'user_user_operations_block',
-    ),
-    'cancel' => array(
-      'label' => t('Cancel the selected user accounts'),
-    ),
-  );
-
-  if (user_access('administer permissions')) {
-    $roles = user_roles(TRUE);
-    unset($roles[BACKDROP_AUTHENTICATED_ROLE]);  // Can't edit authenticated role.
-
-    $add_roles = array();
-    foreach ($roles as $key => $value) {
-      $add_roles['add_role-' . $key] = $value;
-    }
-
-    $remove_roles = array();
-    foreach ($roles as $key => $value) {
-      $remove_roles['remove_role-' . $key] = $value;
-    }
-
-    if (count($roles)) {
-      $role_operations = array(
-        t('Add a role to the selected users') => array(
-          'label' => $add_roles,
-        ),
-        t('Remove a role from the selected users') => array(
-          'label' => $remove_roles,
-        ),
-      );
-
-      $operations += $role_operations;
-    }
-  }
-
-  // If the form has been posted, we need to insert the proper data for
-  // role editing if necessary.
-  if (!empty($form_state['submitted'])) {
-    $operation_parts = explode('-', $form_state['values']['operation']);
-    $operation = $operation_parts[0];
-    if ($operation == 'add_role' || $operation == 'remove_role') {
-      $role_name = $operation_parts[1];
-      if (user_access('administer permissions')) {
-        $operations[$form_state['values']['operation']] = array(
-          'callback' => 'user_multiple_role_edit',
-          'callback arguments' => array($operation, $role_name),
-        );
-      }
-      else {
-        watchdog('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDOG_WARNING);
-        return;
-      }
-    }
-  }
-
-  return $operations;
-}
-
-/**
- * Callback function for admin mass unblocking users.
- */
-function user_user_operations_unblock($accounts) {
-  $accounts = user_load_multiple($accounts);
-  foreach ($accounts as $account) {
-    // Skip unblocking user if they are already unblocked.
-    if ($account !== FALSE && $account->status == 0) {
-      $account->status = 1;
-      $account->save();
-    }
-  }
-}
-
-/**
- * Callback function for admin mass blocking users.
- */
-function user_user_operations_block($accounts) {
-  $accounts = user_load_multiple($accounts);
-  foreach ($accounts as $account) {
-    // Skip blocking user if they are already blocked.
-    if ($account !== FALSE && $account->status == 1) {
-      // For efficiency manually save the original account before applying any
-      // changes.
-      $account->original = clone $account;
-      $account->status = 0;
-      $account->save();
-    }
-  }
-}
-
-/**
- * Callback function for admin mass adding/deleting a user role.
- */
-function user_multiple_role_edit($accounts, $operation, $role_name) {
-  switch ($operation) {
-    case 'add_role':
-      $accounts = user_load_multiple($accounts);
-      foreach ($accounts as $account) {
-        // Skip adding the role to the user if they already have it.
-        if ($account !== FALSE && !in_array($role_name, $account->roles)) {
-          $roles = $account->roles;
-          $roles[] = $role_name;
-          // For efficiency manually save the original account before applying
-          // any changes.
-          $account->original = clone $account;
-          $account->roles = $roles;
-          $account->save();
-        }
-      }
-      break;
-    case 'remove_role':
-      $accounts = user_load_multiple($accounts);
-      foreach ($accounts as $account) {
-        // Skip removing the role from the user if they already don't have it.
-        if ($account !== FALSE && in_array($role_name, $account->roles)) {
-          $roles = array_diff($account->roles, array($role_name));
-          // For efficiency manually save the original account before applying
-          // any changes.
-          $account->original = clone $account;
-          $account->roles = $roles;
-          $account->save();
-        }
-      }
-      break;
-  }
 }
 
 /**
@@ -3016,7 +2955,7 @@ function user_register_submit($form, &$form_state) {
   if ($admin && !$notify) {
     backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
-  // No e-mail verification required; log in user immediately.
+  // No email verification required; log in user immediately.
   elseif (!$admin && !config_get('system.core', 'user_email_verification') && $account->status) {
     _user_mail_notify('register_no_approval_required', $account);
     $form_state['uid'] = $account->uid;

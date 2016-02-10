@@ -57,3 +57,9 @@ name = Filter file usage
 description = Tests tracking of file usage by Filter module.
 group = Filter
 file = filter.test
+
+[FilterDOMSerializeTestCase]
+name = Serialization
+description = Test serialization of DOMDocument objects.
+group = Filter
+file = filter.test

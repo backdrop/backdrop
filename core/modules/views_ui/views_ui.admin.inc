@@ -122,8 +122,8 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
     // Suppress contextual links of entities within the result set during a
     // Preview.
-    // @todo We'll want to add contextual links specific to editing the View, so
-    //   the suppression may need to be moved deeper into the Preview pipeline.
+    // @todo We'll want to add contextual links specific to configuring the View
+    // so the suppression may need to be moved deeper into the Preview pipeline.
     views_ui_contextual_links_suppress_push();
     $preview = $view->preview($display_id, $args);
     views_ui_contextual_links_suppress_pop();
@@ -244,16 +244,35 @@ function views_ui_list_page() {
   views_ui_add_admin_css();
 
   $header = array(
-    array('data' => t('View name'), 'class' => array('views-ui-name')),
+    array('data' => t('View info'), 'class' => array('views-ui-name')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
-    array('data' => t('Tag'), 'class' => array('views-ui-tag')),
-    array('data' => t('Path'), 'class' => array('views-ui-path')),
+    array('data' => t('Path(s)'), 'class' => array('views-ui-path')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
   );
 
-  $views = views_get_enabled_views() + views_get_disabled_views();
+  // Get and sort enabled views.
+  $enabled = views_get_enabled_views();
+  $enabled_sorted = array();
+  foreach ($enabled as $key => $view) {
+    $enabled_sorted[$key] = $view->human_name;
+  }
+  natcasesort($enabled_sorted);
+
+  // Get and sort disabled views.
+  $disabled = views_get_disabled_views();
+  $disabled_sorted = array();
+  foreach ($disabled as $key => $view) {
+    $disabled_sorted[$key] = $view->human_name;
+  }
+  natcasesort($disabled_sorted);
+
+  // Get complete set of views.
+  $views = $enabled + $disabled;
+  $sorted = array_keys($enabled_sorted + $disabled_sorted);
+
   $rows = array();
-  foreach ($views as $view) {
+  foreach ($sorted as $key) {
+    $view = $views[$key];
     $paths = _views_ui_get_paths($view);
     $paths = implode(", ", $paths);
 
@@ -261,18 +280,19 @@ function views_ui_list_page() {
     $row[] = array(
       'data' => theme('views_ui_view_info', array('view' => $view)),
       'class' => array('views-ui-name'),
+      'data-label' => t('View info'),
     );
+    $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
+    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tag:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
-      'data' => check_plain($view->description),
+      'data' => $data,
       'class' => array('views-ui-description'),
-    );
-    $row[] = array(
-      'data' => check_plain($view->tag),
-      'class' => array('views-ui-tag'),
+      'data-label' => t('Description'),
     );
     $row[] = array(
       'data' => $paths,
       'class' => array('views-ui-path'),
+      'data-label' => t('Path(s)'),
     );
     $row[] = array(
       'data' => array(
@@ -280,6 +300,7 @@ function views_ui_list_page() {
         '#links' => _views_ui_get_operations($view),
       ),
       'class' => array('views-ui-operations'),
+      'data-label' => t('Operations'),
     );
     $rows[] = array(
       'data' => $row,
@@ -291,7 +312,10 @@ function views_ui_list_page() {
     'header' => $header,
     'rows' => $rows,
     'empty' => t('No views match the search criteria.'),
-    'attributes' => array('id' => 'views-list'),
+    'attributes' => array(
+      'id' => 'views-list',
+      'class' => array('views-list'),
+    ),
   );
   return theme('table', $table);
 }
@@ -308,8 +332,8 @@ function _views_ui_get_operations(view $view) {
       'query' => array('token' => backdrop_get_token($view->name)),
     );
   }
-  $links['edit'] = array(
-    'title' => t('Edit'),
+  $links['configure'] = array(
+    'title' => t('Configure'),
     'href' => 'admin/structure/views/view/' . $view->name,
   );
   $links['clone'] = array(
@@ -431,7 +455,7 @@ function views_ui_add_form($form, &$form_state) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue & edit'),
+    '#value' => t('Continue & configure'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
@@ -442,11 +466,11 @@ function views_ui_add_form($form, &$form_state) {
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
-  
+
   $path = 'admin/structure/views';
   $options = array();
   $options['attributes']['class'][] = 'form-cancel';
-  
+
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
@@ -771,7 +795,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
       }
     }
   }
-  backdrop_set_message(t('Your view was saved. You may edit it from the list below.'));
+  backdrop_set_message(t('Your view was saved. You may configure it from the list below.'));
 }
 
 /**
@@ -785,11 +809,11 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
     backdrop_set_message($e->getMessage(), 'error');
     $form_state['redirect'] = 'admin/structure/views';
   }
-  // Just cache it temporarily to edit it.
+  // Just cache it temporarily to configure it.
   views_ui_cache_set($view);
 
   // If there is a destination query, ensure we still redirect the user to the
-  // edit view page, and then redirect the user to the destination.
+  // configure view page, and then redirect the user to the destination.
   $destination = array();
   if (isset($_GET['destination'])) {
     $destination = backdrop_get_destination();
@@ -864,7 +888,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
     return $form;
   }
 
-  $cancel = 'admin/structure/views/view/' . $view->name . '/edit';
+  $cancel = 'admin/structure/views/view/' . $view->name . '/configure';
   $account = user_load($view->locked->uid);
   return confirm_form($form,
                   t('Are you sure you want to break the lock on view %name?',
@@ -880,17 +904,17 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
  */
 function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
   tempstore_clear('views.view', $form_state['view']->name);
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
-  backdrop_set_message(t('The lock has been broken and you may now edit this view.'));
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure';
+  backdrop_set_message(t('The lock has been broken and you may now configure this view.'));
 }
 
 /**
- * Helper function to return the used display_id for the edit page
+ * Helper function to return the used display_id for the configure page.
  *
  * This function handles access to the display.
  */
 function views_ui_edit_page_display($view, $display_id) {
-  // Determine the displays available for editing.
+  // Determine the displays available for configuring.
   if ($tabs = views_ui_edit_page_display_tabs($view, $display_id)) {
     // If a display isn't specified, use the first one.
     if (empty($display_id)) {
@@ -920,7 +944,7 @@ function views_ui_edit_page_display($view, $display_id) {
 }
 
 /**
- * Page callback for the Edit View page.
+ * Page callback for the Configure View page.
  */
 function views_ui_edit_page($view, $display_id = NULL) {
   $display_id = views_ui_edit_page_display($view, $display_id);
@@ -964,7 +988,7 @@ function views_ui_build_preview($view, $display_id, $render = TRUE) {
 }
 
 /**
- * Form builder callback for editing a View.
+ * Form builder callback for configuring a View.
  *
  * @see views_ui_ajax_get_form()
  */
@@ -1028,7 +1052,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['locked'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array('class' => array('view-locked', 'messages', 'warning')),
-      '#markup' => t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
+      '#markup' => t('This view is being configured by user !user, and is therefore locked from configuring by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
     );
   }
   if (isset($view->vid) && $view->vid == 'new') {
@@ -1092,7 +1116,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   if ($display_id) {
     $form_state['display_id'] = $display_id;
 
-    // The part of the page where editing will take place.
+    // The part of the page where configuring will take place.
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'edit-display-settings',
@@ -1111,7 +1135,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'edit-display-settings-content',
       '#attributes' => array(),
     );
-    // Add the edit display content
+    // Add the configure display content
     $form['displays']['settings']['settings_content']['tab_content'] = views_ui_get_display_tab($view, $display_id);
     $form['displays']['settings']['settings_content']['tab_content']['#theme_wrappers'] = array('container');
     $form['displays']['settings']['settings_content']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
@@ -1143,7 +1167,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   }
 
   // If relationships had to be fixed, we want to get that into the cache
-  // so that edits work properly, and to try to get the user to save it
+  // so that configurations work properly, and to try to get the user to save it
   // so that it's not using weird fixed up relationships.
   if (!empty($view->relationships_changed) && empty($_POST)) {
     backdrop_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
@@ -1217,7 +1241,7 @@ function views_ui_render_display_top($view, $display_id) {
     '#type' => 'dropbutton',
     '#links' => array(
       'edit-details' => array(
-        'title' => t('edit view name/description'),
+        'title' => t('Change view name/description'),
         'href' => "admin/structure/views/nojs/edit-details/$view->name",
         'attributes' => array('class' => array('views-ajax-link')),
       ),
@@ -1257,7 +1281,7 @@ function views_ui_render_display_top($view, $display_id) {
     }
   }
 
-  // Determine the displays available for editing.
+  // Determine the displays available for configuring.
   if ($tabs = views_ui_edit_page_display_tabs($view, $display_id)) {
     if ($display_id) {
       $tabs[$display_id]['#active'] = TRUE;
@@ -1286,7 +1310,7 @@ function views_ui_render_display_top($view, $display_id) {
 }
 
 function views_ui_get_default_ajax_message() {
-  return '<div class="message">' . t("Click on an item to edit that item's details.") . '</div>';
+  return '<div class="message">' . t("Click on an item to configure that item's details.") . '</div>';
 }
 
 /**
@@ -1301,8 +1325,8 @@ function views_ui_edit_form_submit_add_display($form, &$form_state) {
   $display_id = $view->add_display($display_type);
   views_ui_cache_set($view);
 
-  // Redirect to the new display's edit page.
-  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id;
+  // Redirect to the new display's configure page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/configure/' . $display_id;
 }
 
 /**
@@ -1323,8 +1347,8 @@ function views_ui_edit_form_submit_duplicate_display($form, &$form_state) {
   $view->current_display = $new_display_id;
   views_ui_cache_set($view);
 
-  // Redirect to the new display's edit page.
-  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $new_display_id;
+  // Redirect to the new display's configure page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/configure/' . $new_display_id;
 }
 
 /**
@@ -1338,7 +1362,7 @@ function views_ui_edit_form_submit_delete_display($form, &$form_state) {
   $view->display[$display_id]->deleted = TRUE;
   views_ui_cache_set($view);
 
-  // Redirect to the top-level edit page. The first remaining display will
+  // Redirect to the top-level configure page. The first remaining display will
   // become the active display.
   $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
 }
@@ -1354,8 +1378,8 @@ function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
   // Store in cache
   views_ui_cache_set($form_state['view']);
 
-  // Redirect to the top-level edit page.
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+  // Redirect to the top-level configure page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure/' . $id;
 }
 
 /**
@@ -1369,8 +1393,8 @@ function views_ui_edit_form_submit_enable_display($form, &$form_state) {
   // Store in cache
   views_ui_cache_set($form_state['view']);
 
-  // Redirect to the top-level edit page.
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+  // Redirect to the top-level configure page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure/' . $id;
 }
 
 /**
@@ -1383,8 +1407,8 @@ function views_ui_edit_form_submit_disable_display($form, &$form_state) {
   // Store in cache
   views_ui_cache_set($form_state['view']);
 
-  // Redirect to the top-level edit page.
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+  // Redirect to the top-level configure page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure/' . $id;
 }
 
 /**
@@ -1400,10 +1424,10 @@ function views_ui_edit_form_submit_preview($form, &$form_state) {
 /**
  * Submit handler for form buttons that do not complete a form workflow.
  *
- * The Edit View form is a multistep form workflow, but with state managed by
- * the Views object cache rather than $form_state['rebuild']. Without this
+ * The Configure View form is a multistep form workflow, but with state managed
+ * by the Views object cache rather than $form_state['rebuild']. Without this
  * submit handler, buttons that add or remove displays would redirect to the
- * destination parameter (e.g., when the Edit View form is linked to from a
+ * destination parameter (e.g., when the Configure View form is linked to from a
  * contextual link). This handler can be added to buttons whose form submission
  * should not yet redirect to the destination.
  */
@@ -1425,7 +1449,7 @@ function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
 }
 
 /**
- * Adds tabs for navigating across Displays when editing a View.
+ * Adds tabs for navigating across Displays when configuring a View.
  *
  * This function can be called from hook_menu_local_tasks_alter() to implement
  * these tabs as secondary local tasks, or it can be called from elsewhere if
@@ -1433,9 +1457,9 @@ function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
  * for setting the active tab's #active property to TRUE.
  *
  * @param view $view
- *    The view which will be edited.
+ *    The view which will be configured.
  * @param $display_id
- *    The display_id which is edited on the current request.
+ *    The display_id which is configured on the current request.
  */
 function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
   $tabs = array();
@@ -1446,7 +1470,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
       '#theme' => 'menu_local_task',
       '#link' => array(
         'title' => views_ui_get_display_label($view, $id),
-        'href' => 'admin/structure/views/view/' . $view->name . '/edit/' . $id,
+        'href' => 'admin/structure/views/view/' . $view->name . '/configure/' . $id,
         'localized_options' => array(),
       ),
     );
@@ -1479,7 +1503,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
 }
 
 /**
- * Controls whether or not the default display should have its own tab on edit.
+ * Controls whether the default display should have its own tab on configure.
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
@@ -1492,19 +1516,19 @@ function views_ui_show_default_display($view) {
 }
 
 /**
- * Returns a renderable array representing the edit page for one display.
+ * Returns a renderable array representing the configure page for one display.
  */
 function views_ui_get_display_tab($view, $display_id) {
   $build = array();
   $display = $view->display[$display_id];
-  // If the plugin doesn't exist, display an error message instead of an edit
-  // page.
+  // If the plugin doesn't exist, display an error message instead of a
+  // configure page.
   if (empty($display->handler)) {
     $title = isset($display->display_title) ? $display->display_title : t('Invalid');
     // @TODO: Improved UX for the case where a plugin is missing.
     $build['#markup'] = t("Error: Display @display refers to a plugin named '@plugin', but that plugin is not available.", array('@display' => $display->id, '@plugin' => $display->display_plugin));
   }
-  // Build the content of the edit page.
+  // Build the content of the configure page.
   else {
     $build['details'] = views_ui_get_display_tab_details($view, $display);
   }
@@ -1515,7 +1539,7 @@ function views_ui_get_display_tab($view, $display_id) {
 }
 
 /**
- * Helper function to get the display details section of the edit UI.
+ * Helper function to get the display details section of the configure UI.
  *
  * @param $view
  * @param $display
@@ -1710,7 +1734,7 @@ function views_ui_get_display_tab_details($view, $display) {
 }
 
 /**
- * Build a renderable array representing one option on the edit form.
+ * Build a renderable array representing one option on the configure form.
  *
  * This function might be more logical as a method on an object, if a suitable
  * object emerges out of refactoring.
@@ -1989,7 +2013,7 @@ function views_ui_edit_view_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for the edit view form.
+ * Submit handler for the configure view form.
  */
 function views_ui_edit_view_form_submit($form, &$form_state) {
   // Go through and remove displayed scheduled for removal.
@@ -2003,7 +2027,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
     if (!empty($display->new_id)) {
       $form_state['view']->display[$id]->id = $display->new_id;
       // Redirect the user to the renamed display to be sure that the page itself exists and doesn't throw errors.
-      $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $display->new_id;
+      $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure/' . $display->new_id;
     }
   }
 
@@ -2029,15 +2053,15 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   $form_state['view']->save();
   backdrop_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
 
-  // Remove this view from cache so we can edit it properly.
+  // Remove this view from cache so we can configure it properly.
   tempstore_clear('views.view', $form_state['view']->name);
 }
 
 /**
- * Submit handler for the edit view form.
+ * Submit handler for the configure view form.
  */
 function views_ui_edit_view_form_cancel($form, &$form_state) {
-  // Remove this view from cache so edits will be lost.
+  // Remove this view from cache so configurations will be lost.
   tempstore_clear('views.view', $form_state['view']->name);
   if (empty($form['view']->vid)) {
     // I seem to have to backdrop_goto here because I can't get fapi to
@@ -2049,7 +2073,7 @@ function views_ui_edit_view_form_cancel($form, &$form_state) {
 function views_ui_edit_view_form_delete($form, &$form_state) {
   unset($_REQUEST['destination']);
   // Redirect to the delete confirm page
-  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/delete', array('query' => backdrop_get_destination() + array('cancel' => 'admin/structure/views/view/' . $form_state['view']->name . '/edit')));
+  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/delete', array('query' => backdrop_get_destination() + array('cancel' => 'admin/structure/views/view/' . $form_state['view']->name . '/configure')));
 }
 
 /**
@@ -2494,7 +2518,7 @@ function views_ui_standard_cancel($form, &$form_state) {
     views_ui_cache_set($form_state['view']);
   }
 
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure';
 }
 
 /**
@@ -2593,7 +2617,7 @@ function views_ui_get_form_progress($view) {
 
 
 // --------------------------------------------------------------------------
-// Various subforms for editing the pieces of a view.
+// Various subforms for configuring the pieces of a view.
 
 function views_ui_ajax_forms($key = NULL) {
   $forms = array(
@@ -2641,7 +2665,7 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_config_style_form',
       'args' => array('type', 'id'),
     ),
-    'edit-details' => array(
+    'config-details' => array(
       'form_id' => 'views_ui_edit_details_form',
       'args' => array(),
     ),
@@ -2837,7 +2861,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     }
     elseif (!$js) {
       // if nothing on the stack, non-js forms just go back to the main view editor.
-      return backdrop_goto("admin/structure/views/view/$view->name/edit");
+      return backdrop_goto("admin/structure/views/view/$view->name/configure");
     }
     else {
       $output = array();
@@ -2898,7 +2922,7 @@ function views_ui_analyze_view_form($form, &$form_state) {
  * Submit handler for views_ui_analyze_view_form
  */
 function views_ui_analyze_view_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/configure';
 }
 
 /**
@@ -3011,7 +3035,7 @@ function views_ui_reorder_displays_form_submit($form, &$form_state) {
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
-  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/edit', array('fragment' => 'views-tab-default'));
+  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/configure', array('fragment' => 'views-tab-default'));
 }
 
 /**
@@ -3068,7 +3092,7 @@ function views_ui_edit_details_form_submit($form, &$form_state) {
 }
 
 /**
- * Form constructor callback to edit display of a view
+ * Form constructor callback to configure display of a view
  */
 function views_ui_edit_display_form($form, &$form_state) {
   $view = &$form_state['view'];
@@ -4823,7 +4847,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
 /**
  * Placeholder function for overriding $display->display_title.
  *
- * @todo Remove this function once editing the display title is possible.
+ * @todo Remove this function once configuring the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;

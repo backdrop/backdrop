@@ -35,6 +35,7 @@ function field_info_cache_clear() {
 
   _field_info_collate_types_reset();
   _field_info_collate_fields_reset();
+  cache()->delete('field_block_list');
 }
 
 /**

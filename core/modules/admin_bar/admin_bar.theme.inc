@@ -114,4 +114,3 @@ function template_preprocess_admin_bar_icon(&$variables) {
   $variables['src'] = $GLOBALS['base_url'] . '/' . backdrop_get_path('module', 'admin_bar') . '/images/home.png';
   $variables['alt'] = t('Home');
 }
-

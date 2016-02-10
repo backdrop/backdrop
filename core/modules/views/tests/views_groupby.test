@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests aggregate functionality of Views.
@@ -296,15 +295,15 @@ class viewsUiGroupbyTestCase extends BackdropWebTestCase {
    * @todo: this should check the change of the settings as well.
    */
   function testGroupBySave() {
-    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/configure');
 
     $edit = array(
       'group_by' => TRUE,
     );
     $this->backdropPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
 
-    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/edit');
-    $this->backdropPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
+    $this->backdropGet('admin/structure/views/view/test_views_groupby_save/configure');
+    $this->backdropPost('admin/structure/views/view/test_views_groupby_save/configure', array(), t('Save'));
 
     $this->backdropGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
   }

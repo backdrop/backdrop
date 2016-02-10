@@ -724,7 +724,7 @@ function comment_node_page_additions(Node $node) {
   // Only attempt to render comments if the node has visible comments.
   // Unpublished comments are not included in $node->comment_count, so show
   // comments unconditionally if the user is an administrator.
-  if (($node->comment_count && user_access('access comments')) || user_access('administer comments')) {
+  if ((!empty($node->comment_count) && user_access('access comments')) || user_access('administer comments')) {
     $mode = $node_type->settings['comment_mode'];
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($cids = comment_get_thread($node, $mode, $comments_per_page)) {
@@ -1139,20 +1139,20 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         'class' => array('comment-node-type-settings-form'),
       ),
       '#attached' => array(
-        'js' => array(backdrop_get_path('module', 'comment') . '/js/comment-node-form.js'),
+        'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
       ),
+      '#weight' => 20,
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
     $form['comment']['comment_default'] = array(
-      '#type' => 'select',
+      '#type' => 'radios',
       '#title' => t('Default comment setting for new content'),
       '#default_value' => $node_type->settings['comment_default'],
       '#options' => array(
-        COMMENT_NODE_OPEN => t('Open'),
-        COMMENT_NODE_CLOSED => t('Closed'),
-        COMMENT_NODE_HIDDEN => t('Hidden'),
+        COMMENT_NODE_OPEN => t('Open comments'),
+        COMMENT_NODE_CLOSED => t('Closed comments'),
       ),
     );
     $form['comment']['comment_per_page'] = array(
@@ -1224,12 +1224,12 @@ function comment_form_node_form_alter(&$form, $form_state) {
       'class' => array('comment-node-settings-form'),
     ),
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'comment') . '/js/comment-node-form.js'),
+      'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
      ),
     '#weight' => 80,
   );
   $comment_count = isset($node->nid) ? db_query('SELECT comment_count FROM {node_comment_statistics} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() : 0;
-  $comment_settings = ($node->comment == COMMENT_NODE_HIDDEN && empty($comment_count)) ? COMMENT_NODE_CLOSED : $node->comment;
+  $comment_settings = ($node->comment == COMMENT_NODE_HIDDEN) ? COMMENT_NODE_CLOSED : $node->comment;
   $form['comment_settings']['comment'] = array(
     '#type' => 'radios',
     '#title' => t('Comments'),
@@ -1239,24 +1239,36 @@ function comment_form_node_form_alter(&$form, $form_state) {
     '#options' => array(
       COMMENT_NODE_OPEN => t('Open'),
       COMMENT_NODE_CLOSED => t('Closed'),
-      COMMENT_NODE_HIDDEN => t('Hidden'),
     ),
     COMMENT_NODE_OPEN => array(
       '#description' => t('Users with the "Post comments" permission can post comments.'),
     ),
     COMMENT_NODE_CLOSED => array(
-      '#description' => t('Users cannot post comments, but existing comments will be displayed.'),
-    ),
-    COMMENT_NODE_HIDDEN => array(
-      '#description' => t('Comments are hidden from view.'),
+      '#description' => t('Users cannot post comments.'),
     ),
   );
-  // If the node doesn't have any comments, the "hidden" option makes no
-  // sense, so don't even bother presenting it to the user.
-  if (empty($comment_count)) {
-    $form['comment_settings']['comment'][COMMENT_NODE_HIDDEN]['#access'] = FALSE;
-    // Also adjust the description of the "closed" option.
-    $form['comment_settings']['comment'][COMMENT_NODE_CLOSED]['#description'] = t('Users cannot post comments.');
+  // If the node has comments, add the "hidden" option too.
+  if (!empty($comment_count)) {
+    $form['comment_settings']['comment_hidden'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide existing comments.'),
+      '#default_value' => ($node->comment == COMMENT_NODE_HIDDEN) ? TRUE : FALSE,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="comment"]' => array('value' => COMMENT_NODE_CLOSED),
+        ),
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function comment_node_presave(Node $node) {
+  if ($node->comment == COMMENT_NODE_CLOSED && property_exists($node, 'comment_hidden') && $node->comment_hidden) {
+    $node->comment = COMMENT_NODE_HIDDEN;
+    unset($node->comment_hidden);
   }
 }
 

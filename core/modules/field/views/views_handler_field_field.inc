@@ -499,7 +499,10 @@ class views_handler_field_field extends views_handler_field {
     );
 
     // Get the settings form.
-    $settings_form = array('#value' => array());
+    $settings_form = array(
+      '#type' => 'value',
+      '#value' => array(),
+    );
     $function = $formatter['module'] . '_field_formatter_settings_form';
     if (function_exists($function)) {
       $settings_form = $function($field, $this->instance, '_custom', $form, $form_state);

@@ -57,17 +57,8 @@ function menu_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'menu.admin.inc',
   );
-  $items['admin/structure/menu/settings'] = array(
-    'title' => 'Settings',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('menu_configure'),
-    'access arguments' => array('administer menu'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
-    'file' => 'menu.admin.inc',
-  );
   $items['admin/structure/menu/manage/%menu'] = array(
-    'title' => 'Customize menu',
+    'title' => 'Edit links',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_overview_form', 4),
     'title callback' => 'menu_overview_title',
@@ -76,7 +67,7 @@ function menu_menu() {
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/list'] = array(
-    'title' => 'List links',
+    'title' => 'Edit links',
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -89,10 +80,10 @@ function menu_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'menu.admin.inc',
   );
-  $items['admin/structure/menu/manage/%menu/edit'] = array(
-    'title' => 'Edit menu',
+  $items['admin/structure/menu/manage/%menu/configure'] = array(
+    'title' => 'Configure',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('menu_edit_menu', 'edit', 4),
+    'page arguments' => array('menu_edit_menu', 'configure', 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -106,7 +97,7 @@ function menu_menu() {
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/item/%menu_link/edit'] = array(
-    'title' => 'Edit menu link',
+    'title' => 'Edit link',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_item', 'edit', 4, NULL),
     'access arguments' => array('administer menu'),
@@ -151,10 +142,6 @@ function menu_theme() {
  * Implements hook_config_info().
  */
 function menu_config_info() {
-  $prefixes['menu.settings'] = array(
-    'label' => t('Menu settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['menu.menu'] = array(
     'name_key' => 'menu_name',
     'label_key' => 'title',
@@ -738,6 +725,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
     ),
     '#group' => 'additional_settings',
+    '#weight' => 8,
   );
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',

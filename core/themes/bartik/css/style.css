@@ -566,14 +566,30 @@ ul.tips {
   line-height: 2.4em;
   padding: 0 0.8em;
   text-decoration: none;
+}
+[dir="rtl"] .l-header ul.menu a {
+  float: right;
+}
+.l-header .rounded-tabs ul.menu a,
+.l-header .square-tabs ul.menu a {
+  color: #333;
   text-shadow: 0 1px #eee;
+}
+.l-header .rounded-tabs ul.menu a.active,
+.l-header .square-tabs ul.menu a.active,
+.l-header .rounded-tabs ul.menu a:active,
+.l-header .square-tabs ul.menu a:active {
+  color: #333;
+  background: #ffffff;
+}
+.l-header .rounded-tabs ul.menu a {
   -moz-border-radius-topleft: 8px;
   -moz-border-radius-topright: 8px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
-[dir="rtl"] .l-header ul.menu a {
-  float: right;
+.l-header .no-tabs ul.menu li a.active {
+  text-decoration: underline;
 }
 .l-header ul.menu a:hover,
 .l-header ul.menu a:focus {
@@ -586,6 +602,13 @@ ul.tips {
 }
 .l-header ul.menu li a.active {
   border-bottom: none;
+}
+.l-header .no-tabs ul.menu a,
+.l-header .no-tabs ul.menu a:hover,
+.l-header .no-tabs ul.menu a:focus,
+.l-header .no-tabs ul.menu a:active,
+.l-header .no-tabs ul.menu li a.active {
+  background: none;
 }
 
 /* ------------------- Main ------------------- */

@@ -27,17 +27,19 @@ class PathTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['source'] = 'node/' . $node1->nid;
     $edit['alias'] = $this->randomName(8);
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     // Visit the system path for the node and confirm a cache entry is
     // created.
     cache('path')->flush();
     $this->backdropGet($edit['source']);
+    sleep(3); // Path cache is set in the background. Wait for it to populate.
     $this->assertTrue(cache('path')->get($edit['source']), 'Cache entry was created.');
 
     // Visit the alias for the node and confirm a cache entry is created.
     cache('path')->flush();
     $this->backdropGet($edit['alias']);
+    sleep(3); // Path cache is set in the background. Wait for it to populate.
     $this->assertTrue(cache('path')->get($edit['source']), 'Cache entry was created.');
   }
 
@@ -52,7 +54,7 @@ class PathTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['source'] = 'node/' . $node1->nid;
     $edit['alias'] = $this->randomName(8);
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     // Confirm that the alias works.
     $this->backdropGet($edit['alias']);
@@ -66,7 +68,7 @@ class PathTestCase extends BackdropWebTestCase {
     $edit['alias'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
-    $this->backdropPost('admin/config/search/path/edit/' . $pid, $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/edit/' . $pid, $edit, t('Save URL alias'));
 
     // Confirm that the alias works.
     $this->backdropGet($edit['alias']);
@@ -85,7 +87,7 @@ class PathTestCase extends BackdropWebTestCase {
     // Set alias to second test node.
     $edit['source'] = 'node/' . $node2->nid;
     // leave $edit['alias'] the same
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     // Confirm no duplicate was created.
     $this->assertRaw(t('The alias %alias is already in use in this language.', array('%alias' => $edit['alias'])), 'Attempt to move alias was rejected.');
@@ -205,7 +207,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
   function testTermAlias() {
     // Create a term in the default 'Tags' vocabulary with URL alias.
     $vocabulary = taxonomy_vocabulary_load('tags');
-    $description = $this->randomName();;
+    $description = $this->randomName();
     $edit = array();
     $edit['name'] = $this->randomName();
     $edit['description[value]'] = $description;
@@ -422,7 +424,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['source'] = 'admin/config/search/path';
     $edit['alias'] = $name;
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet($name);
     $this->assertText(t('Filter aliases'), 'Language-neutral URL alias works');
@@ -437,7 +439,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
     $edit['source'] = 'admin/config/search/path';
     $edit['alias'] = $name;
     $edit['langcode'] = 'en';
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet($name);
     $this->assertText(t('Filter aliases'), 'English URL alias works');
@@ -452,7 +454,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
     $edit['source'] = 'admin/config/search/path';
     $edit['alias'] = $name;
     $edit['langcode'] = 'fr';
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet('fr/' . $name);
     $this->assertText(t('Filter aliases'), 'Foreign URL alias works');

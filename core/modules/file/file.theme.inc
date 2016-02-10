@@ -49,8 +49,33 @@ function theme_file_link($variables) {
   $icon_directory = $variables['icon_directory'];
 
   $url = file_create_url($file->uri);
-  // theme_file_icon() requires a file entity, make sure it gets one.
-  $icon = theme('file_icon', array('file' => ($file instanceof File) ? $file : file_load($file->fid), 'icon_directory' => $icon_directory));
+
+  // Human-readable names, for use as text-alternatives to icons.
+  $mime_name = array(
+    'application/msword' => t('Microsoft Office document icon'),
+    'application/vnd.ms-excel' => t('Office spreadsheet icon'),
+    'application/vnd.ms-powerpoint' => t('Office presentation icon'),
+    'application/pdf' => t('PDF icon'),
+    'video/quicktime' => t('Movie icon'),
+    'audio/mpeg' => t('Audio icon'),
+    'audio/wav' => t('Audio icon'),
+    'image/jpeg' => t('Image icon'),
+    'image/png' => t('Image icon'),
+    'image/gif' => t('Image icon'),
+    'application/zip' => t('Package icon'),
+    'text/html' => t('HTML icon'),
+    'text/plain' => t('Plain text icon'),
+    'application/octet-stream' => t('Binary Data'),
+  );
+
+  $mimetype = file_get_mimetype($file->uri);
+
+  $icon = theme('file_icon', array(
+    // Requires a file entity, make sure it gets one.
+    'file' => ($file instanceof File) ? $file : file_load($file->fid),
+    'icon_directory' => $icon_directory,
+    'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
+  ));
 
   // Set options as per anchor format described at
   // http://microformats.org/wiki/file-format-examples
@@ -78,6 +103,8 @@ function theme_file_link($variables) {
  * @param $variables
  *   An associative array containing:
  *   - file: A file entity for which to make an icon.
+ *   - alt: (optional) The alternative text to represent the icon in text-based
+ *     browsers. Defaults to an empty string.
  *   - icon_directory: (optional) A path to a directory of icons to be used for
  *     files. Defaults to the value of the "file_icon_directory" variable.
  *
@@ -85,11 +112,12 @@ function theme_file_link($variables) {
  */
 function theme_file_icon($variables) {
   $file = $variables['file'];
+  $alt = $variables['alt'];
   $icon_directory = $variables['icon_directory'];
 
   $mime = check_plain($file->filemime);
   $icon_url = file_icon_url($file, $icon_directory);
-  return '<img class="file-icon" alt="" title="' . $mime . '" src="' . $icon_url . '" />';
+  return '<img class="file-icon" alt="' . check_plain($alt) . '" title="' . $mime . '" src="' . $icon_url . '" />';
 }
 
 /**

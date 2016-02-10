@@ -1073,7 +1073,7 @@ function user_update_1009() {
           'path' => 'admin/people/list',
           'menu' => array(
             'type' => 'default tab',
-            'title' => 'Find user accounts',
+            'title' => 'Manage user accounts',
             'description' => '',
             'name' => 'management',
             'weight' => '0',
@@ -1100,13 +1100,19 @@ function user_update_1009() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-1.x"
- */
-
-/**
- * Update 'People' menus to 'User accounts'
+ * Set default option for login method to use accounts only.
  */
 function user_update_1010() {
+  $config = config('system.core');
+  $config->set('user_login_method', 'username_only');
+  $config->set('user_email_match', 1);
+  $config->save();
+}
+
+/**
+ * Update 'People' menus to 'User accounts'.
+ */
+function user_update_1011() {
   $config = config('views.view.user_admin');
   if ($config->get('display.default.display_options.title') == 'People') {
     $config->set('display.default.display_options.title', 'User accounts');
@@ -1116,3 +1122,21 @@ function user_update_1010() {
   }
   $config->save();
 }
+
+/**
+ * Update 'Find user accounts'  to 'Manage user accounts'
+ */
+function user_update_1012() {
+  $config = config('views.view.user_admin');
+	if ($config->get('display.default.display_options.title') == 'User accounts') {
+    $config->set('display.default.display_options.title', 'Manage user accounts');
+  }
+  if ($config->get('display.page.display_options.menu.title') == 'Find user accounts') {
+    $config->set('display.page.display_options.menu.title', 'Manage user accounts');
+  }
+  $config->save();
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ */

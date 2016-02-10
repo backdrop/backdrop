@@ -39,9 +39,9 @@ function contact_category_list() {
       }
 
       $links = array();
-      $links['edit'] = array(
-        'title' => t('Edit'),
-        'href' => 'admin/structure/contact/edit/' . $cat['cid'],
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => 'admin/structure/contact/configure/' . $cat['cid'],
       );
       $links['delete'] = array(
         'title' => t('Delete'),
@@ -260,7 +260,7 @@ function contact_category_edit_form_submit($form, &$form_state) {
   $config->save();
 
   backdrop_set_message(t('Category %category has been saved.', array('%category' => $form_state['values']['category'])));
-  watchdog('contact', 'Category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Edit'), 'admin/structure/contact/edit/' . $form_state['values']['cid']));
+  watchdog('contact', 'Category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
   $form_state['redirect'] = 'admin/structure/contact';
 }
 

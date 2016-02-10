@@ -563,7 +563,10 @@ function views_preprocess_layout(&$variables) {
       $view = $view->view;
     }
 
-    views_add_contextual_links($variables['content'], 'page', $view, $view->current_display);
+    // Since views exposed filters do not have a current display, test first.
+    if (property_exists($view, 'current_display') && isset($view->current_display)) {
+      views_add_contextual_links($variables['content'], 'page', $view, $view->current_display);
+    }
   }
 }
 
@@ -793,6 +796,11 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
         // array.
         if ($valid) {
           $render_element['#contextual_links'][$module] = array($link['parent path'], $args);
+          $render_element['#views_contextual_links_info'][$module] = array(
+            'location' => $location,
+            'view_name' => $view->name,
+            'view_display_id' => $display_id,
+          );
         }
       }
     }

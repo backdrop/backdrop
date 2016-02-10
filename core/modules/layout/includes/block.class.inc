@@ -20,6 +20,13 @@ class Block extends LayoutHandler {
   var $delta;
 
   /**
+   * If this block has children, the sub-block identifier.
+   *
+   * @var string|NULL
+   */
+  var $childDelta;
+
+  /**
    * The identifier for this instance of this block.
    *
    * @var string
@@ -48,15 +55,16 @@ class Block extends LayoutHandler {
   /**
    * Create a new Block object.
    *
-   * @param string $module
-   *   The module that provides this block.
-   * @param string $delta
-   *   The key for this block within the module.
+   * @param string $plugin_name
+   *   The Layout plugin name. In the case of a block, this is a key identifying
+   *   the block module, delta, and (if applicable) child delta, separated by
+   *   colons.
    * @param array $data
    *   Settings that provide current configuration of the block, such as
    *   access rules, style settings, block settings, etc.
    */
   function __construct($plugin_name, array $data = array()) {
+    parent::__construct($plugin_name, $data);
     $this->plugin = $plugin_name;
 
     // Provide defaults.
@@ -76,10 +84,12 @@ class Block extends LayoutHandler {
       'contexts' => array(),
     );
 
-    // Initialize basics, module, delta, and UUID.
+    // Initialize basics, module, delta, UUID, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
+    $parts = explode(':', $this->plugin, 3);
+    $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
     // Initialize the style.
     $this->style = layout_create_handler('layout_style', $data['style']['plugin'], $data['style']['data']);
@@ -99,9 +109,11 @@ class Block extends LayoutHandler {
    * @return mixed
    */
   function getTitle() {
+    $title = NULL;
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
-      return $this->settings['title'];
+      $title = check_plain($this->settings['title']);
     }
+    return $title;
   }
 
   /**
@@ -111,8 +123,8 @@ class Block extends LayoutHandler {
     $title = $this->getTitle();
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
-      $info = module_invoke($this->module, 'block_info');
-      $title = $info[$this->delta]['info'];
+      $info = $this->getBlockInfo();
+      $title = $info['info'];
     }
     return $title;
   }
@@ -123,21 +135,49 @@ class Block extends LayoutHandler {
    * @return mixed
    */
   function getContent() {
-    $block_content = $this->buildBlock();
-    return $block_content['content'];
+    return '';
   }
 
   /**
    * Return a preview for this block.
    */
   function getAdminPreview() {
-    $info = module_invoke($this->module, 'block_info');
+    $info = $this->getBlockInfo();
     $preview = '';
-    if (isset($info[$this->delta]['description'])) {
-      $preview .= '<p>' . $info[$this->delta]['description'] . '</p>';
+    if (isset($info['description'])) {
+      $preview .= '<p>' . $info['description'] . '</p>';
+    }
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
+  }
+
+  /**
+   * Return the block info for this block, as provided by hook_block_info().
+   *
+   * @return array
+   *   The block info.
+   */
+  function getBlockInfo() {
+    $block_info = layout_get_block_info($this->module, $this->delta);
+
+    // If this is a child block, merge in its child-specific data.
+    if ($this->childDelta) {
+      $children_blocks = $this->getChildren();
+      $block_info = array_merge($block_info, $children_blocks[$this->childDelta]);
     }
 
+    return $block_info;
+  }
+
+  /**
+   * Return a fieldset listing any visibility conditions set for this block.
+   */
+  function getAdminConditionsPreview() {
+    $preview = '';
+
     if (!empty($this->conditions)) {
+      $condition_list = array();
       foreach ($this->conditions as $condition) {
         $condition_list[] = $condition->summary();
       }
@@ -152,9 +192,9 @@ class Block extends LayoutHandler {
       );
       $form_state = array();
       form_process_fieldset($fieldset, $form_state);
-      $preview .= backdrop_render($fieldset);
-    }
 
+      $preview = backdrop_render($fieldset);
+    }
     return $preview;
   }
 
@@ -164,15 +204,15 @@ class Block extends LayoutHandler {
   function form(&$form, &$form_state) {
     $layout = $form_state['layout'];
     $contexts = $layout->getContexts();
+    $block_info = $this->getBlockInfo();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
-    $block_info = layout_get_block_info($this->module, $this->delta);
 
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $block_info);
 
     $form['title_display']['#tree'] = FALSE;
     $form['title_display']['title_display'] = array(
       '#type' => 'select',
-      '#title' => t('Title type'),
+      '#title' => t('Block title type'),
       '#options' => array(
         LAYOUT_TITLE_DEFAULT => t('Default'),
         LAYOUT_TITLE_CUSTOM => t('Custom'),
@@ -258,7 +298,7 @@ class Block extends LayoutHandler {
    */
   function getRequiredContexts() {
     $required_contexts = array();
-    $block_info = layout_get_block_info($this->module, $this->delta);
+    $block_info = $this->getBlockInfo();
     if (!empty($block_info['required contexts'])) {
       $required_contexts = $block_info['required contexts'];
     }
@@ -269,7 +309,7 @@ class Block extends LayoutHandler {
    * Set the contexts for this block.
    */
   function setContexts(array $all_contexts) {
-    $block_info = layout_get_block_info($this->module, $this->delta);
+    $block_info = $this->getBlockInfo();
     $all_contexts_set = TRUE;
     if (!empty($block_info['required contexts'])) {
       $all_contexts_set = layout_set_handler_contexts($this->contexts, $all_contexts, $block_info['required contexts'], $this->settings['contexts']);
@@ -301,7 +341,23 @@ class Block extends LayoutHandler {
     }
     return TRUE;
   }
-
+  
+  /**
+   * Allows an array of "child blocks" for display in the "Add Block" dialog.
+   *
+   * This allows a single entry in hook_block_info() to provide multiple
+   * block instances displaying different fields.
+   *
+   * Note that this function may return NULL or an empty array, which have
+   * different meanings. NULL means that a block does not provide children at
+   * all. An empty array means that a block may provide children, but that there
+   * are none currently.
+   *
+   * return array|NULL
+   */
+  function getChildren() {
+    return NULL;
+  }
 }
 
 /**

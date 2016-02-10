@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for search.module.
@@ -1342,11 +1341,11 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There are @count items left to index.', array('@count' => 0)));
 
-    // Test the re-index button.
-    $this->backdropPost('admin/config/search/settings', array(), t('Re-index site'));
-    $this->assertText(t('Are you sure you want to re-index the site'));
-    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Re-index site'));
-    $this->assertText(t('The index will be rebuilt'));
+    // Test the Invalidate search index button.
+    $this->backdropPost('admin/config/search/settings', array(), t('Invalidate search index'));
+    $this->assertText(t('Are you sure you want to invalidate the search index?'));
+    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Invalidate search index'));
+    $this->assertText(t('The search index will be invalidated'));
     $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There is 1 item left to index.'));
 
@@ -1858,10 +1857,11 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that search returns results with punctuation in the search phrase.
+   * Tests that search works with punctuation and HTML entities.
    */
   function testPhraseSearchPunctuation() {
     $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
+    $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo meus natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
 
     // Update the search index.
     module_invoke_all('update_index');
@@ -1874,6 +1874,17 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
     $edit = array('keys' => '"bunny\'s"');
     $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertText($node->title);
+
+    // Search for "&" and verify entities are not broken up in the output.
+    $edit = array('keys' => '&');
+    $this->backdropPost('search/node', $edit, t('Search'));
+    $this->assertNoRaw('<strong>&</strong>amp;');
+    $this->assertText('You must include at least one positive keyword');
+
+    $edit = array('keys' => '&amp;');
+    $this->backdropPost('search/node', $edit, t('Search'));
+    $this->assertNoRaw('<strong>&</strong>amp;');
+    $this->assertText('You must include at least one positive keyword');
   }
 }
 

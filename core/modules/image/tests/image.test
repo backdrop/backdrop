@@ -1654,8 +1654,8 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
     // Reduce the threshold down to 2 unauthorized images at a time.
     config_set('system.core', 'image_style_flood_limit', 2);
 
-    // The image_module_test_null effect has a 2 second delay on it. Make 3
-    // simultaneous requests and check that the 3rd one returns a 403.
+    // The image_module_test_wait_effect effect has a 5 second delay on it. Make
+    // 3 simultaneous requests and check that the 3rd one returns a 403.
     $images = array(
       image_style_url($this->style_name, $image1),
       image_style_url($this->style_name, $image2),

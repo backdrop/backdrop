@@ -54,7 +54,7 @@ function theme_image_style($variables) {
 function theme_image_style_list($variables) {
   $styles = $variables['styles'];
 
-  $header = array(t('Style name'), t('Settings'), array('data' => t('Operations'), 'colspan' => 3));
+  $header = array(t('Style name'), t('Storage state'), array('data' => t('Operations'), 'colspan' => 3));
   $rows = array();
   foreach ($styles as $style) {
     $row = array();
@@ -81,7 +81,7 @@ function theme_image_style_list($variables) {
       );
     }
     else {
-      $row[] = t('Default');
+      $row[] = t('Default (module-provided)');
     }
     $row[] = array(
       'data' => array(

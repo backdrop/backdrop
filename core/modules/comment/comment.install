@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the Comment module.
@@ -348,6 +347,20 @@ function comment_update_1002() {
 
   state_set('comment_maintain_node_statistics', update_variable_get('comment_maintain_node_statistics', TRUE));
   update_variable_del('comment_maintain_node_statistics');
+}
+
+/**
+ * Node type comment settings should be closed instead of hidden by default.
+ */
+function comment_update_1003() {
+  foreach (config_get_names_with_prefix('node.type.') as $config_name) {
+    $config = config($config_name);
+    $comment_default = $config->get('settings.comment_default');
+    if ($comment_default == COMMENT_NODE_HIDDEN) {
+      $config->set('settings.comment_default', COMMENT_NODE_CLOSED);
+      $config->save();
+    }
+  }
 }
 
 /**

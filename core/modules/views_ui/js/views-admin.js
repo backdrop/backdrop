@@ -28,8 +28,6 @@ Backdrop.behaviors.viewsUiEditView = {
 Backdrop.behaviors.viewsUiAddView = {
   attach: function (context) {
     var $context = $(context);
-    // Set up regular expressions to allow only numbers, letters, and dashes.
-    var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
     var replace = '-';
     var suffix;
 
@@ -53,7 +51,7 @@ Backdrop.behaviors.viewsUiAddView = {
     var $pathField = $context.find('[id^="edit-page-path"]');
     if ($pathField.length) {
       if (!this.pathFiller) {
-        this.pathFiller = new Backdrop.viewsUi.FormFieldFiller($pathField, exclude, replace);
+        this.pathFiller = new Backdrop.viewsUi.FormFieldFiller($pathField, replace);
       }
       else {
         this.pathFiller.rebind($pathField);
@@ -65,7 +63,7 @@ Backdrop.behaviors.viewsUiAddView = {
     if ($feedField.length) {
       if (!this.feedFiller) {
         suffix = '.xml';
-        this.feedFiller = new Backdrop.viewsUi.FormFieldFiller($feedField, exclude, replace, suffix);
+        this.feedFiller = new Backdrop.viewsUi.FormFieldFiller($feedField, replace, suffix);
       }
       else {
         this.feedFiller.rebind($feedField);
@@ -81,19 +79,15 @@ Backdrop.behaviors.viewsUiAddView = {
  *
  * @param $target
  *   A jQuery object representing the form field to prepopulate.
- * @param exclude
- *   Optional. A regular expression representing characters to exclude from the
- *   target field.
  * @param replace
  *   Optional. A string to use as the replacement value for disallowed
  *   characters.
  * @param suffix
  *   Optional. A suffix to append at the end of the target field content.
  */
-Backdrop.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
+Backdrop.viewsUi.FormFieldFiller = function ($target, replace, suffix) {
   this.source = $('#edit-human-name');
   this.target = $target;
-  this.exclude = exclude || false;
   this.replace = replace || '';
   this.suffix = suffix || '';
 
@@ -126,19 +120,29 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
    * Get the source form field value as altered by the passed-in parameters.
    */
   getTransliterated: function () {
-    var from = this.source.val();
-    if (this.exclude) {
-      from = from.toLowerCase().replace(this.exclude, this.replace);
-    }
-    return from + this.suffix;
+    var self = this;
+    return $.ajax({
+      url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + self.source.val().toLowerCase()),
+      data: { replace: self.replace },
+      dataType: "text"
+    });
   },
   
   /**
-   * Populate the target form field with the altered source field value.
+   * Use the title for populating the fields, or send a request
+   * for a translitarated version of the source field value when needed.
    */
   _populate: function () {
-    var transliterated = this.getTransliterated();
-    this.target.val(transliterated);
+    if (this.replace == '') {
+      this.target.val(this.source.val() + this.suffix);
+    }
+    else {
+      var transliterated = this.getTransliterated();
+      var self = this;
+      transliterated.done(function(machine) {
+        self.target.val(machine + self.suffix);
+      });
+    }
   },
   
   /**

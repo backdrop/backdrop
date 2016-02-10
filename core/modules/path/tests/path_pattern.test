@@ -17,7 +17,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
   function assertToken($type, $object, $token, $expected) {
     $tokens = token_generate($type, array($token => $token), array($type => $object));
     $tokens += array($token => '');
-    $this->assertIdentical($tokens[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $tokens[$token], '@expected' => $expected)));
+    $this->assertIdentical($tokens[$token], $expected, format_string("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $tokens[$token], '@expected' => $expected)));
   }
 
   function saveAlias($source, $alias, $langcode = LANGUAGE_NONE) {
@@ -58,18 +58,18 @@ class PathPatternTestHelper extends BackdropWebTestCase {
   function assertAlias($source, $expected_alias, $langcode = LANGUAGE_NONE) {
     backdrop_clear_path_cache($source);
     $alias = backdrop_get_path_alias($source, $langcode);
-    $this->assertIdentical($alias, $expected_alias, t("Alias for %source with language '@language' was %actual, expected %expected.", array('%source' => $source, '%actual' => $alias, '%expected' => $expected_alias, '@language' => $langcode)));
+    $this->assertIdentical($alias, $expected_alias, format_string("Alias for %source with language '@language' was %actual, expected %expected.", array('%source' => $source, '%actual' => $alias, '%expected' => $expected_alias, '@language' => $langcode)));
   }
 
   function assertAliasExists($conditions) {
     $path = path_load($conditions);
-    $this->assertTrue($path, t('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
+    $this->assertTrue($path, format_string('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
     return $path;
   }
 
   function assertNoAliasExists($conditions) {
     $alias = path_load($conditions);
-    $this->assertFalse($alias, t('Alias with conditions @conditions not found.', array('@conditions' => var_export($conditions, TRUE))));
+    $this->assertFalse($alias, format_string('Alias with conditions @conditions not found.', array('@conditions' => var_export($conditions, TRUE))));
   }
 
   function deleteAllAliases() {
@@ -150,7 +150,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     );
     foreach ($tests as $test) {
       $actual = path_get_pattern_by_entity_type($test['entity'], $test['bundle'], $test['langcode']);
-      $this->assertIdentical($actual, $test['expected'], t("path_get_pattern_by_entity_type('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
+      $this->assertIdentical($actual, $test['expected'], format_string("path_get_pattern_by_entity_type('@entity', '@bundle', '@language') returned '@actual', expected '@expected'", array('@entity' => $test['entity'], '@bundle' => $test['bundle'], '@language' => $test['langcode'], '@actual' => $actual, '@expected' => $test['expected'])));
     }
   }
 
@@ -160,7 +160,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   function testCleanString() {
     $config = config('path.settings');
     $tests = array();
-    $config->set('ignore_words', ', in, is,that, the  , this, with, ');
+    $config->set('ignore_words', ', a, in, is,that, the  , this, with, ');
     $config->set('max_component_length', 35);
     $config->save();
 
@@ -178,8 +178,18 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
 
     foreach ($tests as $input => $expected) {
       $output = path_clean_string($input);
-      $this->assertEqual($output, $expected, t("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+      $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
+
+    // Test transliteration replacements.
+    $config->set('transliterate', 1);
+    $config->save();
+    backdrop_static_reset('path_clean_string');
+
+    $input = 'ädd ä accènts thè';
+    $expected = 'add-accents'; // "a" and "the" is stripped out.
+    $output = path_clean_string($input);
+    $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
   }
 
   /**
@@ -194,7 +204,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $tests['one/-//three--/four'] = 'one/three/four';
     foreach ($tests as $input => $expected) {
       $output = path_clean_alias($input);
-      $this->assertEqual($output, $expected, t("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+      $this->assertEqual($output, $expected, format_string("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
 
   }
@@ -607,18 +617,24 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     // Delete all current URL aliases.
     $this->deleteAllAliases();
 
+    // Find the last row in the users table to apply the alias to the new user.
+    $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
+    $checkbox_name = (string) $checkbox[0]['name'];
+
     $edit = array(
       'action' => 'path_user_update_action',
-      'bulk_form[' . ($account->uid - 1) . ']' => TRUE,
+      $checkbox_name => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Execute'));
+    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item.', array('%action' => 'Update user alias')));
 
     $this->assertEntityAlias('user', $account, 'accounts/' . backdrop_strtolower($account->name));
     $this->assertEntityAlias('user', $this->admin_user, 'user/' . $this->admin_user->uid);
   }
 
-  function testSettingsValidation() {
+  function testConfigurationUserInterfaces() {
+    // Test validation.
     $edit = array();
     $edit['max_length'] = 'abc';
     $edit['max_component_length'] = 'abc';
@@ -645,6 +661,40 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['max_component_length'] = '50';
     $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
+
+    // To test alternate interfaces, we need more permissions.
+    $permissions = array(
+      'administer path patterns',
+      'administer content types',
+      'administer taxonomy',
+      'administer account settings',
+    );
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
+
+    // Test alternate interfaces - node type configuration.
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    $edit = array('path_pattern' => 'post/[node:title]/foo');
+    $this->backdropPost('admin/structure/types/manage/post', $edit, 'Save content type');
+    // Check the page url pattern is on the pathauto form.
+    $this->backdropGet('admin/config/search/path/patterns');
+    $this->assertFieldByName('node_post_pattern', 'post/[node:title]/foo', 'URL pattern set with node type settings appears on path config page.');
+
+    // Test alternate interfaces - vocab configuration.
+    $vocabulary = $this->addVocabulary();
+    $pattern = $vocabulary->machine_name . '/[term:name]/foo';
+    $edit = array('path_pattern' =>  $pattern);
+    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure', $edit, 'Save');
+    // Check the page url pattern is on the pathauto form.
+    $this->backdropGet('admin/config/search/path/patterns');
+    $this->assertFieldByName('taxonomy_term_' . $vocabulary->machine_name . '_pattern', $pattern, 'URL pattern set with vocabulary settings appears on path config page.');
+
+    // Test alternate interfaces - user configuration.
+    $edit = array('path_pattern' => 'accounts/[user:name]/foo');
+    $this->backdropPost('admin/config/people/settings', $edit, 'Save configuration');
+    // Check the page url pattern is on the pathauto form.
+    $this->backdropGet('admin/config/search/path/patterns');
+    $this->assertFieldByName('user_pattern', 'accounts/[user:name]/foo', 'URL pattern set with user account settings appears on path config page.');
   }
 
   function testPatternsValidation() {
@@ -652,8 +702,8 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
     $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
-    $this->assertText('The Default path pattern (applies to all content types with blank patterns below) is using the following invalid tokens: [user:name], [term:name].');
-    $this->assertText('The Pattern for all Page paths cannot contain fewer than one token.');
+    $this->assertText('The Default URL pattern (applies to all content types with blank patterns below) is using the following invalid tokens: [user:name], [term:name].');
+    $this->assertText('The Pattern for all Page URLs cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['node_pattern'] = '[node:title]';
@@ -747,23 +797,44 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
   private $nodes;
 
   function testBulkUpdate() {
-    // Create some nodes.
+    // Create five nodes.
     $this->nodes = array();
     for ($i = 1; $i <= 5; $i++) {
       $node = $this->backdropCreateNode();
       $this->nodes[$node->nid] = $node;
     }
+    // Create three terms.
+    $this->terms = array();
+    for ($i = 1; $i <= 3; $i++) {
+      $term = entity_create('taxonomy_term', array(
+        'name' => $this->randomName(),
+        'vocabulary' => 'tags',
+        'langcode' => LANGUAGE_NONE,
+      ));
+      taxonomy_term_save($term);
+      $this->terms[$term->tid] = $term;
+      // Test that terms have proper aliases.
+      $this->assertEntityAlias('term', $term, 'tags/' . strtolower($term->name));
+    }
 
     // Clear out all aliases.
     $this->deleteAllAliases();
+    // Test that aliases were deleted.
+    foreach ($this->nodes as $node) {
+      $this->assertNoEntityAliasExists('node', $node);
+    }
+    foreach ($this->terms as $term) {
+      $this->assertNoEntityAliasExists('term', $term);
+    }
 
     // Bulk create aliases.
     $edit = array(
-      'update[node_path_bulk_update_batch_process]' => TRUE,
-      'update[user_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][node_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][taxonomy_path_bulk_update_batch_process]' => TRUE,
+      'generate[update][user_path_bulk_update_batch_process]' => TRUE,
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
-    $this->assertText('Generated 7 URL aliases.'); // 5 nodes + 2 users
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
+    $this->assertText('Generated 10 URL aliases.'); // 5 nodes + 2 users
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
@@ -775,7 +846,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Bulk generate paths'));
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
@@ -815,16 +886,16 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     foreach ($tokens as $name => $expected) {
       $token = $input[$name];
       if (!isset($expected)) {
-        $this->assertTrue(!isset($values[$token]), t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->assertTrue(!isset($values[$token]), format_string("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
       }
       elseif (!isset($replacements[$token])) {
         $this->fail(t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
       }
       elseif (!empty($options['regex'])) {
-        $this->assertTrue(preg_match('/^' . $expected . '$/', $replacements[$token]), t("Token value for @token was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+        $this->assertTrue(preg_match('/^' . $expected . '$/', $replacements[$token]), format_string("Token value for @token was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
       }
       else {
-        $this->assertIdentical($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+        $this->assertIdentical($replacements[$token], $expected, format_string("Token value for @token was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
       }
     }
 

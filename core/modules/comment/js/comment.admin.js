@@ -9,7 +9,15 @@ Backdrop.behaviors.commentFieldsetSummaries = {
   attach: function (context) {
     var $context = $(context);
     $context.find('fieldset.comment-node-settings-form').backdropSetSummary(function () {
-      return Backdrop.checkPlain($context.find('.form-item-comment input:checked').next('label').text());
+      var vals = [];
+      var status = $context.find('.form-item-comment input:checked').next('label').text().replace(/^\s+|\s+$/g, '');
+      vals.push(Backdrop.checkPlain(status));
+      if ($.trim(status) != 'Open') {
+        if ($context.find(".form-item-comment-hidden input:checked").length) {
+          vals.push(Backdrop.t('Hidden'));
+        }
+      }
+      return Backdrop.checkPlain(vals.join(', '));
     });
 
     // Provide the summary for the node type form.
@@ -17,7 +25,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       var vals = [];
 
       // Default comment setting.
-      vals.push($context.find(".form-item-comment-default select option:selected").text());
+      vals.push($context.find(".form-item-comment-default input:checked").parent().find('label').text().replace(/^\s+|\s+$/g, ''));
 
       // Comments per page.
       var number = parseInt($context.find(".form-item-comment-per-page select option:selected").val());

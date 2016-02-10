@@ -1327,7 +1327,7 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get a listing of all template files in the path to search.
   $files = file_scan_directory($path, $regex, array('key' => 'name', 'nomask' => $no_mask));
@@ -1742,12 +1742,29 @@ function theme_status_messages($variables) {
  * outputs a link should call the l() function directly, as #theme 'link'
  * implementations have a measurable performance impact.
  *
- * @param $variables
- *   An associative array containing the keys 'text', 'path', and 'options'.
- *   See the l() function for information about these variables. Both render
- *   arrays and strings are supported as 'text', unlike in the l() function.
+ * @param array $variables
+ *   An associative array containing the keys:
+ *   - text: The text of the link.
+ *   - path: The internal path or external URL being linked to. It is used as
+ *     the $path parameter of the url() function.
+ *   - options: (optional) An array that defaults to empty, but can contain:
+ *     - attributes: Can contain optional attributes:
+ *       - class: must be declared in an array. Example: 'class' =>
+ *         array('class_name1','class_name2').
+ *       - title: must be a string. Example: 'title' => 'Example title'
+ *       - Others are more flexible as long as they work with
+ *         backdrop_attributes($variables['options']['attributes]).
+ *     - html: Boolean flag that tells whether text contains
+ *       html or plain text.  If not set to TRUE the text value will be
+ *       sanitized.
+ *   The elements $variables['options']['attributes'] and
+ *   $variables['options']['html'] are used in this function similarly to the
+ *   way that $options['attributes'] and $options['html'] are used in l().
+ *   The link itself is built by the url() function, which takes
+ *   $variables['path'] and $variables['options'] as arguments.
  *
  * @see l()
+ * @see url()
  */
 function theme_link($variables) {
   $rendered_text = is_array($variables['text']) ? backdrop_render($variables['text']) : $variables['text'];

@@ -1,12 +1,3 @@
-
-/* ---------- Color form ----------- */
-#color_scheme_form #palette .form-item {
-  width: 25em;
-}
-#color_scheme_form #palette .form-item label {
-  width: 15em;
-}
-
 /* ---------- Preview Styles ----------- */
 
 .js #preview {
@@ -14,6 +5,7 @@
   float: none !important;
 }
 #preview {
+  min-width: 640px;
   background-color: #fff;
   font-family: Georgia, "Times New Roman", Times, serif;
   font-size: 14px;
@@ -37,7 +29,8 @@
 }
 #preview-main-menu {
   clear: both;
-  padding: 0 15px 3px;
+  padding: 0 15px 2px;
+  white-space: nowrap;
 }
 #preview-main-menu-links a {
   color: #d9d9d9;

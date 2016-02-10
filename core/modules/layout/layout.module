@@ -486,6 +486,9 @@ function layout_theme() {
     'layout_settings_context_table' => array(
       'render element' => 'element',
     ) + $base,
+    'layout_conditions' => array(
+      'render element' => 'element',
+    ) + $base,
   );
 
   // Register all layouts.
@@ -591,6 +594,20 @@ function layout_layout_api() {
 }
 
 /**
+ * Implements hook_block_info().
+ */
+function layout_block_info() {
+  $blocks = array();
+  $blocks['custom_block'] = array(
+    'info' => t('Add a custom block'),
+    'description' => t('A basic block for adding custom text.'),
+    'class' => 'BlockText',
+  );
+
+  return $blocks;
+}
+
+/**
  * Implements hook_autoload_info().
  */
 function layout_autoload_info() {
@@ -601,6 +618,7 @@ function layout_autoload_info() {
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
+    'BlockText' => 'includes/block.text.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
@@ -1200,6 +1218,14 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
       return FALSE;
     }
   }
+  elseif (isset($block_module)) {
+    if (isset($block_info['modules'][$block_module])) {
+      return $block_info['modules'][$block_module];
+    }
+    else {
+      return FALSE;
+    }
+  }
 
   return $block_info['modules'];
 }
@@ -1437,7 +1463,7 @@ function layout_context_required_by_path($path) {
   // Convert required context info into objects.
   $required_contexts[$path] = array();
   foreach ($required_context_info as $context_position => $context_info) {
-    $context = layout_create_handler('layout_context', $context_info['plugin']);
+    $context = layout_create_context($context_info['plugin']);
     $context->required = TRUE;
     // String placeholders are not locked, allowing a new value to be set.
     $context->locked = $context_info['plugin'] !== 'string';
@@ -1451,8 +1477,6 @@ function layout_context_required_by_path($path) {
 
 /**
  * Determine if a block has the necessary contexts.
- *
- * This
  *
  * @param Layout $layout
  *   The layout on which the specified block will be displayed.
@@ -1471,7 +1495,7 @@ function layout_block_has_required_contexts(Layout $layout, $block_module, $bloc
   $available_contexts = $layout->getContexts();
   foreach ($required_contexts as $key => $required_context_plugin_name) {
     foreach ($available_contexts as $context) {
-      if ($context->plugin === $required_context_plugin_name) {
+      if ($context->isA($required_context_plugin_name)) {
         // Matching context available, remove from required list.
         unset($required_contexts[$key]);
       }
@@ -1504,14 +1528,14 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
     // Use the configured context if available.
     if (isset($context_settings[$required_context_key])) {
       $layout_context_key = $context_settings[$required_context_key];
-      if (isset($all_contexts[$layout_context_key]) && $all_contexts[$layout_context_key]->plugin === $context_type) {
+      if (isset($all_contexts[$layout_context_key]) && ($all_contexts[$layout_context_key]->isA($context_type))) {
         $contexts[$required_context_key] = $all_contexts[$layout_context_key];
         continue;
       }
     }
     // Otherwise use the first context that matches the right type.
     foreach ($all_contexts as $layout_context) {
-      if ($context_type == $layout_context->plugin) {
+      if ($layout_context->isA($context_type)) {
         $contexts[$required_context_key] = $layout_context;
         continue 2;
       }

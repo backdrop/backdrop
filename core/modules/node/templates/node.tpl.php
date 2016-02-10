@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default theme implementation to display a node.
@@ -27,7 +26,7 @@
  *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
  *   - preview: Nodes in preview mode.
  *   The following are controlled through the node publishing options.
- *   - promoted: Nodes promoted to the front page.
+ *   - promoted: Nodes that are promoted.
  *   - sticky: Nodes ordered above other non-sticky nodes in teaser
  *     listings.
  *   - unpublished: Unpublished nodes visible only to administrators.

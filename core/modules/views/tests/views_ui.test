@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests Views UI Wizard.
@@ -35,7 +34,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view1['description'] = $this->randomName(16);
     $view1['page[create]'] = FALSE;
     $this->backdropPost('admin/structure/views/add', $view1, t('Save & exit'));
-    $this->assertText(t('Your view was saved. You may edit it from the list below.'));
+    $this->assertText(t('Your view was saved. You may configure it from the list below.'));
     $this->assertText($view1['human_name']);
     $this->assertText($view1['description']);
     foreach (array('/delete', '/clone', '') as $operation) {
@@ -155,12 +154,12 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
 
-    // Edit the view and change the title. Make sure that the new title is
+    // Configure the view and change the title. Make sure that the new title is
     // displayed.
     $new_title = $this->randomName(16);
     $edit = array('title' => $new_title);
     $this->backdropPost('admin/structure/views/nojs/display/frontpage/page/title', $edit, t('Apply'));
-    $this->backdropPost('admin/structure/views/view/frontpage/edit/page', array(), t('Save'));
+    $this->backdropPost('admin/structure/views/view/frontpage/configure/page', array(), t('Save'));
     $this->backdropGet('frontpage');
     $this->assertText($new_title);
 
@@ -742,7 +741,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $edit['title'] = $original_title = $this->randomName(16);
     $edit['override[dropdown]'] = 'default';
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
-    $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/page", array(), t('Save'));
 
     // Put the block into the sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
@@ -774,7 +773,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $edit['title'] = $new_title = $this->randomName(16);
     $edit['override[dropdown]'] = 'page';
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
-    $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/page", array(), t('Save'));
     $this->backdropGet($view_path);
     $this->assertText($new_title);
     $this->assertNoText($original_title);
@@ -832,12 +831,12 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertText($view['block[title]']);
     $this->assertNoText($view['page[title]']);
 
-    // Edit the page and change the title. This should automatically change
+    // Configure the page and change the title. This should automatically change
     // the feed's title also, but not the block.
     $edit = array();
     $edit['title'] = $new_default_title = $this->randomName(16);
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
-    $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/page", array(), t('Save'));
     $this->backdropGet($view['page[path]']);
     $this->assertText($new_default_title);
     $this->assertNoText($view['page[title]']);
@@ -851,12 +850,12 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertNoText($new_default_title);
     $this->assertNoText($view['page[title]']);
 
-    // Edit the block and change the title. This should automatically change
-    // the block title only, and leave the defaults alone.
+    // Configure the block and change the title. This should automatically
+    // change the block title only, and leave the defaults alone.
     $edit = array();
     $edit['title'] = $new_block_title = $this->randomName(16);
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/block/title", $edit, t('Apply'));
-    $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/block", array(), t('Save'));
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/block", array(), t('Save'));
     $this->backdropGet($view['page[path]']);
     $this->assertText($new_default_title);
     $this->assertNoText($new_block_title);
@@ -882,7 +881,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view, t('Continue & edit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue & configure'));
 
     // Revert the title of the block back to the default ones, but submit some
     // new values to be sure that the new value is not stored.
@@ -891,7 +890,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $edit['override[dropdown]'] = 'default_revert';
 
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/block/title", $edit, t('Apply'));
-    $this->backdropPost("admin/structure/views/view/{$view['name']}/edit/block", array(), t('Save'));
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/block", array(), t('Save'));
     $this->assertText($view['page[title]']);
   }
 }

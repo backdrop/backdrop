@@ -118,7 +118,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  */
 function backdrop_mail($module, $key, $to, $language, $params = array(), $reply = NULL, $send = TRUE) {
   $from = config_get('system.core', 'site_mail');
-  if (empty($site_mail))  {
+  if (empty($from))  {
     $from = ini_get('sendmail_from');
   }
 

@@ -216,7 +216,9 @@ function _image_field_default_image_validate($element, &$form_state) {
     // Move the file to the final location, and don't manage it in the database.
     // Because field configurations should not be tied to database auto-increment
     // IDs, we only track the URI.
-    $uri = file_unmanaged_move($file->uri, $element['#default_scheme'] . '://default_images');
+    $directory = $element['#default_scheme'] . '://default_images/';
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+    $uri = file_unmanaged_move($file->uri, $directory);
 
     // Delete the file entity record.
     file_delete($file->fid);
