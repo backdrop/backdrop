@@ -729,17 +729,14 @@ function path_entity_insert(Entity $entity) {
  */
 function path_entity_update(Entity $entity) {
   if (isset($entity->path)) {
-    dpm($entity, 'entity');
     $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
     $uri = $entity->uri();
     $path = $entity->path;
     $path_original = $entity->original->path;
     $path['source'] = $uri['path'];
-    dpm($path, 'path');
 
     //save a redirect if the path is changed on node save.
     if (!config_get('redirect.settings', 'auto_redirect')) {
-      dpm(config_get('redirect.settings', 'auto_redirect'));
       return;
     }
     elseif (isset($path['redirect']) && !$path['redirect']) {
@@ -763,7 +760,6 @@ function path_entity_update(Entity $entity) {
       if (!redirect_load_by_hash($hash)) {
         redirect_save($redirect);
       }
-      dpm($redirect, 'redirect');
     }
 
     // If no pattern exists for this entity type, default to a manual alias.
