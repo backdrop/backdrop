@@ -4,6 +4,103 @@
  * Install, update, and uninstall functions for Path module.
  */
 
+ /**
+  * Implements hook_schema().
+  */
+ function path_schema() {
+   $schema['redirect'] = array(
+     'description' => 'Stores information on redirects.',
+     'fields' => array(
+       'rid'  => array(
+         'type' => 'serial',
+         'not null' => TRUE,
+         'description' => 'Primary Key: Unique redirect ID.',
+       ),
+       'hash' => array(
+         'type' => 'varchar',
+         'length' => 64,
+         'not null' => TRUE,
+         'description' => 'A unique hash based on source, source_options, and language.',
+       ),
+       'type' => array(
+         'type' => 'varchar',
+         'length' => 64,
+         'not null' => TRUE,
+         'default' => '',
+         'description' => "The redirect type; if value is 'redirect' it is a normal redirect handled by the module.",
+       ),
+       'uid' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+         'description' => 'The {users}.uid of the user who created the redirect.',
+       ),
+       'source' => array(
+         'type' => 'varchar',
+         'length' => 255,
+         'not null' => TRUE,
+         'description' => 'The source path to redirect from.',
+       ),
+       'source_options' => array(
+         'type' => 'text',
+         'not null' => TRUE,
+         'serialize' => TRUE,
+         'description' => 'A serialized array of source options.',
+       ),
+       'redirect' => array(
+         'type' => 'varchar',
+         'length' => 255,
+         'not null' => TRUE,
+         'description' => 'The destination path to redirect to.',
+       ),
+       'redirect_options' => array(
+         'type' => 'text',
+         'not null' => TRUE,
+         'serialize' => TRUE,
+         'description' => 'A serialized array of redirect options.',
+       ),
+       'langcode' => array(
+         'description' => 'The language this redirect is for; if blank, the alias will be used for unknown languages.',
+         'type' => 'varchar',
+         'length' => 12,
+         'not null' => TRUE,
+         'default' => 'und',
+       ),
+       'status_code' => array(
+         'type' => 'int',
+         'size' => 'small',
+         'not null' => TRUE,
+         'description' => 'The HTTP status code to use for the redirect.',
+       ),
+       'count' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+         'description' => 'The number of times the redirect has been used.',
+       ),
+       'access' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+         'description' => 'The timestamp of when the redirect was last accessed.'
+       ),
+     ),
+     'primary key' => array('rid'),
+     'unique keys' => array(
+       'hash' => array('hash'),
+     ),
+     'indexes' => array(
+       'expires' => array('type', 'access'),
+       'source_langcode' => array('source', 'langcode'),
+     ),
+   );
+
+   return $schema;
+ }
+
 /**
  * Upgrades Drupal 7 Pathauto variables to Path config.
  */
