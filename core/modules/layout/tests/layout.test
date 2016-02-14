@@ -891,6 +891,25 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test region styles.
+   */
+  function testRegionStyles() {
+    $this->backdropGet('admin/structure/layouts/manage/default/configure-region/editor/header');
+    $edit = array(
+      'style_settings[classes]' => 'new-test-class',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node');
+    $style_exists = $this->xpath('//header[contains(@class,"l-header")]//div[contains(@class,:region_style)]', array(
+      ':region_style' => 'new-test-class',
+    ));
+    $this->assertTrue($style_exists, 'Style exists on header div.');
+  }
+
+  /**
    * Ensure that reassignment of menu items works when deleting layouts.
    */
   function testMenuItemReassignment() {

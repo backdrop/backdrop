@@ -278,3 +278,13 @@ function template_preprocess_block_dynamic(&$variables) {
     'class' => array_filter(explode(' ', $style->settings['content_classes']))
   );
 }
+
+/**
+ * Prepares variables for region templates.
+ */
+function template_preprocess_region(&$variables) {
+  if (!empty($variables['blocks'])) {
+    $variables['blocks'] =  implode('', $variables['blocks']);
+  }
+  $variables['classes'][] = isset($variables['settings']) ? $variables['settings'] : '';;
+}

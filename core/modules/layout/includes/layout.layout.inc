@@ -158,5 +158,14 @@ function layout_layout_style_info() {
     'template' => 'templates/block-dynamic',
     'file' => 'layout.theme.inc',
   );
+  $info['region'] = array(
+    'title' => t('Region'),
+    'description' => t('Style for regions.'),
+    'region theme' => 'region',
+    'block theme' => NULL,
+    'class' => 'LayoutStyleRegion',
+    'template' => 'templates/layout-region',
+    'file' => 'layout.theme.inc',
+  );
   return $info;
 }

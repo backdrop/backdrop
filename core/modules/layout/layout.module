@@ -123,6 +123,12 @@ function layout_menu() {
     'page arguments' => array(4, 6, 7),
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/configure-region/%/%'] = array(
+    'title' => 'Configure region',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_configure_region_page', 4, 6, 7),
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
     'title' => 'Configure block',
     'load arguments' => array(4),
@@ -467,6 +473,10 @@ function layout_theme() {
       'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
       'template' => 'templates/layout',
     ) + $base,
+    'layout_region' => array(
+      'variables' => array('layout' => NULL, 'blocks' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
+      'template' => 'templates/layout-region',
+    ) + $base,
     'layout_reorder_layouts' => array(
       'render element' => 'element',
     ) + $base,
@@ -537,7 +547,7 @@ function layout_theme() {
         $items[$style['region theme']]['path'] = $style['path'];
       }
       if (isset($style['template'])) {
-        $items[$style['region theme']]['path'] = $style['path'];
+        $items[$style['region theme']]['template'] = $style['template'];
       }
     }
 
@@ -652,6 +662,7 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+    'LayoutStyleRegion' => 'plugins/styles/layout_style_region.inc',
   );
 }
 
