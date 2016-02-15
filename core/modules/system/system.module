@@ -1601,6 +1601,21 @@ function system_library_info() {
       array('system', 'ui.widget'),
     ),
   );
+  $libraries['ui.tooltip'] = array(
+    'title' => 'jQuery UI: Tooltip',
+    'website' => 'http://jqueryui.com/tooltip/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.tooltip.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.tooltip.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.position'),
+    ),
+  );
   $libraries['ui.widget'] = array(
     'title' => 'jQuery UI: Widget',
     'website' => 'http://jqueryui.com/widget/',
