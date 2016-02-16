@@ -75,9 +75,19 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       LAYOUT_TITLE_DEFAULT => t('Default title'),
       LAYOUT_TITLE_CUSTOM => t('Custom title'),
       LAYOUT_TITLE_NONE => t('No title'),
+      LAYOUT_TITLE_BLOCK => t('Title from block'),
     );
+    $title_string = '';
+    if ($this->layout->settings['title_display'] == LAYOUT_TITLE_BLOCK) {
+      $all_blocks = layout_get_block_info();
+      if (!empty ($this->layout->settings['title_block'])) {
+        $uuid = $this->layout->settings['title_block'];
+        $title_block = $this->layout->content[$uuid];
+        $title_string = ': ' . $all_blocks[$title_block->module][$title_block->delta]['info'];
+      }
+    }
     $title_setting = $this->layout->settings['title_display'];
-    $description = t('Displaying: ') . $options[$title_setting];
+    $description = t('Displaying: ') . $options[$title_setting] . $title_string;
     $region_buttons = $this->getRegionLinks($region_id);
     
     $output = '<div class="layout-editor-region layout-editor-region-page-title" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';

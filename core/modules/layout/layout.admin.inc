@@ -956,8 +956,7 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
     '#options' => array(
       LAYOUT_TITLE_DEFAULT => t('Default title'),
       LAYOUT_TITLE_CUSTOM => t('Custom title'),
-      // @todo: Port "from block" title ability.
-      //LAYOUT_TITLE_BLOCK => t('From block'),
+      LAYOUT_TITLE_BLOCK => t('From block'),
       LAYOUT_TITLE_NONE => t('No title'),
     ),
   );
@@ -973,6 +972,26 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
       ),
     ),
     '#maxlength' => 255,
+  );
+
+  $all_blocks = layout_get_block_info();
+  $block_options = array();
+  foreach ($layout->content as $uuid => $block) {
+    $title = $all_blocks[$block->module][$block->delta]['info'];
+    $block_options[$uuid] = $title;
+  }
+
+  $form['title_display']['title_block'] = array(
+    '#type' => 'select',
+    '#default_value' => $layout->settings['title_block'],
+    '#title' => t('Title block'),
+    '#description' => t('The page title will be taken from this block\'s title.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_BLOCK),
+      ),
+    ),
+    '#options' => $block_options,
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -1002,6 +1021,7 @@ function layout_title_settings_form_submit($form, &$form_state) {
   // Save title settings.
   if (isset($form_state['values']['title_display'])) {
     $layout->settings['title'] = $form_state['values']['title'];
+    $layout->settings['title_block'] = $form_state['values']['title_block'];
     $layout->settings['title_display'] = $form_state['values']['title_display'];
   }
 
