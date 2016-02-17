@@ -31,9 +31,10 @@ function node_add_page() {
   // Only use node types to which the user has access.
   foreach (node_type_get_types() as $node_type) {
     if (node_access('create', $node_type->type)) {
+      $href_url_friendly = str_replace('_', '-', $node_type->type);
       $content[$node_type->type] = array(
         'title' => t($node_type->name),
-        'href'=>'node/add/' . $node_type->type,
+        'href'=>'node/add/' . $href_url_friendly,
         'localized_options' => array('html' => TRUE),
         'description' => t($node_type->description),
       );
