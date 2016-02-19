@@ -1329,15 +1329,19 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
   $layout->removeBlock($block->uuid);
   layout_set_layout_tempstore($layout);
 
+  if ($message = layout_locked_message($layout, 'layout')) {
+    backdrop_set_message($message, 'warning');
+  }
+
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#layout-editor-block-' . $block->uuid);
+    $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
     return array(
       '#type' => 'ajax',
       '#commands' => $commands,
     );
   }
   else {
-    backdrop_set_message(t('Block "@title" removed.', array('@title' => $block->getAdminTitle())));
     backdrop_goto('admin/structure/layouts/manage/' . $layout->name);
   }
 }

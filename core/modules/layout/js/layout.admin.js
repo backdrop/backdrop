@@ -127,7 +127,18 @@ Backdrop.behaviors.layoutDisplayEditor = {
       blockList.push($(this).data('blockId'));
     });
     $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+
+    // Display a warning message.
+    $('#ajax-block-changed').remove();
+    $(Backdrop.theme('blockChangedWarning')).appendTo($('#layout-messages'));
   }
+};
+
+/**
+ * Returns a warning message.
+ */
+Backdrop.theme.prototype.blockChangedWarning = function () {
+  return '<div id="ajax-block-changed" class="messages warning">' + ' ' + Backdrop.t('This form has unsaved changes. Click "Save layout" to make changes permanent or "Cancel" to discard changes.') + '</div>';
 };
 
 /**
