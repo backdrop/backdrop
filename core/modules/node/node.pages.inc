@@ -288,8 +288,39 @@ function node_form($form, &$form_state, Node $node) {
   );
   $form['options']['status'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Published'),
+    '#title' => t('Publish now'),
     '#default_value' => $node->status,
+  );
+  $form['options']['future'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Would you like to pulish this content on specified date?'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#states' => array(
+      'invisible' => array(
+       ':input[name="status"]' => array('checked' => TRUE),
+      ),
+    ),
+    '#description' => t(
+      'The publication of scheduled content happens on cron runs.  As such you
+      must have cron configured on your system for this to work. You may check
+      and configure your settings for cron here: <a href="@url">cron settings</a>.',
+      array('@url' => url('admin/config/system/cron'))
+    ),
+  );
+  $form['options']['future']['specify-date'] = array(
+    '#type' => 'checkbox',
+    '#group' => 'future',
+    '#title' => t('Yes'),
+    '#description' => t(
+      'If you check this box you can shedule the content to be published on
+      a specified date.  If you leave it blank you can make a draft of the
+      content with no publication schedule.'
+    ),
+  );
+  $form['options']['future']['future-publish'] = array(
+    '#type' => 'date',
+    '#title' => t('Pick the date to schedule publication:'),
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
@@ -438,6 +469,15 @@ function node_form_submit_build_node($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
 
   $node = $form_state['node'];
+  if ($form_state['values']['status'] == 0 && $form_state['values']['specify-date'] == 1) {
+    $date = $form_state['values']['future-publish']['month'] . '/' .
+      $form_state['values']['future-publish']['day'] . '/' .
+      $form_state['values']['future-publish']['year'];
+    $node->published_on = strtotime($date);
+  }
+  else {
+    $node->published_on = 0;
+  }
   entity_form_submit_build_entity('node', $node, $form, $form_state);
 
   node_submit($node);
