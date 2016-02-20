@@ -442,7 +442,6 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
       $maximum_line_length = max($maximum_line_length, strlen($line . $eol));
     }
     $verbose = 'Maximum line length found was ' . $maximum_line_length . ' octets.';
-    // @todo This should assert that $maximum_line_length <= 1000.
     $this->pass($verbose);
     $this->assertTrue($maximum_line_length <= 1000, $verbose);
   }
