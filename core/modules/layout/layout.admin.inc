@@ -1141,6 +1141,34 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
       ),
       '#name' => 'conditions[' . $access_key . '][configure]',
     );
+
+    // Conditions dropbutton
+    $links = array();
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => '#',
+      'attributes' => array(
+        'class' => array('layout-button-link layout-access-configure'),
+      ),
+      'external' => TRUE,
+    );
+    $links['remove'] = array(
+      'title' => t('Remove'),
+      'href' => '#',
+      'attributes' => array(
+        'class' => array('layout-button-link layout-access-remove'),
+      ),
+      'external' => TRUE,
+    );
+
+    $dropbutton = array(
+      '#type' => 'dropbutton',
+      '#links' => $links,
+    );
+
+    $form['conditions']['active'][$access_key]['dropdown'] = array(
+      '#markup' => backdrop_render($dropbutton),
+    );
   }
   /* End visibility conditions. */
 
