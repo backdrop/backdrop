@@ -3230,12 +3230,12 @@ function node_action_info() {
     ),
     'node_promote_action' => array(
       'type' => 'node',
-      'label' => t('Promote content to front page'),
+      'label' => t('Promote content'),
       'callback' => 'node_promote_action',
     ),
     'node_unpromote_action' => array(
       'type' => 'node',
-      'label' => t('Remove content from front page'),
+      'label' => t('Remove promotion'),
       'callback' => 'node_unpromote_action',
     ),
     'node_delete_action' => array(
