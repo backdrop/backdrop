@@ -1114,6 +1114,8 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     );
     $form['conditions']['active'][$access_key]['label'] = array(
       '#markup' => $block_access->summary(),
+      '#prefix' => '<div class="condition-summary">',
+      '#suffix' => '</div>',
     );
     $form['conditions']['active'][$access_key]['remove'] = array(
       '#type' => 'submit',
