@@ -12,7 +12,7 @@
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
-$database = 'mysql://root:root@localhost/backdrop';
+$database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
@@ -34,8 +34,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
-$config_directories['active'] = 'files/config_823db585cf7731985e2d67d2bfc30cb6/active';
-$config_directories['staging'] = 'files/config_823db585cf7731985e2d67d2bfc30cb6/staging';
+$config_directories['active'] = 'files/config_' . md5($database) . '/active';
+$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
  * Access control for update.php script.
@@ -67,7 +67,7 @@ $settings['update_free_access'] = FALSE;
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  *
  */
-$settings['hash_salt'] = '8nxd5dYXf7zP62UtoKNcUjUsiiindP9iA-nCuH2K7M8';
+$settings['hash_salt'] = '';
 
 /**
  * Base URL (optional).
