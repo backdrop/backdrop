@@ -1467,7 +1467,7 @@ function system_cron_settings($form, &$form_state) {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
-  
+
   $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
@@ -1486,7 +1486,7 @@ function system_cron_settings($form, &$form_state) {
     '#title' => t('Run cron every'),
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
     '#default_value' => config('system.core')->get('cron_safe_threshold'),
-    '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -2194,7 +2194,7 @@ function system_urls_settings($form, &$form_state) {
       '#value' => 1,
     );
   }
-  
+
   $form['canonical_secure'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),

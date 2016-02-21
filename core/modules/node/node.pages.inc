@@ -318,9 +318,14 @@ function node_form($form, &$form_state, Node $node) {
       content with no publication schedule.'
     ),
   );
+  $now = date(time());
   $form['options']['future']['future-publish'] = array(
-    '#type' => 'date',
+    '#type' => 'date_select',
     '#title' => t('Pick the date to schedule publication:'),
+    '#date_format' => 'Y-m-d H:i',
+    '#date_increment' => 10,
+    '#date_year_range' => '-0:+3',
+    '#default_value' => $now,
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
@@ -470,10 +475,7 @@ function node_form_submit_build_node($form, &$form_state) {
 
   $node = $form_state['node'];
   if ($form_state['values']['status'] == 0 && $form_state['values']['specify-date'] == 1) {
-    $date = $form_state['values']['future-publish']['month'] . '/' .
-      $form_state['values']['future-publish']['day'] . '/' .
-      $form_state['values']['future-publish']['year'];
-    $node->published_on = strtotime($date);
+    $node->published_on = strtotime($form_state['values']['future-publish']);
   }
   else {
     $node->published_on = 0;
