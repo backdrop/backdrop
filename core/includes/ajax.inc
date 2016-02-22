@@ -1344,7 +1344,7 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
   // jQuery UI does not allow markup in its titles, and does its own escaping.
   // The value passed in should already be escaped (as it would be from
   // backdrop_get_title()), so we decode it back to the original characters.
-  $title = html_entity_decode(strip_tags($title));
+  $title = html_entity_decode(strip_tags($title), ENT_QUOTES);
 
   $dialog_options['title'] = $title;
 
