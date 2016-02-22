@@ -506,7 +506,7 @@ function menu_node_update(Node $node) {
 function menu_node_save(Node $node) {
   if (isset($node->menu)) {
     $link = &$node->menu;
-    if (empty($link['enabled'])) {
+    if (isset($link['enabled']) && !$link['enabled']) {
       if (!empty($link['mlid'])) {
         menu_link_delete($link['mlid']);
       }
