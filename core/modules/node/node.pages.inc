@@ -286,46 +286,49 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  $form['options']['status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Publish now'),
-    '#default_value' => $node->status,
-  );
-  $form['options']['future'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Would you like to pulish this content on specified date?'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#states' => array(
-      'invisible' => array(
-       ':input[name="status"]' => array('checked' => TRUE),
-      ),
+  function _is_scheduled() {
+    $node = node_load(arg(1));
+    if (arg(2) == 'edit') {
+      if ($node->published_on > 0 && $node->status == 0) {
+        return 2;
+      }
+      elseif ($node->status == 0) {
+        return 0;
+      }
+    }
+    return 1;
+  }
+  $form['options']['publishing-states'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      0 => t('Save Draft'),
+      1 => t('Publish Now'),
+      2 => t('Schedule Publish Time'),
     ),
-    '#description' => t(
-      'The publication of scheduled content happens on cron runs.  As such you
-      must have cron configured on your system for this to work. You may check
-      and configure your settings for cron here: <a href="@url">cron settings</a>.',
-      array('@url' => url('admin/config/system/cron'))
-    ),
+    '#default_value' => _is_scheduled(),
   );
-  $form['options']['future']['specify-date'] = array(
-    '#type' => 'checkbox',
-    '#group' => 'future',
-    '#title' => t('Yes'),
-    '#description' => t(
-      'If you check this box you can shedule the content to be published on
-      a specified date.  If you leave it blank you can make a draft of the
-      content with no publication schedule.'
-    ),
-  );
-  $now = date(time());
-  $form['options']['future']['future-publish'] = array(
-    '#type' => 'date_select',
-    '#title' => t('Pick the date to schedule publication:'),
+  function _remember_published_on() {
+    $node = node_load(arg(1));
+    $current_published_on = date(time());
+    if (arg(2) == 'edit') {
+      if ($node->status == 0 && $node->published_on != 0) {
+        $current_published_on = $node->published_on;
+      }
+    }
+    return date('Y-m-d H:i', $current_published_on);
+  }
+  $form['options']['future-publish'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Publish on:'),
     '#date_format' => 'Y-m-d H:i',
     '#date_increment' => 10,
     '#date_year_range' => '-0:+3',
-    '#default_value' => $now,
+    '#default_value' => _remember_published_on(),
+    '#states' => array(
+      'visible' => array(
+       ':input[name="publishing-states"]' => array('value' => 2),
+      ),
+    ),
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
@@ -474,12 +477,22 @@ function node_form_submit_build_node($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
 
   $node = $form_state['node'];
-  if ($form_state['values']['status'] == 0 && $form_state['values']['specify-date'] == 1) {
+  if ($form_state['values']['publishing-states'] == 1) {
+    $node->status = 1;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing-states'] == 0) {
+    $node->status = 0;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing-states'] == 2) {
+    $node->status = 0;
     $node->published_on = strtotime($form_state['values']['future-publish']);
+    dpm($node->published_on, 'pub on');
   }
   else {
     $node->published_on = 0;
-  }
+  }dpm(strtotime($form_state['values']['future-publish']), 'time');
   entity_form_submit_build_entity('node', $node, $form, $form_state);
 
   node_submit($node);
