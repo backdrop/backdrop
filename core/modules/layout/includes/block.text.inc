@@ -108,6 +108,8 @@ class BlockText extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
+    parent::formSubmit($form, $form_state);
+
     if (module_exists('block') && $form_state['values']['reusable']) {
       $delta = $form_state['values']['delta'];
       $this->settings = array_diff_key($this->settings, array('title' => '', 'content' => '', 'format' => ''));

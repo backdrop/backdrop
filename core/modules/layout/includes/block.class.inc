@@ -244,7 +244,9 @@ class Block extends LayoutHandler {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
-    $this->settings['title_display'] = $form_state['values']['title_display'];
+    if (isset($form_state['values']['title_display'])) {
+      $this->settings['title_display'] = $form_state['values']['title_display'];
+    }
     $this->settings['title'] = $form_state['values']['title'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {
