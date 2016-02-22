@@ -28,10 +28,9 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
     $('fieldset.node-form-options', context).backdropSetSummary(function (context) {
       var vals = [];
 
-      $('select#edit-publishing-states', context).parent().change(function () {
+      $('div#edit-publishing-states', context).parent().change(function () {
         var published_state = "";
-        published_state = $('select option:selected').text();
-        published_state = published_state.replace('Filtered HTML', '');
+        published_state = $('input[type="radio"]:checked').next('label:first').text();
         vals.push(Backdrop.checkPlain($.trim(published_state)));
       }).trigger('change');
 

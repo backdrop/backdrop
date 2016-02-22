@@ -299,7 +299,7 @@ function node_form($form, &$form_state, Node $node) {
     return 1;
   }
   $form['options']['publishing-states'] = array(
-    '#type' => 'select',
+    '#type' => 'radios',
     '#options' => array(
       0 => t('Save Draft'),
       1 => t('Publish Now'),
@@ -320,7 +320,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['options']['future-publish'] = array(
     '#type' => 'date_popup',
     '#title' => t('Publish on:'),
-    '#date_format' => 'Y-m-d H:i',
+    '#date_format' => 'Y-m-d h:i',
     '#date_increment' => 10,
     '#date_year_range' => '-0:+3',
     '#default_value' => _remember_published_on(),
