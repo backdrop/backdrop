@@ -488,11 +488,10 @@ function node_form_submit_build_node($form, &$form_state) {
   elseif ($form_state['values']['publishing-states'] == 2) {
     $node->status = 0;
     $node->published_on = strtotime($form_state['values']['future-publish']);
-    dpm($node->published_on, 'pub on');
   }
   else {
     $node->published_on = 0;
-  }dpm(strtotime($form_state['values']['future-publish']), 'time');
+  }
   entity_form_submit_build_entity('node', $node, $form, $form_state);
 
   node_submit($node);
