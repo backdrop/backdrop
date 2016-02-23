@@ -14,12 +14,20 @@ Backdrop.behaviors.contentTypes = {
     // Publishing settings.
     $context.find('#edit-workflow').backdropSetSummary(function() {
       var vals = [];
-      if (parseInt($context.find('input[name="status_default"]:checked').val())) {
-        vals.push(Backdrop.t('Published'));
-      }
-      else {
-        vals.push(Backdrop.t('Unpublished'));
-      }
+      // if (parseInt($context.find('input[name="status_default"]:checked').val())) {
+      //   vals.push(Backdrop.t('Draft'));
+      // }
+      // else if (parseInt($context.find('input[name="status_default"]:checked').val())) {
+      //   vals.push(Backdrop.t('Published'));
+      // }
+      // else {
+      //   vals.push(Backdrop.t('Schedule Publish Time'));
+      // }
+      $('div#edit-status-default', context).parent().change(function () {
+        var published_state = "";
+        published_state = $('input[type="radio"]:checked').next('label:first').text();
+        vals.push(Backdrop.checkPlain($.trim(published_state)));
+      }).trigger('change');
       if ($context.find('input[name="sticky_default"]:checked').length) {
         vals.push(Backdrop.t('Sticky'));
       }

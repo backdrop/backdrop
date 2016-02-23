@@ -160,10 +160,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'radios',
     '#title' => t('Published status'),
     '#options' => array(
+      0 => t('Draft'),
       1 => t('Published'),
-      0 => t('Unpublished'),
+      2 => t('Schedule Publish Time'),
     ),
-    '#default_value' => (int) $type->settings['status_default'],
+    '#default_value' => 1,//(int) $type->settings['status_default'],
     '#description' => t('Unpublished content is only accessible to the content creator or site administrators.')
   );
 
@@ -596,7 +597,7 @@ function node_type_delete_confirm($form, &$form_state, $type) {
  * Process content type delete confirm submissions.
  *
  * @see node_type_delete_confirm()
- */                                                
+ */
 function node_type_delete_confirm_submit($form, &$form_state) {
   $type_name = $form_state['values']['type'];
   node_type_delete($type_name);
