@@ -1605,7 +1605,7 @@ function filter_node_revision_delete(Node $node) {
 function _filter_record_file_usage(array $fids, EntityInterface $entity) {
   foreach ($fids as $fid) {
     $file = file_load($fid);
-    if ($file->status !== FILE_STATUS_PERMANENT) {
+    if ($file->status != FILE_STATUS_PERMANENT) {
       $file->status = FILE_STATUS_PERMANENT;
       $file->save();
     }
