@@ -366,6 +366,7 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#limit_validation_errors' => array($element['#parents']),
     '#ajax' => $ajax_settings,
     '#weight' => -5,
+    '#attributes' => array('class' => array('file-upload-button')),
   );
 
   // Force the progress indicator for the remove button to be either 'none' or
@@ -381,6 +382,7 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#limit_validation_errors' => array($element['#parents']),
     '#ajax' => $ajax_settings,
     '#weight' => -5,
+    '#attributes' => array('class' => array('file-remove-button')),
   );
 
   $element['fid'] = array(
