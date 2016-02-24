@@ -332,7 +332,8 @@ function backdrop_match_path($path, $patterns) {
  * backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL) makes this function available.
  *
  * @return
- *   The current Backdrop URL path.
+ *   The current Backdrop URL path. The path is untrusted user input and must be
+ *   treated as such.
  *
  * @see request_path()
  */
