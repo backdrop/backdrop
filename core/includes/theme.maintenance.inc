@@ -45,7 +45,10 @@ function _backdrop_maintenance_theme() {
     // We use the default theme as the maintenance theme. If a maintenance theme
     // isn't specified in the database or in settings.php, we use the default.
     try {
-      $custom_theme = config_get('system.core', 'maintenance_theme');
+      $custom_theme = settings_get('maintenance_theme');
+      if (empty($custom_theme)) {
+        $custom_theme = config_get('system.core', 'maintenance_theme');
+      }
       if (empty($custom_theme)) {
         $custom_theme = config_get('system.core', 'theme_default');
       }
