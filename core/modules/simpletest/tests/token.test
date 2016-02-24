@@ -461,6 +461,7 @@ class TokenNodeTestCase extends TokenTestHelper {
 
     $files = $this->backdropGetTestFiles('image');
     $file = new File((array) $files[0]);
+    $file->uid = $admin_user->uid;
     $file->save();
     $node_title = $this->randomName();
     $node_edit = array(

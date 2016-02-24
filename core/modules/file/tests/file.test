@@ -1417,7 +1417,6 @@ class FilePrivateTestCase extends FileFieldTestCase {
 
     // Attempt to reuse the existing file when creating a new node, and confirm
     // that access is still denied.
-    //$this->backdropLogin($this->admin_user);
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$field_name . '[' . LANGUAGE_NONE . '][0][fid]'] = $node_file->fid;

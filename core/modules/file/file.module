@@ -500,7 +500,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
       // public file) to confirm it exists and that the current user has access
       // to it.
       if (isset($input['fid']) && ($file = file_load($input['fid']))) {
-        if (file_uri_scheme($file->uri) == 'public' && !file_download_access($file->uri)) {
+        if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
           $force_default = TRUE;
         }
         // Temporary files that belong to other users should never be allowed.
