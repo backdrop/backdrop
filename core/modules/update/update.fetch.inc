@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only when fetching information about available updates.
@@ -13,19 +12,21 @@
  * @see update_menu()
  */
 function update_manual_status() {
-  _update_refresh();
-  $batch = array(
-    'operations' => array(
-      array('update_fetch_data_batch', array()),
-    ),
-    'finished' => 'update_fetch_data_finished',
-    'title' => t('Checking available update data'),
-    'progress_message' => t('Trying to check available update data ...'),
-    'error_message' => t('Error checking available update data.'),
-    'file' => backdrop_get_path('module', 'update') . '/update.fetch.inc',
-  );
-  batch_set($batch);
-  batch_process('admin/reports/updates');
+  if (empty($GLOBALS['backdrop_test_info']['test_run_id']) || strstr(config_get('update.settings', 'update_url'), $GLOBALS['base_url'])) {
+    _update_refresh();
+    $batch = array(
+      'operations' => array(
+        array('update_fetch_data_batch', array()),
+      ),
+      'finished' => 'update_fetch_data_finished',
+      'title' => t('Checking available update data'),
+      'progress_message' => t('Trying to check available update data ...'),
+      'error_message' => t('Error checking available update data.'),
+      'file' => backdrop_get_path('module', 'update') . '/update.fetch.inc',
+    );
+    batch_set($batch);
+    batch_process('admin/reports/updates');
+  }
 }
 
 /**
