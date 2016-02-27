@@ -2733,7 +2733,7 @@ function system_update_1050() {
 }
 
 /**
- * Notify administrators if a non-core version of CKEditor module is present.
+ * Notify administrators if a non-core version of Redirect module is present.
  */
 function system_update_1051() {
   $path = backdrop_get_path('module', 'redirect');
