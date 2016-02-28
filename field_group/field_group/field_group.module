@@ -2258,7 +2258,7 @@ function field_group_field_group_to_hook_code($data, $module) {
   $code .= "  \${$export['identifier']}s = array();\n\n";
   foreach ($objects as $object) {
     $code .= ctools_export_object('field_group', $object, '  ');
-    $code .= "  \${$export['identifier']}s['" . check_plain($object->$export['key']) . "'] = \${$export['identifier']};\n\n";
+    $code .= "  \${$export['identifier']}s['" . check_plain($object->{$export['key']}) . "'] = \${$export['identifier']};\n\n";
     if (!empty($object->data['label'])) {
       $translatables[] =  $object->data['label'];
     }
