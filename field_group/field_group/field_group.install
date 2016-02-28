@@ -355,8 +355,18 @@ function field_group_update_7007() {
   // Migrate the field groups so they have a unique identifier.
   $field_groups = ctools_export_load_object("field_group");
   foreach ($field_groups as $row) {
-    if ($row->data['format_type'] == 'div' || $row->data['format_type'] == 'html5' || $row->data['format_type'] == 'html-element') {
+    // These field group types have an ID setting to populate.
+    $populate_id_setting = array(
+      'html-element',
+      'div',
+      'html5',
+      'fieldset',
+      'tabs',
+      'htabs',
+      'accordion',
+    );
 
+    if (in_array($row->data['format_type'], $populate_id_setting)) {
       // If mode is default, we don't know what view mode it was. Take full then.
       $view_mode = $row->mode == 'default' ? 'full' : $row->mode;
       $id = $row->entity_type . '_' . $row->bundle . '_' . $view_mode . '_' . $row->group_name;
