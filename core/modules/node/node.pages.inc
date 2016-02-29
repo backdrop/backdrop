@@ -286,7 +286,19 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  function _is_scheduled() {
+  /**
+   * Helper function to determine #default_value of 'publishing_states'.
+   *
+   *  @param $type
+   *   The node type object that the node/add form is working on.
+   *
+   * @return int.
+   *  Status code for the publishing state of the node.
+   *   0 => Draft
+   *   1 => Publish Now
+   *   2 => Schedule Publish Time
+   */
+  function _is_scheduled($type) {
     $node = node_load(arg(1));
     if (arg(2) == 'edit') {
       if ($node->published_on > 0 && $node->status == 0) {
@@ -295,8 +307,11 @@ function node_form($form, &$form_state, Node $node) {
       elseif ($node->status == 0) {
         return 0;
       }
+      elseif ($node->status == 1) {
+        return 1;
+      }
     }
-    return 1;
+    return $type->settings['status_default'];
   }
   $form['options']['publishing-states'] = array(
     '#type' => 'radios',
@@ -305,8 +320,15 @@ function node_form($form, &$form_state, Node $node) {
       1 => t('Publish Now'),
       2 => t('Schedule Publish Time'),
     ),
-    '#default_value' => _is_scheduled(),
+    '#default_value' => _is_scheduled($node_type),
   );
+  /**
+   * Helper function to determine the #default_vaule of 'future-publish'.
+   *
+   * @return date.
+   *  If a non zero 'published_on' date exists for this node then return it,
+   *  otherwise use the current time.
+   */
   function _remember_published_on() {
     $node = node_load(arg(1));
     $current_published_on = date(time());
@@ -315,12 +337,12 @@ function node_form($form, &$form_state, Node $node) {
         $current_published_on = $node->published_on;
       }
     }
-    return date('Y-m-d H:i', $current_published_on);
+    return date('Y-m-d g:i', $current_published_on);
   }
   $form['options']['future-publish'] = array(
     '#type' => 'date_popup',
     '#title' => t('Publish on:'),
-    '#date_format' => 'Y-m-d h:i',
+    '#date_format' => 'Y-m-d g:i',
     '#date_increment' => 10,
     '#date_year_range' => '-0:+3',
     '#default_value' => _remember_published_on(),
