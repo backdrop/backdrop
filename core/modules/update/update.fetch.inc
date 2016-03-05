@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only when fetching information about available updates.
@@ -13,6 +12,12 @@
  * @see update_menu()
  */
 function update_manual_status() {
+  // Do not trigger an update if in testing.
+  if (!_update_checking_enabled()) {
+    backdrop_set_message(t('Update checking is disabled on this site.'), 'error');
+    return;
+  }
+
   _update_refresh();
   $batch = array(
     'operations' => array(

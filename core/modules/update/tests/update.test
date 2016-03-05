@@ -23,6 +23,7 @@
  * Defines some shared functions used by all update tests.
  */
 class UpdateTestHelper extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
   /**
    * Refreshes the update status based on the desired available update scenario.
@@ -60,7 +61,7 @@ class UpdateTestHelper extends BackdropWebTestCase {
 
 class UpdateCoreTestCase extends UpdateTestHelper {
   function setUp() {
-    parent::setUp('update_test', 'update');
+    parent::setUp(array('update_test', 'update'));
     $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer modules'));
     $this->backdropLogin($admin_user);
   }
@@ -253,6 +254,26 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
+   * Tests _update_checking_enabled() returns the expected value during tests.
+   */
+  function testUpdateCheckingEnabled() {
+    $config = config('update.settings');
+    $this->assertEqual($config->get('update_url'), '', 'No update server specified in the default installation.');
+    $this->assertFalse(_update_checking_enabled(), 'Update checking is not enabled when using the default server.');
+
+    $this->backdropGet('admin/reports/updates/check');
+    $this->assertText(t('Update checking is disabled on this site.'));
+
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->save();
+
+    $this->assertTrue(_update_checking_enabled(), 'Update checking enabled during tests when using a local host update URL.');
+
+    $this->backdropGet('admin/reports/updates/check');
+    $this->assertNoText(t('Update checking is disabled on this site.'));
+  }
+
+  /**
    * Sets the version to 1.0 when no project-specific mapping is defined.
    */
   protected function setSystemInfo1_0() {
@@ -268,7 +289,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
 
 class UpdateTestContribCase extends UpdateTestHelper {
   function setUp() {
-    parent::setUp('update_test', 'update', 'aaa_update_test', 'bbb_update_test', 'ccc_update_test');
+    parent::setUp(array('update_test', 'update', 'aaa_update_test', 'bbb_update_test', 'ccc_update_test'));
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
   }
@@ -624,7 +645,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
 
 class UpdateTestUploadCase extends UpdateTestHelper {
   public function setUp() {
-    parent::setUp('update', 'update_test');
+    parent::setUp(array('update', 'update_test'));
     $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
     $admin_user = $this->backdropCreateUser(array('administer software updates', 'administer site configuration'));
     $this->backdropLogin($admin_user);
@@ -717,7 +738,7 @@ class UpdateTestUploadCase extends UpdateTestHelper {
  */
 class UpdateCoreUnitTestCase extends BackdropUnitTestCase {
   function setUp() {
-    parent::setUp('update');
+    parent::setUp(array('update'));
     module_load_include('inc', 'update', 'update.fetch');
   }
 
