@@ -542,12 +542,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     ));
     $block_uuid = (string) $last_block[0]['data-block-id'];
 
-    // Save the layout.
+    // Change the title type to custom.
     $edit = array(
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Configure'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Visit the sample node page and check that the block is visible.
     $this->backdropGet('node/1');
@@ -581,7 +582,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Post node title',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name . '/edit-title/editor/title', $edit, t('Configure'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText('Post node title', 'The node-type specific layout is used over the generic layout.');
@@ -649,7 +651,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Configure'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Check that the validation prevented two main content blocks.
     $this->assertText(t('The "@block" block may only be added once to this layout.', array('@block' => t('Main page content'))));
@@ -740,7 +743,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Menu item test',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Configure'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
     $this->backdropGet($layout_path);
     $this->assertResponse(200, 'Layout displayed at the given path.');
 

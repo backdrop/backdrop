@@ -123,6 +123,12 @@ function layout_menu() {
     'page arguments' => array(4, 6, 7),
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/edit-title/editor/title'] = array(
+    'title' => 'Block title type',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_title_settings_form', 4),
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
     'title' => 'Configure block',
     'load arguments' => array(4),

@@ -95,6 +95,9 @@
   border: 1px dashed #CCC;
   background: white;
 }
+.layout-editor-region-page-title {
+  background: #eee;
+}
 .layout-editor-region-title .label {
   float: left;
   margin: 0 12px 0 0; /* LTR */
@@ -190,6 +193,14 @@
 }
 .layout-editor-placeholder {
   background-color: #EFEFEF;
+}
+
+#layout-edit .page-title div.description, #layout-edit .title div.description {
+  clear: both;
+}
+
+#layout-edit h1.page-title, #layout-edit h1.title {
+  font-size: 1em;
 }
 
 /* Layout Misc */
