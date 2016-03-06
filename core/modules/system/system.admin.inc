@@ -1194,13 +1194,18 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('site_slogan'),
     '#description' => t("How this is used depends on your site's theme."),
   );
-
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
     '#title' => t('E-mail address'),
     '#default_value' => $site_mail,
     '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
     '#required' => TRUE,
+  );
+  $form['site_information']['site_mail_replyto'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use Reply-To header'),
+    '#default_value' => variable_get('site_mail_replyto', TRUE),
+    '#description' => t('Sends all e-mail from the domain of the default address above and sets the "Reply-To" header to the actual sender. Helps prevent e-mail from being flagged as spam.'),
   );
 
   $form['front_page'] = array(
