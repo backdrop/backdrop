@@ -244,6 +244,8 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     $file = file_load($fid);
+    $file->status = 1;
+    $file->save();
     $form_state['values']['attributes']['src'] = file_create_url($file->uri);
     $form_state['values']['attributes']['data-file-id'] = $fid;
     unset($form_state['values']['fid']);
