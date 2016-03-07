@@ -1672,11 +1672,11 @@ function user_login_final_validate($form, &$form_state) {
       else {
         form_set_error('name', t('Sorry, unrecognized username.'));
       }
-      watchdog('user', 'The user account or email %name could not be found.', array('%name' => $form_state['values']['name']));
+      watchdog('user', 'The user account or email %name could not be found.', array('%name' => $form_state['values']['name']), WATCHDOG_WARNING);
     }
     else {
       form_set_error('pass', t('Sorry, incorrect password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
-      watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
+      watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']), WATCHDOG_WARNING);
     }
   }
   elseif (isset($form_state['flood_control_user_identifier'])) {
