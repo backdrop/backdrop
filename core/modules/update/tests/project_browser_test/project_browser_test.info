@@ -1,0 +1,8 @@
+name = "Project Browser module tests"
+description = "Support module for Project Browser related testing."
+package = Testing
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = module
+hidden = TRUE
+

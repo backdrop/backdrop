@@ -616,6 +616,21 @@ function update_manager_install_form_validate($form, &$form_state) {
 
 /**
  * Form submission handler for update_manager_install_form().
+ */
+function update_manager_install_form_submit($form, &$form_state) {
+  $field = 'project_url';
+
+  $return = update_manager_download_project($form_state['values']['project_url']);
+  if (empty($return['success'])) {
+    form_set_error($field, $return['message']);
+  }
+  elseif ($return['redirect']) {
+    $form_state['redirect'] = system_authorized_get_url();
+  }
+}
+
+/**
+ * Downloads a project given a project url.
  *
  * Either downloads the file specified in the URL to a temporary cache, or
  * uploads the file attached to the form, then attempts to extract the archive
@@ -625,18 +640,27 @@ function update_manager_install_form_validate($form, &$form_state) {
  * via authorize.php which will copy the extracted files from the temporary
  * location into the live site.
  *
+ * @param string $browser
+ *   Whether the project is being installed via the Project Browser.
+ *
+ * @return array
+ *   An associative array with keys:
+ *   - 'success': whether the update was successful
+ *   - 'message': an error or success message.
+ *
  * @see update_manager_install_form_validate()
  * @see update_authorize_run_install()
  * @see system_authorized_init()
  * @see system_authorized_get_url()
  */
-function update_manager_install_form_submit($form, &$form_state) {
-  if ($form_state['values']['project_url']) {
-    $field = 'project_url';
-    $local_cache = update_manager_file_get($form_state['values']['project_url']);
+function update_manager_download_project($url, $browser = FALSE) {
+  if ($url) {
+    $local_cache = update_manager_file_get($url);
     if (!$local_cache) {
-      form_set_error($field, t('Unable to retrieve Backdrop project from %url.', array('%url' => $form_state['values']['project_url'])));
-      return;
+      return array(
+        'success' => FALSE,
+        'message' => t('Unable to retrieve Backdrop project from %url.', array('%url' => $url)),
+      );
     }
   }
   elseif ($_FILES['files']['name']['project_upload']) {
@@ -650,20 +674,25 @@ function update_manager_install_form_submit($form, &$form_state) {
     $local_cache = $finfo->uri;
   }
 
+  // Try to extract it.
   $directory = _update_manager_extract_directory();
   try {
     $archive = update_manager_archive_extract($local_cache, $directory);
   }
   catch (Exception $e) {
-    form_set_error($field, $e->getMessage());
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => $e->getMessage(),
+    );
   }
-
   $files = $archive->listContents();
   if (!$files) {
-    form_set_error($field, t('Provided archive contains no files.'));
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => t('Provided archive contains no files.'),
+    );
   }
+
 
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
@@ -672,15 +701,10 @@ function update_manager_install_form_submit($form, &$form_state) {
 
   $archive_errors = update_manager_archive_verify($project, $local_cache, $directory);
   if (!empty($archive_errors)) {
-    form_set_error($field, array_shift($archive_errors));
-    // @todo: We need a way to set multiple errors on the same form element and
-    // have all of them appear!
-    if (!empty($archive_errors)) {
-      foreach ($archive_errors as $error) {
-        backdrop_set_message($error, 'error');
-      }
-    }
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => array_shift($archive_errors),
+    );
   }
 
   // Make sure the Updater registry is loaded.
@@ -691,50 +715,90 @@ function update_manager_install_form_submit($form, &$form_state) {
     $updater = Updater::factory($project_location);
   }
   catch (Exception $e) {
-    form_set_error($field, $e->getMessage());
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => $e->getMessage(),
+    );
   }
 
   try {
     $project_title = Updater::getProjectTitle($project_location);
   }
   catch (Exception $e) {
-    form_set_error($field, $e->getMessage());
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => $e->getMessage(),
+    );
   }
 
   if (!$project_title) {
-    form_set_error($field, t('Unable to determine %project name.', array('%project' => $project)));
+    return array(
+      'success' => FALSE,
+      'message' => t('Unable to determine %project name.', array('%project' => $project)),
+    );
   }
 
   if ($updater->isInstalled()) {
-    form_set_error($field, t('%project is already installed.', array('%project' => $project_title)));
-    return;
+    return array(
+      'success' => FALSE,
+      'message' => t('%project is already installed.', array('%project' => $project_title)),
+    );
   }
+
   $project_real_location = backdrop_realpath($project_location);
+
   $arguments = array(
     'project' => $project,
     'updater_name' => get_class($updater),
     'local_url' => $project_real_location,
   );
 
-  // If the owner of the directory we extracted is the same as the
-  // owner of our configuration directory where we're trying to install the
-  // code, there's no need to prompt for FTP/SSH credentials. Instead, we
-  // instantiate a FileTransferLocal and invoke update_authorize_run_install()
-  // directly.
   if (fileowner($project_real_location) == fileowner(conf_path())) {
     module_load_include('inc', 'update', 'update.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
-    call_user_func_array('update_authorize_run_install', array_merge(array($filetransfer), $arguments));
+
+    if ($browser) {
+      // Initialize some variables in the Batch API $context array.
+      $updater = new $arguments['updater_name']($project_real_location);
+
+      try {
+        if ($updater->isInstalled()) {
+          // This is an update.
+          $updater->update($filetransfer);
+        }
+        else {
+          $updater->install($filetransfer);
+        }
+      }
+      catch (UpdaterException $e) {
+        return array(
+          'success' => FALSE,
+          'message' => t('Error installing / updating. Error: @error', array('@error' => $e->getMessage())),
+        );
+      }
+    }
+    else {
+      call_user_func_array('update_authorize_run_install', array_merge(array($filetransfer), $arguments));
+    }
   }
-  // Otherwise, go through the regular workflow to prompt for FTP/SSH
-  // credentials and invoke update_authorize_run_install() indirectly with
-  // whatever FileTransfer object authorize.php creates for us.
   else {
-    system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'update') . '/update.authorize.inc', $arguments, t('Update manager'));
-    $form_state['redirect'] = system_authorized_get_url();
+    if ($browser) {
+      return array(
+        'success' => FALSE,
+        'message' => t('Permissions are not set up properly.'),
+      );
+    }
+    else {
+      system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'update') . '/update.authorize.inc', $arguments, t('Update manager'));
+      return array(
+        'redirect' => TRUE,
+      );
+    }
   }
+
+  return array(
+    'success' => TRUE,
+  );
 }
 
 /**
