@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Installer module.
+ */
+
+/**
+ * Implements hook_update_N().
+ */
+function installer_update_1000() {
+  // If contrib Project Browser module was installed, disable it and show a
+  // message.
+  if (module_exists('project_browser')) {
+    $path = backdrop_get_path('module', 'project_browser');
+    backdrop_set_message(t('Backdrop core now provides project browsing functions in core. A copy of Project Browser module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Project Browser module in the system table. This will
+    // "disable" the module if present.
+    db_query("DELETE FROM {system} WHERE name = 'project_browser' AND type = 'module'");
+  }
+}
