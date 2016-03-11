@@ -706,12 +706,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     ));
     //$block_uuid = (string) $last_block[0]['data-block-id'];
 
-    // Save the layout.
+    // Change the title type to custom.
     $edit = array(
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Visit the sample node page and check that the block is visible.
     $this->backdropGet('node/1');
@@ -741,14 +742,21 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
+    // Record the UUID for the same block in this layout.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+
     $edit = array(
-      'title_display' => LAYOUT_TITLE_CUSTOM,
-      'title' => 'Post node title',
+      'title_display' => LAYOUT_TITLE_BLOCK,
+      'title_block' => $block_uuid,
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText('Post node title', 'The node-type specific layout is used over the generic layout.');
+    $this->assertText('Node title', 'The node-type specific layout is used over the generic layout, and the page title is copied from the block title.');
 
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertText('Generic node title', 'The generic layout is used when there is not a more specific layout.');
@@ -813,7 +821,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Check that the validation prevented two main content blocks.
     $this->assertText(t('The "@block" block may only be added once to this layout.', array('@block' => t('Main page content'))));
@@ -904,7 +913,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Menu item test',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
     $this->backdropGet($layout_path);
     $this->assertResponse(200, 'Layout displayed at the given path.');
 
