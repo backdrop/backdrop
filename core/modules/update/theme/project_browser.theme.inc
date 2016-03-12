@@ -67,40 +67,37 @@ function update_preprocess_project_browser_list(&$variables) {
   if (is_array($variables['projects_list']) AND !empty($variables['projects_list'])) {
     $content = '';
     $first = TRUE;
+    $rows = array();
+    switch ($variables['type']) {
+      case 'module':
+        $title = t('Modules');
+        break;
+      case 'theme':
+        $title = t('Themes');
+        break;
+      case 'layout':
+        $title = t('Layouts');
+        break;
+      default:
+        $title = t('Projects');
+        break;
+    }
+    $headers = array(
+      $title,
+    );
     // Theme each individual project and add to the list.
     foreach ($variables['projects_list'] as $project) {
-      $content .= theme('project_browser_project', array('project' => $project, 'first' => $first));
-      $first = FALSE;
+      $row = array();
+      $row[] = theme('project_browser_project', array('project' => $project, 'first' => NULL));
+      $rows[] = $row;
     }
+    $content .= theme('table', array('header' => $headers, 'rows' => $rows));
   }
   else {
     $content = t('No results found.');
   }
 
-  switch ($variables['type']) {
-    case 'module':
-      $title = t('Modules');
-      break;
-    case 'theme':
-      $title = t('Themes');
-      break;
-    case 'layout':
-      $title = t('Layouts');
-      break;
-    default:
-      $title = t('Projects');
-      break;
-  }
-
-  $main_content['project_browser_main_block'] = array(
-    '#theme' => 'project_browser_block',
-    '#title' => $title,
-    '#content' => $content,
-    '#contextual_links' => array(
-      'project_browser' => array('admin/config/development/project_browser', array()),
-    ),
-  );
-  $variables['main_content'] = render($main_content);
+  $variables['main_content'] = render($content);
 
   // Add the pager.
   $variables['pager'] = theme('pager', array('tags' => NULL));

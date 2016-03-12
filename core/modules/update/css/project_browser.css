@@ -105,9 +105,7 @@ a.show-more {
 }
 
 .project-item {
-  border-top: 1px solid #E0E0D8;
   clear: both;
-  padding: 10px;
   position: relative;
 }
 
@@ -188,7 +186,7 @@ div.install-item-prefix {
 
 #project-browser div.project-browser-block {
   margin-bottom: 20px;
-  border: 1px solid #CCCCCC;
+  background-color: #fff;
 }
 
 #project-browser .project-browser-region .project-browser-block {
@@ -199,10 +197,9 @@ div.install-item-prefix {
   float: none;
   font-size: 1em;
   margin: 0;
-  padding: 3px 10px;
-  background: none repeat scroll 0 0 #E0E0D8;
+  padding: 10px;
+  background: none repeat scroll 0 0 #e9e8e8;
 }
-
 #project-browser div#project-browser-sidebar-right div.project-browser-block div.content {
   padding: 5px 10px;
 }
