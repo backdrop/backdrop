@@ -147,12 +147,6 @@ function update_preprocess_project_browser_project(&$variables) {
   module_load_include('inc', 'update', 'update.browser');
   $project = $variables['project'];
 
-  // Todo: uncomment the conditional when PBS is serving the right URL for 
-  // images.
-  // if (empty($project['image'])) {
-    $project['image'] = base_path() . backdrop_get_path('module', 'update') . '/images/' . $project['type'] . '-icon.png';
-  // }
-
   $variables['title'] = l(
     $project['title'], 
     'admin/modules/project-browser/project/' . $project['name'],
@@ -166,7 +160,6 @@ function update_preprocess_project_browser_project(&$variables) {
     )
   ); 
   $variables['author'] = t('Author: @author', array('@author' => $project['author']));
-  $variables['image'] = $project['image'];
   $variables['description'] = theme('project_browser_project_description', array('project' => $project));
   $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', array('@date' => format_date($project['last updated'], 'long'))) : '';
 

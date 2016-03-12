@@ -6,7 +6,6 @@
  * 
  * Available variables:
  * - $first: Whether or not this project item is the first one in the list
- * - $image: The project image, if any
  * - $title: The title of the project
  * - $author: Ther author of the project
  * - $last_updated: A string representing when the project was last updated
@@ -23,12 +22,6 @@ $class = ($first) ? 'project-item-first' : 'project-item';
  
 ?>
 <div class="<?php print $class; ?>">
-  <?php if ($image) { ?>
-    <div class='project-image'>
-      <img src='<?php print $image; ?>' />
-    </div>
-  <?php } ?>
-  
   <div class="project-information" >
     <div class="project-title">
       <?php print $title; ?>

@@ -35,12 +35,6 @@
       </div>
       
     </div>
-    
-    <?php if ($image) { ?>
-      <div class='project-dialog-image'>
-        <img src='<?php print $image; ?>' />
-      </div>
-    <?php } ?>
   </div>
 
   <div class="project-status">
