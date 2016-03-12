@@ -74,7 +74,7 @@ function project_browser_test_query($query, $type, $version = 1) {
         'text' => (isset($_GET['text']) AND $_GET['text']) ? $_GET['text'] : '',
         'order_by' => isset($_GET['order_by']) ? $_GET['order_by'] : 'usage',
         'sort' => isset($_GET['sort']) ? $_GET['sort'] : 'desc',
-        'requested' => isset($_GET['requested']) ? (int) $_GET['requested'] : 12,
+        'items_per_page' => isset($_GET['items_per_page']) ? (int) $_GET['items_per_page'] : 12,
         'page' => isset($_GET['page']) ? (int) $_GET['page'] : 0,
       );
       
@@ -173,8 +173,8 @@ function project_browser_test_get_results($filters) {
   $results['total'] = count($projects);
   
   // Only send back the requested amount
-  $start = $filters['page'] * $filters['requested'];
-  $end = $start + $filters['requested'];
+  $start = $filters['page'] * $filters['items_per_page'];
+  $end = $start + $filters['items_per_page'];
   
   $results['projects'] = $projects;
   

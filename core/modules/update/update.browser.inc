@@ -22,8 +22,8 @@ function project_browser_page($type) {
   if (isset($_GET['repository'])) {
     $_SESSION['project_browser_sever_filter'] = $_GET['repository'];
   }
-  if (isset($_GET['order_by'])) {
-    $_SESSION['project_browser_order_by_filter_' . $type] = $_GET['order_by'];
+  if (isset($_GET['order'])) {
+    $_SESSION['project_browser_order_filter_' . $type] = $_GET['order'];
   }
   if (isset($_GET['sort'])) {
     $_SESSION['project_browser_sort_filter_' . $type] = $_GET['sort'];
@@ -50,14 +50,14 @@ function project_browser_page($type) {
   if (isset($_SESSION['project_browser_text_filter_' . $type])) {
     $filters['text'] = $_SESSION['project_browser_text_filter_' . $type];
   }
-  if (isset($_SESSION['project_browser_order_by_filter_' . $type])) {
-    $filters['order_by'] = $_SESSION['project_browser_order_by_filter_' . $type];
+  if (isset($_SESSION['project_browser_order_filter_' . $type])) {
+    $filters['order'] = $_SESSION['project_browser_order_filter_' . $type];
   }
   if (isset($_SESSION['project_browser_sort_filter_' . $type])) {
     $filters['sort'] = $_SESSION['project_browser_sort_filter_' . $type];
   }
 
-  $filters['requested'] = 10;
+  $filters['items_per_page'] = 10;
   $filters['page'] = isset($_GET['page']) ? $_GET['page'] : 0;
 
   // Get the projects to display here based on the filters.
@@ -83,7 +83,7 @@ function project_browser_page($type) {
   }
 
   $sort_options = project_browser_get_sort_options();
-  $current_order_by = isset($_SESSION['project_browser_order_by_filter_' . $type]) ? $_SESSION['project_browser_order_by_filter_' . $type] : 'score';
+  $current_order = isset($_SESSION['project_browser_order_filter_' . $type]) ? $_SESSION['project_browser_order_filter_' . $type] : 'score';
   $current_sort = isset($_SESSION['project_browser_sort_filter_' . $type]) ? $_SESSION['project_browser_sort_filter_' . $type] : 'desc';;
 
   $build = array();
@@ -96,7 +96,7 @@ function project_browser_page($type) {
     'project_browser_sort_header' => array(
       '#type' => 'item',
       '#weight' => 2,
-      '#markup' => project_browser_get_sort_widget($sort_options, $current_order_by, $current_sort),
+      '#markup' => project_browser_get_sort_widget($sort_options, $current_order, $current_sort),
     ),
     'project_browser_list' => array(
       '#markup' => theme('project_browser_list', array('projects_list' => $list, 'type' => $type)),
@@ -614,7 +614,7 @@ function project_browser_filters_form($form, &$form_state, $type) {
 /**
  * Returns a themed sort widget for the filters.
  */
-function project_browser_get_sort_widget($sort_options, $current_order_by, $current_sort) {
+function project_browser_get_sort_widget($sort_options, $current_order, $current_sort) {
   $sort_list = array();
   $sort_list[] = array('data' => t('Sort by:'), 'class' => array('sort-header'));
   $current_path = backdrop_get_path_alias($_GET['q']);
@@ -622,12 +622,12 @@ function project_browser_get_sort_widget($sort_options, $current_order_by, $curr
   foreach ($sort_options as $sort_option) {
     $classes = array();
     $query = array(
-      'order_by' => $sort_option['method'],
+      'order' => $sort_option['method'],
       'sort' => $sort_option['default_sort'],
     );
 
     // If the sort option is currently active, handle it differently.
-    if ($current_order_by == $sort_option['method']) {
+    if ($current_order == $sort_option['method']) {
       $classes[] = 'sort-active';
       $classes[] = 'sort-' . $current_sort;
 
@@ -897,7 +897,7 @@ function project_browser_get_queued_releases() {
  *   'categories' => array() // The categories that were selected, if any
  *   'type' => 'module', // The type of project being searched
  *   'page' => 3, // The zero-based page number
- *   'requested' => 12, // How many results are requested per page
+ *   'items_per_page' => 12, // How many results are requested per page
  * )
  *
  * The project_browser_fetch_results($filters) call returns an array like this:
