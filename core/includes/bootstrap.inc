@@ -947,7 +947,9 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
       // Layouts we use the existing registry rather than the system table.
       if ($type === 'layout' && function_exists('layout_get_layout_info')) {
         $layout_info = layout_get_layout_info($name);
-        $files[$type][$name] = $layout_info['path'] . '/' . $layout_info['name'] . '.info';
+        if ($layout_info) {
+          $files[$type][$name] = $layout_info['path'] . '/' . $layout_info['name'] . '.info';
+        }
       }
       // Modules, themes, and profiles pull from the system table.
       elseif (function_exists('db_query')) {
