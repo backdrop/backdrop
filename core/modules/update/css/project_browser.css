@@ -236,3 +236,6 @@ div.install-item-prefix {
     clear: none;
   }
 }
+.browser-installed-theme img {
+  max-width: 300px;
+}

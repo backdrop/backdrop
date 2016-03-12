@@ -178,11 +178,14 @@ function update_preprocess_project_browser_project(&$variables) {
   $variables['extras'] = implode(' | ', $extras);
 
   // Check if the project is installed.
+  $found = backdrop_get_filename($project['type'], $project['name']);
   if (_project_browser_is_project_enabled($project['type'], $project['name'])) {
     $variables['status'] = '<div class="install-disabled">Already installed</div>';
     $variables['install'] = '';
   }
-  elseif (backdrop_get_filename($project['type'], $project['name'])) {
+  // Todo: this is to mitigate a bug in bootstrap.inc. 
+  // See https://github.com/backdrop/backdrop-issues/issues/1709
+  elseif ($found && $found != '/.info') {
     $variables['status'] = '<div class="install-disabled">Already downloaded</div>';
     $variables['install'] = '';
   }

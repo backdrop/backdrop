@@ -146,6 +146,10 @@ function project_browser_installation_page($op) {
       backdrop_set_title(t("Install Dependencies"));
       $content = project_browser_installation_install_dependencies_page();
       break;
+    case 'theme':
+      backdrop_set_title(t("Themes were installed"));
+      $content = project_browser_installation_enable_page('theme');
+      break;
     case 'enable':
       backdrop_set_title(t("Enable modules"));
       $content = project_browser_installation_enable_page();
@@ -397,16 +401,64 @@ function project_browser_installation_install_dependencies_page() {
  *
  * Show a form which lets the user enable the newly installed projects.
  */
-function project_browser_installation_enable_page() {
+function project_browser_installation_enable_page($type = 'enable') {
   $installed_projects = project_browser_get_installed_projects();
 
   if (count($installed_projects) > 0) {
-    return backdrop_get_form('project_browser_installation_enable_form', $installed_projects);
+    return backdrop_get_form('project_browser_installation_' . $type . '_form', $installed_projects);
   }
   else {
     backdrop_goto('admin/modules/project-browser');
   }
 }
+
+/**
+ * Form builder for theme install.
+ *
+ * @param $projects
+ *   An array of projects to get the releases for.
+ */
+function project_browser_installation_theme_form($form, &$form_state, $projects) {
+  $form['instructions'] = array(
+  '#type' => 'item',
+  '#markup' => t('The themes you selected have been successfully installed.
+    You may enable installed themes on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
+  );
+
+  $themes = system_rebuild_theme_data();
+
+  foreach ($projects as $project) {
+    if ($project['type'] == 'theme' && isset($themes[$project['name']])) {
+      $form[$project['name']] = array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array('browser-installed-theme'),
+        ),
+      );
+      if (file_exists($themes[$project['name']]->info['screenshot'])) {
+        $form[$project['name']]['image'] = array(
+          '#type' => 'item',
+          '#markup' => theme('image', array('uri' => $themes[$project['name']]->info['screenshot'])),
+          '#attributes' => array(
+            'class' => array('browser-installed-theme-image'),
+          ),
+        );
+      }
+      $form[$project['name']]['name'] = array(
+        '#type' => 'item',
+        '#markup' => $themes[$project['name']]->info['name'],
+      );
+    }
+  }
+  $form['next_link'] = array(
+    '#type' => 'link',
+    '#title' => 'Next: Install downloaded modules',
+    '#href' => 'admin/modules/project-browser/install/enable',
+  );
+  
+  return $form;
+}
+
 
 /**
  * Form builder for the select versions form.
@@ -416,12 +468,6 @@ function project_browser_installation_enable_page() {
  */
 function project_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
-  $form['instructions'] = array(
-  '#type' => 'item',
-  '#markup' => t('The projects you selected have been successfully installed.
-    You may enable installed themes on the main !themes page and add new 
-    layouts on the main !layouts page. ', array('!themes' => l(t('Themes'), 'admin/appearance'), '!layouts' => l(t('Add Layout'), 'admin/structure/layouts/add')))
-  );
 
   $options = array();
   $missing = array();
@@ -534,6 +580,7 @@ function project_browser_installation_task_list($active = NULL) {
   $tasks = array(
     'select_versions' => t('Select versions'),
     'install_dependencies' => t('Install Dependencies'),
+    'theme' => t('Enable themes'),
     'enable' => t('Enable projects'),
   );
 
@@ -1166,6 +1213,49 @@ function _project_browser_batch_install_releases_finished($success, $results, $o
   if (count($missing) > 0) {
     backdrop_goto('admin/modules/project-browser/install/install_dependencies');
   }
+  else {
+    project_browser_get_destination_after_install($projects);
+  }
+}
+
+/**
+ * Determines the form destination after installed projects.
+ */
+function project_browser_get_destination_after_install($projects) {
+  $layout = FALSE;
+  $theme = FALSE;
+  $module = FALSE;
+  foreach ($projects as $project) {
+    $layout = ($project['type'] = 'layout');
+    $theme = ($project['type'] = 'theme');
+    $module = ($project['type'] = 'module');
+  }
+
+  if ($layout) {
+    // Installed a layout and other project(s), continue the wizard. There's no
+    // step for layouts in the wizard, since there's nothing we could do there.
+    if ($theme || $module) {
+      if (!$theme) {
+        backdrop_set_message('layout! No theme!');
+        backdrop_goto('admin/modules/project-browser/install/enable');
+      }
+      else {
+        backdrop_set_message('layout!');
+        backdrop_goto('admin/modules/project-browser/install/theme');
+      }
+    }
+    // Installed only a layout, go straight to layout list.
+    else {
+      backdrop_set_message('layout!');
+      backdrop_goto('admin/structure/layouts');
+    }
+  }
+  // Only a theme, go to theme list.
+  elseif ($theme && !$module) {
+    backdrop_set_message('theme!');
+    backdrop_goto('admin/appearance');
+  }
+  // Only a module, jump to the module enable stage of the wizard.
   else {
     backdrop_goto('admin/modules/project-browser/install/enable');
   }
