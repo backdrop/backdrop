@@ -655,7 +655,7 @@ function project_browser_get_sort_widget($sort_options, $current_order, $current
   return theme('item_list', array(
       'items' => $sort_list,
       'type' => 'ul',
-      'attributes' => array('class' => array('project-browser-sort-list'))));
+      'attributes' => array('class' => array('project-browser-sort-list', 'clearfix'))));
 }
 
 

@@ -43,7 +43,9 @@ div.item-list ul.project-browser-servers-list li {
   display: inline;
   list-style-image: none;
   margin-right: 10px;
-}
+  float: left;
+  clear: both;
+}}
 
 div.item-list ul.project-browser-sort-list li a, 
 div.item-list ul.project-browser-servers-list li a {
@@ -115,13 +117,6 @@ a.show-more {
   position: relative;
 }
 
-div.project-status {
-  position: absolute;
-  right: 10px;
-  text-align: right;
-  top: 5px;
-}
-
 div.project-information {
   
 }
@@ -173,17 +168,6 @@ div.install-item-prefix {
   min-height: 1px;
 }
 
-#project-browser div#project-browser-main {
-  width: 75%;
-  float: left;
-  margin-right: 1%;
-}
-
-#project-browser div#project-browser-sidebar-right {
-  width: 23%;
-  float: right;
-}
-
 #project-browser div.project-browser-block {
   margin-bottom: 20px;
   background-color: #fff;
@@ -228,4 +212,27 @@ div.install-item-prefix {
 
 #backdrop-modal .project-item {
   border: none;
+}
+
+@media only screen and (min-width: 768px) {
+  #project-browser div#project-browser-main {
+    width: 75%;
+    float: left;
+    margin-right: 1%;
+  }
+
+  #project-browser div#project-browser-sidebar-right {
+    width: 23%;
+    float: right;
+  }
+  div.project-status {
+    position: absolute;
+    right: 10px;
+    text-align: right;
+    top: 5px;
+  }
+  div.item-list ul.project-browser-sort-list li, div.item-list ul.project-browser-servers-list li {
+    float: none;
+    clear: none;
+  }
 }
