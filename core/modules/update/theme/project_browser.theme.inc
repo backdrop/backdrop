@@ -133,7 +133,7 @@ function update_preprocess_project_browser_list(&$variables) {
 function update_preprocess_project_browser_project_dialog(&$variables) {
   update_preprocess_project_browser_project($variables);
   $project = $variables['project'];
-  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2')));
+  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li')));
 }
 
 /**
@@ -208,7 +208,7 @@ function theme_project_browser_project_description($variables) {
   $form['project_dialog_link'] = array(
     '#type' => 'link',
     '#href' => 'admin/modules/project-browser/project/' . $project['name'],
-    '#title' => t('details'),
+    '#title' => t('  details'),
     '#value' => t('details'),
     '#attributes' => array(
       'class' => array('use-ajax more-link'),
