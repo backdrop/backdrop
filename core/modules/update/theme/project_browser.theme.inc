@@ -159,7 +159,6 @@ function update_preprocess_project_browser_project(&$variables) {
       ), 
     )
   ); 
-  $variables['author'] = t('Author: @author', array('@author' => $project['author']));
   $variables['description'] = theme('project_browser_project_description', array('project' => $project));
   $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', array('@date' => format_date($project['last updated'], 'long'))) : '';
 

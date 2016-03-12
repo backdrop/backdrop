@@ -670,7 +670,6 @@ function project_browser_get_sort_options($full = FALSE) {
     'score' => array('method' => 'score', 'name' => t('Relevancy'), 'default_sort' => 'desc'),
     'usage' => array('method' => 'usage', 'name' => t('Most installed'), 'default_sort' => 'desc'),
     'title' => array('method' => 'title', 'name' => t('Title'), 'default_sort' => 'asc'),
-    'name' => array('method' => 'name', 'name' => t('Author'), 'default_sort' => 'asc'),
     'latest_release' => array('method' => 'latest_release', 'name' => t('Latest release'), 'default_sort' => 'desc'),
   );
 

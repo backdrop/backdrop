@@ -7,7 +7,6 @@
  * Available variables:
  * - $first: Whether or not this project item is the first one in the list
  * - $title: The title of the project
- * - $author: Ther author of the project
  * - $last_updated: A string representing when the project was last updated
  * - $description: The project description. This could be long.
  * - $extras: A string of any extra info that should go at the bottom
