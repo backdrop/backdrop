@@ -186,12 +186,11 @@ function update_menu() {
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
       'page callback' => 'backdrop_get_form',
-      'page arguments' => array('update_manager_install_form', $context),
+      'page arguments' => array('update_menu_install_links_redirect', $context),
       'access callback' => 'update_manager_access',
       'access arguments' => array(),
       'weight' => 25,
       'type' => MENU_LOCAL_ACTION,
-      'file' => 'update.manager.inc',
     );
     $items[$path . '/update'] = array(
       'page callback' => 'backdrop_get_form',
@@ -233,7 +232,7 @@ function update_menu() {
   );
 
   $items['admin/modules/project-browser'] = array(
-    'title' => 'Project Browser',
+    'title' => 'Browse downloads',
     'description' => 'Browse and search for new modules',
     'page callback' => 'project_browser_page',
     'page arguments' => array('module'),
@@ -247,9 +246,10 @@ function update_menu() {
     'page callback' => 'project_browser_installation_select_versions_form_reset',
     'access arguments' => array('use project browser'),
     'file' => 'update.browser.inc',
+    'type' => MENU_CALLBACK,
   );
 
-  $items['admin/modules/project-browser/modules'] = array(
+  $items['admin/modules/project-browser/module'] = array(
     'title' => 'Modules',
     'description' => 'Browse and search for new modules',
     'page callback' => 'project_browser_page',
@@ -269,7 +269,7 @@ function update_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['admin/modules/project-browser/themes'] = array(
+  $items['admin/modules/project-browser/theme'] = array(
     'title' => 'Themes',
     'description' => 'Browse and search for new themes',
     'page callback' => 'project_browser_page',
@@ -279,7 +279,7 @@ function update_menu() {
     'type' => MENU_LOCAL_TASK,
   );
 
-  $items['admin/modules/project-browser/layouts'] = array(
+  $items['admin/modules/project-browser/layout'] = array(
     'title' => 'Layouts',
     'description' => 'Browse and search for new layouts',
     'page callback' => 'project_browser_page',
@@ -308,6 +308,19 @@ function update_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Menu callback; route local task links to appropriate browser tabs.
+ */
+function update_menu_install_links_redirect($form, &$form_state, $context) {
+  if ($context == 'report') {
+    module_load_include('inc', 'update', 'update.manager');
+    return update_manager_install_form($form, $form_state, $context);
+  }
+  else {
+    backdrop_goto('admin/modules/project-browser/' . $context) ;
+  }
 }
 
 /**
