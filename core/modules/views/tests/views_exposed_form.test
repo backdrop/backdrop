@@ -35,10 +35,54 @@ class ViewsExposedFormTest extends ViewsSqlTest {
 
     views_invalidate_cache();
 
-    // Look whether ther reset button label changed.
+    // Look whether the reset button label changed.
     $this->backdropGet('test_rename_reset_button');
 
     $this->helperButtonHasLabel('edit-reset', $expected_label);
+  }
+
+  /**
+   * Test remembering exposed filters.
+   */
+  function testExposedRemember() {
+    $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
+    $this->backdropLogin($admin_user);
+
+    // Check that filters are remembered.
+    $query = array(
+      'type' => 'page',
+    );
+    $this->backdropGet('test_exposed_remember');
+    $this->assertFieldByName('type', 'All', 'Filter is set to the default with no query string.');
+    $this->backdropGet('test_exposed_remember', array('query' => $query));
+    $this->assertFieldByName('type', 'page', 'Filter is set when visiting by query string.');
+    $this->backdropGet('test_exposed_remember');
+    $this->assertFieldByName('type', 'page', 'Filter is remembered when the query string is removed.');
+
+    // Reset back to the default.
+    $query = array(
+      'type' => 'page',
+      'op' => 'Reset',
+    );
+    $this->backdropGet('test_exposed_remember', array('query' => $query));
+    $this->assertFieldByName('type', 'All', 'Filter is reset to default using Reset button.');
+
+    // Disable remembering.
+    $this->backdropGet('admin/structure/views/nojs/config-item/test_exposed_remember/default/filter/type');
+    $edit = array(
+      'options[expose][remember]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Apply'));
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Check that values are no longer remembered.
+    $query = array(
+      'type' => 'page',
+    );
+    $this->backdropGet('test_exposed_remember', array('query' => $query));
+    $this->assertFieldByName('type', 'page', 'Filter is set when visiting by query string.');
+    $this->backdropGet('test_exposed_remember');
+    $this->assertFieldByName('type', 'All', 'Filter is set to the default with no query string.');
   }
 
   /**

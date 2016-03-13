@@ -719,6 +719,30 @@ class CronRunTestCase extends BackdropWebTestCase {
     $result = state_get('common_test_cron');
     $this->assertEqual($result, 'success', 'Cron correctly handles exceptions thrown during hook_cron() invocations.');
   }
+
+  /**
+   * Tests that hook_flush_caches() is not invoked on every single cron run.
+   *
+   * @see system_cron()
+   */
+  public function testCronCacheExpiration() {
+    module_enable(array('system_cron_test'));
+    state_del('system_cron_test_flush_caches');
+    cache()->flush();
+
+    // Invoke cron the first time: hook_flush_caches() should be called and then
+    // get cached.
+    backdrop_cron_run();
+    $this->assertEqual(state_get('system_cron_test_flush_caches'), 1, 'hook_flush_caches() was invoked the first time.');
+    $cache = cache_get('system_cache_tables');
+    $this->assertEqual(empty($cache), FALSE, 'Cache is filled with cache table data.');
+
+    // Run cron again and ensure that hook_flush_caches() is not called.
+    state_del('system_cron_test_flush_caches');
+    backdrop_cron_run();
+    $this->assertNull(state_get('system_cron_test_flush_caches'), 'hook_flush_caches() was not invoked the second time.');
+  }
+
 }
 
 /**

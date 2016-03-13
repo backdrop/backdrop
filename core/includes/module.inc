@@ -323,15 +323,26 @@ function module_load_install($module) {
  *   The name of the included file, if successful; FALSE otherwise.
  */
 function module_load_include($type, $module, $name = NULL) {
+  static $files = array();
+
   if (!isset($name)) {
     $name = $module;
+  }
+
+  $key = $type . ':' . $module . ':' . $name;
+  if (isset($files[$key])) {
+    return $files[$key];
   }
 
   if (function_exists('backdrop_get_path')) {
     $file = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module) . "/$name.$type";
     if (is_file($file)) {
       require_once $file;
+      $files[$key] = $file;
       return $file;
+    }
+    else {
+      $files[$key] = FALSE;
     }
   }
   return FALSE;
@@ -368,20 +379,22 @@ function module_load_all_includes($type, $name = NULL) {
  * - Invoke hook_modules_installed().
  * - Invoke hook_modules_enabled().
  *
- * @param $module_list
+ * @param string[] $module_list
  *   An array of module names.
- * @param $enable_dependencies
+ * @param bool $enable_dependencies
  *   If TRUE, dependencies will automatically be added and enabled in the
  *   correct order. This incurs a significant performance cost, so use FALSE
  *   if you know $module_list is already complete and in the correct order.
  *
- * @return
+ * @return bool
  *   FALSE if one or more dependencies are missing, TRUE otherwise.
  *
  * @see hook_install()
  * @see hook_enable()
  * @see hook_modules_installed()
  * @see hook_modules_enabled()
+ * @see module_disable()
+ * @see backdrop_uninstall_modules()
  */
 function module_enable($module_list, $enable_dependencies = TRUE) {
   if ($enable_dependencies) {
@@ -515,12 +528,15 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
 /**
  * Disables a given set of modules.
  *
- * @param $module_list
+ * @param array $module_list
  *   An array of module names.
- * @param $disable_dependents
+ * @param bool $disable_dependents
  *   If TRUE, dependent modules will automatically be added and disabled in the
  *   correct order. This incurs a significant performance cost, so use FALSE
  *   if you know $module_list is already complete and in the correct order.
+ *
+ * @see backdrop_uninstall_modules()
+ * @see module_enable()
  */
 function module_disable($module_list, $disable_dependents = TRUE) {
   if ($disable_dependents) {

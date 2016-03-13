@@ -625,6 +625,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       'menu_options[main-menu]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
     // Change default parent item to Main menu, so we can assert more
     // easily.
     $edit = array(
@@ -667,6 +668,24 @@ class MenuNodeTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertOptionSelected('edit-menu-weight', 17, 'Menu weight correct in edit form');
+
+    // Disable Main menu as available menu to ensure the link stays when saving
+    // the node while menu options are not on the node form.
+    $edit = array(
+      'menu_options[main-menu]' => 0,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('node/' . $node->nid . '/edit', array(), t('Save'));
+
+    // Check that the link is still present.
+    $this->backdropGet('');
+    $this->assertLink($node_title);
+
+    // Re-enable Main menu as available menu, then remove the link.
+    $edit = array(
+      'menu_options[main-menu]' => 1,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
     // Edit the node and remove the menu link.
     $edit = array(

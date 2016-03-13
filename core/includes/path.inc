@@ -332,7 +332,8 @@ function backdrop_match_path($path, $patterns) {
  * backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL) makes this function available.
  *
  * @return
- *   The current Backdrop URL path.
+ *   The current Backdrop URL path. The path is untrusted user input and must be
+ *   treated as such.
  *
  * @see request_path()
  */
@@ -399,12 +400,15 @@ function path_load($conditions) {
  *   An array of the loaded paths, keyed by the $field parameter values.
  */
 function path_load_multiple(array $keys, $field, $langcode) {
-  $paths = db_select('url_alias')
-    ->fields('url_alias')
+  $subquery = db_select('url_alias')
     ->condition($field, $keys, 'IN')
     ->condition('langcode', $langcode)
-    ->orderBy('pid', 'DESC')
-    ->groupBy($field)
+    ->groupBy($field);
+  $subquery->addExpression('MAX(pid)', 'pid');
+
+  $paths = db_select('url_alias')
+    ->fields('url_alias')
+    ->condition('pid', $subquery, 'IN')
     ->execute()
     ->fetchAllAssoc($field, PDO::FETCH_ASSOC);
 

@@ -1,3 +1,9 @@
+[FileTaxonomyTermTestCase]
+name = Taxonomy term file test
+description = Tests adding a file to a non-node entity.
+group = File
+file = file.test
+
 [FileManagedFileElementTestCase]
 name = Managed file element test
 description = Tests the managed_file element type.

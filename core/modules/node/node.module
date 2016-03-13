@@ -2377,7 +2377,10 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * system. When adding a node listing to your module, be sure to use a dynamic
  * query created by db_select() and add a tag of "node_access". This will allow
  * modules dealing with node access to ensure only nodes to which the user has
- * access are retrieved, through the use of hook_query_TAG_alter().
+ * access are retrieved, through the use of hook_query_TAG_alter(). Tagging a
+ * query with "node_access" does not check the published/unpublished status of
+ * nodes, so the base query is responsible for ensuring that unpublished nodes
+ * are not displayed to inappropriate users.
  *
  * Note: Even a single module returning NODE_ACCESS_DENY from hook_node_access()
  * will block access to the node. Therefore, implementers should take care to
@@ -3106,7 +3109,7 @@ function _node_access_rebuild_batch_operation(&$context) {
     // Initiate multistep processing.
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {node}')->fetchField();
+    $context['sandbox']['max'] = db_query('SELECT COUNT(nid) FROM {node}')->fetchField();
   }
 
   // Process the next 20 nodes.
@@ -3230,12 +3233,12 @@ function node_action_info() {
     ),
     'node_promote_action' => array(
       'type' => 'node',
-      'label' => t('Promote content to front page'),
+      'label' => t('Promote content'),
       'callback' => 'node_promote_action',
     ),
     'node_unpromote_action' => array(
       'type' => 'node',
-      'label' => t('Remove content from front page'),
+      'label' => t('Remove promotion'),
       'callback' => 'node_unpromote_action',
     ),
     'node_delete_action' => array(

@@ -7,6 +7,18 @@
  */
 class BlockText extends Block {
   /**
+   * {@inheritdoc}
+   */
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+
+    $this->settings += array(
+      'content' => '',
+      'format' => NULL,
+    );
+  }
+
+  /**
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
@@ -33,16 +45,23 @@ class BlockText extends Block {
    *  Builds the block's configuration form.
    */
   function form(&$form, &$form_state) {
-    $form['title'] = array(
+    parent::form($form, $form_state);
+
+    // Hide the title display, as custom text blocks don't have "default" title
+    // from which they would inherit, so it's either a custom title or no title.
+    $form['title_display']['title_display']['#access'] = FALSE;
+
+    $form['title_display']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Display title'),
-      '#default_value' => !empty($this->settings['title']) ? $this->settings['title'] : '',
+      '#default_value' => $this->settings['title'],
+      '#maxlength' => 255,
     );
     $form['content'] = array(
       '#type' => 'text_format',
       '#title' => t('Block content'),
-      '#default_value' => !empty($this->settings['content']) ? $this->settings['content'] : '',
-      '#format' => !empty($this->settings['format']) ? $this->settings['format'] : NULL,
+      '#default_value' => $this->settings['content'],
+      '#format' => $this->settings['format'],
       '#rows' => 5,
     );
 
@@ -108,6 +127,8 @@ class BlockText extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
+    parent::formSubmit($form, $form_state);
+
     if (module_exists('block') && $form_state['values']['reusable']) {
       $delta = $form_state['values']['delta'];
       $this->settings = array_diff_key($this->settings, array('title' => '', 'content' => '', 'format' => ''));

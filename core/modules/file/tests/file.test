@@ -222,6 +222,140 @@ class FileFieldTestCase extends BackdropWebTestCase {
     $message = isset($message) ? $message : format_string('File %file is permanent.', array('%file' => $file->uri));
     $this->assertTrue($file->status == FILE_STATUS_PERMANENT, $message);
   }
+
+  /**
+   * Creates a temporary file, for a specific user.
+   *
+   * @param string $data
+   *   A string containing the contents of the file.
+   * @param int $uid
+   *   The user ID of the file owner.
+   *
+   * @return object
+   *   A file object, or FALSE on error.
+   */
+  function createTemporaryFile($data, $uid = NULL) {
+    $file = file_save_data($data);
+
+    if ($file) {
+      $file->uid = isset($uid) ? $uid : $this->admin_user->uid;
+      // Change the file status to be temporary.
+      $file->status = 0;
+      file_save($file);
+    }
+
+    return $file;
+  }
+}
+
+/**
+ * Tests adding a file to a non-node entity.
+ */
+class FileTaxonomyTermTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+
+  public function setUp() {
+    $modules[] = 'file';
+    $modules[] = 'taxonomy';
+    parent::setUp($modules);
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer taxonomy'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Creates a file field and attaches it to the "Tags" taxonomy vocabulary.
+   *
+   * @param $name
+   *   The field name of the file field to create.
+   * @param $uri_scheme
+   *   The URI scheme to use for the file field (for example, "private" to
+   *   create a field that stores private files or "public" to create a field
+   *   that stores public files).
+   */
+  protected function createAttachFileField($name, $uri_scheme) {
+    $field = array(
+      'field_name' => $name,
+      'type' => 'file',
+      'settings' => array(
+        'uri_scheme' => $uri_scheme,
+      ),
+      'cardinality' => 1,
+    );
+    field_create_field($field);
+    // Attach an instance of it.
+    $instance = array(
+      'field_name' => $name,
+      'label' => 'File',
+      'entity_type' => 'taxonomy_term',
+      'bundle' => 'tags',
+      'required' => FALSE,
+      'settings' => array(),
+      'widget' => array(
+        'type' => 'file_generic',
+        'settings' => array(),
+      ),
+    );
+    field_create_instance($instance);
+  }
+
+  /**
+   * Tests that a public file can be attached to a taxonomy term.
+   */
+  public function testTermFilePublic() {
+    $this->_testTermFile('public');
+  }
+
+  /**
+   * Tests that a private file can be attached to a taxonomy term.
+   */
+  public function testTermFilePrivate() {
+    $this->_testTermFile('private');
+  }
+
+  /**
+   * Runs tests for attaching a file field to a taxonomy term.
+   *
+   * @param $uri_scheme
+   *   The URI scheme to use for the file field, either "public" or "private".
+   */
+  protected function _testTermFile($uri_scheme) {
+    $field_name = strtolower($this->randomName());
+    $this->createAttachFileField($field_name, $uri_scheme);
+    // Get a file to upload.
+    $file = current($this->backdropGetTestFiles('text'));
+    // Add a filesize property to files as would be read by file_load().
+    $file->filesize = filesize($file->uri);
+    $langcode = LANGUAGE_NONE;
+    $edit = array(
+      "name" => $this->randomName(),
+    );
+    // Attach a file to the term.
+    $edit['files[' . $field_name . '_' . $langcode . '_0]'] = backdrop_realpath($file->uri);
+    $this->backdropPost("admin/structure/taxonomy/tags/add", $edit, t('Save'));
+    // Find the term ID we just created.
+    $tid = db_query_range('SELECT tid FROM {taxonomy_term_data} ORDER BY tid DESC', 0, 1)->fetchField();
+    $terms = entity_load('taxonomy_term', array($tid));
+    $term = $terms[$tid];
+    $fid = $term->{$field_name}[LANGUAGE_NONE][0]['fid'];
+    // Check that the uploaded file is present on the edit form.
+    $this->backdropGet("taxonomy/term/$tid/edit");
+    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fid]';
+    $this->assertFieldByXpath('//input[@type="hidden" and @name="' . $file_input_name . '"]', $fid, 'File is attached on edit form.');
+    // Edit the term and change name without changing the file.
+    $edit = array(
+      "name" => $this->randomName(),
+    );
+    $this->backdropPost("taxonomy/term/$tid/edit", $edit, t('Save'));
+    // Check that the uploaded file is still present on the edit form.
+    $this->backdropGet("taxonomy/term/$tid/edit");
+    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fid]';
+    $this->assertFieldByXpath('//input[@type="hidden" and @name="' . $file_input_name . '"]', $fid, 'File is attached on edit form.');
+    // Load term while resetting the cache.
+    $terms = entity_load('taxonomy_term', array($tid), array(), TRUE);
+    $term = $terms[$tid];
+    $this->assertTrue(!empty($term->{$field_name}[LANGUAGE_NONE]), 'Term has attached files.');
+    $this->assertEqual($term->{$field_name}[LANGUAGE_NONE][0]['fid'], $fid, 'Same File ID is attached to the term.');
+  }
 }
 
 /**
@@ -380,6 +514,119 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       $this->backdropPost(NULL, array(), t('Save'));
       $node = node_load($nid, NULL, TRUE);
       $this->assertTrue(empty($node->{$field_name}[LANGUAGE_NONE][0]['fid']), 'File was successfully removed from the node.');
+    }
+  }
+
+  /**
+   * Tests exploiting the temporary file removal of another user using fid.
+   */
+  function testTemporaryFileRemovalExploit() {
+    // Create a victim user.
+    $victim_user = $this->backdropCreateUser();
+
+    // Create an attacker user.
+    $attacker_user = $this->backdropCreateUser(array(
+      'access content',
+      'create page content',
+      'edit any page content',
+    ));
+
+    // Log in as the attacker user.
+    $this->backdropLogin($attacker_user);
+
+    // Perform tests using the newly created users.
+    $this->doTestTemporaryFileRemovalExploit($victim_user->uid, $attacker_user->uid);
+  }
+
+  /**
+   * Tests exploiting the temporary file removal for anonymous users using fid.
+   */
+  public function testTemporaryFileRemovalExploitAnonymous() {
+    // Set up an anonymous victim user.
+    $victim_uid = 0;
+
+    // Set up an anonymous attacker user.
+    $attacker_uid = 0;
+
+    // Set up permissions for anonymous attacker user.
+    user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array(
+      'access content' => TRUE,
+      'create page content' => TRUE,
+      'edit any page content' => TRUE,
+    ));
+
+    // In order to simulate being the anonymous attacker user, we need to log
+    // out here since setUp() has logged in the admin.
+    $this->backdropLogout();
+
+    // Perform tests using the newly set up users.
+    $this->doTestTemporaryFileRemovalExploit($victim_uid, $attacker_uid);
+  }
+
+  /**
+   * Helper for testing exploiting the temporary file removal using fid.
+   *
+   * @param int $victim_uid
+   *   The victim user ID.
+   * @param int $attacker_uid
+   *   The attacker user ID.
+   */
+  protected function doTestTemporaryFileRemovalExploit($victim_uid, $attacker_uid) {
+    // Use 'page' instead of 'article', so that the 'article' image field does
+    // not conflict with this test. If in the future the 'page' type gets its
+    // own default file or image field, this test can be made more robust by
+    // using a custom node type.
+    $type_name = 'page';
+    $field_name = 'test_file_field';
+    $this->createFileField($field_name, $type_name);
+
+    $test_file = $this->getTestFile('text');
+    foreach (array('nojs', 'js') as $type) {
+      // Create a temporary file owned by the anonymous victim user. This will be
+      // as if they had uploaded the file, but not saved the node they were
+      // editing or creating.
+      $victim_tmp_file = $this->createTemporaryFile('some text', $victim_uid);
+      $victim_tmp_file = file_load($victim_tmp_file->fid);
+      $this->assertTrue($victim_tmp_file->status != FILE_STATUS_PERMANENT, 'New file saved to disk is temporary.');
+      $this->assertFalse(empty($victim_tmp_file->fid), 'New file has a fid');
+      $this->assertEqual($victim_uid, $victim_tmp_file->uid, 'New file belongs to the victim user');
+
+      // Have attacker create a new node with a different uploaded file and
+      // ensure it got uploaded successfully.
+      $edit = array(
+        'title' => $type . '-title',
+      );
+
+      // Attach a file to a node.
+      $langcode = LANGUAGE_NONE;
+      $edit['files[' . $field_name . '_' . $langcode . '_0]'] = backdrop_realpath($test_file->uri);
+      $this->backdropPost("node/add/$type_name", $edit, 'Save');
+      $node = $this->backdropGetNodeByTitle($edit['title']);
+      $node_file = file_load($node->{$field_name}[$langcode][0]['fid']);
+      $this->assertFileExists($node_file, 'New file saved to disk on node creation.');
+      $this->assertEqual($attacker_uid, $node_file->uid, 'New file belongs to the attacker.');
+
+      // Ensure the file can be downloaded.
+      $this->backdropGet(file_create_url($node_file->uri));
+      $this->assertResponse(200, 'Confirmed that the generated URL is correct by downloading the shipped file.');
+
+      // "Click" the remove button (emulating either a nojs or js submission).
+      // In this POST request, the attacker "guesses" the fid of the victim's
+      // temporary file and uses that to remove this file.
+      $this->backdropGet('node/' . $node->nid . '/edit');
+      switch ($type) {
+        case 'nojs':
+          $this->backdropPost(NULL, array("{$field_name}[$langcode][0][fid]" => (string) $victim_tmp_file->fid), 'Remove');
+          break;
+        case 'js':
+          $button = $this->xpath('//input[@type="submit" and @value="Remove"]');
+          $this->backdropPostAJAX(NULL, array("{$field_name}[$langcode][0][fid]" => (string) $victim_tmp_file->fid), array((string) $button[0]['name'] => (string) $button[0]['value']));
+          break;
+      }
+
+      // The victim's temporary file should not be removed by the attacker's
+      // POST request.
+      $this->assertFileExists($victim_tmp_file);
     }
   }
 
@@ -1170,7 +1417,6 @@ class FilePrivateTestCase extends FileFieldTestCase {
 
     // Attempt to reuse the existing file when creating a new node, and confirm
     // that access is still denied.
-    //$this->backdropLogin($this->admin_user);
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$field_name . '[' . LANGUAGE_NONE . '][0][fid]'] = $node_file->fid;

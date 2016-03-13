@@ -1601,6 +1601,21 @@ function system_library_info() {
       array('system', 'ui.widget'),
     ),
   );
+  $libraries['ui.tooltip'] = array(
+    'title' => 'jQuery UI: Tooltip',
+    'website' => 'http://jqueryui.com/tooltip/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.tooltip.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.tooltip.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.position'),
+    ),
+  );
   $libraries['ui.widget'] = array(
     'title' => 'jQuery UI: Widget',
     'website' => 'http://jqueryui.com/widget/',
@@ -3340,9 +3355,20 @@ function system_cron() {
     }
   }
 
-  // Remove expired and temporary items from cache bins.
-  $core = array('cache', 'path', 'filter', 'page', 'menu');
-  $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
+  // Delete expired cache entries.
+  // Avoid invoking hook_flush_cashes() on every cron run because some modules
+  // use this hook to perform expensive rebuilding operations (which are only
+  // designed to happen on full cache clears), rather than just returning a
+  // list of cache tables to be cleared.
+  $cache_object = cache_get('system_cache_tables');
+  if (empty($cache_object)) {
+    $core = array('cache', 'path', 'filter', 'page', 'menu');
+    $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
+    cache_set('system_cache_tables', $cache_bins);
+  }
+  else {
+    $cache_bins = $cache_object->data;
+  }
   foreach ($cache_bins as $bin) {
     cache($bin)->garbageCollection();
   }
