@@ -1,0 +1,45 @@
+deploy:
+  branch:
+    server: backdrop.vps-private.net
+    username: backdrop
+    dir: '{home}/github/branch/{branch}'
+    env_vars:
+      domain: {branch}.backdrop.vps-private.net
+      database_user: backdrop_{branch}
+      database_name: backdrop_{branch}
+      site_name: '{branch} testing site'
+      site_mail: 'testing@{domain}'
+      account_name: admin
+      account_mail: 'testing@{domain}' 
+    scripts:
+      init: '{deploy_dir}/core/scripts/init_deploy.sh'
+      before: '{deploy_dir}/core/scripts/before_deploy.sh'
+      after: '{deploy_dir}/core/scripts/after_deploy.sh'
+      remove: '{deploy_dir}/core/scripts/remove.sh'
+    webhooks:
+      init: http://github.backdrop.expert/webhook/init
+      before: http://github.backdrop.expert/webhook/before
+      after: http://github.backdrop.expert/webhook/after
+      remove: http://github.backdrop.expert/webhook/remove
+  pull_request:
+    server: backdrop.vps-private.net
+    username: backdrop
+    dir: '{home}/github/pr/{pr_number}'
+    env_vars:
+      domain: {pr_number}.backdrop.vps-private.net
+      database_user: backdrop_{pr_number}
+      database_name: backdrop_{pr_number}
+      site_name: '{pr_number} testing site'
+      site_mail: 'testing@{domain}'
+      account_name: admin
+      account_mail: 'testing@{domain}' 
+    scripts:
+      init: '{deploy_dir}/core/scripts/init_deploy.sh'
+      before: '{deploy_dir}/core/scripts/before_deploy.sh'
+      after: '{deploy_dir}/core/scripts/after_deploy.sh'
+      remove: '{deploy_dir}/core/scripts/remove.sh'
+    webhooks:
+      init: http://github.backdrop.expert/webhook/init
+      before: http://github.backdrop.expert/webhook/before
+      after: http://github.backdrop.expert/webhook/after
+      remove: http://github.backdrop.expert/webhook/remove
