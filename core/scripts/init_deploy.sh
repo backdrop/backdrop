@@ -1,6 +1,4 @@
 #!/bin/sh
-echo "INIT"
-printenv
 
 #set site pacth
 SITEPATH="$HOME/domains/$DOMAIN"
