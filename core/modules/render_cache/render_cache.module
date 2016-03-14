@@ -224,7 +224,7 @@ function render_cache_backdrop_render(&$elements)
 
   if (!empty($matches[0])) {
     $form_storage = render_cache_form_storage();
-
+    
     foreach ($matches[2] as $key => $form_serial_number) {
       $rendered_element = $form_storage[$form_serial_number]['render'];
       $output = str_replace($matches[0][$key], $rendered_element, $output);
@@ -267,21 +267,21 @@ function render_cache_render(&$elements)
   }
 
 
-/*  if (isset($elements['#type']) && $elements['#type'] == 'form') {
+  if (isset($elements['#type']) && $elements['#type'] == 'form') {
     // Do not cache form render ....
     return render_cache_original_render($elements);
   }
-  if (isset($elements['#type']) && $elements['#type'] == 'submit') {
+/*  if (isset($elements['#type']) && $elements['#type'] == 'submit') {
     // Do not cache form render ....
     return render_cache_original_render($elements);
   }
-/*
+*/
   if (isset($elements['#entity_type']) && $elements['#entity_type'] == 'node') {
     // It's hard to cache this data ....
     return render_cache_original_render($elements);
   }
 
-*/
+
   if (isset($elements['#type']) && $elements['#type'] == 'scripts') {
     // No need to cache window.Backdrop = ....
     return render_cache_original_render($elements);
