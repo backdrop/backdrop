@@ -343,7 +343,7 @@ function project_browser_installation_select_versions_form_submit($form, &$form_
     'operations' => $operations,
     'finished' => '_project_browser_batch_install_releases_finished',
     'title' => t('Installing projects'),
-    'init_message' => t('Installing modules...'),
+    'init_message' => t('Installing projects...'),
     'progress_message' => t('Installed @current out of @total.'),
     'error_message' => t('Installation has encountered an error.'),
     'file' => backdrop_get_path('module', 'update') . '/update.browser.inc',
