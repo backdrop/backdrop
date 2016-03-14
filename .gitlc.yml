@@ -4,9 +4,9 @@ deploy:
     username: qa
     dir: '{home}/github/branch/{branch}'
     env_vars:
-      domain: {branch}.qa.backdrop.vps-private.net
-      database_user: backdrop_{branch}
-      database_name: backdrop_{branch}
+      domain: '{branch}.qa.backdrop.vps-private.net'
+      database_user: 'backdrop_{branch}'
+      database_name: 'backdrop_{branch}'
       site_name: '{branch} testing site'
       site_mail: 'testing@{domain}'
       account_name: admin
@@ -26,9 +26,9 @@ deploy:
     username: qa
     dir: '{home}/github/pr/{pr_number}'
     env_vars:
-      domain: {pr_number}.qa.backdrop.vps-private.net
-      database_user: backdrop_{pr_number}
-      database_name: backdrop_{pr_number}
+      domain: '{pr_number}.qa.backdrop.vps-private.net'
+      database_user: 'backdrop_{pr_number}'
+      database_name: 'backdrop_{pr_number}'
       site_name: '{pr_number} testing site'
       site_mail: 'testing@{domain}'
       account_name: admin
