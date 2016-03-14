@@ -11,13 +11,8 @@ deploy:
       account_mail: 'testing@{branch}.qa.backdrop.vps-private.net' 
     scripts:
       init: '{deploy_dir}/core/scripts/init_deploy.sh'
-      before: '{deploy_dir}/core/scripts/before_deploy.sh'
-      after: '{deploy_dir}/core/scripts/after_deploy.sh'
-      remove: '{deploy_dir}/core/scripts/remove.sh'
     webhooks:
       init: http://github.backdrop.expert/webhook/init
-      before: http://github.backdrop.expert/webhook/before
-      after: http://github.backdrop.expert/webhook/after
       remove: http://github.backdrop.expert/webhook/remove
   pull_request:
     server: backdrop.vps-private.net
@@ -31,11 +26,7 @@ deploy:
       account_mail: 'testing@{pr_number}.qa.backdrop.vps-private.net' 
     scripts:
       init: '{deploy_dir}/core/scripts/init_deploy.sh'
-      before: '{deploy_dir}/core/scripts/before_deploy.sh'
-      after: '{deploy_dir}/core/scripts/after_deploy.sh'
       remove: '{deploy_dir}/core/scripts/remove.sh'
     webhooks:
       init: http://github.backdrop.expert/webhook/init
-      before: http://github.backdrop.expert/webhook/before
-      after: http://github.backdrop.expert/webhook/after
       remove: http://github.backdrop.expert/webhook/remove
