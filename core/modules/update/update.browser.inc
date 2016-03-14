@@ -629,7 +629,8 @@ function project_browser_installation_enable_form_submit($form, &$form_state) {
   // Enable these all at once so that dependencies are handled properly.
   module_enable($enable_queue);
   backdrop_flush_all_caches();
-  backdrop_goto('admin/modules');
+  backdrop_set_message(t('Installation is complete.'));
+  backdrop_goto('admin/modules/project-browser');
 }
 
 /**
@@ -1342,7 +1343,7 @@ function project_browser_get_destination_after_install() {
   }
   // Only a theme, go to theme list.
   elseif ($theme && !$module) {
-    backdrop_set_message(t('One or more themes were downloaded. You may enable them now'));
+    backdrop_set_message(t('One or more themes were downloaded. You may enable them now.'));
     backdrop_goto('admin/appearance');
   }
   // Only a module, jump to the module enable stage of the wizard.

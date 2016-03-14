@@ -349,8 +349,16 @@ function update_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       }
       break;
 
-    case 'admin/modules/project-browser':
     case 'admin/modules/project-browser/modules':
+    case 'admin/modules/project-browser':
+      $item = menu_get_item('admin/modules');
+      if ($item['access']) {
+        $item['title'] = t('View all installed modules');
+        $data['actions']['output'][] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
+      }
     case 'admin/modules/project-browser/themes':
     case 'admin/modules/project-browser/layouts':
       $item = menu_get_item('admin/modules/manual-install');
