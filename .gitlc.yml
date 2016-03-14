@@ -26,7 +26,6 @@ deploy:
       account_mail: 'testing@{pr_number}.qa.backdrop.vps-private.net' 
     scripts:
       init: '{deploy_dir}/core/scripts/init_deploy.sh'
-      remove: '{deploy_dir}/core/scripts/remove.sh'
     webhooks:
       init: http://github.backdrop.expert/webhook/init
       remove: http://github.backdrop.expert/webhook/remove
