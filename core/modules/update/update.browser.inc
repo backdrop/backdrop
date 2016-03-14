@@ -309,7 +309,7 @@ function project_browser_installation_select_versions_form($form, &$form_state, 
  * Submit handler for the reset/cancel link.
  */
 function project_browser_installation_select_versions_form_reset() {
-  $_SESSION['project_browser_install_list'] = array();
+  project_browser_install_queue_clear();
   backdrop_goto('admin/modules/project-browser');
 }
 
@@ -418,45 +418,103 @@ function project_browser_installation_enable_page($type = 'enable') {
  * @param $projects
  *   An array of projects to get the releases for.
  */
-function project_browser_installation_theme_form($form, &$form_state, $projects) {
+function project_browser_theme_installation_form($form, &$form_state, $projects) {
   $form['instructions'] = array(
   '#type' => 'item',
   '#markup' => t('The themes you selected have been successfully installed.
-    You may enable installed themes on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
+    You may enable installed themes here or on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
   );
 
+  $theme_default = config_get('system.core', 'theme_default');
   $themes = system_rebuild_theme_data();
 
   foreach ($projects as $project) {
     if ($project['type'] == 'theme' && isset($themes[$project['name']])) {
-      $form[$project['name']] = array(
+      $theme = $project['name'];
+      $form[$theme] = array(
         '#type' => 'container',
         '#attributes' => array(
           'class' => array('browser-installed-theme'),
         ),
       );
-      if (file_exists($themes[$project['name']]->info['screenshot'])) {
-        $form[$project['name']]['image'] = array(
+      if (file_exists($themes[$theme]->info['screenshot'])) {
+        $form[$theme]['image'] = array(
           '#type' => 'item',
-          '#markup' => theme('image', array('uri' => $themes[$project['name']]->info['screenshot'])),
+          '#markup' => theme('image', array('uri' => $themes[$theme]->info['screenshot'])),
           '#attributes' => array(
             'class' => array('browser-installed-theme-image'),
           ),
         );
       }
-      $form[$project['name']]['name'] = array(
+      $form[$theme]['name'] = array(
         '#type' => 'item',
-        '#markup' => $themes[$project['name']]->info['name'],
+        '#markup' => $themes[$theme]->info['name'],
       );
+      if ($theme == $theme_default) {
+        $form[$theme]['is_default'] = array(
+          '#type' => 'markup',
+          '#markup' => t('Default theme'),
+        );
+      }
+      else {
+        $form[$theme]['set'] = array(
+          '#type' => 'submit',
+          '#value' => 'Set as default theme',
+          '#name' => $theme . '-submit',
+          '#submit' => array('project_browser_installation_theme_set'),
+        );
+      }
     }
   }
-  $form['next_link'] = array(
-    '#type' => 'link',
-    '#title' => 'Next: Install downloaded modules',
-    '#href' => 'admin/modules/project-browser/install/enable',
-  );
+
+  if (in_array('module', project_browser_get_installed_types())) {
+    $form['next_link'] = array(
+      '#type' => 'link',
+      '#title' => 'Next: Install downloaded modules',
+      '#href' => 'admin/modules/project-browser/install/enable',
+    );
+  }
+  else {
+    $form['next_link'] = array(
+      '#type' => 'submit',
+      '#value' => t('Finish'),
+      '#submit' => array('project_browser_installation_theme_finish'),
+    );
+  }
   
   return $form;
+}
+
+
+/**
+ * Submit callback for project_browser_theme_installation_form().
+ *
+ * Ends the installation wizard.
+ */
+function project_browser_installation_theme_finish($form, &$form_state) {
+  project_browser_installation_select_versions_form_reset();
+}
+
+
+/**
+ * Sets a selected theme as the default site theme.
+ */
+function project_browser_installation_theme_set($form, &$form_state) {
+  $theme = $form_state['triggering_element']['#array_parents'][0];
+  // Get current list of themes.
+  $themes = list_themes();
+
+  // Check if the specified theme is one recognized by the system.
+  if (!empty($themes[$theme])) {
+    // Enable the theme if it is currently disabled.
+    if (empty($themes[$theme]->status)) {
+     theme_enable(array($theme));
+    }
+    // Set the default theme.
+    config_set('system.core', 'theme_default', $theme);
+    menu_rebuild();
+  }
+  dpm($theme);
 }
 
 
@@ -533,11 +591,18 @@ function project_browser_installation_enable_form($form, &$form_state, $projects
         '#weight' => 1,
       );
 
-      $form['submit'] = array(
+      $form['actions'] = array('#type' => 'actions');
+      $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#submit' => array('project_browser_installation_enable_form_submit'),
         '#value' => t('Enable modules'),
-        '#weight' => 99,
+      );
+      $form['actions']['cancel'] = array(
+        '#type' => 'link',
+        '#name' => 'cancel',
+        '#title' => t('Cancel'),
+        '#href' => 'admin/modules/project-browser/reset',
+        '#options' => array(),
       );
     }
 
@@ -917,6 +982,13 @@ function project_browser_install_queue_remove($project_name) {
 }
 
 /**
+ * Clears the install queue.
+ */
+function project_browser_install_queue_clear() {
+  $_SESSION['project_browser_install_list'] = array();
+}
+
+/**
  * Gets the currently queued releases from the session.
  */
 function project_browser_get_queued_releases() {
@@ -1214,45 +1286,63 @@ function _project_browser_batch_install_releases_finished($success, $results, $o
     backdrop_goto('admin/modules/project-browser/install/install_dependencies');
   }
   else {
-    project_browser_get_destination_after_install($projects);
+    project_browser_get_destination_after_install();
   }
 }
 
 /**
+ * Determines the types of installed projects.
+ */
+function project_browser_get_installed_types() {
+  $types = array();
+  $projects = project_browser_get_installed_projects();
+  foreach ($projects as $project) {
+    $types[$project['type']] = $project['type'];
+  }
+
+  return $types;
+}
+
+
+
+/**
  * Determines the form destination after installed projects.
  */
-function project_browser_get_destination_after_install($projects) {
-  $layout = FALSE;
-  $theme = FALSE;
-  $module = FALSE;
-  foreach ($projects as $project) {
-    $layout = ($project['type'] = 'layout');
-    $theme = ($project['type'] = 'theme');
-    $module = ($project['type'] = 'module');
-  }
+function project_browser_get_destination_after_install() {
+  $types = project_browser_get_installed_types();
+
+  $layout = in_array('layout', $types);
+  $theme = in_array('theme', $types);
+  $module = in_array('module', $types);
+
+  $layout_message = t('One or more layouts were installed. You may enable layouts on the !link page.', array('!link' => l(t('Layout'), 'admin/structure/layouts')));
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no
     // step for layouts in the wizard, since there's nothing we could do there.
     if ($theme || $module) {
       if (!$theme) {
-        backdrop_set_message('layout! No theme!');
+        backdrop_set_message($layout_message);
         backdrop_goto('admin/modules/project-browser/install/enable');
       }
       else {
-        backdrop_set_message('layout!');
+        backdrop_set_message($layout_message);
         backdrop_goto('admin/modules/project-browser/install/theme');
       }
     }
     // Installed only a layout, go straight to layout list.
     else {
-      backdrop_set_message('layout!');
+      backdrop_set_message($layout_message);
       backdrop_goto('admin/structure/layouts');
     }
   }
+  // Theme and module, go to theme stage of wizard.
+  elseif ($theme && $module) {
+    backdrop_goto('admin/modules/project-browser/install/theme');
+  }
   // Only a theme, go to theme list.
   elseif ($theme && !$module) {
-    backdrop_set_message('theme!');
+    backdrop_set_message(t('One or more themes were downloaded. You may enable them now'));
     backdrop_goto('admin/appearance');
   }
   // Only a module, jump to the module enable stage of the wizard.
