@@ -8,9 +8,9 @@ deploy:
       database_user: 'backdrop_{branch}'
       database_name: 'backdrop_{branch}'
       site_name: '{branch} testing site'
-      site_mail: 'testing@{domain}'
+      site_mail: 'testing@{branch}.qa.backdrop.vps-private.net'
       account_name: admin
-      account_mail: 'testing@{domain}' 
+      account_mail: 'testing@{branch}.qa.backdrop.vps-private.net' 
     scripts:
       init: '{deploy_dir}/core/scripts/init_deploy.sh'
       before: '{deploy_dir}/core/scripts/before_deploy.sh'
@@ -30,9 +30,9 @@ deploy:
       database_user: 'backdrop_{pr_number}'
       database_name: 'backdrop_{pr_number}'
       site_name: '{pr_number} testing site'
-      site_mail: 'testing@{domain}'
+      site_mail: 'testing@{pr_number}.qa.backdrop.vps-private.net'
       account_name: admin
-      account_mail: 'testing@{domain}' 
+      account_mail: 'testing@{pr_number}.qa.backdrop.vps-private.net' 
     scripts:
       init: '{deploy_dir}/core/scripts/init_deploy.sh'
       before: '{deploy_dir}/core/scripts/before_deploy.sh'
