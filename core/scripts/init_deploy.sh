@@ -1,6 +1,7 @@
 #!/bin/sh
+# This script create a website based on ENV variables provided by qithab-auto
 
-#set site pacth
+#set site path
 SITEPATH="$HOME/domains/$DOMAIN"
 
 # Go to domain dir
