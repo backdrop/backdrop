@@ -36,7 +36,9 @@ function project_browser_test_menu() {
  */
 function update_test_xml($project = NULL, $version = '1.x') {
   $path = url(backdrop_get_path('module', 'update') . '/tests/update_test_xml/' . $project . '.xml', array('absolute' => TRUE)); 
-  print file_get_contents($path);
+  $parsed_url = backdrop_parse_url($path);
+  $filepath = $parsed_url['path'];
+  print file_get_contents($filepath);
   exit();
 }
 

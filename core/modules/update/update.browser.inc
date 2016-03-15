@@ -1233,8 +1233,9 @@ function project_browser_get_project_release_data($project) {
  */
 function _project_browser_batch_install_release($release_name, $project, &$context) {
   $release = project_browser_get_release($release_name, $project);
+
   module_load_include('inc', 'update', 'update.manager');
-  $url = url($release['download_link'], array('absolute' => TRUE));
+  $url = file_create_url($release['download_link']);
   $result = update_manager_download_project($url, TRUE);
 
   if ($result['success']) {

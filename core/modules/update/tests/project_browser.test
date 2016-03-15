@@ -130,7 +130,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
 
     // Check that dependencies install page loaded with the recommended
     // dependency selected.
-    $dependencies_page = $this->xpath('//h1[contains(@id, "page-title") and normalize-space(text()) = "Install Dependencies"]');
+    $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Install Dependencies"]');
     $this->assertTrue($dependencies_page, 'The Install Dependencies page was loaded');
     $this->assertText($module_two . ' ' . $module_two_data['recommended']);
     
@@ -141,7 +141,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Install'));
     
     // Check that enable page loaded.
-    $dependencies_page = $this->xpath('//h1[contains(@id, "page-title") and normalize-space(text()) = "Enable modules"]');
+    $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Enable modules"]');
     $this->assertTrue($dependencies_page, 'The Enable modules page was loaded');
     
     // Test that the test module was really downloaded
