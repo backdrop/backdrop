@@ -106,7 +106,7 @@ function update_preprocess_project_browser_list(&$variables) {
   $filter_content = backdrop_get_form('project_browser_filters_form', $variables['type']);
   $filters['project_browser_filters_block'] = array(
     '#theme' => 'project_browser_block',
-    '#title' => t('Filters'),
+    '#title' => t('Filter search'),
     '#content' => backdrop_render($filter_content),
   );
   $variables['filters'] = render($filters);
@@ -130,7 +130,6 @@ function update_preprocess_project_browser_list(&$variables) {
 function update_preprocess_project_browser_project_dialog(&$variables) {
   update_preprocess_project_browser_project($variables);
   $project = $variables['project'];
-  dpm($project);
   $variables['project_page'] = l(t('View on BackdropCMS.org'), $project['project url']);
   $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li')));
 }

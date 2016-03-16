@@ -504,7 +504,6 @@ function project_browser_installation_theme_set($form, &$form_state) {
     config_set('system.core', 'theme_default', $theme);
     menu_rebuild();
   }
-  dpm($theme);
 }
 
 
@@ -677,7 +676,6 @@ function project_browser_filters_form($form, &$form_state, $type) {
   $form['search_text'] = array(
     '#type' => 'textfield',
     '#size' => '25',
-    '#title' => t('Search String'),
     '#default_value' => isset($_SESSION['project_browser_text_filter_' . $type]) ? $_SESSION['project_browser_text_filter_' . $type] : '',
   );
 
