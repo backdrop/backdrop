@@ -130,6 +130,8 @@ function update_preprocess_project_browser_list(&$variables) {
 function update_preprocess_project_browser_project_dialog(&$variables) {
   update_preprocess_project_browser_project($variables);
   $project = $variables['project'];
+  dpm($project);
+  $variables['project_page'] = l(t('View on BackdropCMS.org'), $project['project url']);
   $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li')));
 }
 

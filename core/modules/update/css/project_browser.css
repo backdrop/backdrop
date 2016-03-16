@@ -92,6 +92,10 @@ a.show-more {
   font-size: 0.9em;
 }
 
+.project-page {
+  font-size: 0.9em;
+}
+
 .project-image {
   float: left;
   margin-right: 10px;
@@ -194,6 +198,7 @@ div.install-item-prefix {
 
 .project-dialog-description {
   margin-top: 1em;
+  border-top: 1px solid #ccc;
 }
 
 .project-dialog-info {
@@ -208,6 +213,7 @@ div.install-item-prefix {
 
 #backdrop-modal .project-status {
   position: relative;
+  right: 0;
 }
 
 #backdrop-modal .project-item {

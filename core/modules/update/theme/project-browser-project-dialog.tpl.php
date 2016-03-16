@@ -20,29 +20,29 @@
 
 <div class="project-item">
   <div class="project-dialog-header clearfix" >
-    <div class="project-dialog-info" >
-      <div class="project-title">
-        <?php print $title; ?>
-      </div>
-      
-      <div class="project-updated">
-        <?php print $last_updated; ?>
-      </div>
-      
+    <div class="project-title">
+      <?php print $title; ?>
+    </div>
+    
+    <div class="project-updated">
+      <?php print $last_updated; ?>
+    </div>
+    <div class="project-page">
+      <?php print $project_page; ?>
+    </div>
+    <div class="project-extra">
+      <?php print $extras; ?>
+    </div>
+    <div class="project-status">
+        <?php print $status; ?>
     </div>
   </div>
 
-  <div class="project-status">
-      <?php print $status; ?>
-  </div>
   
   <div class="project-dialog-description">
     <?php print $description; ?>
   </div>
   
-  <div class="project-extra">
-    <?php print $extras; ?>
-  </div>
   
   <div class='clearfix'></div>
 </div>
