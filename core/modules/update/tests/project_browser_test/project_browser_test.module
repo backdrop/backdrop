@@ -20,14 +20,6 @@ function project_browser_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['project_browser_test/categories/%'] = array(
-    'title' => 'Test Query page',
-    'description' => "Tests the ability to fetch and display projects, and filter them appropriately.",
-    'page callback' => 'project_browser_test_query',
-    'page arguments' => array(1, 2),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
   return $items;
 }
 
@@ -47,17 +39,6 @@ function update_test_xml($project = NULL, $version = '1.x') {
  */
 function project_browser_test_query($query, $type, $version = 1) {
   switch ($query) {
-    case 'categories':
-      if (!isset($type)) {
-        print backdrop_json_encode(t('You must specify a project type.'));
-        exit();
-      }
-      
-      $categories['project_browser_test'] = project_browser_test_get_categories($type);
-      
-      print backdrop_json_encode($categories);
-      exit();
-    
     case 'query':
       // Check that we have valid data
       if (!isset($version)) {
@@ -80,13 +61,6 @@ function project_browser_test_query($query, $type, $version = 1) {
         'page' => isset($_GET['page']) ? (int) $_GET['page'] : 0,
       );
       
-      if (isset($_GET['categories'])) {
-        $categories = unserialize($_GET['categories']);
-        if (is_array($categories) AND !empty($categories)) {
-          $filters['categories'] = $categories;
-        }
-      }
-      
       // Pass them off to the project_browser_server_get_results() function
       $results = project_browser_test_get_results($filters);
       
@@ -94,31 +68,6 @@ function project_browser_test_query($query, $type, $version = 1) {
       
       exit();
   }
-}
-
-/**
- * Returns some static categories
- */
-function project_browser_test_get_categories($type) {
-  $categories = array();
-  
-  switch ($type) {
-    case 'module':
-      $categories = array(
-        'admin' => "Administrative",
-        'search' => "Search",
-        'user_management' => "User Management",
-      );
-      break;
-      
-    case 'theme':
-      $categories = array(
-        'dark' => "Dark",
-        'light' => "Light",
-      );
-  }
-
-  return $categories;
 }
 
 /**
@@ -148,19 +97,6 @@ function project_browser_test_get_results($filters) {
         unset($projects[$name]);
       }
     }
-  }
-  
-  // Filter out projects based on categories number
-  if (isset($filters['categories']) AND is_array($filters['categories']) AND !empty($filters['categories'])) {
-    $filtered = array();
-    foreach ($projects as $name => $project) {
-      foreach ($project['categories'] as $category) {
-        if (in_array($category, $filters['categories'])) {
-          $filtered[$name] = $project;
-        }
-      }
-    }
-    $projects = $filtered;
   }
 
   // Filter out projects based on the text query
@@ -197,7 +133,6 @@ function project_browser_test_projects() {
     'author' => 'docwilmot',
     'description' => "Support module for update module testing",
     'versions' => array(1),
-    'categories' => array('admin', 'search'),
     'image' => '',
     'usage' => '542312',
     'project url' => '',
@@ -221,7 +156,6 @@ function project_browser_test_projects() {
     'author' => 'docwilmot',
     'description' => "Support module for update module testing",
     'versions' => array(1),
-    'categories' => array('admin', 'search'),
     'image' => '',
     'usage' => '542312',
     'project url' => '',
@@ -247,7 +181,6 @@ function project_browser_test_projects() {
     'author' => 'docwilmot',
     'description' => "Support module for update module testing",
     'versions' => array(1),
-    'categories' => array('admin', 'search'),
     'image' => '',
     'usage' => '542312',
     'project url' => '',
@@ -271,7 +204,6 @@ function project_browser_test_projects() {
     'author' => 'docwilmot',
     'description' => "Support theme for update module testing",
     'versions' => array(1),
-    'categories' => array('admin', 'search'),
     'image' => '',
     'usage' => '542312',
     'project url' => '',
@@ -294,7 +226,6 @@ function project_browser_test_projects() {
     'author' => 'docwilmot',
     'description' => "Support layout for update module testing",
     'versions' => array(1),
-    'categories' => array('admin', 'search'),
     'image' => '',
     'usage' => '542312',
     'project url' => '',

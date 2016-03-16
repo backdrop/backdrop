@@ -36,17 +36,7 @@ function project_browser_page($type) {
     'type' => $type,
   );
 
-  // Todo: this disables the categories fetching function of PB. Delete this
-  // line once BackdropCMS.org initiates project categories.
-  unset($_SESSION['project_browser_category_filter_' . $type]);
-
   // Add filters.
-  if (isset($_SESSION['project_browser_category_filter_' . $type])) {
-    $categories = array_filter($_SESSION['project_browser_category_filter_' . $type]);
-    if (!empty($categories)) {
-      $filters['categories'] = project_browser_prepare_categories($categories, $type);
-    }
-  }
   if (isset($_SESSION['project_browser_text_filter_' . $type])) {
     $filters['text'] = $_SESSION['project_browser_text_filter_' . $type];
   }
@@ -691,19 +681,6 @@ function project_browser_filters_form($form, &$form_state, $type) {
     '#default_value' => isset($_SESSION['project_browser_text_filter_' . $type]) ? $_SESSION['project_browser_text_filter_' . $type] : '',
   );
 
-  // Add the categories filter if there are categories.
-  if ($categories = project_browser_get_categories($type)) {
-    $form['categories'] = array(
-      '#type' => 'select',
-      '#title' => t('Categories'),
-      '#multiple' => TRUE,
-      '#options' => $categories,
-      '#prefix' => '<div id="project-browser-filters-categories">',
-      '#suffix' => '</div>',
-      '#default_value' => isset($_SESSION['project_browser_category_filter_' . $type]) ? $_SESSION['project_browser_category_filter_' . $type] : array(),
-    );
-  }
-
   $form['project_type'] = array(
     '#type' => 'value',
     '#value' => $type,
@@ -800,83 +777,12 @@ function project_browser_get_sort_options($full = FALSE) {
  */
 function project_browser_filters_form_submit($form, &$form_state) {
   $type = $form_state['values']['project_type'];
-  if (isset($form_state['values']['categories'])) {
-    $_SESSION['project_browser_category_filter_' . $type] = $form_state['values']['categories'];
-  }
-  else {
-    $_SESSION['project_browser_category_filter_' . $type] = array();
-  }
   if ($form_state['clicked_button']['#id'] == 'edit-clear') {
     $_SESSION['project_browser_text_filter_' . $type] = array();
   }
   else {
     $_SESSION['project_browser_text_filter_' . $type] = $form_state['values']['search_text'];
   }
-}
-
-/**
- * Returns all available categories for a project type.
- *
- * @param string $type
- *   The type of project to get the categories for. Example: 'module' or
- *   'theme' or 'layout'.
- *
- * @return
- *   Array containing all available categories or FALSE if no categories.
- */
-function project_browser_get_categories($type) {
-  $categories = array();
-
-  $categories_raw = project_browser_fetch_categories($type);
-  if (is_array($categories_raw) AND !empty($categories_raw)) {
-    foreach ($categories_raw as $url => $cats) {
-      foreach ($cats as $key => $value) {
-        // Create a new key so that there are no duplicate categories from
-        // different sites.
-        $new_key = preg_replace('/[^a-z0-9_]+/', '_', strtolower($value));
-        $categories[$new_key] = $value;
-      }
-    }
-  }
-
-  if (is_array($categories) AND !empty($categories)) {
-    ksort($categories);
-
-    return $categories;
-  }
-  return FALSE;
-}
-
-/**
- * Prepares the categories for sending to the server as filters.
- *
- * @param $raw_cats
- *   An array of categories from $form_state['values'].
- * @param $type
- *   The type of project to prepare the categories for, eg 'module' or 'theme' or 'layout'.
- */
-function project_browser_prepare_categories($raw_cats, $type) {
-  $categories = project_browser_fetch_categories($type);
-
-  // Set the value of the categories to true if it is selected.
-  foreach ($categories as $url => $cats) {
-    foreach ($cats as $key => $value) {
-      $new_key = preg_replace('/[^a-z0-9_]+/', '_', strtolower($value));
-      if (isset($raw_cats[$new_key]) AND $raw_cats[$new_key]) {
-        $categories[$url][$key] = TRUE;
-      }
-      else {
-        unset($categories[$url][$key]);
-      }
-    }
-
-    // Unset the parent if there are no children.
-    if (empty($categories[$url])) {
-      unset($categories[$url]);
-    }
-  }
-
-  return $categories;
 }
 
 /**
@@ -1013,7 +919,6 @@ function project_browser_get_queued_releases() {
  * array(
  *   'version' => '1', // The Major Version of Backdrop that is running on the Client
  *   'text' => 'views', // The text that was entered as the search query, or '' if none
- *   'categories' => array() // The categories that were selected, if any
  *   'type' => 'module', // The type of project being searched
  *   'page' => 3, // The zero-based page number
  *   'items_per_page' => 12, // How many results are requested per page
@@ -1067,16 +972,6 @@ function project_browser_fetch_results($filters) {
 
   $local_filters = $filters;
 
-  // Send only the relevant categories to the server.
-  if (isset($filters['categories'])) {
-    if (!isset($filters['categories'][$server['url']])) {
-      // Don't call the server for results if categories are being used, and
-      // none of them belong to the server.
-      return array();
-    }
-    $local_filters['categories'] = $filters['categories'][$server['url']];
-  }
-
   // Use XMLRPC if it is set.
   if ($server['method'] == 'xmlrpc') {
     $results = xmlrpc($server['url'], array(
@@ -1094,9 +989,6 @@ function project_browser_fetch_results($filters) {
   // Use json if it is set.
   if ($server['method'] == 'json') {
     $local_filters['method'] = 'query';
-    if (isset($local_filters['categories'])) {
-      $local_filters['categories'] = serialize($local_filters['categories']);
-    }
 
     $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1?' . http_build_query($local_filters, FALSE, '&');
 
@@ -1116,75 +1008,6 @@ function project_browser_fetch_results($filters) {
   cache_set($cid, $results, 'cache', strtotime("+24 hours"));
 
   return $results;
-}
-
-/**
- * Fetches categories from the server based on the type of project.
- *
- * @param $type
- *   The type of project we are getting categories for.
- * @param $use_server
- *   (Optional) The server to use. Defaults to 'all'.
- *
- * @return
- *   Returns an array of the categories.
- */
-function project_browser_fetch_categories($type) {
-  // Todo: this disables category querying to save bandwidth. Re-enable when
-  // categories are working on BackdropCMS.org.
-  return array();
-
-  $server = project_browser_get_server();
-
-  // Attempt to retrieve the cached version of this page.
-  $cid = md5('categories_' . $type . serialize($server));
-
-  if ($cache = cache_get($cid)) {
-    return $cache->data;
-  }
-  else {
-    $categories = array();
-
-    // Use xmlrpc if it is set.
-    if ($server['method'] == 'xmlrpc') {
-      $categories = xmlrpc($server['url'], array(
-        'project_browser_server.fetch_categories' => array($type),
-      ));
-
-      // Check for errors.
-      if ($error = xmlrpc_error() AND $error->is_error) {
-        backdrop_set_message(t("Encountered an error when trying to fetch categories from @name. Error @code : @message",
-          array('@name' => $server['name'], '@code' => $error->code, '@message' => $error->message)));
-        return array();
-      }
-    }
-
-    // Use json if it is set.
-    if ($server['method'] == 'json') {
-      $params = array(
-        'method' => 'categories',
-        'type' => $type,
-      );
-      $response = backdrop_http_request($server['url'] . '/categories/' . $type . '?' . http_build_query($params, FALSE, '&'));
-      if ($response->code == '200') {
-        $categories = backdrop_json_decode($response->data);
-      }
-      else {
-        backdrop_set_message(t("Encountered an error when trying to fetch categories from @name. Error @code : @message",
-          array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
-        return array();
-      }
-    }
-
-    if (!empty($categories)) {
-      $categories[$server['url']] = $categories;
-    }
-
-    // Cache this for 24 hours.
-    cache_set($cid, $categories, 'cache', strtotime("+24 hours"));
-  }
-
-  return $categories;
 }
 
 /**
