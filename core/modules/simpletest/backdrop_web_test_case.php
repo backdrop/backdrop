@@ -2014,6 +2014,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Retrieve a Backdrop path or an absolute path and JSON decode the result.
    */
   protected function backdropGetAJAX($path, array $options = array(), array $headers = array()) {
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     return backdrop_json_decode($this->backdropGet($path, $options, $headers));
   }
@@ -2276,6 +2277,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Submit the POST request.
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
     $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Ajax-Token'), '1', 'Ajax response header found.');

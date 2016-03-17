@@ -3802,9 +3802,14 @@ function backdrop_is_cli() {
 
 /**
  * Detects if this is an HTML HTTP request.
+ *
+ * This liberal detection considers all requests that lack an Accept header or
+ * X-Requested-With (as set by jQuery and other JavaScript libraries) to be
+ * an HTML request. Any other types of requests must specify X-Requested-With
+ * in order to be returned in an alternative format.
  */
 function backdrop_is_html() {
-  return ((empty($_SERVER['HTTP_ACCEPT']) || $_SERVER['HTTP_ACCEPT'] === '*/*') && empty($_SERVER['X_REQUESTED_WITH'])) || strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0;
+  return strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0 || empty($_SERVER['HTTP_ACCEPT']) || empty($_SERVER['HTTP_X_REQUESTED_WITH']);
 }
 
 /**
