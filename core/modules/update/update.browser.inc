@@ -47,7 +47,7 @@ function project_browser_page($type) {
     $filters['sort'] = $_SESSION['project_browser_sort_filter_' . $type];
   }
 
-  $filters['items_per_page'] = 10;
+  $filters['items_per_page'] = 20;
   $filters['page'] = isset($_GET['page']) ? $_GET['page'] : 0;
 
   // Get the projects to display here based on the filters.
@@ -63,11 +63,11 @@ function project_browser_page($type) {
 
   // Add the pager.
   $total = $results['total'];
-  $num_per_page = 10;
-  $page = pager_default_initialize($total, $num_per_page);
-  $offset = $num_per_page * $page;
+  $items_per_page = 20;
+  $page = pager_default_initialize($total, $items_per_page);
+  $offset = $items_per_page * $page;
   $start = ($total) ? $offset + 1 : 0;
-  $finish = $offset + $num_per_page;
+  $finish = $offset + $items_per_page;
   if ($finish > $total) {
     $finish = $total;
   }
