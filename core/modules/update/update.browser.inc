@@ -784,6 +784,32 @@ function project_browser_filters_form_submit($form, &$form_state) {
 }
 
 /**
+ * Shows an install button for the Install Queue block.
+ */
+function project_browser_advanced_block($form, &$form_state) {
+  $advanced['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $advanced['advanced']['manual_link'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/modules/manual-install',
+    '#title' => t('Install manually'),
+    '#value' => t('details'),
+    '#attributes' => array(
+      'class' => array('use-ajax more-link'),
+      'id' => array('title-link'),
+      'data-dialog' => 'true',
+      'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
+    ),
+  );
+
+  return $advanced;
+}
+
+/**
  * Checks if a project is enabled.
  *
  * @param string $type

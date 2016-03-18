@@ -118,6 +118,10 @@ function update_preprocess_project_browser_list(&$variables) {
     '#content' => project_browser_get_install_list(),
   );
   $variables['install_list'] = render($install_list);
+
+  // Add the advanced options block.
+  $advanced_content = backdrop_get_form('project_browser_advanced_block');
+  $variables['advanced'] = backdrop_render($advanced_content);
 }
 
 /**

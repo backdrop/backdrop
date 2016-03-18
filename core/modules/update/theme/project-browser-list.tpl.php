@@ -21,6 +21,7 @@
   <div id="project-browser-sidebar-right" class="project-browser-region">
     <?php print $filters; ?>
     <?php print $install_list; ?>
+    <?php print $advanced; ?>
   </div>
   
 </div>
