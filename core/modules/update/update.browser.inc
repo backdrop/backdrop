@@ -427,7 +427,10 @@ function project_browser_installation_theme_form($form, &$form_state, $projects)
     if ($project['type'] == 'theme' && isset($themes[$project['name']])) {
       $theme = $project['name'];
       $form[$theme] = array(
-        '#type' => 'container',
+        '#type' => 'fieldset',
+        '#collapsed' => FALSE,
+        '#collapsible' => FALSE,
+        '#title' => $themes[$theme]->info['name'],
         '#attributes' => array(
           'class' => array('browser-installed-theme'),
         ),
@@ -441,10 +444,6 @@ function project_browser_installation_theme_form($form, &$form_state, $projects)
           ),
         );
       }
-      $form[$theme]['name'] = array(
-        '#type' => 'item',
-        '#markup' => $themes[$theme]->info['name'],
-      );
       if ($theme == $theme_default) {
         $form[$theme]['is_default'] = array(
           '#type' => 'markup',
