@@ -17,11 +17,11 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp('update', 'project_browser_test');  // Enable any modules required for the test
+    parent::setUp('update', 'installer_browser_test');  // Enable any modules required for the test
 
     // Set the default server variable
-    $server_url = url('project_browser_test', array('absolute' => TRUE));
-    config_set('update.settings', 'project_browser_server', array(
+    $server_url = url('installer_browser_test', array('absolute' => TRUE));
+    config_set('update.settings', 'installer_browser_server', array(
       'url' => $server_url,
       'name' => 'Test Server',
       'method' => 'json',
@@ -41,17 +41,17 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     // Attempt to fetch the default projects
     $edit = array();
     $edit['search_text'] = '';
-    $this->backdropPost('admin/modules/project-browser/modules', $edit, t('Filter'));
+    $this->backdropPost('admin/modules/installer-browser/modules', $edit, t('Filter'));
     $this->assertText(t('Showing 1 to'), 'Module browser loaded');
 
     $edit = array();
     $edit['search_text'] = '';
-    $this->backdropPost('admin/modules/project-browser/themes', $edit, t('Filter'));
+    $this->backdropPost('admin/modules/installer-browser/themes', $edit, t('Filter'));
     $this->assertText(t('Showing 1 to'), 'Theme browser loaded');
 
     $edit = array();
     $edit['search_text'] = '';
-    $this->backdropPost('admin/modules/project-browser/layouts', $edit, t('Filter'));
+    $this->backdropPost('admin/modules/installer-browser/layouts', $edit, t('Filter'));
     $this->assertText(t('Showing 1 to'), 'Layout browser loaded');
     }
 
@@ -59,41 +59,41 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     // Test searching for a project by name.
     $edit = array();
     $edit['search_text'] = 'aaa';
-    $this->backdropPost('admin/modules/project-browser/modules', $edit, t('Filter'));
+    $this->backdropPost('admin/modules/installer-browser/modules', $edit, t('Filter'));
     $this->assertText('Showing 1 to');
   }
 
   public function testProjectBrowserProjectEnabled() {
     // Make sure project enabled detection works
-    module_load_include('inc', 'update', 'update.browser');
-    $this->assertTrue(_project_browser_is_project_enabled('module', 'update'), t('Make sure project enabled detection works.'));
+    module_load_include('inc', 'installer', 'installer.browser');
+    $this->assertTrue(_installer_browser_is_project_enabled('module', 'update'), t('Make sure project enabled detection works.'));
   }
 
   public function testProjectBrowserAddRemoveQueue() {
     // Refresh the page
-    $this->backdropGet('admin/modules/project-browser/modules');
+    $this->backdropGet('admin/modules/installer-browser/modules');
 
     // Simulate adding a project to the install queue
-    $this->backdropGet('admin/project-browser/nojs/install-queue/add/ddd_update_test', array('query' => array('destination' => 'admin/modules/project-browser')));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/ddd_update_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->assertNoText('Install queue is empty.');
     $this->assertNoText('Error: The project was not found.');
 
     // Simulate removing a project from the install queue
-    $this->backdropGet('admin/project-browser/nojs/install-queue/remove/ddd_update_test', array('query' => array('destination' => 'admin/modules/project-browser')));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/remove/ddd_update_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->assertText('Install queue is empty.');
     $this->assertNoText('Error: The project was not found.');
   }
 
   public function testProjectBrowserInstallPage() {
     // Refresh the page
-    $this->backdropGet('admin/modules/project-browser/modules');
+    $this->backdropGet('admin/modules/installer-browser/modules');
     $module_one = 'ddd_update_test';
     $module_two = 'eee_update_test';
 
     // Attempt to install a project
-    $this->backdropGet('admin/project-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/project-browser')));
-    $this->backdropGet('admin/project-browser/nojs/install-queue/add/' . $module_two, array('query' => array('destination' => 'admin/modules/project-browser')));
-    $this->backdropPost('admin/modules/project-browser/modules', array(), t('Install'));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/installer-browser')));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_two, array('query' => array('destination' => 'admin/modules/installer-browser')));
+    $this->backdropPost('admin/modules/installer-browser/modules', array(), t('Install'));
     
     // Check that this is the install page
     $this->assertText("You're about to install");
@@ -106,15 +106,15 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertText($module_two_data['title'] . ' ' . $module_two_data['recommended']);
     
     // Check that two versions of EEE Update test are listed
-    $releases = $this->xpath('//div[contains(@class, "project-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-update-test-release-name")]');
+    $releases = $this->xpath('//div[contains(@class, "installer-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-update-test-release-name")]');
     $this->assertEqual(count($releases), 2, 'Two releases available for EEE Update test.');  
     
     // Cancel and go back to project list
-    $this->backdropGet('admin/modules/project-browser/reset');
+    $this->backdropGet('admin/modules/installer-browser/reset');
 
     // Check project installs
-    $this->backdropGet('admin/project-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/project-browser')));
-    $this->backdropPost('admin/modules/project-browser/modules', array(), t('Install'));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/installer-browser')));
+    $this->backdropPost('admin/modules/installer-browser/modules', array(), t('Install'));
 
     // Check that this is the install page
     $this->assertText("You're about to install");
@@ -174,7 +174,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
    *   The recommended version.
    */
   protected function getProjectData($test_module) {
-    module_load_include('inc', 'update', 'update.browser');
+    module_load_include('inc', 'installer', 'installer.browser');
     module_load_include('inc', 'update', 'update.compare');
     // Build the filters.
     $backdrop_version = explode('.', BACKDROP_CORE_COMPATIBILITY);
@@ -182,8 +182,8 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
       'version' => $backdrop_version[0],
       'type' => 'module',
     );
-    $results = project_browser_fetch_results($filters);
-    $release_data = project_browser_get_project_release_data($results['projects'][$test_module]);
+    $results = installer_browser_fetch_results($filters);
+    $release_data = installer_browser_get_project_release_data($results['projects'][$test_module]);
     $project_data = array(
       'existing_major' => 0,
       'existing_version' => 0,

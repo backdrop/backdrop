@@ -38,7 +38,7 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   public static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'module');
+    return (installer_get_package_type($directory) == 'module');
   }
 
   public static function canUpdate($project_name) {
@@ -131,7 +131,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'theme');
+    return (installer_get_package_type($directory) == 'theme');
   }
 
   public static function canUpdate($project_name) {
@@ -184,7 +184,7 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'layout');
+    return (installer_get_package_type($directory) == 'layout');
   }
 
   public static function canUpdate($project_name) {

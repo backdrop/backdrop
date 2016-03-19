@@ -11,16 +11,16 @@
  *   An associative array containing:
  *     - current_task : the current task
  */
-function update_preprocess_project_browser_install(&$variables) {
-  module_load_include('inc', 'update', 'update.browser');
+function update_preprocess_installer_browser_install(&$variables) {
+  module_load_include('inc', 'installer', 'installer.browser');
   // Add the themed list.
-  $variables['task_list'] = project_browser_installation_task_list($variables['current_task']);
+  $variables['task_list'] = installer_browser_installation_task_list($variables['current_task']);
 }
 
 /**
  * Add some variables for the projects install queue theme.
  */
-function update_preprocess_project_browser_install_queue(&$variables) {
+function update_preprocess_installer_browser_install_queue(&$variables) {
   $build = array();
   if (empty($variables['projects'])) {
     $build['empty_text'] = array(
@@ -30,12 +30,12 @@ function update_preprocess_project_browser_install_queue(&$variables) {
   else {
     foreach ($variables['projects'] as $project) {
       $build['queued-item-' . $project['name']] = array(
-        '#prefix' => "<div class='project-browser-install-queue-item'>",
-        '#markup' => project_browser_add_remove_queue_link($project['name'], $project['title'], 'remove-queue-link'),
+        '#prefix' => "<div class='installer-browser-install-queue-item'>",
+        '#markup' => installer_browser_add_remove_queue_link($project['name'], $project['title'], 'remove-queue-link'),
         '#suffix' => "</div>",
       );
     }
-    $build['install-link'] = backdrop_get_form('project_browser_install_button_form');
+    $build['install-link'] = backdrop_get_form('installer_browser_install_button_form');
   }
 
   // Add the install button.
@@ -47,7 +47,7 @@ function update_preprocess_project_browser_install_queue(&$variables) {
  *
  * @param $variables
  */
-function update_preprocess_project_browser_block(&$variables) {
+function update_preprocess_installer_browser_block(&$variables) {
   // Add the title and content variables.
   $variables['title'] = $variables['element']['#title'];
   $variables['content'] = $variables['element']['#content'];
@@ -60,9 +60,9 @@ function update_preprocess_project_browser_block(&$variables) {
  *   An associative array containing:
  *     - projects_list : array of all projects.
  */
-function update_preprocess_project_browser_list(&$variables) {
-  module_load_include('inc', 'update', 'update.browser');
-  backdrop_add_css(backdrop_get_path('module', 'update') . '/css/project_browser.css');
+function update_preprocess_installer_browser_list(&$variables) {
+  module_load_include('inc', 'installer', 'installer.browser');
+  backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
 
   if (is_array($variables['projects_list']) AND !empty($variables['projects_list'])) {
     $content = '';
@@ -88,7 +88,7 @@ function update_preprocess_project_browser_list(&$variables) {
     // Theme each individual project and add to the list.
     foreach ($variables['projects_list'] as $project) {
       $row = array();
-      $row[] = theme('project_browser_project', array('project' => $project, 'first' => NULL));
+      $row[] = theme('installer_browser_project', array('project' => $project, 'first' => NULL));
       $rows[] = $row;
     }
     $content .= theme('table', array('header' => $headers, 'rows' => $rows));
@@ -103,24 +103,24 @@ function update_preprocess_project_browser_list(&$variables) {
   $variables['pager'] = theme('pager', array('tags' => NULL));
 
   // Add the filters.
-  $filter_content = backdrop_get_form('project_browser_filters_form', $variables['type']);
-  $filters['project_browser_filters_block'] = array(
-    '#theme' => 'project_browser_block',
+  $filter_content = backdrop_get_form('installer_browser_filters_form', $variables['type']);
+  $filters['installer_browser_filters_block'] = array(
+    '#theme' => 'installer_browser_block',
     '#title' => t('Filter search'),
     '#content' => backdrop_render($filter_content),
   );
   $variables['filters'] = render($filters);
 
   // Add the install list.
-  $install_list['project_browser_filters_block'] = array(
-    '#theme' => 'project_browser_block',
+  $install_list['installer_browser_filters_block'] = array(
+    '#theme' => 'installer_browser_block',
     '#title' => t('Install queue'),
-    '#content' => project_browser_get_install_list(),
+    '#content' => installer_browser_get_install_list(),
   );
   $variables['install_list'] = render($install_list);
 
   // Add the advanced options block.
-  $advanced_content = backdrop_get_form('project_browser_advanced_block', $variables['type']);
+  $advanced_content = backdrop_get_form('installer_browser_advanced_block', $variables['type']);
   $variables['advanced'] = backdrop_render($advanced_content);
 }
 
@@ -131,8 +131,8 @@ function update_preprocess_project_browser_list(&$variables) {
  *   An associative array containing:
  *     - project : associative array of project variables.
  */
-function update_preprocess_project_browser_project_dialog(&$variables) {
-  update_preprocess_project_browser_project($variables);
+function update_preprocess_installer_browser_project_dialog(&$variables) {
+  update_preprocess_installer_browser_project($variables);
   $project = $variables['project'];
   $variables['project_page'] = l(t('View on BackdropCMS.org'), $project['project url']);
   $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li')));
@@ -145,13 +145,13 @@ function update_preprocess_project_browser_project_dialog(&$variables) {
  *   An associative array containing:
  *     - project : associative array of project variables.
  */
-function update_preprocess_project_browser_project(&$variables) {
-  module_load_include('inc', 'update', 'update.browser');
+function update_preprocess_installer_browser_project(&$variables) {
+  module_load_include('inc', 'installer', 'installer.browser');
   $project = $variables['project'];
 
   $variables['title'] = l(
     $project['title'], 
-    'admin/modules/project-browser/project/' . $project['name'],
+    'admin/modules/installer-browser/project/' . $project['name'],
     array(
       'attributes' => array(
         'class' => array('use-ajax'),
@@ -161,7 +161,7 @@ function update_preprocess_project_browser_project(&$variables) {
       ), 
     )
   ); 
-  $variables['description'] = theme('project_browser_project_description', array('project' => $project));
+  $variables['description'] = theme('installer_browser_project_description', array('project' => $project));
   $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', array('@date' => format_date($project['last updated'], 'long'))) : '';
 
   $extras = array();
@@ -184,7 +184,7 @@ function update_preprocess_project_browser_project(&$variables) {
 
   // Check if the project is installed.
   $found = backdrop_get_filename($project['type'], $project['name']);
-  if (_project_browser_is_project_enabled($project['type'], $project['name'])) {
+  if (_installer_browser_is_project_enabled($project['type'], $project['name'])) {
     $variables['status'] = '<div class="install-disabled">Already installed</div>';
     $variables['install'] = '';
   }
@@ -196,14 +196,14 @@ function update_preprocess_project_browser_project(&$variables) {
   }
   else {
     $variables['status'] = '';
-    $variables['install'] = project_browser_add_remove_queue_link($project['name']);
+    $variables['install'] = installer_browser_add_remove_queue_link($project['name']);
   }
 }
 
 /**
  * Builds the truncated description on the project list.
  */
-function theme_project_browser_project_description($variables) {
+function theme_installer_browser_project_description($variables) {
   backdrop_add_library('system', 'backdrop.ajax');
 
   $project = $variables['project'];
@@ -212,7 +212,7 @@ function theme_project_browser_project_description($variables) {
   );
   $form['project_dialog_link'] = array(
     '#type' => 'link',
-    '#href' => 'admin/modules/project-browser/project/' . $project['name'],
+    '#href' => 'admin/modules/installer-browser/project/' . $project['name'],
     '#title' => t('  details'),
     '#value' => t('details'),
     '#attributes' => array(

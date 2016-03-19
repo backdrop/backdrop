@@ -3,7 +3,7 @@
 /**
  * Implements hook_menu().
  */
-function project_browser_test_menu() {
+function installer_browser_test_menu() {
   $items['core/modules/update/tests/update_test_xml/%/%'] = array(
     'title' => 'XML feed page',
     'description' => "Deliver release info as an XML file.",
@@ -12,10 +12,10 @@ function project_browser_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['project_browser_test/query/%/%'] = array(
+  $items['installer_browser_test/query/%/%'] = array(
     'title' => 'Test Query page',
     'description' => "Tests the ability to fetch and display projects, and filter them appropriately.",
-    'page callback' => 'project_browser_test_query',
+    'page callback' => 'installer_browser_test_query',
     'page arguments' => array(1, 2, 3),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -27,7 +27,7 @@ function project_browser_test_menu() {
  * Page callback. Outputs release information for test projects as XML data.
  */
 function update_test_xml($project = NULL, $version = '1.x') {
-  $path = url(backdrop_get_path('module', 'update') . '/tests/update_test_xml/' . $project . '.xml', array('absolute' => TRUE)); 
+  $path = url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml/' . $project . '.xml', array('absolute' => TRUE)); 
   $parsed_url = backdrop_parse_url($path);
   $filepath = $parsed_url['path'];
   print file_get_contents($filepath);
@@ -37,7 +37,7 @@ function update_test_xml($project = NULL, $version = '1.x') {
 /**
  * Page callback. Generates json based on the input filters
  */
-function project_browser_test_query($query, $type, $version = 1) {
+function installer_browser_test_query($query, $type, $version = 1) {
   switch ($query) {
     case 'query':
       // Check that we have valid data
@@ -61,8 +61,8 @@ function project_browser_test_query($query, $type, $version = 1) {
         'page' => isset($_GET['page']) ? (int) $_GET['page'] : 0,
       );
       
-      // Pass them off to the project_browser_server_get_results() function
-      $results = project_browser_test_get_results($filters);
+      // Pass them off to the installer_browser_server_get_results() function
+      $results = installer_browser_test_get_results($filters);
       
       print backdrop_json_encode($results);
       
@@ -73,8 +73,8 @@ function project_browser_test_query($query, $type, $version = 1) {
 /**
  * Returns projects based on the filters
  */
-function project_browser_test_get_results($filters) {
-  $projects = project_browser_test_projects();
+function installer_browser_test_get_results($filters) {
+  $projects = installer_browser_test_projects();
   
   $results = array(
     'total' => count($projects),
@@ -122,7 +122,7 @@ function project_browser_test_get_results($filters) {
 /**
  * Returns some static projects
  */
-function project_browser_test_projects() {
+function installer_browser_test_projects() {
   $projects = array();
   
   $projects['aaa_update_test'] = array(
@@ -136,9 +136,9 @@ function project_browser_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     ),
     'last updated' => '12342521',
     'maintenance status' => 'Actively maintained',
@@ -159,9 +159,9 @@ function project_browser_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     ),
     'last updated' => '12342522',
     'maintenance status' => 'Actively maintained',
@@ -184,9 +184,9 @@ function project_browser_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     ),
     'last updated' => '12342523',
     'maintenance status' => 'Actively maintained',
@@ -207,9 +207,9 @@ function project_browser_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     ),
     'last updated' => '12342511',
     'maintenance status' => 'Actively maintained',
@@ -229,9 +229,9 @@ function project_browser_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'update') . '/tests/update_test_xml', array('absolute' => TRUE)),
+      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/update_test_xml', array('absolute' => TRUE)),
     ),
     'last updated' => '12342531',
     'maintenance status' => 'Actively maintained',

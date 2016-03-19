@@ -6,9 +6,9 @@
  * Available variables:
  * - $title: The title of the block
  * - $content: The content of the block
- * These are defined in project_browser_preprocess_project_browser_block()
+ * These are defined in installer_browser_preprocess_installer_browser_block()
  * 
- * @see project_browser_preprocess_project_browser_block()
+ * @see installer_browser_preprocess_installer_browser_block()
  */
 ?>
 <div class="<?php print implode(' ', $classes); ?>">

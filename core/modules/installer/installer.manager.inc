@@ -56,7 +56,7 @@
  *
  * @see installer_manager_update_form_validate()
  * @see installer_manager_update_form_submit()
- * @see update_menu()
+ * @see installer_menu()
  * @ingroup forms
  */
 function installer_manager_update_form($form, $form_state = array(), $context) {
@@ -329,7 +329,7 @@ function installer_manager_update_form_submit($form, &$form_state) {
     'init_message' => t('Preparing to download selected updates'),
     'operations' => $operations,
     'finished' => 'installer_manager_download_batch_finished',
-    'file' => backdrop_get_path('module', 'update') . '/update.manager.inc',
+    'file' => backdrop_get_path('module', 'installer') . '/installer.manager.inc',
   );
   batch_set($batch);
 }
@@ -452,7 +452,7 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     // instantiate a FileTransferLocal and invoke update_authorize_run_update()
     // directly.
     if (fileowner($project_real_location) == fileowner(conf_path())) {
-      module_load_include('inc', 'update', 'update.authorize');
+      module_load_include('inc', 'installer', 'installer.authorize');
       $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
       update_authorize_run_update($filetransfer, $updates);
     }
@@ -460,7 +460,7 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     // credentials and invoke update_authorize_run_update() indirectly with
     // whatever FileTransfer object authorize.php creates for us.
     else {
-      system_authorized_init('update_authorize_run_update', backdrop_get_path('module', 'update') . '/update.authorize.inc', array($updates), t('Update manager'));
+      system_authorized_init('update_authorize_run_update', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', array($updates), t('Update manager'));
       $form_state['redirect'] = system_authorized_get_url();
     }
   }
@@ -754,7 +754,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
   );
 
   if (fileowner($project_real_location) == fileowner(conf_path())) {
-    module_load_include('inc', 'update', 'update.authorize');
+    module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
 
     if ($browser) {
@@ -789,7 +789,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
       );
     }
     else {
-      system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'update') . '/update.authorize.inc', $arguments, t('Update manager'));
+      system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', $arguments, t('Update manager'));
       return array(
         'redirect' => TRUE,
       );
@@ -895,7 +895,7 @@ function installer_manager_file_get($url) {
   $cache_directory = _installer_manager_cache_directory();
   $local = $cache_directory . '/' . backdrop_basename($parsed_url['path']);
 
-  if (!file_exists($local) || update_delete_file_if_stale($local)) {
+  if (!file_exists($local) || installer_delete_file_if_stale($local)) {
     return system_retrieve_file($url, $local, FALSE, FILE_EXISTS_REPLACE);
   }
   else {
