@@ -276,6 +276,15 @@ function update_menu() {
     'weight' => 10,
     'type' => MENU_LOCAL_TASK,
   );
+  $items['admin/modules/project-browser/bulk/%'] = array(
+    'title' => 'Install by machine name',
+    'description' => 'Install multiple projects by listing machine names.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('project_browser_bulk_install_form', 4),
+    'access arguments' => array('use project browser'),
+    'file' => 'update.browser.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['admin/modules/project-browser/project/%'] = array(
     'title' => 'Modules',
     'description' => 'Project details',
