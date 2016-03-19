@@ -413,7 +413,7 @@ function project_browser_installation_enable_page($type = 'enable') {
  * @param $projects
  *   An array of projects to get the releases for.
  */
-function project_browser_theme_installation_form($form, &$form_state, $projects) {
+function project_browser_installation_theme_form($form, &$form_state, $projects) {
   $form['instructions'] = array(
   '#type' => 'item',
   '#markup' => t('The themes you selected have been successfully installed.
@@ -482,7 +482,7 @@ function project_browser_theme_installation_form($form, &$form_state, $projects)
 
 
 /**
- * Submit callback for project_browser_theme_installation_form().
+ * Submit callback for project_browser_installation_theme_form().
  *
  * Ends the installation wizard.
  */
