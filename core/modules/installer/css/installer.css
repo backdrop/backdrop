@@ -245,3 +245,7 @@ div.install-item-prefix {
 .browser-installed-theme img {
   max-width: 300px;
 }
+
+th.installer-project-name {
+  width: 50%;
+}

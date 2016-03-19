@@ -89,7 +89,7 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
     return $form;
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/css/update.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'installer') . '/css/installer.css';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
@@ -229,7 +229,7 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
   $headers = array(
     'title' => array(
       'data' => t('Name'),
-      'class' => array('update-project-name'),
+      'class' => array('installer-project-name'),
     ),
     'installed_version' => t('Installed version'),
     'recommended_version' => t('Recommended version'),
