@@ -1,0 +1,7 @@
+name = BBB Update test
+description = Support module for update module testing.
+package = Testing
+version = BACKDROP_VERSION
+backdrop = 1.x
+hidden = TRUE
+type = module

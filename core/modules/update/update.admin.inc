@@ -53,22 +53,6 @@ function update_settings($form, &$form_state) {
     '#description' => t('You can choose to send e-mail only if a security update is available, or to be notified about all newer versions. If there are updates available of Backdrop CMS or any of your installed modules, themes, and layouts, your site will always print a message on the <a href="@status_report">status report</a> page, and will also display an error message on administration pages if there is a security update.', array('@status_report' => url('admin/reports/status')))
   );
 
-  $form['server'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Project Browser server settings'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-  );
-  $form['server']['project_browser_servers'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Repositories'),
-    '#default_value' => config_get('project_browser.settings', 'project_browser_servers'),
-    '#description' => t("Add new repositories to use for the Project Browser, one per line, in 
-      the 'url|method|Site Name' format. <MAINSITE_URL> is added by default, and doesn't need to be 
-      set here."),
-    '#required' => FALSE,
-  );
-
   // Custom validation callback for the email notification setting.
   $form['#validate'][] = 'update_settings_validate';
 
@@ -141,7 +125,6 @@ function update_settings_submit($form, $form_state) {
     ->set('update_interval_days', $form_state['values']['update_check_frequency'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
-    ->set('project_browser_servers', $form_state['values']['project_browser_servers'])
     ->save();
     
   // Display status messages for this form.

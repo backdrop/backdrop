@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Installer module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function installer_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function installer_uninstall() {
+}
+

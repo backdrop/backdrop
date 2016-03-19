@@ -1,0 +1,247 @@
+#project-browser-install-button-form {
+  clear: both;
+  margin: 10px 0 0;
+}
+
+#project-browser-install-queue {
+  margin: 5px 0 0;
+}
+
+.project-browser-install-queue-item {
+  margin: 5px 0;
+}
+
+.project-browser-install-queue-items {
+  clear: both;
+  margin: 0 0 15px;
+}
+
+.project-browser-install-link {
+  clear: both;
+}
+
+.project-browser-install-queue-item a {
+  padding-left: 20px;
+  background: url("../images/red-x.png") no-repeat scroll left 2px transparent;
+}
+
+.project-browser-selected-release {
+  display: none;
+}
+
+.project-browser-show-releases-link {
+  cursor: pointer;
+}
+
+div.item-list ul.project-browser-sort-list, 
+div.item-list ul.project-browser-servers-list {
+  margin: 0;
+}
+
+div.item-list ul.project-browser-sort-list li, 
+div.item-list ul.project-browser-servers-list li {
+  display: inline;
+  list-style-image: none;
+  margin-right: 10px;
+  float: left;
+  clear: both;
+}}
+
+div.item-list ul.project-browser-sort-list li a, 
+div.item-list ul.project-browser-servers-list li a {
+  color: #0074BD;
+}
+
+div.item-list ul.project-browser-sort-list li.sort-active a,
+div.item-list ul.project-browser-servers-list li.server-active a {
+  color: #000;
+}
+
+div.item-list ul.project-browser-sort-list li.sort-header,
+div.item-list ul.project-browser-servers-list li.server-header {
+  font-weight: bold;
+}
+
+div.item-list ul.project-browser-sort-list li.sort-asc {
+  background: url("../images/arrow-asc.png") no-repeat scroll right 2px transparent;
+  padding-right: 15px;
+}
+
+div.item-list ul.project-browser-sort-list li.sort-desc {
+  background: url("../images/arrow-desc.png") no-repeat scroll right 2px transparent;
+  padding-right: 15px;
+}
+
+a.show-more {
+  float: right;
+}
+
+.project-extra {
+  clear: both;
+  color: gray;
+  text-align: right;
+}
+
+.project-author {
+  color: gray;
+  font-size: 0.9em;
+}
+
+.project-updated {
+  color: gray;
+  font-size: 0.9em;
+}
+
+.project-page {
+  font-size: 0.9em;
+}
+
+.project-image {
+  float: left;
+  margin-right: 10px;
+}
+
+.project-image img {
+  /* max-height: 150px; */
+  max-width: 100px;
+}
+
+#project-browser-main ul, #project-browser-main ol {
+  list-style-position: inside;
+}
+
+.project-item {
+  clear: both;
+  position: relative;
+}
+
+.project-item-first {
+  clear: both;
+  padding: 10px;
+  position: relative;
+}
+
+div.project-information {
+  
+}
+
+.project-browser-install-main {
+  padding: 10px;
+  float: right;
+  width: 76%; 
+}
+
+.install-disabled {
+  color: gray;
+}
+
+.install-enabled {
+  color: green;
+}
+
+.project-browser-install-sidebar-left {
+  float: left;
+  width: 19%;
+  padding: 10px;
+}
+
+div.project-title {
+  font-size: 18px;
+}
+
+.ui-dialog .project-title {
+  font-size: 1.385em;
+  font-weight: bold;
+}
+
+fieldset#edit-category,
+fieldset#edit-version  {
+  border: none;
+}
+
+div.install-item-prefix {
+  float:left;
+  margin-left: 50px;
+}
+
+#project-browser-main div.form-item-install {
+  float: right; 
+}
+
+#project-browser div.project-browser-region {
+  min-height: 1px;
+}
+
+#project-browser div.project-browser-block {
+  margin-bottom: 20px;
+  background-color: #fff;
+}
+
+#project-browser .project-browser-region .project-browser-block {
+  clear: both;
+}
+
+#project-browser div.project-browser-block h2 {
+  float: none;
+  font-size: 1em;
+  margin: 0;
+  padding: 10px;
+  background: none repeat scroll 0 0 #e9e8e8;
+}
+#project-browser div#project-browser-sidebar-right div.project-browser-block div.content {
+  padding: 5px 10px;
+}
+
+.ui-dialog.project-dialog {
+  max-width:95%;
+}
+
+.project-dialog-description {
+  margin-top: 1em;
+  border-top: 1px solid #ccc;
+}
+
+.project-dialog-info {
+  float: left;
+  max-width: 45%;
+}
+
+.project-dialog-image {
+  float: right;
+  max-width: 45%;
+}
+
+#backdrop-modal .project-status {
+  position: relative;
+  right: 0;
+}
+
+#backdrop-modal .project-item {
+  border: none;
+}
+
+@media only screen and (min-width: 768px) {
+  #project-browser div#project-browser-main {
+    width: 75%;
+    float: left;
+    margin-right: 1%;
+  }
+
+  #project-browser div#project-browser-sidebar-right {
+    width: 23%;
+    float: right;
+  }
+  div.project-status {
+    position: absolute;
+    right: 10px;
+    text-align: right;
+    top: 5px;
+  }
+  div.item-list ul.project-browser-sort-list li, div.item-list ul.project-browser-servers-list li {
+    float: none;
+    clear: none;
+  }
+}
+.browser-installed-theme img {
+  max-width: 300px;
+}

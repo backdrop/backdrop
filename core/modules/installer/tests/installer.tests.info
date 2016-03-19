@@ -21,3 +21,9 @@ name = Unit tests
 description = Test update functionality unrelated to the database.
 group = Update
 file = update.test
+
+[ProjectBrowserAdministrationTestCase]
+name = Project Browser tests
+description = Tests project browser functionality.
+group = Update
+file = project_browser.test
