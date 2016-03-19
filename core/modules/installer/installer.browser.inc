@@ -162,7 +162,6 @@ function installer_browser_installation_page($op) {
 function installer_browser_installation_select_versions_page() {
   // Show a form that lets the user select which version of the projects to install
   $queued_projects = installer_browser_get_queued_projects();
-  unset($_SESSION['installer_browser_installed_projects']);
 
   return backdrop_get_form('installer_browser_installation_select_versions_form', $queued_projects);
 }
@@ -621,6 +620,7 @@ function installer_browser_installation_enable_form_submit($form, &$form_state) 
   $enable_queue = array_filter($form_state['values']['modules']);
   // Enable these all at once so that dependencies are handled properly.
   module_enable($enable_queue);
+  unset($_SESSION['installer_browser_installed_projects']);
   backdrop_flush_all_caches();
   backdrop_set_message(t('Installation is complete.'));
   backdrop_goto('admin/modules/installer-browser');
