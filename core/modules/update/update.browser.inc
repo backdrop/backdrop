@@ -18,6 +18,11 @@ function project_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   $zip_loaded = project_browser_check_zip_loaded();
 
+  // Show link to enable page if recently installed modules were not yet 
+  // enabled.
+  if (!empty($_SESSION['project_browser_installed_projects'])) {
+    backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the enable page.</a>', array('@url' => url('admin/modules/project-browser/install/enable'))));
+  }
   // Save needed filters to session.
   if (isset($_GET['repository'])) {
     $_SESSION['project_browser_sever_filter'] = $_GET['repository'];
