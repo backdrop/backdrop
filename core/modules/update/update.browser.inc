@@ -142,7 +142,7 @@ function project_browser_installation_page($op) {
       $content = project_browser_installation_install_dependencies_page();
       break;
     case 'theme':
-      backdrop_set_title(t("Themes were installed"));
+      backdrop_set_title(t("Set themes"));
       $content = project_browser_installation_enable_page('theme');
       break;
     case 'enable':
@@ -638,9 +638,9 @@ function project_browser_installation_task_list($active = NULL) {
   // Default list of tasks.
   $tasks = array(
     'select_versions' => t('Select versions'),
-    'install_dependencies' => t('Install Dependencies'),
+    'install_dependencies' => t('Install dependencies'),
     'theme' => t('Enable themes'),
-    'enable' => t('Enable projects'),
+    'enable' => t('Enable modules'),
   );
 
   require_once BACKDROP_ROOT . '/core/includes/theme.maintenance.inc';
