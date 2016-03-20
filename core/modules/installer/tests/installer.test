@@ -17,11 +17,11 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp('update', 'installer_browser_test');  // Enable any modules required for the test
+    parent::setUp('installer', 'update', 'installer_test');  // Enable any modules required for the test
 
     // Set the default server variable
-    $server_url = url('installer_browser_test', array('absolute' => TRUE));
-    config_set('update.settings', 'installer_browser_server', array(
+    $server_url = url('installer_test', array('absolute' => TRUE));
+    config_set('installer.settings', 'installer_browser_server', array(
       'url' => $server_url,
       'name' => 'Test Server',
       'method' => 'json',
@@ -29,7 +29,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(array(
-      'use project browser',
+      'use installer browser',
       'administer site configuration',
       'administer modules',
       'access site in maintenance mode',
@@ -194,4 +194,95 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
   }
 
 }
+
+class UpdateTestUploadCase extends BackdropWebTestCase {
+  public function setUp() {
+    parent::setUp(array('installer', 'update', 'installer_test'));
+    $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
+    $admin_user = $this->backdropCreateUser(array('administer software updates', 'administer site configuration'));
+    $this->backdropLogin($admin_user);
+  }
+
+  /**
+   * Tests upload and extraction of a module.
+   */
+  public function testUploadModule() {
+    // Images are not valid archives, so get one and try to install it. We
+    // need an extra variable to store the result of backdropGetTestFiles()
+    // since reset() takes an argument by reference and passing in a constant
+    // emits a notice in strict mode.
+    $imageTestFiles = $this->backdropGetTestFiles('image');
+    $invalidArchiveFile = reset($imageTestFiles);
+    $edit = array(
+      'files[project_upload]' => $invalidArchiveFile->uri,
+    );
+    // This also checks that the correct archive extensions are allowed.
+    $this->backdropPost('admin/modules/manual-install', $edit, t('Install'));
+    $this->assertText(t('Only files with the following extensions are allowed: @archive_extensions.', array('@archive_extensions' => archiver_get_extensions())),'Only valid archives can be uploaded.');
+
+    // Check to ensure an existing module can't be reinstalled. Also checks that
+    // the archive was extracted since we can't know if the module is already
+    // installed until after extraction.
+    $validArchiveFile = backdrop_get_path('module', 'update') . '/tests/aaa_update_test/aaa_update_test.tar.gz';
+    $edit = array(
+      'files[project_upload]' => $validArchiveFile,
+    );
+    $this->backdropPost('admin/modules/manual-install', $edit, t('Install'));
+    $this->assertText(t('@module_name is already installed.', array('@module_name' => 'AAA Update test')), 'Existing module was extracted and not reinstalled.');
+  }
+
+  /**
+   * Ensures that archiver extensions are properly merged in the UI.
+   */
+  function testFileNameExtensionMerging() {
+    $this->backdropGet('admin/modules/manual-install');
+    // Make sure the bogus extension supported by update_test.module is there.
+    $this->assertPattern('/file extensions are supported:.*update-test-extension/', "Found 'update-test-extension' extension");
+    // Make sure it didn't clobber the first option from core.
+    $this->assertPattern('/file extensions are supported:.*tar/', "Found 'tar' extension");
+  }
+
+  /**
+   * Checks the messages on update manager pages when missing a security update.
+   */
+  function testUpdateManagerCoreSecurityUpdateMessages() {
+    $config = config('update.settings');
+    $setting = array(
+      '#all' => array(
+        'version' => '1.0',
+      ),
+    );
+    $config->set('update_system_info', $setting)->save();
+    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
+    $config->set('update_xml_map', array('backdrop' => '2-sec'))->save();
+    // Initialize the update status.
+    $this->backdropGet('admin/reports/updates');
+
+    // Now, make sure none of the Update manager pages have duplicate messages
+    // about core missing a security update.
+
+    $this->backdropGet('admin/modules/manual-install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/modules/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/appearance/install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/appearance/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/reports/updates/install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/reports/updates/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+
+    $this->backdropGet('admin/update/ready');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+  }
+
+}
+
 ?>
