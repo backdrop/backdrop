@@ -500,6 +500,14 @@ function installer_delete_file_if_stale($path) {
 }
 
 /**
+ * Implements hook_cron().
+ */
+function installer_cron() {
+  // Clear garbage from disk.
+  installer_clear_update_disk_cache();
+}
+
+/**
  * Implements hook_config_info().
  */
 function installer_config_info() {
