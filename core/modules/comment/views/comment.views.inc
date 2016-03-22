@@ -168,6 +168,59 @@ function comment_views_data() {
     ),
   );
 
+  $data['comment']['changed_fulldata'] = array(
+    'title' => t('Post date'),
+    'help' => t('Date in the form of CCYYMMDD.'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_fulldate',
+    ),
+  );
+
+  $data['comment']['created_year_month'] = array(
+    'title' => t('Created year + month'),
+    'help' => t('Date in the form of YYYYMM.'),
+    'argument' => array(
+      'field' => 'created',
+      'handler' => 'views_handler_argument_node_created_year_month',
+    ),
+  );
+
+  $data['comment']['created_year'] = array(
+    'title' => t('Created year'),
+    'help' => t('Date in the form of YYYY.'),
+    'argument' => array(
+      'field' => 'created',
+      'handler' => 'views_handler_argument_node_created_year',
+    ),
+  );
+
+  $data['comment']['created_month'] = array(
+    'title' => t('Created month'),
+    'help' => t('Date in the form of MM (01 - 12).'),
+    'argument' => array(
+      'field' => 'created',
+      'handler' => 'views_handler_argument_node_created_month',
+    ),
+  );
+
+  $data['comment']['created_day'] = array(
+    'title' => t('Created day'),
+    'help' => t('Date in the form of DD (01 - 31).'),
+    'argument' => array(
+      'field' => 'created',
+      'handler' => 'views_handler_argument_node_created_day',
+    ),
+  );
+
+  $data['comment']['created_week'] = array(
+    'title' => t('Created week'),
+    'help' => t('Date in the form of WW (01 - 53).'),
+    'argument' => array(
+      'field' => 'created',
+      'handler' => 'views_handler_argument_node_created_week',
+    ),
+  );
 
   // Language field
   if (module_exists('locale')) {
@@ -209,7 +262,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_fulldate']['moved to'] = array('comment', 'changed_fulldata');
   $data['comment']['changed_fulldata'] = array(
-    'title' => t('Created date'),
+    'title' => t('Updated date'),
     'help' => t('Date in the form of CCYYMMDD.'),
     'argument' => array(
       'field' => 'changed',
@@ -219,7 +272,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_year_month']['moved to'] = array('comment', 'changed_year_month');
   $data['comment']['changed_year_month'] = array(
-    'title' => t('Created year + month'),
+    'title' => t('Updated year + month'),
     'help' => t('Date in the form of YYYYMM.'),
     'argument' => array(
       'field' => 'changed',
@@ -229,7 +282,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_year']['moved to'] = array('comment', 'changed_year');
   $data['comment']['changed_year'] = array(
-    'title' => t('Created year'),
+    'title' => t('Updated year'),
     'help' => t('Date in the form of YYYY.'),
     'argument' => array(
       'field' => 'changed',
@@ -239,7 +292,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_month']['moved to'] = array('comment', 'changed_month');
   $data['comment']['changed_month'] = array(
-    'title' => t('Created month'),
+    'title' => t('Updated month'),
     'help' => t('Date in the form of MM (01 - 12).'),
     'argument' => array(
       'field' => 'changed',
@@ -249,7 +302,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_day']['moved to'] = array('comment', 'changed_day');
   $data['comment']['changed_day'] = array(
-    'title' => t('Created day'),
+    'title' => t('Updated day'),
     'help' => t('Date in the form of DD (01 - 31).'),
     'argument' => array(
       'field' => 'changed',
@@ -259,7 +312,7 @@ function comment_views_data() {
 
   $data['comments']['timestamp_week']['moved to'] = array('comment', 'changed_week');
   $data['comment']['changed_week'] = array(
-    'title' => t('Created week'),
+    'title' => t('Updated week'),
     'help' => t('Date in the form of WW (01 - 53).'),
     'argument' => array(
       'field' => 'changed',

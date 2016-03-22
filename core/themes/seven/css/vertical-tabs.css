@@ -156,13 +156,21 @@
 .vertical-tab-selected.vertical-tab-item {
   background-color: #fff;
   border-right-width: 0; /* LTR */
+  border-left-width: 1px #000;
+  box-shadow: 0 5px 5px -5px hsla(0,0%,0%,0.3);
+  z-index: 1;
+  position: relative;
 }
  [dir="rtl"] .vertical-tab-selected.vertical-tab-item {
   border-left-width: 0;
-  border-right-width: 1px;
+  border-right-width: 1px #000;
 }
 .vertical-tab-selected .vertical-tab-link {
   background: #fff;
+  border-left: 4px solid;
+}
+[dir="rtl"] .vertical-tab-selected .vertical-tab-link {
+  border-right: 4px solid;
 }
 .vertical-tab-selected strong,
 .vertical-tab-selected .fieldset-legend {
