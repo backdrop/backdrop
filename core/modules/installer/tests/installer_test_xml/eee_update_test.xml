@@ -25,13 +25,13 @@
   <security_update>false</security_update>
 </release>
 <release>
-  <name>eee_update_test 1.x-1.0.2</name>
-  <version>1.0.2</version>
+  <name>eee_update_test 1.x-1.0.3</name>
+  <version>1.0.3</version>
   <version_major>1</version_major>
   <version_minor>0</version_minor>
-  <version_patch>2</version_patch>
+  <version_patch>3</version_patch>
   <status>published</status>
-  <release_link>https://github.com/backdrop-contrib/eee_update_test/releases/tag/1.x-1.0.2</release_link>
+  <release_link>https://github.com/backdrop-contrib/eee_update_test/releases/tag/1.x-1.0.3</release_link>
   <download_link>core/modules/installer/tests/eee_installer_test.zip</download_link>
   <date>1440215999</date>
   <filesize>48285</filesize>

@@ -12,13 +12,13 @@
 <link>https://backdropcms.org/project/ddd_update_test</link>
 <releases>
 <release>
-  <name>ddd_update_test 1.x-1.0.0</name>
-  <version>1.0.0</version>
+  <name>ddd_update_test 1.x-1.0.1</name>
+  <version>1.0.1</version>
   <version_major>1</version_major>
   <version_minor>0</version_minor>
-  <version_patch>0</version_patch>
+  <version_patch>1</version_patch>
   <status>published</status>
-  <release_link>https://github.com/backdrop-contrib/ddd_update_test/releases/tag/1.x-1.0.0</release_link>
+  <release_link>https://github.com/backdrop-contrib/ddd_update_test/releases/tag/1.x-1.0.1</release_link>
   <download_link>core/modules/installer/tests/ddd_installer_test.zip</download_link>
   <date>1440215584</date>
   <filesize>48285</filesize>

@@ -41,10 +41,8 @@ function installer_test_menu() {
  * Page callback. Outputs release information for test projects as XML data.
  */
 function installer_test_xml($project = NULL, $version = '1.x') {
-  $path = url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/' . $project . '.xml', array('absolute' => TRUE)); 
-  $parsed_url = backdrop_parse_url($path);
-  $filepath = $parsed_url['path'];
-  readfile($filepath);
+  $path = backdrop_get_path('module', 'installer'); 
+  readfile("$path/tests/installer_test_xml/$project.xml");
   backdrop_exit();
 }
 
