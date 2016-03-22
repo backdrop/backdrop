@@ -2887,7 +2887,6 @@ function backdrop_deliver_html_page($page_callback_result) {
 
       case MENU_SITE_OFFLINE:
         // Print a 503 page.
-        backdrop_maintenance_theme();
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
         print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))))));
