@@ -412,7 +412,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[post]' => TRUE,
       'bundles[page]' => FALSE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Save visibility condition'));
     $this->backdropPost(Null, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
