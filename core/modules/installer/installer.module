@@ -83,22 +83,13 @@ function installer_menu() {
     'file' => 'installer.manager.inc',
   );
 
-  $items['admin/config/development/project_browser'] = array(
-    'title' => 'Project Browser settings',
-    'description' => 'Add new repositories and set other settings for Project Browser.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('installer_browser_admin'),
-    'access arguments' => array('access administration pages'),
-    'file' => 'project_browser.admin.inc',
-  );
-
   $items['admin/modules/installer-browser'] = array(
     'title' => 'Browse downloads',
     'description' => 'Browse and search for new modules',
     'page callback' => 'installer_browser_page',
     'page arguments' => array('module'),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
   );
   $items['admin/modules/installer-browser/module'] = array(
     'title' => 'Modules',
@@ -106,7 +97,7 @@ function installer_menu() {
     'page callback' => 'installer_browser_page',
     'page arguments' => array('module'),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/modules/installer-browser/theme'] = array(
@@ -115,7 +106,7 @@ function installer_menu() {
     'page callback' => 'installer_browser_page',
     'page arguments' => array('theme'),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
   $items['admin/modules/installer-browser/layout'] = array(
@@ -124,7 +115,7 @@ function installer_menu() {
     'page callback' => 'installer_browser_page',
     'page arguments' => array('layout'),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'weight' => 10,
     'type' => MENU_LOCAL_TASK,
   );
@@ -134,7 +125,7 @@ function installer_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_browser_bulk_install_form', 4),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['admin/modules/installer-browser/project/%'] = array(
@@ -143,7 +134,7 @@ function installer_menu() {
     'page callback' => 'installer_browser_project_display',
     'page arguments' => array(4),
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['admin/modules/installer-browser/reset'] = array(
@@ -151,7 +142,7 @@ function installer_menu() {
     'description' => 'Browse and search for new modules',
     'page callback' => 'installer_browser_installation_select_versions_form_reset',
     'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['admin/modules/installer-browser/install/%'] = array(
@@ -160,14 +151,14 @@ function installer_menu() {
     'page arguments' => array(4),
     'access arguments' => array('use installer browser'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
   );
   $items['admin/installer-browser/%/install-queue/%/%'] = array(
     'page callback' => 'installer_browser_install_queue_callback',
     'page arguments' => array(2, 4, 5),
     'access arguments' => array('use installer browser'),
     'type' => MENU_CALLBACK,
-    'file' => 'installer.browser.inc',
+    'file' => 'installer.browser.pages.inc',
   );
 
   return $items;
