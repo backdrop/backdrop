@@ -629,16 +629,6 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Security update required!'));
     $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
-
-    // Turn the altering back on and visit the Update manager UI.
-    $config->set('update_status', $update_status)->save();
-    $this->backdropGet('admin/modules/update');
-    $this->assertText(t('Security update'));
-
-    // Turn the altering back off and visit the Update manager UI.
-    $config->set('update_status', array())->save();
-    $this->backdropGet('admin/modules/update');
-    $this->assertNoText(t('Security update'));
   }
 
 }

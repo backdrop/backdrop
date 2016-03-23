@@ -2,7 +2,7 @@
 /**
 * Administration tests for Project Browser.
 */
-class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
+class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   protected $privileged_user;
 
   /**
@@ -74,12 +74,12 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/modules/installer-browser/modules');
 
     // Simulate adding a project to the install queue
-    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/ddd_update_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/add/ddd_installer_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->assertNoText('Install queue is empty.');
     $this->assertNoText('Error: The project was not found.');
 
     // Simulate removing a project from the install queue
-    $this->backdropGet('admin/installer-browser/nojs/install-queue/remove/ddd_update_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
+    $this->backdropGet('admin/installer-browser/nojs/install-queue/remove/ddd_installer_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->assertText('Install queue is empty.');
     $this->assertNoText('Error: The project was not found.');
   }
@@ -87,8 +87,8 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
   public function testProjectBrowserInstallPage() {
     // Refresh the page
     $this->backdropGet('admin/modules/installer-browser/modules');
-    $module_one = 'ddd_update_test';
-    $module_two = 'eee_update_test';
+    $module_one = 'ddd_installer_test';
+    $module_two = 'eee_installer_test';
 
     // Attempt to install a project
     $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/installer-browser')));
@@ -105,9 +105,9 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     $module_two_data = $this->getProjectData($module_two);
     $this->assertText($module_two_data['title'] . ' ' . $module_two_data['recommended']);
     
-    // Check that two versions of EEE Update test are listed
-    $releases = $this->xpath('//div[contains(@class, "installer-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-update-test-release-name")]');
-    $this->assertEqual(count($releases), 2, 'Two releases available for EEE Update test.');  
+    // Check that two versions of EEE Installer test are listed
+    $releases = $this->xpath('//div[contains(@class, "installer-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-installer-test-release-name")]');
+    $this->assertEqual(count($releases), 2, 'Two releases available for EEE Installer test.');  
     
     // Cancel and go back to project list
     $this->backdropGet('admin/modules/installer-browser/reset');
@@ -149,8 +149,8 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     
     // Enable both modules
     $edit = array(
-      'modules[ddd_update_test]' => TRUE,
-      'modules[eee_update_test]' => TRUE,
+      'modules[ddd_installer_test]' => TRUE,
+      'modules[eee_installer_test]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Enable modules'));
     $this->resetAll();
@@ -158,7 +158,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertTrue(module_exists($module_two), $module_two_data['title'] . ' was enabled.');
     
     // Delete the test module files
-    foreach (array('ddd_update_test', 'eee_update_test') as $test_module) {
+    foreach (array('ddd_installer_test', 'eee_installer_test') as $test_module) {
       $directory = backdrop_get_path('module', $test_module);
       $this->assertTrue(file_unmanaged_delete_recursive($directory), 'Deleted test module.');
     }
@@ -195,7 +195,7 @@ class ProjectBrowserAdministrationTestCase extends BackdropWebTestCase {
 
 }
 
-class UpdateTestUploadCase extends BackdropWebTestCase {
+class InstallerTestUploadCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp(array('installer', 'update', 'installer_test'));
     $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
@@ -236,8 +236,8 @@ class UpdateTestUploadCase extends BackdropWebTestCase {
    */
   function testFileNameExtensionMerging() {
     $this->backdropGet('admin/modules/manual-install');
-    // Make sure the bogus extension supported by update_test.module is there.
-    $this->assertPattern('/file extensions are supported:.*update-test-extension/', "Found 'update-test-extension' extension");
+    // Make sure the bogus extension supported by installer_test.module is there.
+    $this->assertPattern('/file extensions are supported:.*installer-test-extension/', "Found 'installer-test-extension' extension");
     // Make sure it didn't clobber the first option from core.
     $this->assertPattern('/file extensions are supported:.*tar/', "Found 'tar' extension");
   }

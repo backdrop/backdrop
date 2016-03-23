@@ -6,10 +6,10 @@
  */
 function installer_test_archiver_info() {
   return array(
-    'update_test_archiver' => array(
+    'installer_test_archiver' => array(
       // This is bogus, we only care about the extensions for now.
-      'class' => 'ArchiverUpdateTest',
-      'extensions' => array('update-test-extension'),
+      'class' => 'ArchiverInstallerTest',
+      'extensions' => array('installer-test-extension'),
     ),
   );
 }
@@ -137,13 +137,13 @@ function installer_test_get_results($filters) {
 function installer_test_projects() {
   $projects = array();
   
-  $projects['aaa_update_test'] = array(
+  $projects['aaa_installer_test'] = array(
     'type' => 'module',
-    'title' => 'AAA Update test',
-    'name' => 'aaa_update_test',
+    'title' => 'AAA Installer test',
+    'name' => 'aaa_installer_test',
     'version' => 1,
     'author' => 'docwilmot',
-    'description' => "Support module for update module testing",
+    'description' => "Support module for installer module testing",
     'versions' => array(1),
     'image' => '',
     'usage' => '542312',
@@ -160,13 +160,13 @@ function installer_test_projects() {
     'dependencies' => array(),
   );
   
-  $projects['ddd_update_test'] = array(
+  $projects['ddd_installer_test'] = array(
     'type' => 'module',
-    'title' => 'DDD Update test',
-    'name' => 'ddd_update_test',
+    'title' => 'DDD Installer test',
+    'name' => 'ddd_installer_test',
     'version' => 1,
     'author' => 'docwilmot',
-    'description' => "Support module for update module testing",
+    'description' => "Support module for installer module testing",
     'versions' => array(1),
     'image' => '',
     'usage' => '542312',
@@ -181,17 +181,17 @@ function installer_test_projects() {
     'rating' => '9.6',
     'includes' => array(),
     'dependencies' => array(
-      'eee_update_test',
+      'eee_installer_test',
     ),
   );
   
-  $projects['eee_update_test'] = array(
+  $projects['eee_installer_test'] = array(
     'type' => 'module',
-    'title' => 'EEE Update test',
-    'name' => 'eee_update_test',
+    'title' => 'EEE Installer test',
+    'name' => 'eee_installer_test',
     'version' => 1,
     'author' => 'docwilmot',
-    'description' => "Support module for update module testing",
+    'description' => "Support module for installer module testing",
     'versions' => array(1),
     'image' => '',
     'usage' => '542312',
@@ -208,13 +208,13 @@ function installer_test_projects() {
     'dependencies' => array(),
   );
   
-  $projects['ttt_update_test'] = array(
+  $projects['ttt_installer_test'] = array(
     'type' => 'theme',
-    'title' => 'TTT Update test',
-    'name' => 'ttt_update_test',
+    'title' => 'TTT Installer test',
+    'name' => 'ttt_installer_test',
     'version' => 1,
     'author' => 'docwilmot',
-    'description' => "Support theme for update module testing",
+    'description' => "Support theme for installer module testing",
     'versions' => array(1),
     'image' => '',
     'usage' => '542312',
@@ -230,13 +230,13 @@ function installer_test_projects() {
     'includes' => array(),
     'dependencies' => array(),
   );
-  $projects['lll_update_test'] = array(
+  $projects['lll_installer_test'] = array(
     'type' => 'layout',
-    'title' => 'LLL Update test',
-    'name' => 'lll_update_test',
+    'title' => 'LLL Installer test',
+    'name' => 'lll_installer_test',
     'version' => 1,
     'author' => 'docwilmot',
-    'description' => "Support layout for update module testing",
+    'description' => "Support layout for installer module testing",
     'versions' => array(1),
     'image' => '',
     'usage' => '542312',
