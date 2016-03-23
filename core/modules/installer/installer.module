@@ -120,7 +120,7 @@ function installer_menu() {
     'type' => MENU_LOCAL_TASK,
   );
   $items['admin/modules/installer-browser/bulk/%'] = array(
-    'title' => 'Install by machine name',
+    'title' => 'Install by names',
     'description' => 'Install multiple projects by listing machine names.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_browser_bulk_install_form', 4),

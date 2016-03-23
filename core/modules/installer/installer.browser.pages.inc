@@ -821,7 +821,7 @@ function installer_browser_advanced_block($form, &$form_state, $type) {
         ),
       ),
       'bulk_install' => array(
-        'title' => 'Bulk install by names',
+        'title' => 'Install by names',
         'href' => 'admin/modules/installer-browser/bulk/' . $type,
         'attributes' => array(
           'class' => array('use-ajax'),
@@ -848,7 +848,7 @@ function installer_browser_bulk_install_form($form, &$form_state, $type) {
     '#type' => 'textarea',
     '#required' => TRUE,
     '#title' => t('Names'),
-    '#description' => t('Enter <em>%project</em> machine names, one name per line. Names must only contain lowercase letters, numbers, and underscores.', array('%project' => $type)),
+    '#description' => t('Enter <em>%project</em> project names, one name per line. Names must only contain lowercase letters, numbers, and underscores.', array('%project' => $type)),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -858,7 +858,7 @@ function installer_browser_bulk_install_form($form, &$form_state, $type) {
     ),
     '#type' => 'submit',
     '#name' => 'bulk-submit',
-    '#value' => t('Search for projects'),
+    '#value' => t('Add projects'),
   );
 
   return $form;
