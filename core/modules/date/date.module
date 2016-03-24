@@ -586,7 +586,7 @@ function date_autoload_info() {
 function date_views_fields($base = 'node', $reset = FALSE) {
   static $fields = array();
   $empty = array('name' => array(), 'alias' => array());
-  module_load_include('inc', 'date_views', 'includes/date_views_fields');
+  module_load_include('inc', 'date', 'views/date_views_fields');
 
   if (empty($fields[$base]) || $reset) {
     $cid = 'date_views_fields_' . $base;
