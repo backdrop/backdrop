@@ -386,17 +386,17 @@ function layout_page_access() {
  * This is useful for modules that implement popup pages or other special
  * pages where the default layout would be distracting or just waste space.
  *
- * @param $set
- *   Defaults to TRUE. If called before menu_execute_active_handler(), the layout
+ * @param $suppress
+ *   If set to TRUE, and called before menu_execute_active_handler(), the layout
  *   will default to menu_default_route_handler().
- *   If FALSE is passed, the suppression state is returned.
+ *   The suppression state is returned.
  */
-function layout_suppress($set = TRUE) {
-  static $suppress = FALSE;
-  if (!empty($set)) {
-    $suppress = TRUE;
+function layout_suppress($suppress = NULL) {
+  static $suppression_state = FALSE;
+  if (isset($suppress)) {
+    $suppression_state = $suppress;
   }
-  return $suppress;
+  return $suppression_state;
 }
 
 /**
@@ -418,7 +418,7 @@ function layout_route_handler($router_item) {
   }
 
   // If requested by layout_suppress(), use the default route handler instead of layouts.
-  if (layout_suppress(FALSE)) {
+  if (layout_suppress()) {
     return menu_default_route_handler($router_item);
   }
 
