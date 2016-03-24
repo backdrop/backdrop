@@ -18,7 +18,7 @@ function layout_list_page() {
     $path_groups[$layout->getPath()][$layout->name] = $layout;
   }
 
-  // Assmeble the rows of the table.
+  // Assemble the rows of the table.
   $rows = array();
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
@@ -521,7 +521,7 @@ function layout_settings_form_condition_remove($form, &$form_state) {
  */
 function layout_settings_form_condition_edit($form, &$form_state) {
   $edit_condition = $form_state['clicked_button']['#array_parents'][2];
-  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/condition/edit/' . $edit_condition;
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/condition/edit/layout/' . $edit_condition;
 }
 
 /**
@@ -1125,21 +1125,20 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
       '#ajax' => array(
         'callback' => 'layout_ajax_form_update',
       ),
-      '#name' => 'conditions[' . $access_key . '][remove]',
+      '#name' => 'conditions' . $access_key . 'remove',
     );
     $form['conditions']['active'][$access_key]['configure'] = array(
       '#type' => 'submit',
       '#value' => t('Configure'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-configure')),
       '#submit' => array(
-        'layout_block_configure_form_submit',
         'layout_block_configure_form_condition_edit',
       ),
       '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
       '#ajax' => array(
         'callback' => 'layout_ajax_form_open_dialog',
       ),
-      '#name' => 'conditions[' . $access_key . '][configure]',
+      '#name' => 'conditions' . $access_key . 'remove',
     );
   }
   /* End visibility conditions. */
@@ -1182,10 +1181,8 @@ function layout_block_configure_form_condition_edit($form, &$form_state) {
   $layout = $form_state['layout'];
   $block = $form_state['block'];
 
-  $layout->in_progress['section'] = 'conditions';
-  layout_set_layout_tempstore($layout);
   $edit_condition = $form_state['clicked_button']['#array_parents'][2];
-  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/condition/edit/' . $edit_condition . '/' . $block->uuid;
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/condition/edit/' . $block->uuid . '/' . $edit_condition;
 }
 
 /**
@@ -1350,41 +1347,88 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
  *   The layout to which a condition is being added.
  * @param Block|null $block
  *   If applying a condition to a particular block, the block instance.
+ * @param LayoutMenuItem|null $menu_item
+ *   If applying a condition to an menu item, the menu item object.
+ * @param int|null $condition_id
+ *   The integer ID of the condition being configured. If adding a new
+ *   condition, no value will be passed in. Note that this value may be a
+ *   FALSE-like value, such as 0, indicating the first condition is being
+ *   configured, which is different than a NULL value indicating a new
+ *   condition is being added.
  *
  * @ingroup forms
  */
-function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL) {
+function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $condition_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
   $form_state['menu_item'] = $menu_item;
+  $form_state['condition_id'] = $condition_id;
 
+  // Condition position may be a zero-value. Use a clear variable for checking
+  // the add vs. configure existing status.
+  $is_new_condition = TRUE;
+  if (isset($condition_id)) {
+    $is_new_condition = FALSE;
+  }
+  // Specify the default value of the current condition if configuring an
+  // existing condition.
+  if (!isset($form_state['values']['condition'])) {
+    $form_state['values']['condition'] = $condition_id;
+  }
+
+  $handler = NULL;
   if (isset($menu_item)) {
-    $form['#title'] = t('Add visibility condition');
     $form['#redirect'] = 'admin/structure/layouts/menu/' . $menu_item->name . '/access';
-    $help = t('Add a new visibility condition to restrict access to all layouts at this path.');
+    if ($is_new_condition) {
+      $form['#title'] = t('Add visibility condition');
+      $help = t('Add a new visibility condition to restrict access to all layouts at this path.');
+    }
+    else {
+      $form['#title'] = t('Configure visibility condition');
+      $help = t('Configure this visibility condition to restrict access to all layouts on this path.');
+    }
+    $handler = isset($menu_item->conditions[$condition_id]) ? $menu_item->conditions[$condition_id] : NULL;
   }
   elseif (isset($block)) {
-    $form['#title'] = t('Add visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
-    $help = t('Add a new visibility condition to limit the situations in which this block will be shown.');
+    if ($is_new_condition) {
+      $form['#title'] = t('Add visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
+      $help = t('Add a new visibility condition to limit the situations in which this block will be shown.');
+    }
+    else {
+      $form['#title'] = t('Configure visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
+      $help = t('Configure this visibility condition to limit the situations in which this block will be shown.');
+    }
+    $handler = isset($block->conditions[$condition_id]) ? $block->conditions[$condition_id] : NULL;
   }
   else {
-    $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
-    $help = t('Add a new visibility condition to limit the situations in which this layout will apply.');
+    if ($is_new_condition) {
+      $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
+      $help = t('Add a new visibility condition to limit the situations in which this layout will apply.');
+    }
+    else {
+      $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
+      $help = t('Configure this visibility condition to limit the situations in which this layout will apply.');
+    }
+    $handler = isset($layout->conditions[$condition_id]) ? $layout->conditions[$condition_id] : NULL;
   }
   $form['help'] = array(
     '#markup' => '<p>' . $help . '</p>',
   );
-
   $all_access_info = _layout_get_all_info('layout_access');
   $form['condition'] = array(
     '#type' => 'select',
-    '#title' => t('Add visibility condition'),
+    '#title' => t('Visibility condition'),
     '#options' => array(),
     '#required' => TRUE,
+    '#default_value' => isset($handler->plugin) ? $handler->plugin : NULL,
+    '#parents' => array('condition'),
+    '#ajax' => array(
+      'wrapper' => 'condition_settings',
+      'callback' => 'layout_condition_ajax_style',
+    ),
   );
   foreach ($all_access_info as $access_info) {
     $required_contexts = !empty($access_info['required contexts']) ? $access_info['required contexts'] : array();
@@ -1394,14 +1438,34 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
       $form['condition']['#options'][$access_info['name']] = $access_info['title'];
     }
   }
+
+  $form['condition_settings'] = array(
+    '#type' => 'container',
+    '#id' => 'condition_settings',
+    '#parents' => array('condition_settings'),
+  );
+  $form['condition_settings']['content'] = layout_condition_return_form($form['condition_settings'], $form_state);
   $form['actions'] = array(
     '#type' => 'actions',
   );
+  $form['load_condition_nojs'] = array(
+    '#type' => 'submit',
+    '#value' => t('Load condition'),
+    '#submit' => array(
+      'layout_condition_add_load_condition_nojs',
+    ),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+  );
   $form['actions']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => $is_new_condition ? t('Add visibility condition') : t('Save visibility condition'),
     '#submit' => array(
       'layout_condition_add_form_submit',
+    ),
+    '#validate' => array(
+      'layout_condition_add_form_validate',
     ),
     '#ajax' => array(
       'callback' => 'layout_ajax_form_save_dialog',
@@ -1410,83 +1474,101 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
+    '#limit_validation_errors' => array(),
+    '#submit' => array(
+      'layout_condition_add_form_cancel',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_condition_cancel_dialog',
+    ),
   );
-
   return $form;
 }
 
 /**
- * Submit handler for layout_condition_add_form().
+ * Submit handler for the cancel button on layout_condition_add_form().
  */
-function layout_condition_add_form_submit($form, &$form_state) {
+function layout_condition_add_form_cancel($form, &$form_state) {
+  if (isset($form_state['block'])) {
+    $block = $form_state['block'];
+    $layout = $form_state['layout'];
+    $renderer_name = isset($layout->in_progress['renderer_name']) ? $layout->in_progress['renderer_name'] : 'editor';
+    $renderer = layout_create_renderer($renderer_name, $layout);
+    $form_state['redirect'] = $renderer->getUrl('configure-block', $block->uuid);
+  }
+}
+
+/**
+ * AJAX callback to update the condition settings.
+ */
+function layout_condition_ajax_style($form, $form_state) {
+  return $form['condition_settings'];
+}
+
+/**
+ * Submit handler to select a condition. Hidden when JavaScript is enabled.
+ */
+function layout_condition_add_load_condition_nojs($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * AJAX handler that cancels the condition edit dialog.
+ */
+function layout_ajax_condition_cancel_dialog($form, $form_state) {
+  $layout = $form_state['layout'];
+  $menu_item = $form_state['menu_item'];
+
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  // Reload the block configure dialog if editting block conditions.
+  if (!empty($form_state['redirect'])) {
+    $dialog_ajax = layout_ajax_form_open_dialog($form, $form_state);
+    $commands = array_merge($commands, $dialog_ajax['#commands']);
+  }
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
+ * Helper function to return a partial condition settings form.
+ *
+ * This can be used to add a condition to either a layout, block, or menu item,
+ * based on the values in the $form_state parameter.
+ */
+function layout_condition_return_form($form, &$form_state) {
   $layout = $form_state['layout'];
   $block = $form_state['block'];
   $menu_item = $form_state['menu_item'];
+  $condition_id = $form_state['condition_id'];
 
-  if ($menu_item) {
-    $form_state['redirect'] = 'admin/structure/layouts/menu/' . $menu_item->name . '/condition/edit/' . $form_state['values']['condition'];
+  // If no condition has yet been selected, there is no sub-form to display.
+  if (!isset($form_state['values']['condition'])) {
+    return;
   }
   else {
-    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/condition/edit/' . $form_state['values']['condition'];
-    if ($block) {
-      $form_state['redirect'] .= '/' . $block->uuid;
-    }
+    $handler_id = $form_state['values']['condition'];
   }
-}
 
-/**
- * Title callback; Provide the page title for configuring a layout condition.
- */
-function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $handler_id) {
-  if (isset($menu_item->conditions[$handler_id])) {
-    $plugin_name = $menu_item->conditions[$handler_id]->plugin;
-  }
-  elseif (isset($block->conditions[$handler_id])) {
-    $plugin_name = $block->conditions[$handler_id]->plugin;
-  }
-  elseif (isset($layout->conditions[$handler_id])) {
-    $plugin_name = $layout->conditions[$handler_id]->plugin;
-  }
-  else {
-    $plugin_name = $handler_id;
-  }
-  $access_info = layout_get_access_info($plugin_name);
-  if (isset($access_info['title'])) {
+  if (isset($condition_id)) {
     if ($menu_item) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $menu_item->path));
+      $handler = &$menu_item->conditions[$condition_id];
     }
     elseif ($block) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $block->getAdminTitle()));
+      $handler = &$block->conditions[$condition_id];
     }
     else {
-      return t('Configure condition "@condition"', array('@condition' => $access_info['title']));
+      $handler = &$layout->conditions[$condition_id];
     }
-  }
-}
 
-/**
- * Form callback; Creates a form for editing a new or existing condition.
- *
- * This can be used to add a condition to either a layout or a block. If adding
- * to a layout, the $block parameter will be empty.
- *
- * @ingroup forms
- */
-function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $handler_id) {
-  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-
-  if (is_numeric($handler_id)) {
-    if ($menu_item) {
-      $handler = $menu_item->conditions[$handler_id];
-    }
-    elseif ($block) {
-      $handler = $block->conditions[$handler_id];
-    }
-    else {
-      $handler = $layout->conditions[$handler_id];
+    // Update the condition in the same place if the type of condition has
+    // changed entirely (note the $handler is assigned by reference above).
+    if (!is_numeric($handler_id) && $condition_id != $handler_id) {
+      $handler = layout_create_access($handler_id);
     }
   }
   else {
@@ -1498,54 +1580,35 @@ function layout_condition_edit_form($form, &$form_state, Layout $layout = NULL, 
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
   $form_state['menu_item'] = $menu_item;
-  $form_state['handler'] = $handler;
+  $form_state['handler']  = $handler;
   $handler->form($form, $form_state);
 
-  $form['actions'] = array(
-    '#type' => 'actions',
-    '#weight' => 1000,
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $handler->is_new ? t('Add visibility condition') : t('Save condition'),
-    '#validate' => array(
-      'layout_condition_edit_form_validate',
-    ),
-    '#submit' => array(
-      'layout_condition_edit_form_submit',
-    ),
-    '#ajax' => array(
-      'callback' => 'layout_ajax_form_save_dialog',
-    ),
-  );
-  $form['actions']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel'),
-    '#attributes' => array('class' => array('dialog-cancel')),
-    '#validate' => array(),
-    '#submit' => array(),
-  );
   return $form;
 }
 
 /**
- * Validation handler for layout_condition_edit_form().
+ * Validation handler for layout_condition_add_form().
  */
-function layout_condition_edit_form_validate($form, &$form_state) {
-  $handler = $form_state['handler'];
-  $handler->formValidate($form, $form_state);
+function layout_condition_add_form_validate($form, &$form_state) {
+  if (isset($form_state['handler'])) {
+    $handler = $form_state['handler'];
+    $handler->formValidate($form, $form_state);
+  }
 }
 
 /**
- * Submit handler for layout_condition_edit_form().
+ * Submit handler for layout_condition_add_form().
  *
  * Saves a condition into the layout, block, or menu item.
  */
-function layout_condition_edit_form_submit($form, &$form_state) {
+function layout_condition_add_form_submit($form, &$form_state) {
   $layout = $form_state['layout'];
   $block = $form_state['block'];
   $menu_item = $form_state['menu_item'];
 
+  if (!isset($form_state['handler'])) {
+    return;
+  }
   $handler = $form_state['handler'];
   $handler->formSubmit($form, $form_state);
   if (!empty($handler->is_new)) {
@@ -1586,6 +1649,36 @@ function layout_condition_edit_form_submit($form, &$form_state) {
     $form_state['ajax_rebuild_args'] = array($layout);
     $form_state['ajax_update'] = array('conditions');
     $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+  }
+}
+
+/**
+ * Title callback; Provide the page title for configuring a layout condition.
+ */
+function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $handler_id) {
+  if (isset($menu_item->conditions[$handler_id])) {
+    $plugin_name = $menu_item->conditions[$handler_id]->plugin;
+  }
+  elseif (isset($block->conditions[$handler_id])) {
+    $plugin_name = $block->conditions[$handler_id]->plugin;
+  }
+  elseif (isset($layout->conditions[$handler_id])) {
+    $plugin_name = $layout->conditions[$handler_id]->plugin;
+  }
+  else {
+    $plugin_name = $handler_id;
+  }
+  $access_info = layout_get_access_info($plugin_name);
+  if (isset($access_info['title'])) {
+    if ($menu_item) {
+      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $menu_item->path));
+    }
+    elseif ($block) {
+      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $block->getAdminTitle()));
+    }
+    else {
+      return t('Configure condition "@condition"', array('@condition' => $access_info['title']));
+    }
   }
 }
 
