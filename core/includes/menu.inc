@@ -507,13 +507,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   // Check if site is offline.
-  $site_status = _menu_site_is_offline() ? MENU_SITE_OFFLINE : MENU_SITE_ONLINE;
-
-  // Allow other modules to change the site status but not the path because that
-  // would not change the global variable. hook_url_inbound_alter() can be used
-  // to change the path. Code later will not use the $read_only_path variable.
-  $read_only_path = !empty($path) ? $path : $_GET['q'];
-  backdrop_alter('menu_site_status', $site_status, $read_only_path);
+  $site_status = _menu_site_status($path, TRUE);
 
   // If online, check access to the page and call the menu handler.
   if ($site_status == MENU_SITE_ONLINE) {
@@ -1776,9 +1770,19 @@ function theme_menu_local_actions(&$variables) {
  */
 function menu_get_custom_theme($initialize = FALSE) {
   $custom_theme = &backdrop_static(__FUNCTION__);
-  // Skip this if the site is offline or being installed or updated, since the
-  // menu system may not be correctly initialized then.
-  if ($initialize && !_menu_site_is_offline(TRUE) && (!defined('MAINTENANCE_MODE') || (MAINTENANCE_MODE != 'update' && MAINTENANCE_MODE != 'install'))) {
+
+  // Offline mode checking does not allow for module overrides of the theme.
+  $offline_mode = (_menu_site_status() === MENU_SITE_OFFLINE || defined('MAINTENANCE_MODE'));
+  if ($offline_mode) {
+    $custom_theme = settings_get('maintenance_theme');
+    if (empty($custom_theme)) {
+      $custom_theme = config_get('system.core', 'maintenance_theme');
+    }
+    if (empty($custom_theme)) {
+      $custom_theme = config_get('system.core', 'theme_default');
+    }
+  }
+  elseif ($initialize) {
     // First allow modules to dynamically set a custom theme for the current
     // page. Since we can only have one, the last module to return a valid
     // theme takes precedence.
@@ -3860,10 +3864,13 @@ function _menu_router_save($menu, $masks) {
  * This function will log the current user out and redirect to front page
  * if the current user has no 'access site in maintenance mode' permission.
  *
- * @param $check_only
- *   If this is set to TRUE, the function will perform the access checks and
- *   return the site offline status, but not log the user out or display any
- *   messages.
+ * @param string $path
+ *   The path at which to check site status. Some pages (such as user/login) may
+ *   be considered online while the rest of the site is offline. If empty, the
+ *   current path will be used.
+ * @param bool $display_messages
+ *   If set to TRUE, messages will be displayed indicating the site is in
+ *   offline mode.
  *
  * @return
  *   FALSE if the site is not in maintenance mode, the user login page is
@@ -3871,14 +3878,21 @@ function _menu_router_save($menu, $masks) {
  *   permission. TRUE for anonymous users not being on the login page when the
  *   site is in maintenance mode.
  */
-function _menu_site_is_offline($check_only = FALSE) {
+function _menu_site_status($path = NULL, $display_messages = FALSE) {
+  $site_status = &backdrop_static(__FUNCTION__);
+  if (isset($site_status) && !$display_messages) {
+    return $site_status === MENU_SITE_OFFLINE;
+  }
+
+  $site_status = MENU_SITE_ONLINE;
+
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
       // the maintenance mode settings page.
-      if (!$check_only && $_GET['q'] != 'admin/config/development/maintenance') {
+      if ($display_messages && $_GET['q'] != 'admin/config/development/maintenance') {
         if (user_access('administer site configuration')) {
           backdrop_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
         }
@@ -3888,10 +3902,17 @@ function _menu_site_is_offline($check_only = FALSE) {
       }
     }
     else {
-      return TRUE;
+      $site_status = MENU_SITE_OFFLINE;;
     }
   }
-  return FALSE;
+
+  // Allow other modules to change the site status but not the path because that
+  // would not change the global variable. hook_url_inbound_alter() can be used
+  // to change the path. Code later will not use the $read_only_path variable.
+  $read_only_path = !empty($path) ? $path : $_GET['q'];
+  backdrop_alter('menu_site_status', $site_status, $read_only_path);
+
+  return $site_status;
 }
 
 /**

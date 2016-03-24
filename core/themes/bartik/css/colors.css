@@ -25,6 +25,9 @@ body {
 .l-header ul.menu li.active-trail a {
   color: #fefeff;
 }
+input {
+  color: #3b3b3b;
+}
 .tabs ul.primary li a.active {
   background-color: #ffffff;
 }
