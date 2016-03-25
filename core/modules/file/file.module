@@ -438,15 +438,23 @@ function file_managed_file_process($element, &$form_state, $form) {
     );
   }
 
-  // Add the extension list to the page as JavaScript settings.
+  // Enable auto-uploading unless requested otherwise.
+  if (!isset($element['#auto_upload']) || $element['##auto_upload']) {
+    $element['upload']['#attributes']['data-file-auto-upload'] = '1';
+  }
+
+  // Add client-side validation of file extensions.
   if (isset($element['#upload_validators']['file_validate_extensions'][0])) {
-    $extension_list = implode(',', array_filter(explode(' ', $element['#upload_validators']['file_validate_extensions'][0])));
-    $element['upload']['#attached']['js'] = array(
-      array(
-        'type' => 'setting',
-        'data' => array('file' => array('elements' => array('#' . $element['#id'] . '-upload' => $extension_list)))
-      )
-    );
+    $extension_array = array_filter(explode(' ', $element['#upload_validators']['file_validate_extensions'][0]));
+    $extension_string = implode(',', $extension_array);
+    $element['upload']['#attributes']['data-file-extensions'] = $extension_string;
+
+    // Add support for mobile camera uploads if jpg is a valid extension.
+    // Browser support for HTML5 extension validation is still weak at this
+    // point, add more extensive extension support in the future.
+    if (in_array('jpg', $extension_array)) {
+      $element['upload']['#attributes']['accept'] = '*/*,capture=camera';
+    }
   }
 
   // Prefix and suffix used for Ajax replacement.
