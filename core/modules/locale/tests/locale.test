@@ -1,23 +1,7 @@
 <?php
-
 /**
  * @file
  * Tests for locale.module.
- *
- * The test file includes:
- *  - a functional test for the language configuration forms;
- *  - functional tests for the translation functionalities, including searching;
- *  - a functional test for the PO files import feature, including validation;
- *  - functional tests for translations and templates export feature;
- *  - functional tests for the uninstall process;
- *  - a functional test for the language switching feature;
- *  - a functional test for a user's ability to change their default language;
- *  - a functional test for configuring a different path alias per language;
- *  - a functional test for configuring a different path alias per language;
- *  - a functional test for multilingual support by content type and on nodes.
- *  - a functional test for multilingual fields.
- *  - a functional test for comment language.
- *  - a functional test fot language types/negotiation info.
  */
 
 
@@ -1589,7 +1573,9 @@ class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost($path, $edit, t('Save'));
     // Ensure form was submitted successfully.
     $this->assertText(t('The changes have been saved.'), 'Changes were saved.');
+
     // Check if language was changed.
+    $this->backdropGet($path);
     $elements = $this->xpath('//input[@id=:id]', array(':id' => 'edit-language-' . $langcode));
     $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), 'Default language successfully updated.');
 
