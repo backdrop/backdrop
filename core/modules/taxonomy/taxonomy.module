@@ -745,6 +745,7 @@ function taxonomy_vocabulary_static_reset(array $ids = NULL) {
  * @see taxonomy_vocabulary_load_multiple()
  */
 function taxonomy_vocabulary_get_names() {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
   return taxonomy_vocabulary_load_multiple(FALSE);
 }
 
@@ -1132,6 +1133,7 @@ function taxonomy_vocabulary_load($machine_name) {
  * @see taxonomy_vocabulary_load()
  */
 function taxonomy_vocabulary_machine_name_load($machine_name) {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
   return taxonomy_vocabulary_load($machine_name);
 }
 
