@@ -60,9 +60,7 @@ class views_object {
    *
    * @deprecated since views2
    */
-  function options(&$options) {
-    watchdog_deprecated_function('views', __FUNCTION__);
-  }
+  function options(&$options) { }
 
   /**
    * Set default options.
