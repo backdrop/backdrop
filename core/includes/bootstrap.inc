@@ -112,6 +112,11 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
+ * Log message severity -- Deprecated function / feature notices.
+ */
+define('WATCHDOG_DEPRECATED', 8);
+
+/**
  * @} End of "defgroup logging_severity_levels".
  */
 
@@ -2040,6 +2045,7 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  *   - WATCHDOG_NOTICE: (default) Normal but significant conditions.
  *   - WATCHDOG_INFO: Informational messages.
  *   - WATCHDOG_DEBUG: Debug-level messages.
+ *   - WATCHDOG_DEPRECATED: Use of deprecated functions or features.
  * @param $link
  *   A link to associate with the message.
  *
