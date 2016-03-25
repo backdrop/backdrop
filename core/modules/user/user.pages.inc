@@ -315,6 +315,9 @@ function user_profile_form_submit($form, &$form_state) {
     unset($_SESSION['pass_reset_'. $account->uid]);
   }
 
+  // Redirect to view the user account.
+  $form_state['redirect'] = 'user/' . $account->uid;
+
   backdrop_set_message(t('The changes have been saved.'));
 }
 

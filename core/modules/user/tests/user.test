@@ -1978,6 +1978,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     $this->backdropPost('user/' . $this->web_user->uid . '/edit', $edit, t('Save'));
 
     // Verify that values were stored.
+    $this->backdropGet('user/' . $this->web_user->uid . '/edit');
     $this->assertFieldByName('signature[value]', $edit['signature[value]'], 'Submitted signature text found.');
 
     // Create a comment.
@@ -2300,12 +2301,14 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
     // Assign the role to the user.
     $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => $role_name), t('Save'));
     $this->assertText(t('The changes have been saved.'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
     $this->assertFieldChecked('edit-roles-' . strtolower($role_name), 'Role is assigned.');
     $this->userLoadAndCheckRoleAssigned($account, $role_name);
 
     // Remove the role from the user.
     $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
     $this->assertNoFieldChecked('edit-roles-' . strtolower($role_name), 'Role is removed from user.');
     $this->userLoadAndCheckRoleAssigned($account, $role_name, FALSE);
   }
@@ -2336,6 +2339,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
     // Remove the role again.
     $this->backdropPost('user/' . $account->uid . '/edit', array("roles[$role_name]" => FALSE), t('Save'));
     $this->assertText(t('The changes have been saved.'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
     $this->assertNoFieldChecked('edit-roles-' . strtolower($role_name), 'Role is removed from user.');
     $this->userLoadAndCheckRoleAssigned($account, $role_name, FALSE);
   }
