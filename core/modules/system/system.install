@@ -375,7 +375,7 @@ function system_requirements($phase) {
 
   // Verify the update.php access setting
   if ($phase == 'runtime') {
-    if (!empty($GLOBALS['update_free_access'])) {
+    if (!empty($GLOBALS['settings']['update_free_access'])) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
