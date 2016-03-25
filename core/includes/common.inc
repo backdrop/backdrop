@@ -8062,6 +8062,7 @@ function watchdog_severity_levels() {
     WATCHDOG_NOTICE  => t('notice'),
     WATCHDOG_INFO    => t('info'),
     WATCHDOG_DEBUG   => t('debug'),
+    WATCHDOG_DEPRECATED => t('deprecated'),
   );
 }
 
