@@ -1016,6 +1016,7 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
  * @deprecated since 1.0
  */
 function variable_initialize($conf = array()) {
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
   // NOTE: caching the variables improves performance by 20% when serving
   // cached pages.
   if ($cached = cache('bootstrap')->get('variables')) {
@@ -1100,6 +1101,7 @@ function settings_get($name, $default = NULL) {
 function variable_get($name, $default = NULL) {
   global $conf;
 
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
   return isset($conf[$name]) ? $conf[$name] : $default;
 }
 
@@ -1133,6 +1135,8 @@ function variable_get($name, $default = NULL) {
 function variable_set($name, $value) {
   global $conf;
 
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
+
   db_merge('variable')->key(array('name' => $name))->fields(array('value' => serialize($value)))->execute();
 
   cache('bootstrap')->delete('variables');
@@ -1157,6 +1161,8 @@ function variable_set($name, $value) {
  */
 function variable_del($name) {
   global $conf;
+
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
 
   db_delete('variable')
     ->condition('name', $name)
@@ -1975,6 +1981,50 @@ function request_uri() {
   $uri = '/' . ltrim($uri, '/');
 
   return $uri;
+}
+
+/**
+ * Logs a deprecation warning.
+ *
+ * This is a wrapper function for watchdog() to record uses of deprecated
+ * functions in Backdrop modules. To prevent an explosion of WATCHDOG_DEPRECATED
+ * messages, only the first use of a function in a particular file:line will get
+ * a watchdog message.
+ *
+ * @param $type
+ *   The category to which this message belongs.
+ * @param $func
+ *   The function or method deprecated.  Usually, __FUNCTION__ or __METHOD__.
+ * @param $link
+ *   A link to associate with the message.
+ *
+ * @see watchdog()
+ */
+function watchdog_deprecated_function($type, $func, $link=NULL) {
+  static $deprecated_calls = array();
+
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+
+  // Get the caller of the deprecated function.
+  $trace = debug_backtrace();
+  array_shift($trace);
+  $caller = _backdrop_get_last_caller($trace);
+
+  $caller_sig = $caller['file'] . ':' . $caller['line'];
+  if (array_key_exists($caller_sig, $deprecated_calls)) {
+    return;
+  }
+  $deprecated_calls[$caller_sig] = TRUE;
+
+  // Call watchdog()
+  $message = 'The function @original_caller (@file:@line) called deprecated function @function(). It will be removed in the next major release of Backdrop.';
+  $variables = array(
+    '@function' => $func,
+    '@original_caller' => $caller['function'],
+    '@file' => basename($caller['file']),
+    '@line' => $caller['line'],
+  );
+  watchdog($type, $message, $variables, WATCHDOG_DEPRECATED, $link);
 }
 
 /**

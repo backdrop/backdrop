@@ -1043,6 +1043,7 @@ function _filter_format_is_cacheable($format) {
  * @deprecated since 1.0
  */
 function filter_list_format($format_id) {
+  watchdog_deprecated_function('Filter', __FUNCTION__);
   if ($format = filter_format_load($format_id)) {
     return $format->filters;
   }

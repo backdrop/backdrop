@@ -457,6 +457,7 @@ function drupal_render_cid_create($elements) {
  * @see backdrop_sort()
  */
 function element_sort_by_title($a, $b) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $a_title = (is_array($a) && isset($a['#title'])) ? $a['#title'] : '';
   $b_title = (is_array($b) && isset($b['#title'])) ? $b['#title'] : '';
   return strnatcasecmp($a_title, $b_title);
@@ -469,6 +470,7 @@ function element_sort_by_title($a, $b) {
  * @see backdrop_sort()
  */
 function element_sort($a, $b) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $a_weight = (is_array($a) && isset($a['#weight'])) ? $a['#weight'] : 0;
   $b_weight = (is_array($b) && isset($b['#weight'])) ? $b['#weight'] : 0;
   if ($a_weight == $b_weight) {
@@ -484,6 +486,7 @@ function element_sort($a, $b) {
  * @see backdrop_sort()
  */
 function drupal_sort_weight($a, $b) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
   $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
   if ($a_weight == $b_weight) {
@@ -499,6 +502,7 @@ function drupal_sort_weight($a, $b) {
  * @see backdrop_sort()
  */
 function drupal_sort_title($a, $b) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   if (!isset($b['title'])) {
     return -1;
   }
@@ -509,60 +513,79 @@ function drupal_sort_title($a, $b) {
 }
 
 function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }
 function drupal_array_set_nested_value(array &$array, array $parents, $value, $force = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_array_set_nested_value($array, $parents, $value, $force);
 }
 function drupal_array_unset_nested_value(array &$array, array $parents, &$key_existed = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_array_unset_nested_value($array, $parents, $key_existed);
 }
 function drupal_array_nested_key_exists(array $array, array $parents) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_array_nested_key_exists($array, $parents);
 }
 function drupal_common_theme() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_common_theme();
 }
 function drupal_install_schema($module) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_install_schema($module);
 }
 function drupal_uninstall_schema($module) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_uninstall_schema($module);
 }
 function drupal_get_schema_unprocessed($module, $table = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_schema_unprocessed($module, $table);
 }
 function drupal_schema_fields_sql($table, $prefix = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_schema_fields_sql($table, $prefix);
 }
 function drupal_write_record($table, &$record, $primary_keys = array()) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_write_record($table, $record, $primary_keys);
 }
 function drupal_parse_info_file($filename, $process_sections = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_parse_info_file($filename, $process_sections);
 }
 function drupal_parse_info_format($data, $process_sections = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_parse_info_format($data, $process_sections);
 }
 function drupal_explode_tags($tags) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_explode_tags($tags);
 }
 function drupal_implode_tags($tags) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_implode_tags($tags);
 }
 function drupal_flush_all_caches() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_flush_all_caches();
 }
 function drupal_parse_dependency($dependency) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_parse_dependency($dependency);
 }
 function drupal_check_incompatibility($v, $current_version) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_check_incompatibility($v, $current_version);
 }
 function drupal_get_updaters() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_updaters();
 }
 function drupal_get_filetransfer_info() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_filetransfer_info();
 }
 
@@ -572,39 +595,50 @@ function drupal_get_filetransfer_info() {
  * @deprecated since 1.0
  */
 function format_username($account) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return user_format_name($account);
 }
 
 // Functions from errors.inc.
 function drupal_error_levels() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_error_levels();
 }
 // Functions from file.inc.
 function drupal_move_uploaded_file($filename, $uri) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_move_uploaded_file($filename, $uri);
 }
 function drupal_chmod($uri, $mode = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_chmod($uri, $mode);
 }
 function drupal_unlink($uri, $context = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_unlink($uri, $context);
 }
 function drupal_realpath($uri) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_realpath($uri);
 }
 function drupal_dirname($uri) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_dirname($uri);
 }
 function drupal_basename($uri, $suffix = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_basename($uri, $suffix);
 }
 function drupal_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_mkdir($uri, $mode, $recursive, $context);
 }
 function drupal_rmdir($uri, $context = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_rmdir($uri, $context);
 }
 function drupal_tempnam($directory, $prefix) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_tempnam($directory, $prefix);
 }
 
@@ -614,225 +648,294 @@ function drupal_tempnam($directory, $prefix) {
  * @deprecated since 1.0
  */
 function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return file_save_htaccess($directory, $private, $force_overwrite);
 }
 
 // Functions from form.inc.
 function drupal_get_form() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $args = func_get_args(); // pass $args to form function
   return call_user_func_array('backdrop_get_form', $args);
 }
 function drupal_build_form($form_id, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_build_form($form_id, $form_state);
 }
 function drupal_rebuild_form($form_id, &$form_state, $old_form = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_rebuild_form($form_id, $form_state, $old_form);
 }
 function drupal_form_submit($form_id, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_form_submit($form_id, $form_state);
 }
 function drupal_retrieve_form($form_id, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_retrieve_form($form_id, $form_state);
 }
 function drupal_process_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_process_form($form_id, $form, $form_state);
 }
 function drupal_prepare_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_prepare_form($form_id, $form, $form_state);
 }
 function drupal_validate_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_validate_form($form_id, $form, $form_state);
 }
 function drupal_redirect_form($form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_redirect_form($form_state);
 }
 // Functions from graph.inc.
 function drupal_depth_first_search(&$graph) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_depth_first_search($graph);
 }
 // Functions from install.core.inc.
 function install_drupal() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return install_backdrop();
 }
 // Functions from install.inc.
 function drupal_load_updates() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_load_updates();
 }
 function drupal_get_schema_versions($module) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_schema_versions($module);
 }
 function drupal_get_installed_schema_version($module, $reset = FALSE, $array = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_installed_schema_version($module, $reset, $array);
 }
 function drupal_set_installed_schema_version($module, $version) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_set_installed_schema_version($module, $version);
 }
 function drupal_install_profile_distribution_name() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_install_profile_distribution_name();
 }
 function drupal_detect_baseurl($file = 'core/install.php') {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_detect_baseurl($file);
 }
 function drupal_detect_database_types() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $installer = backdrop_load_database_driver();
   return array('mysql' => $installer->name());
 }
 function drupal_get_database_types() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $mysql = backdrop_load_database_driver();
   return array('mysql' => $mysql);
 }
 function drupal_rewrite_settings($settings = array()) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_rewrite_settings($settings);
 }
 function drupal_verify_profile($install_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_verify_profile($install_state);
 }
 function drupal_install_system() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_install_system();
 }
 function drupal_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_uninstall_modules($module_list, $uninstall_dependents);
 }
 function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_verify_install_file($file, $mask, $type);
 }
 function drupal_install_mkdir($file, $mask, $message = TRUE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_install_mkdir($file, $mask, $message);
 }
 function drupal_current_script_url($query = array()) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_current_script_url($query);
 }
 function drupal_requirements_url($severity) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_requirements_url($severity);
 }
 function drupal_check_profile($profile) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_check_profile($profile);
 }
 function drupal_requirements_severity(&$requirements) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_requirements_severity($requirements);
 }
 function drupal_check_module($module) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_check_module($module);
 }
 // Functions from mail.inc.
 function drupal_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_mail($module, $key, $to, $language, $params, $from, $send);
 }
 function drupal_mail_system($module, $key) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_mail_system($module, $key);
 }
 function drupal_wrap_mail($text, $indent = '') {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_wrap_mail($text, $indent);
 }
 function drupal_html_to_text($string, $allowed_tags = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_html_to_text($string, $allowed_tags);
 }
 // Functions from module.inc.
 function drupal_required_modules() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_required_modules();
 }
 function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_alter($type, $data, $context1, $context2, $context3);
 }
 // Functions from path.inc.
 function drupal_path_initialize() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_path_initialize();
 }
 function drupal_lookup_path($action, $path = '', $langcode = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_lookup_path($action, $path, $langcode);
 }
 function drupal_cache_system_paths() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_cache_system_paths();
 }
 function drupal_get_path_alias($path = NULL, $langcode = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_path_alias($path, $langcode);
 }
 function drupal_get_normal_path($path, $langcode = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_get_normal_path($path, $langcode);
 }
 function drupal_is_front_page() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_is_front_page();
 }
 function drupal_match_path($path, $patterns) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_match_path($path, $patterns);
 }
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return;
 }
 function drupal_valid_path($path, $dynamic_allowed = FALSE) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_valid_path($path, $dynamic_allowed);
 }
 function drupal_clear_path_cache($source = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_clear_path_cache($source);
 }
 // Functions from session.inc.
 function drupal_session_initialize() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_initialize();
 }
 function drupal_session_start() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_start();
 }
 function drupal_session_commit() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_commit();
 }
 function drupal_session_started($set = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_started($set);
 }
 function drupal_session_regenerate() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_regenerate();
 }
 function drupal_session_destroy_uid($uid) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_session_destroy_uid($uid);
 }
 function drupal_save_session($status = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_save_session($status);
 }
 // Functions from theme.inc.
 function drupal_theme_access($theme) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_theme_access($theme);
 }
 function drupal_theme_initialize() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_theme_initialize();
 }
 function drupal_theme_rebuild() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_theme_rebuild();
 }
 function drupal_find_base_themes($themes, $key, $used_keys = array()) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_find_base_themes($themes, $key, $used_keys);
 }
 function drupal_find_theme_functions($cache, $prefixes) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_find_theme_functions($cache, $prefixes);
 }
 function drupal_find_theme_templates($cache, $extension, $path) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_find_theme_templates($cache, $extension, $path);
 }
 // Functions from unicode.inc.
 function drupal_xml_parser_create(&$data) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_xml_parser_create($data);
 }
 function drupal_convert_to_utf8($data, $encoding) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_convert_to_utf8($data, $encoding);
 }
 function drupal_truncate_bytes($string, $len) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_truncate_bytes($string, $len);
 }
 function drupal_strlen($text) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_strlen($text);
 }
 function drupal_strtoupper($text) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_strtoupper($text);
 }
 function drupal_strtolower($text) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_strtolower($text);
 }
 function drupal_ucfirst($text) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_ucfirst($text);
 }
 function drupal_substr($text, $start, $length = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_substr($text, $start, $length);
 }
 // Functions from utility.inc.
 function drupal_var_export($var, $prefix = '') {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   return backdrop_var_export($var, $prefix);
 }
 
@@ -846,6 +949,7 @@ function drupal_var_export($var, $prefix = '') {
  * @deprecated since 1.0
  */
 function node_types_rebuild() {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   node_type_cache_reset();
 }
 
@@ -870,6 +974,7 @@ function node_types_rebuild() {
  * @deprecated since 1.0
  */
 function system_settings_form($form) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
@@ -898,6 +1003,7 @@ function system_settings_form($form) {
  * @deprecated since 1.0
  */
 function system_settings_form_submit($form, &$form_state) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   form_state_values_clean($form_state);
 
   foreach ($form_state['values'] as $key => $value) {
@@ -918,6 +1024,7 @@ function system_settings_form_submit($form, &$form_state) {
  * @deprecated since 1.0
  */
 function system_get_date_types($type = NULL) {
+  watchdog_deprecated_function('Drupal Compatibility', __FUNCTION__);
   $formats = system_get_date_formats($type);
 
   if ($type) {
