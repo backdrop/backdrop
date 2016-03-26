@@ -14,13 +14,17 @@
  * back to its original state!
  */
 
-// Change the directory to the Backdrop root.
-chdir('..');
-
 /**
  * Defines the root directory of the Backdrop installation.
+ *
+ * The dirname() function is used to get path to Backdrop root folder, which
+ * avoids resolving of symlinks. This allows the code repository to be a symlink
+ * and hosted outside of the web root. See issue #1297.
  */
-define('BACKDROP_ROOT', getcwd());
+define('BACKDROP_ROOT', dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+
+// Change the directory to the Backdrop root.
+chdir(BACKDROP_ROOT);
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
