@@ -89,6 +89,14 @@ function layout_layout_access_info() {
     'description' => t('Control access by the currently active interface language.'),
     'class' => 'LanguageLayoutAccess',
   );
+  $info['node_id'] = array(
+    'title' => t('Node: ID'),
+    'description' => t('Control access by the current node ID.'),
+    'class' => 'NodeIDAccess',
+    'required contexts' => array(
+      'node' => 'node',
+    ),
+  );
   $info['user_permission'] = array(
     'title' => t('User: Permission'),
     'description' => t('Control access by permission string.'),
