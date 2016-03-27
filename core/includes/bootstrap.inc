@@ -1016,7 +1016,9 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
  * @deprecated since 1.0
  */
 function variable_initialize($conf = array()) {
-  watchdog_deprecated_function('bootstrap', __FUNCTION__);
+  // watchdog_deprecated_function() is not called here even though this function
+  // is deprecated because this function is *always* called during bootstrap.
+
   // NOTE: caching the variables improves performance by 20% when serving
   // cached pages.
   if ($cached = cache('bootstrap')->get('variables')) {
