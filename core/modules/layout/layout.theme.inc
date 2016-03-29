@@ -46,37 +46,11 @@ function theme_layout_reorder_layouts($variables) {
  */
 function theme_layout_info($variables) {
   $layout = $variables['layout'];
-  $info = layout_get_layout_info($layout->layout);
-  
-  // Buuild template thumbnail preview
-  $preview_path = $info['path'] . '/' . $info['preview'];
-  $preview = theme('image', array('uri' => $preview_path));
-  
-  // Build a list of visibility conditions on this layout
-  $conditions = array();
-  foreach ($layout->conditions as $access_key => $layout_access) {
-    $conditions[] = $layout_access->summary();
-  }
-  $conditions_list = theme('item_list', array('items' => $conditions));
-  
-  // Create a link to the settings page
-  $settings_link = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/settings');
-  
-  $output = '';
-  $output .= '<div class="layout-info">';
-  $output .= '<div class="layout-preview">' . $preview . '</div>';
-  $output .= '<div class="layout-detail">';
-  $output .= '<div class="layout-title">' . check_plain($layout->title) . '</div>';
-  $output .= '<div class="layout-template description">' . t('Template: !title', array('!title' =>$settings_link)) . '</div>';
-  if ($conditions) {
-    $output .= '<div class="layout-conditions description">';
-    $output .= '<div class="conditions-toggle">' . t('Visibility conditions (!count)', array('!count' =>count($conditions))) . '</div>';
-    $output .= '<div class="layout-conditions-list">' . $conditions_list . '</div>';
-    $output .= '</div>';
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
 
-  }
-  $output .= '</div></div>';
+  $output  = '<div class="layout-info">';
+  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
+  $output .= '</div>';
+
   return $output;
 }
 
@@ -152,7 +126,7 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Output the list of visiblity conditions for layouts.
+ * Output the list of visibility conditions for layouts.
  */
 function theme_layout_conditions($variables) {
   $element = $variables['element'];
