@@ -29,11 +29,11 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 2);
+      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 4);
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link, 'colspan' => 2);
+      $row[] = array('data' => $path_link, 'colspan' => 4);
     }
     $row[] = backdrop_render($operations);
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
@@ -52,8 +52,23 @@ function layout_list_page() {
       else {
         $storage = t('Custom');
       }
+
+      $layout_info = layout_get_layout_info($layout->layout);
+      $preview = theme('image', array('uri' => $layout_info['path'] . '/' . $layout_info['preview']));
+
+      $conditions_list = 'None';
+      if (!empty($layout->conditions)) {
+        $conditions = array();
+        foreach ($layout->conditions as $access_key => $layout_access) {
+          $conditions[] = $layout_access->summary();
+        }
+        $conditions_list = theme('item_list', array('items' => $conditions));
+      }
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = $preview . '<div class="template-name">' . $layout_info['title'] . '</div>';
+      $row[] = $conditions_list;
       $row[] = $storage;
       $row[] = backdrop_render($operations);
       $class = array('layout-row');
@@ -65,8 +80,10 @@ function layout_list_page() {
   }
 
   $header = array(
-    array('data' => t('Layout and path'), 'class' => array('layout-title')),
-    array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
+    array('data' => t('Layout name and path'), 'class' => array('layout-title')),
+    array('data' => t('Layout Template'), 'class' => array('layout-template', 'priority-medium')),
+    array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
+    array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low', 'priority-very-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 

@@ -46,8 +46,11 @@ function theme_layout_reorder_layouts($variables) {
  */
 function theme_layout_info($variables) {
   $layout = $variables['layout'];
-  $output = '';
-  $output .= '<div class="layout-title">' . check_plain($layout->title) . '</div>';
+
+  $output  = '<div class="layout-info">';
+  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
+  $output .= '</div>';
+
   return $output;
 }
 
@@ -123,7 +126,7 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Output the list of visiblity conditions for layouts.
+ * Output the list of visibility conditions for layouts.
  */
 function theme_layout_conditions($variables) {
   $element = $variables['element'];
