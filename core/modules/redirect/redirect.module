@@ -90,7 +90,7 @@ function redirect_menu() {
     'file' => 'redirect.admin.inc',
   );
   $items['admin/config/search/redirect/list'] = array(
-    'title' => 'List',
+    'title' => 'List redirects',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -168,11 +168,15 @@ function redirect_menu() {
 }
 
 /**
- * Centralize static $redirect storage so other modules can rely on consistent
- * API for resetting other fucntions variables.
+ * Stores the redirect for the current page request.
+ *
+ * This is set very early in the bootstrap process, during
+ * redirect_url_inbound_alter(). Immediately after the full Backdrop bootstrap,
+ * this value is checked. Setting a current page redirect after hook_init()
+ * will have no effect.
  *
  * @param Redirect $redirect
- *  A redirect entity.
+ *   A redirect object.
  *
  * @see &backdrop_static()
  */
@@ -182,10 +186,10 @@ function redirect_set_current_redirect($redirect) {
 }
 
 /**
- * Try to get a redirect object from the cache otherwise attempt to find redirect
- * from current path, query string, and language code.
+ * Attempt to find redirect from current path, query string, and language code.
  *
- * @return a Redirect enitity.
+ * @return Redirect
+ *   The redirect object (if any) for the current page. FALSE if not found.
  */
 function redirect_get_current_redirect() {
   $redirect = backdrop_static('redirect_set_current_redirect', NULL);
@@ -194,7 +198,6 @@ function redirect_get_current_redirect() {
     $redirect = redirect_load_by_source(current_path(), $GLOBALS['language']->langcode, backdrop_get_query_parameters());
   }
 
-  // @todo Add an alter hook here?
   return $redirect;
 }
 
@@ -208,59 +211,11 @@ function redirect_url_inbound_alter(&$path, $original_path, $path_language) {
   // 'foo/redirect' to 'node/1/redirect', and there is a redirect enabled for
   // the path 'foo/redirect', then redirect_init() would normally fail since it
   // would not find a match.
-  if ($path != $original_path && $original_path == current_path()) {
+  if ($path !== $original_path && $original_path === $_GET['q']) {
     $current_langcode = !empty($path_language) ? $path_language : $GLOBALS['language']->langcode;
     $current_query = backdrop_get_query_parameters();
     if ($redirect = redirect_load_by_source($original_path, $current_langcode, $current_query)) {
       redirect_set_current_redirect($redirect);
-    }
-  }
-
-  // @TODO: gff see if you can fix this otherwise remove it and file an issue
-  //  against it in backdrop issue queue.
-  // Redirect to canonical URLs.
-  // Commented out per https://www.drupal.org/node/2048137.
-  //if ($path && variable_get('redirect_canonical', 1)) {
-    //$alias = backdrop_get_path_alias($path, $path_language);
-    //if ($alias != $path && $alias != $original_path) {
-      //return redirect_redirect(array('redirect' => $alias, 'type' => 'global'));
-    //}
-
-    // Redirect from default entity paths to the proper entity path.
-    //if ($path_entity = redirect_load_entity_from_path($path)) {
-    //  if ($uri = entity_uri($path_entity['entity_type'], $path_entity['entity'])) {
-    //    if ($path != $uri['path']) {
-    //      return redirect_redirect(array('redirect' => $uri['path'], 'redirect_options' => $uri['options'], 'type' => 'global'));
-    //    }
-    //  }
-    //}
-  //}
-}
-
-/**
- * Implements hook_entity_info_alter().
- */
-function redirect_entity_info_alter(&$info) {
-  $default_paths = array(
-    'node' => 'node/%node',
-    'user' => 'user/%user',
-    'taxonomy_term' => 'taxonomy/term/%taxonomy_term',
-  );
-
-  foreach ($default_paths as $entity_type => $default_path) {
-    if (isset($info[$entity_type]) && !isset($info[$entity_type]['default path'])) {
-      $info[$entity_type]['default path'] = $default_path;
-    }
-  }
-
-  // Disable support for some entity types that cause problems.
-  $unsupported_entity_types = array(
-    'comment',
-    'media',
-  );
-  foreach ($unsupported_entity_types as $unsupported_entity_type) {
-    if (isset($info[$unsupported_entity_type])) {
-      $info[$unsupported_entity_type]['redirect'] = FALSE;
     }
   }
 }
@@ -281,7 +236,7 @@ function redirect_entity_type_supports_redirects($entity_type) {
   if (!isset($types)) {
     $types = array();
     foreach (entity_get_info() as $type => $entity_info) {
-      $types[$type] = !empty($entity_info['uri callback']) && (!isset($entity_info['redirect']) || !empty($entity_info['redirect']));
+      $types[$type] = !empty($entity_info['redirect support']);
     }
   }
 
@@ -296,7 +251,7 @@ function redirect_init() {
     return;
   }
 
-  // Fetch the current redirect.
+  // Fetch the current redirect set in redirect_url_inbound_alter().
   if ($redirect = redirect_get_current_redirect()) {
     redirect_redirect($redirect);
   }
@@ -354,7 +309,17 @@ function redirect_exit($destination = NULL) {
  */
 function redirect_entity_delete($entity, $entity_type) {
   if (redirect_entity_type_supports_redirects($entity_type)) {
-    redirect_delete_by_entity_path($entity_type, $entity);
+    redirect_delete_by_entity_path($entity);
+  }
+}
+
+/**
+ * Implements hook_path_insert().
+ */
+function redirect_path_insert(array $path) {
+  // Check if the new path was previously a redirect and delete it.
+  if ($previous_redirect = redirect_load_by_source($path['alias'], $path['langcode'])) {
+    redirect_delete($previous_redirect->rid);
   }
 }
 
@@ -369,6 +334,7 @@ function redirect_path_update(array $path) {
     return;
   }
 
+  // If the path ID is the same, but the alias has changed, make a redirect.
   if (!empty($path['original']['pid']) && $path['original']['pid'] == $path['pid'] && $path['original']['alias'] != $path['alias']) {
     $redirect = new Redirect(array(
       'source' => $path['original']['alias'],
@@ -376,10 +342,15 @@ function redirect_path_update(array $path) {
       'langcode' => $path['original']['langcode'],
     ));
 
-    // Check if the redirect exists before saving.
+    // Check if the redirect already exists before saving a new one.
     $hash = redirect_hash($redirect);
     if (!redirect_load_by_hash($hash)) {
       redirect_save($redirect);
+    }
+
+    // Check if the new path was previously a redirect and delete it.
+    if ($previous_redirect = redirect_load_by_source($path['alias'], $path['langcode'])) {
+      redirect_delete($previous_redirect->rid);
     }
   }
 }
@@ -401,14 +372,14 @@ function redirect_path_delete($path) {
   }
 
   // Redirect from a deleted alias to the system path.
-  //if (!redirect_load_by_source($path['alias'], $path['langcode'])) {
-  //  $redirect = new stdClass();
-  //  redirect_object_prepare($redirect);
-  //  $redirect->source = $path['alias'];
-  //  $redirect->redirect = $path['source'];
-  //  $redirect->langcode = $path['langcode'];
-  //  redirect_save($redirect);
-  //}
+  if (!redirect_load_by_source($path['alias'], $path['langcode'])) {
+    $redirect = new Redirect(array(
+      'source' => $path['alias'],
+      'redirect' => $path['source'],
+      'langcode' => $path['langcode'],
+    ));
+    $redirect->save();
+  }
 }
 
 /**
@@ -460,15 +431,15 @@ function redirect_form_path_admin_form_alter(&$form, $form_state) {
  * @param $rid
  *   The URL redirect ID.
  * @param $reset
- *   Whether to reset the redirect_load_multiple cache.
+ *   Whether to reset the redirect_load_multiple() cache.
  *
- * @return
+ * @return Redirect|FALSE
  *   An URL redirect object, or FALSE if loading failed.
  *
  * @ingroup redirect_api
  */
 function redirect_load($rid, $reset = FALSE) {
-  $redirects = entity_load('redirect', array($rid), array(), $reset);
+  $redirects = redirect_load_multiple(array($rid), array(), $reset);
   return !empty($redirects) ? reset($redirects) : FALSE;
 }
 
@@ -478,15 +449,15 @@ function redirect_load($rid, $reset = FALSE) {
  * @param $hash
  *   The hash of the URL redirect.
  * @param $reset
- *   Whether to reset the redirect_load_multiple cache.
+ *   Whether to reset the redirect_load_multiple() cache.
  *
- * @return
+ * @return Redirect|FALSE
  *   An URL redirect object, or FALSE if loading failed.
  *
  * @ingroup redirect_api
  */
 function redirect_load_by_hash($hash, $reset = FALSE) {
-  $redirects = entity_load('redirect', FALSE, array('hash' => $hash), $reset);
+  $redirects = redirect_load_multiple(array(), array('hash' => $hash), $reset);
   return !empty($redirects) ? reset($redirects) : FALSE;
 }
 
@@ -500,7 +471,7 @@ function redirect_load_by_hash($hash, $reset = FALSE) {
  * @param $query
  *   Array of URL query parameters.
  *
- * @return
+ * @return Redirect|FALSE
  *   The first matched URL redirect object, or FALSE if there aren't any.
  *
  * @see redirect_load_multiple()
@@ -513,8 +484,8 @@ function redirect_load_by_source($source, $langcode = LANGUAGE_NONE, array $quer
   // Run a case-insensitive query for matching RIDs first.
   $rid_query = db_select('redirect');
   $rid_query->addField('redirect', 'rid');
-  $sys_config = config('system.core');
-  if ($source != $sys_config->get('site_frontpage', 'node')) {
+  $system_config = config('system.core');
+  if ($source != $system_config->get('site_frontpage')) {
     $rid_query->condition('source', db_like($source), 'LIKE');
   }
   else {
@@ -573,8 +544,46 @@ function redirect_load_by_source($source, $langcode = LANGUAGE_NONE, array $quer
  *
  * @ingroup redirect_api
  */
-function redirect_load_multiple($rids = array(), array $conditions = array(), $reset = FALSE) {
-  return entity_load('redirect', $rids, $conditions, $reset);
+function redirect_load_multiple(array $rids = array(), array $conditions = array(), $reset = FALSE) {
+  $cached_redirects = &backdrop_static(__FUNCTION__, array());
+  if ($reset) {
+    $cached_redirects = array();
+  }
+
+  $new_rids = array_diff($rids, array_keys($cached_redirects));
+  if ($new_rids || $conditions) {
+    $query = db_select('redirect')->fields('redirect');
+    if ($rids) {
+      $query->condition('rid', $new_rids, 'IN');
+    }
+    foreach ($conditions as $key => $value) {
+      $query->condition($key, $value);
+    }
+    $rows = $query->execute()->fetchAllAssoc('rid', PDO::FETCH_ASSOC);
+    $added_redirects = array();
+    foreach ($rows as $rid => $row) {
+      if ($rows[$rid]) {
+        $added_redirects[$rid] = new Redirect($row);
+      }
+      else {
+        $added_redirects[$rid] = FALSE;
+      }
+    }
+    $cached_redirects += $added_redirects;
+  }
+
+  // Return the requested redirects.
+  $redirects = array();
+  if ($rids) {
+    foreach ($rids as $rid) {
+      $redirects[$rid] = $cached_redirects[$rid];
+    }
+  }
+  elseif ($conditions) {
+    $redirects = $added_redirects;
+  }
+
+  return $redirects;
 }
 
 /**
@@ -663,29 +672,6 @@ function redirect_validate(Redirect $redirect, $form, &$form_state) {
   }
 }
 
-function redirect_object_prepare($redirect, $defaults = array()) {
-  $defaults += array(
-    'rid' => NULL,
-    'type' => 'redirect',
-    'uid' => $GLOBALS['user']->uid,
-    'source_options' => array(),
-    'redirect_options' => array(),
-    'langcode' => LANGUAGE_NONE,
-    'status_code' => 0,
-    'count' => 0,
-    'access' => 0,
-    'hash' => '',
-  );
-
-  foreach ($defaults as $key => $default) {
-    if (!isset($redirect->{$key})) {
-      $redirect->{$key} = $default;
-    }
-  }
-
-  module_invoke_all('redirect_prepare', $redirect);
-}
-
 /**
  * Save an URL redirect.
  *
@@ -696,7 +682,58 @@ function redirect_object_prepare($redirect, $defaults = array()) {
  * @ingroup redirect_api
  */
 function redirect_save(Redirect $redirect) {
-  $redirect->save();
+  $transaction = db_transaction();
+
+  try {
+    if (!empty($redirect->rid) && !isset($redirect->original)) {
+      $redirect->original = redirect_load($redirect->rid, TRUE);
+    }
+
+    // Determine if we will be inserting a new redirect.
+    if (!isset($redirect->is_new)) {
+      $redirect->is_new = empty($redirect->rid);
+    }
+
+    redirect_hash($redirect);
+    if ($redirect->is_new || $redirect->hash !== $redirect->original->hash) {
+      // Only new or changed redirects reset the last used value.
+      $redirect->count = 0;
+      $redirect->access = 0;
+    }
+
+    // Allow other modules to alter the redirect before saving.
+    module_invoke_all('redirect_presave', $redirect);
+
+    // Save the redirect to the database and invoke the post-save hooks.
+    if ($redirect->is_new) {
+      backdrop_write_record('redirect', $redirect);
+      module_invoke_all('redirect_insert', $redirect);
+    }
+    else {
+      backdrop_write_record('redirect', $redirect, array('rid'));
+      module_invoke_all('redirect_update', $redirect);
+    }
+
+    // Clear internal properties.
+    $redirect->is_new = FALSE;
+    if (isset($redirect->original)) {
+      unset($redirect->original);
+    }
+
+    // Clear the static loading cache.
+    redirect_load_multiple(array(), array(), TRUE);
+
+    // Ignore slave server temporarily to give time for the
+    // saved node to be propagated to the slave.
+    db_ignore_slave();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('redirect', $e);
+    throw $e;
+  }
+
+  return $redirect->is_new ? SAVED_NEW : SAVED_UPDATED;
 }
 
 /**
@@ -746,6 +783,10 @@ function redirect_delete($rid) {
  * @param $path
  *   An string with an internal Backdrop path.
  *
+ * @return int|FALSE
+ *   The constant SAVED_DELETED if redirects were removed. FALSE if no redirects
+ *   were removed.
+ *
  * @ingroup redirect_api
  */
 function redirect_delete_by_path($path) {
@@ -762,35 +803,28 @@ function redirect_delete_by_path($path) {
   if ($rids) {
     return redirect_delete_multiple($rids);
   }
+
+  return FALSE;
 }
 
 /**
  * Delete an entity URL alias and any of its sub-paths.
  *
- * This function also checks to see if the default entity URI is different from
- * the current entity URI and will delete any of the default aliases.
- *
- * @param $entity_type
- *   A string with the entity type.
- * @param $entity
+ * @param Entity $entity
  *   An entity object.
+ *
+ * @return int|FALSE
+ *   The constant SAVED_DELETED if redirects were removed. FALSE if no redirects
+ *   were removed.
  *
  * @ingroup redirect_api
  */
-function redirect_delete_by_entity_path($entity_type, $entity) {
-  $uri = entity_uri($entity_type, $entity);
+function redirect_delete_by_entity_path($entity) {
+  $uri = $entity->uri();
   if (!empty($uri['path'])) {
-    redirect_delete_by_path($uri['path']);
+    return redirect_delete_by_path($uri['path']);
   }
-
-  //$info = entity_get_info($entity_type);
-  //if (isset($info['default path'])) {
-  //  list($id) = entity_extract_ids($entity_type, $entity);
-  //  $default_path = str_replace('[id]', $id, $info['default path']);
-  //  if ($uri['path'] !== $default_path) {
-  //    redirect_delete_by_path($default_path);
-  //  }
-  //}
+  return FALSE;
 }
 
 /**
@@ -802,7 +836,28 @@ function redirect_delete_by_entity_path($entity_type, $entity) {
  * @ingroup redirect_api
  */
 function redirect_delete_multiple(array $rids) {
-  entity_delete_multiple('redirect', $rids);
+  $transaction = db_transaction();
+  $redirects = redirect_load_multiple($rids);
+
+  try {
+    // Let modules react to the individual redirects being deleted.
+    foreach ($redirects as $rid => $redirect) {
+      module_invoke_all('redirect_delete', $redirect);
+    }
+
+    db_delete('redirect')
+      ->condition('rid', $rids, 'IN')
+      ->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('redirect', $e);
+    throw $e;
+  }
+
+  redirect_load_multiple(array(), array(), TRUE);
+
+  return SAVED_DELETED;
 }
 
 /**
@@ -816,20 +871,16 @@ function redirect_delete_multiple(array $rids) {
  *   The number of seconds to subtract from the current time and used to
  *   find the inactive redirects.
  *
- * @return
- *   An array of redirect IDs that were deleted or FALSE if none were.
+ * @return array
+ *   An array of redirect IDs that were deleted.
  */
 function redirect_purge_inactive_redirects(array $types = array('redirect'), $interval = NULL) {
-  $config = config('redirect.settings');
   if (!isset($interval)) {
-    $interval = $config->get('purge_inactive');
+    $interval = config_get('redirect.settings', 'purge_inactive');
   }
-
-  if (!$interval || !$config->get('page_cache') || !$config->get('cache_invoke_hooks')) {
-    // If serving redirects from the page cache is enabled and hooks are not
-    // executed during page caching, then we cannot track when a redirect is
-    // used. Therefore, we cannot remove unused redirects.
-    return FALSE;
+  // If there is no interval at all, do not discard any redirects.
+  if (empty($interval)) {
+    return;
   }
 
   $query = db_select('redirect');
@@ -838,14 +889,16 @@ function redirect_purge_inactive_redirects(array $types = array('redirect'), $in
     $query->condition('type', $types);
   }
   $query->condition('access', REQUEST_TIME - $interval, '<');
+  $query->condition('access', 0, '<>');
   $query->addTag('redirect_purge');
   $rids = $query->execute()->fetchCol();
 
   if (count($rids)) {
     redirect_delete_multiple($rids);
     watchdog('redirect', format_plural(count($rids), 'Removed 1 inactive redirect from the database.', 'Removed @count inactive redirects from the database.'));
-    return $rids;
   }
+
+  return $rids;
 }
 
 /**
@@ -892,35 +945,16 @@ function redirect_goto($redirect) {
   backdrop_add_http_header('Status', redirect_status_code_options($redirect->status_code));
 
   if (!empty($redirect->rid)) {
-    // Add a custom header for the redirect ID so when the redirect is served
-    // from the page cache, we can track it.
+    // Add a custom header for the redirect ID. This allows redirect usage to
+    // be tracked even when the page is served from a cache.
     backdrop_add_http_header('X-Redirect-ID', $redirect->rid);
   }
-  $config = config('redirect.settings');
-  $sys_config = config('system.core');
-  if (!$config->get('page_cache') || !$sys_config->get('cache') || !backdrop_page_is_cacheable() || empty($redirect->cache)) {
-    backdrop_exit($url);
-  }
 
-  // @see backdrop_exit()
-  if (backdrop_get_bootstrap_phase() == BACKDROP_BOOTSTRAP_FULL) {
-    if (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update') {
-      module_invoke_all('exit', $url);
-    }
-    backdrop_session_commit();
-    if ($sys_config->get('cache')) {
-      // We must output something to allow the request to be cached.
-      echo ' ';
-      if ($cache = backdrop_page_set_cache()) {
-        // When caching this redirect for the first time we still need to ensure
-        // that the correct cache headers are sent.
-        // @see backdrop_page_footer()
-        backdrop_serve_page_from_cache($cache);
-      }
-    }
-  }
-
-  exit;
+  // Invoke hook_exit() and set the page cache (if enabled). The redirect will
+  // be cached for the same lifetime as the normal expiration setting from
+  // the performance page.
+  backdrop_page_footer();
+  exit();
 }
 
 /**
@@ -950,21 +984,10 @@ function redirect_hash(Redirect $redirect) {
 /**
  * Clear a page from the page cache.
  */
-function redirect_page_cache_clear($redirect = NULL) {
-  $config = config('redirect.settings');
-  if (!$config->get('page_cache')) {
-    return;
-  }
-
-  if (isset($redirect)) {
-    $path = url($redirect->source, array('absolute' => TRUE));
-    // Use a wildcard to catch paths with query strings.
-    cache('page')->deletePrefix($path);
-  }
-  else {
-    // Clear the entire page cache.
-    cache('page')->flush();
-  }
+function redirect_page_cache_clear(Redirect $redirect) {
+  $path = url($redirect->source, array('absolute' => TRUE));
+  // Use a wildcard to catch paths with query strings.
+  cache('page')->deletePrefix($path);
 }
 
 // TODO: @gff commented this out per https://github.com/backdrop/backdrop/pull/1249#discussion_r52810547
@@ -1231,22 +1254,33 @@ function redirect_parse_url($url) {
  * Return either a status code or array of possible status codes.
  *
  * @param int $code
- *  optional numeric code, if present as key of $codes value string is returned.
+ *   Optional numeric code, if present as key of $codes value string is returned.
+ * @param bool $all_types
+ *   Include the less-common redirect types. If set to FALSE, only the 301 and
+ *   302 types are returned.
  *
- * @return string or string[]
- *   if $code is passed and present then return is string value of key $code,
- *   otherwise the array of posssible codes $codes is returned.
+ * @return string|string[]
+ *   If $code is passed and present then return is string value of key $code,
+ *   otherwise the array of possible codes $codes is returned.
  */
-function redirect_status_code_options($code = NULL) {
-  $codes = array(
-    300 => t('300 Multiple Choices'),
-    301 => t('301 Moved Permanently'),
-    302 => t('302 Found'),
-    303 => t('303 See Other'),
-    304 => t('304 Not Modified'),
-    305 => t('305 Use Proxy'),
-    307 => t('307 Temporary Redirect'),
-  );
+function redirect_status_code_options($code = NULL, $all_types = TRUE) {
+  if ($all_types) {
+    $codes = array(
+      300 => t('300 - Multiple Choices'),
+      301 => t('301 - Moved Permanently'),
+      302 => t('302 - Found'),
+      303 => t('303 - See Other'),
+      304 => t('304 - Not Modified'),
+      305 => t('305 - Use Proxy'),
+      307 => t('307 - Temporary Redirect'),
+    );
+  }
+  else {
+    $codes = array(
+      301 => t('301 - Moved Permanently'),
+      302 => t('302 - Moved Temporarily'),
+    );
+  }
   return isset($codes[$code]) ? $codes[$code] : $codes;
 }
 
@@ -1297,24 +1331,17 @@ function locale_form_redirect_edit_form_alter(&$form, &$form_state) {
 
 /**
  * Implements hook_field_attach_form().
- *
- * @todo Investigate using hook_entity_load() to load all entity redirects.
- * @todo Figure out how to support entity URIs that contain query strings.
  */
-function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+function redirect_field_attach_form($entity_type, Entity $entity, &$form, &$form_state, $langcode) {
   list($id) = entity_extract_ids($entity_type, $entity);
   if (!empty($form['redirect']) || empty($id)) {
     return;
   }
 
-  /**
-   * todo: fix redirect_entity_type_supports_redirects function
-   * todo: to correctly detect if entity type supports redirects
-   */
   // Check if this entity type supports redirects.
-  /*if (!redirect_entity_type_supports_redirects($entity_type)) {
+  if (!redirect_entity_type_supports_redirects($entity_type)) {
     return;
-  }*/
+  }
 
   $uri = $entity->uri();
   if (empty($uri['path'])) {
@@ -1336,7 +1363,6 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
 
   // Only support vertical tabs if there is a vertical tab element.
   foreach (element_children($form) as $key) {
-    $my_type = &backdrop_static(__FUNCTION__);
     if (isset($form[$key]['#type']) && $form[$key]['#type'] == 'vertical_tabs') {
       $form['redirect']['#group'] = $key;
       $form['redirect']['#attached']['js']['vertical-tabs'] = backdrop_get_path('module', 'redirect') . '/js/redirect.js';
@@ -1365,7 +1391,7 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
   // We don't have to put our include in $form_state['build_info']['files']
   // since the build array will already be cached.
   module_load_include('inc', 'redirect', 'redirect.admin');
-  $redirects = redirect_load_multiple(FALSE, array('redirect' => $uri['path']));
+  $redirects = redirect_load_multiple(array(), array('redirect' => $uri['path']));
   $header = array('source', 'status_code', 'language', 'count', 'access', 'operations');
   $form['redirect'] += redirect_list_table($redirects, $header);
 }
@@ -1419,8 +1445,7 @@ function redirect_config_info() {
  */
 function redirect_autoload_info() {
   return array(
-    'Redirect' => 'redirect.entity.inc',
-    'RedirectController' => 'redirect.entity.inc',
+    'Redirect' => 'redirect.class.inc',
     'redirect_handler_field_redirect_link_delete' => 'views/redirect_handler_field_redirect_link_delete.inc',
     'redirect_handler_field_redirect_link_edit' => 'views/redirect_handler_field_redirect_link_edit.inc',
     'redirect_handler_field_redirect_operations' => 'views/redirect_handler_field_redirect_operations.inc',

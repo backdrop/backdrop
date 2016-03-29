@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for the redirect module.
+ * Install, update and uninstall functions for the Redirect module.
  */
 
 /**
@@ -105,20 +105,18 @@ function redirect_schema() {
  * Implements hook_update_last_removed().
  */
 function redirect_update_last_removed() {
-  return 7000;
+  return 7101;
 }
 
 /**
- * Upgrade Redirect variables to config.
+ * Upgrade Drupal 7 Redirect variables to config.
  */
 function redirect_update_1000() {
   // Write the initial config file.
   $config = config('redirect.settings');
   $config->set('auto_redirect', update_variable_get('redirect_auto_redirect', TRUE));
   $config->set('passthrough_querystring', update_variable_get('redirect_passthrough_querystring', TRUE));
-  $config->set('warning', update_variable_get('redirect_warning', FALSE));
   $config->set('default_status_code', update_variable_get('redirect_default_status_code', '301'));
-  $config->set('page_cache', update_variable_get('redirect_page_cache', FALSE));
   $config->set('purge_inactive', update_variable_get('redirect_purge_inactive', FALSE));
   $config->set('global_home', update_variable_get('redirect_global_home', TRUE));
   $config->set('global_clean', update_variable_get('redirect_global_clean', TRUE));
@@ -168,4 +166,19 @@ function redirect_update_1002() {
   config('redirect.settings')
     ->set('_config_static', true)
     ->save();
+}
+
+/**
+ * Explicitly set the redirect status code and remove the default fallback.
+ */
+function redirect_update_1003() {
+  $config = config('redirect.settings');
+  $default_status = $config->get('default_status_code');
+  $additional_statuses = !in_array($default_status, array(301, 302));
+  $config->clear('default_status');
+  $config->clear('warning');
+  $config->set('additional_statuses', $additional_statuses);
+  $config->save();
+
+  db_query("UPDATE {redirect} SET status_code = :default_status WHERE status_code = 0", array(':default_status' => $default_status));
 }

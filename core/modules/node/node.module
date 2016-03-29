@@ -127,6 +127,7 @@ function node_entity_info() {
       'base table' => 'node',
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
+      'redirect support' => TRUE,
       'entity keys' => array(
         'id' => 'nid',
         'revision' => 'vid',

@@ -6,8 +6,12 @@
  */
 
 class RedirectTestHelper extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+
   function setUp(array $modules = array()) {
-    array_unshift($modules, 'redirect');
+    $modules[] = 'node';
+    $modules[] = 'path';
+    $modules[] = 'redirect';
     parent::setUp($modules);
   }
 
@@ -19,7 +23,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
 
     // Reload the redirect.
     if (!empty($redirect->rid)) {
-      return redirect_load($redirect->rid);
+      return redirect_load($redirect->rid, TRUE);
     }
   }
 
@@ -82,7 +86,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
   }
 }
 
-class RedirectUnitTest extends RedirectTestHelper {
+class RedirectUnitTest extends BackdropUnitTestCase {
 
   /**
    * Test the redirect_compare_array_recursive() function.
@@ -139,11 +143,12 @@ class RedirectUnitTest extends RedirectTestHelper {
 }
 
 class RedirectFunctionalTest extends RedirectTestHelper {
-  private $admin_user;
+  protected $admin_user;
 
   function setUp(array $modules = array()) {
     parent::setUp($modules);
 
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     $this->admin_user = $this->backdropCreateUser(array('administer redirects', 'access site reports', 'access content', 'create post content', 'edit any post content', 'create url aliases'));
     $this->backdropLogin($this->admin_user);
   }
@@ -167,50 +172,46 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $this->assertNoLink('Add an URL redirect from this page to another location');
   }
 
-  // TODO: Dear @quicksketch I tried to set 'page_cache_invoke_hooks' with
-  // settings_get('page_cache_invoke_hooks', TRUE), but I think it is over my
-  // head. ~@serundeputy
-  //
-  // function testPageCache() {
-  //   // Set up cache variables.
-  //   config_set('system.core', 'cache', 1);
-  //   $edit = array(
-  //     'redirect_page_cache' => TRUE,
-  //     'redirect_purge_inactive' => 604800,
-  //   );
-  //   $this->backdropPost('admin/config/search/redirect/settings', $edit, 'Save configuration');
-  //   $this->assertText('The configuration options have been saved.');
-  //   $this->backdropLogout();
-  //
-  //   // Add a new redirect.
-  //   $redirect = $this->addRedirect('redirect', 'node');
-  //   $this->assertEqual($redirect->access, 0);
-  //   $this->assertEqual($redirect->count, 0);
-  //   $this->assertPageNotCached('redirect');
-  //
-  //   // Perform the redirect and check that last_used
-  //   $redirect = $this->assertRedirect($redirect);
-  //   $this->assertEqual($redirect->count, 1);
-  //   $this->assertTrue($redirect->access > 0);
-  //   $cache = $this->assertPageCached('redirect');
-  //   $this->assertHeader('Location', url('node', array('absolute' => TRUE)), $cache->data['headers']);
-  //   $this->assertHeader('X-Redirect-ID', $redirect->rid, $cache->data['headers']);
-  //
-  //   // Set a redirect to not used in a while and disable running bootstrap
-  //   // hooks during cache page serve. Running cron to remove inactive redirects
-  //   // should not remove since they cannot be tracked.
-  //   $redirect->access = 1;
-  //   redirect_save($redirect);
-  //   settings_get('page_cache_invoke_hooks', FALSE);
-  //   $this->cronRun();
-  //   $this->assertRedirect($redirect);
-  //
-  //   $redirect->access = 1;
-  //   redirect_save($redirect);
-  //   settings_get('page_cache_invoke_hooks', TRUE);
-  //   $this->cronRun();
-  //   $this->assertNoRedirect($redirect);
-  // }
+   function testPageCache() {
+     // Set up cache variables.
+     config_set('system.core', 'cache', 1);
+     $edit = array(
+       'redirect_purge_inactive' => 604800,
+     );
+     $this->backdropPost('admin/config/search/redirect/settings', $edit, 'Save configuration');
+     $this->assertText('The configuration options have been saved.');
+     $this->backdropLogout();
+
+     // Add a new redirect.
+     $redirect = $this->addRedirect('redirect', 'node');
+     $this->assertEqual($redirect->access, 0);
+     $this->assertEqual($redirect->count, 0);
+     $this->assertPageNotCached('redirect');
+
+     // Perform the redirect and check that count and access are updated.
+     $first_redirect_call = $this->assertRedirect($redirect);
+     $this->assertEqual($first_redirect_call->count, 1);
+     $this->assertTrue($first_redirect_call->access > 0);
+     $cache = $this->assertPageCached('redirect');
+     $this->assertHeader('Location', url('node', array('absolute' => TRUE)), $cache->data['headers']);
+     $this->assertHeader('X-Redirect-ID', $first_redirect_call->rid, $cache->data['headers']);
+
+     // Perform a second call, counts should not be updated due to the page
+     // cache.
+     $second_redirect_call = $this->assertRedirect($redirect);
+     $this->assertEqual($second_redirect_call->count, 1);
+     $this->assertEqual($second_redirect_call->access, $first_redirect_call->access);
+     $cache = $this->assertPageCached('redirect');
+     $this->assertHeader('Location', url('node', array('absolute' => TRUE)), $cache->data['headers']);
+     $this->assertHeader('X-Redirect-ID', $first_redirect_call->rid, $cache->data['headers']);
+
+     // Set a redirect to not accessed since the UNIX epoch, then run cron to
+     // see that it will be removed.
+     $redirect->access = 1;
+     redirect_save($redirect);
+     $this->cronRun();
+     $this->assertNoRedirect($redirect);
+   }
 
   function testPathChangeRedirects() {
     // Create an initial post node with a path alias.

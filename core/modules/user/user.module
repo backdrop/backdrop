@@ -112,6 +112,7 @@ function user_entity_info() {
       'controller class' => 'UserStorageController',
       'base table' => 'users',
       'fieldable' => TRUE,
+      'redirect support' => TRUE,
       'entity class' => 'User',
       'entity keys' => array(
         'id' => 'uid',

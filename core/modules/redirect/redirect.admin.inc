@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administrative page callbacks for the redirect module.
+ * Administrative page callbacks for the Redirect module.
  */
 
 function redirect_list_form($form, &$form_state) {
@@ -12,8 +11,6 @@ function redirect_list_form($form, &$form_state) {
   }
 
   $destination = backdrop_get_destination();
-  $config = config('redirect.settings');
-  $default_status_code = $config->get('default_status_code');
 
   // Set up the header.
   $header = array(
@@ -85,7 +82,7 @@ function redirect_list_form($form, &$form_state) {
     backdrop_alter('redirect_url', $redirect->redirect, $redirect->redirect_options);
     $row['source'] = l($source_url, $redirect->source, $redirect->source_options);
     $row['redirect'] = l($redirect_url, $redirect->redirect, $redirect->redirect_options);
-    $row['status_code'] = $redirect->status_code ? $redirect->status_code : t('Default (@default)', array('@default' => $default_status_code));
+    $row['status_code'] = $redirect->status_code;
     $row['language'] = language_name($redirect->langcode);
     $row['count'] = $redirect->count;
     if ($redirect->access) {
@@ -328,7 +325,6 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
       'langcode' => isset($_GET['langcode']) ? urldecode($_GET['langcode']) : LANGUAGE_NONE,
     ));
   }
-  $config = config('redirect.settings');
 
   $form['rid'] = array(
     '#type' => 'value',
@@ -383,18 +379,17 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#value' => $redirect->langcode,
   );
 
-  $form['advanced'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Advanced options'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['advanced']['status_code'] = array(
-    '#type' => 'select',
-    '#title' => t('Redirect status'),
-    '#description' => t('You can find more information about HTTP redirect status codes at <a href="@status-codes">@status-codes</a>.', array('@status-codes' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection')),
+  $all_statuses = config_get('redirect.settings', 'additional_statuses');
+  $options = redirect_status_code_options(NULL, $all_statuses);
+  if (!array_key_exists($redirect->status_code, $options)) {
+    $options = redirect_status_code_options(NULL, TRUE);
+  }
+  $form['status_code'] = array(
+    '#type' => $all_statuses ? 'select' : 'radios',
+    '#title' => t('Redirect type'),
+    '#description' => t('<a href="https://wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection">More information about status codes</a>.'),
     '#default_value' => $redirect->status_code,
-    '#options' => array(0 => t('Default (@default)', array('@default' => $config->get('redirect_default_status_code')))) + redirect_status_code_options(),
+    '#options' => $options,
   );
 
   $form['override'] = array(
@@ -527,6 +522,7 @@ function _redirect_extract_url_options(&$element, &$form_state) {
  * @see redirect_edit_form()
  */
 function redirect_edit_form_validate($form, &$form_state) {
+  form_state_values_clean($form_state);
   $redirect = new Redirect($form_state['values']);
 
   if (empty($form_state['values']['override'])) {
@@ -555,7 +551,7 @@ function redirect_edit_form_validate($form, &$form_state) {
  */
 function redirect_edit_form_submit($form, &$form_state) {
   $redirect = $form_state['redirect'];
-  $redirect->save();
+  redirect_save($redirect);
   backdrop_set_message(t('The redirect has been saved.'));
   $form_state['redirect'] = 'admin/config/search/redirect';
 }
@@ -602,45 +598,35 @@ function redirect_delete_form_submit($form, &$form_state) {
  */
 function redirect_settings_form($form, &$form_state) {
   $config = config('redirect.settings');
-  $form['redirect_auto_redirect'] = array(
+  $form['auto_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
+    '#description' => t('This setting is most commonly used when replacing existing aliases under the "Update action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/search/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
-  $form['redirect_passthrough_querystring'] = array(
+  $form['passthrough_querystring'] = array(
     '#type' => 'checkbox',
     '#title' => t('Retain query string through redirect.'),
     '#default_value' => $config->get('passthrough_querystring'),
     '#description' => t('For example, given a redirect from %source to %redirect, if a user visits %sourcequery they would be redirected to %redirectquery. The query strings in the redirection will always take precedence over the current query string.', array('%source' => 'source-path', '%redirect' => 'node?a=apples', '%sourcequery' => 'source-path?a=alligators&b=bananas', '%redirectquery' => 'node?a=apples&b=bananas')),
   );
-  $form['redirect_warning'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Display a warning message to users when they are redirected.'),
-    '#default_value' => $config->get('warning'),
-    '#access' => FALSE,
+  $form['additional_statuses'] = array(
+    '#type' => 'radios',
+    '#title' => t('Redirect types'),
+    '#options' => array(
+      '0' => t('Show only common redirect types (301 and 302)'),
+      '1' => t('Show all redirect types (300, 301, 302, 303, 304, 305, and 307)'),
+    ),
+    '#default_value' => $config->get('additional_statuses') ? '1' : '0',
+    '#description' => t('<a href="https://wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection">More information about status codes</a>.'),
   );
-  $form['redirect_default_status_code'] = array(
-    '#type' => 'select',
-    '#title' => t('Default redirect status'),
-    '#description' => t('You can find more information about HTTP redirect status codes at <a href="@status-codes">@status-codes</a>.', array('@status-codes' => 'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection')),
-    '#options' => redirect_status_code_options(),
-    '#default_value' => $config->get('default_status_code'),
-  );
-  $form['redirect_page_cache'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow redirects to be saved into the page cache.'),
-    '#default_value' => $config->get('page_cache'),
-    '#description' => t('This feature requires <a href="@performance">Cache pages for anonymous users</a> to be enabled and the %variable variable to be TRUE.', array('@performance' => url('admin/config/development/performance'), '%variable' => "\$settings['page_cache_invoke_hooks']")),
-    '#disabled' => !$config->get('cache') || !settings_get('page_cache_invoke_hooks', FALSE),
-  );
-  $form['redirect_purge_inactive'] = array(
+  $form['purge_inactive'] = array(
     '#type' => 'select',
     '#title' => t('Delete redirects that have not been accessed for'),
     '#default_value' => $config->get('purge_inactive'),
     '#options' => array(0 => t('Never (do not discard)')) + backdrop_map_assoc(array(604800, 1209600, 1814400, 2592000, 5184000, 7776000, 10368000, 15552000, 31536000), 'format_interval'),
     '#description' => t('Only redirects managed by the redirect module itself will be deleted. Redirects managed by other modules will be left alone.'),
-    '#disabled' => $config->get('page_cache') && !settings_get('page_cache_invoke_hooks', FALSE),
   );
 
   $form['globals'] = array(
@@ -649,31 +635,31 @@ function redirect_settings_form($form, &$form_state) {
     '#description' => t('(formerly Global Redirect features)'),
     '#access' => FALSE,
   );
-  $form['globals']['redirect_global_home'] = array(
+  $form['globals']['global_home'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect from paths like index.php and /node to the root directory.'),
     '#default_value' => $config->get('global_home'),
     '#access' => FALSE,
   );
-  $form['globals']['redirect_global_clean'] = array(
+  $form['globals']['global_clean'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect from non-clean URLs to clean URLs.'),
     '#default_value' => $config->get('global_clean'),
     '#disabled' => !$config->get('clean_url'),
     '#access' => FALSE,
   );
-  $form['globals']['redirect_global_canonical'] = array(
+  $form['globals']['global_canonical'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect from non-canonical URLs to the canonical URLs.'),
     '#default_value' => $config->get('global_canonical'),
   );
-  $form['globals']['redirect_global_deslash'] = array(
+  $form['globals']['global_deslash'] = array(
     '#type' => 'checkbox',
     '#title' => t('Remove trailing slashes from paths.'),
     '#default_value' => $config->get('global_deslash'),
     '#access' => FALSE,
   );
-  $form['globals']['redirect_global_admin_paths'] = array(
+  $form['globals']['global_admin_paths'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow redirections on admin paths.'),
     '#default_value' => $config->get('global_admin_paths'),
@@ -690,25 +676,22 @@ function redirect_settings_form($form, &$form_state) {
 /**
  * Form submit handler; clears the page cache.
  *
- * @see redirect_settings_form()
+ * @see settings_form()
  */
 function redirect_settings_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $config = config('redirect.settings');
-  $config->set('auto_redirect', (bool) $values['redirect_auto_redirect']);
-  $config->set('passthrough_querystring', (bool) $values['redirect_passthrough_querystring']);
-  $config->set('warning', (bool) $values['redirect_warning']);
-  $config->set('default_status_code', $values['redirect_default_status_code']);
-  $config->set('page_cache', (bool) $values['redirect_page_cache']);
-  $config->set('purge_inactive', (bool) $values['redirect_purge_inactive']);
-  $config->set('global_home', (bool) $values['redirect_global_home']);
-  $config->set('global_clean', (bool) $values['redirect_global_clean']);
-  $config->set('global_canonical', (bool) $values['redirect_global_canonical']);
-  $config->set('global_deslash', (bool) $values['redirect_global_deslash']);
-  $config->set('global_admin_paths', (bool) $values['redirect_global_admin_paths']);
+  $config->set('auto_redirect', (bool) $values['auto_redirect']);
+  $config->set('passthrough_querystring', (bool) $values['passthrough_querystring']);
+  $config->set('additional_statuses', (bool) $values['additional_statuses']);
+  $config->set('purge_inactive', (bool) $values['purge_inactive']);
+  $config->set('global_home', (bool) $values['global_home']);
+  $config->set('global_clean', (bool) $values['global_clean']);
+  $config->set('global_canonical', (bool) $values['global_canonical']);
+  $config->set('global_deslash', (bool) $values['global_deslash']);
+  $config->set('global_admin_paths', (bool) $values['global_admin_paths']);
   $config->save();
-  redirect_page_cache_clear();
-  backdrop_set_message(t('Redirect configuration saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 function redirect_404_list($form = NULL) {
@@ -839,6 +822,17 @@ function redirect_list_404_filter_form_reset($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/search/redirect/404';
 }
 
+/**
+ * Display a list of redirects. Used on forms when editing an entity.
+ *
+ * @param Redirects[] $redirects
+ *   An array of Redirect objects.
+ * @param $header
+ *   The table header columns for the table.
+ *
+ * @return array
+ *   A renderable table element.
+ */
 function redirect_list_table($redirects, $header) {
   $destination = backdrop_get_destination();
   $config = config('redirect.settings');

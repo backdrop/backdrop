@@ -171,7 +171,8 @@ function hook_redirect_access($op, $redirect, $account) {
 /**
  * Act on a redirect object about to be shown on the add/edit form.
  *
- * This hook is invoked from redirect_object_prepare().
+ * This hook is invoked from the Redirect object contructor in
+ * Redirect::__construct().
  *
  * @param $redirect
  *   The redirect that is about to be shown on the add/edit form.
