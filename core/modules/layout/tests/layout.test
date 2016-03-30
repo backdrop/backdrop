@@ -61,7 +61,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -363,7 +363,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_url,
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
@@ -436,7 +436,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_path,
     );
     // Check the path first to populate available contexts.
@@ -525,7 +525,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -627,7 +627,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -732,7 +732,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -811,7 +811,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $tab_layout_name,
       'title' => $tab_layout_name,
       'path' => $tab_layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -842,7 +842,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $subtab_layout_name,
       'title' => $subtab_layout_name,
       'path' => $subtab_layout_path_last,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -901,7 +901,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -928,7 +928,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $second_layout_name,
       'title' => $second_layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -981,7 +981,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -991,7 +991,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Change the layout to the test layout, which has identical regions.
     $edit = array(
-      'layout' => 'layout_test_layout',
+      'layout_template' => 'layout_test_layout',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
 
@@ -1001,7 +1001,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Change the layout to the one_column layout, eliminating the sidebar.
     $edit = array(
-      'layout' => 'one_column',
+      'layout_template' => 'one_column',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
 
@@ -1042,10 +1042,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
             $blocks_match = FALSE;
           }
         }
-        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout, '@layout2' => $layout->layout, '@region' => $region_name)));
+        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout_template, '@layout2' => $layout->layout_template, '@region' => $region_name)));
       }
       else {
-        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout, '@region' => $region_name)));
+        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout_template, '@region' => $region_name)));
       }
     }
   }
@@ -1151,7 +1151,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
     );
 
     // Note that this adds a condition, not saving the layout yet.
@@ -1401,7 +1401,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -1459,7 +1459,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     // one_column layout.
     state_set('layout_test', array());
     $edit = array(
-      'layout' => 'one_column',
+      'layout_template' => 'one_column',
     );
     $this->backdropPost('admin/structure/layouts/manage/default/settings', $edit, t('Save layout'));
     $this->assertHookMessageOrder(array(
