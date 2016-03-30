@@ -732,7 +732,7 @@ function drupal_required_modules() {
   return backdrop_required_modules();
 }
 function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
-  return backdrop_alter($type, $data, $context1, $context2, &$context3);
+  return backdrop_alter($type, $data, $context1, $context2, $context3);
 }
 // Functions from path.inc.
 function drupal_path_initialize() {
