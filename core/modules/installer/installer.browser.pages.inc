@@ -14,6 +14,7 @@
  *   Themed list of the projects.
  */
 function installer_browser_page($type) {
+  backdrop_add_js(backdrop_get_path('module', 'installer') . '/js/detail-dialog.js');
   module_load_include('inc', 'installer', 'installer.browser');
   // Show a warning if no zip extension available, but allow to browse and
   // select to view available releases. Install blocked on select versions page.
