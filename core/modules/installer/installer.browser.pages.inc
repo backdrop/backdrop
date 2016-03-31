@@ -878,7 +878,7 @@ function installer_browser_bulk_install_modal_callback($form, $form_state) {
     $html = '';
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
-    $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
+    $title = isset($form['#title']) ? $form['#title'] : t('Install by names');
     $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
   }
   else {

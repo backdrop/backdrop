@@ -129,7 +129,7 @@ function installer_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['admin/modules/installer-browser/project/%'] = array(
-    'title' => 'Modules',
+    'title' => 'Project details',
     'description' => 'Project details',
     'page callback' => 'installer_browser_project_display',
     'page arguments' => array(4),
