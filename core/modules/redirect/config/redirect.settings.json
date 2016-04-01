@@ -1,0 +1,14 @@
+{
+  "_config_name": "redirect.settings",
+  "_config_static": true,
+  "auto_redirect": true,
+  "passthrough_querystring": true,
+  "warning": false,
+  "additional_statuses": false,
+  "purge_inactive": false,
+  "global_home": true,
+  "global_clean": true,
+  "global_canonical": true,
+  "global_deslash": false,
+  "global_admin_paths": false
+}
