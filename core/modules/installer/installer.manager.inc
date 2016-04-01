@@ -641,7 +641,7 @@ function installer_manager_install_form_submit($form, &$form_state) {
  * location into the live site.
  *
  * @param string $browser
- *   Whether the project is being installed via the Project Browser.
+ *   Whether the project is being installed via the Installer Browser.
  *
  * @return array
  *   An associative array with keys:
@@ -649,7 +649,7 @@ function installer_manager_install_form_submit($form, &$form_state) {
  *   - 'message': an error or success message.
  *
  * @see installer_manager_install_form_validate()
- * @see update_authorize_run_install()
+ * @see installer_authorize_run_install()
  * @see system_authorized_init()
  * @see system_authorized_get_url()
  */
@@ -778,7 +778,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
       }
     }
     else {
-      call_user_func_array('update_authorize_run_install', array_merge(array($filetransfer), $arguments));
+      call_user_func_array('installer_authorize_run_install', array_merge(array($filetransfer), $arguments));
     }
   }
   else {
@@ -789,7 +789,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
       );
     }
     else {
-      system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', $arguments, t('Update manager'));
+      system_authorized_init('installer_authorize_run_install', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', $arguments, t('Update manager'));
       return array(
         'redirect' => TRUE,
       );
