@@ -92,6 +92,7 @@ class RedirectUnitTest extends BackdropUnitTestCase {
    * Test the redirect_compare_array_recursive() function.
    */
   function testCompareArrayRecursive() {
+    backdrop_load('module', 'redirect');
     $haystack = array('a' => 'aa', 'b' => 'bb', 'c' => array('c1' => 'cc1', 'c2' => 'cc2'));
     $cases = array(
       array('query' => array('a' => 'aa', 'b' => 'invalid'), 'result' => FALSE),
@@ -176,7 +177,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
      // Set up cache variables.
      config_set('system.core', 'cache', 1);
      $edit = array(
-       'redirect_purge_inactive' => 604800,
+       'purge_inactive' => 604800,
      );
      $this->backdropPost('admin/config/search/redirect/settings', $edit, 'Save configuration');
      $this->assertText('The configuration options have been saved.');
