@@ -30,7 +30,6 @@ function installer_menu() {
   // indicating what context we're entering the action from, so that can
   // customize the appearance as needed.
   $paths = array(
-    'report' => 'admin/reports/updates',
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
     'layout' => 'admin/structure/layouts',
@@ -43,15 +42,6 @@ function installer_menu() {
       'access arguments' => array(),
       'weight' => 25,
       'type' => MENU_LOCAL_ACTION,
-    );
-    $items[$path . '/manual-install'] = array(
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('installer_manager_install_form', $context),
-      'access callback' => 'installer_manager_access',
-      'access arguments' => array(),
-      'weight' => 25,
-      'type' => MENU_CALLBACK,
-      'file' => 'installer.manager.inc',
     );
     $items[$path . '/update'] = array(
       'page callback' => 'backdrop_get_form',
@@ -66,10 +56,9 @@ function installer_menu() {
   }
   // Customize the titles of the action links depending on where they appear.
   // We use += array() to let the translation extractor find these menu titles.
-  $items['admin/reports/updates/install'] += array('title' => 'Install module, theme or layout');
-  $items['admin/modules/install'] += array('title' => 'Install module');
-  $items['admin/appearance/install'] += array('title' => 'Install theme');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install layout');
+  $items['admin/modules/install'] += array('title' => 'Find new modules');
+  $items['admin/appearance/install'] += array('title' => 'Find new themes');
+  $items['admin/structure/layouts/install'] += array('title' => 'Find new layouts');
 
   // Menu callback used for the confirmation page after all the releases
   // have been downloaded, asking you to backup before installing updates.
@@ -168,13 +157,7 @@ function installer_menu() {
  * Menu callback; route local task links to appropriate browser tabs.
  */
 function installer_menu_install_links_redirect($form, &$form_state, $context) {
-  if ($context == 'report') {
-    module_load_include('inc', 'installer', 'installer.manager');
-    return installer_manager_install_form($form, $form_state, $context);
-  }
-  else {
-    backdrop_goto('admin/modules/installer-browser/' . $context) ;
-  }
+  backdrop_goto('admin/modules/installer-browser/' . $context) ;
 }
 
 /**
@@ -191,9 +174,9 @@ function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
           unset($data['actions']['output'][$num]);
         }
       }
-      $item = menu_get_item('admin/modules/installer-browser/modules');
+      $item = menu_get_item('admin/modules/installer-browser/module');
       if ($item['access']) {
-        $item['title'] = t('Install new modules');
+        $item['title'] = t('Find new modules');
         $data['actions']['output'][] = array(
           '#theme' => 'menu_local_action',
           '#link' => $item,
@@ -201,7 +184,32 @@ function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       }
       break;
 
-    case 'admin/modules/installer-browser/modules':
+    case 'admin/structure/layouts/add':
+      // Unset the install theme page.
+      foreach ($data['actions']['output'] as $num => $item) {
+        if ($item['#link']['path'] == 'admin/structure/layouts/install') {
+          unset($data['actions']['output'][$num]);
+        }
+      }
+      $item = menu_get_item('admin/modules/installer-browser/layout');
+      if ($item['access']) {
+        $item['title'] = t('Find new layouts');
+        $data['actions']['output'][] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
+      }
+      break;
+
+    case 'admin/structure/layouts':
+      foreach ($data['actions']['output'] as $num => $item) {
+        if ($item['#link']['path'] == 'admin/structure/layouts/install') {
+          unset($data['actions']['output'][$num]);
+        }
+      }
+      break;
+
+    case 'admin/modules/installer-browser/module':
     case 'admin/modules/installer-browser':
       $item = menu_get_item('admin/modules');
       if ($item['access']) {
@@ -220,9 +228,9 @@ function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
           unset($data['actions']['output'][$num]);
         }
       }
-      $item = menu_get_item('admin/modules/installer-browser/themes');
+      $item = menu_get_item('admin/modules/installer-browser/theme');
       if ($item['access']) {
-        $item['title'] = t('Install new themes');
+        $item['title'] = t('Find new themes');
         $data['actions']['output'][] = array(
           '#theme' => 'menu_local_action',
           '#link' => $item,
