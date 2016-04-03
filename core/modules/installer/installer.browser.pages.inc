@@ -802,158 +802,18 @@ function installer_browser_filters_form_submit($form, &$form_state) {
  * Shows an install button for the Install Queue block.
  */
 function installer_browser_advanced_block($form, &$form_state, $type) {
-  $advanced['advanced'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Advanced'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $advanced['advanced']['links'] = array(
-    '#theme' => 'links',
-    '#links' => array(
-      'manual_install' => array(
-        'title' => 'Manual install',
-        'href' => 'admin/modules/manual-install',
-        'attributes' => array(
-          'class' => array('use-ajax'),
-          'id' => array('manual-link'),
-          'data-dialog' => 'true',
-          'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
-        ),
-      ),
-      'bulk_install' => array(
-        'title' => 'Install by names',
-        'href' => 'admin/modules/installer-browser/bulk/' . $type,
-        'attributes' => array(
-          'class' => array('use-ajax'),
-          'id' => array('bulk-link'),
-          'data-dialog' => 'true',
-          'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
-        ),
-      ),
+  $advanced['links'] = array(
+    '#type' => 'link',
+    '#title' => 'Manual install',
+    '#href' => 'admin/modules/manual-install',
+    '#attributes' => array(
+      'class' => array('use-ajax'),
+      'data-dialog' => 'true',
+      'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
     ),
   );
 
   return $advanced;
-}
-
-/**
- * Install multiple projects by listing machine names.
- */
-function installer_browser_bulk_install_form($form, &$form_state, $type) {
-  $form['type'] = array(
-    '#type' => 'hidden',
-    '#value' => $type,
-  );
-  $form['bulk'] = array(
-    '#type' => 'textarea',
-    '#required' => TRUE,
-    '#title' => t('Names'),
-    '#description' => t('Enter <em>%project</em> project names, one name per line. Names must only contain lowercase letters, numbers, and underscores.', array('%project' => $type)),
-  );
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#ajax' => array(
-      'callback' => 'installer_browser_bulk_install_modal_callback',
-    ),
-    '#type' => 'submit',
-    '#name' => 'bulk-submit',
-    '#value' => t('Add projects'),
-  );
-
-  return $form;
-}
-
-/**
- * AJAX callback to update the add/remove queue on bulk add.
- */
-function installer_browser_bulk_install_modal_callback($form, $form_state) {
-  module_load_include('inc', 'installer', 'installer.browser');
-  $commands = array();
-  $commands[] = ajax_command_close_modal_dialog();
-
-  // If errors occurred in the dialog, show messages and re-display.
-  if (form_get_errors()) {
-    $html = '';
-    $html .= theme('status_messages');
-    $html .= backdrop_render($form);
-    $title = isset($form['#title']) ? $form['#title'] : t('Install by names');
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
-  }
-  else {
-    $commands[] = ajax_command_remove('#messages');
-    // Refresh the install queue.
-    $commands[] = ajax_command_replace('#installer-browser-install-queue', installer_browser_get_install_list());
-    // Refresh the add to queue link.
-    foreach ($form_state['projects'] as $project_name => $project) {
-      $commands[] = ajax_command_replace('#add-to-queue-link-' . $project_name, installer_browser_add_remove_queue_link($project_name));
-    }
-  }
-
-  return array(
-    '#type' => 'ajax',
-    '#commands' => $commands,
-  );
-}
-
-/**
- * Validate handler for installer_browser_bulk_install_form().
- */
-function installer_browser_bulk_install_form_validate($form, &$form_state) {
-  module_load_include('inc', 'installer', 'installer.browser');
-  $type = $form_state['values']['type'];
-
-  // Prepare entered names.
-  $project_names = explode("\n", $form_state['values']['bulk']);
-  $project_names = array_map('trim', $project_names);
-  $project_names = array_filter($project_names, 'strlen');
-  if (empty($project_names)) {
-    form_set_error('bulk', t('Sorry, none of the submitted names are valid.'));
-  }
-  else {
-    foreach ($project_names as $project_name) {
-      // Check not already downloaded.
-      $already_enabled = array();
-      if (backdrop_get_filename($type, $project_name)) {
-        $already_enabled[] = $project_name;
-      }
-      if (!empty($already_enabled)) {
-        form_set_error('bulk', t('The following projects are already installed: %names', array('%names' => implode(', ', $already_enabled))));
-      }
-    }
-  }
-
-  $results = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => $form_state['values']['type']));
-  if (!empty($results)) {
-    $listed_projects = array_keys($results['projects']);
-    $not_found = array_diff($project_names, $listed_projects);
-    if ($not_found) {
-      form_set_error('bulk', t('Sorry, the following projects are not recognized: %names', array('%names' => implode(', ', $not_found))));
-    }
-    else {
-      $projects = array();
-      foreach ($project_names as $project_name) {
-        $projects[$project_name] = $results['projects'][$project_name];
-      }
-      $form_state['projects'] = $projects;
-    }
-  }
-  else {
-    form_set_error('bulk', t('Sorry, the project server is offline.'));
-  }
-}
-
-
-/**
- * Submit handler for installer_browser_bulk_install_form().
- */
-function installer_browser_bulk_install_form_submit($form, &$form_state) {
-  module_load_include('inc', 'installer', 'installer.browser');
-  foreach ($form_state['projects'] as $project) {
-    installer_browser_install_queue_add($project);
-  }
-  $form_state['redirect'] = 'admin/modules/installer-browser/' . $form_state['values']['type'];
 }
 
 /**

@@ -498,7 +498,7 @@ function installer_manager_install_form($form, &$form_state, $context) {
     return $form;
   }
 
-  backdrop_set_title('Install a project');
+  backdrop_set_title('Manual install');
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
@@ -509,19 +509,37 @@ function installer_manager_install_form($form, &$form_state, $context) {
     '#suffix' => '</p>',
   );
 
-  $form['project_url'] = array(
+  $form['bulk_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t('Install projects by name'),
+  );
+  $form['bulk_wrapper']['bulk'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Names'),
+    '#description' => t('Enter project names, one name per line. Names must only contain lowercase letters, numbers, and underscores.'),
+  );
+
+  $form['project_url_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Install from a URL'),
+  );
+  $form['project_url_wrapper']['project_url'] = array(
     '#type' => 'url',
     '#title' => t('Install from a URL'),
     '#description' => t('For example: %url', array('%url' => 'https://github.com/backdrop-contrib/module/archive/1.x-1.2.3.zip')),
   );
 
-  $form['information'] = array(
-    '#prefix' => '<strong>',
-    '#markup' => t('Or'),
-    '#suffix' => '</strong>',
+  $form['project_upload_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Upload a module, theme, or layout archive to install'),
   );
-
-  $form['project_upload'] = array(
+  $form['project_upload_wrapper']['project_upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload a module, theme, or layout archive to install'),
     '#description' => t('For example: %filename from your local computer', array('%filename' => 'name.tar.gz')),
@@ -529,11 +547,39 @@ function installer_manager_install_form($form, &$form_state, $context) {
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
+    // Todo: need this so errors reload in dialog, but it stops the form from
+    // continuing.
+    // '#ajax' => array(
+      // 'callback' => 'installer_manager_install_modal_callback',
+    // ),
+    '#submit' => array('installer_manager_install_form_submit'),
     '#type' => 'submit',
     '#value' => t('Install'),
   );
 
   return $form;
+}
+
+/**
+ * AJAX callback to update the add/remove queue on bulk add.
+ */
+function installer_manager_install_modal_callback($form, $form_state) {
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  // If errors occurred in the dialog, show messages and re-display.
+  if (form_get_errors()) {
+    $html = '';
+    $html .= theme('status_messages');
+    $html .= backdrop_render($form);
+    $title = isset($form['#title']) ? $form['#title'] : 'Manual install';
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
+  }
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
@@ -609,8 +655,90 @@ function _installer_manager_check_backends(&$form, $operation) {
  * @see installer_manager_install_form_submit()
  */
 function installer_manager_install_form_validate($form, &$form_state) {
-  if (!($form_state['values']['project_url'] XOR !empty($_FILES['files']['name']['project_upload']))) {
-    form_set_error('project_url', t('You must either provide a URL or upload an archive file to install.'));
+  if (!empty($form_state['values']['bulk'])) {
+    // Prepare entered names.
+    $project_names = explode("\n", $form_state['values']['bulk']);
+    $project_names = array_map('trim', $project_names);
+    $project_names = array_filter($project_names, 'strlen');
+    if (empty($project_names)) {
+      form_set_error('bulk', t('Sorry, none of the submitted names are valid.'));
+    }
+
+    // This repetitious bit here exists because there is no way to query all 
+    // projects at once from the server. So we compromise by searching each
+    // project type using a large 'items_per_page' value to get all results.
+    // Since we can only query the server by project, we ask for all modules
+    // first, check if any of the submitted project names are not modules, then
+    // check themes, then layouts. Anything left over after this is not a valid
+    // project on the server.
+    $all_projects = array();
+    $not_found = array();
+    module_load_include('inc', 'installer', 'installer.browser');
+
+    $modules = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'module'));
+    $all_projects = $modules['projects'];
+    if (!empty($modules)) {
+      $listed_projects = array_keys($modules['projects']);
+      $not_found = array_diff($project_names, $listed_projects);
+      if ($not_found) {
+        $themes = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'theme'));
+        if (!empty($themes)) {
+          $all_projects = array_merge($all_projects, $themes['projects']);
+          $listed_projects = array_keys($themes['projects']);
+          $not_found = array_diff($not_found, $listed_projects);
+          if ($not_found) {
+            $layouts = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'layout'));
+            if (!empty($layouts)) {
+              $all_projects = array_merge($all_projects, $layouts['projects']);
+              $listed_projects = array_keys($layouts['projects']);
+              $not_found = array_diff($not_found, $listed_projects);
+            }
+          }
+        }
+      }
+    }
+    else {
+      // If there was no return from the server assume it is offline.
+      form_set_error('bulk', t('Sorry, the project server is offline.'));
+    }
+
+    // If some of the submitted names were not valid projects first check to
+    // see if any at all were valid. If some were valid, we proceed with a 
+    // warning. If not were valid, we terminate with error.
+    if ($not_found) {
+      $project_names = array_diff($project_names, $not_found);
+      backdrop_set_message(t('Sorry, the following projects were not recognized: %names', array('%names' => implode(', ', $not_found))));
+    }
+    // Check if any remaining names are already installed.
+    foreach ($project_names as $project_name) {
+      $project = $all_projects[$project_name];
+      // Check not already downloaded.
+      $already_enabled = array();
+      if (backdrop_get_filename($project['type'], $project_name)) {
+        $already_enabled[] = $project_name;
+      }
+      if (!empty($already_enabled)) {
+        $project_names = array_diff($project_names, $already_enabled);
+        backdrop_set_message(t('The following projects are already installed: %names', array('%names' => implode(', ', $already_enabled))));
+      }
+    }
+
+    // If there are no valid projects left, stop here
+    if (!$project_names) {
+      form_set_error('bulk', t('Sorry, none of the submitted names are valid projects.'));
+    }
+
+    // If we got this far, we have at least one valid project, so save in
+    // $form_state.
+    $projects = array();
+    foreach ($project_names as $project_name) {
+      $projects[$project_name] = $all_projects[$project_name];
+    }
+
+    $form_state['projects'] = $projects;
+  }
+  elseif (!($form_state['values']['project_url'] XOR !empty($_FILES['files']['name']['project_upload']))) {
+    form_set_error('project_url', t('You must either provide project names, a URL, or upload an archive file to install.'));
   }
 }
 
@@ -618,14 +746,22 @@ function installer_manager_install_form_validate($form, &$form_state) {
  * Form submission handler for installer_manager_install_form().
  */
 function installer_manager_install_form_submit($form, &$form_state) {
-  $field = 'project_url';
-
-  $return = installer_manager_download_project($form_state['values']['project_url']);
-  if (empty($return['success'])) {
-    form_set_error($field, $return['message']);
+  if (!empty($form_state['projects'])) {
+    foreach ($form_state['projects'] as $project) {
+      installer_browser_install_queue_add($project);
+    }
+    $form_state['redirect'] = 'admin/modules/installer-browser/install/select_versions';
   }
-  elseif ($return['redirect']) {
-    $form_state['redirect'] = system_authorized_get_url();
+  else {
+    $field = 'project_url';
+
+    $return = installer_manager_download_project($form_state['values']['project_url']);
+    if (empty($return['success'])) {
+      form_set_error($field, $return['message']);
+    }
+    elseif ($return['redirect']) {
+      $form_state['redirect'] = system_authorized_get_url();
+    }
   }
 }
 
