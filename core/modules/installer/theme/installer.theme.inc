@@ -174,7 +174,7 @@ function update_preprocess_installer_browser_project(&$variables) {
     // $extras[] = check_plain($project['development status']);
   }
   if ($project['usage'] AND is_numeric($project['usage'])) {
-    $extras[] = format_plural($project['usage'], '1 Install', '@count Installs');
+    $extras[] = format_plural($project['usage'], '1 Installation', '@count Installations');
   }
   if ($project['rating']) {
     $extras[] = check_plain($project['rating']);
