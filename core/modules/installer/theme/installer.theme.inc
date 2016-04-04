@@ -120,7 +120,7 @@ function update_preprocess_installer_browser_list(&$variables) {
   $variables['install_list'] = render($install_list);
 
   // Add the advanced options block.
-  $advanced_content = backdrop_get_form('installer_browser_advanced_block', $variables['type']);
+  $advanced_content = backdrop_get_form('installer_browser_manual_install_link');
   $variables['advanced'] = backdrop_render($advanced_content);
 }
 
@@ -188,9 +188,7 @@ function update_preprocess_installer_browser_project(&$variables) {
     $variables['status'] = '<div class="install-disabled">Already installed</div>';
     $variables['install'] = '';
   }
-  // Todo: this is to mitigate a bug in bootstrap.inc. 
-  // See https://github.com/backdrop/backdrop-issues/issues/1709
-  elseif ($found && $found != '/.info') {
+  elseif ($found) {
     $variables['status'] = '<div class="install-disabled">Already downloaded</div>';
     $variables['install'] = '';
   }

@@ -60,6 +60,15 @@ function installer_menu() {
   $items['admin/appearance/install'] += array('title' => 'Find new themes');
   $items['admin/structure/layouts/install'] += array('title' => 'Find new layouts');
 
+  $items['admin/modules/manual-install'] = array(
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('installer_manager_install_form'),
+    'access callback' => 'installer_manager_access',
+    'access arguments' => array(),
+    'weight' => 25,
+    'type' => MENU_CALLBACK,
+    'file' => 'installer.manager.inc',
+  );
   // Menu callback used for the confirmation page after all the releases
   // have been downloaded, asking you to backup before installing updates.
   $items['admin/update/ready'] = array(

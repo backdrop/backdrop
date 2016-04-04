@@ -799,10 +799,10 @@ function installer_browser_filters_form_submit($form, &$form_state) {
 }
 
 /**
- * Shows an install button for the Install Queue block.
+ * Shows the link to open the manual install dialog.
  */
-function installer_browser_advanced_block($form, &$form_state, $type) {
-  $advanced['links'] = array(
+function installer_browser_manual_install_link($form, &$form_state) {
+  $manual['link'] = array(
     '#type' => 'link',
     '#title' => 'Manual install',
     '#href' => 'admin/modules/manual-install',
@@ -813,7 +813,7 @@ function installer_browser_advanced_block($form, &$form_state, $type) {
     ),
   );
 
-  return $advanced;
+  return $manual;
 }
 
 /**

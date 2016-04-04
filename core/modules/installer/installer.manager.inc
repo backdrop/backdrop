@@ -484,16 +484,12 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
  * This presents a place to enter a URL or upload an archive file to use to
  * install a new module, theme, or layout.
  *
- * @param $context
- *   String representing the context from which we're trying to install.
- *   Allowed values are 'module', 'theme', 'layout', and 'report'.
- *
  * @see installer_manager_install_form_validate()
  * @see installer_manager_install_form_submit()
  * @see update_menu()
  * @ingroup forms
  */
-function installer_manager_install_form($form, &$form_state, $context) {
+function installer_manager_install_form($form, &$form_state) {
   if (!_installer_manager_check_backends($form, 'install')) {
     return $form;
   }
