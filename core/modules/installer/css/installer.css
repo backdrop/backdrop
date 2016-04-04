@@ -21,8 +21,8 @@
 }
 
 .installer-browser-install-queue-item a {
-  padding-left: 20px;
-  background: url("../images/red-x.png") no-repeat scroll left 2px transparent;
+  padding-left: 22px;
+  background: url("../images/remove.png") no-repeat scroll left 3px transparent;
 }
 
 .installer-browser-selected-release {
