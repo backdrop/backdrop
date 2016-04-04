@@ -680,6 +680,13 @@ function installer_browser_install_button_form($form, &$form_state) {
     '#value' => 'Install',
   );
   $form['#action'] = url('admin/modules/installer-browser/install/select_versions');
+  $form['cancel'] = array(
+    '#type' => 'link',
+    '#name' => 'cancel',
+    '#title' => t('Clear queue'),
+    '#href' => 'admin/modules/installer-browser/reset',
+    '#options' => array(),
+  );
 
   return $form;
 }
