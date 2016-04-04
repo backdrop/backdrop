@@ -249,3 +249,12 @@ div.install-item-prefix {
 th.installer-project-name {
   width: 50%;
 }
+
+th .projects-selected {
+  text-transform: lowercase;
+}
+
+#status-count-link {
+  display: inline;
+  float: right;
+}
