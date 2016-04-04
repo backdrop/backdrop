@@ -218,18 +218,6 @@ function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       }
       break;
 
-    case 'admin/modules/installer-browser/module':
-    case 'admin/modules/installer-browser':
-      $item = menu_get_item('admin/modules');
-      if ($item['access']) {
-        $item['title'] = t('View all installed modules');
-        $data['actions']['output'][] = array(
-          '#theme' => 'menu_local_action',
-          '#link' => $item,
-        );
-      }
-      break;
-
     case 'admin/appearance':
       // Unset the install theme page
       foreach ($data['actions']['output'] as $num => $item) {
