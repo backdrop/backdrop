@@ -331,6 +331,9 @@ function _installer_browser_batch_install_release($release_name, $project, &$con
  * Batch API callback: shows a message and finishes up the batch.
  */
 function _installer_browser_batch_install_releases_finished($success, $results, $operations) {
+  // Although we turn off maintenance mode immediately, the message that the
+  // site is offline displays until a page reload. We wipe the messages cache
+  // here to avoid this.
   backdrop_get_messages();
 
   // Restore the maintenance mode to what it was at the start.
