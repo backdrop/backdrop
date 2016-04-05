@@ -445,7 +445,8 @@ function installer_browser_get_missing_dependencies($projects) {
     if ($project['type'] == 'module') {
       $dependencies = array();
       if (isset($modules[$project['name']])) {
-        foreach ($modules[$project['name']]->info['dependencies'] as $dependency) {
+        foreach ($modules[$project['name']]->requires as $requires) {
+          $dependency = $requires['name'];
           if (!isset($modules[$dependency])) {
             $dependencies[] = $dependency;
           }
