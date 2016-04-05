@@ -13,7 +13,6 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     config_set('installer.settings', 'installer_browser_server', array(
       'url' => $server_url,
       'name' => 'Test Server',
-      'method' => 'json',
     ));
 
     // Create and log in our privileged user.

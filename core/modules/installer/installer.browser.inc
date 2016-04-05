@@ -224,37 +224,18 @@ function installer_browser_fetch_results($filters) {
   );
 
   $local_filters = $filters;
+  $local_filters['method'] = 'query';
 
-  // Use XMLRPC if it is set.
-  if ($server['method'] == 'xmlrpc') {
-    $results = xmlrpc($server['url'], array(
-      'installer_browser_server.fetch_results' => array($local_filters),
-    ));
+  $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1?' . http_build_query($local_filters, FALSE, '&');
+  $response = backdrop_http_request($query_url);
 
-    // Check for errors.
-    if ($error = xmlrpc_error() && $error->is_error) {
-      backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-        array('@name' => $server['name'], '@code' => $error->code, '@message' => $error->message)));
-      return array();
-    }
+  if ($response->code == '200') {
+    $results = backdrop_json_decode($response->data);
   }
-
-  // Use json if it is set.
-  if ($server['method'] == 'json') {
-    $local_filters['method'] = 'query';
-
-    $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1?' . http_build_query($local_filters, FALSE, '&');
-
-    $response = backdrop_http_request($query_url);
-
-    if ($response->code == '200') {
-      $results = backdrop_json_decode($response->data);
-    }
-    else {
-      backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-        array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
-      return array();
-    }
+  else {
+    backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
+      array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
+    return array();
   }
 
   // Set the cached version of the results.
@@ -268,11 +249,12 @@ function installer_browser_fetch_results($filters) {
  *
  * @return
  *   Returns the active server, in the format:
+ *  @code
  *   array(
  *     "url" => "https://projects.backdropcms.org",
  *     "name" => "Backdrop",
- *     "method" => "json"
  *   )
+ *  @endcode
  */
 function installer_browser_get_server() {
   $server = config_get('installer.settings', 'installer_browser_server');

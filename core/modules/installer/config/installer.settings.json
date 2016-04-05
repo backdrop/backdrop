@@ -2,8 +2,6 @@
     "_config_name": "installer.settings",
     "installer_browser_server": {
         "url": "https://projects.backdropcms.org",
-        "name": "Backdrop",
-        "method": "json"
-        
+        "name": "Backdrop"
     }
 }
