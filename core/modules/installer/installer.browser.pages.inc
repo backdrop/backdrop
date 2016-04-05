@@ -151,6 +151,8 @@ function installer_browser_installation_page($op) {
       backdrop_set_title(t("Enable modules"));
       $content = installer_browser_installation_enable_page();
       break;
+    default:
+      return MENU_NOT_FOUND;
   }
   return theme('installer_browser_install', array('current_task' => $op, 'main_content' => backdrop_render($content)));
 }
@@ -218,16 +220,16 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     $releases_list = array();
 
     foreach ($release_data['releases'] as $version => $release) {
-      $release_title = t("@project @version - @date", array(
+      $release_title = format_string("@project @version - @date", array(
         '@project' => $project['title'],
         '@version' => $release['version'],
         '@date' => format_date($release['date'], 'custom', 'M j, Y'),
         ));
       if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
-        $release_title .= " (" . implode(', ', $release['terms']['Release type']) . ")";
+        $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
       if (isset($release['release_link'])) {
-        $releases_list[$version] = l($release_title, $release['release_link']);
+        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE));
       }
       else {
         $releases_list[$version] = $release_title;
@@ -841,6 +843,9 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
     case 'remove':
       installer_browser_install_queue_remove($project_name);
       break;
+
+    default:
+      return MENU_NOT_FOUND;    
   }
 
   switch ($method) {
