@@ -306,11 +306,14 @@ function installer_browser_installation_select_versions_form($form, &$form_state
 }
 
 /**
- * Submit handler for the reset/cancel link.
+ * Submit handler for a reset/cancel link.
+ *
+ * @param string $include_installed
+ *   If true, also clear the list of recently installed projects.
  */
-function installer_browser_installation_select_versions_form_reset() {
+function installer_browser_installation_reset($include_installed = NULL) {
   module_load_include('inc', 'installer', 'installer.browser');
-  installer_browser_install_queue_clear();
+  installer_browser_install_queue_clear($include_installed);
   backdrop_goto('admin/modules/installer-browser');
 }
 
@@ -497,7 +500,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
  */
 function installer_browser_installation_theme_finish($form, &$form_state) {
   module_load_include('inc', 'installer', 'installer.browser');
-  installer_browser_installation_select_versions_form_reset();
+  installer_browser_installation_reset();
 }
 
 
@@ -603,7 +606,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#type' => 'link',
         '#name' => 'cancel',
         '#title' => t('Cancel'),
-        '#href' => 'admin/modules/installer-browser/reset',
+        '#href' => 'admin/modules/installer-browser/reset/all',
         '#options' => array(),
       );
     }

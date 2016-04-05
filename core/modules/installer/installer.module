@@ -135,10 +135,11 @@ function installer_menu() {
     'file' => 'installer.browser.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['admin/modules/installer-browser/reset'] = array(
+  $items['admin/modules/installer-browser/reset/%'] = array(
     'title' => 'Project Browser',
     'description' => 'Browse and search for new modules',
-    'page callback' => 'installer_browser_installation_select_versions_form_reset',
+    'page callback' => 'installer_browser_installation_reset',
+    'page arguments' => array(4),
     'access arguments' => array('use installer browser'),
     'file' => 'installer.browser.pages.inc',
     'type' => MENU_CALLBACK,

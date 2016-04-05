@@ -109,9 +109,17 @@ function installer_browser_install_queue_remove($project_name) {
 
 /**
  * Clears the install queue.
+ *
+ * Removes all projects from the $_SESSION variables.
+ *
+ * @param string $include_installed
+ *   If true, also clear the list of recently installed projects.
  */
-function installer_browser_install_queue_clear() {
+function installer_browser_install_queue_clear($include_installed = NULL) {
   $_SESSION['installer_browser_install_list'] = array();
+  if ($include_installed) {
+    $_SESSION['installer_browser_installed_projects'] = array();
+  }
 }
 
 /**
