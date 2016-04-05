@@ -117,7 +117,7 @@ function installer_browser_install_queue_remove($project_name) {
  */
 function installer_browser_install_queue_clear($include_installed = NULL) {
   $_SESSION['installer_browser_install_list'] = array();
-  if ($include_installed) {
+  if ($include_installed == 'all') {
     $_SESSION['installer_browser_installed_projects'] = array();
   }
 }

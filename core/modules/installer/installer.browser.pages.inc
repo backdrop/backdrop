@@ -299,7 +299,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     '#type' => 'link',
     '#name' => 'cancel',
     '#title' => t('Cancel'),
-    '#href' => 'admin/modules/installer-browser/reset',
+    '#href' => 'admin/modules/installer-browser/reset/clear',
     '#options' => array(),
   );
   return $form;
@@ -686,7 +686,7 @@ function installer_browser_install_button_form($form, &$form_state) {
     '#type' => 'link',
     '#name' => 'cancel',
     '#title' => t('Clear queue'),
-    '#href' => 'admin/modules/installer-browser/reset',
+    '#href' => 'admin/modules/installer-browser/reset/clear',
     '#options' => array(),
   );
 
