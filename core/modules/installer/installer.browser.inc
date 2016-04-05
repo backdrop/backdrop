@@ -247,14 +247,19 @@ function installer_browser_fetch_results($filters) {
 /**
  * Gets the server to use for fetching results.
  *
+ * The installer_browser_fetch_results($filters) call returns an array with the
+ * following keys:
  * @return
- *   Returns the active server, in the format:
- *  @code
- *   array(
- *     "url" => "https://projects.backdropcms.org",
+ *   Returns an array representing the active server with the following keys:
+ *     - url: The absolute url to the server without query parameters.
+ *     - name: A human-readable name for this server.
+ *   For example:
+ *   @code
+ *    array(
+ *      "url" => "https://projects.backdropcms.org",
  *     "name" => "Backdrop",
- *   )
- *  @endcode
+ *    )
+ *   @endcode
  */
 function installer_browser_get_server() {
   $server = config_get('installer.settings', 'installer_browser_server');
