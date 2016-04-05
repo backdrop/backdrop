@@ -612,6 +612,14 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     }
 
     if (!empty($missing)) {
+      $form['actions'] = array('#type' => 'actions');
+      $form['actions']['cancel'] = array(
+        '#type' => 'link',
+        '#name' => 'cancel',
+        '#title' => t('Cancel'),
+        '#href' => 'admin/modules/installer-browser/reset/all',
+        '#options' => array(),
+      );
       $form['missing'] = array(
         '#type' => 'item',
         '#title' => t('Missing Dependencies'),
