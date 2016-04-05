@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * Default theme implementation to display a block on the projects browser page
+ * Default theme implementation to display a block on the projects browser page.
  *
  * Available variables:
- * - $title: The title of the block
- * - $content: The content of the block
- * These are defined in installer_browser_preprocess_installer_browser_block()
+ * - $title: The title of the block.
+ * - $content: The content of the block.
+ * These are defined in installer_browser_preprocess_installer_browser_block().
  * 
- * @see installer_browser_preprocess_installer_browser_block()
+ * @see installer_browser_preprocess_installer_browser_block().
  */
 ?>
 <div class="<?php print implode(' ', $classes); ?>">

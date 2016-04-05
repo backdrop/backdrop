@@ -47,7 +47,7 @@ function installer_test_xml($project = NULL, $version = '1.x') {
 }
 
 /**
- * Page callback. Generates json based on the input filters
+ * Page callback. Generates json based on the input filters.
  */
 function installer_test_query($query, $type, $version = 1) {
   switch ($query) {
@@ -66,7 +66,7 @@ function installer_test_query($query, $type, $version = 1) {
       $filters = array(
         'version' => $version,
         'type' => $type,
-        'text' => (isset($_GET['text']) AND $_GET['text']) ? $_GET['text'] : '',
+        'text' => (isset($_GET['text']) && $_GET['text']) ? $_GET['text'] : '',
         'order_by' => isset($_GET['order_by']) ? $_GET['order_by'] : 'usage',
         'sort' => isset($_GET['sort']) ? $_GET['sort'] : 'desc',
         'items_per_page' => isset($_GET['items_per_page']) ? (int) $_GET['items_per_page'] : 12,
@@ -83,7 +83,7 @@ function installer_test_query($query, $type, $version = 1) {
 }
 
 /**
- * Returns projects based on the filters
+ * Returns projects based on the filters.
  */
 function installer_test_get_results($filters) {
   $projects = installer_test_projects();
@@ -94,7 +94,7 @@ function installer_test_get_results($filters) {
   );
   
   // Filter out projects based on type
-  if (isset($filters['type']) AND $type = $filters['type']) {
+  if (isset($filters['type']) && $type = $filters['type']) {
     foreach ($projects as $name => $project) {
       if ($type != $project['type']) {
         unset($projects[$name]);
@@ -103,7 +103,7 @@ function installer_test_get_results($filters) {
   }
   
   // Filter out projects based on backdrop version number
-  if (isset($filters['version']) AND $version = $filters['version']) {
+  if (isset($filters['version']) && $version = $filters['version']) {
     foreach ($projects as $name => $project) {
       if ($version != $project['version']) {
         unset($projects[$name]);
@@ -112,9 +112,9 @@ function installer_test_get_results($filters) {
   }
 
   // Filter out projects based on the text query
-  if (isset($filters['text']) AND $text = $filters['text']) {
+  if (isset($filters['text']) && $text = $filters['text']) {
     foreach ($projects as $name => $project) {
-      if (!stristr($project['title'], $text) AND !stristr($project['description'], $text)) {
+      if (!stristr($project['title'], $text) && !stristr($project['description'], $text)) {
         unset($projects[$name]);
       }
     }
@@ -132,7 +132,7 @@ function installer_test_get_results($filters) {
 }
 
 /**
- * Returns some static projects
+ * Returns some static projects.
  */
 function installer_test_projects() {
   $projects = array();

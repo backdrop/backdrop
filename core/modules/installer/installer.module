@@ -10,8 +10,8 @@
 function installer_permission() {
   return array(
     'use installer browser' => array(
-      'title' => t('use installer browser'),
-      'description' => t('This allows the user to browse for and install new modules, themes and layouts using Project Browser.'),
+      'title' => t('Access installer interface'),
+      'description' => t('This allows the user to browse for and install new modules, themes and layouts using Installer Browser.'),
       'restrict access' => TRUE,
     )
   );

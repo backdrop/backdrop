@@ -51,8 +51,8 @@ function installer_browser_get_queued_projects($type = NULL) {
 
   if (isset($_SESSION['installer_browser_install_list'])) {
     foreach ($_SESSION['installer_browser_install_list'] as $project) {
-      if (is_array($project) AND !empty($project)) {
-        if (isset($type) AND $type != $project['type']) {
+      if (is_array($project) && !empty($project)) {
+        if (isset($type) && $type != $project['type']) {
           continue;
         }
         else {
@@ -82,7 +82,7 @@ function installer_browser_get_installed_projects() {
 
   if (isset($_SESSION['installer_browser_installed_projects'])) {
     foreach ($_SESSION['installer_browser_installed_projects'] as $project) {
-      if (is_array($project) AND !empty($project)) {
+      if (is_array($project) && !empty($project)) {
         $projects[$project['name']] = $project;
       }
     }
@@ -122,7 +122,7 @@ function installer_browser_get_queued_releases() {
 
   if (isset($_SESSION['installer_browser_install_releases_list'])) {
     foreach ($_SESSION['installer_browser_install_releases_list'] as $release_name => $project) {
-      if (is_array($project) AND !empty($project)) {
+      if (is_array($project) && !empty($project)) {
         $releases[$release_name] = $project;
       }
     }
@@ -135,40 +135,74 @@ function installer_browser_get_queued_releases() {
  * Fetches results from the server based on the parameters passed in.
  *
  * $filters should be an associative array with the following keys:
+ *  - version: The Major Version of Backdrop that is running on the Client.
+ *  - text: The text that was entered as the search query, or '' if none.
+ *  - type: The type of project being searched.
+ *  - page: The zero-based page number.
+ *  - items_per_page: How many results are requested per page.
+ *
+ * For example:
+ * @code
  * array(
- *   'version' => '1', // The Major Version of Backdrop that is running on the Client
- *   'text' => 'views', // The text that was entered as the search query, or '' if none
- *   'type' => 'module', // The type of project being searched
- *   'page' => 3, // The zero-based page number
- *   'items_per_page' => 12, // How many results are requested per page
+ *   'version' => '1',
+ *   'text' => 'views',
+ *   'type' => 'module',
+ *   'page' => 3,
+ *   'items_per_page' => 12,
  * )
+ * @endcode
  *
- * The installer_browser_fetch_results($filters) call returns an array like this:
+ * The installer_browser_fetch_results($filters) call returns an array with the
+ * following keys:
+ *  - total: The total number of results found for the filters.
+ *  - projects: An array of projects returned for this page request keyed by
+ *    machine name. Each project array may contain the following key-value
+ *    pairs:
+ *     - type: The type of project this is. Can be 'module' or 'theme'.
+ *     - title: The title of the project.
+ *     - name: The machine name of the project.
+ *     - author: The author's name.
+ *     - description: The project description.
+ *     - image: Absolute url to the image, if any.
+ *     - usage: Number of reported active installs.
+ *     - project url: Absolute url to the project page, if any.
+ *     - project status url: The absolute url of the update checker.
+ *     - last updated: UNIX Timestamp of when the project was last updated.
+ *     - maintenance status: The project maintenance status.
+ *     - development status: The project development status.
+ *     - rating: A rating on a scale of 1 to 10 of the project, if available.
+ *     - dependencies: An array of the dependencies of this module.
  *
- * array(
- *   'total' = 5, // The total number of results found for the filters
- *   'projects' => array( // An array of projects returned for this page request
- *     'views' => array( // A project array keyed by the machine name
- *       'type' => 'module', // The type of project this is. Can be 'module' or 'theme'
- *       'title' => 'Views', // The title of the project
- *       'name' => 'views', // The machine name of the project
- *       'author' => 'merlinofchaos', // The author's name
- *       'description' => "Long project description ...",
- *       'image' => 'http://www.example.com/image.jpg', // Absolute url to the image, if any
- *       'usage' => '542312', // How many Downloads the module has had
- *       'project url' => 'http://www.<MAINSITE_URL>/projects/views', // Absolute url to the project page, if any
- *       'project status url' => 'http://updates.<MAINSITE_URL>/release-history/views/1.x', // The absolute url of the update checker, formatted like how <MAINSITE_URL> Update Status does it
- *       'last updated' => '12342523', // UNIX Timestamp of when the project was last updated
- *       'maintenance status' => 'Actively maintained', // Maintenance status
- *       'development status' => 'Under active development', // Development status
- *       'rating' => '9.6', // A rating on a scale of 1 to 10 of the project, if available
- *       'dependencies' => array( // An array of the dependencies of this module
- *         'entity',
- *       ),
- *     ),
- *   'another_project => array( ... ),
- *   ),
- * );
+ *    The following is an example of a valid return array:
+ *    @code
+ *    array(
+ *      'total' = 5,
+ *      'projects' => array(
+ *        'views' => array(
+ *          'type' => 'module',
+ *          'title' => 'Views',
+ *          'name' => 'views',
+ *          'author' => 'merlinofchaos',
+ *          'description' => 'Long project description',
+ *          'image' => 'http://www.example.com/image.jpg',
+ *          'usage' => '542312',
+ *          'project url' => 'http://www.example.org/projects/views',
+ *          'project status url' => 'http://updates.example.org/release-history/views/1.x',
+ *          'last updated' => '12342523',
+ *          'maintenance status' => 'Actively maintained',
+ *          'development status' => 'Under active development',
+ *          'rating' => '9.6',
+ *          'dependencies' => array(
+ *            'entity',
+ *          ),
+ *        ),
+ *        'another_project => array(
+ *          'type' => 'module',
+ *          ...
+ *        ),
+ *      ),
+ *    );
+ *    @endcode
  *
  * @param array $filters
  *   An associative array of queries to use to filter results.
@@ -179,7 +213,7 @@ function installer_browser_get_queued_releases() {
 function installer_browser_fetch_results($filters) {
   $server = installer_browser_get_server();
   // Attempt to retrieve the cached version of this page.
-  $cid = md5(serialize(array_merge($filters, $server)));
+  $cid = 'installer:results:' . md5(serialize(array_merge($filters, $server)));
   if ($cache = cache_get($cid)) {
     return $cache->data;
   }
@@ -198,7 +232,7 @@ function installer_browser_fetch_results($filters) {
     ));
 
     // Check for errors.
-    if ($error = xmlrpc_error() AND $error->is_error) {
+    if ($error = xmlrpc_error() && $error->is_error) {
       backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
         array('@name' => $server['name'], '@code' => $error->code, '@message' => $error->message)));
       return array();
@@ -251,7 +285,8 @@ function installer_browser_get_server() {
  * Uses the project status url to get the available releases for a project.
  *
  * @param $project
- *   The project to get the releases for.
+ *   Associative array of information about the project to fetch release data
+ *   for, as returned by the remote server.
  *
  * @return
  *   An array of releases for this project.
@@ -262,7 +297,7 @@ function installer_browser_get_project_release_data($project) {
   module_load_include('inc', 'update', 'update.fetch');
   if (_update_process_fetch_task($project)) {
     $data = _update_cache_get('available_releases::' . $project['name']);
-    if (isset($data->data) AND isset($data->data['releases']) AND is_array($data->data['releases'])) {
+    if (isset($data->data) && isset($data->data['releases']) && is_array($data->data['releases'])) {
       return $data->data;
     }
   }
@@ -271,7 +306,12 @@ function installer_browser_get_project_release_data($project) {
 }
 
 /**
- * Installs a single release of a project during batch.
+ * Batch API callback: Installs a single release of a project during batch.
+ *
+ * @param $release_name
+ *   The short name of the selected release of the project being installed.
+ * @param $project
+ *   Associative array of information about the project to be installed.
  */
 function _installer_browser_batch_install_release($release_name, $project, &$context) {
   $release = installer_browser_get_release($release_name, $project);
@@ -301,7 +341,7 @@ function _installer_browser_batch_install_release($release_name, $project, &$con
 }
 
 /**
- * Shows a message and finish up the batch.
+ * Batch API callback: shows a message and finishes up the batch.
  */
 function _installer_browser_batch_install_releases_finished($success, $results, $operations) {
   backdrop_get_messages();
@@ -463,8 +503,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
 function installer_browser_check_zip_loaded() {
   $zip_loaded = array_key_exists('zip', archiver_get_info());
   if(!$zip_loaded) {
-    backdrop_set_message(t('Sorry, it seems that the PHP .zip extension is not loaded on your server. You will not be able
-    to download any projects using Project Browser until this is fixed. Please contact your website administrator.'), 'warning');
+    backdrop_set_message(t('Sorry, it seems that the PHP .zip extension is not loaded on your server. You will not be able to download any projects using Project Browser until this is fixed. Please contact your website administrator.'), 'warning');
   }
   return $zip_loaded;
 }

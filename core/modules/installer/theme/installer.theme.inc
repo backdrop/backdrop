@@ -9,7 +9,7 @@
  *
  * @param $variables
  *   An associative array containing:
- *     - current_task : the current task
+ *     - current_task : the current task.
  */
 function update_preprocess_installer_browser_install(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
@@ -64,7 +64,7 @@ function update_preprocess_installer_browser_list(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
   backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
 
-  if (is_array($variables['projects_list']) AND !empty($variables['projects_list'])) {
+  if (is_array($variables['projects_list']) && !empty($variables['projects_list'])) {
     $content = '';
     $first = TRUE;
     $rows = array();
@@ -173,7 +173,7 @@ function update_preprocess_installer_browser_project(&$variables) {
     // We are not showing this because it isn't a good indicator right now.
     // $extras[] = check_plain($project['development status']);
   }
-  if ($project['usage'] AND is_numeric($project['usage'])) {
+  if ($project['usage'] && is_numeric($project['usage'])) {
     $extras[] = format_plural($project['usage'], '1 Installation', '@count Installations');
   }
   if ($project['rating']) {

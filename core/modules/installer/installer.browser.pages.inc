@@ -8,7 +8,7 @@
  * Page to display the projects.
  *
  * @param $type
- *   Type of project to view, ie 'module', 'theme' or 'layout'.
+ *   Type of project to view. Must be one of 'module', 'theme' or 'layout'.
  *
  * @return
  *   Themed list of the projects.
@@ -112,7 +112,7 @@ function installer_browser_page($type) {
  * Page to display individual projects in a modal.
  *
  * @param $project
- *   The project name.
+ *   The short name of the project to be displayed in the modal.
  *
  * @return
  *   Render array of a themed project.
@@ -173,7 +173,7 @@ function installer_browser_installation_select_versions_page() {
  * Form builder for the select versions form.
  *
  * @param $projects
- *   An array of projects to get the releases for.
+ *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_select_versions_form($form, &$form_state, $projects) {
   module_load_include('inc', 'installer', 'installer.browser');
@@ -223,7 +223,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
         '@version' => $release['version'],
         '@date' => format_date($release['date'], 'custom', 'M j, Y'),
         ));
-      if (isset($release['terms']['Release type']) AND !empty($release['terms']['Release type'])) {
+      if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
         $release_title .= " (" . implode(', ', $release['terms']['Release type']) . ")";
       }
       if (isset($release['release_link'])) {
@@ -418,7 +418,7 @@ function installer_browser_installation_enable_page($type = 'enable') {
  * Form builder for theme install.
  *
  * @param $projects
- *   An array of projects to get the releases for.
+ *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_theme_form($form, &$form_state, $projects) {
   module_load_include('inc', 'installer', 'installer.browser');
@@ -519,12 +519,11 @@ function installer_browser_installation_theme_set($form, &$form_state) {
   }
 }
 
-
 /**
  * Form builder for the select versions form.
  *
  * @param $projects
- *   An array of projects to get the releases for.
+ *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
@@ -577,8 +576,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   if(!empty($options) || !empty($missing)) {
     $form['module_instructions'] = array(
     '#type' => 'item',
-    '#markup' => t('You may enable modules using the form below
-      or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
+    '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     if (!empty($options)) {
       $form['modules'] = array(
@@ -612,8 +610,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       $form['missing'] = array(
         '#type' => 'item',
         '#title' => t('Missing Dependencies'),
-        '#description' => t('These modules are missing one or more dependencies,
-          and so cannot be enabled.'),
+        '#description' => t('These modules are missing one or more dependencies, and so cannot be enabled.'),
         '#markup' => theme('table', array('header' => $headers, 'rows' => $missing)),
         '#weight' => 2,
       );
@@ -757,7 +754,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
     }
 
     $sort_list[] = array(
-      'data' => l($sort_option['name'], $current_path, array('query' => $query, 'class' => array())),
+      'data' => l($sort_option['name'], $current_path, array('query' => $query)),
       'class' => $classes,
     );
   }

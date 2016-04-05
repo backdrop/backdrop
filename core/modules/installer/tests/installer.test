@@ -5,17 +5,6 @@
 class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   protected $privileged_user;
 
-  /**
-   * Implements getInfo().
-   */
-  public static function getInfo() {
-    return array (
-      'name' => t('Project Browser Install Project Test'),
-      'description' => t('Attempts to install a project.'),
-      'group' => t('Project Browser'),
-    );
-  }
-
   public function setUp() {
     parent::setUp('installer', 'update', 'installer_test');  // Enable any modules required for the test
 
@@ -284,5 +273,3 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   }
 
 }
-
-?>
