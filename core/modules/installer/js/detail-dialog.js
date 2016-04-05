@@ -23,7 +23,7 @@
     // On mobile add an indicator of number of projects installed and scroll to
     // installation queue on click.
     var windowsize = $(window).width();
-    var header = $("#installer-browser-main th").html();
+    var header = $(".installer-browser-main th").html();
     var items = $('.installer-browser-install-queue-item').length;
     checkQueue();
 
@@ -35,7 +35,7 @@
     }
 
     function updateTH() {
-      $("#installer-browser-main th").html(header+': <span class="projects-selected">'+items+' selected. <a id="status-count-link" href="ff">review and install</a></span>');
+      $(".installer-browser-main th").html(header+': <span class="projects-selected">'+items+' selected. <a id="status-count-link" href="ff">review and install</a></span>');
     }
 
     $(document).ajaxComplete(function() {
@@ -48,7 +48,7 @@
         updateTH();
       }
       else {
-        $("#installer-browser-main th").html(header);
+        $(".installer-browser-main th").html(header);
       }
     });
     
@@ -56,7 +56,7 @@
       event.preventDefault();
       event.stopPropagation();
       $('html, body').animate({
-          scrollTop: $("#installer-browser-sidebar-right").offset().top
+          scrollTop: $(".installer-browser-sidebar-right").offset().top
       }, 400);
     });
   });

@@ -13,12 +13,12 @@
  * @see installer_browser_preprocess_installer_browser_list()
  */
 ?>
-<div id="installer-browser" class="clearfix">
-  <div id="installer-browser-main" class="installer-browser-region">
+<div class="installer-browser clearfix">
+  <div class="installer-browser-main installer-browser-region">
     <?php print $main_content; ?>
   </div>
 
-  <div id="installer-browser-sidebar-right" class="installer-browser-region">
+  <div class="installer-browser-sidebar-right installer-browser-region">
     <?php print $filters; ?>
     <?php print $install_list; ?>
     <?php print $advanced; ?>

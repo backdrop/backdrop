@@ -11,6 +11,6 @@
  * @see installer_browser_preprocess_installer_browser_install_queue()
  */
 ?>
-<div id="installer-browser-install-queue" class="clearfix">
+<div class="installer-browser-install-queue clearfix">
   <?php print $queue_html; ?>
 </div>

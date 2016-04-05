@@ -674,7 +674,7 @@ function installer_browser_get_install_list() {
  * Shows an install button for the Install Queue block.
  */
 function installer_browser_install_button_form($form, &$form_state) {
-  $form['#attributes']['id'] = 'installer-browser-install-button-form';
+  $form['#attributes']['class'] = 'installer-browser-install-button-form';
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Install',
@@ -857,7 +857,7 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
     case 'ajax':
       $commands = array();
       // Refresh the install queue.
-      $commands[] = ajax_command_replace('#installer-browser-install-queue', installer_browser_get_install_list());
+      $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
       // Refresh the add to queue link.
       $commands[] = ajax_command_replace('#add-to-queue-link-' . $project_name, installer_browser_add_remove_queue_link($project_name));
       return array('#type' => 'ajax', '#commands' => $commands);
