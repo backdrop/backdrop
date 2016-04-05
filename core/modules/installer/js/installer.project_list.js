@@ -22,7 +22,7 @@ Backdrop.behaviors.installerProjectList = {
 
     // On mobile add an indicator of number of projects installed and scroll to
     // installation queue on click.
-    var windowsize = $(window).width();
+    var windowsize = window.innerWidth;
     var header = $(".installer-browser-main th").html();
     var items = $('.installer-browser-install-queue-item').length;
     checkQueue();
@@ -43,7 +43,7 @@ Backdrop.behaviors.installerProjectList = {
     });
 
     $(window).resize(function() {
-      windowsize = $(window).width();
+      windowsize = window.innerWidth;
       if (windowsize < 768) {
         updateTH();
       }
