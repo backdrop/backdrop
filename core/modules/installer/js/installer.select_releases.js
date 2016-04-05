@@ -1,5 +1,9 @@
-(function ($) {
-  $(document).ready(function() {
+/**
+ * @file
+ * Hides the releases radio elements if only one release is available.
+ */
+Backdrop.behaviors.installerSelectReleases = {
+  attach: function (context, settings) {
     $('.installer-browser-releases-wrapper').hide();
     $('.installer-browser-selected-release').show();
     
@@ -8,5 +12,5 @@
       $('.installer-browser-release-' + target).show();
       $('.installer-browser-selected-release-' + target).hide();
     })
-  });
-})(jQuery);
+  }
+}

@@ -14,7 +14,7 @@
  *   Themed list of the projects.
  */
 function installer_browser_page($type) {
-  backdrop_add_js(backdrop_get_path('module', 'installer') . '/js/detail-dialog.js');
+  backdrop_add_js(backdrop_get_path('module', 'installer') . '/js/installer.project_list.js');
   module_load_include('inc', 'installer', 'installer.browser');
   // Show a warning if no zip extension available, but allow to browse and
   // select to view available releases. Install blocked on select versions page.
@@ -179,7 +179,7 @@ function installer_browser_installation_select_versions_page() {
  */
 function installer_browser_installation_select_versions_form($form, &$form_state, $projects) {
   module_load_include('inc', 'installer', 'installer.browser');
-  backdrop_add_js(backdrop_get_path('module', 'installer') . '/js/select_releases.js');
+  backdrop_add_js(backdrop_get_path('module', 'installer') . '/js/installer.select_releases.js');
 
   $zip_loaded = installer_browser_check_zip_loaded();
 

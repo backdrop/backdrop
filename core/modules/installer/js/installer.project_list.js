@@ -1,11 +1,11 @@
 /**
  * @file
- *
  * Open all external links in a dialog.
+ *
  * Inspired by https://css-tricks.com/snippets/jquery/open-external-links-in-new-window/
  */
-(function ($) {
-  $(document).ready(function() {
+Backdrop.behaviors.installerProjectList = {
+  attach: function (context, settings) {
     // Open all links in dialogs in a new window.
     $(window).on( "dialog:aftercreate", function( event, ui ) {
       $('a').each(function() {
@@ -59,5 +59,5 @@
           scrollTop: $(".installer-browser-sidebar-right").offset().top
       }, 400);
     });
-  });
-})(jQuery);
+  }
+}
