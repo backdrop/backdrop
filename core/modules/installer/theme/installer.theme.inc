@@ -135,7 +135,7 @@ function update_preprocess_installer_browser_project_dialog(&$variables) {
   update_preprocess_installer_browser_project($variables);
   $project = $variables['project'];
   $variables['project_page'] = l(t('View on BackdropCMS.org'), 'https://backdropcms.org/project/' . $project['name']);
-  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li')));
+  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li', 'pre')));
 }
 
 /**
