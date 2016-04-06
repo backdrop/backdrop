@@ -23,7 +23,7 @@ Backdrop.behaviors.installerProjectList = {
     // On mobile add an indicator of number of projects installed and scroll to
     // installation queue on click.
     var windowsize = window.innerWidth;
-    var header = $(".installer-browser-main th").html();
+    var header = $(".installer-browser-main th");
     var items = $('.installer-browser-install-queue-item').length;
     checkQueue();
 
@@ -35,7 +35,8 @@ Backdrop.behaviors.installerProjectList = {
     }
 
     function updateTH() {
-      $(".installer-browser-main th").html(header+': <span class="projects-selected">'+items+' selected. <a id="status-count-link" href="ff">review and install</a></span>');
+      $(".projects-selected").remove();
+      header.append('<span class="projects-selected">: '+items+' selected. <a id="status-count-link" href="ff">review and install</a></span>');
     }
 
     $(document).ajaxComplete(function() {
@@ -48,7 +49,7 @@ Backdrop.behaviors.installerProjectList = {
         updateTH();
       }
       else {
-        $(".installer-browser-main th").html(header);
+        $(".projects-selected").remove();
       }
     });
     
