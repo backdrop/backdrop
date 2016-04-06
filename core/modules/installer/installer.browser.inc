@@ -471,7 +471,7 @@ function installer_browser_get_missing_dependencies($projects) {
 function installer_browser_add_remove_queue_link($project_name, $title = NULL, $id_prefix = 'add-to-queue-link') {
   $queued_projects = installer_browser_get_queued_projects();
   if (!$title) {
-    $title = isset($queued_projects[$project_name]) ? t('Remove from Install queue') : t('Add to Install queue');
+    $title = isset($queued_projects[$project_name]) ? t('Remove from Installation queue') : t('Add to Installation queue');
   }
   $op = isset($queued_projects[$project_name]) ? 'remove' : 'add';
 

@@ -821,7 +821,7 @@ function installer_browser_filters_form_submit($form, &$form_state) {
 function installer_browser_manual_install_link($form, &$form_state) {
   $manual['link'] = array(
     '#type' => 'link',
-    '#title' => 'Manual install',
+    '#title' => 'Manual installation',
     '#href' => 'admin/modules/manual-install',
     '#attributes' => array(
       'class' => array('use-ajax'),

@@ -494,7 +494,7 @@ function installer_manager_install_form($form, &$form_state) {
     return $form;
   }
 
-  backdrop_set_title('Manual install');
+  backdrop_set_title('Manual installation');
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
@@ -568,7 +568,7 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $html = '';
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
-    $title = isset($form['#title']) ? $form['#title'] : 'Manual install';
+    $title = isset($form['#title']) ? $form['#title'] : 'Manual installation';
     $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
   }
 

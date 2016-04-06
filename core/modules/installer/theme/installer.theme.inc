@@ -24,7 +24,7 @@ function update_preprocess_installer_browser_install_queue(&$variables) {
   $build = array();
   if (empty($variables['projects'])) {
     $build['empty_text'] = array(
-      '#markup' => t('Install queue is empty.'),
+      '#markup' => t('Installation queue is empty.'),
     );
   }
   else {
@@ -114,7 +114,7 @@ function update_preprocess_installer_browser_list(&$variables) {
   // Add the install list.
   $install_list['installer_browser_filters_block'] = array(
     '#theme' => 'installer_browser_block',
-    '#title' => t('Install queue'),
+    '#title' => t('Installation queue'),
     '#content' => installer_browser_get_install_list(),
   );
   $variables['install_list'] = render($install_list);
