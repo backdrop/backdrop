@@ -2109,6 +2109,11 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   static $in_error_state = FALSE;
 
+  // Don't report watchdog messages for disabled severity levels.
+  if (!in_array($severity, config('system.core', 'watchdog_enabled_severities'))) {
+    return;
+  }
+
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
   if (!$in_error_state && function_exists('module_implements')) {
