@@ -4,6 +4,9 @@
  * Administrative page callbacks for the Redirect module.
  */
 
+/**
+ * Form callback; Display the list of all redirects.
+ */
 function redirect_list_form($form, &$form_state) {
   $form['#operations'] = redirect_get_redirect_operations();
   if (isset($form_state['values']['operation']) && empty($form_state['values']['confirm'])) {
@@ -15,11 +18,11 @@ function redirect_list_form($form, &$form_state) {
   // Set up the header.
   $header = array(
     'source' => array('data' => t('From'), 'field' => 'source', 'sort' => 'asc'),
-    'redirect' => array('data' => t('To'), 'field' => 'redirect'),
-    'status_code' => array('data' => t('Type'), 'field' => 'status_code'),
+    'redirect' => array('data' => t('To'), 'field' => 'redirect', 'class' => array('priority-medium')),
+    'status_code' => array('data' => t('Type'), 'field' => 'status_code', 'class' => array('priority-low')),
     'language' => array('data' => t('Language'), 'field' => 'langcode'),
-    'count' => array('data' => t('Count'), 'field' => 'count'),
-    'access' => array('data' => t('Last accessed'), 'field' => 'access'),
+    'count' => array('data' => t('Count'), 'field' => 'count', 'class' => array('priority-low')),
+    'access' => array('data' => t('Last accessed'), 'field' => 'access', 'class' => array('priority-low')),
     'operations' => array('data' => t('Operations')),
   );
 
@@ -118,9 +121,8 @@ function redirect_list_form($form, &$form_state) {
     }
     $row['operations'] = array(
       'data' => array(
-        '#theme' => 'links',
+        '#type' => 'operations',
         '#links' => $operations,
-        '#attributes' => array('class' => array('links', 'inline', 'nowrap')),
       ),
     );
 
@@ -142,7 +144,7 @@ function redirect_list_form($form, &$form_state) {
     ),
   );
   if (redirect_access('create', 'redirect')) {
-    $form['rids']['#empty'] .= ' ' . l(t('Add URL redirect.'), 'admin/config/search/redirect/add', array('query' => $destination));
+    $form['rids']['#empty'] .= ' ' . l(t('Add URL redirect.'), 'admin/config/search/redirect/add');
   }
   $form['pager'] = array('#theme' => 'pager');
   return $form;
@@ -232,7 +234,7 @@ function redirect_list_form_operations_validate($form, &$form_state) {
 }
 
 /**
- * Process redirect_list_form form submissions.
+ * Submit handler for redirect_list_form().
  *
  * Execute the chosen 'Update option' on the selected redirects.
  */
@@ -266,6 +268,11 @@ function redirect_list_form_operations_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Form callback; Confirm a bulk operation on a list of redirects.
+ *
+ * @see redirect_list_form()
+ */
 function redirect_list_form_operations_confirm_form($form, &$form_state, $operation, $rids) {
   $operations = $form['#operations'];
   $operation = $operations[$form_state['values']['operation']];
@@ -288,10 +295,13 @@ function redirect_list_form_operations_confirm_form($form, &$form_state, $operat
   $form['#submit'][] = 'redirect_list_form_operations_submit';
   $confirm_question = format_plural(count($rids), 'Are you sure you want to @action this redirect?', 'Are you sure you want to @action these redirects?', array('@action' => backdrop_strtolower($operation['action'])));
 
+  // Cancel link returns to the current search if possible.
+  $cancel_path = strpos($_GET['q'], 'admin/config/search/redirect') === 0 ? $_GET['q'] : 'admin/config/search/redirect';
+
   return confirm_form(
     $form,
     $confirm_question,
-    'admin/config/search/redirect', // @todo This does not redirect back to filtered page.
+    $cancel_path,
     t('This action cannot be undone.'),
     $operation['action'],
     t('Cancel')
@@ -694,6 +704,12 @@ function redirect_settings_form_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
 }
 
+/**
+ * Form callback; Display a list of all recent 404 pages.
+ *
+ * This callback is only used if the dblog.module is enabled, from which it
+ * pulls the list of recent 404 pages.
+ */
 function redirect_404_list($form = NULL) {
   $destination = backdrop_get_destination();
 
@@ -706,7 +722,7 @@ function redirect_404_list($form = NULL) {
   $header = array(
     array('data' => t('Page'), 'field' => 'message'),
     array('data' => t('Count'), 'field' => 'count', 'sort' => 'desc'),
-    array('data' => t('Last accessed'), 'field' => 'timestamp'),
+    array('data' => t('Last accessed'), 'field' => 'timestamp', 'class' => array('priority-low')),
     array('data' => t('Operations')),
   );
 
@@ -748,9 +764,8 @@ function redirect_404_list($form = NULL) {
     }
     $row['operations'] = array(
       'data' => array(
-        '#theme' => 'links',
+        '#type' => 'operations',
         '#links' => $operations,
-        '#attributes' => array('class' => array('links', 'inline', 'nowrap')),
       ),
     );
 
@@ -843,10 +858,10 @@ function redirect_list_table($redirects, $header) {
   $header = array_intersect_key(array(
     'source' => array('data' => t('From'), 'field' => 'source', 'sort' => 'asc'),
     'redirect' => array('data' => t('To'), 'field' => 'redirect'),
-    'status_code' => array('data' => t('Type'), 'field' => 'status_code'),
+    'status_code' => array('data' => t('Type'), 'field' => 'status_code', 'class' => array('priority-low')),
     'language' => array('data' => t('Language'), 'field' => 'langcode'),
-    'count' => array('data' => t('Count'), 'field' => 'count'),
-    'access' => array('data' => t('Last accessed'), 'field' => 'access'),
+    'count' => array('data' => t('Count'), 'field' => 'count', 'class' => array('priority-medium')),
+    'access' => array('data' => t('Last accessed'), 'field' => 'access', 'class' => array('priority-low')),
     'operations' => array('data' => t('Operations')),
   ), $header);
 
@@ -899,9 +914,8 @@ function redirect_list_table($redirects, $header) {
     }
     $row['data']['operations'] = array(
       'data' => array(
-        '#theme' => 'links',
+        '#type' => 'operations',
         '#links' => $operations,
-        '#attributes' => array('class' => array('links', 'inline', 'nowrap')),
       ),
     );
 
