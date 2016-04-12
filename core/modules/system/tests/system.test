@@ -333,6 +333,18 @@ class HookRequirementsTestCase extends ModuleTestCase {
  */
 class ModuleDependencyTestCase extends ModuleTestCase {
   /**
+   * Checks functionality of project namespaces for dependencies.
+   */
+  function testProjectNamespaceForDependencies() {
+    // Enable module with project namespace to ensure nothing breaks.
+    $edit = array(
+      'modules[Testing][system_project_namespace_test][enable]' => TRUE,
+    );
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertModules(array('system_project_namespace_test'), TRUE);
+  }
+
+  /**
    * Attempt to enable translation module without locale enabled.
    */
   function testEnableWithoutDependency() {
@@ -707,15 +719,38 @@ class CronRunTestCase extends BackdropWebTestCase {
     $result = state_get('common_test_cron');
     $this->assertEqual($result, 'success', 'Cron correctly handles exceptions thrown during hook_cron() invocations.');
   }
+
+  /**
+   * Tests that hook_flush_caches() is not invoked on every single cron run.
+   *
+   * @see system_cron()
+   */
+  public function testCronCacheExpiration() {
+    module_enable(array('system_cron_test'));
+    state_del('system_cron_test_flush_caches');
+    cache()->flush();
+
+    // Invoke cron the first time: hook_flush_caches() should be called and then
+    // get cached.
+    backdrop_cron_run();
+    $this->assertEqual(state_get('system_cron_test_flush_caches'), 1, 'hook_flush_caches() was invoked the first time.');
+    $cache = cache_get('system_cache_tables');
+    $this->assertEqual(empty($cache), FALSE, 'Cache is filled with cache table data.');
+
+    // Run cron again and ensure that hook_flush_caches() is not called.
+    state_del('system_cron_test_flush_caches');
+    backdrop_cron_run();
+    $this->assertNull(state_get('system_cron_test_flush_caches'), 'hook_flush_caches() was not invoked the second time.');
+  }
+
 }
 
 /**
  * Test execution of the cron queue.
  */
 class CronQueueTestCase extends BackdropWebTestCase {
-
   function setUp() {
-    parent::setUp(array('common_test', 'common_test_cron_helper'));
+    parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
 
   /**
@@ -735,6 +770,22 @@ class CronQueueTestCase extends BackdropWebTestCase {
     $this->assertEqual($queue->numberOfItems(), 1, 'Failing item still in the queue after throwing an exception.');
   }
 
+  /**
+   * Tests worker defined as a class method callable.
+   */
+  function testCallable() {
+    $queue = BackdropQueue::get('cron_queue_test_callback');
+
+    // Enqueue an item for processing.
+    $queue->createItem(array($this->randomName() => $this->randomName()));
+
+    // Run cron; the worker should perform the task and delete the item from the
+    // queue.
+    $this->cronRun();
+
+    // The queue should be empty.
+    $this->assertEqual($queue->numberOfItems(), 0);
+  }
 }
 
 class MetaTagsTestCase extends BackdropWebTestCase {
@@ -1014,6 +1065,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp();
@@ -1029,6 +1081,9 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
    * Verify site maintenance mode functionality.
    */
   function testSiteMaintenance() {
+    // Start with the page cache disabled.
+    config_set('system.core', 'page_cache_maximum_age', 0);
+
     // Turn on maintenance mode.
     $edit = array(
       'maintenance_mode' => TRUE,
@@ -1045,17 +1100,36 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Logout and verify that offline message is displayed.
     $this->backdropLogout();
-    $this->backdropGet('');
+
+    $this->backdropGet('token/tree');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
-    $this->backdropGet('node');
-    $this->assertText($offline_message);
+
+    // With caching disabled, the maintenance page is also disabled.
+    $this->assertIdentical(strpos($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
+
+    // Enable caching and check that the default maintenance max age is set.
+    config_set('system.core', 'page_cache_maximum_age', 300);
+    $this->backdropGet('token/tree');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 10');
+
+    // Increase the cache lifetime and try a different path.
+    config_set('system.core', 'maintenance_page_maximum_age', 60);
     $this->backdropGet('user/register');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public; max-age: 60');
 
     // Verify that user is able to log in.
     $this->backdropGet('user');
+    $this->assertResponse(200);
+    $this->assertNoText($offline_message);
+    // The user should also be able to reset their password.
+    $this->backdropGet('user/password');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
     $this->backdropGet('user/login');
+    $this->assertResponse(200);
     $this->assertNoText($offline_message);
 
     // Log in user and verify that maintenance mode message is displayed
@@ -1704,66 +1778,86 @@ array_space[a b] = Value';
   }
 }
 
-
-class InfoFileTypeTest extends BackdropUnitTestCase {
+/**
+ * Ensures that all info files have expected contents.
+ */
+class InfoFileCoreTest extends BackdropUnitTestCase {
   /**
    * Tests that all core modules' .info files have the project type string set to "module".
    */
-  function testModuleInfoFileType() {
+  function testModuleInfoFileContents() {
     $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'core/modules', 'name', 0);
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($modules as $key => $module) {
       $info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "module".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->fail(format_string('%key does not have project type set to "module".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'module') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "module".', array('%key' => $key)));
+      elseif ($info['type'] != 'module') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "module".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "module" for all core modules.');
+    $this->assertFalse($type_fails, 'Project type string set to "module" for all core modules.');
+    $this->assertFalse($version_fails, 'Version set for all core modules.');
   }
 
   /**
    * Tests that all core themes' .info files have the project type string set to "theme".
    */
-  function testThemeInfoFileType() {
+  function testThemeInfoFileContents() {
     $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/themes');
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($themes as $key => $theme) {
       $info = backdrop_parse_info_file(dirname($theme->uri) . '/' . $theme->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "theme".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->fail(format_string('%key does not have project type set to "theme".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'theme') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "theme".', array('%key' => $key)));
+      elseif ($info['type'] != 'theme') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "theme".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "theme" for all core themes.');
+    $this->assertFalse($type_fails, 'Project type string set to "theme" for all core themes.');
+    $this->assertFalse($version_fails, 'Version set for all core themes.');
   }
 
   /**
    * Tests that all core layouts' .info files have the project type string set to "layout".
    */
-  function testLayoutInfoFileType() {
+  function testLayoutInfoFileContents() {
     $layouts = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/layouts', 'name', 0);
-    $fails = array();
+    $type_fails = array();
+    $version_fails = array();
     foreach($layouts as $key => $layout) {
       $info = backdrop_parse_info_file(dirname($layout->uri) . '/' . $layout->name . '.info');
       if (!isset($info['type'])) {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('%key does not have project type set to "layout".', array('%key' => $key)));
+        $type_fails[] = $key;
+        $this->fail(format_string('%key does not have project type set to "layout".', array('%key' => $key)));
       }
-      if (isset($info['type']) && $info['type'] != 'layout') {
-        $fails[] = $key;
-        $this->assertTrue(FALSE, t('Project type for %key is not set to "layout".', array('%key' => $key)));
+      elseif ($info['type'] != 'layout') {
+        $type_fails[] = $key;
+        $this->fail(format_string('Project type for %key is not set to "layout".', array('%key' => $key)));
+      }
+      if (!isset($info['version'])) {
+        $version_fails[] = $key;
+        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($fails, 'Project type string set to "layout" for all core layouts.');
+    $this->assertFalse($type_fails, 'Project type string set to "layout" for all core layouts.');
+    $this->assertFalse($version_fails, 'Version set for all core layouts.');
   }
 }
 
@@ -2070,12 +2164,29 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
     $arg1 = $this->randomName();
     $arg2 = $this->randomName();
     $this->backdropGet('system-test/shutdown-functions/' . $arg1 . '/' . $arg2);
-    $this->assertText(t('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
-    $this->assertText(t('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2)));
+
+    // Now wait a few seconds to ensure that the watchdog entries are written
+    // before we check for them.
+    sleep(2);
+
+    $shutdown1 = format_string('First shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+    $shutdown2 = format_string('Second shutdown function, arg1 : @arg1, arg2: @arg2', array('@arg1' => $arg1, '@arg2' => $arg2));
+
+    // Text doesn't show up because the page returns before shutdown functions.
+    $this->assertNoText($shutdown1);
+    $this->assertNoText($shutdown2);
+
+    // However, the messages should show up in watchdog.
+    $shutdown1_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown1))->fetchField();
+    $shutdown2_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message = :string", array(':string' => $shutdown2))->fetchField();
+    $this->assertEqual($shutdown1_log, 1, 'Shutdown message 1 logged.');
+    $this->assertEqual($shutdown2_log, 1, 'Shutdown message 2 logged.');
 
     // Make sure exceptions displayed through _backdrop_render_exception_safe()
     // are correctly escaped.
-    $this->assertRaw('Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;.');
+    $message = 'Exception: Backdrop is &amp;lt;blink&amp;gt;awesome&amp;lt;/blink&amp;gt;';
+    $exception_log = db_query("SELECT COUNT(*) FROM {watchdog} WHERE message LIKE :string", array(':string' => db_like($message) . '%'))->fetchField();
+    $this->assertRaw($exception_log, 1, 'Uncaught exception logged.');
   }
 }
 
@@ -2240,6 +2351,7 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
  */
 class SystemValidTokenTest extends BackdropWebTestCase {
   protected $profile = 'testing';
+  private $assertErrors = FALSE;
 
   /**
    * Tests invalid invocations of backdrop_valid_token() that must return FALSE.

@@ -1,6 +1,8 @@
-
 .text-format-wrapper .form-item {
   margin-bottom: 0;
+}
+.text-format-wrapper .form-text {
+  width: 100%;
 }
 .filter-wrapper {
   border-top: 0;

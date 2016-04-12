@@ -118,7 +118,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  */
 function backdrop_mail($module, $key, $to, $language, $params = array(), $reply = NULL, $send = TRUE) {
   $from = config_get('system.core', 'site_mail');
-  if (empty($site_mail))  {
+  if (empty($from))  {
     $from = ini_get('sendmail_from');
   }
 
@@ -568,7 +568,7 @@ function _backdrop_wrap_mail_line(&$line, $key, $values) {
   // Use soft-breaks only for purely quoted or unindented text.
   $line = wordwrap($line, 77 - $values['length'], $values['soft'] ? " \n" : "\n");
   // Break really long words at the maximum width allowed.
-  $line = wordwrap($line, 996 - $values['length'], $values['soft'] ? " \n" : "\n");
+  $line = wordwrap($line, 996 - $values['length'], $values['soft'] ? " \n" : "\n", TRUE);
 }
 
 /**

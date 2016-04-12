@@ -1315,6 +1315,61 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests that node types permissions are correctly set from the Node Type UI.
+   */
+  function testNodeTypePermissions() {
+    // Create admin user.
+    $admin_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer permissions', 'administer users', 'access user profiles'));
+    $this->backdropLogin($admin_user);
+
+    // Create new role
+    $role_name = $this->backdropCreateRole(array('access content'));
+    $web_user = $this->backdropCreateUser();
+
+    // Assign the role to a user.
+    $this->backdropPost('user/' . $web_user->uid . '/edit', array("roles[$role_name]" => $role_name), t('Save'));
+
+    // Check that the new role appears on the Node Type edit page.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $this->assertText($role_name, "$role_name is found on node type form.");
+
+    // Check that the new role does not have a permission which wasn't granted.
+    $this->assertFieldByName($role_name . '[edit any page content]', 'edit any page content', "Role $role_name does not have edit any page content permission.");
+
+    // On the Node Type page: change permissions for the "page" node type.
+    $edit = array(
+      $role_name . '[edit own page content]' => TRUE,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Check that the permission changes are saved on the permissions page.
+    $this->backdropGet('admin/config/people/permissions');
+    $this->assertFieldByName($role_name . '[edit own page content]', 'edit own page content', "Role $role_name has edit own page content permission.");
+
+    // Check that the new role does not have a permission which wasn't granted.
+    $this->assertFieldByName($role_name . '[edit any page content]', 'edit any page content', "Role $role_name does not have edit any page content permission.");
+
+    // On the Permissions page: change permissions for the "page" node type.
+    $edit = array(
+      $role_name . '[edit any page content]' => TRUE,
+    );
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+
+    // Check that this permission is now selected on the Node Type page.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $this->assertFieldByName($role_name . '[edit any page content]', 'edit any page content', "Role $role_name has edit any page content permission.");
+
+    // Test that the permissions actually exist
+    $this->backdropLogin($web_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+
+    $account = user_load($web_user->uid, TRUE);
+    $this->assertTrue(user_access('edit own page content', $account), "Web user has edit own page content permission.");
+    $this->assertTrue(user_access('edit any page content', $account), "Web user has edit any page content permission.");
+  }
+
+  /**
    * Tests that node types correctly handle the 'disabled' flag.
    */
   function testNodeTypeStatus() {
@@ -1758,6 +1813,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Create the custom block.
     $custom_block = array();
     $custom_block['info'] = $this->randomName();
+    $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName();
     $custom_block['body[value]'] = $this->randomName(32);
     $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
@@ -1779,7 +1835,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Add the custom block to the layout.
     $layout = layout_load('post_layout');
-    $layout->addBlock('block', 1, 'sidebar');
+    $layout->addBlock('block', $custom_block['delta'], 'sidebar');
     $layout->save();
 
     // Verify visibility rules.

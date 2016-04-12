@@ -4,4 +4,6 @@ version = BACKDROP_VERSION
 type = theme
 backdrop = 1.x
 stylesheets[all][] = layout.css
+
+; Hides this theme from the Appearance page
 hidden = TRUE

@@ -118,9 +118,9 @@ description = Tests proper parsing of a .info file formatted string.
 group = System
 file = tests/system.test
 
-[InfoFileTypeTest]
-name = Info file type test
-description = Tests that all core .info files have the project type string set correctly.
+[InfoFileCoreTest]
+name = Info file test
+description = Tests that all core .info files have the project type and version string set correctly.
 group = System
 file = tests/system.test
 

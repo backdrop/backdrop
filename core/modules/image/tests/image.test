@@ -170,6 +170,22 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test that we do not pass an array to backdrop_add_http_header.
+   */
+  function testImageContentTypeHeaders() {
+    $files = $this->backdropGetTestFiles('image');
+    $file = array_shift($files);
+    // Copy the test file to private folder.
+    $private_uri = file_unmanaged_copy($file->uri, 'private://test.png');
+    // Tell image_module_test module to return the headers we want to test.
+    state_set('image_module_test_invalid_headers', $private_uri);
+    // Invoke image_style_deliver so it will try to set headers.
+    $generated_url = image_style_url($this->style_name, $private_uri);
+    $this->backdropGet($generated_url);
+    state_del('image_module_test_invalid_headers');
+  }
+
+  /**
    * Test image_style_url().
    */
   function _testImageStyleUrlAndPath($scheme, $clean_url = TRUE) {
@@ -1002,7 +1018,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     // Create a style.
     image_style_save(array('name' => 'test', 'label' => 'Test'));
-    $generated_uri = 'public://styles/test/public/'. backdrop_basename($original_uri);
+    $generated_uri = 'public://styles/test/public/' . backdrop_basename($original_uri);
     $url = image_style_url('test', $original_uri);
 
     $variables = array(
@@ -1654,8 +1670,8 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
     // Reduce the threshold down to 2 unauthorized images at a time.
     config_set('system.core', 'image_style_flood_limit', 2);
 
-    // The image_module_test_null effect has a 2 second delay on it. Make 3
-    // simultaneous requests and check that the 3rd one returns a 403.
+    // The image_module_test_wait_effect effect has a 5 second delay on it. Make
+    // 3 simultaneous requests and check that the 3rd one returns a 403.
     $images = array(
       image_style_url($this->style_name, $image1),
       image_style_url($this->style_name, $image2),

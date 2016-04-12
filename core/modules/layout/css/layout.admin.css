@@ -13,16 +13,31 @@
 }
 
 /* Individual layout settings form. */
-.layout-settings-form .layout-options {
+.layout-settings-form .form-type-radios {
   width: 100%;
 }
+.layout-settings-form .layout-options .form-radios {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  line-height: 1.3;
+  max-width: calc(100vw - 60px); /* Fix flex-wrap issue in some browsers */
+}
+.layout-settings-form .layout-options.no-flexbox .form-radios {
+  display: block;
+}
 .layout-settings-form .layout-options .form-type-radio {
-  float: left;
+  width: 100px;
+  margin: 0 5px 5px 0;
+  padding: 0;
   text-align: center;
 }
-.layout-settings-form .layout-icon .layout-caption {
-  width: 90px;
-  margin-bottom: 1em;
+.layout-settings-form .layout-options.no-flexbox .form-type-radio {
+  float: left;
 }
 
 /* Menu item argument settings. */
@@ -96,7 +111,16 @@
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
   width: 105px;
-  margin: 10px 0;
+  margin: 4px 0 10px
+}
+.layout-editor-region .dropbutton-wrapper a {
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+}
+.layout-editor-region .dropbutton-wrapper .ajax-progress {
+  position: absolute;
+  padding: 0.1em 0;
 }
 .ui-sortable .layout-editor-block {
   cursor: move;
@@ -152,7 +176,7 @@
   padding-left: 0;
   padding-right: 0;
 }
-.layout-editor-block-content .item-list  ul {
+.layout-editor-block-content .item-list ul {
   margin: 0;
   padding: 0;
 }
@@ -171,4 +195,8 @@
 /* Layout Misc */
 #layout-edit h1 {
   margin: 1em 0 .6em;
+}
+.layout-access-list ul {
+  margin: 1em 0px;
+  padding: 0px 20px;
 }

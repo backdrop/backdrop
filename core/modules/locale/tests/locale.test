@@ -1743,7 +1743,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
       'alias'    => $english_path,
       'langcode' => 'en',
     );
-    $this->backdropPost($path, $edit, t('Save'));
+    $this->backdropPost($path, $edit, t('Save URL alias'));
 
     // Create a path alias in new custom language.
     $custom_language_path = $this->randomName(8);
@@ -1752,7 +1752,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
       'alias'    => $custom_language_path,
       'langcode' => $langcode,
     );
-    $this->backdropPost($path, $edit, t('Save'));
+    $this->backdropPost($path, $edit, t('Save URL alias'));
 
     // Confirm English language path alias works.
     $this->backdropGet($english_path);

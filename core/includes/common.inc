@@ -773,6 +773,13 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
     $options['fragment'] = $destination['fragment'];
   }
 
+  // In some cases modules call backdrop_goto(current_path()). We need to ensure
+  // that such a redirect is not to an external URL.
+  if ($path === current_path() && empty($options['external']) && url_is_external($path)) {
+    // Force url() to generate a non-external URL.
+    $options['external'] = FALSE;
+  }
+
   backdrop_alter('backdrop_goto', $path, $options, $http_response_code);
 
   // The 'Location' HTTP header must be absolute.
@@ -780,7 +787,9 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
 
   $url = url($path, $options);
 
-  header('Location: ' . $url, TRUE, $http_response_code);
+  if (!backdrop_is_background()) {
+    header('Location: ' . $url, TRUE, $http_response_code);
+  }
 
   // The "Location" header sends a redirect status code to the HTTP daemon. In
   // some cases this can be wrong, so we make sure none of the code below the
@@ -987,12 +996,6 @@ function backdrop_http_request($url, array $options = array()) {
     $result->code = -$errno;
     $result->error = trim($errstr) ? trim($errstr) : t('Error opening socket @socket', array('@socket' => $socket));
 
-    // Mark that this request failed. This will trigger a check of the web
-    // server's ability to make outgoing HTTP requests the next time that
-    // requirements checking is performed.
-    // See system_requirements().
-    state_set('backdrop_http_request_fails', TRUE);
-
     return $result;
   }
 
@@ -1146,6 +1149,12 @@ function backdrop_http_request($url, array $options = array()) {
 
   switch ($code) {
     case 200: // OK
+    case 201: // Created
+    case 202: // Accepted
+    case 203: // Non-Authoritative Information
+    case 204: // No Content
+    case 205: // Reset Content
+    case 206: // Partial Content
     case 304: // Not modified
       break;
     case 301: // Moved permanently
@@ -2394,20 +2403,8 @@ function url($path = NULL, array $options = array()) {
     'prefix' => ''
   );
 
-  // A duplicate of the code from url_is_external() to avoid needing another
-  // function call, since performance inside url() is critical.
   if (!isset($options['external'])) {
-    // Return an external link if $path contains an allowed absolute URL. Avoid
-    // calling backdrop_strip_dangerous_protocols() if there is any slash (/),
-    // hash (#) or question_mark (?) before the colon (:) occurrence - if any -
-    // as this would clearly mean it is not a URL. If the path starts with 2
-    // slashes then it is always considered an external URL without an explicit
-    // protocol part.
-    $colonpos = strpos($path, ':');
-    $options['external'] = (strpos($path, '//') === 0)
-      || ($colonpos !== FALSE
-        && !preg_match('![/?#]!', substr($path, 0, $colonpos))
-        && backdrop_strip_dangerous_protocols($path) == $path);
+    $options['external'] = url_is_external($path);
   }
 
   // Preserve the original path before altering or aliasing.
@@ -2549,12 +2546,18 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $colonpos = strpos($path, ':');
-  // Avoid calling backdrop_strip_dangerous_protocols() if there is any slash (/),
-  // hash (#) or question_mark (?) before the colon (:) occurrence - if any - as
-  // this would clearly mean it is not a URL. If the path starts with 2 slashes
-  // then it is always considered an external URL without an explicit protocol
-  // part.
+  // Some browsers treat \ as / so normalize to forward slashes.
+  $path = str_replace('\\', '/', $path);
+  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
+  // slashes then it is always considered an external URL without an explicit
+  // protocol part.
   return (strpos($path, '//') === 0)
+    // Leading control characters may be ignored or mishandled by browsers, so
+    // assume such a path may lead to an external location. The \p{C} character
+    // class matches all UTF-8 control, unassigned, and private characters.
+    || (preg_match('/^\p{C}/u', $path) !== 0)
+    // If there is any slash (/), hash (#) or question_mark (?) before the colon
+    // (:) occurrence - if any - as this would clearly mean it is not a URL.
     || ($colonpos !== FALSE
       && !preg_match('![/?#]!', substr($path, 0, $colonpos))
       && backdrop_strip_dangerous_protocols($path) == $path);
@@ -2884,7 +2887,6 @@ function backdrop_deliver_html_page($page_callback_result) {
 
       case MENU_SITE_OFFLINE:
         // Print a 503 page.
-        backdrop_maintenance_theme();
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
         print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))))));
@@ -2910,16 +2912,51 @@ function backdrop_deliver_html_page($page_callback_result) {
 function backdrop_page_footer() {
   module_invoke_all('exit');
 
-  // Commit the user session, if needed.
+  // Commit the user session, if needed. This must be done before sending the
+  // response, as it may set a cookie header.
   backdrop_session_commit();
 
-  if (config_get('system.core', 'cache') && ($cache = backdrop_page_set_cache())) {
-    backdrop_serve_page_from_cache($cache);
-  }
-  else {
-    ob_flush();
+  // In order to do post-delivery processing (e.g. cron run), we must close the
+  // connection. Otherwise the connection will wait for PHP to finish before it
+  // is used again in a subsequent request, such as for a JS or CSS file.
+  if (!backdrop_is_background()) {
+    header('Connection: close');
   }
 
+  // Get the contents of the output buffer, which was started in
+  // _backdrop_bootstrap_page_header().
+  $page_length = ob_get_length();
+  $page_content = ob_get_clean();
+
+  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
+    $cache = backdrop_page_create_cache($page_content);
+    // If this is a background request, there is no need to print the page to a
+    // buffer that will never be sent to the browser.
+    if (!backdrop_is_background()) {
+      backdrop_serve_page_from_cache($cache);
+    }
+  }
+  else {
+    backdrop_set_length_headers($page_length);
+    print $page_content;
+  }
+
+  // If we're not already in a background request, flush to the browser.
+  if (!backdrop_is_background()) {
+    // Flushing for PHP-FPM based installations.
+    if (function_exists('fastcgi_finish_request')) {
+      fastcgi_finish_request();
+    }
+    // Flushing for Apache mod_php installations.
+    else {
+      flush();
+    }
+  }
+
+  // Then continue background tasks without holding up the rest of the request.
+  if (isset($cache)) {
+    backdrop_page_save_cache($cache);
+  }
   backdrop_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
@@ -2983,11 +3020,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  * into script execution a call such as set_time_limit(20) is made, the
  * script will run for a total of 45 seconds before timing out.
  *
- * It also means that it is possible to decrease the total time limit if
- * the sum of the new time limit and the current time spent running the
- * script is inferior to the original time limit. It is inherent to the way
- * set_time_limit() works, it should rather be called with an appropriate
- * value every time you need to allocate a certain amount of time
+ * If the current time limit is not unlimited it is possible to decrease the
+ * total time limit if the sum of the new time limit and the current time spent
+ * running the script is inferior to the original time limit. It is inherent to
+ * the way set_time_limit() works, it should rather be called with an
+ * appropriate value every time you need to allocate a certain amount of time
  * to execute a task than only once at the beginning of the script.
  *
  * Before calling set_time_limit(), we check if this function is available
@@ -3004,7 +3041,11 @@ function backdrop_map_assoc($array, $function = NULL) {
  */
 function backdrop_set_time_limit($time_limit) {
   if (function_exists('set_time_limit')) {
-    @set_time_limit($time_limit);
+    $current = ini_get('max_execution_time');
+    // Do not set time limit if it is currently unlimited.
+    if ($current != 0) {
+      @set_time_limit($time_limit);
+    }
   }
 }
 
@@ -3061,7 +3102,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes), TRUE);
+    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes));
   }
 
   backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
@@ -3528,12 +3569,6 @@ function backdrop_pre_render_styles($elements) {
   // URL changed.
   $query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
-  // For inline CSS to validate as XHTML, all CSS containing XHTML needs to be
-  // wrapped in CDATA. To make that backwards compatible with HTML 4, we need to
-  // comment out the CDATA-tag.
-  $embed_prefix = "\n/* <![CDATA[ */\n";
-  $embed_suffix = "\n/* ]]> */\n";
-
   // Defaults for LINK and STYLE elements.
   $link_element_defaults = array(
     '#type' => 'head_tag',
@@ -3641,8 +3676,6 @@ function backdrop_pre_render_styles($elements) {
         if (isset($group['data'])) {
           $element = $style_element_defaults;
           $element['#value'] = $group['data'];
-          $element['#value_prefix'] = $embed_prefix;
-          $element['#value_suffix'] = $embed_suffix;
           $element['#attributes']['media'] = $group['media'];
           $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
@@ -3651,8 +3684,6 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
-            $element['#value_prefix'] = $embed_prefix;
-            $element['#value_suffix'] = $embed_suffix;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -4153,10 +4184,7 @@ function backdrop_region_class($region) {
  *   on the current page by placing the code directly in the page (for example,
  *   to tell the user that a new message arrived, by opening a pop up, alert
  *   box, etc.). This should only be used for JavaScript that cannot be executed
- *   from a file. When adding inline code, make sure that you are not relying on
- *   $() being the jQuery function. Wrap your code in
- *   @code (function ($) {... })(jQuery); @endcode
- *   or use jQuery() instead of $().
+ *   from a file.
  * - Add external JavaScript ('external'): Allows the inclusion of external
  *   JavaScript files that are not hosted on the local server. Note that these
  *   external JavaScript references do not get aggregated when preprocessing is
@@ -4177,8 +4205,8 @@ function backdrop_region_class($region) {
  *   backdrop_add_js(array('myModule' => array('key' => 'value')), 'setting');
  * @endcode
  *
- * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript added
- * so far.
+ * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript
+ * added so far.
  *
  * If JavaScript aggregation is enabled, all JavaScript files added with
  * $options['preprocess'] set to TRUE will be merged into one aggregate file.
@@ -4210,17 +4238,20 @@ function backdrop_region_class($region) {
  *   - 'setting': An associative array with configuration options. The array is
  *     merged directly into Backdrop.settings. All modules should wrap their
  *     actual configuration settings in another variable to prevent conflicts in
- *     the Backdrop.settings namespace. Items added with a string key will replace
- *     existing settings with that key; items with numeric array keys will be
- *     added to the existing settings array.
+ *     the Backdrop.settings namespace. Settings within the same namespace will
+ *     be recursively merged together unless a "key" option is specified in the
+ *     $options array.
  * @param $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
- *   associative array. JavaScript settings should always pass the string
- *   'setting' only. Other types can have the following elements in the array:
+ *   associative array.
  *   - type: The type of JavaScript that is to be added to the page. Allowed
  *     values are 'file', 'inline', 'external' or 'setting'. Defaults
  *     to 'file'.
+ *   - key: Applies to the 'setting' and 'inline' types only. A string that
+ *     identifies data that should only be added once per page. If omitted,
+ *     multiple settings within the same namespace will be merged together
+ *     recursively.
  *   - scope: The location in which you want to place the script. Possible
  *     values are 'header' or 'footer'. If your theme implements different
  *     regions, you can also use these. Defaults to 'header'.
@@ -4367,11 +4398,21 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       case 'setting':
         // All JavaScript settings are placed in the header of the page with
         // the library weight so that inline scripts appear afterwards.
-        $javascript['settings']['data'][] = $data;
+        if (isset($options['key'])) {
+          $javascript['settings']['data'][$options['key']] = $data;
+        }
+        else {
+          $javascript['settings']['data'][] = $data;
+        }
         break;
 
       case 'inline':
-        $javascript[] = $options;
+        if (isset($options['key'])) {
+          $javascript[$options['key']] = $options;
+        }
+        else {
+          $javascript[] = $options;
+        }
         break;
 
       default: // 'file' and 'external'
@@ -4531,20 +4572,11 @@ function backdrop_pre_render_scripts($elements) {
   // page request.
   $default_query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
-  // For inline JavaScript to validate as XHTML, all JavaScript containing
-  // XHTML needs to be wrapped in CDATA. To make that backwards compatible
-  // with HTML 4, we need to comment out the CDATA-tag.
-  $embed_prefix = "\n<!--//--><![CDATA[//><!--\n";
-  $embed_suffix = "\n//--><!]]>\n";
-
   // Defaults for each SCRIPT element.
   $element_defaults = array(
     '#type' => 'head_tag',
     '#tag' => 'script',
     '#value' => '',
-    '#attributes' => array(
-      'type' => 'text/javascript',
-    ),
   );
 
   // Loop through each group.
@@ -4572,15 +4604,11 @@ function backdrop_pre_render_scripts($elements) {
         // Element properties that depend on item type.
         switch ($item['type']) {
           case 'setting':
-            $element['#value_prefix'] = $embed_prefix;
             $element['#value'] = 'window.Backdrop = {settings: ' . backdrop_json_encode(backdrop_array_merge_deep_array($item['data'])) . "};";
-            $element['#value_suffix'] = $embed_suffix;
             break;
 
           case 'inline':
-            $element['#value_prefix'] = $embed_prefix;
             $element['#value'] = $item['data'];
-            $element['#value_suffix'] = $embed_suffix;
             break;
 
           case 'file':
@@ -5312,8 +5340,11 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
     }
     else {
       $string = json_encode($var);
+      // PHP 5.3 JSON_PRETTY_PRINT.
       $string = backdrop_json_format($string);
+      // PHP 5.3 JSON_UNESCAPED_UNICODE.
       $string = backdrop_json_decode_unicode($string);
+      // PHP 5.3 JSON_UNESCAPED_SLASHES.
       $string = str_replace('\/', '/', $string);
     }
     // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
@@ -5408,9 +5439,20 @@ function backdrop_json_format($json) {
  * Decode Unicode characters in JSON strings.
  */
 function backdrop_json_decode_unicode($json) {
-  return preg_replace_callback('/\\\\u([0-9a-f]{4})/i', function ($match) {
-    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
-  }, $json);
+  // Convert escaped characters, such as \u00e9 to the unescaped version (é).
+  // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
+  $decode_callback = function ($match) {
+    return $match[1] . mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+  };
+  // To prevent unintentionally unescaping the string "\u", be sure that the
+  // the backslash itself is not also escaped. Note that because the replacement
+  // may include part of a 4-digit code for a previous Unicode character, this
+  // will only escape every-other Unicode character if they are next to each
+  // other.
+  $pattern = '/([^\\\\])\\\\u([0-9a-fA-F]{4})/';
+  $json = preg_replace_callback($pattern, $decode_callback, $json);
+  // Replace a second time to catch any sequences multiple Unicode characters.
+  return preg_replace_callback($pattern, $decode_callback, $json);
 }
 
 /**
@@ -5527,6 +5569,11 @@ function _backdrop_bootstrap_full() {
   fix_gpc_magic();
   // Load all enabled modules
   module_load_all();
+  // Reset backdrop_alter() and module_implements() static caches as these
+  // include implementations for vital modules only when called early on
+  // in the bootstrap.
+  backdrop_static_reset('backdrop_alter');
+  backdrop_static_reset('module_implements');
   // Make sure all stream wrappers are registered.
   file_get_stream_wrappers();
   // Ensure mt_rand is reseeded, to prevent random values from one page load
@@ -5564,60 +5611,110 @@ function _backdrop_bootstrap_full() {
 /**
  * Stores the current page in the cache.
  *
+ * This function is no longer used by core but is preserved for
+ * backwards-compatibility.
+ *
+ * @deprecated since 1.3.0
+ */
+function backdrop_page_set_cache() {
+  $cache = FALSE;
+  if (backdrop_page_is_cacheable()) {
+    $page_content = ob_get_clean();
+    $cache = backdrop_page_create_cache($page_content);
+    backdrop_page_save_cache($cache);
+  }
+  return $cache;
+}
+
+/**
+ * Create a page cache object for a page request.
+ *
  * If page_compression is enabled, a gzipped version of the page is stored in
  * the cache to avoid compressing the output on each request. The cache entry
- * is unzipped in the relatively rare event that the page is requested by a
- * client without gzip support.
+ * is unzipped on delivery in the relatively rare event that the page is
+ * requested by a client without gzip support.
  *
  * Page compression requires the PHP zlib extension
  * (http://php.net/manual/ref.zlib.php).
  *
+ * @param $page_content
+ *   The page content (HTML) that should be entered into a cache entry.
+ *
+ * @return stdClass|FALSE
+ *   A cache entry ready to be written to the cache backend. If the page is not
+ *   cacheable, FALSE will be returned.
+ *
  * @see backdrop_page_header()
+ * @see backdrop_page_save_cache();
  */
-function backdrop_page_set_cache() {
+function backdrop_page_create_cache($page_content) {
   global $base_root;
 
-  if (backdrop_page_is_cacheable()) {
+  // Check whether the current page might be compressed.
+  $config = config('system.core');
+  $page_compressed = $config->get('page_compression') && extension_loaded('zlib');
 
-    // Check whether the current page might be compressed.
-    $page_compressed = config_get('system.core', 'page_compression') && extension_loaded('zlib');
+  // If using background fetch, we keep cache entries for a much longer period.
+  // This allows the stale entries to be served while generating a new one.
+  if ($config->get('page_cache_background_fetch')) {
+    $stale_lifetime = $config->get('page_cache_keep_stale_age');
+    // Ensure a stale lifetime is set. Defaults to 2 days.
+    if (!$stale_lifetime) {
+      $stale_lifetime = 172800;
+    }
+    $cache_lifetime = $stale_lifetime;
+  }
+  // If not using background fetch, the page only needs to be kept for as long
+  // as the life of the cache lifetime.
+  else {
+    $cache_lifetime = $config->get('page_cache_maximum_age');
+  }
 
-    $cache = (object) array(
-      'cid' => $base_root . request_uri(),
-      'data' => array(
-        'path' => $_GET['q'],
-        'body' => ob_get_clean(),
-        'title' => backdrop_get_title(),
-        'headers' => array(),
-        // We need to store whether page was compressed or not,
-        // because by the time it is read, the configuration might change.
-        'page_compressed' => $page_compressed,
-      ),
-      'expire' => REQUEST_TIME + config_get('system.core', 'page_cache_maximum_age'),
-      'created' => REQUEST_TIME,
-    );
+  $cache = (object) array(
+    'cid' => $base_root . request_uri(),
+    'data' => array(
+      'path' => $_GET['q'],
+      'body' => $page_content,
+      'title' => backdrop_get_title(),
+      'headers' => array(),
+      // We need to store whether page was compressed or not,
+      // because by the time it is read, the configuration might change.
+      'page_compressed' => $page_compressed,
+    ),
+    'expire' => REQUEST_TIME + $cache_lifetime,
+    'created' => REQUEST_TIME,
+  );
 
-    // Restore preferred header names based on the lower-case names returned
-    // by backdrop_get_http_header().
-    $header_names = _backdrop_set_preferred_header_name();
-    foreach (backdrop_get_http_header() as $name_lower => $value) {
-      $cache->data['headers'][$header_names[$name_lower]] = $value;
-      if ($name_lower == 'cache-control') {
-        // Set page cache expiration time based on Cache-Control header.
-        $matches = array();
-        if (preg_match('/max-age=(\d+)/', $value, $matches)) {
-          $cache->expire = REQUEST_TIME + $matches[1];
-        }
+  if ($page_compressed) {
+    $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
+  }
+
+  // Restore preferred header names based on the lower-case names returned
+  // by backdrop_get_http_header().
+  $header_names = _backdrop_set_preferred_header_name();
+  foreach (backdrop_get_http_header() as $name_lower => $value) {
+    $cache->data['headers'][$header_names[$name_lower]] = $value;
+    if ($name_lower == 'cache-control') {
+      // Set page cache expiration time based on Cache-Control header.
+      $matches = array();
+      if (preg_match('/max-age=(\d+)/', $value, $matches)) {
+        $cache->expire = REQUEST_TIME + $matches[1];
       }
     }
+  }
 
-    if ($cache->data['body']) {
-      if ($page_compressed) {
-        $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
-      }
-      cache('page')->set($cache->cid, $cache->data, $cache->expire);
-    }
-    return $cache;
+  return $cache;
+}
+
+/**
+ * Save a page cache entry to the cache.
+ *
+ * @param stdClass $cache
+ *   A cache entry object to be written to the cache backend.
+ */
+function backdrop_page_save_cache($cache) {
+  if ($cache->data['body']) {
+    cache('page')->set($cache->cid, $cache->data, $cache->expire);
   }
 }
 
@@ -5626,8 +5723,8 @@ function backdrop_page_set_cache() {
  *
  * Do not call this function from a test. Use $this->cronRun() instead.
  *
- * @return
- *   TRUE if cron ran successfully.
+ * @return bool
+ *   TRUE if cron ran successfully and FALSE if cron is already running.
  */
 function backdrop_cron_run() {
   // Allow execution to continue even if the request gets canceled.
@@ -5689,12 +5786,12 @@ function backdrop_cron_run() {
       // Do not run if queue wants to skip.
       continue;
     }
-    $function = $info['worker callback'];
+    $callback = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
     $queue = BackdropQueue::get($queue_name);
     while (time() < $end && ($item = $queue->claimItem())) {
       try {
-        $function($item->data);
+        call_user_func($callback, $item->data);
         $queue->deleteItem($item);
       }
       catch (Exception $e) {
@@ -5768,8 +5865,8 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   $searchdir = array('core/' . $directory);
 
   // For the case of searching for profiles, scan top-level directories.
-  // Always search for contributed and custom extensions in top-level
-  // directories as well as sites/all/* directories. If the same extension is
+  // Always search for contributed and custom extensions in the profile
+  // directories as well as in the root directories. If the same extension is
   // located in both directories, then the latter wins for legacy/historical
   // reasons.
   $profiles = array();
@@ -5809,7 +5906,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get current list of items.
   if (!function_exists('file_scan_directory')) {
@@ -7502,7 +7599,8 @@ function backdrop_uninstall_schema($module) {
  * specification of a schema, as it was defined in a module's
  * hook_schema(). No additional default values will be set,
  * hook_schema_alter() is not invoked and these unprocessed
- * definitions won't be cached.
+ * definitions won't be cached. To retrieve the schema after
+ * hook_schema_alter() has been invoked use backdrop_get_schema().
  *
  * This function can be used to retrieve a schema specification in
  * hook_schema(), so it allows you to derive your tables from existing
@@ -8078,11 +8176,17 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * Parses a dependency for comparison by backdrop_check_incompatibility().
  *
  * @param $dependency
- *   A dependency string, for example 'foo (>=1.x-4.5-beta5, 3.x)'.
+ *   A dependency string, which specifies a module dependency, and optionally
+ *   the project it comes from and versions that are supported. Supported
+ *   formats include:
+ *   - 'module'
+ *   - 'project:module'
+ *   - 'project:module (>=version, version)'
  *
  * @return
  *   An associative array with three keys:
- *   - 'name' includes the name of the thing to depend on (e.g. 'foo').
+ *   - 'project' includes the name of the project containing the module.
+ *   - 'name' includes the name of the module to depend on.
  *   - 'original_version' contains the original version string (which can be
  *     used in the UI for reporting incompatibilities).
  *   - 'versions' is a list of associative arrays, each containing the keys
@@ -8093,6 +8197,12 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * @see backdrop_check_incompatibility()
  */
 function backdrop_parse_dependency($dependency) {
+  $value = array();
+  // Split out the optional project name.
+  if (strpos($dependency, ':')) {
+    list($project_name, $dependency) = explode(':', $dependency);
+    $value['project'] = $project_name;
+  }
   // We use named subpatterns and support every op that version_compare
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
@@ -8101,7 +8211,6 @@ function backdrop_parse_dependency($dependency) {
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
-  $value = array();
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {

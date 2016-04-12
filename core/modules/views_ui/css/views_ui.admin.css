@@ -30,49 +30,51 @@
 
 /* @group Columns */
 
-.views-left-25 {
-  float: left;
-  width: 25%;
-}
+@media (min-width:768px) {
+  .views-left-25 {
+    float: left;
+    width: 25%;
+  }
 
-.views-left-30 {
-  float: left;
-  width: 30%;
-}
+  .views-left-30 {
+    float: left;
+    width: 30%;
+  }
 
-.views-left-40 {
-  float: left;
-  width: 40%;
-}
+  .views-left-40 {
+    float: left;
+    width: 40%;
+  }
 
-.views-left-50 {
-  float: left;
-  width: 50%;
-}
+  .views-left-50 {
+    float: left;
+    width: 50%;
+  }
 
-.views-left-75 {
-  float: left;
-  width: 75%;
-}
+  .views-left-75 {
+    float: left;
+    width: 75%;
+  }
 
-.views-right-50 {
-  float: right;
-  width: 50%;
-}
+  .views-right-50 {
+    float: right;
+    width: 50%;
+  }
 
-.views-right-60 {
-  float: right;
-  width: 60%;
-}
+  .views-right-60 {
+    float: right;
+    width: 60%;
+  }
 
-.views-right-70 {
-  float: right;
-  width: 70%;
-}
+  .views-right-70 {
+    float: right;
+    width: 70%;
+  }
 
-.views-group-box .form-item {
-  margin-left: 3px;
-  margin-right: 3px;
+  .views-group-box .form-item {
+    margin-left: 3px;
+    margin-right: 3px;
+  }
 }
 
 /* @end */
@@ -220,30 +222,31 @@
 /* @end */
 
 /* @group Attachment configuration columns */
+@media (min-width: 768px) {
+  .views-display-columns > * {
+    float: left; /* LTR */
+    margin-left: 1%; /* LTR */
+    padding-left: 1%; /* LTR */
+    width: 32%;
+  }
+  [dir="rtl"] .views-display-columns > * {
+    float: right;
+    margin-left: 0;
+    margin-right: 1%;
+    padding-left: 0;
+    padding-right: 1%;
+  }
 
-.views-display-columns > * {
-  float: left; /* LTR */
-  margin-left: 1%; /* LTR */
-  padding-left: 1%; /* LTR */
-  width: 32%;
-}
-[dir="rtl"] .views-display-columns > * {
-  float: right;
-  margin-left: 0;
-  margin-right: 1%;
-  padding-left: 0;
-  padding-right: 1%;
-}
-
-.views-display-columns > *:first-child {
-  margin-left: 0; /* LTR */
-  padding-left: 0; /* LTR */
-}
-[dir="rtl"] .views-display-columns > *:first-child {
-  margin-left: inherit;
-  margin-right: 0;
-  padding-left: inherit;
-  padding-right: 0;
+  .views-display-columns > *:first-child {
+    margin-left: 0; /* LTR */
+    padding-left: 0; /* LTR */
+  }
+  [dir="rtl"] .views-display-columns > *:first-child {
+    margin-left: inherit;
+    margin-right: 0;
+    padding-left: inherit;
+    padding-right: 0;
+  }
 }
 
 /* @end */

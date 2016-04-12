@@ -217,6 +217,74 @@ input.form-radio {
   margin-top: 6px;
 }
 
+.form-item-show-wizard-key,
+.form-item-show-type,
+.form-item-show-tagged-with,
+.form-item-show-sort {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0 0 0.5em;
+}
+
+.edit-page-style-wrapper,
+.edit-block-style-wrapper {
+  display: table-cell;
+  padding-top: 1em;
+}
+
+.edit-page-style-wrapper .fieldset-wrapper,
+.edit-block-style-wrapper .fieldset-wrapper {
+  margin-bottom: 0;
+}
+
+.form-item-page-create input.form-checkbox,
+.form-item-block-create input.form-checkbox,
+.form-item-page-create label.option,
+.form-item-block-create label.option {
+  margin-bottom: 0;
+}
+
+.edit-page-style-inner-wrapper,
+.edit-block-style-inner-wrapper {
+  padding-top: 1em;
+}
+
+.edit-page-style-wrapper div,
+.edit-block-style-wrapper div {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .edit-page-style-wrapper div,
+  .edit-page-style-wrapper label,
+  .edit-page-style-wrapper input,
+  .edit-block-style-wrapper div,
+  .edit-block-style-wrapper label,
+  .edit-block-style-wrapper input {
+    display: inline-block;
+    margin: 0 0 0.5em;
+  }
+
+  .form-item-show-wizard-key,
+  .form-item-show-type,
+  .form-item-show-tagged-with,
+  .form-item-show-sort {
+    display: block;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  .form-item-show-wizard-key label,
+  .form-item-show-type label,
+  .form-item-show-tagged-with label,
+  .form-item-show-sort label {
+    display: block;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}
+
 /* @end */
 
 /* @end */
@@ -230,6 +298,46 @@ input.form-radio {
 
 .views-ui-view-title {
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  table.sticky-header {
+    display: none;
+  }
+
+  .views-list thead {
+    display: none;
+  }
+
+
+  .views-list td,
+  .views-list tr {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .views-list td:empty {
+    display: none;
+  }
+
+  .views-list td:before {
+    content: attr(data-label);
+    display: block;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.923em;
+  }
+
+  .views-list .views-ui-operations:before {
+    display: none;
+  }
+
+  .js .views-list .dropbutton-widget {
+    left: 0;
+    right: auto;
+  }
+
 }
 
 /* @end */
@@ -268,15 +376,11 @@ table th {
 /* These header classes are ambiguous and should be scoped to th elements */
 
 th.views-ui-name {
-  width: 18%;
+  width: 20%;
 }
 
 th.views-ui-description {
-  width: 26%;
-}
-
-th.views-ui-tag {
-  width: 8%;
+  width: 40%;
 }
 
 th.views-ui-path {
@@ -284,7 +388,7 @@ th.views-ui-path {
 }
 
 th.views-ui-operations {
-  width: 24%;
+  width: 10%;
 }
 
 /* @end */
@@ -439,14 +543,6 @@ td.group-title {
  *
  * The tabs that switch between sections
  */
-
-ul#views-display-menu-tabs {
-  margin-right: 200px; /* RTL */
-}
-[dir="rtl"] ul#views-display-menu-tabs {
-  margin-right: auto;
-  margin-left: 200px;
-}
 
 ul#views-display-menu-tabs li {
   margin-bottom: 5px;
@@ -672,6 +768,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 .views-ui-display-tab-bucket {
   position: relative;
+  margin: 0 0 0.8em;
 }
 
 /* @end */
@@ -683,8 +780,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 .views-ui-display-tab-bucket .views-display-setting {
   color: #666666;
-  font-size: 12px;
-  padding-bottom: 2px;
+  font-size: 14px;
+  padding-bottom: 0.5em;
 }
 
 .views-ui-display-tab-bucket .views-group-text {
@@ -698,52 +795,12 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 /* @end */
 
-/* @group Preview
- *
- * The preview controls and the preview pane
- */
-
-#edit-displays-preview-controls .fieldset-wrapper > * {
-  float: left;
-}
-
-#edit-displays-preview-controls .fieldset-wrapper > .form-item {
-  margin-top: 0.3333em;
-}
-
-#edit-displays-preview-controls .form-submit {
-  display: inline-block;
-  margin-right: 1em;
-}
-
-#edit-displays-preview-controls .form-type-textfield {
-  margin-left: 1em;
-  position: relative;
-}
-
-#edit-displays-preview-controls .form-type-textfield label {
-  border-left: 1px solid #999;
-  padding-left: 1em;
-  position: absolute;
-}
-
-#edit-displays-preview-controls .form-type-textfield label:after {
-  content: ":";
-}
-
-#edit-displays-preview-controls .form-type-textfield label ~ * {
-  margin-left: 105px;
-}
-
-/* @end */
-
 /* @group Modal dialog box
  *
  * The contents of the popup dialog on the views edit form.
  */
 
 .views-ui-dialog {
-  font-size: small;
   padding: 0;
 }
 
@@ -796,6 +853,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-ui-dialog .views-add-form-selected.container-inline > div {
   display: block;
 }
+
+
 
 .views-ui-dialog #edit-selected {
   margin: 0;

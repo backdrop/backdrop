@@ -13,10 +13,9 @@
  * @see filter_menu()
  * @see theme_filter_tips()
  */
-function filter_tips_long() {
-  $format_id = arg(2);
-  if ($format_id) {
-    $output = theme('filter_tips', array('tips' => _filter_tips($format_id, TRUE), 'long' => TRUE));
+function filter_tips_long($format = NULL) {
+  if (!empty($format)) {
+    $output = theme('filter_tips', array('tips' => _filter_tips($format->format, TRUE), 'long' => TRUE));
   }
   else {
     $output = theme('filter_tips', array('tips' => _filter_tips(-1, TRUE), 'long' => TRUE));
@@ -138,9 +137,11 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#weight' => -10,
   );
 
+  // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
     '#title' => t('Image URL'),
-    '#type' => 'url',
+    '#type' => 'textfield',
+    '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
@@ -290,7 +291,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
   form_set_value($element, $value, $form_state);
 
-  // Unlike
+  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
   if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }

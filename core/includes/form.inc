@@ -3346,9 +3346,12 @@ function form_process_container($element, &$form_state) {
 /**
  * Returns HTML to wrap child elements in a container.
  *
- * Used for grouped form items. Can also be used as a #theme_wrapper for any
+ * Used for grouped form items. Can also be used as a theme wrapper for any
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
+ *
+ * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * for more information on the #theme_wrappers render array property.
  *
  * @param $variables
  *   An associative array containing:
@@ -3556,6 +3559,8 @@ function form_process_tableselect($element) {
  *     - replace: (optional) A character to replace disallowed characters in the
  *       machine name via JavaScript. Defaults to '_' (underscore). When using a
  *       different character, 'replace_pattern' needs to be set accordingly.
+ *     - langcode: (optional) The two-character language code for the input
+ *       language, with which transliteration will be used.
  *     - error: (optional) A custom form error message string to show, if the
  *       machine name contains disallowed characters.
  *     - standalone: (optional) Whether the live preview should stay in its own
@@ -3581,10 +3586,10 @@ function form_process_machine_name($element, &$form_state) {
   // were defined in hook_element_info(). Therefore, we apply the defaults here.
   $element['#machine_name'] += array(
     'source' => array('name'),
-    'target' => '#' . $element['#id'],
     'label' => t('Machine name'),
     'replace_pattern' => '[^a-z0-9_]+',
     'replace' => '_',
+    'langcode' => $GLOBALS['language']->langcode,
     'standalone' => FALSE,
     'field_prefix' => $element['#field_prefix'],
     'field_suffix' => $element['#field_suffix'],
@@ -3627,16 +3632,10 @@ function form_process_machine_name($element, &$form_state) {
     backdrop_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
   }
 
-  $js_settings = array(
-    'type' => 'setting',
-    'data' => array(
-      'machineName' => array(
-        '#' . $source['#id'] => $element['#machine_name'],
-      ),
-    ),
-  );
+  $js_settings = $element['#machine_name'];
+  $js_settings['source'] = '#' . $source['#id'];
+  $element['#attributes']['data-machine-name'] = json_encode($js_settings);
   $element['#attached']['js'][] = 'core/misc/machine-name.js';
-  $element['#attached']['js'][] = $js_settings;
 
   return $element;
 }
@@ -3937,9 +3936,12 @@ function form_process_autocomplete($element) {
   $element['#autocomplete_input'] = array();
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
-    // Force autocomplete to use non-clean URLs since this protects against the
-    // browser interpreting the path plus search string as an actual file.
-    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE));
+    // Force the script path to 'index.php', in case the server is not
+    // configured to find it automatically. Normally it is the responsibility
+    // of the site to do this themselves using hook_url_outbound_alter() (see
+    // url()) but since this code is forcing non-clean URLs on sites that don't
+    // normally use them, it is done here instead.
+    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php'));
   }
   return $element;
 }
@@ -4709,7 +4711,7 @@ function _form_set_class(&$element, $class = array()) {
  *
  * Sample callback_batch_finished():
  * @code
- * function batch_test_finished($success, $results, $operations) {
+ * function my_finished_callback($success, $results, $operations) {
  *   // The 'success' parameter means no fatal PHP errors were detected. All
  *   // other error management should be handled using 'results'.
  *   if ($success) {

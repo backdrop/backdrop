@@ -6,3 +6,6 @@ backdrop = 1.x
 stylesheets[screen][] = css/seven.fonts.css
 stylesheets[screen][] = css/seven.base.css
 stylesheets[screen][] = css/style.css
+stylesheets[screen][] = css/responsive-tabs.css
+
+scripts[] = js/script.js

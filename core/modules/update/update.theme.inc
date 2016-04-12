@@ -68,8 +68,6 @@ function theme_update_report($variables) {
   $header = array();
   $rows = array();
 
-  $notification_level = config_get('update.settings', 'update_threshold');
-
   // Create an array of status values keyed by module, theme, or layout name, since
   // we'll need this while generating the report if we have to cross reference
   // anything (e.g. subthemes which have base themes missing an update).
@@ -86,10 +84,11 @@ function theme_update_report($variables) {
         $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
         break;
       case UPDATE_UNKNOWN:
+      case UPDATE_NOT_CHECKED:
       case UPDATE_FETCH_PENDING:
       case UPDATE_NOT_FETCHED:
         $class = 'unknown';
-        $icon = theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('warning'), 'title' => t('warning')));
+        $icon = '';
         break;
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
@@ -97,7 +96,6 @@ function theme_update_report($variables) {
         $class = 'error';
         $icon = theme('image', array('uri' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('error'), 'title' => t('error')));
         break;
-      case UPDATE_NOT_CHECKED:
       case UPDATE_NOT_CURRENT:
       default:
         $class = 'warning';

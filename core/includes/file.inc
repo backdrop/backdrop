@@ -339,7 +339,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
  * @param $scheme
  *   If the stream was "public://target", "public" would be the scheme.
  *
- * @return
+ * @return BackdropLocalStreamWrapper|BackdropStreamWrapperInterface|FALSE
  *   Returns a new stream wrapper object appropriate for the given $scheme.
  *   For example, for the public scheme a stream wrapper object
  *   (BackdropPublicStreamWrapper).
@@ -529,8 +529,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
 # Turn off all options we don't need.
-Options None
-Options +SymLinksIfOwnerMatch
+Options -Indexes -ExecCGI -Includes
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -577,7 +576,7 @@ EOF;
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
  *
- * @return
+ * @return array
  *   An array of file entities, indexed by fid.
  *
  * @see hook_file_load()
@@ -1764,7 +1763,7 @@ function file_validate_is_image(File $file) {
 /**
  * Verifies that image dimensions are within the specified maximum and minimum.
  *
- * Non-image files will be ignored. If a image toolkit is available the image
+ * Non-image files will be ignored. If an image toolkit is available the image
  * will be scaled to fit within the desired maximum dimensions.
  *
  * @param File $file
@@ -2088,7 +2087,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     'node_modules',
     'bower_components',
   );
-  $no_mask = '/^(\..*)|' . implode('|', $ignore_directories) .  '$/';
+  $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Merge in defaults.
   $options += array(

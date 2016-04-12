@@ -53,7 +53,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   }
 
   /**
-   * Create, edit and delete a vocabulary via the user interface.
+   * Create, configure and delete a vocabulary via the user interface.
    */
   function testVocabularyInterface() {
     // Visit the main taxonomy administration page.
@@ -69,10 +69,10 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
 
-    // Edit the vocabulary.
+    // Configure the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
-    $this->clickLink(t('Edit vocabulary'));
+    $this->clickLink(t('Configure'));
     $edit = array();
     $edit['name'] = $this->randomName();
     $this->backdropPost(NULL, $edit, t('Save'));
@@ -100,6 +100,61 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->backdropGet('admin/structure/taxonomy/don_t_panic');
     $this->assertTitle(t('Don\'t Panic | @site-name', array('@site-name' => $site_name)));
     $this->assertNoTitle(t('Don&#039;t Panic | @site-name', array('@site-name' => $site_name)));
+  }
+
+  /**
+   * Tests that node types permissions are correctly set from the Node Type UI.
+   */
+  function testVocabularyPermissions() {
+    // Create admin user.
+    $admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer permissions', 'administer users', 'access user profiles'));
+    $this->backdropLogin($admin_user);
+
+    // Create new role
+    $role_name = $this->backdropCreateRole(array('access content'));
+    $web_user = $this->backdropCreateUser();
+
+    // Assign the role to a user.
+    $this->backdropPost('user/' . $web_user->uid . '/edit', array("roles[$role_name]" => $role_name), t('Save'));
+
+    // Check that the new role appears on the Vocabulary edit page.
+    $this->backdropGet('admin/structure/taxonomy/tags/configure');
+    $this->assertText($role_name, "$role_name is found on vocabulary form.");
+
+    // Check that the new role does not have a permission which wasn't granted.
+    $this->assertFieldByName($role_name . '[edit terms in tags]', 'edit terms in tags', "Role $role_name does not have edit terms in tags permission.");
+
+    // On the Vocabulary page: change permissions.
+    $edit = array(
+      $role_name . '[edit terms in tags]' => TRUE,
+    );
+    $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save'));
+
+    // Check that the permission changes are saved on the permissions page.
+    $this->backdropGet('admin/config/people/permissions');
+    $this->assertFieldByName($role_name . '[edit terms in tags]', 'edit terms in tags', "Role $role_name has edit terms in tags permission.");
+
+    // Check that the new role does not have a permission which wasn't granted.
+    $this->assertFieldByName($role_name . '[delete terms in tags]', 'delete terms in tags', "Role $role_name does not have delete terms in tags permission.");
+
+    // On the Permissions page: change permissions for the "tags" vocabulary.
+    $edit = array(
+      $role_name . '[delete terms in tags]' => TRUE,
+    );
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+
+    // Check that this permission is now selected on the vocabulary page.
+    $this->backdropGet('admin/structure/taxonomy/tags/configure');
+    $this->assertFieldByName($role_name . '[delete terms in tags]', 'delete terms in tags', "Role $role_name has delete terms in tags permission.");
+
+    // Test that the permissions actually exist
+    $this->backdropLogin($web_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+
+    $account = user_load($web_user->uid, TRUE);
+    $this->assertTrue(user_access('edit terms in tags', $account), "Web user has edit terms in tags permission.");
+    $this->assertTrue(user_access('delete terms in tags', $account), "Web user has delete terms in tags permission.");
   }
 
   /**
@@ -636,7 +691,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Test edit link as accessed from Taxonomy administration pages.
     // Because Simpletest creates its own database when running tests, we know
     // the first edit link found on the listing page is to our term.
-    $this->clickLink(t('Edit'), 1);
+    $this->clickLink(t('Edit'), 0);
 
     $this->assertRaw($edit['name'], 'The randomly generated term name is present.');
     $this->assertText($edit['description[value]'], 'The randomly generated term description is present.');

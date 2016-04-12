@@ -19,7 +19,7 @@ function language_menu() {
     'weight' => -10,
   );
   $items['admin/config/regional/language/list'] = array(
-    'title' => 'List',
+    'title' => 'List languages',
     'weight' => 0,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );

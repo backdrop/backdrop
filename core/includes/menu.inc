@@ -223,12 +223,22 @@ define('MENU_CONTEXT_INLINE', 0x0002);
  */
 
 /**
- * Internal menu status code -- Menu item was not found.
+ * Menu status code -- Not found.
+ *
+ * This can be used as the return value from a page callback, although it is
+ * preferable to use a load function to accomplish this.
+ *
+ * @see see hook_menu()
  */
 define('MENU_NOT_FOUND', 404);
 
 /**
- * Internal menu status code -- Menu item access is denied.
+ * Menu status code -- Access denied.
+ *
+ * This can be used as the return value from a page callback, although it is
+ * preferable to use an access callback to accomplish this.
+ *
+ * @see see hook_menu()
  */
 define('MENU_ACCESS_DENIED', 403);
 
@@ -424,7 +434,7 @@ function menu_set_item($path, $router_item) {
  *
  * @param $path
  *   The path; for example, 'node/5'. The function will find the corresponding
- *   node/% item and return that.
+ *   node/% item and return that. Defaults to the current path.
  * @param $router_item
  *   Internal use only.
  *
@@ -497,16 +507,10 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   // Check if site is offline.
-  $page_callback_result = _menu_site_is_offline() ? MENU_SITE_OFFLINE : MENU_SITE_ONLINE;
+  $site_status = _menu_site_status($path, TRUE);
 
-  // Allow other modules to change the site status but not the path because that
-  // would not change the global variable. hook_url_inbound_alter() can be used
-  // to change the path. Code later will not use the $read_only_path variable.
-  $read_only_path = !empty($path) ? $path : $_GET['q'];
-  backdrop_alter('menu_site_status', $page_callback_result, $read_only_path);
-
-  // Only continue if the site status is not set.
-  if ($page_callback_result == MENU_SITE_ONLINE) {
+  // If online, check access to the page and call the menu handler.
+  if ($site_status == MENU_SITE_ONLINE) {
     if ($router_item = menu_get_item($path)) {
       if ($router_item['access']) {
         // In most cases, Layout module will provide the route handler if
@@ -526,6 +530,21 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
     else {
       $page_callback_result = MENU_NOT_FOUND;
     }
+  }
+  // Offline pages are not cached in the database but have a Cache-Control
+  // header to allow reverse proxies to serve offline hits instead of Backdrop.
+  elseif ($site_status == MENU_SITE_OFFLINE) {
+    $page_cache_enabled = (bool) config_get('system.core', 'page_cache_maximum_age');
+    $maintenance_max_age = config_get('system.core', 'maintenance_page_maximum_age');
+    if ($page_cache_enabled && $maintenance_max_age) {
+      backdrop_add_http_header('Cache-Control', 'public; max-age: ' . $maintenance_max_age);
+    }
+    backdrop_page_is_cacheable(FALSE);
+    $page_callback_result = MENU_SITE_OFFLINE;
+  }
+  // Any other statuses that may have been set in hook_menu_site_status_alter().
+  else {
+    $page_callback_result = $site_status;
   }
 
   // Deliver the result of the page callback to the browser, or if requested,
@@ -1778,9 +1797,19 @@ function theme_menu_local_actions(&$variables) {
  */
 function menu_get_custom_theme($initialize = FALSE) {
   $custom_theme = &backdrop_static(__FUNCTION__);
-  // Skip this if the site is offline or being installed or updated, since the
-  // menu system may not be correctly initialized then.
-  if ($initialize && !_menu_site_is_offline(TRUE) && (!defined('MAINTENANCE_MODE') || (MAINTENANCE_MODE != 'update' && MAINTENANCE_MODE != 'install'))) {
+
+  // Offline mode checking does not allow for module overrides of the theme.
+  $offline_mode = (_menu_site_status() === MENU_SITE_OFFLINE || defined('MAINTENANCE_MODE'));
+  if ($offline_mode) {
+    $custom_theme = settings_get('maintenance_theme');
+    if (empty($custom_theme)) {
+      $custom_theme = config_get('system.core', 'maintenance_theme');
+    }
+    if (empty($custom_theme)) {
+      $custom_theme = config_get('system.core', 'theme_default');
+    }
+  }
+  elseif ($initialize) {
     // First allow modules to dynamically set a custom theme for the current
     // page. Since we can only have one, the last module to return a valid
     // theme takes precedence.
@@ -1818,37 +1847,6 @@ function menu_list_system_menus() {
     'management' => 'Administration menu',
     'user-menu' => 'Account menu',
   );
-}
-
-/**
- * Returns an array of links to be rendered as the Main menu.
- */
-function menu_main_menu() {
-  $config = config('menu.settings');
-  $menu_enabled = module_exists('menu');
-  // When menu module is not enabled, we need a hardcoded default value.
-  $main_links_source = $menu_enabled ? $config->get('menu_main_links') : 'main-menu';
-  return menu_navigation_links($main_links_source);
-}
-
-/**
- * Returns an array of links to be rendered as the Secondary links.
- */
-function menu_secondary_menu() {
-  $config = config('menu.settings');
-  $menu_enabled = module_exists('menu');
-  // When menu module is not enabled, we need a hardcoded default value.
-  $main_links_source = $menu_enabled ? $config->get('menu_main_links') : 'main-menu';
-  $secondary_links_source = $menu_enabled ? $config->get('menu_secondary_links') : 'user-menu';
-
-  // If the secondary menu source is set as the primary menu, we display the
-  // second level of the primary menu.
-  if ($secondary_links_source == $main_links_source) {
-    return menu_navigation_links($main_links_source, 1);
-  }
-  else {
-    return menu_navigation_links($secondary_links_source, 0);
-  }
 }
 
 /**
@@ -2642,10 +2640,30 @@ function menu_get_active_breadcrumb() {
  */
 function menu_get_active_title() {
   $active_trail = menu_get_active_trail();
+  $local_task_title = NULL;
 
   foreach (array_reverse($active_trail) as $item) {
-    if (!(bool) ($item['type'] & MENU_IS_LOCAL_TASK)) {
-      return $item['title'];
+    // Local task titles are displayed as tabs and therefore should not be
+    // repeated as the page title. However, if the local task appears in a
+    // top-level menu, it is no longer a "local task" anymore (the front page
+    // of the site does not have tabs) so it is better to use the local task
+    // title in that case than to fall back on the front page link in the
+    // active trail (which is usually "Home" and would not make sense in this
+    // context).
+    if ((bool) ($item['type'] & MENU_IS_LOCAL_TASK)) {
+      // A local task title is being skipped; track it in case it needs to be
+      // used later.
+      $local_task_title = $item['title'];
+    }
+    else {
+      // This is not a local task, so use it for the page title (unless the
+      // conditions described above are met).
+      if (isset($local_task_title) && isset($item['href']) && $item['href'] == '<front>') {
+        return $local_task_title;
+      }
+      else {
+        return $item['title'];
+      }
     }
   }
 }
@@ -3884,10 +3902,13 @@ function _menu_router_save($menu, $masks) {
  * This function will log the current user out and redirect to front page
  * if the current user has no 'access site in maintenance mode' permission.
  *
- * @param $check_only
- *   If this is set to TRUE, the function will perform the access checks and
- *   return the site offline status, but not log the user out or display any
- *   messages.
+ * @param string $path
+ *   The path at which to check site status. Some pages (such as user/login) may
+ *   be considered online while the rest of the site is offline. If empty, the
+ *   current path will be used.
+ * @param bool $display_messages
+ *   If set to TRUE, messages will be displayed indicating the site is in
+ *   offline mode.
  *
  * @return
  *   FALSE if the site is not in maintenance mode, the user login page is
@@ -3895,14 +3916,21 @@ function _menu_router_save($menu, $masks) {
  *   permission. TRUE for anonymous users not being on the login page when the
  *   site is in maintenance mode.
  */
-function _menu_site_is_offline($check_only = FALSE) {
+function _menu_site_status($path = NULL, $display_messages = FALSE) {
+  $site_status = &backdrop_static(__FUNCTION__);
+  if (isset($site_status) && !$display_messages) {
+    return $site_status === MENU_SITE_OFFLINE;
+  }
+
+  $site_status = MENU_SITE_ONLINE;
+
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
       // the maintenance mode settings page.
-      if (!$check_only && $_GET['q'] != 'admin/config/development/maintenance') {
+      if ($display_messages && $_GET['q'] != 'admin/config/development/maintenance') {
         if (user_access('administer site configuration')) {
           backdrop_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
         }
@@ -3912,10 +3940,17 @@ function _menu_site_is_offline($check_only = FALSE) {
       }
     }
     else {
-      return TRUE;
+      $site_status = MENU_SITE_OFFLINE;;
     }
   }
-  return FALSE;
+
+  // Allow other modules to change the site status but not the path because that
+  // would not change the global variable. hook_url_inbound_alter() can be used
+  // to change the path. Code later will not use the $read_only_path variable.
+  $read_only_path = !empty($path) ? $path : $_GET['q'];
+  backdrop_alter('menu_site_status', $site_status, $read_only_path);
+
+  return $site_status;
 }
 
 /**

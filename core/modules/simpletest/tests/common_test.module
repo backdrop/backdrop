@@ -12,56 +12,56 @@ function common_test_menu() {
   $items['common-test/backdrop_goto'] = array(
     'title' => 'Backdrop Goto',
     'page callback' => 'common_test_backdrop_goto_land',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/backdrop_goto/fail'] = array(
     'title' => 'Backdrop Goto',
     'page callback' => 'common_test_backdrop_goto_land_fail',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/backdrop_goto/redirect'] = array(
     'title' => 'Backdrop Goto',
     'page callback' => 'common_test_backdrop_goto_redirect',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/backdrop_goto/redirect_advanced'] = array(
     'title' => 'Backdrop Goto',
     'page callback' => 'common_test_backdrop_goto_redirect_advanced',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/backdrop_goto/redirect_fail'] = array(
     'title' => 'Backdrop Goto Failure',
     'page callback' => 'backdrop_goto',
     'page arguments' => array('common-test/backdrop_goto/fail'),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/destination'] = array(
     'title' => 'Backdrop Get Destination',
     'page callback' => 'common_test_destination',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/query-string'] = array(
     'title' => 'Test querystring',
     'page callback' => 'common_test_js_and_css_querystring',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/backdrop-render-invalid-keys'] = array(
     'title' => 'Backdrop Render',
     'page callback' => 'common_test_backdrop_render_invalid_keys',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['common-test/css-render-inline-full-page'] = array(
     'title' => 'Test rendering inline stylesheets through a full page request.',
     'page callback' => 'common_test_render_inline_full_page',
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -105,6 +105,15 @@ function common_test_backdrop_goto_alter(&$path, &$options, &$http_response_code
 }
 
 /**
+ * Implements hook_init().
+ */
+function common_test_init() {
+  if (state_get('common_test_redirect_current_path', FALSE)) {
+    backdrop_goto(current_path());
+  }
+}
+
+/**
  * Print destination query parameter.
  */
 function common_test_destination() {
@@ -133,7 +142,8 @@ function common_test_backdrop_render_invalid_keys() {
  */
 function common_test_render_inline_full_page() {
   $css = 'body { font-size: 254px; }';
-  return t('This tests the inline CSS!') . backdrop_add_css($css, 'inline');
+  backdrop_add_css($css, 'inline');
+  return 'This tests the inline CSS!';
 }
 
 /**

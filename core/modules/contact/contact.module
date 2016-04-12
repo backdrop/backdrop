@@ -67,8 +67,8 @@ function contact_menu() {
     'weight' => 1,
     'file' => 'contact.admin.inc',
   );
-  $items['admin/structure/contact/edit/%contact'] = array(
-    'title' => 'Edit contact category',
+  $items['admin/structure/contact/configure/%contact'] = array(
+    'title' => 'Configure contact category',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_category_edit_form', 4),
     'access arguments' => array('administer contact forms'),

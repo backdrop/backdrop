@@ -229,10 +229,6 @@ ul.menu li.expanded {
   line-height: 1.3;
   font-size: 1.385em;
   font-weight: normal;
-  float: left; /* LTR */
-}
-[dir="rtl"] .page-title {
-  float: right;
 }
 
 /**
@@ -243,52 +239,51 @@ ul.menu li.expanded {
 }
 
 /**
- * Tabs.
+ * Admin tabs
  */
-.tabs {
-  clear: none; /* For IE8 */
-}
-.tabs:nth-child(2) {
-  clear: both; /* For small screens */
-}
-@media only screen and (min-width: 600px) {
-  .tabs:nth-child(2) {
-    clear: none; /* For large screens */
-  }
-}
+
+/**
+ * Primary admin tabs
+ */
 ul.primary {
-  height: 2.6em;
+  clear: both;
+  box-sizing: border-box;
   border: none;
-  float: right; /* LTR */
+  width: 100%;
+  float: left; /* LTR */
   margin: 0;
-  padding-top: 0;
+  padding: 0;
   font-size: 0.9375em;
   text-transform: uppercase;
 }
 [dir="rtl"] ul.primary {
-  float: left;
+  float: right;
 }
 ul.primary li {
   float: left; /* LTR */
+  margin: 0 0;
+  border-right: 2px solid #f0f0f0; /* LTR */
   list-style: none;
-  margin: 0 2px 0 0; /* LTR */
 }
 [dir="rtl"] ul.primary li {
   float: right;
-  margin: 0 0 0 2px;
+  border-left: 2px solid #f0f0f0;
+  border-right: 0;
 }
-ul.primary li a:link,
+ul.primary li a,
 ul.primary li a.active,
 ul.primary li a:active,
 ul.primary li a:visited,
 ul.primary li a:hover,
-ul.primary li.active a {
+ul.primary li.active a,
+.expand-dropdown-tabs-control,
+.responsive-tabs-mobile .expand-dropdown-tabs-control:before,
+.responsive-tabs-mobile .expand-dropdown-tabs-label {
   display: block;
-  height: 2.8em;
-  padding: 1px 20px 2px;
+  padding: 12px 20px;
   border: none;
   overflow: visible;
-  line-height: 2.6;
+  line-height: 1;
   color: #757575;
   font-weight: normal;
   background-color: #DBDBD9;
@@ -300,12 +295,17 @@ ul.primary li.active a {
 ul.primary li.active a,
 ul.primary li.active a.active,
 ul.primary li.active a:active,
-ul.primary li.active a:visited {
+ul.primary li.active a:visited,
+.responsive-tabs-mobile .expand-dropdown-tabs-label {
   color: #000;
   background-color: #fafafa;
   font-weight: bold;
 }
-ul.primary li a:hover {
+ul.primary li a:hover,
+.expand-dropdown-tabs-control:hover,
+.responsive-tabs-mobile .expand-dropdown-tabs-control:hover:before,
+.responsive-tabs-mobile .expand-dropdown-tabs-control.js-active:before,
+.expand-dropdown-tabs-control.js-active {
   color: #000;
   background: #c5c5c3;
 }
@@ -314,25 +314,34 @@ ul.primary li:first-child a {
   -moz-border-radius: 4px 0 0 0;
   border-radius: 4px 0 0 0;
 }
+.expand-dropdown-tabs-control,
 ul.primary li:last-child a {
   -webkit-border-radius: 0 4px 0 0;
   -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
+@media (max-width: 450px) {
+  ul.primary li {
+    float: none;
+    margin-bottom: 2px;
+  }
+  .js ul.primary li {
+    float: left;
+  }
+}
+/**
+ * Secondary admin tabs
+ */
 ul.secondary {
-  text-align: right; /* LTR */
   font-size: 0.8125em;
   font-weight: bold;
   padding: 16px 23px 6px;
-  margin: -.23em -20px 0;
+  margin: 0 -20px 0;
   line-height: 1.385em;
   overflow: hidden;
   background-color: #fafafa;
   clear: both;
   border: none;
-}
-[dir="rtl"] ul.secondary {
-  text-align: left;
 }
 ul.secondary li {
   display: inline-block;
@@ -796,6 +805,7 @@ td.checkbox .form-item input {
 }
 .filter-wrapper .fieldset-wrapper {
   padding: 0 6px;
+  margin-top: 45px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
@@ -1099,6 +1109,56 @@ div.admin-panel h3 {
 }
 #layout-edit-main .page-title {
   float: none;
+}
+
+/**
+ * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
+ */
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+  /* Hide radios from visuals but not screen-readers */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.layout-settings-form .layout-options .form-type-radio label {
+  position: relative;
+  z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
+  display: block;
+  padding: .6em;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  min-height: 145px;
+  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
+  will-change: border-color, background-color;
+}
+.layout-settings-form .layout-options.no-flexbox .form-type-radio label {
+  min-height: 150px;
+}
+.layout-settings-form .layout-options .form-type-radio:active label,
+.layout-settings-form .layout-options .form-type-radio:hover label,
+.layout-settings-form .layout-options .form-type-radio input:checked + label {
+  background-color: #ffffff;
+  border-color: #d0d0d0;
+}
+.layout-settings-form .layout-options .form-type-radio input:focus + label {
+  background-color: #ffffff;
+  border-color: #43afe4;
+}
+.layout-settings-form .layout-options .form-type-radio img {
+  position: relative;
+  z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
+  padding: 4px;
+  border-radius: 4px;
+  background: #ffffff;
 }
 
 /* Update options. */
@@ -1523,4 +1583,18 @@ div.add-or-remove-shortcuts {
   100% {
     left: 100%;
   }
+}
+
+/**
+ * Misc. Elements
+ */
+#check-font-wrapper #check-font {
+  /* Bumping specificity since it's very important these styles apply. */
+  /* This is for testing if the webfont has loaded. */
+  font-family: 'Open Sans', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  position: absolute;
+  z-index: -100;
+  visibility: hidden;
 }

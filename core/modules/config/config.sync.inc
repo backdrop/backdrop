@@ -90,7 +90,7 @@ function _config_sync_import(&$context) {
 /**
  * Batch API callback. Finish the config import.
  */
-function _config_sync_finished($status, $results, &$context) {
+function _config_sync_finished($status, $results, $operations) {
   if ($status === FALSE) {
     backdrop_set_message(t('Configuration sync failed. Check that the configuration files are properly formatted.'), 'error');
   }

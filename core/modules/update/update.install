@@ -28,7 +28,7 @@
 function update_requirements($phase) {
   $requirements = array();
   if ($phase == 'runtime') {
-    if ($available = update_get_available(FALSE)) {
+    if (_update_checking_enabled() && ($available = update_get_available(FALSE))) {
       module_load_include('inc', 'update', 'update.compare');
       $data = update_calculate_project_data($available);
       // First, populate the requirements for core:
@@ -135,8 +135,8 @@ function _update_requirement_check($project, $type) {
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
     case UPDATE_NOT_FETCHED:
-      $requirement_label = isset($project['reason']) ? $project['reason'] : t('Can not determine status');
-      $requirement['severity'] = REQUIREMENT_WARNING;
+      $requirement_label = isset($project['reason']) ? $project['reason'] : t('Update information not available.');
+      $requirement['severity'] = REQUIREMENT_INFO;
       break;
     case UPDATE_NOT_IMPLEMENTED:
       $text = t('Not yet implemented');

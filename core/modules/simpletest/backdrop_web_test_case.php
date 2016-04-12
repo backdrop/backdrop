@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Global variable that holds information about the tests being run.
  *
@@ -910,7 +909,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The current user logged in using the internal browser.
    *
-   * @var bool
+   * @var FALSE|User
    */
   protected $loggedInUser = FALSE;
 
@@ -1017,7 +1016,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $settings
    *   An associative array of settings to change from the defaults, keys are
    *   node properties, for example 'title' => 'Hello, world!'.
-   * @return
+   * @return Node
    *   Created node entity.
    */
   protected function backdropCreateNode($settings = array()) {
@@ -1096,9 +1095,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'description' => '',
       'help' => '',
       'title_label' => 'Title',
-      'body_label' => 'Body',
       'has_title' => 1,
-      'has_body' => 1,
       'is_new' => TRUE,
     );
     // Imposed values for a custom type.
@@ -1148,7 +1145,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $lines = array(16, 256, 1024, 2048, 20480);
       $count = 0;
       foreach ($lines as $line) {
-        simpletest_generate_file('text-' . $count++, 64, $line);
+        simpletest_generate_file('text-' . $count++, 64, $line, 'text');
       }
 
       // Copy other test files from simpletest.
@@ -1328,16 +1325,23 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @param $account
    *   User object representing the user to log in.
+   * @param $by_email
+   *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account) {
+  protected function backdropLogin($account, $by_email = FALSE) {
+    global $user;
     if ($this->loggedInUser) {
+      $this->backdropLogout();
+    }
+    // Sometimes $this->loggedInUser is FALSE even when user is logged in.
+    elseif ($user->uid) {
       $this->backdropLogout();
     }
 
     $edit = array(
-      'name' => $account->name,
+      'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw
     );
     $this->backdropPost('user', $edit, t('Log in'));
@@ -2010,6 +2014,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Retrieve a Backdrop path or an absolute path and JSON decode the result.
    */
   protected function backdropGetAJAX($path, array $options = array(), array $headers = array()) {
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     return backdrop_json_decode($this->backdropGet($path, $options, $headers));
   }
@@ -2272,6 +2277,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Submit the POST request.
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
     $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Ajax-Token'), '1', 'Ajax response header found.');
@@ -2384,7 +2390,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $verbose .= '<hr />Ending URL: ' . $this->getUrl();
     $verbose .= '<hr />' . $this->content;
 
-    $this->verbose($verbose);    
+    $this->verbose($verbose);
     return $return;
   }
 
@@ -2640,7 +2646,13 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @param $xpath
    *   The xpath string to use in the search.
-   * @return SimpleXmlElement
+   *
+   * @param array $arguments
+   *   An array of arguments with keys in the form ':name' matching the
+   *   placeholders in the query. The values may be either strings or numeric
+   *   values.
+   *
+   * @return SimpleXmlElement[]|FALSE
    *   The return value of the xpath search. For details on the xpath string
    *   format and return values see the SimpleXML documentation,
    *   http://us.php.net/manual/function.simplexml-element-xpath.php.
@@ -2813,7 +2825,7 @@ class BackdropWebTestCase extends BackdropTestCase {
         $path = substr($path, $length);
       }
       // Ensure that we have an absolute path.
-      if ($path[0] !== '/') {
+      if (strlen($path) && $path[0] !== '/') {
         $path = '/' . $path;
       }
       // Finally, prepend the $base_url.

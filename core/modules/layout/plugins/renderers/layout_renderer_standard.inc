@@ -383,7 +383,7 @@ class LayoutRendererStandard {
         break;
       case 'inline':
         $url = base_path() . $filename;
-        $this->prefix .= '<link type="text/css" rel="stylesheet" href="' . $url . '" />'."\n";
+        $this->prefix .= '<link rel="stylesheet" href="' . $url . '" />' . "\n";
         break;
     }
   }
@@ -473,7 +473,7 @@ class LayoutRendererStandard {
       );
 
       if (isset($style) && isset($style['block theme'])) {
-        $output = theme($style['block theme'] . '__' . $block->module . '__' . $block->delta, array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
+        $output = theme($style['block theme'] . '__' . $block->module . '__' . strtr($block->delta, '-', '_'), array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
       }
       else {
         // Fallback.

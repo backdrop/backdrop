@@ -31,6 +31,13 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     $form['color'] += color_scheme_form($form, $form_state, $theme);
     $form['#validate'][] = 'color_scheme_form_validate';
     array_unshift($form['#submit'], 'color_scheme_form_submit');
+
+    // Check for legacy Bartik colors.
+    // @todo Remove in Backdrop 2.0.
+    if ($theme === 'bartik') {
+      module_load_include('inc', 'color', 'color.legacy');
+      bartik_form_system_theme_settings_alter($form, $form_state);
+    }
   }
 }
 

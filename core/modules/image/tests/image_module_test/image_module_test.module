@@ -9,6 +9,9 @@ function image_module_test_file_download($uri) {
   if (state_get('image_module_test_file_download', FALSE) == $uri) {
     return array('X-Image-Owned-By' => 'image_module_test');
   }
+  if (state_get('image_module_test_invalid_headers', FALSE) == $uri) {
+    return array('Content-Type' => 'image/png');
+  }
 }
 
 /**
@@ -21,7 +24,7 @@ function image_module_test_image_effect_info() {
     ),
     'image_module_test_wait' => array(
       'label' => t('Wait 2 seconds'),
-      'help' => t('Performs a NULL operation that takes 2 seconds.'),
+      'help' => t('Performs a NULL operation that takes 5 seconds.'),
       'effect callback' => 'image_module_test_wait_effect',
       'dimensions passthrough' => TRUE,
     )
@@ -55,7 +58,7 @@ function image_module_test_null_effect(array &$image, array $data) {
  * @return TRUE
  */
 function image_module_test_wait_effect() {
-  sleep(2);
+  sleep(5);
   return TRUE;
 }
 

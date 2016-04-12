@@ -1016,8 +1016,8 @@ function _locale_export_po($language = NULL, $output = NULL) {
     watchdog('locale', 'Exported translation file: %filename.', array('%filename' => $filename));
   }
   // Download the file for the client.
-  header("Content-Disposition: attachment; filename=$filename");
-  header("Content-Type: text/plain; charset=utf-8");
+  backdrop_add_http_header('Content-Disposition', "attachment; filename=$filename");
+  backdrop_add_http_header('Content-Type', 'text/plain; charset=utf-8');
   print $output;
   backdrop_exit();
 }

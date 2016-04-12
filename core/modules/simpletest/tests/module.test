@@ -81,6 +81,11 @@ class ModuleUnitTest extends BackdropWebTestCase {
     cache('bootstrap')->delete('module_implements');
     $this->assertFalse(cache('bootstrap')->get('module_implements'), 'The module implements cache is empty.');
     $this->backdropGet('');
+
+    // The module_implements cache is written after delivering the page, so
+    // allow a few seconds for it to be written to the cache.
+    sleep(3);
+
     $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Test again with an authenticated user.
@@ -88,6 +93,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     $this->backdropLogin($this->user);
     cache('bootstrap')->delete('module_implements');
     $this->backdropGet('');
+    sleep(3);
     $this->assertTrue(cache('bootstrap')->get('module_implements'), 'The module implements cache is populated after requesting a page.');
 
     // Make sure group include files are detected properly even when the file is
@@ -284,4 +290,41 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
     $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
     $this->assertFalse(in_array('module_test perm', $role->permissions), 'Test module permission removed upon uninstall.');
   }
+}
+
+/**
+ * Unit tests for module_implements_alter().
+ */
+class ModuleImplementsAlterTestCase extends BackdropWebTestCase {
+  /**
+   * Tests hook_module_implements_alter() adding an implementation.
+   */
+  function testModuleImplementsAlter() {
+    module_enable(array('module_test'), FALSE);
+    $this->assertTrue(module_exists('module_test'), 'Test module is enabled.');
+
+    // Assert that module_test.module is now included.
+    $this->assertTrue(function_exists('module_test_permission'),
+      'The file module_test.module was successfully included.');
+
+    $modules = module_implements('permission');
+    $this->assertTrue(in_array('module_test', $modules), 'module_test implements hook_permission.');
+
+    $modules = module_implements('module_implements_alter');
+    $this->assertTrue(in_array('module_test', $modules), 'module_test implements hook_module_implements_alter().');
+
+    // Assert that module_test.implementations.inc is not included yet.
+    $this->assertFalse(function_exists('module_test_altered_test_hook'),
+      'The file module_test.implementations.inc is not included yet.');
+
+    // Assert that module_test_module_implements_alter(*, 'altered_test_hook')
+    // has added an implementation
+    $this->assertTrue(in_array('module_test', module_implements('altered_test_hook')),
+      'module_test implements hook_altered_test_hook().');
+
+    // Assert that module_test.implementations.inc was included as part of the process.
+    $this->assertTrue(function_exists('module_test_altered_test_hook'),
+      'The file module_test.implementations.inc was included.');
+  }
+
 }

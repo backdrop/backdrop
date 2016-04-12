@@ -37,17 +37,31 @@ function taxonomy_permission() {
     ),
   );
   foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
-    $permissions += array(
-      'edit terms in ' . $vocabulary->machine_name => array(
-        'title' => t('%vocabulary: Edit terms', array('%vocabulary' => $vocabulary->name)),
-      ),
-    );
-    $permissions += array(
-       'delete terms in ' . $vocabulary->machine_name => array(
-         'title' => t('%vocabulary: Delete terms', array('%vocabulary' => $vocabulary->name)),
-      ),
-    );
+    $permissions += taxonomy_vocabulary_list_permissions($vocabulary);
   }
+
+  return $permissions;
+}
+
+/**
+ * Helper function to generate standard permission list for a vocabulary.
+ *
+ * @param $vocabulary
+ *   Fully loaded TaxonomyVocabulary object.
+ *
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function taxonomy_vocabulary_list_permissions($vocabulary) {
+  $permissions = array(
+    'edit terms in ' . $vocabulary->machine_name => array(
+      'title' => t('%vocabulary: Edit terms', array('%vocabulary' => $vocabulary->name)),
+    ),
+    'delete terms in ' . $vocabulary->machine_name => array(
+      'title' => t('%vocabulary: Delete terms', array('%vocabulary' => $vocabulary->name)),
+    ),
+  );
+
   return $permissions;
 }
 
@@ -212,6 +226,10 @@ function taxonomy_theme() {
       'render element' => 'elements',
       'template' => 'templates/taxonomy-term',
     ) + $base,
+    'taxonomy_vocabulary_form_permissions' => array(
+      'render element' => 'form',
+      'function' => 'theme_user_admin_permissions',
+    ),
   );
 }
 
@@ -228,7 +246,7 @@ function taxonomy_menu() {
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
-    'title' => 'List',
+    'title' => 'List vocabularies',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -303,12 +321,12 @@ function taxonomy_menu() {
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
-    'title' => 'List',
+    'title' => 'List terms',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20,
   );
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary/edit'] = array(
-    'title' => 'Edit',
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/configure'] = array(
+    'title' => 'Configure',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_vocabulary', 3),
     'access arguments' => array('administer taxonomy'),

@@ -17,15 +17,15 @@ function theme_views_ui_view_info($variables) {
   switch ($view->type) {
     case t('Default'):
     default:
-      $type = t('Module-provided default');
+      $type = t('Default (module-provided)');
       break;
 
     case t('Normal'):
-      $type = t('User-created');
+      $type = t('Custom');
       break;
 
     case t('Overridden'):
-      $type = t('User overriding default');
+      $type = t('Overridden');
   }
 
   $output = '';

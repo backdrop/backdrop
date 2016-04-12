@@ -68,15 +68,9 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     $custom_block = array(
       'info' => '',
       'title' => '',
-      'body' => '',
-      'format' => NULL,
+      'body' => array('value' => '', 'format' => NULL),
     );
   }
-  $form['delta'] = array(
-    '#type' => 'value',
-    '#value' => $delta,
-  );
-
   if ($custom_block['info']) {
     backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
   }
@@ -84,21 +78,8 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     backdrop_set_title(t('Add new block'));
   }
 
-  $form['settings']['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Title'),
-    '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user.'),
-    '#default_value' => isset($custom_block['title']) ? $custom_block['title'] : '',
-    '#weight' => -18,
-  );
-
-  // Module-specific block configuration.
-  if ($settings = module_invoke('block', 'block_configure', $delta)) {
-    foreach ($settings as $k => $v) {
-      $form['settings'][$k] = $v;
-    }
-  }
+  // Call our own block configuration form (also used by Layout module).
+  $form += block_custom_block_form($custom_block, TRUE);
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
@@ -139,12 +120,12 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
  * @see block_admin_configure_submit()
  */
 function block_admin_configure_validate($form, &$form_state) {
-  $custom_block_exists = (bool) db_query_range('SELECT 1 FROM {block_custom} WHERE bid <> :bid AND info = :info', 0, 1, array(
-    ':bid' => $form_state['values']['delta'],
-    ':info' => $form_state['values']['info'],
-  ))->fetchField();
-  if (empty($form_state['values']['info']) || $custom_block_exists) {
-    form_set_error('info', t('Ensure that each block description is unique.'));
+  $blocks = block_block_info();
+  foreach ($blocks as $delta => $block) {
+    if ($delta != $form_state['values']['delta'] && $block['info'] == $form_state['values']['info']) {
+      form_set_error('info', t('Ensure that each block description is unique.'));
+      return;
+    }
   }
 }
 
@@ -179,11 +160,7 @@ function block_add_block_form($form, &$form_state) {
  * @see block_add_block_form_submit()
  */
 function block_add_block_form_validate($form, &$form_state) {
-  $custom_block_exists = (bool) db_query_range('SELECT 1 FROM {block_custom} WHERE info = :info', 0, 1, array(':info' => $form_state['values']['info']))->fetchField();
-
-  if (empty($form_state['values']['info']) || $custom_block_exists) {
-    form_set_error('info', t('Ensure that each block description is unique.'));
-  }
+  return block_admin_configure_validate($form, $form_state);
 }
 
 /**
@@ -195,10 +172,7 @@ function block_add_block_form_validate($form, &$form_state) {
  * @see block_add_block_form_validate()
  */
 function block_add_block_form_submit($form, &$form_state) {
-  $delta = block_custom_block_save($form_state['values']);
-  // Store block delta to allow other modules to work with new block.
-  $form_state['values']['delta'] = $delta;
-
+  block_custom_block_save($form_state['values'], $form_state['values']['delta']);
   backdrop_set_message(t('The block has been created.'));
   $form_state['redirect'] = 'admin/structure/block';
 }
@@ -218,7 +192,7 @@ function block_add_block_form_submit($form, &$form_state) {
 function block_custom_block_delete($form, &$form_state, $delta) {
   $custom_block = block_custom_block_load($delta);
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
-  $form['bid'] = array('#type' => 'hidden', '#value' => $delta);
+  $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
   return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
 }
@@ -229,9 +203,7 @@ function block_custom_block_delete($form, &$form_state, $delta) {
  * @see block_custom_block_delete()
  */
 function block_custom_block_delete_submit($form, &$form_state) {
-  db_delete('block_custom')
-    ->condition('bid', $form_state['values']['bid'])
-    ->execute();
+  config('block.custom.' . $form_state['values']['delta'])->delete();
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
   $form_state['redirect'] = 'admin/structure/block';
 }

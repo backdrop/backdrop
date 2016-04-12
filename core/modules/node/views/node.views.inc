@@ -177,8 +177,8 @@ function node_views_data() {
 
   // promote status
   $data['node']['promote'] = array(
-    'title' => t('Promoted to front page'),
-    'help' => t('Whether or not the content is promoted to the front page.'),
+    'title' => t('Promoted'),
+    'help' => t('Whether or not the content is promoted.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
@@ -188,7 +188,7 @@ function node_views_data() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
-      'label' => t('Promoted to front page'),
+      'label' => t('Promoted'),
       'type' => 'yes-no',
     ),
     'sort' => array(

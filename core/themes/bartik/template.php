@@ -1,30 +1,52 @@
 <?php
+/**
+ * @file
+ * Contains a theme's functions to manipulate or override the default markup.
+ */
 
 /**
- * Implements hook_preprocess_maintenance_page().
+ * Prepares variables for maintenance page templates.
+ *
+ * @see maintenance_page.tpl.php
  */
 function bartik_preprocess_maintenance_page(&$variables) {
   backdrop_add_css(backdrop_get_path('theme', 'bartik') . '/css/maintenance-page.css');
 }
 
 /**
- * Implements hook_preprocess_layout().
+ * Prepares variables for page templates.
+ *
+ * @see page.tpl.php
  */
-function bartik_preprocess_layout(&$variables) {
-  if ($variables['content']['header']) {
-    $variables['content']['header'] = '<div class="l-header-inner">' . $variables['content']['header'] . '</div>';
+function bartik_css_alter(&$css) {
+  // If using the legacy "Blue lagoon" color scheme, load the legacy stylesheet.
+  $theme_path = backdrop_get_path('theme', 'bartik');
+  if (theme_get_setting('color_legacy') && isset($css[$theme_path . '/css/colors.css'])) {
+    $css[$theme_path . '/css/colors.css']['data'] = $theme_path . '/css/colors-legacy.css';
   }
 }
 
 /**
- * Implements theme_menu_tree().
+ * Prepares variables for layout template files.
+ *
+ * @see layout.tpl.php
+ */
+function bartik_preprocess_layout(&$variables) {
+  if ($variables['content']['header']) {
+    $tab_class = theme_get_setting('main_menu_tabs');
+    $variables['content']['header'] = '<div class="l-header-inner ' . $tab_class . '">' . $variables['content']['header'] . '</div>';
+  }
+}
+
+/**
+ * Overrides theme_menu_tree().
  */
 function bartik_menu_tree($variables) {
   return '<ul class="menu clearfix">' . $variables['tree'] . '</ul>';
 }
 
 /**
- * Implements theme_field__field_type().
+ * Overrides theme_field__FIELD_TYPE().
  */
 function bartik_field__taxonomy_term_reference($variables) {
   $output = '';

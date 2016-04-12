@@ -139,7 +139,8 @@ function drupal_hash_base64($data) {
   return backdrop_hash_base64($data);
 }
 function drupal_array_merge_deep() {
-  return backdrop_array_merge_deep();
+  $args = func_get_args(); // pass $args to function
+  return call_user_func_array('backdrop_array_merge_deep', $args);
 }
 function drupal_array_merge_deep_array($arrays) {
   return backdrop_array_merge_deep_array($arrays);
