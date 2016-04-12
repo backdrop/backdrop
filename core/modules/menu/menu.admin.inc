@@ -16,10 +16,11 @@ function menu_overview_page() {
 
   if ($multilanguage) {
     $header = array(t('Title'), t('Language'), t('Operations'));
-  } else {
+  }
+  else {
     $header = array(t('Title'), t('Operations'));
   }
-  
+
   $rows = array();
 
   foreach ($menus as $menu) {
@@ -36,13 +37,18 @@ function menu_overview_page() {
     }
 
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $row[] = theme('menu_admin_overview', array(
+      'title' => $menu['title'],
+      'name' => $menu['menu_name'],
+      'description' => $menu['description']
+    ));
 
     if ($multilanguage) {
       $language = language_load($menu['langcode']);
       if ($language) {
         $row[] = $language->name;
-      } else {
+      }
+      else {
         $row[] = '';
       }
     }
@@ -128,8 +134,9 @@ function menu_overview_form($form, &$form_state, $menu) {
           'wrapper' => 'menu_overview_form_wrapper'
         )
       );
-    } else {
-      $langcode = (isset($form_state['values']['langcode'])?$form_state['values']['langcode']:LANGUAGE_NONE);
+    }
+    else {
+      $langcode = (isset($form_state['values']['langcode']) ? $form_state['values']['langcode'] : LANGUAGE_NONE);
 
       // Show a select box;
       $language_options = language_list(TRUE, TRUE);
@@ -148,7 +155,7 @@ function menu_overview_form($form, &$form_state, $menu) {
       );
     }
 
-    if ($langcode!=LANGUAGE_NONE && (!isset($form_state['values']['show_all']) || !$form_state['values']['show_all'])) {
+    if ($langcode != LANGUAGE_NONE && (!isset($form_state['values']['show_all']) || !$form_state['values']['show_all'])) {
       $language_condition = db_or();
       $language_condition->condition('ml.langcode', $langcode);
       $language_condition->condition('ml.langcode', LANGUAGE_NONE);
@@ -176,7 +183,8 @@ function menu_overview_form($form, &$form_state, $menu) {
       '#type' => 'submit',
       '#value' => t('Save configuration'),
     );
-  } else {
+  }
+  else {
     $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add')));
   }
   return $form;
@@ -188,9 +196,8 @@ function menu_overview_form($form, &$form_state, $menu) {
  * @param $tree
  *   The menu_tree retrieved by menu_tree_data.
  */
-function _menu_overview_tree_form($tree, $menu)
-{
-  $form = & backdrop_static(__FUNCTION__, array('#tree' => TRUE));
+function _menu_overview_tree_form($tree, $menu) {
+  $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
   foreach ($tree as $data) {
     $title = '';
     $item = $data['link'];
@@ -202,7 +209,8 @@ function _menu_overview_tree_form($tree, $menu)
       $form[$mlid]['title']['#markup'] = l($item['title'], $item['href'], $item['localized_options']);
       if ($item['hidden']) {
         $form[$mlid]['title']['#markup'] .= ' (' . t('disabled') . ')';
-      } elseif ($item['link_path'] == 'user' && $item['module'] == 'system') {
+      }
+      elseif ($item['link_path'] == 'user' && $item['module'] == 'system') {
         $form[$mlid]['title']['#markup'] .= ' (' . t('logged in users only') . ')';
       }
 
@@ -288,8 +296,7 @@ function _menu_overview_tree_form($tree, $menu)
  *
  * @see menu_overview_form()
  */
-function menu_overview_form_submit($form, &$form_state)
-{
+function menu_overview_form_submit($form, &$form_state) {
   // When dealing with saving menu items, the order in which these items are
   // saved is critical. If a changed child item is saved before its parent,
   // the child item could be saved with an invalid path past its immediate
@@ -331,8 +338,7 @@ function menu_overview_form_submit($form, &$form_state)
 /**
  * Menu callback; Build the menu link editing form.
  */
-function menu_edit_item($form, &$form_state, $type, $item, $menu)
-{
+function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if ($type == 'add' || empty($item)) {
 
     $langcode = $menu['langcode'];
@@ -353,7 +359,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
       'langcode' => $langcode,
       'tsid' => 0
     );
-  } else {
+  }
+  else {
     // Get the human-readable menu title from the given menu name
     $titles = menu_get_menus();
     $current_title = $titles[$item['menu_name']];
@@ -364,7 +371,10 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
     backdrop_set_breadcrumb($breadcrumb);
   }
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
   $form['link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
@@ -372,7 +382,13 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
     '#description' => t('The text to be used for this link in the menu.'),
     '#required' => TRUE,
   );
-  foreach (array('link_path', 'mlid', 'module', 'has_children', 'options') as $key) {
+  foreach (array(
+             'link_path',
+             'mlid',
+             'module',
+             'has_children',
+             'options'
+           ) as $key) {
     $form[$key] = array('#type' => 'value', '#value' => $item[$key]);
   }
   // Any item created or edited via this interface is considered "customized".
@@ -392,7 +408,11 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
       '#title' => t('Path'),
       '#maxlength' => 255,
       '#default_value' => $path,
-      '#description' => t('The path for this menu link. This can be an internal Drupal path such as %add-node or an external URL such as %drupal. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%drupal' => 'http://drupal.org')),
+      '#description' => t('The path for this menu link. This can be an internal Drupal path such as %add-node or an external URL such as %drupal. Enter %front to link to the front page.', array(
+        '%front' => '<front>',
+        '%add-node' => 'node/add',
+        '%drupal' => 'http://drupal.org'
+      )),
       '#required' => TRUE,
     );
     $form['actions']['delete'] = array(
@@ -402,7 +422,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
       '#submit' => array('menu_item_delete_submit'),
       '#weight' => 10,
     );
-  } else {
+  }
+  else {
     $form['_path'] = array(
       '#type' => 'item',
       '#title' => t('Path'),
@@ -472,19 +493,20 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
     foreach ($languages as $lcode => $language) {
       // When the menu has a fixed language, only allow the current items language
       // and the menu language.
-      if ($menu['langcode']==LANGUAGE_NONE || $lcode==$menu['langcode'] || $lcode==$item['langcode']) {
+      if ($menu['langcode'] == LANGUAGE_NONE || $lcode == $menu['langcode'] || $lcode == $item['langcode']) {
         $language_options[$lcode] = $language->name;
       }
     }
 
-    if ($menu['langcode']!=LANGUAGE_NONE) {
-      if($type == 'add') {
+    if ($menu['langcode'] != LANGUAGE_NONE) {
+      if ($type == 'add') {
         $description = t('The parent menu is fixed to :language.', array(':language' => $languages[$menu['langcode']]->name));
       }
       else {
         $description = t('The parent menu is fixed to :language. You can either switch to this language or keep the existing language (:existing)', array(
           ':language' => $languages[$menu['langcode']]->name,
-          ':existing' => isset($languages[$item['langcode']])?$languages[$item['langcode']]->name:t('None')));
+          ':existing' => isset($languages[$item['langcode']]) ? $languages[$item['langcode']]->name : t('None')
+        ));
       }
     }
     else {
@@ -497,14 +519,17 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu)
       '#description' => $description,
       '#default_value' => $item['langcode'],
       '#options' => $language_options,
-      '#disabled' => ($type == 'add' && $menu['langcode']!=LANGUAGE_NONE),
+      '#disabled' => ($type == 'add' && $menu['langcode'] != LANGUAGE_NONE),
       '#empty_value' => LANGUAGE_NONE,
       '#prefix' => '<div id="langcode-wrapper">',
       '#suffix' => '</div>'
     );
   }
 
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
 
   return $form;
 }
@@ -521,26 +546,30 @@ function menu_edit_item_langcode_ajax_callback($form, $form_state) {
 /**
  * Validate form values for a menu link being added or edited.
  */
-function menu_edit_item_validate($form, &$form_state)
-{
-  $item = & $form_state['values'];
+function menu_edit_item_validate($form, &$form_state) {
+  $item = &$form_state['values'];
   $normal_path = backdrop_get_normal_path($item['link_path']);
   if ($item['link_path'] != $normal_path) {
-    backdrop_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array('%link_path' => $item['link_path'], '%normal_path' => $normal_path)));
+    backdrop_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array(
+      '%link_path' => $item['link_path'],
+      '%normal_path' => $normal_path
+    )));
     $item['link_path'] = $normal_path;
   }
   if (!url_is_external($item['link_path'])) {
     $parsed_link = parse_url($item['link_path']);
     if (isset($parsed_link['query'])) {
       $item['options']['query'] = backdrop_get_query_array($parsed_link['query']);
-    } else {
+    }
+    else {
       // Use unset() rather than setting to empty string
       // to avoid redundant serialized data being stored.
       unset($item['options']['query']);
     }
     if (isset($parsed_link['fragment'])) {
       $item['options']['fragment'] = $parsed_link['fragment'];
-    } else {
+    }
+    else {
       unset($item['options']['fragment']);
     }
     if (isset($parsed_link['path']) && $item['link_path'] != $parsed_link['path']) {
@@ -555,28 +584,27 @@ function menu_edit_item_validate($form, &$form_state)
 /**
  * Submit function for the delete button on the menu item editing form.
  */
-function menu_item_delete_submit($form, &$form_state)
-{
+function menu_item_delete_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/menu/item/' . $form_state['values']['mlid'] . '/delete';
 }
 
 /**
  * Process menu and menu item add/edit form submissions.
  */
-function menu_edit_item_submit($form, &$form_state)
-{
-  $item = & $form_state['values'];
+function menu_edit_item_submit($form, &$form_state) {
+  $item = &$form_state['values'];
 
   // The value of "hidden" is the opposite of the value
   // supplied by the "enabled" checkbox.
-  $item['hidden'] = (int)!$item['enabled'];
+  $item['hidden'] = (int) !$item['enabled'];
   unset($item['enabled']);
 
   $item['options']['attributes']['title'] = $item['description'];
   list($item['menu_name'], $item['plid']) = explode(':', $item['parent']);
   if (!menu_link_save($item)) {
     backdrop_set_message(t('There was an error saving the menu link.'), 'error');
-  } else {
+  }
+  else {
     backdrop_set_message(t('Your configuration has been saved.'));
   }
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
@@ -585,8 +613,7 @@ function menu_edit_item_submit($form, &$form_state)
 /**
  * Menu callback; Build the form that handles the adding/editing of a custom menu.
  */
-function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = NULL)
-{
+function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = NULL) {
   if ($type == 'add') {
     $query = backdrop_get_query_parameters();
     if (isset($query['translation'])) {
@@ -679,10 +706,10 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
       '#default_value' => $menu['langcode'],
       '#states' => array(
         'visible' => array(
-          ':input[name="multilingual_mode"]' => array('!value' => (string)MENU_MULTILINGUAL_DISABLED),
+          ':input[name="multilingual_mode"]' => array('!value' => (string) MENU_MULTILINGUAL_DISABLED),
         ),
-        'required' =>  array(
-          ':input[name="multilingual_mode"]' => array('value' => (string)MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION),
+        'required' => array(
+          ':input[name="multilingual_mode"]' => array('value' => (string) MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION),
         ),
       ),
       '#options' => $language_options,
@@ -719,16 +746,14 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = N
 /**
  * Submit function for the 'Delete' button on the menu editing form.
  */
-function menu_custom_delete_submit($form, &$form_state)
-{
+function menu_custom_delete_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $form_state['values']['menu_name'] . '/delete';
 }
 
 /**
  * Menu callback; check access and get a confirm form for deletion of a custom menu.
  */
-function menu_delete_menu_page($menu)
-{
+function menu_delete_menu_page($menu) {
   // System-defined menus may not be deleted.
   $system_menus = menu_list_system_menus();
   if (isset($system_menus[$menu['menu_name']])) {
@@ -740,8 +765,7 @@ function menu_delete_menu_page($menu)
 /**
  * Build a confirm form for deletion of a custom menu.
  */
-function menu_delete_menu_confirm($form, &$form_state, $menu)
-{
+function menu_delete_menu_confirm($form, &$form_state, $menu) {
   $form['#menu'] = $menu;
   $caption = '';
   $num_links = db_query("SELECT COUNT(*) FROM {menu_links} WHERE menu_name = :menu", array(':menu' => $menu['menu_name']))->fetchField();
@@ -755,8 +779,7 @@ function menu_delete_menu_confirm($form, &$form_state, $menu)
 /**
  * Delete a custom menu and all links in it.
  */
-function menu_delete_menu_confirm_submit($form, &$form_state)
-{
+function menu_delete_menu_confirm_submit($form, &$form_state) {
   $menu = $form['#menu'];
   $form_state['redirect'] = 'admin/structure/menu';
 
@@ -792,8 +815,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state)
  * @see menu_edit_menu()
  * @see form_validate_machine_name()
  */
-function menu_edit_menu_name_exists($value)
-{
+function menu_edit_menu_name_exists($value) {
   // 'menu-' is added to the menu name to avoid name-space conflicts.
   $value = 'menu-' . $value;
   $custom_exists = (bool) menu_load($value);
@@ -805,8 +827,7 @@ function menu_edit_menu_name_exists($value)
 /**
  * Submit function for adding or editing a custom menu.
  */
-function menu_edit_menu_submit($form, &$form_state)
-{
+function menu_edit_menu_submit($form, &$form_state) {
   $menu = $form_state['values'];
   $path = 'admin/structure/menu/manage/';
   if ($form['#insert']) {
@@ -825,7 +846,8 @@ function menu_edit_menu_submit($form, &$form_state)
 
     menu_link_save($link);
     menu_save($menu);
-  } else {
+  }
+  else {
     menu_save($menu);
     $result = db_query("SELECT mlid FROM {menu_links} WHERE link_path = :path", array(':path' => $path . $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
     foreach ($result as $m) {
@@ -841,8 +863,7 @@ function menu_edit_menu_submit($form, &$form_state)
 /**
  * Menu callback; Check access and present a confirm form for deleting a menu link.
  */
-function menu_item_delete_page($item)
-{
+function menu_item_delete_page($item) {
   // Links defined via hook_menu may not be deleted. Updated items are an
   // exception, as they can be broken.
   if ($item['module'] == 'system' && !$item['updated']) {
@@ -854,8 +875,7 @@ function menu_item_delete_page($item)
 /**
  * Build a confirm form for deletion of a single menu link.
  */
-function menu_item_delete_form($form, &$form_state, $item)
-{
+function menu_item_delete_form($form, &$form_state, $item) {
   $form['#item'] = $item;
   return confirm_form($form, t('Are you sure you want to delete the custom menu link %item?', array('%item' => $item['link_title'])), 'admin/structure/menu/manage/' . $item['menu_name']);
 }
@@ -863,8 +883,7 @@ function menu_item_delete_form($form, &$form_state, $item)
 /**
  * Process menu delete form submissions.
  */
-function menu_item_delete_form_submit($form, &$form_state)
-{
+function menu_item_delete_form_submit($form, &$form_state) {
   $item = $form['#item'];
   menu_link_delete($item['mlid']);
   $t_args = array('%title' => $item['link_title']);
@@ -876,8 +895,7 @@ function menu_item_delete_form_submit($form, &$form_state)
 /**
  * Menu callback; reset a single modified menu link.
  */
-function menu_reset_item_confirm($form, &$form_state, $item)
-{
+function menu_reset_item_confirm($form, &$form_state, $item) {
   $form['item'] = array('#type' => 'value', '#value' => $item);
   return confirm_form($form, t('Are you sure you want to reset the link %item to its default values?', array('%item' => $item['link_title'])), 'admin/structure/menu/manage/' . $item['menu_name'], t('Any customizations will be lost. This action cannot be undone.'), t('Reset'));
 }
@@ -885,8 +903,7 @@ function menu_reset_item_confirm($form, &$form_state, $item)
 /**
  * Process menu reset item form submissions.
  */
-function menu_reset_item_confirm_submit($form, &$form_state)
-{
+function menu_reset_item_confirm_submit($form, &$form_state) {
   $item = $form_state['values']['item'];
   $new_item = menu_reset_item($item);
   backdrop_set_message(t('The menu link was reset to its default settings.'));
@@ -952,9 +969,8 @@ function menu_configure_submit($form, &$form_state) {
 /**
  * Menu callback; Translate the menu form.
  */
-function menu_translate_menu($form, &$form_state, $menu)
-{
-  if(strlen($menu['tmenu_name'])>0) {
+function menu_translate_menu($form, &$form_state, $menu) {
+  if (strlen($menu['tmenu_name']) > 0) {
     // Already part of a set, grab the set
     $translations = menu_get_menu_translation_set($menu['tmenu_name']);
   }
@@ -966,7 +982,10 @@ function menu_translate_menu($form, &$form_state, $menu)
     );
   }
 
-  $form['translation_set'] = array('#type' => 'value', '#value' => $translations);
+  $form['translation_set'] = array(
+    '#type' => 'value',
+    '#value' => $translations
+  );
   $header = array(t('Language'), t('Title'), t('Status'), t('Operations'));
 
   $menus = menu_load_all();
@@ -1016,7 +1035,10 @@ function menu_translate_menu($form, &$form_state, $menu)
       $options['add'] = array(
         'title' => t('Add translation'),
         'href' => 'admin/structure/menu/add',
-        'query' => array('translation' => $menu['menu_name'], 'target' => $langcode)
+        'query' => array(
+          'translation' => $menu['menu_name'],
+          'target' => $langcode
+        )
       );
 
       $status = t('Not translated');
@@ -1025,11 +1047,11 @@ function menu_translate_menu($form, &$form_state, $menu)
     if (!isset($form['translations'][$langcode])) {
       // Generate a list of possible translation candidates (not including this menu).
       $translation_options = array();
-      foreach($menus as $candidate) {
-        if ( ($candidate['menu_name'] != $menu['menu_name']
-          && $candidate['multilingual_mode'] > MENU_MULTILINGUAL_DISABLED
-          && ($candidate['langcode'] == LANGUAGE_NONE || $candidate['langcode'] == $langcode))
-        || ($candidate['menu_name'] == $menu['menu_name'] && $langcode == $menu['langcode'])
+      foreach ($menus as $candidate) {
+        if (($candidate['menu_name'] != $menu['menu_name']
+            && $candidate['multilingual_mode'] > MENU_MULTILINGUAL_DISABLED
+            && ($candidate['langcode'] == LANGUAGE_NONE || $candidate['langcode'] == $langcode))
+          || ($candidate['menu_name'] == $menu['menu_name'] && $langcode == $menu['langcode'])
         ) {
           $translation_options[$candidate['menu_name']] = $candidate['title'];
         }
@@ -1044,7 +1066,7 @@ function menu_translate_menu($form, &$form_state, $menu)
         '#title' => $language->name,
         '#default_value' => $default,
         '#options' => $translation_options,
-        '#description' => t('Select the :language menu.', array(':language'=>$language->name)),
+        '#description' => t('Select the :language menu.', array(':language' => $language->name)),
         '#attributes' => array('class' => array('menu-title-select')),
         '#empty_value' => '',
       );
@@ -1072,7 +1094,10 @@ function menu_translate_menu($form, &$form_state, $menu)
   );
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['update'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions']['update'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
 
   return $form;
 }
@@ -1089,7 +1114,7 @@ function menu_translate_menu_submit($form, &$form_state) {
       $translations = $form_state['values']['translation_set'];
 
       // Reset the translations.
-      foreach($translations as $langcode => $menu) {
+      foreach ($translations as $langcode => $menu) {
         $source_name = $menu['tmenu_name'];
         $menu['tmenu_name'] = '';
         menu_save($menu);
