@@ -814,17 +814,6 @@ function system_admin_bar_cache_info() {
 }
 
 /**
- * Implements hook_admin_bar_cache_info() on behalf of Update module.
- */
-function update_admin_bar_cache_info() {
-  $caches['update'] = array(
-    'title' => t('Update data'),
-    'callback' => '_update_cache_clear',
-  );
-  return $caches;
-}
-
-/**
  * Flush all caches or a specific one.
  *
  * @param $name
