@@ -9,7 +9,8 @@
   max-width: none;
   max-height: none;
 }
-@media only screen and (max-width: 600px) {
+/* min-width ~600px */
+@media only screen and (max-width: 37.5em) {
   .token-dialog {
     width: 100% !important;
     max-width: 100%;

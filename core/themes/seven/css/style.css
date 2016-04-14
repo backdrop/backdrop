@@ -155,7 +155,8 @@ ul.menu li.expanded {
   display: none;
 }
 
-@media screen and (min-width:720px) {
+/* min-width ~720px */
+@media screen and (min-width: 45em) {
   .block-system-header .name-and-slogan {
     float: left; /* LTR */
   }
@@ -320,7 +321,8 @@ ul.primary li:last-child a {
   -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
-@media (max-width: 450px) {
+/* min-width ~450px */
+@media (max-width: 28.125em) {
   ul.primary li {
     float: none;
     margin-bottom: 2px;
@@ -609,7 +611,8 @@ tr.selected td {
 /**
  * Responsive tables.
  */
-@media screen and (max-width:450px) {
+/* min-width ~450px */
+@media screen and (max-width: 28.125em) {
   th.priority-low,
   td.priority-low,
   th.priority-medium,
@@ -617,7 +620,8 @@ tr.selected td {
     display: none;
   }
 }
-@media screen and (max-width:720px) {
+/* min-width ~720px */
+@media screen and (max-width: 45em) {
   th.priority-low,
   td.priority-low {
     display: none;
@@ -719,7 +723,8 @@ fieldset .fieldset-wrapper {
   right: 2em;
   display: none;
 }
-@media (min-width: 450px) {
+/* min-width ~450px */
+@media (min-width: 28.125em) {
   .fieldset-legend span.summary {
     display: block;
   }
@@ -1445,7 +1450,8 @@ div.add-or-remove-shortcuts {
   background: #e9e8e8;
 }
 
-@media all and (min-width: 768px) {
+/* min-width ~750px */
+@media all and (min-width: 46.875em) {
   html {
     margin: 0;
     height: 100%;
@@ -1471,7 +1477,8 @@ div.add-or-remove-shortcuts {
   }
 }
 
-@media all and (max-width: 768px) {
+/* min-width ~750px */
+@media all and (min-width: 46.875em) {
   body.maintenance-page #page {
     width: auto;
   }

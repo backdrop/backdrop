@@ -79,7 +79,8 @@ small .admin-link:after {
 #system-modules td.module {
   width: 110px;
 }
-@media screen and (min-width: 800px) {
+/* min-width ~800px */
+@media screen and (min-width: 50em) {
   #system-modules td.module {
     width: 180px;
   }

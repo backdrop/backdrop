@@ -255,7 +255,8 @@ input.form-radio {
   box-sizing: border-box;
 }
 
-@media (max-width: 600px) {
+/* min-width ~600px */
+@media (max-width: 37.5em) {
   .edit-page-style-wrapper div,
   .edit-page-style-wrapper label,
   .edit-page-style-wrapper input,
@@ -300,7 +301,8 @@ input.form-radio {
   font-weight: bold;
 }
 
-@media (max-width: 768px) {
+/* min-width ~750px */
+@media (max-width: 46.875em) {
   table.sticky-header {
     display: none;
   }
