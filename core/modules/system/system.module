@@ -3856,30 +3856,30 @@ function system_form_alter(&$form, &$form_state, $form_id) {
     /* Style settings: */
     $form['menu_style'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Animation style settings'),
+      '#title' => t('Dropdown menu settings'),
       '#collapsed' => FALSE,
       '#collapsible' => TRUE,
     );
     $styles = system_menu_block_get_style_info();
-    $style_options = array('' => t('No animation'));
+    $style_options = array('' => t('No dropdown'));
 
     foreach ($styles as $style_name => $style_info) {
       $style_options[$style_name] = $style_info['title'];
     }
     $form['menu_style']['menu_style'] = array(
       '#type' => 'select',
-      '#title' => t('Animation style'),
+      '#title' => t('Dropdown style'),
       '#options' => $style_options,
       '#default_value' => $current_style,
       '#ajax' => array(
-        'wrapper' => 'block_animation_settings',
+        'wrapper' => 'block_dropdown_settings',
         'callback' => 'system_menu_block_configure_ajax_style'
       ),
       '#parents' => array('menu_style'),
     );
     $form['menu_style']['block_settings'] = array(
       '#type' => 'container',
-      '#id' => 'block_animation_settings',
+      '#id' => 'block_dropdown_settings',
       '#parents' => array('block_settings'),
     );
 
