@@ -34,7 +34,7 @@ class MenuStyleSlim extends MenuStyle {
       '#type' => 'textfield',
       '#title' => t('Hover intent'),
       '#default_value' => isset($settings['anim_speed']) ? $settings['anim_speed'] : 'medium', // accepts slow, medium, fast or miliseconds
-      '#description' => t('Speed of the submenu expand and collapse animation.'),
+      '#description' => t('Speed of the submenu expand and collapse dropdown.'),
     );
     $form['easing_effect'] = array(
       '#type' => 'textfield',
