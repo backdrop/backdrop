@@ -14,4 +14,11 @@ abstract class MenuStyle {
    * Build settings.
    */
   function buildSettings($settings = array()) {}
+
+  /**
+   * Submit handler for saving the form settings.
+   */
+  function formSubmit($form, $form_state) {
+    $this->settings = $form_state['values']['style_settings'];
+  }
 }
