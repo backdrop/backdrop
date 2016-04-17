@@ -40,6 +40,12 @@ function system_menu_block_defaults($menu_name) {
 function system_menu_block_form($config) {
   $form = array();
   $form['#config'] = $config;
+
+  $form['menu_name'] = array(
+    '#type' => 'value',
+    '#value' => $config['menu_name'],
+  );
+
   $form['level'] = array(
     '#type' => 'select',
     '#title' => t('Starting level'),
@@ -78,7 +84,6 @@ function system_menu_block_form($config) {
 
   return $form;
 }
-
 
 /**
  * Build a menu tree based on the provided configuration.

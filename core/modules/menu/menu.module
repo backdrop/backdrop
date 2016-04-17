@@ -306,7 +306,7 @@ function menu_delete($menu) {
   menu_delete_links($menu['menu_name']);
 
   // Remove menu from active menus variable.
-  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());  
+  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());
   foreach ($active_menus as $i => $menu_name) {
     if ($menu['menu_name'] == $menu_name) {
       unset($active_menus[$i]);
@@ -472,6 +472,12 @@ function menu_block_view($delta = '', $settings = array()) {
   if (!empty($block['content'])) {
     $block['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
   }
+
+  // Execute block styles
+  if (!empty($settings['menu_style_settings'])) {
+    system_menu_block_view_style($settings, 'menu');
+  }
+
   return $block;
 }
 
@@ -812,4 +818,17 @@ function menu_preprocess_block(&$variables) {
   if ($variables['block']->module == 'menu') {
     $variables['attributes']['role'] = 'navigation';
   }
+}
+
+/**
+ * Implements hook_menu_block_style_info().
+ */
+function menu_menu_block_style_info() {
+  $info['responsive_menu'] = array(
+    'name' => 'responsive_menu',
+    'title' => t('Responsive Menu'),
+    'description' => t('Responsive menus written for Backdrop'),
+    'class' => 'responsive-menu',
+  );
+  return $info;
 }

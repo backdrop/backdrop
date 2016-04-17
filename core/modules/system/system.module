@@ -2339,12 +2339,13 @@ function system_block_view($delta = '', $settings = array()) {
         $data = system_menu_block_build($settings);
         $block['subject'] = $data['subject'];
         $block['content'] = $data['content'];
-        
+
         // Todo: call this from Block class??
         // Execute block styles
         if (!empty($settings['style_settings'])) {
           system_menu_block_view_style($settings);
         }
+
         return $block;
       }
       break;
