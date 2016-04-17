@@ -15,6 +15,19 @@ class MenuTestCase extends BackdropWebTestCase {
     // Create users.
     $this->big_user = $this->backdropCreateUser(array('access administration pages', 'administer blocks', 'administer menu', 'create post content'));
     $this->std_user = $this->backdropCreateUser(array());
+
+    // Set the main menu link depth to unlimited.
+    $layout = layout_load('default');
+    // Assume that the menu block is the second block in the default layout.
+    $menu_uuid = $layout->positions['header'][1];
+    $menu_block = $layout->content[$menu_uuid];
+
+    // Set the menu block depth and level.
+    $menu_block->settings['block_settings']['level'] = 1;
+    $menu_block->settings['block_settings']['depth'] = 0;
+
+    // Save the layout containing the block.
+    $layout->save();
   }
 
   /**

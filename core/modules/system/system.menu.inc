@@ -40,6 +40,12 @@ function system_menu_block_defaults($menu_name) {
 function system_menu_block_form($config) {
   $form = array();
   $form['#config'] = $config;
+
+  $form['menu_name'] = array(
+    '#type' => 'value',
+    '#value' => $config['menu_name'],
+  );
+
   $form['level'] = array(
     '#type' => 'select',
     '#title' => t('Starting level'),
@@ -79,7 +85,6 @@ function system_menu_block_form($config) {
   return $form;
 }
 
-
 /**
  * Build a menu tree based on the provided configuration.
  *
@@ -99,7 +104,12 @@ function system_menu_block_form($config) {
  *   - subject_array: The title as a renderable array.
  */
 function system_menu_block_build(array $config) {
-  $menu_names = menu_list_system_menus();
+  if (module_exists('menu')) {
+    $menu_names = menu_get_menus();
+  }
+  else {
+    $menu_names = menu_list_system_menus();
+  }  
   
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
