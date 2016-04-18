@@ -9,7 +9,7 @@ class MenuStyleSlim extends MenuStyle {
    * Specifies the settings form for configuring the style.
    */
   function form($config) {
-    $settings = $config['menu_style_settings'];
+    $settings = isset($config['menu_style_settings']) ? $config['menu_style_settings'] : NULL;
     $form['resize_width'] = array(
       '#type' => 'textfield',
       '#title' => t('Resize width'),
