@@ -2342,7 +2342,7 @@ function system_block_view($delta = '', $settings = array()) {
 
         // Todo: call this from Block class??
         // Execute block styles
-        if (!empty($settings['style_settings'])) {
+        if (!empty($settings['menu_style_settings'])) {
           system_menu_block_view_style($settings);
         }
 
@@ -3879,45 +3879,51 @@ function system_form_alter(&$form, &$form_state, $form_id) {
     $config = $form['block_settings']['#config'];
 
     $current_style = '';
-    if (isset($form_state['values']['menu_style'])) {
-      $current_style = $form_state['values']['menu_style'];
+    if (isset($form_state['values']['menu_style_name'])) {
+      $current_style = $form_state['values']['menu_style_name'];
     }
-    elseif (isset($config['menu_style_name'])) {
-      $current_style = $config['menu_style_name'];
-      
+    elseif (isset($config['menu_style_settings'])) {
+      $current_style = $config['menu_style_settings']['menu_style_name'];
     }
+
     /* Style settings: */
     $form['menu_style'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Dropdown menu settings'),
+      '#title' => t('Menu style settings'),
       '#collapsed' => FALSE,
       '#collapsible' => TRUE,
     );
     $styles = system_menu_block_get_style_info();
-    $style_options = array('' => t('No dropdown'));
+    $style_options = array('' => t('No style'));
 
     foreach ($styles as $style_name => $style_info) {
       $style_options[$style_name] = $style_info['title'];
     }
-    $form['menu_style']['menu_style'] = array(
+    $form['menu_style']['menu_style_name'] = array(
       '#type' => 'select',
-      '#title' => t('Dropdown style'),
+      '#title' => t('Menu style'),
       '#options' => $style_options,
       '#default_value' => $current_style,
       '#ajax' => array(
-        'wrapper' => 'block_dropdown_settings',
+        'wrapper' => 'block_menu_settings',
         'callback' => 'system_menu_block_configure_ajax_style'
       ),
-      '#parents' => array('menu_style'),
+      '#parents' => array('menu_style_name'),
     );
     $form['menu_style']['block_settings'] = array(
       '#type' => 'container',
-      '#id' => 'block_dropdown_settings',
+      '#id' => 'block_menu_settings',
       '#parents' => array('block_settings'),
     );
 
     $settings_form = ($current_style) ? system_menu_block_style_settings_form($current_style, $config) : NULL;
-    $form['menu_style']['block_settings']['style_settings'] = $settings_form;
+    if ($settings_form) {
+      $form['menu_style']['block_settings']['menu_style_settings'] = $settings_form;
+      $form['menu_style']['block_settings']['menu_style_settings']['menu_style_name'] = array(
+        '#type' => 'value',
+        '#value' => $current_style,
+      );
+    }
   }
 }
 
@@ -3933,10 +3939,10 @@ function system_menu_block_configure_ajax_style($form, &$form_state) {
  */
 function system_menu_block_view_style($settings) {
   // Load our style.
-  $style_info = system_menu_block_style_load($settings['menu_style_name']);
-  if (!$style_info) {
+  if (!isset($settings['menu_style_settings']['menu_style_name'])) {
     return;
   }
+  $style_info = system_menu_block_style_load($settings['menu_style_settings']['menu_style_name']);
   $data = &backdrop_static(__FUNCTION__, array());
   if (!isset($data['execute_index'])) {
     $data['execute_index'] = -1;
@@ -3986,7 +3992,8 @@ function system_menu_block_view_style($settings) {
   // Add JS settings.
   $class = new $style_info['class'];
   $js_settings[$data['execute_index']] = $class->buildSettings($settings);
-  $js_settings[$data['execute_index']]['menu_style'] = $settings['menu_style_name'];
+  //$js_settings[$data['execute_index']]['menu_style'] = $settings['menu_style_settings']['menu_style_name'];
+
   backdrop_alter('system_menu_block_view_style', $js_settings);
   backdrop_add_js(array('menu_style' => $js_settings), 'setting');
 }

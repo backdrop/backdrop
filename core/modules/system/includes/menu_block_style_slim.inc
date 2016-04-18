@@ -8,10 +8,8 @@ class MenuStyleSlim extends MenuStyle {
   /**
    * Specifies the settings form for configuring the style.
    */
-  function form($settings) {
-    //parent::form($form, $form_state);
-    $config = config('system.menu_block_style_simple');
-
+  function form($config) {
+    $settings = $config['menu_style_settings'];
     $form['resize_width'] = array(
       '#type' => 'textfield',
       '#title' => t('Resize width'),
@@ -73,19 +71,20 @@ class MenuStyleSlim extends MenuStyle {
   /**
    * Build settings.
    */
-  function buildSettings($settings = array()) {
-    $style = $settings['style_settings'];
+  function buildSettings($config = array()) {
+    $settings = $config['menu_style_settings'];
 
-    $style['resizeWidth'] = isset($style['resize_width']) ? $style['resize_width'] : 800;
-    $style['initiallyVisible'] = isset($style['initially_visible']) ? $style['initially_visible'] : 'false';
-    $style['collapserTitle'] = isset($style['collapser_title']) ? $style['collapser_title'] : 'Menu';
-    $style['animSpeed'] = isset($style['anim_speed']) ? $style['anim_speed'] : 'medium';
-    $style['easingEffect'] = isset($style['easing_effect']) ? $style['easing_effect'] : 'null';
-    $style['indentChildren'] = isset($style['indent_children']) ? $style['indent_children'] : 'false';
-    $style['childrenIndenter'] = isset($style['children_indenter']) ? $style['children_indenter'] : '&nbsp;';
-    $style['expandIcon'] = isset($style['expand_icon']) ? $style['expand_icon'] : '<i>&#9660;<i>';
-    $style['collapseIcon'] = isset($style['collapse_icon']) ? $style['collapse_icon'] : '<i>&#9650;<i>';
-    $style['menuName'] = isset($settings['menu_name']) ? $settings['menu_name'] : NULL;
+    $style['resizeWidth'] = isset($settings['resize_width']) ? $settings['resize_width'] : 800;
+    $style['initiallyVisible'] = isset($settings['initially_visible']) ? $settings['initially_visible'] : 'false';
+    $style['collapserTitle'] = isset($settings['collapser_title']) ? $settings['collapser_title'] : 'Menu';
+    $style['animSpeed'] = isset($settings['anim_speed']) ? $settings['anim_speed'] : 'medium';
+    $style['easingEffect'] = isset($settings['easing_effect']) ? $settings['easing_effect'] : 'null';
+    $style['indentChildren'] = isset($settings['indent_children']) ? $settings['indent_children'] : 'false';
+    $style['childrenIndenter'] = isset($settings['children_indenter']) ? $settings['children_indenter'] : '&nbsp;';
+    $style['expandIcon'] = isset($settings['expand_icon']) ? $settings['expand_icon'] : '<i>&#9660;<i>';
+    $style['collapseIcon'] = isset($settings['collapse_icon']) ? $settings['collapse_icon'] : '<i>&#9650;<i>';
+    $style['menuName'] = isset($config['menu_name']) ? $config['menu_name'] : NULL;
+
     return $style;
   }
 
