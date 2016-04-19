@@ -98,6 +98,10 @@ class BlockLegacy extends Block {
         $function($this->delta, $form_state['values']['block_settings']);
       }
 
+      // Save menu styles to settings if available.
+      if (isset($form_state['values']['menu_style'])) {
+        $form_state['values']['block_settings']['menu_style_name'] = $form_state['values']['menu_style'];
+      }
       $this->settings['block_settings'] = $form_state['values']['block_settings'];
     }
   }

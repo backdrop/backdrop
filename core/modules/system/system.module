@@ -3937,7 +3937,7 @@ function system_menu_block_configure_ajax_style($form, &$form_state) {
 /**
  * Final execution for Responsive Menus.  Add any js/css and settings required.
  */
-function system_menu_block_view_style($settings) {
+function system_menu_block_view_style($settings, $module = 'system') {
   // Load our style.
   if (!isset($settings['menu_style_settings']['menu_style_name'])) {
     return;
@@ -3948,6 +3948,9 @@ function system_menu_block_view_style($settings) {
     $data['execute_index'] = -1;
   }
   $data['execute_index']++;
+
+  // Build selector.
+  $selector = backdrop_html_class('block-' . $module . '-' . $settings['menu_name']);
 
   $js_settings = array();
   $js_files = array();
@@ -3992,7 +3995,8 @@ function system_menu_block_view_style($settings) {
   // Add JS settings.
   $class = new $style_info['class'];
   $js_settings[$data['execute_index']] = $class->buildSettings($settings);
-  //$js_settings[$data['execute_index']]['menu_style'] = $settings['menu_style_settings']['menu_style_name'];
+  $js_settings[$data['execute_index']]['menu_style_name'] = $settings['menu_style_settings']['menu_style_name'];
+  $js_settings[$data['execute_index']]['selector'] = $selector;
 
   backdrop_alter('system_menu_block_view_style', $js_settings);
   backdrop_add_js(array('menu_style' => $js_settings), 'setting');
