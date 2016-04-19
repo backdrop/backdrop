@@ -123,7 +123,6 @@
                     $menu.find('li > a > i').remove();
                     $menu.removeClass('collapsed').show();
                     $menuCollapser.hide();
-                    console.log($menuCollapser);
                 }
             }
         },
