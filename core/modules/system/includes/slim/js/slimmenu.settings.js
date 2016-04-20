@@ -23,7 +23,7 @@
           }
         });
         block = $('.' + iteration.selector + ' .block-content').find('ul').first().addClass('slimmenu');
-        $('.slimmenu').once('responsive-menus-mean-menu', function() {
+        $('.slimmenu').once('slimmenu-style', function() {
           $(this).slimmenu(iteration);      
         });
       });

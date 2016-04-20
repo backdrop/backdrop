@@ -3905,6 +3905,49 @@ function system_menu_block_configure_ajax_style($form, &$form_state) {
 /**
  * Final execution for Responsive Menus.  Add any js/css and settings required.
  */
+function system_menu_block_settings_load($style_info, $menu_style_name) {
+  $menu_style = &drupal_static(__FUNCTION__);
+  if (!isset($menu_style[$menu_style_name])) {
+    if ($cache = cache_get('system_menu_block_files')) {
+      $menu_style = $cache->data;
+    }
+    else {
+      $path = backdrop_get_path('module', $style_info['module']) . '/';
+      // Load JS files from folder.
+      if (!empty($style_info['js_folder'])) {
+        $js_files = system_menu_block_glob_files($path, $style_info['js_folder'], 'js');
+      }
+      // Load CSS files from folder.
+      if (!empty($style_info['css_folder'])) {
+        $css_files = system_menu_block_glob_files($path, $style_info['css_folder'], 'css');
+      }
+      // Load individual JS files.
+      if (!empty($style_info['js'])) {
+        foreach ($style_info['js'] as $file) {
+          $js_file_path = $path . $file;
+          array_push($js_files, $js_file_path);
+          $js_files = array_unique($js_files);
+        }
+      }
+      // Load individual CSS files.
+      if (!empty($style_info['css'])) {
+        foreach ($style_info['css'] as $file) {
+          $css_file_path = $path . $file;
+          array_push($css_files, $css_file_path);
+          $css_files = array_unique($css_files);
+        }
+      }
+      $menu_style[$menu_style_name]['js_files'] = $js_files;
+      $menu_style[$menu_style_name]['css_files'] = $css_files;
+      cache_set('system_menu_block_files', $menu_style, 'cache');
+    }
+  }
+  return $menu_style[$menu_style_name];
+}
+
+/**
+ * Final execution for Responsive Menus.  Add any js/css and settings required.
+ */
 function system_menu_block_view_style($settings, $module = 'system') {
   // Load our style.
   if (!isset($settings['menu_style_settings']['menu_style_name'])) {
@@ -3923,31 +3966,11 @@ function system_menu_block_view_style($settings, $module = 'system') {
   $js_settings = array();
   $js_files = array();
   $css_files = array();
-  $path = backdrop_get_path('module', $style_info['module']) . '/';
-  // Load JS files from folder.
-  if (!empty($style_info['js_folder'])) {
-    $js_files = system_menu_block_glob_files($path, $style_info['js_folder'], 'js');
-  }
-  // Load CSS files from folder.
-  if (!empty($style_info['css_folder'])) {
-    $css_files = system_menu_block_glob_files($path, $style_info['css_folder'], 'css');
-  }
-  // Load individual JS files.
-  if (!empty($style_info['js'])) {
-    foreach ($style_info['js'] as $file) {
-      $js_file_path = $path . $file;
-      array_push($js_files, $js_file_path);
-      $js_files = array_unique($js_files);
-    }
-  }
-  // Load individual CSS files.
-  if (!empty($style_info['css'])) {
-    foreach ($style_info['css'] as $file) {
-      $css_file_path = $path . $file;
-      array_push($css_files, $css_file_path);
-      $css_files = array_unique($css_files);
-    }
-  }
+
+  $files = system_menu_block_settings_load($style_info, $settings['menu_style_settings']['menu_style_name']);
+  $js_files = $files['js_files'];
+  $css_files = $files['css_files'];
+
   // Add JS files.
   if (!empty($js_files)) {
     foreach ($js_files as $js_file) {
