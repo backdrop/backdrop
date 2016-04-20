@@ -75,6 +75,7 @@ function installer_browser_page($type) {
 
   // Add the pager.
   $total = $results['total'];
+  dpm($total);
   $items_per_page = 20;
   $page = pager_default_initialize($total, $items_per_page);
   $offset = $items_per_page * $page;
@@ -287,7 +288,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
   $form['backup_warning'] = array(
     '#type' => 'markup',
     '#markup' => t('Back up your database and site before you continue. !link.',
-      array('!link' => l(t('Learn how'), 'http://<MAINSITE_URL>/node/22281'))),
+      array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))),
   );
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
