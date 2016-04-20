@@ -59,6 +59,11 @@ function installer_browser_page($type) {
 
   // Get the projects to display here based on the filters.
   $results = installer_browser_fetch_results($filters);
+  // Add defaults to prevent PHP errors if server is down.
+  $results += array (
+    'total' => 0,
+    'projects' => array(),
+  );
 
   // Save the listed projects in the session so it can be used.
   $_SESSION['installer_browser_listed_projects'] = $results['projects'];
