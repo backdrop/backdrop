@@ -502,11 +502,15 @@ function ckeditor_get_settings($format, $existing_settings) {
     'externalPlugins' => $external_plugins,
     'format' => $format->format,
   );
+
+  // Create a token for access to dialogs.
   if (isset($external_plugins['backdroplink'])) {
-    $settings['backdrop']['linkDialogUrl'] = url('editor/dialog/link');
+    $link_token = filter_editor_dialog_token($format, 'link');
+    $settings['backdrop']['linkDialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));
   }
   if (isset($external_plugins['backdropimage'])) {
-    $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image');
+    $image_token = filter_editor_dialog_token($format, 'image');
+    $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
   }
   if (isset($external_plugins['backdropimagecaption'])) {
     $settings['backdrop']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
