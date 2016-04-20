@@ -485,6 +485,12 @@ function menu_block_view($delta = '', $settings = array()) {
   if (!empty($block['content'])) {
     $block['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
   }
+
+  // Execute block styles
+  if (!empty($settings['menu_style_settings'])) {
+    system_menu_block_view_style($settings, 'menu');
+  }
+
   return $block;
 }
 

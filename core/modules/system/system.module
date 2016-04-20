@@ -2324,7 +2324,6 @@ function system_block_view($delta = '', $settings = array()) {
         $block['subject'] = $data['subject'];
         $block['content'] = $data['content'];
 
-        // Todo: call this from Block class??
         // Execute block styles
         if (!empty($settings['menu_style_settings'])) {
           system_menu_block_view_style($settings);
