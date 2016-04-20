@@ -75,7 +75,6 @@ function installer_browser_page($type) {
 
   // Add the pager.
   $total = $results['total'];
-  dpm($total);
   $items_per_page = 20;
   $page = pager_default_initialize($total, $items_per_page);
   $offset = $items_per_page * $page;
