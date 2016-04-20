@@ -14,13 +14,18 @@
  * back to its original state!
  */
 
-// Change the directory to the Backdrop root.
-chdir('..');
-
 /**
  * Defines the root directory of the Backdrop installation.
+ *
+ * We are using dirname to get path to backdrop root folder without symlink resolving.
+ * This way you can keep github repository out of the DOCROOT and have files directory
+ * and settings.php out of github repository.
+ * Relate to issues: #1297, #346.
  */
-define('BACKDROP_ROOT', getcwd());
+define('BACKDROP_ROOT', dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+
+// Change the directory to the Backdrop root.
+chdir(BACKDROP_ROOT);
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
