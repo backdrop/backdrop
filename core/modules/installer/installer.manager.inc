@@ -414,7 +414,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
  * generate an array of update operations to perform, and hand it all off to
  * system_authorized_init(), then redirect to authorize.php.
  *
- * @see update_authorize_run_update()
+ * @see installer_authorize_run_update()
  * @see system_authorized_init()
  * @see system_authorized_get_url()
  */
@@ -449,18 +449,18 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     // If the owner of the last directory we extracted is the same as the
     // owner of our configuration directory where we're trying to install the
     // code, there's no need to prompt for FTP/SSH credentials. Instead, we
-    // instantiate a FileTransferLocal and invoke update_authorize_run_update()
+    // instantiate a FileTransferLocal and invoke installer_authorize_run_update()
     // directly.
     if (fileowner($project_real_location) == fileowner(conf_path())) {
       module_load_include('inc', 'installer', 'installer.authorize');
       $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
-      update_authorize_run_update($filetransfer, $updates);
+      installer_authorize_run_update($filetransfer, $updates);
     }
     // Otherwise, go through the regular workflow to prompt for FTP/SSH
-    // credentials and invoke update_authorize_run_update() indirectly with
+    // credentials and invoke installer_authorize_run_update() indirectly with
     // whatever FileTransfer object authorize.php creates for us.
     else {
-      system_authorized_init('update_authorize_run_update', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', array($updates), t('Update manager'));
+      system_authorized_init('installer_authorize_run_update', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', array($updates), t('Update manager'));
       $form_state['redirect'] = system_authorized_get_url();
     }
   }
