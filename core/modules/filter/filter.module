@@ -177,16 +177,13 @@ function filter_dialog_access($format, $dialog_name, $account = NULL, $calling_p
     $calling_path = $_GET['calling_path'];
   }
 
-  $accessed_via_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
-
   $format_access = filter_access($format, $account);
-
   $tokens_match = FALSE;
   if (isset($_GET['token'])) {
     $tokens_match = ($_GET['token'] === filter_editor_dialog_token($format, $dialog_name, $account, $calling_path));
   }
 
-  return $accessed_via_ajax && $format_access && $tokens_match;
+  return $format_access && $tokens_match;
 }
 
 /**

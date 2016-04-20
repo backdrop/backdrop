@@ -2130,15 +2130,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
     );
 
     $this->backdropGet('editor/dialog/image/filtered_html', $options);
-    $this->assertResponse(403, 'Access denied on image dialog with token but no AJAX header.');
-
-    $this->backdropGetAJAX('editor/dialog/image/filtered_html', $options);
-    $this->assertResponse(200, 'Access granted on image dialog with token and via AJAX.');
-
-    // Get an HTML version for easier parsing.
-    $headers = array('X-Requested-With: XMLHttpRequest');
-    $this->backdropGet('editor/dialog/image/filtered_html', $options, $headers);
-    $this->assertResponse(200, 'Access granted on image dialog with token and via pseudo-AJAX.');
+    $this->assertResponse(200, 'Access granted on image dialog with token.');
 
     $this->assertNoField('files[fid]', 'File upload field not found when uploads are disabled.');
 
@@ -2148,17 +2140,17 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
     );
     filter_format_save($format);
 
-    $this->backdropGet('editor/dialog/image/filtered_html', $options, $headers);
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
     $this->assertNoField('files[fid]', 'File upload field not found when uploads are enabled but user missing upload permission.');
 
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('upload editor images'));
-    $this->backdropGet('editor/dialog/image/filtered_html', $options, $headers);
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
     $this->assertField('files[fid]', 'File upload field found when uploads are enabled and user has upload permission.');
 
     // Revoke access to the format and check that access is denied.
     $filtered_html_permission = filter_permission_name($format);
     user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array($filtered_html_permission));
-    $this->backdropGet('editor/dialog/image/filtered_html', $options, $headers);
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
     $this->assertResponse(403, 'Access denied on image dialog when access to the format is not allowed.');
   }
 }
