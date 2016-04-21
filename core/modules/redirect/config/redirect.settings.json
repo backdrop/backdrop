@@ -5,10 +5,5 @@
   "passthrough_querystring": true,
   "warning": false,
   "additional_statuses": false,
-  "purge_inactive": false,
-  "global_home": true,
-  "global_clean": true,
-  "global_canonical": true,
-  "global_deslash": false,
-  "global_admin_paths": false
+  "purge_inactive": false
 }

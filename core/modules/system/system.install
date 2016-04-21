@@ -532,10 +532,10 @@ function system_requirements($phase) {
     $path = backdrop_get_path('module', 'redirect');
     if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
       $requirements['redirect_replaced'] = array(
-        'title' => $t('Link'),
+        'title' => $t('Redirect'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/{nid}">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -2738,7 +2738,7 @@ function system_update_1050() {
 function system_update_1051() {
   $path = backdrop_get_path('module', 'redirect');
   if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. To use the new Redirect module, disable and then uninstall the current module, remove it from your installation, and then enable the new Redirect module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/{nid}">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

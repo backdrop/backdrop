@@ -1,5 +1,10 @@
-
+/**
+ * @file
+ * Attaches behaviors for the Redirect module admin pages.
+ */
 (function ($) {
+
+"use strict";
 
 Backdrop.behaviors.redirectAdmin = {
   attach: function (context) {

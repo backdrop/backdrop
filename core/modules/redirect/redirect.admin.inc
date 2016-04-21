@@ -374,7 +374,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->redirect ? redirect_url($redirect->redirect, $redirect->redirect_options, TRUE) : '',
     '#required' => TRUE,
-    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to redirect to. Use %front to redirect to the front page.', array('%front' => '<front>')),
+    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the front page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
   );
   $form['redirect_options'] = array(
@@ -403,19 +403,30 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   );
 
   $form['override'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('I understand the following warnings and would like to proceed with saving this URL redirect'),
-    '#default_value' => FALSE,
-    '#access' => FALSE,
-    '#required' => FALSE,
-    '#weight' => -100,
     '#prefix' => '<div class="messages warning">',
     '#suffix' => '</div>',
+    '#access' => FALSE,
+    '#weight' => -100,
   );
-  if (!empty($form_state['storage']['override_messages'])) {
+  $form['override']['confirm'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('I understand the above warnings and would like to proceed with saving this URL redirect'),
+    '#default_value' => FALSE,
+    '#parents' => array('override'),
+  );
+
+  if (!empty($form_state['storage']['override_messages']) && !count(form_get_errors())) {
     $form['override']['#access'] = TRUE;
-    //$form['override']['#required'] = TRUE;
-    $form['override']['#description'] = theme('item_list', array('items' => $form_state['storage']['override_messages']));
+    if (count($form_state['storage']['override_messages']) > 1) {
+      $message_output = theme('item_list', array('items' => $form_state['storage']['override_messages']));
+    }
+    else {
+      $message_output = implode('', $form_state['storage']['override_messages']);
+    }
+    $form['override']['messages'] = array(
+      '#markup' => $message_output,
+      '#weight' => -1,
+    );
     // Reset the messages.
     $form_state['storage']['override_messages'] = array();
   }
@@ -423,7 +434,14 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save redirect'),
+  );
+  $form['actions']['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('redirect_edit_form_delete_submit'),
+    '#limit_validation_errors' => array(array('actions')),
+    '#access' => !$redirect->isNew(),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -440,26 +458,33 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
  * @see redirect_edit_form()
  */
 function redirect_element_validate_source($element, &$form_state) {
-  $value = &$element['#value'];
-
   // Check that the source contains no URL fragment.
-  if (strpos($value, '#') !== FALSE) {
+  if (strpos($element['#value'], '#') !== FALSE) {
     form_error($element, t('The source path cannot contain an URL fragment anchor.'));
   }
 
-  _redirect_extract_url_options($element, $form_state);
+  $parsed_value = _redirect_extract_url_options($element, $form_state);
 
   // Disallow redirections from the frontpage.
-  if ($value === '<front>') {
+  if ($parsed_value['path'] === '<front>') {
     form_error($element, t('The source path cannot be the front page.'));
   }
 
   // Cannot create redirects for valid paths.
   if (empty($form_state['values']['override'])) {
-    $menu_item = menu_get_item($value);
-    if ($menu_item && $menu_item['page_callback'] != 'redirect_redirect' && $value == $menu_item['path']) {
-      $form_state['storage']['override_messages']['valid-path'] = t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.', array('%path' => $value, '@url-alias' => url('admin/config/search/path/add')));
+    // Check if this is an alias.
+    $alias = path_load(array('alias' => $parsed_value['path']));
+    if ($alias) {
+      $form_state['storage']['override_messages']['existing-alias'] = t('The source path !path is an existing alias. You may prefer to <a href="@url-alias">edit this URL alias</a> rather than using a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/edit/' . $alias['pid'])));
       $form_state['rebuild'] = TRUE;
+      return $element;
+    }
+    $path = backdrop_get_normal_path($parsed_value['path'], $form_state['values']['langcode']);
+    $menu_item = menu_get_item($path);
+    if ($menu_item && $menu_item['page_callback'] != 'redirect_redirect') {
+      $form_state['storage']['override_messages']['valid-path'] = t('The source path !path is an existing path. Creating a redirect may make it inaccessible. You may prefer to <a href="@url-alias">create a URL alias</a> for this path rather than a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/add')));
+      $form_state['rebuild'] = TRUE;
+      return $element;
     }
   }
 
@@ -472,13 +497,14 @@ function redirect_element_validate_source($element, &$form_state) {
  * @see redirect_edit_form()
  */
 function redirect_element_validate_redirect($element, &$form_state) {
-  $value = &$element['#value'];
-  _redirect_extract_url_options($element, $form_state);
-  $value = &$form_state['values']['redirect'];
-
-
-  // Normalize the path.
-  $value = backdrop_get_normal_path($value, $form_state['values']['langcode']);
+  $parsed = _redirect_extract_url_options($element, $form_state);
+  if (!url_is_external($parsed['url'])) {
+    $value = backdrop_get_normal_path($parsed['url'], $form_state['values']['langcode']);
+  }
+  else {
+    $value = $parsed['url'];
+  }
+  form_set_value($element, $value, $form_state);
 
   if (!valid_url($value) && !valid_url($value, TRUE) && $value != '<front>' && $value != '' && !file_exists($value)) {
     form_error($element, t('The redirect path %value is not valid.', array('%value' => $value)));
@@ -518,11 +544,6 @@ function _redirect_extract_url_options(&$element, &$form_state) {
     unset($options['https']);
   }
 
-  if (!url_is_external($parsed['url'])) {
-    $parsed['url'] = backdrop_get_normal_path($parsed['url'], $form_state['values']['langcode']);
-  }
-
-  form_set_value($element, $parsed['url'], $form_state);
   return $parsed;
 }
 
@@ -543,15 +564,22 @@ function redirect_edit_form_validate($form, &$form_state) {
         $form_state['rebuild'] = TRUE;
       }
     }
-
-    if ($form['override']['#access']) {
-      backdrop_set_message('Did you read the warnings and click the checkbox?', 'error');
-      $form_state['rebuild'] = TRUE;
-    }
   }
 
   redirect_validate($redirect, $form, $form_state);
   $form_state['redirect'] = $redirect;
+}
+
+/**
+ * Form submit handler; handle the 'Delete' button on redirect_edit_form().
+ */
+function redirect_edit_form_delete_submit($form, &$form_state) {
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = backdrop_get_destination();
+    unset($_GET['destination']);
+  }
+  $form_state['redirect'] = array('admin/config/search/redirect/delete/' . $form_state['redirect']->rid, array('query' => $destination));
 }
 
 /**
@@ -639,41 +667,6 @@ function redirect_settings_form($form, &$form_state) {
     '#description' => t('Only redirects managed by the redirect module itself will be deleted. Redirects managed by other modules will be left alone.'),
   );
 
-  $form['globals'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Always enabled redirections'),
-    '#description' => t('(formerly Global Redirect features)'),
-    '#access' => FALSE,
-  );
-  $form['globals']['global_home'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Redirect from paths like index.php and /node to the root directory.'),
-    '#default_value' => $config->get('global_home'),
-    '#access' => FALSE,
-  );
-  $form['globals']['global_clean'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Redirect from non-clean URLs to clean URLs.'),
-    '#default_value' => $config->get('global_clean'),
-    '#disabled' => !$config->get('clean_url'),
-    '#access' => FALSE,
-  );
-  $form['globals']['global_canonical'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Redirect from non-canonical URLs to the canonical URLs.'),
-    '#default_value' => $config->get('global_canonical'),
-  );
-  $form['globals']['global_deslash'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Remove trailing slashes from paths.'),
-    '#default_value' => $config->get('global_deslash'),
-    '#access' => FALSE,
-  );
-  $form['globals']['global_admin_paths'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow redirections on admin paths.'),
-    '#default_value' => $config->get('global_admin_paths'),
-  );
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -695,11 +688,6 @@ function redirect_settings_form_submit($form, &$form_state) {
   $config->set('passthrough_querystring', (bool) $values['passthrough_querystring']);
   $config->set('additional_statuses', (bool) $values['additional_statuses']);
   $config->set('purge_inactive', (bool) $values['purge_inactive']);
-  $config->set('global_home', (bool) $values['global_home']);
-  $config->set('global_clean', (bool) $values['global_clean']);
-  $config->set('global_canonical', (bool) $values['global_canonical']);
-  $config->set('global_deslash', (bool) $values['global_deslash']);
-  $config->set('global_admin_paths', (bool) $values['global_admin_paths']);
   $config->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }

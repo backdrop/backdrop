@@ -180,8 +180,14 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
       '#type' => 'submit',
       '#value' => t('Delete'),
       '#submit' => array('path_admin_form_delete_submit'),
+      '#limit_validation_errors' => array(array('actions'), array('pid')),
     );
   }
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/search/path',
+  );
 
   return $form;
 }

@@ -131,7 +131,7 @@ function redirect_menu() {
   );
 
   // Add an action link to the 404 page.
-  $site_404 = config_get('system.site_404');
+  $site_404 = config_get('system.c');
   if (empty($path)) {
     $site_404 = 'system/404';
   }
@@ -255,36 +255,20 @@ function redirect_init() {
   if ($redirect = redirect_get_current_redirect()) {
     redirect_redirect($redirect);
   }
-
-  $redirect_global = FALSE;
-  $request_uri = $original_uri = ltrim(request_uri(), '/');
-
-  // Redirect from non-clean URLs to clean URLs.
-  if (config_get('redirect.settings', 'global_clean') && config_get('system.core', 'clean_url') && strpos($request_uri, '?q=') !== FALSE) {
-    //$redirect_global = TRUE;
-    //$request_uri = str_replace('?q=', '', $request_uri);
-  }
-
-  if (strpos($request_uri, 'index.php') !== FALSE) {
-    //$redirect_global = TRUE;
-    //$request_uri = str_replace('index.php', '', $request_uri);
-  }
-
-  //$request_uri = ltrim($request_uri, '/');
-  //$parsed = parse_url($request_uri);
-  // TODO: gff figure out what this is trying to do, if it does it and if Not
-  // determine if should/can be fixed or removed.
-  if ($redirect_global && $request_uri != $original_uri) {
-    redirect_redirect(array(/*'redirect' => $request_uri,*/ 'type' => 'global'));
-  }
 }
 
 /**
  * Implements hook_cron().
  */
 function redirect_cron() {
-  // Purge inactive self-managed redirects from the database.
-  redirect_purge_inactive_redirects();
+  // Throttle to only once every 6 hours.
+  $last_run = state_get('redirect_cron_last', 0);
+  $interval = 21600;
+  if ($last_run + $interval < REQUEST_TIME) {
+    // Purge inactive self-managed redirects from the database.
+    redirect_purge_inactive_redirects();
+    state_set('redirect_cron_last', REQUEST_TIME);
+  }
 }
 
 /**
@@ -576,7 +560,9 @@ function redirect_load_multiple(array $rids = array(), array $conditions = array
   $redirects = array();
   if ($rids) {
     foreach ($rids as $rid) {
-      $redirects[$rid] = $cached_redirects[$rid];
+      if (isset($cached_redirects[$rid])) {
+        $redirects[$rid] = $cached_redirects[$rid];
+      }
     }
   }
   elseif ($conditions) {
@@ -1033,7 +1019,7 @@ function redirect_page_cache_clear(Redirect $redirect) {
  * - If the PHP entry point is the root index.php file.
  * - If PHP is not running as CLI.
  * - If the site is not offline or in install/update mode.
- * - If the curerent page is not an admin page (check can be disabled).
+ * - If the current page is not an admin page (check can be disabled).
  * - If the current request does not have any POST data since a redirect
  *   may interrupt form submission.
  *
@@ -1042,9 +1028,7 @@ function redirect_page_cache_clear(Redirect $redirect) {
  */
 function redirect_can_redirect() {
   $can_redirect = &backdrop_static(__FUNCTION__);
-  $config = config('redirect.settings');
   if (!isset($can_redirect)) {
-    $path = current_path();
     $can_redirect = TRUE;
 
     if ($_SERVER['SCRIPT_NAME'] != $GLOBALS['base_path'] . 'index.php') {
@@ -1061,10 +1045,6 @@ function redirect_can_redirect() {
     }
     elseif ((state_get('maintenance_mode', 0) || defined('MAINTENANCE_MODE')) && !user_access('access site in maintenance mode')) {
       // Do not redirect in offline or maintenance mode.
-      $can_redirect = FALSE;
-    }
-    elseif (!$config->get('global_admin_paths') && path_is_admin($path)) {
-      // Do not redirect on admin paths.
       $can_redirect = FALSE;
     }
   }

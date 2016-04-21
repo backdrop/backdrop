@@ -40,7 +40,7 @@ function redirect_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'description' => 'The source path to redirect from.',
+        'description' => 'The source path from which to redirect.',
       ),
       'source_options' => array(
         'type' => 'text',
@@ -52,7 +52,7 @@ function redirect_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'description' => 'The destination path to redirect to.',
+        'description' => 'The destination path to which the user will be redirected.',
       ),
       'redirect_options' => array(
         'type' => 'text',
@@ -118,11 +118,6 @@ function redirect_update_1000() {
   $config->set('passthrough_querystring', update_variable_get('redirect_passthrough_querystring', TRUE));
   $config->set('default_status_code', update_variable_get('redirect_default_status_code', '301'));
   $config->set('purge_inactive', update_variable_get('redirect_purge_inactive', FALSE));
-  $config->set('global_home', update_variable_get('redirect_global_home', TRUE));
-  $config->set('global_clean', update_variable_get('redirect_global_clean', TRUE));
-  $config->set('global_canonical', update_variable_get('redirect_global_canonical', TRUE));
-  $config->set('global_deslash', update_variable_get('redirect_global_deslash', FALSE));
-  $config->set('global_admin_paths', update_variable_get('redirect_global_admin_paths', FALSE));
   $config->save();
 
   // Remove old variables.
@@ -132,11 +127,6 @@ function redirect_update_1000() {
   update_variable_del('redirect_default_status_code');
   update_variable_del('redirect_page_cache');
   update_variable_del('redirect_purge_inactive');
-  update_variable_del('redirect_global_home');
-  update_variable_del('redirect_global_clean');
-  update_variable_del('redirect_global_canonical');
-  update_variable_del('redirect_global_deslash');
-  update_variable_del('redirect_global_admin_paths');
 }
 
 /**

@@ -1,5 +1,10 @@
-
+/**
+ * @file
+ * Attaches behaviors for the Redirect module.
+ */
 (function ($) {
+
+"use strict";
 
 Backdrop.behaviors.redirectFieldsetSummaries = {
   attach: function (context) {
