@@ -1211,6 +1211,9 @@ function node_permission() {
     'view own unpublished content' => array(
       'title' => t('View own unpublished content'),
     ),
+    'view any unpublished content' => array(
+      'title' => t('View any unpublished content'),
+    ),
     'view revisions' => array(
       'title' => t('View content revisions'),
     ),
@@ -1921,11 +1924,14 @@ function node_block_configure($delta = '', $settings = array()) {
 function node_get_recent($number = 10) {
   $query = db_select('node', 'n');
 
-  if (!user_access('bypass node access')) {
-    // If the user is able to view their own unpublished nodes, allow them
-    // to see these in addition to published nodes. Check that they actually
-    // have some unpublished nodes to view before adding the condition.
-    if (user_access('view own unpublished content') && $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status', array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol()) {
+  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
+    // If the user is able to view unpublished nodes, allow them to see these
+    // in addition to published nodes. Check that they actually have some
+    // unpublished nodes to view before adding the condition.
+    // Note: this query still ignores unpublished by type permissions.
+    // See: https://github.com/backdrop/backdrop-issues/issues/146.
+    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status', array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    if (user_access('view own unpublished content') && $own_unpublished) {
       $query->condition(db_or()
         ->condition('n.status', NODE_PUBLISHED)
         ->condition('n.nid', $own_unpublished, 'IN')
@@ -2566,6 +2572,9 @@ function node_list_permissions($type) {
     "delete any $type content" => array(
       'title' => t('%type_name: Delete any content', array('%type_name' => $info->name)),
     ),
+    "view any unpublished $type content" => array(
+      'title' => t('%type_name: View any unpublished content', array('%type_name' => $info->name)),
+    ),
   );
 
   return $perms;
@@ -2912,6 +2921,40 @@ function _node_query_node_access_alter($query, $type) {
 }
 
 /**
+ * Returns the user's view_unpublished permissions in the following format:
+ *  $perms['any'] = TRUE if any of the below is TRUE, otherwise FALSE.
+ *  $perms['full'] = TRUE if "view any unpublished content" is set.
+ *  $perms['content_type'] = array of content types and the user's
+ *    associated view unpublished permission.
+*/
+function node_unpublished_user_permsissions() {
+  $permissions = FALSE;
+  $permissions['full'] = user_access('view any unpublished content') ? TRUE : FALSE;
+
+  foreach (node_permissions_get_configured_types() as $type) {
+    $type = check_plain($info->type);
+    $permission = "view any unpublished $type content";
+    $permissions['content_type'][$machine_type] = user_access($permission) ? TRUE : FALSE;
+  }
+
+  _node_in_array_r(TRUE, $permissions, TRUE) ? $permissions['any'] = TRUE : $permissions['any'] = FALSE;
+
+  return $permissions;
+}
+
+/**
+ * Utility function, multidimensional in_array().
+*/
+function _node_in_array_r($needle, $haystack, $strict = TRUE) {
+  foreach ($haystack as $item) {
+    if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && _vup_in_array_r($needle, $item, $strict))) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
  * Gets the list of node access grants and writes them to the database.
  *
  * This function is called when a node is saved, and can also be called by
@@ -2928,7 +2971,37 @@ function _node_query_node_access_alter($query, $type) {
  *   new ones. Defaults to TRUE.
  */
 function node_access_acquire_grants(Node $node, $delete = TRUE) {
-  $grants = module_invoke_all('node_access_records', $node);
+  // We only care about the node if is unpublished. If not, it is
+  // treated just like any other node and we completely ignore it.
+  $grants = array();
+  if ($node->status == 0) {
+    // Unpublished nodes should be viewable to all editors.
+    $grants[] = array(
+      'realm' => 'view_unpublished_content',
+      'gid' => 1,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
+    $grants[] = array(
+      'realm' => 'view_unpublished_' . $node->type . '_content',
+      'gid' => 1,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
+    $grants[] = array(
+      'realm' => 'view_unpublished_author',
+      'gid' => $node->uid,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
+  }
+  $grants = array_merge($grants, module_invoke_all('node_access_records', $node));
   // Let modules alter the grants.
   backdrop_alter('node_access_records', $grants, $node);
   // If no grants are set and the node is published, then use the default grant.
