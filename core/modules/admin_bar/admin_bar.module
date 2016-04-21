@@ -294,13 +294,7 @@ function admin_bar_js_cache() {
   $cache = backdrop_page_get_cache();
   if (is_object($cache)) {
     backdrop_add_http_header('X-Backdrop-Cache', 'HIT');
-    // Restore the metadata cached with the page.
-    $_GET['q'] = $cache->data['path'];
-    date_default_timezone_set(backdrop_get_user_timezone());
-
     backdrop_serve_page_from_cache($cache);
-
-    // We are done.
     exit;
   }
 

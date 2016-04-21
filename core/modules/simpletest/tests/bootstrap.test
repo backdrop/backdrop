@@ -254,6 +254,41 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate, post-check=0, pre-check=0', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
+    $this->backdropLogout();
+
+    // Check that 403 pages are refreshed properly after caches expire.
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Access granted by default on first page load.');
+
+    // Disable access.
+    state_set('system_test_access', FALSE);
+
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Background fetch copy served after blocking access.');
+    $this->assertText(t('Access granted'), 'Access granted page title shown.');
+
+    // Fresh copy should now be a 403.
+    sleep(1);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(403, 'Access denied on basic callback on fresh copy.');
+    $this->assertText(t('Access denied'), 'Access denied page title shown.');
+
+    // Enable access.
+    state_set('system_test_access', TRUE);
+
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(403, 'Background fetch copy served after granting access.');
+    $this->assertText(t('Access denied'), 'Access denied page title shown.');
+
+    // Fresh copy should now be a 200.
+    sleep(1);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Access granted on basic callback on fresh copy.');
+    $this->assertText(t('Access granted'), 'Access granted page title shown.');
   }
 
   /**
