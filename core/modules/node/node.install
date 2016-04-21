@@ -1088,6 +1088,13 @@ function node_update_1011() {
 }
 
 /**
+ * Rebuild node access to account for view unpublished.
+ */
+function node_update_1012() {
+  node_access_needs_rebuild(TRUE);
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
