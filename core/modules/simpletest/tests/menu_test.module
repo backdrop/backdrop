@@ -21,6 +21,7 @@ function menu_test_menu() {
     'page callback' => 'menu_test_callback',
     'type' => MENU_CALLBACK,
     'access arguments' => array('access content'),
+    'menu_name' => 'main-menu',
   );
   // Use FALSE as 'title callback' to bypass t().
   $items['menu_no_title_callback'] = array(
@@ -29,6 +30,7 @@ function menu_test_menu() {
     'title arguments' => array('@placeholder' => 'some other text'),
     'page callback' => 'menu_test_callback',
     'access arguments' => array('access content'),
+    'menu_name' => 'main-menu',
   );
 
   // Hidden link for menu_link_maintain tests
@@ -41,6 +43,7 @@ function menu_test_menu() {
   $items['menu-test/hierarchy/parent'] = array(
     'title' => 'Parent menu router',
     'page callback' => 'node_page_default',
+    'menu_name' => 'main-menu',
   );
   $items['menu-test/hierarchy/parent/child'] = array(
     'title' => 'Child menu router',
@@ -86,6 +89,7 @@ function menu_test_menu() {
     'title' => 'Menu test root',
     'page callback' => 'node_page_default',
     'access arguments' => array('access content'),
+    'menu_name' => 'main-menu',
   );
   $items['menu-test/hidden'] = array(
     'title' => 'Hidden test root',

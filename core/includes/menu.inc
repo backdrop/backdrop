@@ -2820,7 +2820,7 @@ function _menu_link_build($item) {
   // the menu links generated automatically from entries in {menu_router}.
   $item['module'] = 'system';
   $item += array(
-    'menu_name' => 'main-menu',
+    'menu_name' => 'internal',
     'link_title' => $item['title'],
     'link_path' => $item['path'],
     'hidden' => 0,
