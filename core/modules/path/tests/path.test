@@ -518,3 +518,60 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
     $this->assertText(t('Add language'), 'Page contains the add language text');
   }
 }
+
+/**
+ * Tests that path hooks are invoked.
+ */
+class PathHooksTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('node', 'path', 'path_test'));
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'delete own page content', 'administer url aliases', 'create url aliases'));
+    $this->backdropLogin($web_user);
+  }
+
+  function testPathHooks() {
+    // Create test node.
+    $node1 = $this->backdropCreateNode();
+
+    // Generate two test aliases.
+    $alias1 = $this->randomName(8);
+    $alias2 = $this->randomName(8);
+
+    // Insert aliases and test that hook_path_insert() is called.
+    $edit = array();
+    $edit['source'] = 'node/' . $node1->nid;
+    $edit['alias'] = $alias1;
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->assertRaw('path_test_path_insert(): ' . $edit['alias'] . ' => ' . $edit['source'], t('hook_path_insert() was called.'));
+
+    $edit['alias'] = $alias2;
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+
+    // Extract the path ID from the second path alias.
+    $inserted_path = state_get('path_test_inserted_path', array());
+    $pid2 = $inserted_path['pid'];
+
+    // Update the second path alias and test that hook_path_update() is called.
+    $edit['alias'] = $alias2 = $this->randomName(8);
+    $this->backdropPost('admin/config/search/path/edit/' . $pid2, $edit, t('Save URL alias'));
+    $this->assertRaw('path_test_path_update(): ' . $edit['alias'] . ' => ' . $edit['source'], t('hook_path_update() was called.'));
+
+    // Delete the node and test that hook_path_delete() is called once for each
+    // path alias.
+    $this->backdropPost('node/' . $node1->nid . '/delete', array(), t('Delete'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias1 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the first path alias.'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias2 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the second path alias.'));
+
+    // Test that hook_path_delete() is not called if the node has no path
+    // aliases.
+    $node2 = $this->backdropCreateNode();
+    $this->backdropPost('node/' . $node2->nid . '/delete', array(), t('Delete'));
+    $this->assertNoRaw('path_test_path_delete()', t('hook_path_delete() was not called.'));
+  }
+}

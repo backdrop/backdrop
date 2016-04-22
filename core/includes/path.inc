@@ -460,14 +460,12 @@ function path_delete($criteria) {
   if (!is_array($criteria)) {
     $criteria = array('pid' => $criteria);
   }
-  $path = path_load($criteria);
-  $query = db_delete('url_alias');
-  foreach ($criteria as $field => $value) {
-    $query->condition($field, $value);
+  // Load and then delete each path until there are no more aliases left.
+  while ($path = path_load($criteria)) {
+    module_invoke_all('path_delete', $path);
+    backdrop_clear_path_cache($path['source']);
+    db_delete('url_alias')->condition('pid', $path['pid'])->execute();
   }
-  $query->execute();
-  module_invoke_all('path_delete', $path);
-  backdrop_clear_path_cache($path['source']);
 }
 
 /**

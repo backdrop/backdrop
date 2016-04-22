@@ -342,16 +342,11 @@ function redirect_path_update(array $path) {
 /**
  * Implements hook_path_delete().
  */
-function redirect_path_delete($path) {
+function redirect_path_delete(array $path) {
   if (!config_get('redirect.settings', 'auto_redirect')) {
     return;
   }
   elseif (isset($path['redirect']) && !$path['redirect']) {
-    return;
-  }
-  elseif (empty($path)) {
-    // @todo Remove this condition and allow $path to use an array type hint
-    // when http://drupal.org/node/1025904 is fixed.
     return;
   }
 
@@ -661,8 +656,8 @@ function redirect_validate(Redirect $redirect, $form, &$form_state) {
 /**
  * Save an URL redirect.
  *
- * @param $redirect
- *   The URL redirect object to be saved. If $redirect->rid is omitted (or
+ * @param Redirect $redirect
+ *   The Redirect object to be saved. If $redirect->rid is omitted (or
  *   $redirect->is_new is TRUE), a new redirect will be added.
  *
  * @ingroup redirect_api
@@ -710,7 +705,7 @@ function redirect_save(Redirect $redirect) {
     redirect_load_multiple(array(), array(), TRUE);
 
     // Ignore slave server temporarily to give time for the
-    // saved node to be propagated to the slave.
+    // saved redirect to be propagated to the slave.
     db_ignore_slave();
   }
   catch (Exception $e) {
@@ -976,42 +971,6 @@ function redirect_page_cache_clear(Redirect $redirect) {
   cache('page')->deletePrefix($path);
 }
 
-// TODO: @gff commented this out per https://github.com/backdrop/backdrop/pull/1249#discussion_r52810547
-// if redirect module is still working without redirect_load_entity_from_path()
-// and the above function can not be fixed, let's remove it from the codebase.
-/**
- * Given a path determine if it is an entity default path.
- *
- * @param $path
- *   The internal path. The id of the entity should be in the string as '[id]'.
- * @return
- *   An array with the entity type and the loaded entity object.
- */
-// function redirect_load_entity_from_path($path) {
-//   $entity_paths = &backdrop_static(__FUNCTION__);
-//
-//   if (!isset($entity_paths)) {
-//     $entity_paths = array();
-//     foreach (entity_get_info() as $entity_type => $entity_info) {
-//       if (isset($entity_info['default path'])) {
-//         $default_path = $entity_info['default path'];
-//         $default_path = preg_quote($default_path, '/');
-//         $default_path = str_replace(preg_quote('%' . $entity_type, '/'), '(\d+)', $default_path);
-//         $entity_paths[$entity_type] = $default_path;
-//       }
-//     }
-//   }
-//
-//   foreach ($entity_paths as $entity_type => $default_path) {
-//     if (preg_match("/^{$default_path}$/", $path, $matches)) {
-//       if ($entity = entity_load($entity_type, array($matches[1]))) {
-//         return array('entity_type' => $entity_type, 'entity' => reset($entity));
-//       }
-//       break;
-//     }
-//   }
-// }
-
 /**
  * Check the ability to perform redirects with the current request context.
  *
@@ -1104,28 +1063,6 @@ function redirect_sort_recursive(&$array, $callback = 'sort') {
     }
   }
   return $result;
-}
-
-/**
- * Load a language object by its language code.
- * @gff take this function out and replace calls with language_load().
- *
- * @todo Remove when http://drupal.org/node/660736 is fixed in Drupal core.
- *
- * @param $langcode
- *   A language code. If not provided the default language will be returned.
- * @return
- *   A language object.
- */
-function redirect_language_load($langcode = LANGUAGE_NONE) {
-  $languages = &backdrop_static(__FUNCTION__);
-
-  if (!isset($languages)) {
-    $languages = language_list();
-    $languages[LANGUAGE_NONE] = NULL;
-  }
-
-  return isset($languages[$langcode]) ? $languages[$langcode] : NULL;
 }
 
 /**

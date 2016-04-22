@@ -78,7 +78,7 @@ function redirect_list_form($form, &$form_state) {
   $rows = array();
   foreach ($redirects as $rid => $redirect) {
     $row = array();
-    $redirect->source_options = array_merge($redirect->source_options, array('alias' => TRUE, 'langcode' => redirect_language_load($redirect->langcode)));
+    $redirect->source_options = array_merge($redirect->source_options, array('alias' => TRUE));
     $source_url = redirect_url($redirect->source, $redirect->source_options);
     $redirect_url = redirect_url($redirect->redirect, array_merge($redirect->redirect_options, array('alias' => TRUE)));
     backdrop_alter('redirect_url', $redirect->source, $redirect->source_options);
@@ -861,7 +861,7 @@ function redirect_list_table($redirects, $header) {
   $rows = array();
   foreach ($redirects as $rid => $redirect) {
     $row = array();
-    $redirect->source_options = array_merge($redirect->source_options, array('alias' => TRUE, 'language' => redirect_language_load($redirect->langcode)));
+    $redirect->source_options = array_merge($redirect->source_options, array('alias' => TRUE, 'language' => language_load($redirect->langcode)));
     $source_url = redirect_url($redirect->source, $redirect->source_options);
     $redirect_url = redirect_url($redirect->redirect, array_merge($redirect->redirect_options, array('alias' => TRUE)));
     $row['data']['source'] = l($source_url, $redirect->source, $redirect->source_options);
