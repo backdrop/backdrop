@@ -33,9 +33,11 @@ class redirect_handler_field_redirect_link_edit extends views_handler_field {
 
   function render($values) {
     $rid = $values->{$this->aliases['rid']};
+    $output = '';
     if (($redirect = redirect_load($rid)) && redirect_access('update', $redirect)) {
       $text = !empty($this->options['text']) ? $this->options['text'] : t('Edit');
-      return l($text, "admin/config/search/redirect/edit/" . $rid, array('query' => backdrop_get_destination()));
+      $output = l($text, "admin/config/search/redirect/edit/" . $rid, array('query' => backdrop_get_destination()));
     }
+    return $output;
   }
 }

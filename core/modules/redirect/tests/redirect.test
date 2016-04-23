@@ -38,10 +38,12 @@ class RedirectTestHelper extends BackdropWebTestCase {
   /**
    * Add an URL redirection.
    *
-   * @param $source
+   * @param string $source_path
    *   A source path.
-   * @param $redirect
+   * @param string $redirect_path
    *   A redirect path.
+   * @param array $redirect
+   *   An array of values from which a Redirect object will be created.
    *
    * @return Redirect
    *   A redirect object.

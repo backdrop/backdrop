@@ -85,6 +85,11 @@ class Redirect {
   public $count = 0;
 
   /**
+   * A timestamp of the last time this redirect was accessed.
+   */
+  public $access = 0;
+
+  /**
    * Hashes are an alternative ID by which a redirect may be loaded.
    *
    * @var string
@@ -122,7 +127,7 @@ class Redirect {
       $this->redirect_options = unserialize($this->redirect_options);
     }
 
-    module_invoke_all('redirect_prepare', $this);
+    module_invoke_all('redirect_prepare', $this, $values);
   }
 
   /**

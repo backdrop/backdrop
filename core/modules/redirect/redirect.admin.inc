@@ -151,13 +151,20 @@ function redirect_list_form($form, &$form_state) {
 }
 
 /**
- * Return a form to filter URL redirects.
+ * Return a partial form to filter URL redirects.
  *
+ * @param string $filter_value
+ *   The default value for the filter textfield.
+ *
+ * @return array
+ *   The partial form for filtering redirects.
+ *
+ * @see redirect_list_form().
  * @see redirect_list_filter_form_submit()
  *
  * @ingroup forms
  */
-function redirect_list_filter_form($keys = '') {
+function redirect_list_filter_form($filter_value = '') {
   $form['#attributes'] = array('class' => array('search-form'));
   $form['basic'] = array(
     '#type' => 'fieldset',
@@ -167,7 +174,7 @@ function redirect_list_filter_form($keys = '') {
   $form['basic']['filter'] = array(
     '#type' => 'textfield',
     '#title' => '',
-    '#default_value' => $keys,
+    '#default_value' => $filter_value,
     '#maxlength' => 128,
     '#size' => 25,
   );
@@ -176,7 +183,7 @@ function redirect_list_filter_form($keys = '') {
     '#value' => t('Filter'),
     '#submit' => array('redirect_list_filter_form_submit'),
   );
-  if ($keys) {
+  if ($filter_value) {
     $form['basic']['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset'),
@@ -203,12 +210,14 @@ function redirect_list_filter_form_reset($form, &$form_state) {
 /**
  * Extends a query object for URL redirect filters.
  *
- * @param $query
+ * @param QueryAlterableInterface $query
  *   Query object that should be filtered.
- * @param $keys
- *   The filter string to use.
+ * @param array $fields
+ *   The fields within the query that should be checked for the $keys value.
+ * @param string $keys
+ *   The filter string on which asterisks should be replaced with
  */
-function redirect_build_filter_query(QueryAlterableInterface $query, array $fields, $keys = '') {
+function redirect_build_filter_query(SelectQueryInterface $query, array $fields, $keys = '') {
   if ($keys && $fields) {
     // Replace wildcards with PDO wildcards.
     $conditions = db_or();
@@ -271,6 +280,11 @@ function redirect_list_form_operations_submit($form, &$form_state) {
 /**
  * Form callback; Confirm a bulk operation on a list of redirects.
  *
+ * @param string $operation
+ *   An operation string from hook_redirect_operations().
+ * @param int[] $rids
+ *   An array of redirect IDs on which the operation will be performed.
+ *
  * @see redirect_list_form()
  */
 function redirect_list_form_operations_confirm_form($form, &$form_state, $operation, $rids) {
@@ -317,6 +331,9 @@ function redirect_add_redirect_page() {
 
 /**
  * Form builder to add or edit an URL redirect.
+ *
+ * @param Redirect|NULL $redirect
+ *   The redirect object to be edited or NULL if creating a new redirect.
  *
  * @see redirect_element_validate_source()
  * @see redirect_element_validate_redirect()
@@ -465,7 +482,7 @@ function redirect_element_validate_source($element, &$form_state) {
 
   $parsed_value = _redirect_extract_url_options($element, $form_state);
 
-  // Disallow redirections from the frontpage.
+  // Disallow redirects from the front page.
   if ($parsed_value['path'] === '<front>') {
     form_error($element, t('The source path cannot be the front page.'));
   }
@@ -597,12 +614,15 @@ function redirect_edit_form_submit($form, &$form_state) {
 /**
  * Form builder to delete an URL redirect.
  *
+ * @param Redirect $redirect
+ *   The redirect object to be deleted.
+ *
  * @see redirect_delete_form()
  * @see confirm_form()
  *
  * @ingroup forms
  */
-function redirect_delete_form($form, &$form_state, $redirect) {
+function redirect_delete_form($form, &$form_state, Redirect $redirect) {
   $form['rid'] = array(
     '#type' => 'value',
     '#value' => $redirect->rid,
@@ -647,7 +667,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Retain query string through redirect.'),
     '#default_value' => $config->get('passthrough_querystring'),
-    '#description' => t('For example, given a redirect from %source to %redirect, if a user visits %sourcequery they would be redirected to %redirectquery. The query strings in the redirection will always take precedence over the current query string.', array('%source' => 'source-path', '%redirect' => 'node?a=apples', '%sourcequery' => 'source-path?a=alligators&b=bananas', '%redirectquery' => 'node?a=apples&b=bananas')),
+    '#description' => t('For example, given a redirect from %source to %redirect, if a user visits %source_query they would be redirected to %redirect_query. The query strings in the redirection will always take precedence over the current query string.', array('%source' => 'source-path', '%redirect' => 'node?a=apples', '%source_query' => 'source-path?a=alligators&b=bananas', '%redirect_query' => 'node?a=apples&b=bananas')),
   );
   $form['additional_statuses'] = array(
     '#type' => 'radios',
@@ -773,11 +793,14 @@ function redirect_404_list($form = NULL) {
 /**
  * Return a form to filter URL redirects.
  *
+ * @param string $filter_value
+ *   The current string by which the list of 404s will be filtered.
+ *
  * @see redirect_list_filter_form_submit()
  *
  * @ingroup forms
  */
-function redirect_list_404_filter_form($form, &$form_state, $keys = '') {
+function redirect_list_404_filter_form($form, &$form_state, $filter_value = '') {
   $form['#attributes'] = array('class' => array('search-form'));
   $form['help'] = array(
     '#markup' => '<p>' .
@@ -792,7 +815,7 @@ function redirect_list_404_filter_form($form, &$form_state, $keys = '') {
   $form['basic']['filter'] = array(
     '#type' => 'textfield',
     '#title' => '',
-    '#default_value' => $keys,
+    '#default_value' => $filter_value,
     '#maxlength' => 128,
     '#size' => 25,
   );
@@ -801,7 +824,7 @@ function redirect_list_404_filter_form($form, &$form_state, $keys = '') {
     '#value' => t('Filter'),
     '#submit' => array('redirect_list_404_filter_form_submit'),
   );
-  if ($keys) {
+  if ($filter_value) {
     $form['basic']['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset'),
@@ -828,7 +851,7 @@ function redirect_list_404_filter_form_reset($form, &$form_state) {
 /**
  * Display a list of redirects. Used on forms when editing an entity.
  *
- * @param Redirects[] $redirects
+ * @param Redirect[] $redirects
  *   An array of Redirect objects.
  * @param $header
  *   The table header columns for the table.

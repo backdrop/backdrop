@@ -8,43 +8,25 @@
 /**
  * @defgroup redirect_api_hooks Redirect API Hooks
  * @{
- * During redirect operations (create, update, view, delete, etc.), there are
- * several sets of hooks that get invoked to allow modules to modify the
- * redirect operation:
- * - All-module hooks: Generic hooks for "redirect" operations. These are
- *   always invoked on all modules.
- * - Entity hooks: Generic hooks for "entity" operations. These are always
- *   invoked on all modules.
+ * Redirects may be created by end-users to manually redirect from one URL on
+ * the site to another one (or to an external URL). For example the path
+ * "about" may be redirected to "pages/about-us" after a site redesign. The old
+ * URLs should be redirect to the new ones to maintain search engine rankings,
+ * existing links, and bookmarks to the old URL.
  *
- * Here is a list of the redirect and entity hooks that are invoked, and other
- * steps that take place during redirect operations:
- * - Creating a new redirect (calling redirect_save() on a new redirect):
- *   - hook_redirect_presave() (all)
- *   - Redirect written to the database
- *   - hook_redirect_insert() (all)
- *   - hook_entity_insert() (all)
- * - Updating an existing redirect (calling redirect_save() on an existing redirect):
- *   - hook_redirect_presave() (all)
- *   - Redirect written to the database
- *   - hook_redirect_update() (all)
- *   - hook_entity_update() (all)
- * - Loading a redirect (calling redirect_load(), redirect_load_multiple(), or
- *   entity_load() with $entity_type of 'redirect'):
- *   - Redirect information is read from database.
- *   - hook_entity_load() (all)
- *   - hook_redirect_load() (all)
- * - Deleting a redirect (calling redirect_delete() or redirect_delete_multiple()):
- *   - Redirect is loaded (see Loading section above)
- *   - Redirect information is deleted from database
- *   - hook_redirect_delete() (all)
- *   - hook_entity_delete() (all)
- * - Preparing a redirect for editing (note that if it's
- *   an existing redirect, it will already be loaded; see the Loading section
- *   above):
- *   - hook_redirect_prepare() (all)
- * - Validating a redirect during editing form submit (calling
- *   redirect_form_validate()):
- *   - hook_redirect_validate() (all)
+ * Redirects are stored in the database in the "redirect" table. Loading and
+ * saving of redirects should be done through the Redirect API to ensure modules
+ * responding to the modification of redirects also have an opportunity to
+ * make adjustments as needed. The Redirect object is used to wrap around all
+ * the operations that can be done on redirects. It is recommended that
+ * redirects be loaded using one of the existing functions for loading, or
+ * if creating a new redirect, created by instantiating a new Redirect object.
+ *
+ * @see Redirect
+ * @see redirect_load()
+ * @see redirect_load_multiple()
+ * @see redirect_load_by_source()
+ *
  * @}
  */
 
@@ -57,15 +39,12 @@
  * Act on redirects being loaded from the database.
  *
  * This hook is invoked during redirect loading, which is handled by
- * entity_load(), via classes RedirectController and
- * DefaultEntityController. After the redirect information is read from
- * the database or the entity cache, hook_entity_load() is invoked on all
- * implementing modules, and then hook_redirect_load() is invoked on all
- * implementing modules.
+ * redirect_load_multiple(). After the redirect information is read from
+ * the database hook_redirect_load() is invoked on all implementing modules.
  *
  * This hook should only be used to add information that is not in the redirect
  * table, not to replace information that is in that table (which could
- * interfere with the entity cache). For performance reasons, information for
+ * interfere with saving). For performance reasons, information for
  * all available redirects should be loaded in a single query where possible.
  *
  * The $types parameter allows for your module to have an early return (for
@@ -123,7 +102,7 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
  * block access, return REDIRECT_ACCESS_IGNORE or simply return nothing.
  * Blindly returning FALSE will break other redirect access modules.
  *
- * @param $redirect
+ * @param Redirect|string $redirect
  *   The redirect object on which the operation is to be performed, or, if it
  *   does not yet exist, the type of redirect to be created.
  * @param $op
@@ -135,10 +114,10 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
  *   A user object representing the user for whom the operation is to be
  *   performed.
  *
- * @return
+ * @return string|NULL
  *   REDIRECT_ACCESS_ALLOW if the operation is to be allowed;
  *   REDIRECT_ACCESS_DENY if the operation is to be denied;
- *   REDIRECT_ACCESSS_IGNORE to not affect this operation at all.
+ *   REDIRECT_ACCESS_IGNORE to not affect this operation at all.
  *
  * @see redirect_access()
  * @ingroup redirect_api_hooks
@@ -171,16 +150,24 @@ function hook_redirect_access($op, $redirect, $account) {
 /**
  * Act on a redirect object about to be shown on the add/edit form.
  *
- * This hook is invoked from the Redirect object contructor in
+ * This hook is invoked from the Redirect object constructor in
  * Redirect::__construct().
  *
- * @param $redirect
- *   The redirect that is about to be shown on the add/edit form.
+ * @param Redirect $redirect
+ *   A newly initialized redirect object. Likely to be shown on the form for
+ *   adding or editing a redirect.
+ * @param array $values
+ *   The default values for the Redirect from the database if editing an
+ *   existing Redirect.
  *
  * @ingroup redirect_api_hooks
  */
-function hook_redirect_prepare($redirect) {
-
+function hook_redirect_prepare(Redirect $redirect, array $values) {
+  // Change the default type to be a 302 temporary redirect instead of a 301
+  // permanent redirect.
+  if (empty($values['type'])) {
+    $redirect->type = 302;
+  }
 }
 
 /**
@@ -289,6 +276,27 @@ function hook_redirect_delete($redirect) {
  * @ingroup redirect_api_hooks
  */
 function hook_redirect_alter($redirect) {
+  // Make any redirect going to the homepage considered temporary.
+  if ($redirect->redirect = '<front>') {
+    $redirect->type = 302;
+  }
+}
+
+/**
+ * Provide additional operations that may be done on redirects.
+ *
+ * @return array
+ *   An array of callback information for executing the operation.
+ */
+function hook_redirect_operations() {
+  // Example from redirect_redirect_operations():
+  $operations['delete'] = array(
+    'action' => t('Delete'),
+    'action_past' => t('Deleted'),
+    'callback' => 'redirect_delete_multiple',
+    'confirm' => TRUE,
+  );
+  return $operations;
 }
 
 /**

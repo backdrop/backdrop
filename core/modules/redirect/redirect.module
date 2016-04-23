@@ -27,27 +27,6 @@ define('REDIRECT_ACCESS_DENY', 'deny');
 define('REDIRECT_ACCESS_IGNORE', NULL);
 
 /**
- * Implements hook_entity_info().
- */
-function redirect_entity_info() {
-  $info['redirect'] = array(
-    'label' => t('Redirect'),
-    'base table' => 'redirect',
-    'entity class' => 'Redirect',
-    'controller class' => 'RedirectController',
-    'entity keys' => array(
-      'id' => 'rid',
-      'bundle' => 'type',
-    ),
-    'fieldable' => FALSE,
-    'uuid' => FALSE,
-    'redirect' => FALSE,
-  );
-
-  return $info;
-}
-
-/**
  * Implements hook_hook_info().
  */
 function redirect_hook_info() {
@@ -72,7 +51,7 @@ function redirect_hook_info() {
  */
 function redirect_permission() {
   $permissions['administer redirects'] = array(
-    'title' => t('Administer URL redirections'),
+    'title' => t('Administer URL redirects'),
   );
   return $permissions;
 }
@@ -131,7 +110,7 @@ function redirect_menu() {
   );
 
   // Add an action link to the 404 page.
-  $site_404 = config_get('system.c');
+  $site_404 = config_get('system.core', 'site_404');
   if (empty($path)) {
     $site_404 = 'system/404';
   }
@@ -207,7 +186,7 @@ function redirect_get_current_redirect() {
 function redirect_url_inbound_alter(&$path, $original_path, $path_language) {
   // If the inbound path has been changed, then attempt to find a redirect
   // matching the original path and save it for processing later in
-  // redirect_init(). For example, if the Sub-pathauto module changes the path
+  // redirect_init(). For example, if the Sub-Pathauto module changes the path
   // 'foo/redirect' to 'node/1/redirect', and there is a redirect enabled for
   // the path 'foo/redirect', then redirect_init() would normally fail since it
   // would not find a match.
@@ -226,9 +205,11 @@ function redirect_url_inbound_alter(&$path, $original_path, $path_language) {
  * @param $entity_type
  *   An entity type.
  *
- * @return
- *   TRUE if the entity type has an uri callback and supports redirects, or
- *   FALSE otherwise.
+ * @return bool
+ *   TRUE if the entity type has specified that it supports redirects in
+ *   hook_entity_info(). FALSE otherwise.
+ *
+ * @see hook_entity_info()
  */
 function redirect_entity_type_supports_redirects($entity_type) {
   $types = &backdrop_static(__FUNCTION__);
@@ -518,7 +499,7 @@ function redirect_load_by_source($source, $langcode = LANGUAGE_NONE, array $quer
  * @param $reset
  *   Whether to reset the redirect_load_multiple cache.
  *
- * @return
+ * @return Redirect[]
  *   An array of URL redirect objects indexed by redirect IDs.
  *
  * @ingroup redirect_api
@@ -530,6 +511,7 @@ function redirect_load_multiple(array $rids = array(), array $conditions = array
   }
 
   $new_rids = array_diff($rids, array_keys($cached_redirects));
+  $added_redirects = array();
   if ($new_rids || $conditions) {
     $query = db_select('redirect')->fields('redirect');
     if ($rids) {
@@ -539,7 +521,6 @@ function redirect_load_multiple(array $rids = array(), array $conditions = array
       $query->condition($key, $value);
     }
     $rows = $query->execute()->fetchAllAssoc('rid', PDO::FETCH_ASSOC);
-    $added_redirects = array();
     foreach ($rows as $rid => $row) {
       if ($rows[$rid]) {
         $added_redirects[$rid] = new Redirect($row);
@@ -583,7 +564,7 @@ function redirect_load_multiple(array $rids = array(), array $conditions = array
  *   Optional, a user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function redirect_access($op, $redirect, $account = NULL) {
@@ -632,6 +613,9 @@ function redirect_access($op, $redirect, $account = NULL) {
 
 /**
  * Validate a redirect.
+ *
+ * @param Redirect $redirect
+ *   The Redirect object to be validated.
  */
 function redirect_validate(Redirect $redirect, $form, &$form_state) {
   // Check that there there are no redirect loops.
@@ -659,6 +643,12 @@ function redirect_validate(Redirect $redirect, $form, &$form_state) {
  * @param Redirect $redirect
  *   The Redirect object to be saved. If $redirect->rid is omitted (or
  *   $redirect->is_new is TRUE), a new redirect will be added.
+ *
+ * @return int
+ *   The constants SAVED_NEW or SAVED_UPDATED.
+ *
+ * @throws Exception
+ *   A generic exception if the redirect cannot be saved.
  *
  * @ingroup redirect_api
  */
@@ -720,14 +710,14 @@ function redirect_save(Redirect $redirect) {
 /**
  * Implements hook_redirect_insert().
  */
-function redirect_redirect_insert($redirect) {
+function redirect_redirect_insert(Redirect $redirect) {
   redirect_page_cache_clear($redirect);
 }
 
 /**
  * Implements hook_redirect_update().
  */
-function redirect_redirect_update($redirect) {
+function redirect_redirect_update(Redirect $redirect) {
   redirect_page_cache_clear($redirect);
 
   // Clear the page cache for the original redirect as well.
@@ -739,7 +729,7 @@ function redirect_redirect_update($redirect) {
 /**
  * Implements hook_redirect_delete().
  */
-function redirect_redirect_delete($redirect) {
+function redirect_redirect_delete(Redirect $redirect) {
   redirect_page_cache_clear($redirect);
 }
 
@@ -748,6 +738,12 @@ function redirect_redirect_delete($redirect) {
  *
  * @param $rid
  *   The ID of the redirect to delete.
+ *
+ * @return int
+ *   The constant SAVED_DELETED on success.
+ *
+ * @throws Exception
+ *   A generic exception if the redirects could not be deleted.
  *
  * @ingroup redirect_api
  */
@@ -814,6 +810,12 @@ function redirect_delete_by_entity_path($entity) {
  * @param $rids
  *   An array of redirect IDs to delete.
  *
+ * @return int
+ *   The constant SAVED_DELETED on success.
+ *
+ * @throws Exception
+ *   A generic exception if the redirects could not be deleted.
+ *
  * @ingroup redirect_api
  */
 function redirect_delete_multiple(array $rids) {
@@ -861,7 +863,7 @@ function redirect_purge_inactive_redirects(array $types = array('redirect'), $in
   }
   // If there is no interval at all, do not discard any redirects.
   if (empty($interval)) {
-    return;
+    return array();
   }
 
   $query = db_select('redirect');
@@ -918,8 +920,14 @@ function redirect_redirect($redirect = NULL) {
 
 /**
  * Redirect callback; perform an URL redirect.
+ *
+ * @param Redirect $redirect
+ *   The Redirect that should be executed.
+ *
+ * @return NULL
+ *   This function will end the execution of the current page.
  */
-function redirect_goto($redirect) {
+function redirect_goto(Redirect $redirect) {
   $redirect->redirect_options['absolute'] = TRUE;
   $url = url($redirect->redirect, $redirect->redirect_options);
   backdrop_add_http_header('Location', $url);
@@ -964,6 +972,9 @@ function redirect_hash(Redirect $redirect) {
 
 /**
  * Clear a page from the page cache.
+ *
+ * @param Redirect $redirect
+ *   The redirect upon which the cache-clear should be based.
  */
 function redirect_page_cache_clear(Redirect $redirect) {
   $path = url($redirect->source, array('absolute' => TRUE));
@@ -982,8 +993,8 @@ function redirect_page_cache_clear(Redirect $redirect) {
  * - If the current request does not have any POST data since a redirect
  *   may interrupt form submission.
  *
- * @return
- *   TRUE if redirections can be performed, or FALSE otherwise.
+ * @return bool
+ *   TRUE if redirects can be performed, or FALSE otherwise.
  */
 function redirect_can_redirect() {
   $can_redirect = &backdrop_static(__FUNCTION__);
@@ -1020,7 +1031,7 @@ function redirect_can_redirect() {
  *   The array that has the values.
  * @param $haystack
  *   The array that will be searched for values.
- * @return
+ * @return bool
  *   TRUE if all the elements of $match were found in $haystack, or FALSE
  *   otherwise.
  */
@@ -1045,7 +1056,7 @@ function redirect_compare_array_recursive($match, $haystack) {
 }
 
 /**
- * Sort an array recusively.
+ * Sort an array recursively.
  *
  * @param $array
  *   The array to sort, by reference.
@@ -1067,6 +1078,18 @@ function redirect_sort_recursive(&$array, $callback = 'sort') {
 
 /**
  * Build the URL of a redirect for display purposes only.
+ *
+ * @param string $path
+ *   The internal Backdrop path to be displayed.
+ * @param array $options
+ *   An array of options as would be passed into the url() function.
+ * @param bool|NULL $clean_url
+ *   Whether the returns string should use clean URLs or not. Defaults to the
+ *   site-wide setting for clean URLs.
+ *
+ * @return string
+ *   A string suitable for display. Note this is not yet escaped for HTML,
+ *   so check_plain() should still be used if printing to HTML.
  */
 function redirect_url($path, array $options = array(), $clean_url = NULL) {
   if (!isset($clean_url)) {
@@ -1117,12 +1140,32 @@ function redirect_url($path, array $options = array(), $clean_url = NULL) {
 }
 
 /**
- * Parse URLs into consituent parts.
- *  fragment, query, protocol, and URL.
+ * Parse URLs into component parts: fragment, query, protocol, and URL.
+ *
+ * This function extends the PHP parse_url() function. In addition to the return
+ * array normally provided by that function, this does additional parsing,
+ * including:
+ *   - Removing the hash symbol from the "fragment" value.
+ *   - Converting the "query" value into an array instead of a string.
+ *   - Adds an "https" value indicating an https scheme.
+ *   - Adds a "url" value that is suitable for passing into the url() function.
+ *     If given a full URL of the current site, the hostname, scheme, and port
+ *     will be stripped from this value. External URLs will be unaffected.
  *
  * @param string $url.
  *
  * @return array $parsed.
+ *   An array with the following keys:
+ *     - scheme: Usually "http" or "https".
+ *     - host: The hostname, e.g. "example.com".
+ *     - port: The port number.
+ *     - user: Any HTTP user in a URL such as user:pass@example.com.
+ *     - pass: Any HTTP password that is used with the "user".
+ *     - path: The path portion of the URL.
+ *     - query: An array of query string parameters.
+ *     - fragment: Any string after the hash (#) symbol.
+ *     - url: A local internal Backdrop path or a full external URL.
+ *     - https: Whether the URL starts with "https".
  */
 function redirect_parse_url($url) {
   $original_url = $url;
@@ -1249,9 +1292,8 @@ function locale_form_redirect_edit_form_alter(&$form, &$form_state) {
 /**
  * Implements hook_field_attach_form().
  */
-function redirect_field_attach_form($entity_type, Entity $entity, &$form, &$form_state, $langcode) {
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if (!empty($form['redirect']) || empty($id)) {
+function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  if (!empty($form['redirect']) || !empty($entity->is_new)) {
     return;
   }
 
@@ -1299,7 +1341,7 @@ function redirect_field_attach_form($entity_type, Entity $entity, &$form, &$form
   );
   if (redirect_access('create', 'redirect')) {
     $form['redirect']['actions']['#links']['add'] = array(
-      'title' => t('Add URL redirect to this @entitytype', array('@entitytype' => backdrop_strtolower($info['label']))),
+      'title' => t('Add URL redirect to this @type', array('@type' => backdrop_strtolower($info['label']))),
       'href' => 'admin/config/search/redirect/add',
       'query' => array_filter($redirect) + backdrop_get_destination(),
     );
