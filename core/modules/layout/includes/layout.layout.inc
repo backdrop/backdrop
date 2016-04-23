@@ -68,21 +68,32 @@ function layout_layout_context_info() {
 function layout_layout_access_info() {
   $entity_types = entity_get_info();
 
-  // Provide a bundle (type) plugin for each entity type.
+  // Provide type-specific plugins for each entity type.
   foreach ($entity_types as $entity_type => $entity_info) {
-    // Skip users, which don't support multiple types.
-    if (empty($entity_info['entity keys']['bundle'])) {
-      continue;
-    }
 
     // Create a key such as "node_type" or "comment_node_type".
-    $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
-    $bundle_label = array_key_exists('bundle label', $entity_info) ? $entity_info['bundle label'] : 'Type';
+    // Skip users, which don't support multiple types.
+    if (!empty($entity_info['entity keys']['bundle'])) {
+      $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
+      $bundle_label = array_key_exists('bundle label', $entity_info) ? $entity_info['bundle label'] : 'Type';
+      $info[$key] = array(
+        'title' => t('@entity: @bundle', array('@entity' => $entity_info['label'], '@bundle' => $bundle_label)),
+        'description' => t('Control access by @entity_type @bundle_label.', array('@entity_type' => $entity_type, '@bundle_label' => backdrop_strtolower($bundle_label))),
+        'entity_type' => $entity_type,
+        'class' => 'EntityBundleLayoutAccess',
+        'required contexts' => array(
+          $entity_type => $entity_type,
+        ),
+      );
+    }
+
+    // Create a entity id key such as "nid" or "cid".
+    $key = $entity_type . '_' . $entity_info['entity keys']['id'];
     $info[$key] = array(
-      'title' => t('@entity: @bundle', array('@entity' => $entity_info['label'], '@bundle' => $bundle_label)),
-      'description' => t('Control access by @entity_type @bundle_label.', array('@entity_type' => $entity_type, '@bundle_label' => backdrop_strtolower($bundle_label))),
+      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_info['label'], '@entity_id_key' => $key)),
+      'description' => t('Control access by @entity_type @entity_id_key.', array('@entity_type' => $entity_type, '@entity_id_key' => $key)),
       'entity_type' => $entity_type,
-      'class' => 'EntityBundleLayoutAccess',
+      'class' => 'EntityIDLayoutAccess',
       'required contexts' => array(
         $entity_type => $entity_type,
       ),

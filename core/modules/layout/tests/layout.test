@@ -353,9 +353,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test block conditions.
+   * Test block path and type conditions.
    */
-  function testBlockConditions() {
+  function testBlockPathTypeConditions() {
     // Create a new layout overriding node/%.
     $layout_name = strtolower($this->randomName());
     $layout_title = $this->randomString();
@@ -423,6 +423,89 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $second_post->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on post content when path does not match.');
+  }
+
+  /**
+   * Test block entity ID conditions.
+   */
+  function testBlockEntityIDConditions() {
+    // Create a new layout overriding node/%.
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout' => 'two_column',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Create another post node.
+    $second_post = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => $this->randomString(),
+    ));
+
+    // Add another testing block.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'node_nid',
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'entity_id' => $this->test_node1->nid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when node ID does not match.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Add another condition to show this block only for a particular user ID.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'user_uid',
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'entity_id' => $this->web_user->uid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    // Login as a the web user and test that the block is now shown.
+    $this->backdropLogin($this->web_user);
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown when user ID and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID and node ID does not match.');
   }
 
   /**

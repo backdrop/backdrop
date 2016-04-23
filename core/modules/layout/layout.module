@@ -640,6 +640,7 @@ function layout_autoload_info() {
     'LayoutAccessNegatable' => 'plugins/access/layout_access.inc',
     'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
     'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
+    'EntityIDLayoutAccess' => 'plugins/access/entity_id_layout_access.inc',
     'PathLayoutAccess' => 'plugins/access/path_layout_access.inc',
     'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
     'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
