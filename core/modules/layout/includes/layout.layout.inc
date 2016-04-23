@@ -35,7 +35,7 @@ function layout_layout_context_info() {
     'path placeholder' => '%user',
     'load callback' => 'user_load',
   );
-  $info['term'] = array(
+  $info['taxonomy_term'] = array(
     'title' => t('Term'),
     'class' => 'EntityLayoutContext',
     'menu paths' => array(
