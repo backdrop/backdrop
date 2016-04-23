@@ -330,3 +330,17 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+
+
+/**
+ * Include a local settings file after core variables are set.
+ *
+ * To make local development easier, you can add a file to place local settings,
+ * like CSS/JS aggregation and caching settings, you commonly change during
+ * development and have this file ignored in your Git repository. This way, any
+ * changes made to settings.php by core contributors can be pulled in without
+ * overwriting your local changes.
+ */
+if (file_exists(__DIR__ . '/settings.local.php')) {
+  include __DIR__ . '/settings.local.php';
+}

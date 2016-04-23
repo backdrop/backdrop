@@ -3,6 +3,7 @@
 
 # Ignore configuration files that may contain sensitive information.
 settings.php
+settings.*.php
 sites/*/settings*.php
 
 # Ignore paths that contain user-generated content.
