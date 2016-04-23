@@ -35,6 +35,16 @@ function layout_layout_context_info() {
     'path placeholder' => '%user',
     'load callback' => 'user_load',
   );
+  $info['taxonomy_term'] = array(
+    'title' => t('Term'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'taxonomy/term/%term',
+      'taxonomy/term/%term/view',
+    ),
+    'path placeholder' => '%term',
+    'load callback' => 'taxonomy_term_load',
+  );
   $info['overrides_path'] = array(
     'title' => t('Overrides path'),
     'description' => t('Layout overrides existing path provided by another module.'),
