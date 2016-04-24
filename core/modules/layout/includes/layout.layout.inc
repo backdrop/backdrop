@@ -117,6 +117,14 @@ function layout_layout_access_info() {
     'description' => t('Control access by the current path.'),
     'class' => 'PathLayoutAccess',
   );
+  $info['tag'] = array(
+    'title' => t('Tag'),
+    'description' => t('Control access by the given tag.'),
+    'class' => 'TagLayoutAccess',
+    'required contexts' => array(
+      'node' => 'node',
+    ),
+  );
   return $info;
 }
 

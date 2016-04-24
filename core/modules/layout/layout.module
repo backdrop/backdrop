@@ -643,6 +643,7 @@ function layout_autoload_info() {
     'PathLayoutAccess' => 'plugins/access/path_layout_access.inc',
     'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
     'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
+    'TagLayoutAccess' => 'plugins/access/tag_layout_access.inc',
 
     // Renderer handlers.
     'LayoutRendererEditor' => 'plugins/renderers/layout_renderer_editor.inc',
