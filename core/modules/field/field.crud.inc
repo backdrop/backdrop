@@ -913,7 +913,7 @@ function field_delete_instance($instance, $field_cleanup = TRUE) {
  * would look something like this:
  *
  * @code
- *   $entity = stdClass Object(
+ *   $entity = Node(array(
  *     [nid] => 37,
  *     [vid] => 37,
  *     [type] => 'story',
@@ -922,7 +922,7 @@ function field_delete_instance($instance, $field_cleanup = TRUE) {
  *         'value' => 'subtitle text',
  *       ),
  *     ),
- *   );
+ *   ));
  * @endcode
  *
  * See @link field Field API @endlink for information about the other parts of
