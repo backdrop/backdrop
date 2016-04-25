@@ -123,6 +123,12 @@ function layout_menu() {
     'page arguments' => array(4, 6, 7),
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/configure-region/%/%'] = array(
+    'title' => 'Configure region',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_configure_region_page', 4, 6, 7),
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
     'title' => 'Configure block',
     'load arguments' => array(4),
@@ -489,6 +495,9 @@ function layout_theme() {
     'layout_conditions' => array(
       'render element' => 'element',
     ) + $base,
+    'layout_region_inner' => array(
+      'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
+    ) + $base,
   );
 
   // Register all layouts.
@@ -525,22 +534,6 @@ function layout_theme() {
         $items[$style['block theme']]['template'] = $style['template'];
       }
     }
-    if (!empty($style['region theme'])) {
-      $items[$style['region theme']] = array(
-        'variables' => array('layout' => NULL, 'blocks' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
-        'base hook' => 'layout_region',
-      );
-      if (isset($style['file'])) {
-        $items[$style['region theme']]['file'] = $style['file'];
-      }
-      if (isset($style['path'])) {
-        $items[$style['region theme']]['path'] = $style['path'];
-      }
-      if (isset($style['template'])) {
-        $items[$style['region theme']]['path'] = $style['path'];
-      }
-    }
-
     if (!empty($style['hook theme'])) {
       if (is_array($style['hook theme'])) {
         $items += $style['hook theme'];

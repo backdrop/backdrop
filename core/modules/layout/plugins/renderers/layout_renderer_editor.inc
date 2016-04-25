@@ -128,6 +128,16 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       ),
     );
 
+    $links['configure'] = array(
+      'title' => t('Configure region'),
+      'href' => $this->getUrl('configure-region', $region_id),
+      'attributes' => array(
+        'class' => array('use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+      ),
+    );
+
     $dropbutton = array(
       '#type' => 'dropbutton',
       '#links' => $links,

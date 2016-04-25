@@ -1673,10 +1673,9 @@ function hook_permission() {
  *     path, include it here. This path should be relative to the Backdrop root
  *     directory.
  *   - template: If specified, this theme implementation is a template, and
- *     this is the template file without an extension. Do not put .tpl.php on
- *     this file; that extension will be added automatically by the default
- *     rendering engine (which is PHPTemplate). If 'path', above, is specified,
- *     the template should also be in this path.
+ *     this is the template file name without an extension. Do not include the
+ *     extension .tpl.php; it will be added automatically. If 'path' is
+ *     specified, then the template should be located in this path.
  *   - function: If specified, this will be the function name to invoke for
  *     this implementation. If neither 'template' nor 'function' is specified,
  *     a default function name will be assumed. For example, if a module
