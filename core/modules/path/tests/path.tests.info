@@ -28,6 +28,12 @@ description = Confirm that paths are not changed on monolingual non-English site
 group = Path
 file = path.test
 
+[PathHooksTestCase]
+name = Path hooks
+description = Test the hooks invoked when a path is inserted, updated, or deleted.
+group = Path
+file = path.test
+
 [PathPatternUnitTestCase]
 name = Path pattern unit tests
 description = Unit tests for Path automatic alias functions.

@@ -22,12 +22,21 @@ interface QueryExtendableInterface {
   /**
    * Enhance this object by wrapping it in an extender object.
    *
+   * The core implementations of QueryExtendableInterface include:
+   *   - TableSort: Extend a query to sort based on query strings.
+   *   - PagerDefault: Extend a query to limit results based on query strings.
+   *   - SearchQuery: Extend a query to join on the search index tables.
+   *
+   * Other implementations may be added by other modules, but for the sake of
+   * code validation, these core extenders are specified as possible return
+   * values of this interface.
+   *
    * @param $extender_name
    *   The base name of the extending class.  The base name will be checked
    *   against the current database connection to allow driver-specific subclasses
    *   as well, using the same logic as the query objects themselves.  For example,
    *   PagerDefault_mysql is the MySQL-specific override for PagerDefault.
-   * @return QueryExtendableInterface
+   * @return QueryExtendableInterface|SelectQueryInterface|TableSort|PagerDefault|SearchQuery
    *   The extender object, which now contains a reference to this object.
    */
   public function extend($extender_name);
@@ -1291,6 +1300,19 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $alias;
   }
 
+  /**
+   * Add columns to be retrieved from a database table.
+   *
+   * @param $table_alias
+   *   The table alias used when specifying a table to be added to the query,
+   *   either through SelectQueryInterface::select(),
+   *   SelectQueryInterface::join(), or other joining methods.
+   * @param array $fields
+   *   An array of column names to be selected from this table.
+   *
+   * @return SelectQueryInterface
+   *   The current select object.
+   */
   public function fields($table_alias, array $fields = array()) {
 
     if ($fields) {

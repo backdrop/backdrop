@@ -527,6 +527,17 @@ function system_requirements($phase) {
         'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
+
+    // Check for a duplicate redirect project.
+    $path = backdrop_get_path('module', 'redirect');
+    if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
+      $requirements['redirect_replaced'] = array(
+        'title' => $t('Redirect'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
   }
 
   return $requirements;
@@ -2516,7 +2527,7 @@ function system_update_1036() {
  */
 function system_update_1037() {
   config_set('system.core', 'canonical_secure', 0);
-  
+
   $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
   if ($res->rowCount()) {
     $mlid = $res->fetch()->mlid;
@@ -2662,7 +2673,7 @@ function system_update_1046() {
     $config->set('file_transliterate_lowercase', update_variable_get('transliteration_file_lowercase', FALSE));
     $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', TRUE));
     $config->set('file_transliterate_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', FALSE));
-  
+
     // Remove variables from D7.
     update_variable_del('transliteration_file_lowercase');
     update_variable_del('transliteration_file_uploads');
@@ -2718,6 +2729,16 @@ function system_update_1050() {
     $config->set('color_legacy', TRUE);
     $config->clear('legacy');
     $config->save();
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Redirect module is present.
+ */
+function system_update_1051() {
+  $path = backdrop_get_path('module', 'redirect');
+  if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

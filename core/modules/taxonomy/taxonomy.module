@@ -78,6 +78,7 @@ function taxonomy_entity_info() {
       'base table' => 'taxonomy_term_data',
       'token type' => 'term',
       'fieldable' => TRUE,
+      'redirect support' => TRUE,
       'entity keys' => array(
         'id' => 'tid',
         'bundle' => 'vocabulary',

@@ -388,11 +388,16 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
 
   function setUp(array $modules = array()) {
     parent::setUp($modules);
-    $this->config = config('path.settings');
+    $config = config('path.settings');
 
     // Set Path settings we assume to be as-is in this test.
-    $this->config->set('node_page_pattern', 'content/[node:title]');
-    $this->config->save();
+    $config->set('node_page_pattern', 'content/[node:title]');
+    $config->save();
+
+    // Redirect module is not tested with aliases in these tests. Redirect does
+    // its own testing in RedirectFunctionalTest.
+    module_disable(array('redirect'));
+    menu_rebuild();
 
     // Allow other modules to add additional permissions for the admin user.
     $permissions = array(
@@ -419,19 +424,14 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
  * Test basic Path automatic alias functionality.
  */
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
-
-  protected $config;
-
   /**
    * Basic functional testing of Path patterns.
    */
   function testNodeEditing() {
-    module_load_include('inc', 'path');
-
-    $this->config = config('path.settings');
+    $config = config('path.settings');
     // Delete the default node pattern. Only the page content type will have a pattern.
-    $this->config->set('node_pattern', '');
-    $this->config->save();
+    $config->set('node_pattern', '');
+    $config->save();
 
     // Ensure the Path auto checkbox is checked by default on the node add form.
     $this->backdropGet('node/add/page');
@@ -453,14 +453,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->assertText($title, 'Node accessible through automatic alias.');
 
     // Disable the update action. The checkbox should not be visible.
-    $this->config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
-    $this->config->save();
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
+    $config->save();
     $this->backdropGet("node/{$node->nid}/edit");
     $this->assertNoFieldById('edit-path-auto');
 
     // Reset the update action back to default. The checkbox should be visible.
-    $this->config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
-    $this->config->save();
+    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
+    $config->save();
     $this->backdropGet("node/{$node->nid}/edit");
     $this->assertFieldChecked('edit-path-auto');
 
@@ -508,8 +508,8 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Set the page pattern to use only tokens so we can test the checkbox
     // behavior if none of the tokens have a value currently.
-    $this->config->set('node_page_pattern', '[node:title]');
-    $this->config->save();
+    $config->set('node_page_pattern', '[node:title]');
+    $config->save();
 
     // Create a node with an empty title. The auto checkbox should still be
     // visible but unchecked.

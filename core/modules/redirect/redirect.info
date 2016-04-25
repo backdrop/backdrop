@@ -1,0 +1,7 @@
+name = Redirect
+description = Allows users to redirect from old URLs to new URLs.
+package = System
+backdrop = 1.x
+version = BACKDROP_VERSION
+type = module
+configure = admin/config/search/redirect/settings
