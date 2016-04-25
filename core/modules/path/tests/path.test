@@ -8,11 +8,19 @@
  * Provides a base class for testing the Path module.
  */
 class PathTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('path');
+  protected $profile = 'minimal';
+
+  function setUp($modules = array()) {
+    $modules[] = 'path';
+    parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
 
     // Create test user and login.
-    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content', 'create post content', 'edit own post content', 'administer url aliases', 'create url aliases'));
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content', 'administer url aliases', 'create url aliases'));
     $this->backdropLogin($web_user);
   }
 
@@ -107,9 +115,7 @@ class PathTestCase extends BackdropWebTestCase {
    */
   function testNodeAlias() {
     // Create test node.
-    $node1 = $this->backdropCreateNode(array(
-      'type' => 'post',
-    ));
+    $node1 = $this->backdropCreateNode();
 
     // Create alias.
     $edit = array();
@@ -178,7 +184,6 @@ class PathTestCase extends BackdropWebTestCase {
     $node_one = $this->backdropCreateNode();
     $edit = array();
     $edit['path[alias]'] = $this->randomName();
-    $edit['path[auto]'] = FALSE;
     $this->backdropPost('node/' . $node_one->nid . '/edit', $edit, t('Save'));
 
     // Now create another node and try to set the same alias.
@@ -195,6 +200,11 @@ class PathTestCase extends BackdropWebTestCase {
 class PathTaxonomyTermTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('path', 'taxonomy');
+
+    // Redirect module is not tested with aliases in these tests. Redirect does
+    // its own testing in RedirectFunctionalTest.
+    module_disable(array('redirect'));
+    menu_rebuild();
 
     // Create and login user.
     $web_user = $this->backdropCreateUser(array('administer url aliases', 'administer taxonomy', 'access administration pages'));
@@ -251,11 +261,29 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
  * Tests URL aliases for translated nodes.
  */
 class PathLanguageTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('path', 'locale', 'translation');
+  protected $profile = 'testing';
+
+  /**
+   * The user account of the logged in user for these tests.
+   *
+   * @var User
+   */
+  protected $web_user;
+
+  function setUp($modules = array()) {
+    $modules[] = 'node';
+    $modules[] = 'path';
+    $modules[] = 'locale';
+    $modules[] = 'translation';
+    parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
 
     // Create and login user.
-    $this->web_user = $this->backdropCreateUser(array('edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'translate content', 'access administration pages'));
+    $this->web_user = $this->backdropCreateUser(array('access content', 'edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'translate content', 'access administration pages'));
     $this->backdropLogin($this->web_user);
 
     // Enable French language.
@@ -284,7 +312,6 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // Edit the node to set language and path.
     $edit = array();
     $edit['langcode'] = 'en';
-    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $english_alias;
     $this->backdropPost('node/' . $english_node->nid . '/edit', $edit, t('Save'));
 
@@ -300,7 +327,6 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $french_alias = $this->randomName();
-    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $french_alias;
     $this->backdropPost(NULL, $edit, t('Save'));
 

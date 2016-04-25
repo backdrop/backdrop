@@ -353,39 +353,6 @@ function redirect_views_api() {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- *
- * Adds support for creating redirects if a node URL alias is changed.
- */
-function redirect_form_node_form_alter(&$form, $form_state) {
-  if (!empty($form['path']['pid']['#value']) && !isset($form['path']['original'])) {
-    $form['path']['original'] = array('#type' => 'value', '#value' => path_load($form['path']['pid']['#value']));
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Adds support for creating redirects if a taxonomy term URL alias is changed.
- */
-function redirect_form_taxonomy_form_term_alter(&$form, $form_state) {
-  if (!empty($form['path']['pid']['#value']) && !isset($form['path']['original'])) {
-    $form['path']['original'] = array('#type' => 'value', '#value' => path_load($form['path']['pid']['#value']));
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Adds support for creating redirects if an URL alias is changed.
- */
-function redirect_form_path_admin_form_alter(&$form, $form_state) {
-  if (!empty($form['pid']['#value']) && !isset($form['original'])) {
-    $form['original'] = array('#type' => 'value', '#value' => path_load($form['pid']['#value']));
-  }
-}
-
-/**
  * Load an URL redirect from the database.
  *
  * @param $rid
