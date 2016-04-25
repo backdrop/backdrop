@@ -127,9 +127,6 @@ function hook_layout_context_info() {
  *   include:
  *   - title: The translated title of the style.
  *   - description: The translated description of the style.
- *   - region theme: Optional. If this style needs to modify the display of an
- *     entire region, specify the theme function/template key that would be
- *     passed into the theme() function.
  *   - block theme: Optional. If this style modifies the display of blocks,
  *     specify the theme function/template key that would be passed into the
  *     theme function.
@@ -140,7 +137,7 @@ function hook_layout_context_info() {
  *   - file: Optional. If using theme or preprocess functions, specify the path
  *     to the containing file. This file path is NOT the path to the class.
  *     Class paths and loading is done through hook_autoload_info().
- *   - path: The relative path from this module to the directory containing any
+ *   - template: The relative path from this module to the directory containing any
  *     templates or include files needed by this style.
  *   - hook theme: Optional. If specified, additional information to be merged
  *     into hook_theme() on behalf of this style. This may be necessary if the
@@ -155,8 +152,6 @@ function hook_layout_style_info() {
   $info['custom_style'] = array(
     'title' => t('A new style'),
     'description' => t('An advanced style with settings.'),
-    // The theme key indicating what theme function/template will be used.
-    'region theme' => 'mymodule_layout_region',
     // The theme key for rendering an individual block.
     'block theme' => 'mymodule_block',
     // Provide a class name if this style has settings. The class should extend
@@ -164,7 +159,7 @@ function hook_layout_style_info() {
     'class' => 'MyModuleLayoutStyle',
     // If nesting templates or a theme include file in a directory, the relative
     // path can be specified.
-    'path' => 'templates',
+    'template' => 'templates/mymodule-file.tpl.php',
   );
   return $info;
 }
