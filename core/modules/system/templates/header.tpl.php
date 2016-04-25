@@ -28,7 +28,7 @@
 <?php if ($site_name || $site_slogan): ?>
   <div class="name-and-slogan">
     <?php if ($site_name): ?>
-      <?php if (!$is_front): ?>
+      <?php if ($title): ?>
         <div class="site-name"><strong>
           <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
         </strong></div>
