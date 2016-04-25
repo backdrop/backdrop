@@ -1,0 +1,19 @@
+name = Sanderson Flipped
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header]           = Header
+regions[column1]          = Row 1: First Column
+regions[column2]          = Row 1: Second Column
+regions[column3]          = Row 1: Third Column
+regions[secondarycolumn1] = Row 2: First Column
+regions[secondarycolumn2] = Row 2: Second Column
+regions[footer]           = Footer
+
+; Preview
+preview = sanderson-flipped.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

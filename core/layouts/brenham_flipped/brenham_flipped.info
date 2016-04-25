@@ -1,0 +1,17 @@
+name = Brenham Flipped
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header] = Header
+regions[top] = Top
+regions[content] = Content
+regions[sidebar] = Sidebar
+regions[footer] = Footer
+
+; Preview
+preview = brenham-flipped.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css

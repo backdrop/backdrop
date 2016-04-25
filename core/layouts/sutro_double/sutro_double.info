@@ -1,0 +1,21 @@
+name = Sutro Double
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header]        = Header
+regions[top]           = Top
+regions[column1]       = First Column
+regions[column2]       = Second Column
+regions[middle]        = Middle
+regions[secondcolumn1] = Bottom First Column
+regions[secondcolumn2] = Bottom Second Column
+regions[bottom]        = Bottom
+regions[footer]        = Footer
+
+; Preview
+preview = sutro-double.png
+
+; Default stylesheets
+stylesheets[all][] = layout-style.css
