@@ -7,6 +7,70 @@
  */
 
 /**
+ * Output a page to enable or disable layout templates.
+ */
+function layout_settings_page($form, &$form_state) {
+  // Get the list of layout options.
+  $config = config('layout.settings');
+  $available_layouts = $config->get('templates');
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+
+  $form['markup'] = array(
+    '#markup' => t('Only templates selected here will be enabled on layout settings pages.'),
+  );
+  $form['templates'] = array(
+    '#title' => t('Templates'),
+    '#type' => 'checkboxes',
+    '#default_value' => $available_layouts,
+    '#options' => array(),
+    '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
+  );
+  $form['show_all_admin'] = array(
+    '#title' => t('Show all for admins'),
+    '#description' => t('When enabled, all templates will be shown on layout edit pages for users with \'use all templates\' permissions.'),
+    '#type' => 'checkbox',
+    '#default_value' => 1,
+  );
+  // Get the list of layout options.
+  $all_layout_info = layout_get_layout_info();
+  foreach ($all_layout_info as $layout_name => $layout_info) {
+    $form['templates']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
+  }
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' =>t('Save configuration'),
+  );
+  return $form;
+}
+
+/**
+ * Submit handler for layout_settings_page().
+ */
+function layout_settings_page_submit($form, &$form_state) {
+  $templates = array_keys(array_filter($form_state['values']['templates']));
+  $active_templates = array();
+  $all_layouts = layout_get_all_configs('layout');
+  foreach ($all_layouts as $layout) {
+    $active_templates[] = $layout['layout'];
+  }  
+  $excluded_active_templates = array_unique(array_diff($active_templates, $templates));
+  if (!empty($excluded_active_templates)) {
+    $message = t('The following templates are in use but have been disabled: %disabled', array('%disabled' => implode(', ', $excluded_active_templates)));
+    backdrop_set_message($message, 'warning');
+  }
+
+  $config = config('layout.settings');
+  $config->set('templates', $templates);
+  $config->set('show_all_admin', $form_state['values']['show_all_admin']);
+  $config->save();
+  backdrop_set_message('The configuration has been saved');
+  
+}
+
+/**
  * Output a list of pages that are managed.
  */
 function layout_list_page() {
@@ -229,10 +293,35 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
+
+  $config = config('layout.settings');
+  $available_layouts = $config->get('templates');
+  $form_state['show_all_admin'] = $show_all_admin = $config->get('show_all_admin');
+
   // Get the list of layout options.
   $all_layout_info = layout_get_layout_info();
+  $all_template_access = user_access('use all templates');
   foreach ($all_layout_info as $layout_name => $layout_info) {
-    $form['layout']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
+    if (in_array($layout_name, $available_layouts) || ($all_template_access && $form_state['show_all_admin'])) {
+      $form['layout']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
+    }
+  }
+
+  // If a non-admin is viewing, or if admin has chosen to view only the enabled
+  // layouts, the currently selected layout may not be one of the allowed 
+  // layouts; if so set one of the allowed layouts as default to avoid FormAPI
+  // errors.
+  if (empty($show_all_admin)) {
+    $form['layout']['#default_value'] = in_array($layout->layout, $available_layouts) ? $layout->layout : reset($available_layouts);
+  }
+
+  // Only show the 'Show all' toggle if user has access.
+  if ($all_template_access) {
+    $form['show_all'] = array(
+      '#value' => !empty($form_state['show_all_admin']) ? t('Hide disabled') : t('Show all'),
+      '#type' => 'submit',
+      '#submit' => array('layout_settings_form_show_all_submit'),
+    );
   }
 
   $form['path'] = array(
@@ -420,6 +509,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   return $form;
+}
+
+/**
+ * Sets the config settings to show all templates.
+ */
+function layout_settings_form_show_all_submit(&$form, &$form_state) {
+  $config = config('layout.settings');
+  $setting = !empty($form_state['show_all_admin']) ? 0 : 1;
+  $config->set('show_all_admin', $setting);
+  $config->save();
 }
 
 /**
