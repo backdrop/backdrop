@@ -35,7 +35,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 8 --url http://localhost:8080 --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url http://localhost:8080 --color --verbose --force --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - cat ./core/misc/travis-ci/apache2.log
