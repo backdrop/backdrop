@@ -1,17 +1,27 @@
 # Configuration file for running the test suite. Results typically at http://travis-ci.org/backdrop/backdrop
 language: php
-sudo: required
-dist: precise
-group: legacy
 php:
   - 5.3
   - 7.0
+dist: trusty
+sudo: required
+group: edge
+addons:
+  apt:
+    packages:
+      - mysql-server
+      - apache2
+      - curl
+
 before_script:
-  # Install Apache and FastCGI extension to connect to PHP-FPM.
-  - sudo apt-get update > /dev/null
-  - sudo apt-get install apache2 libapache2-mod-fastcgi > /dev/null
+  # Install Apache FastCGI.
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty multiverse" && sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse"
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty universe" && sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-updates universe"
+  - sudo apt-get update -qq
+  - sudo apt-get install libapache2-mod-fastcgi
+
   - sudo a2enmod rewrite actions fastcgi alias
-  - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
+  - sudo cp -f core/misc/travis-ci/apache2-vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
   - sudo apachectl restart
 
@@ -27,12 +37,12 @@ before_script:
   - phpenv config-add core/misc/travis-ci/php.ini
 
   # Set MySQL configuration and create the database.
-  - mysql -e 'SET GLOBAL wait_timeout = 5400;'
-  - mysql -e 'create database backdrop;'
+  - mysql -u root -e 'SET GLOBAL wait_timeout = 5400;'
+  - mysql -u root -e 'create database backdrop;'
 
   # Install Backdrop with the installation script.
   - chmod a+w . settings.php
-  - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
+  - ./core/scripts/install.sh --db-url=mysql://root:@127.0.0.1/backdrop
   - chmod go-w . settings.php
 script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url 'http://localhost' --color --verbose --force --all
 after_failure:
