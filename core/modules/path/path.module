@@ -83,7 +83,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/patterns/settings'] = array(
-    'title' => 'Pattern Settings',
+    'title' => 'Pattern settings',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_settings_form'),
     'access arguments' => array('administer path patterns'),
