@@ -216,13 +216,15 @@ function _simpletest_batch_finished($success, $results, $operations, $elapsed) {
   }
   else {
     // Use the test_id passed as a parameter to _simpletest_batch_operation().
-    $test_id = $operations[0][1][1];
+    if (array_key_exists(0, $operations)) {
+      $test_id = $operations[0][1][1];
 
-    // Retrieve the last database prefix used for testing and the last test
-    // class that was run from. Use the information to read the lgo file
-    // in case any fatal errors caused the test to crash.
-    list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
-    simpletest_log_read($test_id, $last_prefix, $last_test_class);
+      // Retrieve the last database prefix used for testing and the last test
+      // class that was run from. Use the information to read the lgo file
+      // in case any fatal errors caused the test to crash.
+      list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
+      simpletest_log_read($test_id, $last_prefix, $last_test_class);
+    }
 
     backdrop_set_message(t('The test run did not successfully finish.'), 'error');
     backdrop_set_message(t('Use the <em>Clean environment</em> button to clean-up temporary files and tables.'), 'warning');

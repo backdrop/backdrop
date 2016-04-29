@@ -113,6 +113,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $test_path = 'system-test/hello-world';
     $this->backdropGet($test_path);
 
+    sleep(1);
     $this->backdropHead($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $etag = $this->backdropGetHeader('ETag');
@@ -163,6 +164,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
+    sleep(1);
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -187,6 +189,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
+    sleep(1);
     $start = microtime(TRUE);
     $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
@@ -310,6 +313,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
+    sleep(3);
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
