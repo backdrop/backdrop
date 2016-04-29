@@ -1,24 +1,22 @@
 # Configuration file for running the test suite. Results typically at http://travis-ci.org/backdrop/backdrop
 language: php
-sudo: required
-dist: precise
-group: legacy
 php:
   - 5.3
   - 7.0
+sudo: false
+addons:
+  apt:
+    packages:
+      - apache2
+      - libapache2-mod-fastcgi
 before_script:
-  # Install Apache and FastCGI extension to connect to PHP-FPM.
-  - sudo apt-get update > /dev/null
-  - sudo apt-get install apache2 libapache2-mod-fastcgi > /dev/null
-  - sudo a2enmod rewrite actions fastcgi alias
-  - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
-  - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
-  - sudo apachectl restart
-
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
-  - sudo cp core/misc/travis-ci/php-fpm.conf $HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - $HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - cp core/misc/travis-ci/php-fpm.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+
+  # Start Apache manually on port 8080.
+  - ./core/misc/travis-ci/apache2-start.sh
 
   # Disable XDebug to speed up execution.
   - phpenv config-rm xdebug.ini
@@ -34,8 +32,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url 'http://localhost' --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url http://localhost:8080 --color --verbose --force --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
-  - sudo cat /var/log/apache2/error.log
-  - sudo cat /var/log/mysql/error.log
+  - cat ./core/misc/travis-ci/apache2.log
