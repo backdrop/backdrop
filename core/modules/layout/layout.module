@@ -75,6 +75,14 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
 
+  $items['admin/structure/layouts/settings'] = array(
+    'title' => 'Manage layout templates',
+    'description' => 'Manage layout templates.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_settings_page'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
   $items['admin/structure/layouts/list'] = array(
     'title' => 'List layouts',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -564,6 +572,11 @@ function layout_permission() {
       'description' => t('Add and modify layouts on pages.'),
       'restrict access' => TRUE,
     ),
+    'use all templates' => array(
+      'title' => t('Use disabled templates'),
+      'description' => t('Use disabled templates.'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -571,6 +584,10 @@ function layout_permission() {
  * Implements hook_config_info().
  */
 function layout_config_info() {
+  $prefixes['layout.settings'] = array(
+    'label' => t('Layout settings'),
+    'group' => t('Layouts'),
+  );
   $prefixes['layout.layout'] = array(
     'name_key' => 'name',
     'label_key' => 'title',

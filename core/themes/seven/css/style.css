@@ -1114,7 +1114,8 @@ div.admin-panel h3 {
 /**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, 
+:not(#foo) > .layout-settings-page .layout-options .form-type-checkbox input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1125,7 +1126,8 @@ div.admin-panel h3 {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
-.layout-settings-form .layout-options .form-type-radio label {
+.layout-settings-form .layout-options .form-type-radio label,
+.layout-settings-page .layout-options .form-type-checkbox label {
   position: relative;
   z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
   display: block;
@@ -1140,20 +1142,26 @@ div.admin-panel h3 {
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
-.layout-settings-form .layout-options.no-flexbox .form-type-radio label {
+.layout-settings-form .layout-options.no-flexbox .form-type-radio label,
+.layout-settings-page .layout-options.no-flexbox .form-type-checkbox label {
   min-height: 150px;
 }
 .layout-settings-form .layout-options .form-type-radio:active label,
 .layout-settings-form .layout-options .form-type-radio:hover label,
-.layout-settings-form .layout-options .form-type-radio input:checked + label {
+.layout-settings-form .layout-options .form-type-radio input:checked + label,
+.layout-settings-page .layout-options .form-type-checkbox:active label,
+.layout-settings-page .layout-options .form-type-checkbox:hover label,
+.layout-settings-page .layout-options .form-type-checkbox input:checked + label {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
-.layout-settings-form .layout-options .form-type-radio input:focus + label {
+.layout-settings-form .layout-options .form-type-radio input:focus + label,
+.layout-settings-page .layout-options .form-type-checkbox input:focus + label {
   background-color: #ffffff;
   border-color: #43afe4;
 }
-.layout-settings-form .layout-options .form-type-radio img {
+.layout-settings-form .layout-options .form-type-radio img,
+.layout-settings-page .layout-options .form-type-checkbox img {
   position: relative;
   z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
   padding: 4px;

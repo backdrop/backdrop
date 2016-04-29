@@ -13,10 +13,12 @@
 }
 
 /* Individual layout settings form. */
-.layout-settings-form .form-type-radios {
+.layout-settings-form .form-type-radios,
+.layout-settings-page .form-type-checkbox {
   width: 100%;
 }
-.layout-settings-form .layout-options .form-radios {
+.layout-settings-form .layout-options .form-radios,
+.layout-settings-page .layout-options .form-checkbox {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -27,16 +29,23 @@
   line-height: 1.3;
   max-width: calc(100vw - 60px); /* Fix flex-wrap issue in some browsers */
 }
-.layout-settings-form .layout-options.no-flexbox .form-radios {
+.layout-settings-form .layout-options.no-flexbox .form-radios,
+.layout-settings-page .layout-options.no-flexbox .form-checkbox {
   display: block;
 }
-.layout-settings-form .layout-options .form-type-radio {
+.layout-settings-form .layout-options .form-type-radio,
+.layout-settings-page .layout-options .form-type-checkbox {
   width: 100px;
   margin: 0 5px 5px 0;
   padding: 0;
   text-align: center;
 }
-.layout-settings-form .layout-options.no-flexbox .form-type-radio {
+.layout-settings-form .layout-options.no-flexbox .form-type-radio,
+.layout-settings-page .layout-options.no-flexbox .form-type-checkbox {
+  float: left;
+}
+
+.layout-settings-page .layout-options .form-type-checkbox {
   float: left;
 }
 
