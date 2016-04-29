@@ -1,6 +1,6 @@
 {
     "_config_name": "layout.settings",
-    "templates": [
+    "layout_allowed_templates": [
         "one_column",
         "two_column",
         "two_column_flipped",
