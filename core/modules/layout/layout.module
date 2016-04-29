@@ -81,6 +81,14 @@ function layout_menu() {
     'weight' => -10,
   ) + $base;
 
+  $items['admin/structure/layouts/settings'] = array(
+    'title' => 'Settings',
+    'description' => 'Manage layout templates.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_settings_page'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
   $items['admin/structure/layouts/reorder'] = array(
     'title' => 'List',
     'page callback' => 'backdrop_get_form',
@@ -535,6 +543,10 @@ function layout_permission() {
  * Implements hook_config_info().
  */
 function layout_config_info() {
+  $prefixes['layout.settings'] = array(
+    'label' => t('Layout settings'),
+    'group' => t('Configuration'),
+  );
   $prefixes['layout.layout'] = array(
     'name_key' => 'name',
     'label_key' => 'title',
