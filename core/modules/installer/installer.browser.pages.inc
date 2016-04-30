@@ -482,7 +482,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
   if (in_array('module', installer_browser_get_installed_types())) {
     $form['next_link'] = array(
       '#type' => 'link',
-      '#title' => 'Next: Install downloaded modules',
+      '#title' => 'Next: enable new modules',
       '#href' => 'admin/modules/installer-browser/install/enable',
     );
   }
@@ -610,7 +610,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       $form['actions']['cancel'] = array(
         '#type' => 'link',
         '#name' => 'cancel',
-        '#title' => t('Cancel'),
+        '#title' => t('Skip'),
         '#href' => 'admin/modules/installer-browser/reset/all',
         '#options' => array(),
       );

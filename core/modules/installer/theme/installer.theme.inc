@@ -189,7 +189,7 @@ function update_preprocess_installer_browser_project(&$variables) {
     $variables['install'] = '';
   }
   elseif ($found) {
-    $variables['status'] = '<div class="install-disabled">Already downloaded</div>';
+    $variables['status'] = '<div class="install-disabled">Already enabled</div>';
     $variables['install'] = '';
   }
   else {

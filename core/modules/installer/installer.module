@@ -10,8 +10,8 @@
 function installer_permission() {
   return array(
     'use installer browser' => array(
-      'title' => t('Access installer interface'),
-      'description' => t('This allows the user to browse for and install new modules, themes and layouts using Installer Browser.'),
+      'title' => t('Install and update modules, themes & layouts'),
+      'description' => t('Allows the user to browse for and install new modules, themes and layouts.'),
       'restrict access' => TRUE,
     )
   );
@@ -82,7 +82,7 @@ function installer_menu() {
   );
 
   $items['admin/modules/installer-browser'] = array(
-    'title' => 'Browse downloads',
+    'title' => 'Browse projects',
     'description' => 'Browse and search for new modules',
     'page callback' => 'installer_browser_page',
     'page arguments' => array('module'),
@@ -136,8 +136,8 @@ function installer_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['admin/modules/installer-browser/reset/%'] = array(
-    'title' => 'Project Browser',
-    'description' => 'Browse and search for new modules',
+    'title' => 'Reset',
+    'description' => 'Reset installer project list.',
     'page callback' => 'installer_browser_installation_reset',
     'page arguments' => array(4),
     'access arguments' => array('use installer browser'),

@@ -424,7 +424,7 @@ function installer_browser_get_destination_after_install() {
   }
   // Only a theme, go to theme list.
   elseif ($theme && !$module) {
-    backdrop_set_message(t('One or more themes were downloaded. You may enable them now.'));
+    backdrop_set_message(t('One or more themes were installed. You may enable them now.'));
     backdrop_goto('admin/appearance');
   }
   // Only a module, jump to the module enable stage of the wizard.
