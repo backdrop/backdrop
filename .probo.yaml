@@ -1,14 +1,23 @@
 steps:
   - plugin: LAMPApp
     databaseName: backdrop
-    databaseUser: backdrop
     phpMods:
       - gd
   - plugin: Script
     name: Run Backdrop Tests
     script:
-      - cd $SRC_DIR
-      - ls -la
-      - chmod a+w . settings.php
-      - ./core/scripts/install.sh --db-url=mysql://backdrop:@127.0.0.1/backdrop
+      - php --version
+
+      # Probo CI runs as root, but the web server needs to write to files and
+      # settings.php, so we give everyone write permission.
+      - chmod go+w files
+      - chmod go+w settings.php
+      - ./core/scripts/install.sh --db-url=mysql://root:strongpassword@127.0.0.1/backdrop
       - chmod go-w . settings.php
+
+      # Probo CI does not yet support the --color parameter.
+      - ./core/scripts/run-tests.sh --concurrency 16 --url 'http://localhost' --verbose --force --all
+
+      # Clean up the files directory of all simpletest files to save disk.
+      - rm -rf files/simpletest
+      - cat /var/log/apache2/error.log
