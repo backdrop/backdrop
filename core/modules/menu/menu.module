@@ -17,6 +17,13 @@
 define('MENU_MAX_MENU_NAME_LENGTH_UI', 27);
 
 /**
+ * Menu multilingual modes.
+ */
+const MENU_MULTILINGUAL_DISABLED = 0;
+const MENU_MULTILINGUAL_ENABLED = 1;
+const MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION = 3;
+
+/**
  * Implements hook_permission().
  */
 function menu_permission() {
@@ -96,6 +103,20 @@ function menu_menu() {
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
   );
+
+  if(language_multilingual()) {
+    $items['admin/structure/menu/manage/%menu/translate'] = array(
+      'title' => 'Translate menu',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('menu_translate_menu', 4),
+      'access callback' => 'menu_translate_access',
+      'access arguments' => array('administer menu', 4),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+      'file' => 'menu.admin.inc',
+    );
+  }
+
   $items['admin/structure/menu/item/%menu_link/edit'] = array(
     'title' => 'Edit link',
     'page callback' => 'backdrop_get_form',
@@ -118,6 +139,26 @@ function menu_menu() {
     'file' => 'menu.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Access callback implementation for translation tab when editing a menu.
+ *
+ * Only visible if the menu multilingual mode is set to enabled. When disabled
+ * the normal user access is checked.
+ *
+ * @param $permission
+ * @param $menu
+ *
+ * @return bool
+ */
+function menu_translate_access($permission, $menu) {
+  if ($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    return user_access($permission);
+  }
+  else {
+    return FALSE;
+  }
 }
 
 /**
@@ -224,6 +265,24 @@ function menu_load_all() {
 }
 
 /**
+ * Load all custom menu data by translation set.
+ *
+ * @return
+ *   Array of custom menu data.
+ */
+function menu_load_translations($tmenu_name) {
+  $config_names = config_get_names_with_prefix('menu.menu.');
+  $translations = array();
+  foreach ($config_names as $config_name) {
+    $menu = config_get($config_name);
+    if ($menu['tmenu_name'] == $tmenu_name) {
+      $translations[$menu['langcode']] = $menu;
+    }
+  }
+  return $translations;
+}
+
+/**
  * Save a custom menu.
  *
  * @param $menu
@@ -232,6 +291,9 @@ function menu_load_all() {
  *     letters, numbers, and hyphens).
  *   - title: The human readable menu title.
  *   - description: The custom menu description.
+ *   - multilingual_mode: Multilingual support mode (disabled, enabled or enabled with translations)
+ *   - langcode: The Language code in case the menu is associated with a fixed language
+ *   - tmenu_name: The translation set source id (menu name of the source menu)
  *
  * Modules should always pass a fully populated $menu when saving a custom
  * menu, so other modules are able to output proper status or watchdog messages.
@@ -243,6 +305,9 @@ function menu_save($menu) {
     'menu_name' => '',
     'title' => '',
     'description' => '',
+    'multilingual_mode' => '',
+    'langcode' => '',
+    'tmenu_name' => ''
   );
   $menu += $menu_defaults;
   $menu = array_intersect_key($menu, $menu_defaults);
@@ -311,6 +376,18 @@ function menu_delete($menu) {
     if ($menu['menu_name'] == $menu_name) {
       unset($active_menus[$i]);
       $config->set('active_menus_default', $active_menus)->save();
+    }
+  }
+
+  // Check if the menu belongs to a translation set. If it does, remove
+  // the references in the set.
+  if ($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    $translations = menu_get_menu_translation_set($menu['menu_name']);
+    foreach($translations as $langcode => $tmenu) {
+      if ($tmenu['menu_name'] != $menu['menu_name']){
+        $tmenu['tmenu_name'] = '';
+        menu_save($tmenu);
+      }
     }
   }
 
@@ -522,6 +599,11 @@ function menu_node_save(Node $node) {
         // from the menu link.
         unset($link['options']['attributes']['title']);
       }
+
+      if (isset($node->path['langcode'])) {
+        $link['langcode'] = $node->path['langcode'];
+      }
+
       if (!menu_link_save($link)) {
         backdrop_set_message(t('There was an error saving the menu link.'), 'error');
       }
@@ -798,4 +880,42 @@ function menu_preprocess_block(&$variables) {
   if ($variables['block']->module == 'menu') {
     $variables['attributes']['role'] = 'navigation';
   }
+}
+
+/**
+ * Retrieve the translation set of a menu.
+ *
+ * @param $menu_name
+ * @return array
+ */
+function menu_get_menu_translation_set($menu_name) {
+  $translations = menu_load_translations($menu_name);
+  return $translations;
+}
+
+/**
+ * Get the translated version of a menu in a specific language.
+ * If the langcode parameter is not set, the current interface language will be used.
+ *
+ * @param string $menu_name
+ * @param  string $langcode
+ * @return array
+ */
+function menu_get_menu_translation($menu_name, $langcode = LANGUAGE_NONE) {
+
+  $menu = menu_load($menu_name);
+
+  if($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    $translations = menu_get_menu_translation_set($menu['tmenu_name']);
+
+    if($langcode == LANGUAGE_NONE) {
+      $langcode = $GLOBALS['language']->langcode;
+    }
+
+    if (isset($translations[$langcode])) {
+      return $translations[$langcode];
+    }
+  }
+
+  return $menu;
 }

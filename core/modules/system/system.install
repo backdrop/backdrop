@@ -1183,6 +1183,19 @@ function system_schema() {
         'default' => 0,
         'size' => 'small',
       ),
+      'langcode' => array(
+        'description' => 'Language code of the item',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'und',
+      ),
+      'tsid' => array(
+        'description' => 'Translation set id (source mlid)',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'path_menu' => array(array('link_path', 128), 'menu_name'),

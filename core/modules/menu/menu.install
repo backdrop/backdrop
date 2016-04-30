@@ -21,6 +21,9 @@ function menu_install() {
       'menu_name' => $menu_name,
       'title' => $t($title),
       'description' => $descriptions[$menu_name],
+      'multilingual_mode' => MENU_MULTILINGUAL_DISABLED,
+      'langcode' => LANGUAGE_NONE,
+      'tmenu_name' => ''
     );
     menu_save($menu);
   }

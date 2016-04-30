@@ -36,12 +36,26 @@ function theme_menu_overview_form($variables) {
   backdrop_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
   backdrop_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
 
-  $header = array(
-    t('Menu link'),
-    array('data' => t('Enabled'), 'class' => array('checkbox')),
-    t('Weight'),
-    t('Operations'),
-  );
+  // Enable language if language module is enabled.
+  $multilanguage = module_exists('language');
+
+  if ($multilanguage) {
+    $header = array(
+      t('Menu link'),
+      t('Language'),
+      array('data' => t('Enabled'), 'class' => array('checkbox')),
+      t('Weight'),
+      t('Operations'),
+    );
+  }
+  else {
+    $header = array(
+      t('Menu link'),
+      array('data' => t('Enabled'), 'class' => array('checkbox')),
+      t('Weight'),
+      t('Operations'),
+    );
+  }
 
   $rows = array();
   foreach (element_children($form) as $mlid) {
@@ -58,7 +72,13 @@ function theme_menu_overview_form($variables) {
 
       $row = array();
       $row[] = theme('indentation', array('size' => $element['#item']['depth'] - 1)) . backdrop_render($element['title']);
-      $row[] = array('data' => backdrop_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
+      if ($multilanguage) {
+        $row[] = backdrop_render($element['langcode']);
+      }
+      $row[] = array(
+        'data' => backdrop_render($element['hidden']),
+        'class' => array('checkbox', 'menu-enabled')
+      );
       $row[] = backdrop_render($element['weight']) . backdrop_render($element['plid']) . backdrop_render($element['mlid']);
       $row[] = backdrop_render($element['operations']);
 
@@ -69,9 +89,18 @@ function theme_menu_overview_form($variables) {
   }
   $output = '';
   if (empty($rows)) {
-    $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '7'));
+    $rows[] = array(
+      array(
+        'data' => $form['#empty_text'],
+        'colspan' => count($header)
+      )
+    );
   }
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
+  $output .= theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => 'menu-overview')
+  ));
   $output .= backdrop_render_children($form);
   return $output;
 }
