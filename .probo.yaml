@@ -1,0 +1,14 @@
+steps:
+  - plugin: LAMPApp
+    databaseName: backdrop
+    databaseUser: backdrop
+    phpMods:
+      - gd
+  - plugin: Script
+    name: Run Backdrop Tests
+    script:
+      - cd $SRC_DIR
+      - ls -la
+      - chmod a+w . settings.php
+      - ./core/scripts/install.sh --db-url=mysql://backdrop:@127.0.0.1/backdrop
+      - chmod go-w . settings.php
