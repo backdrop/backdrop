@@ -480,10 +480,11 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
   }
 
   if (in_array('module', installer_browser_get_installed_types())) {
-    $form['next_link'] = array(
-      '#type' => 'link',
-      '#title' => 'Next: enable new modules',
-      '#href' => 'admin/modules/installer-browser/install/enable',
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['next_link'] = array(
+      '#type' => 'submit',
+      '#value' => 'Next: enable new modules',
+      '#submit' => array('installer_browser_installation_theme_next'),
     );
   }
   else {
@@ -497,6 +498,15 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
   return $form;
 }
 
+/**
+ * Submit callback for installer_browser_installation_theme_form().
+ *
+ * Continues the installation wizard, taking the user to the module enabling
+ * page.
+ */
+function installer_browser_installation_theme_next($form, &$form_state) {
+  backdrop_goto('admin/modules/installer-browser/install/enable');
+}
 
 /**
  * Submit callback for installer_browser_installation_theme_form().
@@ -507,7 +517,6 @@ function installer_browser_installation_theme_finish($form, &$form_state) {
   module_load_include('inc', 'installer', 'installer.browser');
   installer_browser_installation_reset();
 }
-
 
 /**
  * Sets a selected theme as the default site theme.
@@ -610,7 +619,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       $form['actions']['cancel'] = array(
         '#type' => 'link',
         '#name' => 'cancel',
-        '#title' => t('Skip'),
+        '#title' => t('Finish without enabling'),
         '#href' => 'admin/modules/installer-browser/reset/all',
         '#options' => array(),
       );
