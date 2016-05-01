@@ -720,6 +720,7 @@ function installer_browser_install_button_form($form, &$form_state) {
  */
 function installer_browser_filters_form($form, &$form_state, $type) {
   $form['search_text'] = array(
+    '#title' => t('Search'),
     '#type' => 'textfield',
     '#size' => '25',
     '#default_value' => isset($_SESSION['installer_browser_text_filter_' . $type]) ? $_SESSION['installer_browser_text_filter_' . $type] : '',

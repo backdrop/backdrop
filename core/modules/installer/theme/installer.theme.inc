@@ -104,15 +104,10 @@ function update_preprocess_installer_browser_list(&$variables) {
 
   // Add the filters.
   $filter_content = backdrop_get_form('installer_browser_filters_form', $variables['type']);
-  $filters['installer_browser_filters_block'] = array(
-    '#theme' => 'installer_browser_block',
-    '#title' => t('Filter search'),
-    '#content' => backdrop_render($filter_content),
-  );
-  $variables['filters'] = render($filters);
+  $variables['filters'] = backdrop_render($filter_content);
 
   // Add the install list.
-  $install_list['installer_browser_filters_block'] = array(
+  $install_list['installer_browser_install_list_block'] = array(
     '#theme' => 'installer_browser_block',
     '#title' => t('Installation queue'),
     '#content' => installer_browser_get_install_list(),

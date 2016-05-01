@@ -14,12 +14,12 @@
  */
 ?>
 <div class="installer-browser clearfix">
+    <?php print $filters; ?>
   <div class="installer-browser-main installer-browser-region">
     <?php print $main_content; ?>
   </div>
 
   <div class="installer-browser-sidebar-right installer-browser-region">
-    <?php print $filters; ?>
     <?php print $install_list; ?>
     <?php print $advanced; ?>
   </div>
