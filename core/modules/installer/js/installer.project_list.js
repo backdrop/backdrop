@@ -1,22 +1,18 @@
 /**
- * @file
- * Open all external links in a dialog.
- *
- * Inspired by https://css-tricks.com/snippets/jquery/open-external-links-in-new-window/
- */
+* @file
+* Open all external links in a dialog.
+*
+* Inspired by https://css-tricks.com/snippets/jquery/open-external-links-in-new-window/
+*/
 Backdrop.behaviors.installerProjectList = {
-  attach: function (context, settings) {
+attach: function (context, settings) {
     // Open all links in dialogs in a new window.
     $(window).on( "dialog:aftercreate", function( event, ui ) {
       $('a').each(function() {
-         var a = new RegExp('/' + window.location.host + '/');
-         if(!a.test(this.href)) {
-             $(this).click(function(event) {
-                 event.preventDefault();
-                 event.stopPropagation();
-                 window.open(this.href, '_blank');
-             });
-         }
+        var a = new RegExp('/' + window.location.host + '/');
+        if(!a.test(this.href)) {
+          $(this).attr("target","_blank");
+        }
       });
     });
 
@@ -57,7 +53,7 @@ Backdrop.behaviors.installerProjectList = {
       event.preventDefault();
       event.stopPropagation();
       $('html, body').animate({
-          scrollTop: $(".installer-browser-sidebar-right").offset().top
+scrollTop: $(".installer-browser-sidebar-right").offset().top
       }, 400);
     });
   }
