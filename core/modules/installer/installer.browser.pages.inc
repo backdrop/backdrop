@@ -284,11 +284,8 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     backdrop_goto('admin/modules/installer-browser/install/enable');
   }
 
-  $form['backup_warning'] = array(
-    '#type' => 'markup',
-    '#markup' => t('Back up your database and site before you continue. !link.',
-      array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))),
-  );
+  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))), 'warning');
+
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Perform updates with site in maintenance mode (strongly recommended)'),
