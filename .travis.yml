@@ -4,6 +4,11 @@ php:
   - 5.3
   - 7.0
 sudo: false
+env:
+  - RUNSPLIT: '1/4'
+  - RUNSPLIT: '2/4'
+  - RUNSPLIT: '3/4'
+  - RUNSPLIT: '4/4'
 addons:
   apt:
     packages:
