@@ -545,9 +545,9 @@ function installer_manager_install_form($form, &$form_state) {
   $form['actions']['submit'] = array(
     // Todo: need this so errors reload in dialog, but it stops the form from
     // continuing.
-    // '#ajax' => array(
-      // 'callback' => 'installer_manager_install_modal_callback',
-    // ),
+    '#ajax' => array(
+      'callback' => 'installer_manager_install_modal_callback',
+    ),
     '#submit' => array('installer_manager_install_form_submit'),
     '#type' => 'submit',
     '#value' => t('Install'),
@@ -570,6 +570,10 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : 'Manual installation';
     $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
+  }
+  elseif (!empty($form_state['redirect'])) {
+    $url = url($form_state['redirect'], array('absolute' => true));
+    $commands[] = ajax_command_redirect($url);
   }
 
   return array(
