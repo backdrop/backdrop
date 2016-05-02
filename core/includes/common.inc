@@ -720,6 +720,16 @@ function backdrop_encode_path($path) {
 }
 
 /**
+ * A wrapper function for deprecated menu entries redirecting to their new path.
+ *
+ * @see backdrop_goto()
+ */
+function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
+  watchdog('system', 'The path %path has been depreceated and will be removed in the next major release of Backdrop', array('%path' => $path), WATCHDOG_DEPRECATED);
+  backdrop_goto($path, $options, $http_response_code);
+}
+
+/**
  * Sends the user to a different page.
  *
  * This issues an on-site HTTP redirect. The function makes sure the redirected
@@ -5617,6 +5627,7 @@ function _backdrop_bootstrap_full() {
  * @deprecated since 1.3.0
  */
 function backdrop_page_set_cache() {
+  watchdog_deprecated_function('common', __FUNCTION__);
   $cache = FALSE;
   if (backdrop_page_is_cacheable()) {
     $page_content = ob_get_clean();
@@ -6794,17 +6805,17 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   The input array to be sorted.
  * @param array $keys
  *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
- *   unindexed array is passed in. 
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
  *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
- * 
+ *
  * // Short-hand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
- * 
+ *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
@@ -8051,6 +8062,7 @@ function watchdog_severity_levels() {
     WATCHDOG_NOTICE  => t('notice'),
     WATCHDOG_INFO    => t('info'),
     WATCHDOG_DEBUG   => t('debug'),
+    WATCHDOG_DEPRECATED => t('deprecated'),
   );
 }
 
