@@ -82,6 +82,10 @@ a.show-more {
   text-align: right;
 }
 
+.project-install {
+  text-align: right;
+}
+
 .project-author {
   color: gray;
   font-size: 0.9em;

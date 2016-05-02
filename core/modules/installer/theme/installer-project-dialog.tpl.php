@@ -36,6 +36,9 @@
     <div class="project-status">
         <?php print $status; ?>
     </div>
+    <div class="project-install">
+        <?php print $install; ?>
+    </div>
   </div>
 
   

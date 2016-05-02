@@ -475,24 +475,97 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
   }
   $op = isset($queued_projects[$project_name]) ? 'remove' : 'add';
 
-  $build['ajax_link'] = array(
-    '#type' => 'link',
-    '#title' => $title,
-    '#href' => 'admin/installer-browser/nojs/install-queue/' . $op . '/'. $project_name,
-    '#options' => array(
-      'query' => backdrop_get_destination(),
-    ),
-    '#id' => $id_prefix . '-' . $project_name,
-    '#ajax' => array(
-      'effect' => 'fade',
-      'speed' => 1000,
-      'progress' => array(
-        'type' => 'throbber',
+  if(backdrop_is_dialog()) {
+    $form = backdrop_get_form('installer_browser_add_remove_queue_dialog_link', $project_name, $op, $title);
+    return backdrop_render($form);
+  }
+  else {
+    $build['ajax_link'] = array(
+      '#type' => 'link',
+      '#title' => $title,
+      '#href' => 'admin/installer-browser/nojs/install-queue/' . $op . '/'. $project_name,
+      '#options' => array(
+        'query' => backdrop_get_destination(),
       ),
-    ),
-  );
+      '#id' => $id_prefix . '-' . $project_name,
+      '#ajax' => array(
+        'effect' => 'fade',
+        'speed' => 1000,
+        'progress' => array(
+          'type' => 'throbber',
+        ),
+      ),
+    );
+    
+  }
 
   return backdrop_render($build);
+}
+
+/**
+ * Builds an "add-to-queue-link" button for project detail dialog.
+ */
+function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $project_name, $op, $title) {
+  form_load_include($form_state, 'inc', 'installer', 'installer.browser');
+  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+
+  if (empty($form_state['project_name'])) {
+    $form_state['project_name'] = $project_name;
+    $form_state['op'] = $op;
+    $form_state['title'] = $title;
+  }
+
+  $form['ajax_link'] = array(
+    '#type' => 'submit',
+    '#value' => $form_state['title'],
+      '#attributes' => array('class' => array('layout-link-button')),
+    '#ajax' => array(
+      'callback' => 'installer_browser_add_remove_queue_dialog_link_ajax',
+    ),
+    '#submit' => array(
+      'installer_browser_add_remove_queue_dialog_link_submit',
+      ),
+    );
+
+  return $form;
+}
+
+/**
+ * AJAX submit handler for installer_browser_add_remove_queue_dialog_link().
+ */
+function installer_browser_add_remove_queue_dialog_link_ajax($form, &$form_state) {
+  $button = installer_browser_add_remove_queue_link($form_state['project_name']);
+
+  $commands = array();
+  // Refresh the install queue.
+  $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
+  // Refresh the add to queue link.
+  $commands[] = ajax_command_replace('#add-to-queue-link-' . $form_state['project_name'], installer_browser_add_remove_queue_link($form_state['project_name']));
+
+  if ($form_state['op'] == 'add') {
+    $form_state['op'] = 'remove';
+    $form_state['title'] = t('Remove from Installation queue');
+  }
+  else {
+    $form_state['op'] = 'add';
+    $form_state['title'] = t('Add to Installation queue');
+  }
+
+  $replace_form = backdrop_rebuild_form('installer_browser_add_remove_queue_dialog_link', $form_state);
+  $replace_form['#id'] = preg_replace('/--\d$/', '', $replace_form['#id']);
+
+  $html = backdrop_render($replace_form);
+
+  $commands[] = ajax_command_replace('#' . $replace_form['#id'], $html);
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Submit handler for installer_browser_add_remove_queue_dialog_link().
+ */
+function installer_browser_add_remove_queue_dialog_link_submit($form, &$form_state) {
+  installer_browser_install_queue_callback('link', $form_state['op'], $form_state['project_name']);
 }
 
 /**
