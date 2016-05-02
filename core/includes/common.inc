@@ -691,7 +691,7 @@ function backdrop_encode_path($path) {
  * @see backdrop_goto()
  */
 function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been depreceated and will be removed in the next major release of Backdrop', array('%path' => $path), WATCHDOG_DEPRECATED);
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop', array('%path' => $path), WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
