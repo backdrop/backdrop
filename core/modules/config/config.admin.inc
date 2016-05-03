@@ -323,6 +323,18 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
     '#prefix' => '<div id="edit-export-wrapper">',
     '#suffix' => '</div>',
   );
+
+  if ($config_group || $config_name) {
+    if (empty($form_state['values'])) {
+      $form_state['values'] = array();
+    }
+    $form_state['values'] += array(
+      'config_group' => $config_group,
+      'config_name' => $config_name,
+    );
+    $form['export'] = config_export_single_form_update_export($form, $form_state);
+  }
+
   return $form;
 }
 
