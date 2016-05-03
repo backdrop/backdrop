@@ -359,6 +359,10 @@ function _views_ui_get_operations(view $view) {
       'href' => 'admin/structure/views/view/' . $view->name . '/revert',
     );
   }
+  $links['export'] = array(
+    'title' => t('Export'),
+    'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+  );
   return $links;
 }
 
@@ -1253,6 +1257,10 @@ function views_ui_render_display_top($view, $display_id) {
       'clone' => array(
         'title' => t('clone view'),
         'href' => "admin/structure/views/view/$view->name/clone",
+      ),
+      'export' => array(
+        'title' => t('export view'),
+        'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
       ),
       'reorder' => array(
         'title' => t('reorder displays'),
