@@ -418,6 +418,23 @@ function update_variable_del($name) {
 }
 
 /**
+ * Merge any new default values into the active configuration.
+ *
+ * Used by the update.php script to apply new default config data
+ * from updated modules.
+ *
+ * @param array $modules
+ *   An array where the keys are the modules with pending updates and the
+ *   values are an array of configuration files that require updates.
+ */
+function update_config_defaults($modules, &$context) {
+  foreach($modules as $module_name => $module_data) {
+    config_update_default_config($module_name);
+    $context['message'] = 'Updated default settings for ' . $module_name . '.';
+  }
+}
+
+/**
  * Performs one update and stores the results for display on the results page.
  *
  * If an update function completes successfully, it should return a message
@@ -547,6 +564,15 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
     state_set('maintenance_mode', TRUE);
   }
 
+  $operations = array();
+
+  // Apply configuration changes first
+  if (!empty($start['_config_updates'])) {
+    $config_changes = unserialize($start['_config_updates']);
+    $operations[] = array('update_config_defaults', array($config_changes));
+    unset($start['_config_updates']);
+  }
+
   // Resolve any update dependencies to determine the actual updates that will
   // be run and the order they will be run in.
   $updates = update_resolve_dependencies($start);
@@ -560,7 +586,6 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
     $dependency_map[$function] = !empty($update['reverse_paths']) ? array_keys($update['reverse_paths']) : array();
   }
 
-  $operations = array();
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
