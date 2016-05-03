@@ -2333,11 +2333,17 @@ function system_block_view($delta = '', $settings = array()) {
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
       if (isset($system_menus[$delta])) {
-        // Load customizations from Menu module if present.
-        $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
-        $custom_title = isset($all_menus[$delta]) ? $all_menus[$delta] : $system_menus[$delta];
-        $block['subject'] = t($custom_title);
-        $block['content'] = menu_tree($delta);
+        module_load_include('inc', 'system', 'system.menu');
+        $settings += system_menu_block_defaults($delta);
+        $data = system_menu_block_build($settings);
+        $block['subject'] = $data['subject'];
+        $block['content'] = $data['content'];
+
+        // Execute block styles
+        if (!empty($settings['menu_style_settings'])) {
+          system_menu_block_view_style($settings);
+        }
+
         return $block;
       }
       break;
@@ -2350,6 +2356,13 @@ function system_block_view($delta = '', $settings = array()) {
 function system_block_configure($delta, $settings) {
   if ($delta === 'header') {
     return system_header_block_form($settings);
+  }
+  // System-defined menu blocks.
+  foreach (menu_list_system_menus() as $menu_name => $title) {
+    if ($delta === $menu_name) {
+      module_load_include('inc', 'system', 'system.menu');
+      return _system_block_configure($delta, $settings);
+    }
   }
 }
 
@@ -3700,6 +3713,8 @@ function system_autoload_info() {
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',
+    'MenuStyleSlim' => 'includes/menu_block_style_slim.inc',
+    'MenuStyle' => 'includes/menu_block_style.class.inc',
 
     // @todo: Move file entities to File module.
     // https://github.com/backdrop/backdrop-issues/issues/213
@@ -3797,4 +3812,273 @@ function system_admin_paths() {
     'admin/reports/status/php' => FALSE,
   );
   return $paths;
+}
+
+/**
+ * Get form.
+ */
+function system_menu_block_style_settings_form($style = 'slimmenu', $config) {
+  $style = empty($style) ? 'slimmenu' : $style;
+  $styles = system_menu_block_get_style_info();
+  $menu_style = $styles[$style]['class'];
+  $class = new $menu_style($config);
+  return $class->form($config);
+}
+
+/**
+ * Get styles().
+ */
+function system_menu_block_get_style_info($name = NULL) {
+  $results = array();
+  foreach (module_implements('menu_block_style_info') as $module) {
+    $function = $module . '_menu_block_style_info';
+    $result = $function();
+    foreach ($result as $key => $style) {
+      $results[$key] = $style;
+      $results[$key]['module'] = $module;
+    }
+  }
+
+  if ($name) {
+    return $results[$name];
+  }
+  return $results;
+}
+
+/**
+ * Implements hook_menu_block_style_info().
+ */
+function system_menu_block_style_info() {
+  $info['slimmenu'] = array(
+    'name' => 'slimmenu',
+    'title' => t('Slim Menu'),
+    'description' => t('Slim Menu.'),
+    'class' => 'MenuStyleSlim',
+    'js_folder' => array('includes/slim/js'),
+    'css_folder' => array('includes/slim/css'),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * This is requires to enable AJAX in block configure form.
+ */
+function system_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'layout_block_configure_form' && isset($form['block_settings']['#config'])) {
+    // Todo: decide if we want to check the form using the following instead
+    // Likely more accurate, but would call menu_list_system_menus() for every
+    // invocation of hook_form_alter.
+    // Checking for $form['block_settings']['menu_name'] might be enough since
+    // really only the menu blocks would have this set, I think.
+    // $system_menus = menu_list_system_menus();
+    // if (isset($form_state['block']) && isset($system_menus[$form_state['block']->delta])) {}
+    $config = $form['block_settings']['#config'];
+
+    $current_style = '';
+    if (isset($form_state['values']['menu_style_name'])) {
+      $current_style = $form_state['values']['menu_style_name'];
+    }
+    elseif (isset($config['menu_style_settings'])) {
+      $current_style = $config['menu_style_settings']['menu_style_name'];
+    }
+
+    /* Style settings: */
+    $form['menu_style'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Menu style settings'),
+      '#collapsed' => FALSE,
+      '#collapsible' => TRUE,
+    );
+    $styles = system_menu_block_get_style_info();
+    $style_options = array('' => t('No style'));
+
+    foreach ($styles as $style_name => $style_info) {
+      $style_options[$style_name] = $style_info['title'];
+    }
+    $form['menu_style']['menu_style_name'] = array(
+      '#type' => 'select',
+      '#title' => t('Menu style'),
+      '#options' => $style_options,
+      '#default_value' => $current_style,
+      '#ajax' => array(
+        'wrapper' => 'block_menu_settings',
+        'callback' => 'system_menu_block_configure_ajax_style'
+      ),
+      '#parents' => array('menu_style_name'),
+    );
+    $form['menu_style']['block_settings'] = array(
+      '#type' => 'container',
+      '#id' => 'block_menu_settings',
+      '#parents' => array('block_settings'),
+    );
+
+    $settings_form = ($current_style) ? system_menu_block_style_settings_form($current_style, $config) : NULL;
+    if ($settings_form) {
+      $form['menu_style']['block_settings']['menu_style_settings'] = $settings_form;
+      $form['menu_style']['block_settings']['menu_style_settings']['menu_style_name'] = array(
+        '#type' => 'value',
+        '#value' => $current_style,
+      );
+    }
+  }
+}
+
+/**
+ * AJAX callback to update the style settings within the block configure form.
+ */
+function system_menu_block_configure_ajax_style($form, &$form_state) {
+  return $form['menu_style']['block_settings'];
+}
+
+/**
+ * Final execution for Responsive Menus.  Add any js/css and settings required.
+ */
+function system_menu_block_settings_load($style_info, $menu_style_name) {
+  $menu_style = &drupal_static(__FUNCTION__);
+  if (!isset($menu_style[$menu_style_name])) {
+    if ($cache = cache_get('system_menu_block_files')) {
+      $menu_style = $cache->data;
+    }
+    else {
+      $path = backdrop_get_path('module', $style_info['module']) . '/';
+      // Load JS files from folder.
+      if (!empty($style_info['js_folder'])) {
+        $js_files = system_menu_block_glob_files($path, $style_info['js_folder'], 'js');
+      }
+      // Load CSS files from folder.
+      if (!empty($style_info['css_folder'])) {
+        $css_files = system_menu_block_glob_files($path, $style_info['css_folder'], 'css');
+      }
+      // Load individual JS files.
+      if (!empty($style_info['js'])) {
+        foreach ($style_info['js'] as $file) {
+          $js_file_path = $path . $file;
+          array_push($js_files, $js_file_path);
+          $js_files = array_unique($js_files);
+        }
+      }
+      // Load individual CSS files.
+      if (!empty($style_info['css'])) {
+        foreach ($style_info['css'] as $file) {
+          $css_file_path = $path . $file;
+          array_push($css_files, $css_file_path);
+          $css_files = array_unique($css_files);
+        }
+      }
+      $menu_style[$menu_style_name]['js_files'] = $js_files;
+      $menu_style[$menu_style_name]['css_files'] = $css_files;
+      cache_set('system_menu_block_files', $menu_style, 'cache');
+    }
+  }
+  return $menu_style[$menu_style_name];
+}
+
+/**
+ * Final execution for Responsive Menus.  Add any js/css and settings required.
+ */
+function system_menu_block_view_style($settings, $module = 'system') {
+  // Load our style.
+  if (!isset($settings['menu_style_settings']['menu_style_name'])) {
+    return;
+  }
+  $style_info = system_menu_block_style_load($settings['menu_style_settings']['menu_style_name']);
+  $data = &backdrop_static(__FUNCTION__, array());
+  if (!isset($data['execute_index'])) {
+    $data['execute_index'] = -1;
+  }
+  $data['execute_index']++;
+
+  // Build selector.
+  $selector = backdrop_html_class('block-' . $module . '-' . $settings['menu_name']);
+
+  $js_settings = array();
+  $js_files = array();
+  $css_files = array();
+
+  $files = system_menu_block_settings_load($style_info, $settings['menu_style_settings']['menu_style_name']);
+  $js_files = $files['js_files'];
+  $css_files = $files['css_files'];
+
+  // Add JS files.
+  if (!empty($js_files)) {
+    foreach ($js_files as $js_file) {
+      backdrop_add_js($js_file, array('scope' => 'footer'));
+    }
+  }
+  // Add CSS files.
+  if (!empty($css_files)) {
+    foreach ($css_files as $css_file) {
+      backdrop_add_css($css_file);
+    }
+  }
+  // Add JS settings.
+  $class = new $style_info['class'];
+  $js_settings[$data['execute_index']] = $class->buildSettings($settings);
+  $js_settings[$data['execute_index']]['menu_style_name'] = $settings['menu_style_settings']['menu_style_name'];
+  $js_settings[$data['execute_index']]['selector'] = $selector;
+
+  backdrop_alter('system_menu_block_view_style', $js_settings);
+  backdrop_add_js(array('menu_style' => $js_settings), 'setting');
+}
+
+/**
+ * Load a single style.
+ *
+ * @param string $style
+ *   Style id to be loaded.
+ */
+function system_menu_block_style_load($style) {
+  $styles = system_menu_block_get_style_info();
+  $data = &backdrop_static(__FUNCTION__, array());
+  if (!isset($data[$style]) && !empty($styles[$style])) {
+    $style_info = $styles[$style];
+    $data[$style] = $style_info;
+    return $data[$style];
+  }
+  else {
+    // This style is already loaded.
+    return $data[$style];
+  }
+
+  return FALSE;
+}
+
+/**
+ * Recursively glob for directories.
+ *
+ * @param string $directory
+ *   Directory to glob.
+ * @param array $directories
+ *   Increasing array of matching directories.
+ */
+function system_menu_block_glob_recursive($directory, &$directories = array()) {
+  foreach (glob($directory, GLOB_ONLYDIR | GLOB_NOSORT) as $folder) {
+    $directories[] = $folder;
+    system_menu_block_glob_recursive("{$folder}/*", $directories);
+  }
+}
+
+/**
+ * Recursively search through directories for files with given extension.
+ *
+ * @param string $directory
+ *   Directory to search.
+ * @param string $extension
+ *   File extensions to look for.
+ *
+ * @return array
+ *   Array of matching files.
+ */
+function system_menu_block_glob_files($path, $directories, $extension) {
+  // $directories = (empty($directories) ? array() : $directories);
+  // system_menu_block_glob_recursive($directory, $directories);
+  $files = array();
+  foreach ($directories as $directory) {
+    $dir_path = $path . $directory;
+    $files = array_merge($files, glob("{$dir_path}/*.{$extension}"));
+  }
+
+  return $files;
 }

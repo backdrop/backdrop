@@ -610,7 +610,11 @@ ul.tips {
 .l-header .no-tabs ul.menu li a.active {
   background: none;
 }
-
+/* ------------------- Slimmenu ------------------- */
+.l-header ul.slimmenu li a {
+  display: block;
+  padding: 2px 60px 2px 12px;
+}
 /* ------------------- Main ------------------- */
 
 .l-container {
