@@ -6,6 +6,11 @@ group: legacy
 php:
   - 5.3
   - 7.0
+# Split the execution of our tests into 4 separate builds.
+env:
+  - RUNSPLIT=1/3
+  - RUNSPLIT=2/3
+  - RUNSPLIT=3/3
 before_script:
   # Install Apache and FastCGI extension to connect to PHP-FPM.
   - sudo apt-get update > /dev/null
@@ -26,6 +31,14 @@ before_script:
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-ci/php.ini
 
+  # Create a RAM disk for MySQL to improve performance.
+  - sudo mkdir /mnt/ramdisk
+  - sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
+  - sudo stop mysql
+  - sudo mv /var/lib/mysql /mnt/ramdisk
+  - sudo ln -s /mnt/ramdisk/mysql /var/lib/mysql
+  - sudo start mysql
+
   # Set MySQL configuration and create the database.
   - mysql -e 'SET GLOBAL wait_timeout = 5400;'
   - mysql -e 'create database backdrop;'
@@ -34,7 +47,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --concurrency 12 --url 'http://localhost' --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --split=$RUNSPLIT --concurrency 12 --url http://localhost --color --verbose --force --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log

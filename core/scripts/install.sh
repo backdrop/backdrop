@@ -174,8 +174,10 @@ try {
   print "Installing Backdrop. This may take a moment...\n";
   install_backdrop($settings);
   print "Backdrop installed successfully.\n";
+  exit(0);
 }
 catch (Exception $e) {
   print "An error occurred. Output of installation attempt is as follows:\n";
   print $e->getMessage() . "\n";
+  exit(1);
 }
