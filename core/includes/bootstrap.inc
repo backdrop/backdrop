@@ -2139,7 +2139,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   static $in_error_state = FALSE;
 
   // Don't report watchdog messages for disabled severity levels.
-  if (!in_array($severity, config('system.core', 'watchdog_enabled_severity_levels'))) {
+  if (!in_array($severity, config('system.core')->get('watchdog_enabled_severity_levels'))) {
     return;
   }
 
