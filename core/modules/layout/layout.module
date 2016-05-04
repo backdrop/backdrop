@@ -634,6 +634,7 @@ function layout_autoload_info() {
     'EntityLayoutContext' => 'plugins/context/entity_layout_context_handler.inc',
 
     // Access handlers.
+    'DateTimeLayoutAccess' => 'plugins/access/date_time_layout_access.inc',
     'EntityBundleLayoutAccess' => 'plugins/access/entity_bundle_layout_access.inc',
     'LayoutAccess' => 'plugins/access/layout_access.inc',
     'LayoutAccessBroken' => 'plugins/access/layout_access.inc',
