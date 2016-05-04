@@ -2138,8 +2138,14 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   static $in_error_state = FALSE;
 
+  $wesl = config('system.core')->get('watchdog_enabled_severity_levels');
+  // CMI should make this unnecessary, but we can be called *before* system.core
+  // is installed when we're running an update script.
+  if ($wesl === NULL) {
+    $wesl = array(0,1,2,3,4,5,6);
+  }
   // Don't report watchdog messages for disabled severity levels.
-  if (!in_array($severity, config('system.core')->get('watchdog_enabled_severity_levels'))) {
+  if (!in_array($severity, $wesl)) {
     return;
   }
 
