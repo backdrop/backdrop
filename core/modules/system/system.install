@@ -2566,7 +2566,6 @@ function system_update_1031() {
  */
 function system_update_1032() {
   update_module_enable(array('config'));
-
 }
 
 /**
