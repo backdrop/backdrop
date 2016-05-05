@@ -1812,7 +1812,7 @@ function t($string, array $args = array(), array $options = array()) {
   // and statically cache the result for performance.
   if (!isset($translate_english)) {
     try {
-      $translate_english = config_get('locale.settings', 'translate_english') ? TRUE : FALSE;
+      $translate_english = (function_exists('config_get') && config_get('locale.settings', 'translate_english')) ? TRUE : FALSE;
     }
     catch (ConfigException $e) {
       $translate_english = FALSE;
