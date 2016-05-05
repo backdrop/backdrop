@@ -438,6 +438,11 @@ class Config {
   protected $isLoaded = FALSE;
 
   /**
+   * Signature of the default values so we can tell when the defaults change.
+   */
+  protected $defaultHashes = array();
+
+  /**
    * Constructs a configuration object.
    *
    * @param string $name
@@ -664,7 +669,7 @@ class Config {
       $data = $this->data;
     }
     $algo = self::DEFAULT_HASH_ALGORITHM;
-    $this->data['_default_hashes'][$algo] = Config::hash($data, $algo);
+    $this->defaultHashes[$algo] = Config::hash($data, $algo);
   }
   /**
    * Replaces the data of this configuration object.
@@ -772,6 +777,12 @@ class Config {
       $this->isNew = FALSE;
       $this->replaceData($data);
     }
+    // Remove the signatures from the data block so we don't confuse any of the
+    // tests or modules that want to interate through the values.
+    if (array_key_exists('_default_hashes', $this->data)) {
+      $this->defaultHashes = $this->data['_default_hashes'];
+      unset($this->data['_default_hashes']);
+    }
     $this->isLoaded = TRUE;
     return $this;
   }
@@ -789,7 +800,10 @@ class Config {
       $this->load();
     }
     // Ensure config name is saved in the result.
-    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+    $this->data = array_merge(array(
+      '_config_name' => $this->name,
+      '_default_hashes' => $this->defaultHashes,
+    ), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 
@@ -865,8 +879,8 @@ class Config {
    *   The hash requested or empty string if not set.
    */
   public function getDefaultHash($algo = self::DEFAULT_HASH_ALGORITHM) {
-    return !empty($this->data['_default_hashes'][$algo]) ?
-      $this->data['_default_hashes'][$algo] :
+    return !empty($this->defaultHashes[$algo]) ?
+      $this->defaultHashes[$algo] :
       '';
   }
 }
