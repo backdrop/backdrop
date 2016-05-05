@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function config_install() {
+  $modules = config_all_defaults_changed();
+  foreach (array_keys($modules) as $module_name) {
+    config_update_default_config($module);
+  }
+}
