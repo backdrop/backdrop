@@ -1681,8 +1681,15 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $page_length = strlen($page_content);
   backdrop_set_length_headers($page_length);
 
-  // Print the page.
-  print $page_content;
+  // Print the page. If doing an HTTP HEAD request on some servers like
+  // Apache, it will abort PHP immediately once content has been returned
+  // (because no additional headers would be allowed after that point). So we
+  // print nothing for HEAD requests so that background processing may continue
+  // if needed. Note that the content is still saved in the page cache even
+  // though it is not printed to the page. See backdrop_page_footer().
+  if ($_SERVER['REQUEST_METHOD'] !== 'HEAD') {
+    print $page_content;
+  }
 }
 
 /**
