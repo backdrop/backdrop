@@ -1,13 +1,12 @@
 <?php
 /**
  * @file
- * Handles updates of Backdrop core and contributed projects.
+ * Handles update checking for Backdrop core and contributed projects.
  *
  * The module checks for available updates of Backdrop core and any installed
  * contributed modules, themes, and layouts. It warns site administrators if newer
  * releases are available via the system status report (admin/reports/status),
- * the module, theme and layout pages, and optionally via e-mail. It also provides the
- * ability to install contributed modules, themes, and layouts via an user interface.
+ * the module, theme and layout pages, and optionally via e-mail.
  */
 
 /**
@@ -158,58 +157,6 @@ function update_menu() {
     'file' => 'update.fetch.inc',
   );
 
-  // We want action links for updating projects at a few different locations:
-  // on the module, theme and layout administration pages, and on the available
-  // updates report itself. The menu items will be mostly identical, except the
-  // paths and titles, so we just define them in a loop. We pass in a string
-  // indicating what context we're entering the action from, so that can
-  // customize the appearance as needed.
-  $paths = array(
-    'report' => 'admin/reports/updates',
-    'module' => 'admin/modules',
-    'theme' => 'admin/appearance',
-    'layout' => 'admin/structure/layouts',
-  );
-  foreach ($paths as $context => $path) {
-    $items[$path . '/install'] = array(
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('update_manager_install_form', $context),
-      'access callback' => 'update_manager_access',
-      'access arguments' => array(),
-      'weight' => 25,
-      'type' => MENU_LOCAL_ACTION,
-      'file' => 'update.manager.inc',
-    );
-    $items[$path . '/update'] = array(
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('update_manager_update_form', $context),
-      'access callback' => 'update_manager_access',
-      'access arguments' => array(),
-      'weight' => 10,
-      'title' => 'Update',
-      'type' => MENU_LOCAL_TASK,
-      'file' => 'update.manager.inc',
-    );
-  }
-  // Customize the titles of the action links depending on where they appear.
-  // We use += array() to let the translation extractor find these menu titles.
-  $items['admin/reports/updates/install'] += array('title' => 'Install module, theme or layout');
-  $items['admin/modules/install'] += array('title' => 'Install module');
-  $items['admin/appearance/install'] += array('title' => 'Install theme');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install layout');
-
-  // Menu callback used for the confirmation page after all the releases
-  // have been downloaded, asking you to backup before installing updates.
-  $items['admin/update/ready'] = array(
-    'title' => 'Ready to update',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('update_manager_update_ready_form'),
-    'access callback' => 'update_manager_access',
-    'access arguments' => array(),
-    'type' => MENU_CALLBACK,
-    'file' => 'update.manager.inc',
-  );
-
   return $items;
 }
 
@@ -232,15 +179,13 @@ function update_manager_access() {
 /**
  * Implements hook_theme().
  */
-function update_theme() {
+function update_theme($existing, $type, $theme, $path) {
   $base = array(
     'file' => 'update.theme.inc',
+    'path' => $path . '/theme',
   );
 
   return array(
-    'update_manager_update_form' => array(
-      'render element' => 'form',
-    ) + $base,
     'update_last_check' => array(
       'variables' => array('last' => NULL),
     ) + $base,
@@ -285,9 +230,6 @@ function update_cron() {
     module_load_include('inc', 'update', 'update.fetch');
     _update_cron_notify();
   }
-
-  // Clear garbage from disk.
-  update_clear_update_disk_cache();
 }
 
 /**
@@ -627,72 +569,6 @@ function _update_project_status_sort($a, $b) {
 }
 
 /**
- * Implements hook_verify_update_archive().
- *
- * First, we ensure that the archive isn't a copy of Backdrop core, which the
- * update manager does not yet support. See http://drupal.org/node/606592
- *
- * Then, we make sure that at least one module included in the archive file has
- * an .info file which claims that the code is compatible with the current
- * version of Backdrop core.
- *
- * @see backdrop_system_listing()
- * @see _system_rebuild_module_data()
- */
-function update_verify_update_archive($project, $archive_file, $directory) {
-  $errors = array();
-
-  // Make sure this isn't a tarball of Backdrop core.
-  if (
-    file_exists("$directory/$project/index.php")
-    && file_exists("$directory/$project/core/update.php")
-    && file_exists("$directory/$project/core/includes/bootstrap.inc")
-    && file_exists("$directory/$project/core/modules/node/node.module")
-    && file_exists("$directory/$project/core/modules/system/system.module")
-  ) {
-    return array(
-      'no-core' => t('Automatic updating of Backdrop CMS core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Backdrop CMS core manually.', array('@upgrade-guide' => 'http://backdropcms.org/guide/upgrade')),
-    );
-  }
-
-  // Parse all the .info files and make sure at least one is compatible with
-  // this version of Backdrop core. If one is compatible, then the project as a
-  // whole is considered compatible (since, for example, the project may ship
-  // with some out-of-date modules that are not necessary for its overall
-  // functionality).
-  $compatible_project = FALSE;
-  $incompatible = array();
-  $files = file_scan_directory("$directory/$project", '/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', array('key' => 'name', 'min_depth' => 0));
-  foreach ($files as $key => $file) {
-    // Get the .info file for the module, theme or layout this file belongs to.
-    $info = backdrop_parse_info_file($file->uri);
-
-    // If the module, theme or layout is incompatible with Backdrop core, set an error.
-    if (empty($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
-      $incompatible[] = !empty($info['name']) ? $info['name'] : t('Unknown');
-    }
-    else {
-      $compatible_project = TRUE;
-      break;
-    }
-  }
-
-  if (empty($files)) {
-    $errors[] = t('%archive_file does not contain any .info files.', array('%archive_file' => backdrop_basename($archive_file)));
-  }
-  elseif (!$compatible_project) {
-    $errors[] = format_plural(
-      count($incompatible),
-      '%archive_file contains a version of %names that is not compatible with Backdrop !version.',
-      '%archive_file contains versions of modules or themes that are not compatible with Backdrop !version: %names',
-      array('!version' => BACKDROP_CORE_COMPATIBILITY, '%archive_file' => backdrop_basename($archive_file), '%names' => implode(', ', $incompatible))
-    );
-  }
-
-  return $errors;
-}
-
-/**
  * @defgroup update_status_cache Private update status cache system
  * @{
  * Functions to manage the update status cache.
@@ -847,134 +723,6 @@ function update_flush_caches() {
     _update_cache_clear();
   }
   return array();
-}
-
-/**
- * @} End of "defgroup update_status_cache".
- */
-
-/**
- * Returns a short unique identifier for this Backdrop installation.
- *
- * @return
- *   An eight character string uniquely identifying this Backdrop installation.
- */
-function _update_manager_unique_identifier() {
-  $id = &backdrop_static(__FUNCTION__, '');
-  if (empty($id)) {
-    $id = substr(hash('sha256', backdrop_get_hash_salt()), 0, 8);
-  }
-  return $id;
-}
-
-/**
- * Returns the directory where update archive files should be extracted.
- *
- * @param $create
- *   (optional) Whether to attempt to create the directory if it does not
- *   already exist. Defaults to TRUE.
- *
- * @return
- *   The full path to the temporary directory where update file archives should
- *   be extracted.
- */
-function _update_manager_extract_directory($create = TRUE) {
-  $directory = &backdrop_static(__FUNCTION__, '');
-  if (empty($directory)) {
-    $directory = 'temporary://update-extraction-' . _update_manager_unique_identifier();
-    if ($create && !file_exists($directory)) {
-      mkdir($directory);
-    }
-  }
-  return $directory;
-}
-
-/**
- * Returns the type of package, either module, theme, or layout. Scans for an
- * '.info' file and reads its 'type' key and returns it.
- *
- * @param $directory_path
- *   The full path to the package directory
- *
- * @return
- *   The type of package, either module, theme, or layout.
- */
-function update_get_package_type($directory_path) {
-  if ($contents = file_scan_directory($directory_path, '/.*\.info$/')) {
-    foreach ($contents as $match) {
-      if (substr($match->filename, -5) == '.info') {
-        $info = backdrop_parse_info_file($match->uri);
-        return isset($info['type']) ? $info['type'] : FALSE;
-      }
-    }
-    return FALSE;
-  }
-}
-
-/**
- * Returns the directory where update archive files should be cached.
- *
- * @param $create
- *   (optional) Whether to attempt to create the directory if it does not
- *   already exist. Defaults to TRUE.
- *
- * @return
- *   The full path to the temporary directory where update file archives should
- *   be cached.
- */
-function _update_manager_cache_directory($create = TRUE) {
-  $directory = &backdrop_static(__FUNCTION__, '');
-  if (empty($directory)) {
-    $directory = 'temporary://update-cache-' . _update_manager_unique_identifier();
-    if ($create && !file_exists($directory)) {
-      mkdir($directory);
-    }
-  }
-  return $directory;
-}
-
-/**
- * Clears the temporary files and directories based on file age from disk.
- */
-function update_clear_update_disk_cache() {
-  // List of update module cache directories. Do not create the directories if
-  // they do not exist.
-  $directories = array(
-    _update_manager_cache_directory(FALSE),
-    _update_manager_extract_directory(FALSE),
-  );
-
-  // Search for files and directories in base folder only without recursion.
-  foreach ($directories as $directory) {
-    file_scan_directory($directory, '/.*/', array('callback' => 'update_delete_file_if_stale', 'recurse' => FALSE));
-  }
-}
-
-/**
- * Deletes stale files and directories from the update manager disk cache.
- *
- * Files and directories older than 6 hours and development snapshots older than
- * 5 minutes are considered stale. We only cache development snapshots for 5
- * minutes since otherwise updated snapshots might not be downloaded as
- * expected.
- *
- * When checking file ages, we need to use the ctime, not the mtime
- * (modification time) since many (all?) tar implementations go out of their way
- * to set the mtime on the files they create to the timestamps recorded in the
- * tarball. We want to see the last time the file was changed on disk, which is
- * left alone by tar and correctly set to the time the archive file was
- * unpacked.
- *
- * @param $path
- *   A string containing a file path or (streamwrapper) URI.
- */
-function update_delete_file_if_stale($path) {
-  if (file_exists($path)) {
-    $filectime = filectime($path);
-    if (REQUEST_TIME - $filectime > BACKDROP_MAXIMUM_TEMP_FILE_AGE || (preg_match('/.*-dev\.(tar\.gz|zip)/i', $path) && REQUEST_TIME - $filectime > 300)) {
-      file_unmanaged_delete_recursive($path);
-    }
-  }
 }
 
 /**

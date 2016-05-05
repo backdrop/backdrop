@@ -1,5 +1,5 @@
 name = Update Manager
-description = Checks for available updates, and can securely install or update modules, themes, and layouts via a web interface.
+description = Checks for available updates.
 version = BACKDROP_VERSION
 type = module
 package = Development

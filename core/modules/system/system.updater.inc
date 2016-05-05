@@ -38,7 +38,7 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   public static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'module');
+    return (installer_get_package_type($directory) == 'module');
   }
 
   public static function canUpdate($project_name) {
@@ -73,11 +73,22 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
   /**
    * List of post install actions.
    */
+  public function postInstall() {
+    $project = array();
+    $project['name'] = $this->name;
+    $project['type'] = 'module';
+    $_SESSION['project_browser_installed_projects'][$this->name] = $project;
+  }
+
+  /**
+   * List of post install actions.
+   */
   public function postInstallTasks() {
     return array(
-      l(t('Install another module'), 'admin/modules/install'),
-      l(t('Enable newly added modules'), 'admin/modules'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Manually install another module'), 'admin/modules/install'),
+      l(t('Enable newly added modules'), 'admin/modules/project-browser/install/enable'),
+      l(t('Browse projects'), 'admin/modules/project-browser'),
+      l(t('Module list'), 'modules'),
     );
   }
 
@@ -120,7 +131,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'theme');
+    return (installer_get_package_type($directory) == 'theme');
   }
 
   public static function canUpdate($project_name) {
@@ -136,7 +147,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
   public function postInstallTasks() {
     return array(
       l(t('Enable newly added themes'), 'admin/appearance'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Browse projects'), 'admin/modules/project-browser'),
     );
   }
 }
@@ -173,7 +184,7 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'layout');
+    return (installer_get_package_type($directory) == 'layout');
   }
 
   public static function canUpdate($project_name) {
@@ -188,7 +199,7 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
   public function postInstallTasks() {
     return array(
       l(t('Use newly added layouts'), 'admin/structure/layouts'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Browse projects'), 'admin/modules/project-browser'),
     );
   }
 }
