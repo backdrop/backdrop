@@ -75,7 +75,7 @@ function update_script_selection_form($form, &$form_state) {
 
   // Look for configuration updates
   $config_changes = config_all_defaults_changed();
-  if($config_changes) {
+  if ($config_changes) {
     $form['start']['_config_updates'] = array(
       '#type' => 'hidden',
       '#value' => serialize($config_changes),

@@ -305,7 +305,7 @@ function config_defaults_changed($module, $config_name = NULL) {
       if (is_null($config_name) || $file_config_name === $config_name) {
         $data = $storage->read($file_config_name);
         $config = config($file_config_name);
-        if (Config::Hash($data) !== $config->defaultHash()) {
+        if (Config::hash($data) !== $config->getDefaultHash()) {
           $changed_files[] = $file_config_name;
         }
       }
@@ -383,7 +383,7 @@ class Config {
    * The default hash aglorithm
    *
    * @see http://php.net/manual/en/function.hash.php
-   * @see Config::Hash
+   * @see Config::hash
    */
   const DEFAULT_HASH_ALGORITHM = 'sha256';
 
@@ -664,7 +664,7 @@ class Config {
       $data = $this->data;
     }
     $algo = self::DEFAULT_HASH_ALGORITHM;
-    $this->data['_default_hashes'][$algo] = Config::Hash($data, $algo);
+    $this->data['_default_hashes'][$algo] = Config::hash($data, $algo);
   }
   /**
    * Replaces the data of this configuration object.
@@ -845,7 +845,7 @@ class Config {
    *
    * @see Config::DEFAULT_HASH_ALGORITHM
    */
-  public static function Hash($data, $algo = self::DEFAULT_HASH_ALGORITHM) {
+  public static function hash($data, $algo = self::DEFAULT_HASH_ALGORITHM) {
     // Don't hash the hash.
     unset($data['_default_hashes']);
 
@@ -864,7 +864,7 @@ class Config {
    * @return string
    *   The hash requested or empty string if not set.
    */
-  public function defaultHash($algo = self::DEFAULT_HASH_ALGORITHM) {
+  public function getDefaultHash($algo = self::DEFAULT_HASH_ALGORITHM) {
     return !empty($this->data['_default_hashes'][$algo]) ?
       $this->data['_default_hashes'][$algo] :
       '';
