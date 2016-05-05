@@ -2938,11 +2938,15 @@ function backdrop_page_footer() {
   }
   else {
     backdrop_set_length_headers($page_length);
-    print $page_content;
+    // Do not print body content on HTTP HEAD requests. See
+    // backdrop_serve_page_from_cache() for further explanation.
+    if ($_SERVER['REQUEST_METHOD'] !== 'HEAD') {
+      print $page_content;
+    }
   }
 
   // If we're not already in a background request, flush to the browser.
-  if (!backdrop_is_background()) {
+  if (!backdrop_is_background() && $_SERVER['REQUEST_METHOD'] !== 'HEAD') {
     // Flushing for PHP-FPM based installations.
     if (function_exists('fastcgi_finish_request')) {
       fastcgi_finish_request();

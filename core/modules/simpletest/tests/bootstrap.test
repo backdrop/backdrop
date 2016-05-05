@@ -163,6 +163,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
+    sleep(3); // Delay to ensure caches are set.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -176,6 +177,16 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 19 Nov 2008 05:00:00 GMT', 'Default header was replaced.');
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Vary', 'value' => 'User-Agent')), $headers);
     $this->assertEqual($this->backdropGetHeader('Vary'), 'User-Agent,Accept-Encoding', 'Default header was replaced.');
+
+    // Check setting the cache via an HTTP HEAD request.
+    $this->backdropHead('system-test/hello-world', array('query' => array('cache' => 'test')));
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Cache miss on first request via HTTP HEAD request.');
+
+    sleep(3); // Delay to ensure caches are set.
+    $this->backdropGet('system-test/hello-world', array('query' => array('cache' => 'test')));
+
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cache hit on second request via HTTP GET request.');
+    $this->assertText('Hello world!', 'Page contents shown from cached page that was set via an HTTP HEAD request.');
 
     // Test that the initial load does not wait for shutdown functions.
     // This request will wait 10 seconds, but it should return faster than this
