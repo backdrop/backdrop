@@ -530,11 +530,13 @@ class LayoutRendererStandard {
     $style_settings = $this->prepared['regions'][$region_id]['style settings'];
     $style = layout_get_style_info($style_name);
 
-    if ($style['region theme']) {
-      $output = theme($style['region theme'], array('layout' => $this->layout, 'blocks' => $blocks, 'settings' => $style_settings, 'style' => $style));
-    }
-    else {
-      $output = implode('', $blocks);
+    $output = implode('', $blocks);
+
+    if (isset($this->prepared['regions'][$region_id]['style settings']['element'])
+      && ($this->prepared['regions'][$region_id]['style settings']['element'] != '')) {
+      $wrapper_tag = $this->prepared['regions'][$region_id]['style settings']['element'];
+      $classes = $this->prepared['regions'][$region_id]['style settings']['classes'];
+      $output  = '<' . $wrapper_tag . ' class="' . $classes .'">' . $output . '</' . $wrapper_tag . '>';
     }
 
     return $output;

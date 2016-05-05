@@ -2197,7 +2197,7 @@ function layout_ajax_form_open_dialog($form, &$form_state) {
  */
 function layout_ajax_form_save_dialog($form, $form_state) {
   $layout = $form_state['layout'];
-  $menu_item = $form_state['menu_item'];
+  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item']  : '';
 
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
@@ -2296,4 +2296,93 @@ function layout_ajax_form_update($form, $form_state) {
   }
 
   return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Menu callback; Show the region styles form.
+ */
+function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
+  $form_state['layout'] = $layout;
+  $form_state['region_name'] = $region_name;
+  $layout_info = layout_get_layout_info($layout->layout);
+  if (!array_key_exists($region_name, $layout_info['regions'])) {
+    return MENU_NOT_FOUND;
+  }
+
+  $form['#tree'] = TRUE;
+
+  $styles = _layout_get_all_info('layout_style');
+  $style_options = array();
+  foreach ($styles as $style_name => $style_info) {
+    if (!empty($style_info['region theme'])) {
+      $style_options[$style_name] = $style_info['title'];
+    }
+  }
+  $current_style = 'region';
+  if (isset($form_state['values']['style'])) {
+    $current_style = $form_state['values']['style'];
+  }
+  if (count($style_options) > 1) {
+    $form['style'] = array(
+      '#type' => 'select',
+      '#title' => t('Style'),
+      '#options' => $style_options,
+      '#default_value' => $current_style,
+      '#ajax' => array(
+        'wrapper' => 'region_style_settings',
+        'callback' => 'layout_region_configure_ajax_style'
+      ),
+      '#parents' => array('style'),
+    );
+  }
+  else {
+    $form['style'] = array (
+      '#type' => 'value',
+      '#value' => 'region',
+    );
+  }
+  $form['style_settings'] = array(
+    '#type' => 'container',
+    '#id' => 'region_style_settings',
+    '#parents' => array('style_settings'),
+  );
+
+  $data = array (
+    'layout' => $layout,
+    'region' => $region_name,
+  );
+  $style = layout_create_handler('layout_style', 'region', $data);
+  $style->form($form['style_settings'], $form_state);
+  $form_state['style'] = $style;
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#submit' => array(
+      'layout_configure_region_page_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
+  );
+
+  return $form;
+}
+ 
+/**
+ * AJAX callback to update the style settings within the region styles form.
+ */
+function layout_region_configure_ajax_style($form, $form_state) {
+  return $form['style_settings'];
+}
+
+/**
+ * Submit handler for layout_configure_region_page().
+ */
+function layout_configure_region_page_submit($form, &$form_state) {
+  $style = $form_state['style'];
+
+  $style->formSubmit($form, $form_state);
+  layout_set_layout_tempstore($form_state['layout']);
 }
