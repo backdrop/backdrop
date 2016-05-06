@@ -278,7 +278,7 @@ class DateFieldTestCase extends DateFieldBasic {
         );
         $this->createDateField($options);
         $this->dateForm($field_name, $field_type, $widget_type);
-        $this->deleteDateField($label);
+        $this->deleteDateField($label, $field_name);
       }
     }
   }
