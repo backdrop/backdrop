@@ -1681,8 +1681,15 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $page_length = strlen($page_content);
   backdrop_set_length_headers($page_length);
 
-  // Print the page.
-  print $page_content;
+  // Print the page. If doing an HTTP HEAD request on some servers like
+  // Apache, it will abort PHP immediately once content has been returned
+  // (because no additional headers would be allowed after that point). So we
+  // print nothing for HEAD requests so that background processing may continue
+  // if needed. Note that the content is still saved in the page cache even
+  // though it is not printed to the page. See backdrop_page_footer().
+  if ($_SERVER['REQUEST_METHOD'] !== 'HEAD') {
+    print $page_content;
+  }
 }
 
 /**
@@ -1805,7 +1812,7 @@ function t($string, array $args = array(), array $options = array()) {
   // and statically cache the result for performance.
   if (!isset($translate_english)) {
     try {
-      $translate_english = config_get('locale.settings', 'translate_english') ? TRUE : FALSE;
+      $translate_english = (function_exists('config_get') && config_get('locale.settings', 'translate_english')) ? TRUE : FALSE;
     }
     catch (ConfigException $e) {
       $translate_english = FALSE;
@@ -2798,11 +2805,6 @@ function _backdrop_bootstrap_page_cache() {
     if (is_object($cache)) {
       header('X-Backdrop-Cache: HIT');
 
-      // Restore the metadata cached with the page.
-      $_GET['q'] = $cache->data['path'];
-      backdrop_set_title($cache->data['title'], PASS_THROUGH);
-      date_default_timezone_set(backdrop_get_user_timezone());
-
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
       // on its creation date.
@@ -2816,12 +2818,20 @@ function _backdrop_bootstrap_page_cache() {
       // Calls to hook_boot() on page cache requests is deprecated, though they
       // can still be enabled via settings.php
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
+        // Restore the metadata cached with the page for hook_boot().
+        $_GET['q'] = $cache->data['path'];
+        backdrop_set_title($cache->data['title'], PASS_THROUGH);
+        date_default_timezone_set(backdrop_get_user_timezone());
+
         // Load bootstrap modules.
         require_once BACKDROP_ROOT . '/core/includes/module.inc';
         module_load_all(TRUE);
         bootstrap_invoke_all('boot');
       }
+
+      // Deliver the cached page.
       backdrop_serve_page_from_cache($cache);
+
       // Like hook_boot(), hook_exit() is no longer called on page cache
       // requests unless enabled via settings.php.
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
@@ -2851,6 +2861,11 @@ function _backdrop_bootstrap_page_cache() {
       if ($cache_expired) {
         // Enter background mode (this suppresses any output of headers).
         backdrop_is_background(TRUE);
+
+        // Restore the current path and page title.
+        $_GET['q'] = request_path();
+        backdrop_static_reset('backdrop_set_title');
+        backdrop_static_reset('backdrop_http_headers');
       }
       // No new cache entry needed. Exit immediately after serving the page.
       else {
@@ -3811,7 +3826,7 @@ function backdrop_is_cli() {
  * in order to be returned in an alternative format.
  */
 function backdrop_is_html() {
-  return strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0 || empty($_SERVER['HTTP_ACCEPT']) || empty($_SERVER['HTTP_X_REQUESTED_WITH']);
+  return empty($_SERVER['HTTP_ACCEPT']) || strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0 || empty($_SERVER['HTTP_X_REQUESTED_WITH']);
 }
 
 /**

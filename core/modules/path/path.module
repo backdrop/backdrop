@@ -789,6 +789,11 @@ function path_form_element(Entity $entity) {
     '#type' => 'value',
     '#value' => $path['source'],
   );
+  $fieldset['original'] = array(
+    '#type' => 'value',
+    '#value' => path_load($path['pid'])
+  );
+
   $fieldset['langcode'] = array(
     '#type' => 'value',
     '#value' => $path['langcode'],

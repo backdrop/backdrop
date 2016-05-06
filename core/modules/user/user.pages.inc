@@ -98,14 +98,16 @@ function user_pass_submit($form, &$form_state) {
 /**
  * Menu callback; process one time login link and redirects to the user page on success.
  *
- * @param $uid
+ * @param int $uid
  *   User ID for the user who would like their password reset.
- * @param $timestamp
+ * @param int $timestamp
  *   Timestamp when the one-time password reset link was generated.
- * @param $hashed_pass
+ * @param string $hashed_pass
  *   Hashed version of the user's password using user_pass_rehash().
+ * @param bool $immediate_login
+ *   Skip the change password form and just immediately log in.
  */
-function user_pass_reset($uid, $timestamp, $hashed_pass) {
+function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALSE) {
   global $user;
 
   // When processing the one-time login link, we have to make sure that a user
@@ -141,7 +143,16 @@ function user_pass_reset($uid, $timestamp, $hashed_pass) {
         backdrop_goto('user/password');
       }
       elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
-        return backdrop_get_form('user_pass_reset_form', $account);
+        if ($immediate_login) {
+          $user = $account;
+          user_login_finalize();
+          backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
+          watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
+          backdrop_goto();
+        }
+        else {
+          return backdrop_get_form('user_pass_reset_form', $account);
+        }
       }
       else {
         backdrop_set_message(t('You have tried to use a reset password link that has either been used or is no longer valid. Please request a new one using the form below.'), 'error');
@@ -194,7 +205,7 @@ function user_pass_reset_form_submit($form, &$form_state) {
   // invalidates further use of the one-time login link.
   user_login_finalize();
   backdrop_set_message(t('Your account password has been updated.'));
-  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => REQUEST_TIME));
+  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
   backdrop_goto();
 }
 
@@ -314,6 +325,9 @@ function user_profile_form_submit($form, &$form_state) {
     // Remove the password reset tag since a new password was saved.
     unset($_SESSION['pass_reset_'. $account->uid]);
   }
+
+  // Redirect to view the user account.
+  $form_state['redirect'] = 'user/' . $account->uid;
 
   backdrop_set_message(t('The changes have been saved.'));
 }

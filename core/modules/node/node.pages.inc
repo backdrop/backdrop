@@ -69,7 +69,7 @@ function node_add($type) {
     'type' => $type,
     'langcode' => LANGUAGE_NONE,
   ));
-  backdrop_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
+  backdrop_set_title(t('Create @name', array('@name' => t($types[$type]->name))), PASS_THROUGH);
   $output = backdrop_get_form($type . '_node_form', $node);
 
   return $output;

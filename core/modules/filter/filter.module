@@ -67,8 +67,8 @@ function filter_menu() {
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_format_editor_link_form', 3),
-    'access callback' => 'filter_format_access',
-    'access arguments' => array(3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'link'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
@@ -77,8 +77,8 @@ function filter_menu() {
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_format_editor_image_form', 3),
-    'access callback' => 'filter_format_access',
-    'access arguments' => array(3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'image'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
@@ -161,6 +161,29 @@ function filter_format_access($format) {
 function _filter_disable_format_access($format) {
   // The fallback format can never be disabled.
   return user_access('administer filters') && ($format->format != filter_fallback_format());
+}
+
+/**
+ * Access callback: Generic dialog access check callback.
+ *
+ * Ensures that a dialog is only opened from a safe calling page and via an
+ * AJAX request from the same site.
+ */
+function filter_dialog_access($format, $dialog_name, $account = NULL, $calling_path = NULL) {
+  if (!isset($account)) {
+    $account = $GLOBALS['user'];
+  }
+  if (!isset($calling_path) && isset($_GET['token'])) {
+    $calling_path = $_GET['calling_path'];
+  }
+
+  $format_access = filter_access($format, $account);
+  $tokens_match = FALSE;
+  if (isset($_GET['token'])) {
+    $tokens_match = ($_GET['token'] === filter_editor_dialog_token($format, $dialog_name, $account, $calling_path));
+  }
+
+  return $format_access && $tokens_match;
 }
 
 /**
@@ -546,6 +569,11 @@ function filter_permission() {
     'restrict access' => TRUE,
   );
 
+  $perms['upload editor images'] = array(
+    'title' => t('Upload images through editor dialogs'),
+    'description' => t('Allow users with access to image dialogs to upload files.'),
+  );
+
   // Generate permissions for each text format. Warn the administrator that any
   // of them are potentially unsafe.
   foreach (filter_formats() as $format) {
@@ -761,6 +789,41 @@ function filter_get_editors() {
 function filter_editor_load($editor_name) {
   $editors = filter_get_editors();
   return isset($editors[$editor_name]) ? $editors[$editor_name] : FALSE;
+}
+
+/**
+ * Generate a URL token for checking access to an editor dialog.
+ *
+ * Note that we do not use backdrop_get_token() because it requires an active
+ * session.
+ *
+ * @param stdClass $format
+ *   An object representing the text format.
+ * @param string $dialog_name
+ *   The type of dialog that will be opened.
+ * @param User $account
+ *   The user account that will be opening the dialog.
+ * @param string $path
+ *   The path from which the dialog will be opened. Defaults to the current
+ *   path.
+ *
+ * @return string
+ *   A token intended to be used in a query string.
+ */
+function filter_editor_dialog_token($format, $dialog_name, $account = NULL, $path = NULL) {
+  if (!isset($account)) {
+    $account = $GLOBALS['user'];
+  }
+  if (!isset($path)) {
+    $path = $_GET['q'];
+  }
+  $values = array(
+    $path,
+    $format->format,
+    $dialog_name,
+    $account->uid,
+  );
+  return backdrop_hmac_base64(implode('-', $values), backdrop_get_private_key() . backdrop_get_hash_salt());
 }
 
 /**
@@ -1161,7 +1224,7 @@ function filter_process_format($element) {
   $element['format'] = array(
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
-    '#title' => 'Formatting options',
+    '#title' => t('Formatting options'),
     '#collapsible' => TRUE, 
     '#collapsed' => TRUE,
   );
