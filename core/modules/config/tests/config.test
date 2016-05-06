@@ -269,9 +269,9 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Load the diff UI and verify that the diff reflects the changes.
     $this->backdropGet('admin/config/development/configuration/sync/diff/' . $config_name);
     $deleted_words = $this->xpath('//td[contains(@class, :class)]//del', array(':class' => 'diff-deletedline'));
-    $this->assertEqual($original_data[$change_key], (string) $deleted_words[0]);
-    $this->assertEqual($remove_key, (string) $deleted_words[1]);
-    $this->assertEqual($original_data[$remove_key], (string) $deleted_words[2]);
+    $this->assertEqual($original_data[$change_key], (string) $deleted_words[3]);
+    $this->assertEqual($remove_key, (string) $deleted_words[4]);
+    $this->assertEqual($original_data[$remove_key], (string) $deleted_words[5]);
 
     $added_words = $this->xpath('//td[contains(@class, :class)]//ins', array(':class' => 'diff-addedline'));
     $this->assertEqual($change_data, (string) $added_words[0]);
