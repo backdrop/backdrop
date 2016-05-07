@@ -414,7 +414,6 @@ function simpletest_script_init($server_software) {
    * and hosted outside of the web root. See issue #1297.
    */
   define('BACKDROP_ROOT', dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))));
-  echo BACKDROP_ROOT;
 
   // Change the directory to the Backdrop root.
   chdir(BACKDROP_ROOT);
