@@ -20,6 +20,7 @@ function update_settings($form, &$form_state) {
     '#options' => array(
       '1' => t('Daily'),
       '7' => t('Weekly'),
+      '0' => t('Manually only'),
     ),
     '#description' => t('Select how frequently you want to automatically check for new releases of your currently installed modules, themes, and layouts.'),
   );

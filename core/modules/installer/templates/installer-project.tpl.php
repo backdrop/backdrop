@@ -41,5 +41,5 @@ $class = ($first) ? 'project-item-first' : 'project-item';
      	<?php print $install; ?>
   </div>
   </div>
-  <div class='clearfix'></div>
+  <div class="clearfix"></div>
 </div>

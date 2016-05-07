@@ -1,6 +1,6 @@
 {
     "_config_name": "installer.settings",
-    "installer_browser_server": {
+    "installer_server": {
         "url": "https://projects.backdropcms.org",
         "name": "Backdrop"
     }

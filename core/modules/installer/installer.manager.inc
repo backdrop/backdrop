@@ -435,6 +435,7 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     $projects = $_SESSION['installer_manager_update_projects'];
     unset($_SESSION['installer_manager_update_projects']);
 
+    $project_real_location = NULL;
     foreach ($projects as $project => $url) {
       $project_location = $directory . '/' . $project;
       $updater = Updater::factory($project_location);
@@ -498,8 +499,7 @@ function installer_manager_install_form($form, &$form_state) {
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
-    '#markup' => t('You can find modules, themes, and layouts on <a href="@url">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
-      '@url' => 'http://backdropcms.org',
+    '#markup' => t('You can find modules, themes, and layouts on <a href="https://backdropcms.org">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
       '%extensions' => archiver_get_extensions(),
     )),
     '#suffix' => '</p>',
@@ -671,7 +671,6 @@ function installer_manager_install_form_validate($form, &$form_state) {
     // first, check if any of the submitted project names are not modules, then
     // check themes, then layouts. Anything left over after this is not a valid
     // project on the server.
-    $all_projects = array();
     $not_found = array();
     module_load_include('inc', 'installer', 'installer.browser');
 
@@ -750,7 +749,7 @@ function installer_manager_install_form_submit($form, &$form_state) {
     foreach ($form_state['projects'] as $project) {
       installer_browser_install_queue_add($project);
     }
-    $form_state['redirect'] = 'admin/modules/installer-browser/install/select_versions';
+    $form_state['redirect'] = 'admin/installer/install/select_versions';
   }
   else {
     $field = 'project_url';
@@ -776,8 +775,8 @@ function installer_manager_install_form_submit($form, &$form_state) {
  * via authorize.php which will copy the extracted files from the temporary
  * location into the live site.
  *
- * @param string $browser
- *   Whether the project is being installed via the Installer Browser.
+ * @param string $is_installer
+ *   Whether the project is being installed via the Project Installer UI.
  *
  * @return array
  *   An associative array with keys:
@@ -789,7 +788,7 @@ function installer_manager_install_form_submit($form, &$form_state) {
  * @see system_authorized_init()
  * @see system_authorized_get_url()
  */
-function installer_manager_download_project($url, $browser = FALSE) {
+function installer_manager_download_project($url, $is_installer = FALSE) {
   if ($url) {
     $local_cache = installer_manager_file_get($url);
     if (!$local_cache) {
@@ -802,12 +801,18 @@ function installer_manager_download_project($url, $browser = FALSE) {
   elseif ($_FILES['files']['name']['project_upload']) {
     $validators = array('file_validate_extensions' => array(archiver_get_extensions()));
     $field = 'project_upload';
-    if (!($finfo = file_save_upload($field, $validators, NULL, FILE_EXISTS_REPLACE))) {
+    if (!($file_info = file_save_upload($field, $validators, NULL, FILE_EXISTS_REPLACE))) {
       // Failed to upload the file. file_save_upload() calls form_set_error() on
       // failure.
-      return;
+      return array(
+        'success' => FALSE,
+        'message' => t('Unable to save downloaded project into the temporary directory.'),
+      );
     }
-    $local_cache = $finfo->uri;
+    $local_cache = $file_info->uri;
+  }
+  else {
+    $local_cache = NULL;
   }
 
   // Try to extract it.
@@ -893,8 +898,9 @@ function installer_manager_download_project($url, $browser = FALSE) {
     module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
 
-    if ($browser) {
+    if ($is_installer) {
       // Initialize some variables in the Batch API $context array.
+      /* @var Updater $updater */
       $updater = new $arguments['updater_name']($project_real_location);
 
       try {
@@ -918,7 +924,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
     }
   }
   else {
-    if ($browser) {
+    if ($is_installer) {
       return array(
         'success' => FALSE,
         'message' => t('Permissions are not set up properly.'),
@@ -958,7 +964,7 @@ function installer_manager_download_project($url, $browser = FALSE) {
  * @param string $directory
  *   The directory you wish to extract the archive into.
  *
- * @return Archiver
+ * @return ArchiverInterface
  *   The Archiver object used to extract the archive.
  *
  * @throws Exception
@@ -1030,8 +1036,9 @@ function installer_manager_file_get($url) {
   // Check the cache and download the file if needed.
   $cache_directory = _installer_manager_cache_directory();
   $local = $cache_directory . '/' . backdrop_basename($parsed_url['path']);
+  installer_delete_file_if_stale($local);
 
-  if (!file_exists($local) || installer_delete_file_if_stale($local)) {
+  if (!file_exists($local)) {
     return system_retrieve_file($url, $local, FALSE, FILE_EXISTS_REPLACE);
   }
   else {

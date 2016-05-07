@@ -139,6 +139,7 @@ function installer_authorize_batch_copy_project($project, $updater_name, $local_
     return;
   }
 
+  /* @var Updater $updater */
   $updater = new $updater_name($local_url);
 
   try {

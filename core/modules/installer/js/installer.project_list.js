@@ -4,57 +4,58 @@
 *
 * Inspired by https://css-tricks.com/snippets/jquery/open-external-links-in-new-window/
 */
-Backdrop.behaviors.installerProjectList = {
-attach: function (context, settings) {
-    // Open all links in dialogs in a new window.
-    $(window).on( "dialog:aftercreate", function( event, ui ) {
-      $('a').each(function() {
-        var a = new RegExp('/' + window.location.host + '/');
-        if(!a.test(this.href)) {
-          $(this).attr("target","_blank");
-        }
-      });
-    });
+(function ($) {
 
+"use strict";
+
+Backdrop.behaviors.installerProjectList = {
+  attach: function(context, settings) {
     // On mobile add an indicator of number of projects installed and scroll to
     // installation queue on click.
-    var windowsize = window.innerWidth;
-    var header = $(".installer-browser-main th");
-    var items = $('.installer-browser-install-queue-item').length;
-    checkQueue();
+    updateTableHeader();
 
-    function checkQueue() {
-      items = $('.installer-browser-install-queue-item').length;
-      if (windowsize < 768) {
-        updateTH();
-      }
-    }
-
-    function updateTH() {
+    /**
+     * Update the table header installation links for mobile.
+     */
+    function updateTableHeader() {
+      var itemCount = $('.installer-browser-install-queue-item').length;
+      var $header = $(".installer-browser-main th");
       $(".projects-selected").remove();
-      header.append('<span class="projects-selected">: '+items+' selected. <a id="status-count-link" href="ff">review and install</a></span>');
+      if (window.innerWidth < 768 && itemCount > 0) {
+        $header.append('<span class="projects-selected">: ' + Backdrop.formatPlural(itemCount, '@count item selected.', '@count items selected.') + '<a class="installer-status-count-link" href="#">' + Backdrop.t('Review and install') + '</a></span>');
+      }
     }
 
+    // Update the table header after any AJAX event completes.
     $(document).ajaxComplete(function() {
-      checkQueue();
+      updateTableHeader();
     });
 
-    $(window).resize(function() {
-      windowsize = window.innerWidth;
-      if (windowsize < 768) {
-        updateTH();
-      }
-      else {
-        $(".projects-selected").remove();
-      }
+    // Update the table header on window resize.
+    var resizeTimeout;
+    $(window).on('resize.installer', function (event) {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateTableHeader, 50);
     });
-    
-    $('body').on('click', '#status-count-link', function(event) {
+
+    $('body').once('installer-status-count').on('click', '.installer-status-count-link', function(event) {
       event.preventDefault();
       event.stopPropagation();
       $('html, body').animate({
-scrollTop: $(".installer-browser-sidebar-right").offset().top
+        scrollTop: $(".installer-browser-list-sidebar").offset().top
       }, 400);
     });
   }
-}
+};
+
+// Open all links in dialogs in a new window.
+$(window).on('dialog:aftercreate', function(e, dialog, $element, settings) {
+  $element.find('a').each(function() {
+    var a = new RegExp('/' + window.location.host + '/');
+    if (!a.test(this.href)) {
+      $(this).attr("target", "_blank");
+    }
+  });
+});
+
+})(jQuery);

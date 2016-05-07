@@ -23,7 +23,7 @@ function installer_test_menu() {
     'description' => "Deliver release info as an XML file.",
     'page callback' => 'installer_test_xml',
     'page arguments' => array(5, 6),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['installer_test/query/%/%'] = array(
@@ -31,7 +31,7 @@ function installer_test_menu() {
     'description' => "Tests the ability to fetch and display projects, and filter them appropriately.",
     'page callback' => 'installer_test_query',
     'page arguments' => array(1, 2, 3),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -148,10 +148,7 @@ function installer_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    ),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/aaa_installer_test.xml', array('absolute' => TRUE)),
     'last updated' => '12342521',
     'maintenance status' => 'Actively maintained',
     'development status' => 'Under active development',
@@ -171,10 +168,7 @@ function installer_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    ),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/ddd_installer_test.xml', array('absolute' => TRUE)),
     'last updated' => '12342522',
     'maintenance status' => 'Actively maintained',
     'development status' => 'Under active development',
@@ -196,10 +190,7 @@ function installer_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    ),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/eee_installer_test.xml', array('absolute' => TRUE)),
     'last updated' => '12342523',
     'maintenance status' => 'Actively maintained',
     'development status' => 'Under active development',
@@ -219,10 +210,7 @@ function installer_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    ),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/ttt_installer_test.xml', array('absolute' => TRUE)),
     'last updated' => '12342511',
     'maintenance status' => 'Actively maintained',
     'development status' => 'Under active development',
@@ -241,10 +229,7 @@ function installer_test_projects() {
     'image' => '',
     'usage' => '542312',
     'project url' => '',
-    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    'info' => array(
-      'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml', array('absolute' => TRUE)),
-    ),
+    'project status url' => url(backdrop_get_path('module', 'installer') . '/tests/installer_test_xml/lll_installer_test.xml', array('absolute' => TRUE)),
     'last updated' => '12342531',
     'maintenance status' => 'Actively maintained',
     'development status' => 'Under active development',

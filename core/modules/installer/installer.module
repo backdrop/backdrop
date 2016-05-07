@@ -23,12 +23,7 @@ function installer_permission() {
 function installer_menu() {
   $items = array();
 
-  // We want action links for updating projects at a few different locations:
-  // on the module, theme and layout administration pages, and on the available
-  // updates report itself. The menu items will be mostly identical, except the
-  // paths and titles, so we just define them in a loop. We pass in a string
-  // indicating what context we're entering the action from, so that can
-  // customize the appearance as needed.
+  // Add the tabs for install and update on modules, themes, and layouts.
   $paths = array(
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
@@ -36,206 +31,95 @@ function installer_menu() {
   );
   foreach ($paths as $context => $path) {
     $items[$path . '/install'] = array(
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('installer_menu_install_links_redirect', $context),
-      'access callback' => 'installer_manager_access',
-      'access arguments' => array(),
-      'weight' => 25,
-      'type' => MENU_LOCAL_ACTION,
+      'page callback' => 'installer_browser_page',
+      'page arguments' => array($context),
+      'access callback' => 'installer_install_access',
+      'weight' => 4,
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'installer.pages.inc',
     );
     $items[$path . '/update'] = array(
       'page callback' => 'backdrop_get_form',
       'page arguments' => array('installer_manager_update_form', $context),
-      'access callback' => 'installer_manager_access',
-      'access arguments' => array(),
+      'access callback' => 'installer_update_access',
       'weight' => 10,
-      'title' => 'Update',
       'type' => MENU_LOCAL_TASK,
       'file' => 'installer.manager.inc',
     );
   }
-  // Customize the titles of the action links depending on where they appear.
-  // We use += array() to let the translation extractor find these menu titles.
-  $items['admin/modules/install'] += array('title' => 'Find new modules');
-  $items['admin/appearance/install'] += array('title' => 'Find new themes');
-  $items['admin/structure/layouts/install'] += array('title' => 'Find new layouts');
 
-  $items['admin/modules/manual-install'] = array(
+  // Add menu titles with += for the translation extractor.
+  $items['admin/modules/install'] += array('title' => 'Install modules');
+  $items['admin/modules/update'] += array('title' => 'Update modules');
+
+  $items['admin/appearance/install'] += array('title' => 'Install themes');
+  $items['admin/appearance/update'] += array('title' => 'Update themes');
+
+  $items['admin/structure/layouts/install'] += array('title' => 'Install layouts');
+  $items['admin/structure/layouts/update'] += array('title' => 'Update layouts');
+
+  $items['admin/installer/manual'] = array(
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_install_form'),
-    'access callback' => 'installer_manager_access',
+    'access callback' => 'installer_install_access',
     'access arguments' => array(),
     'weight' => 25,
     'type' => MENU_CALLBACK,
     'file' => 'installer.manager.inc',
   );
-  // Menu callback used for the confirmation page after all the releases
-  // have been downloaded, asking you to backup before installing updates.
   $items['admin/update/ready'] = array(
     'title' => 'Ready to update',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_update_ready_form'),
-    'access callback' => 'installer_manager_access',
+    'access callback' => 'installer_install_access',
     'access arguments' => array(),
     'type' => MENU_CALLBACK,
     'file' => 'installer.manager.inc',
   );
-
-  $items['admin/modules/installer-browser'] = array(
-    'title' => 'Browse projects',
-    'description' => 'Browse and search for new modules',
-    'page callback' => 'installer_browser_page',
-    'page arguments' => array('module'),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
-  );
-  $items['admin/modules/installer-browser/module'] = array(
-    'title' => 'Modules',
-    'description' => 'Browse and search for new modules',
-    'page callback' => 'installer_browser_page',
-    'page arguments' => array('module'),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/modules/installer-browser/theme'] = array(
-    'title' => 'Themes',
-    'description' => 'Browse and search for new themes',
-    'page callback' => 'installer_browser_page',
-    'page arguments' => array('theme'),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['admin/modules/installer-browser/layout'] = array(
-    'title' => 'Layouts',
-    'description' => 'Browse and search for new layouts',
-    'page callback' => 'installer_browser_page',
-    'page arguments' => array('layout'),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
-    'weight' => 10,
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['admin/modules/installer-browser/bulk/%'] = array(
+  $items['admin/installer/bulk/%'] = array(
     'title' => 'Install by names',
     'description' => 'Install multiple projects by listing machine names.',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('installer_browser_bulk_install_form', 4),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
+    'page arguments' => array('installer_browser_bulk_install_form', 3),
+    'access callback' => 'installer_install_access',
+    'file' => 'installer.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['admin/modules/installer-browser/project/%'] = array(
+  $items['admin/installer/project/%'] = array(
     'title' => 'Project details',
     'description' => 'Project details',
     'page callback' => 'installer_browser_project_display',
-    'page arguments' => array(4),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
+    'page arguments' => array(3),
+    'access callback' => 'installer_install_access',
+    'file' => 'installer.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['admin/modules/installer-browser/reset/%'] = array(
+  $items['admin/installer/reset/%/%'] = array(
     'title' => 'Reset',
     'description' => 'Reset installer project list.',
     'page callback' => 'installer_browser_installation_reset',
-    'page arguments' => array(4),
-    'access arguments' => array('use installer browser'),
-    'file' => 'installer.browser.pages.inc',
+    'page arguments' => array(3, 4),
+    'access callback' => 'installer_install_access',
+    'file' => 'installer.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['admin/modules/installer-browser/install/%'] = array(
+  $items['admin/installer/install/%'] = array(
     'title' => 'Install',
     'page callback' => 'installer_browser_installation_page',
-    'page arguments' => array(4),
-    'access arguments' => array('use installer browser'),
+    'page arguments' => array(3),
+    'access callback' => 'installer_install_access',
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'installer.browser.pages.inc',
+    'file' => 'installer.pages.inc',
   );
-  $items['admin/installer-browser/%/install-queue/%/%'] = array(
+  $items['admin/installer/queue/%/%/%'] = array(
     'page callback' => 'installer_browser_install_queue_callback',
-    'page arguments' => array(2, 4, 5),
-    'access arguments' => array('use installer browser'),
+    'page arguments' => array(3, 4, 5),
+    'access callback' => 'installer_install_access',
     'type' => MENU_CALLBACK,
-    'file' => 'installer.browser.pages.inc',
+    'file' => 'installer.pages.inc',
   );
 
   return $items;
-}
-
-/**
- * Menu callback; route local task links to appropriate browser tabs.
- */
-function installer_menu_install_links_redirect($form, &$form_state, $context) {
-  backdrop_goto('admin/modules/installer-browser/' . $context) ;
-}
-
-/**
- * Implements hook_menu_local_tasks_alter().
- *
- * This is used to put the 'Project Browser' action on the 'Modules' page.
- */
-function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
-  switch ($root_path) {
-    case 'admin/modules':
-      // Unset the install theme page.
-      foreach ($data['actions']['output'] as $num => $item) {
-        if ($item['#link']['path'] == 'admin/modules/install') {
-          unset($data['actions']['output'][$num]);
-        }
-      }
-      $item = menu_get_item('admin/modules/installer-browser/module');
-      if ($item['access']) {
-        $item['title'] = t('Find new modules');
-        $data['actions']['output'][] = array(
-          '#theme' => 'menu_local_action',
-          '#link' => $item,
-        );
-      }
-      break;
-
-    case 'admin/structure/layouts/add':
-      // Unset the install theme page.
-      foreach ($data['actions']['output'] as $num => $item) {
-        if ($item['#link']['path'] == 'admin/structure/layouts/install') {
-          unset($data['actions']['output'][$num]);
-        }
-      }
-      $item = menu_get_item('admin/modules/installer-browser/layout');
-      if ($item['access']) {
-        $item['title'] = t('Find new layouts');
-        $data['actions']['output'][] = array(
-          '#theme' => 'menu_local_action',
-          '#link' => $item,
-        );
-      }
-      break;
-
-    case 'admin/structure/layouts':
-      foreach ($data['actions']['output'] as $num => $item) {
-        if ($item['#link']['path'] == 'admin/structure/layouts/install') {
-          unset($data['actions']['output'][$num]);
-        }
-      }
-      break;
-
-    case 'admin/appearance':
-      // Unset the install theme page
-      foreach ($data['actions']['output'] as $num => $item) {
-        if ($item['#link']['path'] == 'admin/appearance/install') {
-          unset($data['actions']['output'][$num]);
-        }
-      }
-      $item = menu_get_item('admin/modules/installer-browser/theme');
-      if ($item['access']) {
-        $item['title'] = t('Find new themes');
-        $data['actions']['output'][] = array(
-          '#theme' => 'menu_local_action',
-          '#link' => $item,
-        );
-      }
-      break;
-  }
 }
 
 /**
@@ -250,44 +134,58 @@ function installer_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  *
  * @see installer_menu()
  */
-function installer_manager_access() {
+function installer_update_access() {
   return settings_get('allow_authorize_operations', TRUE) && user_access('administer software updates');
 }
+
+/**
+ * Access callback: Resolves if the current user can install via the installer.
+ *
+ * It both enforces the 'use installer browser' permission and the global
+ * kill switch for the authorize.php script.
+ *
+ * @return
+ *   TRUE if the current user can access the installer menu items; FALSE
+ *   otherwise.
+ *
+ * @see installer_menu()
+ */
+function installer_install_access() {
+  return settings_get('allow_authorize_operations', TRUE) && user_access('use installer browser');
+}
+
 
 /**
  * Implements hook_theme().
  */
 function installer_theme($existing, $type, $theme, $path) {
   $base = array(
-    'path' => $path . '/theme',
     'file' => 'installer.theme.inc',
   );
 
   return array(
     'installer_manager_update_form' => array(
       'render element' => 'form',
-      'file' => 'installer.theme.inc',
-      'path' => $path . '/theme',
-    ),
+    ) + $base,
     // Template for installation page.
     'installer_browser_install' => array(
       'variables' => array('current_task' => NULL, 'main_content' => NULL),
-      'template' => 'installer-install',
+      'template' => 'templates/installer-install',
     ) + $base,
     // Template for list of projects.
     'installer_browser_list' => array(
       'variables' => array('projects_list' => NULL, 'type' => NULL),
-      'template' => 'installer-list',
+      'template' => 'templates/installer-list',
     ) + $base,
     // Template for block.
     'installer_browser_block' => array(
       'render element' => 'element',
-      'template' => 'installer-block',
+      'template' => 'templates/installer-block',
     ) + $base,
     // Template for single project.
     'installer_browser_project' => array(
       'variables' => array('project' => NULL, 'first' => NULL),
-      'template' => 'installer-project',
+      'template' => 'templates/installer-project',
     ) + $base,
     // Template for project description.
     'installer_browser_project_description' => array(
@@ -296,12 +194,12 @@ function installer_theme($existing, $type, $theme, $path) {
     // Template for project details dialog.
     'installer_browser_project_dialog' => array(
       'variables' => array('project' => NULL),
-      'template' => 'installer-project-dialog',
+      'template' => 'templates/installer-project-dialog',
     ) + $base,
     // Template for install queue item.
     'installer_browser_install_queue' => array(
       'variables' => array('projects' => NULL),
-      'template' => 'installer-install-queue',
+      'template' => 'templates/installer-install-queue',
     ) + $base,
   );
 }
@@ -331,7 +229,7 @@ function installer_verify_update_archive($project, $archive_file, $directory) {
     && file_exists("$directory/$project/core/modules/system/system.module")
   ) {
     return array(
-      'no-core' => t('Automatic updating of Backdrop CMS core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Backdrop CMS core manually.', array('@upgrade-guide' => 'http://backdropcms.org/guide/upgrade')),
+      'no-core' => t('Automatic updating of Backdrop CMS core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Backdrop CMS core manually.', array('@upgrade-guide' => 'https://backdropcms.org/guide/upgrade')),
     );
   }
 
@@ -406,28 +304,6 @@ function _installer_manager_extract_directory($create = TRUE) {
     }
   }
   return $directory;
-}
-
-/**
- * Returns the type of package, either module, theme, or layout. Scans for an
- * '.info' file and reads its 'type' key and returns it.
- *
- * @param $directory_path
- *   The full path to the package directory
- *
- * @return
- *   The type of package, either module, theme, or layout.
- */
-function installer_get_package_type($directory_path) {
-  if ($contents = file_scan_directory($directory_path, '/.*\.info$/')) {
-    foreach ($contents as $match) {
-      if (substr($match->filename, -5) == '.info') {
-        $info = backdrop_parse_info_file($match->uri);
-        return isset($info['type']) ? $info['type'] : FALSE;
-      }
-    }
-    return FALSE;
-  }
 }
 
 /**

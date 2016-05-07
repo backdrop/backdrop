@@ -618,7 +618,7 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
   $items['admin/appearance/list'] = array(
-    'title' => 'Themes',
+    'title' => 'List themes',
     'description' => 'Select and configure themes.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
@@ -656,6 +656,7 @@ function system_menu() {
         'access callback' => '_system_themes_access',
         'access arguments' => array($key),
         'file' => 'system.admin.inc',
+        'weight' => 20,
       );
     }
   }
@@ -671,16 +672,16 @@ function system_menu() {
     'weight' => -3,
   );
   $items['admin/modules/list'] = array(
-    'title' => 'Modules',
+    'title' => 'List modules',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/modules/list/confirm'] = array(
-    'title' => 'Modules',
+    'title' => 'List modules',
     'access arguments' => array('administer modules'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/modules/uninstall'] = array(
-    'title' => 'Uninstall',
+    'title' => 'Uninstall modules',
     'page arguments' => array('system_modules_uninstall'),
     'access arguments' => array('administer modules'),
     'type' => MENU_LOCAL_TASK,

@@ -961,7 +961,7 @@ file = image.test
 [InstallerLanguageTestCase]
 name = Installer language tests
 description = Tests for installer language support.
-group = Installer
+group = Installer (install.php)
 file = installer.test
 
 [LockFunctionalTest]
