@@ -546,7 +546,12 @@ abstract class BackdropTestCase {
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
     // methods to run was passed.
+    echo "get class methods " . microtime() . "\n";
+ 
     $class_methods = get_class_methods($class);
+
+    echo "end get class methods " . microtime() . "\n";
+
     if ($methods) {
       $class_methods = array_intersect($class_methods, $methods);
     }
@@ -576,7 +581,9 @@ abstract class BackdropTestCase {
           $this->setUp();
           if ($this->setup) {
             try {
+              echo "[  ". $method . " start " . microtime() . "\n";
               $this->$method();
+              echo "[  ". $method . " end " . microtime() . "\n";
               // Finish up.
             }
             catch (Exception $e) {
@@ -983,6 +990,13 @@ class BackdropWebTestCase extends BackdropTestCase {
    * The number of redirects followed during the handling of a request.
    */
   protected $redirect_count;
+  
+  /**
+   * The config cache file directory, to speed up setUp phase.
+   *
+   * @var string
+   */
+  private $config_cache_dir = NULL;
 
   /**
    * Constructor for BackdropWebTestCase.
@@ -1475,6 +1489,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
     $active_directory = config_get_config_directory('active');
+    
     $staging_directory = config_get_config_directory('staging');
     file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
@@ -1493,6 +1508,114 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Indicate the environment was set up correctly.
     $this->setupEnvironment = TRUE;
+  }
+  
+  /**
+   * Cache configs for future reuse by tests.
+   *
+   * When this function calls first time, we create and cache configs for future reuse.
+   *
+   * @see BackdropWebTestCase::setUp()
+   */
+  private function cacheConfigDir() {
+    global $config_directories;
+
+    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active';
+    
+    if(!file_exists($this->config_cache_dir)){
+      file_prepare_directory($this->config_cache_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS); 
+      $config_directories['active'];
+      
+      $direcory_handle = opendir($config_directories['active']);
+      while (FALSE !== ($entry = readdir($direcory_handle))) {
+        $file = $config_directories['active'] . '/' . $entry;
+        if(is_file($file)){
+          copy($file, $this->config_cache_dir . '/' . $entry);
+        }
+      }
+      closedir($direcory_handle);
+    }
+  }
+  /**
+   * Cache MySQL tables for future reuse by tests.
+   *
+   * When this function calls first time, we create and cache tables for future reuse.
+   *
+   * @see BackdropWebTestCase::setUp()
+   */
+  private function cacheMySQLData() {
+    $connection_info = Database::getConnectionInfo('default');
+    
+    $mysql_cach_dir = $this->originalFileDirectory . '/simpletest/cache/mysql_' . $this->profile; 
+    if(!file_exists($mysql_cach_dir)){
+      file_prepare_directory($mysql_cach_dir, FILE_CREATE_DIRECTORY); 
+      
+      $prefix = 'simpletest_cache_' . $this->profile . '_';
+      
+      echo "copy start: " . microtime() . "\n";
+       
+      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($this->databasePrefix) . '%' ))->fetchCol();
+      foreach($tables as $table_prefix){
+        $table = substr($table_prefix, strlen($this->databasePrefix));
+        echo "Table: " . $table ."\n";
+        echo 'CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table_prefix . "\n";
+        db_query('CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table);
+        
+//        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE=MEMORY');        
+        db_query('INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix);
+//        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');
+        echo 'INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix ."\n";
+
+      }
+
+      echo "copy end: " . microtime() . "\n";      
+    }
+  }
+  
+  protected function useCache(){
+//    return FALSE;
+    global $config_directories;
+    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active';
+    $mysql_cach_dir = $this->originalFileDirectory . '/simpletest/cache/mysql_' . $this->profile;
+    
+    if(file_exists($mysql_cach_dir)){
+      echo "copy start: " . microtime() . "\n";
+      $prefix = 'simpletest_cache_' . $this->profile . '_';
+      
+      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      foreach($tables as $table_prefix){
+        $table = substr($table_prefix, strlen($prefix));
+       // echo "Table: " . $table ."\n";
+//        echo 'CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' .  $prefix . $table ."\n";
+//        echo 'INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $prefix . $table . "\n";
+        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
+//        echo "copy create: "  . $table . ' ' .  microtime() . "\n";
+//        db_query('ALTER TABLE ' . $this->databasePrefix . $table . ' ENGINE=MEMORY');
+        db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
+//        echo "copy insert: " . $table . ' ' . microtime() . "\n";
+      }
+      echo "copy mysql end: " . microtime() . "\n";
+      
+      if(file_exists($this->config_cache_dir)){
+        $config_directories['active'];
+        
+        $direcory_handle = opendir($this->config_cache_dir);
+//        echo "READ:" . $this->config_cache_dir ."\n";
+        while (FALSE !== ($entry = readdir($direcory_handle))) {
+          $file = $this->config_cache_dir . '/' . $entry;
+          if(is_file($file)){
+//            echo "copy " . $file . " to " . $config_directories['active'] . '/' . $entry . "\n";
+            copy($file, $config_directories['active'] . '/' . $entry);
+            chmod($config_directories['active'] . '/' . $entry, 0777);
+          }
+        }
+        closedir($direcory_handle);
+      }
+
+      echo "copy settings end: " . microtime() . "\n"; 
+      return TRUE;
+    }
+    return FALSE; 
   }
 
   /**
@@ -1518,9 +1641,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $conf;
-
+    echo "1 ". microtime() . "\n";
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
+    
+    echo "prefix is ." . $this->databasePrefix . "\n";
 
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
@@ -1531,7 +1656,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
     backdrop_static_reset();
-
+    echo "2 ". microtime() . "\n";
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
     // changed, since BackdropCacheArray implementations attempt to
@@ -1540,6 +1665,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$this->setupDatabasePrefix) {
       return FALSE;
     }
+    echo "3 ". microtime() . "\n";
 
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
@@ -1549,9 +1675,42 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    // Perform the actual Backdrop installation.
-    include_once BACKDROP_ROOT . '/core/includes/install.inc';
-    backdrop_install_system();
+    $use_cache = $this->useCache();
+    if(!$use_cache){
+      // Perform the actual Backdrop installation.
+      include_once BACKDROP_ROOT . '/core/includes/install.inc';
+      backdrop_install_system(); // System install is 0.6 sec.
+
+      echo "4 ". microtime() . "\n";
+      
+
+      echo "5.1 ". microtime() . "\n";
+      
+      // Include the testing profile.
+      config_set('system.core', 'install_profile', $this->profile);
+      $profile_details = install_profile_info($this->profile, 'en');
+
+  
+      // Install the modules specified by the testing profile.
+      module_enable($profile_details['dependencies'], FALSE);  // install profile modules 2.2 sec
+      print_r($profile_details['dependencies']);
+      echo "6 ". microtime() . "\n";
+      
+      echo "7 ". microtime() . "\n";
+      // Run the profile tasks.
+      $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(
+        ':name' => $this->profile,
+      ))->fetchField();
+      if ($install_profile_module_exists) {
+        echo "profile is " . $this->profile . "\n";
+//        module_enable(array($this->profile), FALSE); // probably we don't need this part because we already installed modules. 1.9 sec
+      }
+      echo "8 ". microtime() . "\n";
+
+    }
+    else{
+      
+    }
 
     // Set path variables.
     $core_config = config('system.core');
@@ -1569,13 +1728,21 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Ensure schema versions are recalculated.
     backdrop_static_reset('backdrop_get_schema_versions');
+    echo "5 ". microtime() . "\n";
 
-    // Include the testing profile.
-    config_set('system.core', 'install_profile', $this->profile);
-    $profile_details = install_profile_info($this->profile, 'en');
+
+
+    // Cache configs for future reuse.
+    //$this->cacheConfigDir();
+    if(!$use_cache){
+      $this->cacheMySQLData();
+    }
+    echo "5.1 ". microtime() . "\n";
 
     // Install the modules specified by the testing profile.
-    module_enable($profile_details['dependencies'], FALSE);
+    //module_enable($profile_details['dependencies'], FALSE);  // install profile modules 2.2 sec
+    //print_r($profile_details['dependencies']);
+    //echo "6 ". microtime() . "\n";
 
     // Install modules needed for this test. This could have been passed in as
     // either a single array argument or a variable number of string arguments.
@@ -1585,24 +1752,19 @@ class BackdropWebTestCase extends BackdropTestCase {
       $modules = $modules[0];
     }
     if ($modules) {
+      print_r($modules);
       $success = module_enable($modules, TRUE);
       $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
     }
 
-    // Run the profile tasks.
-    $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(
-      ':name' => $this->profile,
-    ))->fetchField();
-    if ($install_profile_module_exists) {
-      module_enable(array($this->profile), FALSE);
-    }
-
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
+    echo "9 ". microtime() . "\n";
 
     // Run cron once in that environment, as install.php does at the end of
     // the installation process.
     backdrop_cron_run();
+    echo "10 ". microtime() . "\n";
 
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
@@ -1626,6 +1788,12 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
+    echo "11 ". microtime() . "\n";
+    // Cache configs for future reuse.
+    if(!$use_cache){    
+      $this->cacheConfigDir();
+    }  
+    // 5 sec total. where is  almodt 4.7 is repeatable.
   }
 
   /**
@@ -1636,22 +1804,28 @@ class BackdropWebTestCase extends BackdropTestCase {
    * are enabled later.
    */
   protected function resetAll() {
+    echo "reset all " . microtime() . "\n";
     // Reset all static variables.
     backdrop_static_reset();
+    echo "  static " . microtime() . "\n";
     // Reset the list of enabled modules.
     module_list(TRUE);
+    echo "  list " . microtime() . "\n";
 
     // Reset cached schema for new database prefix. This must be done before
     // backdrop_flush_all_caches() so rebuilds can make use of the schema of
     // modules enabled on the cURL side.
     backdrop_get_schema(NULL, TRUE);
+    echo "  schema " . microtime() . "\n";
 
     // Perform rebuilds and flush remaining caches.
     backdrop_flush_all_caches();
+    echo "  flush cache " . microtime() . "\n";
 
     // Reload global $conf array and permissions.
     $this->refreshVariables();
     $this->checkPermissions(array(), TRUE);
+    echo "reset all end " . microtime() . "\n";
   }
 
   /**
@@ -1696,6 +1870,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Remove all prefixed tables.
     $connection_info = Database::getConnectionInfo('default');
+    echo "clean start: " . microtime() . "\n";
     $tables = db_find_tables($connection_info['default']['prefix']['default'] . '%');
     if (empty($tables)) {
       $this->fail('Failed to find test tables to drop.');
@@ -1706,6 +1881,8 @@ class BackdropWebTestCase extends BackdropTestCase {
         unset($tables[$table]);
       }
     }
+    echo "clean end: " . microtime() . "\n";
+    
     if (!empty($tables)) {
       $this->fail('Failed to drop all prefixed tables.');
     }
