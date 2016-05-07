@@ -1019,26 +1019,6 @@ function locale_translate_english() {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for system_file_system_settings().
- *
- * Add interface translation directory setting to directories configuration.
- */
-function locale_form_system_file_system_settings_alter(&$form, $form_state) {
-  $form['locale_translate_file_directory'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Interface translations directory'),
-    '#default_value' => settings_get('locale_translate_file_directory', 'files/translations'),
-    '#maxlength' => 255,
-    '#description' => t('A local file system path where interface translation files are looked for. This directory must exist.'),
-    '#after_build' => array('system_check_directory'),
-    '#weight' => 10,
-  );
-  if ($form['file_default_scheme']) {
-    $form['file_default_scheme']['#weight'] = 20;
-  }
-}
-
-/**
  * Implements MODULE_preprocess_HOOK().
  */
 function locale_preprocess_node(&$variables) {
