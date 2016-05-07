@@ -1520,7 +1520,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   private function cacheConfigDir() {
     global $config_directories;
 
-    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active';
+    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active.' . $this->profile;
     
     if(!file_exists($this->config_cache_dir)){
       file_prepare_directory($this->config_cache_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS); 
@@ -1573,9 +1573,9 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
   
   protected function useCache(){
-//    return FALSE;
+    //return FALSE;
     global $config_directories;
-    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active';
+    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active.'  . $this->profile;
     $mysql_cach_dir = $this->originalFileDirectory . '/simpletest/cache/mysql_' . $this->profile;
     
     if(file_exists($mysql_cach_dir)){
@@ -1703,13 +1703,10 @@ class BackdropWebTestCase extends BackdropTestCase {
       ))->fetchField();
       if ($install_profile_module_exists) {
         echo "profile is " . $this->profile . "\n";
-//        module_enable(array($this->profile), FALSE); // probably we don't need this part because we already installed modules. 1.9 sec
+        module_enable(array($this->profile), FALSE); // probably we don't need this part because we already installed modules. 1.9 sec
       }
       echo "8 ". microtime() . "\n";
 
-    }
-    else{
-      
     }
 
     // Set path variables.
