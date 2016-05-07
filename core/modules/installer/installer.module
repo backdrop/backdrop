@@ -88,6 +88,7 @@ function installer_menu() {
     'page arguments' => array('module'),
     'access arguments' => array('use installer browser'),
     'file' => 'installer.browser.pages.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/modules/installer-browser/module'] = array(
     'title' => 'Modules',

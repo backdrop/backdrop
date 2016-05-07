@@ -18,12 +18,15 @@ function installer_browser_page($type) {
   module_load_include('inc', 'installer', 'installer.browser');
   // Show a warning if no zip extension available, but allow to browse and
   // select to view available releases. Install blocked on select versions page.
-  $zip_loaded = installer_browser_check_zip_loaded();
+  installer_browser_check_zip_loaded();
 
   // Show link to enable page if recently installed modules were not yet 
   // enabled.
-  if (!empty($_SESSION['installer_browser_installed_projects'])) {
-    backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the enable page.</a>', array('@url' => url('admin/modules/installer-browser/install/enable'))));
+  $recent_projects = installer_browser_get_installed_projects();
+  foreach ($recent_projects as $project) {
+    if ($project['type'] === 'module') {
+      backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the enable page.</a>', array('@url' => url('admin/modules/installer-browser/install/enable'))), 'status', FALSE);
+    }
   }
   // Save needed filters to session.
   if (isset($_GET['repository'])) {
