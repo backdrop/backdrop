@@ -1681,6 +1681,8 @@ class BackdropWebTestCase extends BackdropTestCase {
 
       echo "4 ". microtime() . "\n";
       
+      // Ensure schema versions are recalculated.
+      backdrop_static_reset('backdrop_get_schema_versions');
 
       echo "5.1 ". microtime() . "\n";
       
