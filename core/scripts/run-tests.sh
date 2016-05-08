@@ -31,6 +31,12 @@
  *
  *              Run tests in parallel, up to [num] tests at a time.
  *
+ * --split [fraction]
+ *
+ *              Run a portion of the specified tests. e.g. "1/4" would run the
+ *              first quarter of the tests. "2/4" would run the second quarter.
+ *              Intended to be used when running tests across multiple hosts.
+ *
  *  --force     Enable the Simpletest module if it's not enabled already.
  *
  *  --all       Run all available tests.
@@ -263,6 +269,7 @@ function simpletest_script_parse_args() {
     'url' => '',
     'php' => '',
     'concurrency' => 1,
+    'split' => '',
     'force' => FALSE,
     'all' => FALSE,
     'class' => FALSE,
@@ -289,18 +296,21 @@ function simpletest_script_parse_args() {
     }
     // Convert each option into a ordered set of arguments.
     if (preg_match('/--(\S+)/', $arg, $matches)) {
+      $arg_name = $matches[1];
       // Argument found.
-      if (array_key_exists($matches[1], $args)) {
+      if (array_key_exists($arg_name, $args)) {
         // Argument found in list.
-        $previous_arg = $matches[1];
-        if (is_bool($args[$previous_arg])) {
-          $args[$matches[1]] = TRUE;
+        // Convert incoming boolean flags based on the default values.
+        if (is_bool($args[$arg_name])) {
+          $args[$arg_name] = TRUE;
         }
+        // If using = assignment, use the value.
         elseif (!is_null($arg_value)) {
-          $args[$matches[1]] = $arg_value;
+          $args[$arg_name] = $arg_value;
         }
+        // Otherwise, a space was used for assignment, pull the next argument.
         else {
-          $args[$matches[1]] = array_shift($_SERVER['argv']);
+          $args[$arg_name] = array_shift($_SERVER['argv']);
         }
         $count++;
       }
@@ -317,10 +327,19 @@ function simpletest_script_parse_args() {
     }
   }
 
-  // Validate the concurrency argument
+  // Validate the concurrency argument.
   if (!is_numeric($args['concurrency']) || $args['concurrency'] <= 0) {
     simpletest_script_print_error("--concurrency must be a strictly positive integer.");
     exit(1);
+  }
+
+  // Validate the split argument.
+  if ($args['split']) {
+    @list($part, $total) = explode('/', $args['split']);
+    if (!is_numeric($part) || !is_numeric($total)) {
+      simpletest_script_print_error("--split must be specified as a fraction, e.g. 1/4, 2/4, etc.");
+      exit(1);
+    }
   }
 
   return array($args, $count);
@@ -555,6 +574,24 @@ function simpletest_script_get_test_list() {
     }
   }
 
+  // Split into the fraction portion. e.g 1/4 would run the first quarter, or
+  // 2/4 would run the second quarter.
+  if ($args['split']) {
+    list($current_part, $part_total) = explode('/', $args['split']);
+    $part_length = ceil(count($test_list) * (1/$part_total));
+    $part_start = ($current_part - 1) * $part_length;
+    $part_end = $current_part * $part_length;
+    // Ensure part end isn't more than the total test count.
+    $part_end = ($part_end > count($test_list)) ? count($test_list) : $part_end;
+    $current = $part_start;
+    $partial_test_list = array();
+    while ($current < $part_end) {
+      $partial_test_list[$current] = $test_list[$current];
+      $current++;
+    }
+    $test_list = $partial_test_list;
+  }
+
   if (empty($test_list)) {
     simpletest_script_print_error('No valid tests were specified.');
     exit(0);
@@ -581,7 +618,12 @@ function simpletest_script_reporter_init() {
 
   // Tell the user about what tests are to be run.
   if ($args['all']) {
-    echo "All tests will run.\n\n";
+    $part_message = '';
+    if ($args['split']) {
+      list($part, $total) = explode('/', $args['split']);
+      $part_message = " (part $part of $total)";
+    }
+    echo "All tests will run$part_message.\n\n";
   }
   else {
     echo "Tests to be run:\n";

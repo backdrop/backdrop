@@ -375,7 +375,7 @@ function system_requirements($phase) {
 
   // Verify the update.php access setting
   if ($phase == 'runtime') {
-    if (!empty($GLOBALS['update_free_access'])) {
+    if (!empty($GLOBALS['settings']['update_free_access'])) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
@@ -457,16 +457,6 @@ function system_requirements($phase) {
       );
     }
     $requirements['update status']['title'] = $t('Update notifications');
-
-    // Check that Backdrop can issue HTTP requests.
-    if (state_get('backdrop_http_request_fails', TRUE) && !system_check_http_request()) {
-      $requirements['http requests'] = array(
-        'title' => $t('HTTP request status'),
-        'value' => $t('Fails'),
-        'severity' => REQUIREMENT_ERROR,
-        'description' => $t('Your system or network configuration does not allow Backdrop to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Backdrop can access web pages but you are still seeing this message, you may add <code>$state[\'backdrop_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
-      );
-    }
   }
 
   if ($phase == 'runtime') {
@@ -535,6 +525,17 @@ function system_requirements($phase) {
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
         'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+      );
+    }
+
+    // Check for a duplicate redirect project.
+    $path = backdrop_get_path('module', 'redirect');
+    if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
+      $requirements['redirect_replaced'] = array(
+        'title' => $t('Redirect'),
+        'value' => $t('Duplicate module detected'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -2526,7 +2527,7 @@ function system_update_1036() {
  */
 function system_update_1037() {
   config_set('system.core', 'canonical_secure', 0);
-  
+
   $res = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = 'management' AND link_title = 'Clean URLs'");
   if ($res->rowCount()) {
     $mlid = $res->fetch()->mlid;
@@ -2672,7 +2673,7 @@ function system_update_1046() {
     $config->set('file_transliterate_lowercase', update_variable_get('transliteration_file_lowercase', FALSE));
     $config->set('file_transliterate_uploads', update_variable_get('transliteration_file_uploads', TRUE));
     $config->set('file_transliterate_uploads_display_name', update_variable_get('transliteration_file_uploads_display_name', FALSE));
-  
+
     // Remove variables from D7.
     update_variable_del('transliteration_file_lowercase');
     update_variable_del('transliteration_file_uploads');
@@ -2713,9 +2714,31 @@ function system_update_1049() {
     // If there are no color settings then the default (Blue Lagoon) was in use.
     if (config_get('bartik.settings', 'color') === NULL) {
       // Set a flag indicating that we should use the legacy style sheet.
-      config_set('bartik.settings', 'legacy', TRUE);
+      config_set('bartik.settings', 'color_legacy', TRUE);
     }
     config_set('bartik.settings', 'main_menu_tabs', 'rounded-tabs');
+  }
+}
+
+/**
+ * Fix legacy color setting in Bartik.
+ */
+function system_update_1050() {
+  $config = config('bartik.settings');
+  if ($config->get('legacy')) {
+    $config->set('color_legacy', TRUE);
+    $config->clear('legacy');
+    $config->save();
+  }
+}
+
+/**
+ * Notify administrators if a non-core version of Redirect module is present.
+ */
+function system_update_1051() {
+  $path = backdrop_get_path('module', 'redirect');
+  if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

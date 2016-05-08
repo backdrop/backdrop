@@ -2597,6 +2597,7 @@ function _template_preprocess_default_variables() {
  */
 function template_preprocess_header(&$variables) {
   $variables['front_page'] = url();
+  $variables['base_path'] = base_path();
 }
 
 /**

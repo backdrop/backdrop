@@ -3346,9 +3346,12 @@ function form_process_container($element, &$form_state) {
 /**
  * Returns HTML to wrap child elements in a container.
  *
- * Used for grouped form items. Can also be used as a #theme_wrapper for any
+ * Used for grouped form items. Can also be used as a theme wrapper for any
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
+ *
+ * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * for more information on the #theme_wrappers render array property.
  *
  * @param $variables
  *   An associative array containing:
@@ -3933,9 +3936,12 @@ function form_process_autocomplete($element) {
   $element['#autocomplete_input'] = array();
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
-    // Force autocomplete to use non-clean URLs since this protects against the
-    // browser interpreting the path plus search string as an actual file.
-    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE));
+    // Force the script path to 'index.php', in case the server is not
+    // configured to find it automatically. Normally it is the responsibility
+    // of the site to do this themselves using hook_url_outbound_alter() (see
+    // url()) but since this code is forcing non-clean URLs on sites that don't
+    // normally use them, it is done here instead.
+    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php'));
   }
   return $element;
 }

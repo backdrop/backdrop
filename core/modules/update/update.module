@@ -260,6 +260,11 @@ function update_theme() {
  * Implements hook_cron().
  */
 function update_cron() {
+  // Check to see if we are running a test before checking for updates.
+  if (!_update_checking_enabled()) {
+    return;
+  }
+
   $frequency = config_get('update.settings', 'update_interval_days');
   $interval = 60 * 60 * 24 * $frequency;
   if ((REQUEST_TIME - state_get('update_last_check', 0)) > $interval) {
@@ -336,6 +341,16 @@ function _update_no_data() {
     '@run_cron' => url('admin/reports/status/run-cron', array('query' => $destination)),
     '@check_manually' => url('admin/reports/updates/check', array('query' => $destination)),
   ));
+}
+
+/**
+ * Check if update checking should make HTTP requests to the update server.
+ *
+ * This function primarily is to ensure that Backdrop does not do update
+ * checking against backdropcms.org or other remote servers during tests.
+ */
+function _update_checking_enabled() {
+  return empty($GLOBALS['backdrop_test_info']['test_run_id']) || strstr(config_get('update.settings', 'update_url'), $GLOBALS['base_url']);
 }
 
 /**

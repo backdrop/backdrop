@@ -353,9 +353,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test block conditions.
+   * Test block path and type conditions.
    */
-  function testBlockConditions() {
+  function testBlockPathTypeConditions() {
     // Create a new layout overriding node/%.
     $layout_name = strtolower($this->randomName());
     $layout_title = $this->randomString();
@@ -423,6 +423,89 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $second_post->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on post content when path does not match.');
+  }
+
+  /**
+   * Test block entity ID conditions.
+   */
+  function testBlockEntityIDConditions() {
+    // Create a new layout overriding node/%.
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout' => 'two_column',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Create another post node.
+    $second_post = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => $this->randomString(),
+    ));
+
+    // Add another testing block.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'node_nid',
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'entity_id' => $this->test_node1->nid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when node ID does not match.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Add another condition to show this block only for a particular user ID.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'user_uid',
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'entity_id' => $this->web_user->uid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    // Login as a the web user and test that the block is now shown.
+    $this->backdropLogin($this->web_user);
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown when user ID and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID and node ID does not match.');
   }
 
   /**
@@ -1013,6 +1096,71 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $intersection = array_intersect(array_keys($layout->content), $deleted_uuids);
     $this->assertEqual($intersection, array(), 'The sidebar blocks have been removed from the layout content array.');
+  }
+
+  /**
+   * Tests Taxonomy contexts within layouts.
+   */
+  function testTaxonomyContext() {
+    module_enable(array('taxonomy'));
+
+    // Create a default vocabulary named "Tags", enabled for the 'post' content type.
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => 'Tags',
+      'description' => 'Use tags to group posts on similar topics into categories.',
+      'machine_name' => 'tags',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    $field = array(
+      'field_name' => 'field_' . $vocabulary->machine_name,
+      'type' => 'taxonomy_term_reference',
+      // Set cardinality to unlimited for tagging.
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($field);
+
+    $instance = array(
+      'field_name' => 'field_' . $vocabulary->machine_name,
+      'entity_type' => 'node',
+      'label' => 'Tags',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'taxonomy_autocomplete',
+      ),
+    );
+    field_create_instance($instance);
+
+    // Make a new layout that creates a custom path with wildcards.
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomName();
+    $layout_path = 'taxonomy/term/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout' => 'two_column',
+      'path' => $layout_path,
+    );
+    // Check the path first to populate available contexts.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Check path'));
+
+    // Try to add a condition to the layout itself to only show on the Tag
+    // vocabulary.
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+
+    $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Create layout'));
+
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
   }
 
   /**

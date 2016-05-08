@@ -122,17 +122,20 @@ function _dblog_get_message_types() {
  * Note: Some values may be truncated to meet database column size restrictions.
  */
 function dblog_watchdog(array $log_entry) {
+  if (!function_exists('backdrop_substr')) {
+    require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
+  }
   Database::getConnection('default', 'default')->insert('watchdog')
     ->fields(array(
       'uid' => $log_entry['uid'],
-      'type' => substr($log_entry['type'], 0, 64),
+      'type' => backdrop_substr($log_entry['type'], 0, 64),
       'message' => $log_entry['message'],
       'variables' => serialize($log_entry['variables']),
       'severity' => $log_entry['severity'],
-      'link' => substr($log_entry['link'], 0, 255),
+      'link' => backdrop_substr($log_entry['link'], 0, 255),
       'location' => $log_entry['request_uri'],
       'referer' => $log_entry['referer'],
-      'hostname' => substr($log_entry['ip'], 0, 128),
+      'hostname' => backdrop_substr($log_entry['ip'], 0, 128),
       'timestamp' => $log_entry['timestamp'],
     ))
     ->execute();

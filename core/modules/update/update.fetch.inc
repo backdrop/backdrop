@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only when fetching information about available updates.
@@ -13,6 +12,12 @@
  * @see update_menu()
  */
 function update_manual_status() {
+  // Do not trigger an update if in testing.
+  if (!_update_checking_enabled()) {
+    backdrop_set_message(t('Update checking is disabled on this site.'), 'error');
+    return;
+  }
+
   _update_refresh();
   $batch = array(
     'operations' => array(
@@ -155,7 +160,10 @@ function _update_process_fetch_task($project) {
   if (empty($fail[$fetch_url_base]) || $fail[$fetch_url_base] < $max_fetch_attempts) {
     $response = backdrop_http_request($url);
     $response_code = (int) $response->code;
-    if (!isset($response->error) && isset($response->data)) {
+    if (isset($response->error)) {
+      watchdog('update', 'HTTP request to @url failed with error: @error.', array('@url' => $url, '@error' => $response->error));
+    }
+    elseif (!isset($response->error) && isset($response->data)) {
       $data = $response->data;
     }
   }

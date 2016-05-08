@@ -194,11 +194,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['sticky_default'],
     '#parents' => array('sticky_default'),
     '#return_value' => 1,
-    '#states' => array(
-      'invisible' => array(
-        'input[name="sticky_enabled"]' => array('checked' => FALSE),
-      ),
-    ),
   );
 
   $form['workflow']['promote'] = array(
@@ -219,11 +214,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['promote_default'],
     '#parents' => array('promote_default'),
     '#return_value' => 1,
-    '#states' => array(
-      'invisible' => array(
-        'input[name="promote_enabled"]' => array('checked' => FALSE),
-      ),
-    ),
   );
 
   $form['revision'] = array(
@@ -246,11 +236,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#title' => t('Create new revision by default'),
     '#default_value' => $type->settings['revision_default'],
     '#parents' => array('revision_default'),
-    '#states' => array(
-      'invisible' => array(
-        'input[name="revision_enabled"]' => array('checked' => FALSE),
-      ),
-    ),
   );
 
   // Node type permissions

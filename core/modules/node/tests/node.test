@@ -2516,6 +2516,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
  * Tests the cache invalidation of node operations.
  */
 class NodePageCacheTest extends NodeWebTestCase {
+  protected $profile = 'minimal';
 
   /**
    * An admin user with administrative permissions for nodes.
@@ -2527,6 +2528,11 @@ class NodePageCacheTest extends NodeWebTestCase {
 
     config_set('system.core', 'cache', 1);
     config_set('system.core', 'page_cache_maximum_age', 300);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
 
     $this->admin_user = $this->backdropCreateUser(array(
         'bypass node access',

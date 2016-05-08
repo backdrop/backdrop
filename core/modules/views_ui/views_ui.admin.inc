@@ -1242,7 +1242,7 @@ function views_ui_render_display_top($view, $display_id) {
     '#links' => array(
       'edit-details' => array(
         'title' => t('Change view name/description'),
-        'href' => "admin/structure/views/nojs/edit-details/$view->name",
+        'href' => "admin/structure/views/nojs/config-details/$view->name",
         'attributes' => array('class' => array('views-ajax-link')),
       ),
       'analyze' => array(

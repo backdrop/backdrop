@@ -2014,6 +2014,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Retrieve a Backdrop path or an absolute path and JSON decode the result.
    */
   protected function backdropGetAJAX($path, array $options = array(), array $headers = array()) {
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     return backdrop_json_decode($this->backdropGet($path, $options, $headers));
   }
@@ -2276,6 +2277,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Submit the POST request.
+    $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
     $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Ajax-Token'), '1', 'Ajax response header found.');
@@ -2388,7 +2390,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $verbose .= '<hr />Ending URL: ' . $this->getUrl();
     $verbose .= '<hr />' . $this->content;
 
-    $this->verbose($verbose);    
+    $this->verbose($verbose);
     return $return;
   }
 
@@ -2644,6 +2646,12 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @param $xpath
    *   The xpath string to use in the search.
+   *
+   * @param array $arguments
+   *   An array of arguments with keys in the form ':name' matching the
+   *   placeholders in the query. The values may be either strings or numeric
+   *   values.
+   *
    * @return SimpleXmlElement[]|FALSE
    *   The return value of the xpath search. For details on the xpath string
    *   format and return values see the SimpleXML documentation,

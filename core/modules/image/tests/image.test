@@ -170,6 +170,22 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test that we do not pass an array to backdrop_add_http_header.
+   */
+  function testImageContentTypeHeaders() {
+    $files = $this->backdropGetTestFiles('image');
+    $file = array_shift($files);
+    // Copy the test file to private folder.
+    $private_uri = file_unmanaged_copy($file->uri, 'private://test.png');
+    // Tell image_module_test module to return the headers we want to test.
+    state_set('image_module_test_invalid_headers', $private_uri);
+    // Invoke image_style_deliver so it will try to set headers.
+    $generated_url = image_style_url($this->style_name, $private_uri);
+    $this->backdropGet($generated_url);
+    state_del('image_module_test_invalid_headers');
+  }
+
+  /**
    * Test image_style_url().
    */
   function _testImageStyleUrlAndPath($scheme, $clean_url = TRUE) {

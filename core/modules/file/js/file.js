@@ -13,19 +13,24 @@
 /**
  * Attach behaviors to managed file element upload fields.
  */
-Backdrop.behaviors.fileValidateAutoAttach = {
+Backdrop.behaviors.fileChangeValidate = {
   attach: function (context, settings) {
     if (settings.file && settings.file.elements) {
+      var $context = $(context);
       $.each(settings.file.elements, function(selector) {
         var extensions = settings.file.elements[selector];
-        $(selector, context).bind('change', {extensions: extensions}, Backdrop.file.validateExtension);
+        var $elements = $context.find(selector);
+        $elements.bind('change.file', {extensions: extensions}, Backdrop.file.validateExtension);
+        $elements.closest('.form-item').find('.file-upload-button').hide();
+        $context.find(selector).bind('change.file', Backdrop.file.autoUpload);
       });
     }
   },
   detach: function (context, settings) {
     if (settings.file && settings.file.elements) {
+      var $context = $(context);
       $.each(settings.file.elements, function(selector) {
-        $(selector, context).unbind('change', Backdrop.file.validateExtension);
+        $context.find(selector).unbind('change.file');
       });
     }
   }
@@ -69,6 +74,7 @@ Backdrop.file = Backdrop.file || {
     $('.file-upload-js-error').remove();
 
     // Add client side validation for the input[type=file].
+    event.filePreValidation = true;
     var extensionPattern = event.data.extensions.replace(/,\s*/g, '|');
     if (extensionPattern.length > 1 && this.value.length > 0) {
       var acceptableMatch = new RegExp('\\.(' + extensionPattern + ')$', 'gi');
@@ -86,8 +92,18 @@ Backdrop.file = Backdrop.file || {
         });
         $(this).closest('div.form-managed-file').prepend('<div class="messages error file-upload-js-error" aria-live="polite">' + error + '</div>');
         this.value = '';
+        event.filePreValidation = false;
         return false;
       }
+    }
+  },
+  /**
+   * Automatically upload files by clicking the Upload button on file selection.
+   */
+  autoUpload: function (event) {
+    // This value is set in Backdrop.file.validateExtension().
+    if (event.filePreValidation) {
+      $(this).closest('.form-item').find('.file-upload-button').trigger('mousedown').trigger('mouseup').trigger('click');
     }
   },
   /**

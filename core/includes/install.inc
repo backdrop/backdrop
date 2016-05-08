@@ -849,6 +849,7 @@ function backdrop_install_system() {
  *   included in $module_list).
  *
  * @see module_disable()
+ * @see module_enable()
  */
 function backdrop_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
   if ($uninstall_dependents) {
