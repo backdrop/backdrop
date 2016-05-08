@@ -127,6 +127,16 @@ function filter_menu() {
     'access arguments' => array(4),
     'file' => 'filter.admin.inc',
   );
+
+  $items['filter/uploadimage/%/%'] = array(
+    'page callback' => 'filter_upload_image',
+    'page arguments' => array(2, 3),
+  //'access arguments' => array('use direct upload'), // ?
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
+
   return $items;
 }
 

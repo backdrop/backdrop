@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.4.7');
+define('CKEDITOR_VERSION', '4.5.6');
 
 /**
  * Implements hook_editor_info().
@@ -38,7 +38,7 @@ function ckeditor_editor_info() {
           ),
           array(
             'name' => 'Tools',
-            'items' => array('Source', 'Maximize'),
+            'items' => array('Source', 'Save', 'Maximize'),
           ),
         ),
       ),
@@ -94,7 +94,11 @@ function ckeditor_library_info() {
     'js' => array(
       // CKEditor is both a large library and needs to be able to identify its
       // installation path, so we disable aggregation on it.
-      'core/misc/ckeditor/ckeditor.js' => array('preprocess' => FALSE, 'group' => JS_LIBRARY),
+      '//cdn.ckeditor.com/4.5.6/full-all/ckeditor.js' => array(
+        'preprocess' => FALSE,
+        'group' => JS_LIBRARY,
+        'type' => 'external',
+      )
     ),
   );
 
@@ -203,6 +207,9 @@ function ckeditor_ckeditor_plugins() {
     ),
     'Source' => array(
       'label' => t('Source code'),
+    ),
+    'Save' => array(
+      'label' => t('Save document'),
     ),
     'HorizontalRule' => array(
       'label' => t('Horizontal rule'),
@@ -330,6 +337,14 @@ function ckeditor_ckeditor_plugins() {
         'image' => $image_prefix . '/unlink.png',
       ),
     ),
+  );
+
+  // The backdropuploadimage plugin replaces normal uploadimage funcitonality.
+  $plugins['backdropuploadimage'] = array(
+    'path' =>  backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropuploadimage',
+    'buttons' => array(),
+    'enabled callback' => TRUE,
+    'file' => 'plugin.js',
   );
 
   return $plugins;
@@ -492,6 +507,10 @@ function ckeditor_get_settings($format, $existing_settings) {
     'language' => isset($language->language) ? $language->language : '',
     'resize_dir' => 'vertical',
   );
+  $settings['extraPlugins'] .= ',image2,uploadwidget,autogrow';
+  if (config_get('system.core', 'node_admin_theme') == false) {
+    $settings['extraPlugins'] .= ',divarea';
+  }
 
   // Add the allowedContent setting, which ensures CKEditor only allows tags
   // and attributes that are allowed by the text format for this text editor.

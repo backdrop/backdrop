@@ -86,7 +86,7 @@ Backdrop.behaviors.filterEditors = {
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
       if (field && Backdrop.settings.filter.formats[activeEditor]) {
-        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
+      //Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
       }
     });
   }
