@@ -1731,9 +1731,11 @@ class BackdropWebTestCase extends BackdropTestCase {
 
 
     // Cache configs for future reuse.
+    // Cache configs for future reuse.
     //$this->cacheConfigDir();
     if(!$use_cache){
       $this->cacheMySQLData();
+      $this->cacheConfigDir();
     }
     echo "5.1 ". microtime() . "\n";
 
@@ -1756,7 +1758,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Reset/rebuild all data structures after enabling the modules.
-    $this->resetAll();
+    $this->resetAll();    
     echo "9 ". microtime() . "\n";
 
     // Run cron once in that environment, as install.php does at the end of
@@ -1787,10 +1789,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
     echo "11 ". microtime() . "\n";
-    // Cache configs for future reuse.
-    if(!$use_cache){    
-      $this->cacheConfigDir();
-    }  
+
     // 5 sec total. where is  almodt 4.7 is repeatable.
   }
 
@@ -1818,6 +1817,9 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Perform rebuilds and flush remaining caches.
     backdrop_flush_all_caches();
+
+    // Reset the Field API.
+    field_cache_clear();
     echo "  flush cache " . microtime() . "\n";
 
     // Reload global $conf array and permissions.
