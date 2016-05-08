@@ -1560,8 +1560,9 @@ class BackdropWebTestCase extends BackdropTestCase {
         echo "Table: " . $table ."\n";
         echo 'CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table_prefix . "\n";
         db_query('CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table);
-        
-//        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE=MEMORY');        
+        if($table != 'taxonomy_term_data') {
+          db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');        
+        }
         db_query('INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix);
 //        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');
         echo 'INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix ."\n";
