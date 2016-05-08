@@ -1604,7 +1604,7 @@ class BackdropWebTestCase extends BackdropTestCase {
           if(is_file($file)){
 //            echo "copy " . $file . " to " . $config_directories['active'] . '/' . $entry . "\n";
             copy($file, $config_directories['active'] . '/' . $entry);
-            chmod($config_directories['active'] . '/' . $entry, 0777);
+//            chmod($config_directories['active'] . '/' . $entry, 0777);
           }
         }
         closedir($direcory_handle);
