@@ -1560,9 +1560,6 @@ class BackdropWebTestCase extends BackdropTestCase {
         echo "Table: " . $table ."\n";
         echo 'CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table_prefix . "\n";
         db_query('CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table);
-        if($table != 'taxonomy_term_data') {
-          db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');        
-        }
         db_query('INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix);
 //        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');
         echo 'INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix ."\n";
@@ -1724,8 +1721,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // @todo This may need to be primed like 'install_profile' above.
     config_set('simpletest.settings', 'parent_profile', $this->originalProfile);
 
-    // Ensure schema versions are recalculated.
-    backdrop_static_reset('backdrop_get_schema_versions');
     echo "5 ". microtime() . "\n";
 
 
