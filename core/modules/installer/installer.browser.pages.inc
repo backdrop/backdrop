@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Page callbacks and various functions that are required by project_browser.
+ * Page callbacks used by the Installer browser.
  */
 
 /**
@@ -62,6 +62,7 @@ function installer_browser_page($type) {
 
   // Get the projects to display here based on the filters.
   $results = installer_browser_fetch_results($filters);
+
   // Add defaults to prevent PHP errors if server is down.
   $results += array (
     'total' => 0,
@@ -87,25 +88,33 @@ function installer_browser_page($type) {
     $finish = $total;
   }
 
+  $filter_form = backdrop_get_form('installer_browser_filters_form', $type);
   $sort_options = installer_browser_get_sort_options();
   $current_order = isset($_SESSION['installer_browser_order_filter_' . $type]) ? $_SESSION['installer_browser_order_filter_' . $type] : 'score';
   $current_sort = isset($_SESSION['installer_browser_sort_filter_' . $type]) ? $_SESSION['installer_browser_sort_filter_' . $type] : 'desc';;
 
   $build = array();
   $build['content'] = array(
-    'installer_browser_header' => array(
-      '#markup' => t('Showing @start to @finish of @total.', array(
-        '@start' => $start, '@finish' => $finish, '@total' => $total)),
+    'installer_browser_filter' => array(
+      '#markup' => backdrop_render($filter_form),
       '#weight' => 0,
     ),
     'installer_browser_sort_header' => array(
       '#type' => 'item',
       '#weight' => 2,
+      '#wrapper_attributes' => array('class' => array('installer-browser-sort')),
       '#markup' => installer_browser_get_sort_widget($sort_options, $current_order, $current_sort),
+    ),
+    'installer_browser_header' => array(
+      '#type' => 'item',
+      '#weight' => 5,
+      '#wrapper_attributes' => array('class' => array('installer-browser-page-number')),
+      '#markup' => t('Showing @start to @finish of @total.', array(
+        '@start' => $start, '@finish' => $finish, '@total' => $total)),
     ),
     'installer_browser_list' => array(
       '#markup' => theme('installer_browser_list', array('projects_list' => $list, 'type' => $type)),
-      '#weight' => 3,
+      '#weight' => 10,
     ),
     'pager' => array(
       '#theme' => 'pager',
@@ -134,10 +143,13 @@ function installer_browser_project_display($project) {
 }
 
 /**
- * Page to install projects.
+ * Menu callback; page to install projects.
  *
  * @param $op
- *    Operation to preform.
+ *   Operation to preform.
+ *
+ * @return string
+ *   The rendered installation page.
  */
 function installer_browser_installation_page($op) {
   backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css', array('preprocess' => FALSE));
@@ -166,7 +178,7 @@ function installer_browser_installation_page($op) {
 }
 
 /**
- * Task page for the Select versions installation task.
+ * Menu callback; Task page for the select versions installation task.
  *
  * Shows a form where the user can select which versions to install for each
  * project.
@@ -207,11 +219,10 @@ function installer_browser_installation_select_versions_form($form, &$form_state
 
   foreach ($projects as $project) {
     // Get the available releases for this project.
-    if (!$release_data = installer_browser_get_project_release_data($project)) {
-      backdrop_set_message(t('Could not fetch releases for project %project.',
-        array('%project' => $project['title'])), 'warning');
-      watchdog('project_browser', 'Could not fetch releases for project %project.',
-        array('%project' => $project['title']), WATCHDOG_ERROR);
+    $release_data = installer_browser_get_project_release_data($project);
+    if (!$release_data) {
+      backdrop_set_message(t('Could not fetch releases for project %project.', array('%project' => $project['title'])), 'warning');
+      watchdog('project_browser', 'Could not fetch releases for project %project.', array('%project' => $project['title']), WATCHDOG_ERROR);
       installer_browser_install_queue_remove($project['name']);
       continue;
     }
@@ -237,7 +248,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
         $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
       if (isset($release['release_link'])) {
-        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE));
+        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank')));
       }
       else {
         $releases_list[$version] = $release_title;
@@ -277,7 +288,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
     if (count($releases_list) > 1) {
       $form['releases'][$project['name']]['selected_text']['#markup'] .=
-        " (<span class='installer-browser-show-releases-link' rel='" . $project['name'] . "'>" . t('change release') . "</span>)";
+        ' (<a class="installer-browser-show-releases-link js-only" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
     }
   }
 
@@ -311,13 +322,16 @@ function installer_browser_installation_select_versions_form($form, &$form_state
 }
 
 /**
- * Submit handler for a reset/cancel link.
+ * Menu callback; Provides the ability to clear the current queue of projects.
  *
- * @param string $include_installed
- *   If true, also clear the list of recently installed projects.
+ * @param string $reset_type
+ *   Either "clear" (the default) to clear the current list of projects selected
+ *   to be installed, or "all" to clear both the selected projects and all
+ *   projects that have been recently installed.
  */
-function installer_browser_installation_reset($include_installed = NULL) {
+function installer_browser_installation_reset($reset_type = 'clear') {
   module_load_include('inc', 'installer', 'installer.browser');
+  $include_installed = $reset_type === 'all' ? TRUE : FALSE;
   installer_browser_install_queue_clear($include_installed);
   backdrop_goto('admin/modules/installer-browser');
 }
@@ -345,7 +359,7 @@ function installer_browser_installation_select_versions_form_submit($form, &$for
   module_load_include('inc', 'installer', 'installer.manager');
 
   $queued_releases = installer_browser_get_queued_releases();
-   $operations = array();
+  $operations = array();
   foreach ($queued_releases as $release_name => $project) {
     $operations[] = array('_installer_browser_batch_install_release', array($release_name, $project));
   }
@@ -376,26 +390,22 @@ function installer_browser_installation_install_dependencies_page() {
     $missing_projects = array();
     // Add the project data in the array as best we can.
     foreach ($missing as $project_shortname => $dependencies) {
-      foreach ($dependencies as $shortname) {
-        $missing_projects[$shortname] = array(
-          'name' => $shortname,
+      foreach ($dependencies as $dependency_shortname) {
+        $missing_projects[$dependency_shortname] = array(
+          'name' => $dependency_shortname,
           'type' => 'module',
-          'title' => $shortname,
+          'title' => $dependency_shortname,
           'includes' => array(),
         );
         // Make an assumption that the dependencies will have the same update
         // status URL as the project. This may not be true in the future if
         // we have decide to have more than one update server, but for now this
         // is necessary to test dependencies installation.
-        if (isset($projects[$project_shortname]['info']['project status url'])) {
-          $status_url = $projects[$project_shortname]['info']['project status url'];
-        }
-        elseif (isset($projects[$project_shortname]['project status url'])) {
-          $status_url = $projects[$project_shortname]['project status url'];
-        }
-        if ($status_url) {
-          $missing_projects[$shortname]['info']['project status url'] = $status_url;
-          $missing_projects[$shortname]['project status url'] = $status_url;
+        if (isset($projects[$project_shortname]['project status url'])) {
+          // Replace the dependent project short name with the parent short
+          // name, as is needed with Backdrop's default update server.
+          $status_url = preg_replace('/\/' . preg_quote($project_shortname, '/') . '([.\/]?)/', '/' . $dependency_shortname . '$1', $projects[$project_shortname]['project status url']);
+          $missing_projects[$dependency_shortname]['project status url'] = $status_url;
         }
       }
     }
@@ -404,6 +414,7 @@ function installer_browser_installation_install_dependencies_page() {
   }
   else {
     backdrop_goto('admin/modules/installer-browser/install/enable');
+    return NULL;
   }
 }
 
@@ -421,6 +432,7 @@ function installer_browser_installation_enable_page($type = 'enable') {
   }
   else {
     backdrop_goto('admin/modules/installer-browser');
+    return NULL;
   }
 }
 
@@ -431,11 +443,12 @@ function installer_browser_installation_enable_page($type = 'enable') {
  *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_theme_form($form, &$form_state, $projects) {
+  backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css', array('preprocess' => FALSE));
   module_load_include('inc', 'installer', 'installer.browser');
+
   $form['instructions'] = array(
-  '#type' => 'item',
-  '#markup' => t('The themes you selected have been successfully installed.
-    You may enable installed themes here or on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
+    '#type' => 'item',
+    '#markup' => t('The themes you selected have been successfully installed. You may enable installed themes here or on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
   );
 
   $theme_default = config_get('system.core', 'theme_default');
@@ -588,8 +601,8 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
 
   $headers = array(
     array('data' => t('Title')),
-    array('data' => t('Version')),
-    array('data' => t('Dependencies')),
+    array('data' => t('Version'), 'class' => array('priority-medium')),
+    array('data' => t('Dependencies'), 'class' => array('priority-low')),
   );
 
   if(!empty($options) || !empty($missing)) {
@@ -637,7 +650,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       $form['missing'] = array(
         '#type' => 'item',
         '#title' => t('Missing Dependencies'),
-        '#description' => t('These modules are missing one or more dependencies, and so cannot be enabled.'),
+        '#description' => t('These modules are missing one or more dependencies and cannot be enabled.'),
         '#markup' => theme('table', array('header' => $headers, 'rows' => $missing)),
         '#weight' => 2,
       );
@@ -667,6 +680,9 @@ function installer_browser_installation_enable_form_submit($form, &$form_state) 
  *
  * @param $active
  *   (Optional) Set the active task by key.
+ *
+ * @return string
+ *   The rendered HTML for the installation task list.
  */
 function installer_browser_installation_task_list($active = NULL) {
   // Default list of tasks.
@@ -679,7 +695,7 @@ function installer_browser_installation_task_list($active = NULL) {
 
   require_once BACKDROP_ROOT . '/core/includes/theme.maintenance.inc';
 
-  return theme_task_list(array('items' => $tasks, 'active' => $active));
+  return theme('task_list', array('items' => $tasks, 'active' => $active));
 }
 
 /**
@@ -736,7 +752,7 @@ function installer_browser_filters_form($form, &$form_state, $type) {
     '#value' => t('Filter'),
   );
 
-  if (isset($_SESSION['installer_browser_text_filter_' . $type])) {
+  if (!empty($_SESSION['installer_browser_text_filter_' . $type])) {
     $form['clear'] = array(
       '#type' => 'submit',
       '#value' => t('Clear'),
@@ -782,36 +798,43 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
     }
 
     $sort_list[] = array(
-      'data' => l($sort_option['name'], $current_path, array('query' => $query)),
+      'data' => l($sort_option['label'], $current_path, array('query' => $query)),
       'class' => $classes,
     );
   }
 
   return theme('item_list', array(
-      'items' => $sort_list,
-      'type' => 'ul',
-      'attributes' => array('class' => array('installer-browser-sort-list', 'clearfix'))));
+    'items' => $sort_list,
+    'type' => 'ul',
+    'attributes' => array('class' => array('installer-browser-sort-list', 'clearfix'))
+  ));
 }
-
 
 /**
  * Returns a list of sort options.
  *
  * @param $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
+ *
+ * return array
+ *   An array of all sort methods, keyed by method name, with each value an
+ *   array with the following keys:
+ *   - method: Same as the method name key.
+ *   - label: Translated label for the method.
+ *   - default_sort: The default sort for this method, either "desc" or "asc".
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'name' => t('Relevancy'), 'default_sort' => 'desc'),
-    'usage' => array('method' => 'usage', 'name' => t('Most installed'), 'default_sort' => 'desc'),
-    'title' => array('method' => 'title', 'name' => t('Title'), 'default_sort' => 'asc'),
-    'latest_release' => array('method' => 'latest_release', 'name' => t('Latest release'), 'default_sort' => 'desc'),
+    'score' => array('method' => 'score', 'label' => t('Relevancy'), 'default_sort' => 'desc'),
+    'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
+    'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
+    'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),
   );
 
   if ($full) {
-    $sort_options['type'] = array('method' => 'type', 'name' => t('Type'), 'default_sort' => 'asc');
-    $sort_options['created'] = array('method' => 'created', 'name' => t('Date created'), 'default_sort' => 'asc');
-    $sort_options['latest_activity'] = array('method' => 'latest_activity', 'name' => t('Latest build'), 'default_sort' => 'desc');
+    $sort_options['type'] = array('method' => 'type', 'label' => t('Type'), 'default_sort' => 'asc');
+    $sort_options['created'] = array('method' => 'created', 'label' => t('Date created'), 'default_sort' => 'asc');
+    $sort_options['latest_activity'] = array('method' => 'latest_activity', 'label' => t('Latest build'), 'default_sort' => 'desc');
   }
 
   return $sort_options;
@@ -822,8 +845,8 @@ function installer_browser_get_sort_options($full = FALSE) {
  */
 function installer_browser_filters_form_submit($form, &$form_state) {
   $type = $form_state['values']['project_type'];
-  if ($form_state['clicked_button']['#id'] == 'edit-clear') {
-    $_SESSION['installer_browser_text_filter_' . $type] = array();
+  if ($form_state['clicked_button']['#parents'][0] == 'clear') {
+    unset($_SESSION['installer_browser_text_filter_' . $type]);
   }
   else {
     $_SESSION['installer_browser_text_filter_' . $type] = $form_state['values']['search_text'];
@@ -849,7 +872,7 @@ function installer_browser_manual_install_link($form, &$form_state) {
 }
 
 /**
- * Page callback: Allows for adding to and removing from the install queue.
+ * Menu callback; Allows for adding to and removing from the install queue.
  */
 function installer_browser_install_queue_callback($method, $op, $project_name) {
   module_load_include('inc', 'installer', 'installer.browser');
@@ -874,21 +897,17 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
       return MENU_NOT_FOUND;    
   }
 
-  switch ($method) {
-    case 'nojs':
-      // Redirect to the page it came from.
-      $redirect = (isset($_GET['destination'])) ? $_GET['destination'] : 'admin/modules/installer-browser';
-
-      backdrop_goto($redirect);
-      break;
-
-    case 'ajax':
-      $commands = array();
-      // Refresh the install queue.
-      $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
-      // Refresh the add to queue link.
-      $commands[] = ajax_command_replace('#add-to-queue-link-' . $project_name, installer_browser_add_remove_queue_link($project_name));
-      return array('#type' => 'ajax', '#commands' => $commands);
-      break;
+  if ($method === 'ajax') {
+    $commands = array();
+    // Refresh the install queue.
+    $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
+    // Refresh the add to queue link.
+    $commands[] = ajax_command_replace('#add-to-queue-link-' . $project_name, installer_browser_add_remove_queue_link($project_name));
+    return array('#type' => 'ajax', '#commands' => $commands);
   }
+
+  // Redirect to the page it came from.
+  $redirect = (isset($_GET['destination'])) ? $_GET['destination'] : 'admin/modules/installer-browser';
+  backdrop_goto($redirect);
+  return NULL;
 }

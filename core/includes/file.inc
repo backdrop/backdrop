@@ -1408,7 +1408,7 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *     unique.
  *   - FILE_EXISTS_ERROR: Do nothing and return FALSE.
  *
- * @return
+ * @return File|FALSE|NULL
  *   An object containing the file information if the upload succeeded, FALSE
  *   in the event of an error, or NULL if no file was uploaded. The
  *   documentation for the "File interface" group, which you can find under

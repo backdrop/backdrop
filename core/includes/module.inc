@@ -958,12 +958,20 @@ function module_invoke_all($hook) {
 
 /**
  * Returns an array of modules that have been merged into Backdrop core.
+ *
+ * Modules that have been merged into core may not be enabled on newer
+ * installations of Backdrop. Note that some modules have been merged into core
+ * but kept the same name as they did previously. For example "redirect" module
+ * existed both as a contrib module and then later as a core module. Because
+ * the core module shares the same name, it's not included in this list.
+ * Including it would prevent the core module from being enabled.
  */
 function backdrop_merged_modules() {
   return array(
     'token', // Backdrop 1.1.0.
     'pathauto', // Backdrop 1.1.0.
     'transliteration', // Backdrop 1.3.0.
+    'project_browser', // Backdrop 1.4.0.
   );
 }
 

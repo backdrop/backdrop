@@ -4,6 +4,7 @@
  * Default theme implementation to display a block on the projects browser page.
  *
  * Available variables:
+ * - $classes: AN array of classes for the wrapper.
  * - $title: The title of the block.
  * - $content: The content of the block.
  * These are defined in installer_browser_preprocess_installer_browser_block().

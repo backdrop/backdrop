@@ -13,7 +13,7 @@
  */
 ?>
 
-<div class="installer-browser-install-sidebar-left">
+<div class="installer-browser-install-sidebar">
   <?php print $task_list; ?>
 </div>
 <div class="installer-browser-install-main">

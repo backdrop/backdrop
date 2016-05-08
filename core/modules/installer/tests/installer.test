@@ -3,6 +3,7 @@
 * Administration tests for Project Browser.
 */
 class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
   protected $privileged_user;
 
   public function setUp() {
@@ -63,13 +64,13 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
 
     // Simulate adding a project to the install queue
     $this->backdropGet('admin/installer-browser/nojs/install-queue/add/ddd_installer_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
-    $this->assertNoText('Install queue is empty.');
-    $this->assertNoText('Error: The project was not found.');
+    $this->assertNoText(t('Installation queue is empty.'));
+    $this->assertNoText(t('Error: The project was not found.'));
 
     // Simulate removing a project from the install queue
     $this->backdropGet('admin/installer-browser/nojs/install-queue/remove/ddd_installer_test', array('query' => array('destination' => 'admin/modules/installer-browser')));
-    $this->assertText('Install queue is empty.');
-    $this->assertNoText('Error: The project was not found.');
+    $this->assertText(t('Installation queue is empty.'));
+    $this->assertNoText(t('Error: The project was not found.'));
   }
 
   public function testProjectBrowserInstallPage() {
@@ -82,23 +83,23 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_two, array('query' => array('destination' => 'admin/modules/installer-browser')));
     $this->backdropPost('admin/modules/installer-browser/modules', array(), t('Install'));
-    
+
     // Check that this is the install page
     $this->assertText("You're about to install");
-    
+
     // Check that two projects are listed for install and the recommended
     // version is shown.
     $module_one_data = $this->getProjectData($module_one);
     $this->assertText($module_one_data['title'] . ' ' . $module_one_data['recommended']);
     $module_two_data = $this->getProjectData($module_two);
     $this->assertText($module_two_data['title'] . ' ' . $module_two_data['recommended']);
-    
+
     // Check that two versions of EEE Installer test are listed
     $releases = $this->xpath('//div[contains(@class, "installer-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-installer-test-release-name")]');
-    $this->assertEqual(count($releases), 2, 'Two releases available for EEE Installer test.');  
-    
+    $this->assertEqual(count($releases), 2, 'Two releases available for EEE Installer test.');
+
     // Cancel and go back to project list
-    $this->backdropGet('admin/modules/installer-browser/reset');
+    $this->backdropGet('admin/modules/installer-browser/reset/all');
 
     // Check project installs
     $this->backdropGet('admin/installer-browser/nojs/install-queue/add/' . $module_one, array('query' => array('destination' => 'admin/modules/installer-browser')));
@@ -121,21 +122,21 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Install Dependencies"]');
     $this->assertTrue($dependencies_page, 'The Install Dependencies page was loaded');
     $this->assertText($module_two . ' ' . $module_two_data['recommended']);
-    
-    // Test that the test module was really downloaded
+
+    // Test that the test module was really downloaded.
     $this->assertTrue(file_exists('modules/' . $module_one), $module_one_data['title'] . ' exists in the modules directory');
-    
-    // Test that project two installs
+
+    // Test that project two installs.
     $this->backdropPost(NULL, $edit, t('Install'));
-    
+
     // Check that enable page loaded.
     $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Enable modules"]');
     $this->assertTrue($dependencies_page, 'The Enable modules page was loaded');
-    
-    // Test that the test module was really downloaded
+
+    // Test that the test module was really downloaded.
     $this->assertTrue(file_exists('modules/' . $module_two), $module_two_data['title'] . ' exists in the modules directory');
-    
-    // Enable both modules
+
+    // Enable both modules.
     $edit = array(
       'modules[ddd_installer_test]' => TRUE,
       'modules[eee_installer_test]' => TRUE,
@@ -144,8 +145,8 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->resetAll();
     $this->assertTrue(module_exists($module_one), $module_one_data['title'] . ' was enabled.');
     $this->assertTrue(module_exists($module_two), $module_two_data['title'] . ' was enabled.');
-    
-    // Delete the test module files
+
+    // Delete the test module files.
     foreach (array('ddd_installer_test', 'eee_installer_test') as $test_module) {
       $directory = backdrop_get_path('module', $test_module);
       $this->assertTrue(file_unmanaged_delete_recursive($directory), 'Deleted test module.');
@@ -184,6 +185,8 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
 }
 
 class InstallerTestUploadCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   public function setUp() {
     parent::setUp(array('installer', 'update', 'installer_test'));
     $GLOBALS['settings']['allow_authorize_operations'] = TRUE;

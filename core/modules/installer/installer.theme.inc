@@ -66,7 +66,6 @@ function update_preprocess_installer_browser_list(&$variables) {
 
   if (is_array($variables['projects_list']) && !empty($variables['projects_list'])) {
     $content = '';
-    $first = TRUE;
     $rows = array();
     switch ($variables['type']) {
       case 'module':
@@ -101,10 +100,6 @@ function update_preprocess_installer_browser_list(&$variables) {
 
   // Add the pager.
   $variables['pager'] = theme('pager', array('tags' => NULL));
-
-  // Add the filters.
-  $filter_content = backdrop_get_form('installer_browser_filters_form', $variables['type']);
-  $variables['filters'] = backdrop_render($filter_content);
 
   // Add the install list.
   $install_list['installer_browser_install_list_block'] = array(

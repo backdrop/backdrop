@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Various functions that are required by project_browser.
+ * Various functions that are required by the Installer browser.
  */
 
 /**
@@ -112,12 +112,12 @@ function installer_browser_install_queue_remove($project_name) {
  *
  * Removes all projects from the $_SESSION variables.
  *
- * @param string $include_installed
- *   If true, also clear the list of recently installed projects.
+ * @param bool $include_installed
+ *   If TRUE, also clear the list of recently installed projects.
  */
-function installer_browser_install_queue_clear($include_installed = NULL) {
+function installer_browser_install_queue_clear($include_installed = FALSE) {
   $_SESSION['installer_browser_install_list'] = array();
-  if ($include_installed == 'all') {
+  if ($include_installed) {
     $_SESSION['installer_browser_installed_projects'] = array();
   }
 }
@@ -194,8 +194,8 @@ function installer_browser_get_queued_releases() {
  *          'description' => 'Long project description',
  *          'image' => 'http://www.example.com/image.jpg',
  *          'usage' => '542312',
- *          'project url' => 'http://www.example.org/projects/views',
- *          'project status url' => 'http://updates.example.org/release-history/views/1.x',
+ *          'project url' => 'https://www.example.org/projects/views',
+ *          'project status url' => 'https://updates.example.org/release-history/views/1.x',
  *          'last updated' => '12342523',
  *          'maintenance status' => 'Actively maintained',
  *          'development status' => 'Under active development',
@@ -225,11 +225,6 @@ function installer_browser_fetch_results($filters) {
   if ($cache = cache_get($cid)) {
     return $cache->data;
   }
-
-  $results = array(
-    'projects' => array(),
-    'total' => 0,
-  );
 
   $local_filters = $filters;
   $local_filters['method'] = 'query';
@@ -265,7 +260,7 @@ function installer_browser_fetch_results($filters) {
  *   @code
  *    array(
  *      "url" => "https://projects.backdropcms.org",
- *     "name" => "Backdrop",
+ *      "name" => "Backdrop",
  *    )
  *   @endcode
  */
@@ -279,14 +274,14 @@ function installer_browser_get_server() {
 /**
  * Uses the project status url to get the available releases for a project.
  *
- * @param $project
+ * @param array $project
  *   Associative array of information about the project to fetch release data
  *   for, as returned by the remote server.
  *
- * @return
- *   An array of releases for this project.
+ * @return array|FALSE
+ *   An array of releases for this project or FALSE if the project is not found.
  */
-function installer_browser_get_project_release_data($project) {
+function installer_browser_get_project_release_data(array $project) {
   $project['project_type'] = $project['type'];
   // Build the releases cache for this project
   module_load_include('inc', 'update', 'update.fetch');
@@ -345,8 +340,10 @@ function _installer_browser_batch_install_releases_finished($success, $results, 
   backdrop_get_messages();
 
   // Restore the maintenance mode to what it was at the start.
-  state_set('maintenance_mode', $_SESSION['maintenance_mode']);
-  unset($_SESSION['maintenance_mode']);
+  if (isset($_SESSION['maintenance_mode'])) {
+    state_set('maintenance_mode', $_SESSION['maintenance_mode']);
+    unset($_SESSION['maintenance_mode']);
+  }
 
   unset($_SESSION['installer_browser_install_releases_list']);
   if ($success) {
@@ -475,7 +472,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
   }
   $op = isset($queued_projects[$project_name]) ? 'remove' : 'add';
 
-  if(backdrop_is_dialog()) {
+  if (backdrop_is_dialog()) {
     $form = backdrop_get_form('installer_browser_add_remove_queue_dialog_link', $project_name, $op, $title);
     return backdrop_render($form);
   }
@@ -519,14 +516,14 @@ function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $pr
   $form['ajax_link'] = array(
     '#type' => 'submit',
     '#value' => $form_state['title'],
-      '#attributes' => array('class' => array('layout-link-button')),
+    '#attributes' => array('class' => array('layout-link-button')),
     '#ajax' => array(
       'callback' => 'installer_browser_add_remove_queue_dialog_link_ajax',
     ),
     '#submit' => array(
       'installer_browser_add_remove_queue_dialog_link_submit',
-      ),
-    );
+    ),
+  );
 
   return $form;
 }
@@ -535,8 +532,6 @@ function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $pr
  * AJAX submit handler for installer_browser_add_remove_queue_dialog_link().
  */
 function installer_browser_add_remove_queue_dialog_link_ajax($form, &$form_state) {
-  $button = installer_browser_add_remove_queue_link($form_state['project_name']);
-
   $commands = array();
   // Refresh the install queue.
   $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
