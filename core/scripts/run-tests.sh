@@ -120,12 +120,30 @@ if ($args['clean']) {
   // Clean up left-over times and directories.
   simpletest_clean_environment();
   echo "\nEnvironment cleaned.\n";
+  
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  }
+  simpletest_script_clean_profile_cache_tables();
+  echo "\nProfile cache tables cleaned.\n";
 
   // Get the status messages and print them.
   $messages = array_pop(backdrop_get_messages('status'));
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
+  
+  simpletest_script_clean_profile_cache_folders();
+  echo "\nProfile cache folders cleaned.\n";
+ 
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  } 
+    
   exit(0);
 }
 
@@ -146,6 +164,25 @@ if ($args['list']) {
     foreach ($tests as $class => $info) {
       echo " - " . $info['name'] . ' (' . $class . ')' . "\n";
     }
+  }
+  exit(0);
+}
+
+// Generate cache tables for profiles.
+if ($args['profilecache']) {
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+  
+  simpletest_script_init(NULL);
+  
+  echo "\nPrepare database and config cache for profiles\n";
+  foreach($profiles as $profile){
+    simpletest_script_prepare_profile_cache($profile); 
+    echo " - " . $profile . " - " . "ready\n"; 
+    
   }
   exit(0);
 }
@@ -237,6 +274,8 @@ All arguments are long options.
   --color     Output text format results with color highlighting.
 
   --verbose   Output detailed assertion messages in addition to summary.
+  
+  --profilecache Generate cache for instalation profiles to boost tests speed.
 
   <test1>[ <test2>[ <test3> ...]]
 
@@ -282,6 +321,7 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
+    'profilecache' => FALSE,
   );
 
   // Override with set values.
@@ -885,3 +925,65 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
     }
   }
 }
+
+/**
+ * Removed profile cached tables from the database.
+ */
+function simpletest_script_clean_profile_cache_tables(){
+  $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
+  $count = 0;
+  foreach ($tables as $table) {
+    db_drop_table($table);
+    $count++;
+  }
+
+  if ($count > 0) {
+    backdrop_set_message(format_plural($count, 'Removed 1 profile cache table.', 'Removed @count profile cache tables.'));
+  }
+  else {
+    backdrop_set_message(t('No profile cache tables to remove.'));
+  }
+}
+
+/**
+ * Removed profile cached folders from the database.
+ */
+function simpletest_script_clean_profile_cache_folders(){
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+  
+  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+  
+  foreach($profiles as $profile) {
+    // Delete temporary files directory.
+    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile); 
+    backdrop_set_message(t('Cleared cache folder for profile !profile.', array('!profile' => $profile)));
+  }
+}
+/**
+ * Removed profile cached tables from the database.
+ */
+function simpletest_script_prepare_profile_cache($profile){
+  try {
+    backdrop_page_is_cacheable(FALSE);
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+    backdrop_page_is_cacheable(TRUE);
+    
+    require_once BACKDROP_ROOT . '/core/modules/simpletest/profile_cache_prepare_test_case.php';
+
+    $test = new ProfileCachePrepareTestCase();
+    $test->setProfile($profile);
+    if(!$test->isCached()){
+      $test->prepareCache();
+    }
+
+  }
+  catch (Exception $e) {
+    simpletest_script_print_error((string) $e);
+    exit(1);
+  }  
+}
+
