@@ -161,8 +161,3 @@ table tbody tr.update-security,
 table tbody tr.update-unsupported {
   background: #fcc;
 }
-
-th.update-project-name {
-  width: 50%;
-}
-
