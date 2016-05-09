@@ -21,10 +21,10 @@ before_script:
   - wget http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz
   - tar xf xcache-3.2.0.tar.gz
   - pushd xcache-3.2.0
-  - phpize
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then phpize; fi
   - ./configure
-  - make
-  - make install
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then make; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then make install; fi
   - popd
   - printf "extension=xcache.so\nxcache.size=64M\nxcache.var_size=16M\nxcache.test=On" > xcache.ini
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then phpenv config-add xcache.ini; fi
