@@ -545,12 +545,7 @@ abstract class BackdropTestCase {
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
-    // methods to run was passed.
-    echo "get class methods " . microtime() . "\n";
- 
     $class_methods = get_class_methods($class);
-
-    echo "end get class methods " . microtime() . "\n";
 
     if ($methods) {
       $class_methods = array_intersect($class_methods, $methods);
@@ -581,9 +576,7 @@ abstract class BackdropTestCase {
           $this->setUp();
           if ($this->setup) {
             try {
-              echo "[  ". $method . " start " . microtime() . "\n";
               $this->$method();
-              echo "[  ". $method . " end " . microtime() . "\n";
               // Finish up.
             }
             catch (Exception $e) {
@@ -1508,7 +1501,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
     
     if(is_dir($config_cache_dir)){
-      echo "copy start: " . microtime() . "\n";
       $prefix = 'simpletest_cache_' . $this->profile . '_';
       
       $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
@@ -1518,11 +1510,9 @@ class BackdropWebTestCase extends BackdropTestCase {
         db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
         db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
       }
-      echo "copy mysql end: " . microtime() . "\n";
       
       $this->recurseiveCopy($config_cache_dir, $this->public_files_directory);
 
-      echo "copy settings " . $this->public_files_directory . "end: " . microtime() . "\n"; 
       return TRUE;
     }
     return FALSE; 
@@ -1567,12 +1557,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $conf;
-    echo "1 ". microtime() . "\n";
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
     
-    echo "prefix is ." . $this->databasePrefix . "\n";
-
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
     if (!$this->setupEnvironment) {
@@ -1582,7 +1569,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
     backdrop_static_reset();
-    echo "2 ". microtime() . "\n";
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
     // changed, since BackdropCacheArray implementations attempt to
@@ -1591,7 +1577,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$this->setupDatabasePrefix) {
       return FALSE;
     }
-    echo "3 ". microtime() . "\n";
 
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
@@ -1607,12 +1592,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
       backdrop_install_system(); // System install is 0.6 sec.
 
-      echo "4 ". microtime() . "\n";
-      
       // Ensure schema versions are recalculated.
       backdrop_static_reset('backdrop_get_schema_versions');
-
-      echo "5.1 ". microtime() . "\n";
       
       // Include the testing profile.
       config_set('system.core', 'install_profile', $this->profile);
@@ -1621,19 +1602,13 @@ class BackdropWebTestCase extends BackdropTestCase {
   
       // Install the modules specified by the testing profile.
       module_enable($profile_details['dependencies'], FALSE);  // install profile modules 2.2 sec
-      print_r($profile_details['dependencies']);
-      echo "6 ". microtime() . "\n";
-      
-      echo "7 ". microtime() . "\n";
       // Run the profile tasks.
       $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(
         ':name' => $this->profile,
       ))->fetchField();
       if ($install_profile_module_exists) {
-        echo "profile is " . $this->profile . "\n";
-        module_enable(array($this->profile), FALSE); // probably we don't need this part because we already installed modules. 1.9 sec
+        module_enable(array($this->profile), FALSE);
       }
-      echo "8 ". microtime() . "\n";
 
     }
 
@@ -1651,15 +1626,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // @todo This may need to be primed like 'install_profile' above.
     config_set('simpletest.settings', 'parent_profile', $this->originalProfile);
 
-    echo "5 ". microtime() . "\n";
-
-    echo "5.1 ". microtime() . "\n";
-
-    // Install the modules specified by the testing profile.
-    //module_enable($profile_details['dependencies'], FALSE);  // install profile modules 2.2 sec
-    //print_r($profile_details['dependencies']);
-    //echo "6 ". microtime() . "\n";
-
     // Install modules needed for this test. This could have been passed in as
     // either a single array argument or a variable number of string arguments.
     // @todo Remove this compatibility layer and only accept a single array.
@@ -1668,20 +1634,16 @@ class BackdropWebTestCase extends BackdropTestCase {
       $modules = $modules[0];
     }
     if ($modules) {
-      echo "enable module";
-      print_r($modules);
       $success = module_enable($modules, TRUE);
       $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
     }
 
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();    
-    echo "9 ". microtime() . "\n";
 
     // Run cron once in that environment, as install.php does at the end of
     // the installation process.
     backdrop_cron_run();
-    echo "10 ". microtime() . "\n";
 
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
@@ -1705,9 +1667,6 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
-    echo "11 ". microtime() . "\n";
-
-    // 5 sec total. where is  almodt 4.7 is repeatable.
   }
 
   /**
@@ -1718,31 +1677,23 @@ class BackdropWebTestCase extends BackdropTestCase {
    * are enabled later.
    */
   protected function resetAll() {
-    echo "reset all " . microtime() . "\n";
     // Reset all static variables.
     backdrop_static_reset();
-    echo "  static " . microtime() . "\n";
+
     // Reset the list of enabled modules.
     module_list(TRUE);
-    echo "  list " . microtime() . "\n";
 
     // Reset cached schema for new database prefix. This must be done before
     // backdrop_flush_all_caches() so rebuilds can make use of the schema of
     // modules enabled on the cURL side.
     backdrop_get_schema(NULL, TRUE);
-    echo "  schema " . microtime() . "\n";
 
     // Perform rebuilds and flush remaining caches.
     backdrop_flush_all_caches();
 
-    // Reset the Field API.
-    //field_cache_clear();
-    echo "  flush cache " . microtime() . "\n";
-
     // Reload global $conf array and permissions.
     $this->refreshVariables();
     $this->checkPermissions(array(), TRUE);
-    echo "reset all end " . microtime() . "\n";
   }
 
   /**
@@ -1787,7 +1738,6 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Remove all prefixed tables.
     $connection_info = Database::getConnectionInfo('default');
-    echo "clean start: " . microtime() . "\n";
     $tables = db_find_tables($connection_info['default']['prefix']['default'] . '%');
     if (empty($tables)) {
       $this->fail('Failed to find test tables to drop.');
@@ -1798,7 +1748,6 @@ class BackdropWebTestCase extends BackdropTestCase {
         unset($tables[$table]);
       }
     }
-    echo "clean end: " . microtime() . "\n";
     
     if (!empty($tables)) {
       $this->fail('Failed to drop all prefixed tables.');
