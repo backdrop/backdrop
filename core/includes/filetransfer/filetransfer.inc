@@ -78,7 +78,6 @@ abstract class FileTransfer {
   public final function copyDirectory($source, $destination) {
     $source = $this->sanitizePath($source);
     $destination = $this->fixRemotePath($destination);
-    echo "-- 3 : " . $source . " -> " . $destination . "\n";
     $this->checkPath($destination);
     $this->copyDirectoryJailed($source, $destination);
   }
@@ -158,12 +157,9 @@ abstract class FileTransfer {
    *   A path to check against the jail.
    */
   protected final function checkPath($path) {
-    echo "PATH: " . $path . "\n";
     $full_jail = $this->chroot . $this->jail;
     $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
-    echo "FULL PATH: " . $path . " " . substr($this->chroot . $path, 0, strlen($full_jail)) . "\n";
     $full_path = $this->fixRemotePath($full_path, FALSE);
-    echo " test - '" . $full_jail . "' '" . $full_path . "' chroot " . $this->chroot . "\n";
     if ($full_jail !== $full_path) {
       throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
     }
@@ -298,9 +294,7 @@ abstract class FileTransfer {
     // If the file exists as is, there is no chroot.
     $path = __FILE__;
     $path = $this->fixRemotePath($path, FALSE);
-    echo "PATH: " . $path ."\n";
     if ($this->isFile($path)) {
-      echo " chroot false";
       return FALSE;
     }
 
@@ -308,10 +302,8 @@ abstract class FileTransfer {
     $path = $this->fixRemotePath($path, FALSE);
     $parts = explode('/', $path);
     $chroot = '';
-    print_r($parts);
     while (count($parts)) {
       $check = implode($parts, '/');
-      echo "CHECK " . $check . '/' . backdrop_basename(__FILE__) . "\n";
       if ($this->isFile($check . '/' . backdrop_basename(__FILE__))) {
         // Remove the trailing slash.
         return substr($chroot, 0, -1);
@@ -326,10 +318,7 @@ abstract class FileTransfer {
    *
    */
   function setChroot() {
-    echo "cal setChroot\n";
-    echo "JAIL: " . $this->jail . "\n";
     $this->chroot = $this->findChroot();
-    echo "CHROOT: " . $this->chroot . "\n";
     $this->jail = $this->fixRemotePath($this->jail);
   }
 
