@@ -47,7 +47,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --split=$RUNSPLIT --concurrency 12 --url http://localhost --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --split=$RUNSPLIT --concurrency 12 --url http://localhost --color --verbose --force --all --cache
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
