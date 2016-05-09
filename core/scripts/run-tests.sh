@@ -169,7 +169,7 @@ if ($args['list']) {
 }
 
 // Generate cache tables for profiles.
-if ($args['profilecache']) {
+if ($args['cache']) {
   $profiles = array(
     'minimal',
     'standard',
@@ -184,7 +184,6 @@ if ($args['profilecache']) {
     echo " - " . $profile . " - " . "ready\n"; 
     
   }
-  exit(0);
 }
 
 $test_list = simpletest_script_get_test_list();
@@ -275,7 +274,7 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
   
-  --profilecache Generate cache for instalation profiles to boost tests speed.
+  --cache     Generate cache for instalation profiles to boost tests speed.
 
   <test1>[ <test2>[ <test3> ...]]
 
@@ -321,7 +320,7 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
-    'profilecache' => FALSE,
+    'cache' => FALSE,
   );
 
   // Override with set values.
