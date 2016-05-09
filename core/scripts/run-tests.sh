@@ -452,7 +452,7 @@ function simpletest_script_init($server_software) {
    * avoids resolving of symlinks. This allows the code repository to be a symlink
    * and hosted outside of the web root. See issue #1297.
    */
-  define('BACKDROP_ROOT', dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))));
+  define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
 
   // Change the directory to the Backdrop root.
   chdir(BACKDROP_ROOT);
