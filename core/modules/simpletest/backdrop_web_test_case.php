@@ -1532,7 +1532,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   private function recurseiveCopy($src, $dst) { 
     $dir = opendir($src);
     if(!file_exists($dst)){
-      file_prepare_directory($dst, FILE_CREATE_DIRECTORY);
+      mkdir($dst);
     }
     while(false !== ( $file = readdir($dir)) ) {
       if (( $file != '.' ) && ( $file != '..' )) {
@@ -1540,7 +1540,7 @@ class BackdropWebTestCase extends BackdropTestCase {
           $this->recurseiveCopy($src . '/' . $file, $dst . '/' . $file);
         } 
         else {
-          file_unmanaged_copy($src . '/' . $file, $dst . '/' . $file);
+          copy($src . '/' . $file, $dst . '/' . $file);
         }
       }
     }
