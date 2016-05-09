@@ -14,11 +14,10 @@ env:
 before_script:
   # Install Apache and FastCGI extension to connect to PHP-FPM.
   - sudo apt-get update > /dev/null
-  - sudo apt-get install apache2 libapache2-mod-fastcgi > /dev/null
+  - sudo apt-get install apache2 libapache2-mod-fastcgi php5-xcache> /dev/null
   - sudo a2enmod rewrite actions fastcgi alias
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
-  - sudo apt-get install php5-xcache
   - sudo apachectl restart
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
