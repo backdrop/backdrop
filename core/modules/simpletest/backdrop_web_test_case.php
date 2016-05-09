@@ -1736,7 +1736,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     backdrop_flush_all_caches();
 
     // Reset the Field API.
-    field_cache_clear();
+    //field_cache_clear();
     echo "  flush cache " . microtime() . "\n";
 
     // Reload global $conf array and permissions.
@@ -1839,7 +1839,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     module_implements_reset();
 
     // Reset the Field API.
-    field_cache_clear();
+    //field_cache_clear();
 
     // Rebuild caches.
     $this->refreshVariables();
