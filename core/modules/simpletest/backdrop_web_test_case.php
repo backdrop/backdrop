@@ -801,6 +801,7 @@ class BackdropUnitTestCase extends BackdropTestCase {
 
     // Create test directory.
     $public_files_directory = $this->originalFileDirectory . '/simpletest/' . substr($this->databasePrefix, 10);
+
     file_prepare_directory($public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $conf['file_public_path'] = $public_files_directory;
 
@@ -1504,8 +1505,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
   
   protected function useCache(){
-    //return FALSE;
-    global $config_directories;
     $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
     
     if(is_dir($config_cache_dir)){
@@ -1520,21 +1519,30 @@ class BackdropWebTestCase extends BackdropTestCase {
         db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
       }
       echo "copy mysql end: " . microtime() . "\n";
-        
-      $direcory_handle = opendir($config_cache_dir . '/config_active');
-      while (FALSE !== ($entry = readdir($direcory_handle))) {
-        $file = $config_cache_dir . '/config_active/' . $entry;
-        if(is_file($file)){
-          copy($file, $config_directories['active'] . '/' . $entry);
-        }
-      }
-      closedir($direcory_handle);
+      
+      $this->recurseiveCopy($config_cache_dir, $this->public_files_directory);
 
-      echo "copy settings end: " . microtime() . "\n"; 
+      echo "copy settings " . $this->public_files_directory . "end: " . microtime() . "\n"; 
       return TRUE;
     }
     return FALSE; 
   }
+  
+  private function recurseiveCopy($src, $dst) { 
+    $dir = opendir($src); 
+    @mkdir($dst); 
+    while(false !== ( $file = readdir($dir)) ) { 
+      if (( $file != '.' ) && ( $file != '..' )) { 
+        if ( is_dir($src . '/' . $file) ) {
+            $this->recurseiveCopy($src . '/' . $file, $dst . '/' . $file); 
+        } 
+        else { 
+            copy($src . '/' . $file, $dst . '/' . $file); 
+        } 
+      } 
+    } 
+    closedir($dir); 
+} 
 
   /**
    * Sets up a Backdrop site for running functional and integration tests.
@@ -1660,6 +1668,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $modules = $modules[0];
     }
     if ($modules) {
+      echo "enable module";
       print_r($modules);
       $success = module_enable($modules, TRUE);
       $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
