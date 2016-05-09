@@ -22,6 +22,7 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
 
   function prepareCache() {
     $this->setUp();
+    $this->alterToMyISAM();
     $this->tearDown();
   }
 
@@ -224,6 +225,26 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
 
     // Close the CURL handler.
     $this->curlClose();
-  }  
-
+  }
+  
+  /**
+   * Delete created files and temporary files directory, delete the tables created by setUp(),
+   * and reset the database prefix.
+   */
+  protected function alterToMyISAM() {
+    $skip_alter = array(
+      'taxonomy_term_data',
+      'node',
+      'node_access',
+      'node_revision',
+      'node_comment_statistics',
+    );
+    $tables = db_find_tables($this->databasePrefix . '%');
+    foreach ($tables as $table) {
+      $original_table_name = substr($table, strlen($this->databasePrefix));
+      if(!in_array($original_table_name, $skip_alter)){
+        db_query('ALTER TABLE ' . $table . ' ENGINE=MyISAM');
+      }
+    }
+  }
 }
