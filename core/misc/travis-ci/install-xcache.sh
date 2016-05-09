@@ -2,11 +2,10 @@
 
 wget http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz
 tar xf xcache-3.2.0.tar.gz
-pushd xcache-3.2.0
+cd xcache-3.2.0
 phpize
 ./configure
 make
 sudo make install
-popd
 printf "extension=xcache.so\nxcache.size=64M\nxcache.var_size=16M\nxcache.test=On" > xcache.ini
 phpenv config-add xcache.ini
