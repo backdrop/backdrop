@@ -18,8 +18,8 @@ before_script:
   - sudo a2enmod rewrite actions fastcgi alias
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
+  - sudo apt-get install php5-xcache
   - sudo apachectl restart
-  - php -i
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
