@@ -992,13 +992,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $redirect_count;
   
   /**
-   * The config cache file directory, to speed up setUp phase.
-   *
-   * @var string
-   */
-  private $config_cache_dir = NULL;
-
-  /**
    * Constructor for BackdropWebTestCase.
    */
   function __construct($test_id = NULL) {
@@ -1510,105 +1503,32 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->setupEnvironment = TRUE;
   }
   
-  /**
-   * Cache configs for future reuse by tests.
-   *
-   * When this function calls first time, we create and cache configs for future reuse.
-   *
-   * @see BackdropWebTestCase::setUp()
-   */
-  private function cacheConfigDir() {
-    global $config_directories;
-
-    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active.' . $this->profile;
-    
-    if(!file_exists($this->config_cache_dir)){
-      file_prepare_directory($this->config_cache_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS); 
-      $config_directories['active'];
-      
-      $direcory_handle = opendir($config_directories['active']);
-      while (FALSE !== ($entry = readdir($direcory_handle))) {
-        $file = $config_directories['active'] . '/' . $entry;
-        if(is_file($file)){
-          copy($file, $this->config_cache_dir . '/' . $entry);
-        }
-      }
-      closedir($direcory_handle);
-    }
-  }
-  /**
-   * Cache MySQL tables for future reuse by tests.
-   *
-   * When this function calls first time, we create and cache tables for future reuse.
-   *
-   * @see BackdropWebTestCase::setUp()
-   */
-  private function cacheMySQLData() {
-    $connection_info = Database::getConnectionInfo('default');
-    
-    $mysql_cach_dir = $this->originalFileDirectory . '/simpletest/cache/mysql_' . $this->profile; 
-    if(!file_exists($mysql_cach_dir)){
-      file_prepare_directory($mysql_cach_dir, FILE_CREATE_DIRECTORY); 
-      
-      $prefix = 'simpletest_cache_' . $this->profile . '_';
-      
-      echo "copy start: " . microtime() . "\n";
-       
-      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($this->databasePrefix) . '%' ))->fetchCol();
-      foreach($tables as $table_prefix){
-        $table = substr($table_prefix, strlen($this->databasePrefix));
-        echo "Table: " . $table ."\n";
-        echo 'CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table_prefix . "\n";
-        db_query('CREATE TABLE ' . $prefix . $table . ' LIKE ' .  $table);
-        db_query('INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix);
-//        db_query('ALTER TABLE ' . $prefix . $table . ' ENGINE = MyISAM');
-        echo 'INSERT ' . $prefix . $table . ' SELECT * FROM ' . $table_prefix ."\n";
-
-      }
-
-      echo "copy end: " . microtime() . "\n";      
-    }
-  }
-  
   protected function useCache(){
     //return FALSE;
     global $config_directories;
-    $this->config_cache_dir = $this->originalFileDirectory . '/simpletest/cache/config_active.'  . $this->profile;
-    $mysql_cach_dir = $this->originalFileDirectory . '/simpletest/cache/mysql_' . $this->profile;
+    $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
     
-    if(file_exists($mysql_cach_dir)){
+    if(is_dir($config_cache_dir)){
       echo "copy start: " . microtime() . "\n";
       $prefix = 'simpletest_cache_' . $this->profile . '_';
       
       $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      
       foreach($tables as $table_prefix){
         $table = substr($table_prefix, strlen($prefix));
-       // echo "Table: " . $table ."\n";
-//        echo 'CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' .  $prefix . $table ."\n";
-//        echo 'INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $prefix . $table . "\n";
         db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
-//        echo "copy create: "  . $table . ' ' .  microtime() . "\n";
-//        db_query('ALTER TABLE ' . $this->databasePrefix . $table . ' ENGINE=MEMORY');
         db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
-//        echo "copy insert: " . $table . ' ' . microtime() . "\n";
       }
       echo "copy mysql end: " . microtime() . "\n";
-      
-      if(file_exists($this->config_cache_dir)){
-        $config_directories['active'];
         
-        $direcory_handle = opendir($this->config_cache_dir);
-//        echo "READ:" . $this->config_cache_dir ."\n";
-        while (FALSE !== ($entry = readdir($direcory_handle))) {
-          $file = $this->config_cache_dir . '/' . $entry;
-          if(is_file($file)){
-//            echo "copy " . $file . " to " . $config_directories['active'] . '/' . $entry . "\n";
-            copy($file, $config_directories['active'] . '/' . $entry);
-//            chmod($config_directories['active'] . '/' . $entry, 0777);
-          }
+      $direcory_handle = opendir($config_cache_dir . '/config_active');
+      while (FALSE !== ($entry = readdir($direcory_handle))) {
+        $file = $config_cache_dir . '/config_active/' . $entry;
+        if(is_file($file)){
+          copy($file, $config_directories['active'] . '/' . $entry);
         }
-        closedir($direcory_handle);
       }
+      closedir($direcory_handle);
 
       echo "copy settings end: " . microtime() . "\n"; 
       return TRUE;
@@ -1725,15 +1645,6 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     echo "5 ". microtime() . "\n";
 
-
-
-    // Cache configs for future reuse.
-    // Cache configs for future reuse.
-    //$this->cacheConfigDir();
-    if(!$use_cache){
-      $this->cacheMySQLData();
-      $this->cacheConfigDir();
-    }
     echo "5.1 ". microtime() . "\n";
 
     // Install the modules specified by the testing profile.
