@@ -143,6 +143,14 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     // Perform the actual Backdrop installation.
     include_once BACKDROP_ROOT . '/core/includes/install.inc';
     backdrop_install_system(); // System install is 0.6 sec.
+    
+    // Set path variables.
+    $core_config = config('system.core');
+    $core_config->set('file_default_scheme', 'public');
+    $core_config->set('file_public_path', $this->public_files_directory);
+    $core_config->set('file_private_path', $this->private_files_directory);
+    $core_config->set('file_temporary_path', $this->temp_files_directory);
+    $core_config->save();
 
     // Ensure schema versions are recalculated.
     backdrop_static_reset('backdrop_get_schema_versions');
