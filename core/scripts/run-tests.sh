@@ -120,12 +120,14 @@ if ($args['clean']) {
   // Clean up left-over times and directories.
   simpletest_clean_environment();
   echo "\nEnvironment cleaned.\n";
-  
+
   // Get the status messages and print them.
   $messages = array_pop(backdrop_get_messages('status'));
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
+
+  // Clean up profiles cache tables.
   simpletest_script_clean_profile_cache_tables();
   echo "\nProfile cache tables cleaned.\n";
 
@@ -134,16 +136,17 @@ if ($args['clean']) {
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
-  
+
+  // Clean up
   simpletest_script_clean_profile_cache_folders();
   echo "\nProfile cache folders cleaned.\n";
- 
+
   // Get the status messages and print them.
   $messages = array_pop(backdrop_get_messages('status'));
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
-  } 
-    
+  }
+
   exit(0);
 }
 
@@ -175,14 +178,14 @@ if ($args['cache']) {
     'standard',
     'testing',
   );
-  
+
   simpletest_script_init(NULL);
-  
+
   echo "\nPrepare database and config cache for profiles\n";
   foreach($profiles as $profile){
-    simpletest_script_prepare_profile_cache($profile); 
-    echo " - " . $profile . " - " . "ready\n"; 
-    
+    simpletest_script_prepare_profile_cache($profile);
+    echo " - " . $profile . " - " . "ready\n";
+
   }
 }
 
@@ -273,7 +276,7 @@ All arguments are long options.
   --color     Output text format results with color highlighting.
 
   --verbose   Output detailed assertion messages in addition to summary.
-  
+
   --cache     Generate cache for instalation profiles to boost tests speed.
 
   <test1>[ <test2>[ <test3> ...]]
@@ -451,6 +454,9 @@ function simpletest_script_init($server_software) {
    * The dirname() function is used to get path to Backdrop root folder, which
    * avoids resolving of symlinks. This allows the code repository to be a symlink
    * and hosted outside of the web root. See issue #1297.
+   *
+   * The realpath is important here to avoid FAILURE with filetransfer.tests. 
+   * When realpath used, BACKDROP_ROOT contain full path to backdrop root folder.
    */
   define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
 
@@ -953,15 +959,16 @@ function simpletest_script_clean_profile_cache_folders(){
     'standard',
     'testing',
   );
-  
+
   $file_public_path = config_get('system.core', 'file_public_path', 'files');
-  
+
   foreach($profiles as $profile) {
     // Delete temporary files directory.
-    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile); 
+    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile);
     backdrop_set_message(t('Cleared cache folder for profile !profile.', array('!profile' => $profile)));
   }
 }
+
 /**
  * Removed profile cached tables from the database.
  */
@@ -970,7 +977,7 @@ function simpletest_script_prepare_profile_cache($profile){
     backdrop_page_is_cacheable(FALSE);
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
     backdrop_page_is_cacheable(TRUE);
-    
+
     require_once BACKDROP_ROOT . '/core/modules/simpletest/profile_cache_prepare_test_case.php';
 
     $test = new ProfileCachePrepareTestCase();
@@ -983,6 +990,6 @@ function simpletest_script_prepare_profile_cache($profile){
   catch (Exception $e) {
     simpletest_script_print_error((string) $e);
     exit(1);
-  }  
+  }
 }
 

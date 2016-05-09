@@ -545,8 +545,8 @@ abstract class BackdropTestCase {
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
+    // methods to run was passed.
     $class_methods = get_class_methods($class);
-
     if ($methods) {
       $class_methods = array_intersect($class_methods, $methods);
     }
@@ -794,7 +794,6 @@ class BackdropUnitTestCase extends BackdropTestCase {
 
     // Create test directory.
     $public_files_directory = $this->originalFileDirectory . '/simpletest/' . substr($this->databasePrefix, 10);
-
     file_prepare_directory($public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $conf['file_public_path'] = $public_files_directory;
 
@@ -984,7 +983,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * The number of redirects followed during the handling of a request.
    */
   protected $redirect_count;
-  
+
   /**
    * Constructor for BackdropWebTestCase.
    */
@@ -1476,7 +1475,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
     $active_directory = config_get_config_directory('active');
-    
     $staging_directory = config_get_config_directory('staging');
     file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
@@ -1496,7 +1494,16 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Indicate the environment was set up correctly.
     $this->setupEnvironment = TRUE;
   }
-  
+
+  /**
+   * If cache available, copy tables and configs from cache.
+   *
+   * @return
+   *   TRUE when cache used, FALSE when cache is not available.   
+   *
+   * @see BackdropWebTestCase::setUp()
+   * @see BackdropWebTestCase::tearDown()
+   */
   protected function useCache(){
     $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
     
@@ -1517,22 +1524,28 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
     return FALSE; 
   }
-  
+
+  /**
+   * Recurseivly copy one directory to another.
+   *
+   */
   private function recurseiveCopy($src, $dst) { 
-    $dir = opendir($src); 
-    @mkdir($dst); 
-    while(false !== ( $file = readdir($dir)) ) { 
-      if (( $file != '.' ) && ( $file != '..' )) { 
+    $dir = opendir($src);
+    if(!file_exists($dst)){
+      file_prepare_directory($dst, FILE_CREATE_DIRECTORY);
+    }
+    while(false !== ( $file = readdir($dir)) ) {
+      if (( $file != '.' ) && ( $file != '..' )) {
         if ( is_dir($src . '/' . $file) ) {
-            $this->recurseiveCopy($src . '/' . $file, $dst . '/' . $file); 
+          $this->recurseiveCopy($src . '/' . $file, $dst . '/' . $file);
         } 
-        else { 
-            copy($src . '/' . $file, $dst . '/' . $file); 
-        } 
-      } 
-    } 
-    closedir($dir); 
-} 
+        else {
+          file_unmanaged_copy($src . '/' . $file, $dst . '/' . $file);
+        }
+      }
+    }
+    closedir($dir);
+  }
 
   /**
    * Sets up a Backdrop site for running functional and integration tests.
@@ -1559,7 +1572,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     global $user, $language, $conf;
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
-    
+
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
     if (!$this->setupEnvironment) {
@@ -1569,6 +1582,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
     backdrop_static_reset();
+
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
     // changed, since BackdropCacheArray implementations attempt to
@@ -1639,7 +1653,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Reset/rebuild all data structures after enabling the modules.
-    $this->resetAll();    
+    $this->resetAll();
 
     // Run cron once in that environment, as install.php does at the end of
     // the installation process.
@@ -1679,7 +1693,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function resetAll() {
     // Reset all static variables.
     backdrop_static_reset();
-
     // Reset the list of enabled modules.
     module_list(TRUE);
 
@@ -1748,7 +1761,6 @@ class BackdropWebTestCase extends BackdropTestCase {
         unset($tables[$table]);
       }
     }
-    
     if (!empty($tables)) {
       $this->fail('Failed to drop all prefixed tables.');
     }
@@ -1786,9 +1798,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // aren't called after tests.
     module_list(TRUE);
     module_implements_reset();
-
-    // Reset the Field API.
-    //field_cache_clear();
 
     // Rebuild caches.
     $this->refreshVariables();

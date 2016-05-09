@@ -4,13 +4,22 @@
  */
 class ProfileCachePrepareTestCase extends BackdropWebTestCase {
   protected $profile = 'minimal';
-  
+
+  /**
+   * Setup databasePrefix and profile to prepare cache tables and config directories.
+   */
   public function setProfile($profile) {
     $this->profile = $profile;
     // Create the database prefix for this test.
-    $this->databasePrefix = 'simpletest_cache_' . $this->profile . '_';    
+    $this->databasePrefix = 'simpletest_cache_' . $this->profile . '_';
   }
-  
+
+  /**
+   * Check if cache folder already exists.
+   *
+   * @return
+   *   TRUE if cache exists, FALSE if no cache for current profile.
+   */
   function isCached(){
     $file_public_path = config_get('system.core', 'file_public_path', 'files');
     $cache_dir = $file_public_path . '/simpletest/' . substr($this->databasePrefix, 0, -1);
@@ -20,6 +29,9 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     return FALSE;
   }
 
+  /**
+   * Prepare cache tables and config dirs. Speed up test speed by converting tables to MyISAM.
+   */
   function prepareCache() {
     $this->setUp();
     $this->alterToMyISAM();
@@ -90,7 +102,7 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
     $active_directory = config_get_config_directory('active');
-    
+
     $staging_directory = config_get_config_directory('staging');
     file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
@@ -110,20 +122,36 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     // Indicate the environment was set up correctly.
     $this->setupEnvironment = TRUE;
   }
-  
+
+  /**
+   * Sets up a Backdrop site for running functional and integration tests.
+   *
+   *
+   * Iinstall Backdrop with the specified installation profile in $profile into the
+   * prefixed database. 
+   *
+   * After installation all caches are flushed and several configuration values
+   * are reset to the values of the parent site executing the test, since the
+   * default values may be incompatible with the environment in which tests are
+   * being executed.
+   *
+   * @see BackdropWebTestCase::prepareDatabasePrefix()
+   * @see BackdropWebTestCase::changeDatabasePrefix()
+   * @see BackdropWebTestCase::prepareEnvironment()
+   */
   protected function setUp(){
     global $conf;
-        
+
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
     if (!$this->setupEnvironment) {
       return FALSE;
     }
-    
+
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
     backdrop_static_reset();
-    
+
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
     // changed, since BackdropCacheArray implementations attempt to
@@ -132,7 +160,7 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     if (!$this->setupDatabasePrefix) {
       return FALSE;
     }
-    
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -140,11 +168,11 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     // profile's hook_install() and other hook implementations are never invoked.
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
-    
+
     // Perform the actual Backdrop installation.
     include_once BACKDROP_ROOT . '/core/includes/install.inc';
     backdrop_install_system(); // System install is 0.6 sec.
-    
+
     // Set path variables.
     $core_config = config('system.core');
     $core_config->set('file_default_scheme', 'public');
@@ -171,12 +199,11 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     if ($install_profile_module_exists) {
       module_enable(array($this->profile), FALSE); // probably we don't need this part because we already installed modules. 1.9 sec
     }
-    
+
   }
 
   /**
-   * Delete created files and temporary files directory, delete the tables created by setUp(),
-   * and reset the database prefix.
+   * Reset the database prefix and global config.
    */
   protected function tearDown() {
     global $user, $language, $settings, $config_directories;
@@ -226,10 +253,11 @@ class ProfileCachePrepareTestCase extends BackdropWebTestCase {
     // Close the CURL handler.
     $this->curlClose();
   }
-  
+
   /**
-   * Delete created files and temporary files directory, delete the tables created by setUp(),
-   * and reset the database prefix.
+   * Alter tables to MyISAM engine to speed up tests.
+   *
+   * MyISAM is faster to delete and copy tables. It gives small adventage when /var/lib/mysql on SHM (memory) device, but much bigger when tests run on regular device.
    */
   protected function alterToMyISAM() {
     $skip_alter = array(
