@@ -6,7 +6,7 @@ pushd xcache-3.2.0
 phpize
 ./configure
 make
-make install
+sudo make install
 popd
 printf "extension=xcache.so\nxcache.size=64M\nxcache.var_size=16M\nxcache.test=On" > xcache.ini
 phpenv config-add xcache.ini
