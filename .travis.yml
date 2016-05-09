@@ -18,6 +18,16 @@ before_script:
   - sudo a2enmod rewrite actions fastcgi alias
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
+  - wget http://xcache.lighttpd.net/pub/Releases/${XCACHE_VERSION}/xcache-3.2.0.tar.gz
+  - tar xf xcache-3.2.0.tar.gz
+  - pushd xcache-3.2.0
+  - phpize
+  - ./configure
+  - make
+  - make install
+  - popd
+  - printf "extension=xcache.so\nxcache.size=64M\nxcache.var_size=16M\nxcache.test=On" > xcache.ini
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then phpenv config-add xcache.ini; fi
   - sudo apachectl restart
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
