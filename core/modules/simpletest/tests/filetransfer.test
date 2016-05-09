@@ -74,8 +74,13 @@ class FileTranferTest extends BackdropWebTestCase {
       $this->testConnection->copyDirectory($source, BACKDROP_ROOT . '/'. config_get('system.core', 'file_public_path'));
     }
     catch (FileTransferException $e) {
+      echo "FAALSE\n";
       $gotit = FALSE;
+      echo " test ". print_r($e,true);
+      
     }
+    echo "2 " . $source . " -> " . BACKDROP_ROOT . '/'. config_get('system.core', 'file_public_path') . "\n";
+    exit();
     $this->assertTrue($gotit, 'Was able to copy a directory inside of the jailed area');
   }
 }
