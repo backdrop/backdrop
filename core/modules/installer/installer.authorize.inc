@@ -14,7 +14,7 @@
  * Updates existing projects when invoked by authorize.php.
  *
  * Callback for system_authorized_init() in
- * update_manager_update_ready_form_submit().
+ * installer_manager_update_ready_form_submit().
  *
  * @param $filetransfer
  *   The FileTransfer object created by authorize.php for use during this
@@ -26,11 +26,11 @@
  *   - updater_name: The name of the Updater class to use for this project.
  *   - local_url: The locally installed location of new code to update with.
  */
-function update_authorize_run_update($filetransfer, $projects) {
+function installer_authorize_run_update($filetransfer, $projects) {
   $operations = array();
   foreach ($projects as $project => $project_info) {
     $operations[] = array(
-      'update_authorize_batch_copy_project',
+      'installer_authorize_batch_copy_project',
       array(
         $project_info['project'],
         $project_info['updater_name'],
@@ -44,8 +44,8 @@ function update_authorize_run_update($filetransfer, $projects) {
     'title' => t('Installing updates'),
     'init_message' => t('Preparing to update your site'),
     'operations' => $operations,
-    'finished' => 'update_authorize_update_batch_finished',
-    'file' => backdrop_get_path('module', 'update') . '/update.authorize.inc',
+    'finished' => 'installer_authorize_update_batch_finished',
+    'file' => backdrop_get_path('module', 'installer') . '/installer.authorize.inc',
   );
 
   batch_set($batch);
@@ -57,7 +57,7 @@ function update_authorize_run_update($filetransfer, $projects) {
  * Installs a new project when invoked by authorize.php.
  *
  * Callback for system_authorized_init() in
- * update_manager_install_form_submit().
+ * installer_manager_install_form_submit().
  *
  * @param FileTransfer $filetransfer
  *   The FileTransfer object created by authorize.php for use during this
@@ -70,9 +70,9 @@ function update_authorize_run_update($filetransfer, $projects) {
  *   The URL to the locally installed temp directory where the project has
  *   already been downloaded and extracted into.
  */
-function update_authorize_run_install($filetransfer, $project, $updater_name, $local_url) {
+function installer_authorize_run_install($filetransfer, $project, $updater_name, $local_url) {
   $operations[] = array(
-    'update_authorize_batch_copy_project',
+    'installer_authorize_batch_copy_project',
     array(
       $project,
       $updater_name,
@@ -87,8 +87,8 @@ function update_authorize_run_install($filetransfer, $project, $updater_name, $l
     'init_message' => t('Preparing to install'),
     'operations' => $operations,
     // @todo Use a different finished callback for different messages?
-    'finished' => 'update_authorize_install_batch_finished',
-    'file' => backdrop_get_path('module', 'update') . '/update.authorize.inc',
+    'finished' => 'installer_authorize_install_batch_finished',
+    'file' => backdrop_get_path('module', 'installer') . '/installer.authorize.inc',
   );
   batch_set($batch);
 
@@ -111,7 +111,7 @@ function update_authorize_run_install($filetransfer, $project, $updater_name, $l
  * @param array $context
  *   Reference to an array used for Batch API storage.
  */
-function update_authorize_batch_copy_project($project, $updater_name, $local_url, $filetransfer, &$context) {
+function installer_authorize_batch_copy_project($project, $updater_name, $local_url, $filetransfer, &$context) {
 
   // Initialize some variables in the Batch API $context array.
   if (!isset($context['results']['log'])) {
@@ -151,13 +151,13 @@ function update_authorize_batch_copy_project($project, $updater_name, $local_url
     }
   }
   catch (UpdaterException $e) {
-    _update_batch_create_message($context['results']['log'][$project], t('Error installing / updating'), FALSE);
-    _update_batch_create_message($context['results']['log'][$project], $e->getMessage(), FALSE);
+    _installer_batch_create_message($context['results']['log'][$project], t('Error installing / updating'), FALSE);
+    _installer_batch_create_message($context['results']['log'][$project], $e->getMessage(), FALSE);
     $context['results']['log'][$project]['#abort'] = TRUE;
     return;
   }
 
-  _update_batch_create_message($context['results']['log'][$project], t('Installed %project_name successfully', array('%project_name' => $project)));
+  _installer_batch_create_message($context['results']['log'][$project], t('Installed %project_name successfully', array('%project_name' => $project)));
   if (!empty($tasks)) {
     $context['results']['tasks'] += $tasks;
   }
@@ -179,7 +179,7 @@ function update_authorize_batch_copy_project($project, $updater_name, $local_url
  * @param $results
  *   An associative array of results from the batch operation.
  */
-function update_authorize_update_batch_finished($success, $results) {
+function installer_authorize_update_batch_finished($success, $results) {
   foreach ($results['log'] as $project => $messages) {
     if (!empty($messages['#abort'])) {
       $success = FALSE;
@@ -189,7 +189,7 @@ function update_authorize_update_batch_finished($success, $results) {
   if ($success) {
     // Now that the update completed, we need to clear the cache of available
     // update data and recompute our status, so prevent show bogus results.
-    _update_authorize_clear_update_status();
+    _installer_authorize_clear_update_status();
 
     // Take the site out of maintenance mode if it was previously that way.
     if ($offline && isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
@@ -246,7 +246,7 @@ function update_authorize_update_batch_finished($success, $results) {
  * @param $results
  *   An associative array of results from the batch operation.
  */
-function update_authorize_install_batch_finished($success, $results) {
+function installer_authorize_install_batch_finished($success, $results) {
   foreach ($results['log'] as $project => $messages) {
     if (!empty($messages['#abort'])) {
       $success = FALSE;
@@ -304,7 +304,7 @@ function update_authorize_install_batch_finished($success, $results) {
  *   (optional) TRUE if the operation the message is about was a success, FALSE
  *   if there were errors. Defaults to TRUE.
  */
-function _update_batch_create_message(&$project_results, $message, $success = TRUE) {
+function _installer_batch_create_message(&$project_results, $message, $success = TRUE) {
   $project_results[] = array('message' => $message, 'success' => $success);
 }
 
@@ -319,10 +319,10 @@ function _update_batch_create_message(&$project_results, $message, $success = TR
  * Note that we do not want to just truncate the table, since that would remove
  * items related to currently pending fetch attempts.
  *
- * @see update_authorize_update_batch_finished()
+ * @see installer_authorize_update_batch_finished()
  * @see _update_cache_clear()
  */
-function _update_authorize_clear_update_status() {
+function _installer_authorize_clear_update_status() {
   $query = db_delete('cache_update');
   $query->condition(
     db_or()
