@@ -489,7 +489,7 @@ function system_modules($form, $form_state = array()) {
   );
   $form['filter']['search'] = array(
     '#type' => 'textfield',
-    '#title' => t('Search'),
+    '#title' => t('Filter'),
     '#size' => 30,
     '#placeholder' => t('Enter module name…'),
     '#attributes' => array(
