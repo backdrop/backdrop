@@ -137,7 +137,7 @@ if ($args['clean']) {
     echo " - " . $text . "\n";
   }
 
-  // Clean up
+  // Clean up profiles cache folders.
   simpletest_script_clean_profile_cache_folders();
   echo "\nProfile cache folders cleaned.\n";
 
@@ -181,7 +181,7 @@ if ($args['cache']) {
 
   simpletest_script_init(NULL);
 
-  echo "\nPrepare database and config cache for profiles\n";
+  echo "\nPreparing database and configuration cache for profiles\n";
   foreach($profiles as $profile){
     simpletest_script_prepare_profile_cache($profile);
     echo " - " . $profile . " - " . "ready\n";
@@ -978,17 +978,16 @@ function simpletest_script_prepare_profile_cache($profile){
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
     backdrop_page_is_cacheable(TRUE);
 
-    require_once BACKDROP_ROOT . '/core/modules/simpletest/profile_cache_prepare_test_case.php';
+    require_once BACKDROP_ROOT . '/core/modules/simpletest/backdrop_web_test_case_cache.php';
 
-    $test = new ProfileCachePrepareTestCase();
+    $test = new BackdropWebTestCaseCache();
     $test->setProfile($profile);
-    if(!$test->isCached()){
+    if (!$test->isCached()) {
       $test->prepareCache();
     }
-
   }
   catch (Exception $e) {
-    simpletest_script_print_error((string) $e);
+    simpletest_script_print_error($e->getMessage());
     exit(1);
   }
 }
