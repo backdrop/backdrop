@@ -1496,6 +1496,58 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
+   * If cache available, copy tables and configs from cache.
+   *
+   * @return
+   *   TRUE when cache used, FALSE when cache is not available.   
+   *
+   * @see BackdropWebTestCase::setUp()
+   * @see BackdropWebTestCase::tearDown()
+   */
+  protected function useCache(){
+    $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
+    
+    if(is_dir($config_cache_dir)){
+      $prefix = 'simpletest_cache_' . $this->profile . '_';
+      
+      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      
+      foreach($tables as $table_prefix){
+        $table = substr($table_prefix, strlen($prefix));
+        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
+        db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
+      }
+      
+      $this->recurseiveCopy($config_cache_dir, $this->public_files_directory);
+
+      return TRUE;
+    }
+    return FALSE; 
+  }
+
+  /**
+   * Recurseivly copy one directory to another.
+   *
+   */
+  private function recurseiveCopy($src, $dst) { 
+    $dir = opendir($src);
+    if(!file_exists($dst)){
+      mkdir($dst);
+    }
+    while(false !== ( $file = readdir($dir)) ) {
+      if (( $file != '.' ) && ( $file != '..' )) {
+        if ( is_dir($src . '/' . $file) ) {
+          $this->recurseiveCopy($src . '/' . $file, $dst . '/' . $file);
+        } 
+        else {
+          copy($src . '/' . $file, $dst . '/' . $file);
+        }
+      }
+    }
+    closedir($dir);
+  }
+
+  /**
    * Sets up a Backdrop site for running functional and integration tests.
    *
    * Generates a random database prefix and installs Backdrop with the specified
@@ -1518,7 +1570,6 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $conf;
-
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
 
@@ -1549,9 +1600,31 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    // Perform the actual Backdrop installation.
-    include_once BACKDROP_ROOT . '/core/includes/install.inc';
-    backdrop_install_system();
+    $use_cache = $this->useCache();
+    if(!$use_cache){
+      // Perform the actual Backdrop installation.
+      include_once BACKDROP_ROOT . '/core/includes/install.inc';
+      backdrop_install_system(); // System install is 0.6 sec.
+
+      // Ensure schema versions are recalculated.
+      backdrop_static_reset('backdrop_get_schema_versions');
+      
+      // Include the testing profile.
+      config_set('system.core', 'install_profile', $this->profile);
+      $profile_details = install_profile_info($this->profile, 'en');
+
+  
+      // Install the modules specified by the testing profile.
+      module_enable($profile_details['dependencies'], FALSE);  // install profile modules 2.2 sec
+      // Run the profile tasks.
+      $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(
+        ':name' => $this->profile,
+      ))->fetchField();
+      if ($install_profile_module_exists) {
+        module_enable(array($this->profile), FALSE);
+      }
+
+    }
 
     // Set path variables.
     $core_config = config('system.core');
@@ -1567,16 +1640,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // @todo This may need to be primed like 'install_profile' above.
     config_set('simpletest.settings', 'parent_profile', $this->originalProfile);
 
-    // Ensure schema versions are recalculated.
-    backdrop_static_reset('backdrop_get_schema_versions');
-
-    // Include the testing profile.
-    config_set('system.core', 'install_profile', $this->profile);
-    $profile_details = install_profile_info($this->profile, 'en');
-
-    // Install the modules specified by the testing profile.
-    module_enable($profile_details['dependencies'], FALSE);
-
     // Install modules needed for this test. This could have been passed in as
     // either a single array argument or a variable number of string arguments.
     // @todo Remove this compatibility layer and only accept a single array.
@@ -1587,14 +1650,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     if ($modules) {
       $success = module_enable($modules, TRUE);
       $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
-    }
-
-    // Run the profile tasks.
-    $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(
-      ':name' => $this->profile,
-    ))->fetchField();
-    if ($install_profile_module_exists) {
-      module_enable(array($this->profile), FALSE);
     }
 
     // Reset/rebuild all data structures after enabling the modules.
@@ -1743,9 +1798,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // aren't called after tests.
     module_list(TRUE);
     module_implements_reset();
-
-    // Reset the Field API.
-    field_cache_clear();
 
     // Rebuild caches.
     $this->refreshVariables();

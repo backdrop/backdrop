@@ -18,6 +18,7 @@ before_script:
   - sudo a2enmod rewrite actions fastcgi alias
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then sh core/misc/travis-ci/install-xcache.sh; fi
   - sudo apachectl restart
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
@@ -47,7 +48,7 @@ before_script:
   - chmod a+w . settings.php
   - ./core/scripts/install.sh --db-url=mysql://travis:@127.0.0.1/backdrop
   - chmod go-w . settings.php
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --split=$RUNSPLIT --concurrency 12 --url http://localhost --color --verbose --force --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --split=$RUNSPLIT --concurrency 2 --url http://localhost --color --verbose --force --all --cache
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
