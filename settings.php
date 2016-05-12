@@ -330,3 +330,15 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+
+/**
+ * Include a local settings file.
+ *
+ * To make local development easier, you can add a file that contains your local
+ * database connection information. This local settings file can be ignored in
+ * your Git repository so that any updates to settings.php can be pulled in 
+ * without overwriting your local changes.
+ */
+if (file_exists(__DIR__ . '/settings.local.php')) {
+  include __DIR__ . '/settings.local.php';
+}
