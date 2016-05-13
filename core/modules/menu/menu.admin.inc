@@ -438,7 +438,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
   $form['actions']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
-    '#access' => $type == 'edit' && !isset($system_menus[$menu['menu_name']]),
+    '#access' => $type == 'configure' && !isset($system_menus[$menu['menu_name']]),
     '#submit' => array('menu_custom_delete_submit'),
   );
 
