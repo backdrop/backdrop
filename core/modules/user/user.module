@@ -2249,7 +2249,7 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
  * @param string $role_name
  *   The role name to be loaded.
  *
- * @return
+ * @return stdClass|FALSE
  *   A fully-loaded role object if a role with the given ID exists, or FALSE
  *   otherwise.
  */

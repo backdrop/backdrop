@@ -126,6 +126,27 @@ if ($args['clean']) {
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
+
+  // Clean up profiles cache tables.
+  simpletest_script_clean_profile_cache_tables();
+  echo "\nProfile cache tables cleaned.\n";
+
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  }
+
+  // Clean up profiles cache folders.
+  simpletest_script_clean_profile_cache_folders();
+  echo "\nProfile cache folders cleaned.\n";
+
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  }
+
   exit(0);
 }
 
@@ -148,6 +169,24 @@ if ($args['list']) {
     }
   }
   exit(0);
+}
+
+// Generate cache tables for profiles.
+if ($args['cache']) {
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+
+  simpletest_script_init(NULL);
+
+  echo "\nPreparing database and configuration cache for profiles\n";
+  foreach($profiles as $profile){
+    simpletest_script_prepare_profile_cache($profile);
+    echo " - " . $profile . " - " . "ready\n";
+
+  }
 }
 
 $test_list = simpletest_script_get_test_list();
@@ -238,6 +277,8 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
+  --cache     Generate cache for instalation profiles to boost tests speed.
+
   <test1>[ <test2>[ <test3> ...]]
 
               One or more tests classes (or groups names) to be run. Names may
@@ -282,6 +323,7 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
+    'cache' => FALSE,
   );
 
   // Override with set values.
@@ -406,8 +448,21 @@ function simpletest_script_init($server_software) {
     }
   }
 
-  chdir(realpath(__DIR__ . '/../..'));
-  define('BACKDROP_ROOT', getcwd());
+  /**
+   * Defines the root directory of the Backdrop installation.
+   *
+   * The dirname() function is used to get path to Backdrop root folder, which
+   * avoids resolving of symlinks. This allows the code repository to be a symlink
+   * and hosted outside of the web root. See issue #1297.
+   *
+   * The realpath is important here to avoid FAILURE with filetransfer.tests. 
+   * When realpath used, BACKDROP_ROOT contain full path to backdrop root folder.
+   */
+  define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
+
+  // Change the directory to the Backdrop root.
+  chdir(BACKDROP_ROOT);
+
   require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 }
 
@@ -875,3 +930,65 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
     }
   }
 }
+
+/**
+ * Removed profile cached tables from the database.
+ */
+function simpletest_script_clean_profile_cache_tables(){
+  $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
+  $count = 0;
+  foreach ($tables as $table) {
+    db_drop_table($table);
+    $count++;
+  }
+
+  if ($count > 0) {
+    backdrop_set_message(format_plural($count, 'Removed 1 profile cache table.', 'Removed @count profile cache tables.'));
+  }
+  else {
+    backdrop_set_message(t('No profile cache tables to remove.'));
+  }
+}
+
+/**
+ * Removed profile cached folders from the database.
+ */
+function simpletest_script_clean_profile_cache_folders(){
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+
+  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+
+  foreach($profiles as $profile) {
+    // Delete temporary files directory.
+    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile);
+    backdrop_set_message(t('Cleared cache folder for profile !profile.', array('!profile' => $profile)));
+  }
+}
+
+/**
+ * Removed profile cached tables from the database.
+ */
+function simpletest_script_prepare_profile_cache($profile){
+  try {
+    backdrop_page_is_cacheable(FALSE);
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+    backdrop_page_is_cacheable(TRUE);
+
+    require_once BACKDROP_ROOT . '/core/modules/simpletest/backdrop_web_test_case_cache.php';
+
+    $test = new BackdropWebTestCaseCache();
+    $test->setProfile($profile);
+    if (!$test->isCached()) {
+      $test->prepareCache();
+    }
+  }
+  catch (Exception $e) {
+    simpletest_script_print_error($e->getMessage());
+    exit(1);
+  }
+}
+
