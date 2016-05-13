@@ -2197,7 +2197,7 @@ function layout_ajax_form_open_dialog($form, &$form_state) {
  */
 function layout_ajax_form_save_dialog($form, $form_state) {
   $layout = $form_state['layout'];
-  $menu_item = $form_state['menu_item'];
+  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item']  : '';
 
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
@@ -2296,4 +2296,67 @@ function layout_ajax_form_update($form, $form_state) {
   }
 
   return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Menu callback; Show the region styles form.
+ */
+function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
+  $form_state['layout'] = $layout;
+  $form_state['region_name'] = $region_name;
+  $layout_info = layout_get_layout_info($layout->layout);
+  if (!array_key_exists($region_name, $layout_info['regions'])) {
+    return MENU_NOT_FOUND;
+  }
+
+  $form['#tree'] = TRUE;
+
+  $options = array(
+    '' => 'No inner wrapper',
+    'div' => 'DIV',
+    'nav' => 'NAV',
+    'aside' => 'ASIDE',
+    'section' => 'SECTION',
+  );
+  $form['element'] = array(
+    '#title' => t('HTML element for inner wrapper'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($layout->settings[$region_name]['element']) ? $layout->settings[$region_name]['element'] : '',
+  );
+  $form['classes'] = array(
+    '#title' => t('CSS classes for inner wrapper'),
+    '#type' => 'textfield',
+    '#default_value' => isset($layout->settings[$region_name]['classes']) ? $layout->settings[$region_name]['classes'] : '',
+    '#description' => t('Separate multiple classes with spaces.'),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="element"]' => array('value' => ''),
+      ),
+    ),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#submit' => array(
+      'layout_configure_region_page_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for layout_configure_region_page().
+ */
+function layout_configure_region_page_submit($form, &$form_state) {
+  $region_name = $form_state['region_name'];
+  $form_state['layout']->settings[$region_name]['element'] = $form_state['values']['element'];
+  $form_state['layout']->settings[$region_name]['classes'] = $form_state['values']['classes'];
+  layout_set_layout_tempstore($form_state['layout']);
 }

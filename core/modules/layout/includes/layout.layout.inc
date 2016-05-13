@@ -164,7 +164,6 @@ function layout_layout_style_info() {
   $info['default'] = array(
     'title' => t('Default'),
     'description' => t('The default block rendering style with predictable tags provided by the site template.'),
-    'region theme' => NULL,
     'block theme' => 'block',
     'class' => 'LayoutStyle',
     'template' => 'templates/block',
@@ -173,7 +172,6 @@ function layout_layout_style_info() {
   $info['dynamic'] = array(
     'title' => t('Dynamic'),
     'description' => t('Customizable rendering style in which every HTML tag can be configured.'),
-    'region theme' => NULL,
     'block theme' => 'block_dynamic',
     'class' => 'LayoutStyleDynamic',
     'template' => 'templates/block-dynamic',

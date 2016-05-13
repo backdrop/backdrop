@@ -137,6 +137,19 @@ function theme_layout_conditions($variables) {
 }
 
 /**
+ * Output region content wrapped by tag specified in layout UI.
+ */
+function theme_layout_region_inner($variables) {
+  $tag = $variables['tag'];
+  $attributes['class'] = $variables['classes'];
+
+  if ($tag != '') {
+    return '<' . $tag . backdrop_attributes($attributes) . '>' . implode('', $variables['blocks']) . '</' . $tag . '>';
+  }
+  return implode('', $variables['blocks']);
+}
+
+/**
  * Prepares variables for layout templates.
  *
  * This uses [module_name]_preprocess_layout() instead of
