@@ -22,12 +22,15 @@
   margin: 0;
   padding: 0;
 }
-@media only screen and (max-width: 600px) {
+
+/* min-width 600px */
+@media only screen and (min-width: 37.5em) {
   .color-form .form-item label {
     max-width: 50%;
   }
 }
-@media only screen and (max-width: 400px) {
+/* min-width 400px */
+@media only screen and (max-width: 25em) {
   .color-form .form-item label {
     max-width: 40%;
   }

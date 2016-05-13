@@ -10,12 +10,14 @@
 .ui-dialog.config-diff {
   max-width: 95%;
 }
-@media only screen and (min-width: 768px) {
+/* min-width ~750px */
+@media only screen and (min-width: 46.875em) {
   .ui-dialog.config-diff {
     max-width: 80%;
   }
 }
-@media only screen and (min-width: 1024px) {
+/* min-width ~1024px */
+@media only screen and (min-width: 64em) {
   .ui-dialog.config-diff {
     max-width: 1000px;
   }

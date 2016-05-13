@@ -2,7 +2,8 @@
   margin: 1em 0;
   border: 1px solid #ccc;
 }
-@media (min-width: 750px) {
+/* min-width ~750px */
+@media (min-width: 46.875em) {
   .vertical-tabs {
     padding: 0 0 0 15em; /* LTR */
   }
@@ -11,13 +12,15 @@
      padding-right: 15em;
   }
 }
+
 .vertical-tabs-list {
   display: none;
   width: 15em;
   border-top: 1px solid #ccc;
   padding: 0;
 }
-@media (min-width: 750px) {
+/* min-width ~750px */
+@media (min-width: 46.875em) {
   .vertical-tabs-list {
     display:block;
     float: left; /* LTR */
@@ -29,6 +32,7 @@
     float: right;
   }
 }
+
 .vertical-tab-item {
   list-style: none;
 }
@@ -45,7 +49,8 @@
 .vertical-tab-selected .fieldset-wrapper {
   display: block;
 }
-@media (min-width: 750px) {
+/* min-width ~750px */
+@media all and (min-width: 46.875em) {
   .vertical-tabs-pane {
     display: none;
     border: 0;
