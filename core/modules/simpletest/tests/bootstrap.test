@@ -107,12 +107,14 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testConditionalRequests() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Fill the cache.
     $test_path = 'system-test/hello-world';
     $this->backdropGet($test_path);
 
+    sleep(5);
     $this->backdropHead($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $etag = $this->backdropGetHeader('ETag');
@@ -147,6 +149,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCache() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Emulate a browser's support for keep-alive so that we can check
@@ -163,7 +166,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
-    sleep(3); // Delay to ensure caches are set.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -182,7 +185,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropHead('system-test/hello-world', array('query' => array('cache' => 'test')));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Cache miss on first request via HTTP HEAD request.');
 
-    sleep(3); // Delay to ensure caches are set.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet('system-test/hello-world', array('query' => array('cache' => 'test')));
 
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cache hit on second request via HTTP GET request.');
