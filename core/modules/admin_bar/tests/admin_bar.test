@@ -383,7 +383,7 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
     ));
 
     // Verify that MENU_LOCAL_TASKs appear.
-    $this->assertLinkTrailByTitle(array(t('Functionality'), t('Uninstall')));
+    $this->assertLinkTrailByTitle(array(t('Functionality'), t('Uninstall modules')));
 
     // Verify that MENU_LOCAL_ACTIONs appear.
     $this->assertLinkTrailByTitle(array(

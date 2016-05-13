@@ -1408,7 +1408,7 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *     unique.
  *   - FILE_EXISTS_ERROR: Do nothing and return FALSE.
  *
- * @return
+ * @return File|FALSE|NULL
  *   An object containing the file information if the upload succeeded, FALSE
  *   in the event of an error, or NULL if no file was uploaded. The
  *   documentation for the "File interface" group, which you can find under
@@ -1486,7 +1486,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   else {
     // No validator was provided, so add one using the default list.
     // Build a default non-munged safe list for file_munge_filename().
-    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp';
+    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
     $validators['file_validate_extensions'] = array();
     $validators['file_validate_extensions'][0] = $extensions;
   }

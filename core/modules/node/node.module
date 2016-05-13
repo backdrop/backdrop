@@ -810,7 +810,7 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * @param $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *
- * @return
+ * @return Node[]
  *   An array of node objects indexed by nid.
  *
  * @see entity_load()

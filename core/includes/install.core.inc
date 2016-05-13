@@ -1849,9 +1849,10 @@ function install_configure_form_submit($form, &$form_state) {
     ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
     ->save();
 
-  // Enable update.module if this option was selected.
-  if ($form_state['values']['update_status_module'][1]) {
-    module_enable(array('update'), FALSE);
+  // Enable checking for updates on cron.
+  if (module_exists('update')) {
+    // Set the update interval to 0 if automatic checking is disabled.
+    config_set('update.settings', 'update_interval_days', (int) $form_state['values']['update_status_module'][1]);
 
     // Add the site maintenance account's email address to the list of
     // addresses to be notified when updates are available, if selected.

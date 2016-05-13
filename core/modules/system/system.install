@@ -2743,6 +2743,24 @@ function system_update_1051() {
 }
 
 /**
+ * Disable project browser if it previously existed on the site.
+ */
+function system_update_1052() {
+  // If contrib Project Browser module was installed, disable it and show a
+  // message.
+  if (module_exists('project_browser')) {
+    $path = backdrop_get_path('module', 'project_browser');
+    backdrop_set_message(t('Backdrop core now provides project browsing functions in core. A copy of Project Browser module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Project Browser module in the system table. This will
+    // "disable" the module if present.
+    db_query("DELETE FROM {system} WHERE name = 'project_browser' AND type = 'module'");
+
+    // Delete any settings config file if present.
+    config('project_browser.settings')->delete();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

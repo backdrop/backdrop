@@ -1,5 +1,7 @@
 {
     "_config_name": "update.settings",
+    "_config_static": true,
+    "update_cron": 1,
     "update_disabled_extensions": 0,
     "update_interval_days": 1,
     "update_url": "",
