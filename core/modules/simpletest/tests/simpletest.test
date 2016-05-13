@@ -430,6 +430,8 @@ class SimpleTestMailCaptureTestCase extends BackdropWebTestCase {
  * Test Folder creation
  */
 class SimpleTestFolderTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     return parent::setUp('image');
   }
