@@ -310,6 +310,7 @@ function simpletest_script_parse_args() {
     'url' => '',
     'php' => '',
     'concurrency' => 1,
+    'cache' => FALSE,
     'split' => '',
     'force' => FALSE,
     'all' => FALSE,
@@ -323,7 +324,6 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
-    'cache' => FALSE,
   );
 
   // Override with set values.
@@ -932,7 +932,7 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
 }
 
 /**
- * Removed profile cached tables from the database.
+ * Removes cached profile tables from the database.
  */
 function simpletest_script_clean_profile_cache_tables(){
   $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
@@ -951,7 +951,7 @@ function simpletest_script_clean_profile_cache_tables(){
 }
 
 /**
- * Removed profile cached folders from the database.
+ * Removes cached profile folders from the database.
  */
 function simpletest_script_clean_profile_cache_folders(){
   $profiles = array(
