@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.4.7');
+define('CKEDITOR_VERSION', '4.5.9');
 
 /**
  * Implements hook_editor_info().
