@@ -250,9 +250,8 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
   /**
    * Remove a Date field though the UI.
    */
-  protected function deleteDateField($label, $bundle = 'story', $bundle_name = 'Story') {
-    $this->backdropGet("admin/structure/types/manage/$bundle/fields");
-    $this->clickLink('Delete');
+  protected function deleteDateField($label, $field_name = 'field_test', $bundle = 'story', $bundle_name = 'Story') {
+    $this->backdropGet("admin/structure/types/manage/$bundle/fields/$field_name/delete");
     $this->backdropPost(NULL, NULL, t('Delete'));
     $this->assertText("The field $label has been deleted from the $bundle_name content type.", 'Removed date field.');
   }
@@ -279,7 +278,7 @@ class DateFieldTestCase extends DateFieldBasic {
         );
         $this->createDateField($options);
         $this->dateForm($field_name, $field_type, $widget_type);
-        $this->deleteDateField($label);
+        $this->deleteDateField($label, $field_name);
       }
     }
   }
