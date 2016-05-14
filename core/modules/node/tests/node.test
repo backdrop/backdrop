@@ -1397,6 +1397,27 @@ class NodeTypeTestCase extends BackdropWebTestCase {
       $this->assertTrue(isset($types[$type]->disabled) && empty($types[$type]->disabled), format_string('%type type is enabled.', array('%type' => $type)));
     }
   }
+
+  /**
+   * Ensures that node_type_has_content function works correctly.
+   *
+   * Add new node type and test function returns correct result with and
+   * without content present.
+   */
+  function testNodeTypeHasContent() {
+    // Test node type to assert no content has been created.
+    $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
+
+    // Create a post.
+    $node = new Node();
+    $node->type = 'post';
+    node_object_prepare($node);
+    $node->title = 'A new post';
+    node_save($node);
+
+    // Test node type to assert content has been created.
+    $this->assertTrue(node_type_has_content('post'), 'The post node type has content associated with it.');
+  }
 }
 
 /**

@@ -359,6 +359,12 @@ function _views_ui_get_operations(view $view) {
       'href' => 'admin/structure/views/view/' . $view->name . '/revert',
     );
   }
+  if (module_exists('config') && user_access('synchronize configuration')) {
+    $links['export'] = array(
+      'title' => t('Export'),
+      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+    );
+  }
   return $links;
 }
 
@@ -1254,6 +1260,7 @@ function views_ui_render_display_top($view, $display_id) {
         'title' => t('clone view'),
         'href' => "admin/structure/views/view/$view->name/clone",
       ),
+      'export' => array(),  // Placeholder for export
       'reorder' => array(
         'title' => t('reorder displays'),
         'href' => "admin/structure/views/nojs/reorder-displays/$view->name/$display_id",
@@ -1261,6 +1268,16 @@ function views_ui_render_display_top($view, $display_id) {
       ),
     ),
   );
+
+  if (module_exists('config') && user_access('synchronize configuration')) {
+    $element['extra_actions']['#links']['export'] = array(
+      'title' => t('export view'),
+      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+    );
+  }
+  else {
+    unset($element['extra_actions']['#links']['export']);
+  }
 
   // Let other modules add additional links here.
   backdrop_alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
