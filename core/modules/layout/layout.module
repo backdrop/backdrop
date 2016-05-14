@@ -251,7 +251,6 @@ function layout_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
-
   // Add menu entries for each custom layout path.
   foreach (layout_menu_item_load_all() as $menu_item) {
     if (!empty($menu_item->disabled)) {

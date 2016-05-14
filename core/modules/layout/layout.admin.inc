@@ -1580,7 +1580,7 @@ function layout_condition_return_form($form, &$form_state) {
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
   $form_state['menu_item'] = $menu_item;
-  $form_state['handler']  = $handler;
+  $form_state['handler'] = $handler;
   $handler->form($form, $form_state);
 
   return $form;
