@@ -402,33 +402,7 @@ function layout_route_handler($router_item) {
     return menu_default_route_handler($router_item);
   }
 
-  // Find if this page has a specified layout.
-  $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
-  $selected_layout = NULL;
-  foreach ($layouts as $layout) {
-    // Contexts must be set before the layout's access may be checked.
-    $contexts = $layout->getContexts();
-    foreach ($contexts as $context) {
-      if (isset($context->position) && isset($router_item['map'][$context->position])) {
-        $context->setData($router_item['map'][$context->position]);
-      }
-    }
-
-    if (!$layout->disabled && $layout->checkAccess()) {
-      $selected_layout = $layout;
-      break;
-    }
-  }
-
-  // If no layout matches at the path, use the default layout.
-  if (!$selected_layout) {
-    if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
-      $selected_layout = layout_load('admin_default');
-    }
-    else {
-      $selected_layout = layout_load('default');
-    }
-  }
+  $selected_layout = layout_get_layout_by_path(NULL, $router_item);
 
   // Safety check that we don't show an admin layout to a user who cannot view
   // the admin theme. This may happen because the cached layout list does not
@@ -988,6 +962,58 @@ function layout_provides_path($path) {
     }
   }
   return $return;
+}
+
+/**
+ * Get the layout which is active on the current path.
+ *
+ * @param string $path
+ *   The menu routing path, with all wildcards represented by "%" symbols.
+ * @param $router_item
+ *   The menu router item for the page currently being loaded.
+ *   This parameter will be ignored if $path is not empty.
+ * @return
+ *   The Layout object.
+ */
+function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
+  if ($path) {
+    $router_item = menu_get_item($path);  
+  }
+
+  $cache = &backdrop_static(__FUNCTION__);
+
+  if (empty($cache[$router_item['path']])) {
+    $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
+    $selected_layout = NULL;
+    foreach ($layouts as $layout) {
+      // Contexts must be set before the layout's access may be checked.
+      $contexts = $layout->getContexts();
+      foreach ($contexts as $context) {
+        if (isset($context->position) && isset($router_item['map'][$context->position])) {
+          $context->setData($router_item['map'][$context->position]);
+        }
+      }
+
+      if (!$layout->disabled && $layout->checkAccess()) {
+        $selected_layout = $layout;
+        break;
+      }
+    }
+
+    // If no layout matches at the path, use the default layout.
+    if (!$selected_layout) {
+      if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
+        $selected_layout = layout_load('admin_default');
+      }
+      else {
+        $selected_layout = layout_load('default');
+      }
+    }
+
+    $cache[$router_item['path']] = $selected_layout;
+  }
+
+  return $cache[$router_item['path']];
 }
 
 /**
