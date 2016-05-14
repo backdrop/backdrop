@@ -194,16 +194,14 @@ function layout_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
-  $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/%'] = array(
+  $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/layout/%'] = array(
     'title' => 'Configure condition',
-    'title callback' => 'layout_condition_edit_title',
-    'title arguments' => array(4, NULL, NULL, 7),
+    'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_condition_edit_form', 4, NULL, NULL, 7),
+    'page arguments' => array('layout_condition_add_form', 4, NULL, NULL, 8),
     'type' => MENU_CALLBACK,
   ) + $base;
 
-  // Add/configure conditions for a block uses the same callback as layout.
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add/%layout_tempstore_block'] = array(
     'title' => 'Add visibility condition',
     'load arguments' => array(4),
@@ -212,13 +210,11 @@ function layout_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
-  $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/%/%layout_tempstore_block'] = array(
+  $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/%layout_tempstore_block/%'] = array(
     'title' => 'Configure condition',
     'load arguments' => array(4),
-    'title callback' => 'layout_condition_edit_title',
-    'title arguments' => array(4, 8, NULL, 7),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_condition_edit_form', 4, 8, NULL, 7),
+    'page arguments' => array('layout_condition_add_form', 4, 7, NULL, 8),
     'type' => MENU_CALLBACK,
   ) + $base;
 
@@ -250,12 +246,11 @@ function layout_menu() {
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/condition/edit/%'] = array(
     'title' => 'Configure condition',
-    'title callback' => 'layout_condition_edit_title',
-    'title arguments' => array(NULL, NULL, 4, 7),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_condition_edit_form', NULL, NULL, 4, 7),
+    'page arguments' => array('layout_condition_add_form', NULL, NULL, 4, 7),
     'type' => MENU_CALLBACK,
   ) + $base;
+
 
   // Add menu entries for each custom layout path.
   foreach (layout_menu_item_load_all() as $menu_item) {
