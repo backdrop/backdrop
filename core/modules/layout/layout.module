@@ -1544,3 +1544,28 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
   // All required contexts populated successfully.
   return TRUE;
 }
+
+/**
+ * Implements hook_modules_uninstalled()
+ *
+ * Deletes all blocks provided by a module when that module is uninstalled.
+ */
+function layout_modules_uninstalled($modules) {
+  $layouts = layout_load_all();
+  foreach ($modules as $module) {
+    foreach ($layouts as $layout) {
+      $blocks_to_remove = array();
+      foreach ($layout->content as $uuid => $block) {
+        if ($block->module == $module) {
+          $blocks_to_remove[] = $uuid;
+        }
+      }
+      if ($blocks_to_remove) {
+        foreach ($blocks_to_remove as $uuid_to_remove) {
+          $layout->removeBlock($uuid_to_remove);
+        }
+        $layout->save();
+      }
+    }
+  }
+}

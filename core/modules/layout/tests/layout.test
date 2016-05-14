@@ -1215,6 +1215,72 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       }
     }
   }
+
+  /**
+   * Tests layout_modules_uninstalled().
+   */
+  function testBlockUninstall() {
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout' => 'two_column',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // Add a block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block is on the edit page.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->assertText(t('A testing block for layouts.'));
+
+    // Add the same block to the default layout.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Add the same block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block is on the edit page.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->assertText(t('A testing block for layouts.'));
+
+    // Uninstall the module providing the block.
+    module_disable(array('layout_test'));
+    backdrop_uninstall_modules(array('layout_test'));
+    $this->assertFalse(module_exists('layout_test'), 'The module has been uninstalled.');
+
+    // Check that the new block is on none of the layout edit pages.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->assertNoText(t('A testing block for layouts.'));
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->assertNoText(t('A testing block for layouts.'));
+  }
 }
 
 /**
