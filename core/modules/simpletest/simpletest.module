@@ -89,6 +89,7 @@ function simpletest_autoload_info() {
     'BackdropTestCase' => 'backdrop_web_test_case.php',
     'BackdropUnitTestCase' => 'backdrop_web_test_case.php',
     'BackdropWebTestCase' => 'backdrop_web_test_case.php',
+    'WatchdogTestCase' => 'tests/bootstrap.test',
   );
 }
 
