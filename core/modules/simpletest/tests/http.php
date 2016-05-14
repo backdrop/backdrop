@@ -8,6 +8,16 @@
 // Set a global variable to indicate a mock HTTP request.
 $is_http_mock = !empty($_SERVER['HTTPS']);
 
+/**
+ * Defines the root directory of the Backdrop installation.
+ *
+ * The dirname() function is used to get path to Backdrop root folder, which
+ * avoids resolving of symlinks. This allows the code repository to be a symlink
+ * and hosted outside of the web root. See issue #1297 and #1862.
+ */
+define('BACKDROP_ROOT', dirname(dirname(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))))));
+
+
 // Change to HTTP.
 $_SERVER['HTTPS'] = NULL;
 ini_set('session.cookie_secure', FALSE);
@@ -17,8 +27,7 @@ foreach ($_SERVER as $key => $value) {
 }
 
 // Change current directory to the Backdrop root.
-chdir('../../../..');
-define('BACKDROP_ROOT', getcwd());
+chdir(BACKDROP_ROOT);
 require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 
 // Make sure this file can only be used by simpletest.
