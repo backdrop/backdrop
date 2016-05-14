@@ -965,18 +965,24 @@ function layout_provides_path($path) {
 }
 
 /**
- * Get the layout which is active on the current path.
+ * Get the layout which is active based on a path or router item.
+ *
+ * This may also be used to get the current layout on a page if no parameters
+ * are passed. In which case the current path will be used.
  *
  * @param string $path
  *   The menu routing path, with all wildcards represented by "%" symbols.
  * @param $router_item
  *   The menu router item for the page currently being loaded.
- *   This parameter will be ignored if $path is not empty.
- * @return
- *   The Layout object.
+ *   The $path parameter will be ignored if $router_item is specified.
+ *
+ * @return Layout
+ *   The Layout object for the specified path.
+ *
+ * @since 1.4.0
  */
 function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
-  if ($path) {
+  if (!isset($router_item)) {
     $router_item = menu_get_item($path);  
   }
 
