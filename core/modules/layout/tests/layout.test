@@ -368,7 +368,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Add a testing block, shown only on post nodes.
+    // Add a testing block, shown only on page nodes.
     $this->clickLink(t('Add block'), 3);
     $this->clickLink(t('Layout foo block'));
     $block_title = $this->randomString();
@@ -380,11 +380,39 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
-      'bundles[post]' => TRUE,
+      'bundles[page]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown on post content.');
+
+    $this->backdropGet('node/' . $this->test_node2->nid);
+    $this->assertText(check_plain($block_title), 'Block shown on page content.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Edit condition to show this block only on post nodes.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Configure'));
+    $this->assertRaw('<label for="edit-bundles">Node Type </label>');
+
+    $edit = array(
+      'condition' => 'node_type',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'bundles[post]' => TRUE,
+      'bundles[page]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save visibility condition'));
     $this->backdropPost(Null, array(), t('Save configuration'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
@@ -394,18 +422,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on page content.');
 
-    // Get the block UUID.
-    layout_reset_caches();
-    $layout = layout_load($layout_name);
-    $block_uuid = end($layout->positions['sidebar']);
-
     // Add another condition to show this block only on a single node path.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
     $this->backdropPost(NULL, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'paths' => 'node/' . $this->test_node1->nid,
     );
@@ -653,7 +676,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'bundles[post]' => TRUE,
     );
@@ -852,7 +875,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
 
     // This condition will make the menu item available on the front page, and
     // on the layout path itself. Note that the "layout_name" is the first part
@@ -1393,7 +1416,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'user_role',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
 
     // Allow authenticated users to see the layout only.
     $edit = array(
