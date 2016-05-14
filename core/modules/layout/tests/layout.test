@@ -482,7 +482,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'node_nid',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'entity_id' => $this->test_node1->nid,
     );
@@ -507,7 +507,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'user_uid',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'entity_id' => $this->web_user->uid,
     );
@@ -1197,7 +1197,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // vocabulary.
     $this->backdropPost(NULL, array(), t('Add visibility condition'));
 
-    $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Load condition'));
     $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Create layout'));
 
