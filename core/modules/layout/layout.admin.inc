@@ -29,11 +29,15 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 2);
+      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
+      $row[] = '';
+      $row[] = '';
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link, 'colspan' => 2);
+      $row[] = array('data' => $path_link);
+      $row[] = '';
+      $row[] = '';
     }
     $row[] = backdrop_render($operations);
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
@@ -52,8 +56,10 @@ function layout_list_page() {
       else {
         $storage = t('Custom');
       }
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = theme('layout_condition_info', array('layout' => $layout));
       $row[] = $storage;
       $row[] = backdrop_render($operations);
       $class = array('layout-row');
@@ -65,7 +71,8 @@ function layout_list_page() {
   }
 
   $header = array(
-    array('data' => t('Layout and path'), 'class' => array('layout-title')),
+    array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
@@ -97,6 +104,10 @@ function _layout_get_operations(Layout $layout) {
   $links['edit'] = array(
     'title' => t('Edit'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
+  );
+  $links['settings'] = array(
+    'title' => t('Settings'),
+    'href' => 'admin/structure/layouts/manage/' . $layout->name . '/settings',
   );
   if (!$layout->isDefault()) {
     $links['clone'] = array(

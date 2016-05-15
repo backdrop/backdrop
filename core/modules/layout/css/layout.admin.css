@@ -12,6 +12,38 @@
   color: #999;
 }
 
+@media (min-width: 768px) {
+  #layout-list span.priority-low {
+    display: inline;
+  }
+}
+
+#layout-list img {
+  display: none;
+  float: left; /* LTR */
+  margin-right: 10px;
+  max-width: 37.5px;
+  height: auto;
+}
+[dir="rtl"] #layout-list img {
+  float: right; /* LTR */
+  margin-right: 0;
+  margin-left: 10px;
+}
+@media (min-width: 768px) {
+  #layout-list img {
+    display: inline;
+  }
+}
+
+#layout-list .layout-conditions-list ul {
+  margin-left: 0;
+}
+
+#layout-list .layout-title {
+  font-weight: bold;
+}
+
 /* Individual layout settings form. */
 .layout-settings-form .form-type-radios {
   width: 100%;
