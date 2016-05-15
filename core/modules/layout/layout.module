@@ -451,6 +451,9 @@ function layout_theme() {
     'layout_info' => array(
       'variables' => array('layout' => NULL),
     ) + $base,
+    'layout_condition_info' => array(
+      'variables' => array('layout' => NULL),
+    ) + $base,
     'layout_template_options' => array(
       'variables' => array('template_info' => NULL),
     ) + $base,
