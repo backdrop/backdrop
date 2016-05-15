@@ -1125,6 +1125,7 @@ div.admin-panel h3 {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
   position: relative;
   z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
@@ -1140,19 +1141,25 @@ div.admin-panel h3 {
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
+.layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.layout-settings-page .layout-options .form-type-checkbox:active label,
+.layout-settings-page .layout-options .form-type-checkbox:hover label,
+.layout-settings-page .layout-options .form-type-checkbox input:checked + label,
 .layout-settings-form .layout-options .form-type-radio:active label,
 .layout-settings-form .layout-options .form-type-radio:hover label,
 .layout-settings-form .layout-options .form-type-radio input:checked + label {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.layout-settings-page .layout-options .form-type-checkbox input:focus + label,
 .layout-settings-form .layout-options .form-type-radio input:focus + label {
   background-color: #ffffff;
   border-color: #43afe4;
 }
+.layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;
   z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
