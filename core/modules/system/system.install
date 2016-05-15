@@ -2761,6 +2761,24 @@ function system_update_1052() {
 }
 
 /**
+ * Remove unnecessary items from the "main-menu" menu.
+ */
+function system_update_1053() {
+  db_query("DELETE FROM {menu_links} WHERE link_path LIKE '%/%%%' AND module = 'system'");
+  db_query("DELETE FROM {menu_links} WHERE link_path LIKE 'search/%' AND module = 'system'");
+
+  // Move the 404 redirect link (if present) to the internal menu.
+  $add_redirect_path = config_get('system.core', 'site_404');
+  if (empty($path)) {
+    $add_redirect_path = 'system/404';
+  }
+  $add_redirect_path .= '/add-redirect';
+  db_query("UPDATE {menu_links} SET menu_name = 'internal' WHERE link_path = :redirect_path AND menu_name = 'main-menu'", array(':redirect_path' => $add_redirect_path));
+
+  state_set('menu_rebuild_needed', TRUE);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
