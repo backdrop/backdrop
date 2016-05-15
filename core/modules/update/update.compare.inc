@@ -87,7 +87,7 @@ function update_get_projects() {
  *   An associative array of layout information.
  */
 function _update_build_layout_data() {
-  $layout_data = layout_get_layout_info();
+  $layout_data = layout_get_layout_template_info();
   foreach($layout_data as $layout) {
     $name = $layout['name'];
     $layouts[$name] = new stdClass();

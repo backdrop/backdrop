@@ -63,6 +63,14 @@ class Layout {
   var $storage;
 
   /**
+   * Deprecated. Now replaced by $layout_template.
+   *
+   * @var NULL
+   * @deprecated since 1.4.0
+   */
+  var $layout;
+
+  /**
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
@@ -71,7 +79,7 @@ class Layout {
    *
    * @var string
    */
-  var $layout;
+  var $layout_template;
 
   /**
    * Whether this layout is disabled.
@@ -167,6 +175,14 @@ class Layout {
       'title_block' => NULL,
     );
 
+    // Adjust for the renaming of "layout" to "layout_template".
+    // See https://github.com/backdrop/backdrop-issues/issues/998
+    // @todo: Remove in 2.x.
+    if (isset($this->layout) && !isset($this->layout_template)) {
+      $this->layout_template = $this->layout;
+      unset($this->layout);
+    }
+
     // Set the storage type.
     if (isset($config['module'])) {
       if (empty($config['storage']) || $config['storage'] == LAYOUT_STORAGE_DEFAULT) {
@@ -211,7 +227,7 @@ class Layout {
       'module' => $this->module,
       'weight' => $this->weight,
       'storage' => $this->storage,
-      'layout' => $this->layout,
+      'layout_template' => $this->layout_template,
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
@@ -602,19 +618,19 @@ class Layout {
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayout($layout_name, $region_mapping = array()) {
+  function setLayoutTemplate($layout_name, $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout && empty($region_mapping)) {
+    if ($layout_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
-    if (!isset($this->layout)) {
-      $this->layout = $layout_name;
+    if (!isset($this->layout_template)) {
+      $this->layout_template = $layout_name;
       return;
     }
 
-    $old_layout_info = layout_get_layout_info($this->layout);
-    $new_layout_info = layout_get_layout_info($layout_name);
+    $old_layout_info = layout_get_layout_template_info($this->layout_template);
+    $new_layout_info = layout_get_layout_template_info($layout_name);
     $new_positions = array();
 
     // Do the mapping in the order provided (if any).
@@ -651,7 +667,7 @@ class Layout {
       }
     }
 
-    $this->layout = $layout_name;
+    $this->layout_template = $layout_name;
     $this->positions = $new_positions;
     module_invoke_all('layout_template_change', $this, $old_layout_info['name']);
   }

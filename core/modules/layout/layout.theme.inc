@@ -54,17 +54,17 @@ function theme_layout_info($variables) {
 /**
  * Outputs an individual option label for selecting a layout.
  */
-function theme_layout_option($variables) {
-  $layout_info = $variables['layout_info'];
-  $icon_path = $layout_info['path'] . '/' . $layout_info['preview'];
+function theme_layout_template_options($variables) {
+  $template_info = $variables['template_info'];
+  $icon_path = $template_info['path'] . '/' . $template_info['preview'];
 
   $output = '';
   $output .= '<div class="layout-icon">';
   $output .= theme('image', array(
     'uri' => $icon_path,
-    'attributes' => array('title' => $layout_info['title']),
+    'attributes' => array('title' => $template_info['title']),
   ));
-  $output .= '<div class="layout-caption">' . check_plain($layout_info['title']) . '</div>';
+  $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
   $output .= '</div>';
   return $output;
 }

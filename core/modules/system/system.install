@@ -2120,7 +2120,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 1,
-    'layout' => 'one_column',
+    'layout_template' => 'one_column',
     'settings' => array(),
     'positions' => array(
       'content' => array(
@@ -2162,7 +2162,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 0,
-    'layout' => $layout_name,
+    'layout_template' => $layout_name,
     'settings' => array(),
     'positions' => array(
       'header' => array(
@@ -2248,7 +2248,7 @@ function system_update_1025() {
     'footer_fourthcolumn' => 'footer_fourthcolumn',
     'footer' => 'footer',
   ));
-  $default_layout['layout'] = $layout_name;
+  $default_layout['layout_template'] = $layout_name;
 
   // Prepare a node-specific layout to be used if necessary.
   $node_layout = $default_layout;
@@ -2775,6 +2775,23 @@ function system_update_1053() {
   db_query("UPDATE {menu_links} SET menu_name = 'internal' WHERE link_path = :redirect_path AND menu_name = 'main-menu'", array(':redirect_path' => $add_redirect_path));
 
   state_set('menu_rebuild_needed', TRUE);
+}
+
+/**
+ * Changes the key in layout config files from 'layout' to 'layout_template'.
+ */
+function system_update_1054() {
+  $layouts = config_get_names_with_prefix('layout.layout.');
+  foreach ($layouts as $layout_name) {
+    $config = config($layout_name);
+    $configs = $config->get();
+    if (isset($configs['layout'])) {
+      $configs['layout_template'] = $configs['layout'];
+      unset($configs['layout']);
+    }
+    $config->setData($configs);
+    $config->save();
+  }
 }
 
 /**

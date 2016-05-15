@@ -221,18 +221,18 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
-  $form['layout'] = array(
-    '#title' => t('Layout'),
+  $form['layout_template'] = array(
+    '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => $layout->layout,
+    '#default_value' => $layout->layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
-  // Get the list of layout options.
-  $all_layout_info = layout_get_layout_info();
-  foreach ($all_layout_info as $layout_name => $layout_info) {
-    $form['layout']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
+  // Get the list of layout template options.
+  $all_template_info = layout_get_layout_template_info();
+  foreach ($all_template_info as $template_name => $template_info) {
+    $form['layout_template']['#options'][$template_name] = theme('layout_template_options', array('template_info' => $template_info));
   }
 
   $form['path'] = array(
@@ -544,8 +544,8 @@ function layout_settings_form_update_layout($form, &$form_state) {
   if (isset($form_state['values']['name'])) {
     $layout->name = $form_state['values']['name'];
   }
-  if (isset($form_state['values']['layout'])) {
-    $layout->setLayout($form_state['values']['layout']);
+  if (isset($form_state['values']['layout_template'])) {
+    $layout->setLayoutTemplate($form_state['values']['layout_template']);
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
@@ -632,9 +632,10 @@ function layout_settings_form_save_submit($form, &$form_state) {
   if (!empty($layout->is_new)) {
     $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
     $default_layout = layout_load($default_layout_name);
-    $layout_info = layout_get_layout_info($layout->layout);
+    // Get the template being used by this layout.
+    $template_info = layout_get_layout_template_info($layout->layout_template);
     foreach ($default_layout->positions as $region => $region_block_list) {
-      if (array_key_exists($region, $layout_info['regions'])) {
+      if (array_key_exists($region, $template_info['regions'])) {
         foreach ($region_block_list as $uuid) {
           if (isset($default_layout->content[$uuid])) {
             $block = $default_layout->content[$uuid];
@@ -870,8 +871,8 @@ function layout_content_form_submit($form, &$form_state) {
  */
 function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
-  $layout_info = layout_get_layout_info($layout->layout);
-  if (!array_key_exists($region_name, $layout_info['regions'])) {
+  $template_info = layout_get_layout_template_info($layout->layout_template);
+  if (!array_key_exists($region_name, $template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
 
@@ -1002,12 +1003,12 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     $form['#title'] = t('Configure block "!title"', array('!title' => $block->getAdminTitle()));
   }
 
-  $layout_info = layout_get_layout_info($layout->layout);
+  $template_info = layout_get_layout_template_info($layout->layout_template);
   $form['region'] = array(
     '#type' => 'select',
     '#title' => t('Region'),
     '#default_value' => $region_name,
-    '#options' => $layout_info['regions'],
+    '#options' => $template_info['regions'],
     '#access' => backdrop_is_html(), // Only show this on non-JS requests.
   );
 
@@ -2398,7 +2399,7 @@ function layout_ajax_form_update($form, $form_state) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_info = layout_get_layout_info($layout->layout);
+  $layout_info = layout_get_layout_template_info($layout->layout_template);
   if (!array_key_exists($region_name, $layout_info['regions'])) {
     return MENU_NOT_FOUND;
   }

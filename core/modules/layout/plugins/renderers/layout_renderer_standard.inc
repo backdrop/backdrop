@@ -129,11 +129,11 @@ class LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_info($layout->layout);
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
     $this->layout = &$layout;
 
     if (empty($layout_info)) {
-      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout, '@title' => $layout->title)));
+      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
     }
     else {
       $this->layout_info = $layout_info;
@@ -339,7 +339,7 @@ class LayoutRendererStandard {
 
     module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
-      $theme = 'layout__' . $this->layout->layout;
+      $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
       $theme = str_replace('-', '_', $this->layout_info['template']);
