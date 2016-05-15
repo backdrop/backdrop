@@ -2106,6 +2106,12 @@ function system_update_1024() {
 function system_update_1025() {
   update_module_enable(array('layout'));
 
+  // When upgrading from Drupal 7 disable legacy layouts initially.
+  $layout_settings_config = config('layout.settings');
+  $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');
+  $layout_settings_config->set('excluded_templates', $legacy);
+  $layout_settings_config->save();
+
   // Manually install schema, as update_module_enable() does not do this for us.
   if (!db_table_exists('cache_layout_path')) {
     $cache_table = backdrop_get_schema_unprocessed('system', 'cache');
@@ -2120,7 +2126,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 1,
-    'layout_template' => 'one_column',
+    'layout_template' => 'boxton',
     'settings' => array(),
     'positions' => array(
       'content' => array(
@@ -2153,7 +2159,7 @@ function system_update_1025() {
   $admin_config->setData($admin_layout);
   $admin_config->save();
 
-  $layout_name = state_get('upgrade_layout_name', 'three_three_four_column');
+  $layout_name = state_get('upgrade_layout_name', 'simmons');
 
   $default_layout = array(
     'path' => NULL,
@@ -2174,9 +2180,6 @@ function system_update_1025() {
       ),
       'footer' => array(
         'cd4d033d-3f67-4191-8655-85ee758877c0',
-      ),
-      'sidebar' => array(
-        'b7efc039-1518-4331-9808-8e5060a3caed',
       ),
       'top' => array(
         '09f11b4e-877e-45ab-9000-a4c6254faa04'
@@ -2219,33 +2222,23 @@ function system_update_1025() {
           'uuid' => 'default',
         ),
       ),
-      'b7efc039-1518-4331-9808-8e5060a3caed' => array(
-        'plugin' => 'user:login',
-        'data' => array(
-          'module' => 'user',
-          'delta' => 'login',
-          'uuid' => 'b7efc039-1518-4331-9808-8e5060a3caed',
-        ),
-      )
     ),
   );
 
   $current_theme = update_variable_get('theme_default', 'bartik');
-
-  // Load the default layout to prepare copying blocks into it.
   $layout_regions = state_get('upgrade_layout_regions', array(
     'header' => 'header',
     'top' => 'top',
     'content' => 'content',
-    'sidebar_first' => 'sidebar_first',
-    'sidebar_second' => 'sidebar_second',
-    'triptych_first' => 'triptych_first',
-    'triptych_middle' => 'triptych_middle',
-    'triptych_last' => 'triptych_last',
-    'footer_firstcolumn' => 'footer_firstcolumn',
-    'footer_secondcolumn' => 'footer_secondcolumn',
-    'footer_thirdcolumn' => 'footer_thirdcolumn',
-    'footer_fourthcolumn' => 'footer_fourthcolumn',
+    'sidebar_first' => 'sidebar',
+    'sidebar_second' => 'sidebar2',
+    'triptych_first' => 'third1',
+    'triptych_middle' => 'third2',
+    'triptych_last' => 'third3',
+    'footer_firstcolumn' => 'quarter1',
+    'footer_secondcolumn' => 'quarter2',
+    'footer_thirdcolumn' => 'quarter3',
+    'footer_fourthcolumn' => 'quarter4',
     'footer' => 'footer',
   ));
   $default_layout['layout_template'] = $layout_name;
@@ -2800,7 +2793,9 @@ function system_update_1054() {
 function system_update_1055() {
   $config = config('layout.settings');
   if ($config->isNew()) {
-    $config->set('excluded_templates', array());
+    // Upgrading from Backdrop 1.3, disable new layouts initially.
+    $bootstrap = array('boxton', 'geary', 'harris', 'moscone', 'moscone_flipped', 'rolph', 'simmons', 'sutro', 'taylor', 'taylor_flipped');
+    $config->set('excluded_templates', $bootstrap);
     $config->save();
   }
 }

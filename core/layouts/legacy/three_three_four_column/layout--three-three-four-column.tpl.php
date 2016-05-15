@@ -32,7 +32,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout--three-three-four-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout--three-three-four-column layout-legacy <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
@@ -107,9 +107,9 @@
     <div class="l-footer-wrapper">
       <?php if ($content['footer_firstcolumn'] || $content['footer_secondcolumn'] || $content['footer_thirdcolumn'] || $content['footer_fourthcolumn']): ?>
         <div class="l-footer-columns">
-            <div class="l-footer-first-column">
-              <?php print $content['footer_firstcolumn']; ?>
-            </div>
+          <div class="l-footer-first-column">
+            <?php print $content['footer_firstcolumn']; ?>
+          </div>
           <div class="l-footer-second-column">
             <?php print $content['footer_secondcolumn']; ?>
           </div>

@@ -468,7 +468,7 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_get_filename('theme_engine', 'phptemplate'), 'core/themes/engines/phptemplate/phptemplate.engine', t('Retrieve theme engine location.'));
 
     // Retrieving the location of a layout.
-    $this->assertIdentical(backdrop_get_filename('layout', 'one_column'), 'core/layouts/one_column/one_column.info', t('Retrieve layout location.'));
+    $this->assertIdentical(backdrop_get_filename('layout', 'boxton'), 'core/layouts/boxton/boxton.info', t('Retrieve layout location.'));
 
     // Retrieving the location of a profile. Profiles are a special case with
     // a fixed location and naming.

@@ -362,6 +362,11 @@ class LayoutRendererStandard {
         }
       }
     }
+    if (!empty($this->layout_info['libraries'])) {
+      foreach ($this->layout_info['libraries'] as $library) {
+        $this->addLibrary('layout', $library);
+      }
+    }
   }
 
   /**
@@ -386,6 +391,13 @@ class LayoutRendererStandard {
         $this->prefix .= '<link rel="stylesheet" href="' . $url . '" />' . "\n";
         break;
     }
+  }
+
+  /**
+   * Add Library information to the renderer.
+   */
+  function addLibrary($module, $name) {
+    backdrop_add_library($module, $name);
   }
 
   /**

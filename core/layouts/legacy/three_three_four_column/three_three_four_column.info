@@ -2,6 +2,7 @@ name = 3/3/4 columns
 version = BACKDROP_VERSION
 type = layout
 backdrop = 1.x
+hidden = true
 
 ; Include file for special preprocessing of this layout's variables.
 file = three_three_four_column.php

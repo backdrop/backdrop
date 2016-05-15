@@ -7,7 +7,7 @@
   "module": "layout",
   "weight": 0,
   "storage": 4,
-  "layout_template": "two_column",
+  "layout_template": "moscone_flipped",
   "disabled": false,
   "settings": {
     "title": "",

@@ -647,8 +647,8 @@ fieldset {
   margin: 1em 0;
   padding: 3em 0 0 0; /* LTR */
   border-radius: 4px;
-  background-color:#fff;
-  border:solid 2px #EAEAEA;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
   min-width: 0;
 }
 [dir="rtl"] fieldset {
@@ -1092,8 +1092,10 @@ div.admin-panel h3 {
  * Layout configuration.
  */
 #layout-edit-main {
-  padding: 20px;
-  background: #F8F9F4;
+  padding: 20px 0;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  border: 2px solid #EAEAEA;
 }
 #layout-edit-main .layout {
   margin: 0;

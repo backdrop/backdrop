@@ -276,20 +276,20 @@ ul.tips {
 
 /* ------------------ Layout ------------------ */
 
-/* All layouts */
-.l-container,
-.l-top,
-.l-messages,
+.container {
+  /* 15px padding on left/right makes for 960px total. */
+  max-width: 930px;
+}
 
-/* Special wrapper added in template.php. */
-.l-header-inner,
-
-/* Bartik (three-three-four) layout specifics */
-.l-featured,
-.l-triptych,
-.l-footer-columns {
-  max-width: 960px;
+.layout-legacy .l-container,
+.layout-legacy .l-top,
+.layout-legacy .l-messages,
+.layout-legacy .l-header-inner,
+.layout-legacy .l-featured,
+.layout-legacy .l-triptych,
+.layout-legacy .l-footer-columns {
   margin: 0 auto;
+  max-width: 960px;
   padding: 0 20px;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -311,6 +311,7 @@ ul.tips {
   padding-top: 33px;
   margin-top: -33px;
 }
+.l-wrapper,
 .l-container,
 .l-triptych {
   -webkit-flex: 1 0 auto;
@@ -621,6 +622,12 @@ ul.tips {
 /* ----------------- Top ----------------- */
 
 .l-top {
+  margin-top: 20px;
+}
+
+/* ----------------- Bottom ----------------- */
+
+.l-bottom {
   margin-top: 20px;
 }
 

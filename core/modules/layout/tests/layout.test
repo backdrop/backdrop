@@ -55,31 +55,31 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Attempt to disable the 1 column layout (should fail).
     $this->backdropGet('admin/structure/layouts/settings');
     $edit = array(
-      'templates[one_column]' => FALSE,
-      'templates[two_column]' => TRUE,
-      'templates[two_column_flipped]' => TRUE,
-      'templates[three_three_four_column]' => TRUE,
+      'templates[boxton]' => FALSE,
+      'templates[moscone]' => TRUE,
+      'templates[moscone_flipped]' => TRUE,
+      'templates[simmons]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
-    $this->assertText(t('The "1 column" layout template is currently in use and may not be excluded.'));
+    $this->assertText(t('The "Boxton" layout template is currently in use and may not be excluded.'));
 
-    // Check to see that the Bartik layout is an existing option.
+    // Check to see that the Simmons layout is an existing option.
     $this->backdropGet('admin/structure/layouts/manage/default/settings');
-    $this->assertText('3/3/4 columns');
+    $this->assertText('Simmons');
 
     // Disable the Bartik layout.
     $edit = array(
-      'templates[one_column]' => TRUE,
-      'templates[two_column]' => TRUE,
-      'templates[two_column_flipped]' => TRUE,
-      'templates[three_three_four_column]' => FALSE,
+      'templates[boxton]' => TRUE,
+      'templates[moscone]' => TRUE,
+      'templates[moscone_flipped]' => TRUE,
+      'templates[simmons]' => FALSE,
     );
     $this->backdropPost('admin/structure/layouts/settings', $edit, t('Save configuration'));
     $this->assertText(t('Your configuration has been saved.'));
 
-    // Check to see that the Bartik layout is no longer an option.
+    // Check to see that the Simmons layout is no longer an option.
     $this->backdropGet('admin/structure/layouts/manage/default/settings');
-    $this->assertNoText('3/3/4 columns');
+    $this->assertNoText('Simmons');
   }
 
   /**
@@ -96,7 +96,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -398,7 +398,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
@@ -494,7 +494,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
@@ -577,7 +577,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Check the path first to populate available contexts.
@@ -666,7 +666,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -768,7 +768,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -873,7 +873,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -952,7 +952,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $tab_layout_name,
       'title' => $tab_layout_name,
       'path' => $tab_layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -983,7 +983,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $subtab_layout_name,
       'title' => $subtab_layout_name,
       'path' => $subtab_layout_path_last,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -1060,7 +1060,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -1087,7 +1087,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $second_layout_name,
       'title' => $second_layout_name,
       'path' => $layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -1140,7 +1140,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -1158,9 +1158,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $layout = layout_load($layout_name);
     $this->assertBlocksMatch($layout, $default_layout);
 
-    // Change the layout to the one_column layout, eliminating the sidebar.
+    // Change the layout to the boxton layout, eliminating the sidebar.
     $edit = array(
-      'layout_template' => 'one_column',
+      'layout_template' => 'boxton',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
 
@@ -1222,7 +1222,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Check the path first to populate available contexts.
@@ -1288,7 +1288,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -1441,7 +1441,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
 
     // Note that this adds a condition, not saving the layout yet.
@@ -1479,12 +1479,12 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   }
 
   private function assertIsDefaultLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout--two-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--moscone-flipped")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
   }
 
   private function assertIsAdminLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout--one-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--boxton")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
   }
 }
@@ -1691,7 +1691,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout_template' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -1746,10 +1746,10 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     ));
 
     // Go to the Default layout's edit page and change the layout to the 
-    // one_column layout.
+    // boxton layout.
     state_set('layout_test', array());
     $edit = array(
-      'layout_template' => 'one_column',
+      'layout_template' => 'boxton',
     );
     $this->backdropPost('admin/structure/layouts/manage/default/settings', $edit, t('Save layout'));
     $this->assertHookMessageOrder(array(
@@ -1765,6 +1765,5 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $this->assertHookMessageOrder(array(
       'layout_test_layout_revert called',
     ));
-
   }
 }

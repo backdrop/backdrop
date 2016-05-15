@@ -562,6 +562,25 @@ function layout_config_info() {
 }
 
 /**
+ * Implements hook_library_info().
+ */
+function layout_library_info() {
+  $path = backdrop_get_path('module', 'layout');
+  $libraries['bootstrap4-gs'] = array(
+    'title' => 'Bootstrap4 Grid System',
+    'website' => 'http://v4-alpha.getbootstrap.com/layout/grid/',
+    'version' => BACKDROP_VERSION,
+    'css' => array(
+      $path . '/css/grid-flexbox.css' => array(),
+    ),
+    'js' => array(
+      $path . '/js/grid-fallback.js' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+/**
  * Implements hook_layout_api().
  */
 function layout_layout_api() {
@@ -1111,9 +1130,8 @@ function _layout_get_all_info($data_type, $init = array()) {
  * Load the layout template information for a single layout template name.
  *
  * @param string $template_name
- *   The name of the layout template, e.g. "one_column" or
- *   "three_three_four_column". If no layout template is specified, all layout 
- *  info will be returned.
+ *   The name of the layout template, e.g. "boxton" or "simmons". If no layout
+ *   template is specified, all layout info will be returned.
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone 
  *   template .info file, or through a module's hook_layout_info().
@@ -1145,6 +1163,7 @@ function layout_get_layout_template_info($template_name = NULL) {
     // Populate defaults.
     foreach ($info as $name => $layout_info) {
       $info[$name] += array(
+        'hidden' => FALSE,
         'preview' => 'preview.png',
         'default region' => 'content',
         'stylesheets' => array(

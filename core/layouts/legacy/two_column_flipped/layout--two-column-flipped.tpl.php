@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Template for a 2 column layout.
+ * Template for a 2 column flipped layout.
  *
- * This template provides a two column layout with the sidebar on the right and
- * a roughly 60/40 split.
+ * This template provides a two column layout with the sidebar on the left and a
+ * roughly 60/40 split.
  *
  * Variables:
  * - $title: The page title, for use in the actual HTML content.
@@ -25,7 +25,7 @@
  *   - $content['footer']
  */
 ?>
-<div class="layout--two-column <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="layout--two-column-flipped layout-legacy <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
@@ -70,9 +70,9 @@
     </main>
 
     <?php if ($content['sidebar']): ?>
-      <div class="l-sidebar">
-        <?php print $content['sidebar']; ?>
-      </div>
+    <div class="l-sidebar">
+      <?php print $content['sidebar']; ?>
+    </div>
     <?php endif; ?>
   </div>
 

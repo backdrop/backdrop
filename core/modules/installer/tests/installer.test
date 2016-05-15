@@ -1,7 +1,7 @@
 <?php
 /**
-* Administration tests for Project Browser.
-*/
+ * Administration tests for Project Browser.
+ */
 class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $privileged_user;

@@ -131,11 +131,14 @@
 
 /* Layout editor. */
 .layout-editor-region {
+  width: 100%;
   min-height: 70px;
   margin: 0 0 15px;
   padding: 8px;
   border: 1px dashed #CCC;
   background: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .layout-editor-region-title .label {
   float: left;
