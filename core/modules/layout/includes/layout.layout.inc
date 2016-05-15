@@ -89,9 +89,10 @@ function layout_layout_access_info() {
 
     // Create a entity id key such as "nid" or "cid".
     $key = $entity_type . '_' . $entity_info['entity keys']['id'];
+    $key_label = strtoupper($entity_info['entity keys']['id']);
     $info[$key] = array(
-      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_info['label'], '@entity_id_key' => $key)),
-      'description' => t('Control access by @entity_type @entity_id_key.', array('@entity_type' => $entity_type, '@entity_id_key' => $key)),
+      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_info['label'], '@entity_id_key' => $key_label)),
+      'description' => t('Control access by @entity_type @entity_id_key.', array('@entity_type' => $entity_type, '@entity_id_key' => $key_label)),
       'entity_type' => $entity_type,
       'class' => 'EntityIDLayoutAccess',
       'required contexts' => array(

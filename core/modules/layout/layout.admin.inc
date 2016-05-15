@@ -1418,6 +1418,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     '#markup' => '<p>' . $help . '</p>',
   );
   $all_access_info = _layout_get_all_info('layout_access');
+  backdrop_sort($all_access_info, array('title'));
   $form['condition'] = array(
     '#type' => 'select',
     '#title' => t('Visibility condition'),
