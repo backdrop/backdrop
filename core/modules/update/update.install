@@ -49,7 +49,7 @@ function update_requirements($phase) {
     else {
       $requirements['update_core']['title'] = t('Backdrop CMS core update status');
       $requirements['update_core']['value'] = t('No update data available');
-      $requirements['update_core']['severity'] = REQUIREMENT_WARNING;
+      $requirements['update_core']['severity'] = REQUIREMENT_INFO;
       $requirements['update_core']['reason'] = UPDATE_UNKNOWN;
       $requirements['update_core']['description'] = _update_no_data();
     }
@@ -194,6 +194,15 @@ function update_update_1000() {
 function update_update_1001() {
   $config = config('update.settings');
   $config->set('update_not_implemented_url', 'https://github.com/backdrop-ops/backdropcms.org/issues/22');
+  $config->save();
+}
+
+/**
+ * Enable static caching for update settings configuration file.
+ */
+function update_update_1002() {
+  $config = config('update.settings');
+  $config->set('_config_static', true);
   $config->save();
 }
 

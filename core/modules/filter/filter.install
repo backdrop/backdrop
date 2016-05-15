@@ -57,6 +57,35 @@ function filter_update_1000() {
 }
 
 /**
+ * Add a separate permission for image upload access.
+ */
+function filter_update_1001() {
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor images'));
+
+  // Enable uploading on existing text formats. Access previously was not
+  // checked previously, so all formats had uploading enabled.
+  $format_configs = config_get_names_with_prefix('filter.format.');
+
+  foreach ($format_configs as $config_name) {
+    $config = config($config_name);
+    if ($config->get('editor')) {
+      $editor_settings = (array) $config->get('editor_settings');
+      $upload_settings = isset($editor_settings['image_upload']) ? $editor_settings['image_upload'] : array();
+      $upload_settings['status'] = 1;
+      $upload_settings += array(
+        'dimensions' => array('max_width' => '', 'max_height' => ''),
+        'max_size' => NULL,
+        'scheme' => 'public',
+        'directory' => 'inline-images',
+      );
+      $editor_settings['image_upload'] = $upload_settings;
+      $config->set('editor_settings', $editor_settings);
+      $config->save();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

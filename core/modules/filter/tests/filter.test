@@ -2085,3 +2085,72 @@ class FilterDOMSerializeTestCase extends BackdropWebTestCase {
     $this->assertEqual('', $result);
   }
 }
+
+/**
+ * Tests access to editors and their associated dialogs.
+ */
+class FilterEditorAccessTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('file'));
+
+    $filtered_html_format = array(
+      'format' => 'filtered_html',
+      'name' => 'Filtered HTML',
+      'weight' => 0,
+      'editor' => 'ckeditor',
+      'filters' => array(),
+    );
+    $filtered_html_format = (object) $filtered_html_format;
+    filter_format_save($filtered_html_format);
+
+    $filtered_html_permission = filter_permission_name($filtered_html_format);
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array($filtered_html_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array($filtered_html_permission));
+  }
+
+  /**
+   * Checks access to editor dialogs for adding images and links.
+   */
+  function testDialogAccess() {
+    // Check that the dialog for filtered HTML is not directly accessible.
+    $this->backdropGet('editor/dialog/image/filtered_html');
+    $this->assertResponse(403, 'Access denied on image dialog without token.');
+
+    // Generate a valid token.
+    $format = filter_format_load('filtered_html');
+    $anonymous = new AnonymousUser();
+    $dialog_token = filter_editor_dialog_token($format, 'image', $anonymous, 'some-path');
+    $options = array(
+      'query' => array(
+        'token' => $dialog_token,
+        'calling_path' => 'some-path',
+      ),
+    );
+
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->assertResponse(200, 'Access granted on image dialog with token.');
+
+    $this->assertNoField('files[fid]', 'File upload field not found when uploads are disabled.');
+
+    $format->editor_settings['image_upload'] = array(
+      'status' => 1,
+      'scheme' => 'public',
+    );
+    filter_format_save($format);
+
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->assertNoField('files[fid]', 'File upload field not found when uploads are enabled but user missing upload permission.');
+
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('upload editor images'));
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->assertField('files[fid]', 'File upload field found when uploads are enabled and user has upload permission.');
+
+    // Revoke access to the format and check that access is denied.
+    $filtered_html_permission = filter_permission_name($format);
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array($filtered_html_permission));
+    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->assertResponse(403, 'Access denied on image dialog when access to the format is not allowed.');
+  }
+}

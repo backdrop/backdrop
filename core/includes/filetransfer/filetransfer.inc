@@ -60,6 +60,8 @@ abstract class FileTransfer {
       $this->setChroot();
       return $this->chroot;
     }
+
+    return NULL;
   }
 
   /**
@@ -86,7 +88,7 @@ abstract class FileTransfer {
    * @see http://php.net/chmod
    *
    * @param string $path
-   * @param long $mode
+   * @param int $mode
    * @param bool $recursive
    */
   public final function chmod($path, $mode, $recursive = FALSE) {
@@ -155,6 +157,9 @@ abstract class FileTransfer {
    *
    * @param $path
    *   A path to check against the jail.
+   *
+   * @throws FileTransferException
+   *
    */
   protected final function checkPath($path) {
     $full_jail = $this->chroot . $this->jail;
@@ -382,7 +387,7 @@ interface FileTransferChmodInterface {
    *
    * @param string $path
    *   Path to change permissions of.
-   * @param long $mode
+   * @param int $mode
    *   The new file permission mode to be passed to chmod().
    * @param boolean $recursive
    *   Pass TRUE to recursively chmod the entire directory specified in $path.

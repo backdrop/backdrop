@@ -479,6 +479,12 @@ function simpletest_clean_temporary_directories() {
     }
   }
 
+  // Delete the verbose output directory if present.
+  $verbose_directory = 'public://simpletest/verbose';
+  if (is_dir($verbose_directory)) {
+    file_unmanaged_delete_recursive($verbose_directory);
+  }
+
   if ($count > 0) {
     backdrop_set_message(format_plural($count, 'Removed 1 temporary directory.', 'Removed @count temporary directories.'));
   }

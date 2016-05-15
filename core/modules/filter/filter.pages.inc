@@ -135,6 +135,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
+    '#access' => $upload_settings['status'] && user_access('upload editor images'),
   );
 
   // Use a "textfield" rather than "url" to allow relative paths.

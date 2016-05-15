@@ -121,6 +121,11 @@ function link_field_instance_settings_form($field, $instance) {
     '#description' => t('Set a maximum length on the title field (applies only if Link Title is optional or required).  The maximum limit is 255 characters.'),
     '#maxlength' => 3,
     '#size' => 3,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
+      ),
+    ),
   );
 
   $form['advanced'] = array(

@@ -127,6 +127,7 @@ function node_entity_info() {
       'base table' => 'node',
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
+      'redirect support' => TRUE,
       'entity keys' => array(
         'id' => 'nid',
         'revision' => 'vid',
@@ -809,7 +810,7 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * @param $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *
- * @return
+ * @return Node[]
  *   An array of node objects indexed by nid.
  *
  * @see entity_load()
@@ -3523,6 +3524,47 @@ function node_config_create_validate(Config $staging_config, $all_changes) {
       throw new ConfigValidateException(t('The field "@name" cannot be added because the node type "@type" does not exist.', array('@name' => $field_name, '@type' => $node_type)));
     }
   }
+}
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function node_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+
+  // Check config name for node type.
+  if (strpos($config_name, 'node.type.') === 0) {
+    // Check if node has content.
+    $node_type = explode('.', $config_name);
+    if (node_type_has_content($node_type[2])) {
+      throw new ConfigValidateException(t('The content type "@content_type" cannot be deleted with active content associated to it. Delete the content manually, then retry the import.', array('@content_type' => $node_type[2])));
+    }
+  }
+}
+
+/**
+ * Determine whether a node type has any data.
+ *
+ * @param $node_type
+ *   Name of bundle to check for content.
+ * @return
+ *   TRUE if the bundle has content associated to it; FALSE otherwise.
+ */
+function node_type_has_content($node_type) {
+  $query = new EntityFieldQuery();
+  $query = $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', $node_type)
+    ->range(0, 1)
+    ->count()
+    // Neutralize the 'entity_field_access' query tag added by
+    // field_sql_storage_field_storage_query(). The result cannot depend on the
+    // access grants of the current user.
+    ->addTag('DANGEROUS_ACCESS_CHECK_OPT_OUT');
+
+  return (bool) $query
+    ->execute() || (bool) $query
+    ->age(FIELD_LOAD_REVISION)
+    ->execute();
 }
 
 /**

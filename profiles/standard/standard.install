@@ -18,6 +18,15 @@ function standard_install() {
     'name' => 'Filtered HTML',
     'weight' => 0,
     'editor' => 'ckeditor',
+    'editor_settings' => array(
+      'image_upload' => array(
+        'status' => 1,
+        'dimensions' => array('max_width' => '', 'max_height' => ''),
+        'max_size' => NULL,
+        'scheme' => 'public',
+        'directory' => 'inline-images',
+      ),
+    ),
     'filters' => array(
       // URL filter.
       'filter_url' => array(
@@ -288,7 +297,7 @@ function standard_install() {
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', 'upload editor images', $filtered_html_permission));
 
   // Create a default role for site administrators, with all available permissions assigned.
   $admin_role = new stdClass();

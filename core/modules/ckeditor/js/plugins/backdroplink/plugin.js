@@ -102,7 +102,7 @@ CKEDITOR.plugins.add('backdroplink', {
         };
 
         // Open the dialog for the edit form.
-        Backdrop.ckeditor.openDialog(editor, editor.config.backdrop.linkDialogUrl + '/' + editor.config.backdrop.format, existingValues, saveCallback, dialogSettings);
+        Backdrop.ckeditor.openDialog(editor, editor.config.backdrop.linkDialogUrl, existingValues, saveCallback, dialogSettings);
       }
     });
     editor.addCommand('backdropunlink', {

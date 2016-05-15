@@ -125,13 +125,13 @@ function _update_fetch_data() {
  * Once the release history XML data is downloaded, it is parsed and saved into
  * the {cache_update} table in an entry just for that project.
  *
- * @param $project
+ * @param array $project
  *   Associative array of information about the project to fetch data for.
  *
  * @return
  *   TRUE if we fetched parsable XML, otherwise FALSE.
  */
-function _update_process_fetch_task($project) {
+function _update_process_fetch_task(array $project) {
   global $base_url;
   $config = config('update.settings');
   $fail = &backdrop_static(__FUNCTION__, array());
@@ -301,8 +301,14 @@ function _update_create_fetch_task($project) {
  */
 function _update_build_fetch_url($project, $site_key = '') {
   $name = $project['name'];
-  $url = _update_get_fetch_url_base($project);
-  $url .= '/' . $name . '/' . BACKDROP_CORE_COMPATIBILITY;
+
+  if (empty($project['project status url'])) {
+    $url = _update_get_fetch_url_base($project);
+    $url .= '/' . $name . '/' . BACKDROP_CORE_COMPATIBILITY;
+  }
+  else {
+    $url = $project['project status url'];
+  }
 
   // Only append usage information if we have a site key and the project is
   // enabled. We do not want to record usage statistics for disabled projects.
@@ -343,9 +349,15 @@ function _update_build_fetch_url($project, $site_key = '') {
  * @see _update_build_fetch_url()
  */
 function _update_get_fetch_url_base($project) {
-  if (isset($project['info']['project status url'])) {
+  // Specified manually, as from the update server.
+  if (isset($project['project status url'])) {
+    $url = $project['project status url'];
+  }
+  // Specified in the .info file.
+  elseif (isset($project['info']['project status url'])) {
     $url = $project['info']['project status url'];
   }
+  // The site default base URL.
   else {
     $url = config_get('update.settings', 'update_url');
     if (empty($url)) {
