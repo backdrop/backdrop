@@ -13,7 +13,7 @@ class ViewsUIWizardHelper extends BackdropWebTestCase {
     parent::setUp('views_ui');
 
     // Create and log in a user with administer views permission.
-    $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
+    $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions', 'synchronize configuration'));
     $this->backdropLogin($views_admin);
   }
 }
@@ -25,6 +25,8 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export/Views/views.view.node_admin_content'));
+
     $this->assertText(t('Add view'));
 
     // Create a simple and not at all useful view.
@@ -40,6 +42,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     foreach (array('/delete', '/clone', '') as $operation) {
       $this->assertLinkByHref(url('admin/structure/views/view/' . $view1['name'] . $operation));
     }
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export/Views/views.view.' . $view1['name']));
 
     // This view should not have a block.
     $this->backdropGet('admin/structure/block');
