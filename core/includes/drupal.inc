@@ -757,7 +757,7 @@ function drupal_match_path($path, $patterns) {
   return backdrop_match_path($path, $patterns);
 }
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
-  return;
+  return array();
 }
 function drupal_valid_path($path, $dynamic_allowed = FALSE) {
   return backdrop_valid_path($path, $dynamic_allowed);
