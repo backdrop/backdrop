@@ -2155,7 +2155,7 @@ function drupal_match_path($path, $patterns) {
  * @deprecated since 1.0.0
  */
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
-  return;
+  return array();
 }
 
 /**
