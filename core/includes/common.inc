@@ -6637,15 +6637,15 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
  * call this function. Executing the query and formatting results should happen
  * in a #pre_render callback.
  *
- * @param $query
+ * @param SelectQuery $query
  *   A select query object as returned by db_select().
- * @param $function
+ * @param string $function
  *   The name of the function doing this caching. A _pre_render suffix will be
  *   added to this string and is also part of the cache key in
  *   backdrop_render_cache_set() and backdrop_render_cache_get().
- * @param $expire
+ * @param int $expire
  *   The cache expire time, passed eventually to cache()->set().
- * @param $granularity
+ * @param int $granularity
  *   One or more granularity constants passed to backdrop_render_cid_parts().
  *
  * @return
@@ -6671,7 +6671,7 @@ function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPO
 /**
  * Returns cache ID parts for building a cache ID.
  *
- * @param $granularity
+ * @param int $granularity
  *   One or more cache granularity constants. For example, to cache separately
  *   for each user, use BACKDROP_CACHE_PER_USER. To cache separately for each
  *   page and role, use the expression:
@@ -7671,12 +7671,12 @@ function _backdrop_schema_initialize(&$schema, $module, $remove_descriptions = T
  *
  * The returned list is suitable for use in an SQL query.
  *
- * @param $table
+ * @param string $table
  *   The name of the table from which to retrieve fields.
- * @param
+ * @param string $prefix
  *   An optional prefix to to all fields.
  *
- * @return An array of fields.
+ * @return array An array of fields.
  */
 function backdrop_schema_fields_sql($table, $prefix = NULL) {
   $schema = backdrop_get_schema($table);

@@ -236,8 +236,8 @@ function entity_load_multiple($entity_type, $ids = FALSE, $conditions = array(),
  *
  * @param string $entity_type
  *   The entity type to load, e.g. node or user.
- * @param int $id
- *   The ID of the entity to load.
+ * @param int|array $id
+ *   The ID(s) of the entity to load.
  *
  * @return EntityInterface|bool
  *   The fully loaded entity or FALSE if not found.

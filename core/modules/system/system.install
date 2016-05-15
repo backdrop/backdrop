@@ -138,8 +138,7 @@ function system_requirements($phase) {
     );
 
     // Make sure PDO is available.
-    $database_ok = extension_loaded('pdo');
-    if (!$database_ok) {
+    if (!extension_loaded('pdo')) {
       $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
         '@link' => 'https://backdropcms.org/requirements',
       ));
@@ -148,14 +147,13 @@ function system_requirements($phase) {
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
-        $database_ok = FALSE;
         $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">system requirements</a> page for more information.', array(
           '@link' => 'http://backdropcms.org/guide/requirements',
         ));
       }
     }
 
-    if (!$database_ok) {
+    if (isset($pdo_message)) {
       $requirements['database_extensions']['value'] = $t('Disabled');
       $requirements['database_extensions']['severity'] = REQUIREMENT_ERROR;
       $requirements['database_extensions']['description'] = $pdo_message;
@@ -167,6 +165,7 @@ function system_requirements($phase) {
   else {
     // Database information.
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
+    /* @var DatabaseTasks $tasks */
     $tasks = new $class();
     $requirements['database_system'] = array(
       'title' => $t('Database system'),

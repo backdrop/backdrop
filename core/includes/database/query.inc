@@ -481,7 +481,7 @@ class InsertQuery extends Query {
   /**
    * A SelectQuery object to fetch the rows that should be inserted.
    *
-   * @var SelectQueryInterface
+   * @var SelectQuery
    */
   protected $fromQuery;
 
@@ -560,6 +560,7 @@ class InsertQuery extends Query {
     }
     else {
       // Reorder the submitted values to match the fields array.
+      $insert_values = array();
       foreach ($this->insertFields as $key) {
         $insert_values[$key] = $values[$key];
       }
@@ -615,6 +616,10 @@ class InsertQuery extends Query {
    *   was given multiple sets of values to insert, the return value is
    *   undefined. If no fields are specified, this method will do nothing and
    *   return NULL. That makes it safe to use in multi-insert loops.
+   *
+   * @throws PDOException
+   * @throws FieldsOverlapException
+   * @throws NoFieldsException
    */
   public function execute() {
     // If validation fails, simply return NULL. Note that validation routines
@@ -644,7 +649,7 @@ class InsertQuery extends Query {
         $last_insert_id = $this->connection->query($sql, $insert_values, $this->queryOptions);
       }
     }
-    catch (Exception $e) {
+    catch (PDOException $e) {
       // One of the INSERTs failed, rollback the whole batch.
       $transaction->rollback();
       // Rethrow the exception for the calling code.
@@ -768,6 +773,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::condition().
+   *
+   * @return DeleteQuery
    */
   public function condition($field, $value = NULL, $operator = NULL) {
     $this->condition->condition($field, $value, $operator);
@@ -776,6 +783,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::isNull().
+   *
+   * @return DeleteQuery
    */
   public function isNull($field) {
     $this->condition->isNull($field);
@@ -784,6 +793,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::isNotNull().
+   *
+   * @return DeleteQuery
    */
   public function isNotNull($field) {
     $this->condition->isNotNull($field);
@@ -792,6 +803,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::exists().
+   *
+   * @return DeleteQuery
    */
   public function exists(SelectQueryInterface $select) {
     $this->condition->exists($select);
@@ -800,6 +813,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::notExists().
+   *
+   * @return DeleteQuery
    */
   public function notExists(SelectQueryInterface $select) {
     $this->condition->notExists($select);
@@ -822,6 +837,8 @@ class DeleteQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::where().
+   *
+   * @return DeleteQuery
    */
   public function where($snippet, $args = array()) {
     $this->condition->where($snippet, $args);
@@ -832,7 +849,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
    * Implements QueryConditionInterface::compile().
    */
   public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
-    return $this->condition->compile($connection, $queryPlaceholder);
+    $this->condition->compile($connection, $queryPlaceholder);
   }
 
   /**
@@ -885,7 +902,6 @@ class DeleteQuery extends Query implements QueryConditionInterface {
  * General class for an abstracted TRUNCATE operation.
  */
 class TruncateQuery extends Query {
-
   /**
    * The table to truncate.
    *
@@ -907,20 +923,6 @@ class TruncateQuery extends Query {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
-  }
-
-  /**
-   * Implements QueryConditionInterface::compile().
-   */
-  public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
-    return $this->condition->compile($connection, $queryPlaceholder);
-  }
-
-  /**
-   * Implements QueryConditionInterface::compiled().
-   */
-  public function compiled() {
-    return $this->condition->compiled();
   }
 
   /**
@@ -1025,6 +1027,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::condition().
+   *
+   * @return UpdateQuery
    */
   public function condition($field, $value = NULL, $operator = NULL) {
     $this->condition->condition($field, $value, $operator);
@@ -1033,6 +1037,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::isNull().
+   *
+   * @return UpdateQuery
    */
   public function isNull($field) {
     $this->condition->isNull($field);
@@ -1041,6 +1047,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::isNotNull().
+   *
+   * @return UpdateQuery
    */
   public function isNotNull($field) {
     $this->condition->isNotNull($field);
@@ -1049,6 +1057,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::exists().
+   *
+   * @return UpdateQuery
    */
   public function exists(SelectQueryInterface $select) {
     $this->condition->exists($select);
@@ -1057,6 +1067,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::notExists().
+   *
+   * @return UpdateQuery
    */
   public function notExists(SelectQueryInterface $select) {
     $this->condition->notExists($select);
@@ -1079,6 +1091,8 @@ class UpdateQuery extends Query implements QueryConditionInterface {
 
   /**
    * Implements QueryConditionInterface::where().
+   *
+   * @return UpdateQuery
    */
   public function where($snippet, $args = array()) {
     $this->condition->where($snippet, $args);
@@ -1089,7 +1103,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * Implements QueryConditionInterface::compile().
    */
   public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
-    return $this->condition->compile($connection, $queryPlaceholder);
+    $this->condition->compile($connection, $queryPlaceholder);
   }
 
   /**
@@ -1144,7 +1158,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
   /**
    * Executes the UPDATE query.
    *
-   * @return
+   * @return int
    *   The number of rows matched by the update. This count includes rows that
    *   may have matched but not necessarily changed by the update.
    */
@@ -1565,7 +1579,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * Implements QueryConditionInterface::compile().
    */
   public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
-    return $this->condition->compile($connection, $queryPlaceholder);
+    $this->condition->compile($connection, $queryPlaceholder);
   }
 
   /**
@@ -1611,8 +1625,8 @@ class MergeQuery extends Query implements QueryConditionInterface {
     }
     // If only doing inserts, select first to see if the row exists.
     else {
-      $select = $this->connection->select($this->table)
-        ->condition($this->condition);
+      $select = $this->connection->select($this->table);
+      $select->condition($this->condition);
       $select->addExpression('1');
       $row_exists = (bool) $select->execute()->fetchField();
     }
@@ -1632,8 +1646,8 @@ class MergeQuery extends Query implements QueryConditionInterface {
         // returns a row, ignore the error and continue with the update
         // query below.
         if (!isset($select)) {
-          $select = $this->connection->select($this->table)
-            ->condition($this->condition);
+          $select = $this->connection->select($this->table);
+          $select->condition($this->condition);
           $select->addExpression('1');
         }
         if (!$select->execute()->fetchField()) {
@@ -1641,6 +1655,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
         }
       }
     }
+    return NULL;
   }
 
   /**
@@ -1687,8 +1702,17 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
 
   /**
    * The identifier of the query placeholder this condition has been compiled against.
+   *
+   * @var string
    */
   protected $queryPlaceholderIdentifier;
+
+  /**
+   * The string version of a query after it has been built.
+   *
+   * @var string
+   */
+  protected $stringVersion;
 
   /**
    * Constructs a DataBaseCondition object.

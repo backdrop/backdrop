@@ -303,12 +303,12 @@ function authorize_run_operation($filetransfer) {
 /**
  * Gets a FileTransfer class for a specific transfer method and settings.
  *
- * @param $backend
- *   The FileTransfer backend to get the class for.
- * @param $settings
+ * @param string $backend
+ *   The name FileTransfer backend.
+ * @param array $settings
  *   Array of settings for the FileTransfer.
  *
- * @return
+ * @return FileTransfer
  *   An instantiated FileTransfer object for the requested method and settings,
  *   or FALSE if there was an error finding or instantiating it.
  */

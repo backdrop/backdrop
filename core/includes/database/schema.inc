@@ -158,10 +158,17 @@ require_once __DIR__ . '/query.inc';
 
 abstract class DatabaseSchema implements QueryPlaceholderInterface {
 
+  /**
+   * The current database connection.
+   *
+   * @var DatabaseConnection
+   */
   protected $connection;
 
   /**
    * The placeholder counter.
+   *
+   * @var int
    */
   protected $placeholder = 0;
 
@@ -172,12 +179,16 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * by defining the defaultSchema variable only MySQL has to re-write the
    * method.
    *
+   * @var string
+   *
    * @see DatabaseSchema::getPrefixInfo()
    */
   protected $defaultSchema = 'public';
 
   /**
    * A unique identifier for this query object.
+   *
+   * @var string
    */
   protected $uniqueIdentifier;
 
@@ -284,7 +295,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
     $info = $this->connection->getConnectionOptions();
 
-    // Retrive the table name and schema
+    // Retrieve the table name and schema
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
 
     $condition = new DatabaseCondition('AND');
@@ -652,6 +663,18 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
       $this->connection->query($statement);
     }
   }
+
+  /**
+   * Generate an array of query strings suitable for creating a table.
+   *
+   * @param $name
+   *   The name of the table to create.
+   * @param $table
+   *   A Schema API table definition array.
+   * @return
+   *   An array of SQL statements to create the table.
+   */
+  abstract protected function createTableSql($name, $table);
 
   /**
    * Return an array of field names from an array of key/index column specifiers.

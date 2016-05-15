@@ -55,8 +55,6 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    * from the condition criteria.
    */
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
-    $info = $this->connection->getConnectionOptions();
-
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
 
     $condition = new DatabaseCondition('AND');
@@ -127,6 +125,9 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    *   Name of the field.
    * @param $spec
    *   The field specification, as per the schema data structure format.
+   *
+   * @return string
+   *   A string that can be used to create or alter a table.
    */
   protected function createFieldSql($name, $spec) {
     $sql = "`" . $name . "` " . $spec['mysql_type'];
