@@ -2778,11 +2778,10 @@ function system_update_1053() {
 }
 
 /**
- * Changes the layout template key in layout config files from 'layout'
- * to 'layout_template'.
+ * Changes the key in layout config files from 'layout' to 'layout_template'.
  */
-function system_update_1051() {
-  $layouts= config_get_names_with_prefix('layout');
+function system_update_1054() {
+  $layouts = config_get_names_with_prefix('layout.layout.');
   foreach ($layouts as $layout_name) {
     $config = config($layout_name);
     $configs = $config->get();

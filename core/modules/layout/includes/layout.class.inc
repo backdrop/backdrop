@@ -63,6 +63,14 @@ class Layout {
   var $storage;
 
   /**
+   * Deprecated. Now replaced by $layout_template.
+   *
+   * @var NULL
+   * @deprecated since 1.4.0
+   */
+  var $layout;
+
+  /**
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
@@ -166,6 +174,14 @@ class Layout {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'title_block' => NULL,
     );
+
+    // Adjust for the renaming of "layout" to "layout_template".
+    // See https://github.com/backdrop/backdrop-issues/issues/998
+    // @todo: Remove in 2.x.
+    if (isset($this->layout) && !isset($this->layout_template)) {
+      $this->layout_template = $this->layout;
+      unset($this->layout);
+    }
 
     // Set the storage type.
     if (isset($config['module'])) {

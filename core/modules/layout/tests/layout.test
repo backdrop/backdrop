@@ -459,7 +459,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_url,
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
@@ -1187,7 +1187,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_path,
     );
     // Check the path first to populate available contexts.
@@ -1656,7 +1656,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'two_column',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
