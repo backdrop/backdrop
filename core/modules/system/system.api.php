@@ -195,28 +195,6 @@ function hook_cron_queue_info_alter(&$queues) {
   $queues['aggregator_feeds']['time'] = 90;
 }
 
- /**
- * Work on a single queue item.
- *
- * Callback for hook_queue_info().
- *
- * @param $queue_item_data
- *   The data that was passed to BackdropQueue::createItem() when the item was
- *   queued.
- *
- * @throws \Exception
- *   The worker callback may throw an exception to indicate there was a problem.
- *   The cron process will log the exception, and leave the item in the queue to
- *   be processed again later.
- *
- * @see backdrop_cron_run()
- */
-function callback_queue_worker($queue_item_data) {
-  $node = node_load($queue_item_data);
-  $node->title = 'Updated title';
-  $node->save();
-}
-
 /**
  * Work on a single queue item.
  *

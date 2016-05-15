@@ -492,13 +492,11 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * @param $cache
    *   An item loaded from BackdropCacheInterface::get() or BackdropCacheInterface::getMultiple().
    *
-   * @return
+   * @return stdClass|FALSE
    *   The item with data unserialized as appropriate or FALSE if there is no
    *   valid item to load.
    */
   protected function prepareItem($cache) {
-    global $user;
-
     if (!isset($cache->data)) {
       return FALSE;
     }

@@ -1468,7 +1468,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     'filesize' => $_FILES['files']['size'][$form_field_name],
   );
   $values['filemime'] = file_get_mimetype($values['filename']);
-  $file = entity_create('file', $values);
+  $file = new File($values);
 
   $extensions = '';
   if (isset($validators['file_validate_extensions'])) {

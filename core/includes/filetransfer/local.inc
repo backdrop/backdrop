@@ -5,7 +5,7 @@
  */
 class FileTransferLocal extends FileTransfer implements FileTransferChmodInterface {
 
-  function connect() {
+  public function connect() {
     // No-op
   }
 
