@@ -14,7 +14,8 @@
   padding: 0 15px;
 }
 
-@media all and (min-width: 851px) {
+/* min-width ~850px */
+@media (min-width: 53.125em) {
   .layout-test-layout #content,
   .layout-test-layout #sidebar {
     display: inline;

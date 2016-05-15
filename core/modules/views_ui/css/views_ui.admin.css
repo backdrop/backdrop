@@ -30,7 +30,8 @@
 
 /* @group Columns */
 
-@media (min-width:768px) {
+/* min-width ~750px */
+@media (min-width: 46.875em) {
   .views-left-25 {
     float: left;
     width: 25%;
@@ -222,7 +223,8 @@
 /* @end */
 
 /* @group Attachment configuration columns */
-@media (min-width: 768px) {
+/* min-width ~750px */
+@media (min-width: 46.875em) {
   .views-display-columns > * {
     float: left; /* LTR */
     margin-left: 1%; /* LTR */
@@ -259,7 +261,8 @@
   position: fixed;
   max-width: 95%;
 }
-@media only screen and (min-width: 1200px) {
+/* min-width ~1200px */
+@media only screen and (min-width: 75em) {
   .views-ui-dialog {
     max-width: 90%;
   }
@@ -305,7 +308,8 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-@media only screen and (min-height: 750px) {
+/* min-width ~600px */
+@media only screen and (min-height: 46.875em) {
   .views-ui-dialog .scroll {
     max-height: 600px;
   }

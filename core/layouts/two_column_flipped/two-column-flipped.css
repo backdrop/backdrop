@@ -36,7 +36,8 @@
   box-sizing: border-box;
 }
 
-@media all and (min-width: 851px) {
+/* min-width ~850px */
+@media all and (min-width: 53.125em) {
   .layout--two-column-flipped .l-content,
   .layout--two-column-flipped .l-sidebar {
     display: inline;

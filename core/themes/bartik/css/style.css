@@ -1628,7 +1628,8 @@ div.admin-panel .description {
 /**
  * Responsive tables.
  */
-@media screen and (max-width:450px) {
+/* min-width ~450px */
+@media screen and (max-width: 28.125em) {
   th.priority-low,
   td.priority-low,
   th.priority-medium,
@@ -1636,7 +1637,8 @@ div.admin-panel .description {
     display: none;
   }
 }
-@media screen and (max-width:720px) {
+/* min-width ~720px */
+@media screen and (max-width:45em) {
   th.priority-low,
   td.priority-low {
     display: none;

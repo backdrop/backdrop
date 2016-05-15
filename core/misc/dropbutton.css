@@ -17,7 +17,8 @@
   width: auto;
 }
 
-@media screen and (max-width:600px) {
+/* min-width ~600px */
+@media all and (min-width: 37.5em) {
   .js .dropbutton-wrapper {
     width: 100%;
   }
