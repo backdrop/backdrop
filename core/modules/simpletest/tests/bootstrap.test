@@ -314,6 +314,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCompression() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
     $test_path = 'system-test/hello-world';
 
@@ -324,6 +325,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
