@@ -29,11 +29,11 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 2);
+      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 3);
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link, 'colspan' => 2);
+      $row[] = array('data' => $path_link, 'colspan' => 3);
     }
     $row[] = backdrop_render($operations);
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
@@ -54,6 +54,8 @@ function layout_list_page() {
       }
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $layout_info = layout_get_layout_info($layout->layout);
+      $row[] = t($layout_info['title']);
       $row[] = $storage;
       $row[] = backdrop_render($operations);
       $class = array('layout-row');
@@ -66,6 +68,7 @@ function layout_list_page() {
 
   $header = array(
     array('data' => t('Layout and path'), 'class' => array('layout-title')),
+    array('data' => t('Layout template'), 'class' => array('layout-template')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
