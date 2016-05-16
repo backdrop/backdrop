@@ -276,11 +276,13 @@ ul.tips {
 
 /* ------------------ Layout ------------------ */
 
+/* Bootstrap layouts, restrict to 960px total width. */
 .container {
-  /* 15px padding on left/right makes for 960px total. */
-  max-width: 930px;
+  max-width: 920px;
+  padding: 0 20px;
 }
 
+/* Legacy layouts, restrict to 960px total width. */
 .layout-legacy .l-container,
 .layout-legacy .l-top,
 .layout-legacy .l-messages,
