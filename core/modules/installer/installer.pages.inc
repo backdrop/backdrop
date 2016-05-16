@@ -922,6 +922,9 @@ function installer_browser_filters_form_submit($form, &$form_state) {
   else {
     $_SESSION['installer_browser_text_filter_' . $type] = $form_state['values']['search_text'];
   }
+  if (isset($_GET['page'])) {
+    unset($_GET['page']);
+  }
 }
 
 /**
