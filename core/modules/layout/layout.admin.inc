@@ -715,7 +715,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   $form['title_display']['#tree'] = FALSE;
   $form['title_display']['title_display'] = array(
     '#type' => 'select',
-    '#title' => t('Block title type'),
+    '#title' => t('Page title type'),
     '#default_value' => $layout->settings['title_display'],
     '#options' => array(
       LAYOUT_TITLE_DEFAULT => t('Default title'),
