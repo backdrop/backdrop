@@ -920,6 +920,9 @@ function layout_content_form_submit($form, &$form_state) {
   // Delete the tempstore copy of the layout.
   layout_clear_layout_tempstore($layout->name);
 
+  // Reset the block usage report.
+  backdrop_static_reset('layout_get_block_usage');
+
   backdrop_set_message(t('Layout content saved.'));
 }
 
@@ -2588,4 +2591,83 @@ function layout_configure_region_page_submit($form, &$form_state) {
   $form_state['layout']->settings[$region_name]['element'] = $form_state['values']['element'];
   $form_state['layout']->settings[$region_name]['classes'] = $form_state['values']['classes'];
   layout_set_layout_tempstore($form_state['layout']);
+}
+
+/**
+ * Menu callback; Lists all blocks and their modules.
+ */
+function layout_block_list() {
+  $rows = array();
+
+  $module_blocks = layout_get_block_info();
+  $usage = layout_get_block_usage();
+
+  // Get all blocks.
+  foreach ($module_blocks as $module => $blocks) {
+    if (!empty($blocks)) {
+      foreach ($blocks as $delta => $block) {
+        $contexts = !empty($block['required contexts']) ? implode(",", $block['required contexts']) : '';
+        $usages = array();
+        if (isset($usage[$delta])) {
+          foreach ($usage[$delta] as $layout => $layout_use) {
+            foreach ($layout_use as $position => $block_use) {
+              foreach ($block_use as $instance) {
+                $usages[] = l($instance->layout_title . ' (' . $position . ')', 'admin/structure/layouts/manage/' . $layout);
+              }
+            }
+          }
+        }
+        $usage_list = theme('item_list', array('items' => $usages));
+        $rows[$block['info']] = array($block['info'], $module, $delta, $usage_list, $contexts);
+      }
+    }
+  }
+
+  // Sort rows by block name.
+  ksort($rows);
+  $page['description_container'] = array(
+    '#type' => 'container',
+  );
+
+  $page['description_container']['description'] = array(
+    '#markup' => t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'."),
+  );
+
+  $page['table'] = array(
+    '#theme' => 'table',
+    '#header' => array(t('Name'), t('Module'), t('Delta'), t('Usage'), t('Required contexts')),
+    '#rows' => $rows,
+    '#empty' => t('There are no blocks.'),
+  );
+
+  return $page;
+}
+
+/**
+ * Lists information about blocks in use in layouts.
+ *
+ * @param string $delta
+ *   The block delta.
+ *
+ * @return array
+ *   An array of block usage instances keyed by block delta, layout 
+ *   machine_name, and position. Each instance is a block object with an
+ *   additional key for the layout name.
+ */
+function layout_get_block_usage($delta = NULL) {
+  $blocks = &backdrop_static(__FUNCTION__, array());
+  if (empty($blocks)) {
+    $layout_info = layout_load_all();
+    foreach ($layout_info as $layout) {
+      foreach ($layout->positions as $position => $uuids) {
+        foreach ($uuids as $uuid) {
+          $block = $layout->content[$uuid];
+          $block->layout_title = $layout->title;
+          $blocks[$block->delta][$layout->name][$position][] = $block;
+        }
+      }
+    }
+  }
+
+  return isset($delta) ? $blocks[$delta] : $blocks;
 }

@@ -21,3 +21,9 @@ name = Layout Hook Test
 description = Tests the upgrade path from block-based regions to layouts.
 group = Layout
 file = layout.test
+
+[LayoutBlockUsageTestCase]
+name = Layout Block Usage Test
+description = Tests the layout_get_block_usage() function.
+group = Layout
+file = layout.test
