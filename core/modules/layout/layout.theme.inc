@@ -97,7 +97,7 @@ function theme_layout_condition_info($variables) {
 /**
  * Outputs an individual option label for selecting a layout.
  */
-function theme_layout_template_options($variables) {
+function theme_layout_template_option($variables) {
   $template_info = $variables['template_info'];
   $icon_path = $template_info['path'] . '/' . $template_info['preview'];
 

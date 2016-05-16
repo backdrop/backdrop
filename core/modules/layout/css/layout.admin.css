@@ -77,8 +77,9 @@
   float: left;
 }
 .layout-settings-page .layout-options .form-item input.form-checkbox {
-  /* needed to override style.css */
+  /* Needed to override Seven's style.css */
   margin-right: 0;
+  margin-left: 0;
 }
 
 /* Menu item argument settings. */

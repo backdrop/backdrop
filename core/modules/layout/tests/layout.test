@@ -47,8 +47,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => $this->randomString(),
     ));
   }
+
   /**
-   * Add and remove blocks from a custom layout path.
+   * Test that layout templates may be enabled and disabled.
    */
   function testLayoutTemplates() {
     // Attempt to disable the 1 column layout (should fail).
@@ -62,24 +63,25 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->assertText(t('The "1 column" layout template is currently in use and may not be excluded.'));
 
-    // Check to see that the Bartik layout is is now an option.
+    // Check to see that the Bartik layout is an existing option.
     $this->backdropGet('admin/structure/layouts/manage/default/settings');
     $this->assertText('3/3/4 columns');
 
-    // Disable the bartik layout.
+    // Disable the Bartik layout.
     $edit = array(
       'templates[one_column]' => TRUE,
       'templates[two_column]' => TRUE,
       'templates[two_column_flipped]' => TRUE,
       'templates[three_three_four_column]' => FALSE,
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
-    $this->assertText(t('Your configuration has been saved'));
+    $this->backdropPost('admin/structure/layouts/settings', $edit, t('Save configuration'));
+    $this->assertText(t('Your configuration has been saved.'));
 
     // Check to see that the Bartik layout is no longer an option.
     $this->backdropGet('admin/structure/layouts/manage/default/settings');
     $this->assertNoText('3/3/4 columns');
   }
+
   /**
    * Add and remove blocks from a custom layout path.
    */

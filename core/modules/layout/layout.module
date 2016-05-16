@@ -87,6 +87,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
   ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(
@@ -462,7 +463,7 @@ function layout_theme() {
     'layout_condition_info' => array(
       'variables' => array('layout' => NULL),
     ) + $base,
-    'layout_template_options' => array(
+    'layout_template_option' => array(
       'variables' => array('template_info' => NULL),
     ) + $base,
     'layout_menu_item_arguments_table' => array(
@@ -684,7 +685,7 @@ function layout_load($layout_name, $skip_menu_items = NULL) {
  *   menu items associated with them, for example the default layouts or a
  *   layout that overrides an existing menu path.
  *
- * @return array
+ * @return Layout[]
  *   An array of Layout object instances.
  */
 function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
@@ -788,6 +789,9 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
  *
  * Note that this operation can be very expensive and its use is discouraged.
  * Use layout_load_multiple() to load specific layouts.
+ *
+ * @return Layout[]
+ *   An array of Layout object instances.
  */
 function layout_load_all() {
   $configs = layout_get_all_configs('layout');

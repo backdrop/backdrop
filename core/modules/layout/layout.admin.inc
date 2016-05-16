@@ -246,7 +246,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $excluded = config_get('layout.settings', 'excluded_templates');
   foreach ($all_template_info as $template_name => $template_info) {
     if (!in_array($template_name, $excluded)) {
-      $form['layout']['#options'][$template_name] = theme('layout_template_option', array('layout_info' => $template_info));
+      $form['layout_template']['#options'][$template_name] = theme('layout_template_option', array('template_info' => $template_info));
     }
   }
 
@@ -2420,14 +2420,14 @@ function layout_settings_page($form, &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $form['#attributes']['class'] = array('layout-settings-page');
 
-  // Get the list of layout options.
-  $all_layout_info = layout_get_layout_info();
+  // Get the list of layout template options.
+  $all_layout_info = layout_get_layout_template_info();
   $options = array();
   $default = array();
-  foreach ($all_layout_info as $layout_name => $layout_info) {
-    $options[$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
-    if (!in_array($layout_name, $excluded)) {
-      $default[] = $layout_name;
+  foreach ($all_layout_info as $template_name => $template_info) {
+    $options[$template_name] = theme('layout_template_option', array('template_info' => $template_info));
+    if (!in_array($template_name, $excluded)) {
+      $default[] = $template_name;
     }
   }
 
@@ -2465,11 +2465,10 @@ function layout_settings_page_validate(&$form, &$form_state) {
     form_set_error('templates', t('At least one layout template must be enabled.'));
   }
 
-  // Check which layout templates are in-use.
-  $active_templates = array();
+  // Check which layout templates are in use.
   foreach (layout_load_all() as $layout) {
-    $info = layout_get_layout_info($layout->layout);
-    if (in_array($layout->layout, $excluded)) {
+    $info = layout_get_layout_template_info($layout->layout_template);
+    if (in_array($layout->layout_template, $excluded)) {
       form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
     }
   }

@@ -2795,6 +2795,17 @@ function system_update_1054() {
 }
 
 /**
+ * Create the new layout settings configuration file.
+ */
+function system_update_1055() {
+  $config = config('layout.settings');
+  if ($config->isNew()) {
+    $config->set('excluded_templates', array());
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
