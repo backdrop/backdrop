@@ -428,10 +428,15 @@ function update_variable_del($name) {
  *   values are an array of configuration files that require updates.
  */
 function update_config_defaults($modules, &$context) {
-  foreach($modules as $module_name => $module_data) {
+  foreach ($modules as $module_name => $module_data) {
     config_update_default_config($module_name);
-    $context['message'] = 'Updated default settings for ' . $module_name . '.';
   }
+  $context['message'] = t('Updated default settings for @count, including @module_name.',
+    array(
+      '@count' => format_plural(count($modules), '1 module', '@count modules'),
+      '@module_name' => end(array_keys($modules)),
+    )
+  );
 }
 
 /**
@@ -526,7 +531,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
     backdrop_set_installed_schema_version($module, $number);
   }
 
-  $context['message'] = 'Updating ' . check_plain($module) . ' module';
+  $context['message'] = t('Updating @module module', array('@module' => $module));
 }
 
 /**
