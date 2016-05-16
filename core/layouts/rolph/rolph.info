@@ -1,0 +1,20 @@
+name = Rolph
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header]           = Header
+regions[top]              = Top
+regions[quarter1]         = Quarter 1 Column
+regions[quarter2]         = Quarter 2 Column
+regions[quarter3]         = Quarter 1 Column
+regions[quarter4]         = Quarter 2 Column
+regions[bottom]           = Bottom
+regions[footer]           = Footer
+
+; Preview
+preview = rolph.png
+
+; Default stylesheets
+stylesheets[all][] = ../bootstrap-grid.css

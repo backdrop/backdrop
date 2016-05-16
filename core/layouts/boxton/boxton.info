@@ -1,0 +1,15 @@
+name = Boxton
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = layout
+
+; Specify regions for this layout.
+regions[header] = Header
+regions[content] = Content
+regions[footer] = Footer
+
+; Preview
+preview = boxton.png
+
+; Default stylesheets
+stylesheets[all][] = ../bootstrap-grid.css
