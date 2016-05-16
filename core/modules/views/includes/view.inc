@@ -2277,6 +2277,7 @@ class views_display {
     $this->id = $id;
     $this->display_title = $title;
     $this->display_options = $display_options;
+    $this->position = isset($this->position) ? $this->position : 0;
   }
 }
 
