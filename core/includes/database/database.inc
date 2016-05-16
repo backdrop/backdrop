@@ -652,7 +652,7 @@ abstract class DatabaseConnection extends PDO {
    *   An associative array of options to control how the query is run. See
    *   the documentation for DatabaseConnection::defaultOptions() for details.
    *
-   * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch
+   * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    *   This method will return one of: the executed statement, the number of
    *   rows affected by the query (not the number matched), or the generated
    *   insert ID of the last query, depending on the value of
@@ -2349,7 +2349,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
  * @param $options
  *   An array of options to control how the query operates.
  *
- * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch
+ * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
  *   A prepared statement object, already executed.
  *
  * @see DatabaseConnection::defaultOptions()
