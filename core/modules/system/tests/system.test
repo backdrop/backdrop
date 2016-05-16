@@ -4,6 +4,9 @@
  * Tests for system.module.
  */
 
+// Include class WatchdogTestCase from Simpletest.
+require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/bootstrap.test';
+
 /**
  * Helper class for module test cases.
  */
