@@ -1788,7 +1788,7 @@ function hook_theme_registry_alter(&$theme_registry) {
  * @return
  *   The machine-readable name of the theme that should be used for the current
  *   page request. The value returned from this function will only have an
- *   effect if it corresponds to a currently-active theme on the site. Do not 
+ *   effect if it corresponds to a currently-active theme on the site. Do not
  *   return a value if you do not wish to set a custom theme.
  */
 function hook_custom_theme() {
@@ -1824,6 +1824,7 @@ function hook_custom_theme() {
  *     - WATCHDOG_NOTICE: Normal but significant conditions.
  *     - WATCHDOG_INFO: Informational messages.
  *     - WATCHDOG_DEBUG: Debug-level messages.
+ *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1840,12 +1841,13 @@ function hook_watchdog(array $log_entry) {
   $severity_list = array(
     WATCHDOG_EMERGENCY     => t('Emergency'),
     WATCHDOG_ALERT     => t('Alert'),
-    WATCHDOG_CRITICALI     => t('Critical'),
+    WATCHDOG_CRITICAL     => t('Critical'),
     WATCHDOG_ERROR       => t('Error'),
     WATCHDOG_WARNING   => t('Warning'),
     WATCHDOG_NOTICE    => t('Notice'),
     WATCHDOG_INFO      => t('Info'),
     WATCHDOG_DEBUG     => t('Debug'),
+    WATCHDOG_DEPRECATED => t('Deprecated Use'),
   );
 
   $to = 'someone@example.com';
@@ -3139,7 +3141,7 @@ function hook_autoload_info_alter(&$class_registry) {
  * inspect later. It is important to remove any temporary variables using
  * state_del() before your last task has completed and control is handed
  * back to the installer.
- * 
+ *
  * @param array $install_state
  *   An array of information about the current installation state.
  *

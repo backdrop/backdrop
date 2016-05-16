@@ -78,5 +78,6 @@
     "user_picture_style": "thumbnail",
     "user_picture_dimensions": "1024x1024",
     "user_picture_file_size": "800",
-    "user_picture_guidelines": ""
+    "user_picture_guidelines": "",
+    "watchdog_enabled_severity_levels": [0, 1, 2, 3, 4, 5, 6]
 }

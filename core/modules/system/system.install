@@ -2916,6 +2916,14 @@ function system_update_1056() {
 }
 
 /**
+ * Add default for watchdog_enabled_severity_levels.
+ */
+function system_update_1057() {
+  $config = config('system.core');
+  $config->set('watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6));
+  $config->save();
+}
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
