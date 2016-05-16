@@ -150,7 +150,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     if (isset($modules['dblog'])) {
       $modules = array('dblog' => $modules['dblog']) + $modules;
     }
- 
+
     // Set a variable so that the hook implementations in system_test.module
     // will display messages via backdrop_set_message().
     state_set('test_verbose_module_hooks', TRUE);
@@ -820,6 +820,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
   }
 
   function testAccessDenied() {
+    $this->backdropLogout();
     $this->backdropGet('admin');
     $this->assertText(t('Access denied'), 'Found the default 403 page');
     $this->assertResponse(403);
@@ -872,6 +873,28 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     // Check that we're still on the same page.
     $this->assertText(t('Site information'));
   }
+
+  function test403PathOnSystemForm() {
+    $this->backdropLogin($this->admin_user);
+    $edit = array(
+      'title' => $this->randomName(10),
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(100)))),
+      'path' => array(
+        'alias' => $this->randomName(8),
+      ),
+    );
+    $node = $this->backdropCreateNode($edit);
+    // Use a custom 403 page.
+    $this->backdropPost('admin/config/system/site-information', array('site_403' => $node->path['alias']), t('Save configuration'));
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path."));
+
+    // Now set a new alias on the node and make sure the new alias is on the 403 field.
+    $node->title = $this->randomName(7);
+    node_save($node);
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path after it has been changed."));
+  }
 }
 
 class PageNotFoundTestCase extends BackdropWebTestCase {
@@ -903,6 +926,28 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
 
     $this->backdropGet($this->randomName(10));
     $this->assertText($node->title, 'Found the custom 404 page');
+  }
+
+  function test404PathOnSystemForm() {
+    $this->backdropLogin($this->admin_user);
+    $edit = array(
+      'title' => $this->randomName(10),
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(100)))),
+      'path' => array(
+        'alias' => $this->randomName(8),
+      ),
+    );
+    $node = $this->backdropCreateNode($edit);
+    // Use a custom 404 page.
+    $this->backdropPost('admin/config/system/site-information', array('site_404' => $node->path['alias']), t('Save configuration'));
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path."));
+
+    // Now set a new alias on the node and make sure the new alias is on the 404 field.
+    $node->title = $this->randomName(7);
+    node_save($node);
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path after it has been changed."));
   }
 }
 
