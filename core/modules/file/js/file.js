@@ -96,7 +96,6 @@ Backdrop.file = Backdrop.file || {
   autoUpload: function (event) {
     // This value is set in Backdrop.file.validateExtension().
     if (event.filePreValidation === undefined || event.filePreValidation === true) {
-      consoe.log('autoupload');
       $(this).closest('.form-item').find('.file-upload-button').trigger('mousedown').trigger('mouseup').trigger('click');
     }
   },

@@ -2458,7 +2458,6 @@ function layout_ajax_form_update($form, $form_state) {
  */
 function layout_settings_page($form, &$form_state) {
   $excluded = config_get('layout.settings', 'excluded_templates');
-  //dpm($excluded);
 
   $form = array();
 
@@ -2470,12 +2469,20 @@ function layout_settings_page($form, &$form_state) {
   $all_layout_info = layout_get_layout_template_info();
   $options = array();
   $default = array();
+  $form_state['hidden_templates'] = array();
   foreach ($all_layout_info as $template_name => $template_info) {
+    // Build the default values list.
     if (!in_array($template_name, $excluded)) {
       $default[] = $template_name;
     }
-    if (!($template_info['hidden'] && !in_array($template_name, $default))) {
+
+    // Build the list of possible options, either enabled or not hidden.
+    if (in_array($template_name, $default) || !$template_info['hidden']) {
       $options[$template_name] = theme('layout_template_option', array('template_info' => $template_info));
+    }
+    // For disabled and hidden templates, save the fact they are disabled.
+    elseif ($template_info['hidden']) {
+      $form_state['hidden_templates'][] = $template_name;
     }
   }
 
@@ -2506,7 +2513,7 @@ function layout_settings_page_validate(&$form, &$form_state) {
   $options = array_keys($form_state['values']['templates']);
   $included = array_values($form_state['values']['templates']);
   $excluded = array_unique(array_diff($options, $included));
-  $form_state['excluded_templates'] = array_values($excluded);
+  $form_state['excluded_templates'] = array_values(array_merge($excluded, $form_state['hidden_templates']));
 
   // Ensure all layouts are not disabled.
   if (empty($form_state['values']['templates'])) {

@@ -80,6 +80,29 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Check to see that the Simmons layout is no longer an option.
     $this->backdropGet('admin/structure/layouts/manage/default/settings');
     $this->assertNoText('Simmons');
+
+    // Check that hidden templates are not shown by default.
+    $this->assertNoText('3/3/4 columns');
+
+    // Enable hidden layouts manually.
+    config_set('layout.settings', 'excluded_templates', array());
+
+    // Check that the hidden templates are now available.
+    $this->backdropGet('admin/structure/layouts/manage/default/settings');
+    $this->assertText('3/3/4 columns');
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->assertText('3/3/4 columns');
+
+    // Disable the legacy Bartik layout.
+    $edit = array(
+      'templates[three_three_four_column]' => FALSE,
+    );
+    $this->backdropPost('admin/structure/layouts/settings', $edit, t('Save configuration'));
+    $this->assertNoText('3/3/4 columns');
+
+    // Post again just make sure the hidden option doesn't return.
+    $this->backdropPost('admin/structure/layouts/settings', array(), t('Save configuration'));
+    $this->assertNoText('3/3/4 columns');
   }
 
   /**
