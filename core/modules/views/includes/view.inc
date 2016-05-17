@@ -304,6 +304,7 @@ class view {
       // Convert all stored displays into display objects.
       foreach ($this->display as $display_id => $display) {
         $this->display[$display_id] = new views_display($display['display_plugin'], $display_id, $display['display_title'], $display['display_options']);
+        $this->display[$display_id]->position = 0;
       }
     }
   }
@@ -2044,6 +2045,7 @@ class view {
 
     // Create the new display object
     $display = new views_display($type, $id, $title);
+    $display->position = 0;
 
     // Add the new display object to the view.
     $this->display[$id] = $display;
