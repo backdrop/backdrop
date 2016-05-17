@@ -196,6 +196,9 @@ function installer_browser_installation_select_versions_page() {
  *
  * @param $projects
  *   An array of projects selected for install, keyed by project name.
+ *
+ * @return array
+ *   The complete form in a renderable.
  */
 function installer_browser_installation_select_versions_form($form, &$form_state, $projects) {
   module_load_include('inc', 'installer', 'installer.browser');
@@ -383,6 +386,9 @@ function installer_browser_path($project_type = NULL) {
  * @param string $incoming_path
  *   The path from which the project type should be determined, or NULL to base
  *   the type from the current path.
+ *
+ * @return string
+ *   The project type, one of "theme", "module", or "layout".
  */
 function installer_browser_type_from_path($incoming_path = NULL) {
   if (!isset($incoming_path)) {
@@ -628,38 +634,19 @@ function installer_browser_installation_theme_set($form, &$form_state) {
  *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
-  $modules = system_rebuild_module_data();
+  $all_modules = system_rebuild_module_data();
 
-  $options = array();
-  $missing = array();
-
+  // Find any newly installed modules and expand any sub-modules found in them.
+  $all_new_modules = array();
   foreach ($projects as $project) {
     if ($project['type'] == 'module') {
-      $dependency_check = TRUE;
-      $dependencies = array();
-      if (isset($modules[$project['name']])) {
-        foreach ($modules[$project['name']]->info['dependencies'] as $dependency) {
-          if (isset($modules[$dependency])) {
-            $dependencies[] = $modules[$dependency]->info['name'] . ' (' . t('Installed') . ')';
+      if (isset($all_modules[$project['name']])) {
+        $directory = backdrop_get_path('module', $project['name']);
+        $sub_modules = backdrop_system_listing('/\.module$/', $directory, 'name', 0);
+        foreach ($sub_modules as $sub_module_name => $sub_module_file) {
+          if (isset($all_modules[$sub_module_name])) {
+            $all_new_modules[$sub_module_name] = $all_modules[$sub_module_name];
           }
-          else {
-            $dependency_check = FALSE;
-            $dependencies[] = $dependency . ' (' . t('Missing') . ')';
-          }
-        }
-        if ($dependency_check) {
-          $options[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
-        }
-        else {
-          $missing[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
         }
       }
       else {
@@ -669,16 +656,50 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     }
   }
 
+  // Sort based on machine name for a reasonable ordering.
+  ksort($all_new_modules);
+
+  // Build a list of options for the new modules.
+  $options = array();
+  $missing = array();
+  foreach ($all_new_modules as $module_name => $module) {
+    $dependency_check = TRUE;
+    $dependencies = array();
+    foreach ($module->requires as $dependency_name => $dependency_info) {
+      if (isset($all_modules[$dependency_name])) {
+        $dependencies[] = $all_modules[$dependency_name]->info['name'] . ' (' . (module_exists($dependency_name) ? t('Enabled') : t('Downloaded')) . ')';
+      }
+      else {
+        $dependency_check = FALSE;
+        $dependencies[] = $dependency_name . ' (' . t('Missing') . ')';
+      }
+    }
+    if ($dependency_check) {
+      $options[$module_name] = array(
+        array('data' => $module->info['name']),
+        array('data' => $module->info['version']),
+        array('data' => implode(', ', $dependencies)),
+      );
+    }
+    else {
+      $missing[$module_name] = array(
+        array('data' => $module->info['name']),
+        array('data' => $module->info['version']),
+        array('data' => implode(', ', $dependencies)),
+      );
+    }
+  }
+
   $headers = array(
     array('data' => t('Title')),
     array('data' => t('Version'), 'class' => array('priority-medium')),
     array('data' => t('Dependencies'), 'class' => array('priority-low')),
   );
 
-  if(!empty($options) || !empty($missing)) {
+  if (!empty($options) || !empty($missing)) {
     $form['module_instructions'] = array(
-    '#type' => 'item',
-    '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
+      '#type' => 'item',
+      '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     if (!empty($options)) {
       $form['modules'] = array(
@@ -887,7 +908,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  * @param $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
- * return array
+ * @return array
  *   An array of all sort methods, keyed by method name, with each value an
  *   array with the following keys:
  *   - method: Same as the method name key.
