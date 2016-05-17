@@ -135,6 +135,7 @@ function _update_requirement_check($project, $type) {
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
     case UPDATE_NOT_FETCHED:
+    case UPDATE_FETCH_PENDING:
       $requirement_label = isset($project['reason']) ? $project['reason'] : t('Update information not available.');
       $requirement['severity'] = REQUIREMENT_INFO;
       break;
