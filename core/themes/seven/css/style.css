@@ -378,6 +378,9 @@ ul.secondary li.active a.active {
   /* Add a margin to all layouts. */
   margin: 0 20px;
 }
+.container {
+  max-width: 1156px;
+}
 .l-header {
   position: relative;
   padding: 20px 0 0;
