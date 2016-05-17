@@ -2845,8 +2845,10 @@ function _backdrop_bootstrap_page_cache() {
         header('Connection: close');
       }
 
-      // End the request and send the response to the browser.
-      ob_end_flush();
+      // End the request and send the response to the browser. This call has
+      // error suppression on it as some PHP versions may require it (PHP 5.3)
+      // but other PHP versions throw a warning (PHP 5.5).
+      @ob_end_flush();
 
       // Flushing for PHP-FPM based installations.
       if (function_exists('fastcgi_finish_request')) {
