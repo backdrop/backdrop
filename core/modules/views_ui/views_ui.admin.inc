@@ -283,7 +283,7 @@ function views_ui_list_page() {
       'data-label' => t('View info'),
     );
     $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
-    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tag:') . '</span> ' . check_plain($view->tag) . '</div>';
+    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
       'data' => $data,
       'class' => array('views-ui-description'),
@@ -3076,7 +3076,7 @@ function views_ui_edit_details_form($form, &$form_state) {
   );
   $form['details']['tag'] = array(
     '#type' => 'textfield',
-    '#title' => t('View tag'),
+    '#title' => t('View tags'),
     '#description' => t('Optionally, enter a comma delimited list of tags for this view to use in filtering and sorting views on the administrative page.'),
     '#default_value' => $view->tag,
     '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
