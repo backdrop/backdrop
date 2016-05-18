@@ -1081,7 +1081,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['help_text'] = array(
     '#prefix' => '<div class="views-display-help">',
     '#suffix' => '</div>',
-    '#markup' => t('Modify the display(s) of your view below or add new displays.'),
+    '#markup' => t('Modify existing displays of your view or add new ones.'),
   );
 
   $form['actions'] = array(
