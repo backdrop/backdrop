@@ -799,8 +799,8 @@ article .link-wrapper ul.links {
 }
 .comment .comment-arrow {
   background: url(../images/comment-arrow.gif) no-repeat 0 center transparent; /* LTR */
-  border-left: 1px solid;
-  border-right: 1px solid;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
   height: 40px;
   margin-left: -47px; /* LTR */
   margin-top: 10px;
