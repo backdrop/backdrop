@@ -184,7 +184,6 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     }
     backdrop_maintenance_theme();
   }
-
   // When running inside the testing framework, we relay the errors
   // to the tested site by the way of HTTP headers.
   $test_info = &$GLOBALS['backdrop_test_info'];
@@ -203,6 +202,27 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     );
     backdrop_add_http_header('X-Backdrop-Assertion-' . $number, rawurlencode(serialize($assertion)));
     $number++;
+  }
+  elseif(!empty($test_info['in_child_site']) && headers_sent() && (!defined('SIMPLETEST_COLLECT_ERRORS') || SIMPLETEST_COLLECT_ERRORS)) {
+    // There is a rare situation when we have error on test level when headers sent.
+    // We are storing it in file to catch it via stored file.
+    $filename = config_get('system.core', 'file_public_path') . '/error.handler';
+    $assertion = array(
+      $error['!message'],
+      $error['%type'],
+      array(
+        'function' => $error['%function'],
+        'file' => $error['%file'],
+        'line' => $error['%line'],
+      ),
+    );
+    if(is_file($filename)){
+      $assertions = unserialize(file_get_contents($filename));
+    }else{
+      $assertions = array();
+    }
+    $assertions[] = $assertion;
+    file_put_contents($filename, serialize($assertions));
   }
 
   watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
