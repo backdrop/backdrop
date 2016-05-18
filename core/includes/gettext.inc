@@ -901,13 +901,13 @@ function _locale_export_get_strings($language = NULL) {
 /**
  * Generates the PO(T) file contents for the given strings.
  *
- * @param $language
+ * @param stdClass $language
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
- * @param $strings
+ * @param array $strings
  *   Array of strings to export. See _locale_export_get_strings()
  *   on how it should be formatted.
- * @param $header
+ * @param string $header
  *   The header portion to use for the output file. Defaults
  *   are provided for PO and POT files.
  */

@@ -138,8 +138,7 @@ function system_requirements($phase) {
     );
 
     // Make sure PDO is available.
-    $database_ok = extension_loaded('pdo');
-    if (!$database_ok) {
+    if (!extension_loaded('pdo')) {
       $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
         '@link' => 'https://backdropcms.org/requirements',
       ));
@@ -148,14 +147,13 @@ function system_requirements($phase) {
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
-        $database_ok = FALSE;
         $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">system requirements</a> page for more information.', array(
           '@link' => 'http://backdropcms.org/guide/requirements',
         ));
       }
     }
 
-    if (!$database_ok) {
+    if (isset($pdo_message)) {
       $requirements['database_extensions']['value'] = $t('Disabled');
       $requirements['database_extensions']['severity'] = REQUIREMENT_ERROR;
       $requirements['database_extensions']['description'] = $pdo_message;
@@ -167,6 +165,7 @@ function system_requirements($phase) {
   else {
     // Database information.
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
+    /* @var DatabaseTasks $tasks */
     $tasks = new $class();
     $requirements['database_system'] = array(
       'title' => $t('Database system'),
@@ -2107,6 +2106,12 @@ function system_update_1024() {
 function system_update_1025() {
   update_module_enable(array('layout'));
 
+  // When upgrading from Drupal 7 disable legacy layouts initially.
+  $layout_settings_config = config('layout.settings');
+  $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');
+  $layout_settings_config->set('excluded_templates', $legacy);
+  $layout_settings_config->save();
+
   // Manually install schema, as update_module_enable() does not do this for us.
   if (!db_table_exists('cache_layout_path')) {
     $cache_table = backdrop_get_schema_unprocessed('system', 'cache');
@@ -2121,7 +2126,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 1,
-    'layout' => 'one_column',
+    'layout_template' => 'boxton',
     'settings' => array(),
     'positions' => array(
       'content' => array(
@@ -2154,7 +2159,7 @@ function system_update_1025() {
   $admin_config->setData($admin_layout);
   $admin_config->save();
 
-  $layout_name = state_get('upgrade_layout_name', 'three_three_four_column');
+  $layout_name = state_get('upgrade_layout_name', 'simmons');
 
   $default_layout = array(
     'path' => NULL,
@@ -2163,7 +2168,7 @@ function system_update_1025() {
     'description' => NULL,
     'module' => 'layout',
     'weight' => 0,
-    'layout' => $layout_name,
+    'layout_template' => $layout_name,
     'settings' => array(),
     'positions' => array(
       'header' => array(
@@ -2175,9 +2180,6 @@ function system_update_1025() {
       ),
       'footer' => array(
         'cd4d033d-3f67-4191-8655-85ee758877c0',
-      ),
-      'sidebar' => array(
-        'b7efc039-1518-4331-9808-8e5060a3caed',
       ),
       'top' => array(
         '09f11b4e-877e-45ab-9000-a4c6254faa04'
@@ -2220,36 +2222,26 @@ function system_update_1025() {
           'uuid' => 'default',
         ),
       ),
-      'b7efc039-1518-4331-9808-8e5060a3caed' => array(
-        'plugin' => 'user:login',
-        'data' => array(
-          'module' => 'user',
-          'delta' => 'login',
-          'uuid' => 'b7efc039-1518-4331-9808-8e5060a3caed',
-        ),
-      )
     ),
   );
 
   $current_theme = update_variable_get('theme_default', 'bartik');
-
-  // Load the default layout to prepare copying blocks into it.
   $layout_regions = state_get('upgrade_layout_regions', array(
     'header' => 'header',
     'top' => 'top',
     'content' => 'content',
-    'sidebar_first' => 'sidebar_first',
-    'sidebar_second' => 'sidebar_second',
-    'triptych_first' => 'triptych_first',
-    'triptych_middle' => 'triptych_middle',
-    'triptych_last' => 'triptych_last',
-    'footer_firstcolumn' => 'footer_firstcolumn',
-    'footer_secondcolumn' => 'footer_secondcolumn',
-    'footer_thirdcolumn' => 'footer_thirdcolumn',
-    'footer_fourthcolumn' => 'footer_fourthcolumn',
+    'sidebar_first' => 'sidebar',
+    'sidebar_second' => 'sidebar2',
+    'triptych_first' => 'third1',
+    'triptych_middle' => 'third2',
+    'triptych_last' => 'third3',
+    'footer_firstcolumn' => 'quarter1',
+    'footer_secondcolumn' => 'quarter2',
+    'footer_thirdcolumn' => 'quarter3',
+    'footer_fourthcolumn' => 'quarter4',
     'footer' => 'footer',
   ));
-  $default_layout['layout'] = $layout_name;
+  $default_layout['layout_template'] = $layout_name;
 
   // Prepare a node-specific layout to be used if necessary.
   $node_layout = $default_layout;
@@ -2757,6 +2749,54 @@ function system_update_1052() {
 
     // Delete any settings config file if present.
     config('project_browser.settings')->delete();
+  }
+}
+
+/**
+ * Remove unnecessary items from the "main-menu" menu.
+ */
+function system_update_1053() {
+  db_query("DELETE FROM {menu_links} WHERE link_path LIKE '%/\%%' AND module = 'system' AND menu_name = 'main-menu'");
+  db_query("DELETE FROM {menu_links} WHERE link_path LIKE 'search/%' AND module = 'system' AND menu_name = 'main-menu'");
+
+  // Move the 404 redirect link (if present) to the internal menu.
+  $add_redirect_path = config_get('system.core', 'site_404');
+  if (empty($path)) {
+    $add_redirect_path = 'system/404';
+  }
+  $add_redirect_path .= '/add-redirect';
+  db_query("UPDATE {menu_links} SET menu_name = 'internal' WHERE link_path = :redirect_path AND menu_name = 'main-menu'", array(':redirect_path' => $add_redirect_path));
+
+  state_set('menu_rebuild_needed', TRUE);
+}
+
+/**
+ * Changes the key in layout config files from 'layout' to 'layout_template'.
+ */
+function system_update_1054() {
+  $layouts = config_get_names_with_prefix('layout.layout.');
+  foreach ($layouts as $layout_name) {
+    $config = config($layout_name);
+    $configs = $config->get();
+    if (isset($configs['layout'])) {
+      $configs['layout_template'] = $configs['layout'];
+      unset($configs['layout']);
+    }
+    $config->setData($configs);
+    $config->save();
+  }
+}
+
+/**
+ * Create the new layout settings configuration file.
+ */
+function system_update_1055() {
+  $config = config('layout.settings');
+  if ($config->isNew()) {
+    // Upgrading from Backdrop 1.3, disable new layouts initially.
+    $bootstrap = array('boxton', 'geary', 'harris', 'moscone', 'moscone_flipped', 'rolph', 'simmons', 'sutro', 'taylor', 'taylor_flipped');
+    $config->set('excluded_templates', $bootstrap);
+    $config->save();
   }
 }
 

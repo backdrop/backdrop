@@ -18,7 +18,7 @@ Backdrop.behaviors.layoutList = {
   attach: function(context) {
     var $element = $(context).find('.layout-options');
     if ($element.length) {
-      if ($element.css('flex-wrap')) {
+      if (Backdrop.featureDetect.flexbox()) {
         $element.addClass('flexbox');
       }
       else {

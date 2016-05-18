@@ -135,68 +135,45 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test title callback set to FALSE.
+   * Tests title and theme callbacks in hook_menu().
    */
-  function testTitleCallbackFalse() {
+  function testMenuCallbacks() {
+    // Test title callback set to FALSE.
     $this->backdropGet('node');
     $this->assertText('A title with @placeholder', 'Raw text found on the page');
     $this->assertNoText(t('A title with @placeholder', array('@placeholder' => 'some other text')), 'Text with placeholder substitutions not found.');
-  }
 
-  /**
-   * Tests page title of MENU_CALLBACKs.
-   */
-  function testTitleMenuCallback() {
+    // Test page title of MENU_CALLBACK items.
     // Verify that the menu router item title is not visible.
     $this->backdropGet('');
     $this->assertNoText(t('Menu Callback Title'));
     // Verify that the menu router item title is output as page title.
     $this->backdropGet('menu_callback_title');
     $this->assertText(t('Menu Callback Title'));
-  }
 
-  /**
-   * Test the theme callback when it is set to use an administrative theme.
-   */
-  function testThemeCallbackAdministrative() {
+    // Test the theme callback when it is set to use an administrative theme.
     $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The administrative theme can be correctly set in a theme callback.');
     $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
-  }
 
-  /**
-   * Test that the theme callback is properly inherited.
-   */
-  function testThemeCallbackInheritance() {
+    // Test that the theme callback is properly inherited.
     $this->backdropGet('menu-test/theme-callback/use-admin-theme/inheritance');
     $this->assertText('Custom theme: seven. Actual theme: seven. Theme callback inheritance is being tested.', 'Theme callback inheritance correctly uses the administrative theme.');
     $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
-  }
 
-  /**
-   * Test that 'page callback', 'file' and 'file path' keys are properly
-   * inherited from parent menu paths.
-   */
-  function testFileInheritance() {
+    // Test that 'page callback', 'file' and 'file path' keys are properly
+    // inherited from parent menu paths.
     $this->backdropGet('admin/config/development/file-inheritance');
     $this->assertText('File inheritance test description', 'File inheritance works.');
-  }
 
-  /**
-   * Test path containing "exotic" characters.
-   */
-  function testExoticPath() {
+    // Test path containing "exotic" characters.
     $path = "menu-test/ -._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
     $this->backdropGet($path);
     $this->assertRaw('This is menu_test_callback().');
-  }
 
-  /**
-   * Test the theme callback when the site is in maintenance mode.
-   */
-  function testThemeCallbackMaintenanceMode() {
+    // Test the theme callback when the site is in maintenance mode.
     state_set('maintenance_mode', TRUE);
 
     // For a regular user, the fact that the site is in maintenance mode means
@@ -210,26 +187,37 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', 'The theme callback system is correctly triggered for an administrator when the site is in maintenance mode.');
     $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
-
-    config_set('system.core', 'maintenance_mode', FALSE);
-  }
-
-  /**
-   * Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
-   *
-   * @see hook_menu_site_status_alter().
-   */
-  function testMaintenanceModeLoginPaths() {
-    state_set('maintenance_mode', TRUE);
-
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
     $this->backdropLogout();
+
+    // Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
     $this->backdropGet('node');
     $this->assertText($offline_message);
     $this->backdropGet('menu_login_callback');
     $this->assertText('This is menu_login_callback().', 'Maintenance mode can be bypassed through hook_login_paths().');
+    state_set('maintenance_mode', FALSE);
 
-    config_set('system.core', 'maintenance_mode', FALSE);
+    // Test the theme callback when it is set to use an optional theme.
+    // Request a theme that is not enabled.
+    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
+    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when a theme that is not enabled is requested.');
+    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
+
+    // Now enable the theme and request it again.
+    theme_enable(array('stark'));
+    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
+    $this->assertText('Custom theme: stark. Actual theme: stark.', 'The theme callback system uses an optional theme once it has been enabled.');
+    $this->assertRaw('stark/layout.css', "The optional theme's CSS appears on the page.");
+
+    // Test the theme callback when it is set to use a theme that does not exist.
+    $this->backdropGet('menu-test/theme-callback/use-fake-theme');
+    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when a theme that does not exist is requested.');
+    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
+
+    // Test the theme callback when no theme is requested.
+    $this->backdropGet('menu-test/theme-callback/no-theme-requested');
+    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when no theme is requested.');
+    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
   }
 
   /**
@@ -247,40 +235,6 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // user/register should redirect to user/UID/edit.
     $this->backdropGet('user/register');
     $this->assertTrue($this->url == url('user/' . $this->loggedInUser->uid . '/edit', array('absolute' => TRUE)), "Logged-in user redirected to q=user/UID/edit on accessing q=user/register");
-  }
-
-  /**
-   * Test the theme callback when it is set to use an optional theme.
-   */
-  function testThemeCallbackOptionalTheme() {
-    // Request a theme that is not enabled.
-    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
-    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when a theme that is not enabled is requested.');
-    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
-
-    // Now enable the theme and request it again.
-    theme_enable(array('stark'));
-    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
-    $this->assertText('Custom theme: stark. Actual theme: stark.', 'The theme callback system uses an optional theme once it has been enabled.');
-    $this->assertRaw('stark/layout.css', "The optional theme's CSS appears on the page.");
-  }
-
-  /**
-   * Test the theme callback when it is set to use a theme that does not exist.
-   */
-  function testThemeCallbackFakeTheme() {
-    $this->backdropGet('menu-test/theme-callback/use-fake-theme');
-    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when a theme that does not exist is requested.');
-    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
-  }
-
-  /**
-   * Test the theme callback when no theme is requested.
-   */
-  function testThemeCallbackNoThemeRequested() {
-    $this->backdropGet('menu-test/theme-callback/no-theme-requested');
-    $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when no theme is requested.');
-    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
   }
 
   /**
@@ -988,6 +942,20 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
    * Tests breadcrumbs on node and administrative paths.
    */
   function testBreadCrumbs() {
+    foreach (array('default', 'admin_default') as $layout_name) {
+      $layout = layout_load($layout_name);
+      // Assume that the menu block is the second block in the default layout.
+      $menu_uuid = $layout->positions['header'][1];
+      $menu_block = $layout->content[$menu_uuid];
+
+      // Set the menu block depth and level.
+      $menu_block->settings['block_settings']['level'] = 1;
+      $menu_block->settings['block_settings']['depth'] = 0;
+
+      // Save the layout containing the block.
+      $layout->save();
+    }
+
     // Prepare common base breadcrumb elements.
     $home = array('<front>' => 'Home');
     $admin = $home + array('admin' => t('Administration'));
@@ -1465,6 +1433,18 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $layout = layout_load('admin_default');
     $layout->addBlock('system', 'management', 'content');
     $layout->addBlock('system', 'main-menu', 'content');
+    $layout->save();
+    // Set the main menu link depth to unlimited.
+    $layout = layout_load('default');
+    // Assume that the menu block is the second block in the default layout.
+    $menu_uuid = $layout->positions['header'][1];
+    $menu_block = $layout->content[$menu_uuid];
+
+    // Set the menu block depth and level.
+    $menu_block->settings['block_settings']['level'] = 1;
+    $menu_block->settings['block_settings']['depth'] = 0;
+
+    // Save the layout containing the block.
     $layout->save();
   }
 

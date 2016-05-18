@@ -129,11 +129,11 @@ class LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_info($layout->layout);
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
     $this->layout = &$layout;
 
     if (empty($layout_info)) {
-      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout, '@title' => $layout->title)));
+      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
     }
     else {
       $this->layout_info = $layout_info;
@@ -339,7 +339,7 @@ class LayoutRendererStandard {
 
     module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
-      $theme = 'layout__' . $this->layout->layout;
+      $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
       $theme = str_replace('-', '_', $this->layout_info['template']);
@@ -360,6 +360,11 @@ class LayoutRendererStandard {
         foreach ($file_names as $file_name) {
           $this->addCss($this->layout_info['path'] . '/' . $file_name, array('media' => $media));
         }
+      }
+    }
+    if (!empty($this->layout_info['libraries'])) {
+      foreach ($this->layout_info['libraries'] as $library) {
+        $this->addLibrary('layout', $library);
       }
     }
   }
@@ -386,6 +391,13 @@ class LayoutRendererStandard {
         $this->prefix .= '<link rel="stylesheet" href="' . $url . '" />' . "\n";
         break;
     }
+  }
+
+  /**
+   * Add Library information to the renderer.
+   */
+  function addLibrary($module, $name) {
+    backdrop_add_library($module, $name);
   }
 
   /**

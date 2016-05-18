@@ -195,28 +195,6 @@ function hook_cron_queue_info_alter(&$queues) {
   $queues['aggregator_feeds']['time'] = 90;
 }
 
- /**
- * Work on a single queue item.
- *
- * Callback for hook_queue_info().
- *
- * @param $queue_item_data
- *   The data that was passed to BackdropQueue::createItem() when the item was
- *   queued.
- *
- * @throws \Exception
- *   The worker callback may throw an exception to indicate there was a problem.
- *   The cron process will log the exception, and leave the item in the queue to
- *   be processed again later.
- *
- * @see backdrop_cron_run()
- */
-function callback_queue_worker($queue_item_data) {
-  $node = node_load($queue_item_data);
-  $node->title = 'Updated title';
-  $node->save();
-}
-
 /**
  * Work on a single queue item.
  *
@@ -1013,11 +991,11 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   $data['actions']['output'][] = array(
     '#theme' => 'menu_local_task',
     '#link' => array(
-      'title' => t('Add new content'),
+      'title' => t('Add content'),
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
@@ -1031,7 +1009,7 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
@@ -2122,31 +2100,31 @@ function hook_stream_wrappers() {
     'public' => array(
       'name' => t('Public files'),
       'class' => 'BackdropPublicStreamWrapper',
-      'description' => t('Public local files served by the webserver.'),
+      'description' => t('Public local files served by the webserver'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'private' => array(
       'name' => t('Private files'),
       'class' => 'BackdropPrivateStreamWrapper',
-      'description' => t('Private local files served by Backdrop.'),
+      'description' => t('Private local files served by Backdrop'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'temp' => array(
       'name' => t('Temporary files'),
       'class' => 'BackdropTempStreamWrapper',
-      'description' => t('Temporary local files for upload and previews.'),
+      'description' => t('Temporary local files for upload and previews'),
       'type' => STREAM_WRAPPERS_LOCAL_HIDDEN,
     ),
     'cdn' => array(
       'name' => t('Content delivery network files'),
       'class' => 'MyModuleCDNStreamWrapper',
-      'description' => t('Files served by a content delivery network.'),
+      'description' => t('Files served by a content delivery network'),
       // 'type' can be omitted to use the default of STREAM_WRAPPERS_NORMAL
     ),
     'youtube' => array(
       'name' => t('YouTube video'),
       'class' => 'MyModuleYouTubeStreamWrapper',
-      'description' => t('Video streamed from YouTube.'),
+      'description' => t('Video streamed from YouTube'),
       // A module implementing YouTube integration may decide to support using
       // the YouTube API for uploading video, but here, we assume that this
       // particular module only supports playing YouTube video.

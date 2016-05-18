@@ -15,6 +15,19 @@ class MenuTestCase extends BackdropWebTestCase {
     // Create users.
     $this->big_user = $this->backdropCreateUser(array('access administration pages', 'administer blocks', 'administer menu', 'create post content'));
     $this->std_user = $this->backdropCreateUser(array());
+
+    // Set the main menu link depth to unlimited.
+    $layout = layout_load('default');
+    // Assume that the menu block is the second block in the default layout.
+    $menu_uuid = $layout->positions['header'][1];
+    $menu_block = $layout->content[$menu_uuid];
+
+    // Set the menu block depth and level.
+    $menu_block->settings['block_settings']['level'] = 1;
+    $menu_block->settings['block_settings']['depth'] = 0;
+
+    // Save the layout containing the block.
+    $layout->save();
   }
 
   /**
@@ -227,6 +240,23 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertMenuLink($item4['mlid'], array('depth' => 1, 'has_children' => 1, 'p1' => $item4['mlid'], 'p2' => 0));
     $this->assertMenuLink($item5['mlid'], array('depth' => 2, 'has_children' => 0, 'p1' => $item4['mlid'], 'p2' => $item5['mlid'], 'p3' => 0));
 
+    // Add an alias to node 4 to test adding a menu link via alias.
+    $node4->path = array(
+      'pid' => NULL,
+      'source' => 'node/' . $node4->nid,
+      'alias' => 'node' . $node4->nid . '-alias',
+      'langcode' => LANGUAGE_NONE,
+      'auto' => FALSE,
+    );
+    $node4->save();
+
+    $item6 = $this->addMenuLink(0, 'node' . $node4->nid . '-alias', $menu_name);
+    $this->assertMenuLink($item6['mlid'], array('link_path' => 'node/' . $node4->nid));
+
+    // Check that the menu UI shows the alias for the node and not the source.
+    $this->backdropGet('admin/structure/menu/item/' . $item6['mlid'] . '/edit');
+    $this->assertFieldByXPath('//input[@name="link_path"]', 'node' . $node4->nid . '-alias');
+
     // Modify menu links.
     $this->modifyMenuLink($item1);
     $this->modifyMenuLink($item2);
@@ -310,9 +340,15 @@ class MenuTestCase extends BackdropWebTestCase {
     // Unlike most other modules, there is no confirmation message displayed.
     $this->assertText($title, 'Menu link was added');
 
+    // Resolve aliases if used.
+    $source = backdrop_lookup_path('source', $link);
+    if (empty($source)) {
+      $source = $link;
+    }
+
     $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => $title))->fetchAssoc();
     $this->assertTrue(t('Menu link was found in database.'));
-    $this->assertMenuLink($item['mlid'], array('menu_name' => $menu_name, 'link_path' => $link, 'has_children' => 0, 'plid' => $plid));
+    $this->assertMenuLink($item['mlid'], array('menu_name' => $menu_name, 'link_path' => $source, 'has_children' => 0, 'plid' => $plid));
 
     return $item;
   }
@@ -513,7 +549,7 @@ class MenuTestCase extends BackdropWebTestCase {
       $item['link_path'] .= '#' . $options['fragment'];
     }
     foreach ($expected_item as $key => $value) {
-      $this->assertEqual($item[$key], $value, format_string('Parameter %key had expected value.', array('%key' => $key)));
+      $this->assertEqual($item[$key], $value, format_string('Parameter %key had value %actual, expected %expected for the %path path.', array('%key' => $key, '%path' => $item['link_path'], '%actual' => $item[$key], '%expected' => $value)));
     }
   }
 

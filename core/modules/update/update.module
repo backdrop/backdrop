@@ -526,10 +526,22 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
-      $text = t('Update version checking not enabled.');
+    if ($msg_type == 'core') {
+        $text = t('Update checking is not available for your version of Backdrop.');
+      }
+      else {
+        $text = t('Update checking is not available for some of your projects.');
+      }
+      break;
+    case UPDATE_FETCH_PENDING:
+      if ($msg_type == 'core') {
+        $text = t('Update may be needed for your version of Backdrop.');
+      }
+      else {
+        $text = t('Updates may be needed for one or more of your projects.');
+      }
       break;
     case UPDATE_NOT_FETCHED:
-    case UPDATE_FETCH_PENDING:
       if ($msg_type == 'core') {
         $text = t('There was a problem checking <a href="@update-report">available updates</a> for Backdrop.', array('@update-report' => url('admin/reports/updates')), array('langcode' => $langcode));
       }
@@ -544,12 +556,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
   }
 
   if ($report_link) {
-    if (update_manager_access()) {
-      $text .= ' ' . t('See the <a href="@available_updates">available updates</a> page for more information and to install your missing updates.', array('@available_updates' => url('admin/reports/updates/update', array('language' => $language))), array('langcode' => $langcode));
-    }
-    else {
-      $text .= ' ' . t('See the <a href="@available_updates">available updates</a> page for more information.', array('@available_updates' => url('admin/reports/updates', array('language' => $language))), array('langcode' => $langcode));
-    }
+    $text .= ' ' . t('See the <a href="@available_updates">available updates</a> page for more information.', array('@available_updates' => url('admin/reports/updates', array('language' => $language))), array('langcode' => $langcode));
   }
 
   return $text;

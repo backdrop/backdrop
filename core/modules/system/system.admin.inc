@@ -1229,7 +1229,7 @@ function system_site_information_settings($form, &$form_state) {
   $form['error_page']['site_403'] = array(
     '#type' => 'textfield',
     '#title' => t('Default 403 (access denied) page'),
-    '#default_value' => $site_config->get('site_403'),
+    '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
@@ -1237,12 +1237,12 @@ function system_site_information_settings($form, &$form_state) {
   $form['error_page']['site_404'] = array(
     '#type' => 'textfield',
     '#title' => t('Default 404 (not found) page'),
-    '#default_value' => $site_config->get('site_404'),
+    '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
   );
-
+  
   $form['#validate'][] = 'system_site_information_settings_validate';
 
   $form['actions']['#type'] = 'actions';
@@ -1467,7 +1467,7 @@ function system_cron_settings($form, &$form_state) {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
-  
+
   $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
@@ -2194,7 +2194,7 @@ function system_urls_settings($form, &$form_state) {
       '#value' => 1,
     );
   }
-  
+
   $form['canonical_secure'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),

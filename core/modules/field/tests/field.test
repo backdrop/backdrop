@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for field.module.
@@ -3494,7 +3493,7 @@ class FieldBlockTestCase extends FieldTestCase {
     $edit = array(
       'title' => 'Post layout',
       'name' => 'node_post',
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.

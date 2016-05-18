@@ -558,7 +558,7 @@ class TokenMenuTestCase extends TokenTestHelper {
       'menu:name' => 'Primary navigation',
       'menu:machine-name' => 'main-menu',
       'menu:description' => 'The <em>Primary navigation</em> menu is used on many sites to show the major sections of the site, often in a top navigation bar.',
-      'menu:menu-link-count' => 11,
+      'menu:menu-link-count' => 2,
       'menu:edit-url' => url("admin/structure/menu/manage/main-menu", array('absolute' => TRUE)),
       'url' => url('root/parent', array('absolute' => TRUE)),
       'url:absolute' => url('root/parent', array('absolute' => TRUE)),

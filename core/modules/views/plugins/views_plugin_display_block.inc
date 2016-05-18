@@ -82,7 +82,7 @@ class views_plugin_display_block extends views_plugin_display {
 
     $options['block_description'] = array(
       'category' => 'block',
-      'title' => t('Block name'),
+      'title' => t('Block admin label'),
       'value' => views_ui_truncate($block_description, 24),
     );
 
@@ -130,10 +130,10 @@ class views_plugin_display_block extends views_plugin_display {
 
     switch ($form_state['section']) {
       case 'block_description':
-        $form['#title'] .= t('Block admin description');
+        $form['#title'] .= t('Block admin label');
         $form['block_description'] = array(
           '#type' => 'textfield',
-          '#description' => t('This will appear as the name of this block when adding it to a layout at administer >> structure >> layouts.'),
+          '#description' => t('Used in administrative interfaces and not shown to end-users.'),
           '#default_value' => $this->get_option('block_description'),
         );
         break;

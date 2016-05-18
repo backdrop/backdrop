@@ -195,3 +195,9 @@ name = Messages
 description = Tests that messages can be displayed using backdrop_set_message().
 group = System
 file = tests/system.test
+
+[MenuBlockTestCase]
+name = Menu Block tests
+description = Tests limiting menu block level and depth.
+group = System
+file = tests/system.test

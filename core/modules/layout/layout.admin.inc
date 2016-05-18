@@ -29,11 +29,18 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => 2);
+      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
+      // Empty columns are intentional so that they may be hidden with
+      // priority-low class on the $header array.
+      $row[] = '';
+      $row[] = '';
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link, 'colspan' => 2);
+      $row[] = array('data' => $path_link);
+      // Empty columns are intentional.
+      $row[] = '';
+      $row[] = '';
     }
     $row[] = backdrop_render($operations);
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
@@ -52,8 +59,10 @@ function layout_list_page() {
       else {
         $storage = t('Custom');
       }
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = theme('layout_condition_info', array('layout' => $layout));
       $row[] = $storage;
       $row[] = backdrop_render($operations);
       $class = array('layout-row');
@@ -65,7 +74,8 @@ function layout_list_page() {
   }
 
   $header = array(
-    array('data' => t('Layout and path'), 'class' => array('layout-title')),
+    array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
@@ -97,6 +107,10 @@ function _layout_get_operations(Layout $layout) {
   $links['edit'] = array(
     'title' => t('Edit'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
+  );
+  $links['settings'] = array(
+    'title' => t('Settings'),
+    'href' => 'admin/structure/layouts/manage/' . $layout->name . '/settings',
   );
   if (!$layout->isDefault()) {
     $links['clone'] = array(
@@ -221,18 +235,23 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
-  $form['layout'] = array(
-    '#title' => t('Layout'),
+  $form['layout_template'] = array(
+    '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => $layout->layout,
+    '#default_value' => $layout->layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
-  // Get the list of layout options.
-  $all_layout_info = layout_get_layout_info();
-  foreach ($all_layout_info as $layout_name => $layout_info) {
-    $form['layout']['#options'][$layout_name] = theme('layout_option', array('layout_info' => $layout_info));
+
+  // Get the list of layout template options.
+  $all_template_info = layout_get_layout_template_info();
+  $excluded = config_get('layout.settings', 'excluded_templates');
+  //dpm($excluded);
+  foreach ($all_template_info as $template_name => $template_info) {
+    if (!in_array($template_name, $excluded)) {
+      $form['layout_template']['#options'][$template_name] = theme('layout_template_option', array('template_info' => $template_info));
+    }
   }
 
   $form['path'] = array(
@@ -544,8 +563,10 @@ function layout_settings_form_update_layout($form, &$form_state) {
   if (isset($form_state['values']['name'])) {
     $layout->name = $form_state['values']['name'];
   }
-  if (isset($form_state['values']['layout'])) {
-    $layout->setLayout($form_state['values']['layout']);
+  if (isset($form_state['values']['layout_template'])) {
+    $new = $form_state['values']['layout_template'];
+    $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
+    $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
@@ -607,6 +628,45 @@ function layout_settings_form_update_layout($form, &$form_state) {
 }
 
 /**
+ * Returns an array of mappings from old region names to new.
+ */
+function layout_get_legacy_region_mapping($old, $new) {
+  $region_mapping = array();
+  $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');
+  $bootstrap = array('boxton', 'geary', 'harris', 'moscone', 'moscone_flipped', 'rolph', 'simmons', 'sutro', 'taylor', 'taylor_flipped');
+
+  if (in_array($old, $legacy) && in_array($new, $bootstrap)) {
+    $region_mapping = array(
+      'sidebar_first'       => 'sidebar',
+      'sidebar_second'      => 'sidebar2',
+      'triptych_first'      => 'third1',
+      'triptych_middle'     => 'third2',
+      'triptych_last'       => 'third3',
+      'footer_firstcolumn'  => 'quarter1',
+      'footer_secondcolumn' => 'quarter2',
+      'footer_thirdcolumn'  => 'quarter3',
+      'footer_fourthcolumn' => 'quarter4',
+    );
+  }
+
+  if (in_array($old, $bootstrap) && in_array($new, $legacy)) {
+    $region_mapping = array(
+      'sidebar'  => 'sidebar_first',
+      'sidebar2' => 'sidebar_second',
+      'third1'   => 'triptych_first',
+      'third2'   => 'triptych_middle',
+      'third3'   => 'triptych_last',
+      'quarter1' => 'footer_firstcolumn',
+      'quarter2' => 'footer_secondcolumn',
+      'quarter3' => 'footer_thirdcolumn',
+      'quarter4' => 'footer_fourthcolumn',
+    );
+  }
+
+  return $region_mapping;
+}
+
+/**
  * Submit handler for layout_settings_form() that resets in-progress changes.
  */
 function layout_settings_form_reset($form, &$form_state) {
@@ -632,9 +692,10 @@ function layout_settings_form_save_submit($form, &$form_state) {
   if (!empty($layout->is_new)) {
     $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
     $default_layout = layout_load($default_layout_name);
-    $layout_info = layout_get_layout_info($layout->layout);
+    // Get the template being used by this layout.
+    $template_info = layout_get_layout_template_info($layout->layout_template);
     foreach ($default_layout->positions as $region => $region_block_list) {
-      if (array_key_exists($region, $layout_info['regions'])) {
+      if (array_key_exists($region, $template_info['regions'])) {
         foreach ($region_block_list as $uuid) {
           if (isset($default_layout->content[$uuid])) {
             $block = $default_layout->content[$uuid];
@@ -714,7 +775,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   $form['title_display']['#tree'] = FALSE;
   $form['title_display']['title_display'] = array(
     '#type' => 'select',
-    '#title' => t('Block title type'),
+    '#title' => t('Page title type'),
     '#default_value' => $layout->settings['title_display'],
     '#options' => array(
       LAYOUT_TITLE_DEFAULT => t('Default title'),
@@ -870,8 +931,8 @@ function layout_content_form_submit($form, &$form_state) {
  */
 function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
-  $layout_info = layout_get_layout_info($layout->layout);
-  if (!array_key_exists($region_name, $layout_info['regions'])) {
+  $template_info = layout_get_layout_template_info($layout->layout_template);
+  if (!array_key_exists($region_name, $template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
 
@@ -1002,12 +1063,12 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     $form['#title'] = t('Configure block "!title"', array('!title' => $block->getAdminTitle()));
   }
 
-  $layout_info = layout_get_layout_info($layout->layout);
+  $template_info = layout_get_layout_template_info($layout->layout_template);
   $form['region'] = array(
     '#type' => 'select',
     '#title' => t('Region'),
     '#default_value' => $region_name,
-    '#options' => $layout_info['regions'],
+    '#options' => $template_info['regions'],
     '#access' => backdrop_is_html(), // Only show this on non-JS requests.
   );
 
@@ -1418,6 +1479,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     '#markup' => '<p>' . $help . '</p>',
   );
   $all_access_info = _layout_get_all_info('layout_access');
+  backdrop_sort($all_access_info, array('title'));
   $form['condition'] = array(
     '#type' => 'select',
     '#title' => t('Visibility condition'),
@@ -2392,12 +2454,96 @@ function layout_ajax_form_update($form, $form_state) {
 }
 
 /**
+ * Administrative form for layout settings.
+ */
+function layout_settings_page($form, &$form_state) {
+  $excluded = config_get('layout.settings', 'excluded_templates');
+
+  $form = array();
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attributes']['class'] = array('layout-settings-page');
+
+  // Get the list of layout template options.
+  $all_layout_info = layout_get_layout_template_info();
+  $options = array();
+  $default = array();
+  $form_state['hidden_templates'] = array();
+  foreach ($all_layout_info as $template_name => $template_info) {
+    // Build the default values list.
+    if (!in_array($template_name, $excluded)) {
+      $default[] = $template_name;
+    }
+
+    // Build the list of possible options, either enabled or not hidden.
+    if (in_array($template_name, $default) || !$template_info['hidden']) {
+      $options[$template_name] = theme('layout_template_option', array('template_info' => $template_info));
+    }
+    // For disabled and hidden templates, save the fact they are disabled.
+    elseif ($template_info['hidden']) {
+      $form_state['hidden_templates'][] = $template_name;
+    }
+  }
+
+  $form['templates'] = array(
+    '#title' => t('Available layout templates'),
+    '#description' => t('Only templates that are selected here will be available when configuring layouts.'),
+    '#type' => 'checkboxes',
+    '#default_value' => $default,
+    '#options' => $options,
+    '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
+  );
+
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Validation for layout settings page.
+ *
+ * Ensures that active layouts are not disabled while in use.
+ */
+function layout_settings_page_validate(&$form, &$form_state) {
+  $options = array_keys($form_state['values']['templates']);
+  $included = array_values($form_state['values']['templates']);
+  $excluded = array_unique(array_diff($options, $included));
+  $form_state['excluded_templates'] = array_values(array_merge($excluded, $form_state['hidden_templates']));
+
+  // Ensure all layouts are not disabled.
+  if (empty($form_state['values']['templates'])) {
+    form_set_error('templates', t('At least one layout template must be enabled.'));
+  }
+
+  // Check which layout templates are in use.
+  foreach (layout_load_all() as $layout) {
+    $info = layout_get_layout_template_info($layout->layout_template);
+    if (in_array($layout->layout_template, $excluded)) {
+      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
+    }
+  }
+}
+
+/**
+ * Submit handler for layout advanced settings page.
+ */
+function layout_settings_page_submit($form, &$form_state) {
+  config_set('layout.settings', 'excluded_templates', $form_state['excluded_templates']);
+  backdrop_set_message(t('Your configuration has been saved.'));
+}
+
+/**
  * Menu callback; Show the region styles form.
  */
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_info = layout_get_layout_info($layout->layout);
+  $layout_info = layout_get_layout_template_info($layout->layout_template);
   if (!array_key_exists($region_name, $layout_info['regions'])) {
     return MENU_NOT_FOUND;
   }

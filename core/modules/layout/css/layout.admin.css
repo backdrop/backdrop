@@ -12,10 +12,44 @@
   color: #999;
 }
 
+@media (min-width: 768px) {
+  #layout-list span.priority-low {
+    display: inline;
+  }
+}
+
+#layout-list img {
+  display: none;
+  float: left; /* LTR */
+  margin-right: 10px;
+  max-width: 37.5px;
+  height: auto;
+}
+[dir="rtl"] #layout-list img {
+  float: right; /* LTR */
+  margin-right: 0;
+  margin-left: 10px;
+}
+@media (min-width: 768px) {
+  #layout-list img {
+    display: inline;
+  }
+}
+
+#layout-list .layout-conditions-list ul {
+  margin-left: 0;
+}
+
+#layout-list .layout-title {
+  font-weight: bold;
+}
+
 /* Individual layout settings form. */
+.layout-settings-page .form-type-checkboxes,
 .layout-settings-form .form-type-radios {
   width: 100%;
 }
+.layout-settings-page .layout-options .form-checkboxes,
 .layout-settings-form .layout-options .form-radios {
   display: -webkit-box;
   display: -webkit-flex;
@@ -27,17 +61,25 @@
   line-height: 1.3;
   max-width: calc(100vw - 60px); /* Fix flex-wrap issue in some browsers */
 }
+.layout-settings-page .layout-options.no-flexbox .form-checkboxes,
 .layout-settings-form .layout-options.no-flexbox .form-radios {
   display: block;
 }
+.layout-settings-page .layout-options .form-type-checkbox,
 .layout-settings-form .layout-options .form-type-radio {
   width: 100px;
   margin: 0 5px 5px 0;
   padding: 0;
   text-align: center;
 }
+.layout-settings-page .layout-options.no-flexbox .form-type-checkbox,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio {
   float: left;
+}
+.layout-settings-page .layout-options .form-item input.form-checkbox {
+  /* Needed to override Seven's style.css */
+  margin-right: 0;
+  margin-left: 0;
 }
 
 /* Menu item argument settings. */
@@ -89,11 +131,14 @@
 
 /* Layout editor. */
 .layout-editor-region {
+  width: 100%;
   min-height: 70px;
   margin: 0 0 15px;
   padding: 8px;
   border: 1px dashed #CCC;
   background: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .layout-editor-region-title .label {
   float: left;
@@ -110,7 +155,7 @@
 }
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
-  width: 200px;
+  width: 140px;
   margin: 4px 0 10px
 }
 .layout-editor-region .dropbutton-wrapper a {

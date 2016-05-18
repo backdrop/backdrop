@@ -283,7 +283,7 @@ function views_ui_list_page() {
       'data-label' => t('View info'),
     );
     $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
-    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tag:') . '</span> ' . check_plain($view->tag) . '</div>';
+    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
       'data' => $data,
       'class' => array('views-ui-description'),
@@ -373,12 +373,12 @@ function _views_ui_get_operations(view $view) {
  */
 function views_ui_add_page() {
   views_ui_add_admin_css();
-  backdrop_set_title(t('Add new view'));
+  backdrop_set_title(t('Add view'));
   return backdrop_get_form('views_ui_add_form');
 }
 
 /**
- * Form builder for the "add new view" page.
+ * Form builder for the "Add view" page.
  */
 function views_ui_add_form($form, &$form_state) {
   $form['#attached']['js'][] = backdrop_get_path('module', 'views_ui') . '/js/views-admin.js';
@@ -3076,7 +3076,7 @@ function views_ui_edit_details_form($form, &$form_state) {
   );
   $form['details']['tag'] = array(
     '#type' => 'textfield',
-    '#title' => t('View tag'),
+    '#title' => t('View tags'),
     '#description' => t('Optionally, enter a comma delimited list of tags for this view to use in filtering and sorting views on the administrative page.'),
     '#default_value' => $view->tag,
     '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',

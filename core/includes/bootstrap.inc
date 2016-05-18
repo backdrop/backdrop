@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.3.x-dev');
+define('BACKDROP_VERSION', '1.4.x-dev');
 
 /**
  * Core API compatibility.
@@ -945,8 +945,8 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
   else {
     try {
       // Layouts we use the existing registry rather than the system table.
-      if ($type === 'layout' && function_exists('layout_get_layout_info')) {
-        $layout_info = layout_get_layout_info($name);
+      if ($type === 'layout' && function_exists('layout_get_layout_template_info')) {
+        $layout_info = layout_get_layout_template_info($name);
         if ($layout_info) {
           $files[$type][$name] = $layout_info['path'] . '/' . $layout_info['name'] . '.info';
         }
@@ -1286,7 +1286,7 @@ function state_del($name) {
  *   FALSE, only cache entries within the maximum cache lifetime will be
  *   returned.
  *
- * @return
+ * @return stdClass|NULL
  *   The cache object, if the page was found in the cache, NULL otherwise.
  */
 function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
@@ -1746,7 +1746,7 @@ function backdrop_unpack($obj, $field = 'data') {
  * @code
  * $text = t("@name's blog", array('@name' => user_format_name($account)));
  * @endcode
- * Basically, you can put variables like @name into your string, and t() will
+ * Basically, you can put variables like "@name" into your string, and t() will
  * substitute their sanitized values at translation time. (See the
  * Localization API pages referenced above and the documentation of
  * format_string() for details about how to define variables in your string.)
@@ -2845,8 +2845,10 @@ function _backdrop_bootstrap_page_cache() {
         header('Connection: close');
       }
 
-      // End the request and send the response to the browser.
-      ob_end_flush();
+      // End the request and send the response to the browser. This call has
+      // error suppression on it as some PHP versions may require it (PHP 5.3)
+      // but other PHP versions throw a warning (PHP 5.5).
+      @ob_end_flush();
 
       // Flushing for PHP-FPM based installations.
       if (function_exists('fastcgi_finish_request')) {
