@@ -2120,7 +2120,7 @@ function node_page_default() {
 
     $default_links = array();
     if (_node_add_access()) {
-      $default_links[] = l(t('Add new content'), 'node/add');
+      $default_links[] = l(t('Add content'), 'node/add');
     }
     if (!empty($default_links)) {
       $default_message .= theme('item_list', array('items' => $default_links));
