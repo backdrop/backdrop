@@ -492,7 +492,7 @@ function user_admin_roles($form, $form_state) {
 
   $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Add new role'),
+    '#title' => t('Add role'),
     '#title_display' => 'invisible',
     '#required' => TRUE,
     '#size' => 32,
