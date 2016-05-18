@@ -373,12 +373,12 @@ function _views_ui_get_operations(view $view) {
  */
 function views_ui_add_page() {
   views_ui_add_admin_css();
-  backdrop_set_title(t('Add new view'));
+  backdrop_set_title(t('Add view'));
   return backdrop_get_form('views_ui_add_form');
 }
 
 /**
- * Form builder for the "add new view" page.
+ * Form builder for the "Add view" page.
  */
 function views_ui_add_form($form, &$form_state) {
   $form['#attached']['js'][] = backdrop_get_path('module', 'views_ui') . '/js/views-admin.js';

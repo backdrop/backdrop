@@ -104,7 +104,7 @@
   </div>
 
   <?php
-    // Remove the "Add new comment" link on the teaser page or if the comment
+    // Remove the "Add comment" link on the teaser page or if the comment
     // form is being displayed on the same page.
     if ($teaser || !empty($comments['comment_form'])) {
       unset($content['links']['comment']['#links']['comment-add']);
@@ -126,7 +126,7 @@
       <?php endif; ?>
 
       <?php if ($comments['comment_form']): ?>
-        <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
+        <h2 class="title comment-form"><?php print t('Add comment'); ?></h2>
         <?php print render($comments['comment_form']); ?>
       <?php endif; ?>
     </section>

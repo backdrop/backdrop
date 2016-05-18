@@ -236,7 +236,7 @@ function comment_menu() {
     'weight' => 2,
   );
   $items['comment/reply/%node'] = array(
-    'title' => 'Add new comment',
+    'title' => 'Add comment',
     'page callback' => 'comment_reply',
     'page arguments' => array(2),
     'access callback' => 'node_access',
@@ -639,7 +639,7 @@ function comment_node_view(Node $node, $view_mode) {
         $comment_form_location = $node_type->settings['comment_form_location'];
         if (user_access('post comments')) {
           $links['comment-add'] = array(
-            'title' => t('Add new comment'),
+            'title' => t('Add comment'),
             'href' => "node/$node->nid",
             'attributes' => array('title' => t('Add a new comment to this page.')),
             'fragment' => 'comment-form',
@@ -668,7 +668,7 @@ function comment_node_view(Node $node, $view_mode) {
           // if there are existing comments that the link will skip past.
           if ($comment_form_location == COMMENT_FORM_SEPARATE_PAGE || (!empty($node->comment_count) && user_access('access comments'))) {
             $links['comment-add'] = array(
-              'title' => t('Add new comment'),
+              'title' => t('Add comment'),
               'attributes' => array('title' => t('Share your thoughts and opinions related to this posting.')),
               'href' => "node/$node->nid",
               'fragment' => 'comment-form',
