@@ -2272,6 +2272,13 @@ class views_display {
    */
   var $display_options;
 
+  /**
+   * The position of this display relative to other displays.
+   *
+   * @var int
+   */
+  var $position = 0;
+
   function __construct($type, $id, $title, $display_options = array()) {
     $this->display_plugin = $type;
     $this->id = $id;
