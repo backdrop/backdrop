@@ -1806,6 +1806,15 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function checkForBackgroundExceptions() {
     $filename = config_get('system.core', 'file_public_path') . '/error.handler';
     if(is_file($filename)){
+      
+      // Stupid enough method to make sure that changes to this file
+      // has been finished. Lock file is a better solution here.
+      $filetime = filemtime($filename);
+      while($filetime + 1 > time()){
+        $filetime = filemtime($filename);
+        sleep(1);  
+      }
+
       $assertions = unserialize(file_get_contents($filename));
       foreach($assertions as $assertion){
         call_user_func_array(array(&$this, 'error'), $assertion);
