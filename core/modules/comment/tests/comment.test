@@ -484,7 +484,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
     $this->assertLink(t('Read more'));
     $count = $this->xpath('//article[@id=:id]//ul/li', array(':id' => 'node-' . $this->node->nid));
-    $this->assertTrue(count($count) == 2, 'Two node links found (Read more and Add new comment)');
+    $this->assertTrue(count($count) == 2, 'Two node links found ("Read more" and "Add comment")');
 
     // Create a new comment. This helper function may be run with different
     // comment settings so use comment_save() to avoid complex setup.
@@ -936,7 +936,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
       // User is not allowed to post comments.
       if (!$info['post comments']) {
-        $this->assertNoLink('Add new comment');
+        $this->assertNoLink('Add comment');
 
         // Anonymous users should see a note to log in or register in case
         // authenticated users are allowed to post comments.
@@ -961,15 +961,15 @@ class CommentInterfaceTest extends CommentHelperCase {
       else {
         $this->assertNoText('Log in or register to post comments');
 
-        // "Add new comment" is always expected, except when there are no
+        // "Add comment" is always expected, except when there are no
         // comments or if the user cannot see them.
         if ($path == "node/$nid" && $info['form'] == COMMENT_FORM_BELOW && (!$info['comment count'] || !$info['access comments'])) {
-          $this->assertNoLink('Add new comment');
+          $this->assertNoLink('Add comment');
         }
         else {
-          $this->assertLink('Add new comment');
+          $this->assertLink('Add comment');
 
-          // Verify that the "Add new comment" link points to the correct URL
+          // Verify that the "Add comment" link points to the correct URL
           // based on the comment form location configuration.
           if ($info['form'] == COMMENT_FORM_SEPARATE_PAGE) {
             $this->assertLinkByHref("comment/reply/$nid#comment-form", 0, 'Comment form link destination is on a separate page.');
@@ -1229,7 +1229,7 @@ class CommentAnonymous extends CommentHelperCase {
     // "Login or register to post comments" type link may be shown.
     $this->backdropGet('node/' . $this->node->nid);
     $this->assertNoPattern('@<h2[^>]*>Comments</h2>@', 'Comments were not displayed.');
-    $this->assertNoLink('Add new comment', 'Link to add comment was found.');
+    $this->assertNoLink('Add comment', 'Link to add comment was found.');
 
     // Attempt to view node-comment form while disallowed.
     $this->backdropGet('comment/reply/' . $this->node->nid);
