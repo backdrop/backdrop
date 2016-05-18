@@ -991,11 +991,11 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   $data['actions']['output'][] = array(
     '#theme' => 'menu_local_task',
     '#link' => array(
-      'title' => t('Add new content'),
+      'title' => t('Add content'),
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
@@ -1009,7 +1009,7 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
