@@ -184,6 +184,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     }
     backdrop_maintenance_theme();
   }
+
   // When running inside the testing framework, we relay the errors
   // to the tested site by the way of HTTP headers.
   $test_info = &$GLOBALS['backdrop_test_info'];
