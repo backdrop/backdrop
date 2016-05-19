@@ -3945,7 +3945,7 @@ function _backdrop_shutdown_function() {
     while (list($key, $callback) = each($callbacks)) {
       call_user_func_array($callback['callback'], $callback['arguments']);
     }
-    
+
     // If this process is under test request. Save lock file to display
     // that test ended.
     $test_info = &$GLOBALS['backdrop_test_info'];
