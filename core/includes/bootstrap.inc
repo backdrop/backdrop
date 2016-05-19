@@ -3945,14 +3945,6 @@ function _backdrop_shutdown_function() {
     while (list($key, $callback) = each($callbacks)) {
       call_user_func_array($callback['callback'], $callback['arguments']);
     }
-
-    // If this process is under test request. Save lock file to display
-    // that test ended.
-    $test_info = &$GLOBALS['backdrop_test_info'];
-    if (!empty($test_info['in_child_site'])){
-      $status_file = config_get('system.core', 'file_public_path') . '/shutdown.handler';
-      touch($status_file);
-    }
   }
   catch (Exception $exception) {
     // If we are displaying errors, then do so with no possibility of a further
@@ -3965,6 +3957,13 @@ function _backdrop_shutdown_function() {
       watchdog('system', $message, array(), WATCHDOG_CRITICAL);
     }
     catch (Exception $e) {}
+  }
+  // If this process is under test request. Save lock file to display
+  // that test ended.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])){
+    $status_file = config_get('system.core', 'file_public_path') . '/shutdown.handler';
+    touch($status_file);
   }
 }
 
