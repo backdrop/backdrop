@@ -1804,14 +1804,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * of the request.
    */
   protected function checkForBackgroundExceptions() {
-    $status_file = config_get('system.core', 'file_public_path') . '/shutdown.handler';
     $filename = config_get('system.core', 'file_public_path') . '/error.handler';
-
-    // Wait until background process finish to properly process error handlers.
-    while(!is_file($status_file)){
-      usleep(100000);
-    }
-    unlink($status_file);
 
     if(is_file($filename)) {
       $assertions = unserialize(file_get_contents($filename));
