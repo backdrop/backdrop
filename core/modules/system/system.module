@@ -2163,7 +2163,22 @@ function system_init() {
       $_FILES['files']['name'][$field] = transliteration_clean_filename($filename, $langcode);
     }
   }
+ // Register shutdown function if this process is under test request.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])){
+    backdrop_register_shutdown_function('_system_shutdown_function');
+  }
+}
 
+/**
+ * Executes registered shutdown functions.
+ */
+function _system_shutdown_function() {
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])){
+    $status_file = config_get('system.core', 'file_public_path') . '/shutdown.handler';
+    touch($status_file);
+  }
 }
 
 /**
