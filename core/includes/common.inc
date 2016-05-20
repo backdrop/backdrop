@@ -2947,9 +2947,11 @@ function backdrop_page_footer() {
 
   // If we're not already in a background request, flush to the browser.
   if (!backdrop_is_background() && $_SERVER['REQUEST_METHOD'] !== 'HEAD') {
-    // End the request and send the response to the browser.
-    ob_end_flush();
-    
+     // End the request and send the response to the browser. This call has
+     // error suppression on it as some PHP versions may require it (PHP 5.3)
+     // but other PHP versions throw a warning (PHP 5.5).
+     @ob_end_flush();
+
     // Flushing for PHP-FPM based installations.
     if (function_exists('fastcgi_finish_request')) {
       fastcgi_finish_request();
