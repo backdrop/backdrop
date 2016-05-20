@@ -785,12 +785,12 @@ function path_admin_bulk_delete($form, $form_state) {
 
   /* TODO:
    1) all - DONE
-   2) all node aliases - DONE
-   4) all user aliases - DONE
-   5) all taxonomy aliases - DONE
+   2) all content URL aliases - DONE
+   4) all user URL aliases - DONE
+   5) all taxonomy term URL aliases - DONE
    6) by node type
    7) by taxonomy vocabulary
-   8) no longer existing aliases (see http://drupal.org/node/128366)
+   8) no longer existing URL aliases (see http://drupal.org/node/128366)
    9) where src like 'pattern' - DON'T DO
    10) where dst like 'pattern' - DON'T DO
   */
