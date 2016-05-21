@@ -191,6 +191,103 @@ if ($args['cache']) {
 
 $test_list = simpletest_script_get_test_list();
 
+//Report to ZenCI that testing started.
+if ($args['zenci']) {
+  simpletest_script_zenci_report('start');
+}
+
+function simpletest_script_zenci_report($stage, $message = FALSE) {
+  global $test_list, $args, $test_id, $results_map;
+  
+  $token = getenv('GITLC_API_TOKEN');
+  $script = getenv('GITLC_STATUS_URL');
+  
+  if(empty($token) || empty($script)){
+    return FALSE;
+  }
+  
+  $data = NULL;
+  switch($stage){
+    case 'state':
+      if($status){
+        $data = array(
+          'state' => 'pending',
+          'message' => $message,
+        );        
+      }
+      break;
+    case 'start':
+      $data = array(
+        'state' => 'pending',
+        'message' => count($test_list) . ' tests to process',
+      );
+      break;
+    case 'stop':
+        $summary = '';
+        $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail') ORDER BY test_class, message_id", array(':test_id' => $test_id));
+        $test_class = '';
+        $count = 0;
+        foreach ($results as $result) {
+          if (isset($results_map[$result->status])) {
+            if ($result->test_class != $test_class) {
+              // Display test class every time results are for new test class.
+              $test_class = $result->test_class;
+              $info = simpletest_test_get_by_class($test_class);
+              $test_group = $info['group'];
+              $test_name = $info['name'];
+              $summary .= "\n$test_group: $test_name ($test_class)\n";
+              $test_class = $result->test_class;
+            }
+            
+            if($count < 10 ){
+              $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
+            }
+            $count++;
+          }
+        }
+        
+        if($count > 10 ){
+          $summary .= "\nResult limited to first 10 items. See log for more details\n";
+        }
+        
+        if(!empty($summary)){
+          $data = array(
+            'state' => 'error',
+            'message' => format_plural($count, '1 test failed', '@count tests failed.'),
+            'summary' => $summary,
+          );
+        } 
+        else{
+          $data = array(
+            'state' => 'success',
+            'message' => format_plural(count($test_list), '1 test passed', '@count tests passed.'),
+            'summary' => $summary,
+          );
+          
+        }
+      break;
+  }
+  
+  if($data){
+    $data = json_encode($data);
+    
+    $options = array(
+      'method' => 'PUT',
+      'max_redirects' => 10,
+      'headers' => array(
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
+        'Token' => $token,
+      ),
+      'timeout' => 600,
+      'data' => $data,
+    );
+  
+    $result = drupal_http_request($script, $options);
+  }
+    
+}
+
 // Try to allocate unlimited time to run the tests.
 backdrop_set_time_limit(0);
 
@@ -218,6 +315,10 @@ simpletest_script_reporter_display_results();
 
 if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
+}
+
+if ($args['zenci']) {
+  simpletest_script_zenci_report('stop');
 }
 
 // Cleanup our test results.
@@ -279,6 +380,8 @@ All arguments are long options.
 
   --cache     Generate cache for instalation profiles to boost tests speed.
 
+  --zenci     Report to ZenCI with status.
+
   <test1>[ <test2>[ <test3> ...]]
 
               One or more tests classes (or groups names) to be run. Names may
@@ -324,6 +427,7 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
+    'zenci' => FALSE,
   );
 
   // Override with set values.
