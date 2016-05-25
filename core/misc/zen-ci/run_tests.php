@@ -74,5 +74,6 @@ function putRequest($data) {
       'Token: ' . $token,                                                                                
       'Content-Length: ' . strlen($data)                                                                       
   )); 
+  curl_exec($ch);
   curl_close($ch);
 }
