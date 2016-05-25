@@ -12,6 +12,8 @@ $data = array(
 
 putRequest($data);
 
+chdir($sitepath);
+
 exec('php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force --all --concurrency 10 --color --verbose --summary /tmp/summary', $output, $status);
 
 $content = file_get_contents('/tmp/summary');
