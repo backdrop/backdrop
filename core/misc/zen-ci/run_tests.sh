@@ -17,7 +17,7 @@ if [ $? -eq 0 ]; then
   curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data "{\"state\": \"success\", \"message\": \"$MESSAGE\"}"
 else
   MESSAGE=`cat /tmp/summary| sed -n 1p| tr '\n' ' '`
-  SUMMARY=`cat /tmp/summary| sed ':a;N;$!ba;s/\n/\\n/g'`
+  SUMMARY=`cat /tmp/summary| sed ':a;N;$!ba;s/\n/\\n/g' | sed ':a;N;$!ba;s/"/\"/g'`
   echo '{"state": "error", "message": "'$MESSAGE'", "summary": "'$SUMMARY'" }'
   curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data "{\"state\": \"error\", \"message\": \"$MESSAGE\", \"summary\": \"$SUMMARY\" }"
 
