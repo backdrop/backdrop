@@ -47,6 +47,7 @@ else {
     'state' => 'success',
     'message' => $content,
   );
+  putRequest($data);
   exit(0);
 }
 
