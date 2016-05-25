@@ -11,12 +11,12 @@ curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GI
 
 php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force --all --concurrency 10 --color --verbose --summary /tmp/summary
 
-if [$? -eq 0 ]; then 
-  MESSAGE = `cat /tmp/summary| sed -n 1p`
+if [ $? -eq 0 ]; then 
+  MESSAGE=`cat /tmp/summary| sed -n 1p`
   curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data '{"state": "success", "message": "'$MESSAGE'"}'
 else
-  MESSAGE = `cat /tmp/summary| sed -n 1p`
-  SUMMARY = `cat /tmp/summary| sed ':a;N;$!ba;s/\n/\\n/g'`
+  MESSAGE=`cat /tmp/summary| sed -n 1p`
+  SUMMARY=`cat /tmp/summary| sed ':a;N;$!ba;s/\n/\\n/g'`
   echo '{"state": "error", "message": "'$MESSAGE'", "summary": "'$SUMMARY'" }'
   curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data '{"state": "error", "message": "'$MESSAGE'", "summary": "'$SUMMARY'" }'
 
