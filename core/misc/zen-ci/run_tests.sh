@@ -14,11 +14,11 @@ php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force -
 if [ $? -eq 0 ]; then 
   MESSAGE=`cat /tmp/summary| sed -n 1p| tr '\n' ' '`
   echo '{"state": "success", "message": "'$MESSAGE'"}'
-  curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data '{"state": "success", "message": "'$MESSAGE'"}'
+  curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data "{\"state\": \"success\", \"message\": \"$MESSAGE\"}"
 else
   MESSAGE=`cat /tmp/summary| sed -n 1p| tr '\n' ' '`
   SUMMARY=`cat /tmp/summary| sed ':a;N;$!ba;s/\n/\\n/g'`
   echo '{"state": "error", "message": "'$MESSAGE'", "summary": "'$SUMMARY'" }'
-  curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data '{"state": "error", "message": "'$MESSAGE'", "summary": "'$SUMMARY'" }'
+  curl -X PUT -H "Content-Type: application/json" -H "Token: $GITLC_API_TOKEN" $GITLC_STATUS_URL -v --data "{\"state\": \"error\", \"message\": \"$MESSAGE\", \"summary\": \"$SUMMARY\" }"
 
 fi
