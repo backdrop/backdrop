@@ -14,7 +14,15 @@ putRequest($data);
 
 chdir($sitepath);
 
-exec('php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force --all --concurrency 10 --color --verbose --summary /tmp/summary', $output, $status);
+$cmd = 'php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force --all --concurrency 10 --color --verbose --summary /tmp/summary';
+$proc = popen($cmd, 'r');
+
+while (!feof($proc)) {
+  echo fread($proc, 4096);
+  @flush();
+}
+
+$status = pclose($proc);
 
 $content = file_get_contents('/tmp/summary');
 
@@ -66,8 +74,5 @@ function putRequest($data) {
       'Token: ' . $token,                                                                                
       'Content-Length: ' . strlen($data)                                                                       
   )); 
-  $output = curl_exec($ch);
-  echo($output) . PHP_EOL;
-  
   curl_close($ch);
 }
