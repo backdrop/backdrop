@@ -409,7 +409,7 @@ function _backdrop_default_html_head() {
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
-      'content' => 'Backdrop CMS ' . $version . ' (http://backdropcms.org)',
+      'content' => 'Backdrop CMS ' . $version . ' (https://backdropcms.org)',
     ),
   );
   // Also send the generator in the HTTP header.
@@ -916,7 +916,7 @@ function backdrop_http_request($url, array $options = array()) {
 
   // Merge the default headers.
   $options['headers'] += array(
-    'User-Agent' => 'Backdrop CMS (+http://backdropcms.org/)',
+    'User-Agent' => 'Backdrop CMS (+https://backdropcms.org)',
   );
 
   // stream_socket_client() requires timeout to be a float.

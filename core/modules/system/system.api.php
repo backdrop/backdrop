@@ -2794,7 +2794,7 @@ function hook_install() {
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
  * removals. For further information about releases and release numbers see the
- * @link http://backdropcms.org/about/releases Backdrop CMS Release Cycle handbook page @endlink
+ * @link https://backdropcms.org/about/releases Backdrop CMS Release Cycle handbook page @endlink
  *
  * Because Backdrop keeps track of the last ran update based on the function
  * name, you should never renumber update functions. It may result in updates

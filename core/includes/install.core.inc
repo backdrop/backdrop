@@ -1688,7 +1688,7 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">online handbook</a>.', array('@profile' => backdrop_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'http://backdropcms.org/guide/installation')),
+        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">Installation Instructions</a> page.', array('@profile' => backdrop_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'https://backdropcms.org/installation')),
       );
     }
     else {
@@ -1800,7 +1800,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
       2 => st('Receive e-mail notifications'),
     ),
     '#default_value' => array(1, 2),
-    '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="http://backdropcms.org">BackdropCMS.org</a>.'),
+    '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),
     '#weight' => 15,
   );
   $form['update_notifications']['update_status_module'][2] = array(
