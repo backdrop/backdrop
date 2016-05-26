@@ -662,7 +662,7 @@ function update_get_update_list() {
         $comparison_schema_version += 7000;
       }
       if ($comparison_schema_version < $last_removed) {
-        $ret[$module]['warning'] = '<em>' . $module . '</em> module can not be updated. Its schema version is ' . $schema_version . '. Updates up to and including ' . $last_removed . ' have been removed in this release. In order to update <em>' . $module . '</em> module, you will first <a href="http://backdropcms.org/upgrade">need to upgrade</a> to the last version in which these updates were available.';
+        $ret[$module]['warning'] = '<em>' . $module . '</em> module can not be updated. Its schema version is ' . $schema_version . '. Updates up to and including ' . $last_removed . ' have been removed in this release. In order to update <em>' . $module . '</em> module, you will first <a href="https://backdropcms.org/upgrade">need to upgrade</a> to the last version in which these updates were available.';
         continue;
       }
 
