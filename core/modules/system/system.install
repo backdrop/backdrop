@@ -147,8 +147,8 @@ function system_requirements($phase) {
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
-        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">system requirements</a> page for more information.', array(
-          '@link' => 'http://backdropcms.org/guide/requirements',
+        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">System Requirements</a> page for more information.', array(
+          '@link' => 'https://backdropcms.org/requirements',
         ));
       }
     }
@@ -326,10 +326,10 @@ function system_requirements($phase) {
         // For the installer UI, we need different wording. 'value' will
         // be treated as version, so provide none there.
         if ($is_directory && !$is_writable) {
-          $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server. If you are unsure how to do this, please see the <a href="@handbook_url">online handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/installation'));
+          $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server. If you are unsure how to do this, please see the <a href="@handbook_url">Installation Instructions</a> page.', array('@handbook_url' => 'https://backdropcms.org/installation'));
         }
         else {
-          $description = $error . ' ' . $t('An automated attempt to create this directory failed. To proceed with the installation, either create the directory and modify its permissions to make it writable or adjust the permissions on the parent directory to allow the installer to create it automatically. If you are unsure how to do this, see the <a href="@handbook_url">online handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/installation'));
+          $description = $error . ' ' . $t('An automated attempt to create this directory failed. To proceed with the installation, either create the directory and modify its permissions to make it writable or adjust the permissions on the parent directory to allow the installer to create it automatically. If you are unsure how to do this, see the <a href="@handbook_url">Installation Instructions</a> page.', array('@handbook_url' => 'https://backdropcms.org/installation'));
         }
         $requirements['file system']['value'] = '';
       }
