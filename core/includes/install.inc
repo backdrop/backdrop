@@ -405,7 +405,7 @@ abstract class DatabaseTasks {
       }
     }
     if (!empty($message)) {
-      $message .= '<p>For more help with configuring your database server, see the <a href="http://backdropcms.org/guide/installation">installation handbook</a>.</p>';
+      $message .= '<p>For more help with configuring your database server, see the <a href="https://backdropcms.org/installation">Installation Instructions</a> page.</p>';
       throw new DatabaseTaskException($message);
     }
   }
@@ -708,9 +708,9 @@ function backdrop_install_config_directories() {
     // Bail out using a similar error message as in system_requirements().
     $config_directory = config_get_config_directory($config_type);
     if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
+      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
         '%directory' => $config_directory,
-        '@handbook_url' => 'http://backdropcms.org/guide/installation',
+        '@handbook_url' => 'https://backdropcms.org/installation',
       )));
     }
 
