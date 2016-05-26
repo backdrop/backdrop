@@ -2286,7 +2286,7 @@ function system_block_info() {
   );
   $blocks['powered-by'] = array(
     'info' => t('Powered by Backdrop'),
-    'description' => t('Displays a link to <a href="http://backdropcms.org">Backdrop CMS</a>.'),
+    'description' => t('Displays a link to <a href="https://backdropcms.org">the Backdrop CMS website</a>.'),
     'weight' => '10',
   );
   // System-defined menu blocks. Load customizations from Menu module.
