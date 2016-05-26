@@ -419,7 +419,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
   $string = preg_replace('!</?(strong|b)((?> +)[^>]*)?>!i', '*', $string);
 
   // Replace inline <a> tags with the text of link and a footnote.
-  // 'See <a href="http://backdropcms.org">the Backdrop CMS site</a>' becomes
+  // 'See <a href="https://backdropcms.org">the Backdrop CMS site</a>' becomes
   // 'See the Backdrop CMS site [1]' with the URL included as a footnote.
   _backdrop_html_to_mail_urls(NULL, TRUE);
   $pattern = '@(<a[^>]+?href="([^"]*)"[^>]*?>(.+?)</a>)@i';
