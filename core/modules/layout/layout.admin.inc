@@ -29,18 +29,11 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
-      // Empty columns are intentional so that they may be hidden with
-      // priority-low class on the $header array.
-      $row[] = '';
-      $row[] = '';
+      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'), 'colspan' => '3');
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link);
-      // Empty columns are intentional.
-      $row[] = '';
-      $row[] = '';
+      $row[] = array('data' => $path_link, 'colspan' => '3');
     }
     if (count($operations['#links']) !== 0) {
       $row[] = backdrop_render($operations);
