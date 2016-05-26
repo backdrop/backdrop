@@ -38,6 +38,9 @@ function layout_list_page() {
     if (count($operations['#links']) !== 0) {
       $row[] = backdrop_render($operations);
     }
+    else {
+      $row[] = '';
+    }
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
 
     foreach ($group as $layout) {
