@@ -42,7 +42,9 @@ function layout_list_page() {
       $row[] = '';
       $row[] = '';
     }
-    $row[] = backdrop_render($operations);
+    if (count($operations['#links']) !== 0) {
+      $row[] = backdrop_render($operations);
+    }
     $rows[] = array('data' => $row, 'class' => array('layout-group'));
 
     foreach ($group as $layout) {
