@@ -188,7 +188,7 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
     $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL parsed correctly.');
 
     // External URL testing.
-    $url = 'http://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
 
     // Test that Backdrop can recognize an absolute URL. Used to prevent attack
     // vectors.
@@ -203,9 +203,9 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
     $this->assertFalse(url_is_external($url), 'Correctly identified an internal URL with a leading slash.');
 
     // Test the parsing of absolute URLs.
-    $url = 'http://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
     $result = array(
-      'path' => 'http://backdropcms.org/foo/bar',
+      'path' => 'https://backdropcms.org/foo/bar',
       'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
       'fragment' => 'foo',
     );
@@ -316,7 +316,7 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
    * Test external URL handling.
    */
   function testExternalUrls() {
-    $test_url = 'http://backdropcms.org/';
+    $test_url = 'https://backdropcms.org/';
 
     // Verify external URL can contain a fragment.
     $url = $test_url . '#backdrop';
