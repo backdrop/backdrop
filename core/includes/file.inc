@@ -1854,7 +1854,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
 
   if ($uri = file_unmanaged_save_data($data, $destination, $replace)) {
     // Create a file entity.
-    $file = entity_create('file', array(
+    $file = new File(array(
       'uri' => $uri,
       'uid' => $user->uid,
       'status' => FILE_STATUS_PERMANENT,

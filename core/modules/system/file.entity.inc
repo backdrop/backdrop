@@ -81,6 +81,23 @@ class File extends Entity {
   public $timestamp;
 
   /**
+   * Constructor for file entities.
+   */
+  public function __construct(array $values = array()) {
+    // Automatically detect filename if not set.
+    if (!isset($values['filename']) && isset($values['uri'])) {
+      $values['filename'] = backdrop_basename($values['uri']);
+    }
+
+    // Automatically detect filemime if not set.
+    if (!isset($values['filemime']) && isset($values['uri'])) {
+      $values['filemime'] = file_get_mimetype($values['uri']);
+    }
+
+    parent::__construct($values);
+  }
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -115,25 +132,11 @@ class File extends Entity {
  * File storage controller for files.
  */
 class FileStorageController extends EntityDatabaseStorageController {
-
-  /**
-   * Overrides EntityDatabaseStorageController::create().
-   */
-  public function create(array $values) {
-    // Automatically detect filename if not set.
-    if (!isset($values['filename']) && isset($values['uri'])) {
-      $values['filename'] = backdrop_basename($values['uri']);
-    }
-
-    // Automatically detect filemime if not set.
-    if (!isset($values['filemime']) && isset($values['uri'])) {
-      $values['filemime'] = file_get_mimetype($values['uri']);
-    }
-    return parent::create($values);
-  }
-
   /**
    * Overrides EntityDatabaseStorageController::presave().
+   *
+   * @param File $entity
+   *   The file entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
     $entity->timestamp = REQUEST_TIME;
@@ -147,6 +150,9 @@ class FileStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::preDelete().
+   *
+   * @param File[] $entities
+   *   The file entities about to be deleted.
    */
   public function preDelete($entities) {
     foreach ($entities as $entity) {
