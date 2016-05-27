@@ -900,8 +900,9 @@ function module_implements_write_cache() {
  * @param ...
  *   Arguments to pass to the hook implementation.
  *
- * @return
- *   The return value of the hook implementation.
+ * @return mixed|NULL
+ *   The return value of the hook implementation. NULL if the module does not
+ *   implement the given hook.
  *
  * @see backdrop_alter()
  */
@@ -912,6 +913,8 @@ function module_invoke($module, $hook) {
   if (module_hook($module, $hook)) {
     return call_user_func_array($module . '_' . $hook, $args);
   }
+
+  return NULL;
 }
 
 /**

@@ -32,6 +32,7 @@ function backdrop_class_list() {
     'WordLevelDiff' => $path . 'diff.inc',
     'DiffFormatter' => $path . 'diff.inc',
     'BackdropDiffFormatter' => $path . 'diff.inc',
+    'BackdropHTTPSystemInterface' => $path . 'http_system.inc',
     'DatabaseTasks' => $path . 'install.inc',
     'DatabaseTaskException' => $path . 'install.inc',
     'MailSystemInterface' => $path . 'mail.inc',

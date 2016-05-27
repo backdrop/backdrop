@@ -64,7 +64,7 @@ class PagerDefault extends SelectQueryExtender {
 
     // A NULL limit is the "kill switch" for pager queries.
     if (empty($this->limit)) {
-      return;
+      return NULL;
     }
     $this->ensureElement();
 
@@ -110,8 +110,8 @@ class PagerDefault extends SelectQueryExtender {
    * The count query may be specified manually or, by default, taken from the
    * query we are extending.
    *
-   * @return SelectQueryInterface
-   *   A count query object.
+   * @return SelectQuery
+   *   A select query object that will return the count when executed.
    */
   public function getCountQuery() {
     if ($this->customCountQuery) {
@@ -130,6 +130,9 @@ class PagerDefault extends SelectQueryExtender {
    * @param $limit
    *   An integer specifying the number of elements per page.  If passed a false
    *   value (FALSE, 0, NULL), the pager is disabled.
+   *
+   * @return PagerDefault
+   *   The current pager object.
    */
   public function limit($limit = 10) {
     $this->limit = $limit;
@@ -152,12 +155,16 @@ class PagerDefault extends SelectQueryExtender {
    * explicitly, so it is possible for two pagers to end up using the same ID
    * if both are set explicitly.
    *
-   * @param $element
+   * @param int $element_id
+   *   The element ID to set.
+   *
+   * @return PagerDefault
+   *   The current pager object.
    */
-  public function element($element) {
-    $this->element = $element;
-    if ($element >= self::$maxElement) {
-      self::$maxElement = $element + 1;
+  public function element($element_id) {
+    $this->element = $element_id;
+    if ($element_id >= self::$maxElement) {
+      self::$maxElement = $element_id + 1;
     }
     return $this;
   }

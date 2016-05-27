@@ -438,7 +438,7 @@ function menu_set_item($path, $router_item) {
  * @param $router_item
  *   Internal use only.
  *
- * @return
+ * @return array|FALSE
  *   The router item or, if an error occurs in _menu_translate(), FALSE. A
  *   router item is an associative array corresponding to one row in the
  *   menu_router table. The value corresponding to the key 'map' holds the
@@ -504,6 +504,11 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  *   left empty, the default route handler will be used. In most installations
  *   of Backdrop, the Layout module will provide the route handler, wrapping
  *   HTML pages in a layout.
+ *
+ * @return string|NULL
+ *   If $deliver is FALSE, then the string result of the current active menu
+ *   item will be returned. If $deliver is TRUE, no result will be returned;
+ *   it will be printed directly to the page.
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   // Check if site is offline.
@@ -552,6 +557,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
   if ($deliver) {
     $default_delivery_callback = (isset($router_item) && $router_item) ? $router_item['delivery_callback'] : NULL;
     backdrop_deliver_page($page_callback_result, $default_delivery_callback);
+    return NULL;
   }
   else {
     return $page_callback_result;
@@ -812,6 +818,8 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
 
   // Generate the link path for the page request or local tasks.
   $link_map = explode('/', $router_item['path']);
+  $tab_root_map = array();
+  $tab_parent_map = array();
   if (isset($router_item['tab_root'])) {
     $tab_root_map = explode('/', $router_item['tab_root']);
   }
@@ -1012,12 +1020,18 @@ function _menu_link_translate(&$item, $translate = FALSE) {
  *   it's 2. Defaults to 1.
  * @param $path
  *   See menu_get_item() for more on this. Defaults to the current path.
+ *
+ * @return Entity|stdClass|array|NULL
+ *   The loaded object affiliated with the menu item position given. This can
+ *   be nearly any kind of data (even an array in some cases). If no item is
+ *   found at the given position, NULL is returned.
  */
 function menu_get_object($type = 'node', $position = 1, $path = NULL) {
   $router_item = menu_get_item($path);
   if (isset($router_item['load_functions'][$position]) && !empty($router_item['map'][$position]) && $router_item['load_functions'][$position] == $type . '_load') {
     return $router_item['map'][$position];
   }
+  return NULL;
 }
 
 /**
@@ -1133,7 +1147,12 @@ function menu_tree_output($tree) {
     $build['#sorted'] = TRUE;
     // Add the theme wrapper for outer markup.
     // Allow menu-specific theme overrides.
-    $build['#theme_wrappers'][] = 'menu_tree__' . strtr($data['link']['menu_name'], '-', '_');
+    if (isset($data['link']['menu_name'])) {
+      $build['#theme_wrappers'][] = 'menu_tree__' . strtr($data['link']['menu_name'], '-', '_');
+    }
+    else {
+      $build['#theme_wrappers'][] = 'menu_tree';
+    }
   }
 
   return $build;
@@ -1219,10 +1238,13 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
  * Setting this path does not affect the main content; for that use
  * menu_set_active_item() instead.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the affected menu tree.
- * @param $path
+ * @param string $path
  *   The path to use when finding the active trail.
+ *
+ * @return string|NULL
+ *   The current menu path for the given menu, if any. NULL if not set.
  */
 function menu_tree_set_path($menu_name, $path = NULL) {
   $paths = &backdrop_static(__FUNCTION__);
@@ -1728,6 +1750,7 @@ function theme_menu_local_task($variables) {
  *     - #link: A menu link array with 'title', 'href', and 'localized_options'
  *       keys.
  *
+ * @see theme_menu_local_actions()
  * @ingroup themeable
  */
 function theme_menu_local_action($variables) {
@@ -1750,8 +1773,15 @@ function theme_menu_local_action($variables) {
 
 /**
  * Returns rendered HTML for the local actions.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *     - actions: An array of action links.
+ *
+ * @see theme_menu_local_action()
+ * @ingroup themeable
  */
-function theme_menu_local_actions(&$variables) {
+function theme_menu_local_actions($variables) {
   $output = backdrop_render($variables['actions']);
   if ($output) {
     $output = '<ul class="action-links">' . $output . '</ul>';
@@ -2042,7 +2072,6 @@ function menu_local_tasks($level = 0) {
     // Find all tabs at the same level or above the current one.
     $parent = $router_item['tab_parent'];
     $path = $router_item['path'];
-    $current = $router_item;
     $depth = 1000;
     while (isset($children[$parent])) {
       $tabs_current = array();
@@ -2282,7 +2311,7 @@ function menu_local_tabs() {
  * @ingroup themeable
  * @see menu_local_tasks()
  */
-function theme_menu_local_tasks(&$variables) {
+function theme_menu_local_tasks($variables) {
   $output = '';
 
   if (!empty($variables['primary'])) {

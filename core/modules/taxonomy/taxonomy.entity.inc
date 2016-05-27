@@ -165,6 +165,9 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postDelete().
+   *
+   * @param TaxonomyTerm[] $entities
+   *   An array of term entities that were just deleted.
    */
   protected function postDelete($entities) {
     // See if any of the term's children are about to be become orphans.
@@ -196,6 +199,9 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postSave().
+   *
+   * @param TaxonomyTerm $entity
+   *   The term entity that was just saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
     if (isset($entity->parent)) {

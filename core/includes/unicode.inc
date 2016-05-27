@@ -99,6 +99,11 @@ function unicode_check() {
  *
  * @param $errors
  *   Whether to report any fatal errors with form_set_error().
+ *
+ * @return array
+ *   An unindexed array with two values:
+ *     - The Unicode support level as a constant.
+ *     - A translated message explaining the current support level.
  */
 function _unicode_check() {
   // Ensure translations don't break during installation.

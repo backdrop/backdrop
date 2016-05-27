@@ -245,7 +245,6 @@ class EvalMath {
       } elseif ($op == '(' and !$expecting_op) {
         $stack->push('('); // that was easy
         $index++;
-        $allow_neg = true;
         //===============
       } elseif ($ex and !$expecting_op) { // do we now have a function/variable/number?
         $expecting_op = true;

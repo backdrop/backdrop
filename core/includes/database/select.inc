@@ -1023,7 +1023,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements QueryConditionInterface::condition().
    *
-   * @return UpdateQuery
+   * @return SelectQuery
    */
   public function condition($field, $value = NULL, $operator = NULL) {
     $this->where->condition($field, $value, $operator);

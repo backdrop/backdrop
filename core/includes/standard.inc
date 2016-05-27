@@ -416,7 +416,6 @@ function standard_timezone_country_list() {
   if (isset($timezone_countries)) {
     return $timezone_countries;
   }
-  $t = get_t();
 
   $timezone_countries = array(
     'Africa/Abidjan' => 'CI',
