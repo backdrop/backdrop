@@ -837,7 +837,7 @@ function simpletest_script_format_result($result) {
 
   simpletest_script_print($summary, $result->status);
 
-  $lines = explode("\n", wordwrap(trim(strip_tags($result->message)), 76));
+  $lines = explode("\n", wordwrap(trim(strip_tags(decode_entities($result->message))), 76));
   foreach ($lines as $line) {
     echo "    $line\n";
   }
