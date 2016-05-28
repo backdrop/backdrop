@@ -800,7 +800,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $options
    *   An array of options on the query.
    *
-   * @return SelectQuery
+   * @return SelectQuery|stdClass[]
    *   An appropriate SelectQuery object for this database connection. Note that
    *   it may be a driver-specific subclass of SelectQuery, depending on the
    *   driver.
@@ -1025,6 +1025,8 @@ abstract class DatabaseConnection extends PDO {
    *   The name of the savepoint. The default, 'backdrop_transaction', will roll
    *   the entire transaction back.
    *
+   * @return NULL
+   *
    * @throws DatabaseTransactionNoActiveException
    * @throws DatabaseTransactionOutOfOrderException
    *
@@ -1032,7 +1034,7 @@ abstract class DatabaseConnection extends PDO {
    */
   public function rollback($savepoint_name = 'backdrop_transaction') {
     if (!$this->supportsTransactions()) {
-      return;
+      return NULL;
     }
     if (!$this->inTransaction()) {
       throw new DatabaseTransactionNoActiveException();
@@ -1060,7 +1062,7 @@ abstract class DatabaseConnection extends PDO {
         if ($rolled_back_other_active_savepoints) {
           throw new DatabaseTransactionOutOfOrderException();
         }
-        return;
+        return NULL;
       }
       else {
         $rolled_back_other_active_savepoints = TRUE;
@@ -1673,6 +1675,9 @@ abstract class Database {
    *   "default".
    * @param $target
    *   The database target to open.
+   *
+   * @return DatabaseConnection
+   *   The created database connection object.
    *
    * @throws DatabaseConnectionNotDefinedException
    * @throws DatabaseDriverNotSpecifiedException
@@ -2381,7 +2386,7 @@ function db_query($query, array $args = array(), array $options = array()) {
  * @param $options
  *   An array of options to control how the query operates.
  *
- * @return DatabaseStatementInterface
+ * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
  *   A prepared statement object, already executed.
  *
  * @see DatabaseConnection::defaultOptions()

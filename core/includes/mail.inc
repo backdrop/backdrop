@@ -255,6 +255,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  *   alter hook in backdrop_mail() would have been {$module}_{$key}.
  *
  * @return MailSystemInterface
+ *
+ * @throws Exception
  */
 function backdrop_mail_system($module, $key) {
   $instances = &backdrop_static(__FUNCTION__, array());

@@ -302,7 +302,7 @@ function file_stream_wrapper_uri_normalize($uri) {
  * @param $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return
+ * @return BackdropStreamWrapperInterface
  *   Returns a new stream wrapper object appropriate for the given URI or FALSE
  *   if no registered handler could be found. For example, a URI of
  *   "private://example.txt" would return a new private stream wrapper object
@@ -316,6 +316,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
+    /* @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($uri);
     return $instance;
@@ -348,6 +349,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 function file_stream_wrapper_get_instance_by_scheme($scheme) {
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
+    /* @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($scheme . '://');
     return $instance;
@@ -887,7 +889,6 @@ function file_valid_uri($uri) {
  */
 function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   $original_source = $source;
-  $original_destination = $destination;
 
   // Assert that the source file actually exists.
   if (!file_exists($source)) {
@@ -1261,7 +1262,7 @@ function file_create_filename($basename, $directory) {
  * @see file_usage_list()
  */
 function file_delete($fid) {
-  return file_delete_multiple(array($fid));
+  file_delete_multiple(array($fid));
 }
 
 /**
@@ -1272,7 +1273,7 @@ function file_delete($fid) {
  * remove it during cleanup.
  *
  * @param $fid
- *   The file id.
+ *   The file ID.
  *
  * @see file_unmanaged_delete()
  * @see file_usage_list()
@@ -2524,7 +2525,6 @@ function file_directory_temp() {
  *   An associative array of headers, as expected by file_transfer().
  */
 function file_get_content_headers(File $file) {
-  $name = mime_header_encode($file->filename);
   $type = mime_header_encode($file->filemime);
 
   return array(

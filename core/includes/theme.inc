@@ -83,7 +83,7 @@ function _backdrop_theme_access($theme) {
  * Initializes the theme system by loading the theme.
  */
 function backdrop_theme_initialize() {
-  global $theme, $user, $theme_key;
+  global $theme, $theme_key;
 
   // If $theme is already set, assume the others are set, too, and do nothing
   if (isset($theme)) {
@@ -105,13 +105,13 @@ function backdrop_theme_initialize() {
   $theme_key = $theme;
 
   // Find all our ancestor themes and put them in an array.
-  $base_theme = array();
+  $base_themes = array();
   $ancestor = $theme;
   while ($ancestor && isset($themes[$ancestor]->base_theme)) {
     $ancestor = $themes[$ancestor]->base_theme;
-    $base_theme[] = $themes[$ancestor];
+    $base_themes[] = $themes[$ancestor];
   }
-  _backdrop_theme_initialize($themes[$theme], array_reverse($base_theme));
+  _backdrop_theme_initialize($themes[$theme], array_reverse($base_themes));
 
   // Themes can have alter functions, so reset the backdrop_alter() cache.
   backdrop_static_reset('backdrop_alter');
@@ -131,7 +131,7 @@ function backdrop_theme_initialize() {
  *
  * This function is useful to initialize a theme when no database is present.
  *
- * @param $theme
+ * @param stdClass $theme
  *   An object with the following information:
  *     filename
  *       The .info file for this theme. The 'path' to
@@ -143,19 +143,19 @@ function backdrop_theme_initialize() {
  *       The primary stylesheet for the theme. (Optional)
  *     engine
  *       The name of theme engine to use. (Optional)
- * @param $base_theme
+ * @param array $base_themes
  *    An optional array of objects that represent the 'base theme' if the
  *    theme is meant to be derivative of another theme. It requires
  *    the same information as the $theme object. It should be in
  *    'oldest first' order, meaning the top level of the chain will
  *    be first.
- * @param $registry_callback
+ * @param string $registry_callback
  *   The callback to invoke to set the theme registry.
  */
-function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_callback = '_theme_load_registry') {
+function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_callback = '_theme_load_registry') {
   global $theme_info, $base_theme_info, $theme_engine, $theme_path;
   $theme_info = $theme;
-  $base_theme_info = $base_theme;
+  $base_theme_info = $base_themes;
 
   $theme_path = dirname($theme->filename);
 
@@ -165,7 +165,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
   $final_stylesheets = array();
 
   // Grab stylesheets from base theme
-  foreach ($base_theme as $base) {
+  foreach ($base_themes as $base) {
     if (!empty($base->stylesheets)) {
       foreach ($base->stylesheets as $media => $stylesheets) {
         foreach ($stylesheets as $name => $stylesheet) {
@@ -195,7 +195,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
   $final_scripts = array();
 
   // Grab scripts from base theme
-  foreach ($base_theme as $base) {
+  foreach ($base_themes as $base) {
     if (!empty($base->scripts)) {
       foreach ($base->scripts as $name => $script) {
         $final_scripts[$name] = $script;
@@ -224,7 +224,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
 
     $theme_engine = $theme->engine;
     if (function_exists($theme_engine . '_init')) {
-      foreach ($base_theme as $base) {
+      foreach ($base_themes as $base) {
         call_user_func($theme_engine . '_init', $base);
       }
       call_user_func($theme_engine . '_init', $theme);
@@ -232,7 +232,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
   }
   else {
     // include non-engine theme files
-    foreach ($base_theme as $base) {
+    foreach ($base_themes as $base) {
       // Include the theme file or the engine.
       if (!empty($base->owner)) {
         include_once BACKDROP_ROOT . '/' . $base->owner;
@@ -245,7 +245,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
   }
 
   if (isset($registry_callback)) {
-    _theme_registry_callback($registry_callback, array($theme, $base_theme, $theme_engine));
+    _theme_registry_callback($registry_callback, array($theme, $base_themes, $theme_engine));
   }
 }
 
@@ -262,7 +262,7 @@ function _backdrop_theme_initialize($theme, $base_theme = array(), $registry_cal
  *   with array syntax and  isset(), and should be more lightweight
  *   than the full registry. Defaults to TRUE.
  *
- * @return
+ * @return array
  *   The complete theme registry array, or an instance of the ThemeRegistry
  *   class.
  */
@@ -301,6 +301,9 @@ function theme_get_registry($complete = TRUE) {
  *   The name of the callback function.
  * @param $arguments
  *   The arguments to pass to the function.
+ *
+ * @return array
+ *   The currently set theme registry callback and arguments.
  */
 function _theme_registry_callback($callback = NULL, array $arguments = array()) {
   static $stored;
@@ -315,7 +318,7 @@ function _theme_registry_callback($callback = NULL, array $arguments = array()) 
  *
  * @param $theme
  *   The loaded $theme object as returned by list_themes().
- * @param $base_theme
+ * @param $base_themes
  *   An array of loaded $theme objects representing the ancestor themes in
  *   oldest first order.
  * @param $theme_engine
@@ -327,7 +330,7 @@ function _theme_registry_callback($callback = NULL, array $arguments = array()) 
  * @return
  *   The theme registry array, or an instance of the ThemeRegistry class.
  */
-function _theme_load_registry($theme, $base_theme = NULL, $theme_engine = NULL, $complete = TRUE) {
+function _theme_load_registry($theme, $base_themes = NULL, $theme_engine = NULL, $complete = TRUE) {
   if ($complete) {
     // Check the theme registry cache; if it exists, use it.
     $cached = cache()->get("theme_registry:$theme->name");
@@ -336,7 +339,7 @@ function _theme_load_registry($theme, $base_theme = NULL, $theme_engine = NULL, 
     }
     else {
       // If not, build one and cache it.
-      $registry = _theme_build_registry($theme, $base_theme, $theme_engine);
+      $registry = _theme_build_registry($theme, $base_themes, $theme_engine);
       // Only persist this registry if all modules are loaded. This assures a
       // complete set of theme hooks.
       if (module_load_all(NULL)) {
@@ -397,7 +400,6 @@ class ThemeRegistry Extends BackdropCacheArray {
     $this->bin = $bin;
     $this->persistable = module_load_all(NULL) && $_SERVER['REQUEST_METHOD'] == 'GET';
 
-    $data = array();
     if ($this->persistable && $cached = cache($this->bin)->get($this->cid)) {
       $data = $cached->data;
     }
@@ -445,6 +447,7 @@ class ThemeRegistry Extends BackdropCacheArray {
     elseif (array_key_exists($offset, $this->storage)) {
       return $this->resolveCacheMiss($offset);
     }
+    return NULL;
   }
 
   public function resolveCacheMiss($offset) {
@@ -673,13 +676,16 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
  *
  * @param $theme
  *   The loaded $theme object as returned by list_themes().
- * @param $base_theme
+ * @param array $base_themes
  *   An array of loaded $theme objects representing the ancestor themes in
  *   oldest first order.
- * @param $theme_engine
+ * @param string $theme_engine
  *   The name of the theme engine.
+ *
+ * @return array
+ *   The completely built theme registry.
  */
-function _theme_build_registry($theme, $base_theme, $theme_engine) {
+function _theme_build_registry($theme, $base_themes, $theme_engine) {
   $cache = array();
   $modules_loaded = module_load_all(NULL);
 
@@ -701,7 +707,7 @@ function _theme_build_registry($theme, $base_theme, $theme_engine) {
   }
 
   // Process each base theme.
-  foreach ($base_theme as $base) {
+  foreach ($base_themes as $base) {
     // If the base theme uses a theme engine, process its hooks.
     $base_path = dirname($base->filename);
     if ($theme_engine) {
@@ -984,8 +990,10 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   this can be a renderable array, in which case, its properties are mapped
  *   to variables expected by the theme hook implementations.
  *
- * @return
+ * @return string
  *   An HTML string representing the themed output.
+ *
+ * @throws Exception
  *
  * @see backdrop_render()
  * @see themeable
@@ -1290,6 +1298,15 @@ function backdrop_find_theme_functions($cache, $prefixes) {
  *   The extension that these templates will have.
  * @param $path
  *   The path to search.
+ *
+ * @return array
+ *   An array of all template locations. Keyed by the theme callback, each entry
+ *   contains the following keys:
+ *   - template: The template file name/
+ *   - path: The path to the template file relative to the Backdrop root.
+ *   - base hook: If this template is dynamically named (usually with two
+ *     hyphens in the template name), a string indicating the base theme
+ *     callback.
  */
 function backdrop_find_theme_templates($cache, $extension, $path) {
   $implementations = array();
@@ -1462,6 +1479,9 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *
  * @param string $theme
  *   The theme name to be checked for settings.
+ *
+ * @return bool
+ *   TRUE if the theme has settings, FALSE otherwise.
  */
 function theme_has_settings($theme) {
   $themes = list_themes();
@@ -1483,7 +1503,7 @@ function theme_has_settings($theme) {
  * @param $variables
  *   A keyed array of variables that will appear in the output.
  *
- * @return
+ * @return string
  *   The output generated by the template.
  */
 function theme_render_template($template_file, $variables) {

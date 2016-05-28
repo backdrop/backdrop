@@ -14,13 +14,13 @@ abstract class FileTransferFTP extends FileTransfer {
   }
 
   /**
-   * Return an object which can implement the FTP protocol.
+   * {@inheritdoc}
    *
-   * @param string $jail
-   * @param array $settings
    * @return FileTransferFTP
    *   The appropriate FileTransferFTP subclass based on the available
    *   options. If the FTP PHP extension is available, use it.
+   *
+   * @throws FileTransferException
    */
   static function factory($jail, $settings) {
     $username = empty($settings['username']) ? '' : $settings['username'];

@@ -109,6 +109,8 @@ function config_set($config_file, $option, $value) {
  *
  * @return string
  *   The configuration directory path.
+ *
+ * @throws ConfigException
  */
 function config_get_config_directory($type = 'active') {
   global $config_directories;

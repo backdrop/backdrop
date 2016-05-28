@@ -36,8 +36,11 @@ abstract class FileTransfer {
    *   An array of connection settings for the FileTransfer subclass. If the
    *   getSettingsForm() method uses any nested settings, the same structure
    *   will be assumed here.
-   * @return object
+   *
+   * @return FileTransfer
    *   New instance of the appropriate FileTransfer subclass.
+   *
+   * @throws FileTransferException
    */
   static function factory($jail, $settings) {
     throw new FileTransferException('FileTransfer::factory() static method not overridden by FileTransfer subclass.');
@@ -90,6 +93,8 @@ abstract class FileTransfer {
    * @param string $path
    * @param int $mode
    * @param bool $recursive
+   *
+   * @throws FileTransferException
    */
   public final function chmod($path, $mode, $recursive = FALSE) {
     if (!in_array('FileTransferChmodInterface', class_implements(get_class($this)))) {

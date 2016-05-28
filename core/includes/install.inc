@@ -254,11 +254,6 @@ function backdrop_load_database_driver() {
   // for the driver explicitly.
   require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
 
-  $driver = array(
-    'name' => 'mysql',
-    'mysql' => BACKDROP_ROOT . '/core/includes/database/mysql',
-  );
-
   $installer = db_installer_object('mysql');
   if ($installer->installable()) {
     return $installer;
@@ -436,6 +431,7 @@ abstract class DatabaseTasks {
     try {
       db_query($query);
       $this->pass(st($pass));
+      return NULL;
     }
     catch (Exception $e) {
       $this->fail(st($fail, array('%query' => $query, '%error' => $e->getMessage(), '%name' => $this->name())));
@@ -570,8 +566,11 @@ class DatabaseTaskException extends Exception {
  *
  * @param $settings
  *   An array of settings that need to be updated.
+ *
  * @return bool
  *   TRUE if the settings file was rewritten successfully. FALSE otherwise.
+ *
+ * @throws Exception
  */
 function backdrop_rewrite_settings($settings = array()) {
   backdrop_static_reset('conf_path');
@@ -754,6 +753,8 @@ make this configuration active, see admin/config/development/configuration/sync.
  *
  * @return
  *   The list of modules to install.
+ *
+ * @throws Exception
  */
 function backdrop_verify_profile($install_state) {
   $profile = $install_state['parameters']['profile'];
@@ -1164,8 +1165,11 @@ function st($string, array $args = array(), array $options = array()) {
  *
  * @param $profile
  *   Name of installation profile to check.
+ *
  * @return
  *   Array of the installation profile's requirements.
+ *
+ * @throws Exception
  */
 function backdrop_check_profile($profile) {
   include_once BACKDROP_ROOT . '/core/includes/file.inc';
@@ -1346,8 +1350,11 @@ function db_run_tasks($driver) {
 /**
  * Returns a database installer object.
  *
- * @param $driver
+ * @param string $driver
  *   The name of the driver.
+ *
+ * @return DatabaseTasks
+ *   The database tasks object for the given driver.
  */
 function db_installer_object($driver) {
   Database::loadDriverFile($driver, array('install.inc'));

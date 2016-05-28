@@ -763,7 +763,7 @@ function backdrop_settings_initialize() {
     require_once $conf_path . '/settings.php';
   }
   if (!empty($settings['backdrop_drupal_compatibility'])) {
-    require_once './core/includes/drupal.inc';
+    require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
   // Convert simplified database settings into the full databases array.
@@ -1460,14 +1460,21 @@ function backdrop_get_http_header($name = NULL) {
  *
  * Header names are case-insensitive, but for maximum compatibility they should
  * follow "common form" (see RFC 2617, section 4.2).
+ *
+ * @param string $name
+ *   Optional. A header name with the preferred capitalization, e.g.
+ *   Cache-Control or Content-Type.
+ * @return
+ *   The array of all current preferred header names. Keyed by a lower-case
+ *   string of each header name.
  */
 function _backdrop_set_preferred_header_name($name = NULL) {
   static $header_names = array();
 
-  if (!isset($name)) {
-    return $header_names;
+  if (isset($name)) {
+    $header_names[strtolower($name)] = $name;
   }
-  $header_names[strtolower($name)] = $name;
+  return $header_names;
 }
 
 /**
@@ -1540,13 +1547,17 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * the client think that the anonymous and authenticated pageviews are
  * identical.
  *
+ * @return bool
+ *   TRUE if the headers were sent. FALSE if the headers have already been sent
+ *   and may not be sent again.
+ *
  * @see backdrop_page_create_cache()
  * @see backdrop_page_save_cache()
  */
 function backdrop_page_header() {
   $headers_sent = &backdrop_static(__FUNCTION__, FALSE);
   if ($headers_sent) {
-    return TRUE;
+    return FALSE;
   }
   $headers_sent = TRUE;
 
@@ -1558,6 +1569,7 @@ function backdrop_page_header() {
     'ETag' => '"' . REQUEST_TIME . '"',
   );
   backdrop_send_headers($default_headers);
+  return TRUE;
 }
 
 /**
@@ -1871,6 +1883,9 @@ function t($string, array $args = array(), array $options = array()) {
  *     example, user-supplied text that has already been run through
  *     check_plain() previously, or is expected to contain some limited HTML
  *     tags and has already been run through filter_xss() previously).
+ *
+ * @return string
+ *   The provided string with the replacements made from the $args array.
  *
  * @see t()
  * @ingroup sanitization
@@ -2290,6 +2305,9 @@ function backdrop_base64_encode($string) {
  *
  * @param $count
  *   The number of characters (bytes) to return in the string.
+ *
+ * @return string
+ *   A string of random characters.
  */
 function backdrop_random_bytes($count)  {
   // $random_state does not use backdrop_static as it stores random bytes.
@@ -2509,6 +2527,10 @@ function backdrop_anonymous_user() {
  *
  * @return int
  *   The most recently completed phase.
+ *
+ * @throws Exception
+ *   This function rethrows any exceptions it encounters, unless Backdrop has
+ *   not yet been installed, in which case it will redirect to the installer.
  */
 function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
   // Not backdrop_static(), because does not depend on any run-time information.
@@ -3178,7 +3200,7 @@ function language_multilingual() {
  *   (optional) Whether to return a list of options instead of objects. This
  *   list is suitable for use in a select list #options array.
  *
- * @return
+ * @return stdClass[]
  *   An associative array of languages, keyed by the language code, ordered by
  *   weight ascending and name ascending.
  */
@@ -3251,7 +3273,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
  * @param $langcode
  *   The language code.
  *
- * @return
+ * @return stdClass
  *   A fully-populated language object or FALSE.
  */
 function language_load($langcode) {
@@ -3405,7 +3427,7 @@ function request_path() {
  * @param $path
  *   A path to break into components. Defaults to the path of the current page.
  *
- * @return
+ * @return string|NULL
  *   The component specified by $index, or NULL if the specified component was
  *   not found. If called without arguments, it returns an array containing all
  *   the components of the current path.
@@ -3434,6 +3456,8 @@ function arg($index = NULL, $path = NULL) {
   if (isset($arguments[$path][$index])) {
     return $arguments[$path][$index];
   }
+  // Not found.
+  return NULL;
 }
 
 /**
@@ -3499,6 +3523,9 @@ function ip_address() {
  *   The name of the table. If not given, the schema of all tables is returned.
  * @param $rebuild
  *   If true, the schema will be rebuilt instead of retrieved from the cache.
+ *
+ * @return array
+ *   The schema definition of the requested table.
  */
 function backdrop_get_schema($table = NULL, $rebuild = FALSE) {
   static $schema;
@@ -3554,6 +3581,9 @@ class SchemaCache extends BackdropCacheArray {
  *
  * @param $rebuild
  *   If true, the schema will be rebuilt instead of retrieved from the cache.
+ *
+ * @return array
+ *   The entire database schema provided by all modules.
  */
 function backdrop_get_complete_schema($rebuild = FALSE) {
   static $schema = array();

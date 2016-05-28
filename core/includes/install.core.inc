@@ -60,6 +60,8 @@ define('INSTALL_TASK_RUN_IF_NOT_COMPLETED', 3);
  *   elements that are allowed to appear in this array.
  *
  * @see install_state_defaults()
+ *
+ * @throws Exception
  */
 function install_backdrop($settings = array()) {
   global $install_state;
@@ -206,6 +208,8 @@ function install_state_defaults() {
  * @param $install_state
  *   An array of information about the current installation state. This is
  *   modified with information gleaned from the beginning of the page request.
+ *
+ * @throws Exception
  */
 function install_begin_request(&$install_state) {
   // Add any installation parameters passed in via the URL.
@@ -367,8 +371,10 @@ function install_run_tasks(&$install_state) {
  *   An array of information about the current installation state. This is
  *   passed in by reference so that it can be modified by the task.
  *
- * @return
+ * @return string|NULL
  *   The output of the task function, if there is any.
+ *
+ * @throws Exception
  */
 function install_run_task($task, &$install_state) {
   $function = $task['function'];
@@ -399,7 +405,7 @@ function install_run_task($task, &$install_state) {
       }
       // Otherwise, return nothing so the next task will run in the same
       // request.
-      return;
+      return NULL;
     }
     else {
       // For non-interactive forms, submit the form programmatically with the
@@ -429,7 +435,7 @@ function install_run_task($task, &$install_state) {
       if (empty($batch)) {
         // If the task did some processing and decided no batch was necessary,
         // there is nothing more to do here.
-        return;
+        return NULL;
       }
       batch_set($batch);
       // For interactive batches, we need to store the fact that this batch
@@ -457,7 +463,7 @@ function install_run_task($task, &$install_state) {
       if ($output === FALSE) {
         // Return nothing so the next task will run in the same request.
         state_del('install_current_batch');
-        return;
+        return NULL;
       }
       else {
         // We need to force the page request to end if the task is not
@@ -746,12 +752,14 @@ function install_display_output($output, $install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string|NULL
  *   A themed status report, or an exception if there are requirement errors.
  *   If there are only requirement warnings, a themed status report is shown
  *   initially, but the user is allowed to bypass it by providing 'continue=1'
  *   in the URL. Otherwise, no output is returned, so that the next task can be
  *   run in the same page request.
+ *
+ * @throws Exception
  */
 function install_verify_requirements(&$install_state) {
   // Check the installation requirements for Backdrop and this profile.
@@ -789,6 +797,9 @@ function install_verify_requirements(&$install_state) {
       }
     }
   }
+
+  // Non-interactive requirements check.
+  return NULL;
 }
 
 /**
@@ -829,9 +840,11 @@ function install_system_module(&$install_state) {
 /**
  * Verifies and returns the last installation task that was completed.
  *
- * @return
+ * @return string|NULL
  *   The last completed task, if there is one. An exception is thrown if Backdrop
  *   is already installed.
+ *
+ * @throws Exception
  */
 function install_verify_completed_task() {
   try {
@@ -849,6 +862,9 @@ function install_verify_completed_task() {
     }
     return $task;
   }
+
+  // No install task found.
+  return NULL;
 }
 
 /**
@@ -1065,10 +1081,12 @@ function install_find_profiles() {
  *   profile will be added here, if it was not already selected previously, as
  *   will a list of all available profiles.
  *
- * @return
+ * @return string
  *   For interactive installations, a form allowing the profile to be selected,
  *   if the user has a choice that needs to be made. Otherwise, an exception is
  *   thrown if a profile cannot be chosen automatically.
+ *
+ * @throws Exception
  */
 function install_select_profile(&$install_state) {
   if (empty($install_state['parameters']['profile'])) {
@@ -1098,6 +1116,13 @@ function install_select_profile(&$install_state) {
 
 /**
  * Selects an installation profile from a list or from a $_POST submission.
+ *
+ * @return string|NULL
+ *   The selected profile from $_POST, or the automatically selected profile if
+ *   possible to determine one without prompting the user. If no profile can
+ *   be selected, NULL is returned.
+ *
+ * @throws Exception
  */
 function _install_select_profile($profiles) {
   if (sizeof($profiles) == 0) {
@@ -1106,8 +1131,6 @@ function _install_select_profile($profiles) {
   // Don't need to choose profile if only one available.
   if (sizeof($profiles) == 1) {
     $profile = array_pop($profiles);
-    // TODO: is this right?
-    require_once BACKDROP_ROOT . '/' . $profile->uri;
     return $profile->name;
   }
   else {
@@ -1138,6 +1161,9 @@ function _install_select_profile($profiles) {
       return reset($exclusive_profiles);
     }
   }
+
+  // No profile yet selected or possible to select automatically.
+  return NULL;
 }
 
 /**
@@ -1252,11 +1278,14 @@ function install_find_translation_files($langcode = NULL) {
  *   langcode will be added here, if it was not already selected previously, as
  *   will a list of all available languages.
  *
- * @return
+ * @return string|NULL
  *   For interactive installations, a form or other page output allowing the
  *   language to be selected or providing information about language selection,
- *   if a language has not been chosen. Otherwise, an exception is thrown if a
- *   language cannot be chosen automatically.
+ *   if a language has not been chosen. For non-interactive installs, nothing
+ *   is returned. An exception is thrown if a language cannot be chosen
+ *   automatically.
+ *
+ * @throws Exception
  */
 function install_select_language(&$install_state) {
   // Find all available translations.
@@ -1267,7 +1296,7 @@ function install_select_language(&$install_state) {
     foreach ($files as $file) {
       if ($_POST['langcode'] == $file->langcode) {
         $install_state['parameters']['langcode'] = $file->langcode;
-        return;
+        return NULL;
       }
     }
   }
@@ -1292,7 +1321,10 @@ function install_select_language(&$install_state) {
           $output .= '<p>How should the installation continue?</p>';
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
-          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('langcode' => 'en', 'translate' => NULL))) . '">Continue installation in English</a></li>';
+          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
+              'langcode' => 'en',
+              'translate' => NULL
+            ))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {
@@ -1304,9 +1336,9 @@ function install_select_language(&$install_state) {
       }
       // One language, but not an interactive installation. Assume the user
       // knows what he is doing.
-      $langcode = current($files);
+      $file = current($files);
       $install_state['parameters']['langcode'] = $file->langcode;
-      return;
+      return NULL;
     }
     else {
       // We still don't have a langcode, so display a form for selecting one.
@@ -1324,6 +1356,10 @@ function install_select_language(&$install_state) {
         throw new Exception(st('Sorry, you must select a language to continue the installation.'));
       }
     }
+  }
+  // Non-interactive installs where no language was specified. No action to do.
+  else {
+    return NULL;
   }
 }
 
@@ -1398,10 +1434,12 @@ function install_already_done_error() {
 /**
  * Loads information about the chosen profile during installation.
  *
- * @param $install_state
+ * @param array $install_state
  *   An array of information about the current installation state. The loaded
  *   profile information will be added here, or an exception will be thrown if
  *   the profile cannot be loaded.
+ *
+ * @throws Exception
  */
 function install_load_profile(&$install_state) {
   $profile_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
@@ -1483,7 +1521,7 @@ function install_profile_modules(&$install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array|NULL
  *   The batch definition, if there are language files to import.
  */
 function install_import_translations(&$install_state) {
@@ -1517,6 +1555,9 @@ function install_import_translations(&$install_state) {
   if (!empty($batch)) {
     return $batch;
   }
+
+  // No active batch.
+  return NULL;
 }
 
 /**

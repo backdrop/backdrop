@@ -257,6 +257,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::save().
+   *
+   * @param Node $entity
+   *   The node entity being saved.
    */
   public function save(EntityInterface $entity) {
     $transaction = db_transaction();
@@ -305,8 +308,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
   /**
    * Saves a node revision.
    *
-   * @param EntityInterface $node
-   *   The node entity.
+   * @param Node $entity
+   *   The node entity whose revision should be saved.
    */
   protected function saveRevision(EntityInterface $entity) {
     $record = clone $entity;
@@ -329,6 +332,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides DefaultEntityController::attachLoad().
+   *
+   * @param Node[] $nodes
+   *   An array of nodes on which fields should be attached.
    */
   protected function attachLoad(&$nodes, $revision_id = FALSE) {
     // Create an array of nodes for each content type and pass this to the
@@ -369,6 +375,11 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::invokeHook().
+   *
+   * @param string $hook
+   *   One of 'presave', 'insert', 'update', 'predelete', or 'delete'.
+   * @param Node $node
+   *   The entity object, always a Node object in this case.
    */
   protected function invokeHook($hook, EntityInterface $node) {
     if ($hook == 'insert' || $hook == 'update') {
@@ -418,6 +429,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::preSave().
+   *
+   * @param Node $node
+   *   The node object about to be saved.
    */
   protected function preSave(EntityInterface $node) {
     // Before saving the node, set changed and revision times.
@@ -434,6 +448,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postSave().
+   *
+   * @param Node $node
+   *   The node object that has just been saved.
    */
   function postSave(EntityInterface $node, $update) {
     node_access_acquire_grants($node, $update);
@@ -441,17 +458,23 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::preDelete().
+   *
+   * @param Node[] $entities
+   *   An array of node entities about to be deleted.
    */
-  function preDelete($entities) {
+  function preDelete($nodes) {
     if (module_exists('search')) {
-      foreach ($entities as $id => $entity) {
-        search_reindex($entity->nid, 'node');
+      foreach ($nodes as $nid => $node) {
+        search_reindex($node->nid, 'node');
       }
     }
   }
 
   /**
    * Overrides EntityDatabaseStorageController::postDelete().
+   *
+   * @param Node[] $nodes
+   *   An array of node entities that have just been deleted.
    */
   protected function postDelete($nodes) {
     // Delete values from other tables also referencing this node.

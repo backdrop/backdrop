@@ -327,6 +327,7 @@ function backdrop_session_commit() {
     // Write the session data.
     session_write_close();
   }
+  return TRUE;
 }
 
 /**
@@ -418,6 +419,9 @@ function backdrop_session_regenerate() {
  *
  * @param $sid
  *   Session ID.
+ *
+ * @return TRUE
+ *   The session destroy handler must always return TRUE.
  */
 function _backdrop_session_destroy($sid) {
   global $user, $is_https;
@@ -493,6 +497,9 @@ function backdrop_session_destroy_uid($uid) {
  * @param $lifetime
  *   The value of session.gc_maxlifetime, passed by PHP.
  *   Sessions not updated for more than $lifetime seconds will be removed.
+ *
+ * @return TRUE
+ *   The garbage collection handler must always return TRUE.
  */
 function _backdrop_session_garbage_collection($lifetime) {
   // Be sure to adjust 'php_value session.gc_maxlifetime' to a large enough

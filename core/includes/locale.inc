@@ -712,13 +712,15 @@ function _locale_invalidate_js($langcode = NULL) {
 /**
  * (Re-)Creates the JavaScript translation file for a language.
  *
- * @param $langcode
- *   The language, the translation file should be (re)created for.
+ * @param string $langcode
+ *   The language code for which the translation file should be (re)created.
+ *
+ * @return bool
+ *   TRUE if the translation file was created successfully, FALSE otherwise.
  */
 function _locale_rebuild_js($langcode = NULL) {
   if (!isset($langcode)) {
-    global $language;
-    $language = $language;
+    $language = $GLOBALS['language'];
   }
   else {
     // Get information about the locale.
