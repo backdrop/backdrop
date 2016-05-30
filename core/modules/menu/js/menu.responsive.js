@@ -313,11 +313,7 @@ Backdrop.makeMenuResponsive = function(context, settings, menuSelector, menuItem
   });
 
   // Resource friendly resize event
-  var resizeTimeout;
-  $(window).on('resize', function () {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(handleResize, 50);
-  });
+  Backdrop.optimizedResize.add(handleResize);
 
   /**
    * Check to see when webfont has loaded and adjust the menu items display
