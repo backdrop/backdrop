@@ -201,6 +201,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
+    sleep(5); // Delay to ensure caches are set.
     $start = microtime(TRUE);
     $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
