@@ -29,23 +29,19 @@ function forTables(method, arg) {
   }
 }
 
-var resizeTimer;
-function tableHeaderResizeHandler(e) {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function() {
-    forTables('recalculateSticky');
-  }, 50);
+function tableHeaderResizeHandler() {
+  forTables('recalculateSticky');
 }
 
 var scrollTimer;
-function tableHeaderOnScrollHandler(e) {
+function tableHeaderOnScrollHandler() {
   clearTimeout(scrollTimer);
   scrollTimer = setTimeout(function() {
     forTables('onScroll');
   }, 50);
 }
 
-function tableHeaderOffsetChangeHandler(e) {
+function tableHeaderOffsetChangeHandler() {
   // Compute the new offset value.
   TableHeader.computeOffsetTop();
   forTables('stickyPosition', TableHeader.offsetTop);
@@ -54,15 +50,15 @@ function tableHeaderOffsetChangeHandler(e) {
 // Bind event that need to change all tables.
 $(window).on({
   /**
-   * When resizing table width and offset top can change, recalculate everything.
-   */
-  'resize.TableHeader': tableHeaderResizeHandler,
-
-  /**
    * Bind only one event to take care of calling all scroll callbacks.
    */
   'scroll.TableHeader': tableHeaderOnScrollHandler
 });
+
+/**
+ * When resizing table width and offset top can change, recalculate everything.
+ */
+Backdrop.optimizedResize.add(tableHeaderResizeHandler);
 
 // Bind to custom Backdrop events.
 $(document).on({
@@ -232,7 +228,7 @@ $.extend(TableHeader.prototype, {
    *
    * This function is throttled to once every 250ms to avoid unnecessary calls.
    */
-  onScroll: function (e) {
+  onScroll: function () {
     // Track horizontal positioning relative to the viewport.
     this.stickyPosition(null, scrollValue('scrollLeft'));
     this.$stickyTable.css('visibility', this.checkStickyVisible() ? 'visible' : 'hidden');
@@ -241,7 +237,7 @@ $.extend(TableHeader.prototype, {
   /**
    * Event handler: recalculates position of the sticky table header.
    */
-  recalculateSticky: function (e) {
+  recalculateSticky: function () {
     // Update table size.
     this.tableHeight = this.$originalTable[0].clientHeight;
 

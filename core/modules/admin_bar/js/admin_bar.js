@@ -189,7 +189,6 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
   var menuWidth;
   var extraWidth;
   var availableWidth;
-  var resizeTimeout;
 
   var adjustItems = function () {
     // Expand the menu items to their full width to check their size.
@@ -214,13 +213,11 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     $adminBar.trigger('afterResize');
   };
 
-  // Adjust items once now.
+
   adjustItems();
-  // Re-adjust items when window is resized.
-  $(window).on('resize.adminBar', function (event) {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(adjustItems, 50);
-  });
+  // Adjust items when window is resized.
+  Backdrop.optimizedResize.add(adjustItems);
+
 };
 
 /**

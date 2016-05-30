@@ -32,11 +32,7 @@ Backdrop.behaviors.installerProjectList = {
     });
 
     // Update the table header on window resize.
-    var resizeTimeout;
-    $(window).on('resize.installer', function (event) {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(updateTableHeader, 50);
-    });
+    Backdrop.optimizedResize.add(updateTableHeader);
 
     $('body').once('installer-status-count').on('click', '.installer-status-count-link', function(event) {
       event.preventDefault();

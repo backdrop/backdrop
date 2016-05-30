@@ -587,4 +587,60 @@ Backdrop.featureDetect.flexbox = function() {
   }
 }
 
+/**
+ * Resource friendly window resize function
+ * Groups all window resize functions and runs them only when a frame comes up
+ * From: developer.mozilla.org/en-US/docs/Web/Events/resize#requestAnimationFrame_customEvent
+ *
+ * Example use:
+ * @code
+ *   Backdrop.optimizedResize.add(function() {
+ *     console.log('Smooth AND resource effecient!');
+ *   });
+ * @endcode
+ */
+Backdrop.optimizedResize = (function() {
+  // Set defaults
+  var callbacks = [],
+    running = false;
+
+  // Fired on resize event
+  function resize() {
+    if (!running) {
+      running = true;
+      // Provide setTimeout fallback to old browsers
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(runCallbacks);
+      } else {
+        setTimeout(runCallbacks, 66);
+      }
+    }
+  }
+
+  // Run the actual callbacks
+  function runCallbacks() {
+    callbacks.forEach(function(callback) {
+      callback();
+    });
+    running = false;
+  }
+
+  // Adds callback to loop
+  function addCallback(callback) {
+    if (callback) {
+      callbacks.push(callback);
+    }
+  }
+
+  return {
+    // Public method to add additional callback
+    add: function(callback) {
+      if (!callbacks.length) {
+        window.addEventListener('resize', resize);
+      }
+      addCallback(callback);
+    }
+  }
+}());
+
 })(jQuery);

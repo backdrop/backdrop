@@ -285,16 +285,8 @@ Backdrop.behaviors.responsivePrimaryTabs = {
       calculateTabWidths();
     });
 
-    // Resource friendly resize event
-    var resizeTimeout;
-    $(window).on('resize', function () {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(handleResize, 50);
-    });
-
-    $(document).ready(function(){
-        handleResize();
-    });
+    Backdrop.optimizedResize.add(handleResize);
+    $(document).ready(handleResize);
   }
 
 }
