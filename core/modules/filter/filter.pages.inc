@@ -77,7 +77,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 }
 
 /**
- * Form callback: Display a form for inserting/editing a link.
+ * Form callback: Display a form for inserting/editing an image.
  */
 function filter_format_editor_image_form($form, &$form_state, $format) {
   $form_state['format'] = $format;
