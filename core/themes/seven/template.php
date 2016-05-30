@@ -138,6 +138,20 @@ function seven_breadcrumb($variables) {
   return $output;
 }
 
+/**
+ * Implements template_preprocess_maintenance_page().
+ */
 function seven_preprocess_maintenance_page(&$variables) {
   $variables['html_attributes']['class'][] = 'maintenance-page-wrapper';
+}
+
+/**
+ * Implements hook_preprocess_menu_local_tasks().
+ */
+function seven_preprocess_menu_local_tasks(&$variables) {
+  $js_options = array('defer' => TRUE);
+  $menu_module_path = backdrop_get_path('module', 'menu');
+  backdrop_add_js($menu_module_path . '/js/menu.responsive.js', $js_options);
+  $seven_theme_path = backdrop_get_path('theme', 'seven');
+  backdrop_add_js($seven_theme_path . '/js/tabs.js', $js_options);
 }

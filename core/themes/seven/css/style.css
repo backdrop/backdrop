@@ -270,15 +270,15 @@ ul.primary li {
   border-left: 2px solid #f0f0f0;
   border-right: 0;
 }
-ul.primary li a,
-ul.primary li a.active,
-ul.primary li a:active,
-ul.primary li a:visited,
-ul.primary li a:hover,
-ul.primary li.active a,
-.expand-dropdown-tabs-control,
-.responsive-tabs-mobile .expand-dropdown-tabs-control:before,
-.responsive-tabs-mobile .expand-dropdown-tabs-label {
+.tabs .primary  a,
+.tabs .primary  a.active,
+.tabs .primary  a:active,
+.tabs .primary  a:visited,
+.tabs .primary  a:hover,
+.tabs .primary .active a,
+.tabs .responsive-menu-control,
+.tabs.responsive-menu-collapsible-strategy .responsive-menu-control:before,
+.tabs.responsive-menu-collapsible-strategy .responsive-menu-control .responsive-menu-link-text-wrapper {
   display: block;
   padding: 12px 20px;
   border: none;
@@ -290,31 +290,32 @@ ul.primary li.active a,
   transition:
     background-color 0.5s ease 0s,
     color 0.5s ease 0s;
-  will-change: background-color, color;
+  will-change: background-color, color;'
+  backface-visibility: hidden;
 }
-ul.primary li.active a,
-ul.primary li.active a.active,
-ul.primary li.active a:active,
-ul.primary li.active a:visited,
-.responsive-tabs-mobile .expand-dropdown-tabs-label {
+.tabs .primary .active a,
+.tabs .primary .active a.active,
+.tabs .primary .active a:active,
+.tabs .primary .active a:visited,
+.tabs.responsive-menu-collapsible-strategy .responsive-menu-control .responsive-menu-link-text-wrapper {
   color: #000;
   background-color: #fafafa;
   font-weight: bold;
 }
-ul.primary li a:hover,
-.expand-dropdown-tabs-control:hover,
-.responsive-tabs-mobile .expand-dropdown-tabs-control:hover:before,
-.responsive-tabs-mobile .expand-dropdown-tabs-control.js-active:before,
-.expand-dropdown-tabs-control.js-active {
+.tabs .primary li a:hover,
+.responsive-menu-control:hover,
+.responsive-menu-collapsible-strategy .responsive-menu-control:hover:before,
+.responsive-menu-collapsible-strategy .responsive-menu-control.js-active:before,
+.responsive-menu-control.js-active {
   color: #000;
   background: #c5c5c3;
 }
-ul.primary li:first-child a {
+.primary li:first-child a {
   -webkit-border-radius: 4px 0 0 0;
   -moz-border-radius: 4px 0 0 0;
   border-radius: 4px 0 0 0;
 }
-.expand-dropdown-tabs-control,
+.responsive-menu-control,
 ul.primary li:last-child a {
   -webkit-border-radius: 0 4px 0 0;
   -moz-border-radius: 0 4px 0 0;
