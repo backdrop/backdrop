@@ -5389,7 +5389,7 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
     }
     // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
     // consistent with PHP 5.4.28+.
-    $string = preg_replace('/\[[\s]+\]/m', '[]', $string);
+    $string = preg_replace('/\[\n[\s]+\]/m', '[]', $string);
     return $string;
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
@@ -5482,7 +5482,14 @@ function backdrop_json_decode_unicode($json) {
   // Convert escaped characters, such as \u00e9 to the unescaped version (é).
   // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
   $decode_callback = function ($match) {
-    return $match[1] . mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+    // Leave control characters such as NULL, backspace, etc. encoded.
+    if (hexdec($match[2]) < 32) {
+      $string = '\u' . $match[2];
+    }
+    else {
+      $string = mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+    }
+    return $match[1] . $string;
   };
   // To prevent unintentionally unescaping the string "\u", be sure that the
   // the backslash itself is not also escaped. Note that because the replacement
