@@ -77,13 +77,14 @@ function _backdrop_error_handler_real($error_level, $message, $filename, $line, 
 /**
  * Decodes an exception and retrieves the correct caller.
  *
- * @param Exception $exception
- *   The exception object that was thrown.
+ * @param Exception|Error $exception
+ *   The exception or error object that was thrown. PHP 7 throws Error objects
+ *   for PHP errors.
  *
  * @return
  *   An error in the format expected by _backdrop_log_error().
  */
-function _backdrop_decode_exception(Exception $exception) {
+function _backdrop_decode_exception($exception) {
   $message = $exception->getMessage();
 
   $backtrace = $exception->getTrace();
