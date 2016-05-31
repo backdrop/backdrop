@@ -489,7 +489,7 @@ function path_patterns_settings_form($form) {
 
   $form['max_length'] = array(
     '#type' => 'number',
-    '#title' => t('Maximum alias length'),
+    '#title' => t('Maximum URL alias length'),
     '#default_value' => $config->get('max_length'),
     '#step' => 1,
     '#min' => 1,
