@@ -55,6 +55,10 @@
  *
  *  --verbose   Output detailed assertion messages in addition to summary.
  *
+ *  --summary [file]
+ *
+ *              Output errors and exception messages to summary file.
+ *
  *  <test1>[ <test2>[ <test3> ...]]
  *
  *              One or more tests classes (or groups names) to be run. Names may
@@ -220,6 +224,10 @@ if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
 }
 
+if($args['summary']) {
+  simpletest_script_write_summary($args['summary']);
+}
+
 // Cleanup our test results.
 simpletest_clean_results_table($test_id);
 
@@ -279,6 +287,11 @@ All arguments are long options.
 
   --cache     Generate cache for instalation profiles to boost tests speed.
 
+  --summary [file]
+
+              Output errors and exception messages to summary file.
+
+
   <test1>[ <test2>[ <test3> ...]]
 
               One or more tests classes (or groups names) to be run. Names may
@@ -324,6 +337,7 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
+    'summary' => '',
   );
 
   // Override with set values.
@@ -700,6 +714,51 @@ function simpletest_script_reporter_init() {
 }
 
 /**
+ * Write a summary of any test failures to a separate file.
+ *
+ * @param string $summary_file
+ *   The path to a file to which the summary will be written.
+ */
+function simpletest_script_write_summary($summary_file) {
+  global $test_list, $args, $test_id, $results_map;
+
+  $summary = '';
+  $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail') ORDER BY test_class, message_id", array(':test_id' => $test_id));
+  $test_class = '';
+  $count = 0;
+  foreach ($results as $result) {
+    if (isset($results_map[$result->status])) {
+      if ($result->test_class != $test_class) {
+        // Display test class every time results are for new test class.
+        $test_class = $result->test_class;
+        $info = simpletest_test_get_by_class($test_class);
+        $test_group = $info['group'];
+        $test_name = $info['name'];
+        $summary .= "\n$test_group: $test_name ($test_class)\n";
+        $test_class = $result->test_class;
+      }
+      
+      if($count < 10 ){
+        $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
+      }
+      $count++;
+    }
+  }
+  
+  if($count > 10 ){
+    $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
+  }
+  
+  if(!empty($summary)){
+    $summary = format_plural($count, '1 test failed', '@count tests failed.') . "\n" . $summary;
+  } 
+  else{
+    $summary = format_plural(count($test_list), '1 test passed', '@count tests passed.');
+  }
+  file_put_contents($summary_file, $summary);
+}
+
+/**
  * Display jUnit XML test results.
  */
 function simpletest_script_reporter_write_xml_results() {
@@ -991,4 +1050,3 @@ function simpletest_script_prepare_profile_cache($profile){
     exit(1);
   }
 }
-
