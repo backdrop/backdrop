@@ -133,19 +133,19 @@ function path_hook_info() {
 function path_action_info() {
   $info['path_node_update_action'] = array(
     'type' => 'node',
-    'label' => t('Update node alias'),
+    'label' => t('Update content URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
     'file' => 'path.inc',
   );
   $info['path_taxonomy_term_update_action'] = array(
     'type' => 'taxonomy_term',
-    'label' => t('Update taxonomy term alias'),
+    'label' => t('Update taxonomy term URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
     'file' => 'path.inc',
   );
   $info['path_user_update_action'] = array(
     'type' => 'user',
-    'label' => t('Update user alias'),
+    'label' => t('Update user URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
     'file' => 'path.inc',
   );
