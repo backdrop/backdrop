@@ -136,6 +136,7 @@
   margin: 0 0 15px;
   padding: 8px;
   border: 1px dashed #CCC;
+  border-radius: 4px;
   background: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -143,8 +144,9 @@
 .layout-editor-region-title .label {
   float: left;
   margin: 0 12px 0 0; /* LTR */
-  padding: 4px 0;
+  padding: 4px 0.5em;
   line-height: 1.2;
+  font-weight: normal;
 }
 .layout-editor-region-content {
   min-height: 40px;
@@ -178,13 +180,29 @@
   margin-bottom: 0;
 }
 .layout-editor-block-title {
-  border: 1px solid #CCC;
-  background: #F3F4EE;
-  padding: 0.4em 1em;
+  border: 0;
+  background: #e9e8e8;
+  border-radius: 4px 4px 0 0;
+  padding: 0.4em 0.5em;
+}
+.layout-editor-block-title .handle {
+  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
+  height: 13px;
+  width: 13px;
+  margin: 0 0.5em 0 0; /* LTR */
+  padding: 0.25em 0.75em;
+  width: 13px;
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -o-box-sizing: content-box;
+}
+[dir="rtl"] .layout-editor-block-title .handle {
+  margin: 0 0 0 0.5em;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1.75;
   font-weight: bold;
 }
 .layout-editor-block-title .buttons {
@@ -195,9 +213,10 @@
   float: left;
 }
 .layout-editor-block-content {
-  border: 1px solid #CCC;
+  border: 1px solid #f7f7f7;
   border-top: none;
   border-bottom-width: 2px;
+  border-radius: 0 0 4px 4px;
   padding: 0.4em 1em;
   min-height: 20px;
   font-size: 90%;
@@ -240,6 +259,12 @@
 /* Layout Misc */
 #layout-edit h1 {
   margin: 1em 0 .6em;
+  font-size: 1.1em;
+  font-weight: bold;
+  line-height: 1.75;
+  background: #e9e8e8;
+  border-radius: 4px;
+  padding: 0.4em 1em;
 }
 .layout-access-list ul {
   margin: 1em 0px;
