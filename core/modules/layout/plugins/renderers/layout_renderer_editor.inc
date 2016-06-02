@@ -71,7 +71,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
 
     $output = '<div class="' . $class . '" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
