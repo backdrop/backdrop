@@ -109,7 +109,7 @@ function path_admin_edit($path = array()) {
 }
 
 /**
- * Form builder; Main URL pattern administration form.
+ * Form builder; Main URL alias pattern administration form.
  *
  * @param $path
  *   An array containing the path ID, source, alias, and language code.
@@ -348,13 +348,13 @@ function path_patterns_form($form, $form_state) {
   $config = config('path.settings');
 
   $form['help'] = array(
-    '#markup' => '<p>' . t('URL patterns automatically alias new content based on wildcards called "tokens". For example the URL "node/10" might be automatically aliased to "blog/my-first-post" using the pattern "blog/[node:title]".') . '</p>',
+    '#markup' => '<p>' . t('URL alias patterns automatically alias new content based on wildcards called "tokens". For example the URL "node/10" might be automatically aliased to "blog/my-first-post" using the pattern "blog/[node:title]".') . '</p>',
   );
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
     $pattern_description = $path_info['pattern description'];
-    $group_header = t('!label URL patterns', array('!label' => $path_info['label']));
+    $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
     $token_types = array();
     if (isset($path_info['entity type'])) {
       $entity_type = entity_get_info($path_info['entity type']);
@@ -370,7 +370,7 @@ function path_patterns_form($form, $form_state) {
       '#collapsed' => FALSE,
     );
 
-    // Prompt for the default pattern for this path type.
+    // Prompt for the default URL alias pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
@@ -431,7 +431,7 @@ function path_patterns_form_submit($form, &$form_state) {
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    // Save default pattern per path type.
+    // Save default URL alias pattern per path type.
     $variable = $path_type . '_pattern';
     $config->set($variable, $values[$variable]);
 
@@ -449,7 +449,7 @@ function path_patterns_form_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Configure the URL pattern settings.
+ * Form builder; Configure the URL alias pattern settings.
  *
  * @see path_patterns_settings_form_validate()
  * @see path_patterns_settings_form_submit()
@@ -463,7 +463,7 @@ function path_patterns_settings_form($form) {
     '#type' => 'checkbox',
     '#title' => t('Verbose'),
     '#default_value' => $config->get('verbose'),
-    '#description' => t('Display alias changes (except during bulk updates).'),
+    '#description' => t('Display URL alias pattern changes (except during bulk updates).'),
   );
 
   $form['separator'] = array(
