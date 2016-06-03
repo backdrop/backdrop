@@ -577,4 +577,45 @@ Backdrop.optimizedResize = (function() {
   }
 }());
 
+/**
+ * Check to see when webfont has loaded and adjust the menu items display
+ */
+Backdrop.isWebFontLoaded = (function (){
+  var checkFontCounter = 0,
+    callbacks = [],
+    $body = $('body');
+
+  // Append an invisible element that will be monospace font or our desired
+  // font. We're using a repeating i because the characters width will
+  // drastically change when it's monospace vs. proportional font.
+  var $checkFontElementExperiment = $('<span id="check-font-element" style="visibility: hidden;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>'),
+    $checkFontElementControl = $checkFontElementExperiment.attr('id', 'check-font-element-control'),
+    $checkFontWrapper = $('<span id="check-font-wrapper"></span>').prepend($checkFontElementExperiment).append($checkFontElementControl);
+
+  $body.append($checkFontWrapper);
+
+  // Check to see if the webfont has been loaded by checking widths of
+  // experimental and control elements
+  function checkFont() {
+    if ($checkFontElementControl.outerWidth() !== $checkFontElementExperiment.outerWidth() || checkFontCounter >= 100) {
+      // Clean up after ourselves
+      clearInterval(checkFontInterval);
+      $checkFontWrapper.remove();
+    }
+    checkFontCounter++;
+  }
+  var checkFontInterval = setInterval(checkFont, 100);
+
+  return {
+    // Public method to add additional callback
+    add: function(fontName, callback) {
+      if (!callbacks.length) {
+        window.addEventListener('resize', resize);
+      }
+      addCallback(callback);
+    }
+  }
+
+}());
+
 })(jQuery);

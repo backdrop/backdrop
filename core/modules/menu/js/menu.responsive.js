@@ -19,27 +19,27 @@ Backdrop.makeMenuResponsive = function(context, settings, menuSelector, menuItem
   }
 
   var $menuWrapper = $menu.parent(),
-      $menuItems = $menu.find(menuItemSelector),
-      isMenuResponsive = false,
-      menuResponsiveStrategy,
-      previousWindowWidth,
-      menuItemWidths = [],
-      initialRunMenuItemWidths,
-      initialRunMenuTextWidths,
-      menuItemHeight,
-      widestMenuWidth = 0,
-      expandControlWidth,
-      activeMenuNth = $menu.find('.active').first().index(),
-      expandedMenusHeaderPadding = 0,
-      defaultHeaderPadding = '20px', // @todo replace with a setting
-      // @todo This functionality should go in callback
-      $mobileHeaderPadder = $('<div class="responsive-menu-collapsible-strategy-header-padder" style="height: ' + expandedMenusHeaderPadding + 'px"></div>'),
-      $body = $('body'),
+    $menuItems = $menu.find(menuItemSelector),
+    isMenuResponsive = false,
+    menuResponsiveStrategy,
+    previousWindowWidth,
+    menuItemWidths = [],
+    initialRunMenuItemWidths,
+    initialRunMenuTextWidths,
+    menuItemHeight,
+    widestMenuWidth = 0,
+    expandControlWidth,
+    activeMenuNth = $menu.find('.active').first().index(),
+    expandedMenusHeaderPadding = 0,
+    defaultHeaderPadding = '20px', // @todo replace with a setting
+    // @todo This functionality should go in callback
+    $mobileHeaderPadder = $('<div class="responsive-menu-collapsible-strategy-header-padder" style="height: ' + expandedMenusHeaderPadding + 'px"></div>'),
+    $body = $('body'),
 
-      // These are essentially breakpoints to be measured against the menuItemArea.
-      allMenusWidth,                // Will show all menu items.
-      activeMenuItemAndBeforeWidth, // Will chop off menu items after active tab.
-      activeMenuItemAndAfterWidth;  // Will chop off menu items before active tab.
+    // These are essentially breakpoints to be measured against the menuItemArea.
+    allMenusWidth,                // Will show all menu items.
+    activeMenuItemAndBeforeWidth, // Will chop off menu items after active tab.
+    activeMenuItemAndAfterWidth;  // Will chop off menu items before active tab.
 
   function initResponsiveMenu() {
     menuItemHeight = $menuItems.first().outerHeight();
@@ -97,16 +97,16 @@ Backdrop.makeMenuResponsive = function(context, settings, menuSelector, menuItem
 
     $menuItems.each(function(i) {
       var $this = $(this),
-          currentMenuItemWidth = $this.outerWidth(),
-          currentMenuTextWidth = $this.find('.responsive-menu-link-text-wrapper').outerWidth();
+        currentMenuItemWidth = $this.outerWidth(),
+        currentMenuTextWidth = $this.find('.responsive-menu-link-text-wrapper').outerWidth();
 
       if (initialRun) {
         initialRunMenuTextWidths.push(currentMenuTextWidth);
       } else {
-        // Can't count on the menu item's outerWidth, as that may change at different
-        // responsive strategies from this behavior. Instead using initial size
-        // (before this behavior applied) and any differences in font size
-        // that may have occured
+        // Can't count on the menu item's outerWidth, as that may change at
+        // different responsive strategies from this behavior. Instead using
+        // initial size (before this behavior applied) and adding any
+        // differences in copy width
         currentMenuItemWidth = currentMenuTextWidth - initialRunMenuTextWidths[i] + initialRunMenuItemWidths[i];
       }
       menuItemWidths.push(currentMenuItemWidth);
@@ -314,33 +314,6 @@ Backdrop.makeMenuResponsive = function(context, settings, menuSelector, menuItem
 
   // Resource friendly resize event
   Backdrop.optimizedResize.add(handleResize);
-
-  /**
-   * Check to see when webfont has loaded and adjust the menu items display
-   */
-  var checkFontCounter = 0;
-  // Append an invisible element that will be monospace font or our desired
-  // font. We're using a repeating i because the characters width will
-  // drastically change when it's monospace vs. proportional font.
-  var $checkFontElement = $('<span id="check-font" style="visibility: hidden;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
-  $checkFontElement.appendTo($body).wrap('<span id="check-font-wrapper"></span>');
-
-  // Function to check the width of the font, if it's substantially different
-  // we'll know we our real font has loaded
-  function checkFont() {
-    var currentWidth = $checkFontElement.width();
-    if (currentWidth < 200 || checkFontCounter >= 60) {
-      // If our font has loaded, or it's been 6 seconds
-      adjustMenuDisplay();
-      // Clean up after ourselves
-      clearInterval(checkFontInterval);
-      $checkFontElement.remove();
-      calculateMenuWidths();
-    }
-    checkFontCounter++;
-  }
-  var checkFontInterval = setInterval(checkFont, 100);
-
 }
 
 })(jQuery);
