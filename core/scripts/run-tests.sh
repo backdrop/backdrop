@@ -753,7 +753,8 @@ function simpletest_script_write_summary($summary_file) {
     $summary = format_plural($count, '1 test failed', '@count tests failed.') . "\n" . $summary;
   } 
   else{
-    $summary = format_plural(count($test_list), '1 test passed', '@count tests passed.');
+    $totalCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id ", array(':test_id' => $test_id))->fetchField();
+    $summary = format_plural($totalCount, '1 test passed', '@count tests passed.');
   }
   file_put_contents($summary_file, $summary);
 }
