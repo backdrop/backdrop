@@ -15,7 +15,7 @@
  * @ingroup forms
  */
 function authorize_filetransfer_form($form, &$form_state) {
-  global $base_url, $is_https;
+  global $is_https;
   $form = array();
 
   // If possible, we want to post this form securely via HTTPS.
@@ -211,9 +211,9 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
     catch (Exception $e) {
       // The format of this error message is similar to that used on the
       // database connection form in the installer.
-      form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">handbook</a>.', array(
+      form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
         '!message' => '<p class="error">' . $e->getMessage()  . '</p>',
-        '@handbook_url' => 'http://backdropcms.org/guide/modules',
+        '@handbook_url' => 'https://backdropcms.org/installation',
       )));
     }
   }
@@ -226,7 +226,6 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
  * @see authorize_filetransfer_validate()
  */
 function authorize_filetransfer_form_submit($form, &$form_state) {
-  global $base_url;
   switch ($form_state['triggering_element']['#name']) {
     case 'process_updates':
 
@@ -320,8 +319,10 @@ function authorize_get_filetransfer($backend, $settings = array()) {
       $file = $backend_info['file path'] . '/' . $backend_info['file'];
       require_once $file;
     }
-    if (class_exists($backend_info['class'])) {
-      $filetransfer = $backend_info['class']::factory(BACKDROP_ROOT, $settings);
+    /* @var FileTransfer $class */
+    $class = $backend_info['class'];
+    if (class_exists($class)) {
+      $filetransfer = $class::factory(BACKDROP_ROOT, $settings);
     }
   }
   return $filetransfer;

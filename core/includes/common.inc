@@ -244,9 +244,12 @@ function backdrop_get_profile() {
 /**
  * Sets the breadcrumb trail for the current page.
  *
- * @param $breadcrumb
+ * @param array $breadcrumb
  *   Array of links, starting with "home" and proceeding up to but not including
  *   the current page.
+ *
+ * @return array
+ *   The current breadcrumb trail array.
  */
 function backdrop_set_breadcrumb($breadcrumb = NULL) {
   $stored_breadcrumb = &backdrop_static(__FUNCTION__);
@@ -409,7 +412,7 @@ function _backdrop_default_html_head() {
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
-      'content' => 'Backdrop CMS ' . $version . ' (http://backdropcms.org)',
+      'content' => 'Backdrop CMS ' . $version . ' (https://backdropcms.org)',
     ),
   );
   // Also send the generator in the HTTP header.
@@ -468,8 +471,11 @@ function backdrop_add_feed($url = NULL, $title = '') {
 /**
  * Gets the feed URLs for the current page.
  *
- * @param $delimiter
+ * @param string $delimiter
  *   A delimiter to split feeds by.
+ *
+ * @return string
+ *   The list of feed URLs joined together by the given delimiter.
  */
 function backdrop_get_feeds($delimiter = "\n") {
   $feeds = backdrop_add_feed();
@@ -712,8 +718,11 @@ function backdrop_parse_url($url) {
  * Note that url() takes care of calling this function, so a path passed to that
  * function should not be encoded in advance.
  *
- * @param $path
+ * @param string $path
  *   The Backdrop path to encode.
+ *
+ * @return string
+ *   The encoded path.
  */
 function backdrop_encode_path($path) {
   return str_replace('%2F', '/', rawurlencode($path));
@@ -855,7 +864,7 @@ function backdrop_access_denied() {
  *     code is set to the HTTP_REQUEST_TIMEOUT constant.
  *   - context: A context resource created with stream_context_create().
  *
- * @return object
+ * @return stdClass
  *   An object that can have one or more of the following components:
  *   - request: A string containing the request body that was sent.
  *   - code: An integer containing the response status code, or the error code
@@ -879,6 +888,7 @@ function backdrop_http_request($url, array $options = array()) {
   $alternate_http_system = &backdrop_static('__FUNCTION__');
   if (!isset($alternate_http_system)) {
     $class = settings_get('http_system');
+    /* @var BackdropHTTPSystemInterface $alternate_http_system */
     $alternate_http_system = $class ? new $class() : FALSE;
   }
   if ($alternate_http_system) {
@@ -916,7 +926,7 @@ function backdrop_http_request($url, array $options = array()) {
 
   // Merge the default headers.
   $options['headers'] += array(
-    'User-Agent' => 'Backdrop CMS (+http://backdropcms.org/)',
+    'User-Agent' => 'Backdrop CMS (+https://backdropcms.org)',
   );
 
   // stream_socket_client() requires timeout to be a float.
@@ -1735,7 +1745,7 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
  * @param $store
  *   Whether to store $m.
  *
- * @return
+ * @return string
  *   If the element isn't allowed, an empty string. Otherwise, the cleaned up
  *   version of the HTML element.
  */
@@ -1744,7 +1754,7 @@ function _filter_xss_split($m, $store = FALSE) {
 
   if ($store) {
     $allowed_html = array_flip($m);
-    return;
+    return '';
   }
 
   $string = $m[1];
@@ -1989,9 +1999,9 @@ function format_rss_item($title, $link, $description, $args = array()) {
 }
 
 /**
- * Formats XML elements.
+ * Recursively formats nested XML array elements as a string.
  *
- * @param $array
+ * @param array $array
  *   An array where each item represents an element and is either a:
  *   - (key => value) pair (<key>value</key>)
  *   - Associative array with fields:
@@ -1999,8 +2009,11 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'value': element contents
  *     - 'attributes': associative array of element attributes
  *
- * In both cases, 'value' can be a simple string, or it can be another array
- * with the same format as $array itself for nesting.
+ *   In both cases, 'value' can be a simple string, or it can be another array
+ *   with the same format as $array itself for nesting.
+ *
+ * @return string
+ *  A string of XML representing the elements passed in.
  */
 function format_xml_elements($array) {
   $output = '';
@@ -2149,6 +2162,7 @@ function format_size($size, $langcode = NULL) {
       t('@size ZB', array(), array('langcode' => $langcode)),
       t('@size YB', array(), array('langcode' => $langcode)),
     );
+    $unit = reset($units);
     foreach ($units as $unit) {
       if (round($size, 2) >= BACKDROP_KILOBYTE) {
         $size = $size / BACKDROP_KILOBYTE;
@@ -2290,6 +2304,15 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  * Translates a formatted date string.
  *
  * Callback for preg_replace_callback() within format_date().
+ *
+ * @param $matches
+ *   The array of matches as found by preg_replace_callback().
+ * @param string $new_langcode
+ *   Sets the internal langcode to be used. Set the langcode prior to calling
+ *   preg_replace_callback().
+ *
+ * @return string
+ *   The date from $matches as a translated string.
  */
 function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
   // We cache translations to avoid redundant and rather costly calls to t().
@@ -2297,7 +2320,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
 
   if (!isset($matches)) {
     $langcode = $new_langcode;
-    return;
+    return NULL;
   }
 
   $code = $matches[1];
@@ -3422,6 +3445,7 @@ function backdrop_group_css($css) {
     // aggregated. Since a group may be rendered with a single HTML tag, all
     // items in the group must share the same information that would need to be
     // part of that HTML tag.
+    $group_keys = NULL;
     switch ($item['type']) {
       case 'file':
         // Group file items if their 'preprocess' flag is TRUE.
@@ -4439,6 +4463,9 @@ function backdrop_add_js($data = NULL, $options = NULL) {
  * @param $data
  *   (optional) The default data parameter for the JavaScript item array.
  *
+ * @return array
+ *   The array of defaults for added JavaScript items.
+ *
  * @see backdrop_get_js()
  * @see backdrop_add_js()
  */
@@ -4676,6 +4703,7 @@ function backdrop_group_js($javascript) {
   // be the same for each item in the group, so that when we iterate the next
   // item, we can determine if it can be put into the current group, or if a
   // new group needs to be made for it.
+  $group_keys = NULL;
   $current_group_keys = NULL;
   $index = -1;
   foreach ($javascript as $item) {
@@ -5331,13 +5359,16 @@ function backdrop_clear_js_cache() {
  *
  * We use HTML-safe strings, with several characters escaped.
  *
- * @param $var
+ * @param mixed $var
  *   The variable to be encoded as JSON.
- * @param $pretty_print
+ * @param bool $pretty_print
  *   Backwards-compatible pretty printing of the JSON string. This uses the
  *   JSON_PRETTY_PRINT and JSON_UNESCAPED_UNICODE options to make the JSON more
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
+ *
+ * @return string
+ *   The given $var encoded as a JSON string.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers
@@ -5358,7 +5389,7 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
     }
     // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
     // consistent with PHP 5.4.28+.
-    $string = preg_replace('/\[[\s]+\]/m', '[]', $string);
+    $string = preg_replace('/\[\n[\s]+\]/m', '[]', $string);
     return $string;
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
@@ -5451,7 +5482,14 @@ function backdrop_json_decode_unicode($json) {
   // Convert escaped characters, such as \u00e9 to the unescaped version (é).
   // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
   $decode_callback = function ($match) {
-    return $match[1] . mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+    // Leave control characters such as NULL, backspace, etc. encoded.
+    if (hexdec($match[2]) < 32) {
+      $string = '\u' . $match[2];
+    }
+    else {
+      $string = mb_convert_encoding(pack('H*', $match[2]), 'UTF-8', 'UCS-2BE');
+    }
+    return $match[1] . $string;
   };
   // To prevent unintentionally unescaping the string "\u", be sure that the
   // the backslash itself is not also escaped. Note that because the replacement
@@ -6564,6 +6602,9 @@ function backdrop_render_cache_get($elements) {
  * @param $elements
  *   A renderable array.
  *
+ * @return bool
+ *   TRUE if the render cache was set. FALSE if it is unable to be set.
+ *
  * @see backdrop_render_cache_get()
  */
 function backdrop_render_cache_set(&$markup, $elements) {
@@ -6587,6 +6628,7 @@ function backdrop_render_cache_set(&$markup, $elements) {
   $bin = isset($elements['#cache']['bin']) ? $elements['#cache']['bin'] : 'cache';
   $expire = isset($elements['#cache']['expire']) ? $elements['#cache']['expire'] : CACHE_PERMANENT;
   cache($bin)->set($cid, $data, $expire);
+  return TRUE;
 }
 
 /**
@@ -6602,8 +6644,10 @@ function backdrop_render_cache_set(&$markup, $elements) {
  * @param $return
  *   Whether to return the attached elements and reset the internal static.
  *
- * @return
- *   The #attached array for this element and its descendants.
+ * @return array|NULL
+ *   If $return is TRUE, the #attached array for this element and its
+ *   descendants. If $return is FALSE, the collected attachments are stored
+ *   internally so they do not have to be collected again.
  */
 function backdrop_render_collect_attached($elements, $return = FALSE) {
   $attached = &backdrop_static(__FUNCTION__, array());
@@ -6629,6 +6673,9 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
     $return = $attached;
     $attached = array();
     return $return;
+  }
+  else {
+    return NULL;
   }
 }
 
@@ -6760,6 +6807,9 @@ function backdrop_render_cid_create($elements) {
  *
  * @param $type
  *   An element type as defined by hook_element_info().
+ *
+ * @return array
+ *   The element information array from hook_element_info().
  */
 function element_info($type) {
   // Use the advanced backdrop_static() pattern, since this is called very often.
@@ -6791,6 +6841,9 @@ function element_info($type) {
  * @param $default
  *   (Optional) The value to return if the element type does not specify a
  *   value for the property. Defaults to NULL.
+ *
+ * @return mixed
+ *   The default property value for the given element type and property key.
  */
 function element_info_property($type, $property_name, $default = NULL) {
   return (($info = element_info($type)) && array_key_exists($property_name, $info)) ? $info[$property_name] : $default;
@@ -6873,6 +6926,8 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
         if ($a[$key] != $b[$key]) {
           return $a[$key] < $b[$key] ? -1 : 1;
         }
+        // Equal values, return 0.
+        return 0;
       });
     }
   }
@@ -6904,6 +6959,7 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
           return ($a[$key] < $b[$key]) ? -1 : 1;
         }
       }
+      return 0;
     };
     uasort($array, $recursive_callback);
   }
@@ -7625,6 +7681,9 @@ function backdrop_uninstall_schema($module) {
  * @param $table
  *   The name of the table. If not given, the module's complete schema
  *   is returned.
+ *
+ * @return array
+ *   The schema for the requested table, without modification by other modules.
  */
 function backdrop_get_schema_unprocessed($module, $table = NULL) {
   // Load the .install file to get hook_schema.
@@ -8258,7 +8317,7 @@ function backdrop_parse_dependency($dependency) {
  * @param $current_version
  *   The version to check against (like 4.2).
  *
- * @return
+ * @return string|NULL
  *   NULL if compatible, otherwise the original dependency version string that
  *   caused the incompatibility.
  *
@@ -8272,6 +8331,8 @@ function backdrop_check_incompatibility($v, $current_version) {
       }
     }
   }
+  // No incompatibilities.
+  return NULL;
 }
 
 /**
@@ -8332,6 +8393,8 @@ function archiver_get_extensions() {
  *   A newly created instance of the archiver class appropriate
  *   for the specified file, already bound to that file.
  *   If no appropriate archiver class was found, will return FALSE.
+ *
+ * @throws Exception
  */
 function archiver_get_archiver($file) {
   // Archivers can only work on local paths
@@ -8353,6 +8416,9 @@ function archiver_get_archiver($file) {
       }
     }
   }
+
+  // No valid archiver found.
+  return FALSE;
 }
 
 /**

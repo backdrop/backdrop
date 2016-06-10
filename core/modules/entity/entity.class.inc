@@ -106,7 +106,7 @@ interface EntityInterface {
 /**
  * Defines a base entity class.
  */
-abstract class Entity implements EntityInterface {
+abstract class Entity extends stdClass implements EntityInterface {
   /**
    * Constructs a new entity object.
    */

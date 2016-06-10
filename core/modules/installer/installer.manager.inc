@@ -614,10 +614,10 @@ function _installer_manager_check_backends(&$form, $operation) {
   $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
     }
     return FALSE;
   }

@@ -795,7 +795,7 @@ class MetaTagsTestCase extends BackdropWebTestCase {
   public function testMetaTag() {
     list($version, ) = explode('.', BACKDROP_VERSION);
     $meta_tags = array(
-      'generator' => '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />',
+      'generator' => '<meta name="Generator" content="Backdrop CMS ' . $version . ' (https://backdropcms.org)" />',
       'viewport' => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
     );
 

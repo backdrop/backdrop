@@ -142,7 +142,6 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
     // isn't a path that has this alias
     elseif ($action == 'source' && !isset($cache['no_source'][$langcode][$path])) {
       // Look for the value $path within the cached $map
-      $source = FALSE;
       if (!isset($cache['map'][$langcode]) || !($source = array_search($path, $cache['map'][$langcode]))) {
         $args = array(
           ':alias' => $path,

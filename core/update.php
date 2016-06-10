@@ -31,7 +31,7 @@ chdir(BACKDROP_ROOT);
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
 if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="http://backdropcms.org/guide/requirements">system requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -298,7 +298,7 @@ function update_info_page() {
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="https://backdropcms.org/guide/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
   $output .= "<ol>\n";
   $output .= "<li><strong>Make any necessary backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
   $output .= "<ul>\n";

@@ -2115,7 +2115,7 @@ class FormUrlTestCase extends BackdropWebTestCase {
 
     $edit = array();
     $edit['url'] = 'http://foo.bar.example.com/';
-    $edit['url_required'] = 'http://backdropcms.org/example?page=0&foo=bar#new';
+    $edit['url_required'] = 'https://backdropcms.org/example?page=0&foo=bar#new';
     $values = backdrop_json_decode($this->backdropPost('form-test/url', $edit, 'Submit'));
     $this->assertEqual($values['url'], $edit['url']);
     $this->assertEqual($values['url_required'], $edit['url_required']);

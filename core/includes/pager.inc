@@ -165,7 +165,7 @@ function theme_pager($variables) {
 
   // Return if there is no pager to be rendered.
   if (!isset($pager_page_array[$element])) {
-    return;
+    return '';
   }
 
   // Calculate various markers within this pager piece:
@@ -268,6 +268,9 @@ function theme_pager($variables) {
       'attributes' => array('class' => array('pager')),
     ));
   }
+
+  // Single page of contents, no pager needed.
+  return '';
 }
 
 

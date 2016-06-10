@@ -26,7 +26,7 @@ function backdrop_var_export($var, $prefix = '') {
       // Don't export keys if the array is non associative.
       $export_keys = array_values($var) != $var;
       foreach ($var as $key => $value) {
-        $output .= '  ' . ($export_keys ? backdrop_var_export($key) . ' => ' : '') . backdrop_var_export($value, '  ', FALSE) . ",\n";
+        $output .= '  ' . ($export_keys ? backdrop_var_export($key) . ' => ' : '') . backdrop_var_export($value, '  ') . ",\n";
       }
       $output .= ')';
     }
@@ -35,7 +35,6 @@ function backdrop_var_export($var, $prefix = '') {
     $output = $var ? 'TRUE' : 'FALSE';
   }
   elseif (is_string($var)) {
-    $line_safe_var = str_replace("\n", '\n', $var);
     if (strpos($var, "\n") !== FALSE || strpos($var, "'") !== FALSE) {
       // If the string contains a line break or a single quote, use the
       // double quote export mode. Encode backslash and double quotes and

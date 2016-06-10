@@ -104,11 +104,14 @@ class User extends Entity {
   public $preferred_langcode = LANGUAGE_NONE;
 
   /**
-   * The file ID of the user's picture.
+   * The file entity for the user's picture.
    *
-   * @var integer
+   * Early in loading a user object, the picture property will contain the file
+   * ID only. It is expanded to be the full file entity in User::attachLoad().
+   *
+   * @var File|int
    */
-  public $picture = 0;
+  public $picture;
 
   /**
    * The email address used for initial account creation.
@@ -186,6 +189,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::attachLoad().
+   *
+   * @param User[] $queried_users
+   *   The user entities for which fields should be attached.
    */
   function attachLoad(&$queried_users, $revision_id = FALSE) {
     // Build an array of user picture IDs so that these can be fetched later.
@@ -239,6 +245,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::save().
+   *
+   * @param User $entity
+   *   The user entity to be saved.
    */
   public function save(EntityInterface $entity) {
     if (empty($entity->uid)) {
@@ -250,6 +259,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::preSave().
+   *
+   * @param User $entity
+   *   The user entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
     // Update the user password if it has changed.
@@ -277,7 +289,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Delete the picture if the submission indicates that it should be deleted
     // and no replacement was submitted.
     elseif (!empty($entity->picture_delete)) {
-      $entity->picture = 0;
+      $entity->picture = NULL;
       file_usage_delete($entity->original->picture, 'user', 'user', $entity->uid);
       file_delete($entity->original->picture->fid);
     }
@@ -308,7 +320,7 @@ class UserStorageController extends EntityDatabaseStorageController {
           file_delete($entity->original->picture->fid);
         }
       }
-      $entity->picture = empty($entity->picture->fid) ? 0 : $entity->picture->fid;
+      $entity->picture = empty($entity->picture->fid) ? NULL : $entity->picture->fid;
 
       // If the password is empty, that means it was not changed, so use the
       // original password.
@@ -332,6 +344,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postSave().
+   *
+   * @param User $entity
+   *   The user entity that has just been saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
 

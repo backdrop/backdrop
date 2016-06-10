@@ -512,6 +512,9 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
 
 /**
  * Fetches a form from the cache.
+ *
+ * @return array|NULL
+ *   The form array retrieved from cache if found. NULL otherwise.
  */
 function form_get_cache($form_build_id, &$form_state) {
   if ($form = tempstore_get('form', $form_build_id)) {
@@ -547,6 +550,8 @@ function form_get_cache($form_build_id, &$form_state) {
       return $form;
     }
   }
+
+  return NULL;
 }
 
 /**
@@ -759,6 +764,9 @@ function backdrop_form_submit($form_id, &$form_state) {
  *   A keyed array containing the current state of the form, including the
  *   additional arguments to backdrop_get_form() or backdrop_form_submit() in the
  *   'args' component of the array.
+ *
+ * @return array
+ *   The form structure as a renderable array.
  */
 function backdrop_retrieve_form($form_id, &$form_state) {
   $forms = &backdrop_static(__FUNCTION__);
@@ -1498,6 +1506,12 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
  *   A keyed array containing the current state of the form. If the user
  *   submitted the form by clicking a button with custom handler functions
  *   defined, those handlers will be stored here.
+ *
+ * @return bool
+ *   TRUE if any handlers were executed at all. FALSE if no handlers were found
+ *   to execute. This return value only indicates if handlers were fired, it
+ *   does not represent all validations passed or all submit values were saved.
+ *   The result of those actions will be stored in the $form_state array.
  */
 function form_execute_handlers($type, &$form, &$form_state) {
   $return = FALSE;
@@ -1621,7 +1635,7 @@ function form_execute_handlers($type, &$form, &$form_state) {
  *   Internal use only. The #limit_validation_errors property of the clicked
  *   button, if it exists.
  *
- * @return
+ * @return array
  *   Return value is for internal use only. To get a list of errors, use
  *   form_get_errors() or form_get_error().
  *
@@ -1680,12 +1694,16 @@ function form_clear_error() {
 
 /**
  * Returns an associative array of all errors.
+ *
+ * @return array|NULL
+ *   An array of any errors that have been set. NULL if no errors occurred.
  */
 function form_get_errors() {
-  $form = form_set_error();
-  if (!empty($form)) {
-    return $form;
+  $errors = form_set_error();
+  if (!empty($errors)) {
+    return $errors;
   }
+  return NULL;
 }
 
 /**
@@ -1693,17 +1711,22 @@ function form_get_errors() {
  *
  * Form errors higher up in the form structure override deeper errors as well as
  * errors on the element itself.
+ *
+ * @return string|NULL
+ *   The error message against the given element. NULL if no error was flagged.
  */
 function form_get_error($element) {
-  $form = form_set_error();
+  $errors = form_set_error();
   $parents = array();
   foreach ($element['#parents'] as $parent) {
     $parents[] = $parent;
     $key = implode('][', $parents);
-    if (isset($form[$key])) {
-      return $form[$key];
+    if (isset($errors[$key])) {
+      return $errors[$key];
     }
   }
+
+  return NULL;
 }
 
 /**
@@ -1794,16 +1817,19 @@ function form_error(&$element, $message = '') {
  *   within functions that run during the rendering phase (#pre_render, #theme,
  *   #theme_wrappers, and #post_render).
  *
- * @param $form_id
+ * @param string $form_id
  *   A unique string identifying the form for validation, submission,
  *   theming, and hook_form_alter functions.
- * @param $element
+ * @param array $element
  *   An associative array containing the structure of the current element.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. In this
  *   context, it is used to accumulate information about which button
  *   was clicked when the form was submitted, as well as the sanitized
  *   $_POST data.
+ *
+ * @return array
+ *   The element with it an all of its children processed.
  */
 function form_builder($form_id, &$element, &$form_state) {
   // Initialize as unprocessed.
@@ -3570,6 +3596,9 @@ function form_process_tableselect($element) {
  *     machine name. Defaults to 64.
  *   - #disabled: (optional) Should be set to TRUE in case an existing machine
  *     name must not be changed after initial creation.
+ *
+ * @return array
+ *   The expanded $element populated with defaults.
  */
 function form_process_machine_name($element, &$form_state) {
   // Apply default form element properties.
@@ -4986,7 +5015,7 @@ function _batch_populate_queue(&$batch, $set_id) {
  * @param $batch_set
  *   The batch set.
  *
- * @return
+ * @return BatchQueue
  *   The queue object.
  */
 function _batch_queue($batch_set) {

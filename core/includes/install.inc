@@ -254,11 +254,6 @@ function backdrop_load_database_driver() {
   // for the driver explicitly.
   require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
 
-  $driver = array(
-    'name' => 'mysql',
-    'mysql' => BACKDROP_ROOT . '/core/includes/database/mysql',
-  );
-
   $installer = db_installer_object('mysql');
   if ($installer->installable()) {
     return $installer;
@@ -405,7 +400,7 @@ abstract class DatabaseTasks {
       }
     }
     if (!empty($message)) {
-      $message .= '<p>For more help with configuring your database server, see the <a href="http://backdropcms.org/guide/installation">installation handbook</a>.</p>';
+      $message .= '<p>For more help with configuring your database server, see the <a href="https://backdropcms.org/installation">Installation Instructions</a> page.</p>';
       throw new DatabaseTaskException($message);
     }
   }
@@ -436,6 +431,7 @@ abstract class DatabaseTasks {
     try {
       db_query($query);
       $this->pass(st($pass));
+      return NULL;
     }
     catch (Exception $e) {
       $this->fail(st($fail, array('%query' => $query, '%error' => $e->getMessage(), '%name' => $this->name())));
@@ -570,8 +566,11 @@ class DatabaseTaskException extends Exception {
  *
  * @param $settings
  *   An array of settings that need to be updated.
+ *
  * @return bool
  *   TRUE if the settings file was rewritten successfully. FALSE otherwise.
+ *
+ * @throws Exception
  */
 function backdrop_rewrite_settings($settings = array()) {
   backdrop_static_reset('conf_path');
@@ -708,9 +707,9 @@ function backdrop_install_config_directories() {
     // Bail out using a similar error message as in system_requirements().
     $config_directory = config_get_config_directory($config_type);
     if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
+      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
         '%directory' => $config_directory,
-        '@handbook_url' => 'http://backdropcms.org/guide/installation',
+        '@handbook_url' => 'https://backdropcms.org/installation',
       )));
     }
 
@@ -754,6 +753,8 @@ make this configuration active, see admin/config/development/configuration/sync.
  *
  * @return
  *   The list of modules to install.
+ *
+ * @throws Exception
  */
 function backdrop_verify_profile($install_state) {
   $profile = $install_state['parameters']['profile'];
@@ -1164,8 +1165,11 @@ function st($string, array $args = array(), array $options = array()) {
  *
  * @param $profile
  *   Name of installation profile to check.
+ *
  * @return
  *   Array of the installation profile's requirements.
+ *
+ * @throws Exception
  */
 function backdrop_check_profile($profile) {
   include_once BACKDROP_ROOT . '/core/includes/file.inc';
@@ -1346,8 +1350,11 @@ function db_run_tasks($driver) {
 /**
  * Returns a database installer object.
  *
- * @param $driver
+ * @param string $driver
  *   The name of the driver.
+ *
+ * @return DatabaseTasks
+ *   The database tasks object for the given driver.
  */
 function db_installer_object($driver) {
   Database::loadDriverFile($driver, array('install.inc'));

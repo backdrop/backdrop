@@ -133,7 +133,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
     global $base_path, $base_url;
     $tests = array(
       // @todo Trailing linefeeds should be trimmed.
-      '<a href = "http://backdropcms.org">BackdropCMS.org</a>' => "BackdropCMS.org [1]\n\n[1] http://backdropcms.org\n",
+      '<a href = "https://backdropcms.org">BackdropCMS.org</a>' => "BackdropCMS.org [1]\n\n[1] https://backdropcms.org\n",
       // @todo Footer URLs should be absolute.
       "<a href = \"$base_path\">Homepage</a>" => "Homepage [1]\n\n[1] $base_url/\n",
       '<address>Backdrop</address>' => "Backdrop\n",

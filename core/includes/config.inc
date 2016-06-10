@@ -109,6 +109,8 @@ function config_set($config_file, $option, $value) {
  *
  * @return string
  *   The configuration directory path.
+ *
+ * @throws ConfigException
  */
 function config_get_config_directory($type = 'active') {
   global $config_directories;
@@ -895,7 +897,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string('The configuration file "@filename" is not properly formatted JSON.', array('@filename' => $name)));
+      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array('@filename' => $name, '@contents' => $data)));
     }
     return $data;
   }
