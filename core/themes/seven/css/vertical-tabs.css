@@ -165,10 +165,10 @@
 }
 .vertical-tab-selected .vertical-tab-link {
   background: #fff;
-  border-left: 4px solid #000;
+  border-left: 4px solid;
 }
 [dir="rtl"] .vertical-tab-selected .vertical-tab-link {
-  border-right: 4px solid #000;
+  border-right: 4px solid;
 }
 .vertical-tab-selected strong,
 .vertical-tab-selected .fieldset-legend {
