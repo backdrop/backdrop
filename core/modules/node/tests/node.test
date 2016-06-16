@@ -1891,7 +1891,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/settings', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
     $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1956,7 +1956,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Test that the full node is shown.
     $this->assertText('This is the middle');
     $this->assertText('This is the end');
-    
+
     // Read more text not found.
     $this->assertNoText('Read more');
 
@@ -1988,7 +1988,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Test that the full node is not shown.
     $this->assertText('This is the middle');
     $this->assertNoText('This is the end');
-    
+
     // Read more text now found.
     $this->assertText('Read more');
   }
