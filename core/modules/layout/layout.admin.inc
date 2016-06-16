@@ -105,7 +105,7 @@ function _layout_get_operations(Layout $layout) {
     );
   }
   $links['edit'] = array(
-    'title' => t('Edit'),
+    'title' => t('Place blocks'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
   );
   $links['settings'] = array(
