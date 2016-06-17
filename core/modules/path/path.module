@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Enables users to customize URLs and provide automatic alias patterns.
+ * Enables users to customize URLs and provide automatic URL alias patterns.
  */
 
 /**
@@ -16,12 +16,12 @@ function path_permission() {
       'title' => t('Create and edit URL aliases'),
     ),
     'administer path patterns' => array(
-      'title' => t('Administer path patterns'),
-      'description' => t('Allows a user to configure patterns for automated aliases and bulk delete URL-aliases.'),
+      'title' => t('Administer URL path patterns'),
+      'description' => t('Allows a user to configure patterns for automated URL aliases and bulk delete URL aliases.'),
     ),
     'notify of path changes' => array(
-      'title' => t('Notify of automatic path changes'),
-      'description' => t('Determines whether or not users are shown a notice when an automatic alias changes.'),
+      'title' => t('Notify of automatic URL path changes'),
+      'description' => t('Determines whether or not users are shown a notice when an automatic URL alias changes.'),
     )
   );
 }
@@ -65,7 +65,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/patterns'] = array(
-    'title' => 'Patterns',
+    'title' => 'URL alias patterns',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_form'),
     'access arguments' => array('administer path patterns'),
@@ -74,7 +74,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/patterns/list'] = array(
-    'title' => 'List patterns',
+    'title' => 'List URL alias patterns',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_form'),
     'access arguments' => array('administer path patterns'),
@@ -83,7 +83,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/patterns/settings'] = array(
-    'title' => 'Pattern Settings',
+    'title' => 'URL alias pattern settings',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_settings_form'),
     'access arguments' => array('administer path patterns'),
@@ -101,7 +101,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/bulk-delete'] = array(
-    'title' => 'Delete aliases',
+    'title' => 'Delete URL aliases',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_admin_bulk_delete'),
     'access arguments' => array('administer url aliases'),
