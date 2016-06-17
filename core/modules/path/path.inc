@@ -22,17 +22,17 @@ define('PATH_CASE_LOWER', 1);
 /**
  * "Do nothing. Leave the old alias intact."
  */
-define('PATH_UPDATE_ACTION_NO_NEW', 0);
+define('PATH_UPDATE_ACTION_NO_NEW_ALIAS', 0);
 
 /**
  * "Create a new alias. Leave the existing alias functioning."
  */
-define('PATH_UPDATE_ACTION_LEAVE', 1);
+define('PATH_UPDATE_ACTION_LEAVE_ALIAS', 1);
 
 /**
  * "Create a new alias. Delete the old alias."
  */
-define('PATH_UPDATE_ACTION_DELETE', 2);
+define('PATH_UPDATE_ACTION_UPDATE_ALIAS', 2);
 
 /**
  * Remove the punctuation from the alias.
@@ -417,7 +417,7 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
   if (!$entity->isNew()) {
     if ($existing_path = _path_load_loosely_by_source($source, $langcode)) {
       switch ($config->get('update_action')) {
-        case PATH_UPDATE_ACTION_NO_NEW:
+        case PATH_UPDATE_ACTION_NO_NEW_ALIAS:
           // If an alias already exists, and the update action is set to do
           // nothing, then return.
           return FALSE;
@@ -533,14 +533,14 @@ function path_save_automatic_alias($source, $alias, $langcode) {
     // If there is already an alias, respect some update actions.
     if (!empty($existing_path)) {
       switch (config_get('path.settings', 'update_action')) {
-        case PATH_UPDATE_ACTION_NO_NEW:
+        case PATH_UPDATE_ACTION_NO_NEW_ALIAS:
           // Do not create the alias.
           return FALSE;
-        case PATH_UPDATE_ACTION_LEAVE:
+        case PATH_UPDATE_ACTION_LEAVE_ALIAS:
           // Create a new alias instead of overwriting the existing by leaving
           // $path['pid'] empty.
           break;
-        case PATH_UPDATE_ACTION_DELETE:
+        case PATH_UPDATE_ACTION_UPDATE_ALIAS:
           // The delete actions should overwrite the existing alias.
           $path['pid'] = $existing_path['pid'];
           break;
