@@ -514,11 +514,9 @@ function path_patterns_settings_form($form) {
     if ($auto_redirect) {
       $update_label .= ' ' . t('Replace the old URL alias with a redirect.');
     }
-    else {
-      $update_label .= ' ' . t('Delete the old URL alias.');
-    }
   }
   else {
+    $update_label .= ' ' . t('Delete the old URL alias.');
     $description .= ' ' . t('Enabling the Redirect module on the <a href="!url">modules page</a> will allow creating a redirect instead of deleting the old URL alias.', array('!url' => url('admin/modules')));
   }
   $form['update_action'] = array(
