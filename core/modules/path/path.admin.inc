@@ -776,10 +776,10 @@ function path_admin_bulk_delete($form, $form_state) {
       '#markup' => theme('item_list', array('items' => $delete_list)),
     );
 
-    $question = t('Delete all the following aliases?');
+    $question = t('Delete all the following URL aliases?');
     $path = 'admin/config/search/path/bulk-delete';
-    $description = t('Deleting these aliases cannot be undone.');
-    $yes = t('Delete aliases');
+    $description = t('Deleting these URL aliases cannot be undone.');
+    $yes = t('Delete URL aliases');
     return confirm_form($form, $question, $path, $description, $yes);
   }
 
@@ -797,7 +797,7 @@ function path_admin_bulk_delete($form, $form_state) {
 
   $form['delete'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Choose aliases to bulk delete'),
+    '#title' => t('Choose URL aliases to bulk delete'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -809,7 +809,7 @@ function path_admin_bulk_delete($form, $form_state) {
     '#type' => 'checkbox',
     '#title' => t('All URL aliases'),
     '#default_value' => FALSE,
-    '#description' => t('Number of aliases which will be deleted: %count.', array('%count' => $total_count)),
+    '#description' => t('Number of URL aliases which will be deleted: %count.', array('%count' => $total_count)),
   );
 
   // Next, provide checkboxes for each alias type.
@@ -819,7 +819,7 @@ function path_admin_bulk_delete($form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
       '#default_value' => FALSE,
-      '#description' => t('Number of aliases which will be deleted: %count.', array('@label' => $path_info['label'], '%count' => $count)),
+      '#description' => t('Number of URL aliases which will be deleted: %count.', array('@label' => $path_info['label'], '%count' => $count)),
     );
   }
 
