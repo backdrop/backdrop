@@ -230,15 +230,15 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
    */
   function testUpdateActions() {
     $config = config('path.settings');
-    // Test PATH_UPDATE_ACTION_NO_NEW with a new inserted, unaliased node.
-    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
+    // Test PATH_UPDATE_ACTION_NO_NEW_ALIAS with a new inserted, unaliased node.
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW_ALIAS);
     $config->set('node_page_pattern', 'content/[node:title]');
     $config->save();
     $node = $this->backdropCreateNode(array('title' => 'First title'));
     $this->assertEntityAlias('node', $node, 'content/first-title');
 
-    // Default action is PATH_UPDATE_ACTION_DELETE.
-    $config->set('update_action', PATH_UPDATE_ACTION_DELETE);
+    // Default action is PATH_UPDATE_ACTION_UPDATE_ALIAS.
+    $config->set('update_action', PATH_UPDATE_ACTION_UPDATE_ALIAS);
     $config->save();
 
     // After each change to the node, load it again to get the latest path
@@ -249,8 +249,8 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $this->assertEntityAlias('node', $node, 'content/second-title');
     $this->assertNoAliasExists(array('alias' => 'content/first-title'));
 
-    // Test PATH_UPDATE_ACTION_LEAVE
-    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
+    // Test PATH_UPDATE_ACTION_LEAVE_ALIAS
+    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE_ALIAS);
     $config->save();
 
     $node->title = 'Third title';
@@ -258,7 +258,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $this->assertEntityAlias('node', $node, 'content/third-title');
     $this->assertAliasExists(array('source' => "node/{$node->nid}", 'alias' => 'content/second-title'));
 
-    $config->set('update_action', PATH_UPDATE_ACTION_DELETE);
+    $config->set('update_action', PATH_UPDATE_ACTION_UPDATE_ALIAS);
     $config->save();
     $node->title = 'Fourth title';
     $node->save();
@@ -268,19 +268,19 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $older_path = $this->assertAliasExists(array('source' => "node/{$node->nid}", 'alias' => 'content/second-title'));
     path_delete($older_path);
 
-    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW_ALIAS);
     $config->save();
     $node->title = 'Fifth title';
     $node->save();
     $this->assertEntityAlias('node', $node, 'content/fourth-title');
     $this->assertNoAliasExists(array('alias' => 'content/fifth-title'));
 
-    // Test PATH_UPDATE_ACTION_NO_NEW with unaliased node and node update.
+    // Test PATH_UPDATE_ACTION_NO_NEW_ALIAS with unaliased node and node update.
     $this->deleteAllAliases();
     $node->save();
     $this->assertEntityAlias('node', $node, 'content/fifth-title');
 
-    // Test PATH_UPDATE_ACTION_NO_NEW with unaliased node and directly update.
+    // Test PATH_UPDATE_ACTION_NO_NEW_ALIAS with unaliased node and directly update.
     $this->deleteAllAliases();
     $node->title = 'Sixth title';
     path_save_automatic_entity_alias($node);
@@ -453,13 +453,13 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->assertText($title, 'Node accessible through automatic alias.');
 
     // Disable the update action. The checkbox should not be visible.
-    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
+    $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW_ALIAS);
     $config->save();
     $this->backdropGet("node/{$node->nid}/edit");
     $this->assertNoFieldById('edit-path-auto');
 
     // Reset the update action back to default. The checkbox should be visible.
-    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE);
+    $config->set('update_action', PATH_UPDATE_ACTION_LEAVE_ALIAS);
     $config->save();
     $this->backdropGet("node/{$node->nid}/edit");
     $this->assertFieldChecked('edit-path-auto');
