@@ -15,9 +15,11 @@
  * height matching for each row of layout template icons.
  */
 Backdrop.behaviors.gridFloatFallback = {
-  attach: function(context) {
-    if (!Backdrop.featureDetect.flexbox()) {
+  attach: function() {
+    var $body = $('body');
+    if (!$body.hasClass('grid-float-fallback-processed') && !Backdrop.featureDetect.flexbox()) {
       $('head').append('<link rel="stylesheet" type="text/css" href="/core/modules/layout/css/grid-float.css">');
+      $body.addClass('grid-float-fallback-processed');
     }
   }
 };
