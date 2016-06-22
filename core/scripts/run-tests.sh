@@ -48,7 +48,9 @@
  *              (i.e. 'core/modules/user/user.test').
  *
  *
- *  --directory Run all tests found within the specified file directory.
+ *  --directory <path>
+ *
+ *              Run all tests found within the specified file directory.
  *
  *  --xml       <path>
  *
@@ -280,7 +282,9 @@ All arguments are long options.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
               
-  --directory Run all tests found within the specified file directory.
+  --directory <path>
+
+              Run all tests found within the specified file directory.
 
   --xml       <path>
 
@@ -633,7 +637,7 @@ function simpletest_script_get_test_list() {
       foreach (file_scan_directory($directory, '/\.test$/') as $file) {
         $content = file_get_contents($file->uri);
         preg_match_all('@^class ([^ ]+)@m', $content, $matches);
-        foreach($matches[1] as $test_class) {
+        foreach ($matches[1] as $test_class) {
           if(in_array($test_class, $all_classes)) {
             $test_list[] = $test_class;
           }
