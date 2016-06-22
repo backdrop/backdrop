@@ -749,11 +749,12 @@ function simpletest_script_write_summary($summary_file) {
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
   
+  $total_count = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN ('fail', 'pass')", array(':test_id' => $test_id))->fetchField();
   if(!empty($summary)){
-    $summary = format_plural($count, '1 test failed', '@count tests failed.') . "\n" . $summary;
+    $summary = format_plural($count, '1 of !total_count tests failed', '@count of !total_count tests failed.', array('!total_count' => $total_count)) . "\n" . $summary;
   } 
   else{
-    $summary = format_plural(count($test_list), '1 test passed', '@count tests passed.');
+    $summary = format_plural($total_count, '1 test passed', '@count tests passed.');
   }
   file_put_contents($summary_file, $summary);
 }
