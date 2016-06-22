@@ -721,7 +721,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 /**
  * Tests that displays can be correctly overridden via the user interface.
  */
-class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
+class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that displays can be overridden via the UI.
    */
@@ -895,5 +895,41 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/block/title", $edit, t('Apply'));
     $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/block", array(), t('Save'));
     $this->assertText($view['page[title]']);
+  }
+
+  /**
+   * Test reordering of displays.
+   */
+  function testReorderDisplays() {
+    // Create a basic view with a page, block.
+    $view['human_name'] = $this->randomName(16);
+    $view['name'] = strtolower($this->randomName(16));
+    $view['page[create]'] = 1;
+    $view['page[title]'] = $this->randomName(16);
+    $view['page[path]'] = $this->randomName(16);
+    $view['block[create]'] = 1;
+    $view['block[title]'] = $this->randomName(16);
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue & configure'));
+
+    // Displays should list Page first and Block second.
+    $display_links = $this->xpath('//*[@id="views-display-menu-tabs"]//a');
+    $this->assertEqual((string) $display_links[0], t('Page'));
+    $this->assertEqual((string) $display_links[1], t('Block'));
+
+    $this->clickLink('reorder displays');
+
+    $edit = array(
+      'page[weight]' => 1,
+      'block[weight]' => 0,
+    );
+
+    $this->backdropPost(NULL, $edit, t('Apply'));
+
+    // Now after reordering, Block should be first and Page should be second.
+    $display_links = $this->xpath('//*[@id="views-display-menu-tabs"]//a');
+    $this->assertEqual((string) $display_links[0], t('Block'));
+    $this->assertEqual((string) $display_links[1], t('Page'));
+
+    $this->backdropPost(NULL, array(), t('Save'));
   }
 }
