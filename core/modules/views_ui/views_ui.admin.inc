@@ -1078,12 +1078,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['changed']['#attributes']['class'][] = 'js-hide';
   }
 
-  $form['help_text'] = array(
-    '#prefix' => '<div class="views-display-help">',
-    '#suffix' => '</div>',
-    '#markup' => t('Modify the display(s) of your view below or add new displays.'),
-  );
-
   $form['actions'] = array(
     '#type' => 'actions',
     '#weight' => 0,
