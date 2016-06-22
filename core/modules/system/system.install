@@ -2801,6 +2801,19 @@ function system_update_1055() {
 }
 
 /**
+ * Move incorrectly stored "log_row_limit" setting.
+ */
+function system_update_1056() {
+  // Move "row_limit" if set to "log_row_limit" in the system.core config file.
+  $config = config('system.core');
+  if ($limit = $config->get('row_limit')) {
+    $config->set('log_row_limit', $limit);
+    $config->clear('row_limit');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
