@@ -5426,6 +5426,7 @@ function backdrop_json_format($json) {
   $indent = "    ";
   $new_line = "\n";
   $prev_char = '';
+  $prev_prev_char = '';
   $out_of_quotes = TRUE;
 
   for ($i = 0; $i < $strlen; $i++) {
@@ -5433,7 +5434,7 @@ function backdrop_json_format($json) {
     $char = substr($json, $i, 1);
 
     // Are we inside a quoted string?
-    if ($char == '"' && $prev_char != '\\') {
+    if ($char === '"' && !($prev_char === '\\' && $prev_prev_char !== '\\')) {
       $out_of_quotes = !$out_of_quotes;
     }
     // If this character is the end of an element, output a new line and indent
@@ -5469,6 +5470,7 @@ function backdrop_json_format($json) {
         $result .= $indent;
       }
     }
+    $prev_prev_char = $prev_char;
     $prev_char = $char;
   }
 

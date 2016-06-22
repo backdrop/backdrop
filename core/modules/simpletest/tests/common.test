@@ -2789,7 +2789,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
 
     // Verify reversibility for structured data. Also verify that necessary
     // characters are escaped.
-    $source = array(TRUE, FALSE, 0, 1, '0', '1', '[ ]', $str, array('key1' => $str, 'key2' => array('nested' => TRUE)));
+    $source = array(TRUE, FALSE, 0, 1, '0', '1', '[ ]', '\'', "\"", '\\', $str, array('key1' => $str, 'key2' => array('nested' => TRUE)));
     $json = backdrop_json_encode($source);
     foreach ($html_unsafe as $char) {
       $this->assertTrue(strpos($json, $char) === FALSE, format_string('A JSON encoded string does not contain @s.', array('@s' => $char)));
