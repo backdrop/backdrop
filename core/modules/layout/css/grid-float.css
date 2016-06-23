@@ -56,6 +56,11 @@
 .row {
   margin-left: -1rem;
   margin-right: -1rem;
+  /* Override flexbox values in case they're set */
+  display: block;
+  -webkit-flex-wrap: unset;
+  -ms-flex-wrap: none;
+  flex-wrap: unset;
 }
 
 .row:after {
@@ -141,6 +146,11 @@
   padding-right: 1rem;
   padding-left: 1rem;
   float: left;
+  /* Override flexbox values in case they're set */
+  -webkit-box-flex: unset;
+  -webkit-flex: unset;
+  -ms-flex: none;
+  flex: unset;
 }
 
 .col-xs-1 {
@@ -949,4 +959,64 @@
   .col-xl-offset-11 {
     margin-left: 91.666667%;
   }
+}
+
+/**
+ * Override flexbox values in case they're set
+ */
+.col-xs-first,
+.col-xs-last,
+.col-sm-first,
+.col-sm-last,
+.col-md-first,
+.col-md-last,
+.col-lg-first,
+.col-lg-last,
+.col-xl-first,
+.col-xl-last {
+  -webkit-box-ordinal-group: unset;
+  -webkit-order: unset;
+  -ms-flex-order: 0;
+  order: unset;
+}
+
+.row-xs-top,
+.row-xs-center,
+.row-xs-bottom,
+.row-sm-top,
+.row-sm-center,
+.row-sm-bottom,
+.row-md-top,
+.row-md-center,
+.row-md-bottom,
+.row-lg-top,
+.row-lg-center,
+.row-lg-bottom,
+.row-xl-top,
+.row-xl-center,
+.row-xl-bottom {
+  -webkit-box-align: unset;
+  -webkit-align-items: unset;
+  -ms-flex-align: stretch;
+  align-items: unset;
+}
+
+.col-xs-top,
+.col-xs-center,
+.col-xs-bottom,
+.col-sm-top,
+.col-sm-center,
+.col-sm-bottom,
+.col-md-top,
+.col-md-center,
+.col-md-bottom,
+.col-lg-top,
+.col-lg-center,
+.col-lg-bottom,
+.col-xl-top,
+.col-xl-center,
+.col-xl-bottom {
+  -webkit-align-self: unset;
+  -ms-flex-item-align: auto;
+  align-self: unset;
 }

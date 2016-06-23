@@ -507,8 +507,7 @@ Backdrop.featureDetect.flexbox = function() {
     return false;
   } else {
     $body.append($flexboxTestElement);
-
-    if ($flexboxTestElement.css('flex-wrap')) {
+    if ($flexboxTestElement.css('display') === 'flex' && $flexboxTestElement.css('flex-wrap') === 'wrap') {
       $body.addClass('has-flexbox');
       $flexboxTestElement.remove();
       return true;
