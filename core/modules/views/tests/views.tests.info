@@ -286,7 +286,7 @@ description = Test the ability of the views wizard to create views with a jump m
 group = Views UI
 file = views_ui.test
 
-[ViewsUIWizardOverrideDisplaysTestCase]
+[ViewsUIWizardDisplaysTestCase]
 name = Views UI overridden displays
 description = Test that displays can be correctly overridden via the user interface.
 group = Views UI

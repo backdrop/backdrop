@@ -1078,12 +1078,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['changed']['#attributes']['class'][] = 'js-hide';
   }
 
-  $form['help_text'] = array(
-    '#prefix' => '<div class="views-display-help">',
-    '#suffix' => '</div>',
-    '#markup' => t('Modify the display(s) of your view below or add new displays.'),
-  );
-
   $form['actions'] = array(
     '#type' => 'actions',
     '#weight' => 0,
@@ -2961,7 +2955,7 @@ function views_ui_reorder_displays_form($form, &$form_state) {
       'weight' => array(
         '#type' => 'weight',
         '#value' => $display->position,
-        '#delta' => $last_display->position,
+        '#delta' => count($last_display->position),
         '#title' => t('Weight for @display', array('@display' => $display->display_title)),
         '#title_display' => 'invisible',
       ),

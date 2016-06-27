@@ -161,6 +161,6 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
  * @see dblog_form_system_logging_settings_alter()
  */
 function dblog_logging_settings_submit($form, &$form_state) {
-  config_set('system.core', 'row_limit', $form_state['values']['dblog_row_limit']);
+  config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
 }
 

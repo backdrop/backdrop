@@ -446,7 +446,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   }
   function updateSearchDisplay(e) {
     // Build the list of extra items to be hidden if in small window mode.
-    $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
+    var $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
     if ($results.children().length) {
       if ($adminBar.find('#admin-bar-extra').hasClass('dropdown')) {
         $hideItems.css('display', 'none');
