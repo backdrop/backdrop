@@ -499,7 +499,9 @@ Backdrop.featureDetect = {};
  */
 Backdrop.featureDetect.flexbox = function() {
   var $body = $('body'),
-      $flexboxTestElement = $('<div style="display: flex; flex-wrap: wrap; width: 0; height: 0;"></div>');
+      $flexboxTestElement = $('<div style="display: flex; flex-wrap: wrap; width: 0; height: 0;"></div>'),
+      // Safari has nasty flex box bugs, but passes basic flex box tests
+      isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
 
   if ($body.hasClass('has-flexbox')) {
     return true;
@@ -507,7 +509,8 @@ Backdrop.featureDetect.flexbox = function() {
     return false;
   } else {
     $body.append($flexboxTestElement);
-    if ($flexboxTestElement.css('display') === 'flex' && $flexboxTestElement.css('flex-wrap') === 'wrap') {
+
+    if (!isSafari && $flexboxTestElement.css('display') === 'flex' && $flexboxTestElement.css('flex-wrap') === 'wrap') {
       $body.addClass('has-flexbox');
       $flexboxTestElement.remove();
       return true;
