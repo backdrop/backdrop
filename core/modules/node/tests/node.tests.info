@@ -4,6 +4,12 @@ description = Test the loading of multiple nodes.
 group = Node
 file = node.test
 
+[NodeFrontPageCallback]
+name = Custom front page
+description = Test changing front page to custom redirect /node to custom page.
+group = Node
+file = node.test
+
 [NodeLoadHooksTestCase]
 name = Node load hooks
 description = Test the hooks invoked when a node is being loaded.

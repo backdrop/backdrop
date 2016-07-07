@@ -1462,8 +1462,12 @@ class FrontPageTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    // Check that the path /node is redirected to the custom frontpage.
     $this->backdropGet('node');
-    $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+    $node_alias = current_path();
+    $this->backdropGet($this->node_path);
+    $this_alias = current_path();
+    $this->assertEqual($node_alias, $this_alias, 'Path /node is redirected to custom frontpage.');
     $this->backdropGet($this->node_path);
     $this->assertText(t('On front page.'), 'Path is the front page.');
   }
@@ -2680,7 +2684,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node1->nid);
 
     // Verify level 2 links are shown, but not level 1.
-    // We use item 6 here since item 1, although not in the menu, is in the 
+    // We use item 6 here since item 1, although not in the menu, is in the
     // breadcrumb.
     $this->assertNoLink($item6['link_title']);
     $this->assertLink($item2['link_title']);

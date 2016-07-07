@@ -1242,7 +1242,7 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
   );
-  
+
   $form['#validate'][] = 'system_site_information_settings_validate';
 
   $form['actions']['#type'] = 'actions';
