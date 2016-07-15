@@ -99,6 +99,12 @@ Backdrop.behaviors.contentTypes = {
       vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL pattern set'));
       return vals.join(', ');
     });
+
+    // Focus the input#edit-path-pattern field when clicking on the token
+    // browser on the /admin/structure/types/add pages (add a content type).
+    $context.find('#edit-path .token-browser-link').click(function(){
+      $('input#edit-path-pattern').focus();
+    });
   }
 };
 
