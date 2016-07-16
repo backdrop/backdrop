@@ -301,11 +301,8 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     }
     var checkFontInterval = setInterval(checkFont, 100);
 
-    // Resource friendly resize event
-    var resizeTimeout;
-    $(window).on('resize', function () {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(handleResize, 50);
+    Backdrop.optimizedResize.add(function() {
+      handleResize();
     });
   }
 
