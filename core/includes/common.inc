@@ -2851,11 +2851,20 @@ function backdrop_deliver_html_page($page_callback_result) {
 
   // Send appropriate HTTP-Header for browsers and search engines.
   global $language;
+  $site_config = config('system.core');
   backdrop_add_http_header('Content-Language', $language->langcode);
+
+  // By default, do not allow the site to be rendered in an iframe on another
+  // domain, but provide a variable to override this. If the code running for
+  // this page request already set the X-Frame-Options header earlier, don't
+  // overwrite it here.
+  $frame_options = $site_config->get('x_frame_options');
+  if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
+    backdrop_add_http_header('X-Frame-Options', $frame_options);
+  }
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -6858,17 +6867,17 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   The input array to be sorted.
  * @param array $keys
  *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
- *   unindexed array is passed in. 
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
  *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
- * 
+ *
  * // Short-hand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
- * 
+ *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
