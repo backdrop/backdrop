@@ -286,10 +286,71 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  $form['options']['status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Published'),
-    '#default_value' => $node->status,
+  /**
+   * Helper function to determine #default_value of 'publishing_states'.
+   *
+   *  @param $type
+   *   The node type object that the node/add form is working on.
+   *
+   * @return int.
+   *  Status code for the publishing state of the node.
+   *   0 => Draft
+   *   1 => Publish Now
+   *   2 => Schedule Publish Time
+   */
+  function _is_scheduled($type) {
+    $node = node_load(arg(1));
+    if (arg(2) == 'edit') {
+      if ($node->published_on > 0 && $node->status == 0) {
+        return 2;
+      }
+      elseif ($node->status == 0) {
+        return 0;
+      }
+      elseif ($node->status == 1) {
+        return 1;
+      }
+    }
+    return $type->settings['status_default'];
+  }
+  $form['options']['publishing-states'] = array(
+    '#type' => 'radios',
+    '#options' => array(
+      0 => t('Save Draft'),
+      1 => t('Publish Now'),
+      2 => t('Schedule Publish Time'),
+    ),
+    '#default_value' => _is_scheduled($node_type),
+  );
+  /**
+   * Helper function to determine the #default_vaule of 'future-publish'.
+   *
+   * @return date.
+   *  If a non zero 'published_on' date exists for this node then return it,
+   *  otherwise use the current time.
+   */
+  function _remember_published_on() {
+    $node = node_load(arg(1));
+    $current_published_on = date(time());
+    if (arg(2) == 'edit') {
+      if ($node->status == 0 && $node->published_on != 0) {
+        $current_published_on = $node->published_on;
+      }
+    }
+    return date('Y-m-d g:i', $current_published_on);
+  }
+  $form['options']['future-publish'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Publish on:'),
+    '#date_format' => 'Y-m-d g:i',
+    '#date_increment' => 10,
+    '#date_year_range' => '-0:+3',
+    '#default_value' => _remember_published_on(),
+    '#states' => array(
+      'visible' => array(
+       ':input[name="publishing-states"]' => array('value' => 2),
+      ),
+    ),
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
@@ -438,6 +499,21 @@ function node_form_submit_build_node($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
 
   $node = $form_state['node'];
+  if ($form_state['values']['publishing-states'] == 1) {
+    $node->status = 1;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing-states'] == 0) {
+    $node->status = 0;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing-states'] == 2) {
+    $node->status = 0;
+    $node->published_on = strtotime($form_state['values']['future-publish']);
+  }
+  else {
+    $node->published_on = 0;
+  }
   entity_form_submit_build_entity('node', $node, $form, $form_state);
 
   node_submit($node);

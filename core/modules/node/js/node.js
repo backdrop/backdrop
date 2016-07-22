@@ -28,13 +28,12 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
     $('fieldset.node-form-options', context).backdropSetSummary(function (context) {
       var vals = [];
 
-      $('input:checked', context).parent().each(function () {
-        vals.push(Backdrop.checkPlain($.trim($(this).text())));
-      });
+      $('div#edit-publishing-states', context).parent().change(function () {
+        var published_state = "";
+        published_state = $('input[type="radio"]:checked').next('label:first').text();
+        vals.push(Backdrop.checkPlain($.trim(published_state)));
+      }).trigger('change');
 
-      if (!$('.form-item-status input', context).is(':checked')) {
-        vals.unshift(Backdrop.t('Not published'));
-      }
       return vals.join(', ');
     });
   }

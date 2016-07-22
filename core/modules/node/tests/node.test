@@ -542,6 +542,7 @@ class PageViewTestCase extends BackdropWebTestCase {
     $this->assertTrue(node_load($node->nid), 'Node created.');
 
     // Try to edit with anonymous user.
+    $this->backdropLogout();
     $html = $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
@@ -766,7 +767,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // viewing node.
     $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, "Node content designed for RSS doesn't appear when viewing node.");
-    
+
     // Check that the node feed page does not try to interpret additional path
     // components as arguments for node_feed() and returns default content.
     $this->backdropGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
@@ -2235,7 +2236,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('node' => $node), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized node token %token replaced for node without a summary.', array('%token' => $input)));
-    }    
+    }
   }
 }
 
@@ -2603,5 +2604,78 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropLogout();
     $this->backdropGet($node_path);
     $this->assertResponse(404);
+  }
+}
+
+/**
+ * Tests Draft, Published, Schedule Publish Time options for node types and
+ * node instances.
+ */
+class NodePublishScheduling extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('node_test');
+    // Create a user that is allowed to post; we'll use this to test the submission.
+    $web_user = $this->backdropCreateUser(array('create post content'));
+    $this->backdropLogin($web_user);
+    $this->web_user = $web_user;
+  }
+
+  function testNodeTypeCreateDefaultDraft() {
+    // Create a content type of fooba via the user interface.
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $this->backdropLogin($web_user);
+    $edit = array(
+      'name' => 'fooba',
+      'title_label' => 'title for fooba',
+      'type' => 'fooba',
+      'status_default' => 0,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Published.
+    $name = $this->randomName(8);
+    $settings = array(
+      'title' => $name,
+    );
+    $this->backdropPost('node/add/fooba', $settings, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    // Create a content type of type foobee via the user interface.
+    $edit = array(
+      'name' => 'foobee',
+      'title_label' => 'title for foobee',
+      'type' => 'foobee',
+      'status_default' => 1,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Published.
+    $name = $this->randomName(8);
+    $settings = array(
+      'title' => $name,
+    );
+    $this->backdropPost('node/add/foobee', $settings, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '1', 'The node is in the state Published.');
+
+    // Create a content type of type foobsee via the user interface.
+    $edit = array(
+      'name' => 'foobsee',
+      'title_label' => 'title for foobsee',
+      'type' => 'foobsee',
+      'status_default' => 2,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Published.
+    $name = $this->randomName(8);
+    $settings = array(
+      'title' => $name,
+    );
+    $this->backdropPost('node/add/foobsee', $settings, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '1', 'The node is in the state Published.');
+    $this->assertNotEqual($node->published_on, 0, 'The node has a non zero published_on date.');
   }
 }
