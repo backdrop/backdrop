@@ -1242,7 +1242,7 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
   );
-  
+
   $form['#validate'][] = 'system_site_information_settings_validate';
 
   $form['actions']['#type'] = 'actions';
@@ -1446,6 +1446,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     ->set('site_mail', $form_state['values']['site_mail'])
     ->set('site_slogan', $form_state['values']['site_slogan'])
     ->set('site_frontpage', $form_state['values']['site_frontpage'])
+    ->set('default_nodes_main', $form_state['values']['default_nodes_main'])
     ->set('site_403', $form_state['values']['site_403'])
     ->set('site_404', $form_state['values']['site_404'])
     ->save();
