@@ -158,7 +158,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
-    '#title' => t('Published status'),
+    '#title' => t('Default status'),
     '#options' => array(
       1 => t('Published'),
       0 => t('Unpublished'),
