@@ -20,3 +20,37 @@
     max-width: 1000px;
   }
 }
+
+/**
+ * CSS for the diff table
+ */
+.diff-deletedline {
+  background-color: #fff4f4;
+}
+del {
+  background-color: #ffa8a8;
+}
+ins {
+  background-color: #CFDE56;
+}
+.diff-addedline {
+  background-color: #E9EEBC;
+}
+tr.odd .diff-addedline {
+  background-color: #f0f3d0;
+}
+tr.odd .diff-deletedline {
+  background-color: #ffdbdb;
+}
+tr:hover .diff-deletedline {
+  background-color: #ffa8a8;
+}
+tr:hover .diff-addedline {
+  background-color: #cfdd55;
+}
+tr:hover del {
+  background-color: #ff7575;
+}
+tr:hover ins {
+  background-color: #b0c026;
+}
