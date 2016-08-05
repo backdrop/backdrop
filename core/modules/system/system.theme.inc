@@ -487,7 +487,7 @@ function theme_token_tree_link($variables) {
 
   if (!empty($variables['dialog'])) {
     backdrop_add_library('system', 'token');
-    $variables['options']['attributes']['class'][] = 'use-ajax';
+    $variables['options']['attributes']['class'][] = 'use-ajax token-browser-link';
   }
 
   $info = system_theme();
