@@ -241,7 +241,23 @@
 #layout-edit h1 {
   margin: 1em 0 .6em;
 }
-.layout-access-list ul {
+.layout-access-list > ul {
   margin: 1em 0px;
-  padding: 0px 20px;
+  padding: 0;
+  list-style: none;
+}
+.layout-access-list > ul > li {
+  display: table;
+  width: 100%;
+}
+
+/* Layout conditions */
+.layout-condition {
+  display: table-row;
+}
+.layout-condition > div {
+  display: table-cell;
+}
+.condition-summary {
+
 }

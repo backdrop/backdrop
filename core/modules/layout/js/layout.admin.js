@@ -57,17 +57,35 @@ Backdrop.behaviors.layoutConfigure = {
     if ($linkButtons.length) {
       $linkButtons.each(function() {
         var $self = $(this).addClass('js-hide');
-        $('<a class="layout-button-link" href="#"></a>')
-          .insertBefore(this)
-          // Copy over the title of the button as the link text.
-          .text(this.value)
-          // Copy over classes.
-          .addClass(this.className)
-          .removeClass('layout-link-button form-submit ajax-processed link-button-processed js-hide')
-          .on('click', function(event) {
-            $self.triggerHandler('mousedown');
-            event.preventDefault();
-          });
+        // Build "Add visibility condition" link
+        if ($self.hasClass('layout-access-add')) {
+          $('<a class="layout-button-link" href="#"></a>')
+            .insertBefore(this)
+            // Copy over the title of the button as the link text.
+            .text(this.value)
+            // Copy over classes.
+            .addClass(this.className)
+            .removeClass('layout-link-button form-submit ajax-processed link-button-processed js-hide')
+            .on('click', function(event) {
+              $self.triggerHandler('mousedown');
+              event.preventDefault();
+            });
+        }
+        else {
+          // Dropbuttons links
+          $self.parent().find('a.layout-button-link').each(function() {
+            $(this)
+            .removeClass('layout-button-link layout-link-button form-submit ajax-processed link-button-processed js-hide')
+            .on('click', function(event) {
+              // Get link class
+              var linkClass = $(this).attr('class');
+              // Find the appropriate button based on class
+              var $button = $(this).parents('.layout-condition').find('input.' + linkClass);
+              $button.triggerHandler('mousedown');
+              event.preventDefault();
+            });
+          });         
+        }
       });
     }
   }
