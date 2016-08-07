@@ -3251,6 +3251,12 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  */
 function backdrop_add_css($data = NULL, $options = NULL) {
   $css = &backdrop_static(__FUNCTION__, array());
+  $count = &backdrop_static(__FUNCTION__ . '_count', 0);
+
+  // Reset the order counter every time the number of entries in $css is 0.
+  if (count($css) === 0) {
+    $count = 0;
+  }
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -3286,7 +3292,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     }
 
     // Always add a tiny value to the weight, to conserve the insertion order.
-    $options['weight'] += count($css) / 1000;
+    $options['weight'] += $count / 1000;
+    $count++;
 
     // Add an every page weight for sorting.
     $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
