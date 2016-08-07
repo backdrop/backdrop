@@ -3251,6 +3251,12 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  */
 function backdrop_add_css($data = NULL, $options = NULL) {
   $css = &backdrop_static(__FUNCTION__, array());
+  $count = &drupal_static(__FUNCTION__ . '_count', 0);
+
+  // Reset the order counter every time the number of entries in $css is 0.
+  if (count($css) === 0) {
+    $count = 0;
+  }
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -3286,7 +3292,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     }
 
     // Always add a tiny value to the weight, to conserve the insertion order.
-    $options['weight'] += count($css) / 1000;
+    $options['weight'] += $count / 1000;
+    $count++;
 
     // Add an every page weight for sorting.
     $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
@@ -6858,17 +6865,17 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   The input array to be sorted.
  * @param array $keys
  *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
- *   unindexed array is passed in. 
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
  *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
- * 
+ *
  * // Short-hand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
- * 
+ *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
