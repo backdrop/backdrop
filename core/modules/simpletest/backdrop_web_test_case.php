@@ -1092,7 +1092,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function backdropCreateNode($settings = array()) {
     // Populate defaults array.
     $settings += array(
-      'body'      => array(LANGUAGE_NONE => array(array())),
       'title'     => $this->randomName(8),
       'comment'   => 2,
       'changed'   => REQUEST_TIME,
@@ -1105,6 +1104,12 @@ class BackdropWebTestCase extends BackdropTestCase {
       'type'      => 'page',
       'revisions' => NULL,
       'langcode'  => LANGUAGE_NONE,
+    );
+
+    // Add the body after the language is defined so that it may be set
+    // properly.
+    $settings += array(
+      'body' => array($settings['language'] => array(array())),
     );
 
     // Use the original node's created time for existing nodes.
