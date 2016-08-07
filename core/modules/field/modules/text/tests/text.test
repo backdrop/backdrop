@@ -400,6 +400,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       'administer content types',
       'access administration pages',
       'bypass node access',
+      'administer fields',
       filter_permission_name($full_html_format),
     ));
     $this->translator = $this->backdropCreateUser(array('create post content', 'edit own post content', 'translate content'));
