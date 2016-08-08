@@ -109,7 +109,7 @@ function path_admin_edit($path = array()) {
 }
 
 /**
- * Form builder; Main URL pattern administration form.
+ * Form builder; Main URL alias pattern administration form.
  *
  * @param $path
  *   An array containing the path ID, source, alias, and language code.
@@ -354,7 +354,7 @@ function path_patterns_form($form, $form_state) {
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
     $pattern_description = $path_info['pattern description'];
-    $group_header = t('!label URL patterns', array('!label' => $path_info['label']));
+    $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
     $token_types = array();
     if (isset($path_info['entity type'])) {
       $entity_type = entity_get_info($path_info['entity type']);
@@ -370,7 +370,7 @@ function path_patterns_form($form, $form_state) {
       '#collapsed' => FALSE,
     );
 
-    // Prompt for the default pattern for this path type.
+    // Prompt for the default URL alias pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
@@ -431,7 +431,7 @@ function path_patterns_form_submit($form, &$form_state) {
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    // Save default pattern per path type.
+    // Save default URL alias pattern per path type.
     $variable = $path_type . '_pattern';
     $config->set($variable, $values[$variable]);
 
@@ -449,7 +449,7 @@ function path_patterns_form_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Configure the URL pattern settings.
+ * Form builder; Configure the URL alias pattern settings.
  *
  * @see path_patterns_settings_form_validate()
  * @see path_patterns_settings_form_submit()
@@ -463,7 +463,7 @@ function path_patterns_settings_form($form) {
     '#type' => 'checkbox',
     '#title' => t('Verbose'),
     '#default_value' => $config->get('verbose'),
-    '#description' => t('Display alias changes (except during bulk updates).'),
+    '#description' => t('Display URL alias pattern changes (except during bulk updates).'),
   );
 
   $form['separator'] = array(
@@ -494,7 +494,7 @@ function path_patterns_settings_form($form) {
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum length of aliases to generate. 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
+    '#description' => t('Maximum length of URL aliases to generate. 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
   $form['max_component_length'] = array(
     '#type' => 'number',
@@ -503,16 +503,16 @@ function path_patterns_settings_form($form) {
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum text length of any component in the alias (e.g., [title]). 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
+    '#description' => t('Maximum text length of any component in the URL alias (e.g., [title]). 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
 
-  $description = t('The action taken when an item already has an alias.');
-  $delete_label = t('Create a new alias. Delete the old alias.');
+  $description = t('The action taken when an item already has a URL alias.');
+  $delete_label = t('Create a new URL alias. Delete the old URL alias.');
   if (module_exists('redirect')) {
     $auto_redirect = config_get('redirect.settings', 'auto_redirect');
-    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when an alias is deleted.', array('!url' => url('admin/config/search/redirect/settings')));
+    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when a URL alias is deleted.', array('!url' => url('admin/config/search/redirect/settings')));
     if ($auto_redirect) {
-      $delete_label = t('Create a new alias. Replace the old alias with a redirect.');
+      $delete_label = t('Create a new URL alias. Replace the old URL alias with a redirect.');
     }
   }
   else {
@@ -524,31 +524,31 @@ function path_patterns_settings_form($form) {
     '#default_value' => $config->get('update_action'),
     '#options' => array(
       PATH_UPDATE_ACTION_DELETE => $delete_label,
-      PATH_UPDATE_ACTION_LEAVE => t('Create a new alias. Leave the existing alias functioning.'),
-      PATH_UPDATE_ACTION_NO_NEW => t('Do nothing. Leave the old alias intact.'),
+      PATH_UPDATE_ACTION_LEAVE => t('Create a new URL alias. Leave the existing URL alias functioning.'),
+      PATH_UPDATE_ACTION_NO_NEW => t('Do nothing. Leave the old URL alias intact.'),
     ),
     '#description' => $description,
   );
 
   $form['transliterate'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Transliterate prior to creating alias'),
+    '#title' => t('Transliterate prior to creating URL aliases'),
     '#default_value' => $config->get('transliterate'),
-    '#description' => t('When a pattern includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet?'),
+    '#description' => t('When the new URL alias includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet?'),
   );
 
   $form['reduce_ascii'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Reduce strings to letters and numbers'),
+    '#title' => t('Reduce URL alias characters to letters and numbers'),
     '#default_value' => $config->get('reduce_ascii'),
-    '#description' => t('Filters the new alias to only letters and numbers found in the ASCII-96 set.'),
+    '#description' => t('Filters the new URL alias to only letters and numbers found in the ASCII-96 set.'),
   );
 
   $form['ignore_words'] = array(
     '#type' => 'textarea',
     '#title' => t('Strings to Remove'),
     '#default_value' => $config->get('ignore_words'),
-    '#description' => t('Words to strip out of the URL alias, separated by commas. Do not use this to remove punctuation.'),
+    '#description' => t('Words to strip out of the URL alias, separated by commas. Do not use this to remove punctuation - use the punctuation section below.'),
     '#wysiwyg' => FALSE,
   );
 
@@ -776,10 +776,10 @@ function path_admin_bulk_delete($form, $form_state) {
       '#markup' => theme('item_list', array('items' => $delete_list)),
     );
 
-    $question = t('Delete all the following aliases?');
+    $question = t('Delete all the following URL aliases?');
     $path = 'admin/config/search/path/bulk-delete';
-    $description = t('Deleting these aliases cannot be undone.');
-    $yes = t('Delete aliases');
+    $description = t('Deleting these URL aliases cannot be undone.');
+    $yes = t('Delete URL aliases');
     return confirm_form($form, $question, $path, $description, $yes);
   }
 
@@ -797,7 +797,7 @@ function path_admin_bulk_delete($form, $form_state) {
 
   $form['delete'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Choose aliases to bulk delete'),
+    '#title' => t('Choose URL aliases to bulk delete'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -809,7 +809,7 @@ function path_admin_bulk_delete($form, $form_state) {
     '#type' => 'checkbox',
     '#title' => t('All URL aliases'),
     '#default_value' => FALSE,
-    '#description' => t('Number of aliases which will be deleted: %count.', array('%count' => $total_count)),
+    '#description' => t('Number of URL aliases which will be deleted: %count.', array('%count' => $total_count)),
   );
 
   // Next, provide checkboxes for each alias type.
@@ -819,7 +819,7 @@ function path_admin_bulk_delete($form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
       '#default_value' => FALSE,
-      '#description' => t('Number of aliases which will be deleted: %count.', array('@label' => $path_info['label'], '%count' => $count)),
+      '#description' => t('Number of URL aliases which will be deleted: %count.', array('@label' => $path_info['label'], '%count' => $count)),
     );
   }
 
