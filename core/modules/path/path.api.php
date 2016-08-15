@@ -114,10 +114,10 @@ function hook_path_delete($path) {
  *       entities of this type will have a "path" property added to their
  *       objects upon loading.
  *   - label: Translated label for the settings group.
- *   - pattern description: The translated label for the default pattern (e.g.,
- *       t('Default path pattern (applies to all content types with blank
- *       patterns)')
- *   - pattern default: Default pattern  (e.g. 'content/[node:title]')
+ *   - pattern description: The translated label for the default URL alias
+ *       pattern (e.g. t('Default path pattern (applies to all content types
+ *       with blank patterns)')
+ *   - pattern default: Default URL alias pattern (e.g. 'content/[node:title]')
  *   - batch update callback: The name of function that should be ran for
  *       bulk update. See node_path_bulk_update_batch_process() for an example.
  *   - batch file: The name of the file with the bulk update function.
