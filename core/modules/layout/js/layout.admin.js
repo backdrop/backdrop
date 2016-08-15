@@ -83,6 +83,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     if ($regions.length) {
       $regions.sortable({
         connectWith: '.layout-editor-region-content',
+        tolerance: 'pointer',
         update: Backdrop.behaviors.layoutDisplayEditor.updateLayout,
         items: '.layout-editor-block',
         placeholder: 'layout-editor-placeholder layout-editor-block',

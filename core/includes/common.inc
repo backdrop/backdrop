@@ -3097,7 +3097,7 @@ function backdrop_get_path($type, $name) {
 }
 
 /**
- * Returns the base URL path (i.e., directory) of the Backdrop installation.
+ * Returns the base path (i.e., directory) of the Backdrop installation.
  *
  * base_path() adds a "/" to the beginning and end of the returned path if the
  * path is not empty. At the very least, this will return "/".
@@ -6858,17 +6858,17 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   The input array to be sorted.
  * @param array $keys
  *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
- *   unindexed array is passed in. 
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
  *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
- * 
+ *
  * // Short-hand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
- * 
+ *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode

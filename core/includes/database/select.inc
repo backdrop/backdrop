@@ -717,6 +717,11 @@ class SelectQueryExtender implements SelectQueryInterface {
     return $this->query->preExecute($query);
   }
 
+  /**
+   * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+   */
   public function execute() {
     // By calling preExecute() here, we force it to preprocess the extender
     // object rather than just the base query object.  That means
@@ -992,28 +997,52 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /* Implementations of QueryAlterableInterface. */
 
+  /**
+   * Implements QueryAlterableInterface::addTag().
+   *
+   * @return SelectQuery
+   */
   public function addTag($tag) {
     $this->alterTags[$tag] = 1;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasTag().
+   */
   public function hasTag($tag) {
     return isset($this->alterTags[$tag]);
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAllTags().
+   */
   public function hasAllTags() {
     return !(boolean)array_diff(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAnyTag().
+   */
   public function hasAnyTag() {
     return (boolean)array_intersect(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::addMetaData().
+   *
+   * @return SelectQuery
+   */
   public function addMetaData($key, $object) {
     $this->alterMetaData[$key] = $object;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::getMetaData().
+   *
+   * @return SelectQuery
+   */
   public function getMetaData($key) {
     return isset($this->alterMetaData[$key]) ? $this->alterMetaData[$key] : NULL;
   }
@@ -1381,6 +1410,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /**
    * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    */
   public function execute() {
     // If validation fails, simply return NULL.

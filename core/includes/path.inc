@@ -64,8 +64,8 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
 
   // If no language is explicitly specified we default to the current URL
   // language. If we used a language different from the one conveyed by the
-  // requested URL, we might end up being unable to check if there is a path
-  // alias matching the URL path.
+  // requested URL, we might end up being unable to check if there is a URL
+  // alias matching the system path.
   $langcode = $langcode ? $langcode : $language_url->langcode;
 
   if ($action == 'wipe') {

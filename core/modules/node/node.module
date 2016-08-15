@@ -213,6 +213,9 @@ function node_admin_paths() {
     );
     return $paths;
   }
+  else {
+    return array();
+  }
 }
 
 /**
@@ -289,7 +292,7 @@ function node_last_viewed($nid) {
  * @param $timestamp
  *   Time which is compared against node's "last viewed" timestamp.
  *
- * @return
+ * @return int
  *   One of the MARK constants.
  */
 function node_mark($nid, $timestamp) {
@@ -317,7 +320,7 @@ function node_mark($nid, $timestamp) {
  * @param Node|string $node
  *   Either a string or object, containing the node type information.
  *
- * @return
+ * @return string
  *   Node type of the passed-in data.
  */
 function _node_extract_type($node) {
@@ -330,7 +333,7 @@ function _node_extract_type($node) {
  * This list can include types that are queued for addition or deletion.
  * See _node_types_build() for details.
  *
- * @return
+ * @return stdClass[]
  *   An array of node types, as objects, keyed by the type.
  *
  * @see node_type_get_type()
@@ -345,7 +348,7 @@ function node_type_get_types() {
  * @param Node|string $node
  *   A node entity or string that indicates the node type to return.
  *
- * @return
+ * @return stdClass|FALSE
  *   A single node type, as an object, or FALSE if the node type is not found.
  *   The node type is an object containing fields from a node type's config
  *   file, merged with the defaults from node_type_set_defaults().
@@ -366,7 +369,7 @@ function node_type_get_type($node) {
  * @param Node|string $node
  *   A node entity or string that indicates the node type to return.
  *
- * @return
+ * @return string
  *   The node type base or FALSE if the node type is not found.
  *
  * @see node_invoke()
@@ -383,7 +386,7 @@ function node_type_get_base($node) {
  * This list can include types that are queued for addition or deletion.
  * See _node_types_build() for details.
  *
- * @return
+ * @return array
  *   An array of node type names, keyed by the type.
  */
 function node_type_get_names() {
@@ -396,7 +399,7 @@ function node_type_get_names() {
  * @param Node|string $node
  *   A node entity or string that indicates the node type to return.
  *
- * @return
+ * @return string|FALSE
  *   The node type name or FALSE if the node type is not found.
  */
 function node_type_get_name($node) {
@@ -412,7 +415,7 @@ function node_type_get_name($node) {
  *   The machine-readable name of a node type to load, where '_' is replaced
  *   with '-'.
  *
- * @return
+ * @return stdClass|FALSE
  *   A node type object or FALSE if $name does not exist.
  */
 function node_type_load($name) {
@@ -504,7 +507,7 @@ function node_type_save($info) {
  * @param $label
  *   (optional) The label for the body instance.
  *
- * @return
+ * @return array
  *   Body field instance.
  */
 function node_add_body_field($type, $label = 'Body') {
@@ -517,7 +520,7 @@ function node_add_body_field($type, $label = 'Body') {
       'type' => 'text_with_summary',
       'entity_types' => array('node'),
     );
-    $field = field_create_field($field);
+    field_create_field($field);
   }
   if (empty($instance)) {
     $instance = array(
@@ -781,7 +784,7 @@ function node_hook($node, $hook) {
  * @param $a2, $a3, $a4
  *   Arguments to pass on to the hook, after the $node argument.
  *
- * @return
+ * @return mixed
  *   The returned value of the invoked hook.
  */
 function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
@@ -1107,7 +1110,7 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
   // 'prepare_view' step. An internal flag prevents the operation from running
   // twice.
   field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-  entity_prepare_view('node', array($node->nid => $node), $langcode);
+  entity_prepare_view('node', array($node->nid => $node));
   $node->content += field_attach_view('node', $node, $view_mode, $langcode);
 
   // Always display a read more link on teasers because we have no way
@@ -1244,7 +1247,7 @@ function node_views_api() {
 /**
  * Gathers the rankings from the the hook_ranking implementations.
  *
- * @param $query
+ * @param SearchQuery|SelectQueryExtender $query
  *   A query object that has been extended with the Search DB Extender.
  */
 function _node_rankings(SelectQueryExtender $query) {
@@ -2060,7 +2063,7 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
   $entities_by_view_mode = entity_view_mode_prepare('node', $nodes, $view_mode, $langcode);
   foreach ($entities_by_view_mode as $entity_view_mode => $entities) {
     field_attach_prepare_view('node', $entities, $entity_view_mode, $langcode);
-    entity_prepare_view('node', $entities, $langcode);
+    entity_prepare_view('node', $entities);
 
     foreach ($entities as $entity) {
       $build['nodes'][$entity->nid] = node_view($entity, $entity_view_mode, $langcode);
@@ -2404,7 +2407,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * @param Node $node
  *   The node entity on which the operation is to be performed, or the node type
  *   (e.g., 'post') for the 'create' operation.
- * @param $account
+ * @param User $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
@@ -2512,6 +2515,12 @@ function node_access($op, $node, $account = NULL) {
 
 /**
  * Implements hook_node_access().
+ *
+ * @param Node|string $node
+ * @param string $op
+ * $param User $account
+ *
+ * @return string
  */
 function node_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : $node->type;
@@ -2741,12 +2750,15 @@ function node_query_entity_field_access_alter(QueryAlterableInterface $query) {
  *     ->addMetaData('base_table', 'taxonomy_index');
  * @endcode
  *
- * @param $query
- *   The query to add conditions to.
- * @param $type
+ * @param SelectQuery|QueryAlterableInterface $query
+ *   The query to which conditions will be added.
+ * @param string $type
  *   Either 'node' or 'entity' depending on what sort of query it is. See
  *   node_query_node_access_alter() and node_query_entity_field_access_alter()
  *   for more.
+ *
+ * @throws Exception
+ *   In the event that the query cannot be altered as expected.
  */
 function _node_query_node_access_alter($query, $type) {
   global $user;
@@ -2886,7 +2898,7 @@ function _node_query_node_access_alter($query, $type) {
       $subquery->where("$nalias.$field = na.nid");
 
       // For an entity query, attach the subquery to entity conditions.
-      if ($type == 'entity') {
+      if (isset($node_conditions)) {
         $node_conditions->exists($subquery);
       }
       // Otherwise attach it to the node query itself.
@@ -2896,7 +2908,7 @@ function _node_query_node_access_alter($query, $type) {
     }
   }
 
-  if ($type == 'entity' && count($subquery->conditions())) {
+  if (isset($node_conditions) && count($subquery->conditions())) {
     // All the node access conditions are only for field values belonging to
     // nodes.
     $node_conditions->condition("$base_alias.entity_type", 'node');
@@ -3005,7 +3017,7 @@ function _node_access_write_grants(Node $node, $grants, $realm = NULL, $delete =
  * @param $rebuild
  *   (optional) The boolean value to be written.
  *
- * @return
+ * @return bool|NULL
  *   The current value of the flag if no value was provided for $rebuild.
  *
  * @see node_access_rebuild()
