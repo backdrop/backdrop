@@ -189,6 +189,7 @@ function layout_add_page() {
     );
     $layout = new Layout($config);
   }
+  backdrop_set_title(t('Add layout'));
   return backdrop_get_form('layout_settings_form', $layout);
 }
 
@@ -2612,6 +2613,7 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
+  backdrop_set_title(t('Layout settings'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
   $form = array();
@@ -2655,7 +2657,6 @@ function layout_settings_page($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
-
   return $form;
 }
 
