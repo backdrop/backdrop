@@ -423,6 +423,12 @@ ul.secondary a {
 ul.secondary a.active {
   background: #dcdcdc;
 }
+ul.primary:after,
+ul.secondary:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
 /**
  * Styles for system messages.
