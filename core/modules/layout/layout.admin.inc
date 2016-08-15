@@ -2501,7 +2501,7 @@ function layout_settings_page($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
-
+  backdrop_set_title(t('Layout settings'));
   return $form;
 }
 
