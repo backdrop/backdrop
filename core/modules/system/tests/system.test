@@ -1450,6 +1450,23 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->backdropGet($this->node_path);
     $this->assertNoText(t('On front page.'), 'Path is not the front page.');
 
+    // Test that the default_nodes_main setting is saved and works from
+    // Site information form: /admin/config/system/site-information
+    $node1 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $node2 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $this->backdropGet('');
+    // Check that all three promoted nodes are on the frontpage.
+    $this->assertText($node1->title, 'node1 title found on front page.');
+    $this->assertText($node2->title, 'node2 title found on front page.');
+    $this->assertText($node3->title, 'node3 title found on front page.');
+    // Change the number of nodes allowed on frontpage.
+    config_set('system.core', 'default_nodes_main', 2);
+    backdrop_flush_all_caches();
+    // Make sure that the 3rd node is no longer on frontpage.
+    $this->backdropGet('');
+    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
+
     // Change the front page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
@@ -2680,7 +2697,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node1->nid);
 
     // Verify level 2 links are shown, but not level 1.
-    // We use item 6 here since item 1, although not in the menu, is in the 
+    // We use item 6 here since item 1, although not in the menu, is in the
     // breadcrumb.
     $this->assertNoLink($item6['link_title']);
     $this->assertLink($item2['link_title']);

@@ -58,8 +58,8 @@ function path_update_1000() {
   $config->set('punctuation_tilde', 0);
   $config->set('punctuation_underscore', 0);
 
-  // The default patterns are all empty on upgrading, for sites that have never
-  // had Pathauto installed.
+  // The default URL alias patterns are all empty on upgrading, for sites that
+  // have never had Pathauto installed.
   $config->set('node_pattern', '');
   $config->set('taxonomy_term_pattern', '');
   $config->set('user_pattern', '');

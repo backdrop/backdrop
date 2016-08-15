@@ -134,7 +134,7 @@
   width: 100%;
   min-height: 70px;
   margin: 0 0 15px;
-  padding: 8px;
+  padding: 8px 8px 16px 8px;
   border: 1px dashed #CCC;
   background: white;
   -webkit-box-sizing: border-box;
@@ -142,16 +142,19 @@
 }
 .layout-editor-region-title .label {
   float: left;
-  margin: 0 12px 0 0; /* LTR */
-  padding: 4px 0;
+  margin: 0;
+  padding: 4px 12px 4px 4px; /* LTR */
   line-height: 1.2;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #908990;
+}
+[dir="rtl"] .layout-editor-region-title .label {
+  padding-right: 4px;
+  padding-left: 12px;
 }
 .layout-editor-region-content {
   min-height: 40px;
-}
-[dir="rtl"] .layout-editor-region-title .label {
-  margin-right: 0;
-  margin-left: 12px;
 }
 .layout-editor-region-title .dropbutton-wrapper {
   float: left;
@@ -171,20 +174,40 @@
   cursor: move;
 }
 .layout-editor-block {
-  margin: -1px -1px 10px -1px;
+  margin: -1px 1px 15px -1px;
   background: #FFF;
+  border-radius: 4px;
+  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
+     -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
+          box-shadow: 2px 2px 0 0 #d0d0d0;
 }
 .layout-editor-block:last-child {
   margin-bottom: 0;
 }
 .layout-editor-block-title {
-  border: 1px solid #CCC;
-  background: #F3F4EE;
-  padding: 0.4em 1em;
+  border: 0;
+  background: #e9e8e8;
+  border-radius: 4px 4px 0 0;
+  padding: 0.4em 0.5em;
+}
+.layout-editor-block-title .handle {
+  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
+  height: 13px;
+  width: 13px;
+  margin: 0 0.5em 0 0; /* LTR */
+  padding: 0.25em 0.75em;
+  width: 13px;
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -o-box-sizing: content-box;
+}
+[dir="rtl"] .layout-editor-block-title .handle {
+  margin: 0 0 0 0.5em;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1.75;
   font-weight: bold;
 }
 .layout-editor-block-title .buttons {
@@ -195,11 +218,13 @@
   float: left;
 }
 .layout-editor-block-content {
-  border: 1px solid #CCC;
+  border: 1px solid #f7f7f7;
   border-top: none;
   border-bottom-width: 2px;
+  border-radius: 0 0 4px 4px;
   padding: 0.4em 1em;
   min-height: 20px;
+  background: #f7f7f7;
   font-size: 90%;
   line-height: 1.5;
 }
@@ -234,12 +259,19 @@
   margin: 0 12px 0 0;
 }
 .layout-editor-placeholder {
-  background-color: #EFEFEF;
+  background-color: #bdf;
+  border-radius: 4px;
 }
 
 /* Layout Misc */
 #layout-edit h1 {
   margin: 1em 0 .6em;
+  font-size: 1.1em;
+  font-weight: bold;
+  line-height: 1.75;
+  background: #e9e8e8;
+  border-radius: 4px;
+  padding: 0.4em 1em;
 }
 .layout-access-list ul {
   margin: 1em 0px;
