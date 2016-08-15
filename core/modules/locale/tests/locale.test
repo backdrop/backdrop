@@ -2813,14 +2813,6 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
  * Tests locale translation safe string handling.
  */
 class LocaleStringIsSafeTest extends BackdropWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Test if a string is safe',
-      'description' => 'Tests locale translation safe string handling.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
   }
@@ -2851,3 +2843,4 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $this->assertTrue($result);
   }
 }
+
