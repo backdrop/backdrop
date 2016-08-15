@@ -1564,7 +1564,7 @@ function backdrop_page_header() {
   $default_headers = array(
     'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
-    'Cache-Control' => 'no-cache, must-revalidate, post-check=0, pre-check=0',
+    'Cache-Control' => 'no-cache, must-revalidate',
     'X-Content-Type-Options' => 'nosniff',
     'ETag' => '"' . REQUEST_TIME . '"',
   );
