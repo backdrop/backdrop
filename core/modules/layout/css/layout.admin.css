@@ -143,11 +143,15 @@
 .layout-editor-region-title .label {
   float: left;
   margin: 0;
-  padding: 4px 12px 4px 4px;
+  padding: 4px 12px 4px 4px; /* LTR */
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
   color: #908990;
+}
+[dir="rtl"] .layout-editor-region-title .label {
+  padding-right: 4px;
+  padding-left: 12px;
 }
 .layout-editor-region-content {
   min-height: 40px;
@@ -214,13 +218,13 @@
   float: left;
 }
 .layout-editor-block-content {
-  background: #f7f7f7;
   border: 1px solid #f7f7f7;
   border-top: none;
   border-bottom-width: 2px;
   border-radius: 0 0 4px 4px;
   padding: 0.4em 1em;
   min-height: 20px;
+  background: #f7f7f7;
   font-size: 90%;
   line-height: 1.5;
 }
