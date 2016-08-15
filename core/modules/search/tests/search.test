@@ -603,10 +603,10 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     // search again with a longer keyword. First test using the block form.
     $terms = array('search_block_form' => 'a');
     $this->backdropPost('node', $terms, t('Search'));
-    $this->assertText('You must include at least one positive keyword with 3 characters or more');
+    $this->assertText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
     $terms = array('search_block_form' => 'foo');
     $this->backdropPost(NULL, $terms, t('Search'));
-    $this->assertNoText('You must include at least one positive keyword with 3 characters or more');
+    $this->assertNoText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
     $this->assertText('Your search yielded no results');
 
     // Same test again, using the search page form for the second search this time.
@@ -614,7 +614,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     $this->backdropPost('node', $terms, t('Search'));
     $terms = array('keys' => 'foo');
     $this->backdropPost(NULL, $terms, t('Search'));
-    $this->assertNoText('You must include at least one positive keyword with 3 characters or more');
+    $this->assertNoText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
     $this->assertText('Your search yielded no results');
   }
 }
@@ -1897,12 +1897,12 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
     $edit = array('keys' => '&');
     $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertNoRaw('<strong>&</strong>amp;');
-    $this->assertText('You must include at least one positive keyword');
+    $this->assertText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
 
     $edit = array('keys' => '&amp;');
     $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertNoRaw('<strong>&</strong>amp;');
-    $this->assertText('You must include at least one positive keyword');
+    $this->assertText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
   }
 }
 
