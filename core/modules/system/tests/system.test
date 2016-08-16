@@ -2653,7 +2653,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[depth]' => 3,
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -2671,7 +2671,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[depth]' => 0,
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -2685,7 +2685,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[level]' => 2,
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
