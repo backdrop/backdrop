@@ -13,7 +13,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(
-      array('access content', 'administer content types', 'administer nodes', 'bypass node access')
+      array('access content', 'administer content types', 'administer fields', 'administer nodes', 'bypass node access')
     );
     $this->backdropLogin($this->privileged_user);
 

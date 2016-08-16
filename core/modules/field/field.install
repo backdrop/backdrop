@@ -93,3 +93,27 @@ function field_update_1001() {
     $config->save();
   }
 }
+
+/**
+ * Grant the new "administer fields" permission to trusted users.
+ */
+function field_update_1002() {
+  // Assign the permission to anyone that already has a trusted core permission
+  // that would have previously let them administer fields on an entity type.
+  $role_names = array();
+  $permissions = array(
+    'administer site configuration',
+    'administer content types',
+    'administer users',
+  );
+  foreach ($permissions as $permission) {
+    $role_names = array_merge($role_names, array_keys(user_roles(FALSE, $permission)));
+  }
+  $role_names = array_unique($role_names);
+  foreach ($role_names as $role_name) {
+    $role_config = config('user.role.' . $role_name);
+    $permissions = array_unique(array_merge($role_config->get('permissions'), array('administer fields')));
+    $role_config->set('permissions', $permissions);
+    $role_config->save();
+  }
+}
