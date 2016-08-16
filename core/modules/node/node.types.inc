@@ -12,7 +12,7 @@
 function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
-  $field_ui = module_exists('field_ui');
+  $field_ui = module_exists('field_ui') && user_access('administer fields');
   $header = array(t('Name'), t('Operations'));
   $rows = array();
 
@@ -596,7 +596,7 @@ function node_type_delete_confirm($form, &$form_state, $type) {
  * Process content type delete confirm submissions.
  *
  * @see node_type_delete_confirm()
- */                                                
+ */
 function node_type_delete_confirm_submit($form, &$form_state) {
   $type_name = $form_state['values']['type'];
   node_type_delete($type_name);
