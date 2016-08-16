@@ -47,6 +47,11 @@
  *              Specify the path and the extension
  *              (i.e. 'core/modules/user/user.test').
  *
+ *
+ *  --directory <path>
+ *
+ *              Run all tests found within the specified file directory.
+ *
  *  --xml       <path>
  *
  *              If provided, test results will be written as xml files to this path.
@@ -276,6 +281,10 @@ All arguments are long options.
   --file      Run tests identified by specific file names, instead of class names.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
+              
+  --directory <path>
+
+              Run all tests found within the specified file directory.
 
   --xml       <path>
 
@@ -338,6 +347,7 @@ function simpletest_script_parse_args() {
     'execute-test' => '',
     'xml' => '',
     'summary' => '',
+    'directory' => NULL,
   );
 
   // Override with set values.
@@ -606,6 +616,31 @@ function simpletest_script_get_test_list() {
         $file = $refclass->getFileName();
         if (isset($files[$file])) {
           $test_list[] = $class_name;
+        }
+      }
+    }
+    elseif ($args['directory']) {
+      // Extract test case class names from specified directory.
+      $files = array();
+      if ($args['directory'][0] === '/') {
+        $directory = $args['directory'];
+      }
+      else {
+        $directory = BACKDROP_ROOT . "/" . $args['directory'];
+      }
+      
+      $all_classes = array();
+      foreach ($groups as $group) {
+        $all_classes = array_merge($all_classes, array_keys($group));
+      }
+
+      foreach (file_scan_directory($directory, '/\.test$/') as $file) {
+        $content = file_get_contents($file->uri);
+        preg_match_all('@^class ([^ ]+)@m', $content, $matches);
+        foreach ($matches[1] as $test_class) {
+          if(in_array($test_class, $all_classes)) {
+            $test_list[] = $test_class;
+          }
         }
       }
     }
