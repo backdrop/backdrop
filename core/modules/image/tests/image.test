@@ -830,7 +830,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/add/post');
     $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on post form.');
     $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on post form.');
-    $this->assertText(t('Images must be between 10x10 and 100x100 pixels.'), 'Image widget allowed resolution displayed on post form.');
+    $this->assertText(t('Images must be larger than 10x10 pixels. Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed resolution displayed on post form.');
 
     // We have to create the post first and then edit it because the alt
     // and title fields do not display until the image has been attached.
