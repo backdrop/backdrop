@@ -425,7 +425,48 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
  */
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
-   * Basic functional testing of Path patterns.
+   * Create a new content type with new path pattern.
+   */
+  function testNodeTypeCreate() {
+    // Create a user with more permissions.
+    $permissions = array(
+      'administer path patterns',
+      'administer content types',
+      'administer taxonomy',
+      'administer account settings',
+    );
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
+
+    // Set the path pattern when creating a new content type.
+    $this->backdropGet('admin/structure/types/add');
+    $edit = array(
+      'name' => 'foo',
+      'type' => 'foo',
+      'path_pattern' => 'foo/[node:title]',
+    );
+    $this->backdropPost(NULL, $edit, t('Save content type'));
+
+    // Create a test node that should have pattern "foo/node1".
+    backdrop_static_reset();
+    $node1 = $this->backdropCreateNode(array('type' => 'foo', 'title' => 'node1'));
+    $this->assertEntityAlias('node', $node1, 'foo/node1');
+
+    // Change the path pattern on the content type.
+    $this->backdropGet('admin/structure/types/manage/foo/configure');
+    $edit = array(
+      'path_pattern' => 'bar/[node:title]',
+    );
+    $this->backdropPost(NULL, $edit, t('Save content type'));
+
+    // Create a test node that should have updated pattern "bar/node2".
+    backdrop_static_reset();
+    $node2 = $this->backdropCreateNode(array('type' => 'foo', 'title' => 'node2'));
+    $this->assertEntityAlias('node', $node2, 'bar/node2');
+  }
+
+  /**
+   * Basic functional testing of node Path patterns.
    */
   function testNodeEditing() {
     $config = config('path.settings');
