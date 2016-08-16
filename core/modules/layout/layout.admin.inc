@@ -2458,6 +2458,7 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
+  backdrop_set_title(t('Layout settings'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
   $form = array();
@@ -2501,7 +2502,6 @@ function layout_settings_page($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
-  backdrop_set_title(t('Layout settings'));
   return $form;
 }
 
