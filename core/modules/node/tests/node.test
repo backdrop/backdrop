@@ -766,7 +766,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // viewing node.
     $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, "Node content designed for RSS doesn't appear when viewing node.");
-    
+
     // Check that the node feed page does not try to interpret additional path
     // components as arguments for node_feed() and returns default content.
     $this->backdropGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
@@ -1249,7 +1249,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertResponse(200, 'The new content type can be accessed at node/add.');
 
     // Create a content type via the user interface.
-    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($web_user);
     $edit = array(
       'name' => 'foo',
@@ -1265,7 +1265,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * Tests editing a node type using the UI.
    */
   function testNodeTypeEditing() {
-    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($web_user);
 
     $instance = field_info_instance('node', 'body', 'page');
@@ -2235,7 +2235,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('node' => $node), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized node token %token replaced for node without a summary.', array('%token' => $input)));
-    }    
+    }
   }
 }
 
@@ -2398,8 +2398,8 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
     node_access_rebuild();
 
     // Create some users.
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
-    $this->content_admin_user = $this->backdropCreateUser(array('access content', 'administer content types'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access', 'administer fields'));
+    $this->content_admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields'));
 
     // Add a custom field to the page content type.
     $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');

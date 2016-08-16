@@ -619,7 +619,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     foreach ($terms as $term) {
       $this->assertText($term, 'The term was retained after edit and still appears on the node page.');
-    }    
+    }
 
     // Delete term 1 from the term edit page.
     $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
@@ -893,7 +893,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('taxonomy');
-    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types'));
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
 
