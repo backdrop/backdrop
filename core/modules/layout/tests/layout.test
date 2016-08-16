@@ -171,7 +171,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_new_title,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertText(check_plain($block_new_title));
@@ -180,7 +180,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title_display' => LAYOUT_TITLE_NONE,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertNoText('Foo subject');
@@ -192,7 +192,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'style_settings[classes]' => $custom_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -212,7 +212,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'style' => 'dynamic',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $edit = array(
       'style_settings[wrapper_tag]' => 'aside',
       'style_settings[title_tag]' => 'h3',
@@ -220,7 +220,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'style_settings[content_tag]' => 'p',
       'style_settings[content_classes]' => $content_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -256,7 +256,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'region' => 'footer',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -378,13 +378,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'reusable' => TRUE,
     );
-    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
     $this->assertText(t('Admin label is required when making a block reusable.'));
     $edit['label'] = 'My custom block label';
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
     $this->assertText(t('An internal name is required when making a block reusable.'));
     $edit['delta'] = 'my_custom_block';
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
 
     // Now back on the layout main page. Check the new admin label is shown.
     $this->assertText('My custom block label');
@@ -443,7 +443,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -471,7 +471,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => FALSE,
     );
     $this->backdropPost(NULL, $edit, t('Save visibility condition'));
-    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -491,7 +491,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'paths' => 'node/' . $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(NULL, array(), t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     // Create another post node and check the combination of conditions work.
@@ -545,7 +545,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'entity_id' => $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Save block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -570,7 +570,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'entity_id' => $this->web_user->uid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(NULL, array(), t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -667,7 +667,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'contexts[my_node]' => '3',
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Now the second node should be used as the title in the page.
