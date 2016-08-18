@@ -56,13 +56,18 @@ function node_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('node', 'n');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
   $query->addField('n', 'nid');
-  $query->isNull('ua.source');
   $query->condition('n.nid', $context['sandbox']['current'], '>');
   $query->orderBy('n.nid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'node');
+  if (!empty($context['choices'])) {
+    $query->condition('n.type', $context['choices'], 'IN');
+  }
+  if (empty($context['checkboxes'])) {
+    $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {

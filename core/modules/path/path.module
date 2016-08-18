@@ -114,6 +114,21 @@ function path_menu() {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function path_theme() {
+  $base = array(
+    'file' => 'path.admin.inc',
+  );
+
+  return array(
+    'path_bulk_update_form' => array(
+      'render element' => 'form',
+    ) + $base,
+  );
+}
+
+/**
  * Implements hook_hook_info().
  */
 function path_hook_info() {

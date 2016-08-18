@@ -644,31 +644,39 @@ function path_patterns_settings_form_submit($form, &$form_state) {
  */
 function path_bulk_update_form() {
   $form['#update_callbacks'] = array();
-
-  $form['generate'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Bulk generate'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
-  );
-
-  $form['generate']['update'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Generate URL aliases for the following types of un-aliased paths:'),
-    '#options' => array(),
-    '#default_value' => array(),
-  );
+  $form['#tree'] = TRUE;
 
   $all_path_info = path_get_info();
-  foreach ($all_path_info as $path_info) {
+
+  $rows = array();
+  
+  foreach ($all_path_info as $type => $path_info) {
     if (!empty($path_info['batch update callback'])) {
-      $form['#update_callbacks'][$path_info['batch update callback']] = $path_info;
-      $form['generate']['update']['#options'][$path_info['batch update callback']] = t('!label URL aliases', array('!label' => $path_info['label']));
+      $form['update'][$type]['base'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
+        '#attributes' => array('class' => array('path-base')),
+      );
+      $form['checkboxes'][$type]['base'] = array(
+        '#type' => 'checkbox',
+      );
+      $form['#update_callbacks'][$type] = $path_info;
+      if (isset($path_info['pattern items'])) {
+        foreach ($path_info['pattern items'] as $item => $item_label) {
+          $form['update'][$type][$item] = array(
+            '#type' => 'checkbox',
+            '#title' => t('!label URL aliases', array('!label' => $item_label)),
+            '#attributes' => array('class' => array('path-type')),
+          );
+          $form['checkboxes'][$type][$item] = array(
+            '#type' => 'checkbox',
+          );
+        }
+      }
     }
   }
 
-  $form['generate']['help'] = array(
+  $form['help'] = array(
     '#markup' => '<p>' . t('URL aliases will only be created for items that do not already have URL aliases.') . '</p>',
   );
 
@@ -682,13 +690,55 @@ function path_bulk_update_form() {
 }
 
 /**
+ * Returns HTML for the Path bulk update page.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @ingroup themeable
+ */
+function theme_path_bulk_update_form($variables) {
+  backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.css');
+  $form = $variables['form'];
+
+  $options = array();
+  foreach (element_children($form['update']) as $base) {
+    if (!empty(element_children($form['update'][$base]))) {
+      foreach (element_children($form['update'][$base]) as $key) {
+        $row = array();
+          // Permission row.
+          $row[] = array(
+            'data' => backdrop_render($form['update'][$base][$key]),
+            'class' => array('permission'),
+          );
+          $row[] = array(
+            'data' => backdrop_render($form['checkboxes'][$base][$key]),
+            'class' => array('permission'),
+          );
+        $rows[] = $row;
+      }
+    }
+  }
+  $header = array(
+    'alias' => t('Alias'),
+    'delete' => t('Delete existing'),
+  );
+
+  $output = '';
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output .= backdrop_render_children($form);
+  return $output;
+}
+
+/**
  * Form submit handler for path alias bulk update form.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_batch_finished()
  */
 function path_bulk_update_form_submit($form, &$form_state) {
-  $batch = array(
+    $batch = array(
     'title' => t('Bulk updating URL aliases'),
     'operations' => array(
       array('path_bulk_update_batch_start', array()),
@@ -697,9 +747,22 @@ function path_bulk_update_form_submit($form, &$form_state) {
     'file' => backdrop_get_path('module', 'path') . '/path.admin.inc',
   );
 
-  foreach ($form_state['values']['generate']['update'] as $callback) {
-    if (!empty($callback)) {
-      $path_info = $form['#update_callbacks'][$callback];
+  foreach ($form_state['values']['update'] as $base_name => $base) {
+    $choices = array();
+    $checkboxes = array();
+    $base = array_filter($base);
+    foreach ($base as $label => $choice) {
+      $choices[$label] = $label;
+      if ($form_state['values']['checkboxes'][$base_name][$label]) {
+        $checkboxes[$base_name][$label] = TRUE;
+      }
+    }
+    if (!empty($choices)) {
+      $path_info = $form['#update_callbacks'][$choice];
+      $path_info['choices'] = empty($choices['base']) ? $choices : array();
+      $path_info['checkboxes'] = $checkboxes;
+      $callback = $path_info['batch update callback'];
+
       if (!empty($path_info['batch file'])) {
         $batch['operations'][] = array('path_bulk_update_batch_process', array($callback, $path_info));
       }
@@ -727,6 +790,8 @@ function path_bulk_update_batch_start(&$context) {
 function path_bulk_update_batch_process($callback, $path_info, &$context) {
   if (!empty($path_info['batch file'])) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
+    $context['choices'] = array_keys($path_info['choices']);
+    $context['checkboxes'] = $path_info['checkboxes'];
   }
   return $callback($context);
 }
