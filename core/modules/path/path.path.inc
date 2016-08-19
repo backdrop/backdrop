@@ -64,7 +64,7 @@ function node_path_bulk_update_batch_process(&$context) {
   if (!empty($context['choices'])) {
     $query->condition('n.type', $context['choices'], 'IN');
   }
-  if (empty($context['checkboxes'])) {
+  if (empty($context['reset_alias'])) {
     $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
     $query->isNull('ua.source');
   }
@@ -88,12 +88,12 @@ function node_path_bulk_update_batch_process(&$context) {
   $nodes = node_load_multiple($nids);
 
   $anodes = array();
-  if (!empty($context['checkboxes'])) {
-    if (isset($context['checkboxes']['base'])) {
+  if (!empty($context['reset_alias'])) {
+    if (isset($context['reset_alias']['base'])) {
     }
     else {
       foreach ($nodes as $node) {
-        if (array_key_exists($node->type, $context['checkboxes'])) {
+        if (array_key_exists($node->type, $context['reset_alias'])) {
           $anodes[] = $node;
         }
       }

@@ -657,7 +657,7 @@ function path_bulk_update_form() {
         '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
         '#attributes' => array('class' => array('path-base')),
       );
-      $form['checkboxes'][$type]['base'] = array(
+      $form['reset_alias'][$type]['base'] = array(
         '#type' => 'checkbox',
       );
       $form['#update_callbacks'][$type] = $path_info;
@@ -668,7 +668,7 @@ function path_bulk_update_form() {
             '#title' => t('!label URL aliases', array('!label' => $item_label)),
             '#attributes' => array('class' => array('path-type')),
           );
-          $form['checkboxes'][$type][$item] = array(
+          $form['reset_alias'][$type][$item] = array(
             '#type' => 'checkbox',
           );
         }
@@ -713,7 +713,7 @@ function theme_path_bulk_update_form($variables) {
             'class' => array('permission'),
           );
           $row[] = array(
-            'data' => backdrop_render($form['checkboxes'][$base][$key]),
+            'data' => backdrop_render($form['reset_alias'][$base][$key]),
             'class' => array('permission'),
           );
         $rows[] = $row;
@@ -749,18 +749,18 @@ function path_bulk_update_form_submit($form, &$form_state) {
 
   foreach ($form_state['values']['update'] as $entity_types => $entities) {
     $choices = array();
-    $checkboxes = array();
+    $reset_alias = array();
     $entities = array_filter($entities);
     foreach ($entities as $label => $choice) {
       $choices[$label] = $label;
-      if ($form_state['values']['checkboxes'][$entity_types][$label]) {
-        $checkboxes[$label] = TRUE;
+      if ($form_state['values']['reset_alias'][$entity_types][$label]) {
+        $reset_alias[$label] = TRUE;
       }
     }
     if (!empty($choices)) {
       $path_info = $form['#update_callbacks'][$entity_types];
       $path_info['choices'] = empty($choices['base']) ? $choices : array();
-      $path_info['checkboxes'] = $checkboxes;
+      $path_info['reset_alias'] = $reset_alias;
       $callback = $path_info['batch update callback'];
 
       if (!empty($path_info['batch file'])) {
@@ -791,7 +791,7 @@ function path_bulk_update_batch_process($callback, $path_info, &$context) {
   if (!empty($path_info['batch file'])) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
     $context['choices'] = array_keys($path_info['choices']);
-    $context['checkboxes'] = $path_info['checkboxes'];
+    $context['reset_alias'] = $path_info['reset_alias'];
   }
   return $callback($context);
 }
