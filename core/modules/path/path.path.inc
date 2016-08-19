@@ -86,6 +86,21 @@ function node_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $nodes = node_load_multiple($nids);
+
+  $anodes = array();
+  if (!empty($context['checkboxes'])) {
+    if (isset($context['checkboxes']['base'])) {
+    }
+    else {
+      foreach ($nodes as $node) {
+        if (array_key_exists($node->type, $context['checkboxes'])) {
+          $anodes[] = $node;
+        }
+      }
+      $nodes = $anodes;
+    }
+  }
+
   foreach ($nodes as $node) {
     path_save_automatic_entity_alias($node);
   }

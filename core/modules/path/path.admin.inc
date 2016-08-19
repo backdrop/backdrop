@@ -754,7 +754,7 @@ function path_bulk_update_form_submit($form, &$form_state) {
     foreach ($entities as $label => $choice) {
       $choices[$label] = $label;
       if ($form_state['values']['checkboxes'][$entity_types][$label]) {
-        $checkboxes[$entity_types][$label] = TRUE;
+        $checkboxes[$label] = TRUE;
       }
     }
     if (!empty($choices)) {
