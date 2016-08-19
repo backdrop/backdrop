@@ -747,18 +747,18 @@ function path_bulk_update_form_submit($form, &$form_state) {
     'file' => backdrop_get_path('module', 'path') . '/path.admin.inc',
   );
 
-  foreach ($form_state['values']['update'] as $base_name => $base) {
+  foreach ($form_state['values']['update'] as $entity_types => $entities) {
     $choices = array();
     $checkboxes = array();
-    $base = array_filter($base);
-    foreach ($base as $label => $choice) {
+    $entities = array_filter($entities);
+    foreach ($entities as $label => $choice) {
       $choices[$label] = $label;
-      if ($form_state['values']['checkboxes'][$base_name][$label]) {
-        $checkboxes[$base_name][$label] = TRUE;
+      if ($form_state['values']['checkboxes'][$entity_types][$label]) {
+        $checkboxes[$entity_types][$label] = TRUE;
       }
     }
     if (!empty($choices)) {
-      $path_info = $form['#update_callbacks'][$choice];
+      $path_info = $form['#update_callbacks'][$entity_types];
       $path_info['choices'] = empty($choices['base']) ? $choices : array();
       $path_info['checkboxes'] = $checkboxes;
       $callback = $path_info['batch update callback'];
