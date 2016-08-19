@@ -704,20 +704,18 @@ function theme_path_bulk_update_form($variables) {
 
   $options = array();
   foreach (element_children($form['update']) as $base) {
-    if (!empty(element_children($form['update'][$base]))) {
-      foreach (element_children($form['update'][$base]) as $key) {
-        $row = array();
-          // Permission row.
-          $row[] = array(
-            'data' => backdrop_render($form['update'][$base][$key]),
-            'class' => array('permission'),
-          );
-          $row[] = array(
-            'data' => backdrop_render($form['reset_alias'][$base][$key]),
-            'class' => array('permission'),
-          );
-        $rows[] = $row;
-      }
+    foreach (element_children($form['update'][$base]) as $key) {
+      $row = array();
+        // Permission row.
+        $row[] = array(
+          'data' => backdrop_render($form['update'][$base][$key]),
+          'class' => array('permission'),
+        );
+        $row[] = array(
+          'data' => backdrop_render($form['reset_alias'][$base][$key]),
+          'class' => array('permission'),
+        );
+      $rows[] = $row;
     }
   }
   $header = array(
