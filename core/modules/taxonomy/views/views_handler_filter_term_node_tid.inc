@@ -21,7 +21,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     // Convert legacy vid option to machine name vocabulary.
-    if (isset($this->options['vid']) && !empty($this->options['vid']) & empty($this->options['vocabulary'])) {
+    if (isset($this->options['vid']) && !empty($this->options['vid']) && empty($this->options['vocabulary'])) {
       $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
       $vid = $this->options['vid'];
       if (isset($vocabularies[$vid], $vocabularies[$vid]->machine_name)) {
@@ -126,7 +126,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
     else {
       if (!empty($this->options['hierarchy']) && $this->options['limit']) {
-        $tree = taxonomy_get_tree($vocabulary->vid);
+        $tree = taxonomy_get_tree($vocabulary->machine_name);
         $options = array();
 
         if ($tree) {
