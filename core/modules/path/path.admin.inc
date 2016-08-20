@@ -659,6 +659,7 @@ function path_bulk_update_form() {
       );
       $form['reset_alias'][$type]['base'] = array(
         '#type' => 'checkbox',
+        '#attributes' => array('class' => array('path-reset-base')),
       );
       $form['#update_callbacks'][$type] = $path_info;
       if (isset($path_info['pattern items'])) {
@@ -666,10 +667,11 @@ function path_bulk_update_form() {
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
             '#title' => t('!label URL aliases', array('!label' => $item_label)),
-            '#attributes' => array('class' => array('path-type')),
+            '#attributes' => array('class' => array('path-type', 'path-' . $type)),
           );
           $form['reset_alias'][$type][$item] = array(
             '#type' => 'checkbox',
+            '#attributes' => array('class' => array('path-reset-type', 'path-reset-' . $type)),
           );
         }
       }
@@ -700,6 +702,7 @@ function path_bulk_update_form() {
  */
 function theme_path_bulk_update_form($variables) {
   backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.css');
+  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path_generate.js');
   $form = $variables['form'];
 
   $options = array();
