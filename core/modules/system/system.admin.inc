@@ -2549,7 +2549,7 @@ function system_utf8mb4_convert_form_submit($form, &$form_state) {
 
   $batch = array(
     'operations' => array(
-      array('_system_utf8mb4_convert_batch_table', array($table_names))
+      array('_system_utf8mb4_convert_batch', array($table_names))
     ),
     'finished' => '_system_utf8mb4_convert_batch_finished',
     'title' => t('Converting database tables'),
@@ -2568,7 +2568,7 @@ function system_utf8mb4_convert_form_submit($form, &$form_state) {
  * @param array $context
  *   Batch array of contextual key/values.
  */
-function _system_utf8mb4_convert_batch_table($tables, &$context) {
+function _system_utf8mb4_convert_batch($tables, &$context) {
   global $databases;
 
   // Instantiate a character set converter object.

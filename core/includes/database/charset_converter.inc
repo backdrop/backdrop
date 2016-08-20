@@ -2,8 +2,24 @@
 /**
  * Character set converter for database tables.
  *
+ * This class is used to upgrade tables from "utf8" character set encoding to
+ * "utf8mb4" encoding. This allows for uses of 4 byte characters such as
+ * emoji and mathematical symbols.
+ *
+ * In Backdrop this conversion may be done through UI at
+ * admin/config/development/utf8mb4-upgrade. More information about this upgrade
+ * can be found in the Backdrop documentation on database configuration:
+ * https://api.backdropcms.org/database-configuration
+ *
+ * Although this class is used within Backdrop purely for the utf8mb4 upgrade,
+ * it is a general purpose converter and could be used for other purposes in
+ * custom scripts or command-line tools.
+ *
  * Based on utf8mb4_convert https://www.drupal.org/project/utf8mb4_convert by
  * joelpittet and stefan.r.
+ *
+ * @see system_utf8mb4_convert_form()
+ * @see _system_utf8mb4_convert_batch()
  */
 class DatabaseCharsetConverter {
 
