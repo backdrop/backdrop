@@ -573,17 +573,21 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://www.drupal.org/node/2754539';
+  $documentation_url = 'https://api.backdropcms.org/database-configuration';
+  $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
-  $requirements['description'] = $t('4 bit UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.') . ' ';
+  $requirements['description'] = $t('4 bit UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
 
   if ($utf8mb4_active) {
     if ($utf8mb4_supported) {
-      if ($phase != 'install' && state_get('backdrop_utf8mb4_active', FALSE)) {
+      if ($phase != 'install' && !state_get('database_utf8mb4_active', FALSE)) {
         // Supported, active, and configurable, but not all database tables
         // have been converted yet.
-        $requirements['value'] = $t('Enabled, but database tables need conversion');
-        $requirements['description'] .= $t('Your server supports this feature but not all tables have been upgraded to use it. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+        $requirements['value'] = l($t('Database tables need conversion'), $upgrade_path);
+        $requirements['description'] .= ' ' . $t('Your server supports this feature but not all tables have been converted to use it.');
+        if ($_GET['q'] !== $upgrade_path) {
+          $requirements['description'] .= ' ' . $t('After making a database backup, you should <a href="@url">convert existing tables</a>.', array('@url' => url($upgrade_path)));
+        }
         $requirements['severity'] = REQUIREMENT_ERROR;
       }
       else {
@@ -595,7 +599,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
     else {
       // Not supported, active.
       $requirements['value'] = $t('Not supported');
-      $requirements['description'] .= $t('This feature is enabled, but not supported on your system. Please turn this off in settings.php, or ensure that all database-related requirements are met. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is enabled, but not supported on your system. Please turn this off in settings.php, or ensure that all database-related requirements are met. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_ERROR;
     }
   }
@@ -603,13 +607,13 @@ function _system_check_db_utf8mb4_requirements($phase) {
     if ($utf8mb4_supported) {
       // Supported, not active.
       $requirements['value'] = $t('Not enabled');
-      $requirements['description'] .= $t('This feature is not enabled, but it is supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not enabled, but it is supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
     else {
       // Not supported, not active.
       $requirements['value'] = $t('Not available');
-      $requirements['description'] .= $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
   }
