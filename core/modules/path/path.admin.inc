@@ -655,11 +655,19 @@ function path_bulk_update_form() {
       $form['update'][$type]['base'] = array(
         '#type' => 'checkbox',
         '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
-        '#attributes' => array('class' => array('path-base')),
+        '#attributes' => array(
+          'class' => array('path-base'),
+          'data-path-type' => array($type),
+          'data-path-name' => array('base'),
+        ),
       );
       $form['reset_alias'][$type]['base'] = array(
         '#type' => 'checkbox',
-        '#attributes' => array('class' => array('path-reset-base')),
+        '#attributes' => array(
+          'class' => array('path-reset', 'path-reset-base'),
+          'data-path-type' => array($type),
+          'data-path-name' => array('base'),
+        ),
       );
       $form['#update_callbacks'][$type] = $path_info;
       if (isset($path_info['pattern items'])) {
@@ -667,11 +675,19 @@ function path_bulk_update_form() {
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
             '#title' => t('!label URL aliases', array('!label' => $item_label)),
-            '#attributes' => array('class' => array('path-type', 'path-' . $type)),
+            '#attributes' => array(
+              'class' => array('path-type', 'path-' . $type),
+              'data-path-type' => array($type),
+              'data-path-name' => array($item),
+            ),
           );
           $form['reset_alias'][$type][$item] = array(
             '#type' => 'checkbox',
-            '#attributes' => array('class' => array('path-reset-type', 'path-reset-' . $type)),
+            '#attributes' => array(
+              'class' => array('path-reset', 'path-reset-' . $item),
+              'data-path-type' => array($type),
+              'data-path-name' => array($item),
+            ),
           );
         }
       }
