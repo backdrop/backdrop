@@ -150,13 +150,18 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('taxonomy_term_data', 'td');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
   $query->addField('td', 'tid');
-  $query->isNull('ua.source');
   $query->condition('td.tid', $context['sandbox']['current'], '>');
   $query->orderBy('td.tid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'taxonomy_term');
+  if (!empty($context['choices'])) {
+    $query->condition('td.vocabulary', $context['choices'], 'IN');
+  }
+  if (empty($context['reset_alias'])) {
+    $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {
@@ -175,6 +180,21 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $terms = taxonomy_term_load_multiple($tids);
+
+  $aterms = array();
+  if (!empty($context['reset_alias'])) {
+    if (isset($context['reset_alias']['base'])) {
+    }
+    else {
+      foreach ($terms as $term) {
+        if (array_key_exists($term->vocabulary, $context['reset_alias'])) {
+          $aterms[] = $term;
+        }
+      }
+      $terms = $aterms;
+    }
+  }
+
   foreach ($terms as $term) {
     path_save_automatic_entity_alias($term);
   }
@@ -217,13 +237,15 @@ function user_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('users', 'u');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
   $query->addField('u', 'uid');
-  $query->isNull('ua.source');
   $query->condition('u.uid', $context['sandbox']['current'], '>');
   $query->orderBy('u.uid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'user');
+  if (empty($context['reset_alias'])) {
+    $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {
