@@ -18,10 +18,18 @@ Backdrop.behaviors.path_generate = {
 		// If you uncheck a subtype checkbox, uncheck the entity checkbox.
 	  $("input.path-type").change(function () {
       var type = $(this).attr('data-path-type');
+      var $base = $("input.path-base[data-path-type='"+type+"']");
 			if($(this).is(":checked") == false) {
-        $("input.path-base[data-path-type='"+type+"']").prop('checked', false);
+        $base.prop('checked', false);
   		}
+      else {
+        unchecked = $("input.path-type[data-path-type='"+type+"']:checkbox:not(:checked)");
+        if(unchecked.length < 1) {
+          $base.prop('checked', true);
+        }
+      }
       updateReset($(this).prop('checked'), type, $(this).attr('data-path-name'));
+      updateReset($base.prop('checked'), type, $base.attr('data-path-name'));
     });
 
     // When you select an entity reset checkbox (like "content"), select the 
