@@ -738,7 +738,7 @@ function theme_path_bulk_update_form($variables) {
     }
   }
   $header = array(
-    'alias' => t('Alias'),
+    'alias' => array('data' => 'Alias', 'class' => 'path-th-alias'),
     'delete' => t('Delete existing'),
   );
 

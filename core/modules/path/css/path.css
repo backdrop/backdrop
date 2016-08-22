@@ -1,3 +1,6 @@
 .path-type {
-    margin-left: 40px;
+  margin-left: 40px;
+}
+th .form-checkbox {
+  margin-right: 15px;  
 }

@@ -39,7 +39,18 @@ Backdrop.behaviors.path_generate = {
 		  $("input.path-reset[data-path-type='"+type+"']").prop('checked', this.checked);
 	  });
 
-    /**
+    // Find all <th> with class select-all, and insert the check all checkbox.
+    var strings = { 'selectAll': Backdrop.t('Select all rows in this table'), 'selectNone': Backdrop.t('Deselect all rows in this table') };
+    $('th.path-th-alias').prepend($('<input type="checkbox" class="form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
+      if ($(event.target).is('input[type="checkbox"]')) {
+        $("input.path-type, input.path-base").each(function () {
+          this.checked = event.target.checked;
+          updateReset($(this).prop('checked'), $(this).attr('data-path-type'), $(this).attr('data-path-name'));
+        });
+      }
+    });
+
+  /**
      * Disables the reset_alias checkboxes if path alias checkbox is unchecked.
      */
     function updateReset(checked, type, name) {
