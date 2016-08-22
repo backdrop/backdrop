@@ -3461,7 +3461,9 @@ function theme_tableselect($variables) {
       if (isset($element['#options'][$key]['#attributes'])) {
         $row += $element['#options'][$key]['#attributes'];
       }
+
       // Render the checkbox / radio element.
+      $element[$key]['#attributes'] = array('class' => array('row-select'));
       $row['data'][] = backdrop_render($element[$key]);
 
       // As theme_table only maps header and row columns by order, create the
