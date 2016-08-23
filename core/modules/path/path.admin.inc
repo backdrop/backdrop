@@ -742,26 +742,25 @@ function theme_path_bulk_update_form($variables) {
   foreach (element_children($form['update']) as $base) {
     foreach (element_children($form['update'][$base]) as $key) {
       $row = array();
-        // Permission row.
         $row[] = array(
           'data' => backdrop_render($form['update'][$base][$key]),
-          'class' => array('permission'),
+          'class' => array('path-alias'),
         );
         $row[] = array(
           'data' => backdrop_render($form['reset_alias'][$base][$key]),
-          'class' => array('permission'),
+          'class' => array('path-alias-update'),
         );
       $rows[] = $row;
     }
   }
   $header = array(
-    'alias' => array('data' => 'Alias', 'class' => 'path-th-alias'),
-    'delete' => t('Delete existing'),
+    'alias' => array('data' => t('Alias'), 'class' => 'path-th-alias'),
+    'delete' => array('data' => t('Update existing'), 'class' => 'path-th-delete'),
   );
 
   $output = '';
   $output = backdrop_render($form['operations']);
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'path-bulk-alias')));
   $output .= backdrop_render_children($form);
   return $output;
 }

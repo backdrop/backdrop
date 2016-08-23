@@ -7,6 +7,11 @@ Backdrop.behaviors.path_generate = {
   attach: function (context) {
 	  $("input.path-reset").prop('disabled', true);
 
+    $("select[name='operations[operation]']").change(function(value){
+      $delete = ($(this).val()=='delete');
+      $("table#path-bulk-alias").toggleClass('delete', $delete);
+    });
+
     // When you select an entity checkbox (like "content"), select the 
     // checkboxes for all the subtypes
 	  $("input.path-base").change(function () {

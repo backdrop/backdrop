@@ -4,3 +4,7 @@
 th .form-checkbox {
   margin-right: 15px;  
 }
+#path-bulk-alias.delete th.path-th-delete,
+#path-bulk-alias.delete td.path-alias-update {
+  display: none;
+}
