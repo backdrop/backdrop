@@ -776,6 +776,9 @@ function path_bulk_update_form_rebuild_submit($form, &$form_state) {
     $form_state['storage']['delete'] = TRUE;
     $form_state['rebuild'] = TRUE;
   }
+  else {
+    path_bulk_update_form_generate_submit($form, $form_state);
+  }
 }
 
 /**
