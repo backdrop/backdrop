@@ -51,7 +51,6 @@ function node_path_info() {
  * Callback to delete aliases for node types.
  */
 function node_path_type_delete_callback($types) {
-  dpm($types);
   $query = db_select('node', 'n');
   $query->addField('n', 'nid');
   $query->condition('n.type', $types, 'IN');
@@ -167,7 +166,6 @@ function taxonomy_path_info() {
  * Callback to delete aliases for taxonomy types.
  */
 function taxonomy_path_type_delete_callback($types) {
-  dpm($types);
   $query = db_select('taxonomy_term_data', 'td');
   $query->addField('td', 'tid');
   $query->condition('td.vocabulary', $types, 'IN');
