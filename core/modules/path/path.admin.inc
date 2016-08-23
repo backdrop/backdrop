@@ -643,9 +643,11 @@ function path_patterns_settings_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function path_bulk_update_form($form, &$form_state) {
+  // Return a confirm form if submitting aliases to be deleted.
   if (isset($form_state['storage']['delete'])) {
     return path_admin_bulk_delete_confirm($form, $form_state);
   }
+
   $form['#update_callbacks'] = array();
   $form['#tree'] = TRUE;
 
@@ -673,11 +675,15 @@ function path_bulk_update_form($form, &$form_state) {
         ),
       );
       $form['#update_callbacks'][$type] = $path_info;
+      // Check if this entity provides bundle types as pattern items and create
+      // a row for each of these bundle types. For the Node entity the pattern
+      // items would be keyed by be node types; for taxonomy, these would be 
+      // vocabularies.
       if (isset($path_info['pattern items'])) {
         foreach ($path_info['pattern items'] as $item => $item_label) {
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
-            '#title' => t('!label URL aliases', array('!label' => $item_label)),
+            '#title' => $item_label,
             '#attributes' => array(
               'class' => array('path-type', 'path-' . $type),
               'data-path-type' => array($type),
@@ -769,9 +775,12 @@ function theme_path_bulk_update_form($variables) {
  * Form submit handler for path alias bulk update form.
  *
  * @see path_bulk_update_form()
- * @see path_bulk_update_batch_finished()
+ * @see path_admin_bulk_delete_confirm()
  */
 function path_bulk_update_form_rebuild_submit($form, &$form_state) {
+  // If aliases are being deleted, rebuild the form to show the confirm form. 
+  // Otherwise aliases are being generated, call the 
+  // path_bulk_update_form_generate_submit() form.
   if ($form_state['values']['operations']['operation'] == 'delete') {
     $form_state['storage']['delete'] = TRUE;
     $form_state['rebuild'] = TRUE;
@@ -782,10 +791,10 @@ function path_bulk_update_form_rebuild_submit($form, &$form_state) {
 }
 
 /**
- * Form submit handler for path alias bulk update form.
+ * Submit handler for path alias bulk generate form.
  *
  * @see path_bulk_update_form()
- * @see path_bulk_update_batch_finished()
+ * @see path_bulk_update_form_rebuild_submit()
  */
 function path_bulk_update_form_generate_submit($form, &$form_state) {
     $batch = array(
@@ -801,6 +810,8 @@ function path_bulk_update_form_generate_submit($form, &$form_state) {
     $choices = array();
     $reset_alias = array();
     $entities = array_filter($entities);
+    // Build an array of selected entity/bundle choices, and an array of which
+    // of these choices should have their aliases reset.
     foreach ($entities as $label => $choice) {
       $choices[$label] = $label;
       if ($form_state['values']['reset_alias'][$entity_types][$label]) {
@@ -842,6 +853,7 @@ function path_bulk_update_batch_process($callback, $path_info, &$context) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
     $context['choices'] = array_keys($path_info['choices']);
     $context['reset_alias'] = $path_info['reset_alias'];
+    $context['results']['reset_count'] = count($path_info['reset_alias']);
   }
   return $callback($context);
 }
@@ -858,6 +870,9 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
     if ($results['count_changed']) {
       backdrop_set_message(format_plural($results['count_changed'], 'Generated 1 URL alias.', 'Generated @count URL aliases.'));
     }
+    elseif ($results['reset_count']) {
+      backdrop_set_message(format_plural($results['reset_count'], 'No new URL aliases generated; 1 alias was updated.', 'No new URL aliases generated; @count aliases were updated.'));
+    }
     else {
       backdrop_set_message(t('No new URL aliases to generate.'));
     }
@@ -869,7 +884,10 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
 }
 
 /**
- * Menu callback; select certain alias types to delete.
+ * Confirm form for path alias bulk deletion.
+ *
+ * @see path_bulk_update_form()
+ * @see path_bulk_update_form_rebuild_submit()
  */
 function path_admin_bulk_delete_confirm($form, $form_state) {
   $all_path_info = path_get_info();
