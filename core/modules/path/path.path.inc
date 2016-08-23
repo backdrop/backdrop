@@ -18,6 +18,7 @@ function node_path_info() {
     'pattern description' => t('Default URL alias pattern (applies to all content types with blank URL alias patterns below)'),
     'pattern default' => 'content/[node:title]',
     'batch update callback' => 'node_path_bulk_update_batch_process',
+    'type delete callback' => 'node_path_type_delete_callback',
     'batch file path' => backdrop_get_path('module', 'path'),
     'batch file' => 'path.path.inc',
     'source prefix' => 'node/',
@@ -45,6 +46,27 @@ function node_path_info() {
 
   return $info;
 }
+
+/**
+ * Callback to delete aliases for node types.
+ */
+function node_path_type_delete_callback($types) {
+  dpm($types);
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid');
+  $query->condition('n.type', $types, 'IN');
+  $nids = $query->execute()->fetchCol();
+
+  $sources = array();
+  foreach ($nids as $nid) {
+    $sources[] = 'node/' . $nid;
+  }
+
+  $query = db_delete('url_alias');
+  $query->condition('source', $sources, 'IN');
+  $query->execute();
+}
+
 
 /**
  * Batch processing callback; Generate aliases for nodes.
@@ -125,6 +147,7 @@ function taxonomy_path_info() {
     'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
     'pattern default' => '[term:vocabulary]/[term:name]',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
+    'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch file' => 'path.path.inc',
     'batch file path' => backdrop_get_path('module', 'path'),
     'source prefix' => 'taxonomy/term/',
@@ -138,6 +161,26 @@ function taxonomy_path_info() {
   }
 
   return $info;
+}
+
+/**
+ * Callback to delete aliases for taxonomy types.
+ */
+function taxonomy_path_type_delete_callback($types) {
+  dpm($types);
+  $query = db_select('taxonomy_term_data', 'td');
+  $query->addField('td', 'tid');
+  $query->condition('td.vocabulary', $types, 'IN');
+  $tids = $query->execute()->fetchCol();
+
+  $sources = array();
+  foreach ($tids as $tid) {
+    $sources[] = 'taxonomy/term/' . $tid;
+  }
+
+  $query = db_delete('url_alias');
+  $query->condition('source', $sources, 'IN');
+  $query->execute();
 }
 
 /**

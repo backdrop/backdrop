@@ -92,21 +92,12 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/bulk-update'] = array(
-    'title' => 'Bulk generate',
+    'title' => 'Bulk alias actions',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_bulk_update_form'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 30,
-    'file' => 'path.admin.inc',
-  );
-  $items['admin/config/search/path/bulk-delete'] = array(
-    'title' => 'Delete URL aliases',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('path_admin_bulk_delete'),
-    'access arguments' => array('administer url aliases'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 40,
     'file' => 'path.admin.inc',
   );
 
