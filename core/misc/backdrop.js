@@ -446,6 +446,60 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   return message;
 };
 
+/**
+ * Check to see when webfont has loaded and adjust the tabs display
+ * @param fontName
+ *   Font name as shown in CSS
+ * @param callback
+ *   Function to run once font has loaded
+ */
+if (typeof Backdrop.fontsLoaded === 'undefined') {
+  Backdrop.fontsLoaded = {};
+}
+Backdrop.isFontLoaded = function(fontName, callback) {
+  if (typeof fontName === 'undefined') {
+    return;
+  }
+
+  if (typeof Backdrop.fontsLoaded[fontName] === 'undefined') {
+    Backdrop.fontsLoaded[fontName] = false;
+  }
+  else if (Backdrop.fontsLoaded[fontName]) {
+    // Fonts loaded, run the callback and don't run anything else.
+    callback();
+    return;
+  }
+
+  var $body = $('body');
+  var checkFontCounter = 0;
+  // Append an invisible element that will be monospace font or our desired
+  // font. We're using a repeating i because the characters width will
+  // drastically change when it's monospace vs. proportional font.
+  var $checkFontElement = $('<span id="check-font" styles="font-family: ' + fontName + ', monospace; position: absolute; z-index: -100; visibility: hidden;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
+  // Control is the same but it will always be our 'control' font, monospace.
+  var $checkFontElementControl = $checkFontElement.clone().attr('id', 'check-font-control')
+    .css('font-family', 'monospace');
+  var $checkFontElements = $('<span id="check-font-wrapper" aria-hidden></span>').append($checkFontElement).append($checkFontElementControl);
+  $body.append($checkFontElements);
+
+  // Function to check the width of the font, if it's substantially different
+  // we'll know we our real font has loaded
+  function checkFont() {
+    var currentWidth = $checkFontElement.width();
+    var controlWidth = $checkFontElementControl.width();
+    if (controlWidth !== currentWidth || checkFontCounter >= 60) {
+      Backdrop.fontsLoaded[fontName] = true;
+      // If our font has loaded, or it's been 6 seconds
+      callback();
+      // Clean up after ourselves
+      clearInterval(checkFontInterval);
+      $checkFontElements.remove();
+    }
+    checkFontCounter++;
+  }
+  var checkFontInterval = setInterval(checkFont, 100);
+};
+
 // Class indicating that JS is enabled; used for styling purpose.
 $('html').addClass('js');
 
@@ -518,7 +572,6 @@ Backdrop.featureDetect.flexbox = function() {
       return false;
     }
   }
-
 }
 
 })(jQuery);
