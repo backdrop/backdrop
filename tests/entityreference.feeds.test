@@ -8,7 +8,7 @@
 /**
  * Class for testing Feeds field mapper.
  */
-class FeedsMapperFieldTestCase extends DrupalWebTestCase{
+class FeedsMapperFieldTestCase extends BackdropWebTestCase{
   /**
    * Test info function.
    */
@@ -39,8 +39,8 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
     $permissions[] = 'administer feeds';
 
     // Create an admin user and log in.
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -96,26 +96,26 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
         $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist before addition.');
       }
 
-      // Get unique flag and unset it. Otherwise, drupalPost will complain that
+      // Get unique flag and unset it. Otherwise, backdropPost will complain that
       // Split up config and mapping.
       $config = $mapping;
       unset($config['source'], $config['target']);
       $mapping = array('source' => $mapping['source'], 'target' => $mapping['target']);
 
       // Add mapping.
-      $this->drupalPost($path, $mapping, t('Add'));
+      $this->backdropPost($path, $mapping, t('Add'));
 
       // If there are other configuration options, set them.
       if ($config) {
-        $this->drupalPostAJAX(NULL, array(), 'mapping_settings_edit_' . $i);
+        $this->backdropPostAJAX(NULL, array(), 'mapping_settings_edit_' . $i);
 
         // Set some settings.
         $edit = array();
         foreach ($config as $key => $value) {
           $edit["config[$i][settings][$key]"] = $value;
         }
-        $this->drupalPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
-        $this->drupalPost(NULL, array(), t('Save'));
+        $this->backdropPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
+        $this->backdropPost(NULL, array(), t('Save'));
       }
 
       if ($test_mappings) {
@@ -154,31 +154,31 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
    * Basic test loading a double entry CSV file.
    */
   public function test() {
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet('admin/structure/types/manage/article/fields');
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/structure/types/manage/article/fields');
     $this->assertText('Ref - entity ID', t('Found Entity reference field %field.', array('%field' => 'field_er_id')));
     $this->assertText('Ref - entity label', t('Found Entity reference field %field.', array('%field' => 'field_er_label')));
     $this->assertText('Ref - feeds GUID', t('Found Entity reference field %field.', array('%field' => 'field_er_guid')));
     $this->assertText('Ref - feeds URL', t('Found Entity reference field %field.', array('%field' => 'field_er_url')));
 
     // Add feeds importer
-    $this->drupalGet('admin/structure/feeds');
+    $this->backdropGet('admin/structure/feeds');
     $this->clickLink('Add importer');
-    $this->drupalPost('admin/structure/feeds/create', array('name' => 'Nodes', 'id' => 'nodes'), 'Create');
+    $this->backdropPost('admin/structure/feeds/create', array('name' => 'Nodes', 'id' => 'nodes'), 'Create');
     $this->assertText('Your configuration has been created with default settings.');
 
-    $this->drupalPost('admin/structure/feeds/nodes/settings/', array('content_type' => '', 'import_period' => -1), 'Save');
+    $this->backdropPost('admin/structure/feeds/nodes/settings/', array('content_type' => '', 'import_period' => -1), 'Save');
     $this->assertText('Your changes have been saved.');
 
-    $this->drupalPost("admin/structure/feeds/nodes/fetcher", array('plugin_key' => 'FeedsFileFetcher'), 'Save');
+    $this->backdropPost("admin/structure/feeds/nodes/fetcher", array('plugin_key' => 'FeedsFileFetcher'), 'Save');
     $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => 'nodes'))->fetchField());
     $this->assertEqual($config['fetcher']['plugin_key'], 'FeedsFileFetcher', 'Verified correct fetcher (FeedsFileFetcher).');
 
-    $this->drupalPost("admin/structure/feeds/nodes/parser", array('plugin_key' => 'FeedsCSVParser'), 'Save');
+    $this->backdropPost("admin/structure/feeds/nodes/parser", array('plugin_key' => 'FeedsCSVParser'), 'Save');
     $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => 'nodes'))->fetchField());
     $this->assertEqual($config['parser']['plugin_key'], 'FeedsCSVParser', 'Verified correct parser (FeedsCSVParser).');
 
-    $this->drupalPost('admin/structure/feeds/nodes/settings/FeedsNodeProcessor', array('content_type' => 'article'), 'Save');
+    $this->backdropPost('admin/structure/feeds/nodes/settings/FeedsNodeProcessor', array('content_type' => 'article'), 'Save');
     $this->assertText('Your changes have been saved.');
 
     $this->addMappings('nodes', array(
@@ -220,10 +220,10 @@ class FeedsMapperFieldTestCase extends DrupalWebTestCase{
       )
     );
 
-    $file = realpath(getcwd()) . '/' . drupal_get_path('module', 'entityreference') . '/tests/feeds_test.csv';
+    $file = realpath(getcwd()) . '/' . backdrop_get_path('module', 'entityreference') . '/tests/feeds_test.csv';
     $this->assertTrue(file_exists($file), 'Source file exists');
 
-    $this->drupalPost('import/nodes', array('files[feeds]' => $file), 'Import');
+    $this->backdropPost('import/nodes', array('files[feeds]' => $file), 'Import');
     $this->assertText('Created 2 nodes');
 
     $parent = node_load(1);

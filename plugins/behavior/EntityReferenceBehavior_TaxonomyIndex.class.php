@@ -19,7 +19,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
    * Overrides EntityReference_BehaviorHandler_Abstract::access().
    *
    * Ensure that it is only enabled for ER instances on nodes targeting
-   * terms, and the core variable to maintain index is enabled.
+   * terms, and the core setting to maintain index is enabled.
    */
   public function access($field, $instance) {
     if ($instance['entity_type'] != 'node' || $field['settings']['target_type'] != 'taxonomy_term') {
@@ -31,7 +31,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
       return;
     }
 
-    return variable_get('taxonomy_maintain_index_table', TRUE);
+    return config_get('taxonomy.settings', 'maintain_index_table');
   }
 
   /**
@@ -75,7 +75,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
     // We maintain a denormalized table of term/node relationships, containing
     // only data for current, published nodes.
     $status = NULL;
-    if (variable_get('taxonomy_maintain_index_table', TRUE)) {
+    if (config_get('taxonomy.settings', 'maintain_index_table')) {
       // If a node property is not set in the node object when node_save() is
       // called, the old value from $node->original is used.
       if (!empty($node->original)) {
@@ -179,9 +179,9 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
       );
     }
 
-    if (!variable_get('taxonomy_maintain_index_table', TRUE)) {
+    if (!config_get('taxonomy.settings', 'maintain_index_table')) {
       $form['ti-disabled'] = array(
-        '#markup' => t('This core variable "taxonomy_maintain_index_table" is disabled.'),
+        '#markup' => t('This core setting "maintain_index_table" is disabled.'),
       );
     }
     return $form;

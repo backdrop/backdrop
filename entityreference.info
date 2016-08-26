@@ -1,16 +1,8 @@
 name = Entity Reference
 description = Provides a field that can reference other entities.
 package = Fields
-core = 7.x
+backdrop = 1.x
 
-dependencies[] = entity
-dependencies[] = ctools
-
-test_dependencies[] = feeds
-test_dependencies[] = views
-
-; Migrate handler.
-files[] = entityreference.migrate.inc
 
 ; Plugins interfaces and abstract implementations.
 files[] = plugins/selection/abstract.inc

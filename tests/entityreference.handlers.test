@@ -8,7 +8,7 @@
 /**
  * Test for Entity Reference handlers.
  */
-class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
+class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Entity Reference Handlers',
@@ -101,7 +101,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     }
 
     // Test as a non-admin.
-    $normal_user = $this->drupalCreateUser(array('access content'));
+    $normal_user = $this->backdropCreateUser(array('access content'));
     $GLOBALS['user'] = $normal_user;
     $referencable_tests = array(
       array(
@@ -166,7 +166,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     $this->assertReferencable($field, $referencable_tests, 'Node handler');
 
     // Test as an admin.
-    $admin_user = $this->drupalCreateUser(array('access content', 'bypass node access'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
     $GLOBALS['user'] = $admin_user;
     $referencable_tests = array(
       array(
@@ -236,13 +236,13 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       ),
     );
 
-    // The label of the anonymous user is variable_get('anonymous').
-    $users['anonymous']->name = variable_get('anonymous', t('Anonymous'));
+    // The label of the anonymous user.
+    $users['anonymous']->name = config_get('system.core', 'anonymous');
 
     $user_labels = array();
     foreach ($users as $key => $user) {
       if (!isset($user->uid)) {
-        $users[$key] = $user = user_save(drupal_anonymous_user(), (array) $user);
+        $users[$key] = $user = user_save(backdrop_anonymous_user(), (array) $user);
       }
       $user_labels[$key] = check_plain($user->name);
     }
@@ -406,7 +406,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     }
 
     // Test as a non-admin.
-    $normal_user = $this->drupalCreateUser(array('access content', 'access comments'));
+    $normal_user = $this->backdropCreateUser(array('access content', 'access comments'));
     $GLOBALS['user'] = $normal_user;
     $referencable_tests = array(
       array(
@@ -445,7 +445,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     $this->assertReferencable($field, $referencable_tests, 'Comment handler');
 
     // Test as a comment admin.
-    $admin_user = $this->drupalCreateUser(array('access content', 'access comments', 'administer comments'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments'));
     $GLOBALS['user'] = $admin_user;
     $referencable_tests = array(
       array(
@@ -463,7 +463,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     $this->assertReferencable($field, $referencable_tests, 'Comment handler (comment admin)');
 
     // Test as a node and comment admin.
-    $admin_user = $this->drupalCreateUser(array('access content', 'access comments', 'administer comments', 'bypass node access'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments', 'bypass node access'));
     $GLOBALS['user'] = $admin_user;
     $referencable_tests = array(
       array(
@@ -580,7 +580,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     }
 
     // Test as a non-admin.
-    $normal_user = $this->drupalCreateUser(array('access content'));
+    $normal_user = $this->backdropCreateUser(array('access content'));
     $GLOBALS['user'] = $normal_user;
 
     $handler = entityreference_get_selection_handler($field);

@@ -135,7 +135,7 @@ function entityreference_views_plugins() {
         'help' => t('Displays the fields with an optional template.'),
         'handler' => 'entityreference_plugin_row_fields',
         'theme' => 'views_view_fields',
-        'theme path' => drupal_get_path('module', 'views') . '/theme',
+        'theme path' => backdrop_get_path('module', 'views') . '/theme',
         'theme file' => 'theme.inc',
         'uses fields' => TRUE,
         'uses options' => TRUE,

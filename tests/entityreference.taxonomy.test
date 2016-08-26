@@ -3,7 +3,7 @@
 /**
  * Test for Entity Reference taxonomy integration.
  */
-class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
+class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Entity Reference Taxonomy',
@@ -85,7 +85,7 @@ class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
     $settings = array();
     $settings['type'] = 'article';
     $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = 1;
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
 

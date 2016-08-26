@@ -102,7 +102,7 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
         '#type' => 'select',
         '#title' => t('Sort property'),
         '#required' => TRUE,
-        '#options' => drupal_map_assoc($entity_info['schema_fields_sql']['base table']),
+        '#options' => backdrop_map_assoc($entity_info['schema_fields_sql']['base table']),
         '#default_value' => $field['settings']['handler_settings']['sort']['property'],
       );
     }
@@ -293,7 +293,7 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
 
     $query->alterTags = array($tag => TRUE);
     $query->alterMetaData['base_table'] = $base_table;
-    drupal_alter(array('query', 'query_' . $tag), $query);
+    backdrop_alter(array('query', 'query_' . $tag), $query);
 
     // Restore the tags and metadata.
     $query->alterTags = $old_tags;
@@ -554,3 +554,10 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
     return $options;
   }
 }
+
+// This is here temporarily
+/**
+ * Exception thrown when the entity view renderer goes into a potentially infinite loop.
+ */
+class EntityReferenceRecursiveRenderingException extends Exception {}
+

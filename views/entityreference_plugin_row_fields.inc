@@ -28,7 +28,7 @@ class entityreference_plugin_row_fields extends views_plugin_row_fields {
     // Force all fields to be inline by default.
     if (empty($this->options['inline'])) {
       $fields = $this->view->get_items('field', $this->display->id);
-      $this->options['inline'] = drupal_map_assoc(array_keys($fields));
+      $this->options['inline'] = backdrop_map_assoc(array_keys($fields));
     }
 
     return parent::pre_render($row);

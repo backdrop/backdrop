@@ -1,51 +1,6 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory().
- */
-function entityreference_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'entityreference') {
-    return 'plugins/' . $plugin;
-  }
-}
-
-/**
- * Implements hook_init().
- */
-function entityreference_init() {
-  // Include feeds.module integration.
-  if (module_exists('feeds')) {
-    module_load_include('inc', 'entityreference', 'entityreference.feeds');
-  }
-}
-
-/**
- * Implements hook_ctools_plugin_type().
- */
-function entityreference_ctools_plugin_type() {
-  $plugins['selection'] = array(
-    'classes' => array('class'),
-  );
-  $plugins['behavior'] = array(
-    'classes' => array('class'),
-    'process' => 'entityreference_behavior_plugin_process',
-  );
-  return $plugins;
-}
-
-/**
- * CTools callback; Process the behavoir plugins.
- */
-function entityreference_behavior_plugin_process(&$plugin, $info) {
-  $plugin += array(
-    'description' => '',
-    'behavior type' => 'field',
-    'access callback' => FALSE,
-    'force enabled' => FALSE,
-  );
-}
-
-/**
  * Implements hook_field_info().
  */
 function entityreference_field_info() {
@@ -75,16 +30,16 @@ function entityreference_flush_caches() {
   // Because of the intricacies of the info hooks, we are forced to keep a
   // separate list of the base tables of each entities, so that we can use
   // it in entityreference_field_schema() without calling entity_get_info().
-  // See http://drupal.org/node/1416558 for details.
+  // See http://backdrop.org/node/1416558 for details.
   $base_tables = array();
   foreach (entity_get_info() as $entity_type => $entity_info) {
     if (!empty($entity_info['base table']) && !empty($entity_info['entity keys']['id'])) {
       $base_tables[$entity_type] = array($entity_info['base table'], $entity_info['entity keys']['id']);
     }
   }
-  // We are using a variable because cache is going to be cleared right after
+  // We are using a setting because cache is going to be cleared right after
   // hook_flush_caches() is finished.
-  variable_set('entityreference:base-tables', $base_tables);
+  config_set('entityreference.settings', 'base-tables', $base_tables);
 }
 
 /**
@@ -130,7 +85,7 @@ function entityreference_field_is_empty($item, $field) {
  * Get the behavior handlers for a given entityreference field.
  */
 function entityreference_get_behavior_handlers($field, $instance = NULL) {
-  $object_cache = drupal_static(__FUNCTION__);
+  $object_cache = backdrop_static(__FUNCTION__);
   $identifier = $field['field_name'];
   if (!empty($instance)) {
     $identifier .= ':' . $instance['entity_type'] . ':' . $instance['bundle'];
@@ -167,11 +122,10 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
  *   The behavior handler name.
  */
 function _entityreference_get_behavior_handler($behavior) {
-  $object_cache = drupal_static(__FUNCTION__);
+  $object_cache = backdrop_static(__FUNCTION__);
 
   if (!isset($object_cache[$behavior])) {
-    ctools_include('plugins');
-    $class = ctools_plugin_load_class('entityreference', 'behavior', $behavior, 'class');
+    $class = entityreference_load_behavior_class($behavior);
 
     $class = class_exists($class) ? $class : 'EntityReference_BehaviorHandler_Broken';
     $object_cache[$behavior] = new $class($behavior);
@@ -184,9 +138,8 @@ function _entityreference_get_behavior_handler($behavior) {
  * Get the selection handler for a given entityreference field.
  */
 function entityreference_get_selection_handler($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-  ctools_include('plugins');
   $handler = $field['settings']['handler'];
-  $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
+  $class = entityreference_load_selection_class($handler);
 
   if (class_exists($class)) {
     return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
@@ -386,7 +339,7 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
   $form = array(
     '#type' => 'container',
     '#attached' => array(
-      'css' => array(drupal_get_path('module', 'entityreference') . '/entityreference.admin.css'),
+      'css' => array(backdrop_get_path('module', 'entityreference') . '/entityreference.admin.css'),
     ),
     '#process' => array(
       '_entityreference_field_settings_process',
@@ -427,9 +380,9 @@ function _entityreference_field_settings_process($form, $form_state) {
     '#limit_validation_errors' => array(),
   );
 
-  ctools_include('plugins');
-  $handlers = ctools_get_plugins('entityreference', 'selection');
-  uasort($handlers, 'ctools_plugin_sort');
+  $handlers = entityreference_entityreference_selection_plugins();
+  asort($handlers);
+  // uasort($handlers, 'ctools_plugin_sort');
   $handlers_options = array();
   foreach ($handlers as $handler => $handler_info) {
     $handlers_options[$handler] = check_plain($handler_info['title']);
@@ -530,7 +483,7 @@ function entityreference_field_instance_settings_form($field, $instance) {
   $form['settings'] = array(
     '#type' => 'container',
     '#attached' => array(
-      'css' => array(drupal_get_path('module', 'entityreference') . '/entityreference.admin.css'),
+      'css' => array(backdrop_get_path('module', 'entityreference') . '/entityreference.admin.css'),
     ),
     '#weight' => 10,
     '#tree' => TRUE,
@@ -568,7 +521,7 @@ function _entityreference_field_instance_settings_validate($form, &$form_state) 
   // Store the new values in the form state.
   $instance = $form['#instance'];
   if (isset($form_state['values']['instance'])) {
-    $instance = drupal_array_merge_deep($instance, $form_state['values']['instance']);
+    $instance = backdrop_array_merge_deep($instance, $form_state['values']['instance']);
   }
   $form_state['entityreference']['instance'] = $instance;
 }
@@ -633,9 +586,8 @@ function _entityreference_get_behavior_elements(&$element, $field, $instance, $l
  * Get all accessible behavior plugins.
  */
 function entityreference_get_accessible_behavior_plugins($field, $instance) {
-  ctools_include('plugins');
   $plugins = array('field' => array(), 'instance' => array());
-  foreach (ctools_get_plugins('entityreference', 'behavior') as $name => $plugin) {
+  foreach (entityreference_entityreference_behavior_plugins() as $name => $plugin) {
     $handler = _entityreference_get_behavior_handler($name);
     $level = $plugin['behavior type'];
     if ($handler->access($field, $instance)) {
@@ -652,7 +604,7 @@ function entityreference_get_accessible_behavior_plugins($field, $instance) {
  */
 function entityreference_settings_ajax($form, $form_state) {
   $trigger = $form_state['triggering_element'];
-  return drupal_array_get_nested_value($form, $trigger['#ajax']['element']);
+  return backdrop_array_get_nested_value($form, $trigger['#ajax']['element']);
 }
 
 /**
@@ -909,7 +861,7 @@ function _entityreference_autocomplete_tags_validate($element, &$form_state, $fo
   $value = array();
   // If a value was entered into the autocomplete...
   if (!empty($element['#value'])) {
-    $entities = drupal_explode_tags($element['#value']);
+    $entities = backdrop_explode_tags($element['#value']);
     $value = array();
     foreach ($entities as $entity) {
       // Take "label (entity id)', match the id from parenthesis.
@@ -1037,8 +989,8 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
 
   if ($type == 'tags') {
     // The user enters a comma-separated list of tags. We only autocomplete the last tag.
-    $tags_typed = drupal_explode_tags($string);
-    $tag_last = drupal_strtolower(array_pop($tags_typed));
+    $tags_typed = backdrop_explode_tags($string);
+    $tag_last = backdrop_strtolower(array_pop($tags_typed));
     if (!empty($tag_last)) {
       $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
     }
@@ -1068,7 +1020,7 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -1295,16 +1247,114 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 }
 
 /**
- * Exception thrown when the entity view renderer goes into a potentially infinite loop.
- */
-class EntityReferenceRecursiveRenderingException extends Exception {}
-
-/**
  * Implements hook_views_api().
  */
 function entityreference_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'entityreference') . '/views',
+    'path' => backdrop_get_path('module', 'entityreference') . '/views',
   );
+}
+
+/**
+ * Implements hook_entityreference_plugins().
+ */
+function entityreference_entityreference_behavior_plugins() {
+  $default = array(
+    'description' => '',
+    'behavior type' => 'field',
+    'access callback' => FALSE,
+    'force enabled' => FALSE,
+  );
+    if (module_exists('taxonomy')) {
+      $plugins['taxonomy'] = array(
+        'title' => t('Taxonomy index'),
+        'description' => t('Include the term references created by instances of this field carried by node entities in the core {taxonomy_index} table. This will allow various modules to handle them like core term_reference fields.'),
+        'class' => 'EntityReferenceBehavior_TaxonomyIndex',
+        'behavior type' => 'instance',
+        'force enabled' => TRUE,
+      ) + $default;
+    }
+    if (module_exists('views')) {
+      $plugins['views'] = array(
+        'title' => t('Render Views filters as select list'),
+        'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
+        'class' => 'EntityReferenceBehavior_ViewsFilterSelect',
+        'behavior type' => 'field',
+      ) + $default;
+    }
+    return $plugins;
+}
+
+
+/**
+ * Implements hook_entityreference_plugins().
+ */
+function entityreference_entityreference_selection_plugins() {
+    $plugins['base'] = array(
+      'title' => t('Simple (with optional filter by bundle)'),
+      'class' => 'EntityReference_SelectionHandler_Generic',
+      'weight' => -100,
+    );
+    if (module_exists('views')) {
+      $plugins['views'] = array(
+        'title' => t('Views: Filter by an entity reference view'),
+        'class' => 'EntityReference_SelectionHandler_Views',
+        'weight' => 0,
+      );
+    }
+    return $plugins;
+}
+
+function entityreference_load_behavior_class($property) {
+  $plugins = entityreference_entityreference_behavior_plugins();
+  return $plugins[$property]['class'];
+}
+
+function entityreference_load_selection_class($property) {
+  $plugins = entityreference_entityreference_selection_plugins();
+  return $plugins[$property]['class'];
+}
+
+
+
+function entityreference_autoload_info() {
+  return array(
+    'EntityReference_BehaviorHandler' => 'plugins\behavior\abstract.inc',
+    'EntityReference_BehaviorHandler_Abstract' => 'plugins\behavior\abstract.inc',
+    'EntityReference_BehaviorHandler_Broken extends' => 'plugins\behavior\abstract.inc',
+    'EntityReferenceBehavior_TaxonomyIndex' => 'plugins\behavior\EntityReferenceBehavior_TaxonomyIndex.class.php',
+    'EntityReferenceBehavior_ViewsFilterSelect' => 'plugins\behavior\EntityReferenceBehavior_ViewsFilterSelect.class.php',
+    'EntityReference_SelectionHandler' => 'plugins\selection\abstract.inc',
+    'EntityReference_SelectionHandler_Broken' => 'plugins\selection\abstract.inc',
+    'EntityReference_SelectionHandler_Generic' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_node' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_user' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_comment' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_file' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_taxonomy_term' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReferenceRecursiveRenderingException' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Views' => 'plugins\selection\EntityReference_SelectionHandler_Views.class.php',
+    'entityreference_plugin_display' => 'views\entityreference_plugin_display.inc',
+    'entityreference_plugin_row_fields' => 'views\entityreference_plugin_row_fields.inc',
+    'entityreference_plugin_style' => 'views\entityreference_plugin_style.inc',
+  );
+}
+
+function entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
+  return TRUE;
+  // if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
+    // return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
+  // }
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function entityreference_config_info() {
+  $prefixes['entityreference.settings'] = array(
+    'label' => t('Entityreference settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
