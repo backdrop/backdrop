@@ -2504,12 +2504,6 @@ function system_utf8mb4_convert_form($form, &$form_state) {
 
   $form['help']['#markup'] .= '<p>' . t('This operation is irreversible! Make sure that you have backed up your database before continuing.') . '</p>';
 
-  $form['maintenance_mode'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Put site in maintenance mode during upgrade'),
-    '#default_value' => TRUE,
-  );
-
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -2535,9 +2529,7 @@ function system_utf8mb4_convert_form_submit($form, &$form_state) {
   global $databases;
 
   // Enter maintenance mode.
-  if ($form_state['values']['maintenance_mode']) {
-    state_set('maintenance_mode', TRUE);
-  }
+  state_set('maintenance_mode', TRUE);
 
   // Build the list of tables to convert.
   $database = $databases['default']['default'];
@@ -2554,6 +2546,7 @@ function system_utf8mb4_convert_form_submit($form, &$form_state) {
     'finished' => '_system_utf8mb4_convert_batch_finished',
     'title' => t('Converting database tables'),
     'progress_message' => '',
+    'init_message' => t('Collecting list of tables...'),
     'error_message' => t('The update has encountered an error.'),
     'file' => backdrop_get_path('module', 'system') . '/system.admin.inc',
   );
@@ -2577,7 +2570,7 @@ function _system_utf8mb4_convert_batch($tables, &$context) {
   // Initial run, prepare sandbox and results arrays.
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['max'] = count($tables);
+    $context['sandbox']['max'] = count($tables) + 1;
     $context['sandbox']['tables_to_process'] = $tables;
     $context['results']['converted'] = array();
     $context['results']['errors'] = array();
@@ -2597,21 +2590,23 @@ function _system_utf8mb4_convert_batch($tables, &$context) {
       return;
     }
   }
-
-  // When converting tables, record but continue after failures.
-  $table_name = array_shift($context['sandbox']['tables_to_process']);
-  try {
-    $result = $converter->convertTable($table_name);
-    if (!$result) {
-      $context['results']['errors'][] = t('The table %name could not be converted.', array('%name' => $table_name));
+  // Subsequent runs, convert each table.
+  else {
+    // When converting tables, record but continue after failures.
+    $table_name = array_shift($context['sandbox']['tables_to_process']);
+    try {
+      $result = $converter->convertTable($table_name);
+      if (!$result) {
+        $context['results']['errors'][] = t('The table %name could not be converted.', array('%name' => $table_name));
+      }
     }
-  }
-  catch (PDOException $e) {
-    $context['results']['errors'][] = $e->getMessage();
-  }
+    catch (PDOException $e) {
+      $context['results']['errors'][] = $e->getMessage();
+    }
 
-  // Store result for post-processing in the finished callback.
-  $context['results']['converted'][] = $table_name;
+    // Store result for post-processing in the finished callback.
+    $context['results']['converted'][] = $table_name;
+  }
 
   // Update our progress information.
   $context['sandbox']['progress']++;
@@ -2620,7 +2615,7 @@ function _system_utf8mb4_convert_batch($tables, &$context) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
-    $context['message'] = t('Completing');
+    $context['message'] = t('Completing...');
     $context['finished'] = 1;
   }
 }
@@ -2642,7 +2637,7 @@ function _system_utf8mb4_convert_batch_finished($success, $results, $operations)
     state_set('database_utf8mb4_active', TRUE);
   }
   else {
-    backdrop_set_message(t('An error was encountered while converting tables! You should restore a database backup, correct any errors, and then try again.') . theme('item_list', $results['errors']), 'error');
+    backdrop_set_message(t('An error was encountered while converting tables! You should restore a database backup, correct any errors, and then try again. Errors reported:') . theme('item_list', $results['errors']), 'error');
   }
   backdrop_goto('admin/reports/status');
 }

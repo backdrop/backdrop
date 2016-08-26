@@ -143,7 +143,8 @@ class DatabaseCharsetConverter {
    * Converts all the tables defined by backdrop_get_schema().
    *
    * @param array $table_names
-   *    A list of table names to convert.
+   *   A list of table names to convert. These should be actual table names
+   *   in the database, with any table prefixes already prepended.
    * @param string $charset
    *   (Optional) The character set. Defaults to the constructor value.
    * @param string $collation
@@ -164,7 +165,8 @@ class DatabaseCharsetConverter {
    * Converts a table to a desired character set and collation.
    *
    * @param string $table_name
-   *  The database table name.
+   *   The table name to convert. This should be the actual table name
+   *   in the database, with any table prefix already prepended.
    * @param string $charset
    *   (Optional) The character set. Defaults to the constructor value.
    * @param string $collation
@@ -176,15 +178,15 @@ class DatabaseCharsetConverter {
    * @throws PDOException
    */
   public function convertTable($table_name, $charset = NULL, $collation = NULL) {
-    $this->connection->query("ALTER TABLE {" . $table_name . "} ROW_FORMAT=DYNAMIC ENGINE=INNODB");
-    $sql = "ALTER TABLE {" . $table_name . "} CHARACTER SET = :charset COLLATE = :collation";
+    $this->connection->query("ALTER TABLE $table_name ROW_FORMAT=DYNAMIC ENGINE=INNODB");
+    $sql = "ALTER TABLE $table_name CHARACTER SET = :charset COLLATE = :collation";
     $result = $this->connection->query($sql, array(
       ':charset' => $charset ?: $this->charset,
       ':collation' => $collation ?: $this->collation,
     ));
     if ($result) {
       $result = $this->convertTableFields($table_name, $charset, $collation);
-      $this->connection->query("OPTIMIZE TABLE {" . $table_name . "}");
+      $this->connection->query("OPTIMIZE TABLE $table_name");
     }
     return $result;
   }
@@ -193,7 +195,8 @@ class DatabaseCharsetConverter {
    * Converts a table's field to a desired character set and collation.
    *
    * @param string $table_name
-   *  The database table name.
+   *   The table name to convert. This should be the actual table name
+   *   in the database, with any table prefix already prepended.
    *   (Optional) The character set. Defaults to the constructor value.
    * @param string $collation
    *   (Optional) The collation. Defaults to the constructor value.
@@ -205,7 +208,7 @@ class DatabaseCharsetConverter {
    */
   public function convertTableFields($table_name, $charset = NULL, $collation = NULL) {
     $return = TRUE;
-    $results = $this->connection->query("SHOW FULL FIELDS FROM {" . $table_name . "}")->fetchAllAssoc('Field');
+    $results = $this->connection->query("SHOW FULL FIELDS FROM $table_name")->fetchAllAssoc('Field');
     $charset = $charset ?: $this->charset;
     $collation = $collation ?: $this->collation;
     foreach ($results as $row) {
@@ -226,7 +229,7 @@ class DatabaseCharsetConverter {
         $default .= 'DEFAULT NULL';
       }
 
-      $sql = "ALTER TABLE {" . $table_name . "}
+      $sql = "ALTER TABLE $table_name
               MODIFY " . $row->Field . " " .
         $row->Type . " " .
         "CHARACTER SET :charset COLLATE :collation " .
