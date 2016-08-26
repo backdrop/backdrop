@@ -103,16 +103,16 @@ function TableHeader(table) {
 
   // React to columns change to avoid making checks in the scroll callback.
   this.$originalTable.bind('columnschange', {tableHeader: this}, function (e, display) {
-     var tableHeader = e.data.tableHeader;
-     if (tableHeader.displayWeight === null || tableHeader.displayWeight !== display) {
-       tableHeader.recalculateSticky();
-     }
-     tableHeader.displayWeight = display;
+    var tableHeader = e.data.tableHeader;
+    if (tableHeader.displayWeight === null || tableHeader.displayWeight !== display) {
+      tableHeader.recalculateSticky();
+    }
+    tableHeader.displayWeight = display;
   });
 
-// Create and display sticky header.
-   this.createSticky();
- }
+  // Create and display sticky header.
+  this.createSticky();
+}
 
 /**
  * Store the state of TableHeader.
@@ -124,26 +124,26 @@ $.extend(TableHeader, {
     * @type {Array}
     */
    tables: [],
- 
+
    /**
     * Cache of computed offset value.
     *
     * @type {Number}
     */
    offsetTop: 0,
- 
-   /**
-    * Sum all [data-offset-top] values and cache it.
-    */
-   computeOffsetTop: function () {
-     var $offsets = $('[data-offset-top]').not('.sticky-header');
-     var value, sum = 0;
-     for (var i = 0, il = $offsets.length; i < il; i++) {
-       value = parseInt($offsets[i].getAttribute('data-offset-top'), 10);
-       sum += !isNaN(value) ? value : 0;
-     }
-     this.offsetTop = sum;
-     return sum;
+
+  /**
+   * Sum all [data-offset-top] values and cache it.
+   */
+  computeOffsetTop: function () {
+    var $offsets = $('[data-offset-top]').not('.sticky-header');
+    var value, sum = 0;
+    for (var i = 0, il = $offsets.length; i < il; i++) {
+      value = parseInt($offsets[i].getAttribute('data-offset-top'), 10);
+      sum += !isNaN(value) ? value : 0;
+    }
+    this.offsetTop = sum;
+    return sum;
   }
 });
 
@@ -205,7 +205,7 @@ $.extend(TableHeader.prototype, {
       css.top = offsetTop + 'px';
     }
     if (!isNaN(offsetLeft) && offsetTop !== null) {
-      css.left = (this.tableOffset.left - offsetLeft) + 'px';
+      css.left = offsetLeft + 'px';
     }
     return this.$stickyTable.css(css);
   },
@@ -245,10 +245,11 @@ $.extend(TableHeader.prototype, {
     // Update table size.
     this.tableHeight = this.$originalTable[0].clientHeight;
 
-    // Update offset top.
+    // Update offset.
     TableHeader.computeOffsetTop();
     this.tableOffset = this.$originalTable.offset();
-    this.stickyPosition(TableHeader.offsetTop);
+    var leftOffset = parseInt(this.$originalTable.offset().left);
+    this.stickyPosition(TableHeader.offsetTop, leftOffset);
 
     // Update columns width.
     var $that = null;
@@ -262,13 +263,13 @@ $.extend(TableHeader.prototype, {
       $stickyCell = this.$stickyHeaderCells.eq($that.index());
       display = $that.css('display');
       if (display !== 'none') {
-        $stickyCell.css({'width': $that.css('width'), 'display': display});
+        $stickyCell.css({'width': $that.outerWidth(), 'display': display});
       }
       else {
         $stickyCell.css('display', 'none');
       }
     }
-    this.$stickyTable.css('width', this.$originalTable.outerWidth());
+    this.$stickyTable.css('width', this.$originalTable.width());
   }
 });
 
