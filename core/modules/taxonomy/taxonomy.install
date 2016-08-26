@@ -319,6 +319,9 @@ function taxonomy_update_1002() {
   if (db_table_exists('taxonomy_vocabulary')) {
     db_drop_table('taxonomy_vocabulary');
   }
+  if (db_table_exists('taxonomy_term_data')) {
+    db_query("ALTER TABLE {taxonomy_term_data} ENGINE = InnoDB");
+  }
   if (db_field_exists('taxonomy_term_data', 'vid')) {
     db_drop_field('taxonomy_term_data', 'vid');
   }
