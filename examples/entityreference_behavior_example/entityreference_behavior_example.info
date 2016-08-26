@@ -1,5 +1,0 @@
-name = Entity Reference Behavior Example
-description = Provides some example code for implementing Entity Reference behaviors.
-core = 7.x
-package = Fields
-dependencies[] = entityreference

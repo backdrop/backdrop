@@ -2,6 +2,7 @@ name = Entity Reference
 description = Provides a field that can reference other entities.
 package = Fields
 backdrop = 1.x
+type = module
 
 
 ; Plugins interfaces and abstract implementations.
