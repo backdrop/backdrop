@@ -22,6 +22,7 @@
 }
 
 .container:after,
+.container-fluid:after,
 .row:after {
   display: table;
   content: " ";
@@ -57,12 +58,6 @@
   padding-left: .9375rem;
   margin-right: auto;
   margin-left: auto;
-}
-
-.container-fluid::after {
-  display: table;
-  clear: both;
-  content: "";
 }
 
 .row {
