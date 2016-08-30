@@ -1319,6 +1319,19 @@ function system_library_info() {
     ),
   );
 
+  // OpenSans.
+  $libraries['opensans'] = array(
+    'title' => 'OpenSans',
+    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+    'version' => '1.0',
+    'css' => array(
+      'core/misc/opensans/opensans.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
+      ),
+    ),
+  );
+
   // Cookie.
   $libraries['jquery.cookie'] = array(
     'title' => 'Cookie',
