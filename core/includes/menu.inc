@@ -313,7 +313,7 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
  * actually exists. This list of 'masks' is built in menu_rebuild().
  *
  * @param $parts
- *   An array of path parts; for the above example, 
+ *   An array of path parts; for the above example,
  *   array('node', '12345', 'edit').
  *
  * @return
@@ -1672,6 +1672,11 @@ function _menu_tree_data(&$links, $parents, $depth) {
  * Implements template_preprocess_HOOK() for theme_menu_tree().
  */
 function template_preprocess_menu_tree(&$variables) {
+  $variables['attributes'] = array();
+  if (isset($variables['tree']['#wrapper_attributes'])) {
+    $variables['attributes'] = $variables['tree']['#wrapper_attributes'];
+  }
+  $variables['attributes']['class'][] = 'menu';
   $variables['tree'] = $variables['tree']['#children'];
 }
 
@@ -1686,7 +1691,7 @@ function template_preprocess_menu_tree(&$variables) {
  * @ingroup themeable
  */
 function theme_menu_tree($variables) {
-  return '<ul class="menu">' . $variables['tree'] . '</ul>';
+  return '<ul ' . backdrop_attributes($variables['attributes']) . '>' . $variables['tree'] . '</ul>';
 }
 
 /**

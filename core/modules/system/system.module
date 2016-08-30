@@ -1329,6 +1329,24 @@ function system_library_info() {
     ),
   );
 
+  // SmartMenus.
+  $libraries['smartmenus'] = array(
+    'title' => 'SmartMenus',
+    'website' => 'http://www.smartmenus.org',
+    'version' => '1.0.0',
+    'css' => array(
+      'core/misc/smartmenus/css/sm-core-css.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
+      ),
+    ),
+    'js' => array(
+      'core/misc/smartmenus/query.smartmenus.min.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+    ),
+  );
+
   // OpenSans.
   $libraries['opensans'] = array(
     'title' => 'OpenSans',
