@@ -1596,17 +1596,3 @@ div.add-or-remove-shortcuts {
     left: 100%;
   }
 }
-
-/**
- * Misc. Elements
- */
-#check-font-wrapper #check-font {
-  /* Bumping specificity since it's very important these styles apply. */
-  /* This is for testing if the webfont has loaded. */
-  font-family: 'Open Sans', monospace;
-  font-size: 10px;
-  font-weight: 400;
-  position: absolute;
-  z-index: -100;
-  visibility: hidden;
-}

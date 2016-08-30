@@ -26,6 +26,11 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     var defaultHeaderPadding = '20px';
     var $mobileHeaderPadder = $('<div class="responsive-tabs-mobile-header-padder" style="height: ' + expandedTabsHeaderPadding + 'px"></div>');
     var $body = $('body');
+    var tabsWrapperPadding = {
+      'top': parseInt($tabsWrapper.css('padding-top').replace("px", "")),
+      'right': parseInt($tabsWrapper.css('padding-right').replace("px", "")),
+      'left': parseInt($tabsWrapper.css('padding-left').replace("px", ""))
+    };
 
     // These are essentially breakpoints to be measured against the tabArea.
     var allTabsWidth;             // Will show all tabs.
@@ -153,7 +158,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
            * 'andAfter'   Show the active tab and the ones after it.
            * 'mobile'     Put all tabs in a dropdown.
            */
-          var $responsiveTabsDropdown = $('<ul class="primary responsive-tabs-dropdown" aria-hidden="true" style="top: ' + tabHeight + 'px; width: ' + (widestTabWidth + expandControlWidth + 20) + 'px"></ul>');
+          var $responsiveTabsDropdown = $('<ul class="primary responsive-tabs-dropdown" aria-hidden="true" style="top: ' + (tabHeight + tabsWrapperPadding.top) + 'px; width: ' + (widestTabWidth + expandControlWidth + 20) + 'px"></ul>');
           if (tabArea >= activeTabAndBeforeWidth) {
             /**
              * 'andBefore' Responsive Tab Strategy.
@@ -181,9 +186,9 @@ Backdrop.behaviors.responsivePrimaryTabs = {
               .removeClass('desktop-primary-tabs responsive-tabs-after responsive-tabs-mobile');
 
             // Apply expand control's position.
-            var expandControlLeft = $lastVisibleTab.position().left + $lastVisibleTab.outerWidth();
+            var expandControlLeft = $lastVisibleTab.position().left + $lastVisibleTab.outerWidth() + tabsWrapperPadding.left;
             $('.expand-dropdown-tabs-control', $tabsWrapper).css('left', expandControlLeft);
-            $responsiveTabsDropdown.css('right', tabArea - expandControlLeft - expandControlWidth);
+            $responsiveTabsDropdown.css('right', tabArea - expandControlLeft - expandControlWidth + tabsWrapperPadding.right + tabsWrapperPadding.left);
 
             // Cleanup things that may have been left over from other
             // responsive tab strategies.
@@ -213,7 +218,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             });
 
             // Dropdown control gets left aligned.
-            $('.expand-dropdown-tabs-control', $tabsWrapper).css('left', 0);
+            $('.expand-dropdown-tabs-control', $tabsWrapper).css('left', tabsWrapperPadding.left);
             $primaryTabs.css('padding-left', expandControlWidth);
 
             // Manage classes on wrapper.
@@ -238,7 +243,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             var tabsTopDistance = $tabsWrapper.position().top;
             $primaryTabs.css('top', '-' + tabsOffset + 'px');
             if (tabsOffset > tabsTopDistance) {
-              expandedTabsHeaderPadding = tabsOffset - tabsTopDistance + parseInt(defaultHeaderPadding, 10);
+              expandedTabsHeaderPadding = tabsOffset - tabsTopDistance + defaultHeaderPadding;
             }
 
             // Get the active tab's text.
@@ -275,37 +280,20 @@ Backdrop.behaviors.responsivePrimaryTabs = {
       }
     });
 
-    /**
-     * Check to see when webfont has loaded and adjust the tabs display
-     */
-    var checkFontCounter = 0;
-    // Append an invisible element that will be monospace font or our desired
-    // font. We're using a repeating i because the characters width will
-    // drastically change when it's monospace vs. proportional font.
-    var $checkFontElement = $('<span id="check-font" style="visibility: hidden;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
-    $checkFontElement.appendTo($body).wrap('<span id="check-font-wrapper"></span>');
-
-    // Function to check the width of the font, if it's substantially different
-    // we'll know we our real font has loaded
-    function checkFont() {
-      var currentWidth = $checkFontElement.width();
-      if (currentWidth < 200 || checkFontCounter >= 60) {
-        // If our font has loaded, or it's been 6 seconds
-        adjustTabsDisplay();
-        // Clean up after ourselves
-        clearInterval(checkFontInterval);
-        $checkFontElement.remove();
-        calculateTabWidths();
-      }
-      checkFontCounter++;
-    }
-    var checkFontInterval = setInterval(checkFont, 100);
+    Backdrop.isFontLoaded('Open Sans', function() {
+      adjustTabsDisplay();
+      calculateTabWidths();
+    });
 
     // Resource friendly resize event
     var resizeTimeout;
     $(window).on('resize', function () {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(handleResize, 50);
+    });
+
+    $(document).ready(function(){
+        handleResize();
     });
   }
 
