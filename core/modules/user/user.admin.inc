@@ -507,7 +507,6 @@ function user_admin_roles($form, $form_state) {
       'source' => array('label'),
       'exists' => 'user_role_load',
       'standalone' => TRUE,
-      'label' => '',
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
