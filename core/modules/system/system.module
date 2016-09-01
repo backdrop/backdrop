@@ -2810,15 +2810,6 @@ function _system_rebuild_theme_data() {
   // Set defaults for theme info.
   $defaults = array(
     'engine' => 'phptemplate',
-    'regions' => array(
-      'sidebar_first' => 'Left sidebar',
-      'sidebar_second' => 'Right sidebar',
-      'content' => 'Content',
-      'header' => 'Header',
-      'footer' => 'Footer',
-      'highlighted' => 'Highlighted',
-      'page_bottom' => 'Page bottom',
-    ),
     'description' => '',
     'screenshot' => 'screenshot.png',
     'php' => BACKDROP_MINIMUM_PHP,

@@ -146,9 +146,7 @@ function system_themes_page() {
 
     if (empty($theme->status)) {
      // Ensure this theme is compatible with this version of core.
-     // Require the 'content' region to make sure the main page
-     // content has a common place in all themes.
-      $theme->incompatible_core = !isset($theme->info['backdrop']) || ($theme->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) || (!isset($theme->info['regions']['content']));
+      $theme->incompatible_core = !isset($theme->info['backdrop']) || ($theme->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY);
       $theme->incompatible_php = version_compare(phpversion(), $theme->info['php']) < 0;
     }
     $query['token'] = backdrop_get_token('system-theme-operation-link');
