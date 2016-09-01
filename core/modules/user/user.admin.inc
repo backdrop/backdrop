@@ -612,7 +612,7 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
     '#type' => 'value',
     '#value' => $role->name,
   );
-  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->label)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->label)), 'admin/config/people/roles', t('This action cannot be undone.'), t('Delete'));
 }
 
 /**
