@@ -134,7 +134,7 @@ function admin_bar_preprocess_page(&$variables) {
   }
 
   // Performance: Skip this entirely for AJAX requests.
-  if (!backdrop_is_html()) {
+  if (backdrop_is_ajax()) {
     return;
   }
 

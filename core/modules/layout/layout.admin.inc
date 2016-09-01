@@ -1074,7 +1074,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#title' => t('Region'),
     '#default_value' => $region_name,
     '#options' => $template_info['regions'],
-    '#access' => backdrop_is_html(), // Only show this on non-JS requests.
+    '#access' => !backdrop_is_ajax(), // Only show this on non-JS requests.
   );
 
   // We overload the layout object with an "in_progress" key to hold information
