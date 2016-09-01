@@ -44,13 +44,18 @@ function file_field_settings_form($field, $instance, $has_data) {
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Display</em> field'),
     '#default_value' => $settings['display_field'],
-    '#description' => t('The display option allows users to choose if a file should be shown when viewing the content.'),
+    '#description' => t('This option allows users to choose if the uploaded files should be shown or hidden when viewing the content.'),
   );
   $form['display_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Files displayed by default'),
     '#default_value' => $settings['display_default'],
-    '#description' => t('This setting only has an effect if the display option is enabled.'),
+    '#description' => t('This option sets the default behavior for uploaded files for this field. Users are still allowed to change this setting individually for each file before saving their content.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="field[settings][display_field]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $scheme_options = array();
