@@ -482,7 +482,7 @@ function theme_system_admin_index($variables) {
  */
 function theme_token_tree_link($variables) {
   if (empty($variables['text'])) {
-    $variables['text'] = t('Browse available tokens.');
+    $variables['text'] = t('Browse available tokens');
   }
 
   if (!empty($variables['dialog'])) {
