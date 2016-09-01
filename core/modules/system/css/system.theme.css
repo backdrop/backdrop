@@ -544,6 +544,47 @@ div.error:before {
 }
 
 /**
+ * Diff display. Used in configuration management sync.
+ */
+.diff-table td {
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+.diff-marker {
+  width: 1px; /* Shrink table cell as much as possible. */
+}
+ins.diffchange {
+  background-color: #CFDE56;
+}
+del.diffchange {
+  background-color: #ffa8a8;
+}
+.diff-addedline {
+  background-color: #f0f3d0;
+}
+.diff-deletedline {
+  background-color: #fff4f4;
+}
+tr.odd .diff-addedline {
+  background-color: #E9EEBC;
+}
+tr.odd .diff-deletedline {
+  background-color: #ffdbdb;
+}
+tr:hover .diff-addedline {
+  background-color: #cfdd55;
+}
+tr:hover .diff-deletedline {
+  background-color: #ffa8a8;
+}
+tr:hover ins.diffchange {
+  background-color: #b0c026;
+}
+tr:hover del.diffchange {
+  background-color: #ff7575;
+}
+
+/**
  * Floated images.
  */
 img {
