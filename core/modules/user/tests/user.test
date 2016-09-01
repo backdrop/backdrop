@@ -1335,12 +1335,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
    */
   function testAdministratorRole() {
     $this->backdropLogin($this->admin_user);
-    $this->backdropGet('admin/config/people/settings');
+    $this->backdropGet('admin/config/people/roles');
 
     // Set the user's role to be the administrator role.
     $edit = array();
     $edit['user_admin_role'] = $this->role_name;
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
 
     // Enable book module and ensure the 'administer book outlines' permission
     // is assigned by default.
@@ -1374,23 +1374,6 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
     $this->assertTrue(user_access('administer site configuration', $account), 'User still has "administer site configuration" permission.');
-  }
-
-  /**
-   * Tests the admin form validates user picture settings.
-   */
-  function testUserPictureAdminFormValidation() {
-    $this->backdropLogin($this->backdropCreateUser(array('administer account settings')));
-    // The default values are valid.
-    $this->backdropPost('admin/config/people/settings', array(), 'Save configuration');
-    $this->assertText(t('The configuration options have been saved.'), 'The default values are valid.');
-
-    // The form does not save with an invalid file size.
-    $edit = array(
-      'user_picture_file_size' => $this->randomName(),
-    );
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
-    $this->assertNoText(t('The configuration options have been saved.'), 'The form does not save with an invalid file size.');
   }
 }
 
@@ -1527,10 +1510,10 @@ class UserAdminSettingsFormTest extends SystemConfigFormCase {
     module_load_include('admin.inc', 'user');
     $this->form_id = 'user_admin_settings';
     $this->values = array(
-      'anonymous' => array(
-        '#value' => $this->randomString(10),
+      'user_picture_path' => array(
+        '#value' => $this->randomName(10),
         '#config_name' => 'system.core',
-        '#config_key' => 'anonymous',
+        '#config_key' => 'user_picture_path',
       ),
     );
   }
@@ -2145,7 +2128,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Change the role weight and submit the form.
     $edit = array('roles['. $role_name .'][weight]' => $old_weight + 1);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Save order'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Retrieve the saved role and compare its weight.

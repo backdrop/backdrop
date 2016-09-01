@@ -121,42 +121,6 @@ function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
   $mail_config = config('user.mail');
 
-  // Settings for anonymous users.
-  $form['anonymous_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Anonymous users'),
-  );
-  $form['anonymous_settings']['anonymous'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Name'),
-    '#default_value' => $config->get('anonymous'),
-    '#description' => t('The name used to indicate anonymous users.'),
-    '#required' => TRUE,
-  );
-
-  // Administrative role option.
-  $form['admin_role'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Administrator role'),
-    '#weight' => -1,
-  );
-
-  // Do not allow users to set the anonymous or authenticated user roles as the
-  // administrator role.
-  $roles = user_roles();
-  unset($roles[BACKDROP_ANONYMOUS_ROLE]);
-  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
-
-  $form['admin_role']['user_admin_role'] = array(
-    '#type' => 'select',
-    '#title' => t('Administrator role'),
-    '#default_value' => $config->get('user_admin_role'),
-    '#options' => $roles,
-    '#description' => t('This role will be automatically assigned new permissions whenever a module is enabled. Changing this setting will not affect existing permissions.'),
-    '#weight' => -3,
-  );
-
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
@@ -322,8 +286,6 @@ function user_admin_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
 
   $config = config('system.core');
-  $config->set('anonymous', $values['anonymous']);
-  $config->set('user_admin_role', $values['user_admin_role']);
   $config->set('user_cancel_method', $values['user_cancel_method']);
   $config->set('user_login_method', $form_state['values']['user_login_method']);
   $config->set('user_register', $values['user_register']);
@@ -448,12 +410,49 @@ function user_admin_permissions_submit($form, &$form_state) {
  * @see theme_user_admin_roles()
  */
 function user_admin_roles($form, $form_state) {
-  $roles = user_roles(FALSE, NULL, TRUE);
+  $system_config = config('system.core');
+
+  // Administrative role option.
+  $form['admin_role'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Administrator role'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => -20,
+  );
+  // Do not allow the anonymous or authenticated user roles as administrator.
+  $roles = user_roles();
+  unset($roles[BACKDROP_ANONYMOUS_ROLE]);
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
+  $roles[0] = t('disabled');
+  $form['admin_role']['user_admin_role'] = array(
+    '#type' => 'select',
+    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#default_value' => $system_config->get('user_admin_role'),
+    '#options' => $roles,
+    '#description' => t('Changing this setting will not affect existing permissions.'),
+  );
+
+  // Settings for anonymous users.
+  $form['anonymous_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Anonymous visitors'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => -10,
+  );
+  $form['anonymous_settings']['anonymous'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The name you would like used for anonymous visitors to your site:'),
+    '#default_value' => $system_config->get('anonymous'),
+    '#required' => TRUE,
+  );
 
   $form['roles'] = array(
     '#tree' => TRUE,
   );
   $order = 0;
+  $roles = user_roles(FALSE, NULL, TRUE);
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
     $form['roles'][$role_name]['#weight'] = $order;
@@ -519,8 +518,8 @@ function user_admin_roles($form, $form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save order'),
-    '#limit_validation_errors' => array(array('roles')),
+    '#value' => t('Save roles'),
+    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -531,6 +530,13 @@ function user_admin_roles($form, $form_state) {
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
+  // Save admin role and anon name.
+  $config = config('system.core');
+  $config->set('anonymous', $form_state['values']['anonymous']);
+  $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->save();
+
+  // Save roles.
   foreach ($form_state['values']['roles'] as $role_name => $role_values) {
     $role = $form['roles'][$role_name]['#role'];
     $role->weight = $role_values['weight'];
