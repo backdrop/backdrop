@@ -585,7 +585,7 @@ Backdrop.featureDetect.flexbox = function() {
       return false;
     }
   }
-}
+};
 
 /**
  * Resource friendly window resize function
