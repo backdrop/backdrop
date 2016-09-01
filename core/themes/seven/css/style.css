@@ -608,6 +608,9 @@ tr.selected td {
   color: #8c2e0b;
   background-color: #fef5f1;
 }
+.diff-table td {
+  padding: 4px;
+}
 
 /**
  * Responsive tables.
@@ -864,6 +867,9 @@ a.button {
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
 }
+a.button {
+  display: inline-block;
+}
 [dir="rtl"] input.form-submit,
 [dir="rtl"] a.button {
   margin-left: 1em;
@@ -886,8 +892,6 @@ input.form-submit:focus {
   background-color: #CFDE56;
   border-color: #CFDE56;
 }
-a.button:link,
-a.button:visited,
 a.button:active,
 input.form-submit:active {
   /* @todo, decide on an active state */
@@ -911,6 +915,8 @@ button.button-primary {
   border-color: #1766ae;
   background-color: #1766ae;
 }
+a.button-primary:hover,
+a.button-primary:focus,
 input.button-primary:hover,
 input.button-primary:focus,
 button.button-primary:hover,
@@ -918,6 +924,7 @@ button.button-primary:focus {
   border-color: #114a75;
   background-color: #114a75;
 }
+a.button-secondary,
 input.button-secondary,
 button.button-secondary {
   color: #828188;
@@ -926,6 +933,8 @@ button.button-secondary {
   -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
   box-shadow: inset 0px 0px 0px 2px #97979e;
 }
+a.button-secondary:hover,
+a.button-secondary:focus,
 input.button-secondary:hover,
 input.button-secondary:focus,
 button.button-secondary:hover,
@@ -933,6 +942,7 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+a.button-danger,
 input.button-danger,
 button.button-danger {
   color: #e7251b;
@@ -941,6 +951,8 @@ button.button-danger {
   -moz-box-shadow: inset 0px 0px 0px 2px #e7251b;
   box-shadow: inset 0px 0px 0px 2px #e7251b;
 }
+a.button-danger:hover,
+a.button-danger:focus,
 input.button-danger:hover,
 input.button-danger:focus,
 button.button-danger:hover,

@@ -144,22 +144,28 @@ function config_diff_page($config_file) {
   $build['diff'] = array(
     '#theme' => 'table',
     '#header' => array(
-      array('data' => t('Old'), 'colspan' => '2'),
-      array('data' => t('New'), 'colspan' => '2'),
+      array('data' => t('Old'), 'colspan' => '2', 'class' => array('config-old')),
+      array('data' => t('New'), 'colspan' => '2', 'class' => array('config-new')),
     ),
+    '#attributes' => array('class' => array('diff-table')),
     '#rows' => $diff,
     '#sticky' => FALSE,
   );
 
-  $build['back'] = array(
+  $build['actions'] = array(
+    '#type' => 'actions',
+    '#attributes' => array('class' => array('form-actions')),
+  );
+  $build['actions']['back'] = array(
     '#type' => 'link',
     '#title' => t('Back to "Synchronize configuration" page.'),
     '#href' => 'admin/config/development/configuration',
+    '#attributes' => array('class' => array('button', 'button-secondary', 'form-submit')),
   );
 
   if (backdrop_is_dialog()) {
-    $build['back']['#attributes']['class'][] = 'dialog-cancel';
-    $build['back']['#title'] = t('Close');
+    $build['actions']['back']['#attributes']['class'][] = 'dialog-cancel';
+    $build['actions']['back']['#title'] = t('Close');
   }
 
   return $build;
@@ -389,6 +395,7 @@ function config_export_single_form_update_export($form, &$form_state) {
  */
 function config_import_single_form(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'config', 'config.sync');
+  $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
     '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => url('admin/config/development/configuration/single/export'))) . '</p>',
