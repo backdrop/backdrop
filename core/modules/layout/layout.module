@@ -399,10 +399,9 @@ function layout_page_access() {
  * @ingroup callbacks
  */
 function layout_route_handler($router_item) {
-  // If a different delivery callback is specified, we're probably not returning
-  // HTML and it definitely should not be wrapped in a layout. Call the default
-  // route handler and return its response directly.
-  if (backdrop_is_ajax() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback') {
+  // If not returning HTML (e.g. AJAX or something else), use the default route
+  // handler instead of layouts.
+  if (!backdrop_is_html() || $router_item['page_callback'] === 'layout_page_callback') {
     return menu_default_route_handler($router_item);
   }
 

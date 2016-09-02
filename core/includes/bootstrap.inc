@@ -3858,7 +3858,7 @@ function backdrop_is_cli() {
  * in order to be returned in an alternative format.
  */
 function backdrop_is_html() {
-  return empty($_SERVER['HTTP_ACCEPT']) || strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0;
+  return empty($_SERVER['HTTP_ACCEPT']) || strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === 0 || empty($_SERVER['HTTP_X_REQUESTED_WITH']);
 }
 
 /**
