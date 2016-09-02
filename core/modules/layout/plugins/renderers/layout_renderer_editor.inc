@@ -63,13 +63,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $class = 'layout-editor-block';
-    if (isset($this->layout->title_block) && $this->layout->title_block == $block->uuid) {
-      $class .= ' layout-editor-block-is-title';
-    }
-    $class .= ' clearfix';
-
-    $output = '<div class="' . $class . '" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $output = '<div class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
     $output .= '<div class="layout-editor-block-title clearfix">';
     $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
@@ -102,6 +96,9 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    *   "remove-block", or "add-block".
    * @param ...
    *   Any additional parameters to be tacked on the end of the URL.
+   *
+   * @return string
+   *   A Backdrop menu path.
    */
   function getUrl($command) {
     $args = func_get_args();

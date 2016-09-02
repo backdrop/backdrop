@@ -96,16 +96,9 @@ class Layout {
   var $locked = FALSE;
 
   /**
-   * An array of all contexts used by this layout.
-   *
-   * @var array
-   */
-  var $context = array();
-
-  /**
    * An array of all conditional rules used by this layout.
    *
-   * @var array
+   * @var LayoutAccess[]
    */
   var $conditions = array();
 
@@ -136,7 +129,7 @@ class Layout {
   /**
    * The main array of configured blocks, keyed by a generated ID per instance.
    *
-   * @var array
+   * @var Block[]
    */
   var $content = array();
 
@@ -151,9 +144,16 @@ class Layout {
   var $positions = array();
 
   /**
-   * An array of LayoutContext instances used by this menu item.
+   * If editing a layout, general storage of in-progress changes.
    *
    * @var array
+   */
+  var $in_progress;
+
+  /**
+   * An array of LayoutContext instances used by this menu item.
+   *
+   * @var LayoutContext[]
    */
   private $contexts;
 
@@ -235,7 +235,7 @@ class Layout {
 
     // Basic validation to prevent data corruption.
     if (empty($this->name)) {
-      throw LayoutSaveException(t('The layout must have a name specified to save.'));
+      throw new LayoutSaveException(t('The layout must have a name specified to save.'));
     }
 
     // Convert all stored conditions to arrays.
@@ -468,7 +468,6 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
-    $block = $this->content[$block_uuid];
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
@@ -674,6 +673,8 @@ class Layout {
 
   /**
    * Return all contexts (from both the layout and menu item) for this Layout.
+   *
+   * return LayoutContext[]
    */
   function getContexts() {
     if (is_null($this->contexts)) {

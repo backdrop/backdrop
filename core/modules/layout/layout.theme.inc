@@ -9,6 +9,7 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
+  $rows = array();
 
   // Assemble the data for a table from everything in $form['handlers']
   foreach (element_children($element) as $layout_name) {
@@ -76,6 +77,7 @@ function theme_layout_info($variables) {
  * @return string
  */
 function theme_layout_condition_info($variables) {
+  /* @var Layout $layout */
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
   $conditions = array();

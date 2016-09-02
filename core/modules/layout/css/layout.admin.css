@@ -22,7 +22,7 @@
   display: none;
   float: left; /* LTR */
   margin-right: 10px;
-  max-width: 37.5px;
+  max-width: 37px;
   height: auto;
 }
 [dir="rtl"] #layout-list img {
@@ -196,7 +196,6 @@
   width: 13px;
   margin: 0 0.5em 0 0; /* LTR */
   padding: 0.25em 0.75em;
-  width: 13px;
   box-sizing: content-box;
   -moz-box-sizing: content-box;
   -webkit-box-sizing: content-box;

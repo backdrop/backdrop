@@ -39,7 +39,7 @@ class LanguageLayoutAccess extends LayoutAccess {
   function checkAccess() {
     global $language;
 
-    // Specialcase: If 'default' is checked, return TRUE if the default site
+    // Special case: If 'default' is checked, return TRUE if the default site
     // language matches the current interface language.
     if (in_array('default', $this->settings['language'])) {
       $default = language_default();

@@ -43,12 +43,14 @@ class Block extends LayoutHandler {
   /**
    * An array of all access rules (of type LayoutAccess), keyed by ID.
    *
-   * @var array
+   * @var LayoutAccess[]
    */
   var $conditions = array();
 
   /**
    * An array of LayoutContext instances used by this block.
+   *
+   * @var LayoutContext[]
    */
   var $contexts = array();
 

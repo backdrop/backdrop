@@ -126,6 +126,8 @@ class LayoutRendererStandard {
    *   The layout object to be rendered.
    * @param array $plugin
    *   The definition of the renderer plugin.
+   *
+   * @throws LayoutMissingException
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
@@ -450,6 +452,9 @@ class LayoutRendererStandard {
    *
    * @param Block $block
    *   The block to be rendered.
+   *
+   * @return string
+   *   The rendered block as HTML.
    */
   function renderBlock($block) {
     if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {

@@ -66,7 +66,5 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
     else {
       return ($entity->$key == $this->settings['entity_id']);
     }
-
-    return TRUE;
   }
 }
