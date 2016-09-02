@@ -72,6 +72,7 @@ class EntityBundleLayoutAccess extends LayoutAccess {
       return FALSE;
     };
 
+    /* @var Entity $entity */
     $entity = $this->contexts[$this->entity_type]->data;
     $bundle = $entity->bundle();
     if (!in_array($bundle, $this->settings['bundles'])) {
