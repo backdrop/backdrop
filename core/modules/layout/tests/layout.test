@@ -704,7 +704,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
       ':region' => 'l-sidebar',
     ));
-    $block_uuid = (string) $last_block[0]['data-block-id'];
+    //$block_uuid = (string) $last_block[0]['data-block-id'];
 
     // Save the layout.
     $edit = array(
@@ -1641,7 +1641,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
   }
 
   protected function assertNoBlocks($blocks) {
-    return $this->assertBlocks($blocks, TRUE);
+    $this->assertBlocks($blocks, TRUE);
   }
 }
 

@@ -323,6 +323,9 @@ function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_positio
  *   The page callback arguments for the menu system.
  * @param $load_arguments
  *   The magic loader arguments for the menu system.
+ *
+ * @return array
+ *   The menu item array.
  */
 function layout_page_menu_item(array $menu, array $access_arguments, array $page_arguments, array $load_arguments) {
   $item = array(
@@ -767,7 +770,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * @param string $path
  *   The menu routing path, with all wildcards represented by "%" symbols.
  *
- * @return array
+ * @return Layout[]
  *   An array of load Layout object instances.
  */
 function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
@@ -1152,6 +1155,7 @@ function layout_get_layout_template_info($template_name = NULL) {
   // Rebuild the list.
   if (!isset($info)) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
+    $init = array();
     foreach ($files as $name => $file) {
       $init[$name] = backdrop_parse_info_file($file->uri);
       $init[$name]['path'] = dirname($file->uri);
@@ -1220,6 +1224,8 @@ function layout_get_layout_info($layout_name = NULL) {
 
 /**
  * Load all layout context information from modules.
+ *
+ * @return array
  */
 function layout_get_context_info($plugin_name) {
   $info = _layout_get_all_info('layout_context');
@@ -1228,6 +1234,8 @@ function layout_get_context_info($plugin_name) {
 
 /**
  * Load all layout access information from modules.
+ *
+ * @return array
  */
 function layout_get_access_info($plugin_name) {
   $info = _layout_get_all_info('layout_access');
@@ -1236,6 +1244,8 @@ function layout_get_access_info($plugin_name) {
 
 /**
  * Load all layout renderer information from modules.
+ *
+ * @return array
  */
 function layout_get_renderer_info($plugin_name) {
   $info = _layout_get_all_info('layout_renderer');
@@ -1257,6 +1267,9 @@ function layout_get_style_info($plugin_name) {
  *   The name of a module providing the desired block.
  * @param $block_delta
  *   The key of the block within that module.
+ *
+ * @return array
+ *   The information from hook_block_info() for the requests block(s).
  */
 function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
   $block_info = &backdrop_static(__FUNCTION__, array(
@@ -1315,6 +1328,7 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
  */
 function layout_get_handler_name($plugin_type, $plugin_name) {
   // Block "plugins" for Layouts are wrappers around the generic block system.
+  $broken_class = NULL;
   if ($plugin_type === 'block') {
     list($module, $delta) = explode(':', $plugin_name);
     $info = layout_get_block_info($module, $delta);
@@ -1392,7 +1406,7 @@ function layout_create_access($access_plugin_name, $config = array()) {
 /**
  * Helper function to create a Layout Renderer.
  *
- * @return LayoutRenderer
+ * @return LayoutRendererStandard|LayoutRendererEditor
  */
 function layout_create_renderer($renderer_plugin_name, Layout $layout) {
   // Renderers do not have "broken" classes if they do not exist. As renderers
@@ -1434,8 +1448,8 @@ function layout_get_layout_tempstore($name, $type = 'layout') {
 /**
  * Store changes to a layout or menu item in the temporary store.
  *
- * @param string $name
- *   The machine name of the Layout item to save into tempstore.
+ * @param Layout|LayoutMenuItem $item
+ *   The Layout item to save into tempstore.
  * @param string $type
  *   The type of item to save. Must be either "layout" or "menu_item".
  */
@@ -1564,6 +1578,9 @@ function layout_context_required_by_path($path) {
  *   The module that provides the block to be checked.
  * @param string $block_delta
  *   The identifier for the block within hook_block_info().
+ *
+ * @return bool
+ *   TRUE if the block has required contexts. FALSE otherwise.
  */
 function layout_block_has_required_contexts(Layout $layout, $block_module, $block_delta) {
   $block_info = module_invoke($block_module, 'block_info');
@@ -1592,7 +1609,7 @@ function layout_block_has_required_contexts(Layout $layout, $block_module, $bloc
  * @param array $contexts
  *   An array of contexts that will be set by reference if all required contexts
  *   are found.
- * @param array $all_contexts
+ * @param LayoutContext[] $all_contexts
  *   The full array of contexts on an entire layout, from which the required
  *   contexts will be selected.
  * @param array $required_contexts
@@ -1602,6 +1619,10 @@ function layout_block_has_required_contexts(Layout $layout, $block_module, $bloc
  *   If a plugin has multiple contexts, a user may select which context should
  *   be used. This array will be keyed by the plugin's required context keys,
  *   with the values being the overall layout's context keys.
+ *
+ * @return bool
+ *   TRUE if all contexts were set on the Layout. If a requested context is not
+ *   available, FALSE will be returned and no contexts will be set at all.
  */
 function layout_set_handler_contexts(array &$contexts, array $all_contexts, array $required_contexts, array $context_settings) {
   foreach ($required_contexts as $required_context_key => $context_type) {

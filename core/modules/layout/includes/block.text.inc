@@ -33,7 +33,9 @@ class BlockText extends Block {
   }
 
   /**
-   *  Sets block content on block view.
+   * Returns the rendered content of this block.
+   *
+   * @return string
    */
   function getContent() {
     if (!empty($this->settings['content'])) {

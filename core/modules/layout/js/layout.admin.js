@@ -97,7 +97,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
           $('[data-block-id="' + blockUuid + '"]').find('li.configure > a').triggerHandler('click');
           // Clear out the hash. Use history if available, preventing another
           // entry (which would require two back button clicks). Fallback to
-          // directlty updating the URL in the location bar.
+          // directly updating the URL in the location bar.
           if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', '#');
           }
@@ -141,7 +141,7 @@ Backdrop.behaviors.blockListFilterByText = {
     var $rows, zebraClass;
     var zebraCounter = 0;
 
-    // Fliter the list of layouts by provided search string.
+    // Filter the list of layouts by provided search string.
     function filterBlockList() {
       var query = $input.val().toLowerCase();
 

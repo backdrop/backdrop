@@ -236,7 +236,7 @@ function hook_layout_revert(Layout $old_layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_delete(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -255,7 +255,7 @@ function hook_layout_delete(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_enable(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -277,7 +277,7 @@ function hook_layout_enable(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_disable(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -294,7 +294,7 @@ function hook_layout_disable(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_update(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -311,7 +311,7 @@ function hook_layout_update(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_insert(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -330,7 +330,7 @@ function hook_layout_insert(Layout $layout) {
 function hook_layout_presave(Layout $layout) {
   if ($layout->name == 'default') {
     $my_block_uuid = get_my_uuid();
-    $my_block = $layout->content[$uuid];
+    $my_block = $layout->content[$my_block_uuid];
     $my_block->data['settings']['title'] = 'New Title';
   }
 }
@@ -369,13 +369,13 @@ function hook_layout_presave(Layout $layout) {
  *     be no longer than a short sentence or two.
  *   - required contexts: (optional) An array of contexts that this block
  *     requires to display. These contexts are keyed by their internal name that
- *     this block will receive as the key in the $context paramater of
+ *     this block will receive as the key in the $context parameter of
  *     hook_block_view(). The value of each item should be the type of context,
  *     as listed by hook_layout_context_info().
  *   - class: (optional) A class that provides the settings form, save routine,
  *     and display of this block. If specified, the class will be used instead
  *     of the hooks for hook_block_configure(), hook_block_save(), and
- *     hook_block_view(). This class should be a sub-classs of the Block class.
+ *     hook_block_view(). This class should be a sub-class of the Block class.
  *
  * For a detailed usage example, see block_example.module.
  *
