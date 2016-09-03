@@ -221,7 +221,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Insert image'),
     '#ajax' => array(
       'callback' => 'filter_format_editor_dialog_save',
       'event' => 'click',
