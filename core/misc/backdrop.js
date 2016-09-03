@@ -479,10 +479,10 @@ Backdrop.isFontLoaded = function(fontName, callback) {
   // Append an invisible element that will be monospace font or our desired
   // font. We're using a repeating i because the characters width will
   // drastically change when it's monospace vs. proportional font.
-  var $checkFontElement = $('<span id="check-font" style="font-family: "' + fontName + '", monospace; position: absolute; z-index: -100; visibility: hidden;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
+  var $checkFontElement = $('<span id="check-font" style="font-family: \'' + fontName + '\', monospace;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
   // Control is the same but it will always be our 'control' font, monospace.
   var $checkFontElementControl = $checkFontElement.clone().attr('id', 'check-font-control').css('font-family', 'monospace');
-  var $checkFontElements = $('<span id="check-font-wrapper" aria-hidden></span>').append($checkFontElement).append($checkFontElementControl);
+  var $checkFontElements = $('<span id="check-font-wrapper" aria-hidden="true" style="visibility: hidden; position: absolute; z-index: -100;"></span>').append($checkFontElement).append($checkFontElementControl);
   $body.append($checkFontElements);
 
   // Function to check the width of the font, if it's substantially different
