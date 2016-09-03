@@ -136,6 +136,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('fid'),
     '#weight' => -10,
     '#access' => $upload_settings['status'] && user_access('upload editor images'),
+    '#temporary' => FALSE,
   );
 
   // Use a "textfield" rather than "url" to allow relative paths.
@@ -245,6 +246,13 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     $file = file_load($fid);
+    // If not marked as temporary, save the file as permanent when uploaded.
+    if (!$form['image']['fid']['#temporary']) {
+      dpm('saving the file');
+      $file->status = 1;
+      $file->save();
+      file_usage_add($file, 'filter', 'file', $fid);
+    }
     $form_state['values']['attributes']['src'] = file_create_url($file->uri);
     $form_state['values']['attributes']['data-file-id'] = $fid;
     unset($form_state['values']['fid']);

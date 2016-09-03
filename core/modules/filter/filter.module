@@ -1225,7 +1225,7 @@ function filter_process_format($element) {
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
     '#title' => t('Formatting options'),
-    '#collapsible' => TRUE, 
+    '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
@@ -1581,6 +1581,62 @@ function filter_dom_serialize_escape_cdata_element($dom_document, $dom_element, 
       $dom_element->appendChild($fragment);
       $dom_element->removeChild($node);
     }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function filter_form_filter_format_editor_image_form_alter(&$form, &$form_state) {
+  // Mark files uploaded on entities as temporary, as they will be updated and
+  // added into the file usage table in filter_entity_insert().
+  $entity = _filter_page_is_entity();
+  if (is_object($entity)) {
+    $form['image']['fid']['#temporary'] = TRUE;
+  }
+}
+
+/**
+ * Determine if the page we are on belongs to any entity.
+ *
+ * @param  $path
+ *   URL or path.
+ *
+ * @return boolean|Entity
+ *   Returns the entity loaded by the menu mapping at this path.
+ *   Returns FALSE if the path does not load an entity.
+ */
+function _filter_page_is_entity() {
+  $path = _filter_referer_path();
+  $router_item = menu_get_item($path);
+  $entity_types = entity_get_info();
+  if (isset($router_item['load_functions'])) {
+    foreach ($router_item['load_functions'] as $position => $function) {
+      $start_pos = strlen($function) - 5;
+      if (substr($function, $start_pos, 5) == '_load') {
+        foreach ($entity_types as $type => $info) {
+          if ($router_item['load_functions'][$position] == $type . '_load') {
+            return $router_item['map'][$position];
+          }
+        }
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Get HTTP_REFERER as Drupal normal path.
+ */
+function _filter_referer_path() {
+  if (!empty($_SERVER['HTTP_REFERER'])) {
+    $url = parse_url($_SERVER['HTTP_REFERER']);
+    if ($url['path'][0] == '/') {
+      $url['path'] = substr($url['path'], 1);
+    }
+
+    return $url['path'];
   }
 }
 
