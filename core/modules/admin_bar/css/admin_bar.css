@@ -313,15 +313,24 @@ tr.admin-bar-tweak-permissions-processed td.module {
 }
 
 /* Alert colors */
-#admin-bar .admin-bar-alert .error-count {
-  padding: 3px 6px;
-  margin: -3px 6px;
-  display: inline-block;
-  min-width: 9px;
-  border-radius: 50%;
-  text-align: center;
-  background-color: #ee3d23;
+#admin-bar .dropdown li.admin-bar-alert a {
+  position: relative;
 }
+#admin-bar .admin-bar-alert .error-count {
+  display: inline-block;
+  text-align: center;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  background-color: #ee3d23;
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  left: 12t bNotification badge should be roundpx;
+  right: 0;
+  bottom: 0;
+}
+
 #admin-bar .top-level .admin-bar-alert .error-count {
   margin-left: 0;
   margin-right: 0;
