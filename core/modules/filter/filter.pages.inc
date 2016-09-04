@@ -93,12 +93,14 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     $values = $form_state['input']['editor_object'];
   }
 
-  // Set the dialog title.
+  // Set the dialog title and submit button label.
   if (!empty($values['src'])) {
     backdrop_set_title(t('Edit image'));
+    $submit_button_label = t('Update');
   }
   else {
     backdrop_set_title(t('Insert image'));
+    $submit_button_label = t('Insert');
   }
 
   // Construct strings to use in the upload validators.
@@ -221,7 +223,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => $submit_button_label,
     '#ajax' => array(
       'callback' => 'filter_format_editor_dialog_save',
       'event' => 'click',
