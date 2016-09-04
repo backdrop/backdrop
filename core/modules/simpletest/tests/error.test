@@ -61,6 +61,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
    * Test the exception handler.
    */
   function testExceptionHandler() {
+    $config = config('system.core');    
     $error_exception = array(
       '%type' => 'Exception',
       '!message' => 'Backdrop is awesome',
@@ -76,6 +77,9 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
       '%file' => backdrop_realpath('core/modules/simpletest/tests/error_test.module'),
     );
 
+    // Set error reporting to collect notices as assumed in the module.
+    $config->set('error_level', ERROR_REPORTING_DISPLAY_ALL)->save();
+    
     $this->backdropGet('error-test/trigger-exception');
     $this->assertTrue(strpos($this->backdropGetHeader(':status'), '500 Service unavailable (with message)'), 'Received expected HTTP status line.');
     $this->assertErrorMessage($error_exception);
