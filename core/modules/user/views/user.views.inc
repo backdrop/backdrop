@@ -374,7 +374,7 @@ function user_views_data() {
   // ----------------------------------------------------------------------
   // users_roles table
 
-  $data['users_roles']['table']['group']  = t('User');
+  $data['users_roles']['table']['group']  = t('User account');
 
   // Explain how this table joins to others.
   $data['users_roles']['table']['join'] = array(
