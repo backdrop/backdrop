@@ -4676,7 +4676,8 @@ function views_ui_autocomplete_tag($string = '') {
     }
   }
 
-  backdrop_json_output($matches);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $matches;
 }
 
 // ------------------------------------------------------------------

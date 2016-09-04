@@ -308,6 +308,7 @@ function taxonomy_menu() {
   $items['taxonomy/autocomplete'] = array(
     'title' => 'Autocomplete taxonomy',
     'page callback' => 'taxonomy_autocomplete',
+    'delivery callback' => 'backdrop_json_deliver',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
     'file' => 'taxonomy.pages.inc',

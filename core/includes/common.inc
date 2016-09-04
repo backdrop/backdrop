@@ -5488,6 +5488,56 @@ function backdrop_json_output($var = NULL) {
 }
 
 /**
+ * Packages and sends the result of a page callback to the browser as JSON.
+ *
+ * @param $page_callback_result
+ *   The result of a page callback. Can be one of:
+ *   - NULL: to indicate no content.
+ *   - An integer menu status constant: to indicate an error condition.
+ *   - An array of raw data to be printed as JSON.
+ *
+ * @since 1.5.0
+ *
+ * @see backdrop_deliver_page()
+ * @see backdrop_deliver_html_page()
+ */
+function backdrop_json_deliver($page_callback_result) {
+
+  // Menu status constants are integers; page content is a string or array.
+  if (is_int($page_callback_result)) {
+    switch ($page_callback_result) {
+      case MENU_NOT_FOUND:
+        backdrop_add_http_header('Status', '404 Not Found');
+        watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+        $output = array('error' => t('Page not found'));
+        break;
+
+      case MENU_ACCESS_DENIED:
+        backdrop_add_http_header('Status', '403 Forbidden');
+        watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+        $output = array('error' => t('Access denied'));
+        break;
+
+      case MENU_SITE_OFFLINE:
+        backdrop_add_http_header('Status', '503 Service unavailable');
+        backdrop_set_title(t('Site under maintenance'));
+        $output = array('error' => t('Site is offline.'));
+        break;
+    }
+  }
+  elseif (isset($page_callback_result)) {
+    $output = $page_callback_result;
+  }
+
+  if (!is_null($output)) {
+    backdrop_json_output($page_callback_result);
+  }
+
+  // Perform end-of-request tasks.
+  backdrop_page_footer();
+}
+
+/**
  * Gets a salt useful for hardening against SQL injection.
  *
  * @return

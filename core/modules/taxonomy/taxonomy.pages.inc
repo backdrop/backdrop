@@ -159,5 +159,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
     }
   }
 
-  backdrop_json_output($term_matches);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $term_matches;
 }
