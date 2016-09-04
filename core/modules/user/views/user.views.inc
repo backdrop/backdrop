@@ -440,8 +440,8 @@ function user_views_plugins() {
     'module' => 'views', // This just tells our themes are elsewhere.
     'row' => array(
       'user' => array(
-        'title' => t('User'),
-        'help' => t('Display the user with standard user view.'),
+        'title' => t('User accounts'),
+        'help' => t('Display the user acounts with standard user account view.'),
         'handler' => 'views_plugin_row_user_view',
         'base' => array('users'), // only works with 'users' as base.
         'uses options' => TRUE,
@@ -463,7 +463,7 @@ function user_views_plugins() {
     ),
     'argument validator' => array(
       'user' => array(
-        'title' => t('User'),
+        'title' => t('User account'),
         'handler' => 'views_plugin_argument_validate_user',
         'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
