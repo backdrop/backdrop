@@ -141,7 +141,7 @@ function block_block_view($delta = '') {
  * @param $delta
  *   ID of the block to get information for.
  *
- * @return
+ * @return array
  *   Associative array of information stored in configuration for this block, or FALSE if it doesn't exist
  *   Array keys:
  *   - delta: Block ID.
@@ -253,11 +253,9 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  *     - value: Block contents.
  *     - format: Filter ID of the filter format for the body.
  * @param string|NULL $delta
- *   Machine name of the block to save, comprised of lower-case letters, numbers, and underscores
- *   Note: null values are still accepted when creating new nodes to maintain API contiguity
- *
- * @return
- *   Always returns TRUE.
+ *   Machine name of the block to save, comprised of lower-case letters,
+ *   numbers, and underscores. Note: NULL values are still accepted when
+ *   creating new nodes to maintain API contiguity.
  */
 function block_custom_block_save(array $edit, $delta = NULL) {
   $delta = $delta ? $delta : preg_replace('/[^a-z0-9_]+/', '_', strtolower($edit['info']));
@@ -267,7 +265,7 @@ function block_custom_block_save(array $edit, $delta = NULL) {
       'delta' => $delta,
       'info' => '',
       'title' => '',
-      'body' => '',
+      'body' => array('value' => '', 'format' => ''),
     );
   }
   foreach ($block as $key => $value) {
@@ -278,6 +276,21 @@ function block_custom_block_save(array $edit, $delta = NULL) {
   $config = config('block.custom.' . $delta);
   $config->setData($block);
   $config->save();
+
+  // Save each file as permanent, preventing it from being deleted. The same
+  // process is used in Layout::save(), but that only applies to non-reusable
+  // blocks (BlockText objects). If a block has been marked reusable, the files
+  // are immediately marked as permanent.
+  // File usages are not currently removed for custom blocks.
+  // See https://github.com/backdrop/backdrop-issues/issues/2137.
+  $fids = filter_parse_file_fids($block['body']['value']);
+  $files = file_load_multiple($fids);
+  foreach ($files as $fid => $file) {
+    if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+      // This makes the file "self-referencing", so it will never be deleted.
+      file_usage_add($file, 'file', 'file', $file->fid);
+    }
+  }
 
   // Reset the static cache on the block list so this block is picked up.
   backdrop_static_reset('block_block_info');
