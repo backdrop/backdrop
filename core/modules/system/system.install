@@ -2916,9 +2916,9 @@ function system_update_1056() {
 }
 
 /**
- * Add default for watchdog_enabled_severity_levels
+ * Add default for watchdog_enabled_severity_levels.
  */
-function system_update_1056() {
+function system_update_1057() {
   $config = config('system.core');
   $config->set('watchdog_enabled_severity_levels', array(0,1,2,3,4,5,6));
   $config->save();
