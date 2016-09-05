@@ -28,7 +28,6 @@ class views_handler_area_text extends views_handler_area {
       '#default_value' => $this->options['content'],
       '#rows' => 6,
       '#format' => isset($this->options['format']) ? $this->options['format'] : filter_default_format(),
-      '#wysiwyg' => FALSE,
     );
 
     // @TODO: Refactor token handling into a base class.
