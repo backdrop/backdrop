@@ -55,7 +55,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $layout = layout_load('default');
     $layout->addBlock('block', $custom_block['delta'], 'sidebar');
     $layout->save();
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $this->assertText($data['subject'], 'Newly added block found.');
 
     // Verify presence of configure and delete links for custom block.

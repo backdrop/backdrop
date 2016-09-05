@@ -1657,6 +1657,7 @@ function node_menu() {
     'menu_name' => 'management',
     'weight' => -20,
   );
+
   $items['rss.xml'] = array(
     'title' => 'RSS feed',
     'page callback' => 'node_feed',
@@ -1666,6 +1667,7 @@ function node_menu() {
     // are not passed to node_feed().
     'page arguments' => array(FALSE, array()),
   );
+
   // @todo Remove this loop when we have a 'description callback' property.
   // Resets the internal static cache of _node_types_build() and forces a
   // rebuild of the node type information.
@@ -1863,6 +1865,10 @@ function node_block_info() {
     'description' => t('Displays a node in a block.'),
     'class' => 'NodeBlock',
   );
+  $blocks['empty'] = array(
+    'info' => t('Create content'),
+    'description' => t('A prompt to create some content with appropriate links.'),
+  );
 
   return $blocks;
 }
@@ -1876,12 +1882,14 @@ function node_block_view($delta = '', $settings = array()) {
 
   switch ($delta) {
     case 'syndicate':
-      $block['subject'] = t('Syndicate');
-      $block['content'] = array(
-        '#theme' => 'feed_icon',
-        '#url' => 'rss.xml',
-        '#title' => t('Syndicate'),
-      );
+      if (backdrop_valid_path('rss.xml')) {
+        $block['subject'] = t('Syndicate');
+        $block['content'] = array(
+          '#theme' => 'feed_icon',
+          '#url' => 'rss.xml',
+          '#title' => t('Syndicate'),
+        );
+      }
       break;
 
     case 'recent':
@@ -1898,6 +1906,33 @@ function node_block_view($delta = '', $settings = array()) {
         }
         else {
           $block['content'] = t('No content available.');
+        }
+      }
+      break;
+
+    case 'empty':
+      // Check if the promoted view exists and still has the block display.
+      $view = views_get_view('promoted');
+      if ($view && $view->access('block')) {
+        $nids = views_get_view_result('promoted', 'block');
+
+        if (empty($nids)) {
+          $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
+
+          $default_links = array();
+          $content_types = node_type_get_types();
+          foreach ($content_types as $type) {
+            if (user_access('create ' . $type->type . ' content')) {
+              $type_url_str = str_replace('_', '-', $type->type);
+              $default_links[] = l(t('Create a !content', array('!content' => $type->name)), 'node/add/' . $type_url_str);
+            }
+          }
+
+          if (!empty($default_links)) {
+            $default_message .= theme('item_list', array('items' => $default_links));
+          }
+
+          $block['content'] = $default_message;
         }
       }
       break;
@@ -1983,6 +2018,8 @@ function node_get_recent($number = 10) {
  *   The link should be an absolute URL.
  *
  * @see node_menu()
+ *
+ * @deprecated since 1.5.0
  */
 function node_feed($nids = FALSE, $channel = array()) {
   global $base_url, $language_content;
@@ -2054,6 +2091,7 @@ function node_feed($nids = FALSE, $channel = array()) {
   backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
   print $output;
 }
+
 
 /**
  * Constructs a backdrop_render() style array from an array of loaded nodes.

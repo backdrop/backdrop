@@ -1085,7 +1085,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify that breadcrumb on node listing page contains "Home" only.
     $trail = array();
-    $this->assertBreadcrumb('node', $trail);
+    $this->assertBreadcrumb('home', $trail);
 
     // Verify node breadcrumbs (in menu).
     // Do this separately for Main menu and Main menu, since only the
@@ -1156,8 +1156,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       $this->assertBreadcrumb("node/$nid3/edit", $trail);
 
       // Verify that node listing page still contains "Home" only.
-      $trail = array();
-      $this->assertBreadcrumb('node', $trail);
+      $this->assertBreadcrumb('node', $home);
 
       if ($menu == 'main-menu') {
         $parent = $node2;
