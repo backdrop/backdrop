@@ -706,7 +706,7 @@ function path_bulk_update_form($form, &$form_state) {
   // Build the 'Update options' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Bulk options'),
+    '#title' => t('Bulk actions'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -715,7 +715,7 @@ function path_bulk_update_form($form, &$form_state) {
   );
   $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => t('Operations'),
+    '#title' => '',
     '#options' => array(
       'generate' => t('Generate aliases'),
       'delete' => t('Delete aliases'),

@@ -92,7 +92,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/bulk-update'] = array(
-    'title' => 'Bulk alias actions',
+    'title' => 'Update URL aliases',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_bulk_update_form'),
     'access arguments' => array('administer url aliases'),
