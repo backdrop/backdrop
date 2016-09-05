@@ -1504,7 +1504,7 @@ function _filter_tips($format_id, $long = FALSE) {
  * @param $text
  *   The partial (X)HTML snippet to load. Invalid mark-up will be corrected on
  *   import.
- * @return
+ * @return DOMDocument
  *   A DOMDocument that represents the loaded (X)HTML snippet.
  */
 function filter_dom_load($text) {
@@ -1723,10 +1723,10 @@ function _filter_get_file_ids_by_field(EntityInterface $entity) {
       foreach ($entity->$processed_text_field as $langcode => $values) {
         foreach ($values as $delta => $text) {
           if (isset($text['value'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['value']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['value']));
           }
           if (isset($text['summary'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['summary']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['summary']));
           }
         }
       }
@@ -1766,7 +1766,7 @@ function _filter_get_processed_text_fields(EntityInterface $entity) {
  * @return array
  *   An array of all found FIDs.
  */
-function _filter_parse_file_fids($text) {
+function filter_parse_file_fids($text) {
   $dom = filter_dom_load($text);
   $xpath = new DOMXPath($dom);
   $fids = array();

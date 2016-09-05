@@ -24,19 +24,28 @@ class BlockTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test creating custom block, moving it to a specific region and then deleting it.
+   * Test creating custom block, editing, and then deleting it.
    */
   function testCustomBlock() {
     // Confirm that the add block link appears on block overview pages.
     $this->backdropGet('admin/structure/block');
     $this->assertRaw(l('Add custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
 
+    // Save a file to test file usage saving.
+    $files = $this->backdropGetTestFiles('image');
+    $file_info = (array) array_pop($files);
+    $file_info['status'] = 0;
+    $file = new File($file_info);
+    $file->save();
+    $file_info['attributes']['data-file-id'] = $file->fid;
+    $image_string = theme('image', $file_info);
+
     // Add a new custom block by filling out the input form on the admin/structure/block/add page.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
     $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName(8);
-    $custom_block['body[value]'] = $this->randomName(32);
+    $custom_block['body[value]'] = $this->randomName(32) . $image_string;
     $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
 
     // Confirm that the custom block has been created, and then find its config file
@@ -50,6 +59,12 @@ class BlockTestCase extends BackdropWebTestCase {
     $data = block_block_view($custom_block['delta']);
     $this->assertEqual($data['subject'], $custom_block['title'], 'block_block_view() provides the correct block title.');
     $this->assertEqual(check_markup($custom_block['body']['value'], $custom_block['body']['format']), $data['content'], 'block_block_view() provides correct block content.');
+
+    // Check that a file usage was recorded for the file within the block.
+    $file = file_load($file->fid);
+    $references = file_usage_list($file);
+    $this->assertEqual($references['file']['file'][$file->fid], 1, 'File usage recorded for the file within the block.');
+    $this->assertEqual($file->status, 1, 'File has been marked permanent by its file usage.');
 
     // Check whether the block can be moved to all available regions.
     $layout = layout_load('default');
@@ -68,6 +83,9 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/block/manage/' . $custom_block['delta'] . '/delete', array(), 'Delete');
     $this->assertRaw(t('The block %title has been removed.', array('%title' => $custom_block['info'])), 'Custom block successfully deleted.');
     $this->assertNoText(t($custom_block['title']), 'Custom block no longer appears on page.');
+
+    // Note that file usages are NOT removed after a block has been deleted.
+    // See https://github.com/backdrop/backdrop-issues/issues/2137.
   }
 
   /**
