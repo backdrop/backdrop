@@ -45,6 +45,12 @@ function filter_theme() {
  */
 function filter_element_info() {
   $type['text_format'] = array(
+    // The text format selected by default for this element.
+    '#format' => NULL,
+    // Whether file uploads are permitted through the editor (if supported).
+    // Disable by default, modules must specifically implement saving files as
+    // permanent when they save their text data. See filter_entity_insert().
+    '#editor_uploads' => FALSE,
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
@@ -1209,6 +1215,9 @@ function filter_process_format($element) {
   else {
     $element['#attached'] = filter_get_attached($formats);
   }
+
+  // Specify if uploads are allowed by using a data attribute.
+  $element['value']['#attributes']['data-editor-uploads'] = empty($element['#editor_uploads']) ? 'false' : 'true';
 
   // Use the default format for this user if none was selected.
   if (!isset($element['#format'])) {
