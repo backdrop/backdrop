@@ -25,13 +25,11 @@ Backdrop.date = Backdrop.date || {};
  *   The fieldset DOM element containing the from and to dates.
  */
 Backdrop.date.EndDateHandler = function ($widget) {
-  console.log($widget);
   this.$widget = $widget;
   this.$toggle = this.$widget.find('[data-toggle-todate]');
   this.$start = this.$widget.find('.start-date-wrapper');
   this.$end = this.$widget.find('.end-date-wrapper');
 
-console.log(this.$toggle);
   // The toggle may not always exist in the event end dates are required.
   if (this.$toggle.length) {
     this.bindToggle();
