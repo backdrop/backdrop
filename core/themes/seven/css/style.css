@@ -1263,14 +1263,14 @@ body.maintenance-page .sidebar {
 body.maintenance-page main {
   padding: 0 20px;
 }
-body.maintenance-page .sidebar + body.maintenance-page main {
+body.maintenance-page .sidebar + main {
   max-width: 590px;
   padding-right: 20px; /* LTR */
   margin-left: 210px; /* LTR */
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-[dir="rtl"] body.maintenance-page .sidebar + body.maintenance-page main {
+[dir="rtl"] body.maintenance-page .sidebar + main {
   padding-right: 0;
   padding-left: 20px;
   margin-left: 0;
