@@ -1513,6 +1513,85 @@ class LayoutSelectionTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests the BlockTest (custom text) block functionality.
+ */
+class LayoutBlockTextTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'block'));
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer layouts',
+      'view the administration theme',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests the BlockText class functionality.
+   */
+  function testBlockText() {
+    // Save a file to test file usage saving.
+    $files = $this->backdropGetTestFiles('image');
+    $file_info = (array) array_pop($files);
+    $file_info['status'] = 0;
+    $file = new File($file_info);
+    $file->save();
+    $file_info['attributes']['data-file-id'] = $file->fid;
+    $image_string = theme('image', $file_info);
+
+    $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/sidebar');
+    $this->clickLink(t('Add a custom block'));
+    $this->backdropPost(NULL, array(
+      'title' => 'Custom block test',
+      'content[value]' => $this->randomString(32) . $image_string,
+    ), t('Add block'));
+
+    // Get the block UUID.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+
+    // Check that file usage is not added by the act of adding the block, as the
+    // layout has not yet been saved.
+    $usage = file_usage_list($file);
+    $this->assertEqual($usage, array(), 'No file usages recorded (as correct) when adding block to layout.');
+
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that a file usage was recorded for the file within the block.
+    $file = file_load($file->fid);
+    $references = file_usage_list($file);
+    $this->assertEqual($references['file']['file'][$file->fid], 1, 'File usage recorded for the file within the block.');
+    $this->assertEqual($file->status, 1, 'File has been marked permanent by its file usage.');
+
+    // Visit the front-end and check the block is displayed.
+    $this->backdropGet('user');
+    $this->assertRaw('Custom block test', 'Custom block found on front-end.');
+
+    // Removing the block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check the file usage is left in place.
+    $file = file_load($file->fid);
+    $references = file_usage_list($file);
+    $this->assertEqual($references['file']['file'][$file->fid], 1, 'File usage is unaffected by removing the block from the layout.');
+    $this->assertEqual($file->status, 1, 'File still exists and is marked as permanent after removing the block from the layout.');
+  }
+}
+
+/**
  * Tests the upgrade path from block-based regions to layouts.
  */
 class LayoutUpgradePathTest extends UpgradePathTestCase {
