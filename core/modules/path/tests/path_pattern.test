@@ -405,6 +405,7 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
       'administer url aliases',
       'create url aliases',
       'administer nodes',
+      'administer content types',
       'bypass node access',
       'access content overview',
       'administer taxonomy',
@@ -838,13 +839,30 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
   private $nodes;
 
   function testBulkUpdate() {
-    // Create five nodes.
     $this->nodes = array();
+    // Add a path pattern on the post content type.
+    $edit = array(
+      'path_pattern' => 'post/[node:title]',
+    );
+    $this->backdropPost('admin/structure/types/manage/post/configure', $edit, t('Save content type'));
+
+    // Create five page nodes.
     for ($i = 1; $i <= 5; $i++) {
-      $node = $this->backdropCreateNode();
+      $node = $this->backdropCreateNode(array('type' => 'page'));
       $this->nodes[$node->nid] = $node;
     }
-    // Create three terms.
+    // Create five post nodes.
+    for ($i = 1; $i <= 5; $i++) {
+      $node = $this->backdropCreateNode(array('type' => 'post'));
+      $this->nodes[$node->nid] = $node;
+    }
+    // Create a vocabulary named "Bulk test".
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => 'Bulk test',
+      'machine_name' => 'bulk_test',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+    // Create three tags terms.
     $this->terms = array();
     for ($i = 1; $i <= 3; $i++) {
       $term = entity_create('taxonomy_term', array(
@@ -856,6 +874,19 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       $this->terms[$term->tid] = $term;
       // Test that terms have proper aliases.
       $this->assertEntityAlias('term', $term, 'tags/' . strtolower($term->name));
+    }
+    // Create three bulk_test terms.
+    $this->terms = array();
+    for ($i = 1; $i <= 3; $i++) {
+      $term = entity_create('taxonomy_term', array(
+        'name' => $this->randomName(),
+        'vocabulary' => 'bulk_test',
+        'langcode' => LANGUAGE_NONE,
+      ));
+      taxonomy_term_save($term);
+      $this->terms[$term->tid] = $term;
+      // Test that terms have proper aliases.
+      $this->assertEntityAlias('term', $term, 'bulk-test/' . strtolower($term->name));
     }
 
     // Clear out all aliases.
@@ -870,12 +901,12 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
 
     // Bulk create aliases.
     $edit = array(
-      'generate[update][node_path_bulk_update_batch_process]' => TRUE,
-      'generate[update][taxonomy_path_bulk_update_batch_process]' => TRUE,
-      'generate[update][user_path_bulk_update_batch_process]' => TRUE,
+      'update[node][base]' => TRUE,
+      'update[taxonomy_term][base]' => TRUE,
+      'update[user][base]' => TRUE,
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
-    $this->assertText('Generated 10 URL aliases.'); // 5 nodes + 2 users
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->assertText('Generated 18 URL aliases.'); // 10 nodes + 6 terms + 2 users.
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
@@ -887,7 +918,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Generate URL aliases'));
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
