@@ -916,12 +916,62 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
 
     // Add a new node.
     $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
+    $this->nodes[$new_node->nid] = $new_node;
 
     // Run the update again which should only run against the new node.
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
+
+    // Test deletion of aliases by deleting all node aliases.
+    $edit = array(
+      'update[node][base]' => TRUE,
+      'operations[operation]' => 'delete',
+    );
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost(NULL, array(), t('Delete URL aliases'));
+    // Check that aliases have actually been deleted.
+    foreach ($this->nodes as $node) {
+      $this->assertNoEntityAliasExists('node', $node);
+    }
+
+    // Test generation of node types by creating only post aliases.
+    $edit = array(
+      'update[node][post]' => TRUE,
+    );
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    // Check that aliases only now exists for post types.
+    foreach ($this->nodes as $node) {
+      if ($node->type == 'page') {
+        $this->assertNoEntityAliasExists('node', $node);
+      }
+      if ($node->type == 'post') {
+        $this->assertEntityAliasExists('node', $node);
+      }
+    }
+
+    // Test deletion of individual types by deleting only post and tags aliases.
+    $edit = array(
+      'update[node][post]' => TRUE,
+      'update[taxonomy_term][tags]' => TRUE,
+      'operations[operation]' => 'delete',
+    );
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost(NULL, array(), t('Delete URL aliases'));
+    // Check that all node aliases are again deleted.
+    foreach ($this->nodes as $node) {
+      $this->assertNoEntityAliasExists('node', $node);
+    }
+    // Check only tags aliases were deleted.
+    foreach ($this->terms as $term) {
+      if ($term->vocabulary == 'tags') {
+        $this->assertNoEntityAliasExists('taxonomy_term', $term);
+      }
+      if ($term->vocabulary == 'bulk_test') {
+        $this->assertEntityAliasExists('taxonomy_term', $term);
+      }
+    }
   }
 }
 
