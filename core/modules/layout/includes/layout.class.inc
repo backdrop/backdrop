@@ -269,6 +269,27 @@ class Layout {
       ->setData($data)
       ->save();
 
+    // Parse each BlockText block for file IDs.
+    $fids = array();
+    foreach ($this->content as $content) {
+      if (is_a($content, 'BlockText')) {
+        $block_content = $content->settings['content'];
+        $block_fids = filter_parse_file_fids($block_content);
+        if (isset($block_fids)) {
+          $fids = array_merge($fids, $block_fids);
+        }
+      }
+    }
+    $files = file_load_multiple($fids);
+    foreach ($files as $fid => $file) {
+      if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+        // This makes the file "self-referencing", so it will never be deleted.
+        // File usages are not removed for text blocks currently.
+        // See https://github.com/backdrop/backdrop-issues/issues/2137.
+        file_usage_add($file, 'file', 'file', $file->fid);
+      }
+    }
+
     if (!empty($this->is_new)) {
       $this->invokeHook('insert');
     }
