@@ -1185,6 +1185,28 @@ ul.action-links li a {
   padding: 0;
 }
 
+ /* -------------- Hero blocks  -------------- */
+
+ .hero-block {
+   font-size: 250%;
+   position: relative;
+   padding: 0;
+ }
+ .hero-block.maintain-aspect-ratio:before {
+   display: block;
+   content: "";
+   width: 100%;
+   padding-top: 42.85%; /* 9:21 aspect ratio */
+ }
+ .hero-block.maintain-aspect-ratio > .block-content {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   padding: 100px;
+ }
+
 /* -------------- User Profile   -------------- */
 
 .profile .user-picture {
