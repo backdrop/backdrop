@@ -1644,7 +1644,6 @@ function node_menu() {
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'node.types.inc',
   );
-
   $items['node'] = array(
     'page callback' => 'node_page_default',
     'access arguments' => array('access content'),
@@ -2091,51 +2090,58 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
  * @see node_menu()
  */
 function node_page_default() {
-  $site_config = config('system.core');
-  $select = db_select('node', 'n')
-    ->fields('n', array('nid', 'sticky', 'created'))
-    ->condition('n.promote', 1)
-    ->condition('n.status', 1)
-    ->orderBy('n.sticky', 'DESC')
-    ->orderBy('n.created', 'DESC')
-    ->extend('PagerDefault')
-    ->limit($site_config->get('default_nodes_main'))
-    ->addTag('node_access');
-
-  $nids = $select->execute()->fetchCol();
-
-  if (!empty($nids)) {
-    $nodes = node_load_multiple($nids);
-    $build = node_view_multiple($nodes);
-
-    // 'rss.xml' is a path, not a file, registered in node_menu().
-    backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
-    $build['pager'] = array(
-      '#theme' => 'pager',
-      '#weight' => 5,
-    );
-    backdrop_set_title('');
+  // Check for custom <front> page
+  $front = config_get('system.core', 'site_frontpage');
+  if ($front != 'node') {
+    backdrop_goto('<front>', array(), '301');
   }
   else {
-    backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
+    $site_config = config('system.core');
+    $select = db_select('node', 'n')
+      ->fields('n', array('nid', 'sticky', 'created'))
+      ->condition('n.promote', 1)
+      ->condition('n.status', 1)
+      ->orderBy('n.sticky', 'DESC')
+      ->orderBy('n.created', 'DESC')
+      ->extend('PagerDefault')
+      ->limit($site_config->get('default_nodes_main'))
+      ->addTag('node_access');
 
-    $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
+    $nids = $select->execute()->fetchCol();
 
-    $default_links = array();
-    if (_node_add_access()) {
-      $default_links[] = l(t('Add content'), 'node/add');
+    if (!empty($nids)) {
+      $nodes = node_load_multiple($nids);
+      $build = node_view_multiple($nodes);
+
+      // 'rss.xml' is a path, not a file, registered in node_menu().
+      backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
+      $build['pager'] = array(
+        '#theme' => 'pager',
+        '#weight' => 5,
+      );
+      backdrop_set_title('');
     }
-    if (!empty($default_links)) {
-      $default_message .= theme('item_list', array('items' => $default_links));
-    }
+    else {
+      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
 
-    $build['default_message'] = array(
-      '#markup' => $default_message,
-      '#prefix' => '<div id="first-time">',
-      '#suffix' => '</div>',
-    );
+      $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
+
+      $default_links = array();
+      if (_node_add_access()) {
+        $default_links[] = l(t('Add content'), 'node/add');
+      }
+      if (!empty($default_links)) {
+        $default_message .= theme('item_list', array('items' => $default_links));
+      }
+
+      $build['default_message'] = array(
+        '#markup' => $default_message,
+        '#prefix' => '<div id="first-time">',
+        '#suffix' => '</div>',
+      );
+    }
+    return $build;
   }
-  return $build;
 }
 
 /**

@@ -1735,6 +1735,48 @@ class NodeFeedTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test toggle between custom front page callback and default /node callback.
+ */
+class NodeFrontPageCallback extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('node', 'system');
+
+    $this->admin_user = $this->backdropCreateUser(
+      array(
+        'administer site configuration',
+        'administer nodes',
+        'create post content',
+        'create page content'
+      )
+    );
+    $this->backdropLogin($this->admin_user);
+  }
+
+  function testCustomFrontPage() {
+    $settings = array(
+      'title' => $this->randomName(8),
+      'promote' => 0,
+    );
+    // Set a custom front page.
+    $node = $this->backdropCreateNode($settings);
+    $edit['site_frontpage'] = 'node/' . $node->nid;
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+    $this->backdropGet("node/$node->nid");
+    $this->assertResponse(200);
+    $this->backdropGet('node');
+    $this->assertNoText(t('No front page content has been created yet.'), 'Confirmed /node is not the frontpage.');
+    $this->assertText($node->title);
+
+    // Set back to default front page.
+    $edit['site_frontpage'] = 'node';
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+    $this->backdropGet('<front>');
+    $current_path = current_path();
+    $this->assertEqual('node', $current_path, "Default /node front page restored.");
+  }
+}
+
+/**
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {

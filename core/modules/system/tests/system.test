@@ -1479,8 +1479,12 @@ class FrontPageTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    // Check that the path /node is redirected to the custom frontpage.
     $this->backdropGet('node');
-    $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+    $node_alias = current_path();
+    $this->backdropGet($this->node_path);
+    $this_alias = current_path();
+    $this->assertEqual($node_alias, $this_alias, 'Path /node is redirected to custom frontpage.');
     $this->backdropGet($this->node_path);
     $this->assertText(t('On front page.'), 'Path is the front page.');
   }
