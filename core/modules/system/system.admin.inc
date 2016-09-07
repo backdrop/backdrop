@@ -2502,7 +2502,7 @@ function system_utf8mb4_convert_form($form, &$form_state) {
     return $form;
   }
 
-  $form['help']['#markup'] .= '<p>' . t('This operation is irreversible! Make sure that you have backed up your database before continuing.') . '</p>';
+  $form['help']['#markup'] .= '<p>' . t('This operation is irreversible! Make sure that you have backed up your database before continuing. Your site will be put into maintenance mode during the upgrade. A site with hundreds of pieces of content should take a few minutes. Sites with thousands of pieces of content may take @minutes minutes or more.', array('@minutes' => 10)) . '</p>';
 
   $form['actions'] = array(
     '#type' => 'actions',

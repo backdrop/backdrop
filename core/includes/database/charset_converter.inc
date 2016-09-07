@@ -132,7 +132,7 @@ class DatabaseCharsetConverter {
    * @throws PDOException
    */
   public function convertDatabase($database_name, $charset = NULL, $collation = NULL) {
-    $sql = "ALTER DATABASE `" . $database_name . "` CHARACTER SET = :charset COLLATE = :collation;";
+    $sql = "ALTER DATABASE `$database_name` CHARACTER SET = :charset COLLATE = :collation;";
     return $this->connection->query($sql, array(
       ':charset' => $charset ?: $this->charset,
       ':collation' => $collation ?: $this->collation,
@@ -178,15 +178,15 @@ class DatabaseCharsetConverter {
    * @throws PDOException
    */
   public function convertTable($table_name, $charset = NULL, $collation = NULL) {
-    $this->connection->query("ALTER TABLE $table_name ROW_FORMAT=DYNAMIC ENGINE=INNODB");
-    $sql = "ALTER TABLE $table_name CHARACTER SET = :charset COLLATE = :collation";
+    $this->connection->query("ALTER TABLE `$table_name` ROW_FORMAT=DYNAMIC ENGINE=INNODB");
+    $sql = "ALTER TABLE `$table_name` CHARACTER SET = :charset COLLATE = :collation";
     $result = $this->connection->query($sql, array(
       ':charset' => $charset ?: $this->charset,
       ':collation' => $collation ?: $this->collation,
     ));
     if ($result) {
       $result = $this->convertTableFields($table_name, $charset, $collation);
-      $this->connection->query("OPTIMIZE TABLE $table_name");
+      $this->connection->query("OPTIMIZE TABLE `$table_name`");
     }
     return $result;
   }
@@ -208,7 +208,7 @@ class DatabaseCharsetConverter {
    */
   public function convertTableFields($table_name, $charset = NULL, $collation = NULL) {
     $return = TRUE;
-    $results = $this->connection->query("SHOW FULL FIELDS FROM $table_name")->fetchAllAssoc('Field');
+    $results = $this->connection->query("SHOW FULL FIELDS FROM `$table_name`")->fetchAllAssoc('Field');
     $charset = $charset ?: $this->charset;
     $collation = $collation ?: $this->collation;
     foreach ($results as $row) {
@@ -229,8 +229,8 @@ class DatabaseCharsetConverter {
         $default .= 'DEFAULT NULL';
       }
 
-      $sql = "ALTER TABLE $table_name
-              MODIFY " . $row->Field . " " .
+      $sql = "ALTER TABLE `$table_name`
+              MODIFY `" . $row->Field . "` " .
         $row->Type . " " .
         "CHARACTER SET :charset COLLATE :collation " .
         ($row->Null == "YES" ? "" : "NOT NULL ") .
