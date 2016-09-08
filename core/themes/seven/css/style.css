@@ -365,8 +365,12 @@ ul.secondary li.active a,
 ul.secondary li.active a.active {
   padding: .36em 1em;
 }
-ul.secondary li a:hover,
+ul.secondary li a:hover {
+  color: #000;
+  background: #c5c5c3;
+}
 ul.secondary li.active a,
+ul.secondary li.active a:hover,
 ul.secondary li.active a.active {
   color: #fff;
   background: #666;
