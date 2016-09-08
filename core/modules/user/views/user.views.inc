@@ -21,7 +21,7 @@ function user_views_data() {
   $data['users']['table']['base'] = array(
     'field' => 'uid',
     'title' => t('User account'),
-    'help' => t('People who have created user accounts on your site.'),
+    'help' => t('Users who have created accounts on your site.'),
     'access query tag' => 'user_access',
   );
   $data['users']['table']['entity type'] = 'user';
@@ -63,7 +63,7 @@ function user_views_data() {
     ),
     'relationship' => array(
       'title' => t('Content authored'),
-      'help' => t('Relate content to the user account of the person who created it. This relationship will create one record for each content item created by the user account.'),
+      'help' => t('Relate content to the user account of its creator. This relationship will create one record for each content item created by the user account.'),
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'uid',
@@ -102,7 +102,7 @@ function user_views_data() {
   $data['users']['uid_current'] = array(
     'real field' => 'uid',
     'title' => t('Current'),
-    'help' => t('Filter the view to the account of the currently logged in person.'),
+    'help' => t('Filter the view to the currently logged in user account.'),
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
       'type' => 'yes-no',
@@ -111,8 +111,8 @@ function user_views_data() {
 
   // name
   $data['users']['name'] = array(
-    'title' => t('Name'), // The item it appears as on the UI,
-    'help' => t('The user account or author name.'), // The help that appears on the UI,
+    'title' => t('Username'), // The item it appears as on the UI,
+    'help' => t('The username for the user account or author.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_user_name',
       'click sortable' => TRUE,
@@ -126,7 +126,7 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
       'title' => t('Name (raw)'),
-      'help' => t('The user account or author name. This filter does not check if the user account exists and allows partial matching. Does not utilize autocomplete.')
+      'help' => t('The username for the user account or author. This filter does not check if the user account exists and allows partial matching. Does not utilize autocomplete.')
     ),
   );
 
@@ -134,7 +134,7 @@ function user_views_data() {
   // Note that this field implements field level access control.
   $data['users']['mail'] = array(
     'title' => t('E-mail'), // The item it appears as on the UI,
-    'help' => t('Email address for a given user account. This field is normally not shown to people, so be cautious when using it.'), // The help that appears on the UI,
+    'help' => t('Email address for a given user account. This field is normally not disclosed, so be cautious when using it.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_user_mail',
       'click sortable' => TRUE,
@@ -153,7 +153,7 @@ function user_views_data() {
   // language
   $data['users']['language'] = array(
     'title' => t('Language'), // The item it appears as on the UI,
-    'help' => t('The language of the user account.'),
+    'help' => t('The language for the user account.'),
     'field' => array(
       'handler' => 'views_handler_field_user_language',
       'click sortable' => TRUE,
@@ -272,7 +272,7 @@ function user_views_data() {
   // access field
   $data['users']['access'] = array(
     'title' => t('Last access'), // The item it appears as on the UI,
-    'help' => t("The user account last access date."), // The help that appears on the UI,
+    'help' => t("The user account's last access date."), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -288,7 +288,7 @@ function user_views_data() {
   // login field
   $data['users']['login'] = array(
     'title' => t('Last login'), // The item it appears as on the UI,
-    'help' => t("The user account last login date."), // The help that appears on the UI,
+    'help' => t("The user account's last login date."), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -326,7 +326,7 @@ function user_views_data() {
   // log field
   $data['users']['signature'] = array(
     'title' => t('Signature'), // The item it appears as on the UI,
-    'help' => t("The user account signature."), // The help that appears on the UI,
+    'help' => t("The user account's signature."), // The help that appears on the UI,
      // Information for displaying a title as a field
     'field' => array(
       'handler' => 'views_handler_field_markup',
