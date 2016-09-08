@@ -123,7 +123,9 @@ function node_path_bulk_update_batch_process(&$context) {
   }
 
   foreach ($nodes as $node) {
-    path_save_automatic_entity_alias($node);
+    if (path_save_automatic_entity_alias($node)) {
+      $context['results']['total']['node'] += 1;
+    }
   }
   path_verbose_resume();
 
@@ -237,7 +239,9 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   }
 
   foreach ($terms as $term) {
-    path_save_automatic_entity_alias($term);
+    if (path_save_automatic_entity_alias($term)) {
+      $context['results']['total']['taxonomy_term'] += 1;
+    }
   }
   path_verbose_resume();
 
@@ -306,7 +310,9 @@ function user_path_bulk_update_batch_process(&$context) {
   path_verbose_suspend();
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
-    path_save_automatic_entity_alias($account);
+    if (path_save_automatic_entity_alias($account)) {
+      $context['results']['total']['user'] += 1;
+    }
   }
   path_verbose_resume();
 

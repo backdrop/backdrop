@@ -840,6 +840,9 @@ function path_bulk_update_form_generate_submit($form, &$form_state) {
  * Batch callback; count the current number of URL aliases for comparison later.
  */
 function path_bulk_update_batch_start(&$context) {
+  $context['results']['total']['node'] = 0;
+  $context['results']['total']['taxonomy_term'] = 0;
+  $context['results']['total']['user'] = 0;
   $context['results']['count_before'] = db_select('url_alias')->countQuery()->execute()->fetchField();
 }
 
@@ -853,7 +856,6 @@ function path_bulk_update_batch_process($callback, $path_info, &$context) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
     $context['choices'] = array_keys($path_info['choices']);
     $context['reset_alias'] = $path_info['reset_alias'];
-    $context['results']['reset_count'] = count($path_info['reset_alias']);
   }
   return $callback($context);
 }
@@ -870,8 +872,8 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
     if ($results['count_changed']) {
       backdrop_set_message(format_plural($results['count_changed'], 'Generated 1 URL alias.', 'Generated @count URL aliases.'));
     }
-    elseif ($results['reset_count']) {
-      backdrop_set_message(format_plural($results['reset_count'], 'No new URL aliases generated; 1 alias was updated.', 'No new URL aliases generated; @count aliases were updated.'));
+    elseif (isset($results['total'])) {
+      backdrop_set_message(format_plural(array_sum($results['total']), 'No new URL aliases generated; 1 alias was updated.', 'No new URL aliases generated; @count aliases were updated.'));
     }
     else {
       backdrop_set_message(t('No new URL aliases to generate.'));
