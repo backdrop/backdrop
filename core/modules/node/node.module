@@ -1917,7 +1917,7 @@ function node_block_view($delta = '', $settings = array()) {
         $nids = views_get_view_result('promoted', 'block');
 
         if (empty($nids)) {
-          $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
+          $default_message = '<p>' . t('No content has been promoted to the front page yet.') . '</p>';
 
           $default_links = array();
           $content_types = node_type_get_types();
@@ -2176,8 +2176,7 @@ function node_page_default() {
     else {
       backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
 
-      $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
-
+      $default_message = '<p>' . t('No content has been promoted to the front page yet.') . '</p>';
       $default_links = array();
       if (_node_add_access()) {
         $default_links[] = l(t('Add content'), 'node/add');

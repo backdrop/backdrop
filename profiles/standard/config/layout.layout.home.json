@@ -6,13 +6,13 @@
     "description": null,
     "module": "standard",
     "weight": 0,
-    "storage": 2,
+    "storage": 4,
     "layout_template": "boxton",
     "disabled": false,
     "settings": {
         "title": "Welcome to Backdrop",
-        "title_display": "custom",
-        "title_block": null
+        "title_display": "none",
+        "title_block": "2d7c0189-0ac9-48e6-9400-f5b63362e34a"
     },
     "positions": {
         "header": [
@@ -23,13 +23,15 @@
             "2d7c0189-0ac9-48e6-9400-f5b63362e34a"
         ],
         "content": [
+            "094cbc03-d088-4b3c-8361-977733540ae8",
             "500ef0b9-c1bc-4049-a91b-27e3decec0ed",
             "578243cf-a4c8-46ad-9504-04aaf4ec9ccc"
         ],
         "bottom": [],
         "footer": [
             "d6903155-4ad7-46d3-9300-e628fd337f06"
-        ]
+        ],
+        "title": []
     },
     "content": {
         "9bd5a524-3670-4922-8b12-18b00a2858b9": {
@@ -100,6 +102,33 @@
                     "contexts": []
                 },
                 "uuid": "2d7c0189-0ac9-48e6-9400-f5b63362e34a",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "094cbc03-d088-4b3c-8361-977733540ae8": {
+            "plugin": "layout:hero_block",
+            "data": {
+                "module": "layout",
+                "delta": "hero_block",
+                "settings": {
+                    "title_display": "default",
+                    "title": "Welcome to Backdrop CMS",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "content": "",
+                    "format": "filtered_html",
+                    "image": null,
+                    "image_path": null
+                },
+                "uuid": "094cbc03-d088-4b3c-8361-977733540ae8",
                 "style": {
                     "plugin": "default",
                     "data": {
