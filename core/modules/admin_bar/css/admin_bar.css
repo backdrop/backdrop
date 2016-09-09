@@ -322,10 +322,10 @@ tr.admin-bar-tweak-permissions-processed td.module {
   text-align: center;
   background-color: #ee3d23;
 }
-#admin-bar .top-level .admin-bar-alert .error-count {
+#admin-bar .admin-bar-alert .error-count {
   margin-left: 0;
   margin-right: 0;
 }
-#admin-bar .top-level .admin-bar-alert .error-label {
+#admin-bar .admin-bar-alert .error-label {
   display: none;
 }
