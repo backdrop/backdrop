@@ -588,8 +588,9 @@ tr:hover del.diffchange {
  * Hero blocks.
  */
  .hero-block {
-   background-size: 100%;
+   background-size: cover;
    background-repeat: no-repeat;
+   background-position: top center;
    padding: 50px 100px;
    text-align: center;
    color: #ffffff;

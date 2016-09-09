@@ -31,13 +31,23 @@ class BlockHero extends BlockText {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
+    $upload_validators = array(
+      'file_validate_extensions' => array('jpg jpeg png gif'),
+      'file_validate_image_resolution' => array('3200x1600', '1200x600'),
+    );
+    $upload_description = theme('file_upload_help', array(
+      'description' => t('The uploaded image will be displayed as a background.'),
+      'upload_validators' => $upload_validators,
+    ));
+
     // Add an image field at the top of the settings form.
     $form['image'] = array(
       '#type' => 'managed_file',
       '#title' => t('Background image'),
-      '#description' => t('The uploaded image will be displayed as a background. The intended aspect ratio is 21:9.'),
+      '#description' => $upload_description,
       '#default_value' => $this->settings['image'],
       '#upload_location' => 'public://hero/',
+      '#upload_validators' => $upload_validators,
       '#weight' => -10,
     );
     // Store the image path separately.

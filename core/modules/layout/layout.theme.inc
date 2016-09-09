@@ -254,10 +254,16 @@ function template_preprocess_block(&$variables) {
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
-  // Add the hero background image inline.
-  if (get_class($block) == 'BlockHero' && isset($block->settings['image_path'])) {
-    $variables['attributes']['style'] = 'background-image:url(' . $block->settings['image_path'] . ');';
-    $variables['classes'][] = 'hero-block';
+  // Add the hero background image inline. This could also be added in a
+  // specific template_preprocess_block__layout__hero() function, but we add
+  // it here just to cut down on unnecessary separation.
+  if (get_class($block) == 'BlockHero') {
+    if (isset($block->settings['image_path'])) {
+      $variables['attributes']['style'] = 'background-image:url(' . $block->settings['image_path'] . ');';
+    }
+    else {
+      $variables['classes'][] = 'hero-block';
+    }
   }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
