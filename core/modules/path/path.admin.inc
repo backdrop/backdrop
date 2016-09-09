@@ -688,6 +688,7 @@ function path_bulk_update_form($form, &$form_state) {
               'class' => array('path-type', 'path-' . $type),
               'data-path-type' => array($type),
               'data-path-name' => array($item),
+            '#parents' => array('update'),
             ),
           );
           $form['reset_alias'][$type][$item] = array(
@@ -725,6 +726,7 @@ function path_bulk_update_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Execute'),
     '#submit' => array('path_bulk_update_form_rebuild_submit'),
+    '#validate' => array('path_bulk_update_form_validate'),
   );
 
   return $form;
@@ -787,6 +789,43 @@ function path_bulk_update_form_rebuild_submit($form, &$form_state) {
   }
   else {
     path_bulk_update_form_generate_submit($form, $form_state);
+  }
+}
+
+/**
+ * Validate handler for path alias bulk generate form.
+ *
+ * @see path_bulk_update_form()
+ * @see path_bulk_update_form_generate_submit()
+ */
+function path_bulk_update_form_validate($form, &$form_state) {
+  $selected = array();
+  $reset_errors = array();
+  // At least one update checkbox must be checked.
+  if (isset($form_state['values']['update'])) {
+    foreach ($form_state['values']['update'] as $entity_type) {
+      $values = array_filter($entity_type);
+      if (!empty($values)) {
+        $selected[] = $values;
+      }
+    }
+    if (!$selected) {
+      form_set_error('update', t('You must select an alias to update.'));
+    }
+  }
+  // Don't allow reset checkbox to be checked if the corresponding alias 
+  // checkbox is not selected.
+  if (isset($form_state['values']['reset_alias'])) {
+    foreach ($form_state['values']['reset_alias'] as $entity_type => $reset) {
+      foreach ($reset as $reset_status => $value) {
+        if ($value && empty($form_state['values']['update'][$entity_type][$reset_status])) {
+          $reset_errors[] = TRUE;
+        }
+      }
+    }
+    if ($reset_errors) {
+      form_set_error('update', t('You must select an alias to reset.'));
+    }
   }
 }
 
