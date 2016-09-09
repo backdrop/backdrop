@@ -351,6 +351,8 @@ ul.secondary li {
 ul.secondary li a {
   display: block;
   border: 0;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
   border-radius: 3px;
   background: #ddd;
   color: #000;
