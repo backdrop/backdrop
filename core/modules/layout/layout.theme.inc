@@ -56,7 +56,7 @@ function theme_layout_info($variables) {
 
   // Create a link to the settings page
   $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/settings');
-  
+
   $output = '';
   $output .= '<div class="layout-info">';
   $output .= $preview;
@@ -250,8 +250,21 @@ function template_preprocess_block(&$variables) {
   $style = $block->style;
 
   $variables['classes'] = array();
+  $variables['attributes'] = array();
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
+
+  // Add the hero background image inline. This could also be added in a
+  // specific template_preprocess_block__layout__hero() function, but we add
+  // it here just to cut down on unnecessary separation.
+  if (get_class($block) == 'BlockHero') {
+    if (isset($block->settings['image_path'])) {
+      $variables['attributes']['style'] = 'background-image:url(' . $block->settings['image_path'] . ');';
+    }
+    else {
+      $variables['classes'][] = 'hero-block';
+    }
+  }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
     $links = array();
@@ -322,7 +335,6 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Classes for the wrapper set in template_preprocess_block().
   $variables['wrapper_tag'] = $style->settings['wrapper_tag'];
-  $variables['attributes'] = array();
 
   // Title tag and classes.
   $variables['title_tag'] = $style->settings['title_tag'];
