@@ -47,7 +47,8 @@ function bartik_preprocess_layout(&$variables) {
  * Overrides theme_menu_tree().
  */
 function bartik_menu_tree($variables) {
-  return '<ul class="menu clearfix">' . $variables['tree'] . '</ul>';
+  $variables['attributes']['class'][] = 'clearfix';
+  return '<ul' . backdrop_attributes($variables['attributes']) . '>' . $variables['tree'] . '</ul>';
 }
 
 /**
