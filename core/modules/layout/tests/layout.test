@@ -308,109 +308,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test Custom Text blocks.
-   */
-  function testCustomTextBlocks() {
-    $this->backdropGet('admin/structure/layouts/manage/default');
-    $block_title_1 = 'Title of block one';
-    $block_content_1 = 'Content of block one';
-    $block_content_2 = 'Content of block two';
-    $block_title_3 = 'Title of block three';
-
-    // Add a Custom Text block to the sidebar.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'title' => $block_title_1,
-      'content[value]' => $block_content_1,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
-      ':region' => 'l-sidebar',
-    ));
-    $first_block_uuid = (string) $first_block[0]['data-block-id'];
-
-    // Add a Custom Text block without subject.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'content[value]' => $block_content_2,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-
-    // Add a Custom Text block without content.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'title' => $block_title_3,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    // Go to the front page and check that the text shows.
-    $this->backdropGet('<front>');
-
-    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
-      ':region' => 'l-sidebar',
-      ':block' => 'block-layout-custom-block',
-    ));
-    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
-
-    // Both title and content are visible for block one.
-    $this->assertText(t($block_title_1));
-    $this->assertText(t($block_content_1));
-
-    // Block two content is visible.
-    $this->assertText(t($block_content_2));
-    // Block two has no title.
-    $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
-    $this->assertFalse($title_2);
-
-    // Block three doesn't appear.
-    $this->assertNoText(t($block_title_3));
-    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
-    $this->assertFalse($block_3);
-
-    // Convert the first block from being a text block into a custom block.
-    module_enable(array('block'));
-    $edit = array(
-      'reusable' => TRUE,
-    );
-    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
-    $this->assertText(t('Admin label is required when making a block reusable.'));
-    $edit['label'] = 'My custom block label';
-    $this->backdropPost(NULL, $edit, t('Save block'));
-    $this->assertText(t('An internal name is required when making a block reusable.'));
-    $edit['delta'] = 'my_custom_block';
-    $this->backdropPost(NULL, $edit, t('Save block'));
-
-    // Now back on the layout main page. Check the new admin label is shown.
-    $this->assertText('My custom block label');
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    // Check that the new block.module provided configuration form is now used.
-    $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
-    // The reusable checkbox should exist but be disabled.
-    $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
-
-    // Go to the front page and check that the converted block shows up.
-    $this->backdropGet('<front>');
-    $custom_block = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
-      ':region' => 'l-sidebar',
-      ':block' => 'block-block-my-custom-block',
-    ));
-    $this->assertEqual(count($custom_block), 1, 'Converted custom block found.');
-    if (count($custom_block)) {
-      $custom_block_title = $custom_block[0]->xpath('.//*[contains(@class, "block-title")]');
-      $custom_block_content = $custom_block[0]->xpath('.//*[contains(@class, "block-content")]/p');
-      $this->assertEqual((string) $custom_block_title[0], $block_title_1, 'Converted custom block title found.');
-      $this->assertEqual((string) $custom_block_content[0], $block_content_1, 'Converted custom block content.');
-    }
-  }
-
-  /**
    * Test block path and type conditions.
    */
   function testBlockPathTypeConditions() {
@@ -1375,6 +1272,244 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests the blocks title, content, and display settings.
+ */
+class LayoutBlockTest extends BackdropWebTestCase {
+    protected $profile = 'minimal';
+    protected $admin_user;
+
+    function setUp() {
+      parent::setUp(array('file'));
+
+      // Create and login admin user.
+      $this->admin_user = $this->backdropCreateUser(array(
+        'access administration pages',
+        'administer layouts',
+        'access user profiles',
+      ));
+      $this->backdropLogin($this->admin_user);
+    }
+
+  /**
+   * Test Custom Text blocks.
+   */
+  function testCustomTextBlocks() {
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $block_title_1 = 'Title of block one';
+    $block_content_1 = 'Content of block one';
+    $block_content_2 = 'Content of block two';
+    $block_title_3 = 'Title of block three';
+
+    // Add a Custom Text block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'title' => $block_title_1,
+      'content[value]' => $block_content_1,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $first_block_uuid = (string) $first_block[0]['data-block-id'];
+
+    // Add a Custom Text block without subject.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'content[value]' => $block_content_2,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a Custom Text block without content.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Add a custom block'));
+    $edit = array(
+      'title' => $block_title_3,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the front page and check that the text shows.
+    $this->backdropGet('<front>');
+
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
+      ':block' => 'block-layout-custom-block',
+    ));
+    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
+
+    // Both title and content are visible for block one.
+    $this->assertText($block_title_1);
+    $this->assertText($block_content_1);
+
+    // Block two content is visible.
+    $this->assertText($block_content_2);
+    // Block two has no title.
+    $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
+    $this->assertFalse($title_2);
+
+    // Block three doesn't appear.
+    $this->assertNoText($block_title_3);
+    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
+    $this->assertFalse($block_3);
+
+    // Convert the first block from being a text block into a custom block.
+    module_enable(array('block'));
+    $edit = array(
+      'reusable' => TRUE,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
+    $this->assertText(t('Admin label is required when making a block reusable.'));
+    $edit['label'] = 'My custom block label';
+    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->assertText(t('An internal name is required when making a block reusable.'));
+    $edit['delta'] = 'my_custom_block';
+    $this->backdropPost(NULL, $edit, t('Save block'));
+
+    // Now back on the layout main page. Check the new admin label is shown.
+    $this->assertText('My custom block label');
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block.module provided configuration form is now used.
+    $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
+    // The reusable checkbox should exist but be disabled.
+    $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
+
+    // Go to the front page and check that the converted block shows up.
+    $this->backdropGet('<front>');
+    $custom_block = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
+      ':block' => 'block-block-my-custom-block',
+    ));
+    $this->assertEqual(count($custom_block), 1, 'Converted custom block found.');
+    if (count($custom_block)) {
+      $custom_block_title = $custom_block[0]->xpath('.//*[contains(@class, "block-title")]');
+      $custom_block_content = $custom_block[0]->xpath('.//*[contains(@class, "block-content")]/p');
+      $this->assertEqual((string) $custom_block_title[0], $block_title_1, 'Converted custom block title found.');
+      $this->assertEqual((string) $custom_block_content[0], $block_content_1, 'Converted custom block content.');
+    }
+  }
+
+  /**
+   * Test Hero blocks.
+   */
+  function testHeroBlocks() {
+    $hero_title_1 = 'Wonderwoman';
+    $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
+    $hero_title_2 = 'Black Widow';
+    $hero_content_2 = "This isnt gonna end well...";
+
+    // Create some sample images.
+    $good_image = imagecreate(2400, 400);
+    $good_filename = 'good.jpg';
+    $good_realpath_filename = backdrop_realpath('temporary://' . $good_filename);
+    imagejpeg($good_image, $good_realpath_filename);
+
+    $bad_image =  imagecreate(1024, 260);
+    imagecolorallocate($bad_image, 255, 0, 0); // Red image.
+    $bad_filename = 'bad.jpg';
+    $bad_realpath_filename = backdrop_realpath('temporary://' . $bad_filename);
+    imagejpeg($bad_image, $bad_realpath_filename);
+
+    $good_image2 = imagecreate(2400, 400);
+    $good_filename2 = 'good2.jpg';
+    $good_realpath_filename2 = backdrop_realpath('temporary://' . $good_filename2);
+    imagejpeg($good_image2, $good_realpath_filename2);
+
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Block 1: Add a hero block with no image to the content area.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Add a hero block'));
+    $edit = array(
+      'title' => $hero_title_1,
+      'content[value]' => $hero_content_1,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Block 2: Add a hero block with only content and an image.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Add a hero block'));
+    $edit = array(
+      'content[value]' => $hero_content_2,
+      'files[image]' => $good_realpath_filename,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Block 3: Add a hero block with only an image.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Add a hero block'));
+
+    // Confirm a too-small background image fails validation.
+    $edit = array(
+      'files[image]' => $bad_realpath_filename,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $this->assertText(t('The specified file ' . $bad_filename . ' could not be uploaded. The image is too small; the minimum dimensions are 1200x300 pixels.'));
+
+    // Resubmit using the good image.
+    $edit['files[image]'] = $good_realpath_filename2;
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the user page and check for all hero blocks.
+    $this->backdropGet('user');
+
+    // Get all hero blocks on the user page and confirm the correct number.
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-content',
+      ':block' => 'block-layout-hero-block',
+    ));
+    $this->assertEqual(count($elements), 3, 'Three hero blocks were found in the content area.');
+
+    // Get all the hero block elements for testing. Order matters here.
+    $elements = $this->xpath('(//div[contains(@class, "block-layout-hero-block")])');
+
+    // Block 1: Confirm both title and content are visible.
+    $this->assertText($hero_title_1);
+    $this->assertText($hero_content_1);
+    // Block 1: Confirm handy `block-hero-no-image` class is present.
+    $classes_1 = (string)$elements[0]['class'];
+    $this->assertTrue(strstr($classes_1, 'block-hero-no-image'));
+    // Block 1: Confirm that no background image is present.
+    $this->assertNull($elements[0]['style'], 'No image present for 1st hero block.');
+
+    // Block 2: no title present.
+    $title_2 = $elements[1]->xpath('.//h2');
+    $this->assertFalse($title_2, 'No title present for 2nd hero block.');
+    // Block 2: content is visible.
+    $this->assertText($hero_content_2);
+    // Block 2: Confirm handy `block-hero-image` class is present.
+    $classes_2 = (string)$elements[1]['class'];
+    $this->assertTrue(strstr($classes_2, 'block-hero-image'));
+    // Block 2: Background image present.
+    $style_2 = (string)$elements[1]['style'];
+    $this->assertTrue(strstr($style_2, $good_filename), 'Image present for 2nd hero block.');
+
+    // Block 3: no title present.
+    $title_3 = $elements[2]->xpath('.//h2');
+    $this->assertFalse($title_3, 'No title present for 3rd hero block.');
+    // Block 3: no content present.
+    $content_3_element = $elements[2]->xpath('.//div[contains(@class, "block-content")]');
+    // Extract the content.
+    $content_3 = (string)$content_3_element[0];
+    // Remove non-breaking spaces.
+    $content_3 = preg_replace('~\x{00a0}~siu', '', $content_3);
+    // Trim all other whitespace.
+    $content_3 = trim(preg_replace('/\s+/S', '', $content_3), ' \t\n\r\0\x0B\xC2\xA0');
+    $this->assertEqual($content_3, '', 'No content present for 3rd hero block.');
+    // Background image present for block three.
+    $style_3 = (string)$elements[2]['style'];
+    $this->assertTrue(strstr($style_3, $good_filename2), 'Image present for 3rd hero block.');
+  }
+}
+
+/**
  * Tests that the correct layout is used in various situations.
  */
 class LayoutSelectionTest extends BackdropWebTestCase {
@@ -1713,7 +1848,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
    */
   public function testLayoutHooks() {
     state_set('layout_test', array());
-    
+
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
@@ -1731,10 +1866,10 @@ class LayoutHookTestCase extends BackdropWebTestCase {
 
     // We should be taken to the layout content page next.
     $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
-    
+
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    
+
     $this->assertHookMessageOrder(array(
       'layout_test_layout_presave called',
       'layout_test_layout_insert called',
@@ -1778,7 +1913,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
       'layout_test_layout_delete called',
     ));
 
-    // Go to the Default layout's edit page and change the layout to the 
+    // Go to the Default layout's edit page and change the layout to the
     // boxton layout.
     state_set('layout_test', array());
     $edit = array(

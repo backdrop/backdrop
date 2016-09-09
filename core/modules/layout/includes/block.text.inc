@@ -2,7 +2,7 @@
 
 /**
  *  TextBlock extends Block
- *  
+ *
  *  This class allows us to create text blocks.
  */
 class BlockText extends Block {

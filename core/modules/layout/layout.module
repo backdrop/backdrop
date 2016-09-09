@@ -609,6 +609,11 @@ function layout_block_info() {
     'description' => t('A basic block for adding custom text.'),
     'class' => 'BlockText',
   );
+  $blocks['hero_block'] = array(
+    'info' => t('Add a hero block'),
+    'description' => t('A hero block often consists of text over a background image, though either are optional.'),
+    'class' => 'BlockHero',
+  );
 
   return $blocks;
 }
@@ -625,6 +630,7 @@ function layout_autoload_info() {
     'BlockBroken' => 'includes/block.class.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
     'BlockText' => 'includes/block.text.inc',
+    'BlockHero' => 'includes/block.hero.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
@@ -1025,7 +1031,7 @@ function layout_provides_path($path) {
  */
 function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
   if (!isset($router_item)) {
-    $router_item = menu_get_item($path);  
+    $router_item = menu_get_item($path);
   }
 
   $cache = &backdrop_static(__FUNCTION__);
@@ -1143,7 +1149,7 @@ function _layout_get_all_info($data_type, $init = array()) {
  *   The name of the layout template, e.g. "boxton" or "simmons". If no layout
  *   template is specified, all layout info will be returned.
  * @return array|boolean
- *   The layout template information, as returned by either a stand-alone 
+ *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
  *
  * @see hook_layout_info()
@@ -1216,10 +1222,10 @@ function layout_get_layout_template_info($template_name = NULL) {
  *
  * @param string $layout_name
  *   The name of the layout template, e.g. "one_column" or
- *   "three_three_four_column". If no layout template is specified, all layout 
+ *   "three_three_four_column". If no layout template is specified, all layout
  *  info will be returned.
  * @return array|boolean
- *   The layout template information, as returned by either a stand-alone 
+ *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
  *
  * @deprecated since 1.4.0

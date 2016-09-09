@@ -1185,6 +1185,35 @@ ul.action-links li a {
   padding: 0;
 }
 
+ /* -------------- Hero blocks  -------------- */
+
+.block-hero {
+  position: relative;
+  padding: 8% 4%; /* All padding shrinks/grows according to available width. */
+  min-height: 128px;
+  font-size: 120%;
+  -webkit-transition: min-height 0.25s;
+  transition: min-height 0.25s;
+  will-change: min-height;
+}
+.block-hero .block-title {
+  margin: 2% 0; /* Top/bottom margin shrinks/grows according to width. */
+  font-size: 180%;
+}
+@media (min-width: 34em) {
+  .block-hero {
+    min-height: 166px;
+    font-size: 140%;
+  }
+}
+@media (min-width: 48em) {
+  .block-hero {
+    min-height: 200px;
+    font-size: 180%;
+  }
+}
+
+
 /* -------------- User Profile   -------------- */
 
 .profile .user-picture {
