@@ -22,7 +22,7 @@ function ckeditor_editor_info() {
           ),
           array(
             'name' => 'Linking',
-            'items' => array('Link', 'Unlink'),
+            'items' => array('BackdropLink', 'BackdropUnlink'),
           ),
           array(
             'name' => 'Alignment',
