@@ -951,6 +951,26 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       }
     }
 
+    // Test resetting aliases. Change the path pattern on the post content type.
+    $edit = array(
+      'path_pattern' => 'changed-post/[node:title]',
+    );
+    $this->backdropPost('admin/structure/types/manage/post/configure', $edit, t('Save content type'));
+    $edit = array(
+      'update[node][page]' => TRUE,
+      'update[node][post]' => TRUE,
+      'reset_alias[node][post]' => TRUE,
+    );
+    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    foreach ($this->nodes as $node) {
+      if ($node->type == 'page') {
+        $this->assertNoEntityAliasExists('node', $node);
+      }
+      if ($node->type == 'post') {
+        $this->assertEntityAlias('node', $node, 'changed-post/' . strtolower($node->title));
+      }
+    }
+
     // Test deletion of individual types by deleting only post and tags aliases.
     $edit = array(
       'update[node][post]' => TRUE,
