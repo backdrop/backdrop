@@ -44,14 +44,6 @@ function bartik_preprocess_layout(&$variables) {
 }
 
 /**
- * Overrides theme_menu_tree().
- */
-function bartik_menu_tree($variables) {
-  $variables['attributes']['class'][] = 'clearfix';
-  return '<ul' . backdrop_attributes($variables['attributes']) . '>' . $variables['tree'] . '</ul>';
-}
-
-/**
  * Overrides theme_field__FIELD_TYPE().
  */
 function bartik_field__taxonomy_term_reference($variables) {

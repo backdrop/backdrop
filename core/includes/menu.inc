@@ -1069,10 +1069,13 @@ function menu_tree($menu_name) {
  * @param $tree
  *   A data structure representing the tree as returned from menu_tree_data.
  *
+ * @param $_current_depth
+ *   Internal use only. The current menu level depth being printed out.
+ *
  * @return
  *   A structured array to be rendered by backdrop_render().
  */
-function menu_tree_output($tree) {
+function menu_tree_output($tree, $_current_depth = 0) {
   global $language_url;
 
   $build = array();
@@ -1101,15 +1104,13 @@ function menu_tree_output($tree) {
     // the current menu.
     if ($data['link']['has_children'] && $data['below']) {
       $class[] = 'expanded';
+      $class[] = 'has-children';
     }
     elseif ($data['link']['has_children']) {
       $class[] = 'collapsed';
     }
     else {
       $class[] = 'leaf';
-    }
-    if (!empty($data['link']['leaf_has_children'])) {
-      $class[] = 'has-children';
     }
     // Set a class if the link is in the active trail.
     if ($data['link']['in_active_trail']) {
@@ -1137,7 +1138,7 @@ function menu_tree_output($tree) {
     $element['#title'] = $data['link']['title'];
     $element['#href'] = $data['link']['href'];
     $element['#localized_options'] = !empty($data['link']['localized_options']) ? $data['link']['localized_options'] : array();
-    $element['#below'] = $data['below'] ? menu_tree_output($data['below']) : $data['below'];
+    $element['#below'] = $data['below'] ? menu_tree_output($data['below'], $_current_depth + 1) : $data['below'];
     $element['#original_link'] = $data['link'];
     // Index using the link's unique mlid.
     $build[$data['link']['mlid']] = $element;
@@ -1145,6 +1146,8 @@ function menu_tree_output($tree) {
   if ($build) {
     // Make sure backdrop_render() does not re-order the links.
     $build['#sorted'] = TRUE;
+    // Add the depth for use in the theme wrapper.
+    $build['#depth'] = $_current_depth;
     // Add the theme wrapper for outer markup.
     // Allow menu-specific theme overrides.
     if (isset($data['link']['menu_name'])) {
@@ -1676,15 +1679,26 @@ function template_preprocess_menu_tree(&$variables) {
   if (isset($variables['tree']['#wrapper_attributes'])) {
     $variables['attributes'] = $variables['tree']['#wrapper_attributes'];
   }
-  $variables['attributes']['class'][] = 'menu';
+
+  // Only add the menu class to the first level of depth.
+  if ($variables['tree']['#depth'] === 0) {
+    $variables['attributes']['class'][] = 'menu';
+  }
+
+  $variables['depth'] = $variables['tree']['#depth'];
   $variables['tree'] = $variables['tree']['#children'];
 }
 
 /**
- * Returns HTML for a wrapper for a menu sub-tree.
+ * Returns HTML for a wrapper for a menu tree.
+ *
+ * Note that this may be called multiple times for rendering a menu and its
+ * children if showing multiple levels of depth.
  *
  * @param $variables
  *   An associative array containing:
+ *   - attributes: Since 1.5.0. Attributes to be added to this menu tree.
+ *   - depth: Since 1.5.0. The menu level depth. Will be 0 for the first level.
  *   - tree: An HTML string containing the tree's items.
  *
  * @see template_preprocess_menu_tree()

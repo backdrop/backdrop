@@ -44,7 +44,7 @@
 			this[0].focus();
 		}
 		return this;
-	}
+	};
 
 	$.extend($.SmartMenus.Keyboard = {}, {
 		docKeydown: function(e) {

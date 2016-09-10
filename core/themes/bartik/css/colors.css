@@ -18,20 +18,27 @@ body {
   background-image: -webkit-linear-gradient(top, #000000 0%, #000001 100%);
   background-image: linear-gradient(top, #000000 0%, #000001 100%);
 }
-.l-header ul.menu li a {
+.l-header ul.menu > li > a {
   color: #e3e3e3;
 }
-.l-header ul.menu li a.active,
-.l-header ul.menu li.active-trail a {
+.l-header ul.menu-dropdown a {
+  color: #3b3b3b;
+}
+.l-header ul.menu-dropdown ul a.highlighted,
+.l-header ul.menu-dropdown ul a:hover {
+  color: #27ace2;
+}
+.l-header ul.menu > li > a.active,
+.l-header ul.menu > li.active-trail a {
   color: #fefeff;
 }
 input {
   color: #3b3b3b;
 }
-.tabs ul.primary li a.active {
+.tabs ul.primary > li > a.active {
   background-color: #ffffff;
 }
-.tabs ul.primary li.active a {
+.tabs ul.primary > li.active > a {
   background-color: #ffffff;
   border-bottom: 1px solid #ffffff;
 }
