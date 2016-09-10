@@ -18,7 +18,7 @@ function system_menu_block_defaults($menu_name) {
   $defaults = array(
     'level' => 1,
     'menu_name' => $menu_name,
-    'dropdown' => FALSE,
+    'style' => NULL,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -79,11 +79,12 @@ function system_menu_block_form($config) {
     '#description' => t('From the starting level, specify the maximum depth of the menu tree.'),
   );
 
-  $form['dropdown'] = array(
+  $form['style'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Drop-down or Fly-out'),
-    '#default_value' => $config['dropdown'],
-    '#description' => t('Would you like deeper levels of this menu to be hidden initially?'),
+    '#title' => t('Display as drop-down'),
+    '#return_value' => 'dropdown',
+    '#default_value' => empty($config['style']) ? NULL : $config['style'],
+    '#description' => t('If enabled, children items will be shown on mouse hover or touch events.'),
     '#states' => array(
       'invisible' => array(
         'select[name="block_settings[depth]"]' => array('value' => '1'),
@@ -135,10 +136,17 @@ function system_menu_block_build(array $config) {
   // Create a renderable tree.
   if (!empty($tree) && $output = menu_tree_output($tree)) {
     $data['content'] = $output;
-    // Add smartmenus.
-    if ($config['dropdown']) {
-      $data['content']['#wrapper_attributes'] = array('class' => array('sm'));
-      $data['content']['#attached'] = array('library' => array(array('system', 'smartmenus')));
+    // Add any menu style (currently always "dropdown" if any).
+    if (!empty($config['style'])) {
+      $data['content']['#wrapper_attributes']['class'][] = 'menu-' . $config['style'];
+      $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+      $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
+      if ($config['style'] === 'dropdown') {
+        $data['content']['#attached']['library'][] = array('system', 'smartmenus');
+      }
+    }
+    if (!empty($config['style_settings'])) {
+      $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
     }
   }
 
@@ -282,11 +290,6 @@ function system_menu_tree_depth_trim(array &$tree, $depth_limit) {
         // Remove the children items.
         $tree[$key]['below'] = FALSE;
       }
-    }
-    if ($depth_limit == 1 && $tree[$key]['link']['has_children']) {
-      // Turn off the menu styling that shows there were children.
-      $tree[$key]['link']['has_children'] = FALSE;
-      $tree[$key]['link']['leaf_has_children'] = TRUE;
     }
   }
 }

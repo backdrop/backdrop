@@ -1221,6 +1221,17 @@ function system_library_info() {
     ),
   );
 
+  $libraries['backdrop.menus'] = array(
+    'title' => 'Backdrop menu styles',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',
@@ -1341,7 +1352,7 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      'core/misc/smartmenus/query.smartmenus.min.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.min.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -2398,6 +2409,17 @@ function system_block_configure($delta, $settings) {
     if ($delta === $menu_name) {
       module_load_include('inc', 'system', 'system.menu');
       return _system_block_configure($delta, $settings);
+    }
+  }
+}
+
+/**
+ * Implements hook_block_save().
+ */
+function system_block_save($delta, &$settings) {
+  if (in_array($delta, array_keys(menu_list_system_menus()))) {
+    if ($settings['depth'] == 1 && $settings['style'] == 'dropdown') {
+      $settings['style'] = NULL;
     }
   }
 }
