@@ -937,9 +937,6 @@ function layout_content_form_submit($form, &$form_state) {
   // Delete the tempstore copy of the layout.
   layout_clear_layout_tempstore($layout->name);
 
-  // Reset the block usage report.
-  backdrop_static_reset('layout_get_block_usage');
-
   backdrop_set_message(t('Layout content saved.'));
 }
 
