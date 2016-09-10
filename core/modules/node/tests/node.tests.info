@@ -190,6 +190,12 @@ description = Test cache invalidation of node operations.
 group = Node
 file = node.test
 
+[NodeMultiByteUtf8Test]
+name = Multi-byte UTF-8
+description = Test that multi-byte UTF-8 characters are stored and retrieved correctly.
+group = Node
+file = node.test
+
 [NodeViewsRevisionRelationsTestCase]
 name = Views node revision relationship
 description = Tests the Views integration of node_revision table of node module.

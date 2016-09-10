@@ -806,6 +806,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -15,
   );
+  $items['admin/config/development/utf8mb4-upgrade'] = array(
+    'title' => 'Database 4 byte UTF-8 upgrade',
+    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathmatical symbols.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_utf8mb4_convert_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  );
 
   // Regional and date settings.
   $items['admin/config/regional'] = array(

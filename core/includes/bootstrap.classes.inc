@@ -56,6 +56,7 @@ function backdrop_class_list() {
     'UuidPhp' => $path . 'uuid.inc',
     'UuidInterface' => $path . 'uuid.inc',
 
+    'DatabaseCharsetConverter' => $path . 'database/charset_converter.inc',
     'DatabaseConnection' => $path . 'database/database.inc',
     'Database' => $path . 'database/database.inc',
     'DatabaseTransactionNoActiveException' => $path . 'database/database.inc',

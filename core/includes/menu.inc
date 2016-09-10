@@ -3923,8 +3923,8 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
-      // the maintenance mode settings page.
-      if ($display_messages && $_GET['q'] != 'admin/config/development/maintenance') {
+      // the batch and maintenance mode settings pages.
+      if ($display_messages && !in_array($_GET['q'], array('batch', 'admin/config/development/maintenance'))) {
         if (user_access('administer site configuration')) {
           backdrop_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
         }

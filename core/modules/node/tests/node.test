@@ -2647,3 +2647,27 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->assertResponse(404);
   }
 }
+
+/**
+ * Tests that multi-byte UTF-8 characters are stored and retrieved correctly.
+ */
+class NodeMultiByteUtf8Test extends NodeWebTestCase {
+  /**
+   * Tests that multi-byte UTF-8 characters are stored and retrieved correctly.
+   */
+  public function testMultiByteUtf8() {
+    $connection = Database::getConnection();
+    // On MySQL, this test will only run if 'charset' is set to 'utf8mb4' in
+    // settings.php.
+    if (!($connection->utf8mb4IsSupported() && $connection->utf8mb4IsActive())) {
+      return;
+    }
+    $title = '🐙';
+    $this->assertTrue(backdrop_strlen($title) < strlen($title), 'Title has multi-byte characters.');
+    $node = $this->backdropCreateNode(array('title' => $title));
+    $this->backdropGet('node/' . $node->nid);
+    $result = $this->xpath('//h1[@id="page-title"]');
+    $this->assertEqual(trim((string) $result[0]), $title, 'The passed title was returned.');
+  }
+
+}

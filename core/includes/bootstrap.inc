@@ -811,6 +811,13 @@ function backdrop_settings_initialize() {
     }
   }
 
+  // Pull in the database charset option if specified. This removes the need
+  // to use the long-form array and allows enabling ut8mb4 support even if the
+  // server provided options via $_SERVER['BACKDROP_SETTINGS'].
+  if (isset($database_charset) && isset($databases['default']['default']) && !isset($databases['default']['default']['charset'])) {
+    $databases['default']['default']['charset'] = $database_charset;
+  }
+
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);
