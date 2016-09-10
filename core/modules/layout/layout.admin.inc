@@ -2666,21 +2666,35 @@ function layout_block_list() {
         $usages = array();
         if (isset($usage[$delta])) {
           foreach ($usage[$delta] as $layout => $layout_use) {
+            $instances = array();
             foreach ($layout_use as $position => $block_use) {
               foreach ($block_use as $instance) {
-                $usages[] = l($instance->layout_title . ' (' . $position . ')', 'admin/structure/layouts/manage/' . $layout);
+                $instances[$position][] = $instance;
               }
             }
+            $positions = implode(', ', array_map('ucfirst', array_keys($instances)));
+            $usages[] = l($instance->layout_title . ' (' . $positions . ')', 'admin/structure/layouts/manage/' . $layout);
           }
         }
-        $usage_list = theme('item_list', array('items' => $usages));
-        $rows[$block['info']] = array($block['info'], $module, $delta, $usage_list, $contexts);
+        $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
+        $block_name = $block['info'] . ' (' . $delta . ')';
+        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
       }
     }
   }
 
-  // Sort rows by block name.
-  ksort($rows);
+  $header = array(
+    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
+    array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
+    array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC'),
+    array('data' => 'Contexts', 'field' => 'contexts'),
+  );
+
+  $order = tablesort_get_order($header);
+  $sort = tablesort_get_sort($header);
+
+  backdrop_sort($rows, array($order['sql'] => SORT_STRING));
+
   $page['description_container'] = array(
     '#type' => 'container',
   );
@@ -2691,7 +2705,7 @@ function layout_block_list() {
 
   $page['table'] = array(
     '#theme' => 'table',
-    '#header' => array(t('Name'), t('Module'), t('Delta'), t('Usage'), t('Required contexts')),
+    '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('There are no blocks.'),
   );
