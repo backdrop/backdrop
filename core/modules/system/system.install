@@ -544,6 +544,30 @@ function system_requirements($phase) {
       );
     }
   }
+  
+  if ($phase == 'runtime') {
+    // Inform user about status of display error messages.
+    $error_level = config_get('system.core', 'error_level');
+    $description_start = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
+    $logging_url = base_path() . 'admin/config/development/logging';
+    if ($error_level != ERROR_REPORTING_HIDE) {
+      $value =  $t('Enabled');
+      $severity =  REQUIREMENT_WARNING;
+      $description = $description_start . ' ' . $t('Do not forget to <a href="@error_level">disable the display of errors</a> when you have finished testing and this site goes live.', array('@error_level' => $logging_url));
+    }
+    else {
+      $value =  $t('Disabled');
+      $severity =  REQUIREMENT_OK;
+      $description = $description_start . ' ' . $t('If your site is in development, you might want to <a href="@error_level">enable the display of errors</a>.', array('@error_level' => $logging_url));
+    }
+
+    $requirements['error_level'] = array(
+      'title' => $t('Display error messages'),
+      'value' => $value,
+      'severity' => $severity,
+      'description' => $description,
+    );
+  }
 
   return $requirements;
 }
