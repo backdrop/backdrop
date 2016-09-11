@@ -2661,8 +2661,8 @@ function layout_block_list() {
       foreach ($blocks as $delta => $block) {
         $contexts = !empty($block['required contexts']) ? implode(",", $block['required contexts']) : '';
         $usages = array();
-        if (isset($usage[$delta])) {
-          foreach ($usage[$delta] as $layout => $layout_use) {
+        if (isset($usage[$module][$delta])) {
+          foreach ($usage[$module][$delta] as $layout => $layout_use) {
             $instances = array();
             foreach ($layout_use as $position => $block_use) {
               foreach ($block_use as $instance) {
@@ -2713,15 +2713,18 @@ function layout_block_list() {
 /**
  * Lists information about blocks in use in layouts.
  *
+ * @param string $module
+ *   The module providing the required blocks.
  * @param string $delta
- *   The block delta.
+ *   The block delta. If $delta is provided, $module is also required since
+ *   block deltas are not required to be unique.
  *
  * @return array
- *   An array of block usage instances keyed by block delta, layout 
+ *   An array of block usage instances keyed by block module, delta, layout 
  *   machine_name, and position. Each instance is a block object with an
  *   additional key for the layout name.
  */
-function layout_get_block_usage($delta = NULL) {
+function layout_get_block_usage($module = NULL, $delta = NULL) {
   $blocks = &backdrop_static(__FUNCTION__, array());
   if (empty($blocks)) {
     $layout_info = layout_load_all();
@@ -2730,11 +2733,17 @@ function layout_get_block_usage($delta = NULL) {
         foreach ($uuids as $uuid) {
           $block = $layout->content[$uuid];
           $block->layout_title = $layout->title;
-          $blocks[$block->delta][$layout->name][$position][] = $block;
+          $blocks[$block->module][$block->delta][$layout->name][$position][] = $block;
         }
       }
     }
   }
 
-  return isset($delta) ? $blocks[$delta] : $blocks;
+  if ($module && $delta) {
+    return $blocks[$module][$delta];
+  }
+  elseif ($module) {
+    return $blocks[$module];
+  }
+  return $blocks;
 }
