@@ -90,6 +90,9 @@
   background: #202020;
   vertical-align: top;
 }
+#admin-bar-wrapper > .dropdown {
+  background: transparent;
+}
 #admin-bar li > a,
 #admin-bar li > span {
   background: transparent none;
@@ -314,10 +317,11 @@ tr.admin-bar-tweak-permissions-processed td.module {
 
 /* Alert colors */
 #admin-bar .admin-bar-alert .error-count {
-  padding: 3px 4px 4px 3px;
+  padding: 4px 5px 5px 4px;
   display: inline-block;
   min-width: 13px;
-  border-radius: 50%;
+  border-radius: 2em;
+  margin: -4px 0 -5px;
   text-align: center;
   background-color: #ee3d23;
   line-height: 1;
