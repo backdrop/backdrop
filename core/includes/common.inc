@@ -7010,6 +7010,8 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   An array of keys to sort by. Values must be PHP sorting type flags,
  *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
  *   unindexed array is passed in.
+ * @param string $dir
+ *   The sort direction. Values must be either SORT_ASC or SORT_DESC.
  *
  * Example usage:
  * @code
@@ -7023,7 +7025,7 @@ function element_info_property($type, $property_name, $default = NULL) {
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
  */
-function backdrop_sort(array &$array, array $keys = array('weight')) {
+function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
   // Ensure all keys have a sort value.
   $new_keys = array();
   foreach ($keys as $index => $sort) {
@@ -7051,7 +7053,7 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
     $key_sort = reset($keys);
 
     if ($key_sort === SORT_STRING) {
-      uasort($array, function($a, $b) use ($key) {
+      uasort($array, function($a, $b) use ($key, $dir) {
         if (!is_array($a) || !is_array($b)) {
           return 0;
         }
@@ -7061,11 +7063,12 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
         if (!isset($b[$key])) {
           $b[$key] = '';
         }
-        return strnatcasecmp($a[$key], $b[$key]);
+        $cmp = strnatcasecmp($a[$key], $b[$key]);
+        return ($dir == SORT_DESC) ? -$cmp : $cmp;
       });
     }
     else {
-      uasort($array, function($a, $b) use ($key) {
+      uasort($array, function($a, $b) use ($key, $dir) {
         if (!is_array($a) || !is_array($b)) {
           return 0;
         }
@@ -7076,7 +7079,8 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
           $b[$key] = 0;
         }
         if ($a[$key] != $b[$key]) {
-          return $a[$key] < $b[$key] ? -1 : 1;
+          $cmp = $a[$key] < $b[$key] ? -1 : 1;
+          return ($dir == SORT_DESC) ? -$cmp : $cmp;
         }
         // Equal values, return 0.
         return 0;
@@ -7086,7 +7090,7 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
   // If doing a multiple-key comparison, use a recursive callback.
   else {
     $keys_map = array_keys($keys);
-    $recursive_callback = function ($a, $b, $key_index = 0) use ($keys, $keys_map, &$recursive_callback) {
+    $recursive_callback = function ($a, $b, $key_index = 0) use ($keys, $keys_map, $dir, &$recursive_callback) {
       $key = $keys_map[$key_index];
       if (!is_array($a) || !is_array($b)) {
         return 0;
@@ -7104,12 +7108,14 @@ function backdrop_sort(array &$array, array $keys = array('weight')) {
         }
       }
       else {
+        $cmp = 0;
         if ($keys[$key] === SORT_STRING) {
-          return strnatcasecmp($a[$key], $b[$key]);
+          $cmp = strnatcasecmp($a[$key], $b[$key]);
         }
         else {
-          return ($a[$key] < $b[$key]) ? -1 : 1;
+          $cmp = ($a[$key] < $b[$key]) ? -1 : 1;
         }
+        return ($dir == SORT_DESC) ? -$cmp : $cmp;
       }
       return 0;
     };
