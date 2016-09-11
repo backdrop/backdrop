@@ -1873,9 +1873,9 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
     layout_reset_caches();
     module_load_include('inc', 'layout', 'layout.admin');
     $usage = layout_get_block_usage();
-    $this->assertTrue(isset($usage[$delta][$layout][$position]), 'Block usage returned correctly. Block found in array.');
-    if (isset($usage[$delta][$layout][$position])) {
-      return count($usage[$delta][$layout][$position]);
+    $this->assertTrue(isset($usage['system'][$delta][$layout][$position]), 'Block usage returned correctly. Block found in array.');
+    if (isset($usage['system'][$delta][$layout][$position])) {
+      return count($usage['system'][$delta][$layout][$position]);
     }
     return FALSE;
   }
