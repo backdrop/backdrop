@@ -172,6 +172,7 @@ function views_ui_menu() {
   //   Views module as well.
   $items['admin/views/ajax/autocomplete/tag'] = array(
     'page callback' => 'views_ui_autocomplete_tag',
+    'delivery callback' => 'backdrop_json_deliver',
     'type' => MENU_CALLBACK,
   ) + $base;
 

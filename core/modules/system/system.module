@@ -558,6 +558,7 @@ function system_menu() {
   $items['system/timezone'] = array(
     'title' => 'Time zone',
     'page callback' => 'system_timezone',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
@@ -3490,7 +3491,7 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
   $timezone = timezone_name_from_abbr($abbreviation, intval($offset), $is_daylight_saving_time);
-  backdrop_json_output($timezone);
+  return array('timezone' => $timezone);
 }
 
 /**

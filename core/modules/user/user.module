@@ -1134,6 +1134,7 @@ function user_menu() {
   $items['user/autocomplete'] = array(
     'title' => 'User autocomplete',
     'page callback' => 'user_autocomplete',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => 'user_access',
     'access arguments' => array('access user profiles'),
     'type' => MENU_CALLBACK,

@@ -93,6 +93,7 @@ function form_test_menu() {
   $items['form_test/form-storage-legacy'] = array(
     'title' => 'Emulate legacy AHAH-style ajax callback',
     'page callback' => 'form_test_storage_legacy_handler',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );

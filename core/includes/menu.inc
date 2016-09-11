@@ -554,7 +554,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
 
   // Deliver the result of the page callback to the browser, or if requested,
   // return it raw, so calling code can do more processing.
-  if ($deliver) {
+  if ($deliver && !is_null($page_callback_result)) {
     $default_delivery_callback = (isset($router_item) && $router_item) ? $router_item['delivery_callback'] : NULL;
     backdrop_deliver_page($page_callback_result, $default_delivery_callback);
     return NULL;

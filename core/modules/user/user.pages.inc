@@ -16,8 +16,8 @@ function user_autocomplete($string = '') {
     }
   }
 
-  backdrop_json_output($matches);
-  backdrop_exit();
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $matches;
 }
 
 /**

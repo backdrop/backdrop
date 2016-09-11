@@ -688,7 +688,22 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
  *     item. Note that this function is called even if the access checks fail,
  *     so any custom delivery callback function should take that into account.
- *     See backdrop_deliver_html_page() for an example.
+ *     Backdrop includes the following delivery callbacks in core:
+ *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
+ *       Menu items with this callback may be wrapped in a layout template by
+ *       Layout module. See layout_route_handler().
+ *     - backdrop_json_deliver: The value of the menu callback will be rendered
+ *       as JSON without any further processing. This delivery callback should
+ *       be used on any path that should return a JSON response at all times,
+ *       even on access denied or 404 pages.
+ *     - ajax_deliver: This delivery callback is used when returning AJAX
+ *       commands that will be interpreted by Backdrop core's ajax.js file. This
+ *       delivery callback is set automatically if the menu callback returns a
+ *       renderable element with the #type property "ajax_commands".
+ *     - ajax_deliver_dialog: This delivery callback is used when the contents
+ *       of a menu callback should be returned as AJAX commands to open as a
+ *       dialog. This delivery callback is set automatically if the requesting
+ *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
  *   - "access callback": A function returning TRUE if the user has access
  *     rights to this menu item, and FALSE if not. It can also be a boolean
  *     constant instead of a function, and you can also use numeric values
@@ -725,6 +740,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     "file". This defaults to the path to the module implementing the hook.
  *   - "load arguments": An array of arguments to be passed to each of the
  *     wildcard object loaders in the path, after the path argument itself.
+ *
  *     For example, if a module registers path node/%node/revisions/%/view
  *     with load arguments set to array(3), the '%node' in the path indicates
  *     that the loader function node_load() will be called with the second
@@ -732,6 +748,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     indicates that the fourth path component will also be passed to
  *     node_load() (numbering of path components starts at zero). So, if path
  *     node/12/revisions/29/view is requested, node_load(12, 29) will be called.
+ *
  *     There are also two "magic" values that can be used in load arguments.
  *     "%index" indicates the index of the wildcard path component. "%map"
  *     indicates the path components as an array. For example, if a module
