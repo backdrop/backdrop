@@ -118,6 +118,7 @@ class NodeBlock extends Block {
       '#states' => array(
         'invisible' => array(
           ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_NONE),
+          ':input[name="leave_node_title"]' => array('checked' => FALSE),
         ),
       ),
     );
