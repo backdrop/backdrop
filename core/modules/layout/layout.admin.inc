@@ -2674,17 +2674,17 @@ function layout_block_list() {
           }
         }
         $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
-        $block_name = $block['info'] . ' (' . $delta . ')';
+        $block_name = check_plain($block['info']) . ' (' . $delta . ')';
         $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
       }
     }
   }
 
   $header = array(
-    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
+    array('data' => 'Name (delta)', 'field' => 'name', 'sort' => 'ASC'),
     array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
     array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC'),
-    array('data' => 'Contexts', 'field' => 'contexts'),
+    array('data' => 'Required contexts', 'field' => 'contexts'),
   );
 
   $order = tablesort_get_order($header);
@@ -2697,7 +2697,7 @@ function layout_block_list() {
   );
 
   $page['description_container']['description'] = array(
-    '#markup' => t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'."),
+    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'.") . '<p>',
   );
 
   $page['table'] = array(
