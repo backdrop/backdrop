@@ -1756,6 +1756,15 @@ function node_menu() {
     'access arguments' => array(1, 'delete'),
     'file' => 'node.pages.inc',
   );
+  $items['node/autocomplete'] = array(
+    'title' => 'Node autocomplete',
+    'page callback' => 'node_autocomplete',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'node.pages.inc',
+  );
+
   return $items;
 }
 
@@ -1848,6 +1857,11 @@ function node_block_info() {
   $blocks['recent'] = array(
     'info' => t('Recent content'),
     'description' => t('A list of recently published content.'),
+  );
+  $blocks['content'] = array(
+    'info' => t('Content block'),
+    'description' => t('Displays a node in a block.'),
+    'class' => 'NodeBlock',
   );
 
   return $blocks;
@@ -3476,6 +3490,8 @@ function node_autoload_info() {
   return array(
     'Node' => 'node.entity.inc',
     'NodeStorageController' => 'node.entity.inc',
+
+    'NodeBlock' => 'node.block.inc',
 
     // Views handlers.
     'views_handler_argument_node_created_fulldate' => 'views/views_handler_argument_dates_various.inc',
