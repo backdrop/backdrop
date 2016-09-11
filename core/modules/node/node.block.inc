@@ -1,9 +1,9 @@
 <?php
 
 /**
- *  NodeBlock  extends Block
+ * NodeBlock extends Block
  *  
- *  This class allows us to display a particular node in a block.
+ * This class allows us to display a particular node in a block.
  */
 class NodeBlock extends Block {
   /**
@@ -35,6 +35,9 @@ class NodeBlock extends Block {
 
     if ($title && $this->settings['link_node_title']) {
       $title = l($title, 'node/' . $node->nid);
+    }
+    else {
+      $title = check_plain($title);
     }
 
     return $title;
@@ -72,7 +75,7 @@ class NodeBlock extends Block {
     }
 
     // Add theme hook suggestion.
-    $content['#theme'] = 'node__content-block-' . $this->settings['nid'];
+    $content['#theme'] = 'node__block-' . $this->settings['nid'];
 
     return $content;
   }
@@ -98,14 +101,13 @@ class NodeBlock extends Block {
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['display_submitted']),
       '#title' => t('Show author and date information'),
-      '#description' => t('Advanced: if checked, display the node author and date information.'),
     );
 
     $form['leave_node_title'] = array(
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['leave_node_title']),
       '#title' => t('Show node title in block content'),
-      '#description' => t('Advanced: if checked, display the node title; this can cause the node title to appear twice unless you select "none" for the block title type.'),
+      '#description' => t('This may cause the node title to appear twice. Select "none" for the block title type if using this option.'),
     );
 
     $form['link_node_title'] = array(
@@ -113,6 +115,11 @@ class NodeBlock extends Block {
       '#default_value' => !empty($settings['link_node_title']),
       '#title' => t('Link the block title to the node'),
       '#description' => t('Check this box if you would like the block title to link to the node.'),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_NONE),
+        ),
+      ),
     );
 
     $form['links'] = array(
@@ -130,7 +137,6 @@ class NodeBlock extends Block {
     $form['view_mode'] = array(
       '#title' => t('View mode'),
       '#type' => 'select',
-      '#description' => t('Select a view mode for this node.'),
       '#options' => $view_mode_options,
       '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',
     );
@@ -147,7 +153,7 @@ class NodeBlock extends Block {
       $form_state['values']['nid'] = $nid;
     }
     else {
-      form_error($form['nid'], t('Sorry, no node matching <em>%title</em> was found.', array('%title' => $form_state['values']['nid'])));
+      form_error($form['nid'], t('Sorry, no content matching <em>%title</em> was found.', array('%title' => $form_state['values']['nid'])));
     }
   }
 
@@ -156,8 +162,11 @@ class NodeBlock extends Block {
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
-    foreach (array('nid', 'links', 'leave_node_title', 'link_node_title', 'view_mode', 'display_submitted') as $key) {
-      $this->settings[$key] = $form_state['values'][$key];
-    }
+    $this->settings['nid'] = (int) $form_state['values']['nid'];
+    $this->settings['links'] = (bool) $form_state['values']['links'];
+    $this->settings['leave_node_title'] = (bool) $form_state['values']['leave_node_title'];
+    $this->settings['link_node_title'] = (bool) $form_state['values']['link_node_title'];
+    $this->settings['display_submitted'] = (bool) $form_state['values']['display_submitted'];
+    $this->settings['view_mode'] = (string) $form_state['values']['view_mode'];
   }
 }
