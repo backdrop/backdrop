@@ -11,7 +11,13 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     parent::__construct($layout, $renderer_plugin);
+
+    // Set the page title region if not already.
+    if (!isset($this->layout_info['regions']['title'])) {
+      $this->layout_info['regions']['title'] = t('Page title');
+    }
     $this->admin = TRUE;
+
   }
 
   /**
@@ -41,16 +47,39 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderRegion($region_id, $blocks) {
-    $content = implode('', $blocks);
+    $output = '';
+    if ($region_id == 'title') {
+      return $this->renderTitleRegion($region_id);
+    }
+    else {
+      $content = implode('', $blocks);
+      $region_buttons = $this->getRegionLinks($region_id);
 
+      $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
+      $output .= '<div class="layout-editor-region-title clearfix">';
+      $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
+      $output .= $region_buttons;
+      $output .= '</div>';
+      $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+      $output .= '</div>';
+    }
+
+    return $output;
+  }
+
+  /**
+   * Render the Page Title region in the Layout Editor.
+   */
+  function renderTitleRegion($region_id) {
     $region_buttons = $this->getRegionLinks($region_id);
+    $description = layout_get_title_description($this->layout);
 
-    $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
-    $output .= '<div class="layout-editor-region-title clearfix">';
-    $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
-    $output .= $region_buttons;
+    $output  = '<div class="layout-editor-block" id="layout-editor-title" data-region-name="' . $region_id . '">';
+    $output .= '<div class="layout-editor-block-title clearfix">';
+    $output .= '  <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
+    $output .= '  <span class="buttons">' . $region_buttons . '</span>';
     $output .= '</div>';
-    $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+    $output .= '<div class="layout-editor-block-content">' . $description . '</div>';
     $output .= '</div>';
 
     return $output;
@@ -115,25 +144,37 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   protected function getRegionLinks($region_id) {
     $links = array();
-    $links['add'] = array(
-      'title' => t('Add block'),
-      'href' => $this->getUrl('add-block', $region_id),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
-
-    $links['configure'] = array(
-      'title' => t('Configure region'),
-      'href' => $this->getUrl('configure-region', $region_id),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
+    if ($region_id == 'title') {
+      $links['title'] = array(
+        'title' => t('Configure'),
+        'href' => $this->getUrl('edit-title', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
+    else {
+      $links['add'] = array(
+        'title' => t('Add block'),
+        'href' => $this->getUrl('add-block', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+      $links['configure'] = array(
+        'title' => t('Configure region'),
+        'href' => $this->getUrl('configure-region', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',

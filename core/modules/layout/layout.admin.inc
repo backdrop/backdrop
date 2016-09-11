@@ -784,33 +784,6 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#suffix' => '</div>',
   );
 
-  $form['title_display']['#tree'] = FALSE;
-  $form['title_display']['title_display'] = array(
-    '#type' => 'select',
-    '#title' => t('Page title type'),
-    '#default_value' => $layout->settings['title_display'],
-    '#options' => array(
-      LAYOUT_TITLE_DEFAULT => t('Default title'),
-      LAYOUT_TITLE_CUSTOM => t('Custom title'),
-      // @todo: Port "from block" title ability.
-      //LAYOUT_TITLE_BLOCK => t('From block'),
-      LAYOUT_TITLE_NONE => t('No title'),
-    ),
-  );
-
-  $form['title_display']['title'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $layout->settings['title'],
-    '#title' => t('Title'),
-    '#description' => t('The title of this layout. If left blank, a default title may be used.'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
-      ),
-    ),
-    '#maxlength' => 255,
-  );
-
   $form['content'] = array('#tree' => TRUE);
   $form['content']['block'] = array('#tree' => TRUE);
 
@@ -1040,6 +1013,107 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   }
 
   return $output;
+}
+
+/**
+ * Form callback; Configure layout title type.
+ *
+ * @ingroup forms
+ */
+function layout_title_settings_form($form, &$form_state, Layout $layout) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $form_state['layout'] = $layout;
+  $form_state['menu_item'] = NULL;
+
+  $form['title_display']['#tree'] = FALSE;
+  $form['title_display']['title_display'] = array(
+    '#type' => 'radios',
+    '#default_value' => $layout->settings['title_display'],
+    '#options' => array(
+      LAYOUT_TITLE_DEFAULT => t('Default page title'),
+      LAYOUT_TITLE_CUSTOM => t('Custom page title'),
+      LAYOUT_TITLE_BLOCK => t('Copy from block'),
+      LAYOUT_TITLE_NONE => t('No title'),
+    ),
+  );
+
+  $form['title_display']['title_display'][LAYOUT_TITLE_DEFAULT]['#description'] = t('The page title will pull from a default source. For example: on the user account page, a username may be used.');
+  $form['title_display']['title_display'][LAYOUT_TITLE_CUSTOM]['#description'] = t('Provide a custom page title for this layout.');
+  $form['title_display']['title_display'][LAYOUT_TITLE_BLOCK]['#description'] = t('Copy the page title from a block for this layout.');
+  $form['title_display']['title_display'][LAYOUT_TITLE_NONE]['#description'] = t('Hide the page title for this layout.');
+
+  $form['title_display']['title'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $layout->settings['title'],
+    '#title' => t('Custom page title'),
+    '#description' => t('If left blank, a default title may be used.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
+      ),
+    ),
+    '#maxlength' => 255,
+  );
+
+  $all_blocks = layout_get_block_info();
+  $block_options = array();
+  foreach ($layout->content as $uuid => $block) {
+    $title = $all_blocks[$block->module][$block->delta]['info'];
+    if ($title !== 'Add a custom block') {
+      $block_options[$uuid] = $title;
+    }
+  }
+  asort($block_options);
+
+  $form['title_display']['title_block'] = array(
+    '#type' => 'select',
+    '#default_value' => $layout->settings['title_block'],
+    '#title' => t('Block to copy'),
+    '#description' => t('The page title will be taken from this block\'s title.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_BLOCK),
+      ),
+    ),
+    '#options' => $block_options,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#attributes' => array('class' => array('layout-title-button')),
+    '#submit' => array(
+      'layout_title_settings_form_submit',
+    ),
+    '#save_in_progress' => TRUE,
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_title_dialog',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for layout_title_settings_form() to change title settings.
+ */
+function layout_title_settings_form_submit($form, &$form_state) {
+  $layout = $form_state['layout'];
+
+  // Save title settings.
+  if (isset($form_state['values']['title_display'])) {
+    $layout->settings['title'] = $form_state['values']['title'];
+    $layout->settings['title_block'] = $form_state['values']['title_block'];
+    $layout->settings['title_display'] = $form_state['values']['title_display'];
+  }
+
+  // Set the part of the form to be rebuilt via ajax.
+  $form_state['ajax_update'] = array('title_display');
+
+  $layout->in_progress['section'] = 'title';
+  layout_set_layout_tempstore($layout);
 }
 
 /**
@@ -2422,6 +2496,42 @@ function layout_ajax_form_save_dialog($form, $form_state) {
       $dialog_ajax = layout_ajax_form_open_dialog($form, $form_state);
       $commands = array_merge($commands, $dialog_ajax['#commands']);
     }
+
+    // Clear out previous messages.
+    if ($message = layout_locked_message($layout, 'layout')) {
+      backdrop_set_message($message, 'warning');
+    }
+    elseif ($message = layout_locked_message($menu_item, 'menu_item')) {
+      backdrop_set_message($message, 'warning');
+    }
+    $commands[] = ajax_command_remove('#messages');
+    $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+  }
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+function layout_ajax_form_save_title_dialog($form, $form_state) {
+  $layout = $form_state['layout'];
+
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  // If errors occurred in the dialog, show messages and re-display.
+  if (form_get_errors()) {
+    $html = '';
+    $html .= theme('status_messages');
+    $html .= backdrop_render($form);
+    $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+  }
+  else {
+    // Rebuild the title area description.
+    $description = '<div class="layout-editor-block-content">' . layout_get_title_description($layout) . '</div>';
+    $commands[] = ajax_command_replace("#layout-editor-title .layout-editor-block-content", $description);
 
     // Clear out previous messages.
     if ($message = layout_locked_message($layout, 'layout')) {
