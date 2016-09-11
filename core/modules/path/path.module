@@ -92,7 +92,7 @@ function path_menu() {
     'file' => 'path.admin.inc',
   );
   $items['admin/config/search/path/bulk-update'] = array(
-    'title' => 'Bulk generate',
+    'title' => 'Update URL aliases',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_bulk_update_form'),
     'access arguments' => array('administer url aliases'),
@@ -100,17 +100,23 @@ function path_menu() {
     'weight' => 30,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/bulk-delete'] = array(
-    'title' => 'Delete URL aliases',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('path_admin_bulk_delete'),
-    'access arguments' => array('administer url aliases'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 40,
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function path_theme() {
+  $base = array(
     'file' => 'path.admin.inc',
   );
 
-  return $items;
+  return array(
+    'path_bulk_update_form' => array(
+      'render element' => 'form',
+    ) + $base,
+  );
 }
 
 /**
