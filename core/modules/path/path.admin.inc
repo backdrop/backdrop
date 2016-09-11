@@ -742,17 +742,16 @@ function path_bulk_update_form($form, &$form_state) {
  * @ingroup themeable
  */
 function theme_path_bulk_update_form($variables) {
-  backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.css');
-  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path_generate.js');
+  backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.admin.css');
+  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path.admin.js');
   $form = $variables['form'];
 
-  $options = array();
   foreach (element_children($form['update']) as $base) {
     foreach (element_children($form['update'][$base]) as $key) {
       $row = array();
         $row[] = array(
           'data' => backdrop_render($form['update'][$base][$key]),
-          'class' => array('path-alias'),
+          'class' => array('path-alias-generate'),
         );
         $row[] = array(
           'data' => backdrop_render($form['reset_alias'][$base][$key]),
@@ -762,12 +761,12 @@ function theme_path_bulk_update_form($variables) {
     }
   }
   $header = array(
-    'alias' => array('data' => t('Alias'), 'class' => 'path-th-alias'),
-    'delete' => array('data' => t('Update existing'), 'class' => 'path-th-delete'),
+    'alias' => array('data' => t('Generate'), 'class' => 'path-alias-generate'),
+    'delete' => array('data' => t('Update existing'), 'class' => 'path-alias-update'),
   );
 
   $output = '';
-  $output = backdrop_render($form['operations']);
+  $output .= backdrop_render($form['operations']);
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'path-bulk-alias')));
   $output .= backdrop_render_children($form);
   return $output;

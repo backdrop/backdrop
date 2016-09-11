@@ -1,26 +1,36 @@
 /**
  * @file
- * Manages checkboxes for Path generation page.
+ * Behaviors for Path module's administration pages.
  */
 
 (function ($) {
-Backdrop.behaviors.path_generate = {
+
+"use strict";
+
+/**
+ * Manages checkboxes for Update URL Aliases (bulk-update) page.
+ */
+Backdrop.behaviors.pathGenerate = {
   attach: function (context) {
+    var $form = $(context).find('#path-bulk-update-form').once('path-generate');
+    if ($form.length === 0) {
+      return;
+    }
 
     // Hide the Update existing checkboxes if deleting aliases
-    $("select[name='operations[operation]']").change(function(value){
-      $delete = ($(this).val()=='delete');
+    $form.find("select[name='operations[operation]']").change(function(){
+      var $delete = ($(this).val()=='delete');
       $("table#path-bulk-alias").toggleClass('delete', $delete);
     });
 
     // When you select an entity checkbox (like "content"), select the 
     // checkboxes for all the subtypes
-    $("input.path-base").change(function () {
+    $form.find("input.path-base").change(function () {
       var type = $(this).attr('data-path-type');
       $("input.path-type[data-path-type='"+type+"']").prop('checked', this.checked);
     });
 
-    $("input.path-type").change(function () {
+    $form.find("input.path-type").change(function () {
       var type = $(this).attr('data-path-type');
       var $base = $("input.path-base[data-path-type='"+type+"']");
       // If you uncheck a subtype checkbox, uncheck the entity checkbox.
@@ -30,7 +40,7 @@ Backdrop.behaviors.path_generate = {
       }
       // If all subtype checkboxes checked, check the base checkbox.
       else {
-        unchecked = $("input.path-type[data-path-type='"+type+"']:checkbox:not(:checked)");
+        var unchecked = $("input.path-type[data-path-type='"+type+"']:checkbox:not(:checked)");
         if(unchecked.length < 1) {
           $base.prop('checked', true);
         }
@@ -39,12 +49,12 @@ Backdrop.behaviors.path_generate = {
 
     // When you select an entity reset checkbox (like "content"), select the 
     // reset checkboxes for all the subtypes.
-    $("input.path-reset-base").change(function () {
+    $form.find("input.path-reset-base").change(function () {
       var type = $(this).attr('data-path-type');
       $("input.path-reset[data-path-type='"+type+"']").prop('checked', this.checked);
     });
 
-    $("input.path-reset").change(function () {
+    $form.find("input.path-reset").change(function () {
       var type = $(this).attr('data-path-type');
       var $base = $("input.path-reset-base[data-path-type='"+type+"']");
       // If you uncheck a subtype checkbox, uncheck the entity checkbox.
@@ -53,7 +63,7 @@ Backdrop.behaviors.path_generate = {
       }
       // If all subtype checkboxes checked, check the base checkbox.
       else {
-        unchecked = $("input.path-reset[data-path-type='"+type+"']:checkbox:not(:checked)");
+        var unchecked = $("input.path-reset[data-path-type='"+type+"']:checkbox:not(:checked)");
         if(unchecked.length < 2) {
           $base.prop('checked', true);
         }
@@ -62,27 +72,27 @@ Backdrop.behaviors.path_generate = {
 
     // Add check all checkboxes in the table head row.
     var strings = { 'selectAll': Backdrop.t('Select all rows in this table'), 'selectNone': Backdrop.t('Deselect all rows in this table') };
-    $('th.path-th-alias').prepend($('<input type="checkbox" class="select-all-alias form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
+    $form.find('th.path-alias-generate').prepend($('<input type="checkbox" class="select-all-alias form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
       if ($(event.target).is('input[type="checkbox"]')) {
-        $("input.path-type, input.path-base").each(function () {
-          this.checked = event.target.checked;
+        $form.find("input.path-type, input.path-base").each(function () {
+          $(this).prop('checked', event.target.checked);
         });
       }
     });
-    $('th.path-th-delete').prepend($('<input type="checkbox" class="select-all-delete form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
+    $form.find('th.path-alias-update').prepend($('<input type="checkbox" class="select-all-delete form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
       if ($(event.target).is('input[type="checkbox"]')) {
-        $("input.path-reset").each(function () {
-          this.checked = event.target.checked;
+        $form.find("input.path-reset").each(function () {
+          $(this).prop('checked', event.target.checked);
         });
       }
     });
 
-    // Uncheck the "select all" checkboxes if not all checkboxes schecked.
-    $('input[type="checkbox"]').change(function () {
-      uncheckedAll = ($("input.path-type:checkbox:not(:checked)").length)+($("input.path-base:checkbox:not(:checked)").length);
-      $("input.select-all-alias").prop('checked', uncheckedAll<1);
-      uncheckedAllDelete = $("input.path-reset:checkbox:not(:checked)").length;
-      $("input.select-all-delete").prop('checked', uncheckedAllDelete<1);
+    // Uncheck the "select all" checkboxes if not all checkboxes checked.
+    $form.find('input[type="checkbox"]').change(function () {
+      var uncheckedAll = ($form.find("input.path-type:checkbox:not(:checked)").length)+($("input.path-base:checkbox:not(:checked)").length);
+      $form.find("input.select-all-alias").prop('checked', uncheckedAll<1);
+      var uncheckedAllDelete = $form.find("input.path-reset:checkbox:not(:checked)").length;
+      $form.find("input.select-all-delete").prop('checked', uncheckedAllDelete<1);
     });
 
   }
