@@ -2683,8 +2683,8 @@ function layout_block_list() {
   $header = array(
     array('data' => 'Name (delta)', 'field' => 'name', 'sort' => 'ASC'),
     array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
-    array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC'),
-    array('data' => 'Required contexts', 'field' => 'contexts'),
+    array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => 'Required contexts', 'field' => 'contexts', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
   );
 
   $order = tablesort_get_order($header);
