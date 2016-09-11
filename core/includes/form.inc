@@ -3327,6 +3327,11 @@ function form_process_actions($element, &$form_state) {
   $first_button = NULL;
   $primary_set = FALSE;
   foreach (element_children($element) as $key) {
+    // Don't add automatic classes to non-buttons.
+    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+      continue;
+    }
+
     $button = $element[$key];
     if (!$first_button && $button['#type'] === 'submit') {
       $first_button = $key;
