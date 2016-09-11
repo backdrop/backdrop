@@ -653,6 +653,7 @@ function node_autocomplete($string = "") {
     $result = db_select('node')
       ->fields('node', array('nid', 'title'))
       ->condition('title', db_like($string) . '%', 'LIKE')
+      ->addTag('node_access')
       ->range(0, 10)
       ->execute();
     foreach ($result as $node) {
@@ -708,6 +709,7 @@ function node_autocomplete_validate($string) {
     $nid = db_select('node')
       ->fields('node', array('nid'))
       ->condition('title', db_like($string) . '%', 'LIKE')
+      ->addTag('node_access')
       ->range(0, 1)
       ->execute()
       ->fetchField();
