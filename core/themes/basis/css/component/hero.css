@@ -1,0 +1,58 @@
+/**
+ * @file
+ * Hero component styling.
+ */
+.hero-block {
+  /* Positioning, width and transform is to make hero full width on smaller screens */
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  min-height: 50vh;
+  padding: 1.5rem 2rem 2rem;
+  margin: 0 0 2rem;
+  -webkit-transform: translate(-50%, 0);
+  transform: translate(-50%, 0);
+  background: #0074bd url(../../images/texture.png) no-repeat center center;
+  background-blend-mode: luminosity;
+  -webkit-transition: min-height 0.25s;
+  transition: min-height 0.25s;
+  will-change: min-height;
+}
+
+@media (min-width: 25em) {
+  .hero-block {
+    padding: 2rem 3rem 3rem;
+    font-size: 1.3em;
+  }
+}
+
+@media (min-width: 34em) {
+  .hero-block {
+    font-size: 1.5em;
+    min-height: 40vh;
+  }
+}
+
+@media (min-width: 62em) {
+  .hero-block {
+    /* Remove full width styles on larger screens */
+    position: static;
+    left: auto;
+    width: 100%;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+.hero-block .block-title {
+  margin: 0 0 0.2em;
+  padding: 0;
+  font-weight: 200;
+  line-height: 1.2;
+  font-size: 2.3em;
+}
+@media (min-width: 34em) {
+  .hero-block .block-title {
+    font-size: 2.667em;
+  }
+}

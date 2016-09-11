@@ -1,0 +1,107 @@
+/**
+ * Custom utility classes
+ */
+.disable-text-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/**
+ * Semantic class
+ *
+ * Styles to remove default styles when tags are meant to be semantic only
+ * Does not change the default setting for the display style.
+ */
+h1.semantic,
+h2.semantic,
+h3.semantic,
+h4.semantic,
+h5.semantic,
+h6.semantic,
+p.semantic{
+  font-size: 100%;
+  font-weight: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+blockquote.semantic {
+  margin: 0;
+  padding: 0;
+}
+
+code.semantic,
+kbd.semantic,
+pre.semantic {
+  font: inherit;
+  white-space: normal;
+}
+
+pre.semantic {
+  margin: 0;
+}
+
+address.semantic,
+cite.semantic,
+dfn.semantic,
+em.semantic,
+var.semantic {
+  font-style: inherit;
+}
+
+code.semantic,
+samp.semantic {
+  font: inherit;
+}
+
+del.semantic,
+ins.semantic,
+s.semantic,
+strike.semantic {
+  text-decoration: inherit;
+}
+
+q.semantic:before,
+q.semantic:after {
+  content: '';
+}
+
+sub.semantic,
+sup.semantic {
+  position: static;
+  font-size: inherit;
+  line-height: inherit;
+  vertical-align: inherit;
+}
+
+strong.semantic {
+  font-weight: inherit;
+}
+
+figure.semantic {
+  margin: 0;
+}
+
+mark.semantic {
+  background: transparent;
+  color: inherit;
+}
+
+ul.semantic,
+ol.semantic {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+dl.semantic {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+dl.semantic > dd {
+  margin-left: 0;
+}
