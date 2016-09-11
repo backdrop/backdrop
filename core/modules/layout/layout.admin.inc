@@ -2691,6 +2691,7 @@ function layout_block_list() {
   $sort = tablesort_get_sort($header);
 
   backdrop_sort($rows, array($order['sql'] => SORT_STRING));
+  $rows = ($sort == 'asc') ? $rows : array_reverse($rows);
 
   $page['description_container'] = array(
     '#type' => 'container',
