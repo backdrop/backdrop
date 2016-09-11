@@ -668,6 +668,10 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
+    // Use Stark for expected markup checking.
+    theme_enable(array('stark'));
+    config_set('system.core', 'theme_default', 'stark');
+
     $web_user = $this->backdropCreateUser(array('create page content', 'administer content types', 'access user profiles'));
     $this->backdropLogin($web_user);
   }
@@ -690,7 +694,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $elements = $this->xpath('//div[contains(@class,:class)]', array(':class' => 'submitted'));
+    $elements = $this->xpath('//p[contains(@class, :class)]', array(':class' => 'submitted'));
     $this->assertEqual(count($elements), 1, 'Post information is displayed.');
   }
 
@@ -1736,6 +1740,11 @@ class NodeTitleTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
+
+    // Use Stark for expected markup checking.
+    theme_enable(array('stark'));
+    config_set('system.core', 'theme_default', 'stark');
+
     $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
     $this->backdropLogin($this->admin_user);
   }
@@ -1763,7 +1772,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     $this->assertEqual(current($this->xpath($xpath)), $node->title, 'Node breadcrumb is equal to node title.', 'Node');
 
     // Test node title in comment preview.
-    $this->assertEqual(current($this->xpath('//article[@id=:id]/header/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath('//article[@id=:id]//h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
 
     // Test node title is clickable on teaser list (/node).
     $this->backdropGet('node');

@@ -1,0 +1,17 @@
+/**
+ * @file
+ * Component Layout CSS and some Page layout overrides
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+.l-header {
+  position: relative;
+  margin: 0 0 2rem;
+}
+
+.layout .l-messages {
+  margin: 0 0 2rem;
+}

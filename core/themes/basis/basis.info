@@ -1,0 +1,30 @@
+name = Basis
+description = The default front-end theme for Backdrop CMS, which can make a great base theme.
+type = theme
+backdrop = 1.x
+version = BACKDROP_VERSION
+
+stylesheets[all][] = css/base.css
+stylesheets[all][] = css/layout.css
+stylesheets[all][] = css/component/small-text-components.css
+stylesheets[all][] = css/component/l-header.css
+stylesheets[all][] = css/component/l-footer.css
+stylesheets[all][] = css/component/menu-dropdown.css
+stylesheets[all][] = css/component/breadcrumb.css
+stylesheets[all][] = css/component/backdrop-form.css
+stylesheets[all][] = css/component/fieldset.css
+stylesheets[all][] = css/component/pager.css
+stylesheets[all][] = css/component/status-messages.css
+stylesheets[all][] = css/component/tabledrag.css
+stylesheets[all][] = css/component/teasers.css
+stylesheets[all][] = css/component/progress.css
+stylesheets[all][] = css/component/dialog.css
+stylesheets[all][] = css/utility.css
+stylesheets[all][] = css/skin.css
+stylesheets[print][] = css/print.css
+
+; Remove unwanted upstream CSS
+stylesheets[all][] = system.theme.css
+stylesheets[all][] = menu-dropdown.theme.css
+
+scripts[] = js/script.js

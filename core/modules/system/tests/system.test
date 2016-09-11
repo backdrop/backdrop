@@ -1629,7 +1629,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw('core/themes/stark', 'Site default theme used on the add content page.');
 
     // Reset to the default theme settings.
-    config_set('system.core', 'theme_default', 'bartik');
+    config_set('system.core', 'theme_default', 'basis');
     $edit = array(
       'admin_theme' => '0',
       'node_admin_theme' => FALSE,
@@ -1637,10 +1637,10 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/appearance', $edit, t('Save configuration'));
 
     $this->backdropGet('admin');
-    $this->assertRaw('core/themes/bartik', 'Site default theme used on administration page.');
+    $this->assertRaw('core/themes/basis', 'Site default theme used on administration page.');
 
     $this->backdropGet('node/add');
-    $this->assertRaw('core/themes/bartik', 'Site default theme used on the add content page.');
+    $this->assertRaw('core/themes/basis', 'Site default theme used on the add content page.');
 
     // Check that Stark does not show up on the Appearance page.
     $this->backdropGet('admin/appearance');
@@ -1656,16 +1656,16 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    * Test switching the default theme.
    */
   function testSwitchDefaultTheme() {
-    // Enable Bartik and set it as the default theme.
-    theme_enable(array('bartik'));
+    // Enable Basis and set it as the default theme.
+    theme_enable(array('basis'));
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Set default'));
-    $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'basis');
 
-    // Switch back to Seven and test again.
+    // Enable the first disabled theme (Bartik) and check again.
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Enable and set default'), 0);
-    $this->assertEqual(config_get('system.core', 'theme_default'), 'seven');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
   }
 }
 

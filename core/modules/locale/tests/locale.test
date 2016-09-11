@@ -2257,6 +2257,10 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $layout->addBlock('locale', 'language', 'top');
     $layout->save();
 
+    // Use Stark for expected markup checking.
+    theme_enable(array('stark'));
+    config_set('system.core', 'theme_default', 'stark');
+
     // Access the front page without specifying any valid URL language prefix
     // and having as browser language preference a non-default language.
     $http_header = array("Accept-Language: $langcode_browser_fallback;q=1");

@@ -78,6 +78,11 @@
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#9F9F9F', endColorstr='#808080',GradientType=0); /* IE6-9 */
 }
 
+#admin-bar li {
+  margin: 0;
+  padding: 0;
+}
+
 /* Dropdown lists */
 #admin-bar .dropdown {
   line-height: 1.4em;
@@ -317,6 +322,7 @@ tr.admin-bar-tweak-permissions-processed td.module {
 
 /* Alert colors */
 #admin-bar .admin-bar-alert .error-count {
+  box-sizing: content-box;
   padding: 4px 5px 5px 4px;
   display: inline-block;
   min-width: 13px;
