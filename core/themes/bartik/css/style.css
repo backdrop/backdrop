@@ -352,6 +352,8 @@ ul.tips {
   text-decoration: none;
   -moz-border-radius: 0 0 10px 10px;
   border-radius: 0 0 10px 10px;
+  white-space: nowrap;
+  width: auto;
 }
 #skip-link a:hover,
 #skip-link a:active,
@@ -552,56 +554,109 @@ ul.tips {
   padding: 0;
 }
 .l-header ul.menu li {
-  float: left; /* LTR */
   list-style: none;
+}
+.l-header ul.menu > li {
   padding: 0 1px;
   margin: 0 1px;
 }
-[dir="rtl"] .l-header ul.menu li {
-  float: right;
+.l-header ul.menu > li > a {
+  display: block;
 }
 .l-header ul.menu a {
   color: #333;
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
-  float: left; /* LTR */
   height: 2.4em;
   line-height: 2.4em;
   padding: 0 0.8em;
   text-decoration: none;
 }
-[dir="rtl"] .l-header ul.menu a {
-  float: right;
+.l-header ul.menu li li a {
+  background: rgba(255, 255, 255, 0.8);
 }
-.l-header .rounded-tabs ul.menu a,
-.l-header .square-tabs ul.menu a {
+.l-header ul.menu li li li a {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.l-header .rounded-tabs ul.menu > li > a,
+.l-header .square-tabs ul.menu > li > a {
   color: #333;
   text-shadow: 0 1px #eee;
 }
-.l-header .rounded-tabs ul.menu a.active,
-.l-header .square-tabs ul.menu a.active,
-.l-header .rounded-tabs ul.menu a:active,
-.l-header .square-tabs ul.menu a:active {
+
+.l-header .rounded-tabs ul.menu > li > a.active,
+.l-header .square-tabs ul.menu > li > a.active {
   color: #333;
   background: #ffffff;
 }
-.l-header .rounded-tabs ul.menu a {
+
+
+.l-header ul.menu > li.last > a {
+  margin-bottom: 1em;
+}
+
+/* Only the first tab is rounded on mobile. */
+.l-header .rounded-tabs ul.menu > li.first > a {
   -moz-border-radius-topleft: 8px;
   -moz-border-radius-topright: 8px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
-.l-header .no-tabs ul.menu li a.active {
+/* Likewise, the last tab is rounded on the bottom. */
+.l-header .rounded-tabs ul.menu > li.last > a {
+  -moz-border-radius-bottomleft: 8px;
+  -moz-border-radius-bottomright: 8px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+@media (min-width: 768px) {
+  .l-header ul.menu > li.last > a {
+    margin-bottom: 0;
+  }
+  .l-header .rounded-tabs ul.menu > li > a {
+    -moz-border-radius-topleft: 8px;
+    -moz-border-radius-topright: 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .l-header .rounded-tabs ul.menu > li.last > a {
+    -moz-border-radius-bottomleft: 0;
+    -moz-border-radius-bottomright: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+
+  .l-header ul.menu > li {
+    float: left; /* LTR */
+  }
+  [dir="rtl"] .l-header ul.menu > li {
+    float: right;
+  }
+
+  /* Drop down specific styling. */
+  .l-header ul.menu-dropdown ul {
+    background-color: white;
+  }
+  .l-header ul.menu-dropdown > li.has-children > a {
+    padding-right: 2.5em;
+  }
+  .l-header ul.menu-dropdown > li > a.highlighted {
+    background-color: white;
+  }
+  .l-header ul.menu-dropdown ul {
+    border: 0;
+    box-shadow: 2px 2px 2px -2px #333333;
+  }
+}
+.l-header .no-tabs ul.menu > li > a.active {
   text-decoration: underline;
 }
 .l-header ul.menu a:hover,
 .l-header ul.menu a:focus {
   background: #f6f6f2;
-  background: rgba(255, 255, 255, 0.95);
-}
-.l-header ul.menu a:active {
-  background: #b3b3b3;
-  background: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.60);
 }
 .l-header ul.menu li a.active {
   border-bottom: none;
@@ -610,6 +665,7 @@ ul.tips {
 .l-header .no-tabs ul.menu a:hover,
 .l-header .no-tabs ul.menu a:focus,
 .l-header .no-tabs ul.menu a:active,
+.l-header .no-tabs ul.menu a.highlighted,
 .l-header .no-tabs ul.menu li a.active {
   background: none;
 }
@@ -1081,7 +1137,7 @@ article .link-wrapper ul.links {
 
 .tabs {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 .tabs ul.primary {
   padding: 0 3px;

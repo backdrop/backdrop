@@ -1221,6 +1221,17 @@ function system_library_info() {
     ),
   );
 
+  $libraries['backdrop.menus'] = array(
+    'title' => 'Backdrop menu styles',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',
@@ -1325,6 +1336,26 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -21,
         'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
+      ),
+    ),
+  );
+
+  // SmartMenus.
+  $libraries['smartmenus'] = array(
+    'title' => 'SmartMenus',
+    'website' => 'http://www.smartmenus.org',
+    'version' => '1.0.0',
+    'css' => array(
+      'core/misc/smartmenus/css/sm-core-css.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
+      ),
+    ),
+    'js' => array(
+      // Backdrop includes a "combined" file that bundles together both the
+      // main library and the keyboard support file.
+      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+        'group' => JS_LIBRARY,
       ),
     ),
   );
