@@ -17,6 +17,7 @@ function node_path_info() {
     'label' => t('Content'),
     'pattern description' => t('Default URL alias pattern (applies to all content types with blank URL alias patterns below)'),
     'pattern default' => 'content/[node:title]',
+    'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'node_path_bulk_update_batch_process',
     'batch file path' => backdrop_get_path('module', 'path'),
     'batch file' => 'path.path.inc',
@@ -47,7 +48,27 @@ function node_path_info() {
 }
 
 /**
- * Batch processing callback; Generate aliases for nodes.
+ * Callback to delete aliases for node types.
+ */
+function node_path_type_delete_callback($types) {
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid');
+  $query->condition('n.type', $types, 'IN');
+  $nids = $query->execute()->fetchCol();
+
+  $sources = array();
+  foreach ($nids as $nid) {
+    $sources[] = 'node/' . $nid;
+  }
+
+  $query = db_delete('url_alias');
+  $query->condition('source', $sources, 'IN');
+  $query->execute();
+}
+
+
+/**
+ * Batch processing callback; Generate or update aliases for nodes.
  */
 function node_path_bulk_update_batch_process(&$context) {
   if (!isset($context['sandbox']['current'])) {
@@ -56,13 +77,21 @@ function node_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('node', 'n');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
   $query->addField('n', 'nid');
-  $query->isNull('ua.source');
   $query->condition('n.nid', $context['sandbox']['current'], '>');
   $query->orderBy('n.nid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'node');
+  if (!empty($context['choices'])) {
+    $query->condition('n.type', $context['choices'], 'IN');
+  }
+  $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {
@@ -81,8 +110,11 @@ function node_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $nodes = node_load_multiple($nids);
+
   foreach ($nodes as $node) {
-    path_save_automatic_entity_alias($node);
+    if (path_save_automatic_entity_alias($node)) {
+      $context['results']['total']['node'] += 1;
+    }
   }
   path_verbose_resume();
 
@@ -104,6 +136,7 @@ function taxonomy_path_info() {
     'label' => t('Taxonomy term'),
     'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
     'pattern default' => '[term:vocabulary]/[term:name]',
+    'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
     'batch file' => 'path.path.inc',
     'batch file path' => backdrop_get_path('module', 'path'),
@@ -121,6 +154,25 @@ function taxonomy_path_info() {
 }
 
 /**
+ * Callback to delete aliases for taxonomy types.
+ */
+function taxonomy_path_type_delete_callback($types) {
+  $query = db_select('taxonomy_term_data', 'td');
+  $query->addField('td', 'tid');
+  $query->condition('td.vocabulary', $types, 'IN');
+  $tids = $query->execute()->fetchCol();
+
+  $sources = array();
+  foreach ($tids as $tid) {
+    $sources[] = 'taxonomy/term/' . $tid;
+  }
+
+  $query = db_delete('url_alias');
+  $query->condition('source', $sources, 'IN');
+  $query->execute();
+}
+
+/**
  * Batch processing callback; Generate aliases for taxonomy terms.
  */
 function taxonomy_path_bulk_update_batch_process(&$context) {
@@ -130,13 +182,21 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('taxonomy_term_data', 'td');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
   $query->addField('td', 'tid');
-  $query->isNull('ua.source');
   $query->condition('td.tid', $context['sandbox']['current'], '>');
   $query->orderBy('td.tid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'taxonomy_term');
+  if (!empty($context['choices'])) {
+    $query->condition('td.vocabulary', $context['choices'], 'IN');
+  }
+  $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {
@@ -155,8 +215,11 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $terms = taxonomy_term_load_multiple($tids);
+
   foreach ($terms as $term) {
-    path_save_automatic_entity_alias($term);
+    if (path_save_automatic_entity_alias($term)) {
+      $context['results']['total']['taxonomy_term'] += 1;
+    }
   }
   path_verbose_resume();
 
@@ -197,13 +260,18 @@ function user_path_bulk_update_batch_process(&$context) {
   }
 
   $query = db_select('users', 'u');
-  $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
   $query->addField('u', 'uid');
-  $query->isNull('ua.source');
   $query->condition('u.uid', $context['sandbox']['current'], '>');
   $query->orderBy('u.uid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'user');
+  $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
+    $query->isNull('ua.source');
+  }
 
   // Get the total amount of items to process.
   if (!isset($context['sandbox']['total'])) {
@@ -223,7 +291,9 @@ function user_path_bulk_update_batch_process(&$context) {
   path_verbose_suspend();
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
-    path_save_automatic_entity_alias($account);
+    if (path_save_automatic_entity_alias($account)) {
+      $context['results']['total']['user'] += 1;
+    }
   }
   path_verbose_resume();
 
