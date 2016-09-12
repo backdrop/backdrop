@@ -4,6 +4,12 @@ description = Tests the interface for adding, removing, and moving blocks.
 group = Layout
 file = layout.test
 
+[LayoutBlockTest]
+name = Layout Block Test
+description = Tests the blocks title, content, and display settings.
+group = Layout
+file = layout.test
+
 [LayoutSelectionTest]
 name = Layout Selection Test
 description = Tests that the correct layout is used in various situations.
