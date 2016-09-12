@@ -106,12 +106,13 @@ function standard_install() {
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "node".
-  config_set('system.core', 'site_frontpage', 'node');
+  // Set front page to "home".
+  config_set('system.core', 'site_frontpage', 'home');
+  backdrop_flush_all_caches();
 
-  // Insert default pre-defined node types into the database. For a complete
-  // list of available node type attributes, refer to the node type API
-  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
+  // Create default pre-defined node types. For a complete list of available
+  // node type attributes please refer to the node type API documentation at:
+  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
   $types = array(
     array(
       'type' => 'page',

@@ -857,20 +857,20 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
 
   function testCurrentPageTokens() {
     $tokens = array(
-      '[current-page:title]' => t('Welcome to @site-name', array('@site-name' => config_get('system.core', 'site_name'))),
-      '[current-page:url]' => url('node', array('absolute' => TRUE)),
-      '[current-page:url:absolute]' => url('node', array('absolute' => TRUE)),
-      '[current-page:url:relative]' => url('node', array('absolute' => FALSE)),
-      '[current-page:url:path]' => 'node',
-      '[current-page:url:args:value:0]' => 'node',
+      '[current-page:title]' => t('Home', array('@site-name' => config_get('system.core', 'site_name'))),
+      '[current-page:url]' => url('home', array('absolute' => TRUE)),
+      '[current-page:url:absolute]' => url('home', array('absolute' => TRUE)),
+      '[current-page:url:relative]' => url('home', array('absolute' => FALSE)),
+      '[current-page:url:path]' => 'home',
+      '[current-page:url:args:value:0]' => 'home',
       '[current-page:url:args:value:1]' => NULL,
-      '[current-page:url:unaliased]' => url('node', array('absolute' => TRUE, 'alias' => TRUE)),
+      '[current-page:url:unaliased]' => url('home', array('absolute' => TRUE, 'alias' => TRUE)),
       '[current-page:page-number]' => 1,
       '[current-page:query:foo]' => NULL,
       '[current-page:query:bar]' => NULL,
-      '[current-page:query:q]' => 'node',
+      '[current-page:query:q]' => 'home',
       // Deprecated tokens
-      '[current-page:arg:0]' => 'node',
+      '[current-page:arg:0]' => 'home',
       '[current-page:arg:1]' => NULL,
     );
     $this->assertPageTokens('', $tokens);

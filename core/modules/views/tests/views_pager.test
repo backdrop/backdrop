@@ -23,12 +23,12 @@ class ViewsPagerTest extends ViewsSqlTest {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
     // Test behaviour described in http://drupal.org/node/652712#comment-2354918.
-    $this->backdropGet('admin/structure/views/view/frontpage/configure');
+    $this->backdropGet('admin/structure/views/view/promoted/configure');
 
     $edit = array(
       'pager_options[items_per_page]' => 20,
     );
-    $this->backdropPost('admin/structure/views/nojs/display/frontpage/default/pager_options', $edit, t('Apply'));
+    $this->backdropPost('admin/structure/views/nojs/display/promoted/default/pager_options', $edit, t('Apply'));
     $this->assertText('20 items');
 
     // Change type and check whether the type is new type is stored.
@@ -36,8 +36,8 @@ class ViewsPagerTest extends ViewsSqlTest {
     $edit = array(
       'pager[type]' => 'mini',
     );
-    $this->backdropPost('admin/structure/views/nojs/display/frontpage/default/pager', $edit, t('Apply'));
-    $this->backdropGet('admin/structure/views/view/frontpage/configure');
+    $this->backdropPost('admin/structure/views/nojs/display/promoted/default/pager', $edit, t('Apply'));
+    $this->backdropGet('admin/structure/views/view/promoted/configure');
     $this->assertText('Mini', 'Changed pager plugin, should change some text');
 
     // Test behaviour described in http://drupal.org/node/652712#comment-2354400

@@ -1657,6 +1657,7 @@ function node_menu() {
     'menu_name' => 'management',
     'weight' => -20,
   );
+
   $items['rss.xml'] = array(
     'title' => 'RSS feed',
     'page callback' => 'node_feed',
@@ -1666,6 +1667,7 @@ function node_menu() {
     // are not passed to node_feed().
     'page arguments' => array(FALSE, array()),
   );
+
   // @todo Remove this loop when we have a 'description callback' property.
   // Resets the internal static cache of _node_types_build() and forces a
   // rebuild of the node type information.
@@ -1876,12 +1878,14 @@ function node_block_view($delta = '', $settings = array()) {
 
   switch ($delta) {
     case 'syndicate':
-      $block['subject'] = t('Syndicate');
-      $block['content'] = array(
-        '#theme' => 'feed_icon',
-        '#url' => 'rss.xml',
-        '#title' => t('Syndicate'),
-      );
+      if (backdrop_valid_path('rss.xml')) {
+        $block['subject'] = t('Syndicate');
+        $block['content'] = array(
+          '#theme' => 'feed_icon',
+          '#url' => 'rss.xml',
+          '#title' => t('Syndicate'),
+        );
+      }
       break;
 
     case 'recent':
@@ -1901,7 +1905,9 @@ function node_block_view($delta = '', $settings = array()) {
         }
       }
       break;
+
   }
+
   return $block;
 }
 
@@ -1983,6 +1989,8 @@ function node_get_recent($number = 10) {
  *   The link should be an absolute URL.
  *
  * @see node_menu()
+ *
+ * @deprecated since 1.5.0
  */
 function node_feed($nids = FALSE, $channel = array()) {
   global $base_url, $language_content;
@@ -2138,8 +2146,7 @@ function node_page_default() {
     else {
       backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
 
-      $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
-
+      $default_message = '<p>' . t('No content has been promoted yet.') . '</p>';
       $default_links = array();
       if (_node_add_access()) {
         $default_links[] = l(t('Add content'), 'node/add');

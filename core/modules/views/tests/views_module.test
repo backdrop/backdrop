@@ -86,16 +86,12 @@ class ViewsModuleTest extends ViewsSqlTest {
    * Tests the dynamic includes of templates via module feature.
    */
   function testModuleTemplates() {
-    $view = views_get_view('frontpage');
-    $view->disabled = FALSE;
-    $view->save();
-
     $existing = array();
     $type = array();
     $theme = array();
     $path = array();
     $registry = views_theme($existing, $type, $theme, $path);
-    $this->assertTrue(isset($registry['views_view__frontpage']));
+    $this->assertTrue(isset($registry['views_view__promoted']));
   }
 
   /**
