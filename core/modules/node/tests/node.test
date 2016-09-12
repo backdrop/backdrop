@@ -1800,8 +1800,8 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
 
     // Set the block to a region to confirm block is available.
-    $layout = layout_load('default');
-    $block = $layout->addBlock('node', 'recent', 'sidebar');
+    $layout = layout_load('home');
+    $block = $layout->addBlock('node', 'recent', 'content');
 
     // Set block title and variables.
     $block_title = $this->randomName();
@@ -1844,6 +1844,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Test that only the 2 latest nodes are shown.
     $this->backdropLogin($this->web_user);
+    $this->backdropGet('');
     $this->assertNoText($node1->title, t('Node not found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Main view template.

@@ -1410,7 +1410,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
 
     // Load frontpage.
-    $this->backdropGet('');
+    $this->backdropGet('<front>');
 
     // Test the title.
     $this->assertNoRaw($title, 'Check for the unfiltered version of the title.');
@@ -1445,6 +1445,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
   function testBackdropIsFrontPage() {
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    config_set('system.core', 'site_frontpage', 'node');
     $this->backdropGet('node');
     $this->assertText(t('On front page.'), 'Path is the front page.');
     $this->backdropGet($this->node_path);
@@ -1582,6 +1583,8 @@ class SystemMainContentFallback extends BackdropWebTestCase {
   function testMainContentFallback() {
     // Disable the layout module.
     module_disable(array('layout'));
+    // Remove the old layout path from the menu.
+    menu_rebuild();
     $this->assertFalse(module_exists('layout'), 'Layout module disabled.');
 
     // At this point, no region is filled and fallback should be triggered.
@@ -2391,14 +2394,14 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
  * Test the handling of requests containing 'index.php'.
  */
 class SystemIndexPhpTest extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
-  }
 
   /**
    * Test index.php handling.
    */
   function testIndexPhpHandling() {
+    $this->backdropGet('<front>');
+    $this->assertResponse(200, 'Make sure the front page returns a valid page.');
+
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
     $this->backdropGet($index_php, array('external' => TRUE));
@@ -2639,7 +2642,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify menu links. By default the main menu should only show first-level
     // links
@@ -2661,7 +2664,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify level 3 links are shown, but not level 4.
     $this->assertLink($item1['link_title']);
@@ -2679,7 +2682,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify level 5 links are shown.
     $this->assertLink($item5['link_title']);
@@ -2693,9 +2696,8 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $this->assertNoLink($item1['link_title']);
-
 
     // Go to the level 2 node and verify the menu links are shown.
     $this->backdropGet('node/' . $node1->nid);
@@ -2716,7 +2718,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
    * @param string $menu_name Menu name.
    * @return array Menu link created.
    */
-  function addMenuLink($menu_name, $plid = 0, $link = '<front>') {
+  function addMenuLink($menu_name, $plid = 0, $link = 'user') {
     // View add menu link page.
     $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
     $this->assertResponse(200);

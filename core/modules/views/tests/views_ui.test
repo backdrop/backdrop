@@ -142,9 +142,8 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
    * Tests default views.
    */
   function testDefaultViews() {
-    // Make sure the front page view starts off as disabled (does not appear on
-    // the listing page).
-    $edit_href = 'admin/structure/views/view/frontpage';
+    // Make sure the taxonomy term view starts off as disabled.
+    $edit_href = 'admin/structure/views/view/taxonomy_term';
     $this->backdropGet('admin/structure/views');
     // TODO: Disabled default views do now appear on the front page. Test this
     // behavior with templates instead.
@@ -153,33 +152,44 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // Enable the front page view, and make sure it is now visible on the main
     // listing page.
     $this->backdropGet('admin/structure/views/templates');
-    $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
+    $this->clickViewsOperationLink(t('Enable'), '/taxonomy_term/');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
 
-    // Configure the view and change the title. Make sure that the new title is
-    // displayed.
-    $new_title = $this->randomName(16);
-    $edit = array('title' => $new_title);
-    $this->backdropPost('admin/structure/views/nojs/display/frontpage/page/title', $edit, t('Apply'));
-    $this->backdropPost('admin/structure/views/view/frontpage/configure/page', array(), t('Save'));
-    $this->backdropGet('frontpage');
-    $this->assertText($new_title);
+    // Configure the view and add a class. Make sure that the new class is
+    // added correctly.
+    $new_class = $this->randomName(16);
+    $edit = array('css_class' => $new_class);
+    $this->backdropPost('admin/structure/views/nojs/display/taxonomy_term/page/css_class', $edit, t('Apply'));
+    $this->backdropPost('admin/structure/views/view/taxonomy_term/configure/page', array(), t('Save'));
+
+    // Add a term so we can visit this page to test the view.
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => filter_default_format(),
+      'vocabulary' => 'tags',
+      'langcode' => LANGUAGE_NONE,
+    ));
+    taxonomy_term_save($term);
+
+    $this->backdropGet('taxonomy/term/' . $term->tid);
+    $this->assertRaw($new_class);
 
     // It should now be possible to revert the view. Do that, and make sure the
     // view title we added above no longer is displayed.
     $this->backdropGet('admin/structure/views');
     $this->assertLink(t('Revert'));
-    $revert_href = 'admin/structure/views/view/frontpage/revert';
+    $revert_href = 'admin/structure/views/view/taxonomy_term/revert';
     $this->assertLinkByHref($revert_href);
     $this->backdropPost($revert_href, array(), t('Revert'));
-    $this->backdropGet('frontpage');
-    $this->assertNoText($new_title);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
+    $this->assertNoRaw($new_class);
 
     // After reverting, the view will be disabled again. Try to click the
     // "enable" link from there again.
     $this->backdropGet('admin/structure/views/templates');
-    $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
+    $this->clickViewsOperationLink(t('Enable'), '/taxonomy_term/');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
   }
@@ -767,7 +777,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     // Make sure the title appears in both the page and the block.
     $this->backdropGet($view_path);
     $this->assertText($original_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($original_title);
 
     // Change the title for the page display only, and make sure that is the
@@ -780,7 +790,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view_path);
     $this->assertText($new_title);
     $this->assertNoText($original_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($original_title);
     $this->assertNoText($new_title);
   }
@@ -830,7 +840,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view['page[feed_properties][path]']);
     $this->assertText($view['page[title]']);
     $this->assertNoText($view['block[title]']);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($view['block[title]']);
     $this->assertNoText($view['page[title]']);
 
@@ -848,7 +858,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertText($new_default_title);
     $this->assertNoText($view['page[title]']);
     $this->assertNoText($view['block[title]']);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($view['block[title]']);
     $this->assertNoText($new_default_title);
     $this->assertNoText($view['page[title]']);
@@ -865,7 +875,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view['page[feed_properties][path]']);
     $this->assertText($new_default_title);
     $this->assertNoText($new_block_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($new_block_title);
     $this->assertNoText($view['block[title]']);
   }

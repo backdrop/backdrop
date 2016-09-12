@@ -378,8 +378,8 @@ class MenuTestCase extends BackdropWebTestCase {
    * @param object $parent_node Parent menu link content node.
    */
   function verifyMenuLink($item, $item_node, $parent = NULL, $parent_node = NULL) {
-    // View home page.
-    $this->backdropGet('');
+    // View user page.
+    $this->backdropGet('user');
     $this->assertResponse(200);
 
     // Verify parent menu link.
@@ -388,7 +388,7 @@ class MenuTestCase extends BackdropWebTestCase {
       $title = $parent['link_title'];
       $this->assertLink($title, 0, 'Parent menu link was displayed');
 
-      // Verify menu link link.
+      // Verify menu link.
       $this->clickLink($title);
       $title = $parent_node->title;
       $this->assertTitle(t("@title | Backdrop", array('@title' => $title)), 'Parent menu link link target was correct');
@@ -476,7 +476,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('The menu link %title has been deleted.', array('%title' => $title)), 'Menu link was deleted');
 
     // Verify deletion.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertNoText($title, 'Menu link was deleted');
   }
 
@@ -489,12 +489,12 @@ class MenuTestCase extends BackdropWebTestCase {
   function toggleMenuLink($item) {
     $this->disableMenuLink($item);
     // Verify menu link is absent.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertNoText($item['link_title'], 'Menu link was not displayed');
 
     $this->enableMenuLink($item);
     // Verify menu link is displayed.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($item['link_title'], 'Menu link was displayed');
   }
 
@@ -679,7 +679,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);
     // Assert that there is no link for the node.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertNoLink($node_title);
 
     // Edit the node, enable the menu link setting, but skip the link title.
@@ -688,7 +688,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     // Assert that there is no link for the node.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertNoLink($node_title);
 
     // Edit the node and create a menu link.
@@ -699,7 +699,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     // Assert that the link exists.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertLink($node_title);
 
     $this->backdropGet('node/' . $node->nid . '/edit');
@@ -714,7 +714,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/' . $node->nid . '/edit', array(), t('Save'));
 
     // Check that the link is still present.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertLink($node_title);
 
     // Re-enable Main menu as available menu, then remove the link.
@@ -729,7 +729,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     // Assert that there is no link for the node.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertNoLink($node_title);
 
     // Add a menu link to the Administration menu.

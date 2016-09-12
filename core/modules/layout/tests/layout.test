@@ -1682,7 +1682,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
   public function testLayoutUpgrade() {
     $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $blocks = array(
       'l-header' => array(
         'block-system-header',
