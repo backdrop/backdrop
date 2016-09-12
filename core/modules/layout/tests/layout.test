@@ -1800,3 +1800,105 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     ));
   }
 }
+
+
+/**
+ * Tests layout_get_block_usage().
+ */
+class LayoutBlockUsageTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('layout', 'menu');
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+  }
+
+  /**
+   * Tests layout_get_block_usage().
+   */
+  public function testBlockUsage() {
+
+    // By default, the header block should be found in the default layout in 
+    // header position.
+    $this->checkBlockUsage('header', 'default', 'header');
+
+    // Check that the header block is not in the sidebar.
+    $this->checkBlockNoUsage('header', 'default', 'sidebar');
+
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_name = 'block_usage_test_layout';
+    $layout_title = 'Block usage test layout';
+    $layout_url = 'layout-usage-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    
+    // The new layout should have the header block in the header position.
+    $this->checkBlockUsage('header', $layout_name, 'header');
+    
+    // Return to the layout edit page and add another header block.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Header block'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // The new layout should have the header block in the header position.
+    $count = $this->checkBlockUsage('header', $layout_name, 'header');
+    $this->assertTrue($count == 2, 'Function returns two header blocks in this position.');
+
+    // Check that the header block is not in the sidebar.
+    $this->checkBlockNoUsage('header', $layout_name, 'sidebar');
+
+    // Add the header block to the sidebar and check again.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Header block'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->checkBlockUsage('header', $layout_name, 'sidebar');
+  }
+
+  /**
+   * Checks block usage.
+   */
+  protected function checkBlockUsage($delta, $layout, $position) {
+    backdrop_static_reset('layout_get_block_usage');
+    layout_reset_caches();
+    module_load_include('inc', 'layout', 'layout.admin');
+    $usage = layout_get_block_usage();
+    $this->assertTrue(isset($usage['system'][$delta][$layout][$position]), 'Block usage returned correctly. Block found in array.');
+    if (isset($usage['system'][$delta][$layout][$position])) {
+      return count($usage['system'][$delta][$layout][$position]);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Checks block not in usage.
+   */
+  protected function checkBlockNoUsage($delta, $layout, $position) {
+    backdrop_static_reset('layout_get_block_usage');
+    layout_reset_caches();
+    module_load_include('inc', 'layout', 'layout.admin');
+    $usage = layout_get_block_usage();
+    $this->assertFalse(isset($usage[$delta][$layout][$position]), 'Block usage returned correctly. Block not found in array.');
+    return TRUE;
+  }
+}

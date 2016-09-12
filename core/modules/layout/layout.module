@@ -300,6 +300,16 @@ function layout_menu() {
     }
   }
 
+  // A page in the Reports section to list all blocks and their modules.
+  $items['admin/reports/blocks'] = array(
+    'title' => 'Blocks',
+    'description' => 'Overview of all blocks and their modules.',
+    'page callback' => 'layout_block_list',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.admin.inc',
+  );
+
   return $items;
 }
 
