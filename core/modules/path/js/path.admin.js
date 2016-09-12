@@ -17,12 +17,6 @@ Backdrop.behaviors.pathGenerate = {
       return;
     }
 
-    // Hide the Update existing checkboxes if deleting aliases
-    $form.find("select[name='operations[operation]']").change(function(){
-      var $delete = ($(this).val()=='delete');
-      $("table#path-bulk-alias").toggleClass('delete', $delete);
-    });
-
     // When you select an entity checkbox (like "content"), select the 
     // checkboxes for all the subtypes
     $form.find("input.path-base").change(function () {
@@ -47,29 +41,6 @@ Backdrop.behaviors.pathGenerate = {
       }
     });
 
-    // When you select an entity reset checkbox (like "content"), select the 
-    // reset checkboxes for all the subtypes.
-    $form.find("input.path-reset-base").change(function () {
-      var type = $(this).attr('data-path-type');
-      $("input.path-reset[data-path-type='"+type+"']").prop('checked', this.checked);
-    });
-
-    $form.find("input.path-reset").change(function () {
-      var type = $(this).attr('data-path-type');
-      var $base = $("input.path-reset-base[data-path-type='"+type+"']");
-      // If you uncheck a subtype checkbox, uncheck the entity checkbox.
-      if($(this).is(":checked") == false) {
-        $base.prop('checked', false);
-      }
-      // If all subtype checkboxes checked, check the base checkbox.
-      else {
-        var unchecked = $("input.path-reset[data-path-type='"+type+"']:checkbox:not(:checked)");
-        if(unchecked.length < 2) {
-          $base.prop('checked', true);
-        }
-      }
-    });
-
     // Add check all checkboxes in the table head row.
     var strings = { 'selectAll': Backdrop.t('Select all rows in this table'), 'selectNone': Backdrop.t('Deselect all rows in this table') };
     $form.find('th.path-alias-generate').prepend($('<input type="checkbox" class="select-all-alias form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
@@ -79,20 +50,11 @@ Backdrop.behaviors.pathGenerate = {
         });
       }
     });
-    $form.find('th.path-alias-update').prepend($('<input type="checkbox" class="select-all-delete form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
-      if ($(event.target).is('input[type="checkbox"]')) {
-        $form.find("input.path-reset").each(function () {
-          $(this).prop('checked', event.target.checked);
-        });
-      }
-    });
 
     // Uncheck the "select all" checkboxes if not all checkboxes checked.
     $form.find('input[type="checkbox"]').change(function () {
       var uncheckedAll = ($form.find("input.path-type:checkbox:not(:checked)").length)+($("input.path-base:checkbox:not(:checked)").length);
       $form.find("input.select-all-alias").prop('checked', uncheckedAll<1);
-      var uncheckedAllDelete = $form.find("input.path-reset:checkbox:not(:checked)").length;
-      $form.find("input.select-all-delete").prop('checked', uncheckedAllDelete<1);
     });
 
   }

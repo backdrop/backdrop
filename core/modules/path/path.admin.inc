@@ -666,14 +666,6 @@ function path_bulk_update_form($form, &$form_state) {
           'data-path-name' => array('base'),
         ),
       );
-      $form['reset_alias'][$type]['base'] = array(
-        '#type' => 'checkbox',
-        '#attributes' => array(
-          'class' => array('path-reset', 'path-reset-base'),
-          'data-path-type' => array($type),
-          'data-path-name' => array('base'),
-        ),
-      );
       $form['#update_callbacks'][$type] = $path_info;
       // Check if this entity provides bundle types as pattern items and create
       // a row for each of these bundle types. For the Node entity the pattern
@@ -683,20 +675,12 @@ function path_bulk_update_form($form, &$form_state) {
         foreach ($path_info['pattern items'] as $item => $item_label) {
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
-            '#title' => $item_label,
+            '#title' => t('All !label URL aliases', array('!label' => $item)),
             '#attributes' => array(
               'class' => array('path-type', 'path-' . $type),
               'data-path-type' => array($type),
               'data-path-name' => array($item),
             '#parents' => array('update'),
-            ),
-          );
-          $form['reset_alias'][$type][$item] = array(
-            '#type' => 'checkbox',
-            '#attributes' => array(
-              'class' => array('path-reset', 'path-reset-' . $item),
-              'data-path-type' => array($type),
-              'data-path-name' => array($item),
             ),
           );
         }
@@ -707,7 +691,7 @@ function path_bulk_update_form($form, &$form_state) {
   // Build the 'Update options' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Bulk actions'),
+    '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -718,9 +702,11 @@ function path_bulk_update_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => '',
     '#options' => array(
-      'generate' => t('Generate aliases'),
-      'delete' => t('Delete aliases'),
+      'generate' => t('Generate URL aliases'),
+      'update' => t('Update existing URL aliases'),
+      'delete' => t('Delete URL aliases'),
     ),
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
   $form['operations']['submit'] = array(
     '#type' => 'submit',
@@ -753,16 +739,11 @@ function theme_path_bulk_update_form($variables) {
           'data' => backdrop_render($form['update'][$base][$key]),
           'class' => array('path-alias-generate'),
         );
-        $row[] = array(
-          'data' => backdrop_render($form['reset_alias'][$base][$key]),
-          'class' => array('path-alias-update'),
-        );
       $rows[] = $row;
     }
   }
   $header = array(
-    'alias' => array('data' => t('Generate'), 'class' => 'path-alias-generate'),
-    'delete' => array('data' => t('Update existing'), 'class' => 'path-alias-update'),
+    'alias' => array('data' => t('All URL aliases'), 'class' => 'path-alias-generate'),
   );
 
   $output = '';
@@ -780,14 +761,17 @@ function theme_path_bulk_update_form($variables) {
  */
 function path_bulk_update_form_rebuild_submit($form, &$form_state) {
   // If aliases are being deleted, rebuild the form to show the confirm form. 
-  // Otherwise aliases are being generated, call the 
+  // Otherwise aliases are being generated or updated, call the 
   // path_bulk_update_form_generate_submit() form.
   if ($form_state['values']['operations']['operation'] == 'delete') {
     $form_state['storage']['delete'] = TRUE;
     $form_state['rebuild'] = TRUE;
   }
-  else {
-    path_bulk_update_form_generate_submit($form, $form_state);
+  elseif ($form_state['values']['operations']['operation'] == 'generate') {
+    path_bulk_update_form_generate_submit($form, $form_state, 'generate');
+  }
+  elseif ($form_state['values']['operations']['operation'] == 'update') {
+    path_bulk_update_form_generate_submit($form, $form_state, 'update');
   }
 }
 
@@ -812,20 +796,6 @@ function path_bulk_update_form_validate($form, &$form_state) {
       form_set_error('update', t('You must select an alias to update.'));
     }
   }
-  // Don't allow reset checkbox to be checked if the corresponding alias 
-  // checkbox is not selected.
-  if (isset($form_state['values']['reset_alias'])) {
-    foreach ($form_state['values']['reset_alias'] as $entity_type => $reset) {
-      foreach ($reset as $reset_status => $value) {
-        if ($value && empty($form_state['values']['update'][$entity_type][$reset_status])) {
-          $reset_errors[] = TRUE;
-        }
-      }
-    }
-    if ($reset_errors) {
-      form_set_error('update', t('You must select an alias to reset.'));
-    }
-  }
 }
 
 /**
@@ -834,7 +804,7 @@ function path_bulk_update_form_validate($form, &$form_state) {
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
  */
-function path_bulk_update_form_generate_submit($form, &$form_state) {
+function path_bulk_update_form_generate_submit($form, &$form_state, $op = 'generate') {
     $batch = array(
     'title' => t('Bulk updating URL aliases'),
     'operations' => array(
@@ -846,20 +816,15 @@ function path_bulk_update_form_generate_submit($form, &$form_state) {
 
   foreach ($form_state['values']['update'] as $entity_types => $entities) {
     $choices = array();
-    $reset_alias = array();
     $entities = array_filter($entities);
-    // Build an array of selected entity/bundle choices, and an array of which
-    // of these choices should have their aliases reset.
+    // Build an array of selected entity/bundle choices.
     foreach ($entities as $label => $choice) {
       $choices[$label] = $label;
-      if ($form_state['values']['reset_alias'][$entity_types][$label]) {
-        $reset_alias[$label] = TRUE;
-      }
     }
     if (!empty($choices)) {
       $path_info = $form['#update_callbacks'][$entity_types];
       $path_info['choices'] = empty($choices['base']) ? $choices : array();
-      $path_info['reset_alias'] = $reset_alias;
+      $path_info['op'] = $op;
       $callback = $path_info['batch update callback'];
 
       if (!empty($path_info['batch file'])) {
@@ -893,7 +858,7 @@ function path_bulk_update_batch_process($callback, $path_info, &$context) {
   if (!empty($path_info['batch file'])) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
     $context['choices'] = array_keys($path_info['choices']);
-    $context['reset_alias'] = $path_info['reset_alias'];
+    $context['op'] = $path_info['op'];
   }
   return $callback($context);
 }
@@ -958,7 +923,7 @@ function path_admin_bulk_delete_confirm($form, $form_state) {
 
   $question = t('Delete all the following URL aliases?');
   $path = 'admin/config/search/path/bulk-update';
-  $description = t('Deleting these URL aliases cannot be undone.');
+  $description = t('This action cannot be undone.');
   $yes = t('Delete URL aliases');
 
   return confirm_form($form, $question, $path, $description, $yes);

@@ -904,6 +904,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][base]' => TRUE,
       'update[taxonomy_term][base]' => TRUE,
       'update[user][base]' => TRUE,
+      'operations[operation]' => 'generate',
     );
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
     $this->assertText('Generated 18 URL aliases.'); // 10 nodes + 6 terms + 2 users.
@@ -939,6 +940,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     // Test generation of node types by creating only post aliases.
     $edit = array(
       'update[node][post]' => TRUE,
+      'operations[operation]' => 'generate',
     );
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
     // Check that aliases only now exists for post types.
@@ -959,7 +961,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $edit = array(
       'update[node][page]' => TRUE,
       'update[node][post]' => TRUE,
-      'reset_alias[node][post]' => TRUE,
+      'operations[operation]' => 'update',
     );
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
     foreach ($this->nodes as $node) {

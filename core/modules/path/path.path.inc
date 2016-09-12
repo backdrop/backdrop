@@ -68,7 +68,7 @@ function node_path_type_delete_callback($types) {
 
 
 /**
- * Batch processing callback; Generate aliases for nodes.
+ * Batch processing callback; Generate or update aliases for nodes.
  */
 function node_path_bulk_update_batch_process(&$context) {
   if (!isset($context['sandbox']['current'])) {
@@ -85,8 +85,11 @@ function node_path_bulk_update_batch_process(&$context) {
   if (!empty($context['choices'])) {
     $query->condition('n.type', $context['choices'], 'IN');
   }
-  if (empty($context['reset_alias'])) {
-    $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
+  $query->leftJoin('url_alias', 'ua', "CONCAT('node/', n.nid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
     $query->isNull('ua.source');
   }
 
@@ -107,20 +110,6 @@ function node_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $nodes = node_load_multiple($nids);
-
-  $anodes = array();
-  if (!empty($context['reset_alias'])) {
-    if (isset($context['reset_alias']['base'])) {
-    }
-    else {
-      foreach ($nodes as $node) {
-        if (array_key_exists($node->type, $context['reset_alias'])) {
-          $anodes[] = $node;
-        }
-      }
-      $nodes = $anodes;
-    }
-  }
 
   foreach ($nodes as $node) {
     if (path_save_automatic_entity_alias($node)) {
@@ -201,8 +190,11 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   if (!empty($context['choices'])) {
     $query->condition('td.vocabulary', $context['choices'], 'IN');
   }
-  if (empty($context['reset_alias'])) {
-    $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
+  $query->leftJoin('url_alias', 'ua', "CONCAT('taxonomy/term/', td.tid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
     $query->isNull('ua.source');
   }
 
@@ -223,20 +215,6 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
   module_load_include('inc', 'path');
   path_verbose_suspend();
   $terms = taxonomy_term_load_multiple($tids);
-
-  $aterms = array();
-  if (!empty($context['reset_alias'])) {
-    if (isset($context['reset_alias']['base'])) {
-    }
-    else {
-      foreach ($terms as $term) {
-        if (array_key_exists($term->vocabulary, $context['reset_alias'])) {
-          $aterms[] = $term;
-        }
-      }
-      $terms = $aterms;
-    }
-  }
 
   foreach ($terms as $term) {
     if (path_save_automatic_entity_alias($term)) {
@@ -287,8 +265,11 @@ function user_path_bulk_update_batch_process(&$context) {
   $query->orderBy('u.uid');
   $query->addTag('path_bulk_update');
   $query->addMetaData('entity', 'user');
-  if (empty($context['reset_alias'])) {
-    $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
+  $query->leftJoin('url_alias', 'ua', "CONCAT('user/', u.uid) = ua.source");
+  if ($context['op'] == 'update') {
+    $query->isNotNull('ua.source');
+  }
+  if ($context['op'] == 'generate') {
     $query->isNull('ua.source');
   }
 
