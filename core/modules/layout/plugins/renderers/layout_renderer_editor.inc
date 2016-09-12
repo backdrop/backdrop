@@ -75,11 +75,11 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $description = layout_get_title_description($this->layout);
 
     $output  = '<div class="layout-editor-block" id="layout-editor-title" data-region-name="' . $region_id . '">';
-    $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '  <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
-    $output .= '  <span class="buttons">' . $region_buttons . '</span>';
-    $output .= '</div>';
-    $output .= '<div class="layout-editor-block-content">' . $description . '</div>';
+    $output .= '  <div class="layout-editor-block-title clearfix">';
+    $output .= '    <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
+    $output .= '    <span class="description">' . $description . '</span>';
+    $output .= '    <span class="buttons">' . $region_buttons . '</span>';
+    $output .= '  </div>';
     $output .= '</div>';
 
     return $output;
