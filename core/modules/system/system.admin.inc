@@ -1203,14 +1203,14 @@ function system_site_information_settings($form, &$form_state) {
 
   $form['front_page'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Front page'),
+    '#title' => t('Home page'),
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default front page'),
+    '#title' => t('Default home page'),
     '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
+    '#description' => t('Optionally, specify a relative URL to display as the home page.  Leave blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
   );
   $form['front_page']['default_nodes_main'] = array(
