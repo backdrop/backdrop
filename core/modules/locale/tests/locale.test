@@ -1358,7 +1358,7 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
 
     // Assert that the language switching block is displayed on the frontpage.
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText(t('Languages'), 'Language switcher block found.');
 
     // Assert that only the current language is marked as active.
@@ -2253,8 +2253,8 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->backdropGet('admin/config/regional/language/detection');
 
     // Enable the language switcher block.
-    $layout = layout_load('default');
-    $layout->addBlock('locale', 'language', 'sidebar');
+    $layout = layout_load('home');
+    $layout->addBlock('locale', 'language', 'top');
     $layout->save();
 
     // Access the front page without specifying any valid URL language prefix

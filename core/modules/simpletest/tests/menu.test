@@ -291,7 +291,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     menu_cache_clear('main-menu');
 
     // Load front page.
-    $this->backdropGet('node');
+    $this->backdropGet('<front>');
     $this->assertLink(t('Menu link #1'), 0, 'Found menu link #1');
     $this->assertLink(t('Menu link #1-1'), 0, 'Found menu link #1-1');
     $this->assertLink(t('Menu link #2'), 0, 'Found menu link #2');
@@ -498,7 +498,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     menu_link_save($menu_link);
 
     // Load front page.
-    $this->backdropGet('node');
+    $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
     $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
   }
@@ -1085,7 +1085,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify that breadcrumb on node listing page contains "Home" only.
     $trail = array();
-    $this->assertBreadcrumb('node', $trail);
+    $this->assertBreadcrumb('home', $trail);
 
     // Verify node breadcrumbs (in menu).
     // Do this separately for Main menu and Main menu, since only the
@@ -1155,9 +1155,8 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       );
       $this->assertBreadcrumb("node/$nid3/edit", $trail);
 
-      // Verify that node listing page still contains "Home" only.
-      $trail = array();
-      $this->assertBreadcrumb('node', $trail);
+      // Verify that the home page does not have a breadcrumb.
+      $this->assertBreadcrumb('<front>', array());
 
       if ($menu == 'main-menu') {
         $parent = $node2;
@@ -1277,7 +1276,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     ));
     $this->backdropLogout();
 
-    // Verify breadcrumb on front page.
+    // Verify that there is no breadcrumb on front page.
     $this->assertBreadcrumb('<front>', array());
 
     // Verify breadcrumb on user pages (without menu link) for anonymous user.
