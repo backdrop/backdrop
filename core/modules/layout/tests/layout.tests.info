@@ -4,6 +4,12 @@ description = Tests the interface for adding, removing, and moving blocks.
 group = Layout
 file = layout.test
 
+[LayoutBlockTest]
+name = Layout Block Test
+description = Tests the blocks title, content, and display settings.
+group = Layout
+file = layout.test
+
 [LayoutSelectionTest]
 name = Layout Selection Test
 description = Tests that the correct layout is used in various situations.
@@ -19,5 +25,11 @@ file = layout.test
 [LayoutHookTestCase]
 name = Layout Hook Test
 description = Tests the upgrade path from block-based regions to layouts.
+group = Layout
+file = layout.test
+
+[LayoutBlockUsageTestCase]
+name = Layout Block Usage Test
+description = Tests the layout_get_block_usage() function.
 group = Layout
 file = layout.test

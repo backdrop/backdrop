@@ -585,6 +585,20 @@ tr:hover del.diffchange {
 }
 
 /**
+ * Hero blocks.
+ */
+.block-hero {
+  background-color: #cccccc;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
+  padding: 50px 100px;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 50px;
+}
+
+/**
  * Floated images.
  */
 img {
