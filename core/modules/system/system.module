@@ -1352,7 +1352,9 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      'core/misc/smartmenus/jquery.smartmenus.min.js' => array(
+      // Backdrop includes a "combined" file that bundles together both the
+      // main library and the keyboard support file.
+      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -2409,17 +2411,6 @@ function system_block_configure($delta, $settings) {
     if ($delta === $menu_name) {
       module_load_include('inc', 'system', 'system.menu');
       return _system_block_configure($delta, $settings);
-    }
-  }
-}
-
-/**
- * Implements hook_block_save().
- */
-function system_block_save($delta, &$settings) {
-  if (in_array($delta, array_keys(menu_list_system_menus()))) {
-    if ($settings['depth'] == 1 && $settings['style'] == 'dropdown') {
-      $settings['style'] = NULL;
     }
   }
 }

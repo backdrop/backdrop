@@ -1281,10 +1281,13 @@ function menu_tree_get_path($menu_name) {
  *   The named menu links to return.
  * @param $max_depth
  *   (optional) The maximum depth of links to retrieve.
- * @param $only_active_trail
+ * @param bool $only_active_trail
  *   (optional) Whether to only return the links in the active trail (TRUE)
  *   instead of all links on every level of the menu link tree (FALSE). Defaults
  *   to FALSE. Internally used for breadcrumbs only.
+ * @param bool $expand_all
+ *   (optional) Since 1.5.0. Expand the entire menu tree. If set to TRUE, the
+ *   value of $only_active_trail is disregarded.
  *
  * @return
  *   An array of menu links, in the order they should be rendered. The array
@@ -1293,7 +1296,7 @@ function menu_tree_get_path($menu_name) {
  *   submenu below the link if there is one, and it is a subtree that has the
  *   same structure described for the top-level array.
  */
-function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail = FALSE) {
+function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail = FALSE, $expand_all = FALSE) {
   $tree = &backdrop_static(__FUNCTION__, array());
 
   // Check if the active trail has been overridden for this menu tree.
@@ -1305,13 +1308,30 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
     }
     // Generate a cache ID (cid) specific for this page.
     $cid = 'links:' . $menu_name . ':page:' . $item['href'] . ':' . $GLOBALS['language']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
-    // In order to not build a giant menu tree that needs to be checked for
-    // access on all levels, we simply check whether we have the menu already
-    // in cache, or otherwise, build a minimum tree containing the
-    // breadcrumb/active trail only.
-    // @see menu_set_active_trail()
-    if (!isset($tree[$cid]) && $only_active_trail) {
-      $cid .= ':trail';
+
+    // Adjust the cache ID if building a fully expanded tree or active trail.
+    if ($expand_all) {
+      $only_active_trail = FALSE;
+      $cid .= ':all';
+    }
+
+    // The active trail can be derived from an already-cached menu, so if we
+    // already have one generated, there's no need to make a separate cache
+    // just for the active trail. See menu_set_active_trail().
+    if ($only_active_trail) {
+      // Use the tree based on the normally expanded tree.
+      if (isset($tree[$cid])) {
+        // Use the current CID.
+        //$cid = $cid;
+      }
+      // Or use the existing fully expanded tree.
+      elseif (isset($tree[$cid . ':all'])) {
+        $cid .= ':all';
+      }
+      // Or if neither exists, create a new cache entry just for the trail.
+      else {
+        $cid .= ':trail';
+      }
     }
 
     if (!isset($tree[$cid])) {
@@ -1359,20 +1379,23 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
           }
           $parents = $active_trail;
 
-          $expanded = state_get('menu_expanded');
           // Check whether the current menu has any links set to be expanded.
-          if (!$only_active_trail && $expanded && in_array($menu_name, $expanded)) {
+          $menu_names_with_expanded_items = state_get('menus_containing_expanded_items');
+          $menu_contains_expanded = $menu_names_with_expanded_items && in_array($menu_name, $menu_names_with_expanded_items);
+          if ($expand_all || ($menu_contains_expanded && !$only_active_trail)) {
             // Collect all the links set to be expanded, and then add all of
             // their children to the list as well.
             do {
-              $result = db_select('menu_links', NULL, array('fetch' => PDO::FETCH_ASSOC))
-                ->fields('menu_links', array('mlid'))
-                ->condition('menu_name', $menu_name)
-                ->condition('expanded', 1)
-                ->condition('has_children', 1)
-                ->condition('plid', $parents, 'IN')
-                ->condition('mlid', $parents, 'NOT IN')
-                ->execute();
+              $query = db_select('menu_links', NULL, array('fetch' => PDO::FETCH_ASSOC));
+              $query->fields('menu_links', array('mlid'));
+              $query->condition('menu_name', $menu_name);
+              if (!$expand_all) {
+                $query->condition('expanded', 1);
+              }
+              $query->condition('has_children', 1);
+              $query->condition('plid', $parents, 'IN');
+              $query->condition('mlid', $parents, 'NOT IN');
+              $result = $query->execute();
               $num_rows = FALSE;
               foreach ($result as $item) {
                 $parents[$item['mlid']] = $item['mlid'];
@@ -1388,6 +1411,11 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
           $tree_parameters['expanded'] = $active_trail;
           $tree_parameters['active_trail'] = $active_trail;
         }
+
+        if ($expand_all) {
+          $tree_parameters['expanded'] = NULL;
+        }
+
         // Cache the tree building parameters using the page-specific cid.
         cache('menu')->set($cid, $tree_parameters);
       }
@@ -3394,7 +3422,7 @@ function _menu_clear_page_cache() {
  */
 function _menu_set_expanded_menus() {
   $names = db_query("SELECT menu_name FROM {menu_links} WHERE expanded <> 0 GROUP BY menu_name")->fetchCol();
-  state_set('menu_expanded', $names);
+  state_set('menus_containing_expanded_items', $names);
 }
 
 /**

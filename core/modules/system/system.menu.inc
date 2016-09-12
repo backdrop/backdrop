@@ -43,6 +43,19 @@ function system_menu_block_form($config) {
     '#type' => 'value',
     '#value' => $config['menu_name'],
   );
+
+  $form['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Menu style'),
+    '#options' => array(
+      'top_only' => t('Top level only'),
+      'dropdown' => t('Dropdown menu'),
+      'tree' => t('Hierarchical tree'),
+    ),
+    '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
+    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
+  );
+
   $form['level'] = array(
     '#type' => 'select',
     '#title' => t('Starting level'),
@@ -59,6 +72,11 @@ function system_menu_block_form($config) {
       '9' => t('9th level'),
     ),
     '#description' => t('Blocks that start with the 1st level will always be visible. Blocks that start with the 2nd level or deeper will only be visible when the trail to the active menu item passes though the block’s starting level.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'tree'),
+      ),
+    ),
   );
   $form['depth'] = array(
     '#type' => 'select',
@@ -76,18 +94,10 @@ function system_menu_block_form($config) {
       '9' => '9',
       '0' => t('Unlimited'),
     ),
-    '#description' => t('From the starting level, specify the maximum depth of the menu tree.'),
-  );
-
-  $form['style'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Display as drop-down'),
-    '#return_value' => 'dropdown',
-    '#default_value' => empty($config['style']) ? NULL : $config['style'],
-    '#description' => t('If enabled, children items will be shown on mouse hover or touch events.'),
+    '#description' => t('The maximum depth of the menu tree from the starting level (if available).'),
     '#states' => array(
       'invisible' => array(
-        'select[name="block_settings[depth]"]' => array('value' => '1'),
+        'select[name="block_settings[style]"]' => array('value' => 'top_only'),
       ),
     ),
   );
@@ -103,9 +113,11 @@ function system_menu_block_form($config) {
  *   menu tree and its title.
  *   - menu_name: (string) The machine name of the requested menu. Can also be
  *     set to MENU_TREE__CURRENT_PAGE_MENU to use the menu selected by the page.
- *   - level: (int) The starting level of the tree.
+ *   - style: (string) The menu style used to render this menu.
+ *   - level: (int) The starting level of the tree. Some styles may ignore this
+ *     setting.
  *   - depth: (int) The maximum depth the tree should contain, relative to the
- *     starting level.
+ *     starting level. Some styles may ignore this setting.
  *
  * @return array
  *   An associative array containing several pieces of data.
@@ -120,6 +132,13 @@ function system_menu_block_build(array $config) {
   else {
     $menu_names = menu_list_system_menus();
   }
+
+  // Set defaults.
+  $config += array(
+    'style' => 'tree',
+    'level' => 1,
+    'depth' => 3,
+  );
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
@@ -138,7 +157,7 @@ function system_menu_block_build(array $config) {
     $data['content'] = $output;
     // Add any menu style (currently always "dropdown" if any).
     if (!empty($config['style'])) {
-      $data['content']['#wrapper_attributes']['class'][] = 'menu-' . $config['style'];
+      $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
@@ -162,11 +181,35 @@ function system_menu_block_build(array $config) {
  * @return array
  */
 function system_menu_tree_block_data(array &$config) {
+  // @todo: Anything that makes adjustments based on style should come from
+  // a menu style plugin.
+  // See https://github.com/backdrop/backdrop-issues/issues/1457
+  if ($config['style'] === 'top_only') {
+    $config['level'] = 1;
+    $config['depth'] = 1;
+  }
+  elseif ($config['style'] === 'dropdown') {
+    $config['level'] = 1;
+  }
+
   // Determine the max depth based on level and depth setting.
   $max_depth = ($config['depth'] == 0) ? NULL : min($config['level'] + $config['depth'] - 1, MENU_MAX_DEPTH);
 
-  // Get the tree pruned for just the active trail.
-  $tree = menu_tree_page_data($config['menu_name'], $max_depth);
+  // Set the expand all flag if the style requires it.
+  $expand_all = FALSE;
+  if ($config['depth'] != 1) {
+    if (isset($config['expand_all'])) {
+      $expand_all = (bool) $config['expand_all'];
+    }
+    // Right now we assume if any style is set, the whole menu should be expanded.
+    elseif ($config['style'] !== 'tree') {
+      $expand_all = TRUE;
+    }
+  }
+
+  // Get the menu tree based on the configuration options using the central
+  // menu system cache.
+  $tree = menu_tree_page_data($config['menu_name'], $max_depth, FALSE, $expand_all);
 
   // Allow alteration of the tree and config before we begin operations on it.
   backdrop_alter('menu_block_tree', $tree, $config);
@@ -177,7 +220,9 @@ function system_menu_tree_block_data(array &$config) {
   }
 
   // Trim the tree to the active path.
-  system_menu_tree_trim_active_path($tree);
+  if (!$expand_all) {
+    system_menu_tree_trim_active_path($tree);
+  }
 
   // Trim the branches that extend beyond the specified depth.
   if ($config['depth'] > 0) {

@@ -2916,6 +2916,14 @@ function system_update_1056() {
 }
 
 /**
+ * Clarify state "menu_expanded" as "menus_containing_expanded_items".
+ */
+function system_update_1057() {
+  state_set('menus_containing_expanded_items', state_get('menu_expanded'));
+  state_del('menu_expanded');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
