@@ -26,8 +26,10 @@ class BlockHero extends BlockText {
   }
 
   /**
-   * Returns the rendered content of this block, or a non-breaking space if no
-   * content is provided.
+   * Returns the rendered content of this block.
+   *
+   * If there is no content, a non-breaking space is returned to ensure the
+   * block is still displayed, with only the background image applied.
    *
    * @return string
    */

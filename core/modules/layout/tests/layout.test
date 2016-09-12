@@ -1448,7 +1448,9 @@ class LayoutBlockTest extends BackdropWebTestCase {
       'files[image]' => $bad_realpath_filename,
     );
     $this->backdropPost(NULL, $edit, t('Add block'));
-    $this->assertText(t('The specified file ' . $bad_filename . ' could not be uploaded. The image is too small; the minimum dimensions are 1200x300 pixels.'));
+    $error_message = t('The specified file %name could not be uploaded.', array('%name' => $bad_filename));
+    $error_message .= ' ' . t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => '1200x300'));
+    $this->assertRaw($error_message);
 
     // Resubmit using the good image.
     $edit['files[image]'] = $good_realpath_filename2;
@@ -1481,7 +1483,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Block 2: no title present.
     $title_2 = $elements[1]->xpath('.//h2');
-    $this->assertFalse($title_2, 'No title present for 2nd hero block.');
+    $this->assertIdentical($title_2, array(), 'No title present for 2nd hero block.');
     // Block 2: content is visible.
     $this->assertText($hero_content_2);
     // Block 2: Confirm handy `block-hero-image` class is present.
@@ -1493,16 +1495,20 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Block 3: no title present.
     $title_3 = $elements[2]->xpath('.//h2');
-    $this->assertFalse($title_3, 'No title present for 3rd hero block.');
+    $this->assertIdentical($title_3, array(), 'No title present for 3rd hero block.');
     // Block 3: no content present.
     $content_3_element = $elements[2]->xpath('.//div[contains(@class, "block-content")]');
+    $this->assertEqual(count($content_3_element), 1, '3rd hero block content found.');
     // Extract the content.
     $content_3 = (string)$content_3_element[0];
-    // Remove non-breaking spaces.
-    $content_3 = preg_replace('~\x{00a0}~siu', '', $content_3);
-    // Trim all other whitespace.
-    $content_3 = trim(preg_replace('/\s+/S', '', $content_3), ' \t\n\r\0\x0B\xC2\xA0');
-    $this->assertEqual($content_3, '', 'No content present for 3rd hero block.');
+
+    // We inserted an HTML non-breaking space, but SimpleXML will return a
+    // unicode non-breaking space (\u00a0). PHP <7.0.0 does not have native
+    // unicode strings, so we encode as JSON which will encode the character.
+    // In PHP 7 this could be represented simply as $content_3 === "\u00a0".
+    $unicode_nbsp = trim(json_encode(trim($content_3)), '"');
+    $this->assertEqual($unicode_nbsp, '\u00a0', '3rd hero block contains only a non-breaking space.');
+
     // Background image present for block three.
     $style_3 = (string)$elements[2]['style'];
     $this->assertTrue(strstr($style_3, $good_filename2), 'Image present for 3rd hero block.');
