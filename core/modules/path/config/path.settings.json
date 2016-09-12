@@ -42,7 +42,7 @@
     "punctuation_greater_than": 0,
     "punctuation_slash": 0,
     "punctuation_back_slash": 0,
-    "node_pattern": "",
+    "node_pattern": "[node:content-type]/[node:title]",
     "taxonomy_term_pattern": "[term:vocabulary]/[term:name]",
     "user_pattern": "accounts/[user:name]"
 }
