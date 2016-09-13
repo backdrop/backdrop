@@ -2,6 +2,7 @@ name = Basis
 description = The default front-end theme for Backdrop CMS, which can make a great base theme.
 type = theme
 backdrop = 1.x
+version = BACKDROP_VERSION
 
 stylesheets[all][] = css/base.css
 stylesheets[all][] = css/layout.css
