@@ -323,6 +323,16 @@ function standard_install() {
     'link_title' => st('Home'),
     'link_path' => '<front>',
     'menu_name' => 'main-menu',
+    'weight' => -1,
+  );
+  menu_link_save($item);
+
+  // Create a login link in the account menu.
+  $item = array(
+    'link_title' => st('Login'),
+    'link_path' => 'user/login',
+    'menu_name' => 'user-menu',
+    'weight' => -1,
   );
   menu_link_save($item);
 
