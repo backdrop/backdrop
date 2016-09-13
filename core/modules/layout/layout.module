@@ -619,7 +619,7 @@ function layout_block_info() {
     'description' => t('A basic block for adding custom text.'),
     'class' => 'BlockText',
   );
-  $blocks['hero_block'] = array(
+  $blocks['hero'] = array(
     'info' => t('Add a hero block'),
     'description' => t('A hero block often consists of text over a background image, though either are optional.'),
     'class' => 'BlockHero',

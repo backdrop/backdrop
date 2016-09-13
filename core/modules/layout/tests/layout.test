@@ -1465,12 +1465,12 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Get all hero blocks on the user page and confirm the correct number.
     $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
       ':region' => 'l-content',
-      ':block' => 'block-layout-hero-block',
+      ':block' => 'block-layout-hero',
     ));
     $this->assertEqual(count($elements), 3, 'Three hero blocks were found in the content area.');
 
     // Get all the hero block elements for testing. Order matters here.
-    $elements = $this->xpath('(//div[contains(@class, "block-layout-hero-block")])');
+    $elements = $this->xpath('(//div[contains(@class, "block-layout-hero")])');
 
     // Block 1: Confirm both title and content are visible.
     $this->assertText($hero_title_1);
