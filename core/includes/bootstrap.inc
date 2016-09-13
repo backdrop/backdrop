@@ -2031,7 +2031,7 @@ function request_uri() {
  *
  * @see watchdog()
  */
-function watchdog_deprecated_function($type, $func, $link=NULL) {
+function watchdog_deprecated_function($type, $func, $link = NULL) {
   static $deprecated_calls = array();
 
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
@@ -2142,7 +2142,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   // CMI should make this unnecessary, but we can be called *before* system.core
   // is installed when we're running an update script.
   if ($wesl === NULL) {
-    $wesl = array(0,1,2,3,4,5,6);
+    $wesl = array(0, 1, 2, 3, 4, 5, 6);
   }
   // Don't report watchdog messages for disabled severity levels.
   if (!in_array($severity, $wesl)) {
