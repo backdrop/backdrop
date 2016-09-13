@@ -2,7 +2,7 @@
  * @file
  * Hero component styling.
  */
-.hero-block {
+.block-hero {
   /* Positioning, width and transform is to make hero full width on smaller screens */
   position: relative;
   left: 50%;
@@ -20,21 +20,21 @@
 }
 
 @media (min-width: 25em) {
-  .hero-block {
+  .block-hero {
     padding: 2rem 3rem 3rem;
     font-size: 1.3em;
   }
 }
 
 @media (min-width: 34em) {
-  .hero-block {
+  .block-hero {
     font-size: 1.5em;
     min-height: 40vh;
   }
 }
 
 @media (min-width: 62em) {
-  .hero-block {
+  .block-hero {
     /* Remove full width styles on larger screens */
     position: static;
     left: auto;
@@ -44,7 +44,7 @@
   }
 }
 
-.hero-block .block-title {
+.block-hero .block-title {
   margin: 0 0 0.2em;
   padding: 0;
   font-weight: 200;
@@ -52,7 +52,7 @@
   font-size: 2.3em;
 }
 @media (min-width: 34em) {
-  .hero-block .block-title {
+  .block-hero .block-title {
     font-size: 2.667em;
   }
 }
