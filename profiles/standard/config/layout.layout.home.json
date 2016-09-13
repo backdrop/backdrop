@@ -112,10 +112,10 @@
             }
         },
         "094cbc03-d088-4b3c-8361-977733540ae8": {
-            "plugin": "layout:hero_block",
+            "plugin": "layout:hero",
             "data": {
                 "module": "layout",
-                "delta": "hero_block",
+                "delta": "hero",
                 "settings": {
                     "title_display": "default",
                     "title": "Welcome to Backdrop CMS",
