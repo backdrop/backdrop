@@ -481,6 +481,8 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
  * Functional test for initialization of the theme system in hook_init().
  */
 class ThemeHookInitUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('theme_test');
   }
@@ -491,7 +493,7 @@ class ThemeHookInitUnitTest extends BackdropWebTestCase {
   function testThemeInitializationHookInit() {
     $this->backdropGet('theme-test/hook-init');
     $this->assertRaw('Themed output generated in hook_init()', 'Themed output generated in hook_init() correctly appears on the page.');
-    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page when the theme system is initialized in hook_init().");
+    $this->assertRaw('stark/layout.css', "The default theme's CSS appears on the page when the theme system is initialized in hook_init().");
   }
 }
 
