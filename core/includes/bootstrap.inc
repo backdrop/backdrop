@@ -2034,6 +2034,11 @@ function request_uri() {
 function watchdog_deprecated_function($type, $func, $link = NULL) {
   static $deprecated_calls = array();
 
+  // Return early if not logging deprecation warnings.
+  if (!watchdog_severity_enabled(WATCHDOG_DEPRECATED)) {
+    return;
+  }
+
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
   // Get the caller of the deprecated function.
@@ -2084,6 +2089,11 @@ function watchdog_deprecated_function($type, $func, $link = NULL) {
  */
 function watchdog_exception($type, Exception $exception, $message = NULL, $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL) {
 
+  // Return early if not logging this severity level.
+  if (!watchdog_severity_enabled($severity)) {
+    return;
+  }
+
    // Use a default value if $message is not set.
    if (empty($message)) {
      // The exception message is run through check_plain() by _backdrop_decode_exception().
@@ -2097,6 +2107,26 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
    $variables += _backdrop_decode_exception($exception);
    watchdog($type, $message, $variables, $severity, $link);
+}
+
+/**
+ * Check if logging is enabled for a given severity level.
+ *
+ * @param  $severity
+ * @return TRUE if enabled, FALSE otherwise.
+ */
+function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
+
+  $wesl = config('system.core')->get('watchdog_enabled_severity_levels');
+
+  // CMI should make this unnecessary, but we can be called *before* system.core
+  // is installed when we're running an update script.
+  if ($wesl === NULL) {
+    $wesl = array(0, 1, 2, 3, 4, 5, 6);
+  }
+
+  // Return TRUE if the severity level is enabled.
+  return in_array($severity, $wesl);
 }
 
 /**
@@ -2138,14 +2168,8 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   static $in_error_state = FALSE;
 
-  $wesl = config('system.core')->get('watchdog_enabled_severity_levels');
-  // CMI should make this unnecessary, but we can be called *before* system.core
-  // is installed when we're running an update script.
-  if ($wesl === NULL) {
-    $wesl = array(0, 1, 2, 3, 4, 5, 6);
-  }
-  // Don't report watchdog messages for disabled severity levels.
-  if (!in_array($severity, $wesl)) {
+  // Don't log messages if not enabled for this severity level.
+  if (!watchdog_severity_enabled($severity)) {
     return;
   }
 
