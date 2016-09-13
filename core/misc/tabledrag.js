@@ -290,7 +290,7 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
   var $item = $(item);
 
   // Create the handle.
-  var handle = $('<a href="#" class="tabledrag-handle"><div class="handle">&nbsp;</div></a>').attr('title', Backdrop.t('Drag to re-order'));
+  var handle = $(Backdrop.theme('tableDragHandle'));
   // Insert the handle after indentations (if any).
   var $indentationLast = $item.find('td:first .indentation:last');
   if ($indentationLast.length) {
@@ -1215,6 +1215,10 @@ Backdrop.tableDrag.prototype.row.prototype.onIndent = function () {
  */
 Backdrop.tableDrag.prototype.row.prototype.onSwap = function (swappedRow) {
   return null;
+};
+
+Backdrop.theme.prototype.tableDragHandle = function () {
+  return '<a href="#" title="' + Backdrop.t('Drag to re-order') + '" class="tabledrag-handle"><div class="handle">&nbsp;</div></a>';
 };
 
 Backdrop.theme.prototype.tableDragChangedMarker = function () {
