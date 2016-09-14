@@ -47,6 +47,30 @@
   background-blend-mode: luminosity;
 }
 
+.no-background-blend-mode .block-hero-no-image * {
+  position: relative;
+  z-index: 1;
+}
+
+.no-background-blend-mode .block-hero-no-image {
+  /* Fixes IE bug where text is behind pseudo-element */
+  position: relative;
+  z-index: 1;
+}
+
+.no-background-blend-mode .block-hero-no-image:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #009dff;
+  opacity: 0.5;
+  z-index: 0;
+}
+
 .block-hero .block-title {
   margin: 0 0 0.2em;
   padding: 0;
@@ -54,6 +78,7 @@
   line-height: 1.2;
   font-size: 2.3em;
 }
+
 @media (min-width: 34em) {
   .block-hero .block-title {
     font-size: 2.625em;

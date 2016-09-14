@@ -853,36 +853,48 @@ ul.action-links a {
 /**
  * Custom Hero Component
  */
-.hero-block {
-  background-color: #0074bd;
-  background-image: url(../images/texture.png) no-repeat center center;
-  background-repeat: no-repeat
-  background-position: center center;
-  background-blend-mode: luminosity;
+.block-hero {
+  font-size: 1em;
 }
 
 @media (min-width: 25em) {
-  .hero-block {
+  .block-hero {
+    padding: 2rem 3rem 3rem;
     font-size: 1.3em;
   }
 }
 
 @media (min-width: 34em) {
-  .hero-block {
+  .block-hero {
     font-size: 1.5em;
   }
 }
 
-.hero-block .block-title {
-  margin: 0 0 0.2em;
-  padding: 0;
+/* Default background when hero doesn't have image */
+.block-hero-no-image {
+  background-color: #0074bd;
+  background-image: url(../../images/texture.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-blend-mode: luminosity; /* Colorizes bg image */
+}
+
+.no-background-blend-mode .block-hero-no-image:before {
+  /* If we don't have blend-modes, use a more saturated version of overlay color */
+  /* Semi-transparent overlay has similar effect as luminosity */
+  background: #009dff;
+  opacity: 0.5;
+}
+
+.block-hero .block-title {
   font-weight: 200;
   line-height: 1.2;
   font-size: 2.3em;
 }
+
 @media (min-width: 34em) {
-  .hero-block .block-title {
-    font-size: 2.667em;
+  .block-hero .block-title {
+    font-size: 2.625em;
   }
 }
 
