@@ -4,16 +4,16 @@
  */
 .view-mode-teaser {
   margin: 2rem 0 0;
-  padding: 2rem 0 0;
+  padding: 0 0 2em;
 }
 
-.view-mode-teaser:first-of-type {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-.view-mode-teaser + .view-mode-teaser {
+.view-mode-teaser + .view-mode-teaser,
+.view-promoted .views-row {
   border-top: 0.25rem solid #c6cad2;
+}
+
+.view-promoted .views-row:first-child {
+  border-top: 0;
 }
 
 .view-mode-teaser h1,

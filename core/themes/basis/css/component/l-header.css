@@ -8,6 +8,11 @@
   }
 }
 
+.l-header a {
+  -webkit-transition: background-color 0.25s ease-out;
+  transition: background-color 0.25s ease-out;
+}
+
 .header-identity-wrapper:after {
   /* Clearfix */
   content: '';
@@ -20,6 +25,10 @@
     display: block;
     float: left;
   }
+
+  [dir="rtl"] .header-identity-wrapper {
+    float: right;
+  }
 }
 
 .header-site-name-wrapper {
@@ -31,11 +40,19 @@
   .header-site-name-wrapper {
     float: left;
   }
+
+  [dir="rtl"] .header-site-name-wrapper {
+    float: right;
+  }
 }
 
 .header-logo-wrapper {
   display: block;
   float: left;
+}
+
+[dir="rtl"] .header-logo-wrapper {
+  float: right;
 }
 
 /* Makes sure images that are tall logos don't pop out of container */
@@ -84,6 +101,11 @@
     float: right;
     clear: none;
   }
+
+  [dir="rtl"] .header-menu {
+    float: left;
+    clear: none;
+  }
 }
 
 @media (min-width: 34em) {
@@ -93,30 +115,57 @@
 }
 
 .l-header .menu,
-.l-header .leaf {
+.l-header .menu li {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.l-header .leaf,
+.l-header .menu:after {
+  /* Clearfix menus */
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.l-header .menu > li,
 .header-menu li {
   float: left;
+}
+
+[dir="rtl"] .l-header .menu > li,
+[dir="rtl"] .header-menu li {
+  float: left;
+}
+
+.l-header .menu a,
+.header-menu a {
+  display: block;
+  padding: 1rem 1.25rem;
 }
 
 @media (min-width: 34em) {
   /* Specific selector to avoid contextual links */
   .l-header .menu a,
   .header-menu a {
-    padding: 1.5rem 1.25rem;
+    padding: 1rem 1.25rem;
   }
 }
 
 @media (min-width: 48em) {
   .header-menu a {
     /* Attempt at lining up baseline of site name and header menu */
-    padding-top: 1.875rem;
-    padding-bottom: 1.125rem;
+    padding-top: 1.9375rem;
+    padding-bottom: 1.0625rem;
+    line-height: 1.25rem;
+  }
+}
+
+@media (min-width: 62em) {
+  .header-menu a {
+    /* Attempt at lining up baseline of site name and header menu */
+    padding-top: 2rem;
+    padding-bottom: 1rem;
     line-height: 1.25rem;
   }
 }
@@ -125,10 +174,6 @@
 .header-menu li {
   margin: 0;
   padding: 0;
-}
-
-.header-menu li {
-  float: left;
 }
 
 .header-menu .links li:before,

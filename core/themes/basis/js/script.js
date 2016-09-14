@@ -2,9 +2,6 @@
 
 "use strict";
 
-// Add the flexbox class on all pages as soon as possible.
-Backdrop.featureDetect.flexbox();
-
 Backdrop.behaviors.toggles = {
   attach: function(context, settings) {
     var $toggles = $(context).find('[data-toggle]').once('toggle');
@@ -23,5 +20,45 @@ Backdrop.behaviors.toggles = {
 Backdrop.theme.prototype.tableDragHandle = function() {
   return '<a href="#" title="' + Backdrop.t('Drag to re-order') + '" class="tabledrag-handle"><div class="handle"><div class="handle-inner">&nbsp;</div></div></a>';
 };
+
+/**
+ * Tests for background-blend-mode used on some hero elements
+ *
+ * @return {boolean} True if browser supports background-blend-mode.
+ *
+ */
+Backdrop.featureDetect.backgroundBlendMode = function() {
+  var $body = $('body'),
+  $testElement = $('<div style="background-blend-mode: luminosity; width: 0; height: 0;"></div>');
+  console.log('runnin shit', $body);
+
+  if ($body.hasClass('has-background-blend-mode')) {
+    console.log('runnin shit');
+    return true;
+  } else if ($body.hasClass('no-background-blend-mode')) {
+    console.log('runnin shit');
+    return false;
+  } else {
+    console.log('runnin shit');
+    $body.append($testElement);
+    if ($testElement.css('background-blend-mode') === 'luminosity') {
+      $('body').addClass('has-background-blend-mode');
+      $testElement.remove();
+      return true;
+    }
+    else {
+      console.log('runnin shit');
+      $body.addClass('no-background-blend-mode');
+      $testElement.remove();
+      console.log($body.attr('class'));
+      return false;
+    }
+  }
+}
+
+$(document).ready(function() {
+  Backdrop.featureDetect.backgroundBlendMode();
+  Backdrop.featureDetect.flexbox();
+});
 
 })(jQuery);

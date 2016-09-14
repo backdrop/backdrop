@@ -163,6 +163,10 @@ fieldset .fieldset-legend {
   color: #edf8ff;
 }
 
+.l-header a:active {
+  background: #114a75;
+}
+
 .block-system-header {
   /* Helps center .header-identity-wrapper on smaller screens */
   text-align: center;
@@ -284,34 +288,116 @@ fieldset .fieldset-legend {
 }
 
 .l-header .menu,
-.l-header .leaf {
+.l-header .menu > li {
   text-align: left;
 }
 
-.l-header .leaf,
-.header-menu li {
+.l-header .menu > li {
   font-size: 1em;
 }
 
 @media (min-width: 34em) {
-  .l-header .leaf,
-  .header-menu li {
+  .l-header .menu > li {
     font-size: 1.125em;
   }
 }
 
 @media (min-width: 62em) {
-  .l-header .leaf,
-  .header-menu li {
+  .l-header .menu > li {
     font-size: 1.375em;
   }
 }
 
-.l-header .leaf a,
-.header-menu a {
-  display: block;
-  padding: 0.75em 1em;
+/**
+ * Responsive menu styles
+ */
+.menu-dropdown ul {
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom-color: #20252e;
 }
+
+.js .menu-dropdown > li {
+  border-bottom-color: #114a75;
+}
+
+.menu-dropdown a.disabled {
+  color: #bbbbbb;
+}
+
+@media (min-width: 48em) {
+  .menu-dropdown a.disabled {
+    color: #bbbbbb;
+  }
+
+  .js .menu-dropdown ul ul {
+    border-left-color: #20252e;
+  }
+
+  .js .menu-dropdown > li:hover {
+    background-color: #114a75;
+  }
+
+  .js .menu-dropdown > li.has-children > a:hover,
+  .js .menu-dropdown > li.has-children > a:focus {
+    background-color: #114a75;
+  }
+
+  .menu-dropdown a span.sub-arrow {
+    border-color-top: #fff;
+  }
+
+  .menu-dropdown ul {
+    background: #20252e;
+  }
+
+  .menu-dropdown ul a,
+  .menu-dropdown ul a:hover,
+  .menu-dropdown ul a:focus,
+  .menu-dropdown ul a:active,
+  .menu-dropdown ul a.highlighted {
+    color: #fff;
+  }
+
+  .menu-dropdown ul a:hover,
+  .menu-dropdown ul a:focus,
+  .menu-dropdown ul a:active,
+  .menu-dropdown ul a.highlighted {
+    background: #114a75;
+  }
+
+  .menu-dropdown ul a.disabled {
+    background: #fff;
+    color: #cccccc;
+  }
+
+  .menu-dropdown ul a span.sub-arrow {
+    border-color-left: #fff;
+  }
+
+  .menu-dropdown span.scroll-up,
+  .menu-dropdown span.scroll-down {
+    background: #fff;
+  }
+
+  .menu-dropdown span.scroll-up:hover,
+  .menu-dropdown span.scroll-down:hover {
+    background: #eeeeee;
+  }
+
+  .menu-dropdown span.scroll-up-arrow,
+  .menu-dropdown span.scroll-down-arrow {
+    border-color-bottom: #fff;
+  }
+
+  .menu-dropdown span.scroll-down-arrow {
+    border-color-top: #fff;
+  }
+
+  [dir="rtl"] .menu-dropdown span.sub-arrow {
+    border-color-right: #fff;
+  }
+}
+
 
 /**
  * Footer styles
@@ -333,6 +419,16 @@ fieldset .fieldset-legend {
 
 .l-footer .block-system-powered-by a:hover {
   text-decoration: underline;
+}
+
+.drop-lounging {
+  width: 10.3125em;
+}
+
+.drop-lounging:before {
+  /* To remove drop, uncomment the style below, or remove markup from the template */
+  /* display: none; */
+  background-image: url("../images/drop-lounging.png");
 }
 
 /**
@@ -465,21 +561,6 @@ div.error:before {
   font-weight: 400;
 }
 
-.form-disabled input.form-autocomplete,
-.form-disabled input.form-text,
-.form-disabled input.form-tel,
-.form-disabled input.form-email,
-.form-disabled input.form-url,
-.form-disabled input.form-color,
-.form-disabled input.form-number,
-.form-disabled input.form-search,
-.form-disabled input.form-file,
-.form-disabled textarea.form-textarea,
-.form-disabled select.form-select {
-  background-color: #eee;
-  color: #777;
-}
-
 .form-item .description,
 .password-strength,
 .password-match {
@@ -528,14 +609,6 @@ input.form-submit:active {
   background: #e5e5e6;
 }
 
-input.form-button-disabled,
-input.form-button-disabled:active {
-  background: #eee;
-  border-color: #eee;
-  text-shadow: none;
-  color: #999;
-}
-
 .button,
 input.form-submit,
 input.button-primary,
@@ -581,7 +654,6 @@ button.button-secondary:active {
   box-shadow: inset 0 0 0 0.125em #555;
 }
 
-
 input.button-danger,
 button.button-danger {
   color: #e7251b;
@@ -595,6 +667,26 @@ button.button-danger:hover,
 button.button-danger:focus {
   color: #fff;
   background-color: #e7251b;
+}
+
+input.form-button-disabled,
+input.form-button-disabled:active,
+input.form-submit[disabled],
+button.form-submit[disabled],
+.button[disabled] {
+  background: #eee;
+  border-color: #eee;
+  text-shadow: none;
+  color: #999;
+}
+
+input.button-danger[disabled],
+button.button-danger[disabled],
+input.button-secondary[disabled],
+button.button-secondary[disabled] {
+  background: #fefefe;
+  box-shadow: inset 0 0 0 0.125rem #ddd;
+  color: #ccc;
 }
 
 input.form-autocomplete,
@@ -625,6 +717,33 @@ textarea.form-textarea:focus {
   color: #000;
   border-color: #43afe4;
 }
+
+.form-disabled input.form-autocomplete,
+.form-disabled input.form-text,
+.form-disabled input.form-tel,
+.form-disabled input.form-email,
+.form-disabled input.form-url,
+.form-disabled input.form-color,
+.form-disabled input.form-number,
+.form-disabled input.form-search,
+.form-disabled input.form-file,
+.form-disabled textarea.form-textarea,
+.form-disabled select.form-select,
+input.form-autocomplete[disabled],
+input.form-text[disabled],
+input.form-tel[disabled],
+input.form-email[disabled],
+input.form-url[disabled],
+input.form-color[disabled],
+input.form-number[disabled],
+input.form-search[disabled],
+input.form-file[disabled],
+textarea.form-textarea[disabled],
+select.form-select[disabled] {
+  background-color: #eee;
+  color: #777;
+}
+
 
 ul.action-links a {
   background: transparent url(../images/add.png) no-repeat 0 center;
@@ -687,6 +806,16 @@ ul.action-links a {
   background: #20252e;
 }
 
+.pager-first a:before,
+.pager-first a:after,
+.pager-previous a:before,
+.pager-next a:before,
+.pager-last a:before,
+.pager-last a:after {
+  /* Mobile chevron color */
+  border-color: #fff;
+}
+
 /**
  * Progress Bar
  * See system module
@@ -734,36 +863,48 @@ ul.action-links a {
 /**
  * Custom Hero Component
  */
-.hero-block {
-  background-color: #0074bd;
-  background-image: url(../images/texture.png) no-repeat center center;
-  background-repeat: no-repeat
-  background-position: center center;
-  background-blend-mode: luminosity;
+.block-hero {
+  font-size: 1em;
 }
 
 @media (min-width: 25em) {
-  .hero-block {
+  .block-hero {
+    padding: 2rem 3rem 3rem;
     font-size: 1.3em;
   }
 }
 
 @media (min-width: 34em) {
-  .hero-block {
+  .block-hero {
     font-size: 1.5em;
   }
 }
 
-.hero-block .block-title {
-  margin: 0 0 0.2em;
-  padding: 0;
+/* Default background when hero doesn't have image */
+.block-hero-no-image {
+  background-color: #0074bd;
+  background-image: url(../../images/texture.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-blend-mode: luminosity; /* Colorizes bg image */
+}
+
+.no-background-blend-mode .block-hero-no-image:before {
+  /* If we don't have blend-modes, use a more saturated version of overlay color */
+  /* Semi-transparent overlay has similar effect as luminosity */
+  background: #009dff;
+  opacity: 0.5;
+}
+
+.block-hero .block-title {
   font-weight: 200;
   line-height: 1.2;
   font-size: 2.3em;
 }
+
 @media (min-width: 34em) {
-  .hero-block .block-title {
-    font-size: 2.667em;
+  .block-hero .block-title {
+    font-size: 2.625em;
   }
 }
 
@@ -926,3 +1067,68 @@ ul.secondary li a:active {
 .responsive-tabs-mobile-header-padder {
   background: #586172;
 }
+
+/**
+ * Font related override utility classes
+ */
+.color-inverse {
+  color: #fff;
+}
+
+.font-size-xxxxlarge {
+  font-size: 2.625rem;
+}
+
+.font-size-xxxlarge {
+  font-size: 2.25rem;
+}
+
+.font-size-xxlarge {
+  font-size: 1.8125rem;
+}
+
+.font-size-xlarge {
+  font-size: 1.625rem;
+  font-weight: 400;
+}
+
+.font-size-large {
+  font-size: 1.4375rem;
+}
+
+.font-size-medium {
+  font-size: 1.25rem;
+}
+
+.font-size-normal {
+  font-size: 1rem;
+}
+
+.font-size-small {
+  font-size: 0.875rem;
+}
+
+.font-size-xsmall {
+  font-size: 0.75rem;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}
+
+.font-weight-normal {
+  font-weight: 400;
+}
+
+.font-weight-light {
+  font-weight: 200;
+}
+
+.font-style-italic {
+  font-style: italic;
+}
+
+.font-style-normal {
+  font-style: normal;
+}
+
