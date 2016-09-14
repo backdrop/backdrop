@@ -17,7 +17,6 @@ stylesheets[all][] = css/component/status-messages.css
 stylesheets[all][] = css/component/tabledrag.css
 stylesheets[all][] = css/component/teasers.css
 stylesheets[all][] = css/component/progress.css
-stylesheets[all][] = css/component/dropbutton.css
 stylesheets[all][] = css/component/dialog.css
 stylesheets[all][] = css/utility.css
 stylesheets[all][] = css/skin.css
