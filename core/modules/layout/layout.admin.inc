@@ -892,7 +892,6 @@ function layout_content_form_submit($form, &$form_state) {
     }
     $layout->content = $new_content;
     $layout->positions = $new_positions;
-    $form_state['redirect'] = 'admin/structure/layouts';
   }
 
   // Save title settings.

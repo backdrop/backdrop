@@ -1894,6 +1894,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
 
     // Disable the layout via the dropbutton link.
     state_set('layout_test', array());
+    $this->backdropGet('admin/structure/layouts');
     $disable_link = $this->xpath('//*[contains(@class, "disable")]//a');
     $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
     $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
@@ -1966,7 +1967,7 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
    */
   public function testBlockUsage() {
 
-    // By default, the header block should be found in the default layout in 
+    // By default, the header block should be found in the default layout in
     // header position.
     $this->checkBlockUsage('header', 'default', 'header');
 
@@ -1988,10 +1989,10 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
     $this->backdropPost(NULL, array(), t('Save layout'));
-    
+
     // The new layout should have the header block in the header position.
     $this->checkBlockUsage('header', $layout_name, 'header');
-    
+
     // Return to the layout edit page and add another header block.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     $this->clickLink(t('Add block'), 0);
